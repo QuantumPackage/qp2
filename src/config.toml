@@ -30,7 +30,7 @@ pygmentCodeFences = true
 [Author]
 #  name = "A. Scemama & E. Giner"
   email = "quantum.package@gmail.com"
-  github = "LCPQ/qp2"
+  github = "QuantumPackage/qp2"
   twitter = "quantum_package"
 #  reddit = "username"
 #  linkedin = "username"
@@ -49,7 +49,7 @@ pygmentCodeFences = true
 
 [[menu.main]]
     name = "Source code"
-    url = "https://github.com/QuantumPackage"
+    url = "https://github.com/QuantumPackage/qp2"
     weight = 3
 
 [[menu.main]]
