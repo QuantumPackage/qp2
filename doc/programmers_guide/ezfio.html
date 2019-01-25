@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>EZFIO &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Developing plugins" href="plugins.html" />
+    <link rel="prev" title="Programming in the Quantum Package" href="programming.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EZFIO</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ezfio-cfg">EZFIO.cfg</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required">Required</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional">Optional</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ezfio-config">*.ezfio_config</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>EZFIO</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/programmers_guide/ezfio.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ezfio">
+<h1>EZFIO<a class="headerlink" href="#ezfio" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ezfio-cfg">
+<h2>EZFIO.cfg<a class="headerlink" href="#ezfio-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The simplest way to add control parameters in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> directory is to create a
+<code class="file docutils literal notranslate"><span class="pre">EZFIO.cfg</span></code> file in the module. An example can be found in existing modules
+such as <span class="xref std std-ref">hartree_fock</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">max_dim_diis</span><span class="p">]</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">integer</span>
+<span class="n">doc</span><span class="p">:</span> <span class="n">Maximum</span> <span class="n">size</span> <span class="n">of</span> <span class="n">the</span> <span class="o">|</span><span class="n">DIIS</span><span class="o">|</span> <span class="n">extrapolation</span> <span class="n">procedure</span>
+<span class="n">interface</span><span class="p">:</span> <span class="n">ezfio</span><span class="p">,</span><span class="n">provider</span><span class="p">,</span><span class="n">ocaml</span>
+<span class="n">default</span><span class="p">:</span> <span class="mi">15</span>
+
+<span class="p">[</span><span class="n">threshold_diis</span><span class="p">]</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">Threshold</span>
+<span class="n">doc</span><span class="p">:</span> <span class="n">Threshold</span> <span class="n">on</span> <span class="n">the</span> <span class="n">convergence</span> <span class="n">of</span> <span class="n">the</span> <span class="o">|</span><span class="n">DIIS</span><span class="o">|</span> <span class="n">error</span> <span class="n">vector</span> <span class="n">during</span> <span class="n">a</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">calculation</span><span class="o">.</span> <span class="n">If</span> <span class="mf">0.</span> <span class="ow">is</span> <span class="n">chosen</span><span class="p">,</span> <span class="n">the</span> <span class="n">square</span> <span class="n">root</span> <span class="n">of</span> <span class="n">thresh_scf</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="o">.</span>
+<span class="n">interface</span><span class="p">:</span> <span class="n">ezfio</span><span class="p">,</span><span class="n">provider</span><span class="p">,</span><span class="n">ocaml</span>
+<span class="n">default</span><span class="p">:</span> <span class="mf">0.</span>
+
+<span class="p">[</span><span class="n">thresh_scf</span><span class="p">]</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">Threshold</span>
+<span class="n">doc</span><span class="p">:</span> <span class="n">Threshold</span> <span class="n">on</span> <span class="n">the</span> <span class="n">convergence</span> <span class="n">of</span> <span class="n">the</span> <span class="n">Hartree</span> <span class="n">Fock</span> <span class="n">energy</span><span class="o">.</span>
+<span class="n">interface</span><span class="p">:</span> <span class="n">ezfio</span><span class="p">,</span><span class="n">provider</span><span class="p">,</span><span class="n">ocaml</span>
+<span class="n">default</span><span class="p">:</span> <span class="mf">1.e-10</span>
+</pre></div>
+</div>
+<p>The syntax obeys the following rules:</p>
+<div class="section" id="required">
+<h3>Required<a class="headerlink" href="#required" title="Permalink to this headline">¶</a></h3>
+<dl class="option">
+<dt id="cmdoption-arg-provider-name">
+<code class="descname">[&lt;provider_name&gt;]</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-provider-name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the provider in irp.f90 and in the EZFIO lib</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-doc-str">
+<code class="descname">doc:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-doc-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>The plain text documentation</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-type-str">
+<code class="descname">type:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-type-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type supported by the <a class="reference external" href="http://ocaml.org/">OCaml</a> modules. The complete list of supported
+types can be obtained by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ei_handler</span><span class="o">.</span><span class="n">py</span> <span class="n">list_supported_types</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-interface-str">
+<code class="descname">interface:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-interface-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>The interface is a list of strings sepeared by “,”  which can contain :</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">ezfio</span></code> : to build the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> API</li>
+<li><code class="docutils literal notranslate"><span class="pre">provider</span></code> : to build the corresponding providers</li>
+<li><code class="docutils literal notranslate"><span class="pre">ocaml</span></code> : to build the corresponding bindings in <a class="reference external" href="http://ocaml.org/">OCaml</a></li>
+</ul>
+</dd></dl>
+
+<p>If an <code class="docutils literal notranslate"><span class="pre">EZFIO.cfg</span></code> file is used, the compilation of the module will generate
+the <code class="docutils literal notranslate"><span class="pre">ezfio_interface.irp.f</span></code> file which contains the generated providers.
+This file should not be added to the repository</p>
+</div>
+<div class="section" id="optional">
+<h3>Optional<a class="headerlink" href="#optional" title="Permalink to this headline">¶</a></h3>
+<dl class="option">
+<dt id="cmdoption-arg-default-str">
+<code class="descname">default:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-default-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default value needed if <code class="docutils literal notranslate"><span class="pre">ocaml</span></code> is in interface list.
+No default can be set for arrays.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-size-str">
+<code class="descname">size:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-size-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>The size of the variable, which is one by default (scalar).</p>
+<p>Examples : <code class="docutils literal notranslate"><span class="pre">1</span></code>; <code class="docutils literal notranslate"><span class="pre">=sum(ao_num)</span></code>; <code class="docutils literal notranslate"><span class="pre">(ao_basis.ao_num,3)</span></code></p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The module and the value are separed by a <code class="docutils literal notranslate"><span class="pre">.</span></code> not a <code class="docutils literal notranslate"><span class="pre">_</span></code>.
+For example <code class="docutils literal notranslate"><span class="pre">(determinants.n_det)</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-ezfio-name-str">
+<code class="descname">ezfio_name:&lt;str&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-ezfio-name-str" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> API (by default is <code class="docutils literal notranslate"><span class="pre">&lt;provider_name&gt;</span></code>)</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="ezfio-config">
+<h2>*.ezfio_config<a class="headerlink" href="#ezfio-config" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to directly add to the current module <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> configuration
+files, named with the <code class="docutils literal notranslate"><span class="pre">.ezfio_config</span></code> suffix. An example is in the
+<span class="xref std std-ref">bitmask</span> module.</p>
+<div class="code text highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bitmasks</span>
+   <span class="n">N_int</span>         <span class="n">integer</span>
+   <span class="n">bit_kind</span>      <span class="n">integer</span>
+   <span class="n">N_mask_gen</span>    <span class="n">integer</span>
+   <span class="n">generators</span>    <span class="n">integer</span><span class="o">*</span><span class="mi">8</span> <span class="p">(</span><span class="n">bitmasks_N_int</span><span class="o">*</span><span class="n">bitmasks_bit_kind</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">bitmasks_N_mask_gen</span><span class="p">)</span>
+   <span class="n">N_mask_cas</span>    <span class="n">integer</span>
+   <span class="n">cas</span>           <span class="n">integer</span><span class="o">*</span><span class="mi">8</span> <span class="p">(</span><span class="n">bitmasks_N_int</span><span class="o">*</span><span class="n">bitmasks_bit_kind</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">bitmasks_N_mask_cas</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plugins.html" class="btn btn-neutral float-right" title="Developing plugins" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="programming.html" class="btn btn-neutral" title="Programming in the Quantum Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

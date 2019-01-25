@@ -1,0 +1,390 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Coding conventions &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmarks" href="../appendix/benchmarks.html" />
+    <link rel="prev" title="qp_test" href="qp_test.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qp_test.html">qp_test</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Coding conventions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#general-conventions">General conventions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shell-scripts">Shell scripts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#irpf90">IRPF90</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>Coding conventions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/programmers_guide/conventions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="coding-conventions">
+<h1>Coding conventions<a class="headerlink" href="#coding-conventions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-conventions">
+<h2>General conventions<a class="headerlink" href="#general-conventions" title="Permalink to this headline">¶</a></h2>
+<p>All executable files should have a name with lowercase.</p>
+<p>Tabs are forbidden everywhere.</p>
+<p>Try to set the maximum line length to 80 characters.  Long lines can be
+automatically reformatted in vim by pressing <kbd class="kbd docutils literal notranslate">gqj</kbd>.</p>
+<p>Use blank lines between blocks to improve readability.</p>
+<p>For existing files, stay faithful to the existing indentation.</p>
+</div>
+<div class="section" id="shell-scripts">
+<h2>Shell scripts<a class="headerlink" href="#shell-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Executables should have no extension.  To know if the file is binary, or in
+what shell scripting language it was written, the <strong class="command">file</strong> command can
+be used. In addition, all the shell scripts should be under
+<code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/scripts/</span></code>.</p>
+<p>The exit code of the script should be 0 upon success only.</p>
+<p>Bash and Python2 are the only shell scripting language permitted for
+executables.</p>
+<div class="section" id="bash">
+<h3>Bash<a class="headerlink" href="#bash" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">Bash scripts should start with <code class="docutils literal notranslate"><span class="pre">#!/bin/bash</span></code></p>
+</li>
+<li><p class="first">All error messages should go to standard error, and should be prefixed with
+the name of the command. For example, in Bash use</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>function echo_err() {
+   2&gt;&amp; echo $(basename $0)&quot;: error&quot;
+}
+</pre></div>
+</div>
+</li>
+<li><p class="first">The command-line options should be handled with <code class="docutils literal notranslate"><span class="pre">getopt</span></code>.</p>
+</li>
+<li><p class="first">The script should check that the command-line arguments are consistent.</p>
+</li>
+<li><p class="first">Long options should be preferred to short options.</p>
+</li>
+<li><p class="first">Always quote strings containing variables, command substitutions, spaces or
+shell meta characters, unless careful unquoted expansion is required.</p>
+</li>
+<li><p class="first">Use <code class="docutils literal notranslate"><span class="pre">&quot;$&#64;&quot;</span></code> unless you have a specific reason to use <code class="docutils literal notranslate"><span class="pre">$*</span></code>.</p>
+</li>
+<li><p class="first">Use <code class="docutils literal notranslate"><span class="pre">$(command)</span></code> instead of backticks, because they can be easily nested.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">[[</span> <span class="pre">...</span> <span class="pre">]]</span></code> is preferred over <code class="docutils literal notranslate"><span class="pre">[</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">/usr/bin/[</span></code>.</p>
+</li>
+<li><p class="first">Declare function-specific variables with local. Declaration and assignment
+should be on different lines.</p>
+</li>
+<li><p class="first">Pipelines should be split one per line if they don’t all fit on one line.</p>
+</li>
+<li><p class="first">Put <code class="docutils literal notranslate"><span class="pre">;</span> <span class="pre">do</span></code> and <code class="docutils literal notranslate"><span class="pre">;</span> <span class="pre">then</span></code> on the same line as the <code class="docutils literal notranslate"><span class="pre">while</span></code>, <code class="docutils literal notranslate"><span class="pre">for</span></code> or <code class="docutils literal notranslate"><span class="pre">if</span></code>.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="python">
+<h3>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h3>
+<p>Only Python2 is supported. The reason is that some dependencies use Python2,
+and we do not want yet to add an extra dependency to Python3.</p>
+<p>Python scripts should start with <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python2</span></code> to mention
+explicitly that Python2 has to be used.</p>
+<p><strong class="command">pylint</strong> should be used to increase the quality of the source code.</p>
+</div>
+</div>
+<div class="section" id="irpf90">
+<h2>IRPF90<a class="headerlink" href="#irpf90" title="Permalink to this headline">¶</a></h2>
+<p>The code can be automatically indented with <strong class="command">irp_indent</strong>.</p>
+<p>Lines sould not be longer than 80 characters.</p>
+<p>Mathematical formulas in the <cite>BEGIN_DOC…END_DOC</cite> sections sould be written in
+LaTeX format, between <cite>$</cite> symbols.</p>
+<p>All the providers, subroutines and functions should have a
+<cite>BEGIN_DOC…END_DOC</cite> block.</p>
+<p>Providers should never be present in the same file as a main program.</p>
+<p>String must not use double quotes (<cite>“</cite>) but single quotes (<cite>‘</cite>).</p>
+<p>After a <cite>read</cite> statement there should be no comma.</p>
+<p>Only standard Fortran is allowed : Intel or GNU extensions are forbidden.</p>
+<p>The name of a program should be the same as the name of the file. For example,
+for the <a class="reference internal" href="../programs/fci.html#fci"><span class="std std-ref">fci</span></a> program, we have</p>
+<div class="highlight-fortan notranslate"><div class="highlight"><pre><span></span>program fci
+</pre></div>
+</div>
+<p>and the file is named <code class="file docutils literal notranslate"><span class="pre">fci.irp.f</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../appendix/benchmarks.html" class="btn btn-neutral float-right" title="Benchmarks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qp_test.html" class="btn btn-neutral" title="qp_test" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qp_name &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qp_test" href="qp_test.html" />
+    <link rel="prev" title="zmq" href="../modules/zmq.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/zmq.html">zmq</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">qp_name</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>qp_name</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/programmers_guide/qp_name.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qp-name">
+<span id="id1"></span><h1>qp_name<a class="headerlink" href="#qp-name" title="Permalink to this headline">¶</a></h1>
+<p>Displays the names of all the files in which the provider/subroutine/function
+given as argument is used. With the <cite>-r</cite> flag, the name can be changed in the
+whole quantum package.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_name</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="o">&lt;</span><span class="n">new_name</span><span class="o">&gt;</span> <span class="o">|</span> <span class="o">--</span><span class="n">rename</span><span class="o">=&lt;</span><span class="n">new_name</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-qp-name-h">
+<code class="descname">-h</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-name-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the help message.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-name-r">
+<code class="descname">-r</code><code class="descclassname"> &lt;new_name&gt; --rename=&lt;new_name&gt;</code><a class="headerlink" href="#cmdoption-qp-name-r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames the provider/subroutine/function and all its occurences.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is safe to create a commit before renaming a provider, and then to
+check what has changed using git diff.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="qp_test.html" class="btn btn-neutral float-right" title="qp_test" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../modules/zmq.html" class="btn btn-neutral" title="zmq" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

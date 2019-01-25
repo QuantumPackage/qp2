@@ -1,0 +1,1788 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>zmq &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qp_name" href="../programmers_guide/qp_name.html" />
+    <link rel="prev" title="utils" href="utils.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">zmq</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>zmq</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/zmq.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="zmq">
+<span id="module-zmq"></span><h1>zmq<a class="headerlink" href="#zmq" title="Permalink to this headline">¶</a></h1>
+<p>Definition of <a class="reference external" href="http://zeromq.org/">ZeroMQ</a> sockets and messages.</p>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.is_zmq_slave">
+<code class="descname">is_zmq_slave</code><a class="headerlink" href="#c.is_zmq_slave" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="p">::</span> <span class="n">is_zmq_slave</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the current process is a <a class="reference external" href="http://zeromq.org/">ZeroMQ</a> slave.</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.qp_run_address">
+<code class="descname">qp_run_address</code><a class="headerlink" href="#c.qp_run_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">qp_run_address</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">zmq_port_start</span>
+</pre></div>
+</div>
+<p>Address of the qp_run socket
+Example : <a class="reference external" href="tcp://130.120.229.139:12345">tcp://130.120.229.139:12345</a></p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_context">
+<code class="descname">zmq_context</code><a class="headerlink" href="#c.zmq_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">(</span><span class="n">ZMQ_PTR</span><span class="p">)</span>        <span class="p">::</span> <span class="n">zmq_context</span>
+<span class="n">integer</span><span class="p">(</span><span class="n">omp_lock_kind</span><span class="p">)</span>  <span class="p">::</span> <span class="n">zmq_lock</span>
+</pre></div>
+</div>
+<p>Context for the ZeroMQ library</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_lock">
+<code class="descname">zmq_lock</code><a class="headerlink" href="#c.zmq_lock" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">(</span><span class="n">ZMQ_PTR</span><span class="p">)</span>        <span class="p">::</span> <span class="n">zmq_context</span>
+<span class="n">integer</span><span class="p">(</span><span class="n">omp_lock_kind</span><span class="p">)</span>  <span class="p">::</span> <span class="n">zmq_lock</span>
+</pre></div>
+</div>
+<p>Context for the ZeroMQ library</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_port_start">
+<code class="descname">zmq_port_start</code><a class="headerlink" href="#c.zmq_port_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">qp_run_address</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">zmq_port_start</span>
+</pre></div>
+</div>
+<p>Address of the qp_run socket
+Example : <a class="reference external" href="tcp://130.120.229.139:12345">tcp://130.120.229.139:12345</a></p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_pair_inproc_address">
+<code class="descname">zmq_socket_pair_inproc_address</code><a class="headerlink" href="#c.zmq_socket_pair_inproc_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_pull_inproc_address">
+<code class="descname">zmq_socket_pull_inproc_address</code><a class="headerlink" href="#c.zmq_socket_pull_inproc_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_pull_tcp_address">
+<code class="descname">zmq_socket_pull_tcp_address</code><a class="headerlink" href="#c.zmq_socket_pull_tcp_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_push_inproc_address">
+<code class="descname">zmq_socket_push_inproc_address</code><a class="headerlink" href="#c.zmq_socket_push_inproc_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_push_tcp_address">
+<code class="descname">zmq_socket_push_tcp_address</code><a class="headerlink" href="#c.zmq_socket_push_tcp_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_socket_sub_tcp_address">
+<code class="descname">zmq_socket_sub_tcp_address</code><a class="headerlink" href="#c.zmq_socket_sub_tcp_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pair_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_tcp_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_pull_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_push_inproc_address</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_socket_sub_tcp_address</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.zmq_state">
+<code class="descname">zmq_state</code><a class="headerlink" href="#c.zmq_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="p">::</span> <span class="n">zmq_state</span>
+</pre></div>
+</div>
+<p>Threads executing work through the ZeroMQ interface</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.add_task_to_taskserver:">
+<code class="descname">add_task_to_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_task_to_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">add_task_to_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">task</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a task from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.connect_to_taskserver:">
+<code class="descname">connect_to_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.connect_to_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">connect_to_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">,</span><span class="n">thread</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connect to the task server and obtain the worker ID</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.disconnect_from_taskserver:">
+<code class="descname">disconnect_from_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.disconnect_from_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">disconnect_from_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Disconnect from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.disconnect_from_taskserver_state:">
+<code class="descname">disconnect_from_taskserver_state:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.disconnect_from_taskserver_state:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">disconnect_from_taskserver_state</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Disconnect from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_parallel_job:">
+<code class="descname">end_parallel_job:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_parallel_job:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_parallel_job</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">name_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>End a new parallel job with name ‘name’. The slave tasks execute subroutine ‘slave’</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_pull_socket()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">lowercase()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_zmq_pair_socket:">
+<code class="descname">end_zmq_pair_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_zmq_pair_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_zmq_pair_socket</span><span class="p">(</span><span class="n">zmq_socket_pair</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Terminate socket on which the results are sent.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_zmq_pull_socket:">
+<code class="descname">end_zmq_pull_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_zmq_pull_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_zmq_pull_socket</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Terminate socket on which the results are sent.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_parallel_job()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_zmq_push_socket:">
+<code class="descname">end_zmq_push_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_zmq_push_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_zmq_push_socket</span><span class="p">(</span><span class="n">zmq_socket_push</span><span class="p">,</span><span class="n">thread</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Terminate socket on which the results are sent.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_run_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_zmq_sub_socket:">
+<code class="descname">end_zmq_sub_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_zmq_sub_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_zmq_sub_socket</span><span class="p">(</span><span class="n">zmq_socket_sub</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Terminate socket on which the results are sent.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wait_for_next_state()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wait_for_state()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wait_for_states()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.end_zmq_to_qp_run_socket:">
+<code class="descname">end_zmq_to_qp_run_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.end_zmq_to_qp_run_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">end_zmq_to_qp_run_socket</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Terminate the socket from the application to qp_run</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_run_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_parallel_job()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_task_from_taskserver:">
+<code class="descname">get_task_from_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_task_from_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">get_task_from_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">task</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a task from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_tasks_from_taskserver:">
+<code class="descname">get_tasks_from_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_tasks_from_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">get_tasks_from_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">task</span><span class="p">,</span><span class="n">n_tasks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get multiple tasks from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_parallel_job:">
+<code class="descname">new_parallel_job:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_parallel_job:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">new_parallel_job</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">name_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Start a new parallel job with name ‘name’. The slave tasks execute subroutine ‘slave’</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">lowercase()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_zmq_pair_socket:">
+<code class="descname">new_zmq_pair_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_zmq_pair_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">new_zmq_pair_socket</span><span class="p">(</span><span class="n">bind</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Socket on which the collector and the main communicate</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_zmq_pull_socket:">
+<code class="descname">new_zmq_pull_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_zmq_pull_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">new_zmq_pull_socket</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Socket on which the results are sent. If thread is 1, use inproc</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_zmq_push_socket:">
+<code class="descname">new_zmq_push_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_zmq_push_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">new_zmq_push_socket</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Socket on which the results are sent. If thread is 1, use inproc</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_zmq_sub_socket:">
+<code class="descname">new_zmq_sub_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_zmq_sub_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">new_zmq_sub_socket</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Socket to read the state published by the Task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.new_zmq_to_qp_run_socket:">
+<code class="descname">new_zmq_to_qp_run_socket:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.new_zmq_to_qp_run_socket:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">new_zmq_to_qp_run_socket</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Socket on which the qp_run process replies</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.reset_zmq_addresses:">
+<code class="descname">reset_zmq_addresses:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.reset_zmq_addresses:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">reset_zmq_addresses</span>
+</pre></div>
+</div>
+<p>Socket which pulls the results (2)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">switch_qp_run_to_master()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.switch_qp_run_to_master:">
+<code class="descname">switch_qp_run_to_master:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.switch_qp_run_to_master:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">switch_qp_run_to_master</span>
+</pre></div>
+</div>
+<p>Address of the master qp_run socket
+Example : <a class="reference external" href="tcp://130.120.229.139:12345">tcp://130.120.229.139:12345</a></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.is_zmq_slave" title="is_zmq_slave"><code class="xref c c-data docutils literal notranslate"><span class="pre">is_zmq_slave</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getenv()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">reset_zmq_addresses()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.task_done_to_taskserver:">
+<code class="descname">task_done_to_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.task_done_to_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">task_done_to_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a task from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.tasks_done_to_taskserver:">
+<code class="descname">tasks_done_to_taskserver:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.tasks_done_to_taskserver:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">tasks_done_to_taskserver</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">n_tasks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a task from the task server</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.wait_for_next_state:">
+<code class="descname">wait_for_next_state:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.wait_for_next_state:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">wait_for_next_state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_sub_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.wait_for_state:">
+<code class="descname">wait_for_state:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.wait_for_state:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">wait_for_state</span><span class="p">(</span><span class="n">state_wait</span><span class="p">,</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Wait for the ZMQ state to be ready</p>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_sub_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.wait_for_states:">
+<code class="descname">wait_for_states:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.wait_for_states:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">wait_for_states</span><span class="p">(</span><span class="n">state_wait</span><span class="p">,</span><span class="n">state</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Wait for the ZMQ state to be ready</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_main()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_sub_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_abort:">
+<code class="descname">zmq_abort:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_abort:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_abort</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Aborts a running parallel computation</p>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_delete_task:">
+<code class="descname">zmq_delete_task:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_delete_task:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_delete_task</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">more</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When a task is done, it has to be removed from the list of tasks on the qp_run
+queue. This guarantees that the results have been received in the pull.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_delete_tasks:">
+<code class="descname">zmq_delete_tasks:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_delete_tasks:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_delete_tasks</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">n_tasks</span><span class="p">,</span><span class="n">more</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When a task is done, it has to be removed from the list of tasks on the qp_run
+queue. This guarantees that the results have been received in the pull.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_delete_tasks_async_recv:">
+<code class="descname">zmq_delete_tasks_async_recv:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_delete_tasks_async_recv:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_delete_tasks_async_recv</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">n_tasks</span><span class="p">,</span><span class="n">more</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When a task is done, it has to be removed from the list of tasks on the qp_run
+queue. This guarantees that the results have been received in the pull.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_delete_tasks_async_send:">
+<code class="descname">zmq_delete_tasks_async_send:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_delete_tasks_async_send:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_delete_tasks_async_send</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">zmq_socket_pull</span><span class="p">,</span><span class="n">task_id</span><span class="p">,</span><span class="n">n_tasks</span><span class="p">,</span><span class="n">more</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When a task is done, it has to be removed from the list of tasks on the qp_run
+queue. This guarantees that the results have been received in the pull.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get8_dvector:">
+<code class="descname">zmq_get8_dvector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get8_dvector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get8_dvector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a float vector from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get8_ivector:">
+<code class="descname">zmq_get8_ivector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get8_ivector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get8_ivector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a vector of integers from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_dmatrix:">
+<code class="descname">zmq_get_dmatrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_dmatrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_dmatrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a float vector from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_dvector:">
+<code class="descname">zmq_get_dvector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_dvector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_dvector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a float vector from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_i8matrix:">
+<code class="descname">zmq_get_i8matrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_i8matrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_i8matrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a float vector from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_imatrix:">
+<code class="descname">zmq_get_imatrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_imatrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_imatrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a float vector from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_int:">
+<code class="descname">zmq_get_int:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_int:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_int</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a vector of integers from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_int_nompi:">
+<code class="descname">zmq_get_int_nompi:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_int_nompi:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_int_nompi</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a vector of integers from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_ivector:">
+<code class="descname">zmq_get_ivector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_ivector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_ivector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get a vector of integers from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_port:">
+<code class="descname">zmq_port:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_port:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">zmq_port</span><span class="p">(</span><span class="n">ishift</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Return the value of the ZMQ port from the corresponding integer</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.qp_run_address" title="qp_run_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_run_address</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put8_dvector:">
+<code class="descname">zmq_put8_dvector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put8_dvector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put8_dvector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a float vector on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put8_ivector:">
+<code class="descname">zmq_put8_ivector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put8_ivector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put8_ivector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a vector of integers on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_dmatrix:">
+<code class="descname">zmq_put_dmatrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_dmatrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_dmatrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a float vector on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_dvector:">
+<code class="descname">zmq_put_dvector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_dvector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_dvector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a float vector on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_i8matrix:">
+<code class="descname">zmq_put_i8matrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_i8matrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_i8matrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a float vector on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_imatrix:">
+<code class="descname">zmq_put_imatrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_imatrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_imatrix</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x1</span><span class="p">,</span> <span class="n">size_x2</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a float vector on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_int:">
+<code class="descname">zmq_put_int:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_int:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_int</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a vector of integers on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_ivector:">
+<code class="descname">zmq_put_ivector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_ivector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/put_get.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_ivector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">size_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put a vector of integers on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_set_running:">
+<code class="descname">zmq_set_running:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_set_running:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">zmq/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_set_running</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Set the job to Running in QP-run</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../programmers_guide/qp_name.html" class="btn btn-neutral float-right" title="qp_name" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="utils.html" class="btn btn-neutral" title="utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

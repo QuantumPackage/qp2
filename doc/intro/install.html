@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Selected Configuration Interaction" href="selected_ci.html" />
+    <link rel="prev" title="The Quantum Package" href="../index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#help-for-installing-external-dependencies">Help for installing external dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-configure-executable">Using the <strong class="command">configure</strong> executable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#if-the-configure-executable-fails-to-install-a-specific-dependency">If the <strong class="command">configure</strong> executable fails to install a specific dependency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ninja">Ninja</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#irpf90">IRPF90</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#zeromq-and-its-fortran-binding">ZeroMQ and its Fortran binding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#zlib">Zlib</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ocaml">OCaml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ezfio">EZFIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docopt">Docopt</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/install.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The <em>Quantum Package</em> can be downloaded on GitHub as an <a class="reference external" href="https://github.com/LCPQ/quantum_package/releases/latest">archive</a> or as a <a class="reference external" href="https://github.com/LCPQ/quantum_package">git
+repository</a>.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">LCPQ</span><span class="o">/</span><span class="n">quantum_package</span>
+</pre></div>
+</div>
+<p>Before anything, go into your <code class="file docutils literal notranslate"><span class="pre">quantum_package</span></code> directory and run</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span>
+</pre></div>
+</div>
+<p>This script will create the <code class="file docutils literal notranslate"><span class="pre">quantum_package.rc</span></code> bash script, which
+sets all the environment variables required for the normal operation of the
+<em>Quantum Package</em>.</p>
+<p>Running this script will also tell you which external dependencies are missing
+and need to be installed.</p>
+<p>When all dependencies have been installed, ( the <strong class="command">configure</strong> will tell you)
+source the <code class="file docutils literal notranslate"><span class="pre">quantum_package.rc</span></code> in order to load all environment variables and compile the <em>Quantum Package</em>.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Linux OS</li>
+<li>Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran</li>
+<li><a class="reference external" href="http://www.gnu.org/software/make">GNU make</a></li>
+<li><a class="reference external" href="http://www.gnu.org/software/autoconf">Autoconf</a></li>
+<li><a class="reference external" href="http://www.python.org">Python</a> &gt; 2.6</li>
+<li><a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> : Fortran code generator</li>
+<li><a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> : Easy Fortran Input/Output library generator</li>
+<li><a class="reference external" href="http://www.netlib.org/blas/">BLAS</a> and <a class="reference external" href="http://www.netlib.org/lapack/">LAPACK</a></li>
+<li><a class="reference external" href="http://zlib.net">Zlib</a></li>
+<li><a class="reference external" href="http://savannah.gnu.org/projects/patch">GNU Patch</a></li>
+<li><a class="reference external" href="http://zeromq.org/">ZeroMQ</a> : networking library</li>
+<li><a class="reference external" href="http://ocaml.org/">OCaml</a> compiler with <a class="reference external" href="http://opam.ocaml.org/">OPAM</a> package manager</li>
+<li><a class="reference external" href="https://ninja-build.org/">Ninja</a> : a parallel build system</li>
+</ul>
+<p>When all the dependencies have been installed, go into the <code class="file docutils literal notranslate"><span class="pre">config</span></code>
+directory, and copy the configuration file that corresponds to your
+architecture. Modify it if needed, and run <strong class="command">configure</strong> with
+<a class="reference internal" href="../users_guide/configure.html#cmdoption-configure-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">configure</span> <span class="pre">-c</span></code></a>.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">./</span><span class="n">config</span><span class="o">/</span><span class="n">gfortran</span><span class="o">.</span><span class="n">example</span> <span class="n">config</span><span class="o">/</span><span class="n">gfortran</span><span class="o">.</span><span class="n">cfg</span>
+<span class="o">./</span><span class="n">configure</span> <span class="o">-</span><span class="n">c</span> <span class="n">config</span><span class="o">/</span><span class="n">gfortran</span><span class="o">.</span><span class="n">cfg</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="docutils literal notranslate"><span class="pre">popcnt</span></code> instruction accelerates <em>a lot</em> the programs, so the
+SSE4.2, AVX or AVX2 instruction sets should be enabled in the
+configuration file if possible.</p>
+</div>
+</div>
+<div class="section" id="help-for-installing-external-dependencies">
+<h2>Help for installing external dependencies<a class="headerlink" href="#help-for-installing-external-dependencies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-the-configure-executable">
+<h3>Using the <strong class="command">configure</strong> executable<a class="headerlink" href="#using-the-configure-executable" title="Permalink to this headline">¶</a></h3>
+<p>The <strong class="command">configure</strong> executable can help you in installing the minimal dependencies you will need to compile the <em>Quantum Package</em>.
+The command is to be used as follows:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span> <span class="o">--</span><span class="n">install</span> <span class="o">&lt;</span><span class="n">package</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The following packages are supported by the <strong class="command">configure</strong> installer:</p>
+<ul class="simple">
+<li>ninja</li>
+<li>irpf90</li>
+<li>zeromq</li>
+<li>f77zmq</li>
+<li>ocaml  ( <span class="math notranslate nohighlight">\(\approx\)</span> 10 minutes)</li>
+<li>ezfio</li>
+<li>docopt</li>
+<li>resultsFile</li>
+<li>bats</li>
+</ul>
+<p>Example:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span> <span class="o">-</span><span class="n">i</span> <span class="n">ezfio</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>When installing the ocaml package, you will be asked the location of where it should be installed.
+A safe option is to enter the path proposed by the <em>Quantum Package</em>:</p>
+<p>QP&gt;&gt; Please install it here: /your_quantum_package_directory/bin</p>
+<p class="last">So just enter the proposition of the <em>Quantum Package</em> and press enter.</p>
+</div>
+</div>
+<div class="section" id="if-the-configure-executable-fails-to-install-a-specific-dependency">
+<h3>If the <strong class="command">configure</strong> executable fails to install a specific dependency<a class="headerlink" href="#if-the-configure-executable-fails-to-install-a-specific-dependency" title="Permalink to this headline">¶</a></h3>
+<p>If the <strong class="command">configure</strong> executable does not succeed to install a specific dependency,
+there are some proposition of how to download and install the minimal dependencies to compile and use the <em>Quantum Package</em></p>
+<p>Before doing anything below, try to install the packages with your package manager
+(<strong class="command">apt</strong>, <strong class="command">yum</strong>, etc)</p>
+</div>
+<div class="section" id="ninja">
+<h3>Ninja<a class="headerlink" href="#ninja" title="Permalink to this headline">¶</a></h3>
+<p><em>Ninja</em> is a build system (like GNU make), with a focus on speed.</p>
+<ul class="simple">
+<li>Download the latest binary version of Ninja
+here : <a class="reference external" href="https://github.com/ninja-build/ninja/releases/latest">https://github.com/ninja-build/ninja/releases/latest</a></li>
+<li>Unzip the ninja-linux.zip file, and move the ninja binary into
+the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/bin</span></code> directory.</li>
+</ul>
+</div>
+<div class="section" id="irpf90">
+<h3>IRPF90<a class="headerlink" href="#irpf90" title="Permalink to this headline">¶</a></h3>
+<p><em>IRPF90</em> is a Fortran code generator for programming using the Implicit Reference
+to Parameters (IRP) method.</p>
+<ul class="simple">
+<li>Download the latest version of IRPF90
+here : <a class="reference external" href="https://github.com/scemama/irpf90/releases/latest">https://github.com/scemama/irpf90/releases/latest</a> and move
+the downloaded archive in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</li>
+<li>Extract the archive and go into the <code class="file docutils literal notranslate"><span class="pre">irpf90-*</span></code> directory to run
+<strong class="command">make</strong></li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">IRPF90_PATH</span></code> variable may need to be updated in the configuration
+file <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/etc/irpf90.rc</span></code>.</p>
+</div>
+</div>
+<div class="section" id="zeromq-and-its-fortran-binding">
+<h3>ZeroMQ and its Fortran binding<a class="headerlink" href="#zeromq-and-its-fortran-binding" title="Permalink to this headline">¶</a></h3>
+<p><em>ZeroMQ</em> is a high-performance asynchronous messaging library.</p>
+<ul class="simple">
+<li>Download the latest stable version of ZeroMQ
+here : <a class="reference external" href="https://github.com/zeromq/libzmq/releases/latest">https://github.com/zeromq/libzmq/releases/latest</a> and move the
+downloaded archive in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</li>
+<li>Extract the archive, go into the <code class="file docutils literal notranslate"><span class="pre">zeromq-*</span></code> directory and run
+the following commands</li>
+</ul>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{QP_ROOT}</span><span class="s2">&quot;</span> <span class="o">--</span><span class="n">without</span><span class="o">-</span><span class="n">libsodium</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Download the Fortran binding
+here : <a class="reference external" href="https://github.com/zeromq/f77_zmq/releases/latest">https://github.com/zeromq/f77_zmq/releases/latest</a> and move
+the downloaded archive in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</li>
+<li>Extract the archive, go into the <code class="file docutils literal notranslate"><span class="pre">f77_zmq-*</span></code> directory and run
+the following commands</li>
+</ul>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>export ZMQ_H=${QP_ROOT}/include/zmq.h
+make
+cp libf77zmq.a ${QP_ROOT}/lib
+cp libf77zmq.so ${QP_ROOT}/lib
+</pre></div>
+</div>
+<ul class="simple">
+<li>Copy the <code class="file docutils literal notranslate"><span class="pre">f77_zmq_free.h</span></code> file in the <code class="docutils literal notranslate"><span class="pre">ZMQ</span></code> module as follows:</li>
+</ul>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>cp f77_zmq_free.h ${QP_ROOT}/src/ZMQ/f77_zmq.h
+</pre></div>
+</div>
+</div>
+<div class="section" id="zlib">
+<h3>Zlib<a class="headerlink" href="#zlib" title="Permalink to this headline">¶</a></h3>
+<p><em>Zlib</em> is the compression library used by <em>gzip</em>.</p>
+<ul class="simple">
+<li>Download the latest version of Zlib here:
+<a class="reference external" href="https://www.zlib.net/zlib-1.2.11.tar.gz">https://www.zlib.net/zlib-1.2.11.tar.gz</a>
+and move it in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</li>
+<li>Extract the archive, go into the <code class="file docutils literal notranslate"><span class="pre">zlib-*</span></code> directory and run
+the following commands</li>
+</ul>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>./configure --prefix=${QP_ROOT}
+make
+make install
+</pre></div>
+</div>
+</div>
+<div class="section" id="ocaml">
+<h3>OCaml<a class="headerlink" href="#ocaml" title="Permalink to this headline">¶</a></h3>
+<p><em>OCaml</em> is a general purpose programming language with an emphasis on expressiveness and safety.</p>
+<ul>
+<li><p class="first">Download the installer of the OPAM package manager here :
+<a class="reference external" href="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh">https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh</a>
+and move it in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</p>
+</li>
+<li><p class="first">If you use OCaml only with the <em>Quantum Package</em>, you can install the OPAM directory
+containing the compiler and all the installed libraries in the
+<code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory as</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>export OPAMROOT=${QP_ROOT}/external/opam
+</pre></div>
+</div>
+</li>
+<li><p class="first">Run the installer</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>echo ${QP_ROOT}/bin
+${QP_ROOT}/external/opam_installer.sh --no-backup --fresh
+</pre></div>
+</div>
+<p>You the <strong class="command">opam</strong> command can be installed in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/bin</span></code>
+directory. To do this, take the output of <code class="docutils literal notranslate"><span class="pre">echo</span> <span class="pre">${QP_ROOT}/bin</span></code> and
+use it as an answer to where <strong class="command">opam</strong> should be installed.</p>
+</li>
+<li><p class="first">Install the OCaml compiler</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>opam init --disable-sandboxing --comp=4.07.0
+eval `${QP_ROOT}/bin/opam env`
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install the required external OCaml libraries</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">install</span> <span class="n">ocamlbuild</span> <span class="n">cryptokit</span> <span class="n">zmq</span> <span class="n">core</span> <span class="n">sexplib</span> <span class="n">ppx_sexp_conv</span> <span class="n">ppx_deriving</span> <span class="n">getopt</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="ezfio">
+<h3>EZFIO<a class="headerlink" href="#ezfio" title="Permalink to this headline">¶</a></h3>
+<p><em>EZFIO</em> is the Easy Fortran Input/Output library generator.</p>
+<ul class="simple">
+<li>Download EZFIO here : <a class="reference external" href="https://gitlab.com/scemama/EZFIO/-/archive/master/EZFIO-master.tar.gz">https://gitlab.com/scemama/EZFIO/-/archive/master/EZFIO-master.tar.gz</a> and move
+the downloaded archive in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external</span></code> directory</li>
+<li>Extract the archive, and rename it as <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/external/ezfio</span></code></li>
+</ul>
+</div>
+<div class="section" id="docopt">
+<h3>Docopt<a class="headerlink" href="#docopt" title="Permalink to this headline">¶</a></h3>
+<p><em>Docopt</em> is a Python package defining a command-line interface description language.</p>
+<p>If you have <em>pip</em> for Python2, you can do</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip2</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span> <span class="n">docopt</span>
+</pre></div>
+</div>
+<p>Otherwise,</p>
+<ul class="simple">
+<li>Download the archive here : <a class="reference external" href="https://github.com/docopt/docopt/releases/tag/0.6.2">https://github.com/docopt/docopt/releases/tag/0.6.2</a></li>
+<li>Extract the archive</li>
+<li>Copy <code class="file docutils literal notranslate"><span class="pre">docopt-0.6.2/docopt.py</span></code> in the <code class="file docutils literal notranslate"><span class="pre">$</span><em><span class="pre">QP_ROOT</span></em><span class="pre">/scripts</span></code> directory</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="selected_ci.html" class="btn btn-neutral float-right" title="Selected Configuration Interaction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="The Quantum Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

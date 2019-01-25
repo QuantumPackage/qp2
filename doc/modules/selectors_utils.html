@@ -1,0 +1,891 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>selectors_utils &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="single_ref_method" href="single_ref_method.html" />
+    <link rel="prev" title="selectors_full" href="selectors_full.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">selectors_utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>selectors_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/selectors_utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="selectors-utils">
+<span id="module-selectors-utils"></span><h1>selectors_utils<a class="headerlink" href="#selectors-utils" title="Permalink to this headline">¶</a></h1>
+<p>Helper functions for selectors.</p>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.coef_hf_selector">
+<code class="descname">coef_hf_selector</code><a class="headerlink" href="#c.coef_hf_selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.delta_e_per_selector">
+<code class="descname">delta_e_per_selector</code><a class="headerlink" href="#c.delta_e_per_selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.double_index_selectors">
+<code class="descname">double_index_selectors</code><a class="headerlink" href="#c.double_index_selectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">exc_degree_per_selectors</span>     <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">double_index_selectors</span>       <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_double_selectors</span>
+</pre></div>
+</div>
+<p>Degree of excitation respect to Hartree Fock for the wave function
+for the all the selectors determinants.</p>
+<p>double_index_selectors = list of the index of the double excitations</p>
+<p>n_double_selectors = number of double excitations in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.e_corr_double_only">
+<code class="descname">e_corr_double_only</code><a class="headerlink" href="#c.e_corr_double_only" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.e_corr_per_selectors">
+<code class="descname">e_corr_per_selectors</code><a class="headerlink" href="#c.e_corr_per_selectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.e_corr_second_order">
+<code class="descname">e_corr_second_order</code><a class="headerlink" href="#c.e_corr_second_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.exc_degree_per_selectors">
+<code class="descname">exc_degree_per_selectors</code><a class="headerlink" href="#c.exc_degree_per_selectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">exc_degree_per_selectors</span>     <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">double_index_selectors</span>       <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_double_selectors</span>
+</pre></div>
+</div>
+<p>Degree of excitation respect to Hartree Fock for the wave function
+for the all the selectors determinants.</p>
+<p>double_index_selectors = list of the index of the double excitations</p>
+<p>n_double_selectors = number of double excitations in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.i_h_hf_per_selectors">
+<code class="descname">i_h_hf_per_selectors</code><a class="headerlink" href="#c.i_h_hf_per_selectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.inv_selectors_coef_hf">
+<code class="descname">inv_selectors_coef_hf</code><a class="headerlink" href="#c.inv_selectors_coef_hf" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.inv_selectors_coef_hf_squared">
+<code class="descname">inv_selectors_coef_hf_squared</code><a class="headerlink" href="#c.inv_selectors_coef_hf_squared" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">coef_hf_selector</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">inv_selectors_coef_hf_squared</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">e_corr_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">i_h_hf_per_selectors</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">delta_e_per_selector</span> <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_double_only</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">e_corr_second_order</span>
+</pre></div>
+</div>
+<p>Correlation energy per determinant with respect to the Hartree-Fock determinant
+for the all the double excitations in the selectors determinants.</p>
+<p>E_corr_per_selectors(i) = <span class="math notranslate nohighlight">\(\langle D_i | H | \text{HF}\rangle  c(D_i)/c(HF)\)</span> if <span class="math notranslate nohighlight">\(| D_i \rangle\)</span> is a double excitation.</p>
+<p>E_corr_per_selectors(i) = -1000.d0 if it is not a double excitation</p>
+<p>coef_hf_selector = coefficient of the Hartree Fock determinant in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.exc_degree_per_selectors" title="exc_degree_per_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">exc_degree_per_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.n_double_selectors">
+<code class="descname">n_double_selectors</code><a class="headerlink" href="#c.n_double_selectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/e_corr_selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">exc_degree_per_selectors</span>     <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">double_index_selectors</span>       <span class="p">(</span><span class="n">N_det_selectors</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_double_selectors</span>
+</pre></div>
+</div>
+<p>Degree of excitation respect to Hartree Fock for the wave function
+for the all the selectors determinants.</p>
+<p>double_index_selectors = list of the index of the double excitations</p>
+<p>n_double_selectors = number of double excitations in the selectors determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_selectors_coef_transp">
+<code class="descname">psi_selectors_coef_transp</code><a class="headerlink" href="#c.psi_selectors_coef_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_selectors_coef_transp</span>    <span class="p">(</span><span class="n">N_states</span><span class="p">,</span><span class="n">psi_selectors_size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transposed psi_selectors</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_selectors_diag_h_mat">
+<code class="descname">psi_selectors_diag_h_mat</code><a class="headerlink" href="#c.psi_selectors_diag_h_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_selectors_diag_h_mat</span>     <span class="p">(</span><span class="n">psi_selectors_size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Diagonal elements of the H matrix for each selectors</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="electrons.html#c.elec_num" title="elec_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_selectors_size">
+<code class="descname">psi_selectors_size</code><a class="headerlink" href="#c.psi_selectors_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/selectors.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">psi_selectors_size</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_selectors_coef_transp" title="psi_selectors_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_coef_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_selectors_diag_h_mat" title="psi_selectors_diag_h_mat"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_diag_h_mat</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.zmq_get_n_det_generators:">
+<code class="descname">zmq_get_n_det_generators:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_n_det_generators:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/zmq.irp.f_template_102</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_N_det_generators</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get N_det_generators from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_n_det_selectors:">
+<code class="descname">zmq_get_n_det_selectors:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_n_det_selectors:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/zmq.irp.f_template_102</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_N_det_selectors</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get N_det_selectors from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_n_det_generators:">
+<code class="descname">zmq_put_n_det_generators:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_n_det_generators:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/zmq.irp.f_template_102</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_N_det_generators</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put N_det_generators on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_n_det_selectors:">
+<code class="descname">zmq_put_n_det_selectors:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_n_det_selectors:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">selectors_utils/zmq.irp.f_template_102</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_N_det_selectors</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put N_det_selectors on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="single_ref_method.html" class="btn btn-neutral float-right" title="single_ref_method" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="selectors_full.html" class="btn btn-neutral" title="selectors_full" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

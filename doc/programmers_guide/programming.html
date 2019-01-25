@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Programming in the Quantum Package &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EZFIO" href="ezfio.html" />
+    <link rel="prev" title="write_integrals_erf" href="../programs/write_integrals_erf.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Programming in the <em>Quantum Package</em></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Programming in the <em>Quantum Package</em></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/programmers_guide/programming.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="programming-in-the-qp">
+<h1>Programming in the <em>Quantum Package</em><a class="headerlink" href="#programming-in-the-qp" title="Permalink to this headline">¶</a></h1>
+<p>To program in the <em>Quantum Package</em>, it is required that you are familiar with the <a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a>
+code generator. A GitBook can be found <a class="reference external" href="http://scemama.gitbooks.io/irpf90">here</a>,
+and programmers are encouraged to visit this manual.</p>
+<p><a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> make programming very simple. The only information a programmer needs
+in order to write a new program is the name of the required <a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> entities
+which may already exist in other modules.  For example, writing a program which
+prints the Hartree-Fock energy is as simple as:</p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>program print_hf_energy
+  implicit none
+  BEGIN_DOC
+! Program which prints the Hartree-Fock energy
+! to the standard output
+  END_DOC
+  print *, &#39;HF energy = &#39;, HF_energy
+end
+</pre></div>
+</div>
+<p>The only required information was the existence of a provider for
+<strong class="command">hf_energy</strong>. A detailed list of all the providers, subroutines
+and functions of the <em>Quantum Package</em> can be found in the appendix of this manual.</p>
+<div class="section" id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<p>As <a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> is used, the programmer doesn’t have a full control of the sequence
+of instructions in the produced Fortran code. This explains why the input data
+is stored in a database rather than in sequential text files. Indeed, the
+programmer can’t know by advance in which order the files will be read, so a
+simple random access to persistent data is needed. The <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> library generator
+is a practical answer to this problem.</p>
+<p>The <em>Quantum Package</em> uses a collection of programs inter-operating together. Each of these
+programs is reading and/or modifying information in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database.
+This is done mostly using the command line or scripting.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">Each command modifies the state of the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database, so running twice the
+same program on the same database may have different behaviors because of the
+state of the database. For reproducibility, users are encouraged to run scripts
+where a fresg new <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database is created at the beginning of the
+script. This way of running the <em>Quantum Package</em> makes calculations reproducible.</p>
+</div>
+<p>The computational part <em>Quantum Package</em> is organized in <strong>modules</strong>. A module is a
+directory which contains multiple <a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> files, a <code class="file docutils literal notranslate"><span class="pre">README.rst</span></code> and a <code class="file docutils literal notranslate"><span class="pre">NEED</span></code> file.</p>
+<p>The <code class="file docutils literal notranslate"><span class="pre">README.rst</span></code> file contains documentation about the module, that is
+automatically included in the documentation of the <em>Quantum Package</em>. The documentation is
+generated by the <a class="reference external" href="http://www.sphinx-doc.org">Sphinx documentation builder</a>,
+and it should be written using the <abbr title="ReStructured Text">RST</abbr> format.</p>
+<p>The <code class="file docutils literal notranslate"><span class="pre">NEED</span></code> file contains the list of the modules which are needed for the
+current module. When a module is needed, it means that all the <a class="reference external" href="http://irpf90.ups-tlse.fr">IRPF90</a> files
+it contains should be included in the current module. This is done
+automatically during the building process, by creating symbolic links in the
+current directory.</p>
+<p>To compile the program, the <a class="reference external" href="https://ninja-build.org/">Ninja</a> build system is used, and all the building
+process is fully automated such that the programmer will never have to modify a
+file by hand. Running <strong class="command">ninja</strong> inside a module will compile only the
+module, and running <strong class="command">ninja</strong> at the root of the <em>Quantum Package</em> will build all the
+modules, as well as the tools.</p>
+<img alt="http://craniointernational.com/wp-content/uploads/2018/01/work-in-progress.jpg" src="http://craniointernational.com/wp-content/uploads/2018/01/work-in-progress.jpg" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ezfio.html" class="btn btn-neutral float-right" title="EZFIO" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../programs/write_integrals_erf.html" class="btn btn-neutral" title="write_integrals_erf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

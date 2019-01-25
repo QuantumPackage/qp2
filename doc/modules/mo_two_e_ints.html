@@ -1,0 +1,1624 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mo_two_e_ints &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mpi" href="mpi.html" />
+    <link rel="prev" title="mo_two_e_erf_ints" href="mo_two_e_erf_ints.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mo_two_e_ints</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>mo_two_e_ints</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/mo_two_e_ints.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mo-two-e-ints">
+<span id="module-mo-two-e-ints"></span><h1>mo_two_e_ints<a class="headerlink" href="#mo-two-e-ints" title="Permalink to this headline">¶</a></h1>
+<p>Here, all two-electron integrals (<span class="math notranslate nohighlight">\(1/r_{12}\)</span>) are computed.
+As they have 4 indices and many are zero, they are stored in a map, as defined
+in <code class="file docutils literal notranslate"><span class="pre">Utils/map_module.f90</span></code>.</p>
+<p>To fetch an <abbr title="Atomic Orbital">AO</abbr> integral, use the
+<code class="xref std std-option docutils literal notranslate"><span class="pre">get_ao_two_e_integral(i,j,k,l,ao_integrals_map)</span></code> function, and
+to fetch an <abbr title="Molecular Orbital">MO</abbr> integral, use
+<code class="xref std std-option docutils literal notranslate"><span class="pre">get_two_e_integral(i,j,k,l,mo_integrals_map)</span></code> or
+<code class="xref std std-option docutils literal notranslate"><span class="pre">mo_two_e_integral(i,j,k,l)</span></code>.</p>
+<p>The conventions are:</p>
+<ul class="simple">
+<li>For <abbr title="Atomic Orbital">AO</abbr> integrals : (ik|jl) = (11|22)</li>
+<li>For <abbr title="Molecular Orbital">MO</abbr> integrals : &lt;ij|kl&gt; = &lt;12|12&gt;</li>
+</ul>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-mo-two-e-ints-arg-io-mo-two-e-integrals">
+<code class="descname">io_mo_two_e_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-ints-arg-io-mo-two-e-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read/Write <abbr title="Molecular Orbital">MO</abbr> integrals from/to disk [ Write | Read | None ]</p>
+<p>Default: None</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-two-e-ints-arg-mo-integrals-threshold">
+<code class="descname">mo_integrals_threshold</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-ints-arg-mo-integrals-threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>If | &lt;ij|kl&gt; | &lt; <a class="reference internal" href="#cmdoption-mo-two-e-ints-arg-mo-integrals-threshold"><code class="xref std std-option docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></a> then &lt;ij|kl&gt; is zero</p>
+<p>Default: 1.e-15</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-two-e-ints-arg-no-vvvv-integrals">
+<code class="descname">no_vvvv_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-ints-arg-no-vvvv-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="xref std std-option docutils literal notranslate"><span class="pre">True</span></code>, computes all integrals except for the integrals having 4 virtual indices</p>
+<p>Default: False</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-two-e-ints-arg-no-ivvv-integrals">
+<code class="descname">no_ivvv_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-ints-arg-no-ivvv-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be switched on only if <a class="reference internal" href="#cmdoption-mo-two-e-ints-arg-no-vvvv-integrals"><code class="xref std std-option docutils literal notranslate"><span class="pre">no_vvvv_integrals</span></code></a> is <code class="xref std std-option docutils literal notranslate"><span class="pre">True</span></code>, then does not compute the integrals with 3 virtual indices and 1 belonging to the core inactive active orbitals</p>
+<p>Default: False</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-two-e-ints-arg-no-vvv-integrals">
+<code class="descname">no_vvv_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-ints-arg-no-vvv-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be switched on only if <a class="reference internal" href="#cmdoption-mo-two-e-ints-arg-no-vvvv-integrals"><code class="xref std std-option docutils literal notranslate"><span class="pre">no_vvvv_integrals</span></code></a> is <code class="xref std std-option docutils literal notranslate"><span class="pre">True</span></code>, then does not compute the integrals with 3 virtual orbitals</p>
+<p>Default: False</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.big_array_coulomb_integrals">
+<code class="descname">big_array_coulomb_integrals</code><a class="headerlink" href="#c.big_array_coulomb_integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/integrals_3_index.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">big_array_coulomb_integrals</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">big_array_exchange_integrals</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>big_array_coulomb_integrals(i,j)  = &lt;ij|ij&gt; = (ii|jj)</p>
+<p>big_array_exchange_integrals(i,j) = &lt;ij|ji&gt; = (ij|ij)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_utils.html#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_matrix_cas" title="h_matrix_cas"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_cas</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.big_array_exchange_integrals">
+<code class="descname">big_array_exchange_integrals</code><a class="headerlink" href="#c.big_array_exchange_integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/integrals_3_index.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">big_array_coulomb_integrals</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">big_array_exchange_integrals</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>big_array_coulomb_integrals(i,j)  = &lt;ij|ij&gt; = (ii|jj)</p>
+<p>big_array_exchange_integrals(i,j) = &lt;ij|ji&gt; = (ij|ij)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_utils.html#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_matrix_cas" title="h_matrix_cas"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_cas</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.core_energy">
+<code class="descname">core_energy</code><a class="headerlink" href="#c.core_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/core_quantities.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">core_energy</span>
+</pre></div>
+</div>
+<p>energy from the core : contains all core-core contributions</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_one_e_integrals" title="mo_one_e_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_one_e_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.core_fock_operator">
+<code class="descname">core_fock_operator</code><a class="headerlink" href="#c.core_fock_operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/core_quantities.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">core_fock_operator</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>this is the contribution to the Fock operator from the core electrons</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.insert_into_mo_integrals_map:">
+<code class="descname">insert_into_mo_integrals_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.insert_into_mo_integrals_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">subroutine</span> <span class="n">insert_into_mo_integrals_map</span><span class="p">(</span><span class="n">n_integrals</span><span class="p">,</span>                 <span class="o">&amp;</span>
+<span class="n">buffer_i</span><span class="p">,</span> <span class="n">buffer_values</span><span class="p">,</span> <span class="n">thr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create new entry into MO map, or accumulate in an existing entry</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_no_exit_34()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_three_indices()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_update()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_cache">
+<code class="descname">mo_integrals_cache</code><a class="headerlink" href="#c.mo_integrals_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_integrals_cache</span>   <span class="p">(</span><span class="mi">0</span><span class="n">_8</span><span class="p">:</span><span class="mi">128</span><span class="n">_8</span><span class="o">*</span><span class="mi">128</span><span class="n">_8</span><span class="o">*</span><span class="mi">128</span><span class="n">_8</span><span class="o">*</span><span class="mi">128</span><span class="n">_8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cache of MO integrals for fast access</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_cache_max">
+<code class="descname">mo_integrals_cache_max</code><a class="headerlink" href="#c.mo_integrals_cache_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min_8</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max_8</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_cache_max_8">
+<code class="descname">mo_integrals_cache_max_8</code><a class="headerlink" href="#c.mo_integrals_cache_max_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min_8</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max_8</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_cache_min">
+<code class="descname">mo_integrals_cache_min</code><a class="headerlink" href="#c.mo_integrals_cache_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min_8</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max_8</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_cache_min_8">
+<code class="descname">mo_integrals_cache_min_8</code><a class="headerlink" href="#c.mo_integrals_cache_min_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">4</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_min_8</span>
+<span class="n">integer</span><span class="o">*</span><span class="mi">8</span>       <span class="p">::</span> <span class="n">mo_integrals_cache_max_8</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_map">
+<code class="descname">mo_integrals_map</code><a class="headerlink" href="#c.mo_integrals_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">map_type</span><span class="p">)</span>  <span class="p">::</span> <span class="n">mo_integrals_map</span>
+</pre></div>
+</div>
+<p>MO integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.fock_operator_closed_shell_ref_bitmask" title="fock_operator_closed_shell_ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_operator_closed_shell_ref_bitmask</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_wee_closed_shell" title="fock_wee_closed_shell"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_wee_closed_shell</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_cas" title="h_matrix_cas"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_cas</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integral_jj_from_ao">
+<code class="descname">mo_two_e_integral_jj_from_ao</code><a class="headerlink" href="#c.mo_two_e_integral_jj_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integral_jj_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_in_map">
+<code class="descname">mo_two_e_integrals_in_map</code><a class="headerlink" href="#c.mo_two_e_integrals_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="p">::</span> <span class="n">mo_two_e_integrals_in_map</span>
+</pre></div>
+</div>
+<p>If True, the map of MO two-electron integrals is provided</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.core_inact_act_bitmask_4" title="core_inact_act_bitmask_4"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_inact_act_bitmask_4</span></code></a></li>
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.full_ijkl_bitmask_4" title="full_ijkl_bitmask_4"><code class="xref c c-data docutils literal notranslate"><span class="pre">full_ijkl_bitmask_4</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_class</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">no_ivvv_integrals</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">no_vvv_integrals</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">no_vvvv_integrals</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">read_mo_two_e_integrals</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.coef_hf_selector" title="coef_hf_selector"><code class="xref c c-data docutils literal notranslate"><span class="pre">coef_hf_selector</span></code></a></li>
+<li><a class="reference internal" href="#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_operator_closed_shell_ref_bitmask" title="fock_operator_closed_shell_ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_operator_closed_shell_ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.fock_wee_closed_shell" title="fock_wee_closed_shell"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_wee_closed_shell</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_matrix_cas" title="h_matrix_cas"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_cas</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_jj">
+<code class="descname">mo_two_e_integrals_jj</code><a class="headerlink" href="#c.mo_two_e_integrals_jj" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy" title="core_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_jj_anti">
+<code class="descname">mo_two_e_integrals_jj_anti</code><a class="headerlink" href="#c.mo_two_e_integrals_jj_anti" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy" title="core_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_jj_anti_from_ao">
+<code class="descname">mo_two_e_integrals_jj_anti_from_ao</code><a class="headerlink" href="#c.mo_two_e_integrals_jj_anti_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integral_jj_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_jj_exchange">
+<code class="descname">mo_two_e_integrals_jj_exchange</code><a class="headerlink" href="#c.mo_two_e_integrals_jj_exchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy" title="core_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_jj_exchange_from_ao">
+<code class="descname">mo_two_e_integrals_jj_exchange_from_ao</code><a class="headerlink" href="#c.mo_two_e_integrals_jj_exchange_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integral_jj_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_jj_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_vv_anti_from_ao">
+<code class="descname">mo_two_e_integrals_vv_anti_from_ao</code><a class="headerlink" href="#c.mo_two_e_integrals_vv_anti_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_from_ao</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+but only for the virtual orbitals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_vv_exchange_from_ao">
+<code class="descname">mo_two_e_integrals_vv_exchange_from_ao</code><a class="headerlink" href="#c.mo_two_e_integrals_vv_exchange_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_from_ao</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+but only for the virtual orbitals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_vv_from_ao">
+<code class="descname">mo_two_e_integrals_vv_from_ao</code><a class="headerlink" href="#c.mo_two_e_integrals_vv_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_from_ao</span>        <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_exchange_from_ao</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_integrals_vv_anti_from_ao</span>   <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_vv_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_vv_anti_from_ao(i,j) = J_ij - K_ij
+but only for the virtual orbitals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.add_integrals_to_map:">
+<code class="descname">add_integrals_to_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_integrals_to_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">add_integrals_to_map</span><span class="p">(</span><span class="n">mask_ijkl</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Adds integrals to tha MO map according to some bitmask</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_str()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">insert_into_mo_integrals_map()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_merge()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mo_two_e_integrals_index()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.add_integrals_to_map_no_exit_34:">
+<code class="descname">add_integrals_to_map_no_exit_34:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_integrals_to_map_no_exit_34:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">add_integrals_to_map_no_exit_34</span><span class="p">(</span><span class="n">mask_ijkl</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Adds integrals to tha MO map according to some bitmask</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">insert_into_mo_integrals_map()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_merge()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mo_two_e_integrals_index()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.add_integrals_to_map_three_indices:">
+<code class="descname">add_integrals_to_map_three_indices:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_integrals_to_map_three_indices:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">add_integrals_to_map_three_indices</span><span class="p">(</span><span class="n">mask_ijk</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Adds integrals to tha MO map according to some bitmask</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_str()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">insert_into_mo_integrals_map()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_merge()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mo_two_e_integrals_index()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.clear_mo_map:">
+<code class="descname">clear_mo_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.clear_mo_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">clear_mo_map</span>
+</pre></div>
+</div>
+<p>Frees the memory of the MO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.dump_mo_integrals:">
+<code class="descname">dump_mo_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.dump_mo_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">dump_mo_integrals</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Save to disk the <abbr title="Molecular Orbital">MO</abbr> integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_work_empty()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_map_size:">
+<code class="descname">get_mo_map_size:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_map_size:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">8</span> <span class="n">function</span> <span class="n">get_mo_map_size</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Return the number of elements in the MO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals:">
+<code class="descname">get_mo_two_e_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals &lt;ij|kl&gt; in the MO basis, all
+i for j,k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_d0()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_d1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_coulomb_ii:">
+<code class="descname">get_mo_two_e_integrals_coulomb_ii:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_coulomb_ii:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_coulomb_ii</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals &lt;ki|li&gt;
+k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
+for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_operator_closed_shell_ref_bitmask" title="fock_operator_closed_shell_ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_operator_closed_shell_ref_bitmask</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_wee_closed_shell" title="fock_wee_closed_shell"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_wee_closed_shell</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_exch_ii:">
+<code class="descname">get_mo_two_e_integrals_exch_ii:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_exch_ii:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_exch_ii</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals &lt;ki|il&gt;
+k(1)i(2) 1/r12 i(1)l(2) :: out_val(i1)
+for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_operator_closed_shell_ref_bitmask" title="fock_operator_closed_shell_ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_operator_closed_shell_ref_bitmask</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.fock_wee_closed_shell" title="fock_wee_closed_shell"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_wee_closed_shell</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_i1j1:">
+<code class="descname">get_mo_two_e_integrals_i1j1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_i1j1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_i1j1</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_array</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals &lt;ik|jl&gt; in the MO basis, all
+i(1)j(1) 1/r12 k(2)l(2)
+i, j for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i2radix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8radix_sort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">iradix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_ij:">
+<code class="descname">get_mo_two_e_integrals_ij:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_ij:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_ij</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_array</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals &lt;ij|kl&gt; in the MO basis, all
+i(1)j(2) 1/r12 k(1)l(2)
+i, j for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i2radix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8radix_sort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">iradix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_two_e_integral:">
+<code class="descname">get_two_e_integral:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_two_e_integral:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">get_two_e_integral</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns one integral &lt;ij|kl&gt; in the MO basis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.load_mo_integrals:">
+<code class="descname">load_mo_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.load_mo_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">load_mo_integrals</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Read from disk the <abbr title="Molecular Orbital">MO</abbr> integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cache_map_reallocate()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_sort()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_two_e_integral:">
+<code class="descname">mo_two_e_integral:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_two_e_integral:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">mo_two_e_integral</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns one integral &lt;ij|kl&gt; in the MO basis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_two_e_integrals_index:">
+<code class="descname">mo_two_e_integrals_index:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_two_e_integrals_index:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_ints/mo_bi_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mo_two_e_integrals_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">i1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes an unique index for i,j,k,l integrals</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_erf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_no_exit_34()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_three_indices()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mpi.html" class="btn btn-neutral float-right" title="mpi" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mo_two_e_erf_ints.html" class="btn btn-neutral" title="mo_two_e_erf_ints" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

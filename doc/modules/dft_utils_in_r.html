@@ -1,0 +1,1158 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dft_utils_in_r &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dft_utils_one_e" href="dft_utils_one_e.html" />
+    <link rel="prev" title="dft_keywords" href="dft_keywords.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">dft_utils_in_r</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>dft_utils_in_r</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/dft_utils_in_r.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dft-utils-in-r">
+<span id="module-dft-utils-in-r"></span><h1>dft_utils_in_r<a class="headerlink" href="#dft-utils-in-r" title="Permalink to this headline">¶</a></h1>
+<p>This module contains most of the fundamental quantities (AOs, MOs or density derivatives) evaluated in real-space representation that are needed for the various DFT modules.</p>
+<p>As these quantities might be used and re-used, the values at each point of the grid are stored (see <code class="docutils literal notranslate"><span class="pre">becke_numerical_grid</span></code> for more information on the grid).</p>
+<p>The main providers for this module are:</p>
+<ul class="simple">
+<li><code class="xref std std-option docutils literal notranslate"><span class="pre">aos_in_r_array</span></code>: values of the <abbr title="Atomic Orbital">AO</abbr> basis on the grid point.</li>
+<li><code class="xref std std-option docutils literal notranslate"><span class="pre">mos_in_r_array</span></code>: values of the <abbr title="Molecular Orbital">MO</abbr> basis on the grid point.</li>
+<li><code class="xref std std-option docutils literal notranslate"><span class="pre">one_e_dm_and_grad_alpha_in_r</span></code>: values of the density and its gradienst on the grid points.</li>
+</ul>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.aos_grad_in_r_array">
+<code class="descname">aos_grad_in_r_array</code><a class="headerlink" href="#c.aos_grad_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp_xyz</span>       <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith ao on the jth grid point</p>
+<p>aos_grad_in_r_array_transp(i,j,k)   = value of the kth component of the gradient of jth ao on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mos_grad_in_r_array" title="mos_grad_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">mos_grad_in_r_array</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_pbe" title="potential_sr_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_pbe" title="potential_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_grad_in_r_array_transp">
+<code class="descname">aos_grad_in_r_array_transp</code><a class="headerlink" href="#c.aos_grad_in_r_array_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp_xyz</span>       <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith ao on the jth grid point</p>
+<p>aos_grad_in_r_array_transp(i,j,k)   = value of the kth component of the gradient of jth ao on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mos_grad_in_r_array" title="mos_grad_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">mos_grad_in_r_array</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_pbe" title="potential_sr_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_pbe" title="potential_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_grad_in_r_array_transp_xyz">
+<code class="descname">aos_grad_in_r_array_transp_xyz</code><a class="headerlink" href="#c.aos_grad_in_r_array_transp_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_grad_in_r_array_transp_xyz</span>       <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith ao on the jth grid point</p>
+<p>aos_grad_in_r_array_transp(i,j,k)   = value of the kth component of the gradient of jth ao on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mos_grad_in_r_array" title="mos_grad_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">mos_grad_in_r_array</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_pbe" title="potential_sr_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_pbe" title="potential_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_in_r_array">
+<code class="descname">aos_in_r_array</code><a class="headerlink" href="#c.aos_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_in_r_array</span>       <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_in_r_array_transp</span>        <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_in_r_array(i,j)        = value of the ith ao on the jth grid point</p>
+<p>aos_in_r_array_transp(i,j) = value of the jth ao on the ith grid point</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_lda_w" title="aos_sr_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_lda_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_lda_w" title="aos_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_lda_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_c_alpha_ao_lda" title="potential_sr_c_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_c_alpha_ao_lda</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_lda" title="potential_sr_x_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_lda</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_pbe" title="potential_sr_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_pbe</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_lda" title="potential_x_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_lda</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_pbe" title="potential_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_in_r_array_transp">
+<code class="descname">aos_in_r_array_transp</code><a class="headerlink" href="#c.aos_in_r_array_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_in_r_array</span>       <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_in_r_array_transp</span>        <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_in_r_array(i,j)        = value of the ith ao on the jth grid point</p>
+<p>aos_in_r_array_transp(i,j) = value of the jth ao on the ith grid point</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_lda_w" title="aos_sr_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_lda_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_lda_w" title="aos_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_lda_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_c_alpha_ao_lda" title="potential_sr_c_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_c_alpha_ao_lda</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_lda" title="potential_sr_x_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_lda</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_sr_x_alpha_ao_pbe" title="potential_sr_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_sr_x_alpha_ao_pbe</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_lda" title="potential_x_alpha_ao_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_lda</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.potential_x_alpha_ao_pbe" title="potential_x_alpha_ao_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">potential_x_alpha_ao_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_lapl_in_r_array">
+<code class="descname">aos_lapl_in_r_array</code><a class="headerlink" href="#c.aos_lapl_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_lapl_in_r_array</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_lapl_in_r_array_transp</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith ao on the jth grid point</p>
+<p>aos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth ao on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mos_lapl_in_r_array" title="mos_lapl_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">mos_lapl_in_r_array</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.aos_lapl_in_r_array_transp">
+<code class="descname">aos_lapl_in_r_array_transp</code><a class="headerlink" href="#c.aos_lapl_in_r_array_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/ao_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_lapl_in_r_array</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">aos_lapl_in_r_array_transp</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">ao_num</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>aos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith ao on the jth grid point</p>
+<p>aos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth ao on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mos_lapl_in_r_array" title="mos_lapl_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">mos_lapl_in_r_array</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mos_grad_in_r_array">
+<code class="descname">mos_grad_in_r_array</code><a class="headerlink" href="#c.mos_grad_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/mo_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_grad_in_r_array</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith mo on the jth grid point</p>
+<p>mos_grad_in_r_array_transp(i,j,k)   = value of the kth component of the gradient of jth mo on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.aos_grad_in_r_array" title="aos_grad_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_grad_in_r_array</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mos_in_r_array">
+<code class="descname">mos_in_r_array</code><a class="headerlink" href="#c.mos_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/mo_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_in_r_array</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_in_r_array_transp</span>        <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mos_in_r_array(i,j)        = value of the ith mo on the jth grid point</p>
+<p>mos_in_r_array_transp(i,j) = value of the jth mo on the ith grid point</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mos_in_r_array_transp">
+<code class="descname">mos_in_r_array_transp</code><a class="headerlink" href="#c.mos_in_r_array_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/mo_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_in_r_array</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_in_r_array_transp</span>        <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mos_in_r_array(i,j)        = value of the ith mo on the jth grid point</p>
+<p>mos_in_r_array_transp(i,j) = value of the jth mo on the ith grid point</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mos_lapl_in_r_array">
+<code class="descname">mos_lapl_in_r_array</code><a class="headerlink" href="#c.mos_lapl_in_r_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/mo_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mos_lapl_in_r_array</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith mo on the jth grid point</p>
+<p>mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth mo on the ith grid point</p>
+<p>k = 1 : x, k= 2, y, k  3, z</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.aos_lapl_in_r_array" title="aos_lapl_in_r_array"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_lapl_in_r_array</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_alpha_at_r">
+<code class="descname">one_e_dm_alpha_at_r</code><a class="headerlink" href="#c.one_e_dm_alpha_at_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_alpha_at_r</span>  <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_beta_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
+one_e_dm_beta_at_r(i,istate) =  n_beta(r_i,istate)
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_lda_w" title="aos_sr_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_lda_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_lda_w" title="aos_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_lda_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_lda" title="energy_sr_x_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_lda</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_lda" title="energy_x_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_lda</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_alpha_in_r">
+<code class="descname">one_e_dm_alpha_in_r</code><a class="headerlink" href="#c.one_e_dm_alpha_in_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_alpha_in_r</span>  <span class="p">(</span><span class="n">n_points_integration_angular</span><span class="p">,</span><span class="n">n_points_radial_grid</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_beta_in_r</span>   <span class="p">(</span><span class="n">n_points_integration_angular</span><span class="p">,</span><span class="n">n_points_radial_grid</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.grid_points_per_atom" title="grid_points_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">grid_points_per_atom</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_radial_grid" title="n_points_radial_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_radial_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_and_grad_alpha_in_r">
+<code class="descname">one_e_dm_and_grad_alpha_in_r</code><a class="headerlink" href="#c.one_e_dm_and_grad_alpha_in_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_alpha_in_r</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_beta_in_r</span>  <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_alpha_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_beta_at_r</span>    <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_and_grad_alpha_in_r(1,i,i_state) = ddx n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(2,i,i_state) = ddy n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(3,i,i_state) = ddz n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate)
+one_e_grad_2_dm_alpha_at_r(i,istate)      = ddx n_alpha(r_i,istate)^2 + ddy n_alpha(r_i,istate)^2 + ddz n_alpha(r_i,istate)^2
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_pbe" title="energy_sr_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_pbe" title="energy_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_and_grad_beta_in_r">
+<code class="descname">one_e_dm_and_grad_beta_in_r</code><a class="headerlink" href="#c.one_e_dm_and_grad_beta_in_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_alpha_in_r</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_beta_in_r</span>  <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_alpha_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_beta_at_r</span>    <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_and_grad_alpha_in_r(1,i,i_state) = ddx n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(2,i,i_state) = ddy n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(3,i,i_state) = ddz n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate)
+one_e_grad_2_dm_alpha_at_r(i,istate)      = ddx n_alpha(r_i,istate)^2 + ddy n_alpha(r_i,istate)^2 + ddz n_alpha(r_i,istate)^2
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_pbe" title="energy_sr_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_pbe" title="energy_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_beta_at_r">
+<code class="descname">one_e_dm_beta_at_r</code><a class="headerlink" href="#c.one_e_dm_beta_at_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_alpha_at_r</span>  <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_beta_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
+one_e_dm_beta_at_r(i,istate) =  n_beta(r_i,istate)
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_lda_w" title="aos_sr_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_lda_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_lda_w" title="aos_vc_alpha_lda_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_lda_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_lda" title="energy_sr_x_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_lda</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_lda" title="energy_x_lda"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_lda</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_dm_beta_in_r">
+<code class="descname">one_e_dm_beta_in_r</code><a class="headerlink" href="#c.one_e_dm_beta_in_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_alpha_in_r</span>  <span class="p">(</span><span class="n">n_points_integration_angular</span><span class="p">,</span><span class="n">n_points_radial_grid</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_beta_in_r</span>   <span class="p">(</span><span class="n">n_points_integration_angular</span><span class="p">,</span><span class="n">n_points_radial_grid</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.grid_points_per_atom" title="grid_points_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">grid_points_per_atom</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_radial_grid" title="n_points_radial_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_radial_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_grad_2_dm_alpha_at_r">
+<code class="descname">one_e_grad_2_dm_alpha_at_r</code><a class="headerlink" href="#c.one_e_grad_2_dm_alpha_at_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_alpha_in_r</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_beta_in_r</span>  <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_alpha_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_beta_at_r</span>    <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_and_grad_alpha_in_r(1,i,i_state) = ddx n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(2,i,i_state) = ddy n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(3,i,i_state) = ddz n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate)
+one_e_grad_2_dm_alpha_at_r(i,istate)      = ddx n_alpha(r_i,istate)^2 + ddy n_alpha(r_i,istate)^2 + ddz n_alpha(r_i,istate)^2
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_pbe" title="energy_sr_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_pbe" title="energy_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.one_e_grad_2_dm_beta_at_r">
+<code class="descname">one_e_grad_2_dm_beta_at_r</code><a class="headerlink" href="#c.one_e_grad_2_dm_beta_at_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_alpha_in_r</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_dm_and_grad_beta_in_r</span>  <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_alpha_at_r</span>   <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">one_e_grad_2_dm_beta_at_r</span>    <span class="p">(</span><span class="n">n_points_final_grid</span><span class="p">,</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>one_e_dm_and_grad_alpha_in_r(1,i,i_state) = ddx n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(2,i,i_state) = ddy n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(3,i,i_state) = ddz n_alpha(r_i,istate)
+one_e_dm_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate)
+one_e_grad_2_dm_alpha_at_r(i,istate)      = ddx n_alpha(r_i,istate)^2 + ddy n_alpha(r_i,istate)^2 + ddz n_alpha(r_i,istate)^2
+where r_i is the ith point of the grid and istate is the state number</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="becke_numerical_grid.html#c.final_grid_points" title="final_grid_points"><code class="xref c c-data docutils literal notranslate"><span class="pre">final_grid_points</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="becke_numerical_grid.html#c.n_points_final_grid" title="n_points_final_grid"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_points_final_grid</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_sr_vc_alpha_pbe_w" title="aos_sr_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_sr_vc_alpha_pbe_w</span></code></a></li>
+<li><a class="reference internal" href="dft_utils_one_e.html#c.aos_vc_alpha_pbe_w" title="aos_vc_alpha_pbe_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">aos_vc_alpha_pbe_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_sr_x_pbe" title="energy_sr_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_sr_x_pbe</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="dft_utils_one_e.html#c.energy_x_pbe" title="energy_x_pbe"><code class="xref c c-data docutils literal notranslate"><span class="pre">energy_x_pbe</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:">
+<code class="descname">density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">dm_a</span><span class="p">,</span><span class="n">dm_b</span><span class="p">,</span> <span class="n">grad_dm_a</span><span class="p">,</span> <span class="n">grad_dm_b</span><span class="p">,</span> <span class="n">aos_array</span><span class="p">,</span> <span class="n">grad_aos_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input      : r(1) ==&gt; r(1) = x, r(2) = y, r(3) = z
+output     : dm_a = alpha density evaluated at r</p>
+<blockquote>
+<div>: dm_b = beta  density evaluated at r
+: aos_array(i) = ao(i) evaluated at r
+: grad_dm_a(1) = X gradient of the alpha density evaluated in r
+: grad_dm_a(1) = X gradient of the beta  density evaluated in r
+: grad_aos_array(1) = X gradient of the aos(i) evaluated at r</div></blockquote>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.one_e_dm_and_grad_alpha_in_r" title="one_e_dm_and_grad_alpha_in_r"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_and_grad_alpha_in_r</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dsymv()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_and_grad_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.dm_dft_alpha_beta_and_all_aos_at_r:">
+<code class="descname">dm_dft_alpha_beta_and_all_aos_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.dm_dft_alpha_beta_and_all_aos_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">dm_dft_alpha_beta_and_all_aos_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">dm_a</span><span class="p">,</span><span class="n">dm_b</span><span class="p">,</span><span class="n">aos_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input: r(1) ==&gt; r(1) = x, r(2) = y, r(3) = z
+output : dm_a = alpha density evaluated at r
+output : dm_b = beta  density evaluated at r
+output : aos_array(i) = ao(i) evaluated at r</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dsymv()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.dm_dft_alpha_beta_at_r:">
+<code class="descname">dm_dft_alpha_beta_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.dm_dft_alpha_beta_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">dft_utils_in_r/dm_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">dm_dft_alpha_beta_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">dm_a</span><span class="p">,</span><span class="n">dm_b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input: r(1) ==&gt; r(1) = x, r(2) = y, r(3) = z
+output : dm_a = alpha density evaluated at r(3)
+output : dm_b = beta  density evaluated at r(3)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="density_for_dft.html#c.one_e_dm_alpha_ao_for_dft" title="one_e_dm_alpha_ao_for_dft"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_ao_for_dft</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.one_e_dm_alpha_at_r" title="one_e_dm_alpha_at_r"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_at_r</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.one_e_dm_alpha_in_r" title="one_e_dm_alpha_in_r"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_alpha_in_r</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemv()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dft_utils_one_e.html" class="btn btn-neutral float-right" title="dft_utils_one_e" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dft_keywords.html" class="btn btn-neutral" title="dft_keywords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1522 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ao_basis &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ao_one_e_integrals" href="ao_one_e_ints.html" />
+    <link rel="prev" title="Index for programmers" href="../programmers_guide/index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ao_basis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>ao_basis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/ao_basis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ao-basis">
+<span id="module-ao-basis"></span><h1>ao_basis<a class="headerlink" href="#ao-basis" title="Permalink to this headline">¶</a></h1>
+<p>This module describes the atomic orbitals basis set.</p>
+<p>An <abbr title="Atomic Orbital">AO</abbr> <span class="math notranslate nohighlight">\(\chi\)</span> centered on nucleus A is represented as:</p>
+<div class="math notranslate nohighlight">
+\[\chi_i({\bf r}) = (x-X_A)^a (y-Y_A)^b (z-Z_A)^c \sum_k c_{ki} e^{-\gamma_{ki} |{\bf r} - {\bf R}_A|^2}\]</div>
+<p>The <abbr title="Atomic Orbital">AO</abbr> coefficients are normalized as:</p>
+<div class="math notranslate nohighlight">
+\[{\tilde c}_{ki} = \frac{c_{ki}}{ \int \left( (x-X_A)^a (y-Y_A)^b (z-Z_A)^c  e^{-\gamma_{ki} |{\bf r} - {\bf R}_A|^2} \right)^2 dr}\]</div>
+<p>Warning: <a class="reference internal" href="#cmdoption-ao-basis-arg-ao-coef"><code class="xref std std-option docutils literal notranslate"><span class="pre">ao_coef</span></code></a> contains the <abbr title="Atomic Orbital">AO</abbr> coefficients given in input. These do not
+include the normalization constant of the <abbr title="Atomic Orbital">AO</abbr>. The <code class="xref std std-option docutils literal notranslate"><span class="pre">ao_coef_normalized</span></code> provider includes
+this normalization factor.</p>
+<p>The <abbr title="Atomic Orbitals">AOs</abbr> are also sorted by increasing exponent to accelerate the calculation of
+the two electron integrals.</p>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-basis">
+<code class="descname">ao_basis</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the <abbr title="Atomic Orbital">AO</abbr> basis set</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-num">
+<code class="descname">ao_num</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of <abbr title="Atomic Orbitals">AOs</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-prim-num">
+<code class="descname">ao_prim_num</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-prim-num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of primitives per <abbr title="Atomic Orbital">AO</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-prim-num-max">
+<code class="descname">ao_prim_num_max</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-prim-num-max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of primitives</p>
+<p>Default: =maxval(ao_basis.ao_prim_num)</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-nucl">
+<code class="descname">ao_nucl</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-nucl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index of the nucleus on which the <abbr title="Atomic Orbital">AO</abbr> is centered</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-power">
+<code class="descname">ao_power</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-power" title="Permalink to this definition">¶</a></dt>
+<dd><p>Powers of x, y and z for each <abbr title="Atomic Orbital">AO</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-coef">
+<code class="descname">ao_coef</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-coef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Primitive coefficients, read from input. Those should not be used directly, as the MOs are expressed on the basis of <strong>normalized</strong> AOs.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-expo">
+<code class="descname">ao_expo</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-expo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exponents for each primitive of each <abbr title="Atomic Orbital">AO</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-md5">
+<code class="descname">ao_md5</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-md5" title="Permalink to this definition">¶</a></dt>
+<dd><p>MD5 key, specific of the <abbr title="Atomic Orbital">AO</abbr> basis</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-basis-arg-ao-cartesian">
+<code class="descname">ao_cartesian</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-basis-arg-ao-cartesian" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, use <abbr title="Atomic Orbitals">AOs</abbr> in Cartesian coordinates (6d,10f,…)</p>
+<p>Default: false</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.ao_coef_normalization_factor">
+<code class="descname">ao_coef_normalization_factor</code><a class="headerlink" href="#c.ao_coef_normalization_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized</span>   <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalization_factor</span> <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Coefficients including the <abbr title="Atomic Orbital">AO</abbr> normalization</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalization_libint_factor" title="ao_coef_normalization_libint_factor"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalization_libint_factor</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_coef_normalization_libint_factor">
+<code class="descname">ao_coef_normalization_libint_factor</code><a class="headerlink" href="#c.ao_coef_normalization_libint_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalization_libint_factor</span>  <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><abbr title="Atomic Orbital">AO</abbr> normalization for interfacing with libint</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized" title="ao_coef_normalized"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_coef_normalized">
+<code class="descname">ao_coef_normalized</code><a class="headerlink" href="#c.ao_coef_normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized</span>   <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalization_factor</span> <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Coefficients including the <abbr title="Atomic Orbital">AO</abbr> normalization</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalization_libint_factor" title="ao_coef_normalization_libint_factor"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalization_libint_factor</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_coef_normalized_ordered">
+<code class="descname">ao_coef_normalized_ordered</code><a class="headerlink" href="#c.ao_coef_normalized_ordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized_ordered</span>   <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_expo_ordered</span>      <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sorted primitives to accelerate 4 index <abbr title="Molecular Orbital">MO</abbr> transformation</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized" title="ao_coef_normalized"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_coef_normalized_ordered_transp">
+<code class="descname">ao_coef_normalized_ordered_transp</code><a class="headerlink" href="#c.ao_coef_normalized_ordered_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized_ordered_transp</span>    <span class="p">(</span><span class="n">ao_prim_num_max</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transposed <a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_deriv2_x" title="ao_deriv2_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_deriv2_x</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_deriv_1_x" title="ao_deriv_1_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_deriv_1_x</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_dipole_x" title="ao_dipole_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_dipole_x</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e" title="ao_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e_per_atom" title="ao_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e_per_atom</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap" title="ao_overlap"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_pseudo_integrals_local" title="ao_pseudo_integrals_local"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_pseudo_integrals_local</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_pseudo_integrals_non_local" title="ao_pseudo_integrals_non_local"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_pseudo_integrals_non_local</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_spread_x" title="ao_spread_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_spread_x</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_coef_normalized_ordered_transp_per_nucl">
+<code class="descname">ao_coef_normalized_ordered_transp_per_nucl</code><a class="headerlink" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_transp.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized_ordered_transp_per_nucl</span>   <span class="p">(</span><span class="n">ao_prim_num_max</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_expo_ordered">
+<code class="descname">ao_expo_ordered</code><a class="headerlink" href="#c.ao_expo_ordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_coef_normalized_ordered</span>   <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_expo_ordered</span>      <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_prim_num_max</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sorted primitives to accelerate 4 index <abbr title="Molecular Orbital">MO</abbr> transformation</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized" title="ao_coef_normalized"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_expo_ordered_transp">
+<code class="descname">ao_expo_ordered_transp</code><a class="headerlink" href="#c.ao_expo_ordered_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_expo_ordered_transp</span>       <span class="p">(</span><span class="n">ao_prim_num_max</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transposed <a class="reference internal" href="#c.ao_expo_ordered" title="ao_expo_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered</span></code></a></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_deriv2_x" title="ao_deriv2_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_deriv2_x</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_deriv_1_x" title="ao_deriv_1_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_deriv_1_x</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_dipole_x" title="ao_dipole_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_dipole_x</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e" title="ao_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e_per_atom" title="ao_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e_per_atom</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap" title="ao_overlap"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_pseudo_integrals_local" title="ao_pseudo_integrals_local"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_pseudo_integrals_local</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_pseudo_integrals_non_local" title="ao_pseudo_integrals_non_local"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_pseudo_integrals_non_local</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_spread_x" title="ao_spread_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_spread_x</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_expo_ordered_transp_per_nucl">
+<code class="descname">ao_expo_ordered_transp_per_nucl</code><a class="headerlink" href="#c.ao_expo_ordered_transp_per_nucl" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_transp.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_expo_ordered_transp_per_nucl</span>      <span class="p">(</span><span class="n">ao_prim_num_max</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_prim_num_max" title="ao_prim_num_max"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num_max</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_l">
+<code class="descname">ao_l</code><a class="headerlink" href="#c.ao_l" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l</span> <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">ao_l_max</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l_char</span>    <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><span class="math notranslate nohighlight">\(l\)</span> value of the <abbr title="Atomic Orbital">AO</abbr>: :math`a+b+c` in <span class="math notranslate nohighlight">\(x^a y^b z^c\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.l_to_charater" title="l_to_charater"><code class="xref c c-data docutils literal notranslate"><span class="pre">l_to_charater</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_coef_normalization_libint_factor" title="ao_coef_normalization_libint_factor"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalization_libint_factor</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l_char_space" title="ao_l_char_space"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l_char_space</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_l_char">
+<code class="descname">ao_l_char</code><a class="headerlink" href="#c.ao_l_char" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l</span> <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">ao_l_max</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l_char</span>    <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><span class="math notranslate nohighlight">\(l\)</span> value of the <abbr title="Atomic Orbital">AO</abbr>: :math`a+b+c` in <span class="math notranslate nohighlight">\(x^a y^b z^c\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.l_to_charater" title="l_to_charater"><code class="xref c c-data docutils literal notranslate"><span class="pre">l_to_charater</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_coef_normalization_libint_factor" title="ao_coef_normalization_libint_factor"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalization_libint_factor</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l_char_space" title="ao_l_char_space"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l_char_space</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_l_char_space">
+<code class="descname">ao_l_char_space</code><a class="headerlink" href="#c.ao_l_char_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">allocatable</span>      <span class="p">::</span> <span class="n">ao_l_char_space</span>      <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Converts an l value to a string</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_l_max">
+<code class="descname">ao_l_max</code><a class="headerlink" href="#c.ao_l_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l</span> <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">ao_l_max</span>
+<span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_l_char</span>    <span class="p">(</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><span class="math notranslate nohighlight">\(l\)</span> value of the <abbr title="Atomic Orbital">AO</abbr>: :math`a+b+c` in <span class="math notranslate nohighlight">\(x^a y^b z^c\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.l_to_charater" title="l_to_charater"><code class="xref c c-data docutils literal notranslate"><span class="pre">l_to_charater</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_coef_normalization_libint_factor" title="ao_coef_normalization_libint_factor"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalization_libint_factor</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l_char_space" title="ao_l_char_space"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l_char_space</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_power_ordered_transp_per_nucl">
+<code class="descname">ao_power_ordered_transp_per_nucl</code><a class="headerlink" href="#c.ao_power_ordered_transp_per_nucl" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_transp.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">ao_power_ordered_transp_per_nucl</span>     <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_prim_num_max">
+<code class="descname">ao_prim_num_max</code><a class="headerlink" href="#c.ao_prim_num_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">ao_prim_num_max</span>
+</pre></div>
+</div>
+<p>Max number of primitives.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef</span></code></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized" title="ao_coef_normalized"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered" title="ao_coef_normalized_ordered"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_0">
+<code class="descname">cart_to_sphe_0</code><a class="headerlink" href="#c.cart_to_sphe_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_0</span>       <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=0</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_1">
+<code class="descname">cart_to_sphe_1</code><a class="headerlink" href="#c.cart_to_sphe_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_1</span>       <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=1</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_2">
+<code class="descname">cart_to_sphe_2</code><a class="headerlink" href="#c.cart_to_sphe_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_2</span>       <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=2</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_3">
+<code class="descname">cart_to_sphe_3</code><a class="headerlink" href="#c.cart_to_sphe_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_3</span>       <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=3</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_4">
+<code class="descname">cart_to_sphe_4</code><a class="headerlink" href="#c.cart_to_sphe_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_4</span>       <span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=4</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_5">
+<code class="descname">cart_to_sphe_5</code><a class="headerlink" href="#c.cart_to_sphe_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_5</span>       <span class="p">(</span><span class="mi">21</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=5</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_6">
+<code class="descname">cart_to_sphe_6</code><a class="headerlink" href="#c.cart_to_sphe_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_6</span>       <span class="p">(</span><span class="mi">28</span><span class="p">,</span><span class="mi">13</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=6</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_7">
+<code class="descname">cart_to_sphe_7</code><a class="headerlink" href="#c.cart_to_sphe_7" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_7</span>       <span class="p">(</span><span class="mi">36</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=7</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_8">
+<code class="descname">cart_to_sphe_8</code><a class="headerlink" href="#c.cart_to_sphe_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_8</span>       <span class="p">(</span><span class="mi">45</span><span class="p">,</span><span class="mi">17</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=8</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.cart_to_sphe_9">
+<code class="descname">cart_to_sphe_9</code><a class="headerlink" href="#c.cart_to_sphe_9" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/spherical_to_cartesian.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">cart_to_sphe_9</span>       <span class="p">(</span><span class="mi">55</span><span class="p">,</span><span class="mi">19</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spherical -&gt; Cartesian Transformation matrix for l=9</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_cart_to_sphe_coef" title="ao_cart_to_sphe_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_cart_to_sphe_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.l_to_charater">
+<code class="descname">l_to_charater</code><a class="headerlink" href="#c.l_to_charater" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">l_to_charater</span>        <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Character corresponding to the “l” value of an <abbr title="Atomic Orbital">AO</abbr></p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.n_aos_max">
+<code class="descname">n_aos_max</code><a class="headerlink" href="#c.n_aos_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_n_aos</span>   <span class="p">(</span><span class="n">nucl_num</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_aos_max</span>
+</pre></div>
+</div>
+<p>Number of <abbr title="Atomic Orbitals">AOs</abbr> per atom</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_aos" title="nucl_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.n_pt_max_i_x">
+<code class="descname">n_pt_max_i_x</code><a class="headerlink" href="#c.n_pt_max_i_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/dimensions_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">n_pt_max_integrals</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_pt_max_i_x</span>
+</pre></div>
+</div>
+<p>Number of points used in the numerical integrations.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e" title="ao_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e_per_atom" title="ao_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e_per_atom</span></code></a></li>
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.gauleg_t2" title="gauleg_t2"><code class="xref c c-data docutils literal notranslate"><span class="pre">gauleg_t2</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.n_pt_max_integrals">
+<code class="descname">n_pt_max_integrals</code><a class="headerlink" href="#c.n_pt_max_integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/dimensions_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">n_pt_max_integrals</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_pt_max_i_x</span>
+</pre></div>
+</div>
+<p>Number of points used in the numerical integrations.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e" title="ao_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_integrals_n_e_per_atom" title="ao_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_n_e_per_atom</span></code></a></li>
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.gauleg_t2" title="gauleg_t2"><code class="xref c c-data docutils literal notranslate"><span class="pre">gauleg_t2</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nucl_aos">
+<code class="descname">nucl_aos</code><a class="headerlink" href="#c.nucl_aos" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_aos</span>     <span class="p">(</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>List of <abbr title="Atomic Orbitals">AOs</abbr> centered on each atom</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nucl_aos_transposed">
+<code class="descname">nucl_aos_transposed</code><a class="headerlink" href="#c.nucl_aos_transposed" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_transp.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_aos_transposed</span>  <span class="p">(</span><span class="n">N_AOs_max</span><span class="p">,</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>List of AOs attached on each atom</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos" title="nucl_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nucl_list_shell_aos">
+<code class="descname">nucl_list_shell_aos</code><a class="headerlink" href="#c.nucl_list_shell_aos" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_list_shell_aos</span>  <span class="p">(</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_num_shell_aos</span>   <span class="p">(</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Index of the shell type <abbr title="Atomic Orbitals">AOs</abbr> and of the corresponding <abbr title="Atomic Orbitals">AOs</abbr>
+By convention, for p,d,f and g <abbr title="Atomic Orbitals">AOs</abbr>, we take the index
+of the <abbr title="Atomic Orbital">AO</abbr> with the the corresponding power in the x axis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos" title="nucl_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nucl_n_aos">
+<code class="descname">nucl_n_aos</code><a class="headerlink" href="#c.nucl_n_aos" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_n_aos</span>   <span class="p">(</span><span class="n">nucl_num</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">n_aos_max</span>
+</pre></div>
+</div>
+<p>Number of <abbr title="Atomic Orbitals">AOs</abbr> per atom</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_aos" title="nucl_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_list_shell_aos" title="nucl_list_shell_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_list_shell_aos</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nucl_num_shell_aos">
+<code class="descname">nucl_num_shell_aos</code><a class="headerlink" href="#c.nucl_num_shell_aos" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_list_shell_aos</span>  <span class="p">(</span><span class="n">nucl_num</span><span class="p">,</span><span class="n">N_AOs_max</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">nucl_num_shell_aos</span>   <span class="p">(</span><span class="n">nucl_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Index of the shell type <abbr title="Atomic Orbitals">AOs</abbr> and of the corresponding <abbr title="Atomic Orbitals">AOs</abbr>
+By convention, for p,d,f and g <abbr title="Atomic Orbitals">AOs</abbr>, we take the index
+of the <abbr title="Atomic Orbital">AO</abbr> with the the corresponding power in the x axis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos" title="nucl_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.ao_power_index:">
+<code class="descname">ao_power_index:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_power_index:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">ao_power_index</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Unique index given to a triplet of powers:</p>
+<p><span class="math notranslate nohighlight">\(\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1\)</span></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_value:">
+<code class="descname">ao_value:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_value:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">ao_value</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>return the value of the ith ao at point r</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_aos_and_grad_and_lapl_at_r:">
+<code class="descname">give_all_aos_and_grad_and_lapl_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_aos_and_grad_and_lapl_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_aos_and_grad_and_lapl_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">aos_array</span><span class="p">,</span><span class="n">aos_grad_array</span><span class="p">,</span><span class="n">aos_lapl_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input      : r(1) ==&gt; r(1) = x, r(2) = y, r(3) = z
+output     : aos_array(i) = ao(i) evaluated at r</p>
+<blockquote>
+<div>: aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r</div></blockquote>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_mos_and_grad_and_lapl_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_aos_and_grad_at_r:">
+<code class="descname">give_all_aos_and_grad_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_aos_and_grad_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_aos_and_grad_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">aos_array</span><span class="p">,</span><span class="n">aos_grad_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input      : r(1) ==&gt; r(1) = x, r(2) = y, r(3) = z
+output     : aos_array(i) = ao(i) evaluated at r</p>
+<blockquote>
+<div>: aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r</div></blockquote>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_mos_and_grad_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_aos_at_r:">
+<code class="descname">give_all_aos_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_aos_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_aos_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">aos_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>input : r == r(1) = x and so on
+aos_array(i) = aos(i) evaluated in r</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp_per_nucl" title="ao_expo_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_power_ordered_transp_per_nucl" title="ao_power_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power_ordered_transp_per_nucl</span></code></a></li>
+<li><a class="reference internal" href="#c.nucl_n_aos" title="nucl_n_aos"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_n_aos</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="#c.ao_coef_normalized_ordered_transp_per_nucl" title="ao_coef_normalized_ordered_transp_per_nucl"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp_per_nucl</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nucl_aos_transposed" title="nucl_aos_transposed"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_aos_transposed</span></code></a></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_num</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_mos_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_aos_at_r_old:">
+<code class="descname">give_all_aos_at_r_old:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_aos_at_r_old:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_aos_at_r_old</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">aos_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>gives the values of aos at a given point r</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.primitive_value:">
+<code class="descname">primitive_value:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.primitive_value:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_basis/aos_value.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">primitive_value</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>return the value of the jth primitive of ith ao at point r WITHOUT THE COEF</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ao_one_e_ints.html" class="btn btn-neutral float-right" title="ao_one_e_integrals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../programmers_guide/index.html" class="btn btn-neutral" title="Index for programmers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

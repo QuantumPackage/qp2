@@ -1,0 +1,652 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Benchmarks &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Some research made with the Quantum Package" href="research.html" />
+    <link rel="prev" title="Coding conventions" href="../programmers_guide/conventions.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#convergence-of-the-energy">Convergence of the energy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variational-energy">Variational energy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variational-energy-pt2-correction">Variational energy + PT2 correction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#davidson-s-diagonalization">Davidson’s diagonalization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#olympe">Olympe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#irene">Irene</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pt2-correction">PT2 correction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Olympe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Irene</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Benchmarks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/appendix/benchmarks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="benchmarks">
+<h1>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this headline">¶</a></h1>
+<p>The determinant selection, MR-PT2 and diagonalization are parallelized with
+distributed parallelism. Benchmarks for the [NH2-CH-NH2]+ molecule in the
+aug-cc-pVDZ basis set are presented with up to 50 nodes (1800 cores) on
+CALMIP’s <a class="reference external" href="https://www.calmip.univ-toulouse.fr/spip.php?article582&amp;lang=fr">Olympe</a> supercomputer, and 200 nodes (9600 cores) on GENCI’s
+<a class="reference external" href="http://www-hpc.cea.fr/en/complexe/tgcc-Irene.htm">Irene</a> supercomputer. This represents an active space of 18 electrons
+in 111 MOs.</p>
+<ul class="simple">
+<li>Nodes of Olympe have two Skylake sockets, 2x18 cores &#64; 2.3GHz.</li>
+<li>Nodes of Irene  have two Skylake sockets, 2x24 cores &#64; 2.7GHz.</li>
+</ul>
+<div class="section" id="convergence-of-the-energy">
+<h2>Convergence of the energy<a class="headerlink" href="#convergence-of-the-energy" title="Permalink to this headline">¶</a></h2>
+<div class="figure" id="id5">
+<img alt="Convergence of the energy." src="../_images/cn3_energy.png" />
+<p class="caption"><span class="caption-text">Convergence of the variational energy, with and without the PT2 correction.
+Both energies converge to the (frozen core) FCI energy.
+The plot is displayed for the ground state and for the 1st excited state.</span></p>
+</div>
+<div class="section" id="variational-energy">
+<h3>Variational energy<a class="headerlink" href="#variational-energy" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of dets</th>
+<th class="head">Ground state</th>
+<th class="head">Excited state</th>
+<th class="head">Excitation (eV)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>7</td>
+<td>-149.489 186</td>
+<td>-149.207 354</td>
+<td>7.67</td>
+</tr>
+<tr class="row-odd"><td>123</td>
+<td>-149.536 265</td>
+<td>-149.261 860</td>
+<td>7.47</td>
+</tr>
+<tr class="row-even"><td>3 083</td>
+<td>-149.685 606</td>
+<td>-149.404 450</td>
+<td>7.65</td>
+</tr>
+<tr class="row-odd"><td>29 409</td>
+<td>-149.826 151</td>
+<td>-149.547 275</td>
+<td>7.59</td>
+</tr>
+<tr class="row-even"><td>168 595</td>
+<td>-149.900 352</td>
+<td>-149.626 058</td>
+<td>7.46</td>
+</tr>
+<tr class="row-odd"><td>1 322 537</td>
+<td>-149.946 655</td>
+<td>-149.675 032</td>
+<td>7.39</td>
+</tr>
+<tr class="row-even"><td>8 495 334</td>
+<td>-149.972 032</td>
+<td>-149.704 145</td>
+<td>7.29</td>
+</tr>
+<tr class="row-odd"><td>9 356 952</td>
+<td>-149.973 375</td>
+<td>-149.706 822</td>
+<td>7.25</td>
+</tr>
+<tr class="row-even"><td>42 779 636</td>
+<td>-149.987 370</td>
+<td>-149.721 470</td>
+<td>7.24</td>
+</tr>
+<tr class="row-odd"><td>186 978 487</td>
+<td>-149.998 582</td>
+<td>-149.733 039</td>
+<td>7.23</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="variational-energy-pt2-correction">
+<h3>Variational energy + PT2 correction<a class="headerlink" href="#variational-energy-pt2-correction" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of dets</th>
+<th class="head">Ground state</th>
+<th class="head">Excited state</th>
+<th class="head">Excitation (eV)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>7</td>
+<td>-150.161 107</td>
+<td>-149.904 883</td>
+<td>6.97</td>
+</tr>
+<tr class="row-odd"><td>123</td>
+<td>-150.116 958</td>
+<td>-149.849 465</td>
+<td>7.28</td>
+</tr>
+<tr class="row-even"><td>3 083</td>
+<td>-150.043 5(2)</td>
+<td>-149.780 8(2)</td>
+<td>7.15</td>
+</tr>
+<tr class="row-odd"><td>29 409</td>
+<td>-150.022 2(2)</td>
+<td>-149.758 3(2)</td>
+<td>7.18</td>
+</tr>
+<tr class="row-even"><td>168 595</td>
+<td>-150.019 9(1)</td>
+<td>-149.754 5(1)</td>
+<td>7.22</td>
+</tr>
+<tr class="row-odd"><td>1 322 537</td>
+<td>-150.017 89(7)</td>
+<td>-149.752 55(7)</td>
+<td>7.22</td>
+</tr>
+<tr class="row-even"><td>8 495 334</td>
+<td>-150.015 97(4)</td>
+<td>-149.750 87(5)</td>
+<td>7.21</td>
+</tr>
+<tr class="row-odd"><td>9 356 952</td>
+<td>-150.015 89(3)</td>
+<td>-149.750 66(3)</td>
+<td>7.22</td>
+</tr>
+<tr class="row-even"><td>42 959 496</td>
+<td>-150.016 75(2)</td>
+<td>-149.751 88(2)</td>
+<td>7.21</td>
+</tr>
+<tr class="row-odd"><td>186 978 487</td>
+<td>-150.017 51(2)</td>
+<td>-149.752 90(2)</td>
+<td>7.20</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="davidson-s-diagonalization">
+<h2>Davidson’s diagonalization<a class="headerlink" href="#davidson-s-diagonalization" title="Permalink to this headline">¶</a></h2>
+<p>We present the parallel speedup curve, and the wall-clock time in seconds
+required to compute one iteration for two wave functions measured on Olympe
+and Irene.</p>
+<div class="figure" id="id6">
+<img alt="Parallel speedup of Davidson's diagonalization." src="../_images/speedup_davidson.png" />
+<p class="caption"><span class="caption-text">Parallel speedup of Davidson’s diagonalization measured on Olympe and Irene.</span></p>
+</div>
+<div class="section" id="olympe">
+<h3>Olympe<a class="headerlink" href="#olympe" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="32%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of 36-core Nodes</th>
+<th class="head">9 356 952 determinants</th>
+<th class="head">42 959 496 determinants</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>775.55</td>
+<td>11 198.70</td>
+</tr>
+<tr class="row-odd"><td>5</td>
+<td>169.88</td>
+<td>2 288.58</td>
+</tr>
+<tr class="row-even"><td>10</td>
+<td>93.22</td>
+<td>1 213.95</td>
+</tr>
+<tr class="row-odd"><td>20</td>
+<td>56.86</td>
+<td>626.41</td>
+</tr>
+<tr class="row-even"><td>30</td>
+<td>43.76</td>
+<td>445.65</td>
+</tr>
+<tr class="row-odd"><td>40</td>
+<td>36.18</td>
+<td>350.25</td>
+</tr>
+<tr class="row-even"><td>50</td>
+<td>33.67</td>
+<td>295.25</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="irene">
+<h3>Irene<a class="headerlink" href="#irene" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="32%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of 48-core Nodes</th>
+<th class="head">9 356 952 determinants</th>
+<th class="head">42 959 496 determinants</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>572.98</td>
+<td>9 154.30 *</td>
+</tr>
+<tr class="row-odd"><td>10</td>
+<td>72.55</td>
+<td>922.07</td>
+</tr>
+<tr class="row-even"><td>25</td>
+<td>38.88</td>
+<td>412.34</td>
+</tr>
+<tr class="row-odd"><td>50</td>
+<td>27.95</td>
+<td>241.35</td>
+</tr>
+<tr class="row-even"><td>75</td>
+<td>27.54</td>
+<td>183.63</td>
+</tr>
+<tr class="row-odd"><td>100</td>
+<td>27.86</td>
+<td>165.68</td>
+</tr>
+<tr class="row-even"><td>150</td>
+<td>28.14</td>
+<td>134.05</td>
+</tr>
+<tr class="row-odd"><td>200</td>
+<td>27.77</td>
+<td>134.64</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="pt2-correction">
+<h2>PT2 correction<a class="headerlink" href="#pt2-correction" title="Permalink to this headline">¶</a></h2>
+<p>We present the parallel speedup curve, and the wall-clock time in seconds
+required to compute the PT2 correction for two wave functions measured on
+Olympe and Irene.</p>
+<div class="figure" id="id7">
+<img alt="Parallel speedup of the PT2 computation of the ground state." src="../_images/speedup_pt2.png" />
+<p class="caption"><span class="caption-text">Parallel speedup of the PT2 computation of the ground state measured
+on Olympe and Irene.</span></p>
+</div>
+<div class="section" id="id1">
+<h3>Olympe<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="32%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of 36-core Nodes</th>
+<th class="head">Ground state (9.3M)</th>
+<th class="head">Excited state (9.3M)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>7 883.74</td>
+<td>9 829.19</td>
+</tr>
+<tr class="row-odd"><td>5</td>
+<td>1 629.06</td>
+<td>2 022.36</td>
+</tr>
+<tr class="row-even"><td>10</td>
+<td>832.89</td>
+<td>1 029.91</td>
+</tr>
+<tr class="row-odd"><td>20</td>
+<td>440.76</td>
+<td>537.37</td>
+</tr>
+<tr class="row-even"><td>30</td>
+<td>303.31</td>
+<td>378.69</td>
+</tr>
+<tr class="row-odd"><td>40</td>
+<td>246.12</td>
+<td>296.31</td>
+</tr>
+<tr class="row-even"><td>50</td>
+<td>201.84</td>
+<td>241.55</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id2">
+<h3>Irene<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="19%" />
+<col width="20%" />
+<col width="19%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Number of 48-core Nodes</th>
+<th class="head">Ground state (9.3M)</th>
+<th class="head">Excited state (9.3M)</th>
+<th class="head">Ground state (42.9M)</th>
+<th class="head">Excited state (42.9M)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>4 935.81</td>
+<td>6 152.29</td>
+<td>24 586.62</td>
+<td>37 440.59</td>
+</tr>
+<tr class="row-odd"><td>10</td>
+<td>525.95</td>
+<td>652.23</td>
+<td>2 458.66</td>
+<td>3 086.19</td>
+</tr>
+<tr class="row-even"><td>25</td>
+<td>237.47</td>
+<td>286.06</td>
+<td>1 041.69</td>
+<td>1 295.43</td>
+</tr>
+<tr class="row-odd"><td>50</td>
+<td>144.39</td>
+<td>174.12</td>
+<td>588.35</td>
+<td>724.25</td>
+</tr>
+<tr class="row-even"><td>75</td>
+<td>109.13</td>
+<td>129.17</td>
+<td>446.74</td>
+<td>537.59</td>
+</tr>
+<tr class="row-odd"><td>100</td>
+<td>100.75</td>
+<td>103.43</td>
+<td>367.21</td>
+<td>450.32</td>
+</tr>
+<tr class="row-even"><td>150</td>
+<td>82.04</td>
+<td>91.77</td>
+<td>298.63</td>
+<td>358.25</td>
+</tr>
+<tr class="row-odd"><td>200</td>
+<td>75.62</td>
+<td>85.25</td>
+<td>268.96</td>
+<td>312.23</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="research.html" class="btn btn-neutral float-right" title="Some research made with the Quantum Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../programmers_guide/conventions.html" class="btn btn-neutral" title="Coding conventions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

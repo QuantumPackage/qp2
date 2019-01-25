@@ -1,0 +1,1114 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mo_basis &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mo_guess" href="mo_guess.html" />
+    <link rel="prev" title="kohn_sham_rs" href="kohn_sham_rs.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mo_basis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>mo_basis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/mo_basis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mo-basis">
+<span id="module-mo-basis"></span><h1>mo_basis<a class="headerlink" href="#mo-basis" title="Permalink to this headline">¶</a></h1>
+<p>Molecular orbitals are expressed as</p>
+<div class="math notranslate nohighlight">
+\[\phi_k({\bf r}) = \sum_i C_{ik} \chi_k({\bf r})\]</div>
+<p>where <span class="math notranslate nohighlight">\(\chi_k\)</span> are <em>normalized</em> atomic basis functions.</p>
+<p>The current set of <abbr title="Molecular Orbitals">MOs</abbr> has a label <a class="reference internal" href="#cmdoption-mo-basis-arg-mo-label"><code class="xref std std-option docutils literal notranslate"><span class="pre">mo_label</span></code></a>.
+When the orbitals are modified, the label should also be updated to keep
+everything consistent.</p>
+<p>When saving the <abbr title="Molecular Orbitals">MOs</abbr>, the <code class="file docutils literal notranslate"><span class="pre">mo_basis</span></code> directory of the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database
+is copied in the <code class="file docutils literal notranslate"><span class="pre">save</span></code> directory, named by the current <a class="reference internal" href="#cmdoption-mo-basis-arg-mo-label"><code class="xref std std-option docutils literal notranslate"><span class="pre">mo_label</span></code></a>. All
+this is done with the script named <code class="file docutils literal notranslate"><span class="pre">save_current_mos.sh</span></code> in the
+<code class="file docutils literal notranslate"><span class="pre">$QP_ROOT/scripts</span></code> directory.</p>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-mo-num">
+<code class="descname">mo_num</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-mo-num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of <abbr title="Molecular Orbitals">MOs</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-mo-coef">
+<code class="descname">mo_coef</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-mo-coef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coefficient of the i-th <abbr title="Atomic Orbital">AO</abbr> on the j-th <abbr title="Molecular Orbital">MO</abbr></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-mo-label">
+<code class="descname">mo_label</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-mo-label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Label characterizing the MOS (Local, Canonical, Natural, <em>etc</em>)</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-mo-occ">
+<code class="descname">mo_occ</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-mo-occ" title="Permalink to this definition">¶</a></dt>
+<dd><p><abbr title="Molecular Orbital">MO</abbr> occupation numbers</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-mo-class">
+<code class="descname">mo_class</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-mo-class" title="Permalink to this definition">¶</a></dt>
+<dd><p>[ Core | Inactive | Active | Virtual | Deleted ], as defined by <a class="reference internal" href="../users_guide/qp_set_mo_class.html#qp-set-mo-class"><span class="std std-ref">qp_set_mo_class</span></a></p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mo-basis-arg-ao-md5">
+<code class="descname">ao_md5</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-basis-arg-ao-md5" title="Permalink to this definition">¶</a></dt>
+<dd><p>MD5 checksum characterizing the <abbr title="Atomic Orbital">AO</abbr> basis set.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.mo_coef">
+<code class="descname">mo_coef</code><a class="headerlink" href="#c.mo_coef" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_coef</span>      <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Molecular orbital coefficients on <abbr title="Atomic Orbital">AO</abbr> basis set</p>
+<p>mo_coef(i,j) = coefficient of the i-th <abbr title="Atomic Orbital">AO</abbr> on the jth mo</p>
+<p>mo_label : Label characterizing the MOS (local, canonical, natural, etc)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_ortho_canonical_coef" title="ao_ortho_canonical_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_canonical_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="scf_utils.html#c.eigenvectors_fock_matrix_mo" title="eigenvectors_fock_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">eigenvectors_fock_matrix_mo</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_alpha" title="fock_matrix_mo_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_alpha</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_beta" title="fock_matrix_mo_beta"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_beta</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fps_spf_matrix_mo" title="fps_spf_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">fps_spf_matrix_mo</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_in_ao_ortho_basis" title="mo_coef_in_ao_ortho_basis"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_in_ao_ortho_basis</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_dipole_x" title="mo_dipole_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_dipole_x</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e" title="mo_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e_per_atom" title="mo_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e_per_atom</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_kinetic_integrals" title="mo_kinetic_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_kinetic_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_overlap" title="mo_overlap"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_overlap</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_pseudo_integrals" title="mo_pseudo_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_pseudo_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_spread_x" title="mo_spread_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_spread_x</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_int_erf_jj_from_ao" title="mo_two_e_int_erf_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj_from_ao</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_ao_alpha" title="one_e_dm_ao_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_ao_alpha</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_spin_density_ao" title="one_e_spin_density_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_spin_density_ao</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.s_mo_coef" title="s_mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_mo_coef</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.scf_density_matrix_ao_alpha" title="scf_density_matrix_ao_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">scf_density_matrix_ao_alpha</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.scf_density_matrix_ao_beta" title="scf_density_matrix_ao_beta"><code class="xref c c-data docutils literal notranslate"><span class="pre">scf_density_matrix_ao_beta</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_coef_begin_iteration">
+<code class="descname">mo_coef_begin_iteration</code><a class="headerlink" href="#c.mo_coef_begin_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/track_orb.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_coef_begin_iteration</span>      <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Void provider to store the coefficients of the <abbr title="Molecular Orbital">MO</abbr> basis at the beginning of the SCF iteration</p>
+<p>Usefull to track some orbitals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_coef_in_ao_ortho_basis">
+<code class="descname">mo_coef_in_ao_ortho_basis</code><a class="headerlink" href="#c.mo_coef_in_ao_ortho_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_coef_in_ao_ortho_basis</span>    <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><abbr title="Molecular Orbital">MO</abbr> coefficients in orthogonalized <abbr title="Atomic Orbital">AO</abbr> basis</p>
+<p><span class="math notranslate nohighlight">\(C^{-1}.C_{mo}\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_ortho_canonical_coef_inv" title="ao_ortho_canonical_coef_inv"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_canonical_coef_inv</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_coef_transp">
+<code class="descname">mo_coef_transp</code><a class="headerlink" href="#c.mo_coef_transp" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_coef_transp</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><abbr title="Molecular Orbital">MO</abbr> coefficients on <abbr title="Atomic Orbital">AO</abbr> basis set</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_int_erf_jj_from_ao" title="mo_two_e_int_erf_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj_from_ao</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_label">
+<code class="descname">mo_label</code><a class="headerlink" href="#c.mo_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>  <span class="p">::</span> <span class="n">mo_label</span>
+</pre></div>
+</div>
+<p><abbr title="Molecular Orbital">MO</abbr> coefficients on <abbr title="Atomic Orbital">AO</abbr> basis set</p>
+<p>mo_coef(i,j) = coefficient of the i-th <abbr title="Atomic Orbital">AO</abbr> on the j-th <abbr title="Molecular Orbital">MO</abbr></p>
+<p>mo_label : Label characterizing the <abbr title="Molecular Orbitals">MOs</abbr> (local, canonical, natural, etc)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_num">
+<code class="descname">mo_num</code><a class="headerlink" href="#c.mo_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">mo_num</span>
+</pre></div>
+</div>
+<p>Number of MOs</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_ortho_canonical_coef" title="ao_ortho_canonical_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_canonical_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_guess.html#c.ao_ortho_canonical_nucl_elec_integrals" title="ao_ortho_canonical_nucl_elec_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_canonical_nucl_elec_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_guess.html#c.ao_ortho_lowdin_nucl_elec_integrals" title="ao_ortho_lowdin_nucl_elec_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_lowdin_nucl_elec_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.big_array_coulomb_integrals" title="big_array_coulomb_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">big_array_coulomb_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">data_one_e_dm_alpha_mo</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">data_one_e_dm_beta_mo</span></code></li>
+<li><a class="reference internal" href="scf_utils.html#c.eigenvectors_fock_matrix_mo" title="eigenvectors_fock_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">eigenvectors_fock_matrix_mo</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_ao" title="fock_matrix_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_ao</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo" title="fock_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_alpha" title="fock_matrix_mo_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_alpha</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_beta" title="fock_matrix_mo_beta"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_beta</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.fock_operator_closed_shell_ref_bitmask" title="fock_operator_closed_shell_ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_operator_closed_shell_ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.fock_wee_closed_shell" title="fock_wee_closed_shell"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_wee_closed_shell</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fps_spf_matrix_mo" title="fps_spf_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">fps_spf_matrix_mo</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.full_ijkl_bitmask" title="full_ijkl_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">full_ijkl_bitmask</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.list_core_inact_act" title="list_core_inact_act"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_core_inact_act</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_class</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_begin_iteration" title="mo_coef_begin_iteration"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_begin_iteration</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_in_ao_ortho_basis" title="mo_coef_in_ao_ortho_basis"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_in_ao_ortho_basis</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_dipole_x" title="mo_dipole_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_dipole_x</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_cache_min" title="mo_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache_min</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e" title="mo_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e_per_atom" title="mo_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e_per_atom</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_kinetic_integrals" title="mo_kinetic_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_kinetic_integrals</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_occ" title="mo_occ"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_occ</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_one_e_integrals" title="mo_one_e_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_one_e_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_overlap" title="mo_overlap"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_overlap</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_pseudo_integrals" title="mo_pseudo_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_pseudo_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_spread_x" title="mo_spread_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_spread_x</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_int_erf_jj_from_ao" title="mo_two_e_int_erf_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj_from_ao</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_jj" title="mo_two_e_integrals_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_jj</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_ao_alpha" title="one_e_dm_ao_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_ao_alpha</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_dagger_mo_spin_index" title="one_e_dm_dagger_mo_spin_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_dagger_mo_spin_index</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_mo" title="one_e_dm_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_mo</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_mo_alpha" title="one_e_dm_mo_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_mo_alpha</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_mo_alpha_average" title="one_e_dm_mo_alpha_average"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_mo_alpha_average</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_mo_diff" title="one_e_dm_mo_diff"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_mo_diff</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_dm_mo_spin_index" title="one_e_dm_mo_spin_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_dm_mo_spin_index</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_spin_density_ao" title="one_e_spin_density_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_spin_density_ao</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.one_e_spin_density_mo" title="one_e_spin_density_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">one_e_spin_density_mo</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_energy_h_core" title="psi_energy_h_core"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_h_core</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.s_mo_coef" title="s_mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_mo_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_alpha_csc_idx" title="singles_alpha_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_alpha_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_occ">
+<code class="descname">mo_occ</code><a class="headerlink" href="#c.mo_occ" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_occ</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><abbr title="Molecular Orbital">MO</abbr> occupation numbers</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_beta_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.ao_ortho_cano_to_ao:">
+<code class="descname">ao_ortho_cano_to_ao:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_ortho_cano_to_ao:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_ortho_cano_to_ao</span><span class="p">(</span><span class="n">A_ao</span><span class="p">,</span><span class="n">LDA_ao</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">LDA</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform A from the <abbr title="Atomic Orbital">AO</abbr> basis to the orthogonal <abbr title="Atomic Orbital">AO</abbr> basis</p>
+<p>$C^{-1}.A_{ao}.C^{dagger-1}$</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_ortho_canonical_coef_inv" title="ao_ortho_canonical_coef_inv"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_ortho_canonical_coef_inv</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_to_mo:">
+<code class="descname">ao_to_mo:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_to_mo:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_to_mo</span><span class="p">(</span><span class="n">A_ao</span><span class="p">,</span><span class="n">LDA_ao</span><span class="p">,</span><span class="n">A_mo</span><span class="p">,</span><span class="n">LDA_mo</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform A from the <abbr title="Atomic Orbital">AO</abbr> basis to the <abbr title="Molecular Orbital">MO</abbr> basis</p>
+<p>$C^dagger.A_{ao}.C$</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_alpha" title="fock_matrix_mo_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_alpha</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo_beta" title="fock_matrix_mo_beta"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo_beta</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fps_spf_matrix_mo" title="fps_spf_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">fps_spf_matrix_mo</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_dipole_x" title="mo_dipole_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_dipole_x</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e" title="mo_integrals_n_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_integrals_n_e_per_atom" title="mo_integrals_n_e_per_atom"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_n_e_per_atom</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_kinetic_integrals" title="mo_kinetic_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_kinetic_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_pseudo_integrals" title="mo_pseudo_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_pseudo_integrals</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_spread_x" title="mo_spread_x"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_spread_x</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_mos_and_grad_and_lapl_at_r:">
+<code class="descname">give_all_mos_and_grad_and_lapl_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_mos_and_grad_and_lapl_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_mos_and_grad_and_lapl_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">mos_array</span><span class="p">,</span><span class="n">mos_grad_array</span><span class="p">,</span><span class="n">mos_lapl_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_and_grad_and_lapl_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_mos_and_grad_at_r:">
+<code class="descname">give_all_mos_and_grad_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_mos_and_grad_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_mos_and_grad_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">mos_array</span><span class="p">,</span><span class="n">mos_grad_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_and_grad_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_all_mos_at_r:">
+<code class="descname">give_all_mos_at_r:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_all_mos_at_r:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos_in_r.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_all_mos_at_r</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">mos_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemv()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_all_aos_at_r()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.initialize_mo_coef_begin_iteration:">
+<code class="descname">initialize_mo_coef_begin_iteration:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.initialize_mo_coef_begin_iteration:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/track_orb.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">initialize_mo_coef_begin_iteration</span>
+</pre></div>
+</div>
+<p>Initialize <a class="reference internal" href="#c.mo_coef_begin_iteration" title="mo_coef_begin_iteration"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_begin_iteration</span></code></a> to the current <a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef_begin_iteration" title="mo_coef_begin_iteration"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_begin_iteration</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">damping_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">roothaan_hall_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mix_mo_jk:">
+<code class="descname">mix_mo_jk:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mix_mo_jk:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/mos.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mix_mo_jk</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Rotates the j-th <abbr title="Molecular Orbital">MO</abbr> with the k-th <abbr title="Molecular Orbital">MO</abbr> to give two new <abbr title="Molecular Orbitals">MOs</abbr> that are</p>
+<ul class="simple">
+<li>$+ = frac{1}{sqrt{2}} (<a href="#id1"><span class="problematic" id="id2">|</span></a>jrangle + <a href="#id3"><span class="problematic" id="id4">|</span></a>krangle)$</li>
+<li>$- = frac{1}{sqrt{2}} (<a href="#id5"><span class="problematic" id="id6">|</span></a>jrangle - <a href="#id7"><span class="problematic" id="id8">|</span></a>krangle)$</li>
+</ul>
+<p>by convention, the ‘+’ <abbr title="Molecular Orbital">MO</abbr> is in the lowest  index (min(j,k))
+by convention, the ‘-‘ <abbr title="Molecular Orbital">MO</abbr> is in the highest index (max(j,k))</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_as_eigvectors_of_mo_matrix:">
+<code class="descname">mo_as_eigvectors_of_mo_matrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_as_eigvectors_of_mo_matrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mo_as_eigvectors_of_mo_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">label</span><span class="p">,</span><span class="n">sign</span><span class="p">,</span><span class="n">output</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_label" title="mo_label"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_label</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_guess()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">damping_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">hcore_guess()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">roothaan_hall_scf()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">lapack_diag()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_as_svd_vectors_of_mo_matrix:">
+<code class="descname">mo_as_svd_vectors_of_mo_matrix:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_as_svd_vectors_of_mo_matrix:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mo_as_svd_vectors_of_mo_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">lda</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">label</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_label" title="mo_label"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_label</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">svd()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_as_svd_vectors_of_mo_matrix_eig:">
+<code class="descname">mo_as_svd_vectors_of_mo_matrix_eig:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_as_svd_vectors_of_mo_matrix_eig:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mo_as_svd_vectors_of_mo_matrix_eig</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">lda</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">eig</span><span class="p">,</span><span class="n">label</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_label" title="mo_label"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_label</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">set_natural_mos()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">svd()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.reorder_core_orb:">
+<code class="descname">reorder_core_orb:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.reorder_core_orb:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/track_orb.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">reorder_core_orb</span>
+</pre></div>
+</div>
+<p>routines that takes the current <a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a> and reorder the core orbitals (see <a class="reference internal" href="bitmask.html#c.list_core" title="list_core"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_core</span></code></a> and <a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a>) according to the overlap with <a class="reference internal" href="#c.mo_coef_begin_iteration" title="mo_coef_begin_iteration"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_begin_iteration</span></code></a></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef_begin_iteration" title="mo_coef_begin_iteration"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_begin_iteration</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap" title="ao_overlap"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">damping_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">roothaan_hall_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dsort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.save_mos:">
+<code class="descname">save_mos:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.save_mos:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">save_mos</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_occ" title="mo_occ"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_occ</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_md5</span></code></li>
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.mo_label" title="mo_label"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_label</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">damping_scf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">hcore_guess()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">huckel_guess()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">roothaan_hall_scf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_natural_mos()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_ortho_mos()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_ao_md5()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_coef()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_label()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_num()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_occ()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">system()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.save_mos_truncated:">
+<code class="descname">save_mos_truncated:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.save_mos_truncated:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_basis/utils.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">save_mos_truncated</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_occ" title="mo_occ"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_occ</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_md5</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="#c.mo_label" title="mo_label"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_label</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_ao_md5()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_coef()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_label()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_num()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_basis_mo_occ()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">system()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mo_guess.html" class="btn btn-neutral float-right" title="mo_guess" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kohn_sham_rs.html" class="btn btn-neutral" title="kohn_sham_rs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

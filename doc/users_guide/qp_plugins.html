@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qp_plugins &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Index of commands" href="index.html" />
+    <link rel="prev" title="Working with external plugins" href="plugins.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qp_plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Index of commands</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="configure.html">configure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qpsh.html">qpsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_convert_output_to_ezfio.html">qp_convert_output_to_ezfio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_create_ezfio_from_xyz.html">qp_create_ezfio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_edit.html">qp_edit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_export_as_tgz.html">qp_export_as_tgz</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">qp_plugins</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qp_run.html">qp_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_set_frozen_core.html">qp_set_frozen_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_set_mo_class.html">qp_set_mo_class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_stop.html">qp_stop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_update.html">qp_update</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>qp_plugins</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users_guide/qp_plugins.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qp-plugins">
+<span id="id1"></span><h1>qp_plugins<a class="headerlink" href="#qp-plugins" title="Permalink to this headline">¶</a></h1>
+<p>This command deals with all external plugins of <em>Quantum Package</em>. Plugin
+repositories can be downloaded, and the plugins in these repositories
+can be installed/uninstalled or created.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_plugins</span> <span class="nb">list</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">u</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span><span class="p">]</span>
+<span class="n">qp_plugins</span> <span class="n">download</span> <span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span>
+<span class="n">qp_plugins</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;...</span>
+<span class="n">qp_plugins</span> <span class="n">uninstall</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span>
+<span class="n">qp_plugins</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="o">&lt;</span><span class="n">repo</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">needed_modules</span><span class="o">&gt;...</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-qp-plugins-arg-list">
+<code class="descname">list</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-plugins-arg-list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all the available plugins.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-i">
+<code class="descname">-i</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--installed</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-plugins-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all the <em>installed</em> plugins.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-u">
+<code class="descname">-u</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--uninstalled</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-plugins-u" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all the <em>uninstalled</em> plugins.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-q">
+<code class="descname">-q</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--repositories</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-plugins-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all the downloaded repositories.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-arg-download">
+<code class="descname">download</code><code class="descclassname"> &lt;url&gt;</code><a class="headerlink" href="#cmdoption-qp-plugins-arg-download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download an external repository. The URL points to a tar.gz file or a
+git repository, for example:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://example.com/site/example.tar.gz">http://example.com/site/example.tar.gz</a></li>
+<li><a class="reference external" href="mailto:git&#37;&#52;&#48;gitlab&#46;com">git<span>&#64;</span>gitlab<span>&#46;</span>com</a>:user/example_repository</li>
+</ul>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-arg-install">
+<code class="descname">install</code><code class="descclassname"> &lt;plugin_name&gt;</code><a class="headerlink" href="#cmdoption-qp-plugins-arg-install" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install the plugin <code class="docutils literal notranslate"><span class="pre">plugin_name</span></code>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-arg-uninstall">
+<code class="descname">uninstall</code><code class="descclassname"> &lt;plugin_name&gt;</code><a class="headerlink" href="#cmdoption-qp-plugins-arg-uninstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uninstall the plugin <code class="docutils literal notranslate"><span class="pre">plugin_name</span></code>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-n">
+<code class="descname">-n</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--name</code><code class="descclassname">=&lt;plugin_name&gt;</code><a class="headerlink" href="#cmdoption-qp-plugins-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new plugin named <code class="docutils literal notranslate"><span class="pre">plugin_name</span></code> (in local repository by default).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-plugins-r">
+<code class="descname">-r</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--repository</code><code class="descclassname">=&lt;repo&gt;</code><a class="headerlink" href="#cmdoption-qp-plugins-r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify in which repository the new plugin will be created.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Let us download, install and compile some specific external plugins from
+<a class="reference external" href="https://gitlab.com/eginer/qp_plugins_eginer">https://gitlab.com/eginer/qp_plugins_eginer</a> .</p>
+<p>First, download the git repo associated to these plugins. To do so,
+first go to the <cite>plugins</cite> directory in the <em>Quantum Package</em> and execute:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_plugins</span> <span class="n">download</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">gitlab</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">eginer</span><span class="o">/</span><span class="n">qp_plugins_eginer</span>
+</pre></div>
+</div>
+<p>This will create in the directory <cite>plugins</cite> a local copy of
+the git repo located at the URL you indicated. Then, go in
+<cite>qp_plugins_eginer/stable/</cite></p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">qp_plugins_eginer</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>In the directory <cite>stable</cite>, there are many directories which all
+correspond to a specific plugin that have been developed by the person
+in charge of the repository. All these plugins might use some global
+variables and routines contained in the core modules of the <em>Quantum Package</em>.</p>
+<p>Now let us install the plugin <cite>rsdft_cipsi</cite>:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_plugins</span> <span class="n">install</span> <span class="n">rsdft_cipsi</span>
+</pre></div>
+</div>
+<p>This will link this directory to the <em>Quantum Package</em> which means that when the code
+will be compiled, this plugin will be compiled to and therefore all the
+executables/scripts/input keywords contained in this module will be
+available as if there were part of the core of the <em>Quantum Package</em>.</p>
+<p>Then, to compile the new plugin, just recompile the <em>Quantum Package</em> as usual by
+going at the root of the <em>Quantum Package</em> directory:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>cd $QP_ROOT
+ninja
+</pre></div>
+</div>
+<p>Finally, if you go back to the plugin directory you just installed, you
+should see all the executables/scripts which have been created and which
+are now available with the <cite>qp_run</cite> command.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="index.html" class="btn btn-neutral float-right" title="Index of commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="plugins.html" class="btn btn-neutral" title="Working with external plugins" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

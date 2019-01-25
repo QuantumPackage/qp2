@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Printing the near-FCI wave function &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with external plugins" href="plugins.html" />
+    <link rel="prev" title="Natural orbitals" href="natural_orbitals.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users_guide/printing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="printing-the-near-fci-wave-function">
+<h1>Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function<a class="headerlink" href="#printing-the-near-fci-wave-function" title="Permalink to this headline">¶</a></h1>
+<p>Once obtained the near-<abbr title="Full Configuration Interaction">FCI</abbr> energy, one can also take a closer look at
+the wave function stored in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database. If the wave function
+contains less than <span class="math notranslate nohighlight">\(10^4\)</span> determinants, you can directly read it
+with the <a class="reference internal" href="qp_edit.html#qp-edit"><span class="std std-ref">qp_edit</span></a> command. Just run</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_edit</span> <span class="n">file</span><span class="o">.</span><span class="n">ezfio</span>
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">The <a class="reference internal" href="qp_edit.html#qp-edit"><span class="std std-ref">qp_edit</span></a> mode virtually makes human-friendly the
+architecture of the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database through the use of a
+the text editor defined by the <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">EDITOR</span></code> environment
+variable.</p>
+</div>
+<p>Then, look for the word <em>hand</em> when you are in the <a class="reference internal" href="qp_edit.html#qp-edit"><span class="std std-ref">qp_edit</span></a>
+mode. If the research is negative, then it means that the wave
+function stored in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database is too large to be edited
+interactively in <a class="reference internal" href="qp_edit.html#qp-edit"><span class="std std-ref">qp_edit</span></a> mode. An alternative is to use the
+<strong class="command">print_wf</strong> command:</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_run</span> <span class="n">print_wf</span> <span class="n">file</span><span class="o">.</span><span class="n">ezfio</span> <span class="o">|</span> <span class="n">tee</span> <span class="n">file</span><span class="o">.</span><span class="n">ezfio</span><span class="o">.</span><span class="n">fci_natorb</span><span class="o">.</span><span class="n">wf</span>
+</pre></div>
+</div>
+<p>This program will, by default, print out the first <span class="math notranslate nohighlight">\(10^4\)</span>
+determinants whatever the size of the wave function stored in the
+<a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> folder. If you want to change the number of printed Slater
+determinants, just change the <a class="reference internal" href="../modules/determinants.html#cmdoption-determinants-arg-n-det-print-wf"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">n_det_print_wf</span></code></a>
+keyword using the <a class="reference internal" href="qp_edit.html#qp-edit"><span class="std std-ref">qp_edit</span></a> tool.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">The documentation of the <a class="reference internal" href="../programs/print_wf.html#print-wf"><span class="std std-ref">print_wf</span></a> program.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plugins.html" class="btn btn-neutral float-right" title="Working with external plugins" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="natural_orbitals.html" class="btn btn-neutral" title="Natural orbitals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

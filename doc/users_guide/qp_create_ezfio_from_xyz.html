@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qp_create_ezfio &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qp_edit" href="qp_edit.html" />
+    <link rel="prev" title="qp_convert_output_to_ezfio" href="qp_convert_output_to_ezfio.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Index of commands</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="configure.html">configure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qpsh.html">qpsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_convert_output_to_ezfio.html">qp_convert_output_to_ezfio</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">qp_create_ezfio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-custom-atomic-basis-sets">Using custom atomic basis sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-custom-pseudo-potentials">Using custom pseudo-potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qp_edit.html">qp_edit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_export_as_tgz.html">qp_export_as_tgz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_run.html">qp_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_set_frozen_core.html">qp_set_frozen_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_set_mo_class.html">qp_set_mo_class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_stop.html">qp_stop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_update.html">qp_update</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Index of commands</a> &raquo;</li>
+        
+      <li>qp_create_ezfio</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users_guide/qp_create_ezfio_from_xyz.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qp-create-ezfio">
+<span id="id1"></span><h1>qp_create_ezfio<a class="headerlink" href="#qp-create-ezfio" title="Permalink to this headline">¶</a></h1>
+<p>This command creates an <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> directory from a standard <cite>xyz</cite> file or
+from a <cite>z-matrix</cite> file in Gaussian format.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_create_ezfio</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span><span class="p">]</span> <span class="o">-</span><span class="n">b</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="o">&lt;</span><span class="nb">int</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="o">&lt;</span><span class="nb">int</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">EZFIO_DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="p">]</span> <span class="n">FILE</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-a">
+<code class="descname">-a</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--au</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-create-ezfio-a" title="Permalink to this definition">¶</a></dt>
+<dd><p>If present, input geometry is in atomic units.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-b">
+<code class="descname">-b</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--basis</code><code class="descclassname">=&lt;string&gt;</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of basis set. The basis set is defined as a single string if
+all the atoms are taken from the same basis set, otherwise specific
+elements can be defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">b</span> <span class="s2">&quot;cc-pcvdz | H:cc-pvdz | C:6-31g&quot;</span>
+<span class="o">-</span><span class="n">b</span> <span class="s2">&quot;cc-pvtz | 1,H:sto-3g | 3,H:6-31g&quot;</span>
+</pre></div>
+</div>
+<p>By default, the basis set is obtained from the local database of the.
+<em>Quantum Package</em> This option is mandatory                                       .</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span></code> is set to <code class="docutils literal notranslate"><span class="pre">show</span></code>, the list of all available basis
+sets is displayed.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-c">
+<code class="descname">-c</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--charge</code><code class="descclassname">=&lt;int&gt;</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total charge of the molecule. Default is 0.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-d">
+<code class="descname">-d</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--dummy</code><code class="descclassname">=&lt;float&gt;</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add dummy atoms (X) between atoms when the distance between two atoms
+is less than <span class="math notranslate nohighlight">\(x \times \sum R_\mathrm{cov}\)</span>, the covalent radii
+of the atoms. The default is x=0, so no dummy atom is added.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-h">
+<code class="descname">-h</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--help</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-create-ezfio-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the help text and exit</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-m">
+<code class="descname">-m</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--multiplicity</code><code class="descclassname">=&lt;int&gt;</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spin multiplicity <span class="math notranslate nohighlight">\(2S+1\)</span> of the molecule. Default is 1.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-o">
+<code class="descname">-o</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--output</code><code class="descclassname">=EZFIO_DIR</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the created <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> directory.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-p">
+<code class="descname">-p</code><code class="descclassname"> &lt;string&gt;</code><code class="descclassname">, </code><code class="descname">--pseudo</code><code class="descclassname">=&lt;string&gt;</code><a class="headerlink" href="#cmdoption-qp-create-ezfio-p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the pseudo-potential. Follows the same conventions as the basis set.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-qp-create-ezfio-x">
+<code class="descname">-x</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--cart</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-qp-create-ezfio-x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute <abbr title="Atomic Orbitals">AOs</abbr> in the Cartesian basis set (6d, 10f, …)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="using-custom-atomic-basis-sets">
+<h2>Using custom atomic basis sets<a class="headerlink" href="#using-custom-atomic-basis-sets" title="Permalink to this headline">¶</a></h2>
+<p>If a file with the same name as the basis set exists, this file will
+be read. For example, if the file containing the basis set is named
+<code class="docutils literal notranslate"><span class="pre">custom.basis</span></code>, and the <em>xyz</em> geometry is in <code class="docutils literal notranslate"><span class="pre">molecule.xyz</span></code>, the
+following should be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_create_ezfio</span> <span class="o">-</span><span class="n">b</span> <span class="n">custom</span><span class="o">.</span><span class="n">basis</span> <span class="n">molecule</span><span class="o">.</span><span class="n">xyz</span>
+</pre></div>
+</div>
+<p>Basis set files should be given in <a class="reference external" href="https://www.msg.chem.iastate.edu/gamess/">GAMESS</a> format, where the full
+names of the atoms are given, and the basis sets for each element are
+separated by a blank line. Here is an example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HYDROGEN</span>
+<span class="n">S</span>   <span class="mi">3</span>
+<span class="mi">1</span>     <span class="mf">13.0100000</span>              <span class="mf">0.0196850</span>
+<span class="mi">2</span>      <span class="mf">1.9620000</span>              <span class="mf">0.1379770</span>
+<span class="mi">3</span>      <span class="mf">0.4446000</span>              <span class="mf">0.4781480</span>
+<span class="n">S</span>   <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.1220000</span>              <span class="mf">1.0000000</span>
+<span class="n">P</span>   <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.7270000</span>              <span class="mf">1.0000000</span>
+
+<span class="n">BORON</span>
+<span class="n">S</span>   <span class="mi">8</span>
+<span class="mi">1</span>   <span class="mf">4570.0000000</span>              <span class="mf">0.0006960</span>
+<span class="mi">2</span>    <span class="mf">685.9000000</span>              <span class="mf">0.0053530</span>
+<span class="mi">3</span>    <span class="mf">156.5000000</span>              <span class="mf">0.0271340</span>
+<span class="mi">4</span>     <span class="mf">44.4700000</span>              <span class="mf">0.1013800</span>
+<span class="mi">5</span>     <span class="mf">14.4800000</span>              <span class="mf">0.2720550</span>
+<span class="mi">6</span>      <span class="mf">5.1310000</span>              <span class="mf">0.4484030</span>
+<span class="mi">7</span>      <span class="mf">1.8980000</span>              <span class="mf">0.2901230</span>
+<span class="mi">8</span>      <span class="mf">0.3329000</span>              <span class="mf">0.0143220</span>
+<span class="n">S</span>   <span class="mi">8</span>
+<span class="mi">1</span>   <span class="mf">4570.0000000</span>             <span class="o">-</span><span class="mf">0.0001390</span>
+<span class="mi">2</span>    <span class="mf">685.9000000</span>             <span class="o">-</span><span class="mf">0.0010970</span>
+<span class="mi">3</span>    <span class="mf">156.5000000</span>             <span class="o">-</span><span class="mf">0.0054440</span>
+<span class="mi">4</span>     <span class="mf">44.4700000</span>             <span class="o">-</span><span class="mf">0.0219160</span>
+<span class="mi">5</span>     <span class="mf">14.4800000</span>             <span class="o">-</span><span class="mf">0.0597510</span>
+<span class="mi">6</span>      <span class="mf">5.1310000</span>             <span class="o">-</span><span class="mf">0.1387320</span>
+<span class="mi">7</span>      <span class="mf">1.8980000</span>             <span class="o">-</span><span class="mf">0.1314820</span>
+<span class="mi">8</span>      <span class="mf">0.3329000</span>              <span class="mf">0.5395260</span>
+<span class="n">S</span>   <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.1043000</span>              <span class="mf">1.0000000</span>
+<span class="n">P</span>   <span class="mi">3</span>
+<span class="mi">1</span>      <span class="mf">6.0010000</span>              <span class="mf">0.0354810</span>
+<span class="mi">2</span>      <span class="mf">1.2410000</span>              <span class="mf">0.1980720</span>
+<span class="mi">3</span>      <span class="mf">0.3364000</span>              <span class="mf">0.5052300</span>
+<span class="n">P</span>   <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.0953800</span>              <span class="mf">1.0000000</span>
+<span class="n">D</span>   <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.3430000</span>              <span class="mf">1.0000000</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-custom-pseudo-potentials">
+<h2>Using custom pseudo-potentials<a class="headerlink" href="#using-custom-pseudo-potentials" title="Permalink to this headline">¶</a></h2>
+<p>As for the basis set, if a file with the same name as the
+pseudo-potential exists, this file will be read. For example, if the
+file containing the custom pseudo-potential is named <code class="docutils literal notranslate"><span class="pre">custom.pseudo</span></code>,
+the basis set is named <code class="docutils literal notranslate"><span class="pre">custom.basis</span></code>, and the <em>xyz</em> geometry is in
+<code class="docutils literal notranslate"><span class="pre">molecule.xyz</span></code>, the following command should be used</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_create_ezfio</span> <span class="o">-</span><span class="n">b</span> <span class="n">custom</span><span class="o">.</span><span class="n">basis</span> <span class="o">-</span><span class="n">p</span> <span class="n">custom</span><span class="o">.</span><span class="n">pseudo</span> <span class="n">molecule</span><span class="o">.</span><span class="n">xyz</span>
+</pre></div>
+</div>
+<p>Pseudo-potential files should be given in a format very close to
+<a class="reference external" href="https://www.msg.chem.iastate.edu/gamess/">GAMESS</a> format. The first line should be formatted as <code class="docutils literal notranslate"><span class="pre">%s</span> <span class="pre">GEN</span> <span class="pre">%d</span> <span class="pre">%d</span></code>
+where the first string is the chemical symbol, the first integer is
+the number of core electrons to be removed and the second integer is
+LMAX+1 as in <a class="reference external" href="https://www.msg.chem.iastate.edu/gamess/">GAMESS</a> format. The pseudo-potential for each element are
+separated by a blank line. Here is an example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ne</span> <span class="n">GEN</span> <span class="mi">2</span> <span class="mi">1</span>
+<span class="mi">3</span>
+<span class="mf">8.00000000</span> <span class="mi">1</span> <span class="mf">10.74945199</span>
+<span class="mf">85.99561593</span> <span class="mi">3</span> <span class="mf">10.19801460</span>
+<span class="o">-</span><span class="mf">56.79004456</span> <span class="mi">2</span> <span class="mf">10.18694048</span>
+<span class="mi">1</span>
+<span class="mf">55.11144535</span> <span class="mi">2</span> <span class="mf">12.85042963</span>
+
+<span class="n">F</span> <span class="n">GEN</span> <span class="mi">2</span> <span class="mi">1</span>
+<span class="mi">3</span>
+<span class="mf">7.00000000</span> <span class="mi">1</span> <span class="mf">11.39210685</span>
+<span class="mf">79.74474797</span> <span class="mi">3</span> <span class="mf">10.74911370</span>
+<span class="o">-</span><span class="mf">49.45159098</span> <span class="mi">2</span> <span class="mf">10.45120693</span>
+<span class="mi">1</span>
+<span class="mf">50.25646328</span> <span class="mi">2</span> <span class="mf">11.30345826</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="qp_edit.html" class="btn btn-neutral float-right" title="qp_edit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qp_convert_output_to_ezfio.html" class="btn btn-neutral" title="qp_convert_output_to_ezfio" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

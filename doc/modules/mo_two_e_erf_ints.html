@@ -1,0 +1,1291 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mo_two_e_erf_ints &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mo_two_e_ints" href="mo_two_e_ints.html" />
+    <link rel="prev" title="mo_one_e_integrals" href="mo_one_e_ints.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mo_two_e_erf_ints</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>mo_two_e_erf_ints</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/mo_two_e_erf_ints.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mo-two-e-erf-ints">
+<span id="module-mo-two-e-erf-ints"></span><h1>mo_two_e_erf_ints<a class="headerlink" href="#mo-two-e-erf-ints" title="Permalink to this headline">¶</a></h1>
+<p>Here, all two-electron integrals (<span class="math notranslate nohighlight">\(erf({\mu}_{erf} * r_{12})/r_{12}\)</span>) are computed.
+As they have 4 indices and many are zero, they are stored in a map, as defined
+in <code class="file docutils literal notranslate"><span class="pre">Utils/map_module.f90</span></code>.</p>
+<p>The range separation parameter <span class="math notranslate nohighlight">\({\mu}_{erf}\)</span> is the variable <a class="reference internal" href="ao_two_e_erf_ints.html#cmdoption-ao-two-e-erf-ints-arg-mu-erf"><code class="xref std std-option docutils literal notranslate"><span class="pre">ao_two_e_erf_ints</span> <span class="pre">mu_erf</span></code></a>.</p>
+<p>To fetch an <abbr title="Molecular Orbital">MO</abbr> integral, use
+<code class="xref std std-option docutils literal notranslate"><span class="pre">get_mo_two_e_integral_erf(i,j,k,l,mo_integrals_map_erf)</span></code></p>
+<p>The conventions are:</p>
+<ul class="simple">
+<li>For <abbr title="Molecular Orbital">MO</abbr> integrals : &lt;ij|kl&gt; = &lt;12|12&gt;</li>
+</ul>
+<p>Be aware that it might not be the same conventions for <abbr title="Molecular Orbital">MO</abbr> and <abbr title="Atomic Orbital">AO</abbr> integrals.</p>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-mo-two-e-erf-ints-arg-io-mo-two-e-integrals-erf">
+<code class="descname">io_mo_two_e_integrals_erf</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mo-two-e-erf-ints-arg-io-mo-two-e-integrals-erf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read/Write MO integrals with the long range interaction from/to disk [    Write | Read | None ]</p>
+<p>Default: None</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.core_energy_erf">
+<code class="descname">core_energy_erf</code><a class="headerlink" href="#c.core_energy_erf" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/core_quantities_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">core_energy_erf</span>
+</pre></div>
+</div>
+<p>energy from the core : contains all core-core contributionswith the erf interaction</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_one_e_integrals" title="mo_one_e_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_one_e_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.core_fock_operator_erf">
+<code class="descname">core_fock_operator_erf</code><a class="headerlink" href="#c.core_fock_operator_erf" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/core_quantities_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">core_fock_operator_erf</span>       <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>this is the contribution to the Fock operator from the core electrons with the erf interaction</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.insert_into_mo_integrals_erf_map:">
+<code class="descname">insert_into_mo_integrals_erf_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.insert_into_mo_integrals_erf_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">subroutine</span> <span class="n">insert_into_mo_integrals_erf_map</span><span class="p">(</span><span class="n">n_integrals</span><span class="p">,</span>                 <span class="o">&amp;</span>
+<span class="n">buffer_i</span><span class="p">,</span> <span class="n">buffer_values</span><span class="p">,</span> <span class="n">thr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create new entry into <abbr title="Molecular Orbital">MO</abbr> map, or accumulate in an existing entry</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_erf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_update()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.int_erf_3_index">
+<code class="descname">int_erf_3_index</code><a class="headerlink" href="#c.int_erf_3_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/ints_erf_3_index.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">int_erf_3_index</span>      <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">int_erf_3_index_exc</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>int_erf_3_index(i,j)     = &lt;ij|ij&gt; = (ii|jj) with the erf interaction</p>
+<p>int_erf_3_index_exc(i,j) = &lt;ij|ji&gt; = (ij|ij) with the erf interaction</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.int_erf_3_index_exc">
+<code class="descname">int_erf_3_index_exc</code><a class="headerlink" href="#c.int_erf_3_index_exc" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/ints_erf_3_index.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">int_erf_3_index</span>      <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">int_erf_3_index_exc</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>int_erf_3_index(i,j)     = &lt;ij|ij&gt; = (ii|jj) with the erf interaction</p>
+<p>int_erf_3_index_exc(i,j) = &lt;ij|ji&gt; = (ij|ij) with the erf interaction</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_erf_cache">
+<code class="descname">mo_integrals_erf_cache</code><a class="headerlink" href="#c.mo_integrals_erf_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_integrals_erf_cache</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cache of <abbr title="Molecular Orbital">MO</abbr> integrals for fast access</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_erf_cache_max">
+<code class="descname">mo_integrals_erf_cache_max</code><a class="headerlink" href="#c.mo_integrals_erf_cache_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">mo_integrals_erf_cache_min</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">mo_integrals_erf_cache_max</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+<li><a class="reference internal" href="#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_erf_cache_min">
+<code class="descname">mo_integrals_erf_cache_min</code><a class="headerlink" href="#c.mo_integrals_erf_cache_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">mo_integrals_erf_cache_min</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">mo_integrals_erf_cache_max</span>
+</pre></div>
+</div>
+<p>Min and max values of the MOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+<li><a class="reference internal" href="#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_integrals_erf_map">
+<code class="descname">mo_integrals_erf_map</code><a class="headerlink" href="#c.mo_integrals_erf_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">map_type</span><span class="p">)</span>  <span class="p">::</span> <span class="n">mo_integrals_erf_map</span>
+</pre></div>
+</div>
+<p><abbr title="Molecular Orbital">MO</abbr> integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+<li><a class="reference internal" href="#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj">
+<code class="descname">mo_two_e_int_erf_jj</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy_erf" title="core_energy_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy_erf</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj_anti">
+<code class="descname">mo_two_e_int_erf_jj_anti</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj_anti" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy_erf" title="core_energy_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy_erf</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj_anti_from_ao">
+<code class="descname">mo_two_e_int_erf_jj_anti_from_ao</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj_anti_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_from_ao</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti_from_ao</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_integrals_erf_map" title="ao_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_erf_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj_exchange">
+<code class="descname">mo_two_e_int_erf_jj_exchange</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj_exchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integrals_jj(i,j) = J_ij
+mo_two_e_integrals_jj_exchange(i,j) = K_ij
+mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_energy_erf" title="core_energy_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy_erf</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj_exchange_from_ao">
+<code class="descname">mo_two_e_int_erf_jj_exchange_from_ao</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj_exchange_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_from_ao</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti_from_ao</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_integrals_erf_map" title="ao_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_erf_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_int_erf_jj_from_ao">
+<code class="descname">mo_two_e_int_erf_jj_from_ao</code><a class="headerlink" href="#c.mo_two_e_int_erf_jj_from_ao" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_from_ao</span>  <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_exchange_from_ao</span> <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">mo_two_e_int_erf_jj_anti_from_ao</span>     <span class="p">(</span><span class="n">mo_num</span><span class="p">,</span><span class="n">mo_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>mo_two_e_integral_jj_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
+mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_integrals_erf_map" title="ao_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_erf_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integral_erf_schwartz" title="ao_two_e_integral_erf_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_erf_schwartz</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_direct_integrals</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.mo_two_e_integrals_erf_in_map">
+<code class="descname">mo_two_e_integrals_erf_in_map</code><a class="headerlink" href="#c.mo_two_e_integrals_erf_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="p">::</span> <span class="n">mo_two_e_integrals_erf_in_map</span>
+</pre></div>
+</div>
+<p>If True, the map of MO two-electron integrals is provided</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_two_e_integrals_erf_in_map" title="ao_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.full_ijkl_bitmask_4" title="full_ijkl_bitmask_4"><code class="xref c c-data docutils literal notranslate"><span class="pre">full_ijkl_bitmask_4</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">read_mo_two_e_integrals_erf</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.core_fock_operator_erf" title="core_fock_operator_erf"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator_erf</span></code></a></li>
+<li><a class="reference internal" href="#c.int_erf_3_index" title="int_erf_3_index"><code class="xref c c-data docutils literal notranslate"><span class="pre">int_erf_3_index</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.add_integrals_to_map_erf:">
+<code class="descname">add_integrals_to_map_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_integrals_to_map_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">add_integrals_to_map_erf</span><span class="p">(</span><span class="n">mask_ijkl</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Adds integrals to tha MO map according to some bitmask</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef" title="mo_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_coef_transp" title="mo_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_coef_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_two_e_ints.html#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_str()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals_erf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">insert_into_mo_integrals_erf_map()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_merge()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mo_two_e_integrals_index()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.clear_mo_erf_map:">
+<code class="descname">clear_mo_erf_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.clear_mo_erf_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">clear_mo_erf_map</span>
+</pre></div>
+</div>
+<p>Frees the memory of the MO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_erf_map_size:">
+<code class="descname">get_mo_erf_map_size:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_erf_map_size:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="o">*</span><span class="mi">8</span> <span class="n">function</span> <span class="n">get_mo_erf_map_size</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Returns the number of elements in the <abbr title="Molecular Orbital">MO</abbr> map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integral_erf:">
+<code class="descname">get_mo_two_e_integral_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integral_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">get_mo_two_e_integral_erf</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns one integral $langle ij|kl rangle$ in the <abbr title="Molecular Orbital">MO</abbr> basis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache_min" title="mo_integrals_erf_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_erf:">
+<code class="descname">get_mo_two_e_integrals_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_erf</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals $langle ij|kl rangle$ in the <abbr title="Molecular Orbital">MO</abbr> basis, all
+i for j,k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_erf_coulomb_ii:">
+<code class="descname">get_mo_two_e_integrals_erf_coulomb_ii:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_erf_coulomb_ii:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_erf_coulomb_ii</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals $langle ki|li rangle$</p>
+<p>k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
+for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_erf_exch_ii:">
+<code class="descname">get_mo_two_e_integrals_erf_exch_ii:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_erf_exch_ii:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_erf_exch_ii</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals $langle ki|il rangle$</p>
+<p>$int k(1)i(2) frac{1}{r_{12}} i(1)l(2)$ :: out_val(i1)
+for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_erf_i1j1:">
+<code class="descname">get_mo_two_e_integrals_erf_i1j1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_erf_i1j1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_erf_i1j1</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_array</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals $langle ik|jl rangle$ in the <abbr title="Molecular Orbital">MO</abbr> basis, all
+$int i(1)j(1) frac{erf(mu * r_{12})}{r_{12}} k(2)l(2)$
+i, j for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i2radix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8radix_sort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">iradix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mo_two_e_integrals_erf_ij:">
+<code class="descname">get_mo_two_e_integrals_erf_ij:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mo_two_e_integrals_erf_ij:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mo_two_e_integrals_erf_ij</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_array</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns multiple integrals $langle ij|kl rangle$ in the <abbr title="Molecular Orbital">MO</abbr> basis, all
+$int i(1)j(2) frac{1}{r_{12}} k(1)l(2)$
+i, j for k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i2radix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8radix_sort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">iradix_sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get_many()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.load_mo_integrals_erf:">
+<code class="descname">load_mo_integrals_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.load_mo_integrals_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">load_mo_integrals_erf</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Read from disk the <abbr title="Molecular Orbital">MO</abbr> erf integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cache_map_reallocate()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_sort()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_two_e_integral_erf:">
+<code class="descname">mo_two_e_integral_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_two_e_integral_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/map_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">mo_two_e_integral_erf</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns one integral $langle ij|kl rangle$ in the <abbr title="Molecular Orbital">MO</abbr> basis</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.mo_two_e_integrals_erf_index:">
+<code class="descname">mo_two_e_integrals_erf_index:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.mo_two_e_integrals_erf_index:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">mo_two_e_integrals_erf_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">i1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes an unique index for i,j,k,l integrals</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.provide_all_mo_integrals_erf:">
+<code class="descname">provide_all_mo_integrals_erf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.provide_all_mo_integrals_erf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">provide_all_mo_integrals_erf</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_int_erf_jj" title="mo_two_e_int_erf_jj"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_int_erf_jj</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.save_erf_two_e_integrals_mo:">
+<code class="descname">save_erf_two_e_integrals_mo:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.save_erf_two_e_integrals_mo:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/routines_save_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">save_erf_two_e_integrals_mo</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">routine()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_two_e_erf_ints_io_mo_two_e_integrals_erf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_work_empty()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_save_to_disk()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.save_erf_two_e_ints_mo_into_ints_mo:">
+<code class="descname">save_erf_two_e_ints_mo_into_ints_mo:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.save_erf_two_e_ints_mo_into_ints_mo:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">mo_two_e_erf_ints/routines_save_integrals_erf.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">save_erf_two_e_ints_mo_into_ints_mo</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_mo_two_e_ints_io_mo_two_e_integrals()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_work_empty()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_save_to_disk()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mo_two_e_ints.html" class="btn btn-neutral float-right" title="mo_two_e_ints" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mo_one_e_ints.html" class="btn btn-neutral" title="mo_one_e_integrals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Some research made with the Quantum Package &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Benchmarks" href="benchmarks.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Some research made with the <em>Quantum Package</em></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/appendix/research.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="some-research-made-with-the-qp">
+<h1>Some research made with the <em>Quantum Package</em><a class="headerlink" href="#some-research-made-with-the-qp" title="Permalink to this headline">¶</a></h1>
+<p id="bibtex-bibliography-appendix/research-0"><table class="docutils citation" frame="void" id="applencourt2018dec" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Thomas Applencourt, Kevin Gasperich, and Anthony Scemama. Spin adaptation with determinant-based selected configuration interaction. <em>arXiv</em>, Dec 2018. URL: <a class="reference external" href="https://arxiv.org/abs/1812.06902">https://arxiv.org/abs/1812.06902</a>, <a class="reference external" href="https://arxiv.org/abs/1812.06902">arXiv:1812.06902</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="loos2018nov" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>Pierre-François Loos, Martial Boggio-Pasqua, Anthony Scemama, Michel Caffarel, and Denis Jacquemin. Reference Energies for Double Excitations. <em>arXiv</em>, pages 1811.12861, Nov 2018. URL: <a class="reference external" href="https://arxiv.org/abs/1811.12861">https://arxiv.org/abs/1811.12861</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="flores2018nov" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td>Sergio&nbsp;D. Pineda Flores and Eric Neuscamman. Excited State Specific Multi-Slater Jastrow Wave Functions. <em>arXiv</em>, pages 1811.00583, Nov 2018. URL: <a class="reference external" href="https://arxiv.org/abs/1811.00583">https://arxiv.org/abs/1811.00583</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td>Emmanuel Giner, Barthélemy Pradines, Anthony Ferté, Roland Assaraf, Andreas Savin, and Julien Toulouse. Curing basis-set convergence of wave-function theory using density-functional theory: a systematically improvable approach. <em>The Journal of Chemical Physics</em>, 149(19):194301, nov 2018. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.5052714">https://doi.org/10.1063%2F1.5052714</a>, <a class="reference external" href="https://doi.org/10.1063/1.5052714">doi:10.1063/1.5052714</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner2018oct" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[5]</td><td>Emmanuel Giner, David Tew, Yann Garniron, and Ali Alavi. Interplay between electronic correlation and metal-ligand delocalization in the spectroscopy of transition metal compounds: case study on a series of planar Cu2+complexes. <em>J. Chem. Theory Comput.</em>, Oct 2018. <a class="reference external" href="https://doi.org/10.1021/acs.jctc.8b00591">doi:10.1021/acs.jctc.8b00591</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="loos-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[6]</td><td>Pierre-François Loos, Anthony Scemama, Aymeric Blondel, Yann Garniron, Michel Caffarel, and Denis Jacquemin. A mountaineering strategy to excited states: highly accurate reference energies and benchmarks. <em>Journal of Chemical Theory and Computation</em>, 14(8):4360–4379, jul 2018. URL: <a class="reference external" href="https://doi.org/10.1021%2Facs.jctc.8b00406">https://doi.org/10.1021%2Facs.jctc.8b00406</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.8b00406">doi:10.1021/acs.jctc.8b00406</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="scemama-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[7]</td><td>Anthony Scemama, Yann Garniron, Michel Caffarel, and Pierre-François Loos. Deterministic construction of nodal surfaces within quantum monte carlo: the case of FeS. <em>Journal of Chemical Theory and Computation</em>, 14(3):1395–1402, jan 2018. URL: <a class="reference external" href="https://doi.org/10.1021%2Facs.jctc.7b01250">https://doi.org/10.1021%2Facs.jctc.7b01250</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.7b01250">doi:10.1021/acs.jctc.7b01250</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="scemama-2018-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[8]</td><td>Anthony Scemama, Anouar Benali, Denis Jacquemin, Michel Caffarel, and Pierre-François Loos. Excitation energies from diffusion monte carlo using selected configuration interaction nodes. <em>The Journal of Chemical Physics</em>, 149(3):034108, jul 2018. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.5041327">https://doi.org/10.1063%2F1.5041327</a>, <a class="reference external" href="https://doi.org/10.1063/1.5041327">doi:10.1063/1.5041327</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="dash-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[9]</td><td>Monika Dash, Saverio Moroni, Anthony Scemama, and Claudia Filippi. Perturbatively selected configuration-interaction wave functions for efficient geometry optimization in quantum monte carlo. <em>Journal of Chemical Theory and Computation</em>, 14(8):4176–4182, jun 2018. URL: <a class="reference external" href="https://doi.org/10.1021%2Facs.jctc.8b00393">https://doi.org/10.1021%2Facs.jctc.8b00393</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.8b00393">doi:10.1021/acs.jctc.8b00393</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="garniron-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[10]</td><td>Yann Garniron, Anthony Scemama, Emmanuel Giner, Michel Caffarel, and Pierre-François Loos. Selected configuration interaction dressed by perturbation. <em>The Journal of Chemical Physics</em>, 149(6):064103, aug 2018. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.5044503">https://doi.org/10.1063%2F1.5044503</a>, <a class="reference external" href="https://doi.org/10.1063/1.5044503">doi:10.1063/1.5044503</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2017" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[11]</td><td>Emmanuel Giner, Celestino Angeli, Yann Garniron, Anthony Scemama, and Jean-Paul Malrieu. A jeziorski-monkhorst fully uncontracted multi-reference perturbative treatment. i. principles, second-order versions, and tests on ground state potential energy curves. <em>The Journal of Chemical Physics</em>, 146(22):224108, jun 2017. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4984616">https://doi.org/10.1063%2F1.4984616</a>, <a class="reference external" href="https://doi.org/10.1063/1.4984616">doi:10.1063/1.4984616</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="garniron-2017" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[12]</td><td>Yann Garniron, Emmanuel Giner, Jean-Paul Malrieu, and Anthony Scemama. Alternative definition of excitation amplitudes in multi-reference state-specific coupled cluster. <em>The Journal of Chemical Physics</em>, 146(15):154107, apr 2017. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4980034">https://doi.org/10.1063%2F1.4980034</a>, <a class="reference external" href="https://doi.org/10.1063/1.4980034">doi:10.1063/1.4980034</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="garniron-2017-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[13]</td><td>Yann Garniron, Anthony Scemama, Pierre-François Loos, and Michel Caffarel. Hybrid stochastic-deterministic calculation of the second-order perturbative contribution of multireference perturbation theory. <em>The Journal of Chemical Physics</em>, 147(3):034101, jul 2017. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4992127">https://doi.org/10.1063%2F1.4992127</a>, <a class="reference external" href="https://doi.org/10.1063/1.4992127">doi:10.1063/1.4992127</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2017-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[14]</td><td>E.&nbsp;Giner, C.&nbsp;Angeli, A.&nbsp;Scemama, and J.-P. Malrieu. Orthogonal valence bond hamiltonians incorporating dynamical correlation effects. <em>Computational and Theoretical Chemistry</em>, 1116:134–140, sep 2017. URL: <a class="reference external" href="https://doi.org/10.1016%2Fj.comptc.2017.03.001">https://doi.org/10.1016%2Fj.comptc.2017.03.001</a>, <a class="reference external" href="https://doi.org/10.1016/j.comptc.2017.03.001">doi:10.1016/j.comptc.2017.03.001</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2017-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[15]</td><td>Emmanuel Giner, Lorenzo Tenti, Celestino Angeli, and Nicolas Ferré. Computation of the isotropic hyperfine coupling constant: efficiency and insights from a new approach based on wave function theory. <em>Journal of Chemical Theory and Computation</em>, 13(2):475–487, 2017. PMID: 28094936. URL: <a class="reference external" href="https://doi.org/10.1021/acs.jctc.6b00827">https://doi.org/10.1021/acs.jctc.6b00827</a>, <a class="reference external" href="https://arxiv.org/abs/https://doi.org/10.1021/acs.jctc.6b00827">arXiv:https://doi.org/10.1021/acs.jctc.6b00827</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.6b00827">doi:10.1021/acs.jctc.6b00827</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner2016mar" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[16]</td><td>Emmanuel Giner and Celestino Angeli. Spin density and orbital optimization in open shell systems: A rational and computationally efficient proposal. <em>J. Chem. Phys.</em>, 144(10):104104, Mar 2016. <a class="reference external" href="https://doi.org/10.1063/1.4943187">doi:10.1063/1.4943187</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2016" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[17]</td><td>E.&nbsp;Giner, G.&nbsp;David, A.&nbsp;Scemama, and J.&nbsp;P. Malrieu. A simple approach to the state-specific MR-CC using the intermediate hamiltonian formalism. <em>The Journal of Chemical Physics</em>, 144(6):064101, feb 2016. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4940781">https://doi.org/10.1063%2F1.4940781</a>, <a class="reference external" href="https://doi.org/10.1063/1.4940781">doi:10.1063/1.4940781</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="caffarel-2016" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[18]</td><td>Michel Caffarel, Thomas Applencourt, Emmanuel Giner, and Anthony Scemama. Communication: toward an improved control of the fixed-node error in quantum monte carlo: the case of the water molecule. <em>The Journal of Chemical Physics</em>, 144(15):151103, apr 2016. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4947093">https://doi.org/10.1063%2F1.4947093</a>, <a class="reference external" href="https://doi.org/10.1063/1.4947093">doi:10.1063/1.4947093</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="caffarel-2016-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[19]</td><td>Michel Caffarel, Thomas Applencourt, Emmanuel Giner, and Anthony Scemama. Using cipsi nodes in diffusion monte carlo. In <em>ACS Symposium Series</em>, pages 15–46. American Chemical Society, jan 2016. URL: <a class="reference external" href="https://doi.org/10.1021%2Fbk-2016-1234.ch002">https://doi.org/10.1021%2Fbk-2016-1234.ch002</a>, <a class="reference external" href="https://doi.org/10.1021/bk-2016-1234.ch002">doi:10.1021/bk-2016-1234.ch002</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2015" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[20]</td><td>Emmanuel Giner, Anthony Scemama, and Michel Caffarel. Fixed-node diffusion monte carlo potential energy curve of the fluorine molecule f2 using selected configuration interaction trial wavefunctions. <em>The Journal of Chemical Physics</em>, 142(4):044115, jan 2015. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4905528">https://doi.org/10.1063%2F1.4905528</a>, <a class="reference external" href="https://doi.org/10.1063/1.4905528">doi:10.1063/1.4905528</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner2015sep" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[21]</td><td>Emmanuel Giner and Celestino Angeli. Metal-ligand delocalization and spin density in the CuCl2 and [CuCl4]2- molecules: Some insights from wave function theory. <em>J. Chem. Phys.</em>, 143(12):124305, Sep 2015. <a class="reference external" href="https://doi.org/10.1063/1.4931639">doi:10.1063/1.4931639</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="scemama-2014" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[22]</td><td>A.&nbsp;Scemama, T.&nbsp;Applencourt, E.&nbsp;Giner, and M.&nbsp;Caffarel. Accurate nonrelativistic ground-state energies of 3d transition metal atoms. <em>The Journal of Chemical Physics</em>, 141(24):244110, dec 2014. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4903985">https://doi.org/10.1063%2F1.4903985</a>, <a class="reference external" href="https://doi.org/10.1063/1.4903985">doi:10.1063/1.4903985</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="caffarel-2014" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[23]</td><td>Michel Caffarel, Emmanuel Giner, Anthony Scemama, and Alejandro Ram’ırez-Sol’ıs. Spin density distribution in open-shell transition metal systems: a comparative post-hartree-fock, density functional theory, and quantum monte carlo study of the cucl2 molecule. <em>Journal of Chemical Theory and Computation</em>, 10(12):5286–5296, nov 2014. URL: <a class="reference external" href="https://doi.org/10.1021%2Fct5004252">https://doi.org/10.1021%2Fct5004252</a>, <a class="reference external" href="https://doi.org/10.1021/ct5004252">doi:10.1021/ct5004252</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="giner-2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[24]</td><td>Emmanuel Giner, Anthony Scemama, and Michel Caffarel. Using perturbatively selected configuration interaction in quantum monte carlo calculations. <em>Canadian Journal of Chemistry</em>, 91(9):879–885, sep 2013. URL: <a class="reference external" href="https://doi.org/10.1139%2Fcjc-2013-0017">https://doi.org/10.1139%2Fcjc-2013-0017</a>, <a class="reference external" href="https://doi.org/10.1139/cjc-2013-0017">doi:10.1139/cjc-2013-0017</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="scemama2013nov" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[25]</td><td>Anthony Scemama and Emmanuel Giner. An efficient implementation of Slater-Condon rules. <em>arXiv</em>, Nov 2013. URL: <a class="reference external" href="https://arxiv.org/abs/1311.6244">https://arxiv.org/abs/1311.6244</a>, <a class="reference external" href="https://arxiv.org/abs/1311.6244">arXiv:1311.6244</a>.</td></tr>
+</tbody>
+</table>
+</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="benchmarks.html" class="btn btn-neutral" title="Benchmarks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

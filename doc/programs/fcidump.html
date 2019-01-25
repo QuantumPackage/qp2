@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fcidump &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="four_idx_transform" href="four_idx_transform.html" />
+    <link rel="prev" title="fci" href="fci.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagonalize_h.html">diagonalize_h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">fcidump</a></li>
+<li class="toctree-l2"><a class="reference internal" href="four_idx_transform.html">four_idx_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ks_scf.html">ks_scf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molden.html">molden</a></li>
+<li class="toctree-l2"><a class="reference internal" href="print_e_conv.html">print_e_conv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="print_wf.html">print_wf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pt2.html">pt2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rs_ks_scf.html">rs_ks_scf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="save_natorb.html">save_natorb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="save_one_e_dm.html">save_one_e_dm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="save_ortho_mos.html">save_ortho_mos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scf.html">scf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="write_integrals_erf.html">write_integrals_erf</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../users_guide/index.html">Index of commands</a> &raquo;</li>
+        
+      <li>fcidump</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/programs/fcidump.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fcidump">
+<span id="id1"></span><h1>fcidump<a class="headerlink" href="#fcidump" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>Produce a regular FCIDUMP file from the <abbr title="Molecular Orbitals">MOs</abbr> stored in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> folder.</p>
+<p>To specify an active space, the class of the mos have to set in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> folder (see <a class="reference internal" href="../users_guide/qp_set_mo_class.html#qp-set-mo-class"><span class="std std-ref">qp_set_mo_class</span></a>).</p>
+<p>The fcidump program supports 3 types of MO_class :</p>
+<ul class="simple">
+<li>the “core” orbitals which are always doubly occupied in the calculation</li>
+<li>the “del” orbitals that are never occupied in the calculation</li>
+<li>the “act” orbitals that will be occupied by a varying number of electrons</li>
+</ul>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_beta_num</span></code></li>
+<li><a class="reference internal" href="../modules/ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="../modules/mo_two_e_ints.html#c.core_fock_operator" title="core_fock_operator"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_fock_operator</span></code></a></li>
+<li><a class="reference internal" href="../modules/electrons.html#c.elec_num" title="elec_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="../modules/mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+<li><a class="reference internal" href="../modules/mo_one_e_ints.html#c.mo_one_e_integrals" title="mo_one_e_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_one_e_integrals</span></code></a></li>
+<li><a class="reference internal" href="../modules/bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="../modules/bitmask.html#c.list_inact" title="list_inact"><code class="xref c c-data docutils literal notranslate"><span class="pre">list_inact</span></code></a></li>
+<li><a class="reference internal" href="../modules/mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="../modules/mo_two_e_ints.html#c.core_energy" title="core_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">core_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="four_idx_transform.html" class="btn btn-neutral float-right" title="four_idx_transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="fci.html" class="btn btn-neutral" title="fci" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

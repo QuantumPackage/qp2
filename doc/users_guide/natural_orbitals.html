@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Natural orbitals &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Printing the near-FCI wave function" href="printing.html" />
+    <link rel="prev" title="Excited states" href="excited_states.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Excited states</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Natural orbitals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extracting-natural-orbitals">Extracting natural orbitals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hands-on">Hands on</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Natural orbitals</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users_guide/natural_orbitals.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="natural-orbitals">
+<h1>Natural orbitals<a class="headerlink" href="#natural-orbitals" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>To produce state-average natural orbitals, run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_run</span> <span class="n">save_natorb</span> <span class="n">file</span><span class="o">.</span><span class="n">ezfio</span>
+</pre></div>
+</div>
+<p>The MOs will be replaced, so the two-electron integrals and the wave
+function are invalidated as well.</p>
+</div>
+<div class="section" id="extracting-natural-orbitals">
+<h2>Extracting natural orbitals<a class="headerlink" href="#extracting-natural-orbitals" title="Permalink to this headline">¶</a></h2>
+<p>Once obtained the near <abbr title="Full Configuration Interaction">FCI</abbr> wave function, one can obtain many
+Onquantities related to it. e of these quantities are the natural
+Onorbitals which have the properties of diagonalizing the one-body
+Ondensity matrix:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\rho_{ij} = \delta_{ij}\]</div>
+</div></blockquote>
+<p>where the element of the one-body density matrix <span class="math notranslate nohighlight">\(\rho_{ij}\)</span> is
+define as:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\rho_{ij} = \langle \Psi | \left( a^{\dagger}_{j,\alpha} a_{i,\alpha} + a^{\dagger}_{j,\beta} a_{i,\beta} \right) |&nbsp;\Psi&nbsp;\rangle\]</div>
+</div></blockquote>
+<p>These orbitals are in general known to be better than the usual <abbr title="Hartree-Fock">HF</abbr>
+<abbr title="Molecular Orbitals">MOs</abbr> as they are obtained from a correlated wave function. To use these
+orbitals for future calculations, one has to replace the current <abbr title="Molecular Orbitals">MOs</abbr>
+by the natural orbitals. To do so, just run:</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qp_run</span> <span class="n">save_natorb</span> <span class="n">file</span><span class="o">.</span><span class="n">ezfio</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hands-on">
+<h2>Hands on<a class="headerlink" href="#hands-on" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">As the <abbr title="Molecular Orbitals">MOs</abbr> are changed, for the sake of coherence of future
+calculations, the save_natorb program <em>automatically removes the
+current wave function</em> stored in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database and replaces
+it by a single Slater determinant corresponding to a <abbr title="Hartree-Fock">HF</abbr> occupation
+of the new spin orbitals. Also, all the keywords to read the one-
+and two-electron integrals on the <abbr title="Molecular Orbital">MO</abbr> basis are set to <code class="docutils literal notranslate"><span class="pre">None</span></code> in
+order to be sure to avoid reading integrals incompatible with the
+current set of <abbr title="Molecular Orbitals">MOs</abbr>.</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">The documentation of the <code class="xref c c-func docutils literal notranslate"><span class="pre">save_natorb()</span></code> program.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="printing.html" class="btn btn-neutral float-right" title="Printing the near-FCI wave function" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="excited_states.html" class="btn btn-neutral" title="Excited states" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

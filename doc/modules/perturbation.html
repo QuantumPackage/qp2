@@ -1,0 +1,1310 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>perturbation &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pseudo" href="pseudo.html" />
+    <link rel="prev" title="nuclei" href="nuclei.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">perturbation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>perturbation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/perturbation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="perturbation">
+<span id="module-perturbation"></span><h1>perturbation<a class="headerlink" href="#perturbation" title="Permalink to this headline">¶</a></h1>
+<p>All subroutines in <code class="docutils literal notranslate"><span class="pre">*.irp.f</span></code> starting with <code class="xref std std-option docutils literal notranslate"><span class="pre">pt2_</span></code> in the current directory are
+perturbation computed using the routine <code class="xref std std-option docutils literal notranslate"><span class="pre">i_H_psi</span></code>. Other cases are not allowed.
+The arguments of the <code class="xref std std-option docutils literal notranslate"><span class="pre">pt2_</span></code> are always:</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">subroutine </span><span class="n">pt2_</span><span class="p">...(</span>                                          <span class="p">&amp;</span>
+    <span class="n">psi_ref</span><span class="p">,</span>                                                 <span class="p">&amp;</span>
+    <span class="n">psi_ref_coefs</span><span class="p">,</span>                                           <span class="p">&amp;</span>
+    <span class="n">E_refs</span><span class="p">,</span>                                                  <span class="p">&amp;</span>
+    <span class="n">det_pert</span><span class="p">,</span>                                                <span class="p">&amp;</span>
+    <span class="n">c_pert</span><span class="p">,</span>                                                  <span class="p">&amp;</span>
+    <span class="n">e_2_pert</span><span class="p">,</span>                                                <span class="p">&amp;</span>
+    <span class="n">H_pert_diag</span><span class="p">,</span>                                             <span class="p">&amp;</span>
+    <span class="nb">Nint</span><span class="p">,</span>                                                    <span class="p">&amp;</span>
+    <span class="n">Ndet</span><span class="p">,</span>                                                    <span class="p">&amp;</span>
+    <span class="n">N_st</span> <span class="p">)</span>
+
+
+<span class="kt">integer</span>          <span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="nb">Nint</span><span class="p">,</span><span class="n">Ndet</span><span class="p">,</span><span class="n">N_st</span>
+<span class="kt">integer</span><span class="p">(</span><span class="n">bit_kind</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">psi_ref</span><span class="p">(</span><span class="nb">Nint</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">Ndet</span><span class="p">)</span>
+<span class="kt">double precision</span> <span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">psi_ref_coefs</span><span class="p">(</span><span class="n">Ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">)</span>
+<span class="kt">double precision</span> <span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">E_refs</span><span class="p">(</span><span class="n">N_st</span><span class="p">)</span>
+<span class="kt">integer</span><span class="p">(</span><span class="n">bit_kind</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">det_pert</span><span class="p">(</span><span class="nb">Nint</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="kt">double precision</span> <span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_pert</span><span class="p">(</span><span class="n">N_st</span><span class="p">),</span><span class="n">e_2_pert</span><span class="p">(</span><span class="n">N_st</span><span class="p">),</span><span class="n">H_pert_diag</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">psi_ref</span></code></dt>
+<dd>bitstring of the determinants present in the various <code class="xref std std-option docutils literal notranslate"><span class="pre">N_st</span></code> states</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">psi_ref_coefs</span></code></dt>
+<dd>coefficients of the determinants on the various <code class="xref std std-option docutils literal notranslate"><span class="pre">N_st</span></code> states</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">E_refs</span></code></dt>
+<dd>Energy of the various <code class="xref std std-option docutils literal notranslate"><span class="pre">N_st</span></code> states</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">det_pert</span></code></dt>
+<dd>Perturber determinant</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">c_pert</span></code></dt>
+<dd>Perturbative coefficients for the various states</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">e_2_pert</span></code></dt>
+<dd>Perturbative energetic contribution for the various states</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">H_pert_diag</span></code></dt>
+<dd>Diagonal <span class="math notranslate nohighlight">\(\hat H\)</span> matrix element of the perturber</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">Nint</span></code></dt>
+<dd>Should be equal to <code class="xref std std-option docutils literal notranslate"><span class="pre">N_int</span></code></dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">Ndet</span></code></dt>
+<dd>Number of determinants <code class="xref std std-option docutils literal notranslate"><span class="pre">i</span></code> in <span class="math notranslate nohighlight">\(|\Psi \rangle\)</span> on which we apply &lt;det_pert | <span class="math notranslate nohighlight">\(\hat H\)</span> | <code class="xref std std-option docutils literal notranslate"><span class="pre">i</span></code>&gt;</dd>
+<dt><code class="xref std std-option docutils literal notranslate"><span class="pre">N_st</span></code></dt>
+<dd>Number of states</dd>
+</dl>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-perturbation-arg-do-pt2">
+<code class="descname">do_pt2</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-perturbation-arg-do-pt2" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="xref std std-option docutils literal notranslate"><span class="pre">True</span></code>, compute the <abbr title="Second order perturbative correction">PT2</abbr> contribution</p>
+<p>Default: True</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-perturbation-arg-pt2-max">
+<code class="descname">pt2_max</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-perturbation-arg-pt2-max" title="Permalink to this definition">¶</a></dt>
+<dd><p>The selection process stops when the largest <abbr title="Second order perturbative correction">PT2</abbr> (for all the state) is lower</p>
+<p>than <a class="reference internal" href="#cmdoption-perturbation-arg-pt2-max"><code class="xref std std-option docutils literal notranslate"><span class="pre">pt2_max</span></code></a> in absolute value</p>
+<p>Default: 0.0001</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-perturbation-arg-pt2-relative-error">
+<code class="descname">pt2_relative_error</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-perturbation-arg-pt2-relative-error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop stochastic <abbr title="Second order perturbative correction">PT2</abbr> when the relative error is smaller than <code class="xref std std-option docutils literal notranslate"><span class="pre">PT2_relative_error</span></code></p>
+<p>Default: 0.002</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-perturbation-arg-correlation-energy-ratio-max">
+<code class="descname">correlation_energy_ratio_max</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-perturbation-arg-correlation-energy-ratio-max" title="Permalink to this definition">¶</a></dt>
+<dd><p>The selection process stops at a fixed correlation ratio (useful for getting same accuracy between molecules).</p>
+<p>Defined as <span class="math notranslate nohighlight">\({E_{CI}-E_{HF}}/{E_{CI}+E_{PT2} - E_{HF}}\)</span>.</p>
+<p>Default: 1.00</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.fill_h_apply_buffer_selection:">
+<code class="descname">fill_h_apply_buffer_selection:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.fill_h_apply_buffer_selection:" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">fill_H_apply_buffer_selection</span><span class="p">(</span><span class="n">n_selected</span><span class="p">,</span><span class="n">det_buffer</span><span class="p">,</span><span class="n">e_2_pert_buffer</span><span class="p">,</span><span class="n">coef_pert_buffer</span><span class="p">,</span> <span class="o">&amp;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>N_st,Nint,iproc,select_max_out)</p>
+<blockquote>
+<div><p>Fill the H_apply buffer with determiants for the selection</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.selection_criterion" title="selection_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_criterion</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_apply_buffer_allocated" title="h_apply_buffer_allocated"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_apply_buffer_allocated</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_unset_lock()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">resize_h_apply_buffer()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.h0_type">
+<code class="descname">h0_type</code><a class="headerlink" href="#c.h0_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/h0_type.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="o">*</span><span class="mi">32</span>    <span class="p">::</span> <span class="n">h0_type</span>
+</pre></div>
+</div>
+<p>Type of zeroth-order Hamiltonian</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="cipsi.html#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.max_exc_pert">
+<code class="descname">max_exc_pert</code><a class="headerlink" href="#c.max_exc_pert" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/exc_max.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">max_exc_pert</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.selection_criterion">
+<code class="descname">selection_criterion</code><a class="headerlink" href="#c.selection_criterion" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_min</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_factor</span>
+</pre></div>
+</div>
+<p>Threshold to select determinants. Set by selection routines.</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.selection_criterion_factor">
+<code class="descname">selection_criterion_factor</code><a class="headerlink" href="#c.selection_criterion_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_min</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_factor</span>
+</pre></div>
+</div>
+<p>Threshold to select determinants. Set by selection routines.</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.selection_criterion_min">
+<code class="descname">selection_criterion_min</code><a class="headerlink" href="#c.selection_criterion_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_min</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">selection_criterion_factor</span>
+</pre></div>
+</div>
+<p>Threshold to select determinants. Set by selection routines.</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.var_pt2_ratio">
+<code class="descname">var_pt2_ratio</code><a class="headerlink" href="#c.var_pt2_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/var_pt2_ratio_provider.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">var_pt2_ratio</span>
+</pre></div>
+</div>
+<p>The selection process stops when the energy ratio variational/(variational+PT2)
+is equal to var_pt2_ratio</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">correlation_energy_ratio_max</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_dummy:">
+<code class="descname">perturb_buffer_by_mono_dummy:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_dummy:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_dummy(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``dummy`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_dummy()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_epstein_nesbet:">
+<code class="descname">perturb_buffer_by_mono_epstein_nesbet:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_epstein_nesbet:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_epstein_nesbet(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_epstein_nesbet_2x2:">
+<code class="descname">perturb_buffer_by_mono_epstein_nesbet_2x2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_epstein_nesbet_2x2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_epstein_nesbet_2x2(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet_2x2()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag:">
+<code class="descname">perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet_2x2_no_ci_diag()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_moller_plesset:">
+<code class="descname">perturb_buffer_by_mono_moller_plesset:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_moller_plesset:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_moller_plesset(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_moller_plesset()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_by_mono_qdpt:">
+<code class="descname">perturb_buffer_by_mono_qdpt:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_by_mono_qdpt:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_by_mono_qdpt(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_qdpt()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_dummy:">
+<code class="descname">perturb_buffer_dummy:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_dummy:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_dummy(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``dummy`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_dummy()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_epstein_nesbet:">
+<code class="descname">perturb_buffer_epstein_nesbet:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_epstein_nesbet:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_epstein_nesbet(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_epstein_nesbet_2x2:">
+<code class="descname">perturb_buffer_epstein_nesbet_2x2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_epstein_nesbet_2x2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_epstein_nesbet_2x2(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet_2x2()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_epstein_nesbet_2x2_no_ci_diag:">
+<code class="descname">perturb_buffer_epstein_nesbet_2x2_no_ci_diag:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_epstein_nesbet_2x2_no_ci_diag:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_epstein_nesbet_2x2_no_ci_diag(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_epstein_nesbet_2x2_no_ci_diag()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_moller_plesset:">
+<code class="descname">perturb_buffer_moller_plesset:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_moller_plesset:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_moller_plesset(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_moller_plesset()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.perturb_buffer_qdpt:">
+<code class="descname">perturb_buffer_qdpt:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.perturb_buffer_qdpt:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/perturbation.irp.f_shell_13</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>   subroutine perturb_buffer_qdpt(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
+
+
+Applly pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
+</pre></div>
+</div>
+<p>routine.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_microlist()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_minilist_find_previous()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">getmobiles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_qdpt()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_dummy:">
+<code class="descname">pt2_dummy:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_dummy:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_dummy</span> <span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dummy perturbation to add all connected determinants.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="#c.selection_criterion" title="selection_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_criterion</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_dummy()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_dummy()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_epstein_nesbet:">
+<code class="descname">pt2_epstein_nesbet:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_epstein_nesbet:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_epstein_nesbet</span> <span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the standard Epstein-Nesbet perturbative first order coefficient and
+second order energetic contribution for the various N_st states.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">c_pert(i)</span></code> = $frac{langle i|H|alpha rangle}{ E_n - langle alpha|H|alpha rangle }$.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">e_2_pert(i)</span></code> = $frac{langle i|H|alpha rangle^2}{ E_n - langle alpha|H|alpha rangle }$.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="#c.selection_criterion" title="selection_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_criterion</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_epstein_nesbet()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_epstein_nesbet()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi_minilist()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_epstein_nesbet_2x2:">
+<code class="descname">pt2_epstein_nesbet_2x2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_epstein_nesbet_2x2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_epstein_nesbet_2x2</span> <span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes the Epstein-Nesbet 2x2 diagonalization coefficient and energetic contribution
+for the various N_st states.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">e_2_pert(i)</span></code> = $frac{1}{2} ( langle alpha|H|alpha rangle -  E_n) - sqrt{ (langle alpha|H|alpha rangle -  E_n)^2 + 4 langle i|H|alpha rangle^2 }$.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">c_pert(i)</span></code> = <code class="xref std std-option docutils literal notranslate"><span class="pre">e_2_pert(i)</span></code> $times frac{1}{ langle i|H|alpha rangle}$.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_epstein_nesbet_2x2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_epstein_nesbet_2x2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_epstein_nesbet_2x2_no_ci_diag:">
+<code class="descname">pt2_epstein_nesbet_2x2_no_ci_diag:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_epstein_nesbet_2x2_no_ci_diag:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_epstein_nesbet_2x2_no_ci_diag</span><span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>compute the Epstein-Nesbet 2x2 diagonalization coefficient and energetic contribution</p>
+<p>for the various N_st states.</p>
+<p>e_2_pert(i) = 0.5 * (( &lt;det_pert|H|det_pert&gt; -  E(i) )  - sqrt( ( &lt;det_pert|H|det_pert&gt; -  E(i)) ^2 + 4 &lt;psi(i)|H|det_pert&gt;^2  )</p>
+<p>c_pert(i) = e_2_pert(i)/ &lt;psi(i)|H|det_pert&gt;</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_epstein_nesbet_2x2_no_ci_diag()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_moller_plesset:">
+<code class="descname">pt2_moller_plesset:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_moller_plesset:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_moller_plesset</span> <span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes the standard Moller-Plesset perturbative first order coefficient and second
+order energetic contribution for the various N_st states.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">c_pert(i)</span></code> = $frac{langle i|H|alpha rangle}{text{difference of orbital energies}}$.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">e_2_pert(i)</span></code> = $frac{langle i|H|alpha rangle^2}{text{difference of orbital energies}}$.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.ref_bitmask" title="ref_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="scf_utils.html#c.fock_matrix_mo" title="fock_matrix_mo"><code class="xref c c-data docutils literal notranslate"><span class="pre">fock_matrix_mo</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_moller_plesset()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_moller_plesset()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">decode_exc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_excitation()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi_minilist()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_qdpt:">
+<code class="descname">pt2_qdpt:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_qdpt:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/pt2_equations.irp.f_template_305</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_qdpt</span> <span class="p">(</span><span class="n">electronic_energy</span><span class="p">,</span><span class="n">det_ref</span><span class="p">,</span><span class="n">det_pert</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">c_pert</span><span class="p">,</span><span class="n">e_2_pert</span><span class="p">,</span><span class="n">H_pert_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">ndet</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">minilist</span><span class="p">,</span><span class="n">idx_minilist</span><span class="p">,</span><span class="n">N_minilist</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes the QDPT first order coefficient and second order energetic contribution
+for the various N_st states.</p>
+<p><code class="xref std std-option docutils literal notranslate"><span class="pre">c_pert(i)</span></code> = $frac{langle i|H|alpha rangle}{langle i|H|i rangle - langle alpha|H|alpha rangle}$.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="#c.selection_criterion" title="selection_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_criterion</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_size" title="psi_selectors_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_by_mono_qdpt()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">perturb_buffer_qdpt()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_excitation_degree()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi_minilist()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.remove_small_contributions:">
+<code class="descname">remove_small_contributions:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.remove_small_contributions:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">perturbation/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">remove_small_contributions</span>
+</pre></div>
+</div>
+<p>Remove determinants with small contributions. N_states is assumed to be
+provided.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.selection_criterion" title="selection_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_criterion</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">diagonalize_ci()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_psi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_int()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pseudo.html" class="btn btn-neutral float-right" title="pseudo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nuclei.html" class="btn btn-neutral" title="nuclei" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Selected Configuration Interaction &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Quick-start guide" href="../users_guide/quickstart.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Selected Configuration Interaction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simple-algorithm">Simple Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stochastic-approximations-for-the-selection-and-the-computation-of-ept">Stochastic approximations for the selection and the computation of <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deterministic-approximations-for-the-selection">Deterministic approximations for the selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modifying-the-selection-space">Modifying the selection space</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Selected Configuration Interaction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/selected_ci.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="selected-configuration-interaction">
+<h1>Selected Configuration Interaction<a class="headerlink" href="#selected-configuration-interaction" title="Permalink to this headline">¶</a></h1>
+<p>These methods rely on the same principle as the usual <abbr title="Configuration Interaction">CI</abbr> approaches, except
+that determinants aren’t chosen <em>a priori</em> based on an occupation or
+excitation criterion, but selected <em>on the fly</em> among the entire set of
+determinants based on their estimated contribution to the <abbr title="Full Configuration Interaction">FCI</abbr> wave function.
+It has been noticed long ago that, even inside a predefined subspace of
+determinants, only a small number significantly contributes to the wave
+function. <a class="reference internal" href="#bytautas-2009" id="id1">[A1]</a><a class="reference internal" href="#anderson-2018" id="id2">[A2]</a> Therefore, an <em>on the fly</em>
+selection of determinants is a rather natural idea that has been proposed
+in the late 60’s by Bender and Davidson <a class="reference internal" href="#bender-1969" id="id3">[A3]</a> as well as Whitten
+and Hackmeyer. <a class="reference internal" href="#whitten-1969" id="id4">[A4]</a></p>
+<p>The approach we are using in the <em>Quantum Package</em> is based on <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> developed by Huron,
+Rancurel and Malrieu, <a class="reference internal" href="#huron-1973" id="id5">[A5]</a> that iteratively selects <em>external</em>
+determinants (determinants which are not present in the variational space)
+using a perturbative criterion.</p>
+<p>There is however a computational downside. In <em>a priori</em> selected
+methods, the rule by which determinants are selected is known <em>a
+priori</em>, and therefore, one can map a particular determinant to some row or
+column index. <a class="reference internal" href="#knowles-1984" id="id6">[A6]</a> As a consequence, it can be systematically
+determined to which matrix element of <span class="math notranslate nohighlight">\(\hat H\)</span> a two-electron integral
+contributes. This allows for the implementation of so-called
+<em>integral-driven</em> methods, that work essentially by iterating over
+integrals and are very fast.</p>
+<p>On the contrary, in selected methods an explicit list of determinants has to be
+kept, and there is no immediate way to know whether a determinant has been
+selected, or what its index is in the list. Consequently, a
+<em>determinant-driven</em> approach will be used, in which the loops run over
+determinants rather than integrals. This can be a lot more computationally
+expensive since the number of determinants is typically much larger than the
+number of integrals.</p>
+<p>What makes <em>determinant-driven</em> approaches possible here is:</p>
+<ul class="simple">
+<li>the fact that selected <abbr title="Configuration Interaction">CI</abbr> methods will keep the number of determinants small
+enough, orders of magnitude smaller than in <em>a priori</em> selected methods for
+wave functions with equal energies,</li>
+<li>an efficient way to compare determinants in order to extract the
+corresponding excitation operators <a class="reference internal" href="#scemama-2013" id="id7">[A7]</a>,</li>
+<li>an intense filtering of the internal space to avoid as much as possible
+determinant comparisons of disconnected determinants,</li>
+<li>a fast retrieval of the corresponding two-electron integrals in memory.</li>
+</ul>
+<div class="section" id="simple-algorithm">
+<h2>Simple Algorithm<a class="headerlink" href="#simple-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The variational wave function <span class="math notranslate nohighlight">\(|\Psi^{(n)}\rangle\)</span> is defined over a set of determinants
+<span class="math notranslate nohighlight">\(\{|D_I\rangle\}^{(n)}\)</span> in which we diagonalize <span class="math notranslate nohighlight">\(\hat H\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[|\Psi^{(n)}\rangle = \sum_{I} c_I^{(n)} |D_I\rangle\]</div>
+<p>The determinants in <span class="math notranslate nohighlight">\(\{|D_I\rangle\}^{(n)}\)</span> will be characterized as <strong>internal</strong>.</p>
+<ol class="arabic">
+<li><p class="first">For all <strong>external</strong> determinants <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span> <span class="math notranslate nohighlight">\(\notin\)</span> <span class="math notranslate nohighlight">\(\{|D_I\rangle\}^{(n)}\)</span>, compute the
+Epstein-Nesbet second-order perturbative contribution to the energy</p>
+<div class="math notranslate nohighlight">
+\[e_\alpha = \frac{ \langle \Psi^{(n)}| {\hat H} | \alpha \rangle^2 }{E^{(n)} - \langle \alpha | {\hat H} | \alpha \rangle }.\]</div>
+<p><span class="math notranslate nohighlight">\(E^{(n)}\)</span> is the variational energy of the wave function at the current
+iteration. Note that another perturbation theory could be used to estimate
+<span class="math notranslate nohighlight">\(e_\alpha\)</span>.</p>
+</li>
+<li><p class="first">An estimate of the total missing correlation energy can be computed
+by summing all the <span class="math notranslate nohighlight">\(e_\alpha\)</span> contributions</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}E_\text{PT2} &amp; = \sum_{\alpha} e_\alpha \\
+E_\text{FCI} &amp; \approx E + E_\text{PT2}\end{split}\]</div>
+</li>
+<li><p class="first"><span class="math notranslate nohighlight">\(\{ |\alpha \rangle \}_\star ^{(n)}\)</span>, the subset of determinants <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span> with the largest
+contributions <span class="math notranslate nohighlight">\(e_\alpha\)</span>, is added to the variational space</p>
+<div class="math notranslate nohighlight">
+\[\{ |D_I \rangle \}^{(n+1)} = \{|D_I\rangle\}^{(n)} \cup \{ |\alpha\rangle \}_\star^{(n)}\]</div>
+</li>
+<li><p class="first">Go to iteration n+1, or exit on some criterion (number of determinants in
+the wave function, low <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span>, …).</p>
+</li>
+</ol>
+<p>Of course, such a procedure can be applied on any state and therefore can allow to treat both ground and excited states.</p>
+</div>
+<div class="section" id="stochastic-approximations-for-the-selection-and-the-computation-of-ept">
+<h2>Stochastic approximations for the selection and the computation of <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span><a class="headerlink" href="#stochastic-approximations-for-the-selection-and-the-computation-of-ept" title="Permalink to this headline">¶</a></h2>
+<p>The simple algorithm would be too slow to make calculations possible. Instead,
+the <em>Quantum Package</em> uses a stochastic algorithm <a class="reference internal" href="../appendix/research.html#garniron-2017-2" id="id8">[13]</a> in order to compute
+efficiently the <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span> and to select on-the-fly the best Slater determinants.</p>
+<p>In such a way, the selection step introduces no extra cost with respect to the <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span> calculation and the <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span>
+itself is unbiased but associated with a statistical error bar rapidly converging.</p>
+</div>
+<div class="section" id="deterministic-approximations-for-the-selection">
+<h2>Deterministic approximations for the selection<a class="headerlink" href="#deterministic-approximations-for-the-selection" title="Permalink to this headline">¶</a></h2>
+<p>The following description was used in a previous version of the <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> algorithm
+which was less efficient. Nonetheless, it introduces the notions of <strong>generator</strong>  and <strong>selector</strong> determinants
+which are much more general than the <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> algorithm that targets the <abbr title="Full Configuration Interaction">FCI</abbr> and can be used to realize virtually
+<strong>any kind of CI in a selected way</strong>.</p>
+<p>We define <strong>generator</strong> determinants, as determinants of the internal space
+from which the <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span> are generated.
+We then define <strong>selector</strong> determinants, a truncated wave function
+used in the computation of <span class="math notranslate nohighlight">\(e_\alpha\)</span>.</p>
+<p>For calculations in the <abbr title="Full Configuration Interaction">FCI</abbr> space, the determinants are sorted by decreasing
+<span class="math notranslate nohighlight">\(|c_I|^2\)</span>, and thresholds are used on the squared norm of the wave function.
+The default is to use <a class="reference internal" href="../modules/determinants.html#cmdoption-determinants-arg-threshold-generators"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">threshold_generators</span></code></a> = 0.99 for
+the generators, and <code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">threshold_selectors</span></code> = 0.999 for the
+selectors.</p>
+<p>This is nothing but the 3-class <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> approximation to accelerate the selection,
+<a class="reference internal" href="#evangelisti-1983" id="id9">[A8]</a> where instead of generating all possible <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span>,
+we only generate a subset which are likely to be selected.</p>
+<p>The computation of <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span> using a truncated wave function is biased,
+so if an accurate estimate of the <abbr title="Full Configuration Interaction">FCI</abbr> energy is desired, it is preferable
+to recompute <span class="math notranslate nohighlight">\(E_\text{PT2}\)</span> with the hybrid deterministic/stochastic algorithm
+<a class="reference internal" href="#garniron-2017b" id="id10">[A9]</a> which is unbiased (this is the default).</p>
+</div>
+<div class="section" id="modifying-the-selection-space">
+<h2>Modifying the selection space<a class="headerlink" href="#modifying-the-selection-space" title="Permalink to this headline">¶</a></h2>
+<p>By changing the definition of generators, and the rules for the generation of
+the <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span>, it is easy to define selected variants of traditional <abbr title="Configuration Interaction">CI</abbr> methods.</p>
+<p>For example, if one defines the <abbr title="Hartree-Fock">HF</abbr> determinant as the only generator,
+one will produce a selected <abbr title="Configuration Interaction with Single and Double Excitations">CISD</abbr>. If one also changes the rules for the generation
+to generate only the double excitations, one will have a selected <abbr title="Configuration Interaction with Double Excitations">CID</abbr>.</p>
+<p>The generators can also be chosen as determinants belonging to a <abbr title="Complete Active Space">CAS</abbr>. If the
+rules allow only for excitations inside the <abbr title="Complete Active Space">CAS</abbr>, we obtain a selected
+<abbr title="Complete Active Space">CAS</abbr> <abbr title="Configuration Interaction">CI</abbr>. If the rules allow for excitations in the <abbr title="Full Configuration Interaction">FCI</abbr> space, we obtain
+a selected <abbr title="Complete Active Space plus all Singles and Doubles">CAS-SD</abbr>. And if one add the rule to prevent for doing double
+excitations with two holes and two particles outside of the active space, one
+obtains a selected <abbr title="Difference Dedicated Configuration Interaction">DDCI</abbr> method.</p>
+<p>All such things can be done very easily when programming the <em>Quantum Package</em>.</p>
+<hr class="docutils" />
+<p id="bibtex-bibliography-intro/selected_ci-0"><table class="docutils citation" frame="void" id="bytautas-2009" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[A1]</a></td><td>Laimutis Bytautas and Klaus Ruedenberg. A priori identification of configurational deadwood. <em>Chemical Physics</em>, 356(1-3):64–75, feb 2009. URL: <a class="reference external" href="https://doi.org/10.1016%2Fj.chemphys.2008.11.021">https://doi.org/10.1016%2Fj.chemphys.2008.11.021</a>, <a class="reference external" href="https://doi.org/10.1016/j.chemphys.2008.11.021">doi:10.1016/j.chemphys.2008.11.021</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="anderson-2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[A2]</a></td><td>James&nbsp;S.M. Anderson, Farnaz Heidar-Zadeh, and Paul&nbsp;W. Ayers. Breaking the curse of dimension for the electronic schrodinger equation with functional analysis. <em>Computational and Theoretical Chemistry</em>, 1142:66–77, oct 2018. URL: <a class="reference external" href="https://doi.org/10.1016%2Fj.comptc.2018.08.017">https://doi.org/10.1016%2Fj.comptc.2018.08.017</a>, <a class="reference external" href="https://doi.org/10.1016/j.comptc.2018.08.017">doi:10.1016/j.comptc.2018.08.017</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="bender-1969" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[A3]</a></td><td>Charles&nbsp;F. Bender and Ernest&nbsp;R. Davidson. Studies in configuration interaction: the first-row diatomic hydrides. <em>Phys. Rev.</em>, 183(1):23–30, jul 1969. URL: <a class="reference external" href="http://dx.doi.org/10.1103/PhysRev.183.23">http://dx.doi.org/10.1103/PhysRev.183.23</a>, <a class="reference external" href="https://doi.org/10.1103/physrev.183.23">doi:10.1103/physrev.183.23</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="whitten-1969" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[A4]</a></td><td>J.&nbsp;L. Whitten and Melvyn Hackmeyer. Configuration interaction studies of ground and excited states of polyatomic molecules. i. the CI formulation and studies of formaldehyde. <em>The Journal of Chemical Physics</em>, 51(12):5584–5596, dec 1969. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.1671985">https://doi.org/10.1063%2F1.1671985</a>, <a class="reference external" href="https://doi.org/10.1063/1.1671985">doi:10.1063/1.1671985</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="huron-1973" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[A5]</a></td><td>B.&nbsp;Huron, J.&nbsp;P. Malrieu, and P.&nbsp;Rancurel. Iterative perturbation calculations of ground and excited state energies from multiconfigurational zeroth-order wavefunctions. <em>The Journal of Chemical Physics</em>, 58(12):5745–5759, jun 1973. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.1679199">https://doi.org/10.1063%2F1.1679199</a>, <a class="reference external" href="https://doi.org/10.1063/1.1679199">doi:10.1063/1.1679199</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="knowles-1984" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[A6]</a></td><td>Peter&nbsp;J. Knowles and Nicholas&nbsp;C Handy. A new determinant-based full configuration interaction method. <em>Chem. Phys. Letters</em>, 111:315–321, 1984.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="scemama-2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[A7]</a></td><td>A.&nbsp;Scemama and E.&nbsp;Giner. An efficient implementation of Slater-Condon rules. <em>ArXiv [physics.comp-ph]</em>, pages 1311.6244, November 2013. URL: <a class="reference external" href="https://arxiv.org/abs/1311.6244">https://arxiv.org/abs/1311.6244</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="evangelisti-1983" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id9">[A8]</a></td><td>Stefano Evangelisti, Jean-Pierre Daudey, and Jean-Paul Malrieu. Convergence of an improved CIPSI algorithm. <em>Chemical Physics</em>, 75(1):91–102, feb 1983. URL: <a class="reference external" href="https://doi.org/10.1016%2F0301-0104%2883%2985011-3">https://doi.org/10.1016%2F0301-0104%2883%2985011-3</a>, <a class="reference external" href="https://doi.org/10.1016/0301-0104(83)85011-3">doi:10.1016/0301-0104(83)85011-3</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="garniron-2017b" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[A9]</a></td><td>Yann Garniron, Anthony Scemama, Pierre-François Loos, and Michel Caffarel. Hybrid stochastic-deterministic calculation of the second-order perturbative contribution of multireference perturbation theory. <em>The Journal of Chemical Physics</em>, 147(3):034101, jul 2017. URL: <a class="reference external" href="https://doi.org/10.1063%2F1.4992127">https://doi.org/10.1063%2F1.4992127</a>, <a class="reference external" href="https://doi.org/10.1063/1.4992127">doi:10.1063/1.4992127</a>.</td></tr>
+</tbody>
+</table>
+</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../users_guide/quickstart.html" class="btn btn-neutral float-right" title="Quick-start guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,2613 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cipsi &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cis" href="cis.html" />
+    <link rel="prev" title="bitmask module" href="bitmask.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cipsi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#computation-of-the-pt2-energy">Computation of the <abbr title="Second order perturbative correction">PT2</abbr> energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#state-averaging">State-averaging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#extrapolated-fci-energy">Extrapolated <abbr title="Full Configuration Interaction">FCI</abbr> energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>cipsi</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/cipsi.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cipsi">
+<span id="module-cipsi"></span><h1>cipsi<a class="headerlink" href="#cipsi" title="Permalink to this headline">¶</a></h1>
+<p><abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> algorithm.</p>
+<p>The <code class="xref c c-func docutils literal notranslate"><span class="pre">run_stochastic_cipsi()</span></code> and <code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code> subroutines start with a single
+determinant, or with the wave function in the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database if
+<a class="reference internal" href="determinants.html#cmdoption-determinants-arg-read-wf"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">read_wf</span></code></a> is <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+<p>The <code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code> subroutine iteratively:</p>
+<ul class="simple">
+<li>Selects the most important determinants from the external space and adds them to the
+internal space</li>
+<li>If <a class="reference internal" href="determinants.html#cmdoption-determinants-arg-s2-eig"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">s2_eig</span></code></a> is <code class="docutils literal notranslate"><span class="pre">true</span></code>, it adds all the necessary
+determinants to allow the eigenstates of <span class="math notranslate nohighlight">\(\hat H\)</span> to be eigenstates of <span class="math notranslate nohighlight">\(\widehat{S^2}\)</span></li>
+<li>Diagonalizes <span class="math notranslate nohighlight">\(\hat H\)</span> in the enlarged internal space</li>
+<li>Computes the <abbr title="Second order perturbative correction">PT2</abbr> contribution to the energy stochastically <a class="reference internal" href="../appendix/research.html#garniron-2017-2" id="id1">[13]</a>
+or deterministically, depending on <a class="reference internal" href="perturbation.html#cmdoption-perturbation-arg-do-pt2"><code class="xref std std-option docutils literal notranslate"><span class="pre">perturbation</span> <span class="pre">do_pt2</span></code></a></li>
+<li>Extrapolates the variational energy by fitting
+<span class="math notranslate nohighlight">\(E=E_\text{FCI} - \alpha\, E_\text{PT2}\)</span></li>
+</ul>
+<p>The difference between <code class="xref c c-func docutils literal notranslate"><span class="pre">run_stochastic_cipsi()</span></code> and <code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code> is that
+<code class="xref c c-func docutils literal notranslate"><span class="pre">run_stochastic_cipsi()</span></code> selects the determinants on the fly with the computation
+of the stochastic <abbr title="Second order perturbative correction">PT2</abbr> <a class="reference internal" href="../appendix/research.html#garniron-2017-2" id="id2">[13]</a>. Hence, it is a semi-stochastic selection. It</p>
+<ul class="simple">
+<li>Selects the most important determinants from the external space and adds them to the
+internal space, on the fly with the computation of the PT2 with the stochastic algorithm
+presented in <a class="reference internal" href="../appendix/research.html#garniron-2017-2" id="id3">[13]</a>.</li>
+<li>If <a class="reference internal" href="determinants.html#cmdoption-determinants-arg-s2-eig"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">s2_eig</span></code></a> is <code class="docutils literal notranslate"><span class="pre">true</span></code>, it adds all the necessary
+determinants to allow the eigenstates of <span class="math notranslate nohighlight">\(\hat H\)</span> to be eigenstates of <span class="math notranslate nohighlight">\(\widehat{S^2}\)</span></li>
+<li>Extrapolates the variational energy by fitting
+<span class="math notranslate nohighlight">\(E=E_\text{FCI} - \alpha\, E_\text{PT2}\)</span></li>
+<li>Diagonalizes <span class="math notranslate nohighlight">\(\hat H\)</span> in the enlarged internal space</li>
+</ul>
+<p>The number of selected determinants at each iteration will be such that the
+size of the wave function will double at every iteration. If <a class="reference internal" href="determinants.html#cmdoption-determinants-arg-s2-eig"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span>
+<span class="pre">s2_eig</span></code></a> is <code class="docutils literal notranslate"><span class="pre">true</span></code>, then the number of selected determinants will be 1.5x the
+current number, and then all the additional determinants will be added.</p>
+<p>By default, the program will stop when more than one million determinants have
+been selected, or when the <abbr title="Second order perturbative correction">PT2</abbr> energy is below <span class="math notranslate nohighlight">\(10^{-4}\)</span>.</p>
+<p>The variational and <abbr title="Second order perturbative correction">PT2</abbr> energies of the iterations are stored in the
+<a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database, in the <span class="xref std std-ref">iterations</span> module.</p>
+<div class="section" id="computation-of-the-pt2-energy">
+<h2>Computation of the <abbr title="Second order perturbative correction">PT2</abbr> energy<a class="headerlink" href="#computation-of-the-pt2-energy" title="Permalink to this headline">¶</a></h2>
+<p>At each iteration, the <abbr title="Second order perturbative correction">PT2</abbr> energy is computed considering the Epstein-Nesbet
+zeroth-order Hamiltonian:</p>
+<div class="math notranslate nohighlight">
+\[E_{\text{PT2}} = \sum_{ \alpha }
+  \frac{|\langle \Psi_S | \hat{H} | \alpha \rangle|^2}
+       {E - \langle \alpha | \hat{H} | \alpha \rangle}\]</div>
+<p>where the <span class="math notranslate nohighlight">\(|\alpha \rangle\)</span> determinants are generated by applying all the single and
+double excitation operators to all the determinants of the wave function
+<span class="math notranslate nohighlight">\(\Psi_G\)</span>.</p>
+<p>When the hybrid-deterministic/stochastic algorithm is chosen
+(default), <span class="math notranslate nohighlight">\(Psi_G = \Psi_S = \Psi\)</span>, the full wavefunction expanded in the
+internal space.
+When the deterministic algorithm is chosen (<a class="reference internal" href="perturbation.html#cmdoption-perturbation-arg-do-pt2"><code class="xref std std-option docutils literal notranslate"><span class="pre">perturbation</span> <span class="pre">do_pt2</span></code></a>
+is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>), <span class="math notranslate nohighlight">\(Psi_G\)</span> is a truncation of <span class="math notranslate nohighlight">\(|\Psi \rangle\)</span> using
+<a class="reference internal" href="determinants.html#cmdoption-determinants-arg-threshold-generators"><code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">threshold_generators</span></code></a>, and <span class="math notranslate nohighlight">\(Psi_S\)</span> is a truncation
+of <span class="math notranslate nohighlight">\(|\Psi \rangle\)</span> using <code class="xref std std-option docutils literal notranslate"><span class="pre">determinants</span> <span class="pre">threshold_selectors</span></code>, and re-weighted
+by <span class="math notranslate nohighlight">\(1/\langle \Psi_s | \Psi_s \rangle\)</span>.</p>
+<p>At every iteration, while computing the <abbr title="Second order perturbative correction">PT2</abbr>, the variance of the wave
+function is also computed:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma^2 &amp; = \langle \Psi | \hat{H}^2 | \Psi \rangle -
+             \langle  \Psi | \hat{H}   | \Psi \rangle^2 \\
+         &amp; = \sum_{i \in \text{FCI}}
+             \langle \Psi | \hat{H} | i \rangle
+             \langle i | \hat{H} | \Psi \rangle -
+             \langle  \Psi | \hat{H} | \Psi \rangle^2 \\
+         &amp; = \sum_{ \alpha }
+             \langle |\Psi | \hat{H} | \alpha \rangle|^2.\end{split}\]</div>
+<p>The expression of the variance is the same as the expression of the <abbr title="Second order perturbative correction">PT2</abbr>, with
+a denominator of 1. It measures how far the wave function is from the <abbr title="Full Configuration Interaction">FCI</abbr>
+solution. Note that the absence of denominator in the Heat-Bath selected <abbr title="Configuration Interaction">CI</abbr>
+method is selection method by minimization of the variance, whereas <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> is
+a selection method by minimization of the energy.</p>
+<p>If <a class="reference internal" href="perturbation.html#cmdoption-perturbation-arg-do-pt2"><code class="xref std std-option docutils literal notranslate"><span class="pre">perturbation</span> <span class="pre">do_pt2</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>, then the stochastic
+<abbr title="Second order perturbative correction">PT2</abbr> is not computed, and an approximate value is obtained from the <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr>
+selection. The calculation is faster, but the extrapolated <abbr title="Full Configuration Interaction">FCI</abbr> value is
+less accurate. This way of running the code should be used when the only
+goal is to generate a wave function, as for using <abbr title="Configuration Interaction using a Perturbative Selection">CIPSI</abbr> wave functions as
+trial wave functions of <abbr title="Quantum Monte Carlo">QMC</abbr> calculations for example.</p>
+<p>The <strong class="command">PT2</strong> program reads the wave function of the <a class="reference external" href="http://gitlab.com/scemama/EZFIO">EZFIO</a> database
+and computes the energy and the <abbr title="Second order perturbative correction">PT2</abbr> contribution.</p>
+</div>
+<div class="section" id="state-averaging">
+<h2>State-averaging<a class="headerlink" href="#state-averaging" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="extrapolated-fci-energy">
+<h2>Extrapolated <abbr title="Full Configuration Interaction">FCI</abbr> energy<a class="headerlink" href="#extrapolated-fci-energy" title="Permalink to this headline">¶</a></h2>
+<p>An estimate of the <abbr title="Full Configuration Interaction">FCI</abbr> energy is computed by extrapolating</p>
+<div class="math notranslate nohighlight">
+\[E=E_\text{FCI} - \alpha\, E_\text{PT2}\]</div>
+<p>This extrapolation is done for all the requested states, and excitation
+energies are printed as energy differences between the extrapolated
+energies of the excited states and the extrapolated energy of the ground
+state.</p>
+<p>The extrapolations are given considering the 2 last points, the 3 last points, …,
+the 7 last points. The extrapolated value should be chosen such that the extrpolated
+value is stable with the number of points.</p>
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.initialize_pt2_e0_denominator">
+<code class="descname">initialize_pt2_e0_denominator</code><a class="headerlink" href="#c.initialize_pt2_e0_denominator" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/energy.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="p">::</span> <span class="n">initialize_pt2_e0_denominator</span>
+</pre></div>
+</div>
+<p>If true, initialize pt2_E0_denominator</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nthreads_pt2">
+<code class="descname">nthreads_pt2</code><a class="headerlink" href="#c.nthreads_pt2" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/environment.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">nthreads_pt2</span>
+</pre></div>
+</div>
+<p>Number of threads for Davidson</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_collector:">
+<code class="descname">pt2_collector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_collector:" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_collector</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">relative_error</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span>  <span class="o">&amp;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>variance, norm, b, <a href="#id4"><span class="problematic" id="id5">N_</span></a>)</p>
+<blockquote>
+<div><p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_f" title="pt2_f"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_f</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_u" title="pt2_u"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_u</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_to_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pull_pt2_results()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sort_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_cw">
+<code class="descname">pt2_cw</code><a class="headerlink" href="#c.pt2_cw" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_w</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_cw</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_w_t</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_u_0</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_n_0</span>      <span class="p">(</span><span class="n">pt2_N_teeth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_e0_denominator">
+<code class="descname">pt2_e0_denominator</code><a class="headerlink" href="#c.pt2_e0_denominator" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/energy.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_e0_denominator</span>   <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>E0 in the denominator of the PT2</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.barycentric_electronic_energy" title="barycentric_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">barycentric_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="perturbation.html#c.h0_type" title="h0_type"><code class="xref c c-data docutils literal notranslate"><span class="pre">h0_type</span></code></a></li>
+<li><a class="reference internal" href="#c.initialize_pt2_e0_denominator" title="initialize_pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">initialize_pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_f">
+<code class="descname">pt2_f</code><a class="headerlink" href="#c.pt2_f" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_f</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_n_tasks_max</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="electrons.html#c.elec_num" title="elec_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_j">
+<code class="descname">pt2_j</code><a class="headerlink" href="#c.pt2_j" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_j</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_r</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_n_tasks" title="pt2_n_tasks"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_tasks</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_u" title="pt2_u"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_u</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_mindetinfirstteeth">
+<code class="descname">pt2_mindetinfirstteeth</code><a class="headerlink" href="#c.pt2_mindetinfirstteeth" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_n_teeth</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_mindetinfirstteeth</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_n_0">
+<code class="descname">pt2_n_0</code><a class="headerlink" href="#c.pt2_n_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_w</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_cw</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_w_t</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_u_0</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_n_0</span>      <span class="p">(</span><span class="n">pt2_N_teeth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_n_tasks">
+<code class="descname">pt2_n_tasks</code><a class="headerlink" href="#c.pt2_n_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_n_tasks</span>
+</pre></div>
+</div>
+<p>Number of parallel tasks for the Monte Carlo</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_n_tasks_max">
+<code class="descname">pt2_n_tasks_max</code><a class="headerlink" href="#c.pt2_n_tasks_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_f</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_n_tasks_max</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="electrons.html#c.elec_num" title="elec_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_num</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_core_orb" title="n_core_orb"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_core_orb</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_n_teeth">
+<code class="descname">pt2_n_teeth</code><a class="headerlink" href="#c.pt2_n_teeth" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_n_teeth</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_mindetinfirstteeth</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_r">
+<code class="descname">pt2_r</code><a class="headerlink" href="#c.pt2_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_j</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_r</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_n_tasks" title="pt2_n_tasks"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_tasks</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_u" title="pt2_u"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_u</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_stoch_istate">
+<code class="descname">pt2_stoch_istate</code><a class="headerlink" href="#c.pt2_stoch_istate" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">pt2_stoch_istate</span>
+</pre></div>
+</div>
+<p>State for stochatsic PT2</p>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_u">
+<code class="descname">pt2_u</code><a class="headerlink" href="#c.pt2_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_u</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_u_0">
+<code class="descname">pt2_u_0</code><a class="headerlink" href="#c.pt2_u_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_w</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_cw</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_w_t</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_u_0</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_n_0</span>      <span class="p">(</span><span class="n">pt2_N_teeth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_w">
+<code class="descname">pt2_w</code><a class="headerlink" href="#c.pt2_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_w</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_cw</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_w_t</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_u_0</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_n_0</span>      <span class="p">(</span><span class="n">pt2_N_teeth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.pt2_w_t">
+<code class="descname">pt2_w_t</code><a class="headerlink" href="#c.pt2_w_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_w</span>        <span class="p">(</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">pt2_cw</span>       <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N_det_generators</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_w_t</span>
+<span class="n">double</span> <span class="n">precision</span>        <span class="p">::</span> <span class="n">pt2_u_0</span>
+<span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">pt2_n_0</span>      <span class="p">(</span><span class="n">pt2_N_teeth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.selection_weight">
+<code class="descname">selection_weight</code><a class="headerlink" href="#c.selection_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">selection_weight</span>     <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Weights used in the selection criterion</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.c0_weight" title="c0_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">c0_weight</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.add_to_selection_buffer:">
+<code class="descname">add_to_selection_buffer:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.add_to_selection_buffer:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">add_to_selection_buffer</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">det</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fill_buffer_double()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sort_selection_buffer()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.bitstring_to_list_in_selection:">
+<code class="descname">bitstring_to_list_in_selection:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.bitstring_to_list_in_selection:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">bitstring_to_list_in_selection</span><span class="p">(</span> <span class="n">string</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">,</span> <span class="n">Nint</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gives the inidices(+1) of the bits set to 1 in the bit string</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">spot_isinwf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.create_selection_buffer:">
+<code class="descname">create_selection_buffer:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.create_selection_buffer:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">create_selection_buffer</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">siz_</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.delete_selection_buffer:">
+<code class="descname">delete_selection_buffer:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.delete_selection_buffer:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">delete_selection_buffer</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.fill_buffer_double:">
+<code class="descname">fill_buffer_double:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.fill_buffer_double:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">fill_buffer_double</span><span class="p">(</span><span class="n">i_generator</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">,</span> <span class="n">bannedOrb</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">fock_diag_tmp</span><span class="p">,</span> <span class="n">E0</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern_hii" title="psi_occ_pattern_hii"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern_hii</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.det_to_occ_pattern" title="det_to_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">det_to_occ_pattern</span></code></a></li>
+<li><a class="reference internal" href="#c.selection_weight" title="selection_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">selection_weight</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_hii" title="psi_det_hii"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_hii</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="fci.html#c.do_only_1h1p" title="do_only_1h1p"><code class="xref c c-data docutils literal notranslate"><span class="pre">do_only_1h1p</span></code></a></li>
+<li><a class="reference internal" href="perturbation.html#c.h0_type" title="h0_type"><code class="xref c c-data docutils literal notranslate"><span class="pre">h0_type</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_singles_and_doubles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_to_selection_buffer()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">apply_holes()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">apply_particles()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_d0:">
+<code class="descname">get_d0:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_d0:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_d0</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">phasemask</span><span class="p">,</span> <span class="n">bannedOrb</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">coefs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">apply_particles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_d1:">
+<code class="descname">get_d1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_d1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_d1</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">phasemask</span><span class="p">,</span> <span class="n">bannedOrb</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">coefs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">apply_particles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_d2:">
+<code class="descname">get_d2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_d2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_d2</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">phasemask</span><span class="p">,</span> <span class="n">bannedOrb</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">coefs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_mask_phase:">
+<code class="descname">get_mask_phase:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_mask_phase:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_mask_phase</span><span class="p">(</span><span class="n">det1</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">Nint</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_phase_bi:">
+<code class="descname">get_phase_bi:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_phase_bi:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">get_phase_bi</span><span class="p">(</span><span class="n">phasemask</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">h1</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">h2</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">Nint</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.make_selection_buffer_s2:">
+<code class="descname">make_selection_buffer_s2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.make_selection_buffer_s2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">make_selection_buffer_s2</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dsort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8sort()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">occ_pattern_to_dets()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">occ_pattern_to_dets_size()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.merge_selection_buffers:">
+<code class="descname">merge_selection_buffers:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.merge_selection_buffers:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">merge_selection_buffers</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Merges the selection buffers b1 and b2 into b2</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.past_d1:">
+<code class="descname">past_d1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.past_d1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">past_d1</span><span class="p">(</span><span class="n">bannedOrb</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.past_d2:">
+<code class="descname">past_d2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.past_d2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">past_d2</span><span class="p">(</span><span class="n">banned</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">sp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.provide_everything:">
+<code class="descname">provide_everything:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.provide_everything:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/slave_cipsi.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">provide_everything</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.generators_bitmask" title="generators_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">generators_bitmask</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.h_apply_buffer_allocated" title="h_apply_buffer_allocated"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_apply_buffer_allocated</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_find_sample:">
+<code class="descname">pt2_find_sample:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_find_sample:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">pt2_find_sample</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_find_sample_lr:">
+<code class="descname">pt2_find_sample_lr:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_find_sample_lr:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">pt2_find_sample_lr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">l_in</span><span class="p">,</span> <span class="n">r_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pt2_slave_inproc:">
+<code class="descname">pt2_slave_inproc:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pt2_slave_inproc:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pt2_slave_inproc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pull_pt2_results:">
+<code class="descname">pull_pt2_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pull_pt2_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_pt2_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pull_pt2_results</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">n_tasks</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.pull_selection_results:">
+<code class="descname">pull_selection_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.pull_selection_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_selection_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">pull_selection_results</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">det</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">ntask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.push_pt2_results:">
+<code class="descname">push_pt2_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.push_pt2_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_pt2_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">push_pt2_results</span><span class="p">(</span><span class="n">zmq_socket_push</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">n_tasks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.push_selection_results:">
+<code class="descname">push_selection_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.push_selection_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_selection_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">push_selection_results</span><span class="p">(</span><span class="n">zmq_socket_push</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">ntask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.remove_duplicates_in_selection_buffer:">
+<code class="descname">remove_duplicates_in_selection_buffer:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.remove_duplicates_in_selection_buffer:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">remove_duplicates_in_selection_buffer</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i8sort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_cipsi:">
+<code class="descname">run_cipsi:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_cipsi:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/cipsi.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_cipsi</span>
+</pre></div>
+</div>
+<p>Selected Full Configuration Interaction with deterministic selection and
+stochastic PT2.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">correlation_energy_ratio_max</span></code></li>
+<li><a class="reference internal" href="iterations.html#c.n_iter" title="n_iter"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_iter</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy_with_nucl_rep" title="psi_energy_with_nucl_rep"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_with_nucl_rep</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_max</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.h_apply_buffer_allocated" title="h_apply_buffer_allocated"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_apply_buffer_allocated</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_pt2</span></code></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_relative_error</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_max</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fci()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">diagonalize_ci()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_get_hartree_fock_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_has_hartree_fock_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">make_s2_eigenfunction()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">print_extrapolated_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">print_summary()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_iterations()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_wavefunction()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.c0_weight" title="c0_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">c0_weight</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_pt2_slave:">
+<code class="descname">run_pt2_slave:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_pt2_slave:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_pt2_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_pt2_slave</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span><span class="n">iproc</span><span class="p">,</span><span class="n">energy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="davidson.html#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_f" title="pt2_f"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_f</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_slave_inproc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_main()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_push_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">merge_selection_buffers()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">push_pt2_results()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_connected()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sort_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_selection_slave:">
+<code class="descname">run_selection_slave:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_selection_slave:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/run_selection_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_selection_slave</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span><span class="n">iproc</span><span class="p">,</span><span class="n">energy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_f" title="pt2_f"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_f</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_coef_transp" title="psi_selectors_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_coef_transp</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_main()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_slave_inproc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_push_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">merge_selection_buffers()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">push_selection_results()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_connected()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sort_selection_buffer()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_slave_cipsi:">
+<code class="descname">run_slave_cipsi:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_slave_cipsi:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/slave_cipsi.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_slave_cipsi</span>
+</pre></div>
+</div>
+<p>Helper program for distributed parallelism</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">read_wf</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fci()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_nested()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">provide_everything()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_main()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">switch_qp_run_to_master()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">read_wf</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_slave_main:">
+<code class="descname">run_slave_main:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_slave_main:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/slave_cipsi.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_slave_main</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_rank" title="mpi_rank"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_rank</span></code></a></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_tcp()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mpi_print()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_nested()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wait_for_states()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.run_stochastic_cipsi:">
+<code class="descname">run_stochastic_cipsi:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_stochastic_cipsi:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/stochastic_cipsi.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">run_stochastic_cipsi</span>
+</pre></div>
+</div>
+<p>Selected Full Configuration Interaction with Stochastic selection and PT2.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">correlation_energy_ratio_max</span></code></li>
+<li><a class="reference internal" href="iterations.html#c.n_iter" title="n_iter"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_iter</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy_with_nucl_rep" title="psi_energy_with_nucl_rep"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_with_nucl_rep</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_max</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.h_apply_buffer_allocated" title="h_apply_buffer_allocated"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_apply_buffer_allocated</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="davidson.html#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_relative_error</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_max</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fci()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">copy_h_apply_buffer_to_wf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">diagonalize_ci()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_get_hartree_fock_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_has_hartree_fock_energy()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">make_s2_eigenfunction()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">print_extrapolated_energy()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">print_summary()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_energy()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_iterations()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_wavefunction()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+<li><a class="reference internal" href="davidson.html#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.c0_weight" title="c0_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">c0_weight</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_occ_pattern" title="psi_occ_pattern"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_occ_pattern</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.select_connected:">
+<code class="descname">select_connected:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.select_connected:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">select_connected</span><span class="p">(</span><span class="n">i_generator</span><span class="p">,</span><span class="n">E0</span><span class="p">,</span><span class="n">pt2</span><span class="p">,</span><span class="n">variance</span><span class="p">,</span><span class="n">norm</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">subset</span><span class="p">,</span><span class="n">csubset</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.generators_bitmask" title="generators_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">generators_bitmask</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_generators_bitmask" title="n_generators_bitmask"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_generators_bitmask</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">build_fock_tmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_singles_and_doubles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.select_singles_and_doubles:">
+<code class="descname">select_singles_and_doubles:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.select_singles_and_doubles:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">select_singles_and_doubles</span><span class="p">(</span><span class="n">i_generator</span><span class="p">,</span><span class="n">hole_mask</span><span class="p">,</span><span class="n">particle_mask</span><span class="p">,</span><span class="n">fock_diag_tmp</span><span class="p">,</span><span class="n">E0</span><span class="p">,</span><span class="n">pt2</span><span class="p">,</span><span class="n">variance</span><span class="p">,</span><span class="n">norm</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span><span class="n">subset</span><span class="p">,</span><span class="n">csubset</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>WARNING /!: It is assumed that the generators and selectors are psi_det_sorted</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.psi_det_generators" title="psi_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_coef_transp" title="psi_selectors_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_coef_transp</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_connected()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">apply_hole()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list_ab()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fill_buffer_double()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_excitation_degree_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">isort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">splash_pq()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">spot_isinwf()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.selection_collector:">
+<code class="descname">selection_collector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.selection_collector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/zmq_selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">selection_collector</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_to_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pull_selection_results()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sort_selection_buffer()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.selection_slave_inproc:">
+<code class="descname">selection_slave_inproc:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.selection_slave_inproc:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/zmq_selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">selection_slave_inproc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.sort_selection_buffer:">
+<code class="descname">sort_selection_buffer:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.sort_selection_buffer:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection_buffer.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">sort_selection_buffer</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_to_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_pt2_slave()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_selection_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dsort()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.splash_pq:">
+<code class="descname">splash_pq:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.splash_pq:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">splash_pq</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">det</span><span class="p">,</span> <span class="n">i_gen</span><span class="p">,</span> <span class="n">N_sel</span><span class="p">,</span> <span class="n">bannedOrb</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">interesting</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_coef_transp" title="psi_selectors_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_coef_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_singles_and_doubles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list_in_selection()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_d0()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_d1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_d2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mask_phase()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">past_d1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">past_d2()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.spot_isinwf:">
+<code class="descname">spot_isinwf:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.spot_isinwf:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">spot_isinwf</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">det</span><span class="p">,</span> <span class="n">i_gen</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">banned</span><span class="p">,</span> <span class="n">fullMatch</span><span class="p">,</span> <span class="n">interesting</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">select_singles_and_doubles()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">bitstring_to_list_in_selection()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.testteethbuilding:">
+<code class="descname">testteethbuilding:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.testteethbuilding:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="n">function</span> <span class="n">testTeethBuilding</span><span class="p">(</span><span class="n">minF</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="generators_full.html#c.psi_det_sorted_gen" title="psi_det_sorted_gen"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_gen</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_pt2:">
+<code class="descname">zmq_pt2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_pt2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/pt2_stoch_routines.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ZMQ_pt2</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span><span class="n">relative_error</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">N_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_n_teeth" title="pt2_n_teeth"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_n_teeth</span></code></a></li>
+<li><a class="reference internal" href="selectors_utils.html#c.psi_selectors_coef_transp" title="psi_selectors_coef_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors_coef_transp</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><a class="reference internal" href="mo_basis.html#c.mo_num" title="mo_num"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_num</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_pt2" title="nthreads_pt2"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_pt2</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="mo_one_e_ints.html#c.mo_one_e_integrals" title="mo_one_e_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_one_e_integrals</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">elec_alpha_num</span></code></li>
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.pt2_f" title="pt2_f"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_f</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_j" title="pt2_j"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_j</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_w" title="pt2_w"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_w</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_u" title="pt2_u"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_u</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_stochastic_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_parallel_job()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fill_h_apply_buffer_no_selection()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">make_selection_buffer_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">new_parallel_job()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_nested()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">pt2_slave_inproc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">remove_duplicates_in_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">resident_memory()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_int()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_selection()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.c0_weight" title="c0_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">c0_weight</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_stoch_istate" title="pt2_stoch_istate"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_stoch_istate</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_selection:">
+<code class="descname">zmq_selection:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_selection:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">cipsi/zmq_selection.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ZMQ_selection</span><span class="p">(</span><span class="n">N_in</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted" title="psi_det_sorted"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.psi_selectors" title="psi_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+<li><a class="reference internal" href="selectors_full.html#c.n_det_selectors" title="n_det_selectors"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_selectors</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.state_average_weight" title="state_average_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">state_average_weight</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">do_pt2</span></code></li>
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_generators</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.pt2_f" title="pt2_f"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_f</span></code></a></li>
+<li><a class="reference internal" href="generators_full.html#c.n_det_generators" title="n_det_generators"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det_generators</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">zmq_pt2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">copy_h_apply_buffer_to_wf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">create_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">delete_selection_buffer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_parallel_job()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">fill_h_apply_buffer_no_selection()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">make_selection_buffer_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">new_parallel_job()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">save_wavefunction()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">selection_slave_inproc()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.c0_weight" title="c0_weight"><code class="xref c c-data docutils literal notranslate"><span class="pre">c0_weight</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_sorted_bit" title="psi_det_sorted_bit"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_sorted_bit</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cis.html" class="btn btn-neutral float-right" title="cis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bitmask.html" class="btn btn-neutral" title="bitmask module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

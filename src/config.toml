@@ -59,6 +59,6 @@ pygmentCodeFences = true
 
 [[menu.main]]
     name = "Documentation"
-    url = "https://quantum-package-scemamamaster.readthedocs.io/"
+    url = "/doc/index"
     weight = 2
 

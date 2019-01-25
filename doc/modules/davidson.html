@@ -1,0 +1,2177 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>davidson &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="davidson_dressed" href="davidson_dressed.html" />
+    <link rel="prev" title="cisd" href="cisd.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_ints.html">ao_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">davidson</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>davidson</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/davidson.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="davidson">
+<span id="module-davidson"></span><h1>davidson<a class="headerlink" href="#davidson" title="Permalink to this headline">¶</a></h1>
+<p>Abstract module for Davidson’s diagonalization.
+It contains everything required for the Davidson algorithm, dressed or not. If
+a dressing is used, the dressing column should be defined and the
+<span class="xref std std-ref">davidson_dressed</span> module should be used. If no dressing is required,
+the <span class="xref std std-ref">davidson</span> module should be used, and it has a default zero dressing vector.</p>
+<p>The important providers for that module are:</p>
+<p># <code class="xref std std-option docutils literal notranslate"><span class="pre">psi_energy</span></code> which is the expectation value over the wave function (<code class="xref std std-option docutils literal notranslate"><span class="pre">psi_det</span></code>, <code class="xref std std-option docutils literal notranslate"><span class="pre">psi_coef</span></code>) of the Hamiltonian, dressed or not. It uses the general subroutine <code class="xref std std-option docutils literal notranslate"><span class="pre">u_0_H_u_0</span></code>.
+# <code class="xref std std-option docutils literal notranslate"><span class="pre">psi_energy_two_e</span></code> which is the expectation value over the wave function (<code class="xref std std-option docutils literal notranslate"><span class="pre">psi_det</span></code>, <code class="xref std std-option docutils literal notranslate"><span class="pre">psi_coef</span></code>) of the standard two-electrons coulomb operator. It uses the general routine <code class="xref std std-option docutils literal notranslate"><span class="pre">u_0_H_u_0_two_e</span></code>.</p>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-davidson-arg-threshold-davidson">
+<code class="descname">threshold_davidson</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-threshold-davidson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thresholds of Davidson’s algorithm</p>
+<p>Default: 1.e-10</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-n-states-diag">
+<code class="descname">n_states_diag</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-n-states-diag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of states to consider during the Davdison diagonalization</p>
+<p>Default: 4</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-davidson-sze-max">
+<code class="descname">davidson_sze_max</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-davidson-sze-max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of micro-iterations before re-contracting</p>
+<p>Default: 8</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-state-following">
+<code class="descname">state_following</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-state-following" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the states are re-ordered to match the input states</p>
+<p>Default: False</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-disk-based-davidson">
+<code class="descname">disk_based_davidson</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-disk-based-davidson" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, a memory-mapped file may be used to store the W and S2 vectors if not enough RAM is available</p>
+<p>Default: True</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-distributed-davidson">
+<code class="descname">distributed_davidson</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-distributed-davidson" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, use the distributed algorithm</p>
+<p>Default: True</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-davidson-arg-only-expected-s2">
+<code class="descname">only_expected_s2</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-davidson-arg-only-expected-s2" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, use filter out all vectors with bad <span class="math notranslate nohighlight">\(\widehat{S^2}\)</span> values</p>
+<p>Default: True</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.ci_eigenvectors">
+<code class="descname">ci_eigenvectors</code><a class="headerlink" href="#c.ci_eigenvectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalize_ci.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_electronic_energy</span> <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_eigenvectors</span>      <span class="p">(</span><span class="n">N_det</span><span class="p">,</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_s2</span>        <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Eigenvectors/values of the <abbr title="Configuration Interaction">CI</abbr> matrix</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.diag_algorithm" title="diag_algorithm"><code class="xref c c-data docutils literal notranslate"><span class="pre">diag_algorithm</span></code></a></li>
+<li><a class="reference internal" href="davidson_undressed.html#c.dressing_column_h" title="dressing_column_h"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressing_column_h</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.expected_s2" title="expected_s2"><code class="xref c c-data docutils literal notranslate"><span class="pre">expected_s2</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.s2_matrix_all_dets" title="s2_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.s_z" title="s_z"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_z</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_davidson</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ci_electronic_energy">
+<code class="descname">ci_electronic_energy</code><a class="headerlink" href="#c.ci_electronic_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalize_ci.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_electronic_energy</span> <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_eigenvectors</span>      <span class="p">(</span><span class="n">N_det</span><span class="p">,</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_s2</span>        <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Eigenvectors/values of the <abbr title="Configuration Interaction">CI</abbr> matrix</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.diag_algorithm" title="diag_algorithm"><code class="xref c c-data docutils literal notranslate"><span class="pre">diag_algorithm</span></code></a></li>
+<li><a class="reference internal" href="davidson_undressed.html#c.dressing_column_h" title="dressing_column_h"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressing_column_h</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.expected_s2" title="expected_s2"><code class="xref c c-data docutils literal notranslate"><span class="pre">expected_s2</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.s2_matrix_all_dets" title="s2_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.s_z" title="s_z"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_z</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_davidson</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ci_energy">
+<code class="descname">ci_energy</code><a class="headerlink" href="#c.ci_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalize_ci.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_energy</span>    <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code> lowest eigenvalues of the <abbr title="Configuration Interaction">CI</abbr> matrix</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+<li><a class="reference internal" href="ezfio_files.html#c.output_wall_time_0" title="output_wall_time_0"><code class="xref c c-data docutils literal notranslate"><span class="pre">output_wall_time_0</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ci_s2">
+<code class="descname">ci_s2</code><a class="headerlink" href="#c.ci_s2" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalize_ci.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_electronic_energy</span> <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_eigenvectors</span>      <span class="p">(</span><span class="n">N_det</span><span class="p">,</span><span class="n">N_states_diag</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ci_s2</span>        <span class="p">(</span><span class="n">N_states_diag</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Eigenvectors/values of the <abbr title="Configuration Interaction">CI</abbr> matrix</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.diag_algorithm" title="diag_algorithm"><code class="xref c c-data docutils literal notranslate"><span class="pre">diag_algorithm</span></code></a></li>
+<li><a class="reference internal" href="davidson_undressed.html#c.dressing_column_h" title="dressing_column_h"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressing_column_h</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.expected_s2" title="expected_s2"><code class="xref c c-data docutils literal notranslate"><span class="pre">expected_s2</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.h_matrix_all_dets" title="h_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">h_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.s2_matrix_all_dets" title="s2_matrix_all_dets"><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_matrix_all_dets</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.s_z" title="s_z"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_z</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_davidson</span></code></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.davidson_criterion">
+<code class="descname">davidson_criterion</code><a class="headerlink" href="#c.davidson_criterion" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/parameters.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">character</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>   <span class="p">::</span> <span class="n">davidson_criterion</span>
+</pre></div>
+</div>
+<p>Can be : [  energy  | residual | both | wall_time | cpu_time | iterations ]</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.dressed_column_idx">
+<code class="descname">dressed_column_idx</code><a class="headerlink" href="#c.dressed_column_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalization_hs2_dressed.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span><span class="p">,</span> <span class="n">allocatable</span>    <span class="p">::</span> <span class="n">dressed_column_idx</span>   <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Index of the dressed columns</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.n_states_diag">
+<code class="descname">n_states_diag</code><a class="headerlink" href="#c.n_states_diag" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/input.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">n_states_diag</span>
+</pre></div>
+</div>
+<p>Number of states to consider during the Davdison diagonalization</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ezfio_files.html#c.output_wall_time_0" title="output_wall_time_0"><code class="xref c c-data docutils literal notranslate"><span class="pre">output_wall_time_0</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.nthreads_davidson">
+<code class="descname">nthreads_davidson</code><a class="headerlink" href="#c.nthreads_davidson" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">nthreads_davidson</span>
+</pre></div>
+</div>
+<p>Number of threads for Davidson</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_energy">
+<code class="descname">psi_energy</code><a class="headerlink" href="#c.psi_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_energy</span>   <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_s2</span>       <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>psi_energy(i) = <span class="math notranslate nohighlight">\(\langle \Psi_i |&nbsp;H | \Psi_i \rangle\)</span></p>
+<p>psi_s2(i) = <span class="math notranslate nohighlight">\(\langle \Psi_i |&nbsp;S^2 | \Psi_i \rangle\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy_two_e" title="psi_energy_two_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_two_e</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy_with_nucl_rep" title="psi_energy_with_nucl_rep"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_with_nucl_rep</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="cipsi.html#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_energy_two_e">
+<code class="descname">psi_energy_two_e</code><a class="headerlink" href="#c.psi_energy_two_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_energy_two_e</span>     <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Energy of the current wave function</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+<li><a class="reference internal" href="#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_energy_with_nucl_rep">
+<code class="descname">psi_energy_with_nucl_rep</code><a class="headerlink" href="#c.psi_energy_with_nucl_rep" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_energy_with_nucl_rep</span>     <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Energy of the wave function with the nuclear repulsion energy.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.psi_s2">
+<code class="descname">psi_s2</code><a class="headerlink" href="#c.psi_s2" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_energy</span>   <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">psi_s2</span>       <span class="p">(</span><span class="n">N_states</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>psi_energy(i) = <span class="math notranslate nohighlight">\(\langle \Psi_i |&nbsp;H | \Psi_i \rangle\)</span></p>
+<p>psi_s2(i) = <span class="math notranslate nohighlight">\(\langle \Psi_i |&nbsp;S^2 | \Psi_i \rangle\)</span></p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det" title="psi_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_size" title="psi_det_size"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_size</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy_two_e" title="psi_energy_two_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_two_e</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy_with_nucl_rep" title="psi_energy_with_nucl_rep"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_with_nucl_rep</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="cipsi.html#c.pt2_e0_denominator" title="pt2_e0_denominator"><code class="xref c c-data docutils literal notranslate"><span class="pre">pt2_e0_denominator</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.davidson_collector:">
+<code class="descname">davidson_collector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_collector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_collector</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">sze</span><span class="p">,</span> <span class="n">N_st</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Routine collecting the results of the workers in Davidson’s algorithm.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_pull_results()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_converged:">
+<code class="descname">davidson_converged:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_converged:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/parameters.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_converged</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span><span class="n">residual</span><span class="p">,</span><span class="n">wall</span><span class="p">,</span><span class="n">iterations</span><span class="p">,</span><span class="n">cpu</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">converged</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>True if the Davidson algorithm is converged</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">threshold_davidson</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.davidson_criterion" title="davidson_criterion"><code class="xref c c-data docutils literal notranslate"><span class="pre">davidson_criterion</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_diag_hjj_sjj()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_diag_hjj_sjj:">
+<code class="descname">davidson_diag_hjj_sjj:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_diag_hjj_sjj:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalization_hs2_dressed.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_diag_hjj_sjj</span><span class="p">(</span><span class="n">dets_in</span><span class="p">,</span><span class="n">u_in</span><span class="p">,</span><span class="n">H_jj</span><span class="p">,</span><span class="n">s2_out</span><span class="p">,</span><span class="n">energies</span><span class="p">,</span><span class="n">dim_in</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">N_st_diag_in</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">dressing_state</span><span class="p">,</span><span class="n">converged</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Davidson diagonalization with specific diagonal elements of the H matrix</p>
+<p>H_jj : specific diagonal H matrix elements to diagonalize de Davidson</p>
+<p>S2_out : Output : s^2</p>
+<p>dets_in : bitmasks corresponding to determinants</p>
+<dl class="docutils">
+<dt>u_in <span class="classifier-delimiter">:</span> <span class="classifier">guess coefficients on the various states. Overwritten</span></dt>
+<dd>on exit</dd>
+</dl>
+<p>dim_in : leftmost dimension of u_in</p>
+<p>sze : Number of determinants</p>
+<p>N_st : Number of eigenstates</p>
+<p>N_st_diag_in : Number of states in which H is diagonalized. Assumed &gt; sze</p>
+<p>Initial guess vectors are not necessarily orthonormal</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_reverse" title="psi_bilinear_matrix_order_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.dressed_column_idx" title="dressed_column_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressed_column_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.expected_s2" title="expected_s2"><code class="xref c c-data docutils literal notranslate"><span class="pre">expected_s2</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.s_z" title="s_z"><code class="xref c c-data docutils literal notranslate"><span class="pre">s_z</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="davidson_undressed.html#c.dressing_column_h" title="dressing_column_h"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressing_column_h</span></code></a></li>
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_work_dir" title="ezfio_work_dir"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_work_dir</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">davidson_sze_max</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">state_following</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="nuclei.html#c.nuclear_repulsion" title="nuclear_repulsion"><code class="xref c c-data docutils literal notranslate"><span class="pre">nuclear_repulsion</span></code></a></li>
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+<li><a class="reference internal" href="utils.html#c.qp_max_mem" title="qp_max_mem"><code class="xref c c-data docutils literal notranslate"><span class="pre">qp_max_mem</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">disk_based_davidson</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">s2_eig</span></code></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">only_expected_s2</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_diag_hs2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">c_f_pointer()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">check_mem()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cpu_time()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_converged()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dgemm()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dswap()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">lapack_diag()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">mmap()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">munmap()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">normalize()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ortho_qr()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">random_number()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">resident_memory()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sgemm()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">wall_time()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_double()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_int()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">write_time()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_diag_hs2:">
+<code class="descname">davidson_diag_hs2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_diag_hs2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalization_hs2_dressed.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_diag_hs2</span><span class="p">(</span><span class="n">dets_in</span><span class="p">,</span><span class="n">u_in</span><span class="p">,</span><span class="n">s2_out</span><span class="p">,</span><span class="n">dim_in</span><span class="p">,</span><span class="n">energies</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">N_st_diag</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">dressing_state</span><span class="p">,</span><span class="n">converged</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Davidson diagonalization.</p>
+<p>dets_in : bitmasks corresponding to determinants</p>
+<dl class="docutils">
+<dt>u_in <span class="classifier-delimiter">:</span> <span class="classifier">guess coefficients on the various states. Overwritten</span></dt>
+<dd>on exit</dd>
+</dl>
+<p>dim_in : leftmost dimension of u_in</p>
+<p>sze : Number of determinants</p>
+<p>N_st : Number of eigenstates</p>
+<p>Initial guess vectors are not necessarily orthonormal</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="davidson_undressed.html#c.dressing_column_h" title="dressing_column_h"><code class="xref c c-data docutils literal notranslate"><span class="pre">dressing_column_h</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_diag_hjj_sjj()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_pull_results:">
+<code class="descname">davidson_pull_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_pull_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_pull_results</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">,</span> <span class="n">v_t</span><span class="p">,</span> <span class="n">s_t</span><span class="p">,</span> <span class="n">imin</span><span class="p">,</span> <span class="n">imax</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pull the results of $H|U rangle$ on the master.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_push_results:">
+<code class="descname">davidson_push_results:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_push_results:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_push_results</span><span class="p">(</span><span class="n">zmq_socket_push</span><span class="p">,</span> <span class="n">v_t</span><span class="p">,</span> <span class="n">s_t</span><span class="p">,</span> <span class="n">imin</span><span class="p">,</span> <span class="n">imax</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Push the results of $H|U rangle$ from a worker to the master.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_run_slave:">
+<code class="descname">davidson_run_slave:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_run_slave:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_run_slave</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span><span class="n">iproc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Slave routine for Davidson’s diagonalization.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_inproc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_tcp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_work()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_push_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_slave_inproc:">
+<code class="descname">davidson_slave_inproc:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_slave_inproc:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_slave_inproc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_run_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_slave_tcp:">
+<code class="descname">davidson_slave_tcp:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_slave_tcp:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_slave_tcp</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_slave_main()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_run_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.davidson_slave_work:">
+<code class="descname">davidson_slave_work:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.davidson_slave_work:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">davidson_slave_work</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">zmq_socket_push</span><span class="p">,</span> <span class="n">N_st</span><span class="p">,</span> <span class="n">sze</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_initialized" title="mpi_initialized"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_initialized</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_run_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_push_results()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">sleep()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.diagonalize_ci:">
+<code class="descname">diagonalize_ci:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.diagonalize_ci:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/diagonalize_ci.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">diagonalize_CI</span>
+</pre></div>
+</div>
+<p>Replace the coefficients of the <abbr title="Configuration Interaction">CI</abbr> states by the coefficients of the
+eigenstates of the <abbr title="Configuration Interaction">CI</abbr> matrix.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">remove_small_contributions()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_cipsi()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">run_stochastic_cipsi()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ci_energy" title="ci_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_energy</span></code></a></li>
+<li><a class="reference internal" href="#c.ci_electronic_energy" title="ci_electronic_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ci_electronic_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_coef" title="psi_coef"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_coef</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp:">
+<code class="descname">h_s2_u_0_nstates_openmp:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp</span><span class="p">(</span><span class="n">v_0</span><span class="p">,</span><span class="n">s_0</span><span class="p">,</span><span class="n">u_0</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_0 = H|u_0rangle$ and $s_0 = S^2 <a href="#id1"><span class="problematic" id="id2">|</span></a>u_0rangle$.</p>
+<p>Assumes that the determinants are in psi_det</p>
+<p>istart, iend, ishift, istep are used in ZMQ parallelization.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_reverse" title="psi_bilinear_matrix_order_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_reverse</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_diag_hjj_sjj()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">u_0_h_u_0()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dset_order()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dtranspose()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work:">
+<code class="descname">h_s2_u_0_nstates_openmp_work:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_trangle$ and $s_t = S^2 <a href="#id3"><span class="problematic" id="id4">|</span></a>u_trangle$</p>
+<p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work_1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work_2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work_3()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work_4()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work_n_int()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work_1:">
+<code class="descname">h_s2_u_0_nstates_openmp_work_1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work_1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f_template_631</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work_1</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id5"><span class="problematic" id="id6">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc" title="singles_beta_csc"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_mono_spin()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work_2:">
+<code class="descname">h_s2_u_0_nstates_openmp_work_2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work_2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f_template_631</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work_2</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id7"><span class="problematic" id="id8">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc" title="singles_beta_csc"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_mono_spin()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work_3:">
+<code class="descname">h_s2_u_0_nstates_openmp_work_3:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work_3:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f_template_631</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work_3</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id9"><span class="problematic" id="id10">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc" title="singles_beta_csc"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_3()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_3()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_mono_spin()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work_4:">
+<code class="descname">h_s2_u_0_nstates_openmp_work_4:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work_4:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f_template_631</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work_4</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id11"><span class="problematic" id="id12">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc" title="singles_beta_csc"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_4()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_4()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_mono_spin()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_openmp_work_n_int:">
+<code class="descname">h_s2_u_0_nstates_openmp_work_n_int:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_openmp_work_n_int:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f_template_631</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_openmp_work_N_int</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id13"><span class="problematic" id="id14">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc" title="singles_beta_csc"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.singles_beta_csc_idx" title="singles_beta_csc_idx"><code class="xref c c-data docutils literal notranslate"><span class="pre">singles_beta_csc_idx</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_n_int()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_n_int()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_mono_spin()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_nstates_zmq:">
+<code class="descname">h_s2_u_0_nstates_zmq:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_nstates_zmq:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_nstates_zmq</span><span class="p">(</span><span class="n">v_0</span><span class="p">,</span><span class="n">s_0</span><span class="p">,</span><span class="n">u_0</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_0 = H|u_0rangle$ and $s_0 = S^2 <a href="#id15"><span class="problematic" id="id16">|</span></a>u_0rangle$</p>
+<p>n : number of determinants</p>
+<p>H_jj : array of $langle j|H|j rangle$</p>
+<p>S2_jj : array of $langle j|S^2|j rangle$</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_reverse" title="psi_bilinear_matrix_order_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_reverse</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_initialized" title="mpi_initialized"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_initialized</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_diag_hjj_sjj()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">u_0_h_u_0()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_collector()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">davidson_slave_inproc()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dset_order()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dtranspose()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_parallel_job()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">new_parallel_job()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">omp_set_nested()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp</span><span class="p">(</span><span class="n">v_0</span><span class="p">,</span><span class="n">s_0</span><span class="p">,</span><span class="n">u_0</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_0 = H|u_0rangle$ and $s_0 = S^2 <a href="#id17"><span class="problematic" id="id18">|</span></a>u_0rangle$</p>
+<p>Assumes that the determinants are in psi_det</p>
+<p>istart, iend, ishift, istep are used in ZMQ parallelization.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_reverse" title="psi_bilinear_matrix_order_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_reverse</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">u_0_h_u_0_two_e()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dset_order()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">dtranspose()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_trangle$ and $s_t = S^2 <a href="#id19"><span class="problematic" id="id20">|</span></a>u_trangle$</p>
+<p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.ref_bitmask_energy" title="ref_bitmask_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">ref_bitmask_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work_1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work_2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work_3()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work_4()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work_n_int()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work_1:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work_1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work_1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f_template_457</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work_1</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id21"><span class="problematic" id="id22">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_wee_j_mono()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work_2:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work_2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work_2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f_template_457</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work_2</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id23"><span class="problematic" id="id24">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_wee_j_mono()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work_3:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work_3:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work_3:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f_template_457</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work_3</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id25"><span class="problematic" id="id26">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_3()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_3()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_wee_j_mono()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work_4:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work_4:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work_4:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f_template_457</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work_4</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id27"><span class="problematic" id="id28">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_4()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_4()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_wee_j_mono()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.h_s2_u_0_two_e_nstates_openmp_work_n_int:">
+<code class="descname">h_s2_u_0_two_e_nstates_openmp_work_n_int:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.h_s2_u_0_two_e_nstates_openmp_work_n_int:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f_template_457</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">H_S2_u_0_two_e_nstates_openmp_work_N_int</span><span class="p">(</span><span class="n">v_t</span><span class="p">,</span><span class="n">s_t</span><span class="p">,</span><span class="n">u_t</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">iend</span><span class="p">,</span><span class="n">ishift</span><span class="p">,</span><span class="n">istep</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $v_t = H|u_t</p>
+</dd></dl>
+
+<p>angle$ and $s_t = S^2 <a href="#id29"><span class="problematic" id="id30">|</span></a>u_t
+angle$</p>
+<blockquote>
+<div><p>Default should be 1,N_det,0,1</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_det_beta_unique" title="psi_det_beta_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_beta_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_order_transp_reverse" title="psi_bilinear_matrix_order_transp_reverse"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_order_transp_reverse</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_det_alpha_unique" title="psi_det_alpha_unique"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_det_alpha_unique</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_rows_loc" title="psi_bilinear_matrix_transp_rows_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_rows_loc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.n_det" title="n_det"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_det</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_transp_values" title="psi_bilinear_matrix_transp_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_transp_values</span></code></a></li>
+<li><a class="reference internal" href="#c.nthreads_davidson" title="nthreads_davidson"><code class="xref c c-data docutils literal notranslate"><span class="pre">nthreads_davidson</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_values" title="psi_bilinear_matrix_values"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_values</span></code></a></li>
+<li><a class="reference internal" href="bitmask.html#c.n_int" title="n_int"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_int</span></code></a></li>
+<li><a class="reference internal" href="determinants.html#c.psi_bilinear_matrix_columns_loc" title="psi_bilinear_matrix_columns_loc"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_bilinear_matrix_columns_loc</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp_work()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_and_doubles_n_int()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_all_spin_singles_n_int()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_s2()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_alpha_beta()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_h_j_double_spin()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_wee_j_mono()</span></code></li>
+</ul>
+</td></tr></table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.u_0_h_u_0:">
+<code class="descname">u_0_h_u_0:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.u_0_h_u_0:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_h_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">u_0_H_u_0</span><span class="p">(</span><span class="n">e_0</span><span class="p">,</span><span class="n">s_0</span><span class="p">,</span><span class="n">u_0</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">keys_tmp</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $E_0 = frac{langle u_0|H|u_0 rangle}{langle u_0|u_0 rangle}$</p>
+<p>and      $S_0 = frac{langle u_0|S^2|u_0 rangle}{langle u_0|u_0 rangle}$</p>
+<p>n : number of determinants</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">distributed_davidson</span></code></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy" title="psi_energy"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_openmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_nstates_zmq()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.u_0_h_u_0_two_e:">
+<code class="descname">u_0_h_u_0_two_e:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.u_0_h_u_0_two_e:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/u0_wee_u0.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">u_0_H_u_0_two_e</span><span class="p">(</span><span class="n">e_0</span><span class="p">,</span><span class="n">u_0</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">keys_tmp</span><span class="p">,</span><span class="n">Nint</span><span class="p">,</span><span class="n">N_st</span><span class="p">,</span><span class="n">sze</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes $E_0 = frac{ langle u_0|H|u_0rangle}{langle u_0|u_0 rangle}$.</p>
+<p>n : number of determinants</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.psi_energy_two_e" title="psi_energy_two_e"><code class="xref c c-data docutils literal notranslate"><span class="pre">psi_energy_two_e</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">h_s2_u_0_two_e_nstates_openmp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_get_n_states_diag:">
+<code class="descname">zmq_get_n_states_diag:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_get_n_states_diag:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_get_N_states_diag</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span> <span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Get N_states_diag from the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Touches:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.zmq_put_n_states_diag:">
+<code class="descname">zmq_put_n_states_diag:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.zmq_put_n_states_diag:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">davidson/davidson_parallel.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">zmq_put_N_states_diag</span><span class="p">(</span><span class="n">zmq_to_qp_run_socket</span><span class="p">,</span><span class="n">worker_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put N_states_diag on the qp_run scheduler</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.n_states_diag" title="n_states_diag"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_states_diag</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="davidson_dressed.html" class="btn btn-neutral float-right" title="davidson_dressed" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cisd.html" class="btn btn-neutral" title="cisd" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

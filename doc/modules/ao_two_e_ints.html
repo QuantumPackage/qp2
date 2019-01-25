@@ -1,0 +1,1612 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ao_two_e_ints &mdash; Quantum Package 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aux_quantities" href="aux_quantities.html" />
+    <link rel="prev" title="ao_two_e_erf_ints" href="ao_two_e_erf_ints.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Quantum Package
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/selected_ci.html">Selected Configuration Interaction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/quickstart.html">Quick-start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/excited_states.html">Excited states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/natural_orbitals.html">Natural orbitals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/printing.html">Printing the near-<abbr title="Full Configuration Interaction">FCI</abbr> wave function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/plugins.html">Working with external plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/qp_plugins.html">qp_plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html">Index of commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide/index.html#index-of-programs">Index of programs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programmer's guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/programming.html">Programming in the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/ezfio.html">EZFIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../programmers_guide/index.html">Index for programmers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../programmers_guide/index.html#index-of-modules">Index of Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ao_basis.html">ao_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_one_e_ints.html">ao_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ao_two_e_erf_ints.html">ao_two_e_erf_ints</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ao_two_e_ints</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ezfio-parameters">EZFIO parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#providers">Providers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subroutines-functions">Subroutines / functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aux_quantities.html">aux_quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="becke_numerical_grid.html">becke_numerical_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bitmask.html">bitmask module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cipsi.html">cipsi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cis.html">cis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cisd.html">cisd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson.html">davidson</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_dressed.html">davidson_dressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="davidson_undressed.html">davidson_undressed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="density_for_dft.html">density_for_dft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="determinants.html">determinants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_keywords.html">dft_keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_in_r.html">dft_utils_in_r</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dft_utils_one_e.html">dft_utils_one_e</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dressing.html">dress_zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="electrons.html">electrons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ezfio_files.html">ezfio_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fci.html">fci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_cas.html">generators_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generators_full.html">generators_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hartree_fock.html">hartree_fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iterations.html">iterations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham.html">kohn_sham</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kohn_sham_rs.html">kohn_sham_rs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_basis.html">mo_basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_guess.html">mo_guess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_one_e_ints.html">mo_one_e_integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_erf_ints.html">mo_two_e_erf_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mo_two_e_ints.html">mo_two_e_ints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mpi.html">mpi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nuclei.html">nuclei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="perturbation.html">perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pseudo.html">pseudo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_cas.html">psiref_cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="psiref_utils.html">psiref_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scf_utils.html">scf_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_cassd.html">selectors_cassd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_full.html">selectors_full</a></li>
+<li class="toctree-l3"><a class="reference internal" href="selectors_utils.html">selectors_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="single_ref_method.html">single_ref_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zmq.html">zmq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_name.html">qp_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/qp_test.html">qp_test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../programmers_guide/conventions.html">Coding conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-providers">Index of Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programmers_guide/index.html#index-of-subroutines-functions">Index of Subroutines/Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../programmers_guide/plugins.html">Developing plugins</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/research.html">Some research made with the <em>Quantum Package</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/contributors.html">Contributors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Package</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../programmers_guide/index.html">Index for programmers</a> &raquo;</li>
+        
+      <li>ao_two_e_ints</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/ao_two_e_ints.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ao-two-e-ints">
+<span id="module-ao-two-e-ints"></span><h1>ao_two_e_ints<a class="headerlink" href="#ao-two-e-ints" title="Permalink to this headline">¶</a></h1>
+<p>Here, all two-electron integrals (<span class="math notranslate nohighlight">\(1/r_{12}\)</span>) are computed.
+As they have 4 indices and many are zero, they are stored in a map, as defined
+in <code class="file docutils literal notranslate"><span class="pre">utils/map_module.f90</span></code>.</p>
+<p>To fetch an <abbr title="Atomic Orbital">AO</abbr> integral, use the
+<code class="xref std std-option docutils literal notranslate"><span class="pre">get_ao_two_e_integral(i,j,k,l,ao_integrals_map)</span></code> function.</p>
+<p>The conventions are:
+* For <abbr title="Atomic Orbital">AO</abbr> integrals : (ij|kl) = (11|22) = &lt;ik|jl&gt; = &lt;12|12&gt;</p>
+<div class="section" id="ezfio-parameters">
+<h2>EZFIO parameters<a class="headerlink" href="#ezfio-parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-ao-two-e-ints-arg-io-ao-two-e-integrals">
+<code class="descname">io_ao_two_e_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-two-e-ints-arg-io-ao-two-e-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read/Write <abbr title="Atomic Orbital">AO</abbr> integrals from/to disk [ Write | Read | None ]</p>
+<p>Default: None</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-two-e-ints-arg-ao-integrals-threshold">
+<code class="descname">ao_integrals_threshold</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-two-e-ints-arg-ao-integrals-threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>If | (pq|rs) | &lt; <a class="reference internal" href="#cmdoption-ao-two-e-ints-arg-ao-integrals-threshold"><code class="xref std std-option docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></a> then (pq|rs) is zero</p>
+<p>Default: 1.e-15</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-ao-two-e-ints-arg-do-direct-integrals">
+<code class="descname">do_direct_integrals</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-ao-two-e-ints-arg-do-direct-integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute integrals on the fly (very slow, only for debugging)</p>
+<p>Default: False</p>
+</dd></dl>
+
+</div>
+<div class="section" id="providers">
+<h2>Providers<a class="headerlink" href="#providers" title="Permalink to this headline">¶</a></h2>
+<dl class="var">
+<dt id="c.ao_integrals_cache">
+<code class="descname">ao_integrals_cache</code><a class="headerlink" href="#c.ao_integrals_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_integrals_cache</span>   <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="o">*</span><span class="mi">64</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cache of AO integrals for fast access</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache_min" title="ao_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache_min</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_integrals_cache_max">
+<code class="descname">ao_integrals_cache_max</code><a class="headerlink" href="#c.ao_integrals_cache_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">ao_integrals_cache_min</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">ao_integrals_cache_max</span>
+</pre></div>
+</div>
+<p>Min and max values of the AOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_integrals_cache_min">
+<code class="descname">ao_integrals_cache_min</code><a class="headerlink" href="#c.ao_integrals_cache_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="p">::</span> <span class="n">ao_integrals_cache_min</span>
+<span class="n">integer</span> <span class="p">::</span> <span class="n">ao_integrals_cache_max</span>
+</pre></div>
+</div>
+<p>Min and max values of the AOs for which the integrals are in the cache</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_integrals_map">
+<code class="descname">ao_integrals_map</code><a class="headerlink" href="#c.ao_integrals_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">map_type</span><span class="p">)</span>  <span class="p">::</span> <span class="n">ao_integrals_map</span>
+</pre></div>
+</div>
+<p>AO integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_two_e_integral_schwartz">
+<code class="descname">ao_two_e_integral_schwartz</code><a class="headerlink" href="#c.ao_two_e_integral_schwartz" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">ao_two_e_integral_schwartz</span>   <span class="p">(</span><span class="n">ao_num</span><span class="p">,</span><span class="n">ao_num</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Needed to compute Schwartz inequalities</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.ao_two_e_integrals_in_map">
+<code class="descname">ao_two_e_integrals_in_map</code><a class="headerlink" href="#c.ao_two_e_integrals_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logical</span> <span class="p">::</span> <span class="n">ao_two_e_integrals_in_map</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Map of Atomic integrals</dt>
+<dd>i(r1) j(r2) 1/r12 k(r1) l(r2)</dd>
+</dl>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+<li><a class="reference internal" href="ezfio_files.html#c.ezfio_filename" title="ezfio_filename"><code class="xref c c-data docutils literal notranslate"><span class="pre">ezfio_filename</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">io_ao_two_e_integrals</span></code></li>
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+<li><a class="reference internal" href="utils.html#c.nproc" title="nproc"><code class="xref c c-data docutils literal notranslate"><span class="pre">nproc</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">read_ao_two_e_integrals</span></code></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_context" title="zmq_context"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_context</span></code></a></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_socket_pull_tcp_address" title="zmq_socket_pull_tcp_address"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_socket_pull_tcp_address</span></code></a></li>
+<li><a class="reference internal" href="zmq.html#c.zmq_state" title="zmq_state"><code class="xref c c-data docutils literal notranslate"><span class="pre">zmq_state</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Needed by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_two_e_integrals_erf_in_map" title="mo_two_e_integrals_erf_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_erf_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_in_map" title="mo_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_in_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.gauleg_t2">
+<code class="descname">gauleg_t2</code><a class="headerlink" href="#c.gauleg_t2" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/gauss_legendre.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">gauleg_t2</span>    <span class="p">(</span><span class="n">n_pt_max_integrals</span><span class="p">,</span><span class="n">n_pt_max_integrals</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">gauleg_w</span>     <span class="p">(</span><span class="n">n_pt_max_integrals</span><span class="p">,</span><span class="n">n_pt_max_integrals</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>t_w(i,1,k) = w(i)
+t_w(i,2,k) = t(i)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="var">
+<dt id="c.gauleg_w">
+<code class="descname">gauleg_w</code><a class="headerlink" href="#c.gauleg_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/gauss_legendre.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">gauleg_t2</span>    <span class="p">(</span><span class="n">n_pt_max_integrals</span><span class="p">,</span><span class="n">n_pt_max_integrals</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">precision</span><span class="p">,</span> <span class="n">allocatable</span>   <span class="p">::</span> <span class="n">gauleg_w</span>     <span class="p">(</span><span class="n">n_pt_max_integrals</span><span class="p">,</span><span class="n">n_pt_max_integrals</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>t_w(i,1,k) = w(i)
+t_w(i,2,k) = t(i)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.general_primitive_integral:">
+<code class="descname">general_primitive_integral:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.general_primitive_integral:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">general_primitive_integral</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span>            <span class="o">&amp;</span>
+<span class="n">P_new</span><span class="p">,</span><span class="n">P_center</span><span class="p">,</span><span class="n">fact_p</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">p_inv</span><span class="p">,</span><span class="n">iorder_p</span><span class="p">,</span>                        <span class="o">&amp;</span>
+<span class="n">Q_new</span><span class="p">,</span><span class="n">Q_center</span><span class="p">,</span><span class="n">fact_q</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">q_inv</span><span class="p">,</span><span class="n">iorder_q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes the integral &lt;pq|rs&gt; where p,q,r,s are Gaussian primitives</p>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_poly_multiply()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_polynom_mult_center_x()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">multiply_poly()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x1_new:">
+<code class="descname">i_x1_new:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x1_new:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x1_new</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">res</span><span class="p">,</span><span class="n">n_pt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_new()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">integrale_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">integrale_new_erf()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x1_pol_mult_a1:">
+<code class="descname">i_x1_pol_mult_a1:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x1_pol_mult_a1:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x1_pol_mult_a1</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">C_00</span><span class="p">,</span><span class="n">D_00</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">nd</span><span class="p">,</span><span class="n">n_pt_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_recurs()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">multiply_poly()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x1_pol_mult_a2:">
+<code class="descname">i_x1_pol_mult_a2:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x1_pol_mult_a2:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x1_pol_mult_a2</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">C_00</span><span class="p">,</span><span class="n">D_00</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">nd</span><span class="p">,</span><span class="n">n_pt_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_recurs()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">multiply_poly()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x1_pol_mult_recurs:">
+<code class="descname">i_x1_pol_mult_recurs:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x1_pol_mult_recurs:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x1_pol_mult_recurs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">C_00</span><span class="p">,</span><span class="n">D_00</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">nd</span><span class="p">,</span><span class="n">n_pt_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_recurs()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_recurs()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">multiply_poly()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x2_new:">
+<code class="descname">i_x2_new:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x2_new:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x2_new</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">res</span><span class="p">,</span><span class="n">n_pt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x2_pol_mult:">
+<code class="descname">i_x2_pol_mult:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x2_pol_mult:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span> <span class="n">subroutine</span> <span class="n">I_x2_pol_mult</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">C_00</span><span class="p">,</span><span class="n">D_00</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">nd</span><span class="p">,</span><span class="n">dim</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a1()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_pol_mult()</span></code></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">multiply_poly()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+<div class="section" id="subroutines-functions">
+<h2>Subroutines / functions<a class="headerlink" href="#subroutines-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.ao_l4:">
+<code class="descname">ao_l4:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_l4:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">ao_l4</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes the product of l values of i,j,k,and l</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_l" title="ao_l"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_l</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integral:">
+<code class="descname">ao_two_e_integral:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integral:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">ao_two_e_integral</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>integral of the AO basis &lt;ik|jl&gt; or (ij|kl)</dt>
+<dd>i(r1) j(r1) 1/r12 k(r2) l(r2)</dd>
+</dl>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_explicit_poly_and_gaussian()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integral_schwartz_accel:">
+<code class="descname">ao_two_e_integral_schwartz_accel:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integral_schwartz_accel:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">ao_two_e_integral_schwartz_accel</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>integral of the AO basis &lt;ik|jl&gt; or (ij|kl)</dt>
+<dd>i(r1) j(r1) 1/r12 k(r2) l(r2)</dd>
+</dl>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_coef_normalized_ordered_transp" title="ao_coef_normalized_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_coef_normalized_ordered_transp</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_power</span></code></li>
+<li><a class="reference internal" href="ao_basis.html#c.ao_expo_ordered_transp" title="ao_expo_ordered_transp"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_expo_ordered_transp</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_prim_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_nucl</span></code></li>
+<li><a class="reference internal" href="nuclei.html#c.nucl_coord" title="nucl_coord"><code class="xref c c-data docutils literal notranslate"><span class="pre">nucl_coord</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_explicit_poly_and_gaussian()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integrals_in_map_collector:">
+<code class="descname">ao_two_e_integrals_in_map_collector:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integrals_in_map_collector:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/integrals_in_map_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_two_e_integrals_in_map_collector</span><span class="p">(</span><span class="n">zmq_socket_pull</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Collects results from the AO integral calculation</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">insert_into_ao_integrals_map()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integrals_in_map_slave:">
+<code class="descname">ao_two_e_integrals_in_map_slave:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integrals_in_map_slave:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/integrals_in_map_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_two_e_integrals_in_map_slave</span><span class="p">(</span><span class="n">thread</span><span class="p">,</span><span class="n">iproc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes a buffer of integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave_inproc()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave_tcp()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">compute_ao_integrals_jl()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_push_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">end_zmq_to_qp_run_socket()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">push_integrals()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integrals_in_map_slave_inproc:">
+<code class="descname">ao_two_e_integrals_in_map_slave_inproc:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integrals_in_map_slave_inproc:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/integrals_in_map_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_two_e_integrals_in_map_slave_inproc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes a buffer of integrals. i is the ID of the current thread.</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.ao_two_e_integrals_in_map_slave_tcp:">
+<code class="descname">ao_two_e_integrals_in_map_slave_tcp:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.ao_two_e_integrals_in_map_slave_tcp:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/integrals_in_map_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">ao_two_e_integrals_in_map_slave_tcp</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Computes a buffer of integrals. i is the ID of the current thread.</p>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.clear_ao_map:">
+<code class="descname">clear_ao_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.clear_ao_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">clear_ao_map</span>
+</pre></div>
+</div>
+<p>Frees the memory of the AO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.compute_ao_integrals_jl:">
+<code class="descname">compute_ao_integrals_jl:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.compute_ao_integrals_jl:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">compute_ao_integrals_jl</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">n_integrals</span><span class="p">,</span><span class="n">buffer_i</span><span class="p">,</span><span class="n">buffer_value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Parallel client for AO integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.compute_ao_two_e_integrals:">
+<code class="descname">compute_ao_two_e_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.compute_ao_two_e_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">compute_ao_two_e_integrals</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">buffer_value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute AO 1/r12 integrals for all i and fixed j,k,l</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_num</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.dump_ao_integrals:">
+<code class="descname">dump_ao_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.dump_ao_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">dump_ao_integrals</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Save to disk the <abbr title="Atomic Orbital">AO</abbr> integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mpi.html#c.mpi_master" title="mpi_master"><code class="xref c c-data docutils literal notranslate"><span class="pre">mpi_master</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ezfio_set_work_empty()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.eri:">
+<code class="descname">eri:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.eri:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">ERI</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">delta</span><span class="p">,</span><span class="n">gama</span><span class="p">,</span><span class="n">a_x</span><span class="p">,</span><span class="n">b_x</span><span class="p">,</span><span class="n">c_x</span><span class="p">,</span><span class="n">d_x</span><span class="p">,</span><span class="n">a_y</span><span class="p">,</span><span class="n">b_y</span><span class="p">,</span><span class="n">c_y</span><span class="p">,</span><span class="n">d_y</span><span class="p">,</span><span class="n">a_z</span><span class="p">,</span><span class="n">b_z</span><span class="p">,</span><span class="n">c_z</span><span class="p">,</span><span class="n">d_z</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>ATOMIC PRIMTIVE two-electron integral between the 4 primitives ::</dt>
+<dd>primitive_1 = x1**(a_x) y1**(a_y) z1**(a_z) exp(-alpha * r1**2)
+primitive_2 = x1**(b_x) y1**(b_y) z1**(b_z) exp(- beta * r1**2)
+primitive_3 = x2**(c_x) y2**(c_y) z2**(c_z) exp(-delta * r2**2)
+primitive_4 = x2**(d_x) y2**(d_y) z2**(d_z) exp(- gama * r2**2)</dd>
+</dl>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">integrale_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.gauleg:">
+<code class="descname">gauleg:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.gauleg:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/gauss_legendre.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">gauleg</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gauss-Legendre</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.gauleg_t2" title="gauleg_t2"><code class="xref c c-data docutils literal notranslate"><span class="pre">gauleg_t2</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_ao_map_size:">
+<code class="descname">get_ao_map_size:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_ao_map_size:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">get_ao_map_size</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Returns the number of elements in the AO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_ao_two_e_integral:">
+<code class="descname">get_ao_two_e_integral:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_ao_two_e_integral:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">precision</span> <span class="n">function</span> <span class="n">get_ao_two_e_integral</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="nb">map</span><span class="p">)</span> <span class="n">result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gets one AO bi-electronic integral from the AO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache_min" title="ao_integrals_cache_min"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache_min</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_ao_two_e_integrals:">
+<code class="descname">get_ao_two_e_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_ao_two_e_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_ao_two_e_integrals</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gets multiple AO bi-electronic integral from the AO map .
+All i are retrieved for j,k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_no_exit_34()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">add_integrals_to_map_three_indices()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.get_ao_two_e_integrals_non_zero:">
+<code class="descname">get_ao_two_e_integrals_non_zero:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_ao_two_e_integrals_non_zero:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">get_ao_two_e_integrals_non_zero</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">sze</span><span class="p">,</span><span class="n">out_val</span><span class="p">,</span><span class="n">out_val_index</span><span class="p">,</span><span class="n">non_zero_int</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Gets multiple AO bi-electronic integral from the AO map .
+All non-zero i are retrieved for j,k,l fixed.</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><a class="reference internal" href="ao_one_e_ints.html#c.ao_overlap_abs" title="ao_overlap_abs"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_overlap_abs</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_threshold</span></code></li>
+<li><a class="reference internal" href="#c.ao_two_e_integral_schwartz" title="ao_two_e_integral_schwartz"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_schwartz</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_two_e_integrals_in_map" title="ao_two_e_integrals_in_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map</span></code></a></li>
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integral_jj_from_ao" title="mo_two_e_integral_jj_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integral_jj_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_two_e_integrals_vv_from_ao" title="mo_two_e_integrals_vv_from_ao"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_two_e_integrals_vv_from_ao</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_get()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.give_polynom_mult_center_x:">
+<code class="descname">give_polynom_mult_center_x:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.give_polynom_mult_center_x:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">give_polynom_mult_center_x</span><span class="p">(</span><span class="n">P_center</span><span class="p">,</span><span class="n">Q_center</span><span class="p">,</span><span class="n">a_x</span><span class="p">,</span><span class="n">d_x</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">n_pt_in</span><span class="p">,</span><span class="n">pq_inv</span><span class="p">,</span><span class="n">pq_inv_2</span><span class="p">,</span><span class="n">p10_1</span><span class="p">,</span><span class="n">p01_1</span><span class="p">,</span><span class="n">p10_2</span><span class="p">,</span><span class="n">p01_2</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n_pt_out</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>subroutine that returns the explicit polynom in term of the “t”
+variable of the following polynomw :</p>
+<blockquote>
+<div>I_x1(a_x, d_x,p,q) * I_x1(a_y, d_y,p,q) * I_x1(a_z, d_z,p,q)</div></blockquote>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">general_primitive_integral()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">general_primitive_integral_erf()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.i_x1_pol_mult:">
+<code class="descname">i_x1_pol_mult:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.i_x1_pol_mult:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">I_x1_pol_mult</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">B_10</span><span class="p">,</span><span class="n">B_01</span><span class="p">,</span><span class="n">B_00</span><span class="p">,</span><span class="n">C_00</span><span class="p">,</span><span class="n">D_00</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">nd</span><span class="p">,</span><span class="n">n_pt_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>recursive function involved in the two-electron integral</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">give_polynom_mult_center_x()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_a2()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_pol_mult_recurs()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x2_pol_mult()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.insert_into_ao_integrals_map:">
+<code class="descname">insert_into_ao_integrals_map:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.insert_into_ao_integrals_map:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">insert_into_ao_integrals_map</span><span class="p">(</span><span class="n">n_integrals</span><span class="p">,</span><span class="n">buffer_i</span><span class="p">,</span> <span class="n">buffer_values</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create new entry into AO map</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_collector()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_append()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.integrale_new:">
+<code class="descname">integrale_new:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.integrale_new:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">integrale_new</span><span class="p">(</span><span class="n">I_f</span><span class="p">,</span><span class="n">a_x</span><span class="p">,</span><span class="n">b_x</span><span class="p">,</span><span class="n">c_x</span><span class="p">,</span><span class="n">d_x</span><span class="p">,</span><span class="n">a_y</span><span class="p">,</span><span class="n">b_y</span><span class="p">,</span><span class="n">c_y</span><span class="p">,</span><span class="n">d_y</span><span class="p">,</span><span class="n">a_z</span><span class="p">,</span><span class="n">b_z</span><span class="p">,</span><span class="n">c_z</span><span class="p">,</span><span class="n">d_z</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">n_pt</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>calculate the integral of the polynom ::</dt>
+<dd>I_x1(a_x+b_x, c_x+d_x,p,q) * I_x1(a_y+b_y, c_y+d_y,p,q) * I_x1(a_z+b_z, c_z+d_z,p,q)</dd>
+</dl>
+<p>between ( 0 ; 1)</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="ao_basis.html#c.n_pt_max_integrals" title="n_pt_max_integrals"><code class="xref c c-data docutils literal notranslate"><span class="pre">n_pt_max_integrals</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+<li><a class="reference internal" href="#c.gauleg_t2" title="gauleg_t2"><code class="xref c c-data docutils literal notranslate"><span class="pre">gauleg_t2</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">eri()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">i_x1_new()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.load_ao_integrals:">
+<code class="descname">load_ao_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.load_ao_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">load_ao_integrals</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Read from disk the <abbr title="Atomic Orbital">AO</abbr> integrals</p>
+<p>Needs:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">cache_map_reallocate()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_deinit()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">map_sort()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.n_pt_sup:">
+<code class="descname">n_pt_sup:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.n_pt_sup:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/two_e_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">integer</span> <span class="n">function</span> <span class="n">n_pt_sup</span><span class="p">(</span><span class="n">a_x</span><span class="p">,</span><span class="n">b_x</span><span class="p">,</span><span class="n">c_x</span><span class="p">,</span><span class="n">d_x</span><span class="p">,</span><span class="n">a_y</span><span class="p">,</span><span class="n">b_y</span><span class="p">,</span><span class="n">c_y</span><span class="p">,</span><span class="n">d_y</span><span class="p">,</span><span class="n">a_z</span><span class="p">,</span><span class="n">b_z</span><span class="p">,</span><span class="n">c_z</span><span class="p">,</span><span class="n">d_z</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns the upper boundary of the degree of the polynomial involved in the
+bielctronic integral :</p>
+<blockquote>
+<div>Ix(a_x,b_x,c_x,d_x) * Iy(a_y,b_y,c_y,d_y) * Iz(a_z,b_z,c_z,d_z)</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.push_integrals:">
+<code class="descname">push_integrals:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.push_integrals:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/integrals_in_map_slave.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">push_integrals</span><span class="p">(</span><span class="n">zmq_socket_push</span><span class="p">,</span> <span class="n">n_integrals</span><span class="p">,</span> <span class="n">buffer_i</span><span class="p">,</span> <span class="n">buffer_value</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Push integrals in the push socket</p>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_erf_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">ao_two_e_integrals_in_map_slave()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.two_e_integrals_index:">
+<code class="descname">two_e_integrals_index:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.two_e_integrals_index:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">two_e_integrals_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">i1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="#c.ao_integrals_cache" title="ao_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_integrals_erf_cache" title="ao_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="ao_two_e_erf_ints.html#c.ao_integrals_erf_map" title="ao_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="#c.ao_integrals_map" title="ao_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_integrals_map</span></code></a></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">compute_ao_integrals_erf_jl()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">compute_ao_integrals_jl()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integral()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integral_erf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals_erf_non_zero()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_ao_two_e_integrals_non_zero()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integral_erf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_coulomb_ii()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_erf()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_erf_coulomb_ii()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_erf_exch_ii()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_erf_i1j1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_erf_ij()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_exch_ii()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_i1j1()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_mo_two_e_integrals_ij()</span></code></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">get_two_e_integral()</span></code></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_cache" title="mo_integrals_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_cache</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_integrals_erf_cache" title="mo_integrals_erf_cache"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_cache</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_erf_ints.html#c.mo_integrals_erf_map" title="mo_integrals_erf_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_erf_map</span></code></a></li>
+<li><a class="reference internal" href="mo_two_e_ints.html#c.mo_integrals_map" title="mo_integrals_map"><code class="xref c c-data docutils literal notranslate"><span class="pre">mo_integrals_map</span></code></a></li>
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index_reverse()</span></code></li>
+</ul>
+</td></tr></table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.two_e_integrals_index_reverse:">
+<code class="descname">two_e_integrals_index_reverse:</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.two_e_integrals_index_reverse:" title="Permalink to this definition">¶</a></dt>
+<dd><p>File : <code class="file docutils literal notranslate"><span class="pre">ao_two_e_ints/map_integrals.irp.f</span></code></p>
+<div class="code fortran highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subroutine</span> <span class="n">two_e_integrals_index_reverse</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">i1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Called by:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><a class="reference internal" href="hartree_fock.html#c.ao_two_e_integral_alpha" title="ao_two_e_integral_alpha"><code class="xref c c-data docutils literal notranslate"><span class="pre">ao_two_e_integral_alpha</span></code></a></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+<p>Calls:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><code class="xref c c-func docutils literal notranslate"><span class="pre">two_e_integrals_index()</span></code></li>
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td><td><ul class="simple">
+</ul>
+</td></tr></table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="aux_quantities.html" class="btn btn-neutral float-right" title="aux_quantities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ao_two_e_erf_ints.html" class="btn btn-neutral" title="ao_two_e_erf_ints" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, A. Scemama, E. Giner
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

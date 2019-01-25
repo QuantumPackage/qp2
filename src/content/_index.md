@@ -10,7 +10,7 @@ systems.
 
 
 * [Download the source code](http://github.com/QuantumPackage/qp2)
-* [Read the documentation](https://quantum-package-scemamamaster.readthedocs.io/)
+* [Read the documentation](/doc/index)
 * [Try it now in your web browser](/page/try)
 
 
