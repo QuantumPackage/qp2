@@ -1,0 +1,8 @@
+# Required for completion with zsh
+
+if [[ "$(ps -p $$ -ocomm=)" == "zsh" ]] ; then
+  autoload bashcompinit
+  bashcompinit
+fi
+
+

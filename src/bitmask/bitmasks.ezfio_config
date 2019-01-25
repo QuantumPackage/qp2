@@ -1,0 +1,8 @@
+bitmasks
+  N_int         integer
+  bit_kind      integer
+  N_mask_gen    integer
+  generators    integer*8 (bitmasks_N_int*bitmasks_bit_kind/8,2,6,bitmasks_N_mask_gen)
+  N_mask_cas    integer
+  cas           integer*8 (bitmasks_N_int*bitmasks_bit_kind/8,2,bitmasks_N_mask_cas)
+

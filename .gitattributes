@@ -1,0 +1,5 @@
+*.irp.f linguist-language=IRPF90
+*.f linguist-language=Fortran
+*.ml linguist-language=Ocaml
+*.sh linguist-language=Bash
+*.py linguist-language=Python

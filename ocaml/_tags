@@ -1,0 +1,3 @@
+true: package(core,cryptokit,zmq,str,ppx_sexp_conv,ppx_deriving,getopt)
+true: thread
+false: profile

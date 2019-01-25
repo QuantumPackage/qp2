@@ -1,0 +1,12 @@
+# Configuration for the OCaml compiler
+
+if [[ -z $OPAMROOT ]]
+then
+
+  # Comment these lines if you have a system-wide OCaml installation
+  export OPAMROOT=${QP_ROOT}/external/opam
+
+fi
+source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
+
+

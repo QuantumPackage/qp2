@@ -1,0 +1,18 @@
+[thresh_dressed_ci]
+type: Threshold
+doc: Threshold on the convergence of the dressed CI energy
+interface: ezfio,provider,ocaml
+default: 1.e-5
+
+[n_it_max_dressed_ci]
+type: Strictly_positive_int
+doc: Maximum number of dressed CI iterations
+interface: ezfio,provider,ocaml
+default: 10
+
+[dress_relative_error]
+type: Normalized_float
+doc: Stop stochastic PT2 when the relative error is smaller than PT2_relative_error
+interface: ezfio,provider,ocaml
+default: 0.001
+

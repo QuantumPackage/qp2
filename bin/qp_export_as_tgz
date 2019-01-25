@@ -1,0 +1,229 @@
+#!/bin/bash
+#
+# Creates a self-contained binary distribution in the form of a tar.gz file
+#
+# Mon Nov 26 22:57:50 CET 2018
+#
+
+function help() {
+  cat << EOF
+In some HPC facilities, the access to the internet is limited for security
+reasons.  In such an environment, the installation of QP is sometimes very
+painful because the OCaml compiler and the libraries can't be installed by a
+non-root user.
+
+This command creates a self-contained binary distribution in the form of a
+tar.gz file that can be copied on another machine.
+
+
+Usage:
+
+    $(basename $0) [-h|--help]
+
+Options:
+
+    -h    --help    Prints the help message
+
+Note:
+
+    There can be conflicts due to the version of Glibc. The machine on which |QP| is
+    compiled should be the oldest one.
+
+EOF
+  exit 0
+}
+
+function error() {
+    >&2 echo "$(basename $0): $@"
+    exit 2
+}
+
+
+while true ; do
+    case "$1" in
+        "")
+            break;;
+        -h|-help|--help)
+            help;;
+        *)
+            echo $(basename $0)": unknown option $1, try --help"
+            exit 2;;
+    esac
+    shift
+done
+
+set -x
+
+# Check the QP_ROOT directory
+if [[ -z ${QP_ROOT} ]] ; then
+  echo "The QP_ROOT environment variable is not set."
+  echo "Please reload the quantum_package.rc file."
+  exit 1
+fi
+
+cd ${QP_ROOT}
+if [[ -f quantum_package.rc \
+   && -f README.md \
+   && -d src  \
+   && -d etc  \
+   && -d man  \
+   && -d bin  \
+   && -d ocaml \
+   && -d external \
+   && -d scripts ]] ; then
+  : # OK, this is a quantum_package directory
+else
+  error "This doesn't look like a quantum_package directory"
+  exit 1
+fi
+
+
+# Build all sources
+ninja
+if [[ $? -ne 0 ]] ; then
+  error "Error building ${dir}"
+fi
+
+
+# Copy the files in the static directory
+QPACKAGE_STATIC=${QP_ROOT}/quantum_package_static
+
+function find_libs () {
+  for i in "$@" ; do
+      ldd $i
+  done \
+  | sort \
+  | grep '/' \
+  | cut --delimiter=' ' --fields=3 \
+  | uniq
+}
+
+function find_exec () {
+  find ${QP_ROOT}/$1 -perm /u+x -type f
+}
+
+
+
+echo "Creating root of static directory"
+#     ---------------------------------
+
+rm --recursive --force -- "${QPACKAGE_STATIC}"
+mkdir --parents -- ${QPACKAGE_STATIC}/{bin,etc,man,lib,extra_lib,external}
+if [[ $? -ne 0 ]] ; then
+  error "Error creating ${QPACKAGE_STATIC}/{bin,lib,etc,man,extra_lib,external}"
+  exit 1
+fi
+
+
+
+echo "Copying binary files"
+#     --------------------
+
+FORTRAN_EXEC=$(find_exec src)
+if [[ -z $FORTRAN_EXEC ]] ; then
+  error 'No Fortran binaries found.'
+  exit 1
+fi
+
+OCAML_EXEC=$(find_exec ocaml | grep .native )
+if [[ -z $OCAML_EXEC ]] ; then
+  error 'No ocaml binaries found.'
+  exit 1
+fi
+
+cp -- ${FORTRAN_EXEC} ${OCAML_EXEC} ${QPACKAGE_STATIC}/bin
+if [[ $? -ne 0 ]] ; then
+  error "Error in cp -- ${FORTRAN_EXEC} ${OCAML_EXEC} ${QPACKAGE_STATIC}/bin"
+  exit 1
+fi
+
+(
+cd ${QPACKAGE_STATIC}/bin
+  for i in *.native ; do
+    mv "$i" $(basename "$i" .native)
+  done
+)
+
+cp ${QP_ROOT}/bin/qp_* ${QPACKAGE_STATIC}/bin
+cp ${QP_ROOT}/bin/qpsh ${QPACKAGE_STATIC}/bin
+
+cp --recursive -- ${QP_ROOT}/data ${QPACKAGE_STATIC}/data
+for i in ${FORTRAN_EXEC} ; do
+  i=$(basename $i)
+  echo $i \$QP_ROOT/bin/$i
+done > ${QPACKAGE_STATIC}/data/executables
+
+mkdir --parents -- ${QPACKAGE_STATIC}/src/bitmask
+cp ${QP_ROOT}/src/Bitmask/bitmasks_module.f90 ${QPACKAGE_STATIC}/src/bitmask
+
+
+echo "Copying dynamic libraries"
+#     --------------------------
+
+MKL_LIBS=$(find_libs ${FORTRAN_EXEC} \
+           | grep libmkl \
+           | head -1)
+if [[ -n ${MKL_LIBS} ]]
+then
+  MKL_LIBS=$(dirname ${MKL_LIBS})
+  MKL_LIBS=$(ls ${MKL_LIBS}/libmkl_{def,avx,avx2}.so)
+fi
+
+ALL_LIBS=$(find_libs ${OCAML_EXEC} ${FORTRAN_EXEC})
+for i in ${ALL_LIBS} ${MKL_LIBS} ; do
+  cp -- ${i} ${QPACKAGE_STATIC}/extra_lib
+done
+
+if [[ $? -ne 0 ]] ; then
+  echo 'cp -- ${ALL_LIBS} ${MKL_LIBS} ${QPACKAGE_STATIC}/extra_lib'
+  exit 1
+fi
+
+cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*} \
+   ${QPACKAGE_STATIC}/lib/
+
+#
+echo "Copying scripts directory"
+#     -------------------------
+
+cp --recursive -- ${QP_ROOT}/scripts ${QPACKAGE_STATIC}/
+if [[ $? -ne 0 ]] ;
+then
+  error 'cp --recursive -- ${QP_ROOT}/scripts ${QPACKAGE_STATIC}/'
+  exit 1
+fi
+#
+
+echo "Copying external libraries"
+#     --------------------------
+
+cp --recursive -- ${QP_ROOT}/external/Python ${QPACKAGE_STATIC}/external/
+mkdir ${QPACKAGE_STATIC}/external/ezfio
+cp --recursive -- ${QP_ROOT}/external/ezfio/Python ${QPACKAGE_STATIC}/external/ezfio/
+cp --recursive -- ${QP_ROOT}/external/ezfio/Bash   ${QPACKAGE_STATIC}/external/ezfio/
+cp --recursive -- ${QP_ROOT}/man/*   ${QPACKAGE_STATIC}/man/
+
+
+echo "Creating quantum_package.rc"
+#     ---------------------------
+
+cp ${QP_ROOT}/quantum_package.rc ${QPACKAGE_STATIC}/
+cp ${QP_ROOT}/etc/* ${QPACKAGE_STATIC}/etc/
+cat << EOF > ${QPACKAGE_STATIC}/etc/00.qp_root.rc
+export QP_ROOT="\$( cd \$(dirname \\\${BASH_SOURCE}) ; cd .. ; pwd -P )"
+EOF
+
+
+echo "Creating the archive"
+#     --------------------
+
+tar --create --gzip --file "${QPACKAGE_STATIC}".tar.gz quantum_package_static && \
+    rm --recursive --force -- "${QPACKAGE_STATIC}"
+if [[ $? -ne 0 ]] ; then
+  error 'tar --create --gzip --file "${QPACKAGE_STATIC}".tar.gz "${QPACKAGE_STATIC}" &&
+  rm --recursive --force -- "${QPACKAGE_STATIC}"'
+  exit 1
+fi
+
+echo "Done : ${QPACKAGE_STATIC}.tar.gz"
+

@@ -1,0 +1,35 @@
+# Completion for the configrue command with possible configurations
+   
+source ${QP_ROOT}/etc/autocomplete.rc
+
+_configure_Complete()
+{
+  local cur
+
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  case "${prev}" in
+    -h|--help)
+        COMPREPLY=( $(compgen -W "" -- $cur ) )
+        return 0
+        ;;
+    -i)
+        COMPREPLY=( $(compgen -W "bats docopt ezfio f77zmq irpf90 ninja\
+              ocaml resultsFile zeromq" -- $cur ) )
+        return 0
+        ;;
+    -c)
+        COMPREPLY=( $(compgen -W "$(find . -maxdepth 2 -name *.cfg)" -- $cur ) )
+        return 0
+        ;;
+    *)
+        COMPREPLY=( $(compgen -W "-h --help -c -i" -- $cur ) )
+        return 0
+        ;;
+  esac
+}
+
+complete -F _configure_Complete configure
+
