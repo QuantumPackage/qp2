@@ -1,0 +1,306 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Usage:
+       qp_plugins list [-iuq]
+       qp_plugins download <url>
+       qp_plugins install <name>...
+       qp_plugins uninstall <name>
+       qp_plugins create -n <name> [-r <repo>] [<needed_modules>...]
+
+Options:
+    list                      List
+      -i --installed           only the installed plugins
+      -u --uninstalled         only the uninstalled plugins
+      -q --repositories        the external repositories
+
+    download <url>            Download an external repository.
+                              The URL points to a tar.gz file or a git repository:
+                              http://example.com/site/example.tar.gz
+                              git@gitlab.com:user/example_repository
+
+    install                   Install a plugin
+
+    uninstall                 Uninstall a plugin
+
+    create
+      -n --name=<name>        Create a new plugin named <name>
+      -r --repository=<repo>  Name of the repository in which to create the plugin
+
+"""
+
+import sys
+import os
+import subprocess
+
+
+try:
+    from docopt import docopt
+    from module_handler import ModuleHandler, get_dict_child
+    from module_handler import get_l_module_descendant
+    from qp_path import QP_SRC, QP_PLUGINS, QP_DATA, QP_ROOT
+except ImportError:
+    print "Please check if you have sourced the ${QP_ROOT}/quantum_package.rc"
+    print "(`source ${QP_ROOT}/quantum_package.rc`)"
+    print sys.exit(1)
+
+
+def save_new_module(path, l_child):
+    """Creates a new module"""
+
+    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
+    # N E E D E D _ C H I L D R E N _ M O D U L E S #
+    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
+
+    try:
+        os.makedirs(path)
+    except OSError:
+        print "The module ({0}) already exists...".format(path)
+        sys.exit(1)
+
+    with open(os.path.join(path, "NEED"), "w") as f:
+        f.write(" ".join(l_child))
+        f.write("\n")
+
+    # ~#~#~#~#~#~#~ #
+    # R E A D _ M E #
+    # ~#~#~#~#~#~#~ #
+
+    module_name = os.path.basename(path)
+
+    header = "{0}\n{1}\n{0}\n".format("=" * len(module_name), module_name)
+
+    with open(os.path.join(path, "README.rst"), "w") as f:
+        f.write(header + "\n")
+
+    with open(os.path.join(path, ".gitignore"), "w") as f:
+        with open(os.path.join(QP_DATA, "module_gitignore"), "r") as g:
+            data = g.read()
+        f.write(data)
+
+    with open(os.path.join(path, "%s.irp.f"%(module_name)), "w") as f:
+        f.write("program {0}".format(module_name))
+        f.write("""
+  implicit none
+  BEGIN_DOC
+! TODO : Put the documentation of the program here
+  END_DOC
+  print *, 'Hello world'
+  end
+""")
+
+def main(arguments):
+    """Main function"""
+    arguments["<name>"] = [os.path.normpath(name) for name in arguments["<name>"]]
+
+    if arguments["list"]:
+        if arguments["--repositories"]:
+            l_result = [f for f in os.listdir(QP_PLUGINS) \
+                        if f not in [".gitignore", "local"] ]
+
+            for repo in sorted(l_result):
+                print repo
+
+        else:
+            # Search in QP_PLUGINS all directories with a NEED file
+            l_tmp = [dirname for (dirname, _, filenames) in \
+                     os.walk(QP_PLUGINS, followlinks=False) \
+                     for f in filenames if f == 'NEED' and \
+                     "IRPF90_temp" not in dirname]
+
+            # Find directories which contain modules
+            l_tmp = [os.path.split(f) for f in l_tmp]
+            d_tmp = {}
+            repo_of_plugin = {}
+            for (x, y) in l_tmp:
+                d_tmp[x] = y
+                repo_of_plugin[y] = x.replace(QP_PLUGINS+'/','')
+            l_repository = d_tmp.keys()
+            m_instance = ModuleHandler(l_repository)
+            l_plugins = [module for module in m_instance.l_module]
+            l_result = l_plugins
+
+            if arguments["--installed"] or arguments["--uninstalled"]:
+                # Search in src all symbolic links that are modules
+                l_installed = [f for f in os.listdir(QP_SRC) \
+                               if (os.path.islink(os.path.join(QP_SRC, f)) \
+                               and f != ".gitignore")]
+
+            if arguments["--installed"]:
+                l_result = [f for f in l_plugins if f in l_installed]
+
+            elif arguments["--uninstalled"]:
+                l_result = [f for f in l_plugins if f not in l_installed]
+
+            for module in sorted(l_result):
+                print "%-30s %-30s"%(module, repo_of_plugin[module])
+
+    if arguments["create"]:
+        m_instance = ModuleHandler([QP_SRC])
+
+        l_children = arguments["<needed_modules>"]
+
+        name = arguments["--name"]
+
+        if arguments["--repository"]:
+            repository = arguments["--repository"]
+        else:
+            repository = "local"
+
+        path = os.path.join(QP_PLUGINS, repository, name)
+
+        print "Created plugin:"
+        print path, '\n'
+
+        for children in l_children:
+            if children not in m_instance.dict_descendant:
+                print "Error: {0} is not a valid module.".format(children)
+                sys.exit(1)
+
+        print "Needed modules:"
+        print l_children, '\n'
+
+        print "This corresponds to using the following modules:"
+        print l_children + m_instance.l_descendant_unique(l_children), '\n'
+
+        print "Which is reduced to:"
+        l_child_reduce = m_instance.l_reduce_tree(l_children)
+        print l_child_reduce, '\n'
+
+        print "Installation",
+        save_new_module(path, l_child_reduce)
+
+        print "    [ OK ]"
+        print ""
+        arguments["create"] = False
+        arguments["install"] = True
+        main(arguments)
+
+    elif arguments["download"]:
+        url = arguments["<url>"]
+        is_repo = not(url.endswith(".tar.gz") or \
+                      url.endswith(".tgz")    or \
+                      url.endswith(".zip"))
+        os.chdir(QP_PLUGINS)
+        if is_repo:
+            subprocess.check_call(["git", "clone", url])
+        else:
+            filename = url.split('/')[-1]
+
+            import requests, shutil
+            try:
+                r = requests.get(url, verify=True, stream=True)
+            except:
+                r = requests.get(url, verify=False, stream=True)
+            r.raw.decode_content = True
+            with open(filename, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+            if filename.endswith(".tar.gz") or  \
+                 filename.endswith(".tgz") or  \
+                 filename.endswith(".tar.bz2") or  \
+                 filename.endswith(".tar"):
+                subprocess.check_call(["tar", "xf", filename])
+                os.remove(filename)
+
+    elif arguments["install"]:
+
+        d_local = get_dict_child([QP_SRC])
+
+        l_tmp = [dirname for (dirname, _, filenames) in \
+                 os.walk(QP_PLUGINS, followlinks=False) \
+                 for f in filenames if f == 'NEED']
+        d_repo_of_plugin = {}
+        d_repo = {}
+        for (x, y) in [os.path.split(f) for f in l_tmp]:
+            d_repo_of_plugin[y] = x
+            d_repo[x] = None
+        l_repository = d_repo.keys()
+
+        d_plugin = get_dict_child(l_repository)
+
+        d_child = d_local.copy()
+        d_child.update(d_plugin)
+
+        normalize_case = {}
+        for name in d_local.keys() + d_plugin.keys():
+            normalize_case[name.lower()] = name
+
+        l_name = [normalize_case[name.lower()] for name in arguments["<name>"]]
+
+        for name in l_name:
+
+            if name in d_local:
+                print "{0} Is already installed".format(name)
+
+        l_module_descendant = get_l_module_descendant(d_child, l_name)
+
+        l_module_to_cp = [module for module in l_module_descendant if module not in d_local]
+
+        if l_module_to_cp:
+
+            print "Required dependencies:"
+            print l_module_to_cp
+
+            print "Installation...",
+
+            for module_to_cp in l_module_to_cp:
+                src = os.path.join(d_repo_of_plugin[module_to_cp], module_to_cp)
+                des = os.path.join(QP_SRC, module_to_cp)
+                try:
+                    os.symlink(src, des)
+                    install = os.path.join(src, "install")
+                    if os.path.isfile(install):
+                        wd = os.getcwd()
+                        os.chdir(src)
+                        subprocess.check_call([install])
+                        os.chdir(wd)
+                except OSError:
+                    print "The src directory is broken. Please remove %s" % des
+                    raise
+            subprocess.check_call(["qp_create_ninja", "update"])
+            print "[ OK ]"
+
+    elif arguments["uninstall"]:
+
+        m_instance = ModuleHandler([QP_SRC])
+        d_descendant = m_instance.dict_descendant
+
+        d_local = get_dict_child([QP_SRC])
+        l_name = arguments["<name>"]
+
+        l_failed = [name for name in l_name if name not in d_local]
+
+        if l_failed:
+            print "Plugins not installed:"
+            for name in sorted(l_failed):
+                print "%s" % name
+            sys.exit(1)
+
+        l_name_to_remove = l_name + \
+            [module for module in m_instance.l_module \
+              for name in l_name if name in d_descendant[module]]
+
+        print "Removing plugins:"
+        print l_name_to_remove
+
+        for module in set(l_name_to_remove):
+
+            subprocess.check_call(["module_handler.py", "clean", module])
+
+        for module in set(l_name_to_remove):
+
+            uninstall = os.path.join(QP_SRC, module, "uninstall")
+            if os.path.isfile(uninstall):
+                subprocess.check_call([uninstall])
+
+            try:
+                os.unlink(os.path.join(QP_SRC, module))
+            except OSError:
+                print "%s is a core module which can't be removed" % module
+
+
+if __name__ == '__main__':
+    ARG = docopt(__doc__)
+    main(ARG)
+

@@ -1,0 +1,32 @@
+# YAML 1.2
+# Metadata for citation of this software according to the CFF format (https://citation-file-format.github.io/)
+cff-version: 1.0.3
+message: If you use this software, please cite it using these metadata.
+title: Quantum Package
+doi: 10.5281/zenodo.825872
+authors:
+- given-names: Anthony
+  family-names: Scemama
+  affiliation: Laboratoire de Chimie et Physique Quantiques / CNRS
+- given-names: Yann
+  family-names: Garniron
+  affiliation: Laboratoire de Chimie et Physique Quantiques / CNRS
+- given-names: Michel
+  family-names: Caffarel
+  affiliation: Laboratoire de Chimie et Physique Quantiques / CNRS
+- given-names: Thomas
+  family-names: Applencourt
+  affiliation: Argonne National Lab
+- given-names: Kevin 
+  family-names: Gasperich
+  affiliation: Argonne National Lab
+- given-names: Anouar
+  family-names: Benali
+  affiliation: Argonne National Lab
+- given-names: Emmanuel
+  family-names: Giner
+  affiliation: Laboratoire de Chimie Theorique / CNRS
+version: '2.0'
+date-released: 2019-02-11
+repository-code: https://github.com/QuantumPackage/qp2
+license: AGPL-3.0-or-later

@@ -1,0 +1,21 @@
+# Configuration specific to the local machine
+
+# Maximum allowed memory per node
+# export QP_MAXMEM=64
+
+# Target number of threads for Davidson's algorithm (Hyperthreading is useful)
+# export QP_NTHREADS_DAVIDSON=32
+
+# Target number of threads for the computation of the PT2 (Hyperthreading is useful)
+# export QP_NTHREADS_PT2=32
+
+# Number of threads for MKL
+# exort MKL_NUM_THREADS=16
+
+# Number of threads for OpenMP
+# exort OMP_NUM_THREADS=16
+
+# Name of the network interface to be chosen
+# export QP_NIC=ib0
+
+

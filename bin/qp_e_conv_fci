@@ -1,0 +1,47 @@
+#!/bin/bash
+file=$1
+
+if [[ -z ${QP_ROOT} ]] ; then
+  >&2 echo "please source quantum_package.rc"
+  exit 1
+fi
+source ${QP_ROOT}/quantum_package.rc
+
+qp_run print_e_conv $1
+nstates=`cat ${1}/determinants/n_states`
+echo $nstates
+
+
+for i in $(seq 1 $nstates) ; do
+  out=${1}.${i}.conv
+cat << EOF > ${out}.plt
+set term pdf
+set output "$out.pdf"
+set log x
+set xlabel "Number of determinants"
+set ylabel "Total Energy (a.u.)"
+
+plot "$out" w lp title "E_{var} state $i", "$out" u 1:3 w lp title "E_{var} + PT2 state $i"
+
+EOF
+
+gnuplot ${out}.plt
+#rm ${out}.plt
+
+done
+
+for i in $(seq 2 $nstates) ; do
+  out=${1}.${i}.delta_e.conv
+cat << EOF > ${out}.plt
+set term pdf
+set output "$out.pdf"
+set log x
+set xlabel "Number of determinants"
+set ylabel "Energy difference (a.u.)"
+
+plot "$out" w lp title "Delta E_{var} state $i", "$out" u 1:3 w lp title "Delta E_{var} + PT2 state $i"
+
+EOF
+  gnuplot ${out}.plt
+# rm ${out}.plt
+done

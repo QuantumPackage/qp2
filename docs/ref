@@ -1,0 +1,24 @@
+* To reference the QP program prog, use :ref:`.prog.`
+
+* See docs/source/_static/links.rst file for many useful macros
+* option provider :option:`name_of_module provider`
+* subroutine      :c:func:`my_subroutine` 
+* module          :ref:`module`
+* provider        :c:data:`my_subroutine` 
+* qp_command      :ref:`qp_command`
+* linux command   :command:`qp_command`
+* linux command with option :command:`qp_command -o`
+* environment variable :envvar:`VARIABLE`
+* file :file:`filename`
+* for a file to be referenced, type 
+.. _myref:
+in the head of the file.
+(see https://www.sphinx-doc.org/en/1.7/markup/inline.html)
+Then, to reference for "myref" just type :ref:`myref`
+* roles like warning, note, etc : see http://www.sphinx-doc.org/en/1.6/markup/para.html
+* URL : `<https://gitlab.com/eginer/qp_plugins_eginer>`_
+  or use `IRPF90`_ and define
+  _IRPF90: http://irpf90.ups-tlse.fr
+  somewhere
+* References of published results with QP should be added into docs/source/research.bib in bibtex
+  format

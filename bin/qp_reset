@@ -1,0 +1,118 @@
+#!/bin/bash 
+#
+# Resets parts of the EZFIO directory.
+#
+# Wed Jan 16 16:50:36 CET 2019
+#
+
+# Check the QP_ROOT directory
+if [[ -z ${QP_ROOT} ]] ; then
+  echo "The QP_ROOT environment variable is not set."
+  echo "Please reload the quantum_package.rc file."
+  exit 1
+fi
+source ${QP_ROOT}/quantum_package.rc
+
+TEMP=$(getopt -o adhm -l all,dets,help,mos -n $0 -- "$@") || exit 1
+eval set -- "$TEMP"
+
+function help() {
+  cat << EOF
+This command resets parts of the EZFIO directory.
+
+Usage:
+
+    $(basename $0) [OPTIONS] EZFIO_DIR
+
+Arguments:
+
+    EZFIO_DIR       EZFIO directory
+
+Options:
+
+    -a    --all     Reset to the state after qp_create
+    -d    --dets    Deletes the determinants and CI coefficients
+    -h    --help    Prints the help message
+    -m    --mos     Deletes the MOs
+
+Examples:
+
+  To delete the complete set of determinants and CI coefficients:
+
+    $(basename $0) --dets h2o.ezfio 
+
+  To delete the molecular orbitals (implies -dets):
+
+    $(basename $0) --mos h2o.ezfio 
+    
+EOF
+  exit 0
+}
+
+function error() {
+    >&2 echo "$(basename $0): $@"
+    exit 2
+}
+
+
+dets=0
+mos=0
+while true ; do
+    case "$1" in
+        -a|--all)
+            dets=1
+            mos=1
+        ;;
+        -d|--dets)
+            dets=1
+        ;;
+        -m|--mos)
+            mos=1
+        ;;
+        -h|-help|--help)
+            help
+            exit 0;;
+        --) shift ; break ;;
+        *)
+            error $(basename $0)": unknown option $1, try --help"
+            exit 2;;
+    esac
+    shift
+done
+
+if [[ -z $1 ]] ; then
+   help 
+   error "EZFIO directory not specified"
+fi
+
+if [[ ! -d $1 ]] ; then
+   error "EZFIO directory not found"
+fi
+
+ezfio=$1
+qp set_file $ezfio
+
+if [[ $dets -eq 1 ]] ; then
+  rm --force -- ${ezfio}/determinants/n_det
+  rm --force -- ${ezfio}/determinants/psi_{det,coef}.gz
+fi
+
+if [[ $mos -eq 1 ]] ; then
+  if [[ -f ${ezfio}/mo_basis/mo_class.gz ]] && [[ $(qp get mo_basis mo_num) -ne \
+        $(zcat ${ezfio}/mo_basis/mo_class.gz |grep Active | wc -l) ]] ; then
+      echo "Warning: You will need to re-define the MO classes"
+  fi
+  rm --recursive --force -- ${ezfio}/mo_basis
+  rm --recursive --force -- ${ezfio}/work/mo_ints_*
+fi
+
+qp_edit --check ${ezfio}
+
+if [[ $mos -eq 1 ]] ; then
+  qp  set  mo_two_e_ints  io_mo_two_e_integrals    None
+  qp  set  mo_one_e_ints  io_mo_integrals_e_n      None
+  qp  set  mo_one_e_ints  io_mo_integrals_kinetic  None
+  qp  set  mo_one_e_ints  io_mo_integrals_pseudo   None
+  qp  set  mo_one_e_ints  io_mo_one_e_integrals    None
+fi
+

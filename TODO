@@ -1,0 +1,60 @@
+# qpsh
+ 
+* Faire que le slave de Hartree-fock est le calcul des integrales AO en parallele
+
+# Web/doc
+
+* Creer une page web pas trop degueu et la mettre ici : http://lcpq.github.io/quantum_package
+
+* Creer une page avec la liste de tous les exectuables 
+
+
+# Exterieur
+
+* Molden format : http://cheminf.cmbi.ru.nl/molden/molden_format.html : read+write. Thomas est dessus
+* Un module pour lire les integrales Moleculaires depuis un FCIDUMP
+* Un module pour lire des integrales Atomiques (voir module de Mimi pour lire les AO Slater)
+* Format Fchk (gaussian)
+
+# Tests:
+
+* Extrapolation
+* DFT
+
+
+# User doc:
+
+  * Videos: 
+    +) RHF
+  * Renvoyer a la doc des modules : c'est pour les programmeurs au depart!
+  * Mettre le mp2 comme exercice
+
+  * Interfaces : molden/fcidump
+  * Natural orbitals
+  * Parameters for Hartree-Fock
+  * Parameters for Davidson
+  * Running in parallel
+
+# Programmers doc:
+
+  * Example  : Simple Hartree-Fock program from scratch
+  * Examples : subroutine example_module
+
+# Config file for Cray
+
+# EZFIO sans fork
+
+Refaire les benchmarks
+
+# Documentation de qpsh
+
+# Documentation de /etc
+# Extrapolation qui prend aussi en compe la variance? a tester
+Parler dans le papier de rPT2
+
+# Toto
+Re-design de qp command
+
+Doc: plugins et qp_plugins
+
+Ajouter les symetries dans devel

@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Removes white spaces at the end of lines.
+#
+# Usage:
+#
+#  remove_trailing_spaces FILE
+#
+
+if [[ -n $1 ]] ; then
+  exec sed --in-place 's|  *$||' $1
+else
+  >&2 echo "Usage: $0 FILE"
+  exit 1
+fi
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export QP_ROOT=$(dirname $0)/..
+
+bash --init-file <(cat << EOF
+    [[ -f /etc/bashrc ]] && source /etc/bashrc 
+    [[ -f ${HOME}/.bashrc ]] && source ${HOME}/.bashrc
+    source ${QP_ROOT}/quantum_package.rc
+    qp prompt
+EOF
+) -i $@
+
+
+
+

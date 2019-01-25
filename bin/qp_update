@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Updates the current version of QP
+#
+# Mon Jan 14 21:51:08 CET 2019
+#
+
+function help() {
+  cat << EOF
+Updates the current version of QP.
+
+Usage:
+
+    $(basename $0) [-h|--help]
+
+Options:
+
+    -h    --help    Prints the help message
+
+EOF
+  exit 0
+}
+
+function error() {
+    >&2 echo "$(basename $0): $@"
+    exit 2
+}
+
+
+TEMP=`getopt -o h -l help -n $0 -- "$@"` || exit 1
+
+while true ; do
+    case "$1" in
+        ""|--) shift ; break ;;
+        -h|-help|--help)
+            help
+            shift
+            exit 0;;
+        *)
+            echo $(basename $0)": unknown option $1, try --help"
+            exit 2;;
+    esac
+done
+
+# Check the QP_ROOT directory
+if [[ -z ${QP_ROOT} ]] ; then
+  echo "The QP_ROOT environment variable is not set."
+  echo "Please reload the quantum_package.rc file."
+  exit 1
+fi
+
+read -r -p "Are you sure you want to update QP? [y/N] " response
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        :
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+cd ${QP_ROOT}
+ninja clean
+git pull origin master
+ninja
+
+

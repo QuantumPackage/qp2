@@ -1,0 +1,100 @@
+#!/bin/bash 
+#
+# Stops a running calculation in a clean way.
+#
+# Fri Jan 18 16:58:11 CET 2019
+#
+
+# Check the QP_ROOT directory
+if [[ -z ${QP_ROOT} ]] ; then
+  echo "The QP_ROOT environment variable is not set."
+  echo "Please reload the quantum_package.rc file."
+  exit 1
+fi
+
+TEMP=$(getopt -o cqhs -l soft,cancel,query,help -n $0 -- "$@") || exit 1
+eval set -- "$TEMP"
+
+function help() {
+  cat << EOF
+Stops a running QP calculation.
+
+Usage:
+
+    $(basename $0) [-chqs] EZFIO_DIR
+
+Arguments:
+
+    EZFIO_DIR       EZFIO directory
+
+Options:
+
+  -c  --cancel   Cancel qp_stop order
+  -h  --help     Print the help message
+  -q  --query    Ask if EZFIO_DIR was requested to stop
+  -s  --soft     Terminate the current step, but don't kill
+                 the program
+
+EOF
+  exit 0
+}
+
+function error() {
+    >&2 echo "$(basename $0): $@"
+    exit 2
+}
+
+
+while true ; do
+    case "$1" in
+        -h|-help|--help)
+            help
+            exit 0;;
+        -c|--cancel)
+            c_opt=1
+            ;;
+        -q|--query)
+            q_opt=1
+            ;;
+        -s|--soft)
+            s_opt=1
+            ;;
+        --) shift ; break ;;
+        *)
+            error $(basename $0)": unknown option $1, try --help"
+            exit 2;;
+    esac
+    shift
+done
+
+if [[ -z $1 ]] ; then
+   help 
+   error "EZFIO directory not specified"
+fi
+
+if [[ ! -d $1 ]] ; then
+   error "EZFIO directory not found"
+fi
+
+ezfio=$1
+if [[ -z $s_opt ]] ; then
+  qpstopfile=${ezfio}/work/qpkill 
+else
+  qpstopfile=${ezfio}/work/qpstop 
+fi
+
+if [[ -n ${c_opt} ]] ; then
+  rm --force  ${qpstopfile}
+elif [[ -n ${q_opt} ]] ; then
+  if [[ -f ${qpstopfile} ]] ; then
+    echo "${ezfio} was requested to stop"
+    exit 0
+  else 
+    echo "${ezfio} was not requested to stop"
+    exit 1
+  fi
+else
+  echo "...${ezfio} is requested to stop..."
+  touch ${qpstopfile}
+fi
+
