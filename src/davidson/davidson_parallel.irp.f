@@ -37,43 +37,46 @@ subroutine davidson_run_slave(thread,iproc)
   integer, external              :: connect_to_taskserver
   integer, external              :: zmq_get_N_states_diag
 
-
+  PROVIDE mpi_rank
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
+  zmq_socket_push      = new_zmq_push_socket(thread)
+
 
   integer :: ierr, doexit
-  doexit = 0
-  if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-    call sleep(1)
+  do
+    doexit = 0
     if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-      doexit=1
+      call sleep( int(1.5+float(mpi_rank)/10.) )
+      if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+        doexit=1
+      endif
     endif
-  endif
 
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: sendbuf, recvbuf
-    sendbuf = doexit
-    recvbuf = doexit
-    call MPI_ALLREDUCE(sendbuf, recvbuf, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      print *,  irp_here//': Unable to reduce '
-      stop -1
+    IRP_IF MPI
+      include 'mpif.h'
+      integer :: sendbuf, recvbuf
+      sendbuf = doexit
+      recvbuf = doexit
+      call MPI_ALLREDUCE(sendbuf, recvbuf, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+      if (ierr /= MPI_SUCCESS) then
+        print *,  irp_here//': Unable to reduce '
+        stop -1
+      endif
+      doexit = recvbuf
+    IRP_ENDIF
+
+    if (doexit == 0) then
+        exit
+    else
+        print *,  irp_here, ': retrying connection (', doexit, ')'
     endif
-    doexit = recvbuf
-  IRP_ENDIF
-
-  if (doexit > 0) then
-      call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
-      return
-  endif
-
-  zmq_socket_push      = new_zmq_push_socket(thread)
+  enddo
 
   do
     if (zmq_get_N_states_diag(zmq_to_qp_run_socket, 1) /= -1) then
       exit
     endif
-    print *,  'Waiting for N_states_diag in ', irp_here
+    print *,  irp_here, ': Waiting for N_states_diag'
     call sleep(1)
   enddo
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
@@ -82,6 +85,7 @@ subroutine davidson_run_slave(thread,iproc)
   if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) == -1) then
     call sleep(1)
     if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) == -1) then
+      print *,  irp_here, ': disconnect failed'
       continue
     endif
   endif
