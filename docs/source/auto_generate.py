@@ -59,7 +59,8 @@ def generate_modules(abs_module, entities):
         try:
             b = subroutines[b]
         except KeyError:
-            print("Error: The program %s in %s does not have the same name as the file"%
+            print("Error: The program %s in %s does not have the same name as the file, \
+or you did not run ninja at the root."%
                 (b, abs_module))
             sys.exit(1)
         rst += [" * :ref:`%s`"%(b["name"])]

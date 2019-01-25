@@ -529,6 +529,11 @@ Subroutines / functions
 
     File : :file:`mo_one_e_ints/orthonormalize.irp.f`
 
+    .. code:: fortran
+
+        subroutine orthonormalize_mos
+
+
 
     Needs:
 

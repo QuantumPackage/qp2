@@ -66,7 +66,11 @@ function qp()
            >&2 echo "qp: ${2} not found"
         fi;;
 
-    "has"|"set"|"get"|"unset_file")
+    "unset_file")
+        unset EZFIO_FILE
+      ;;
+
+    "has"|"set"|"get")
         ezfio "$@"
       ;;
 
@@ -209,8 +213,8 @@ _qp_Complete()
             ;;
         esac;;
       *)
-        COMPREPLY=( $(compgen -W 'plugins set_file\
-                                   man \
+        COMPREPLY=( $(compgen -W 'plugins set_file \
+                                   unset_file man \
                                    create_ezfio \
                                    convert_output_to_ezfio \
                                    -h update' -- $cur ) )
@@ -259,7 +263,7 @@ _qp_Complete()
         return 0
         ;;
       *)
-        COMPREPLY+=( $(compgen -W 'has get set unset_file edit \
+        COMPREPLY+=( $(compgen -W 'has get set edit \
                                   run srun mpirun set_frozen_core \
                                   reset set_mo_class ' \
                                   -- $cur ) )

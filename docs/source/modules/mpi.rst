@@ -71,7 +71,6 @@ Providers
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`cas_bitmask`
        * :c:data:`ci_energy`
-       * :c:data:`core_bitmask`
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`data_energy_proj`
        * :c:data:`data_energy_var`
@@ -91,7 +90,6 @@ Providers
        * :c:data:`frozen_orb_scf`
        * :c:data:`generators_bitmask`
        * :c:data:`generators_bitmask_restart`
-       * :c:data:`inact_bitmask`
        * :c:data:`io_ao_integrals_e_n`
        * :c:data:`io_ao_integrals_kinetic`
        * :c:data:`io_ao_integrals_overlap`
@@ -116,8 +114,8 @@ Providers
        * :c:data:`mo_occ`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mu_erf`
-       * :c:data:`n_act_orb`
        * :c:data:`n_cas_bitmask`
+       * :c:data:`n_core_orb`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_iterations`

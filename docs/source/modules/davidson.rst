@@ -50,9 +50,9 @@ EZFIO parameters
  
 .. option:: disk_based_davidson
  
-    If |true|, disk space is used to store the vectors
+    If |true|, a memory-mapped file may be used to store the W and S2 vectors if not enough RAM is available
  
-    Default: False
+    Default: True
  
 .. option:: distributed_davidson
  
@@ -79,51 +79,7 @@ Providers
 
         double precision, allocatable	:: ci_electronic_energy	(N_states_diag)
         double precision, allocatable	:: ci_eigenvectors	(N_det,N_states_diag)
-        double precision, allocatable	:: ci_eigenvectors_s2	(N_states_diag)
-
-
-    Eigenvectors/values of the |CI| matrix
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`diag_algorithm`
-       * :c:data:`dressing_column_h`
-       * :c:data:`expected_s2`
-       * :c:data:`h_matrix_all_dets`
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`n_states_diag`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-       * :c:data:`s2_eig`
-       * :c:data:`s2_matrix_all_dets`
-       * :c:data:`s_z`
-       * :c:data:`threshold_davidson`
-
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ci_energy`
-
- 
-.. c:var:: ci_eigenvectors_s2
-
-
-    File : :file:`davidson/diagonalize_ci.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: ci_electronic_energy	(N_states_diag)
-        double precision, allocatable	:: ci_eigenvectors	(N_det,N_states_diag)
-        double precision, allocatable	:: ci_eigenvectors_s2	(N_states_diag)
+        double precision, allocatable	:: ci_s2	(N_states_diag)
 
 
     Eigenvectors/values of the |CI| matrix
@@ -167,7 +123,7 @@ Providers
 
         double precision, allocatable	:: ci_electronic_energy	(N_states_diag)
         double precision, allocatable	:: ci_eigenvectors	(N_det,N_states_diag)
-        double precision, allocatable	:: ci_eigenvectors_s2	(N_states_diag)
+        double precision, allocatable	:: ci_s2	(N_states_diag)
 
 
     Eigenvectors/values of the |CI| matrix
@@ -227,6 +183,50 @@ Providers
        * :c:data:`nuclear_repulsion`
        * :c:data:`output_wall_time_0`
 
+
+ 
+.. c:var:: ci_s2
+
+
+    File : :file:`davidson/diagonalize_ci.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ci_electronic_energy	(N_states_diag)
+        double precision, allocatable	:: ci_eigenvectors	(N_det,N_states_diag)
+        double precision, allocatable	:: ci_s2	(N_states_diag)
+
+
+    Eigenvectors/values of the |CI| matrix
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`diag_algorithm`
+       * :c:data:`dressing_column_h`
+       * :c:data:`expected_s2`
+       * :c:data:`h_matrix_all_dets`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`n_states_diag`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`s2_eig`
+       * :c:data:`s2_matrix_all_dets`
+       * :c:data:`s_z`
+       * :c:data:`threshold_davidson`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ci_energy`
 
  
 .. c:var:: davidson_criterion
@@ -535,7 +535,7 @@ Subroutines / functions
 
     .. code:: fortran
 
-        subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag,Nint,dressing_state,converged)
+        subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
 
 
     Davidson diagonalization with specific diagonal elements of the H matrix
@@ -555,7 +555,7 @@ Subroutines / functions
     
     N_st : Number of eigenstates
     
-    N_st_diag : Number of states in which H is diagonalized. Assumed > sze
+    N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
     
     Initial guess vectors are not necessarily orthonormal
 
@@ -564,26 +564,29 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`davidson_sze_max`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`psi_coef`
        * :c:data:`dressed_column_idx`
        * :c:data:`expected_s2`
-       * :c:data:`distributed_davidson`
        * :c:data:`s_z`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`qp_max_mem`
-       * :c:data:`psi_bilinear_matrix_order_reverse`
-       * :c:data:`nuclear_repulsion`
        * :c:data:`n_det`
-       * :c:data:`nthreads_davidson`
        * :c:data:`dressing_column_h`
-       * :c:data:`only_expected_s2`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`n_int`
-       * :c:data:`nproc`
+       * :c:data:`ezfio_work_dir`
+       * :c:data:`davidson_sze_max`
        * :c:data:`state_following`
        * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_coef`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`nproc`
+       * :c:data:`qp_max_mem`
+       * :c:data:`disk_based_davidson`
        * :c:data:`s2_eig`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`only_expected_s2`
+       * :c:data:`distributed_davidson`
+       * :c:data:`n_states`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -597,6 +600,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`c_f_pointer`
        * :c:func:`check_mem`
        * :c:func:`cpu_time`
        * :c:func:`davidson_converged`
@@ -605,10 +609,13 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp`
        * :c:func:`h_s2_u_0_nstates_zmq`
        * :c:func:`lapack_diag`
+       * :c:func:`mmap`
+       * :c:func:`munmap`
        * :c:func:`normalize`
        * :c:func:`ortho_qr`
        * :c:func:`random_number`
        * :c:func:`resident_memory`
+       * :c:func:`sgemm`
        * :c:func:`wall_time`
        * :c:func:`write_double`
        * :c:func:`write_int`
@@ -619,6 +626,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
 
  
@@ -674,6 +682,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
 
  
@@ -769,6 +778,7 @@ Subroutines / functions
        * :c:func:`davidson_slave_work`
        * :c:func:`end_zmq_push_socket`
        * :c:func:`end_zmq_to_qp_run_socket`
+       * :c:func:`sleep`
 
  
 .. c:function:: davidson_slave_inproc:
@@ -872,6 +882,11 @@ Subroutines / functions
 
     File : :file:`davidson/diagonalize_ci.irp.f`
 
+    .. code:: fortran
+
+        subroutine diagonalize_CI
+
+
     Replace the coefficients of the |CI| states by the coefficients of the
     eigenstates of the |CI| matrix.
 
@@ -885,7 +900,6 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`n_det`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`psi_energy`
        * :c:data:`ci_energy`
        * :c:data:`ci_electronic_energy`
 
@@ -905,10 +919,9 @@ Subroutines / functions
 
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
+       * :c:data:`ci_electronic_energy`
        * :c:data:`psi_coef`
-       * :c:data:`psi_energy`
 
  
 .. c:function:: h_s2_u_0_nstates_openmp:
@@ -1314,6 +1327,13 @@ Subroutines / functions
        * :c:func:`new_parallel_job`
        * :c:func:`omp_set_nested`
 
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states_diag`
+
  
 .. c:function:: h_s2_u_0_two_e_nstates_openmp:
 
@@ -1689,6 +1709,13 @@ Subroutines / functions
 
        * :c:func:`h_s2_u_0_nstates_openmp`
        * :c:func:`h_s2_u_0_nstates_zmq`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states_diag`
 
  
 .. c:function:: u_0_h_u_0_two_e:

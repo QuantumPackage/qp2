@@ -138,6 +138,7 @@ Providers
        * :c:data:`pt2_iterations`
        * :c:data:`pt2_max`
        * :c:data:`pt2_relative_error`
+       * :c:data:`qp_stop_filename`
        * :c:data:`read_wf`
        * :c:data:`s2_eig`
        * :c:data:`scf_algorithm`
@@ -168,6 +169,20 @@ Providers
        :columns: 3
 
        * :c:data:`ezfio_filename`
+
+
+ 
+.. c:var:: file_lock
+
+
+    File : :file:`ezfio_files/lock.irp.f`
+
+    .. code:: fortran
+
+        integer(omp_lock_kind)	:: file_lock	
+
+
+    OpenMP Lock for I/O
 
 
  
@@ -389,6 +404,75 @@ Providers
        * :c:data:`used_weight`
 
  
+.. c:var:: qp_kill_filename
+
+
+    File : :file:`ezfio_files/qp_stop.irp.f`
+
+    .. code:: fortran
+
+        character*(128)	:: qp_stop_filename	
+        character*(128)	:: qp_kill_filename	
+        integer	:: qp_stop_variable	
+
+
+    Name of the file to check for qp stop
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+
+
+ 
+.. c:var:: qp_stop_filename
+
+
+    File : :file:`ezfio_files/qp_stop.irp.f`
+
+    .. code:: fortran
+
+        character*(128)	:: qp_stop_filename	
+        character*(128)	:: qp_kill_filename	
+        integer	:: qp_stop_variable	
+
+
+    Name of the file to check for qp stop
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+
+
+ 
+.. c:var:: qp_stop_variable
+
+
+    File : :file:`ezfio_files/qp_stop.irp.f`
+
+    .. code:: fortran
+
+        character*(128)	:: qp_stop_filename	
+        character*(128)	:: qp_kill_filename	
+        integer	:: qp_stop_variable	
+
+
+    Name of the file to check for qp stop
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+
+
+ 
  
 Subroutines / functions 
 ----------------------- 
@@ -414,6 +498,26 @@ Subroutines / functions
        'a' : APPEND, FORMATTED
        'x' : READ/WRITE, FORMATTED
     
+
+ 
+.. c:function:: qp_stop:
+
+
+    File : :file:`ezfio_files/qp_stop.irp.f`
+
+    .. code:: fortran
+
+        logical function qp_stop()
+
+
+    Checks if the qp_stop command was invoked for the clean termination of the program
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`qp_stop_filename`
 
  
 .. c:function:: write_bool:
@@ -498,13 +602,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
        * :c:func:`davidson_diag_hjj_sjj`
-       * :c:data:`inact_bitmask`
        * :c:func:`make_s2_eigenfunction`
        * :c:data:`mo_num`
-       * :c:data:`n_act_orb`
        * :c:data:`n_cas_bitmask`
+       * :c:data:`n_core_orb`
        * :c:data:`n_det`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`

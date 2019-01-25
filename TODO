@@ -1,10 +1,5 @@
 # qpsh
  
-* reconnaitre les executables en vert en mode qpsh
-* qp set_file ls: cannot access '*/': No such file or directory
-Problem with EMSL
-
-
 * Faire que le slave de Hartree-fock est le calcul des integrales AO en parallele
 
 # Web/doc
@@ -60,6 +55,6 @@ Parler dans le papier de rPT2
 # Toto
 Re-design de qp command
 
-S^2 en simple precision dans davidson?
-
 Doc: plugins et qp_plugins
+
+Ajouter les symetries dans devel

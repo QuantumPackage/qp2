@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "QP_EXPORT_AS_TGZ" "1" "Jan 25, 2019" "2.0" "Quantum Package"
+.TH "QP_STOP" "1" "Jan 25, 2019" "2.0" "Quantum Package"
 .SH NAME
-qp_export_as_tgz \-  | Quantum Package >
+qp_stop \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -31,36 +31,31 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
 .sp
-In some HPC facilities, the access to the internet is limited for
-security reasons. In such an environment, the installation of \fIQuantum Package\fP is
-sometimes very painful because the OCaml compiler and the libraries
-can’t be installed by a non\-root user.
+Requests for a clean termination of the program.
 .sp
-This command creates a self\-contained binary distribution in the form of
-a \fItar.gz\fP file that can be copied on another machine.
+This will have the effect to exit the Davidson diagonalization, the
+SCF procedure or the determinant selection to save the current wave
+function and exit the program.
 .SH USAGE
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-qp_export_as_tgz [\-h|\-\-help]
+qp_stop [\-chq] EZFIO_DIR
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-h, \-\-help
-Prints the help message
+.B \-c, \-\-cancel
+Cancel the qp_stop order.
 .UNINDENT
-.sp
-\fBNOTE:\fP
 .INDENT 0.0
-.INDENT 3.5
-There can be conflicts due to the version of glibc. The machine on which \fIQuantum Package\fP is
-compiled should be the oldest one.
-.UNINDENT
+.TP
+.B \-q, \-\-query
+Ask if \fBEZFIO_DIR\fP was requested to stop.
 .UNINDENT
 .SH AUTHOR
 A. Scemama, E. Giner

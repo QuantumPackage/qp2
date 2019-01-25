@@ -158,6 +158,28 @@ Providers
        * :c:data:`pt2_e0_denominator`
 
  
+.. c:var:: nthreads_pt2
+
+
+    File : :file:`cipsi/environment.irp.f`
+
+    .. code:: fortran
+
+        integer	:: nthreads_pt2	
+
+
+    Number of threads for Davidson
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mpi_master`
+       * :c:data:`nproc`
+
+
+ 
 .. c:function:: pt2_collector:
 
 
@@ -285,8 +307,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
        * :c:data:`elec_num`
+       * :c:data:`n_core_orb`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
        * :c:data:`n_states`
@@ -429,8 +451,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
        * :c:data:`elec_num`
+       * :c:data:`n_core_orb`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
        * :c:data:`n_states`
@@ -811,6 +833,7 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`n_int`
        * :c:data:`psi_det_hii`
+       * :c:data:`do_only_1h1p`
        * :c:data:`h0_type`
        * :c:data:`psi_det_generators`
 
@@ -1097,6 +1120,11 @@ Subroutines / functions
 
     File : :file:`cipsi/slave_cipsi.irp.f`
 
+    .. code:: fortran
+
+        subroutine provide_everything
+
+
 
     Needs:
 
@@ -1354,6 +1382,11 @@ Subroutines / functions
 
     File : :file:`cipsi/cipsi.irp.f`
 
+    .. code:: fortran
+
+        subroutine run_cipsi
+
+
     Selected Full Configuration Interaction with deterministic selection and
     stochastic PT2.
 
@@ -1415,8 +1448,8 @@ Subroutines / functions
 
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
+       * :c:data:`ci_electronic_energy`
        * :c:data:`n_det`
        * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
@@ -1425,7 +1458,6 @@ Subroutines / functions
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_energy`
        * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
@@ -1539,6 +1571,11 @@ Subroutines / functions
 
     File : :file:`cipsi/slave_cipsi.irp.f`
 
+    .. code:: fortran
+
+        subroutine run_slave_cipsi
+
+
     Helper program for distributed parallelism
 
     Needs:
@@ -1573,8 +1610,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`distributed_davidson`
-       * :c:data:`psi_energy`
-       * :c:data:`psi_energy`
+       * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`read_wf`
        * :c:data:`state_average_weight`
@@ -1585,6 +1621,11 @@ Subroutines / functions
 
 
     File : :file:`cipsi/slave_cipsi.irp.f`
+
+    .. code:: fortran
+
+        subroutine run_slave_main
+
 
 
     Needs:
@@ -1600,15 +1641,13 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`n_states`
        * :c:data:`n_det`
-       * :c:data:`threshold_generators`
        * :c:data:`pt2_e0_denominator`
        * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
-       * :c:data:`psi_energy`
        * :c:data:`psi_det`
        * :c:data:`n_states_diag`
        * :c:data:`zmq_context`
-       * :c:data:`psi_energy`
+       * :c:data:`threshold_generators`
 
     Called by:
 
@@ -1637,8 +1676,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_energy`
-       * :c:data:`psi_energy`
+       * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
@@ -1648,6 +1686,11 @@ Subroutines / functions
 
 
     File : :file:`cipsi/stochastic_cipsi.irp.f`
+
+    .. code:: fortran
+
+        subroutine run_stochastic_cipsi
+
 
     Selected Full Configuration Interaction with Stochastic selection and PT2.
 
@@ -1708,8 +1751,8 @@ Subroutines / functions
 
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
+       * :c:data:`ci_electronic_energy`
        * :c:data:`n_det`
        * :c:data:`psi_occ_pattern`
        * :c:data:`c0_weight`
@@ -1718,7 +1761,6 @@ Subroutines / functions
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
-       * :c:data:`psi_energy`
        * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
@@ -1790,12 +1832,13 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`elec_alpha_num`
        * :c:data:`n_det_selectors`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted`
@@ -2061,11 +2104,11 @@ Subroutines / functions
        * :c:data:`psi_selectors`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
+       * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_n_teeth`
        * :c:data:`psi_selectors_coef_transp`
        * :c:data:`n_det`
        * :c:data:`s2_eig`
-       * :c:data:`n_det_selectors`
        * :c:data:`pt2_j`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`psi_bilinear_matrix_transp_values`
@@ -2074,7 +2117,7 @@ Subroutines / functions
        * :c:data:`nthreads_pt2`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`mo_one_e_integrals`
-       * :c:data:`pt2_e0_denominator`
+       * :c:data:`elec_alpha_num`
        * :c:data:`nproc`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`threshold_generators`

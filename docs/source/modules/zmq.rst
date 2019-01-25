@@ -868,6 +868,11 @@ Subroutines / functions
 
     File : :file:`zmq/utils.irp.f`
 
+    .. code:: fortran
+
+        subroutine reset_zmq_addresses
+
+
     Socket which pulls the results (2)
 
     Needs:
@@ -890,6 +895,11 @@ Subroutines / functions
 
 
     File : :file:`zmq/utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine switch_qp_run_to_master
+
 
     Address of the master qp_run socket
     Example : tcp://130.120.229.139:12345

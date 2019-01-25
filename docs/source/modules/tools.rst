@@ -34,6 +34,11 @@ Subroutines / functions
 
     File : :file:`write_integrals_erf.irp.f`
 
+    .. code:: fortran
+
+        subroutine routine
+
+
 
     Called by:
 
@@ -57,6 +62,11 @@ Subroutines / functions
 
 
     File : :file:`print_e_conv.irp.f`
+
+    .. code:: fortran
+
+        subroutine routine_e_conv
+
 
     routine called by :c:func:`print_e_conv`
 
@@ -90,6 +100,11 @@ Subroutines / functions
 
 
     File : :file:`save_one_e_dm.irp.f`
+
+    .. code:: fortran
+
+        subroutine routine_save_one_e_dm
+
 
     routine called by :c:func:`save_one_e_dm`
 

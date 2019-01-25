@@ -154,10 +154,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
+       * :c:data:`n_core_orb`
        * :c:data:`nuclear_repulsion`
 
 
@@ -179,15 +179,13 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
 
 
  
@@ -487,7 +485,7 @@ Providers
        * :c:data:`core_inact_act_bitmask_4`
        * :c:data:`ezfio_filename`
        * :c:data:`full_ijkl_bitmask_4`
-       * :c:data:`inact_bitmask`
+       * :c:data:`list_inact`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
@@ -723,11 +721,11 @@ Providers
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`inact_bitmask`
        * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
 
 
  
@@ -760,11 +758,11 @@ Providers
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`inact_bitmask`
        * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
 
 
  
@@ -797,11 +795,11 @@ Providers
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`inact_bitmask`
        * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
 
 
  
@@ -956,6 +954,11 @@ Subroutines / functions
 
 
     File : :file:`mo_two_e_ints/mo_bi_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine clear_mo_map
+
 
     Frees the memory of the MO map
 

@@ -393,41 +393,6 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
 
  
-.. c:function:: perturb_buffer_by_mono_h_core:
-
-
-    File : :file:`perturbation/perturbation.irp.f_shell_13`
-
-    .. code:: fortran
-
-        subroutine perturb_buffer_by_mono_h_core(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
-
-
-     Applly pertubration ``h_core`` to the buffer of determinants generated in the H_apply
-    routine.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
-       * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_minilist`
-       * :c:func:`create_minilist_find_previous`
-       * :c:func:`pt2_h_core`
-
- 
 .. c:function:: perturb_buffer_by_mono_moller_plesset:
 
 
@@ -461,41 +426,6 @@ Subroutines / functions
        * :c:func:`create_minilist`
        * :c:func:`create_minilist_find_previous`
        * :c:func:`pt2_moller_plesset`
-
- 
-.. c:function:: perturb_buffer_by_mono_moller_plesset_general:
-
-
-    File : :file:`perturbation/perturbation.irp.f_shell_13`
-
-    .. code:: fortran
-
-        subroutine perturb_buffer_by_mono_moller_plesset_general(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
-
-
-     Applly pertubration ``moller_plesset_general`` to the buffer of determinants generated in the H_apply
-    routine.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
-       * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det_generators`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_minilist`
-       * :c:func:`create_minilist_find_previous`
-       * :c:func:`pt2_moller_plesset_general`
 
  
 .. c:function:: perturb_buffer_by_mono_qdpt:
@@ -677,42 +607,6 @@ Subroutines / functions
        * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag`
 
  
-.. c:function:: perturb_buffer_h_core:
-
-
-    File : :file:`perturbation/perturbation.irp.f_shell_13`
-
-    .. code:: fortran
-
-        subroutine perturb_buffer_h_core(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
-
-
-     Applly pertubration ``h_core`` to the buffer of determinants generated in the H_apply
-    routine.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
-       * :c:data:`mo_num`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_microlist`
-       * :c:func:`create_minilist`
-       * :c:func:`create_minilist_find_previous`
-       * :c:func:`getmobiles`
-       * :c:func:`pt2_h_core`
-
- 
 .. c:function:: perturb_buffer_moller_plesset:
 
 
@@ -747,42 +641,6 @@ Subroutines / functions
        * :c:func:`create_minilist_find_previous`
        * :c:func:`getmobiles`
        * :c:func:`pt2_moller_plesset`
-
- 
-.. c:function:: perturb_buffer_moller_plesset_general:
-
-
-    File : :file:`perturbation/perturbation.irp.f_shell_13`
-
-    .. code:: fortran
-
-        subroutine perturb_buffer_moller_plesset_general(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
-
-
-     Applly pertubration ``moller_plesset_general`` to the buffer of determinants generated in the H_apply
-    routine.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
-       * :c:data:`mo_num`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_microlist`
-       * :c:func:`create_minilist`
-       * :c:func:`create_minilist_find_previous`
-       * :c:func:`getmobiles`
-       * :c:func:`pt2_moller_plesset_general`
 
  
 .. c:function:: perturb_buffer_qdpt:
@@ -824,7 +682,7 @@ Subroutines / functions
 .. c:function:: pt2_dummy:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -863,7 +721,7 @@ Subroutines / functions
 .. c:function:: pt2_epstein_nesbet:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -908,7 +766,7 @@ Subroutines / functions
 .. c:function:: pt2_epstein_nesbet_2x2:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -952,7 +810,7 @@ Subroutines / functions
 .. c:function:: pt2_epstein_nesbet_2x2_no_ci_diag:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -995,57 +853,10 @@ Subroutines / functions
        * :c:func:`i_h_psi`
 
  
-.. c:function:: pt2_h_core:
-
-
-    File : :file:`perturbation/pert_single.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_h_core(det_pert,c_pert,e_2_pert,H_pert_diag,Nint,ndet,N_st,minilist,idx_minilist,N_minilist)
-
-
-    compute the standard Epstein-Nesbet perturbative first order coefficient and second order energetic contribution
-    
-    for the various N_st states.
-    
-    c_pert(i) = <psi(i)|H|det_pert>/( E(i) - <det_pert|H|det_pert> )
-    
-    e_2_pert(i) = <psi(i)|H|det_pert>^2/( E(i) - <det_pert|H|det_pert> )
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_selectors`
-       * :c:data:`ref_bitmask_energy`
-       * :c:data:`ref_bitmask`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_by_mono_h_core`
-       * :c:func:`perturb_buffer_h_core`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`decode_exc`
-       * :c:func:`get_excitation`
-
- 
 .. c:function:: pt2_moller_plesset:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -1090,57 +901,10 @@ Subroutines / functions
        * :c:func:`i_h_psi_minilist`
 
  
-.. c:function:: pt2_moller_plesset_general:
-
-
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
-
-    .. code:: fortran
-
-        subroutine pt2_moller_plesset_general (electronic_energy,det_ref,det_pert,fock_diag_tmp,c_pert,e_2_pert,H_pert_diag,Nint,ndet,N_st,minilist,idx_minilist,N_minilist)
-
-
-    Computes the standard Moller-Plesset perturbative first order coefficient and second
-    order energetic contribution for the various N_st states.
-    
-    `c_pert(i)` = $\frac{\langle i|H|\alpha \rangle}{\text{difference of orbital energies}}$.
-    
-    `e_2_pert(i)` = $\frac{\langle i|H|\alpha \rangle^2}{\text{difference of orbital energies}}$.
-    
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_energy_expval`
-       * :c:data:`n_det_selectors`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_selectors_size`
-       * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`perturb_buffer_by_mono_moller_plesset_general`
-       * :c:func:`perturb_buffer_moller_plesset_general`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`decode_exc`
-       * :c:func:`get_excitation`
-       * :c:func:`i_h_psi_minilist`
-
- 
 .. c:function:: pt2_qdpt:
 
 
-    File : :file:`perturbation/pt2_equations.irp.f_template_360`
+    File : :file:`perturbation/pt2_equations.irp.f_template_305`
 
     .. code:: fortran
 
@@ -1187,6 +951,11 @@ Subroutines / functions
 
     File : :file:`perturbation/selection.irp.f`
 
+    .. code:: fortran
+
+        subroutine remove_small_contributions
+
+
     Remove determinants with small contributions. N_states is assumed to be
     provided.
 
@@ -1222,40 +991,9 @@ Subroutines / functions
 
        * :c:data:`ci_electronic_energy`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`ci_electronic_energy`
        * :c:data:`ci_energy`
+       * :c:data:`ci_electronic_energy`
        * :c:data:`n_det`
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
-       * :c:data:`psi_energy`
-
- 
-.. c:function:: repeat_all_e_corr:
-
-
-    File : :file:`perturbation/pert_sc2.irp.f`
-
-    .. code:: fortran
-
-        double precision function repeat_all_e_corr(key_in)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_det_selectors`
-       * :c:data:`ref_bitmask`
-       * :c:data:`psi_selectors`
-       * :c:data:`coef_hf_selector`
-       * :c:data:`n_int`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`get_excitation_degree`
 

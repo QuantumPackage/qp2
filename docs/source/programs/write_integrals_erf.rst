@@ -8,6 +8,11 @@ write_integrals_erf
  
  
  
+ 
+ Saves the two-electron integrals with the :math:`erf(\mu r_{12})/r_{12}` oprerator into the EZFIO folder 
+ 
+ Needs: 
+ 
  .. hlist:: 
     :columns: 3 
  

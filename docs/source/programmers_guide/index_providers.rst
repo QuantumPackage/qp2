@@ -3,6 +3,7 @@ Index of Providers
  
 * :c:data:`abs_psi_coef_max` 
 * :c:data:`abs_psi_coef_min` 
+* :c:data:`act_bitmask` 
 * :c:data:`alpha_knowles` 
 * :c:data:`angular_quadrature_points` 
 * :c:data:`ao_cart_to_sphe_coef` 
@@ -136,9 +137,9 @@ Index of Providers
 * :c:data:`cas_bitmask` 
 * :c:data:`center_of_mass` 
 * :c:data:`ci_eigenvectors` 
-* :c:data:`ci_eigenvectors_s2` 
 * :c:data:`ci_electronic_energy` 
 * :c:data:`ci_energy` 
+* :c:data:`ci_s2` 
 * :c:data:`closed_shell_ref_bitmask` 
 * :c:data:`coef_hf_selector` 
 * :c:data:`core_bitmask` 
@@ -159,6 +160,7 @@ Index of Providers
 * :c:data:`davidson_sze_max` 
 * :c:data:`degree_max_generators` 
 * :c:data:`degree_max_integration_lebedev` 
+* :c:data:`del_bitmask` 
 * :c:data:`delta_e_per_selector` 
 * :c:data:`density_for_dft` 
 * :c:data:`det_alpha_norm` 
@@ -167,10 +169,17 @@ Index of Providers
 * :c:data:`dft_type` 
 * :c:data:`diag_algorithm` 
 * :c:data:`diagonal_h_matrix_on_psi_det` 
+* :c:data:`dim_list_act_orb` 
+* :c:data:`dim_list_core_orb` 
+* :c:data:`dim_list_del_orb` 
+* :c:data:`dim_list_inact_orb` 
+* :c:data:`dim_list_virt_orb` 
 * :c:data:`disk_access_nuclear_repulsion` 
 * :c:data:`disk_based_davidson` 
 * :c:data:`distributed_davidson` 
+* :c:data:`do_ddci` 
 * :c:data:`do_direct_integrals` 
+* :c:data:`do_only_1h1p` 
 * :c:data:`do_pseudo` 
 * :c:data:`do_pt2` 
 * :c:data:`double_exc_bitmask` 
@@ -216,6 +225,7 @@ Index of Providers
 * :c:data:`ezfio_filename` 
 * :c:data:`ezfio_work_dir` 
 * :c:data:`fact_inv` 
+* :c:data:`file_lock` 
 * :c:data:`fill_h_apply_buffer_selection` 
 * :c:data:`final_grid_points` 
 * :c:data:`final_weight_at_r` 
@@ -322,11 +332,11 @@ Index of Providers
 * :c:data:`list_act` 
 * :c:data:`list_act_reverse` 
 * :c:data:`list_core` 
-* :c:data:`list_core_inact` 
 * :c:data:`list_core_inact_act` 
 * :c:data:`list_core_inact_act_reverse` 
-* :c:data:`list_core_inact_reverse` 
 * :c:data:`list_core_reverse` 
+* :c:data:`list_del` 
+* :c:data:`list_del_reverse` 
 * :c:data:`list_inact` 
 * :c:data:`list_inact_reverse` 
 * :c:data:`list_virt` 
@@ -343,7 +353,6 @@ Index of Providers
 * :c:data:`mo_dipole_x` 
 * :c:data:`mo_dipole_y` 
 * :c:data:`mo_dipole_z` 
-* :c:data:`mo_energy_expval` 
 * :c:data:`mo_guess_type` 
 * :c:data:`mo_integrals_cache` 
 * :c:data:`mo_integrals_cache_max` 
@@ -403,6 +412,7 @@ Index of Providers
 * :c:data:`n_core_inact_orb` 
 * :c:data:`n_core_orb` 
 * :c:data:`n_core_orb_allocate` 
+* :c:data:`n_del_orb` 
 * :c:data:`n_det` 
 * :c:data:`n_det_alpha_unique` 
 * :c:data:`n_det_beta_unique` 
@@ -615,8 +625,11 @@ Index of Providers
 * :c:data:`pt2_u_0` 
 * :c:data:`pt2_w` 
 * :c:data:`pt2_w_t` 
+* :c:data:`qp_kill_filename` 
 * :c:data:`qp_max_mem` 
 * :c:data:`qp_run_address` 
+* :c:data:`qp_stop_filename` 
+* :c:data:`qp_stop_variable` 
 * :c:data:`read_ao_integrals_e_n` 
 * :c:data:`read_ao_integrals_kinetic` 
 * :c:data:`read_ao_integrals_overlap` 
@@ -775,7 +788,6 @@ Index of Subroutines/Functions
 * :c:func:`apply_particles` 
 * :c:func:`apply_rotation` 
 * :c:func:`approx_dble` 
-* :c:func:`au0_h_au0` 
 * :c:func:`b_coef` 
 * :c:func:`berf` 
 * :c:func:`binom_func` 
@@ -843,7 +855,6 @@ Index of Subroutines/Functions
 * :c:func:`detcmp` 
 * :c:func:`deteq` 
 * :c:func:`diag_h_mat_elem` 
-* :c:func:`diag_h_mat_elem_au0_h_au0` 
 * :c:func:`diag_h_mat_elem_fock` 
 * :c:func:`diag_h_mat_elem_one_e` 
 * :c:func:`diag_s_mat_elem` 
@@ -972,6 +983,7 @@ Index of Subroutines/Functions
 * :c:func:`get_mono_excitation` 
 * :c:func:`get_mono_excitation_from_fock` 
 * :c:func:`get_mono_excitation_spin` 
+* :c:func:`get_occupation_from_dets` 
 * :c:func:`get_phase` 
 * :c:func:`get_phase_bi` 
 * :c:func:`get_phasemask_bit` 
@@ -1163,17 +1175,13 @@ Index of Subroutines/Functions
 * :c:func:`perturb_buffer_by_mono_epstein_nesbet` 
 * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2` 
 * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag` 
-* :c:func:`perturb_buffer_by_mono_h_core` 
 * :c:func:`perturb_buffer_by_mono_moller_plesset` 
-* :c:func:`perturb_buffer_by_mono_moller_plesset_general` 
 * :c:func:`perturb_buffer_by_mono_qdpt` 
 * :c:func:`perturb_buffer_dummy` 
 * :c:func:`perturb_buffer_epstein_nesbet` 
 * :c:func:`perturb_buffer_epstein_nesbet_2x2` 
 * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag` 
-* :c:func:`perturb_buffer_h_core` 
 * :c:func:`perturb_buffer_moller_plesset` 
-* :c:func:`perturb_buffer_moller_plesset_general` 
 * :c:func:`perturb_buffer_qdpt` 
 * :c:func:`primitive_value` 
 * :c:func:`print_det` 
@@ -1196,9 +1204,7 @@ Index of Subroutines/Functions
 * :c:func:`pt2_epstein_nesbet_2x2_no_ci_diag` 
 * :c:func:`pt2_find_sample` 
 * :c:func:`pt2_find_sample_lr` 
-* :c:func:`pt2_h_core` 
 * :c:func:`pt2_moller_plesset` 
-* :c:func:`pt2_moller_plesset_general` 
 * :c:func:`pt2_qdpt` 
 * :c:func:`pt2_slave_inproc` 
 * :c:func:`pull_pt2` 
@@ -1208,6 +1214,7 @@ Index of Subroutines/Functions
 * :c:func:`push_pt2` 
 * :c:func:`push_pt2_results` 
 * :c:func:`push_selection_results` 
+* :c:func:`qp_stop` 
 * :c:func:`qrpa` 
 * :c:func:`qrpad` 
 * :c:func:`qrpadd` 
@@ -1222,7 +1229,6 @@ Index of Subroutines/Functions
 * :c:func:`remove_duplicates_in_selection_buffer` 
 * :c:func:`remove_small_contributions` 
 * :c:func:`reorder_core_orb` 
-* :c:func:`repeat_all_e_corr` 
 * :c:func:`reset_zmq_addresses` 
 * :c:func:`resident_memory` 
 * :c:func:`resize_h_apply_buffer` 

@@ -462,6 +462,11 @@ Subroutines / functions
 
     File : :file:`ao_two_e_erf_ints/map_integrals_erf.irp.f`
 
+    .. code:: fortran
+
+        subroutine clear_ao_erf_map
+
+
     Frees the memory of the |AO| map
 
     Needs:
@@ -833,6 +838,11 @@ Subroutines / functions
 
     File : :file:`ao_two_e_erf_ints/routines_save_integrals_erf.irp.f`
 
+    .. code:: fortran
+
+        subroutine save_erf_two_e_integrals_ao
+
+
 
     Needs:
 
@@ -864,6 +874,11 @@ Subroutines / functions
 
 
     File : :file:`ao_two_e_erf_ints/routines_save_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_erf_two_e_ints_ao_into_ints_ao
+
 
 
     Needs:

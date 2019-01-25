@@ -1,3 +1,7 @@
+ifndef QP_ROOT  
+$(error "QP_ROOT is not defined. Source quantum_package.rc")
+endif
+
 default:
 	./auto_generate.py
 	make -C ../ html

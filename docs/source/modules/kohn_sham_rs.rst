@@ -445,6 +445,11 @@ Subroutines / functions
 
     File : :file:`rs_ks_scf.irp.f`
 
+    .. code:: fortran
+
+        subroutine check_coherence_functional
+
+
 
     Needs:
 

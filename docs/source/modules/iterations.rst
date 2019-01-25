@@ -105,6 +105,11 @@ Subroutines / functions
 
     File : :file:`iterations/print_extrapolation.irp.f`
 
+    .. code:: fortran
+
+        subroutine print_extrapolated_energy
+
+
     Print the extrapolated energy in the output
 
     Needs:

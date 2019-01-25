@@ -7,6 +7,11 @@ pt2
 === 
  
  
+ 
+ 
+ Second order perturbative correction to the wave function contained in the EZFIO directory. 
+  
+ This programs runs the stochastic PT2 correction on all "n_states" wave function stored in the EZFIO folder (see :option:`determinant n_states`). 
   
  The option for the PT2 correction are the "pt2_relative_error" which is the relative stochastic 
   
@@ -42,8 +47,7 @@ pt2
     * :c:data:`distributed_davidson` 
     * :c:data:`level_shift` 
     * :c:data:`mo_coef` 
-    * :c:data:`psi_energy` 
-    * :c:data:`psi_energy` 
+    * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`read_wf` 
     * :c:data:`state_average_weight` 

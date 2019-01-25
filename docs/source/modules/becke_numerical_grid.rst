@@ -259,6 +259,7 @@ Providers
        :columns: 3
 
        * :c:data:`final_grid_points`
+       * :c:data:`n_points_final_grid`
 
  
 .. c:var:: final_weight_at_r_vector
@@ -346,7 +347,6 @@ Providers
        :columns: 3
 
        * :c:data:`final_grid_points`
-       * :c:data:`n_points_final_grid`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
@@ -524,7 +524,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`grid_points_per_atom`
+       * :c:data:`final_weight_at_r`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
 
@@ -771,6 +771,11 @@ Subroutines / functions
 
 
     File : :file:`becke_numerical_grid/example.irp.f`
+
+    .. code:: fortran
+
+        subroutine example_becke_numerical_grid
+
 
     subroutine that illustrates the main features available in becke_numerical_grid
 

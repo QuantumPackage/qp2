@@ -727,6 +727,11 @@ Subroutines / functions
 
     File : :file:`ao_two_e_ints/map_integrals.irp.f`
 
+    .. code:: fortran
+
+        subroutine clear_ao_map
+
+
     Frees the memory of the AO map
 
     Needs:

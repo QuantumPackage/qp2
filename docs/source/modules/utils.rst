@@ -2636,6 +2636,13 @@ Subroutines / functions
 
     Returns the current used memory in gigabytes used by the current process.
 
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`file_lock`
+
     Called by:
 
     .. hlist::
@@ -2645,6 +2652,14 @@ Subroutines / functions
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`print_memory_usage`
        * :c:func:`zmq_pt2`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`omp_set_lock`
+       * :c:func:`omp_unset_lock`
 
  
 .. c:function:: rint:

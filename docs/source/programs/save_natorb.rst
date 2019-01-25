@@ -7,6 +7,11 @@ save_natorb
 =========== 
  
  
+ 
+ 
+ Save natural MOs into the EZFIO 
+  
+ This program reads the wave function stored in the EZFIO folder, 
   
  extracts the corresponding natural orbitals and set them as the new MOs 
   

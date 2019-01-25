@@ -7,6 +7,11 @@ cisd
 ==== 
  
  
+ 
+ 
+ Configuration Interaction with Single and Double excitations. 
+  
+ This program takes a reference Slater determinant of ROHF-like occupancy, 
   
  and performs all single and double excitations on top of it, disregarding 
  spatial symmetry and compute the "n_states" lowest eigenstates of that CI 

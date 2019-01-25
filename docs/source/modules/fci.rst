@@ -80,25 +80,33 @@ Programs
 Providers 
 --------- 
  
-.. c:var:: nthreads_pt2
+.. c:var:: do_ddci
 
 
-    File : :file:`fci/environment.irp.f`
+    File : :file:`fci/class.irp.f`
 
     .. code:: fortran
 
-        integer	:: nthreads_pt2	
+        logical	:: do_only_1h1p	
+        logical	:: do_ddci	
 
 
-    Number of threads for Davidson
+    In the FCI case, all those are always false
 
-    Needs:
 
-    .. hlist::
-       :columns: 3
+ 
+.. c:var:: do_only_1h1p
 
-       * :c:data:`mpi_master`
-       * :c:data:`nproc`
+
+    File : :file:`fci/class.irp.f`
+
+    .. code:: fortran
+
+        logical	:: do_only_1h1p	
+        logical	:: do_ddci	
+
+
+    In the FCI case, all those are always false
 
 
  

@@ -126,6 +126,11 @@ Subroutines / functions
 
     File : :file:`mo_guess/h_core_guess_routine.irp.f`
 
+    .. code:: fortran
+
+        subroutine hcore_guess
+
+
     Produce `H_core` MO orbital
 
     Needs:

@@ -7,6 +7,11 @@ print_e_conv
 ============ 
  
  
+ 
+ 
+ program that prints in a human readable format the convergence of the CIPSI algorithm. 
+  
+ for all istate, this program produces 
   
  * a file "EZFIO.istate.conv" containing the variational and var+PT2 energies as a function of N_det 
   

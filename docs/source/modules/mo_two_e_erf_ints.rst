@@ -57,10 +57,10 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_int_erf_jj`
+       * :c:data:`n_core_orb`
        * :c:data:`nuclear_repulsion`
 
 
@@ -82,15 +82,13 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_integrals_erf_cache`
        * :c:data:`mo_integrals_erf_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
-       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
 
 
  
@@ -616,6 +614,11 @@ Subroutines / functions
 
     File : :file:`mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f`
 
+    .. code:: fortran
+
+        subroutine clear_mo_erf_map
+
+
     Frees the memory of the MO map
 
     Needs:
@@ -911,6 +914,11 @@ Subroutines / functions
 
     File : :file:`mo_two_e_erf_ints/mo_bi_integrals_erf.irp.f`
 
+    .. code:: fortran
+
+        subroutine provide_all_mo_integrals_erf
+
+
 
     Needs:
 
@@ -928,6 +936,11 @@ Subroutines / functions
 
 
     File : :file:`mo_two_e_erf_ints/routines_save_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_erf_two_e_integrals_mo
+
 
 
     Needs:
@@ -960,6 +973,11 @@ Subroutines / functions
 
 
     File : :file:`mo_two_e_erf_ints/routines_save_integrals_erf.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_erf_two_e_ints_mo_into_ints_mo
+
 
 
     Needs:

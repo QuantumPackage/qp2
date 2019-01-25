@@ -726,33 +726,6 @@ Providers
 
 
  
-.. c:var:: mo_energy_expval
-
-
-    File : :file:`determinants/mo_energy_expval.irp.f`
-
-    .. code:: fortran
-
-        double precision, allocatable	:: mo_energy_expval	(N_states,mo_num,2,2)
-
-
-    Third index is spin.
-    Fourth index is 1:creation, 2:annihilation
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_num`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-       * :c:data:`n_states`
-       * :c:data:`psi_coef`
-       * :c:data:`psi_det`
-
-
- 
 .. c:var:: n_det
 
 
@@ -794,7 +767,6 @@ Providers
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`max_degree_exc`
-       * :c:data:`mo_energy_expval`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
        * :c:data:`one_e_dm_mo_alpha`
@@ -2180,7 +2152,6 @@ Providers
        * :c:data:`c0_weight`
        * :c:data:`ci_electronic_energy`
        * :c:data:`dressed_column_idx`
-       * :c:data:`mo_energy_expval`
        * :c:data:`psi_average_norm_contrib`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
@@ -2386,7 +2357,6 @@ Providers
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`max_degree_exc`
-       * :c:data:`mo_energy_expval`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_cas`
@@ -3802,41 +3772,6 @@ Subroutines / functions
        * :c:func:`get_d1`
 
  
-.. c:function:: au0_h_au0:
-
-
-    File : :file:`determinants/mo_energy_expval.irp.f`
-
-    .. code:: fortran
-
-        subroutine au0_h_au0(energies,psi_in,psi_in_coef,ndet,dim_psi_coef)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states`
-       * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_energy_expval`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`diag_h_mat_elem_au0_h_au0`
-       * :c:func:`i_h_j`
-
- 
 .. c:function:: bitstring_to_list_ab:
 
 
@@ -3867,6 +3802,7 @@ Subroutines / functions
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
        * :c:func:`get_mono_excitation_from_fock`
+       * :c:func:`get_occupation_from_dets`
        * :c:func:`i_h_j`
        * :c:func:`i_h_j_s2`
        * :c:func:`i_h_j_two_e`
@@ -3974,6 +3910,11 @@ Subroutines / functions
 
     File : :file:`determinants/h_apply.irp.f`
 
+    .. code:: fortran
+
+        subroutine copy_H_apply_buffer_to_wf
+
+
     Copies the H_apply buffer to psi_coef.
     After calling this subroutine, N_det, psi_det and psi_coef need to be touched
 
@@ -4074,9 +4015,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_epstein_nesbet`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_h_core`
        * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_moller_plesset_general`
        * :c:func:`perturb_buffer_qdpt`
 
     Calls:
@@ -4107,17 +4046,13 @@ Subroutines / functions
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_by_mono_h_core`
        * :c:func:`perturb_buffer_by_mono_moller_plesset`
-       * :c:func:`perturb_buffer_by_mono_moller_plesset_general`
        * :c:func:`perturb_buffer_by_mono_qdpt`
        * :c:func:`perturb_buffer_dummy`
        * :c:func:`perturb_buffer_epstein_nesbet`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_h_core`
        * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_moller_plesset_general`
        * :c:func:`perturb_buffer_qdpt`
 
  
@@ -4141,17 +4076,13 @@ Subroutines / functions
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet`
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_by_mono_h_core`
        * :c:func:`perturb_buffer_by_mono_moller_plesset`
-       * :c:func:`perturb_buffer_by_mono_moller_plesset_general`
        * :c:func:`perturb_buffer_by_mono_qdpt`
        * :c:func:`perturb_buffer_dummy`
        * :c:func:`perturb_buffer_epstein_nesbet`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_h_core`
        * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_moller_plesset_general`
        * :c:func:`perturb_buffer_qdpt`
 
  
@@ -4228,9 +4159,7 @@ Subroutines / functions
 
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
-       * :c:func:`pt2_h_core`
        * :c:func:`pt2_moller_plesset`
-       * :c:func:`pt2_moller_plesset_general`
 
  
 .. c:function:: decode_exc_spin:
@@ -4343,42 +4272,6 @@ Subroutines / functions
        * :c:func:`a_operator`
        * :c:func:`ac_operator`
        * :c:func:`bitstring_to_list_ab`
-
- 
-.. c:function:: diag_h_mat_elem_au0_h_au0:
-
-
-    File : :file:`determinants/mo_energy_expval.irp.f`
-
-    .. code:: fortran
-
-        subroutine diag_H_mat_elem_au0_h_au0(det_in,Nint,hii)
-
-
-    Computes $\langle i|H|i \rangle$ for any determinant $|i\rangle$.
-    Used for wave functions with an additional electron.
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_jj`
-       * :c:data:`mo_one_e_integrals`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`au0_h_au0`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`bitstring_to_list`
 
  
 .. c:function:: diag_h_mat_elem_fock:
@@ -4522,6 +4415,11 @@ Subroutines / functions
 
     File : :file:`determinants/example.irp.f`
 
+    .. code:: fortran
+
+        subroutine example_determinants
+
+
     subroutine that illustrates the main features available in determinants
 
     Needs:
@@ -4552,6 +4450,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/example.irp.f`
+
+    .. code:: fortran
+
+        subroutine example_determinants_psi_det
+
 
     subroutine that illustrates the main features available in determinants using the psi_det/psi_coef
 
@@ -4698,6 +4601,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine generate_all_alpha_beta_det_products
+
 
     Creates a wave function from all possible $\alpha \times \beta$ determinants
 
@@ -5313,9 +5221,7 @@ Subroutines / functions
 
        * :c:func:`example_determinants`
        * :c:func:`get_phase`
-       * :c:func:`pt2_h_core`
        * :c:func:`pt2_moller_plesset`
-       * :c:func:`pt2_moller_plesset_general`
 
     Calls:
 
@@ -5358,7 +5264,6 @@ Subroutines / functions
        * :c:data:`max_degree_exc`
        * :c:data:`psi_non_cas`
        * :c:func:`pt2_qdpt`
-       * :c:func:`repeat_all_e_corr`
 
  
 .. c:function:: get_excitation_degree_spin:
@@ -5645,6 +5550,37 @@ Subroutines / functions
        * :c:data:`one_e_dm_mo_alpha`
 
  
+.. c:function:: get_occupation_from_dets:
+
+
+    File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_occupation_from_dets(istate,occupation)
+
+
+    Returns the average occupation of the MOs
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det`
+       * :c:data:`n_int`
+       * :c:data:`n_det`
+       * :c:data:`mo_num`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`bitstring_to_list_ab`
+
+ 
 .. c:function:: get_phase:
 
 
@@ -5774,9 +5710,7 @@ Subroutines / functions
        * :c:func:`perturb_buffer_epstein_nesbet`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2`
        * :c:func:`perturb_buffer_epstein_nesbet_2x2_no_ci_diag`
-       * :c:func:`perturb_buffer_h_core`
        * :c:func:`perturb_buffer_moller_plesset`
-       * :c:func:`perturb_buffer_moller_plesset_general`
        * :c:func:`perturb_buffer_qdpt`
 
     Calls:
@@ -5814,7 +5748,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`au0_h_au0`
        * :c:data:`coef_hf_selector`
        * :c:func:`example_determinants`
        * :c:func:`get_d0`
@@ -6191,7 +6124,6 @@ Subroutines / functions
        * :c:func:`pt2_dummy`
        * :c:func:`pt2_epstein_nesbet`
        * :c:func:`pt2_moller_plesset`
-       * :c:func:`pt2_moller_plesset_general`
        * :c:func:`pt2_qdpt`
 
     Calls:
@@ -6332,6 +6264,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/occ_pattern.irp.f`
+
+    .. code:: fortran
+
+        subroutine make_s2_eigenfunction
+
 
 
     Needs:
@@ -6652,6 +6589,11 @@ Subroutines / functions
 
     File : :file:`determinants/example.irp.f`
 
+    .. code:: fortran
+
+        subroutine routine_example_psi_det
+
+
     subroutine that illustrates the main features available in determinants using many determinants
 
     Needs:
@@ -6750,6 +6692,11 @@ Subroutines / functions
 
     File : :file:`determinants/density_matrix.irp.f`
 
+    .. code:: fortran
+
+        subroutine save_natural_mos
+
+
     Save natural orbitals, obtained by diagonalization of the one-body density matrix in
     the |MO| basis
 
@@ -6781,6 +6728,11 @@ Subroutines / functions
 
     File : :file:`determinants/determinants.irp.f`
 
+    .. code:: fortran
+
+        subroutine save_ref_determinant
+
+
 
     Needs:
 
@@ -6809,6 +6761,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/determinants.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_wavefunction
+
 
     Save the wave function into the |EZFIO| file
 
@@ -6957,6 +6914,11 @@ Subroutines / functions
 
     File : :file:`determinants/determinants.irp.f`
 
+    .. code:: fortran
+
+        subroutine save_wavefunction_unsorted
+
+
     Save the wave function into the |EZFIO| file
 
     Needs:
@@ -6982,6 +6944,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/density_matrix.irp.f`
+
+    .. code:: fortran
+
+        subroutine set_natural_mos
+
 
     Set natural orbitals, obtained by diagonalization of the one-body density matrix
     in the |MO| basis
@@ -7246,6 +7213,11 @@ Subroutines / functions
 
 
     File : :file:`determinants/spindeterminants.irp.f`
+
+    .. code:: fortran
+
+        subroutine write_spindeterminants
+
 
 
     Needs:

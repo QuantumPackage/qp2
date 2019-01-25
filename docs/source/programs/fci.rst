@@ -7,6 +7,11 @@ fci
 === 
  
  
+ 
+ 
+ Selected Full Configuration Interaction with stochastic selection 
+ and PT2. 
+  
  This program performs a |CIPSI|-like selected |CI| using a 
  stochastic scheme for both the selection of the important Slater 
  determinants and the computation of the |PT2| correction. This 
@@ -43,8 +48,11 @@ fci
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`psi_coef` 
     * :c:data:`is_zmq_slave` 
     * :c:data:`do_pt2` 
+    * :c:data:`mo_two_e_integrals_in_map` 
+    * :c:data:`psi_det` 
  
  Calls: 
  
@@ -62,8 +70,8 @@ fci
  
     * :c:data:`ci_electronic_energy` 
     * :c:data:`ci_electronic_energy` 
-    * :c:data:`ci_electronic_energy` 
     * :c:data:`ci_energy` 
+    * :c:data:`ci_electronic_energy` 
     * :c:data:`n_det` 
     * :c:data:`psi_occ_pattern` 
     * :c:data:`c0_weight` 
@@ -73,9 +81,8 @@ fci
     * :c:data:`psi_det` 
     * :c:data:`psi_det_size` 
     * :c:data:`psi_det_sorted_bit` 
-    * :c:data:`psi_energy` 
     * :c:data:`psi_occ_pattern` 
-    * :c:data:`psi_energy` 
+    * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`read_wf` 
     * :c:data:`state_average_weight` 

@@ -233,7 +233,7 @@ if __name__ == '__main__':
 
         l_dir = ['IRPF90_temp', 'IRPF90_man']
         l_file = ["irpf90_entities", "tags", "irpf90.make", "Makefile",
-                  "Makefile.depend", ".ninja_log", ".ninja_deps", "build.ninja",
+                  "Makefile.depend", ".ninja_log", ".ninja_deps", 
                   "ezfio_interface.irp.f"]
 
         for module in l_module:

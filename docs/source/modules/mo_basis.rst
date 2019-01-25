@@ -286,9 +286,6 @@ Providers
        * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
        * :c:data:`int_erf_3_index`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
-       * :c:data:`list_core_inact`
        * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
        * :c:data:`mo_class`
@@ -297,7 +294,6 @@ Providers
        * :c:data:`mo_coef_in_ao_ortho_basis`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_dipole_x`
-       * :c:data:`mo_energy_expval`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_erf_cache_min`
        * :c:data:`mo_integrals_erf_map`
@@ -317,6 +313,7 @@ Providers
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_orb`
        * :c:data:`n_int`
        * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
@@ -528,6 +525,11 @@ Subroutines / functions
 
     File : :file:`mo_basis/track_orb.irp.f`
 
+    .. code:: fortran
+
+        subroutine initialize_mo_coef_begin_iteration
+
+
     
     Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
 
@@ -691,6 +693,11 @@ Subroutines / functions
 
     File : :file:`mo_basis/track_orb.irp.f`
 
+    .. code:: fortran
+
+        subroutine reorder_core_orb
+
+
     routines that takes the current :c:data:`mo_coef` and reorder the core orbitals (see :c:data:`list_core` and :c:data:`n_core_orb`) according to the overlap with :c:data:`mo_coef_begin_iteration`
 
     Needs:
@@ -698,13 +705,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`core_bitmask`
        * :c:data:`mo_num`
-       * :c:data:`ao_overlap`
-       * :c:data:`list_core`
-       * :c:data:`ao_num`
        * :c:data:`mo_coef_begin_iteration`
+       * :c:data:`mo_coef`
+       * :c:data:`ao_overlap`
+       * :c:data:`n_core_orb`
+       * :c:data:`ao_num`
+       * :c:data:`list_inact`
 
     Called by:
 
@@ -726,6 +733,11 @@ Subroutines / functions
 
 
     File : :file:`mo_basis/utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_mos
+
 
 
     Needs:

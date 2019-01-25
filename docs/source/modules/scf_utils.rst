@@ -173,17 +173,15 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`core_bitmask`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo`
        * :c:data:`frozen_orb_scf`
        * :c:data:`level_shift`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
-       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
 
 
  
@@ -294,16 +292,14 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
        * :c:data:`frozen_orb_scf`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_num`
-       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
 
     Needed by:
 
@@ -345,16 +341,14 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_bitmask`
        * :c:data:`elec_alpha_num`
        * :c:data:`elec_beta_num`
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
        * :c:data:`frozen_orb_scf`
-       * :c:data:`list_act`
-       * :c:data:`list_core`
+       * :c:data:`list_inact`
        * :c:data:`mo_num`
-       * :c:data:`n_act_orb`
+       * :c:data:`n_core_orb`
 
     Needed by:
 
@@ -632,6 +626,11 @@ Subroutines / functions
 
     File : :file:`scf_utils/damping_scf.irp.f`
 
+    .. code:: fortran
+
+        subroutine damping_SCF
+
+
 
     Needs:
 
@@ -679,6 +678,11 @@ Subroutines / functions
 
     File : :file:`scf_utils/huckel.irp.f`
 
+    .. code:: fortran
+
+        subroutine huckel_guess
+
+
     Build the MOs using the extended Huckel model
 
     Needs:
@@ -723,6 +727,11 @@ Subroutines / functions
 
 
     File : :file:`scf_utils/roothaan_hall_scf.irp.f`
+
+    .. code:: fortran
+
+        subroutine Roothaan_Hall_SCF
+
 
     Roothaan-Hall algorithm for SCF Hartree-Fock calculation
 
