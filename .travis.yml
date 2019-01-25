@@ -21,6 +21,7 @@ addons:
     - gcc
     - liblapack-dev
     - libblas-dev
+    - wget
 
 env:
   - OPAMROOT=$HOME/.opam

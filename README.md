@@ -14,7 +14,7 @@ A programming environment for wave function methods
 
 * Master: [![master build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
 * Development branch : [![dev build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=develop)](https://travis-ci.org/QuantumPackage/qp2)
-* Documentation [![Doc Status](https://quantum-package.readthedocs.io/en/latest/?badge=latest)
+* Documentation [![Doc Status](https://quantum-package.readthedocs.io/en/latest/?badge=master)
 
 
 # Credits
