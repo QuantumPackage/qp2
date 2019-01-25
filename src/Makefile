@@ -1,5 +1,5 @@
 default:
-	hugo
+	hugo --destination "../"
 
 serve:
 	hugo -D server

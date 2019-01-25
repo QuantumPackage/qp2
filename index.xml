@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Quantum Package</title>
+    <link>https://quantumpackage.github.io/qp2/</link>
+    <description>Recent content on Quantum Package</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <managingEditor>quantum.package@gmail.com</managingEditor>
+    <webMaster>quantum.package@gmail.com</webMaster>
+    <lastBuildDate>Wed, 23 Jan 2019 22:35:00 +0100</lastBuildDate>
+    
+	<atom:link href="https://quantumpackage.github.io/qp2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>QP terminal</title>
+      <link>https://quantumpackage.github.io/qp2/page/try/</link>
+      <pubDate>Wed, 23 Jan 2019 22:35:00 +0100</pubDate>
+      <author>quantum.package@gmail.com</author>
+      <guid>https://quantumpackage.github.io/qp2/page/try/</guid>
+      <description>You can try Quantum Package in the terminal below. To configure the terminal for your favorite text editor, set the EDITOR environment variable:
+export EDITOR=vim  Here is an example of a few commands you can run to get the Full-CI energy of the HCN molecule.
+First create a file named hcn.xyz containing the xyz coordinates.
+$ cat &amp;lt;&amp;lt; EOF &amp;gt; hcn.xyz 3 HCN molecule C 0.0 0.0 0.0 H 0.</description>
+    </item>
+    
+    <item>
+      <title>Video Tutorials</title>
+      <link>https://quantumpackage.github.io/qp2/page/tutorials/</link>
+      <pubDate>Wed, 23 Jan 2019 22:33:52 +0100</pubDate>
+      <author>quantum.package@gmail.com</author>
+      <guid>https://quantumpackage.github.io/qp2/page/tutorials/</guid>
+      <description> Installation   </description>
+    </item>
+    
+  </channel>
+</rss>
