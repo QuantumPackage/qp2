@@ -1,0 +1,64 @@
+baseurl = "https://quantumpackage.github.io/qp2"
+contentdir    = "content"
+layoutdir     = "layouts"
+publishdir    = "public"
+title = "Quantum Package"
+canonifyurls  = true
+
+DefaultContentLanguage = "en"
+theme = "beautifulhugo"
+metaDataFormat = "yaml"
+pygmentsUseClasses = true
+pygmentCodeFences = true
+#googleAnalytics = "XXX"
+
+[Params]
+  subtitle = "a programming environment for wave function methods"
+  logo = "img/QP2_circle.png"
+  favicon = "img/favicon.ico"
+  dateFormat = "January 2, 2006"
+  commit = false
+  rss = false
+  comments = false
+  useHLJS = true
+#  gcse = "012345678901234567890:abcdefghijk" # Get your code from google.com/cse. Make sure to go to "Look and Feel" and change Layout to "Full Width" and Theme to "Classic"
+
+[[Params.bigimg]]
+  src = "img/Screen2.png"
+#  desc = "Sphere"
+
+[Author]
+#  name = "A. Scemama & E. Giner"
+  email = "quantum.package@gmail.com"
+  github = "LCPQ/qp2"
+  twitter = "quantum_package"
+#  reddit = "username"
+#  linkedin = "username"
+#  xing = "username"
+#  stackoverflow = "users/XXXXXXX/username"
+#  snapchat = "username"
+#  instagram = "username"
+#  youtube = "user/quantum.package" # or channel/channelname
+   youtube = "channel/UC3a7Yakg9gk36G3HKDIFaYw"
+#  soundcloud = "username"
+#  spotify = "username"
+#  bandcamp = "username"
+#  itchio = "username"
+#  keybase = "username"
+
+
+[[menu.main]]
+    name = "Source code"
+    url = "https://github.com/QuantumPackage"
+    weight = 3
+
+[[menu.main]]
+    name = "Tutorials"
+    url = "/page/Tutorials"
+    weight = 1
+
+[[menu.main]]
+    name = "Documentation"
+    url = "https://quantum-package-scemamamaster.readthedocs.io/"
+    weight = 2
+
