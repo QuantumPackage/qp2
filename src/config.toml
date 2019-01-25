@@ -13,9 +13,9 @@ pygmentCodeFences = true
 #googleAnalytics = "XXX"
 
 [Params]
-  subtitle = "a programming environment for wave function methods"
+  subtitle = "A programming environment for wave function methods"
   logo = "img/QP2_circle.png"
-  favicon = "img/favicon.ico"
+  favicon = "favicon"
   dateFormat = "January 2, 2006"
   commit = false
   rss = false
@@ -59,6 +59,6 @@ pygmentCodeFences = true
 
 [[menu.main]]
     name = "Documentation"
-    url = "/doc/index"
+    url = "https://quantum-package.readthedocs.io"
     weight = 2
 
