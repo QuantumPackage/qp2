@@ -5,11 +5,6 @@ master
   The current up-to-date working branch, that users download It should
   only contain the latest release and bug fixes.
 
-documentation
-  It is a fork of the *master* branch, but with the `/docs` directory
-  containing the sources built properly for the ReadTheDocs website
-  documentation.
-
 develop
   It is a fork of the *master* branch with new developments that will be
   merged in the *master* branch for the next release.
