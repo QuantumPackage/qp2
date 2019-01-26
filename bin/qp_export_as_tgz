@@ -175,6 +175,8 @@ for i in ${ALL_LIBS} ${MKL_LIBS} ; do
 done
 
 if [[ $? -ne 0 ]] ; then
+  echo 'cp -- ${ALL_LIBS} ${MKL_LIBS} ${QPACKAGE_STATIC}/extra_lib'
+  exit 1
 fi
 
 cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*,gfortran*,quad*} \
