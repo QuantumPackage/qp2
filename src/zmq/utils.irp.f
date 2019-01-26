@@ -681,7 +681,7 @@ integer function connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread)
 
   return
   10 continue
-  print *,  irp_here//': '//trim(message)
+!  print *,  irp_here//': '//trim(message)
   connect_to_taskserver = -1
 end
 

@@ -161,10 +161,6 @@ subroutine run_slave_main
         call mpi_print('zmq_get_psi')
       IRP_ENDIF
       if (zmq_get_psi(zmq_to_qp_run_socket,1) == -1) cycle
-      IRP_IF MPI_DEBUG
-        call mpi_print('zmq_get_dvector energy')
-      IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'energy',energy,N_states_diag) == -1) cycle
 
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')

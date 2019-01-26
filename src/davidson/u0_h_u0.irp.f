@@ -45,17 +45,17 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
-    u_1(1:n,1:N_states) = u_0(1:n,1:N_states)
-    u_1(1:n,N_states+1:N_states_diag) = 0.d0
-    call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_st,n)
-    deallocate(u_1)
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
-    u_1(1:n,:) = u_0(1:n,:)
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
-    u_0(1:n,:) = u_1(1:n,:)
-    deallocate(u_1)
   endif
+  u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
+  deallocate(u_1)
   double precision :: norm
   !$OMP PARALLEL DO PRIVATE(i,norm) DEFAULT(SHARED)
   do i=1,N_st
