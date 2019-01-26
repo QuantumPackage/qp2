@@ -174,14 +174,10 @@ for i in ${ALL_LIBS} ${MKL_LIBS} ; do
   cp -- ${i} ${QPACKAGE_STATIC}/extra_lib
 done
 
-rm -rf extra_lib/{libc.so*,libpthread.so*,librt.so*,libm.so*,libdl.so*,libgcc_s.so*}
-
 if [[ $? -ne 0 ]] ; then
-  echo 'cp -- ${ALL_LIBS} ${MKL_LIBS} ${QPACKAGE_STATIC}/extra_lib'
-  exit 1
 fi
 
-cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*} \
+cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*,gfortran*,quad*} \
    ${QPACKAGE_STATIC}/lib/
 
 #
