@@ -35,7 +35,7 @@ subroutine davidson_run_slave(thread,iproc)
   integer(ZMQ_PTR)               :: zmq_socket_push
 
   integer, external              :: connect_to_taskserver
-  integer, external              :: zmq_get_N_states_diag
+  integer, external              :: zmq_get_N_states_diag_notouch
 
   PROVIDE mpi_rank
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
@@ -68,10 +68,23 @@ subroutine davidson_run_slave(thread,iproc)
     if (doexit == 0) then
         exit
     else
-        print *,  irp_here, ': retrying connection (', doexit, ')'
+        if (thread == 0) then
+          print *,  irp_here, ': Connection failed. Exiting Davidson.'
+          return
+        endif
     endif
   enddo
 
+  do 
+    if (zmq_get_N_states_diag_notouch(zmq_to_qp_run_socket,1) == -1) then
+      call sleep(1)
+      print *,  irp_here, ': waiting for N_states_diag'
+    else
+      exit
+    endif
+  enddo
+  SOFT_TOUCH N_states_diag
+      
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
   integer, external :: disconnect_from_taskserver
@@ -569,6 +582,66 @@ integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
   zmq_get_N_states_diag = -1
   IRP_IF MPI
     call MPI_BCAST (zmq_get_N_states_diag, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      print *,  irp_here//': Unable to broadcast N_states'
+      stop -1
+    endif
+  IRP_ENDIF
+end
+
+integer function zmq_get_N_states_diag_notouch(zmq_to_qp_run_socket, worker_id)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Get N_states_diag from the qp_run scheduler
+  END_DOC
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+  integer, intent(in)            :: worker_id
+  integer                        :: rc
+  character*(256)                :: msg
+
+  zmq_get_N_states_diag_notouch = 0
+
+  if (mpi_master) then
+    write(msg,'(A,1X,I8,1X,A200)') 'get_data '//trim(zmq_state), worker_id, 'N_states_diag'
+    rc = f77_zmq_send(zmq_to_qp_run_socket,trim(msg),len(trim(msg)),0)
+    if (rc /= len(trim(msg))) go to 10
+
+    rc = f77_zmq_recv(zmq_to_qp_run_socket,msg,len(msg),0)
+    if (msg(1:14) /= 'get_data_reply') go to 10
+
+    rc = f77_zmq_recv(zmq_to_qp_run_socket,N_states_diag,4,0)
+    if (rc /= 4) go to 10
+  endif
+
+  IRP_IF MPI_DEBUG
+    print *,  irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    call MPI_BCAST (zmq_get_N_states_diag_notouch, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      print *,  irp_here//': Unable to broadcast N_states'
+      stop -1
+    endif
+    if (zmq_get_N_states_diag_notouch == 0) then
+      call MPI_BCAST (N_states_diag, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+      if (ierr /= MPI_SUCCESS) then
+        print *,  irp_here//': Unable to broadcast N_states'
+        stop -1
+      endif
+    endif
+  IRP_ENDIF
+
+  return
+
+  ! Exception
+  10 continue
+  zmq_get_N_states_diag_notouch = -1
+  IRP_IF MPI
+    call MPI_BCAST (zmq_get_N_states_diag_notouch, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) then
       print *,  irp_here//': Unable to broadcast N_states'
       stop -1
