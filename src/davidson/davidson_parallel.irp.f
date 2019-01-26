@@ -13,6 +13,7 @@ end
 subroutine davidson_slave_tcp(i)
   implicit none
   integer, intent(in)            :: i
+  call sleep(1) ! Let the master start
   call davidson_run_slave(0,i)
 end
 
@@ -42,48 +43,18 @@ subroutine davidson_run_slave(thread,iproc)
   zmq_socket_push      = new_zmq_push_socket(thread)
 
 
-  integer :: ierr, doexit
-  do
-    doexit = 0
-    if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-      call sleep( int(1.5+float(mpi_rank)/10.) )
-      if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-        doexit=1
-      endif
-    endif
 
-    IRP_IF MPI
-      include 'mpif.h'
-      integer :: sendbuf, recvbuf
-      sendbuf = doexit
-      recvbuf = doexit
-      call MPI_ALLREDUCE(sendbuf, recvbuf, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        print *,  irp_here//': Unable to reduce '
-        stop -1
-      endif
-      doexit = recvbuf
-    IRP_ENDIF
-
-    if (doexit == 0) then
-        exit
-    else
-        if (thread == 0) then
-          print *,  irp_here, ': Connection failed. Exiting Davidson.'
-          return
-        endif
+  if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    return
+  endif
+  if (zmq_get_N_states_diag_notouch(zmq_to_qp_run_socket,1) == -1) then
+    if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) == -1) then
+        continue
     endif
-  enddo
+    return
+  endif
 
-  do 
-    if (zmq_get_N_states_diag_notouch(zmq_to_qp_run_socket,1) == -1) then
-      call sleep(1)
-      print *,  irp_here, ': waiting for N_states_diag'
-    else
-      exit
-    endif
-  enddo
-  SOFT_TOUCH N_states_diag
+!  SOFT_TOUCH N_states_diag
       
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
