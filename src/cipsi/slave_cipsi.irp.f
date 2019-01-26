@@ -245,6 +245,42 @@ subroutine run_slave_main
         call mpi_print('Entering OpenMP section')
       IRP_ENDIF
       if (.true.) then
+        integer :: nproc_target, ii
+        double precision :: mem_collector, mem, rss
+
+        call resident_memory(rss)
+
+        nproc_target = nthreads_pt2
+        ii = min(N_det, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
+
+        do
+          mem = rss +                             & !
+                nproc_target * 8.d0 *             & ! bytes
+                ( 0.5d0*pt2_n_tasks_max           & ! task_id
+                + 64.d0*pt2_n_tasks_max           & ! task
+                + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
+                + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
+                + 2.d0*(N_int*2.d0*N_det+ N_det)  & ! selection buffers
+                + 1.d0*(N_int*2.d0*N_det+ N_det)  & ! sort/merge selection buffers
+                + 2.0d0*(ii)                      & ! preinteresting, interesting,
+                                                    ! prefullinteresting, fullinteresting
+                + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
+                + 1.0d0*(N_states*mo_num*mo_num)  & ! mat
+                ) / 1024.d0**3
+
+          if (nproc_target == 0) then
+            call check_mem(mem,irp_here)
+            nproc_target = 1
+            exit
+          endif
+
+          if (mem+rss < qp_max_mem) then
+            exit
+          endif
+
+          nproc_target = nproc_target - 1
+
+        enddo
         !$OMP PARALLEL PRIVATE(i)
         i = omp_get_thread_num()
         call run_pt2_slave(0,i,pt2_e0_denominator)
