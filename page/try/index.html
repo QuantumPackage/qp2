@@ -9,15 +9,18 @@
   <meta property="og:title" content="QP terminal" />
   <meta name="twitter:title" content="QP terminal" />
   <meta name="description" content="You can try Quantum Package in the terminal below. To configure the terminal for your favorite text editor, set the EDITOR environment variable:
-export EDITOR=vim  Here is an example of a few commands you can run to get the Full-CI energy of the HCN molecule.
-First create a file named hcn.xyz containing the xyz coordinates.
-$ cat &lt;&lt; EOF &gt; hcn.xyz 3 HCN molecule C 0.0 0.0 0.0 H 0.">
+export EDITOR=vim  Browser not compatible. 
+Here is an example of a few commands you can run to get the Full-CI energy of the HCN molecule.
+First create a file named be.zmt containing the z-matrix of a Beryllium atom.
+echo be &gt; be.zmt  Create the EZFIO database as follows:">
   <meta property="og:description" content="You can try Quantum Package in the terminal below. To configure the terminal for your favorite text editor, set the EDITOR environment variable:
-export EDITOR=vim  Here is an example of a few commands you can run to get the Full-CI energy of the HCN molecule.
-First create a file named hcn.xyz containing the xyz coordinates.
-$ cat &lt;&lt; EOF &gt; hcn.xyz 3 HCN molecule C 0.0 0.0 0.0 H 0.">
+export EDITOR=vim  Browser not compatible. 
+Here is an example of a few commands you can run to get the Full-CI energy of the HCN molecule.
+First create a file named be.zmt containing the z-matrix of a Beryllium atom.
+echo be &gt; be.zmt  Create the EZFIO database as follows:">
   <meta name="twitter:description" content="You can try Quantum Package in the terminal below. To configure the terminal for your favorite text editor, set the EDITOR environment variable:
-export EDITOR=vim  Here is an example of a few commands …">
+export EDITOR=vim  Browser not compatible. 
+Here is an …">
   <meta name="author" content=""/>
   <link href='https://quantumpackage.github.io/qp2/favicon' rel='icon' type='image/x-icon'/>
   <meta property="og:image" content="https://quantumpackage.github.io/qp2/img/QP2_circle.png" />
@@ -143,23 +146,20 @@ set the <code>EDITOR</code> environment variable:</p>
 <pre><code>export EDITOR=vim
 </code></pre>
 
+<p><iframe id="shellframe" src="http://irssv2.ups-tlse.fr/siab/" width="100%" height="500" frameBorder="0" scrolling="no">Browser not compatible.</iframe>
+</body></p>
+
 <p>Here is an example of a few commands you can run to
 get the Full-CI energy of the HCN molecule.</p>
 
-<p>First create a file named <code>hcn.xyz</code> containing the <em>xyz</em> coordinates.</p>
+<p>First create a file named <code>be.zmt</code> containing the z-matrix of a Beryllium atom.</p>
 
-<pre><code>$ cat &lt;&lt; EOF &gt; hcn.xyz
-3
-HCN molecule
-C    0.0    0.0    0.0
-H    0.0    0.0    1.064
-N    0.0    0.0    -1.156
-EOF
+<pre><code>echo be &gt; be.zmt
 </code></pre>
 
 <p>Create the EZFIO database as follows:</p>
 
-<pre><code>qp create_ezfio -b 6-31g hcn.xyz -o hcn
+<pre><code>qp create_ezfio -b cc-pvtz be.zmt -o be
 </code></pre>
 
 <p>Run a Hartree-Fock calculation:</p>
@@ -167,20 +167,14 @@ EOF
 <pre><code>qp run SCF | tee scf.out
 </code></pre>
 
-<p>The MOs are saved in the EZFIO database. Now freeze the core electrons:</p>
+<p>The MOs are saved in the EZFIO database.</p>
 
-<pre><code>qp set_frozen_core
-</code></pre>
-
-<p>And run the CIPSI calculation in the valence full CI space:</p>
+<p>Now run the CIPSI calculation in the full CI space:</p>
 
 <pre><code>qp run fci | tee fci.out
 </code></pre>
 
 <p>That&rsquo;s it!</p>
-
-<p><iframe id="shellframe" src="http://localhost:8080" width="100%" height="500" frameBorder="0" scrolling="no">Browser not compatible.</iframe>
-</body></p>
 
       </article>
 

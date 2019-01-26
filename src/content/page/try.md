@@ -15,26 +15,23 @@ set the ``EDITOR`` environment variable:
 export EDITOR=vim
 ```
 
+<iframe id="shellframe" src="http://irssv2.ups-tlse.fr/siab/" width="100%" height="500" frameBorder="0" scrolling="no">Browser not compatible.</iframe>
+</body>
+
 
 Here is an example of a few commands you can run to
 get the Full-CI energy of the HCN molecule.
 
-First create a file named `hcn.xyz` containing the *xyz* coordinates.
+First create a file named `be.zmt` containing the z-matrix of a Beryllium atom.
 
 ``` 
-$ cat << EOF > hcn.xyz
-3
-HCN molecule
-C    0.0    0.0    0.0
-H    0.0    0.0    1.064
-N    0.0    0.0    -1.156
-EOF
+echo be > be.zmt
 ```
 
 Create the EZFIO database as follows:
 
 ```
-qp create_ezfio -b 6-31g hcn.xyz -o hcn
+qp create_ezfio -b cc-pvtz be.zmt -o be
 ```
 
 Run a Hartree-Fock calculation:
@@ -43,23 +40,15 @@ Run a Hartree-Fock calculation:
 qp run SCF | tee scf.out
 ```
 
-The MOs are saved in the EZFIO database. Now freeze the core electrons:
+The MOs are saved in the EZFIO database. 
 
-```
-qp set_frozen_core
-```
-
-And run the CIPSI calculation in the valence full CI space:
+Now run the CIPSI calculation in the full CI space:
 
 ```
 qp run fci | tee fci.out
 ```
 
 That's it!
-
-<iframe id="shellframe" src="http://localhost:8080" width="100%" height="500" frameBorder="0" scrolling="no">Browser not compatible.</iframe>
-</body>
-
 
 
 
