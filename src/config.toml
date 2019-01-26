@@ -48,11 +48,6 @@ pygmentCodeFences = true
 
 
 [[menu.main]]
-    name = "Source code"
-    url = "https://github.com/QuantumPackage/qp2"
-    weight = 3
-
-[[menu.main]]
     name = "Tutorials"
     url = "/page/Tutorials"
     weight = 1
@@ -61,4 +56,15 @@ pygmentCodeFences = true
     name = "Documentation"
     url = "https://quantum-package.readthedocs.io"
     weight = 2
+
+
+[[menu.main]]
+    name = "Try in the browser"
+    url = "/page/try"
+    weight = 3
+
+[[menu.main]]
+    name = "Source code"
+    url = "https://github.com/QuantumPackage/qp2"
+    weight = 4
 

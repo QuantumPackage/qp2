@@ -15,7 +15,10 @@ set the ``EDITOR`` environment variable:
 export EDITOR=vim
 ```
 
-<iframe id="shellframe" src="http://irssv2.ups-tlse.fr/siab/" width="100%" height="500" frameBorder="0" scrolling="no">Browser not compatible.</iframe>
+**You may need to tell your web browser you accept to load insecure scripts to
+see the terminal**.
+
+<iframe id="shellframe" src="http://irssv2.ups-tlse.fr/siab/" width="800" height="600" frameBorder="1" scrolling="no">Browser not compatible.</iframe>
 </body>
 
 
