@@ -72,13 +72,6 @@ subroutine davidson_run_slave(thread,iproc)
     endif
   enddo
 
-  do
-    if (zmq_get_N_states_diag(zmq_to_qp_run_socket, 1) /= -1) then
-      exit
-    endif
-    print *,  irp_here, ': Waiting for N_states_diag'
-    call sleep(1)
-  enddo
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
   integer, external :: disconnect_from_taskserver
