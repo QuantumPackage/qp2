@@ -46,7 +46,7 @@ function run() {
 @test "HBO" { # 13.3144s
   [[ -n $TRAVIS ]] && skip
   qp set_file hbo.ezfio
-  run -100.212729100021 1.e-5
+  run -100.214185815312 1.e-5
 }
 
 @test "H2O" { # 11.3727s
@@ -64,7 +64,7 @@ function run() {
 @test "SO" { # 13.4952s
   [[ -n $TRAVIS ]] && skip
   qp set_file so.ezfio
-  run -26.0083256834896 1.e-5
+  run -26.0126370436611 1.e-5
 }
 
 @test "H2S" { # 13.6745s
@@ -114,21 +114,21 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file so2.ezfio
   qp set_mo_class --core="[1-8]" --act="[9-87]" 
-  run -41.5746938811597 1.e-5
+  run -41.5746738713298 5.e-5
 }
 
 @test "C2H2" { # 17.6827s
   [[ -n $TRAVIS ]] && skip
   qp set_file c2h2.ezfio
   qp set_mo_class --act="[1-30]" --del="[31-36]"
-  run -12.365788387909 1.e-5
+  run -12.3671467643742 1.e-5
 }
 
 @test "N2" { # 18.0198s
   [[ -n $TRAVIS ]] && skip
   qp set_file n2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-60]"
-  run -109.316843972685 1.e-5
+  run -109.291382745482 1.e-5
 }
 
 @test "N2H4" { # 18.5006s
@@ -142,14 +142,14 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file co2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-30]" --del="[31-42]"
-  run -187.968860407394 1.e-5
+  run -187.969721107603 1.e-5
 }
 
 @test "F2" { # 21.331s
   [[ -n $TRAVIS ]] && skip
   qp set_file f2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-30]" --del="[31-62]"
-  run -199.068219028883 1.e-5 
+  run -199.068518708366 1.e-5 
 }
 
 @test "[Cu(NH3)4]2+" { # 25.0417s
@@ -163,6 +163,6 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file hcn.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-55]"
-  run -93.0806630964871 1.e-5
+  run -93.0779744802522 1.e-5
 }
 
