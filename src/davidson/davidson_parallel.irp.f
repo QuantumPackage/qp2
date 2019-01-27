@@ -13,7 +13,6 @@ end
 subroutine davidson_slave_tcp(i)
   implicit none
   integer, intent(in)            :: i
-  call sleep(1) ! Let the master start
   call davidson_run_slave(0,i)
 end
 
@@ -37,15 +36,14 @@ subroutine davidson_run_slave(thread,iproc)
 
   integer, external              :: connect_to_taskserver
 
-  PROVIDE mpi_rank
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
-  zmq_socket_push      = new_zmq_push_socket(thread)
-
-
 
   if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
     return
   endif
+
+  zmq_socket_push      = new_zmq_push_socket(thread)
       
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
@@ -59,7 +57,6 @@ subroutine davidson_run_slave(thread,iproc)
   endif
 
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
-  call end_zmq_push_socket(zmq_socket_push,thread)
 end subroutine
 
 

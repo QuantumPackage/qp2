@@ -53,7 +53,7 @@ subroutine run_slave_main
 
   PROVIDE psi_det psi_coef threshold_generators state_average_weight mpi_master
   PROVIDE zmq_state N_det_selectors pt2_stoch_istate N_det pt2_e0_denominator
-  PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator
+  PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator mpi_rank
 
   IRP_IF MPI
     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
