@@ -323,6 +323,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       shift2 = N_st_diag*iter
 
       call ortho_qr(U,size(U,1),sze,shift2)
+      call ortho_qr(U,size(U,1),sze,shift2)
 
       ! Compute |W_k> = \sum_i |i><i|H|u_k>
       ! -----------------------------------------
