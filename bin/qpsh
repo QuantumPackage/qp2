@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export QP_ROOT=$(dirname $0)/..
+export QP_ROOT=$(dirname "$(readlink -f "$0")")/..
 
 bash --init-file <(cat << EOF
     [[ -f /etc/bashrc ]] && source /etc/bashrc 
