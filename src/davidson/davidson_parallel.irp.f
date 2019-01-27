@@ -57,6 +57,8 @@ subroutine davidson_run_slave(thread,iproc)
   endif
 
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
+  call end_zmq_push_socket(zmq_socket_push)
+
 end subroutine
 
 
