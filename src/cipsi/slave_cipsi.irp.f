@@ -279,6 +279,11 @@ subroutine run_slave_main
           print *,  'pt2_stoch_istate', pt2_stoch_istate
           print *,  'state_average_weight', state_average_weight
           print *,  'Number of threads', nproc_target
+          PROVIDE psi_det_hii
+
+          if (s2_eig) then
+            PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+          endif
         endif
 
         !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)

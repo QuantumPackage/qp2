@@ -877,9 +877,11 @@ BEGIN_PROVIDER [ double precision, psi_det_Hii, (N_det) ]
  END_DOC
  integer :: i,j
  double precision, external :: diag_H_mat_elem
+ !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
  do i=1,N_det
    psi_det_Hii(i) = diag_H_mat_elem(psi_det(1,1,i),N_int)
  enddo
+ !$OMP END PARALLEL DO
 END_PROVIDER
 
 

@@ -93,7 +93,7 @@ subroutine run_pt2_slave(thread,iproc,energy)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
     call wall_time(time1)
-!print *,  i_generator(1), time1-time0, n_tasks
+!print *,  '-->', i_generator(1), time1-time0, n_tasks
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then

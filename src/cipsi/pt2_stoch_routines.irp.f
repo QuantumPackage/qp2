@@ -13,9 +13,9 @@ END_PROVIDER
   integer :: i
   integer :: e
   e = elec_num - n_core_orb * 2
-  pt2_n_tasks_max = 1+min((e*(e-1))/2, int(dsqrt(dble(N_det_selectors)))/4)
+  pt2_n_tasks_max = 1+min((e*(e-1)), int(dsqrt(dble(N_det_selectors)))/10)
   do i=1,N_det_generators
-    pt2_F(i) = 1 + int(dble(pt2_n_tasks_max)*dsqrt(dabs(psi_coef_sorted_gen(i,pt2_stoch_istate))))
+    pt2_F(i) = 1 + int(dble(pt2_n_tasks_max)*dabs(maxval(psi_coef_sorted_gen(i,:)))**(0.75d0))
   enddo
 END_PROVIDER
 
@@ -120,7 +120,11 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
+  PROVIDE psi_det_hii
 
+  if (s2_eig) then
+    PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+  endif
 
   if (N_det < max(10,N_states)) then
     pt2=0.d0
