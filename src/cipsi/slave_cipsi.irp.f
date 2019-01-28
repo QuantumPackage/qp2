@@ -165,10 +165,12 @@ subroutine run_slave_main
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')
 
+      !---
       call omp_set_nested(.True.)
       call davidson_slave_tcp(0)
       call omp_set_nested(.False.)
       print *,  mpi_rank, ': Davidson done'
+      !---
 
       IRP_IF MPI
         call MPI_BARRIER(MPI_COMM_WORLD, ierr)

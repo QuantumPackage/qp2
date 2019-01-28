@@ -35,10 +35,25 @@ subroutine davidson_run_slave(thread,iproc)
   integer(ZMQ_PTR)               :: zmq_socket_push
 
   integer, external              :: connect_to_taskserver
+  integer                        :: doexit, send, receive
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
+  doexit = 0
   if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    doexit=1
+  endif
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    send = doexit
+    call MPI_AllReduce(send, receive, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      doexit=1
+    endif
+    doexit = receive 
+  IRP_ENDIF
+  if (doexit) then
     call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
     return
   endif
