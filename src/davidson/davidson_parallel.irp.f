@@ -53,7 +53,7 @@ subroutine davidson_run_slave(thread,iproc)
     endif
     doexit = receive 
   IRP_ENDIF
-  if (doexit) then
+  if (doexit>0) then
     call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
     return
   endif
