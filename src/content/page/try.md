@@ -40,7 +40,7 @@ qp create_ezfio -b cc-pvtz be.zmt -o be
 Run a Hartree-Fock calculation:
 
 ```
-qp run SCF | tee scf.out
+qp run scf | tee scf.out
 ```
 
 The MOs are saved in the EZFIO database. 
