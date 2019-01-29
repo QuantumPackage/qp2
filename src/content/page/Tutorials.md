@@ -7,7 +7,7 @@ draft: false
 
 ---------------------
 
-# Installation
+# Hartree-Fock calculation
 
 {{< youtube KIl_xq-NRLo >}}
 
