@@ -330,8 +330,7 @@ subroutine pt2_slave_inproc(i)
 end
 
 
-subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error,  &
-  variance, norm, b, N_)
+subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm, b, N_)
   use f77_zmq
   use selection_types
   use bitmasks

@@ -8,7 +8,7 @@ EZFIO.cfg
 
 The simplest way to add control parameters in the |EZFIO| directory is to create a
 :file:`EZFIO.cfg` file in the module. An example can be found in existing modules
-such as :ref:`hartree_fock`::
+such as :ref:`module_hartree_fock`::
 
    [max_dim_diis]
    type: integer
@@ -92,7 +92,7 @@ Optional
 
 It is possible to directly add to the current module |EZFIO| configuration
 files, named with the ``.ezfio_config`` suffix. An example is in the
-:ref:`bitmask` module. 
+:ref:`module_bitmask` module. 
 
 .. code:: text
 

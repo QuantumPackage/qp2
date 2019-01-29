@@ -170,7 +170,7 @@ subroutine davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
   use f77_zmq
   implicit none
   BEGIN_DOC
-! Push the results of $H|U \rangle$ from a worker to the master.
+! Push the results of $H | U \rangle$ from a worker to the master.
   END_DOC
 
   integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
@@ -216,7 +216,7 @@ subroutine davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
   use f77_zmq
   implicit none
   BEGIN_DOC
-! Pull the results of $H|U \rangle$ on the master.
+! Pull the results of $H | U \rangle$ on the master.
   END_DOC
 
   integer(ZMQ_PTR)    ,intent(in)     :: zmq_socket_pull
@@ -307,13 +307,13 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   use f77_zmq
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
   !
   ! n : number of determinants
   !
-  ! H_jj : array of $\langle j|H|j \rangle$
+  ! H_jj : array of $\langle j | H | j \rangle$
   !
-  ! S2_jj : array of $\langle j|S^2|j \rangle$
+  ! S2_jj : array of $\langle j | S^2 | j \rangle$
   END_DOC
   integer, intent(in)            :: N_st, sze
   double precision, intent(out)  :: v_0(sze,N_st), s_0(sze,N_st)

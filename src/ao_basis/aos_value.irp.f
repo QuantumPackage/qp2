@@ -1,7 +1,7 @@
 double precision function ao_value(i,r)
  implicit none
  BEGIN_DOC
-! return the value of the ith ao at point r
+! Returns the value of the i-th ao at point $\textbf{r}$
  END_DOC
  double precision, intent(in) :: r(3)
  integer, intent(in) :: i
@@ -35,7 +35,8 @@ end
 double precision function primitive_value(i,j,r)
  implicit none
  BEGIN_DOC
-! return the value of the jth primitive of ith ao at point r WITHOUT THE COEF
+! Returns the value of the j-th primitive of the i-th |AO| at point $\textbf{r}
+! **without the coefficient**
  END_DOC
  double precision, intent(in) :: r(3)
  integer, intent(in) :: i,j
@@ -68,7 +69,7 @@ end
 subroutine give_all_aos_at_r_old(r,aos_array)
  implicit none
  BEGIN_dOC
-! gives the values of aos at a given point r
+! Gives the values of |AOs| at a given point $\textbf{r}$
  END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: aos_array(ao_num)
@@ -83,8 +84,9 @@ end
 subroutine give_all_aos_at_r(r,aos_array)
  implicit none
  BEGIN_dOC
-! input : r == r(1) = x and so on
-! aos_array(i) = aos(i) evaluated in r
+! input  : r == r(1) = x and so on
+!
+! output : aos_array(i) = aos(i) evaluated in $\textbf{r}$
  END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: aos_array(ao_num)
@@ -121,9 +123,13 @@ end
 subroutine give_all_aos_and_grad_at_r(r,aos_array,aos_grad_array)
  implicit none
  BEGIN_DOC
-! input      : r(1) ==> r(1) = x, r(2) = y, r(3) = z
-! output     : aos_array(i) = ao(i) evaluated at r
-!            : aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r
+! input : r(1) ==> r(1) = x, r(2) = y, r(3) = z
+!
+! output : 
+!
+! * aos_array(i) = ao(i) evaluated at ro
+! * aos_grad_array(1,i) = gradient X of the ao(i) evaluated at $\textbf{r}$
+!
  END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: aos_array(ao_num)
@@ -187,9 +193,12 @@ end
 subroutine give_all_aos_and_grad_and_lapl_at_r(r,aos_array,aos_grad_array,aos_lapl_array)
  implicit none
  BEGIN_DOC
-! input      : r(1) ==> r(1) = x, r(2) = y, r(3) = z
-! output     : aos_array(i) = ao(i) evaluated at r
-!            : aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r
+! input  : r(1) ==> r(1) = x, r(2) = y, r(3) = z
+!
+! output :
+!
+! * aos_array(i) = ao(i) evaluated at $\textbf{r}$
+! * aos_grad_array(1,i) = $\nabla_x$ of the ao(i) evaluated at $\textbf{r}$
  END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: aos_array(ao_num)

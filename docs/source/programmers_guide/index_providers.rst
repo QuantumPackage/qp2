@@ -226,7 +226,6 @@ Index of Providers
 * :c:data:`ezfio_work_dir` 
 * :c:data:`fact_inv` 
 * :c:data:`file_lock` 
-* :c:data:`fill_h_apply_buffer_selection` 
 * :c:data:`final_grid_points` 
 * :c:data:`final_weight_at_r` 
 * :c:data:`final_weight_at_r_vector` 
@@ -606,7 +605,6 @@ Index of Providers
 * :c:data:`psi_selectors_coef_transp` 
 * :c:data:`psi_selectors_diag_h_mat` 
 * :c:data:`psi_selectors_size` 
-* :c:data:`pt2_collector` 
 * :c:data:`pt2_cw` 
 * :c:data:`pt2_e0_denominator` 
 * :c:data:`pt2_f` 
@@ -907,6 +905,7 @@ Index of Subroutines/Functions
 * :c:func:`fcidump` 
 * :c:func:`fill_buffer_double` 
 * :c:func:`fill_h_apply_buffer_no_selection` 
+* :c:func:`fill_h_apply_buffer_selection` 
 * :c:func:`filter_connected` 
 * :c:func:`filter_connected_i_h_psi0` 
 * :c:func:`filter_not_connected` 
@@ -1198,6 +1197,7 @@ Index of Subroutines/Functions
 * :c:func:`provide_all_mo_integrals_erf` 
 * :c:func:`provide_everything` 
 * :c:func:`pt2` 
+* :c:func:`pt2_collector` 
 * :c:func:`pt2_dummy` 
 * :c:func:`pt2_epstein_nesbet` 
 * :c:func:`pt2_epstein_nesbet_2x2` 

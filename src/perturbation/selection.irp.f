@@ -1,5 +1,4 @@
-subroutine fill_H_apply_buffer_selection(n_selected,det_buffer,e_2_pert_buffer,coef_pert_buffer, &
-   N_st,Nint,iproc,select_max_out)
+subroutine fill_H_apply_buffer_selection(n_selected,det_buffer,e_2_pert_buffer,coef_pert_buffer, N_st,Nint,iproc,select_max_out)
   use bitmasks
   implicit none
   BEGIN_DOC
