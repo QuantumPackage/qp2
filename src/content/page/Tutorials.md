@@ -9,7 +9,8 @@ draft: false
 
 # Installation
 
-{{< youtube ULhqwUX1KWE >}}
+{{< youtube KIl_xq-NRLo >}}
 
+In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.
 
 
