@@ -105,7 +105,7 @@ subroutine example_determinants_psi_det
   END_DOC
   read_wf = .True.
   touch read_wf
-  ! you force the wave function to be set to the one in the EZFIO folder
+  ! you force the wave function to be set to the one in the EZFIO directory
   call routine_example_psi_det
 end
 
