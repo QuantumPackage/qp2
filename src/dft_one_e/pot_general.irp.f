@@ -20,6 +20,9 @@
   else if(exchange_functional.EQ."PBE")then
    potential_x_alpha_ao = potential_x_alpha_ao_PBE
    potential_x_beta_ao = potential_x_beta_ao_PBE
+  else if(exchange_functional.EQ."my_functional")then
+   potential_x_alpha_ao = potential_new_functional_x_alpha_ao
+   potential_x_beta_ao  = potential_new_functional_x_beta_ao
   else if(exchange_functional.EQ."None")then
    potential_x_alpha_ao = 0.d0
    potential_x_beta_ao = 0.d0
@@ -41,6 +44,9 @@
   else if(correlation_functional.EQ."PBE")then
    potential_c_alpha_ao = potential_c_alpha_ao_PBE
    potential_c_beta_ao = potential_c_beta_ao_PBE
+  else if(correlation_functional.EQ."my_functional")then
+   potential_c_alpha_ao = potential_new_functional_c_alpha_ao
+   potential_c_beta_ao  = potential_new_functional_c_beta_ao
   else if(correlation_functional.EQ."None")then
    potential_c_alpha_ao = 0.d0
    potential_c_beta_ao = 0.d0

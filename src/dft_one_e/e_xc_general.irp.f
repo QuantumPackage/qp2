@@ -20,6 +20,8 @@
   else if(exchange_functional.EQ."None")then
    energy_x = 0.d0
    energy_x = 0.d0
+  else if(exchange_functional.EQ."my_functional")then
+   energy_x = energy_x_new_functional
   else
    print*, 'Exchange functional required does not exist ...'
    print*,'exchange_functional',exchange_functional
@@ -41,6 +43,8 @@
   else if(correlation_functional.EQ."None")then
    energy_c = 0.d0
    energy_c = 0.d0
+  else if(correlation_functional.EQ."my_functional")then
+   energy_c = energy_c_new_functional
   else
    print*, 'Correlation functional required does not ecist ...'
    print*,'correlation_functional',correlation_functional
