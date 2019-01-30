@@ -246,7 +246,7 @@ IRP_ENDIF
 !    stop 'Unable to set ZMQ_RCVBUF on pull socket'
 !  endif
 
-  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,10,4)
+  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,8,4)
   if (rc /= 0) then
     stop 'Unable to set ZMQ_RCVHWM on pull socket'
   endif
@@ -323,7 +323,7 @@ IRP_ENDIF
     stop 'Unable to set ZMQ_LINGER on push socket'
   endif
 
-  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,10,4)
+  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,1,4)
   if (rc /= 0) then
     stop 'Unable to set ZMQ_SNDHWM on push socket'
   endif
