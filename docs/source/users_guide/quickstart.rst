@@ -74,7 +74,8 @@ The expected energy is ``-92.827856698`` au.
 
 .. seealso:: 
 
-    The documentation of the :ref:`hartree_fock` module and that of the :c:func:`scf` program.
+    The documentation of the :ref:`module_hartree_fock` module and that of the
+    :ref:`scf` program.
 
 This creates the |MOs| in the |EZFIO| database that will be used to
 perform any other post-SCF method. The |qp| does not handle symmetry and
@@ -138,7 +139,7 @@ The estimated |FCI| energy of HCN is ``-93.0501`` au.
 
 .. seealso:: 
 
-    The documentation of the :ref:`fci` module and that of the :c:func:`fci` program.
+    The documentation of the :ref:`module_fci` module and that of the :ref:`fci` program.
 
 
 ---------------------------

@@ -12,7 +12,6 @@
 .. _Irene: http://www-hpc.cea.fr/en/complexe/tgcc-Irene.htm
 .. _IRPF90: http://irpf90.ups-tlse.fr
 .. _LAPACK: http://www.netlib.org/lapack/
-.. _Molden: http://cheminf.cmbi.ru.nl/molden/
 .. _NECI: https://github.com/ghb24/NECI_STABLE
 .. _Ninja: https://ninja-build.org/
 .. _NWChem: http://www.nwchem-sw.org/
@@ -53,12 +52,15 @@
 .. |CIPSI| replace:: :abbr:`CIPSI (Configuration Interaction using a Perturbative Selection)`
 .. |CI| replace:: :abbr:`CI (Configuration Interaction)`
 .. |CISD| replace:: :abbr:`CISD (Configuration Interaction with Single and Double Excitations)`
+.. |CASSCF| replace:: |CAS| - |SCF|
 .. |CIS| replace:: :abbr:`CIS (Configuration Interaction with Single Excitations)`
-.. |DFT| replace:: :abbr:`DFT (Density Functional Theory)`
 .. |DDCI| replace:: :abbr:`DDCI (Difference Dedicated Configuration Interaction)`
+.. |DFT| replace:: :abbr:`DFT (Density Functional Theory)`
 .. |DIIS| replace:: :abbr:`DIIS (Direct Inversion of the Iterative Subspace)`
+.. |FCIQMC| replace:: |FCI| - |QMC|
 .. |FCI| replace:: :abbr:`FCI (Full Configuration Interaction)`
 .. |HF| replace:: :abbr:`HF (Hartree-Fock)`
+.. |KS-DFT| replace:: :abbr:`KS-DFT (Kohn-Sham Density Functional Theory)`
 .. |MO| replace:: :abbr:`MO (Molecular Orbital)`
 .. |MOs| replace:: :abbr:`MOs (Molecular Orbitals)`
 .. |MP2| replace:: :abbr:`MP2 (Moller-Plesset second order perturbative correction)`
@@ -67,15 +69,13 @@
 .. |MRPT| replace:: :abbr:`MRPT (Multi-Reference Perturbation Theory)`
 .. |PT2| replace:: :abbr:`PT2 (Second order perturbative correction)`
 .. |QMC| replace:: :abbr:`QMC (Quantum Monte Carlo)`
+.. |ROHF| replace:: :abbr:`ROHF (Restricted Open-Shell Hartree-Fock)`
+.. |RSDFT| replace:: :abbr:`RSDFT (Range Separated Density Functional Theory)`
+.. |RSH| replace:: :abbr:`RSH (Range Separated Hybrids)`
 .. |rst| replace:: :abbr:`RST (ReStructured Text)`
 .. |SCF| replace:: :abbr:`SCF (Self Consistent Field)`
-.. |RSH| replace:: :abbr:`RSH (Range Separated Hybrids)`
-.. |RSDFT| replace:: :abbr:`RSDFT (Range Separated Density Functional Theory)`
-.. |KS-DFT| replace:: :abbr:`KS-DFT (Kohn-Sham Density Functional Theory)`
 .. |sCI| replace:: :abbr:`sCI (Selected-CI)`
 .. |WFT| replace:: :abbr:`WFT (Wave Function Theory)`
-.. |CASSCF| replace:: |CAS| - |SCF|
-.. |FCIQMC| replace:: |FCI| - |QMC|
 
 .. |kalpha| replace:: :math:`|\alpha \rangle`
 .. |H| replace:: :math:`\hat H`

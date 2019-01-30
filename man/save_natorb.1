@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "SAVE_NATORB" "1" "Jan 25, 2019" "2.0" "Quantum Package"
+.TH "SAVE_NATORB" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
 save_natorb \-  | Quantum Package >
 .
@@ -32,15 +32,16 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Save natural MOs into the EZFIO
+Save natural MOs into the \fI\%EZFIO\fP\&.
 .sp
-This program reads the wave function stored in the EZFIO folder,
+This program reads the wave function stored in the \fI\%EZFIO\fP directory,
+extracts the corresponding natural orbitals and setd them as the new
+MOs\&.
 .sp
-extracts the corresponding natural orbitals and set them as the new MOs
-.sp
-If this is a multi\-state calculation, the density matrix that produces the natural orbitals
-.sp
-is obtained from a state\-averaged of the density matrices of each state with the corresponding state_average_weight (see the doc of state_average_weight).
+If this is a multi\-state calculation, the density matrix that produces
+the natural orbitals is obtained from an average of the density
+matrices of each state with the corresponding
+\fBdeterminants state_average_weight\fP
 .sp
 Needs:
 .INDENT 0.0

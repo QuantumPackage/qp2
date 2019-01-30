@@ -1,7 +1,7 @@
 program molden
   implicit none
   BEGIN_DOC
-  ! Produce a Molden file
+  ! Produces a Molden file
   END_DOC
   character*(128)                :: output
   integer                        :: i_unit_output,getUnitAndOpen

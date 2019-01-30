@@ -5,8 +5,10 @@
   BEGIN_DOC
   ! Second derivative matrix elements in the |AO| basis.
   !
-  ! :math:`{\tt ao\_deriv2\_x} =
-  !  \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle`
+  ! .. math::
+  !
+  !   {\tt ao\_deriv2\_x} =
+  !   \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle
   !
   END_DOC
   integer :: i,j,n,l
@@ -122,7 +124,8 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
   BEGIN_DOC
   ! Kinetic energy integrals in the |AO| basis.
   !
-  ! :math:`\langle \chi_i |\hat{T}| \chi_j \rangle`
+  ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
+  !
   END_DOC
   integer                        :: i,j,k,l
 

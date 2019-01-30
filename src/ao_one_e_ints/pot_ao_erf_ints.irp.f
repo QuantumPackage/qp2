@@ -2,7 +2,7 @@ subroutine give_all_erf_kl_ao(integrals_ao,mu_in,C_center)
   implicit none
   BEGIN_DOC
   ! Subroutine that returns all integrals over $r$ of type
-  ! $\frac{ \erf(\mu * |r-R_C|) }{ |r-R_C| }$
+  ! $\frac{ \erf(\mu * | r - R_C | ) }{ | r - R_C | }$
   END_DOC
   double precision, intent(in)   :: mu_in,C_center(3)
   double precision, intent(out)  :: integrals_ao(ao_num,ao_num)
@@ -20,7 +20,7 @@ double precision function NAI_pol_mult_erf_ao(i_ao,j_ao,mu_in,C_center)
   implicit none
   BEGIN_DOC
   ! Computes the following integral :
-  ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r-R_C|)}{|r-R_C|}$.
+  ! $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
   END_DOC
   integer, intent(in)            :: i_ao,j_ao
   double precision, intent(in)   :: mu_in, C_center(3)
@@ -51,8 +51,12 @@ end
 double precision function NAI_pol_mult_erf(A_center,B_center,power_A,power_B,alpha,beta,C_center,n_pt_in,mu_in)
   BEGIN_DOC
   ! Computes the following integral :
-  ! $\int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-  !  \frac{\erf(\mu |r-R_C|)}{|r-R_c|}$.
+  !
+  ! .. math::
+  ! 
+  !   \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
+  !   \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
   END_DOC
 
   implicit none
@@ -126,7 +130,8 @@ end
 subroutine give_polynomial_mult_center_one_e_erf_opt(A_center,B_center,alpha,beta,&
       power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in,p,p_inv,p_inv_2,p_new,P_center)
   BEGIN_DOC
-  ! Returns the explicit polynomial in terms of the $t$ variable of the following polynomial:
+  ! Returns the explicit polynomial in terms of the $t$ variable of the
+  ! following polynomial:
   !
   ! $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
   END_DOC
@@ -244,7 +249,8 @@ end
 subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,&
       power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
   BEGIN_DOC
-  ! Returns the explicit polynomial in terms of the $t$ variable of the following polynomial:
+  ! Returns the explicit polynomial in terms of the $t$ variable of the 
+  ! following polynomial:
   !
   ! $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
   END_DOC
@@ -262,7 +268,6 @@ subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,&
   double precision               :: accu,  pq_inv, p10_1, p10_2, p01_1, p01_2
   double precision               :: p,P_center(3),rho,p_inv,p_inv_2
   accu = 0.d0
-  !COMPTEUR irp_rdtsc1 = irp_rdtsc()
   ASSERT (n_pt_in > 1)
   p = alpha+beta
   p_inv = 1.d0/p

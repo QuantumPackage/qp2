@@ -27,9 +27,9 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $E_0 = \frac{\langle u_0|H|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+  ! Computes $E_0 = \frac{\langle u_0 | H | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
   !
-  ! and      $S_0 = \frac{\langle u_0|S^2|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+  ! and      $S_0 = \frac{\langle u_0 | S^2 | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
   !
   ! n : number of determinants
   !
@@ -80,7 +80,7 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$.
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$.
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -135,7 +135,7 @@ subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t\rangle$ and $s_t = S^2  | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -165,7 +165,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC

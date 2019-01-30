@@ -6,7 +6,7 @@ END_SHELL
 subroutine perturb_buffer_$PERT(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
   implicit none
   BEGIN_DOC
-  !  Applly pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
+  ! Apply pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
   ! routine.
   END_DOC
 
@@ -185,7 +185,7 @@ end
 subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
   implicit none
   BEGIN_DOC
-  !  Applly pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
+  ! Apply pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
   ! routine.
   END_DOC
 

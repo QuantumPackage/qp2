@@ -13,15 +13,15 @@ Contains everything for the computation of the Hamiltonian matrix elements in th
 The main providers for this module are:
 
 * :option:`determinants n_states`: number of states to be computed
-* `psi_det`: list of determinants in the wave function used in many routines/providers of the |QP|.
-* `psi_coef`: list of coefficients, for all :option:`determinants n_states` states, and all determinants.
+* :c:data:`psi_det`: list of determinants in the wave function used in many routines/providers of the |QP|.
+* :c:data:`psi_coef`: list of coefficients, for all :option:`determinants n_states` states, and all determinants.
 
 The main routines for this module are:
 
-* `i_H_j`: computes the Hamiltonian matrix element between two arbitrary Slater determinants.
-* `i_H_j_s2`: computes the Hamiltonian and (:math:`S^2`) matrix element between two arbitrary Slater determinants.
-* `i_H_j_verbose`: returns the decomposition in terms of one- and two-body components of the Hamiltonian matrix elements between two arbitrary Slater determinants. Also return the fermionic phase factor.
-* `i_H_psi`: computes the Hamiltonian matrix element between an arbitrary Slater determinant and a wave function composed of a sum of arbitrary Slater determinants.
+* :c:func:`i_H_j`: computes the Hamiltonian matrix element between two arbitrary Slater determinants.
+* :c:func:`i_H_j_s2`: computes the Hamiltonian and (|S^2|) matrix element between two arbitrary Slater determinants.
+* :c:func:`i_H_j_verbose`: returns the decomposition in terms of one- and two-body components of the Hamiltonian matrix elements between two arbitrary Slater determinants. Also return the fermionic phase factor.
+* :c:func:`i_H_psi`: computes the Hamiltonian matrix element between an arbitrary Slater determinant and a wave function composed of a sum of arbitrary Slater determinants.
 
 
 For an example of how to use these routines and providers, take a look at :file:`example.irp.f`.
@@ -81,12 +81,12 @@ EZFIO parameters
  
 .. option:: n_int
  
-    Number of integers required to represent bitstrings (set in module :ref:`bitmask`)
+    Number of integers required to represent bitstrings (set in module :ref:`module_bitmask`)
  
  
 .. option:: bit_kind
  
-    (set in module :ref:`bitmask`)
+    (set in module :ref:`module_bitmask`)
  
  
 .. option:: mo_label

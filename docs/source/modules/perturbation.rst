@@ -106,39 +106,6 @@ EZFIO parameters
 Providers 
 --------- 
  
-.. c:function:: fill_h_apply_buffer_selection:
-
-
-    File : :file:`perturbation/selection.irp.f`
-
-    .. code:: fortran
-
-        subroutine fill_H_apply_buffer_selection(n_selected,det_buffer,e_2_pert_buffer,coef_pert_buffer, &
-   N_st,Nint,iproc,select_max_out)
-
-
-    Fill the H_apply buffer with determiants for the selection
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`selection_criterion`
-       * :c:data:`h_apply_buffer_allocated`
-       * :c:data:`n_det`
-       * :c:data:`n_int`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`omp_set_lock`
-       * :c:func:`omp_unset_lock`
-       * :c:func:`resize_h_apply_buffer`
-
- 
 .. c:var:: h0_type
 
 
@@ -253,6 +220,38 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
+.. c:function:: fill_h_apply_buffer_selection:
+
+
+    File : :file:`perturbation/selection.irp.f`
+
+    .. code:: fortran
+
+        subroutine fill_H_apply_buffer_selection(n_selected,det_buffer,e_2_pert_buffer,coef_pert_buffer, N_st,Nint,iproc,select_max_out)
+
+
+    Fill the H_apply buffer with determiants for the selection
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`selection_criterion`
+       * :c:data:`h_apply_buffer_allocated`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`omp_set_lock`
+       * :c:func:`omp_unset_lock`
+       * :c:func:`resize_h_apply_buffer`
+
+ 
 .. c:function:: perturb_buffer_by_mono_dummy:
 
 
@@ -263,7 +262,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_dummy(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``dummy`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``dummy`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -298,7 +297,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_epstein_nesbet(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -333,7 +332,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_epstein_nesbet_2x2(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -368,7 +367,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_epstein_nesbet_2x2_no_ci_diag(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -403,7 +402,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_moller_plesset(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -438,7 +437,7 @@ Subroutines / functions
         subroutine perturb_buffer_by_mono_qdpt(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -473,7 +472,7 @@ Subroutines / functions
         subroutine perturb_buffer_dummy(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``dummy`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``dummy`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -509,7 +508,7 @@ Subroutines / functions
         subroutine perturb_buffer_epstein_nesbet(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -545,7 +544,7 @@ Subroutines / functions
         subroutine perturb_buffer_epstein_nesbet_2x2(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet_2x2`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -581,7 +580,7 @@ Subroutines / functions
         subroutine perturb_buffer_epstein_nesbet_2x2_no_ci_diag(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``epstein_nesbet_2x2_no_ci_diag`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -617,7 +616,7 @@ Subroutines / functions
         subroutine perturb_buffer_moller_plesset(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``moller_plesset`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:
@@ -653,7 +652,7 @@ Subroutines / functions
         subroutine perturb_buffer_qdpt(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
 
 
-     Applly pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
+    Apply pertubration ``qdpt`` to the buffer of determinants generated in the H_apply
     routine.
 
     Needs:

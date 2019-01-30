@@ -587,11 +587,13 @@ Subroutines / functions
         double precision function ERI_erf(alpha,beta,delta,gama,a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z)
 
 
-    ATOMIC PRIMTIVE two-electron integral between the 4 primitives ::
-           primitive_1 = x1**(a_x) y1**(a_y) z1**(a_z) exp(-alpha * r1**2)
-           primitive_2 = x1**(b_x) y1**(b_y) z1**(b_z) exp(- beta * r1**2)
-           primitive_3 = x2**(c_x) y2**(c_y) z2**(c_z) exp(-delta * r2**2)
-           primitive_4 = x2**(d_x) y2**(d_y) z2**(d_z) exp(- gama * r2**2)
+    Atomic primtive two-electron integral between the 4 primitives :
+    
+    * primitive 1 : $x_1^{a_x} y_1^{a_y} z_1^{a_z} \exp(-\alpha * r1^2)$
+    * primitive 2 : $x_1^{b_x} y_1^{b_y} z_1^{b_z} \exp(- \beta * r1^2)$
+    * primitive 3 : $x_2^{c_x} y_2^{c_y} z_2^{c_z} \exp(-\delta * r2^2)$
+    * primitive 4 : $x_2^{d_x} y_2^{d_y} z_2^{d_z} \exp(-\gamma * r2^2)$
+    
 
     Needs:
 
@@ -776,9 +778,11 @@ Subroutines / functions
         subroutine integrale_new_erf(I_f,a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z,p,q,n_pt)
 
 
-    calculate the integral of the polynom ::
-            I_x1(a_x+b_x, c_x+d_x,p,q) * I_x1(a_y+b_y, c_y+d_y,p,q) * I_x1(a_z+b_z, c_z+d_z,p,q)
-    between ( 0 ; 1)
+    Calculate the integral of the polynomial :
+    
+    $I_x1(a_x+b_x, c_x+d_x,p,q) \, I_x1(a_y+b_y, c_y+d_y,p,q) \, I_x1(a_z+b_z, c_z+d_z,p,q)$
+    
+    between $( 0 ; 1)$
 
     Needs:
 

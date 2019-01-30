@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CIS" "1" "Jan 25, 2019" "2.0" "Quantum Package"
+.TH "CIS" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
 cis \-  | Quantum Package >
 .
@@ -40,19 +40,24 @@ Disregarding spatial symmetry, it computes the \fIn_states\fP lowest
 eigenstates of that CI matrix. (see \fBdeterminants n_states\fP)
 .sp
 This program can be useful in many cases:
+.INDENT 0.0
+.IP 1. 3
+Ground state calculation
 .sp
 To be sure to have the lowest SCF solution, perform an scf
-(see the hartree_fock module), then a \fI\%cis\fP, save
-the natural orbitals (see save_natorb) and re\-run an
-scf optimization from this MO guess.
+(see the module_hartree_fock module), then a \fI\%cis\fP, save the
+natural orbitals (see save_natorb) and re\-run an scf
+optimization from this MO guess.
+.IP 2. 3
+Excited states calculations
 .sp
 The lowest excited states are much likely to be dominated by
-single\-excitations. Therefore, running a \fI\%cis\fP will save
-the \fIn_states\fP lowest states within the CIS space in the \fI\%EZFIO\fP
+single\-excitations. Therefore, running a \fI\%cis\fP will save the
+\fIn_states\fP lowest states within the CIS space in the \fI\%EZFIO\fP
 directory, which can afterwards be used as guess wave functions for
-a further multi\-state FCI calculation if \fBdeterminants read_wf\fP
-is set to \fBtrue\fP before running the fci
-executable.
+a further multi\-state FCI calculation if \fBdeterminants
+read_wf\fP is set to \fBtrue\fP before running the fci executable.
+.UNINDENT
 .sp
 If \fBdeterminants s2_eig\fP is set to \fBtrue\fP, the CIS
 will only retain states having the expected \ewidehat{S^2} value (see

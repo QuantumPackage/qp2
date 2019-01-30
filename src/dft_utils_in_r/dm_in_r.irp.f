@@ -54,13 +54,19 @@ end
  subroutine density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b, grad_dm_a, grad_dm_b, aos_array, grad_aos_array)
  implicit none
  BEGIN_DOC
-! input      : r(1) ==> r(1) = x, r(2) = y, r(3) = z
-! output     : dm_a = alpha density evaluated at r
-!            : dm_b = beta  density evaluated at r
-!            : aos_array(i) = ao(i) evaluated at r
-!            : grad_dm_a(1) = X gradient of the alpha density evaluated in r
-!            : grad_dm_a(1) = X gradient of the beta  density evaluated in r
-!            : grad_aos_array(1) = X gradient of the aos(i) evaluated at r
+! input:
+!
+! * r(1) ==> r(1) = x, r(2) = y, r(3) = z
+!
+! output:
+!
+! * dm_a = alpha density evaluated at r
+! * dm_b = beta  density evaluated at r
+! * aos_array(i) = ao(i) evaluated at r
+! * grad_dm_a(1) = X gradient of the alpha density evaluated in r
+! * grad_dm_a(1) = X gradient of the beta  density evaluated in r
+! * grad_aos_array(1) = X gradient of the aos(i) evaluated at r
+!
  END_DOC
  double precision, intent(in)  :: r(3)
  double precision, intent(out) :: dm_a(N_states),dm_b(N_states)
