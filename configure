@@ -442,7 +442,14 @@ else
       echo "See  ./configure --help  for more details." 
       echo ""
 fi
-   
+
+# Check if the module to create new DFT functionals exists or not
+if [[ ! -d ${QP_ROOT}/src/new_functionals  ]] ; then
+   echo "${QP_ROOT}/src/new_functionals does NOT exists !!"  
+   echo "Creating a new one ..."
+   cp -r ${QP_ROOT}/scripts/functionals/do_not_touch_func ${QP_ROOT}/src/new_functionals
+fi
+
 exit 0
     
 
