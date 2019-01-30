@@ -35,21 +35,21 @@ subroutine davidson_run_slave(thread,iproc)
   integer(ZMQ_PTR)               :: zmq_socket_push
 
   integer, external              :: connect_to_taskserver
-  integer, external              :: zmq_get_N_states_diag
+  integer                        :: doexit, send, receive
 
-  PROVIDE mpi_rank
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
-  zmq_socket_push      = new_zmq_push_socket(thread)
 
-
-  integer :: ierr, doexit
-  do
-    doexit = 0
-    if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-      call sleep( int(1.5+float(mpi_rank)/10.) )
-      if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-        doexit=1
-      endif
+  doexit = 0
+  if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    doexit=1
+  endif
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    send = doexit
+    call MPI_AllReduce(send, receive, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      doexit=1
     endif
     doexit = receive 
   IRP_ENDIF
@@ -58,33 +58,8 @@ subroutine davidson_run_slave(thread,iproc)
     return
   endif
 
-    IRP_IF MPI
-      include 'mpif.h'
-      integer :: sendbuf, recvbuf
-      sendbuf = doexit
-      recvbuf = doexit
-      call MPI_ALLREDUCE(sendbuf, recvbuf, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        print *,  irp_here//': Unable to reduce '
-        stop -1
-      endif
-      doexit = recvbuf
-    IRP_ENDIF
-
-    if (doexit == 0) then
-        exit
-    else
-        print *,  irp_here, ': retrying connection (', doexit, ')'
-    endif
-  enddo
-
-  do
-    if (zmq_get_N_states_diag(zmq_to_qp_run_socket, 1) /= -1) then
-      exit
-    endif
-    print *,  irp_here, ': Waiting for N_states_diag'
-    call sleep(1)
-  enddo
+  zmq_socket_push      = new_zmq_push_socket(thread)
+      
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
   integer, external :: disconnect_from_taskserver
@@ -97,7 +72,8 @@ subroutine davidson_run_slave(thread,iproc)
   endif
 
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
-  call end_zmq_push_socket(zmq_socket_push,thread)
+  call end_zmq_push_socket(zmq_socket_push)
+
 end subroutine
 
 
@@ -147,8 +123,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   endif
 
   do while (zmq_get_dmatrix(zmq_to_qp_run_socket, worker_id, 'u_t', u_t, ni, nj, size(u_t,kind=8)) == -1)
-    call sleep(1)
-    print *,  irp_here, ': waiting for u_t...'
+    print *,  'mpi_rank, N_states_diag, N_det'
+    print *,  mpi_rank, N_states_diag, N_det
+    stop 'u_t'
   enddo
 
   IRP_IF MPI
@@ -353,9 +330,9 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
   call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'davidson')
 
-  integer :: N_states_diag_save
-  N_states_diag_save = N_states_diag
-  N_states_diag = N_st
+!  integer :: N_states_diag_save
+!  N_states_diag_save = N_states_diag
+!  N_states_diag = N_st
   if (zmq_put_N_states_diag(zmq_to_qp_run_socket, 1) == -1) then
     stop 'Unable to put N_states_diag on ZMQ server'
   endif
@@ -474,8 +451,8 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   !$OMP TASKWAIT
   !$OMP END PARALLEL
 
-  N_states_diag = N_states_diag_save
-  SOFT_TOUCH N_states_diag
+!  N_states_diag = N_states_diag_save
+!  SOFT_TOUCH N_states_diag
 end
 
 
@@ -588,3 +565,4 @@ integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
     endif
   IRP_ENDIF
 end
+

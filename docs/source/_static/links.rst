@@ -76,6 +76,8 @@
 .. |SCF| replace:: :abbr:`SCF (Self Consistent Field)`
 .. |sCI| replace:: :abbr:`sCI (Selected-CI)`
 .. |WFT| replace:: :abbr:`WFT (Wave Function Theory)`
+.. |LDA| replace:: :abbr:`LDA (Local Density Approximation)`
+.. |PBE| replace:: :abbr:`PBE (Perdew-Burke-Ernzerhof)`
 
 .. |kalpha| replace:: :math:`|\alpha \rangle`
 .. |H| replace:: :math:`\hat H`
