@@ -1,11 +1,14 @@
 program diagonalize_h
  implicit none
  BEGIN_DOC
-! Program that extracts the :option:`determinants n_states` lowest states of the Hamiltonian within the set of Slater determinants stored in the EZFIO folder.
+! Program that extracts the :option:`determinants n_states` lowest
+! states of the Hamiltonian within the set of Slater determinants stored
+! in the |EZFIO| directory.
 !
-! If :option:`determinants s2_eig` = True, it will retain only states
+! If :option:`determinants s2_eig` = |true|, it will retain only states
+! which correspond to the desired value of
+! :option:`determinants expected_s2`.
 !
-! which corresponds to the desired value of :option:`determinants expected_s2`.
  END_DOC
  read_wf = .True.
  touch read_wf

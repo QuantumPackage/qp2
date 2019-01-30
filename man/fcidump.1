@@ -32,18 +32,22 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Produce a regular FCIDUMP file from the MOs stored in the \fI\%EZFIO\fP folder.
+Produce a regular \fIFCIDUMP\fP file from the MOs stored in the \fI\%EZFIO\fP
+directory.
 .sp
-To specify an active space, the class of the mos have to set in the \fI\%EZFIO\fP folder (see qp_set_mo_class).
+To specify an active space, the class of the MOs have to set in the
+\fI\%EZFIO\fP directory (see qp_set_mo_class).
 .sp
-The fcidump program supports 3 types of MO_class :
+The \fI\%fcidump\fP program supports 3 types of MO classes :
 .INDENT 0.0
 .IP \(bu 2
-the “core” orbitals which are always doubly occupied in the calculation
+the \fIcore\fP orbitals which are always doubly occupied in the
+calculation
 .IP \(bu 2
-the “del” orbitals that are never occupied in the calculation
+the \fIdeleted\fP orbitals that are never occupied in the calculation
 .IP \(bu 2
-the “act” orbitals that will be occupied by a varying number of electrons
+the \fIactive\fP orbitals that are occupied with a varying number of
+electrons
 .UNINDENT
 .sp
 Needs:
