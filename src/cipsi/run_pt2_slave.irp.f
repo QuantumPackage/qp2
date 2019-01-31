@@ -17,8 +17,6 @@ subroutine run_pt2_slave(thread,iproc,energy)
   integer(ZMQ_PTR), external     :: new_zmq_push_socket
   integer(ZMQ_PTR)               :: zmq_socket_push
 
-  double precision, save         :: mini_omp_shared  ! Max value of b%mini, shared among omp tasks via save
-
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
@@ -29,10 +27,8 @@ subroutine run_pt2_slave(thread,iproc,energy)
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
   integer :: bsize ! Size of selection buffers
+  logical :: sending
 
-  !$OMP CRITICAL
-  mini_omp_shared = 0.d0
-  !$OMP END CRITICAL
   rss  = memory_of_int(pt2_n_tasks_max)*67.d0
   rss += memory_of_double(pt2_n_tasks_max)*(N_states*3)
   call check_mem(rss,irp_here)
@@ -56,6 +52,7 @@ subroutine run_pt2_slave(thread,iproc,energy)
   buffer_ready = .False.
   n_tasks = 1
 
+  sending = .False.
   done = .False.
   n_tasks = 1
   do while (.not.done)
@@ -92,7 +89,6 @@ subroutine run_pt2_slave(thread,iproc,energy)
         variance(:,k) = 0.d0
         norm(:,k) = 0.d0
         b%cur = 0
-        b%mini = mini_omp_shared
 !double precision :: time2
 !call wall_time(time2)
         call select_connected(i_generator(k),energy,pt2(1,k),variance(1,k),norm(1,k),b,subset(k),pt2_F(i_generator(k)))
@@ -107,15 +103,14 @@ subroutine run_pt2_slave(thread,iproc,energy)
       done = .true.
     endif
     call sort_selection_buffer(b)
-    call push_pt2_results(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks)
-    !$OMP CRITICAL
-    mini_omp_shared = min(b%mini,mini_omp_shared) ! For sharing with other threads
-    !$OMP END CRITICAL
+    call push_pt2_results_async_recv(zmq_socket_push,sending)
+    call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks,sending)
     b%cur=0
 
     ! Try to adjust n_tasks around nproc/8 seconds per job
     n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/8) / (time1 - time0 + 1.d0)))
   end do
+  call push_pt2_results_async_recv(zmq_socket_push,sending)
 
   integer, external :: disconnect_from_taskserver
   do i=1,300
@@ -231,6 +226,127 @@ IRP_ELSE
 IRP_ENDIF
 
 end subroutine
+
+
+subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2, variance, norm, b, task_id, n_tasks, sending)
+  use f77_zmq
+  use selection_types
+  implicit none
+
+  integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
+  double precision, intent(in)   :: pt2(N_states,n_tasks)
+  double precision, intent(in)   :: variance(N_states,n_tasks)
+  double precision, intent(in)   :: norm(N_states,n_tasks)
+  integer, intent(in) :: n_tasks, index(n_tasks), task_id(n_tasks)
+  type(selection_buffer), intent(inout) :: b
+  logical, intent(inout) :: sending
+  integer :: rc
+
+  if (sending) then
+    print *,  irp_here, ': sending is true'
+    stop -1
+  endif
+  sending = .True.
+
+  rc = f77_zmq_send( zmq_socket_push, n_tasks, 4, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 4) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, index, 4*n_tasks, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 4*n_tasks) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, pt2, 8*N_states*n_tasks, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 8*N_states*n_tasks) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, variance, 8*N_states*n_tasks, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 8*N_states*n_tasks) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, norm, 8*N_states*n_tasks, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 8*N_states*n_tasks) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, task_id, n_tasks*4, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 4*n_tasks) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, b%cur, 4, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 4) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, b%val, 8*b%cur, ZMQ_SNDMORE)
+  if (rc == -1) then
+    return
+  else if(rc /= 8*b%cur) then
+    stop 'push'
+  endif
+
+
+  rc = f77_zmq_send( zmq_socket_push, b%det, bit_kind*N_int*2*b%cur, 0)
+  if (rc == -1) then
+    return
+  else if(rc /= N_int*2*8*b%cur) then
+    stop 'push'
+  endif
+
+end subroutine
+
+subroutine push_pt2_results_async_recv(zmq_socket_push,sending)
+  use f77_zmq
+  use selection_types
+  implicit none
+
+  integer(ZMQ_PTR), intent(in)    :: zmq_socket_push
+  integer(ZMQ_PTR), intent(inout) :: sending
+  integer :: rc
+
+  if (.not.sending) return
+
+! Activate is zmq_socket_push is a REQ
+IRP_IF ZMQ_PUSH
+IRP_ELSE
+  character*(2) :: ok
+  rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
+  if (rc == -1) then
+    return
+  else if ((rc /= 2).and.(ok(1:2) /= 'ok')) then
+    print *,  irp_here//': error in receiving ok'
+    stop -1
+  endif
+IRP_ENDIF
+  sending = .False.
+end subroutine
+
 
 
 subroutine pull_pt2_results(zmq_socket_pull, index, pt2, variance, norm, task_id, n_tasks, b)

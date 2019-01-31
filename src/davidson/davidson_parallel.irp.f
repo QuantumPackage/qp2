@@ -139,6 +139,8 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   ! Run tasks
   ! ---------
 
+  logical :: sending
+  sending=.False.
 
   allocate(v_t(N_st,N_det), s_t(N_st,N_det))
   do
@@ -158,9 +160,11 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
     if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id) == -1) then
         print *,  irp_here, 'Unable to send task_done'
     endif
-    call davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
+    call davidson_push_results_async_recv(zmq_socket_push, sending)
+    call davidson_push_results_async_send(zmq_socket_push, v_t, s_t, imin, imax, task_id, sending)
   end do
   deallocate(u_t,v_t, s_t)
+  call davidson_push_results_async_recv(zmq_socket_push, sending)
 
 end subroutine
 
@@ -207,6 +211,73 @@ IRP_ELSE
     stop -1
   endif
 IRP_ENDIF
+
+end subroutine
+
+subroutine davidson_push_results_async_send(zmq_socket_push, v_t, s_t, imin, imax, task_id,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  integer             ,intent(in)    :: task_id, imin, imax
+  double precision    ,intent(in)    :: v_t(N_states_diag,N_det)
+  double precision    ,intent(in)    :: s_t(N_states_diag,N_det)
+  logical             ,intent(inout) :: sending
+  integer                            :: rc, sz
+  integer*8                          :: rc8
+
+  if (sending) then
+    print *,  irp_here, ': sending=true'
+    stop -1
+  endif
+  sending = .True.
+
+  sz = (imax-imin+1)*N_states_diag
+
+  rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push task_id'
+
+  rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push imin'
+
+  rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push imax'
+
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
+
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz, 0)
+  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
+
+end subroutine
+
+subroutine davidson_push_results_async_recv(zmq_socket_push,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  logical             ,intent(inout) :: sending
+
+  integer                            :: rc
+
+  if (.not.sending) return
+! Activate is zmq_socket_push is a REQ
+IRP_IF ZMQ_PUSH
+IRP_ELSE
+  character*(2) :: ok
+  rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
+  if ((rc /= 2).and.(ok(1:2)/='ok')) then
+    print *, irp_here, ': f77_zmq_recv( zmq_socket_push, ok, 2, 0)'
+    stop -1
+  endif
+IRP_ENDIF
+  sending = .False.
 
 end subroutine
 
@@ -275,22 +346,28 @@ subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze
   integer                          :: more, task_id, imin, imax
 
   double precision, allocatable :: v_t(:,:), s_t(:,:)
+  logical :: sending
   integer :: i,j
+  integer, external :: zmq_delete_task_async_send
+  integer, external :: zmq_delete_task_async_recv
 
   allocate(v_t(N_st,N_det), s_t(N_st,N_det))
   v0 = 0.d0
   s0 = 0.d0
   more = 1
+  sending = .False.
   do while (more == 1)
     call davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
+    if (zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending) == -1) then
+      stop 'Unable to delete task'
+    endif
     do j=1,N_st
       do i=imin,imax
         v0(i,j) = v0(i,j) + v_t(j,i)
         s0(i,j) = s0(i,j) + s_t(j,i)
       enddo
     enddo
-    integer, external :: zmq_delete_task
-    if (zmq_delete_task(zmq_to_qp_run_socket,zmq_socket_pull,task_id,more) == -1) then
+    if (zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
       stop 'Unable to delete task'
     endif
   end do
