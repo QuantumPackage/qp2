@@ -8,5 +8,6 @@ BEGIN_PROVIDER [ character*32,h0_type ]
  else
    h0_type = 'EN'
  endif
+!   h0_type = 'HF'
 END_PROVIDER
 
