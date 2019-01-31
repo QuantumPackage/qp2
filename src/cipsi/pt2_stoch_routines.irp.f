@@ -515,6 +515,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       end do
       do i=1, b2%cur
         call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
+        ! We assume the pulled buffer is sorted
         if (b2%val(i) > b%mini) exit
       end do
 !print *,  'done pulling'

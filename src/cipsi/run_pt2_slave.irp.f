@@ -1,4 +1,3 @@
-
 subroutine run_pt2_slave(thread,iproc,energy)
   use f77_zmq
   use selection_types
@@ -18,8 +17,9 @@ subroutine run_pt2_slave(thread,iproc,energy)
   integer(ZMQ_PTR), external     :: new_zmq_push_socket
   integer(ZMQ_PTR)               :: zmq_socket_push
 
+  double precision, save         :: mini_omp_shared  ! Max value of b%mini, shared among omp tasks via save
+
   type(selection_buffer) :: b
-!  type(selection_buffer) :: b2
   logical :: done, buffer_ready
 
   double precision,allocatable :: pt2(:,:), variance(:,:), norm(:,:)
@@ -30,6 +30,9 @@ subroutine run_pt2_slave(thread,iproc,energy)
   double precision, external :: memory_of_double, memory_of_int
   integer :: bsize ! Size of selection buffers
 
+  !$OMP CRITICAL
+  mini_omp_shared = 0.d0
+  !$OMP END CRITICAL
   rss  = memory_of_int(pt2_n_tasks_max)*67.d0
   rss += memory_of_double(pt2_n_tasks_max)*(N_states*3)
   call check_mem(rss,irp_here)
@@ -77,7 +80,6 @@ subroutine run_pt2_slave(thread,iproc,energy)
       ! Only first time
       bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
       call create_selection_buffer(bsize, bsize*2, b)
-!      call create_selection_buffer(N, N*2, b2)
       buffer_ready = .True.
     else
       ASSERT (N == b%N)
@@ -90,6 +92,7 @@ subroutine run_pt2_slave(thread,iproc,energy)
         variance(:,k) = 0.d0
         norm(:,k) = 0.d0
         b%cur = 0
+        b%mini = mini_omp_shared
 !double precision :: time2
 !call wall_time(time2)
         call select_connected(i_generator(k),energy,pt2(1,k),variance(1,k),norm(1,k),b,subset(k),pt2_F(i_generator(k)))
@@ -104,9 +107,10 @@ subroutine run_pt2_slave(thread,iproc,energy)
       done = .true.
     endif
     call sort_selection_buffer(b)
-!    call merge_selection_buffers(b,b2)
     call push_pt2_results(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks)
-!    b%mini = b2%mini
+    !$OMP CRITICAL
+    mini_omp_shared = min(b%mini,mini_omp_shared) ! For sharing with other threads
+    !$OMP END CRITICAL
     b%cur=0
 
     ! Try to adjust n_tasks around nproc/8 seconds per job
@@ -124,7 +128,6 @@ subroutine run_pt2_slave(thread,iproc,energy)
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
   if (buffer_ready) then
     call delete_selection_buffer(b)
-!    call delete_selection_buffer(b2)
   endif
 end subroutine
 
