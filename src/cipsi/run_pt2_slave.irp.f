@@ -107,8 +107,8 @@ subroutine run_pt2_slave(thread,iproc,energy)
     call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks,sending)
     b%cur=0
 
-    ! Try to adjust n_tasks around nproc/8 seconds per job
-    n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/8) / (time1 - time0 + 1.d0)))
+    ! Try to adjust n_tasks around nproc/2 seconds per job
+    n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/2) / (time1 - time0 + 1.d0)))
   end do
   call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 
