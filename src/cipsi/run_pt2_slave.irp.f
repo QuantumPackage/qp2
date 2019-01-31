@@ -327,9 +327,9 @@ subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
   implicit none
 
   integer(ZMQ_PTR), intent(in)    :: zmq_socket_push
-  integer(ZMQ_PTR), intent(inout) :: sending
+  double precision, intent(out) :: mini
+  logical, intent(inout) :: sending
   integer :: rc
-  double precision :: mini
 
   if (.not.sending) return
 

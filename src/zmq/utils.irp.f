@@ -1193,7 +1193,7 @@ integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_task
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
   integer, intent(in)            :: n_tasks, task_id(n_tasks)
-  integer, intent(inout)         :: sending
+  logical, intent(inout)         :: sending
   integer                        :: rc, k
   character*(64)                 :: fmt, reply
   character(LEN=:), allocatable  :: message
@@ -1231,7 +1231,7 @@ integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending)
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
   integer, intent(out)           :: more
-  integer, intent(inout)         :: sending
+  logical, intent(inout)         :: sending
   integer                        :: rc
   character*(64)                 :: reply
 
