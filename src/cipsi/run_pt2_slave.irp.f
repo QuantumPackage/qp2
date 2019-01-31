@@ -103,14 +103,14 @@ subroutine run_pt2_slave(thread,iproc,energy)
       done = .true.
     endif
     call sort_selection_buffer(b)
-    call push_pt2_results_async_recv(zmq_socket_push,sending)
+    call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
     call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks,sending)
     b%cur=0
 
     ! Try to adjust n_tasks around nproc/8 seconds per job
     n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/8) / (time1 - time0 + 1.d0)))
   end do
-  call push_pt2_results_async_recv(zmq_socket_push,sending)
+  call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 
   integer, external :: disconnect_from_taskserver
   do i=1,300
@@ -321,7 +321,7 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2, variance, no
 
 end subroutine
 
-subroutine push_pt2_results_async_recv(zmq_socket_push,sending)
+subroutine push_pt2_results_async_recv(zmq_socket_push,mini,sending)
   use f77_zmq
   use selection_types
   implicit none
@@ -329,6 +329,7 @@ subroutine push_pt2_results_async_recv(zmq_socket_push,sending)
   integer(ZMQ_PTR), intent(in)    :: zmq_socket_push
   integer(ZMQ_PTR), intent(inout) :: sending
   integer :: rc
+  double precision :: mini
 
   if (.not.sending) return
 
@@ -343,6 +344,7 @@ IRP_ELSE
     print *,  irp_here//': error in receiving ok'
     stop -1
   endif
+  rc = f77_zmq_recv( zmq_socket_push, mini, 8, 0)
 IRP_ENDIF
   sending = .False.
 end subroutine
@@ -438,7 +440,7 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2, variance, norm, task_id
 ! Activate is zmq_socket_pull is a REP
 IRP_IF ZMQ_PUSH
 IRP_ELSE
-  rc = f77_zmq_send( zmq_socket_pull, 'ok', 2, 0)
+  rc = f77_zmq_send( zmq_socket_pull, 'ok', 2, ZMQ_SNDMORE)
   if (rc == -1) then
     n_tasks = 1
     task_id(1) = 0
@@ -446,6 +448,7 @@ IRP_ELSE
     print *,  irp_here//': error in sending ok'
     stop -1
   endif
+  rc = f77_zmq_send( zmq_socket_pull, b%mini, 8, 0)
 IRP_ENDIF
 
 end subroutine
