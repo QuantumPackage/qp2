@@ -2,6 +2,10 @@
 subroutine create_selection_buffer(N, siz_, res)
   use selection_types
   implicit none
+  BEGIN_DOC
+! Allocates the memory for a selection buffer.
+! The arrays have dimension siz_ and the maximum number of elements is N
+  END_DOC
 
   integer, intent(in) :: N, siz_
   type(selection_buffer), intent(out) :: res

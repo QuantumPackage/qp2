@@ -248,8 +248,8 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
               + 64.d0*pt2_n_tasks_max           & ! task
               + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
-              + 2.d0*(N_int*2.d0*N_in + N_in)   & ! selection buffers
-              + 1.d0*(N_int*2.d0*N_in + N_in)   & ! sort/merge selection buffers
+              + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
+              + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
               + 2.0d0*(ii)                      & ! preinteresting, interesting,
                                                   ! prefullinteresting, fullinteresting
               + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
@@ -422,6 +422,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   stop_now = .false.
   do while (n <= N_det_generators)
     if(f(pt2_J(n)) == 0) then
+!print *,  'f(pt2_J(n)) == 0'
       d(pt2_J(n)) = .true.
       do while(d(U+1))
         U += 1
@@ -447,6 +448,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       ! Add Stochastic part
       c = pt2_R(n)
       if(c > 0) then
+!print *,  'c>0'
         x  = 0d0
         x2 = 0d0
         x3 = 0d0
@@ -497,8 +499,10 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       end if
       n += 1
     else if(more == 0) then
+!print *,  'more == 0'
       exit
     else
+!print *,  'pulling...'
       call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
       if (zmq_delete_tasks(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n_tasks,more) == -1) then
           stop 'Unable to delete tasks'
@@ -513,10 +517,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
         call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
         if (b2%val(i) > b%mini) exit
       end do
+!print *,  'done pulling'
     end if
   end do
+!print *,  'deleting b2'
   call delete_selection_buffer(b2)
+!print *,  'sorting b'
   call sort_selection_buffer(b)
+!print *,  'done'
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
 
 end subroutine

@@ -153,9 +153,6 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   logical :: monoAdo, monoBdo
   integer :: maskInd
 
-  double precision :: rss
-  double precision, external :: memory_of_double, memory_of_int
-
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns

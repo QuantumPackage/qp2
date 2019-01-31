@@ -18,7 +18,8 @@ subroutine run_pt2_slave(thread,iproc,energy)
   integer(ZMQ_PTR), external     :: new_zmq_push_socket
   integer(ZMQ_PTR)               :: zmq_socket_push
 
-  type(selection_buffer) :: b, b2
+  type(selection_buffer) :: b
+!  type(selection_buffer) :: b2
   logical :: done, buffer_ready
 
   double precision,allocatable :: pt2(:,:), variance(:,:), norm(:,:)
@@ -27,6 +28,8 @@ subroutine run_pt2_slave(thread,iproc,energy)
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
+  integer :: bsize ! Size of selection buffers
+
   rss  = memory_of_int(pt2_n_tasks_max)*67.d0
   rss += memory_of_double(pt2_n_tasks_max)*(N_states*3)
   call check_mem(rss,irp_here)
@@ -72,8 +75,9 @@ subroutine run_pt2_slave(thread,iproc,energy)
     enddo
     if (b%N == 0) then
       ! Only first time
-      call create_selection_buffer(N, N*2, b)
-      call create_selection_buffer(N, N*2, b2)
+      bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
+      call create_selection_buffer(bsize, bsize*2, b)
+!      call create_selection_buffer(N, N*2, b2)
       buffer_ready = .True.
     else
       ASSERT (N == b%N)
@@ -100,9 +104,9 @@ subroutine run_pt2_slave(thread,iproc,energy)
       done = .true.
     endif
     call sort_selection_buffer(b)
-    call merge_selection_buffers(b,b2)
+!    call merge_selection_buffers(b,b2)
     call push_pt2_results(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks)
-    b%mini = b2%mini
+!    b%mini = b2%mini
     b%cur=0
 
     ! Try to adjust n_tasks around nproc/8 seconds per job
@@ -120,7 +124,7 @@ subroutine run_pt2_slave(thread,iproc,energy)
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
   if (buffer_ready) then
     call delete_selection_buffer(b)
-    call delete_selection_buffer(b2)
+!    call delete_selection_buffer(b2)
   endif
 end subroutine
 
