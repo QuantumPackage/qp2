@@ -248,8 +248,8 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
               + 64.d0*pt2_n_tasks_max           & ! task
               + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
-              + 2.d0*(N_int*2.d0*N_in + N_in)   & ! selection buffers
-              + 1.d0*(N_int*2.d0*N_in + N_in)   & ! sort/merge selection buffers
+              + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
+              + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
               + 2.0d0*(ii)                      & ! preinteresting, interesting,
                                                   ! prefullinteresting, fullinteresting
               + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
@@ -350,7 +350,8 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   double precision, allocatable      :: nI(:,:), nI_task(:,:), T3(:)
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
-  integer, external :: zmq_delete_tasks
+  integer, external :: zmq_delete_tasks_async_send
+  integer, external :: zmq_delete_tasks_async_recv
   integer, external :: zmq_abort
   integer, external :: pt2_find_sample_lr
 
@@ -364,13 +365,15 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
 
   integer, allocatable :: f(:)
   logical, allocatable :: d(:)
-  logical :: do_exit, stop_now
+  logical :: do_exit, stop_now, sending
   logical, external :: qp_stop
   type(selection_buffer) :: b2
 
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
+
+  sending =.False.
 
   rss  = memory_of_int(pt2_n_tasks_max*2+N_det_generators*2)
   rss += memory_of_double(N_states*N_det_generators)*3.d0
@@ -422,6 +425,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   stop_now = .false.
   do while (n <= N_det_generators)
     if(f(pt2_J(n)) == 0) then
+!print *,  'f(pt2_J(n)) == 0'
       d(pt2_J(n)) = .true.
       do while(d(U+1))
         U += 1
@@ -447,6 +451,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       ! Add Stochastic part
       c = pt2_R(n)
       if(c > 0) then
+!print *,  'c>0'
         x  = 0d0
         x2 = 0d0
         x3 = 0d0
@@ -500,7 +505,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       exit
     else
       call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
-      if (zmq_delete_tasks(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n_tasks,more) == -1) then
+      if (zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending) == -1) then
           stop 'Unable to delete tasks'
       endif
       do i=1,n_tasks
@@ -511,12 +516,19 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       end do
       do i=1, b2%cur
         call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
+        ! We assume the pulled buffer is sorted
         if (b2%val(i) > b%mini) exit
       end do
+      if (zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
+          stop 'Unable to delete tasks'
+      endif
     end if
   end do
+!print *,  'deleting b2'
   call delete_selection_buffer(b2)
+!print *,  'sorting b'
   call sort_selection_buffer(b)
+!print *,  'done'
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
 
 end subroutine

@@ -251,8 +251,8 @@ subroutine run_slave_main
                 + 64.d0*pt2_n_tasks_max           & ! task
                 + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
                 + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
-                + 2.d0*(N_int*2.d0*N_det+ N_det)  & ! selection buffers
-                + 1.d0*(N_int*2.d0*N_det+ N_det)  & ! sort/merge selection buffers
+                + 2.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
+                + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
                 + 2.0d0*(ii)                      & ! preinteresting, interesting,
                                                     ! prefullinteresting, fullinteresting
                 + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist

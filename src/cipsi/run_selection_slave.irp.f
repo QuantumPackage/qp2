@@ -55,12 +55,13 @@ subroutine run_selection_slave(thread,iproc,energy)
     if (done) then
       ctask = ctask - 1
     else
-      integer :: i_generator, N, subset
+      integer :: i_generator, N, subset, bsize
       read(task,*) subset, i_generator, N
       if(buf%N == 0) then
         ! Only first time
-        call create_selection_buffer(N, N*2, buf)
-        call create_selection_buffer(N, N*2, buf2)
+        bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
+        call create_selection_buffer(bsize, bsize*2, buf)
+!        call create_selection_buffer(N, N*2, buf2)
         buffer_ready = .True.
       else
         ASSERT (N == buf%N)
@@ -83,9 +84,9 @@ subroutine run_selection_slave(thread,iproc,energy)
       end do
       if(ctask > 0) then
         call sort_selection_buffer(buf)
-        call merge_selection_buffers(buf,buf2)
+!        call merge_selection_buffers(buf,buf2)
         call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
-        buf%mini = buf2%mini
+!        buf%mini = buf2%mini
         pt2(:) = 0d0
         variance(:) = 0d0
         norm(:) = 0d0
@@ -108,7 +109,7 @@ subroutine run_selection_slave(thread,iproc,energy)
   call end_zmq_push_socket(zmq_socket_push,thread)
   if (buffer_ready) then
     call delete_selection_buffer(buf)
-    call delete_selection_buffer(buf2)
+!    call delete_selection_buffer(buf2)
   endif
 end subroutine
 
