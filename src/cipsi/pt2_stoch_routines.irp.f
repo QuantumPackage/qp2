@@ -10,13 +10,20 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, pt2_n_tasks_max ]
   implicit none
   logical, external :: testTeethBuilding
-  integer :: i
-  integer :: e
-  e = elec_num - n_core_orb * 2
-  pt2_n_tasks_max = 1+min((e*(e-1)), int(dsqrt(dble(N_det_selectors)))/10)
-  do i=1,N_det_generators
-    pt2_F(i) = 1 + int(dble(pt2_n_tasks_max)*dabs(maxval(psi_coef_sorted_gen(i,:)))**(0.75d0))
+  integer :: i,j
+  pt2_n_tasks_max = elec_beta_num*elec_beta_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
+  pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
+  call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
+
+  pt2_F(:) = int(sqrt(float(pt2_n_tasks_max)))
+  do i=1,pt2_n_0(pt2_N_teeth/4)
+    pt2_F(i) = pt2_n_tasks_max
   enddo
+  do i=pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), N_det_generators
+    pt2_F(i) = 1
+  enddo
+
+
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer, pt2_N_teeth ]
@@ -29,7 +36,7 @@ END_PROVIDER
     pt2_N_teeth = 1
   else
     pt2_minDetInFirstTeeth = min(5, N_det_generators)
-    do pt2_N_teeth=100,2,-1
+    do pt2_N_teeth=400,2,-1
       if(testTeethBuilding(pt2_minDetInFirstTeeth, pt2_N_teeth)) exit
     end do
   end if
@@ -74,10 +81,14 @@ logical function testTeethBuilding(minF, N)
 
   n0 = 0
   testTeethBuilding = .false.
+  double precision :: f
+  integer :: minFN
+  minFN = N_det_generators - minF * N
+  f = 1.d0/dble(N)
   do
     u0 = tilde_cW(n0)
     r = tilde_cW(n0 + minF)
-    Wt = (1d0 - u0) / dble(N)
+    Wt = (1d0 - u0) * f 
     if (dabs(Wt) <= 1.d-3) then
       return
     endif
@@ -86,7 +97,8 @@ logical function testTeethBuilding(minF, N)
        return
     end if
     n0 += 1
-    if(N_det_generators - n0 < minF * N) then
+!    if(N_det_generators - n0 < minF * N) then
+    if(n0 > minFN) then
       return
     end if
   end do
