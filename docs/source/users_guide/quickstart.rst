@@ -18,9 +18,10 @@ Hands on
 
 .. important::
 
-   Before using the |qp|, it is required to source the file
-   :file:`quantum_package.rc` if it has not been done already in the
-   current shell.
+   Before using the |qp|, it is required to load the environment variables 
+   relatives to the |QP| or to be in the |qpsh| mode. 
+   Here we'll do it within the |qpsh| shell: please run ${QP_ROOT}/bin/qpsh 
+   in the current shell.
 
 Create the EZFIO database
 -------------------------

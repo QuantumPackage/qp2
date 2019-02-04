@@ -4,7 +4,7 @@
 * option provider :option:`name_of_module provider`
 * subroutine      :c:func:`my_subroutine` 
 * module          :ref:`module`
-* provider        :c:data:`my_subroutine` 
+* provider        :c:data:`my_provider` 
 * qp_command      :ref:`qp_command`
 * linux command   :command:`qp_command`
 * linux command with option :command:`qp_command -o`

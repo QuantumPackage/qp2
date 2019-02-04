@@ -207,6 +207,7 @@ Index of Providers
 * :c:data:`element_name` 
 * :c:data:`energy_c` 
 * :c:data:`energy_c_lda` 
+* :c:data:`energy_c_new_functional` 
 * :c:data:`energy_c_pbe` 
 * :c:data:`energy_iterations` 
 * :c:data:`energy_sr_c_lda` 
@@ -215,6 +216,7 @@ Index of Providers
 * :c:data:`energy_sr_x_pbe` 
 * :c:data:`energy_x` 
 * :c:data:`energy_x_lda` 
+* :c:data:`energy_x_new_functional` 
 * :c:data:`energy_x_pbe` 
 * :c:data:`exc_degree_per_selectors` 
 * :c:data:`exchange_functional` 
@@ -445,6 +447,9 @@ Index of Providers
 * :c:data:`n_states_diag` 
 * :c:data:`n_virt_orb` 
 * :c:data:`n_virt_orb_allocate` 
+* :c:data:`new_correlation_functional` 
+* :c:data:`new_exchange_functional` 
+* :c:data:`new_hf_exchange` 
 * :c:data:`no_ivvv_integrals` 
 * :c:data:`no_vvv_integrals` 
 * :c:data:`no_vvvv_integrals` 
@@ -511,6 +516,10 @@ Index of Providers
 * :c:data:`potential_c_beta_ao_lda` 
 * :c:data:`potential_c_beta_ao_pbe` 
 * :c:data:`potential_c_beta_mo` 
+* :c:data:`potential_new_functional_c_alpha_ao` 
+* :c:data:`potential_new_functional_c_beta_ao` 
+* :c:data:`potential_new_functional_x_alpha_ao` 
+* :c:data:`potential_new_functional_x_beta_ao` 
 * :c:data:`potential_sr_c_alpha_ao_lda` 
 * :c:data:`potential_sr_c_alpha_ao_pbe` 
 * :c:data:`potential_sr_c_beta_ao_lda` 
@@ -831,6 +840,8 @@ Index of Subroutines/Functions
 * :c:func:`davidson_diag_hs2` 
 * :c:func:`davidson_pull_results` 
 * :c:func:`davidson_push_results` 
+* :c:func:`davidson_push_results_async_recv` 
+* :c:func:`davidson_push_results_async_send` 
 * :c:func:`davidson_run_slave` 
 * :c:func:`davidson_slave_inproc` 
 * :c:func:`davidson_slave_tcp` 
@@ -1213,6 +1224,8 @@ Index of Subroutines/Functions
 * :c:func:`push_integrals` 
 * :c:func:`push_pt2` 
 * :c:func:`push_pt2_results` 
+* :c:func:`push_pt2_results_async_recv` 
+* :c:func:`push_pt2_results_async_send` 
 * :c:func:`push_selection_results` 
 * :c:func:`qp_stop` 
 * :c:func:`qrpa` 
@@ -1341,6 +1354,8 @@ Index of Subroutines/Functions
 * :c:func:`write_time` 
 * :c:func:`zmq_abort` 
 * :c:func:`zmq_delete_task` 
+* :c:func:`zmq_delete_task_async_recv` 
+* :c:func:`zmq_delete_task_async_send` 
 * :c:func:`zmq_delete_tasks` 
 * :c:func:`zmq_delete_tasks_async_recv` 
 * :c:func:`zmq_delete_tasks_async_send` 
