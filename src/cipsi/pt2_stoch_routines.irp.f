@@ -36,7 +36,7 @@ END_PROVIDER
     pt2_N_teeth = 1
   else
     pt2_minDetInFirstTeeth = min(5, N_det_generators)
-    do pt2_N_teeth=400,2,-1
+    do pt2_N_teeth=100,2,-1
       if(testTeethBuilding(pt2_minDetInFirstTeeth, pt2_N_teeth)) exit
     end do
   end if
@@ -61,17 +61,16 @@ logical function testTeethBuilding(minF, N)
 
   allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
 
-  do i=1,N_det_generators
-    tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
-  enddo
-
-  double precision :: norm
   norm = 0.d0
+  double precision :: norm
   do i=N_det_generators,1,-1
-    norm += tilde_w(i)
+    tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate) * &
+                  psi_coef_sorted_gen(i,pt2_stoch_istate)
+    norm = norm + tilde_w(i)
   enddo
 
-  tilde_w(:) = tilde_w(:) / norm
+  f = 1.d0/norm
+  tilde_w(:) = tilde_w(:) * f
 
   tilde_cW(0) = -1.d0
   do i=1,N_det_generators
@@ -132,7 +131,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii N_generators_bitmask
 
-  if (s2_eig) then
+  if (h0_type == 'SOP') then
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
   endif
 

@@ -281,21 +281,28 @@ subroutine run_slave_main
           print *,  'pt2_stoch_istate', pt2_stoch_istate
           print *,  'state_average_weight', state_average_weight
           print *,  'Number of threads', nproc_target
+        endif
+
+        if (.true.) then
           PROVIDE psi_det_hii
 
-          if (s2_eig) then
+          if (h0_type == 'SOP') then
             PROVIDE psi_occ_pattern_hii det_to_occ_pattern
           endif
         endif
 
         PROVIDE global_selection_buffer 
+        if (mpi_master) then
+          print *,  'Running PT2'
+        endif
         !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
         i = omp_get_thread_num()
         call run_pt2_slave(0,i,pt2_e0_denominator)
         !$OMP END PARALLEL
+        FREE state_average_weight
+        print *,  mpi_rank, ': PT2 done'
+        print *,  '-------'
       endif
-      FREE state_average_weight
-      print *,  mpi_rank, ': PT2 done'
 
       IRP_IF MPI
         call MPI_BARRIER(MPI_COMM_WORLD, ierr)

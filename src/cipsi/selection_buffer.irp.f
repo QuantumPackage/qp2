@@ -74,7 +74,7 @@ subroutine merge_selection_buffers(b1, b2)
   type(selection_buffer), intent(inout) :: b2
   integer(bit_kind), pointer     :: detmp(:,:,:)
   double precision, pointer      :: val(:)
-  integer                        :: i, i1, i2, k, nmwen
+  integer                        :: i, i1, i2, k, nmwen, sze
   if (b1%cur == 0) return
   do while (b1%val(b1%cur) > b2%mini)
     b1%cur = b1%cur-1
@@ -85,9 +85,10 @@ subroutine merge_selection_buffers(b1, b2)
   nmwen = min(b1%N, b1%cur+b2%cur)
   double precision :: rss
   double precision, external :: memory_of_double
-  rss = memory_of_double(size(b1%val)) + 2*N_int*memory_of_double(size(b1%det,3))
+  sze = max(size(b1%val), size(b2%val))
+  rss = memory_of_double(sze) + 2*N_int*memory_of_double(sze)
   call check_mem(rss,irp_here)
-  allocate( val(size(b1%val)), detmp(N_int, 2, size(b1%det,3)) )
+  allocate(val(sze), detmp(N_int, 2, sze))
   i1=1
   i2=1
   do i=1,nmwen
