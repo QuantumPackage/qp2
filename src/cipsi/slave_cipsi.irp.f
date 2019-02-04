@@ -232,6 +232,7 @@ subroutine run_slave_main
         endif
       IRP_ENDIF
 
+
       IRP_IF MPI_DEBUG
         call mpi_print('Entering OpenMP section')
       IRP_ENDIF
@@ -251,7 +252,7 @@ subroutine run_slave_main
                 + 64.d0*pt2_n_tasks_max           & ! task
                 + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
                 + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
-                + 2.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
+                + 3.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
                 + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
                 + 2.0d0*(ii)                      & ! preinteresting, interesting,
                                                     ! prefullinteresting, fullinteresting
@@ -272,36 +273,36 @@ subroutine run_slave_main
           nproc_target = nproc_target - 1
 
         enddo
+        
+        if (N_det > 100000) then
 
-        if (mpi_master) then
-          print *,  'N_det', N_det
-          print *,  'N_det_generators', N_det_generators
-          print *,  'N_det_selectors', N_det_selectors
-          print *,  'pt2_e0_denominator', pt2_e0_denominator
-          print *,  'pt2_stoch_istate', pt2_stoch_istate
-          print *,  'state_average_weight', state_average_weight
-          print *,  'Number of threads', nproc_target
-        endif
-
-        if (.true.) then
-          PROVIDE psi_det_hii
+          if (mpi_master) then
+            print *,  'N_det', N_det
+            print *,  'N_det_generators', N_det_generators
+            print *,  'N_det_selectors', N_det_selectors
+            print *,  'pt2_e0_denominator', pt2_e0_denominator
+            print *,  'pt2_stoch_istate', pt2_stoch_istate
+            print *,  'state_average_weight', state_average_weight
+            print *,  'Number of threads', nproc_target
+          endif
 
           if (h0_type == 'SOP') then
-            PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+            PROVIDE det_to_occ_pattern
           endif
-        endif
 
-        PROVIDE global_selection_buffer 
-        if (mpi_master) then
-          print *,  'Running PT2'
+          PROVIDE global_selection_buffer 
+          if (mpi_master) then
+            print *,  'Running PT2'
+          endif
+          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
+          i = omp_get_thread_num()
+          call run_pt2_slave(0,i,pt2_e0_denominator)
+          !$OMP END PARALLEL
+          FREE state_average_weight
+          print *,  mpi_rank, ': PT2 done'
+          print *,  '-------'
+
         endif
-        !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
-        i = omp_get_thread_num()
-        call run_pt2_slave(0,i,pt2_e0_denominator)
-        !$OMP END PARALLEL
-        FREE state_average_weight
-        print *,  mpi_rank, ': PT2 done'
-        print *,  '-------'
       endif
 
       IRP_IF MPI

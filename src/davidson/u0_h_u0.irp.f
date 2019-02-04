@@ -41,13 +41,27 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
   double precision, allocatable   :: v_0(:,:), s_vec(:,:), u_1(:,:)
   double precision                :: u_dot_u,u_dot_v,diag_H_mat_elem
-  integer                         :: i,j
+  integer                         :: i,j, istate
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
     u_1(:,:) = 0.d0
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
+  else if (n < n_det_max_full) then
+    allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
+    v_0(:,:) = 0.d0
+    u_1(:,:) = 0.d0
+    s_vec(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    do istate = 1,N_st
+      do j=1,n
+        do i=1,n
+          v_0(i,istate) = h_matrix_all_dets(i,j) * u_0(j,istate)
+          s_vec(i,istate) = S2_matrix_all_dets(i,j) * u_0(j,istate)
+        enddo
+      enddo
+    enddo
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
     u_1(:,:) = 0.d0
