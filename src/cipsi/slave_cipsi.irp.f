@@ -288,6 +288,7 @@ subroutine run_slave_main
           endif
         endif
 
+        PROVIDE global_selection_buffer 
         !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
         i = omp_get_thread_num()
         call run_pt2_slave(0,i,pt2_e0_denominator)

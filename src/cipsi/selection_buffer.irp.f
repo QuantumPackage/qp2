@@ -37,6 +37,11 @@ subroutine delete_selection_buffer(b)
   if (associated(b%val)) then
     deallocate(b%val)
   endif
+  NULLIFY(b%det)
+  NULLIFY(b%val)
+  b%cur = 0
+  b%mini = 0.d0
+  b%N = 0
 end
 
 

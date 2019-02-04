@@ -16,7 +16,7 @@ END_PROVIDER
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
   pt2_F(:) = int(sqrt(float(pt2_n_tasks_max)))
-  do i=1,pt2_n_0(pt2_N_teeth/4)
+  do i=1,pt2_n_0(1+pt2_N_teeth/4)
     pt2_F(i) = pt2_n_tasks_max
   enddo
   do i=pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), N_det_generators
@@ -115,7 +115,6 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
-  integer, external              :: omp_get_thread_num
   double precision, intent(in)   :: relative_error, E(N_states)
   double precision, intent(out)  :: pt2(N_states),error(N_states)
   double precision, intent(out)  :: variance(N_states),norm(N_states)
@@ -123,7 +122,6 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
   integer                        :: i, N
 
-  double precision, external     :: omp_get_wtime
   double precision               :: state_average_weight_save(N_states), w(N_states,4)
   integer(ZMQ_PTR), external     :: new_zmq_to_qp_run_socket
   type(selection_buffer)         :: b
@@ -132,7 +130,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
-  PROVIDE psi_det_hii
+  PROVIDE psi_det_hii N_generators_bitmask
 
   if (s2_eig) then
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
@@ -148,6 +146,10 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
     N = max(N_in,1) * N_states
     state_average_weight_save(:) = state_average_weight(:)
+    if (int(N,8)*2_8 > huge(1)) then
+      print *,  irp_here, ': integer too large'
+      stop -1
+    endif
     call create_selection_buffer(N, N*2, b)
     ASSERT (associated(b%det))
     ASSERT (associated(b%val))
@@ -291,6 +293,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm          Seconds      '
       print '(A)', '========== ================= =========== =============== =============== ================='
 
+      PROVIDE global_selection_buffer 
       !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(nproc_target+1)            &
           !$OMP  PRIVATE(i)
       i = omp_get_thread_num()
@@ -338,6 +341,7 @@ subroutine pt2_slave_inproc(i)
   implicit none
   integer, intent(in)            :: i
 
+  PROVIDE global_selection_buffer 
   call run_pt2_slave(1,i,pt2_e0_denominator)
 end
 
@@ -371,7 +375,6 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   integer, allocatable :: task_id(:)
   integer, allocatable :: index(:)
 
-  double precision, external :: omp_get_wtime
   double precision :: v, x, x2, x3, avg, avg2, avg3, eqt, E0, v0, n0
   double precision :: time, time1, time0
 
@@ -437,7 +440,6 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   stop_now = .false.
   do while (n <= N_det_generators)
     if(f(pt2_J(n)) == 0) then
-!print *,  'f(pt2_J(n)) == 0'
       d(pt2_J(n)) = .true.
       do while(d(U+1))
         U += 1
@@ -490,6 +492,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
         pt2(pt2_stoch_istate) = avg
         variance(pt2_stoch_istate) = avg2
         norm(pt2_stoch_istate) = avg3
+        call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((S2(t) / c) - (S(t)/c)**2) ! dabs for numerical stability
@@ -510,7 +513,6 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
             endif
           endif
         endif
-        call wall_time(time)
       end if
       n += 1
     else if(more == 0) then
@@ -521,15 +523,15 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
           stop 'Unable to delete tasks'
       endif
       do i=1,n_tasks
-        eI(:, index(i)) += eI_task(:,i)
-        vI(:, index(i)) += vI_task(:,i)
-        nI(:, index(i)) += nI_task(:,i)
+        eI(1:N_states, index(i)) += eI_task(1:N_states,i)
+        vI(1:N_states, index(i)) += vI_task(1:N_states,i)
+        nI(1:N_states, index(i)) += nI_task(1:N_states,i)
         f(index(i)) -= 1
       end do
       do i=1, b2%cur
-        call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
         ! We assume the pulled buffer is sorted
         if (b2%val(i) > b%mini) exit
+        call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
       end do
       if (zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
           stop 'Unable to delete tasks'
