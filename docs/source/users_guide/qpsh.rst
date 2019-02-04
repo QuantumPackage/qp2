@@ -95,7 +95,7 @@ Running programs
 
      qp (run|srun|mpirun) [options] <program>
 
-  Runs :ref:`qp_run`, :ref:`qp_srun`, or :ref:`qp_mpirun` using the current 
+  Runs :ref:`qp_run`, :command:`qp_srun`, or :command:`qp_mpirun` using the current 
   |EZFIO| directory.
 
 .. option:: stop

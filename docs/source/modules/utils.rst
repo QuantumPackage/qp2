@@ -855,8 +855,8 @@ Subroutines / functions
        * :c:func:`remove_duplicates_in_selection_buffer`
        * :c:func:`run_cipsi`
        * :c:func:`run_pt2_slave`
+       * :c:func:`run_slave_main`
        * :c:func:`run_stochastic_cipsi`
-       * :c:func:`select_singles_and_doubles`
        * :c:func:`selection_collector`
        * :c:func:`sort_selection_buffer`
        * :c:func:`testteethbuilding`
@@ -2651,6 +2651,7 @@ Subroutines / functions
        * :c:func:`check_mem`
        * :c:func:`davidson_diag_hjj_sjj`
        * :c:func:`print_memory_usage`
+       * :c:func:`run_slave_main`
        * :c:func:`zmq_pt2`
 
     Calls:

@@ -9,5 +9,5 @@ selectors_cassd
 ===============
 
 Selectors for |CAS-SD| calculations. The selectors are defined as first the
-generators from :ref:`Generators_CAS`, and then the rest of the wave function.
+generators from :ref:`module_generators_cas`, and then the rest of the wave function.
  

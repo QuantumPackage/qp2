@@ -9,15 +9,22 @@ davidson
 ========
 
 Abstract module for Davidson's diagonalization.
-It contains everything required for the Davidson algorithm, dressed or not. If
-a dressing is used, the dressing column should be defined and the
-:ref:`davidson_dressed` module should be used. If no dressing is required,
-the :ref:`davidson` module should be used, and it has a default zero dressing vector.
+It contains everything required for the Davidson algorithm, dressed or
+not. If a dressing is used, the dressing column should be defined and
+the :ref:`module_davidson_dressed` module should be used. If no dressing
+is required, the :ref:`module_davidson` module should be used, and it
+has a default zero dressing vector.
 
 The important providers for that module are:
 
-# `psi_energy` which is the expectation value over the wave function (`psi_det`, `psi_coef`) of the Hamiltonian, dressed or not. It uses the general subroutine `u_0_H_u_0`.
-# `psi_energy_two_e` which is the expectation value over the wave function (`psi_det`, `psi_coef`) of the standard two-electrons coulomb operator. It uses the general routine `u_0_H_u_0_two_e`.
+#. :c:data:`psi_energy` which is the expectation value over the wave
+   function (:c:data:`psi_det`, :c:data:`psi_coef`) of the Hamiltonian,
+   dressed or not. It uses the general subroutine :c:func:`u_0_H_u_0`.
+
+#. :c:data:`psi_energy_two_e` which is the expectation value over the
+   wave function (:c:data:`psi_det`, :c:data:`psi_coef`) of the standard
+   two-electron Coulomb operator. It uses the general routine
+   :c:func:`u_0_H_u_0_two_e`.
  
  
  
@@ -40,7 +47,7 @@ EZFIO parameters
  
     Number of micro-iterations before re-contracting
  
-    Default: 8
+    Default: 15
  
 .. option:: state_following
  
@@ -585,7 +592,6 @@ Subroutines / functions
        * :c:data:`psi_det_beta_unique`
        * :c:data:`only_expected_s2`
        * :c:data:`distributed_davidson`
-       * :c:data:`n_states`
        * :c:data:`n_int`
 
     Called by:
@@ -626,7 +632,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
 
  
@@ -682,7 +687,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`nthreads_davidson`
 
  
@@ -696,7 +700,7 @@ Subroutines / functions
         subroutine davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
 
 
-    Pull the results of $H|U \rangle$ on the master.
+    Pull the results of $H | U \rangle$ on the master.
 
     Needs:
 
@@ -724,7 +728,7 @@ Subroutines / functions
         subroutine davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
 
 
-    Push the results of $H|U \rangle$ from a worker to the master.
+    Push the results of $H | U \rangle$ from a worker to the master.
 
     Needs:
 
@@ -850,6 +854,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`psi_det_beta_unique`
+       * :c:data:`mpi_rank`
        * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`mpi_initialized`
@@ -858,6 +863,7 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`nproc`
        * :c:data:`ref_bitmask_energy`
+       * :c:data:`n_states_diag`
        * :c:data:`psi_bilinear_matrix_columns_loc`
 
     Called by:
@@ -874,7 +880,6 @@ Subroutines / functions
 
        * :c:func:`davidson_push_results`
        * :c:func:`h_s2_u_0_nstates_openmp_work`
-       * :c:func:`sleep`
 
  
 .. c:function:: diagonalize_ci:
@@ -934,7 +939,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
 
 
-    Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$.
+    Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$.
     
     Assumes that the determinants are in psi_det
     
@@ -977,7 +982,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+    Computes $v_t = H | u_t\rangle$ and $s_t = S^2  | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1020,7 +1025,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work_1(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1072,7 +1077,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work_2(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1124,7 +1129,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work_3(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1176,7 +1181,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work_4(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1228,7 +1233,7 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_openmp_work_N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1280,13 +1285,13 @@ Subroutines / functions
         subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
 
-    Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$
+    Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
     
     n : number of determinants
     
-    H_jj : array of $\langle j|H|j \rangle$
+    H_jj : array of $\langle j | H | j \rangle$
     
-    S2_jj : array of $\langle j|S^2|j \rangle$
+    S2_jj : array of $\langle j | S^2 | j \rangle$
 
     Needs:
 
@@ -1303,7 +1308,6 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`nproc`
        * :c:data:`ref_bitmask_energy`
-       * :c:data:`n_states_diag`
        * :c:data:`psi_bilinear_matrix_columns_loc`
 
     Called by:
@@ -1327,13 +1331,6 @@ Subroutines / functions
        * :c:func:`new_parallel_job`
        * :c:func:`omp_set_nested`
 
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-
  
 .. c:function:: h_s2_u_0_two_e_nstates_openmp:
 
@@ -1345,7 +1342,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp(v_0,s_0,u_0,N_st,sze)
 
 
-    Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$
+    Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2 | u_0\rangle$
     
     Assumes that the determinants are in psi_det
     
@@ -1387,7 +1384,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+    Computes $v_t = H | u_t\rangle$ and $s_t = S^2 | u_t\rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1429,7 +1426,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work_1(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2  | u_t \rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1479,7 +1476,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work_2(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2  | u_t \rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1529,7 +1526,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work_3(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2  | u_t \rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1579,7 +1576,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work_4(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2  | u_t \rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1629,7 +1626,7 @@ Subroutines / functions
         subroutine H_S2_u_0_two_e_nstates_openmp_work_N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
 
 
-    Computes $v_t = H|u_tangle$ and $s_t = S^2 |u_tangle$
+    Computes $v_t = H | u_t \rangle$ and $s_t = S^2  | u_t \rangle$
     
     Default should be 1,N_det,0,1
 
@@ -1679,9 +1676,9 @@ Subroutines / functions
         subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
 
-    Computes $E_0 = \frac{\langle u_0|H|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+    Computes $E_0 = \frac{\langle u_0 | H | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
     
-    and      $S_0 = \frac{\langle u_0|S^2|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+    and      $S_0 = \frac{\langle u_0 | S^2 | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
     
     n : number of determinants
     
@@ -1692,7 +1689,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`n_states_diag`
-       * :c:data:`n_states`
        * :c:data:`distributed_davidson`
 
     Called by:
@@ -1710,13 +1706,6 @@ Subroutines / functions
        * :c:func:`h_s2_u_0_nstates_openmp`
        * :c:func:`h_s2_u_0_nstates_zmq`
 
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`n_states_diag`
-
  
 .. c:function:: u_0_h_u_0_two_e:
 
@@ -1728,7 +1717,7 @@ Subroutines / functions
         subroutine u_0_H_u_0_two_e(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
 
-    Computes $E_0 = \frac{ \langle u_0|H|u_0\rangle}{\langle u_0|u_0 \rangle}$.
+    Computes $E_0 = \frac{ \langle u_0 | H | u_0\rangle}{\langle u_0 | u_0 \rangle}$.
     
     n : number of determinants
     

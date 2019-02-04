@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "FCI" "1" "Jan 25, 2019" "2.0" "Quantum Package"
+.TH "FCI" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
 fci \-  | Quantum Package >
 .
@@ -46,7 +46,7 @@ conditions:
 .IP \(bu 2
 number of Slater determinants > \fBdeterminants n_det_max\fP
 .IP \(bu 2
-PT2 < \fBperturbation pt2_max\fP
+abs(PT2) less than \fBperturbation pt2_max\fP
 .UNINDENT
 .sp
 The following other options can be of interest:
@@ -66,7 +66,7 @@ function with an \ewidehat{S^2} value corresponding to
 .UNINDENT
 .sp
 For excited states calculations, it is recommended to start with
-\&.cis. or \&.cisd. guess wave functions, eventually in
+cis or cisd guess wave functions, eventually in
 a restricted set of MOs, and to set \fBdeterminants s2_eig\fP
 to \fBtrue\fP\&.
 .sp

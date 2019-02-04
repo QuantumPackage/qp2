@@ -21,7 +21,7 @@ fci
  conditions: 
   
  * number of Slater determinants > :option:`determinants n_det_max` 
- * |PT2| < :option:`perturbation pt2_max` 
+ * abs(|PT2|) less than :option:`perturbation pt2_max` 
   
  The following other options can be of interest: 
   
@@ -38,7 +38,7 @@ fci
    :option:`determinants expected_s2`. 
   
  For excited states calculations, it is recommended to start with 
- :ref:`.cis.` or :ref:`.cisd.` guess wave functions, eventually in 
+ :ref:`cis` or :ref:`cisd` guess wave functions, eventually in 
  a restricted set of |MOs|, and to set :option:`determinants s2_eig` 
  to |true|. 
   

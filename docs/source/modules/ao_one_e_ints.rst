@@ -232,8 +232,10 @@ Providers
 
     Second derivative matrix elements in the |AO| basis.
     
-    :math:`{\tt ao\_deriv2\_x} =
-     \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle`
+    .. math::
+    
+      {\tt ao\_deriv2\_x} =
+      \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle
     
 
     Needs:
@@ -271,8 +273,10 @@ Providers
 
     Second derivative matrix elements in the |AO| basis.
     
-    :math:`{\tt ao\_deriv2\_x} =
-     \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle`
+    .. math::
+    
+      {\tt ao\_deriv2\_x} =
+      \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle
     
 
     Needs:
@@ -310,8 +314,10 @@ Providers
 
     Second derivative matrix elements in the |AO| basis.
     
-    :math:`{\tt ao\_deriv2\_x} =
-     \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle`
+    .. math::
+    
+      {\tt ao\_deriv2\_x} =
+      \langle \chi_i(x,y,z) | \frac{\partial^2}{\partial x^2} |\chi_j (x,y,z) \rangle
     
 
     Needs:
@@ -642,7 +648,8 @@ Providers
 
     Kinetic energy integrals in the |AO| basis.
     
-    :math:`\langle \chi_i |\hat{T}| \chi_j \rangle`
+    :math:`\langle \chi_i |\hat{T}| \chi_j \rangle` 
+    
 
     Needs:
 
@@ -1331,7 +1338,8 @@ Providers
       power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
 
 
-    Returns the explicit polynomial in terms of the $t$ variable of the following polynomial:
+    Returns the explicit polynomial in terms of the $t$ variable of the
+    following polynomial:
     
     $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
 
@@ -1355,7 +1363,8 @@ Providers
       power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in,p,p_inv,p_inv_2,p_new,P_center)
 
 
-    Returns the explicit polynomial in terms of the $t$ variable of the following polynomial:
+    Returns the explicit polynomial in terms of the $t$ variable of the
+    following polynomial:
     
     $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
 
@@ -1724,7 +1733,7 @@ Subroutines / functions
 
 
     Subroutine that returns all integrals over $r$ of type
-    $\frac{ \erf(\mu * |r-R_C|) }{ |r-R_C| }$
+    $\frac{ \erf(\mu * | r - R_C | ) }{ | r - R_C | }$
 
     Needs:
 
@@ -1812,8 +1821,12 @@ Subroutines / functions
 
 
     Computes the following integral :
-    $\int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
-     \frac{\erf(\mu |r-R_C|)}{|r-R_c|}$.
+    
+    .. math::
+    
+      \int dr (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
+      \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+    
 
     Calls:
 
@@ -1834,7 +1847,7 @@ Subroutines / functions
 
 
     Computes the following integral :
-    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu |r-R_C|)}{|r-R_C|}$.
+    $\int_{-\infty}^{infty} dr \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
 
     Needs:
 

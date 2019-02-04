@@ -29,7 +29,7 @@ subroutine example_determinants
   print*,'h1 --> p1 of spin s1'
   print*,'i_ok == +1 : excitation is possible '
   print*,'i_ok == -1 : excitation is NOT possible '
-  call do_mono_excitation(det_i,h1,p1,s1,i_ok)
+  call do_single_excitation(det_i,h1,p1,s1,i_ok)
   print*,'h1,p1,s1,i_ok'
   print*, h1,p1,s1,i_ok
   if(i_ok == -1)then
@@ -54,7 +54,7 @@ subroutine example_determinants
   h1 = elec_alpha_num
   p1 = elec_alpha_num + 1
   s1 = 2
-  call do_mono_excitation(det_i,h1,p1,s1,i_ok)
+  call do_single_excitation(det_i,h1,p1,s1,i_ok)
   print*,'h1,p1,s1,i_ok'
   print*, h1,p1,s1,i_ok
   call i_H_j(det_i,det_i,N_int,h0i)
@@ -105,7 +105,7 @@ subroutine example_determinants_psi_det
   END_DOC
   read_wf = .True.
   touch read_wf
-  ! you force the wave function to be set to the one in the EZFIO folder
+  ! you force the wave function to be set to the one in the EZFIO directory
   call routine_example_psi_det
 end
 

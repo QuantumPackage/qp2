@@ -6,7 +6,7 @@ END_SHELL
 subroutine perturb_buffer_$PERT(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
   implicit none
   BEGIN_DOC
-  !  Applly pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
+  ! Apply pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
   ! routine.
   END_DOC
 
@@ -185,7 +185,7 @@ end
 subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_buffer,coef_pert_buffer,sum_e_2_pert,sum_norm_pert,sum_H_pert_diag,N_st,Nint,key_mask,fock_diag_tmp,electronic_energy)
   implicit none
   BEGIN_DOC
-  !  Applly pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
+  ! Apply pertubration ``$PERT`` to the buffer of determinants generated in the H_apply
   ! routine.
   END_DOC
 
@@ -198,7 +198,7 @@ subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_
   double precision, intent(inout) :: coef_pert_buffer(N_st,buffer_size),e_2_pert_buffer(N_st,buffer_size),sum_H_pert_diag(N_st)
   double precision               :: c_pert(N_st), e_2_pert(N_st),  H_pert_diag(N_st)
   integer                        :: i,k, c_ref, ni, ex
-  integer, external              :: connected_to_ref_by_mono
+  integer, external              :: connected_to_ref_by_single
   logical, external              :: is_in_wavefunction
 
   integer(bit_kind), allocatable :: minilist(:,:,:)
@@ -232,7 +232,7 @@ subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_
 
   do i=1,buffer_size
 
-    c_ref = connected_to_ref_by_mono(buffer(1,1,i),psi_det_generators,Nint,i_generator,N_det)
+    c_ref = connected_to_ref_by_single(buffer(1,1,i),psi_det_generators,Nint,i_generator,N_det)
 
     if (c_ref /= 0) then
       cycle

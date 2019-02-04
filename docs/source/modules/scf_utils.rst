@@ -192,11 +192,11 @@ Providers
 
     .. code:: fortran
 
-        subroutine extrapolate_Fock_matrix(      &
-  error_matrix_DIIS,Fock_matrix_DIIS,    &
-  Fock_matrix_AO_,size_Fock_matrix_AO,   &
-  iteration_SCF,dim_DIIS                 &
-)
+        subroutine extrapolate_Fock_matrix(               &
+           error_matrix_DIIS,Fock_matrix_DIIS,    &
+           Fock_matrix_AO_,size_Fock_matrix_AO,   &
+           iteration_SCF,dim_DIIS                 &
+           )
 
 
     Compute the extrapolated Fock matrix using the DIIS procedure

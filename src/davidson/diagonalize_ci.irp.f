@@ -202,6 +202,8 @@ subroutine diagonalize_CI
       psi_coef(i,j) = CI_eigenvectors(i,j)
     enddo
   enddo
+  psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
+  psi_s2(1:N_states) = CI_s2(1:N_states)
 
-  SOFT_TOUCH psi_coef CI_electronic_energy CI_energy CI_eigenvectors CI_s2
+  SOFT_TOUCH psi_coef CI_electronic_energy CI_energy CI_eigenvectors CI_s2 psi_energy psi_s2
 end

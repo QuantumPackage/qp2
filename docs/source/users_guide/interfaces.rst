@@ -15,7 +15,7 @@ A few interfaces to external codes are available.
 |qp| -> \* 
 ----------
 
-`Molden`_
+`Molden <http://cheminf.cmbi.ru.nl/molden>`_
   3D plots of Molecular Orbitals
 
 FCIDUMP 

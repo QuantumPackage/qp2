@@ -408,11 +408,13 @@ subroutine make_s2_eigenfunction
   integer                        :: N_det_new, ithread, omp_get_thread_num
   integer, parameter             :: bufsze = 1000
   logical, external              :: is_in_wavefunction
+  logical                        :: update
 
+  update=.False.
   call write_int(6,N_occ_pattern,'Number of occupation patterns')
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP  SHARED(N_occ_pattern, psi_occ_pattern, elec_alpha_num,N_int) &
+  !$OMP  SHARED(N_occ_pattern, psi_occ_pattern, elec_alpha_num,N_int,update) &
   !$OMP  PRIVATE(s,ithread, d, det_buffer, smax, N_det_new,i,j,k)
   N_det_new = 0
   call occ_pattern_to_dets_size(psi_occ_pattern(1,1,1),s,elec_alpha_num,N_int)
@@ -434,6 +436,7 @@ subroutine make_s2_eigenfunction
       if ( is_in_wavefunction(d(1,1,j), N_int) ) then
         cycle
       endif
+      update = .true.
       N_det_new += 1
       det_buffer(:,:,N_det_new) = d(:,:,j)
       if (N_det_new == bufsze) then
@@ -451,8 +454,10 @@ subroutine make_s2_eigenfunction
   deallocate(d,det_buffer)
   !$OMP END PARALLEL
 
-  call copy_H_apply_buffer_to_wf
-  SOFT_TOUCH N_det psi_coef psi_det psi_occ_pattern N_occ_pattern
+  if (update) then
+    call copy_H_apply_buffer_to_wf
+    TOUCH N_det psi_coef psi_det psi_occ_pattern N_occ_pattern
+  endif
   call write_time(6)
 
 end

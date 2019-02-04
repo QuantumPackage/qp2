@@ -1,5 +1,5 @@
 
-subroutine i_Wee_j_mono(key_i,key_j,Nint,spin,hij)
+subroutine i_Wee_j_single(key_i,key_j,Nint,spin,hij)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -15,8 +15,8 @@ subroutine i_Wee_j_mono(key_i,key_j,Nint,spin,hij)
 
   PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
 
-  call get_mono_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
-  call mono_excitation_wee(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
+  call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
+  call single_excitation_wee(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
 end
 
 
@@ -188,7 +188,7 @@ subroutine i_H_j_mono_spin_one_e(key_i,key_j,Nint,spin,hij)
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  call get_mono_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
+  call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
   integer :: m,p
   m = exc(1,1)
   p = exc(1,2)
@@ -252,7 +252,7 @@ subroutine i_H_j_one_e(key_i,key_j,Nint,hij)
   if(degree==0)then
    hij = diag_H_mat_elem_one_e(key_i,N_int)
   else
-   call get_mono_excitation(key_i,key_j,exc,phase,Nint)
+   call get_single_excitation(key_i,key_j,exc,phase,Nint)
    if (exc(0,1,1) == 1) then
      ! Mono alpha
      m = exc(1,1,1)
@@ -340,7 +340,7 @@ subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
             exc(1,2,2) ,mo_integrals_map) )
       endif
     case (1)
-      call get_mono_excitation(key_i,key_j,exc,phase,Nint)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
       call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
       if (exc(0,1,1) == 1) then
@@ -354,7 +354,7 @@ subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
         p = exc(1,2,2)
         spin = 2
       endif
-      call mono_excitation_wee(key_i,key_j,p,m,spin,phase,hij)
+      call single_excitation_wee(key_i,key_j,p,m,spin,phase,hij)
     case (0)
       double precision :: diag_wee_mat_elem
       hij = diag_wee_mat_elem(key_i,Nint)

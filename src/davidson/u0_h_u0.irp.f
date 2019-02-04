@@ -27,9 +27,9 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $E_0 = \frac{\langle u_0|H|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+  ! Computes $E_0 = \frac{\langle u_0 | H | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
   !
-  ! and      $S_0 = \frac{\langle u_0|S^2|u_0 \rangle}{\langle u_0|u_0 \rangle}$
+  ! and      $S_0 = \frac{\langle u_0 | S^2 | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
   !
   ! n : number of determinants
   !
@@ -41,21 +41,35 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
 
   double precision, allocatable   :: v_0(:,:), s_vec(:,:), u_1(:,:)
   double precision                :: u_dot_u,u_dot_v,diag_H_mat_elem
-  integer                         :: i,j
+  integer                         :: i,j, istate
 
   if ((n > 100000).and.distributed_davidson) then
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
-    u_1(1:n,1:N_states) = u_0(1:n,1:N_states)
-    u_1(1:n,N_states+1:N_states_diag) = 0.d0
-    call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_st,n)
-    deallocate(u_1)
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
+  else if (n < n_det_max_full) then
+    allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
+    v_0(:,:) = 0.d0
+    u_1(:,:) = 0.d0
+    s_vec(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
+    do istate = 1,N_st
+      do j=1,n
+        do i=1,n
+          v_0(i,istate) = h_matrix_all_dets(i,j) * u_0(j,istate)
+          s_vec(i,istate) = S2_matrix_all_dets(i,j) * u_0(j,istate)
+        enddo
+      enddo
+    enddo
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
-    u_1(1:n,:) = u_0(1:n,:)
+    u_1(:,:) = 0.d0
+    u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
-    u_0(1:n,:) = u_1(1:n,:)
-    deallocate(u_1)
   endif
+  u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
+  deallocate(u_1)
   double precision :: norm
   !$OMP PARALLEL DO PRIVATE(i,norm) DEFAULT(SHARED)
   do i=1,N_st
@@ -80,7 +94,7 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$.
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$.
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -135,7 +149,7 @@ subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t\rangle$ and $s_t = S^2  | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -165,7 +179,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -469,7 +483,7 @@ compute_singles=.True.
       ASSERT (lrow <= N_det_alpha_unique)
 
       tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-      call i_H_j_mono_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+      call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
 
       !DIR$ LOOP COUNT AVG(4)
       do l=1,N_st
@@ -554,7 +568,7 @@ compute_singles=.True.
       ASSERT (lcol <= N_det_beta_unique)
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-      call i_H_j_mono_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+      call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
       l_a = psi_bilinear_matrix_transp_order(l_b)
       ASSERT (l_a <= N_det)
       !DIR$ LOOP COUNT AVG(4)

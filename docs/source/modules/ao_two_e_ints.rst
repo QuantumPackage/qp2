@@ -362,7 +362,7 @@ Providers
         recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 
-    recursive function involved in the two-electron integral
+    Recursive function involved in the two-electron integral
 
     Called by:
 
@@ -392,7 +392,7 @@ Providers
         recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 
-    recursive function involved in the two-electron integral
+    Recursive function involved in the two-electron integral
 
     Called by:
 
@@ -422,7 +422,7 @@ Providers
         recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 
-    recursive function involved in the two-electron integral
+    Recursive function involved in the two-electron integral
 
     Called by:
 
@@ -487,7 +487,7 @@ Providers
         recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
 
 
-    recursive function involved in the two-electron integral
+    Recursive function involved in the two-electron integral
 
     Called by:
 
@@ -1027,7 +1027,8 @@ Subroutines / functions
 
     subroutine that returns the explicit polynom in term of the "t"
     variable of the following polynomw :
-            I_x1(a_x, d_x,p,q) * I_x1(a_y, d_y,p,q) * I_x1(a_z, d_z,p,q)
+    
+    $I_{x_1}(a_x,d_x,p,q) \, I_{x_1}(a_y,d_y,p,q) \ I_{x_1}(a_z,d_z,p,q)$
 
     Called by:
 
@@ -1055,7 +1056,7 @@ Subroutines / functions
         subroutine I_x1_pol_mult(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 
-    recursive function involved in the two-electron integral
+    Recursive function involved in the two-electron integral
 
     Called by:
 
@@ -1119,9 +1120,10 @@ Subroutines / functions
         subroutine integrale_new(I_f,a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z,p,q,n_pt)
 
 
-    calculate the integral of the polynom ::
-            I_x1(a_x+b_x, c_x+d_x,p,q) * I_x1(a_y+b_y, c_y+d_y,p,q) * I_x1(a_z+b_z, c_z+d_z,p,q)
-    between ( 0 ; 1)
+    Calculates the integral of the polynomial :
+    
+    $I_{x_1}(a_x+b_x,c_x+d_x,p,q) \, I_{x_1}(a_y+b_y,c_y+d_y,p,q) \, I_{x_1}(a_z+b_z,c_z+d_z,p,q)$
+    in $( 0 ; 1)$
 
     Needs:
 
@@ -1186,8 +1188,9 @@ Subroutines / functions
 
 
     Returns the upper boundary of the degree of the polynomial involved in the
-    bielctronic integral :
-          Ix(a_x,b_x,c_x,d_x) * Iy(a_y,b_y,c_y,d_y) * Iz(a_z,b_z,c_z,d_z)
+    two-electron integral :
+    
+    $I_x(a_x,b_x,c_x,d_x) \, I_y(a_y,b_y,c_y,d_y) \, I_z(a_z,b_z,c_z,d_z)$
 
  
 .. c:function:: push_integrals:

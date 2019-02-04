@@ -15,7 +15,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2 | u_0\rangle$
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -69,7 +69,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,i
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t\rangle$ and $s_t = S^2 | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -99,7 +99,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H|u_t\rangle$ and $s_t = S^2 |u_t\rangle$
+  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2  | u_t \\rangle$
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -304,7 +304,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart
       ASSERT (lrow <= N_det_alpha_unique)
 
       tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-      call i_Wee_j_mono( tmp_det, tmp_det2, $N_int, 1, hij)
+      call i_Wee_j_single( tmp_det, tmp_det2, $N_int, 1, hij)
 
       do l=1,N_st
         v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
@@ -384,7 +384,7 @@ subroutine H_S2_u_0_two_e_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart
       ASSERT (lcol <= N_det_beta_unique)
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-      call i_Wee_j_mono( tmp_det, tmp_det2, $N_int, 2, hij)
+      call i_Wee_j_single( tmp_det, tmp_det2, $N_int, 2, hij)
       l_a = psi_bilinear_matrix_transp_order(l_b)
       ASSERT (l_a <= N_det)
       do l=1,N_st
@@ -461,7 +461,7 @@ subroutine u_0_H_u_0_two_e(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $E_0 = \frac{ \langle u_0|H|u_0\rangle}{\langle u_0|u_0 \rangle}$.
+  ! Computes $E_0 = \frac{ \langle u_0 | H | u_0\rangle}{\langle u_0 | u_0 \rangle}$.
   !
   ! n : number of determinants
   !

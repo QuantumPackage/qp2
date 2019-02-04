@@ -154,7 +154,7 @@ for i in ${FORTRAN_EXEC} ; do
 done > ${QPACKAGE_STATIC}/data/executables
 
 mkdir --parents -- ${QPACKAGE_STATIC}/src/bitmask
-cp ${QP_ROOT}/src/Bitmask/bitmasks_module.f90 ${QPACKAGE_STATIC}/src/bitmask
+cp ${QP_ROOT}/src/bitmask/bitmasks_module.f90 ${QPACKAGE_STATIC}/src/bitmask
 
 
 echo "Copying dynamic libraries"
@@ -179,7 +179,7 @@ if [[ $? -ne 0 ]] ; then
   exit 1
 fi
 
-cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*} \
+cp -- ${QPACKAGE_STATIC}/extra_lib/lib{[gi]omp*,mkl*,lapack*,blas*,z*,gfortran*,quad*} \
    ${QPACKAGE_STATIC}/lib/
 
 #

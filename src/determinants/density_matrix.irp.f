@@ -150,7 +150,7 @@ END_PROVIDER
       call get_excitation_degree_spin(tmp_det(1,1),tmp_det2,degree,N_int)
       if (degree == 1) then
         exc = 0
-        call get_mono_excitation_spin(tmp_det(1,1),tmp_det2,exc,phase,N_int)
+        call get_single_excitation_spin(tmp_det(1,1),tmp_det2,exc,phase,N_int)
         call decode_exc_spin(exc,h1,p1,h2,p2)
         do m=1,N_states
           ckl = psi_bilinear_matrix_values(k_a,m)*psi_bilinear_matrix_values(l,m) * phase
@@ -206,7 +206,7 @@ END_PROVIDER
       call get_excitation_degree_spin(tmp_det(1,2),tmp_det2,degree,N_int)
       if (degree == 1) then
         exc = 0
-        call get_mono_excitation_spin(tmp_det(1,2),tmp_det2,exc,phase,N_int)
+        call get_single_excitation_spin(tmp_det(1,2),tmp_det2,exc,phase,N_int)
         call decode_exc_spin(exc,h1,p1,h2,p2)
         do m=1,N_states
           ckl = psi_bilinear_matrix_transp_values(k_b,m)*psi_bilinear_matrix_transp_values(l,m) * phase
