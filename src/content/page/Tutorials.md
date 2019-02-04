@@ -7,6 +7,13 @@ draft: false
 
 ---------------------
 
+# Installation
+
+{{< youtube Un69atP2-30 >}}
+
+QP installation.
+
+
 # Hartree-Fock calculation
 
 {{< youtube KIl_xq-NRLo >}}
