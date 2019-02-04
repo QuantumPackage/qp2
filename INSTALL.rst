@@ -210,12 +210,25 @@ Zlib
    make
    make install
 
+With Debian or Ubuntu, you can use
+
+.. code:: bash
+
+   sudo apt install zlib1g-dev
+
 
 
 OCaml
 -----
 
 *OCaml* is a general purpose programming language with an emphasis on expressiveness and safety.
+
+* The following packages are required (Debian or Ubuntu):
+
+  .. code:: bash
+
+    sudo apt install libncurses5-dev pkg-config libgmp3-dev m4
+
 
 * Download the installer of the OPAM package manager here :
   `<https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh>`_
