@@ -11,13 +11,11 @@ draft: false
 
 {{< youtube Un69atP2-30 >}}
 
-QP installation.
 
 
 # Hartree-Fock calculation
 
 {{< youtube KIl_xq-NRLo >}}
 
-In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.
 
 
