@@ -1793,11 +1793,16 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   key(k,ispin) = ibset(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
 
-!  if (iorb > mo_num) then
-!    print *,  irp_here, 'iorb > mo_num'
-!    print *,  iorb, mo_num
-!    stop -1
-!  endif
+  if (iorb < 1) then
+    print *,  irp_here, 'iorb < 1'
+    print *,  iorb, mo_num
+    stop -1
+  endif
+  if (iorb > mo_num) then
+    print *,  irp_here, 'iorb > mo_num'
+    print *,  iorb, mo_num
+    stop -1
+  endif
   hjj = hjj + mo_one_e_integrals(iorb,iorb)
 
   ! Same spin
