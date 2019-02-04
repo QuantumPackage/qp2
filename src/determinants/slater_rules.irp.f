@@ -93,7 +93,7 @@ subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
       return
 
     case (1)
-      call get_mono_excitation(det1,det2,exc,phase,Nint)
+      call get_single_excitation(det1,det2,exc,phase,Nint)
       return
 
     case(0)
@@ -336,7 +336,7 @@ end
 
 
 
-subroutine get_mono_excitation(det1,det2,exc,phase,Nint)
+subroutine get_single_excitation(det1,det2,exc,phase,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -499,7 +499,7 @@ subroutine i_H_j_s2(key_i,key_j,Nint,hij,s2)
   select case (degree)
     case (2)
       call get_double_excitation(key_i,key_j,exc,phase,Nint)
-      ! Mono alpha, mono beta
+      ! Single alpha, single beta
       if (exc(0,1,1) == 1) then
         if ( (exc(1,1,1) == exc(1,2,2)).and.(exc(1,1,2) == exc(1,2,1)) ) then
           s2 =  -phase
@@ -541,21 +541,21 @@ subroutine i_H_j_s2(key_i,key_j,Nint,hij,s2)
             exc(1,2,2) ,mo_integrals_map) )
       endif
     case (1)
-      call get_mono_excitation(key_i,key_j,exc,phase,Nint)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
       call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
-      ! Mono alpha
+      ! Single alpha
       if (exc(0,1,1) == 1) then
         m = exc(1,1,1)
         p = exc(1,2,1)
         spin = 1
-      ! Mono beta
+      ! Single beta
       else
         m = exc(1,1,2)
         p = exc(1,2,2)
         spin = 2
       endif
-      call get_mono_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
+      call get_single_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
 
     case (0)
       double precision, external :: diag_S_mat_elem
@@ -602,7 +602,7 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
     case (2)
       call get_double_excitation(key_i,key_j,exc,phase,Nint)
       if (exc(0,1,1) == 1) then
-        ! Mono alpha, mono beta
+        ! Single alpha, single beta
         if(exc(1,1,1) == exc(1,2,2) )then
           hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
@@ -640,21 +640,21 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
             exc(1,2,2) ,mo_integrals_map) )
       endif
     case (1)
-      call get_mono_excitation(key_i,key_j,exc,phase,Nint)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
       call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
       if (exc(0,1,1) == 1) then
-        ! Mono alpha
+        ! Single alpha
         m = exc(1,1,1)
         p = exc(1,2,1)
         spin = 1
       else
-        ! Mono beta
+        ! Single beta
         m = exc(1,1,2)
         p = exc(1,2,2)
         spin = 2
       endif
-      call get_mono_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
+      call get_single_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
 
     case (0)
       hij = diag_H_mat_elem(key_i,Nint)
@@ -703,7 +703,7 @@ subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
     case (2)
       call get_double_excitation(key_i,key_j,exc,phase,Nint)
       if (exc(0,1,1) == 1) then
-        ! Mono alpha, mono beta
+        ! Single alpha, single beta
         hij = phase*get_two_e_integral(                          &
             exc(1,1,1),                                              &
             exc(1,1,2),                                              &
@@ -736,12 +736,12 @@ subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
             exc(1,2,2) ,mo_integrals_map) )
       endif
     case (1)
-      call get_mono_excitation(key_i,key_j,exc,phase,Nint)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
       call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
       has_mipi = .False.
       if (exc(0,1,1) == 1) then
-        ! Mono alpha
+        ! Single alpha
         m = exc(1,1,1)
         p = exc(1,2,1)
         do k = 1, elec_alpha_num
@@ -768,7 +768,7 @@ subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
         enddo
 
       else
-        ! Mono beta
+        ! Single beta
         m = exc(1,1,2)
         p = exc(1,2,2)
         do k = 1, elec_beta_num
@@ -1060,7 +1060,7 @@ end
 
 
 
-subroutine get_excitation_degree_vector_mono(key1,key2,degree,Nint,sze,idx)
+subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1154,7 +1154,7 @@ subroutine get_excitation_degree_vector_mono(key1,key2,degree,Nint,sze,idx)
 end
 
 
-subroutine get_excitation_degree_vector_mono_or_exchange(key1,key2,degree,Nint,sze,idx)
+subroutine get_excitation_degree_vector_single_or_exchange(key1,key2,degree,Nint,sze,idx)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1202,7 +1202,7 @@ subroutine get_excitation_degree_vector_mono_or_exchange(key1,key2,degree,Nint,s
     enddo
   else
 
-    print*, 'get_excitation_degree_vector_mono_or_exchange not yet implemented for N_int > 1 ...'
+    print*, 'get_excitation_degree_vector_single_or_exchange not yet implemented for N_int > 1 ...'
     stop
 
   endif
@@ -1322,7 +1322,7 @@ subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,
 end
 
 
-subroutine get_excitation_degree_vector_mono_or_exchange_verbose(key1,key2,degree,Nint,sze,idx)
+subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,degree,Nint,sze,idx)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1635,7 +1635,7 @@ double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Ni
     endif
 
   else if (degree == 1) then
-    call get_mono_excitation(det_ref,det_pert,exc,phase,Nint)
+    call get_single_excitation(det_ref,det_pert,exc,phase,Nint)
     call decode_exc(exc,1,h1,p1,h2,p2,s1,s2)
     if (s1 == 1) then
       diag_H_mat_elem_fock = E0 - fock_diag_tmp(1,h1) &
@@ -1926,7 +1926,7 @@ subroutine get_excitation_spin(det1,det2,exc,degree,phase,Nint)
       return
 
     case (1)
-      call get_mono_excitation_spin(det1,det2,exc,phase,Nint)
+      call get_single_excitation_spin(det1,det2,exc,phase,Nint)
       return
 
     case(0)
@@ -2098,7 +2098,7 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
 
 end
 
-subroutine get_mono_excitation_spin(det1,det2,exc,phase,Nint)
+subroutine get_single_excitation_spin(det1,det2,exc,phase,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2174,7 +2174,7 @@ subroutine get_mono_excitation_spin(det1,det2,exc,phase,Nint)
   enddo
 end
 
-subroutine i_H_j_mono_spin(key_i,key_j,Nint,spin,hij)
+subroutine i_H_j_single_spin(key_i,key_j,Nint,spin,hij)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2190,8 +2190,8 @@ subroutine i_H_j_mono_spin(key_i,key_j,Nint,spin,hij)
 
   PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
 
-  call get_mono_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
-  call get_mono_excitation_from_fock(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
+  call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
+  call get_single_excitation_from_fock(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
 end
 
 subroutine i_H_j_double_spin(key_i,key_j,Nint,hij)
@@ -2240,8 +2240,8 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
 
   PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
 
-  call get_mono_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
-  call get_mono_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
+  call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
+  call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
   phase = phase*phase2
   if (exc(1,1,1) == exc(1,2,2)) then
     hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))

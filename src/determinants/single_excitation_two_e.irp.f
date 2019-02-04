@@ -1,5 +1,5 @@
   use bitmasks
-subroutine mono_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
+subroutine single_excitation_wee(det_1,det_2,h,p,spin,phase,hij)
  use bitmasks
  implicit none
  integer,intent(in) :: h,p,spin
@@ -79,7 +79,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
  enddo
  double precision :: array_coulomb(mo_num),array_exchange(mo_num)
  call bitstring_to_list_ab(key_virt, occ_virt, n_occ_ab_virt, N_int)
- ! docc ---> virt mono excitations
+ ! docc ---> virt single excitations
  do i0 = 1,  n_occ_ab(1)
   i=occ(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
@@ -97,7 +97,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   enddo
  enddo
 
- ! virt ---> virt mono excitations
+ ! virt ---> virt single excitations
  do i0 = 1,  n_occ_ab_virt(1)
   i=occ_virt(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
@@ -114,7 +114,7 @@ BEGIN_PROVIDER [double precision, fock_wee_closed_shell, (mo_num, mo_num) ]
   enddo
  enddo
 
- ! docc ---> docc mono excitations
+ ! docc ---> docc single excitations
  do i0 = 1,  n_occ_ab(1)
   i=occ(i0,1)
   do j0 = 1, n_occ_ab(1)
