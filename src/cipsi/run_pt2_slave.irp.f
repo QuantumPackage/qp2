@@ -23,7 +23,22 @@ BEGIN_PROVIDER [ type(selection_buffer), global_selection_buffer ]
  call omp_unset_lock(global_selection_buffer_lock)
 END_PROVIDER
 
+
 subroutine run_pt2_slave(thread,iproc,energy)
+ use selection_types
+ use f77_zmq
+  implicit none
+
+  double precision, intent(in)    :: energy(N_states_diag)
+  integer,  intent(in)            :: thread, iproc
+  if (N_det > 1000000) then
+    call run_pt2_slave_large(thread,iproc,energy)
+  else
+    call run_pt2_slave_small(thread,iproc,energy)
+  endif
+end
+
+subroutine run_pt2_slave_small(thread,iproc,energy)
  use selection_types
  use f77_zmq
   implicit none
@@ -49,15 +64,132 @@ subroutine run_pt2_slave(thread,iproc,energy)
   integer :: n_tasks, k, N
   integer, allocatable :: i_generator(:), subset(:)
 
-  double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
+  integer :: bsize ! Size of selection buffers
+!  logical :: sending
+
+  allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
+  allocate(pt2(N_states,pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
+  allocate(variance(N_states,pt2_n_tasks_max))
+  allocate(norm(N_states,pt2_n_tasks_max))
+
+  zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
+
+  integer, external :: connect_to_taskserver
+  if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
+    return
+  endif
+
+  zmq_socket_push      = new_zmq_push_socket(thread)
+
+  b%N = 0
+  buffer_ready = .False.
+  n_tasks = 1
+
+!  sending = .False.
+  done = .False.
+  do while (.not.done)
+
+    n_tasks = max(1,n_tasks)
+    n_tasks = min(pt2_n_tasks_max,n_tasks)
+
+    integer, external :: get_tasks_from_taskserver
+    if (get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id, task_id, task, n_tasks) == -1) then
+      exit
+    endif
+    done = task_id(n_tasks) == 0
+    if (done) then
+      n_tasks = n_tasks-1
+    endif
+    if (n_tasks == 0) exit
+
+    do k=1,n_tasks
+      read (task(k),*) subset(k), i_generator(k), N
+    enddo
+    if (b%N == 0) then
+      ! Only first time
+      bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
+      call create_selection_buffer(bsize, bsize*2, b)
+      buffer_ready = .True.
+    else
+      ASSERT (N == b%N)
+    endif
+
+    double precision :: time0, time1
+    call wall_time(time0)
+    do k=1,n_tasks
+        pt2(:,k) = 0.d0
+        variance(:,k) = 0.d0
+        norm(:,k) = 0.d0
+        b%cur = 0
+!double precision :: time2
+!call wall_time(time2)
+        call select_connected(i_generator(k),energy,pt2(1,k),variance(1,k),norm(1,k),b,subset(k),pt2_F(i_generator(k)))
+!call wall_time(time1)
+!print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
+    enddo
+    call wall_time(time1)
+!print *,  '-->', i_generator(1), time1-time0, n_tasks
+
+    integer, external :: tasks_done_to_taskserver
+    if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then
+      done = .true.
+    endif
+    call sort_selection_buffer(b)
+    call push_pt2_results(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks)
+    b%cur=0
+
+!    ! Try to adjust n_tasks around nproc/2 seconds per job
+!    n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/2) / (time1 - time0 + 1.d0)))
+    n_tasks = 1
+  end do
+
+  integer, external :: disconnect_from_taskserver
+  do i=1,300
+    if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) /= -2) exit
+    call sleep(1)
+    print *,  'Retry disconnect...'
+  end do
+
+  call end_zmq_push_socket(zmq_socket_push,thread)
+  call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
+  if (buffer_ready) then
+    call delete_selection_buffer(b)
+  endif
+end subroutine
+
+
+subroutine run_pt2_slave_large(thread,iproc,energy)
+ use selection_types
+ use f77_zmq
+  implicit none
+
+  double precision, intent(in)    :: energy(N_states_diag)
+  integer,  intent(in)            :: thread, iproc
+  integer                         :: rc, i
+
+  integer                        :: worker_id, ctask, ltask
+  character*(512), allocatable   :: task(:)
+  integer, allocatable           :: task_id(:)
+
+  integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
+  integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
+
+  integer(ZMQ_PTR), external     :: new_zmq_push_socket
+  integer(ZMQ_PTR)               :: zmq_socket_push
+
+  type(selection_buffer) :: b
+  logical :: done, buffer_ready
+
+  double precision,allocatable :: pt2(:,:), variance(:,:), norm(:,:)
+  integer :: n_tasks, k, N
+  integer, allocatable :: i_generator(:), subset(:)
+
   integer :: bsize ! Size of selection buffers
   logical :: sending
   PROVIDE global_selection_buffer global_selection_buffer_lock
 
-  rss  = memory_of_int(pt2_n_tasks_max)*67.d0
-  rss += memory_of_double(pt2_n_tasks_max)*(N_states*3)
-  call check_mem(rss,irp_here)
 
   allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
   allocate(pt2(N_states,pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))

@@ -1775,7 +1775,17 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   integer                        :: other_spin
   integer                        :: k,l,i
 
-  ASSERT (iorb > 0)
+  if (iorb < 1) then
+    print *,  irp_here, 'iorb < 1'
+    print *,  iorb, mo_num
+    stop -1
+  endif
+  if (iorb > mo_num) then
+    print *,  irp_here, 'iorb > mo_num'
+    print *,  iorb, mo_num
+    stop -1
+  endif
+
   ASSERT (ispin > 0)
   ASSERT (ispin < 3)
   ASSERT (Nint > 0)
@@ -1793,16 +1803,6 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   key(k,ispin) = ibset(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
 
-  if (iorb < 1) then
-    print *,  irp_here, 'iorb < 1'
-    print *,  iorb, mo_num
-    stop -1
-  endif
-  if (iorb > mo_num) then
-    print *,  irp_here, 'iorb > mo_num'
-    print *,  iorb, mo_num
-    stop -1
-  endif
   hjj = hjj + mo_one_e_integrals(iorb,iorb)
 
   ! Same spin

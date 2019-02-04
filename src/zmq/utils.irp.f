@@ -603,12 +603,12 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
   do i=3600,1,-1
     rc = f77_zmq_send(zmq_to_qp_run_socket, 'end_job '//trim(zmq_state),8+len(trim(zmq_state)),0)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 512, 0)
-    call sleep(1)
     if (trim(message(1:13)) == 'error waiting') then
       cycle
     else if (message(1:2) == 'ok') then
       exit
     endif
+    call sleep(1)
   end do
   if (i==0) then
     print *,  '.. Forcing kill ..'
