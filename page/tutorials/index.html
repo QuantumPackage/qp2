@@ -8,12 +8,19 @@
   <title>Video Tutorials</title>
   <meta property="og:title" content="Video Tutorials" />
   <meta name="twitter:title" content="Video Tutorials" />
-  <meta name="description" content="Installation   QP installation.
-Hartree-Fock calculation   In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.">
-  <meta property="og:description" content="Installation   QP installation.
-Hartree-Fock calculation   In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.">
-  <meta name="twitter:description" content="Installation   QP installation.
-Hartree-Fock calculation   In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.">
+  <meta name="description" content="Installation   #. Download the source files
+git clone https://github.com/QuantumPackage/qp2.git  #. Install the dependencies
+./configure # tells you what to install. See in INSTALL.rst  #. !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!
+./configure --install something  #. The following libraries are needed for the ocaml package
+ zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  #. Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES">
+  <meta property="og:description" content="Installation   #. Download the source files
+git clone https://github.com/QuantumPackage/qp2.git  #. Install the dependencies
+./configure # tells you what to install. See in INSTALL.rst  #. !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!
+./configure --install something  #. The following libraries are needed for the ocaml package
+ zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  #. Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES">
+  <meta name="twitter:description" content="Installation   #. Download the source files
+git clone https://github.com/QuantumPackage/qp2.git  #. Install the dependencies
+./configure # tells you what to install. See in INSTALL.rst  #. !! USE AT …">
   <meta name="author" content=""/>
   <link href='https://quantumpackage.github.io/qp2/favicon' rel='icon' type='image/x-icon'/>
   <meta property="og:image" content="https://quantumpackage.github.io/qp2/img/QP2_circle.png" />
@@ -148,7 +155,45 @@ Hartree-Fock calculation   In this tutorial, you will run a Hartree-Fock calcula
 </div>
 
 
-<p>QP installation.</p>
+<p>#. Download the source files</p>
+
+<pre><code>git clone https://github.com/QuantumPackage/qp2.git
+</code></pre>
+
+<p>#. Install the dependencies</p>
+
+<pre><code>./configure   # tells you what to install. See in INSTALL.rst
+</code></pre>
+
+<p>#. !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!</p>
+
+<pre><code>./configure --install something
+</code></pre>
+
+<p>#. The following libraries are needed for the ocaml package</p>
+
+<ul>
+<li>zlib1g-dev</li>
+<li>libncurses5-dev</li>
+<li>pkg-config</li>
+<li>libgmp3-dev</li>
+<li>m4</li>
+</ul>
+
+<p>#. Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES</p>
+
+<pre><code>source quantum_package.rc
+</code></pre>
+
+<p>#. Define your COMPILATION CONFIGURATION FILE</p>
+
+<pre><code>./configure -c ./config/a_file.cfg
+</code></pre>
+
+<p>#. COMPILE with NINJA</p>
+
+<pre><code>ninja
+</code></pre>
 
 <h1 id="hartree-fock-calculation">Hartree-Fock calculation</h1>
 
@@ -157,8 +202,6 @@ Hartree-Fock calculation   In this tutorial, you will run a Hartree-Fock calcula
   <iframe src="//www.youtube.com/embed/KIl_xq-NRLo" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
 </div>
 
-
-<p>In this tutorial, you will run a Hartree-Fock calculation on the HCN molecule.</p>
 
       </article>
 
