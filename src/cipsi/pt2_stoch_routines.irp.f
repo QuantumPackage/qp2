@@ -519,7 +519,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
     else
       call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
       if (zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending) == -1) then
-          stop 'Unable to delete tasks'
+          stop 'PT2: Unable to delete tasks (send)'
       endif
       do i=1,n_tasks
         eI(1:N_states, index(i)) += eI_task(1:N_states,i)
@@ -533,7 +533,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
         call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
       end do
       if (zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
-          stop 'Unable to delete tasks'
+          stop 'PT2: Unable to delete tasks (recv)'
       endif
     end if
   end do

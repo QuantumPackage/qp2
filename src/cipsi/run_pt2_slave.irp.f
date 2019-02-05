@@ -31,7 +31,7 @@ subroutine run_pt2_slave(thread,iproc,energy)
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
-  if (N_det > 1000000) then
+  if (N_det > nproc*(elec_alpha_num * (mo_num-elec_alpha_num))**2) then
     call run_pt2_slave_large(thread,iproc,energy)
   else
     call run_pt2_slave_small(thread,iproc,energy)
@@ -236,7 +236,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
       call create_selection_buffer(bsize, bsize*2, b)
       buffer_ready = .True.
     else
-      ASSERT (N == b%N)
+      ASSERT (b%N == bsize)
     endif
 
     double precision :: time0, time1
