@@ -18,7 +18,26 @@ function run() {
 }
 
 
+function run_stoch() {
+  thresh=$2
+  test_exe fci || skip
+  qp set perturbation do_pt2 True
+  qp set determinants n_det_max 100000
+  qp set determinants n_states  1
+  qp set davidson threshold_davidson 1.e-10
+  qp set davidson n_states_diag 1
+  qp run fci 
+  energy1="$(ezfio get fci energy_pt2 | tr '[]' ' ' | cut -d ',' -f 1)"
+  eq $energy1 $1 $thresh
+}
 
+
+@test "F2" { # 4.07m
+  [[ -n $TRAVIS ]] && skip
+  qp set_file f2.ezfio
+  qp set_frozen_core
+  run_stoch -199.30496 1.e-4
+}
 
 @test "NH3" { # 10.6657s
   qp set_file nh3.ezfio
@@ -64,7 +83,7 @@ function run() {
 @test "SO" { # 13.4952s
   [[ -n $TRAVIS ]] && skip
   qp set_file so.ezfio
-  run -26.0126370436611 1.e-5
+  run -26.0144622194831 1.e-5
 }
 
 @test "H2S" { # 13.6745s
@@ -94,20 +113,20 @@ function run() {
 @test "SiH3" { # 15.99s
   [[ -n $TRAVIS ]] && skip
   qp set_file sih3.ezfio
-  run -5.57267383364177 1.e-05 
+  run -5.57269434557089 2.e-05 
 }
 
 @test "CH4" { # 16.1612s
   [[ -n $TRAVIS ]] && skip
   qp set_file ch4.ezfio
   qp set_mo_class --core="[1]" --act="[2-30]" --del="[31-59]"
-  run -40.2409672510721 1.e-5
+  run -40.2409858175829 2.e-5
 }
 
 @test "ClF" { # 16.8864s
   [[ -n $TRAVIS ]] && skip
   qp set_file clf.ezfio
-  run -559.168731496312 1.e-5
+  run -559.170116079903 1.e-5
 }
 
 @test "SO2" { # 17.5645s
@@ -121,36 +140,30 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file c2h2.ezfio
   qp set_mo_class --act="[1-30]" --del="[31-36]"
-  run -12.3671467643742 1.e-5
+  run -12.3678973551285 2.e-5
 }
 
 @test "N2" { # 18.0198s
   [[ -n $TRAVIS ]] && skip
   qp set_file n2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-60]"
-  run -109.291382745482 1.e-5
+  run -109.291310557766 1.e-4
 }
 
 @test "N2H4" { # 18.5006s
   [[ -n $TRAVIS ]] && skip
   qp set_file n2h4.ezfio
   qp set_mo_class --core="[1-2]" --act="[3-24]" --del="[25-48]"
-  run -111.367234092521 1.e-5
+  run -111.367234092521 2.e-5
 }
 
 @test "CO2" { # 21.1748s
   [[ -n $TRAVIS ]] && skip
   qp set_file co2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-30]" --del="[31-42]"
-  run -187.969721107603 1.e-5
+  run -187.969556614801 1.e-5
 }
 
-@test "F2" { # 21.331s
-  [[ -n $TRAVIS ]] && skip
-  qp set_file f2.ezfio
-  qp set_mo_class --core="[1,2]" --act="[3-30]" --del="[31-62]"
-  run -199.068518708366 1.e-5 
-}
 
 @test "[Cu(NH3)4]2+" { # 25.0417s
   [[ -n $TRAVIS ]] && skip
@@ -163,6 +176,6 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file hcn.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-55]"
-  run -93.0779744802522 1.e-5
+  run -93.0794109423741 2.e-5
 }
 
