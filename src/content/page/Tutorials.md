@@ -11,19 +11,19 @@ draft: false
 
 {{< youtube Un69atP2-30 >}}
 
-#. Download the source files
+1. Download the source files
 
     git clone https://github.com/QuantumPackage/qp2.git
 
-#. Install the dependencies
+2. Install the dependencies
 
     ./configure   # tells you what to install. See in INSTALL.rst
 
-#. !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!
+3. !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!
 
     ./configure --install something
 
-#. The following libraries are needed for the ocaml package
+4. The following libraries are needed for the ocaml package
 
   * zlib1g-dev
   * libncurses5-dev
@@ -31,15 +31,15 @@ draft: false
   * libgmp3-dev 
   * m4
 
-#. Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES
+5. Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES
 
     source quantum_package.rc
 
-#. Define your COMPILATION CONFIGURATION FILE
+6. Define your COMPILATION CONFIGURATION FILE
 
     ./configure -c ./config/a_file.cfg
 
-#. COMPILE with NINJA
+7. COMPILE with NINJA
 
     ninja
 
