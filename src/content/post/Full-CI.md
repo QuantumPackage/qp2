@@ -10,7 +10,7 @@ draft: false
 
 # Full-CI calculation
 
-{{< youtube KIl_xq-NRLo >}}
+{{< youtube 4nmdCAPkZlc >}}
 
 
 1. Enter in qpsh mode for auto completion
