@@ -7,7 +7,7 @@ draft: false
 
 ---------------------
 
-* [Installation](/post/Installation)
-* [Hartree-Fock](/post/Hartree-Fock)
-* [Full-CI](/post/Full-CI)
+* [Installation](/post/installation)
+* [Hartree-Fock](/post/hartree-fock)
+* [Full-CI](/post/full-ci)
 
