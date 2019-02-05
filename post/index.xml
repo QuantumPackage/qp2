@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Quantum Package</title>
+    <link>https://quantumpackage.github.io/qp2/post/</link>
+    <description>Recent content in Posts on Quantum Package</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <managingEditor>quantum.package@gmail.com</managingEditor>
+    <webMaster>quantum.package@gmail.com</webMaster>
+    <lastBuildDate>Tue, 05 Feb 2019 16:39:50 +0100</lastBuildDate>
+    
+	<atom:link href="https://quantumpackage.github.io/qp2/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Full-CI</title>
+      <link>https://quantumpackage.github.io/qp2/post/full-ci/</link>
+      <pubDate>Tue, 05 Feb 2019 16:39:50 +0100</pubDate>
+      <author>quantum.package@gmail.com</author>
+      <guid>https://quantumpackage.github.io/qp2/post/full-ci/</guid>
+      <description>Full-CI calculation    Enter in qpsh mode for auto completion  ~/your_path_to_qp/bin/qpsh   Create an EZFIO DATA BASE from .xyz  qp create_ezfio -b 6-31g hcn.xyz # output:: hcn.ezfio DATA BASE   Run a HF calculation on the EZFIO  qp run scf | tee output_file.scf.out # output:: create MO basis in the EZFIO   Freeze the 1s orbitals in the EZFIO  qp set_frozen_core   Run the CIPSI algorithm on the EZFIO  qp run fci | tee output_file.</description>
+    </item>
+    
+    <item>
+      <title>Video Tutorials</title>
+      <link>https://quantumpackage.github.io/qp2/post/hartree-fock/</link>
+      <pubDate>Mon, 04 Feb 2019 16:39:50 +0100</pubDate>
+      <author>quantum.package@gmail.com</author>
+      <guid>https://quantumpackage.github.io/qp2/post/hartree-fock/</guid>
+      <description> Hartree-Fock calculation    Enter in qpsh mode for auto completion  ~/your_path_to_qp/bin/qpsh   Create an EZFIO DATA BASE from .xyz  qp create_ezfio -b 6-31g hcn.xyz   Run a HF calculation on the EZFIO and put the output in a file  qp run scf | tee hcn.ezfio.scf.out  </description>
+    </item>
+    
+    <item>
+      <title>Video Tutorials</title>
+      <link>https://quantumpackage.github.io/qp2/post/installation/</link>
+      <pubDate>Sun, 03 Feb 2019 16:39:50 +0100</pubDate>
+      <author>quantum.package@gmail.com</author>
+      <guid>https://quantumpackage.github.io/qp2/post/installation/</guid>
+      <description>Installation    Download the source files  git clone https://github.com/QuantumPackage/qp2.git   Install the dependencies  ./configure # tells you what to install. See in INSTALL.rst   USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED  ./configure --install something   The following libraries are needed for the ocaml package
+ zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  Once the smiling cow appears, load the environment variables</description>
+    </item>
+    
+  </channel>
+</rss>
