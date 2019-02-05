@@ -113,7 +113,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
       call create_selection_buffer(bsize, bsize*2, b)
       buffer_ready = .True.
     else
-      ASSERT (N == b%N)
+      ASSERT (b%N == bsize)
     endif
 
     double precision :: time0, time1
