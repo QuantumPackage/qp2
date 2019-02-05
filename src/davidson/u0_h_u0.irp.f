@@ -57,8 +57,8 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     do istate = 1,N_st
       do j=1,n
         do i=1,n
-          v_0(i,istate) = h_matrix_all_dets(i,j) * u_0(j,istate)
-          s_vec(i,istate) = S2_matrix_all_dets(i,j) * u_0(j,istate)
+          v_0(i,istate) = v_0(i,istate) + h_matrix_all_dets(i,j) * u_0(j,istate)
+          s_vec(i,istate) = s_vec(i,istate) + S2_matrix_all_dets(i,j) * u_0(j,istate)
         enddo
       enddo
     enddo
