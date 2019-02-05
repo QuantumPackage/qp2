@@ -187,6 +187,104 @@ systems.</p>
         <div class="posts-list">
           
           
+            <article class="post-preview">
+              <a href="https://quantumpackage.github.io/qp2/post/full-ci/">
+                <h2 class="post-title">Full-CI</h2>
+                
+              </a>
+
+              <span class="post-meta">
+  Posted on February 5, 2019
+  
+</span>
+
+
+              <div class="post-entry">
+                
+                  Full-CI calculation    Enter in qpsh mode for auto completion  ~/your_path_to_qp/bin/qpsh   Create an EZFIO DATA BASE from .xyz  qp create_ezfio -b 6-31g hcn.xyz # output:: hcn.ezfio DATA BASE   Run a HF calculation on the EZFIO  qp run scf | tee output_file.scf.out # output:: create MO basis in the EZFIO   Freeze the 1s orbitals in the EZFIO  qp set_frozen_core   Run the CIPSI algorithm on the EZFIO  qp run fci | tee output_file.
+                  <a href="https://quantumpackage.github.io/qp2/post/full-ci/" class="post-read-more">[Read More]</a>
+                
+              </div>
+
+              
+            </article>
+          
+            <article class="post-preview">
+              <a href="https://quantumpackage.github.io/qp2/post/hartree-fock/">
+                <h2 class="post-title">Video Tutorials</h2>
+                
+              </a>
+
+              <span class="post-meta">
+  Posted on February 4, 2019
+  
+</span>
+
+
+              <div class="post-entry">
+                
+                  
+
+<hr />
+
+<h1 id="hartree-fock-calculation">Hartree-Fock calculation</h1>
+
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="//www.youtube.com/embed/KIl_xq-NRLo" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
+</div>
+
+
+<ol>
+<li>Enter in qpsh mode for auto completion</li>
+</ol>
+
+<pre><code class="language-bash">~/your_path_to_qp/bin/qpsh
+</code></pre>
+
+<ol>
+<li>Create an EZFIO DATA BASE from .xyz</li>
+</ol>
+
+<pre><code class="language-bash">qp create_ezfio -b 6-31g hcn.xyz
+</code></pre>
+
+<ol>
+<li>Run a HF calculation on the EZFIO  and put the output in a file</li>
+</ol>
+
+<pre><code class="language-bash">qp run scf | tee hcn.ezfio.scf.out
+</code></pre>
+
+                
+              </div>
+
+              
+            </article>
+          
+            <article class="post-preview">
+              <a href="https://quantumpackage.github.io/qp2/post/installation/">
+                <h2 class="post-title">Video Tutorials</h2>
+                
+              </a>
+
+              <span class="post-meta">
+  Posted on February 3, 2019
+  
+</span>
+
+
+              <div class="post-entry">
+                
+                  Installation    Download the source files  git clone https://github.com/QuantumPackage/qp2.git   Install the dependencies  ./configure # tells you what to install. See in INSTALL.rst   USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED  ./configure --install something   The following libraries are needed for the ocaml package
+ zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  Once the smiling cow appears, load the environment variables
+                  <a href="https://quantumpackage.github.io/qp2/post/installation/" class="post-read-more">[Read More]</a>
+                
+              </div>
+
+              
+            </article>
+          
         </div>
 
         

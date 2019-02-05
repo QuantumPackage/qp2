@@ -31,15 +31,7 @@ First create a file named be.</description>
       <pubDate>Wed, 23 Jan 2019 22:33:52 +0100</pubDate>
       <author>quantum.package@gmail.com</author>
       <guid>https://quantumpackage.github.io/qp2/page/tutorials/</guid>
-      <description>Installation    Download the source files
-git clone https://github.com/QuantumPackage/qp2.git
- Install the dependencies
-./configure # tells you what to install. See in INSTALL.rst
- !! USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED !!
-./configure &amp;ndash;install something
- The following libraries are needed for the ocaml package
- zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  Once the SMILING COW APPEAR, load the ENVIRONMENT VARIABLES
-source quantum_package.rc</description>
+      <description> Installation Hartree-Fock Full-CI  </description>
     </item>
     
   </channel>
