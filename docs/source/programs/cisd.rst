@@ -19,7 +19,7 @@ cisd
   
  This program can be useful in many cases: 
   
- * GROUND STATE CALCULATION: if even after a :c:func:`cis` calculation, natural 
+ * **Ground state calculation**: if even after a :c:func:`cis` calculation, natural 
    orbitals (see :c:func:`save_natorb`) and then :c:func:`scf` optimization, you are not sure to have the lowest scf 
    solution, 
    do the same strategy with the :c:func:`cisd` executable instead of the :c:func:`cis` exectuable to generate the natural 
@@ -27,11 +27,11 @@ cisd
   
   
   
- * EXCITED STATES CALCULATIONS: the lowest excited states are much likely to 
+ * **Excited states calculations**: the lowest excited states are much likely to 
    be dominanted by single- or double-excitations. 
    Therefore, running a :c:func:`cisd` will save the "n_states" lowest states within 
    the CISD space 
-   in the EZFIO folder, which can afterward be used as guess wave functions 
+   in the |EZFIO| directory, which can afterward be used as guess wave functions 
    for a further multi-state fci calculation if you specify "read_wf" = True 
    before running the fci executable (see :option:`determinants read_wf`). 
    Also, if you specify "s2_eig" = True, the cisd will only retain states 

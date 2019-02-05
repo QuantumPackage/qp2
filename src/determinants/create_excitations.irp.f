@@ -1,4 +1,4 @@
-subroutine do_mono_excitation(key_in,i_hole,i_particle,ispin,i_ok)
+subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   implicit none
   BEGIN_DOC
   ! Apply the single excitation operator : a^{dager}_(i_particle) a_(i_hole) of spin = ispin

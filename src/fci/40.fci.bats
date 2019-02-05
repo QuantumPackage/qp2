@@ -34,13 +34,13 @@ function run() {
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.296806579881 1.e-05 
+  run -113.296794171915 2.e-05 
 }
 
 @test "H2O2" { # 12.9214s
   qp set_file h2o2.ezfio
   qp set_mo_class --core="[1-2]" --act="[3-24]" --del="[25-38]"
-  run -151.004935161155 1.e-5
+  run -151.004888189874 2.e-5
 }
 
 @test "HBO" { # 13.3144s
@@ -52,13 +52,13 @@ function run() {
 @test "H2O" { # 11.3727s
   [[ -n $TRAVIS ]] && skip
   qp set_file h2o.ezfio
-  run -76.2359268957699 1.e-5
+  run -76.2359268957699 2.e-5
 }
 
 @test "ClO" { # 13.3755s
   [[ -n $TRAVIS ]] && skip
   qp set_file clo.ezfio
-  run -534.546053053143 1.e-5
+  run -534.546005867797 5.e-5
 }
 
 @test "SO" { # 13.4952s

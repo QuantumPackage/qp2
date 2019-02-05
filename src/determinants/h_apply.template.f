@@ -236,7 +236,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
       call bitstring_to_list_ab(particle_tmp,occ_particle_tmp,N_elec_in_key_part_2,N_int)
       call bitstring_to_list_ab(hole_tmp,occ_hole_tmp,N_elec_in_key_hole_2,N_int)
 
-      !   hole = a^(+)_j_a(ispin) a_i_a(ispin)|key_in> : mono exc :: orb(i_a,ispin) --> orb(j_a,ispin)
+      !   hole = a^(+)_j_a(ispin) a_i_a(ispin)|key_in> : single exc :: orb(i_a,ispin) --> orb(j_a,ispin)
       hole_save = hole
 
       ! Build array of the non-zero integrals of second excitation
@@ -297,7 +297,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
         enddo
       endif
 
-      !   does all the mono excitations of the same spin
+      !   does all the single excitations of the same spin
       i=0
       do kk = 1,N_elec_in_key_hole_2(ispin)
         i_b = occ_hole_tmp(kk,ispin)

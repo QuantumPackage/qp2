@@ -153,9 +153,6 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   logical :: monoAdo, monoBdo
   integer :: maskInd
 
-  double precision :: rss
-  double precision, external :: memory_of_double, memory_of_int
-
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
@@ -231,7 +228,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   
   deallocate(exc_degree)
   nmax=k-1
-  
+
   allocate(iorder(nmax))
   do i=1,nmax
     iorder(i) = i
@@ -241,8 +238,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
       interesting(0:32), fullinteresting(0:32))
-  preinteresting(0) = 0
-  prefullinteresting(0) = 0
+  preinteresting(:) = 0
+  prefullinteresting(:) = 0
   
   do i=1,N_int
     negMask(i,1) = not(psi_det_generators(i,1,i_generator))
@@ -645,12 +642,10 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
     negMask(i,2) = not(mask(i,2))
   end do
 
-  do i=1, N_sel ! interesting(0)
-    !i = interesting(ii)
+  do i=1, N_sel 
     if (interesting(i) < 0) then
       stop 'prefetch interesting(i) and det(i)'
     endif
-
 
     mobMask(1,1) = iand(negMask(1,1), det(1,1,i))
     mobMask(1,2) = iand(negMask(1,2), det(1,2,i))
@@ -682,10 +677,10 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
         end if
     end if
 
-    call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
-    call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
-
     if (interesting(i) >= i_gen) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+
         perMask(1,1) = iand(mask(1,1), not(det(1,1,i)))
         perMask(1,2) = iand(mask(1,2), not(det(1,2,i)))
         do j=2,N_int
@@ -704,9 +699,14 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
         else
           call get_d0(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         end if
-    else
-        if(nt == 4) call past_d2(banned, p, sp)
-        if(nt == 3) call past_d1(bannedOrb, p)
+    else if(nt == 4) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+        call past_d2(banned, p, sp)
+    else if(nt == 3) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+        call past_d1(bannedOrb, p)
     end if
   end do
 

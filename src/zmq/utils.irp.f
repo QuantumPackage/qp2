@@ -246,7 +246,7 @@ IRP_ENDIF
 !    stop 'Unable to set ZMQ_RCVBUF on pull socket'
 !  endif
 
-  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,10,4)
+  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,50,4)
   if (rc /= 0) then
     stop 'Unable to set ZMQ_RCVHWM on pull socket'
   endif
@@ -323,7 +323,7 @@ IRP_ENDIF
     stop 'Unable to set ZMQ_LINGER on push socket'
   endif
 
-  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,10,4)
+  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,1,4)
   if (rc /= 0) then
     stop 'Unable to set ZMQ_SNDHWM on push socket'
   endif
@@ -604,11 +604,11 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
     rc = f77_zmq_send(zmq_to_qp_run_socket, 'end_job '//trim(zmq_state),8+len(trim(zmq_state)),0)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 512, 0)
     if (trim(message(1:13)) == 'error waiting') then
-      call sleep(1)
       cycle
     else if (message(1:2) == 'ok') then
       exit
     endif
+    call sleep(1)
   end do
   if (i==0) then
     print *,  '.. Forcing kill ..'
@@ -1085,6 +1085,62 @@ integer function zmq_delete_task(zmq_to_qp_run_socket,zmq_socket_pull,task_id,mo
   endif
 end
 
+integer function zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! When a task is done, it has to be removed from the list of tasks on the qp_run
+! queue. This guarantees that the results have been received in the pull.
+  END_DOC
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+  integer, intent(in)            :: task_id
+  logical, intent(inout)         :: sending
+  integer                        :: rc
+  character*(512)                :: message
+
+  if (sending) then
+    print *,  irp_here, ': sending=true'
+    stop -1
+  endif
+  zmq_delete_task_async_send = 0
+
+  write(message,*) 'del_task ', zmq_state, task_id
+  rc = f77_zmq_send(zmq_to_qp_run_socket,trim(message),len(trim(message)),0)
+  if (rc /= len(trim(message))) then
+    zmq_delete_task_async_send = -1
+    return
+  endif
+  sending = .True.
+
+end
+
+integer function zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! When a task is done, it has to be removed from the list of tasks on the qp_run
+! queue. This guarantees that the results have been received in the pull.
+  END_DOC
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+  integer, intent(out)           :: more
+  logical, intent(inout)         :: sending
+  integer                        :: rc
+  character*(512)                :: message
+  character*(64) :: reply
+  if (.not.sending) return
+  sending = .False.
+  reply = ''
+  rc = f77_zmq_recv(zmq_to_qp_run_socket,reply,64,0)
+  if (reply(16:19) == 'more') then
+    more = 1
+  else if (reply(16:19) == 'done') then
+    more = 0
+  else
+    zmq_delete_task_async_recv = -1
+    return
+  endif
+end
+
 integer function zmq_delete_tasks(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n_tasks,more)
   use f77_zmq
   implicit none
@@ -1128,7 +1184,7 @@ integer function zmq_delete_tasks(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n
   endif
 end
 
-integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n_tasks,more)
+integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending)
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -1136,13 +1192,17 @@ integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,zmq_socket_pul
 ! queue. This guarantees that the results have been received in the pull.
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
-  integer(ZMQ_PTR)               :: zmq_socket_pull
   integer, intent(in)            :: n_tasks, task_id(n_tasks)
-  integer, intent(in)            :: more
+  logical, intent(inout)         :: sending
   integer                        :: rc, k
   character*(64)                 :: fmt, reply
   character(LEN=:), allocatable  :: message
 
+  if (sending) then
+    print *,  irp_here, ': sending is true'
+    stop -1
+  endif
+  sending = .True.
   zmq_delete_tasks_async_send = 0
 
   allocate(character(LEN=64+n_tasks*12) :: message)
@@ -1162,7 +1222,7 @@ integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,zmq_socket_pul
 end
 
 
-integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n_tasks,more)
+integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending)
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -1170,12 +1230,12 @@ integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,zmq_socket_pul
 ! queue. This guarantees that the results have been received in the pull.
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
-  integer(ZMQ_PTR)               :: zmq_socket_pull
-  integer, intent(in)            :: n_tasks, task_id(n_tasks)
   integer, intent(out)           :: more
+  logical, intent(inout)         :: sending
   integer                        :: rc
   character*(64)                 :: reply
 
+  if (.not.sending) return
   zmq_delete_tasks_async_recv = 0
 
   reply = ''
@@ -1188,6 +1248,7 @@ integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,zmq_socket_pul
   else
     zmq_delete_tasks_async_recv = -1
   endif
+  sending = .False.
 end
 
 

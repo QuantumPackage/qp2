@@ -49,8 +49,6 @@ Refaire les benchmarks
 # Documentation de qpsh
 
 # Documentation de /etc
-# Extrapolation qui prend aussi en compe la variance? a tester
-Parler dans le papier de rPT2
 
 # Toto
 Re-design de qp command
@@ -58,3 +56,5 @@ Re-design de qp command
 Doc: plugins et qp_plugins
 
 Ajouter les symetries dans devel
+
+Compiler ezfio avec openmp

@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "FOUR_IDX_TRANSFORM" "1" "Jan 29, 2019" "2.0" "Quantum Package"
+.TH "QP_RESET" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
-four_idx_transform \-  | Quantum Package >
+qp_reset \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -30,43 +30,33 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
+.sp
+This command resets parts of the \fI\%EZFIO\fP directory.
+.SH USAGE
 .INDENT 0.0
 .INDENT 3.5
-4\-index transformation of two\-electron integrals from AO to MO
-integrals.
 .sp
-This program will compute the two\-electron integrals on the MO basis
-and store it into the \fI\%EZFIO\fP directory.
-.sp
-This program can be useful if the AO –> MO transformation is an
-expensive step by itself.
-.sp
-Needs:
+.nf
+.ft C
+qp_reset [\-adhm] EZFIO_DIR
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .INDENT 0.0
-.INDENT 2.0
-.IP \(bu 2
-\fBio_mo_two_e_integrals\fP
+.TP
+.B \-a, \-\-all
+Reset to the state in which the directory is after after running qp_create_ezfio\&.
 .UNINDENT
-.INDENT 2.0
-.IP \(bu 2
-\fBmo_two_e_integrals_in_map\fP
-.UNINDENT
-.INDENT 2.0
-.UNINDENT
-.UNINDENT
-.sp
-Touches:
 .INDENT 0.0
-.INDENT 2.0
-.IP \(bu 2
-\fBio_mo_two_e_integrals\fP
+.TP
+.B \-d, \-\-dets
+Deletes the determinants and CI coefficients.
 .UNINDENT
-.INDENT 2.0
-.UNINDENT
-.INDENT 2.0
-.UNINDENT
-.UNINDENT
-.UNINDENT
+.INDENT 0.0
+.TP
+.B \-m, \-\-mos
+Deletes the MOs, and consequently the determinants and CI coefficients.
 .UNINDENT
 .SH AUTHOR
 A. Scemama, E. Giner
