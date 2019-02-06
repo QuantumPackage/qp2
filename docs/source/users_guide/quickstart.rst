@@ -10,7 +10,10 @@ the the basics of the |qp|. As an example, we will run a frozen core
 Demo video
 ==========
 
-.. Include demo video here
+This tutorial can be directly watched at: 
+
+
+`<https://www.youtube.com/watch?v=4nmdCAPkZlc>`_
 
 
 Hands on
@@ -20,8 +23,69 @@ Hands on
 
    Before using the |qp|, it is required to load the environment variables 
    relatives to the |QP| or to be in the |qpsh| mode. 
-   Here we'll do it within the |qpsh| shell: please run ${QP_ROOT}/bin/qpsh 
-   in the current shell.
+
+
+Please execute in the current shell: 
+
+.. code:: bash 
+
+  ${QP_ROOT}/bin/qpsh 
+
+where :code:`${QP_ROOT}` is the path to the source files of the |QP| installed on your architecture.  
+
+The |QPSH| mode: a bash-like experience for quantum chemistry
+-------------------------------------------------------------
+
+The |QP| has been designed pretty much as an *interactive* environment for quantum-chemistry calculations, 
+in order to facilitate the user experience. 
+
+Just like in bash, there are many commands in the |QP| (see for instance :ref:`qp_edit` or :ref:`qp_run`) 
+which help in handling useful data or running executables (see for instance :ref:`scf` or :ref:`fci`). 
+
+All commands designed within the |qp| **start** with **qp**, and are two ways of running a **command**: 
+
+* the *executable* associated to the command: 
+
+.. code:: bash
+
+  qp_command 
+
+or the *qp* command which calls the *executable* :code:`qp_command`: 
+
+.. code:: bash
+
+  qp command 
+
+
+The advantage or using :code:`qp command` is that you can, just like in bash, have: 
+
+* the tabulation for the auto-completion for basically any command of the |QP| 
+
+* man pages with -h, --help or qp man 
+
+
+Just try, for instance: 
+
+.. code:: bash 
+
+  qp 
+
+and then use the auto-completion. You will show appear all possible commands that you can run: 
+
+
+.. code:: bash 
+
+  convert_output_to_ezfio  -h                       plugins                  unset_file               
+  create_ezfio             man                      set_file                 update            
+
+Then, try, still with the auto-completion, 
+
+.. code:: bash
+
+  qp create
+
+You will see appear all the options for the :ref:`qp_create_ezfio` commands. 
+
 
 Create the EZFIO database
 -------------------------
@@ -50,7 +114,7 @@ create an |EZFIO| database with the 6-31G basis set:
 
 .. code:: bash
 
-  qp_create_ezfio -b "6-31G" hcn.xyz -o hcn
+  qp create_ezfio -b "6-31G" hcn.xyz -o hcn
 
 The EZFIO database now contains data relative to the nuclear coordinates
 and the atomic basis set:
@@ -65,11 +129,11 @@ Run a Hartree-Fock calculation
 ------------------------------
 
 The program :ref:`qp_run` is the driver program of the |qp|. To run a
-|SCF| calculation, just run
+|scf| calculation, just run
 
 .. code:: bash
 
-    qp_run scf hcn 
+    qp run scf hcn 
 
 The expected energy is ``-92.827856698`` au.
 
@@ -85,13 +149,13 @@ the |MOs| are stored by increasing order of Fock energies.
 Choose the target |MO| space
 ----------------------------
 
-Now, modify to |EZFIO| database to make |CIPSI| calculation in the
+Now, we will modify the |EZFIO| database to make |CIPSI| calculation only in the
 full set of valence |MOs|, keeping the core |MOs| frozen. The simple
 command :ref:`qp_set_frozen_core` does this automatically:
 
 .. code:: bash
 
-    qp_set_frozen_core hcn
+    qp set_frozen_core hcn
 
 
 The general command to specify core and active orbitals is :ref:`qp_set_mo_class`. 
@@ -99,7 +163,7 @@ In the case of HCN molecule in the 631G basis, one has 20 |MOs| in total and the
 
 .. code::
 
-    qp_set_mo_class -core "[1-2]" -act "[3-20]" hcn
+    qp set_mo_class --core "[1-2]" --act "[3-20]" hcn
 
 
 
@@ -110,7 +174,7 @@ We will now use the |CIPSI| algorithm to estimate the |FCI| energy.
 
 .. code::
 
-    qp_run fci hcn | tee hcn.fci.out 
+    qp run fci hcn | tee hcn.fci.out 
 
 
 The program will start with a single determinant and will iteratively:
@@ -131,7 +195,7 @@ To have a pictural illustration of the convergence of the |CIPSI| algorithm, jus
 
 .. code::
 
-    qp_e_conv_fci hcn.fci.out
+    qp_e_conv_fci hcn.ezfio
 
 This will create the files "hcn.fci.out.conv" containing the data of the convergence of the energy that can be plotted, together with the file "hcn.fci.out.conv.1.eps" which is obtained from the gnuplot plot file "hcn.fci.out.conv.plt". 
 
@@ -145,7 +209,6 @@ The estimated |FCI| energy of HCN is ``-93.0501`` au.
 
 ---------------------------
 
-TODO 
 
 
 .. important:: TODO

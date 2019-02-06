@@ -38,6 +38,8 @@
 .. |OPAM|  replace:: `OPAM`_
 .. |Python|  replace:: `Python`_
 .. |qp| replace:: *Quantum Package*
+.. |qpsh| replace:: *Quantum Package Shell*
+.. |QPSH| replace:: *Quantum Package Shell*
 .. |resultsFile| replace:: `resultsFile`_
 .. |SLURM| replace:: `SLURM`_
 .. |ZeroMQ| replace:: `ZeroMQ`_

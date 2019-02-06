@@ -17,7 +17,6 @@ Input_dressing.ml
 Input_mo_one_e_ints.ml
 Input_mo_two_e_erf_ints.ml
 Input_mo_two_e_ints.ml
-Input_new_functionals.ml
 Input_nuclei.ml
 Input_perturbation.ml
 Input_pseudo.ml
