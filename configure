@@ -175,7 +175,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq ocaml ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp ocaml ezfio docopt resultsFile bats"
 fi
 
 
@@ -191,6 +191,21 @@ for PACKAGE in ${PACKAGES} ; do
               unzip "\${QP_ROOT}"/external/ninja.zip -d "\${QP_ROOT}"/bin
 EOF
 
+
+    elif [[ ${PACKAGE} = gmp ]] ; then
+
+            download \
+              "ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2" \
+              "${QP_ROOT}"/external/gmp.tar.bz2
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --bzip2 --extract --file gmp.tar.bz2
+              rm gmp.tar.bz2
+              cd gmp*
+              ./configure --prefix=$QP_ROOT && make -j 8
+              make install
+EOF
+    
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
@@ -377,6 +392,12 @@ fi
 F77ZMQ=$(find_lib -lzmq -lf77zmq)
 if [[ ${F77ZMQ} = $(not_found) ]] ; then
         error "Fortran binding of ZeroMQ (f77zmq) is not installed."
+        fail
+fi
+
+GMP=$(find_lib -lgmp)
+if [[ ${ZLIB} = $(not_found) ]] ; then
+        error "GMP (gmp) is not installed."
         fail
 fi
 
