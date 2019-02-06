@@ -171,7 +171,7 @@ for f in os.listdir("users_guide"):
 
 for f in os.listdir("programs"):
   name = f.split('.')[0]
-  if name not in []:
+  if name not in [""]:
     filename = os.path.join("programs",name)
     man_pages.append( (filename, name, qpdoc, [author], 1) )
 

@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "QP_EXPORT_AS_TGZ" "1" "Jan 29, 2019" "2.0" "Quantum Package"
+.TH "QP_RESET" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
-qp_export_as_tgz \-  | Quantum Package >
+qp_reset \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -31,36 +31,32 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
 .sp
-In some HPC facilities, the access to the internet is limited for
-security reasons. In such an environment, the installation of \fIQuantum Package\fP is
-sometimes very painful because the OCaml compiler and the libraries
-can’t be installed by a non\-root user.
-.sp
-This command creates a self\-contained binary distribution in the form of
-a \fItar.gz\fP file that can be copied on another machine.
+This command resets parts of the \fI\%EZFIO\fP directory.
 .SH USAGE
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-qp_export_as_tgz [\-h|\-\-help]
+qp_reset [\-adhm] EZFIO_DIR
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-h, \-\-help
-Prints the help message
+.B \-a, \-\-all
+Reset to the state in which the directory is after after running qp_create_ezfio\&.
 .UNINDENT
-.sp
-\fBNOTE:\fP
 .INDENT 0.0
-.INDENT 3.5
-There can be conflicts due to the version of glibc. The machine on which \fIQuantum Package\fP is
-compiled should be the oldest one.
+.TP
+.B \-d, \-\-dets
+Deletes the determinants and CI coefficients.
 .UNINDENT
+.INDENT 0.0
+.TP
+.B \-m, \-\-mos
+Deletes the MOs, and consequently the determinants and CI coefficients.
 .UNINDENT
 .SH AUTHOR
 A. Scemama, E. Giner

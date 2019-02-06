@@ -562,9 +562,9 @@ Subroutines / functions
 
     Rotates the j-th |MO| with the k-th |MO| to give two new |MOs| that are
     
-    * $+ = \frac{1}{\sqrt{2}} (|j\rangle + |k\rangle)$
+    * $+ = \frac{1}{\sqrt{2}} ( | j\rangle +  | k\rangle)$
     
-    * $- = \frac{1}{\sqrt{2}} (|j\rangle - |k\rangle)$
+    * $- = \frac{1}{\sqrt{2}} ( | j\rangle -  | k\rangle)$
     
     by convention, the '+' |MO| is in the lowest  index (min(j,k))
     by convention, the '-' |MO| is in the highest index (max(j,k))

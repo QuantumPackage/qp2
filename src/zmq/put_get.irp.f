@@ -397,7 +397,9 @@ integer function zmq_get_dmatrix(zmq_to_qp_run_socket, worker_id, name, x, size_
       if (rc /= len(trim(msg))) then
         print *,  trim(msg)
         zmq_get_dmatrix = -1
-        print *,  irp_here, 'rc /= len(trim(msg))', rc, len(trim(msg))
+        print *,  irp_here, 'rc /= len(trim(msg))'
+        print *,  irp_here, '  received : ', rc
+        print *,  irp_here, '  expected : ', len(trim(msg))
         go to 10
       endif
 
@@ -411,7 +413,9 @@ integer function zmq_get_dmatrix(zmq_to_qp_run_socket, worker_id, name, x, size_
 
       rc = f77_zmq_recv8(zmq_to_qp_run_socket,x(1,j),ni*8_8,0)
       if (rc /= ni*8_8) then
-        print *,  irp_here, 'rc /= size_x1*8', rc, ni*8_8
+        print *,  irp_here, 'rc /= size_x1*8 : ', trim(name)
+        print *,  irp_here, '  received: ', rc
+        print *,  irp_here, '  expected: ', ni*8_8
         zmq_get_dmatrix = -1
         go to 10
       endif

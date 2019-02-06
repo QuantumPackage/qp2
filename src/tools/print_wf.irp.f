@@ -1,17 +1,20 @@
 program print_wf
  implicit none
  BEGIN_DOC
- ! Print the ground state wave function stored in the |EZFIO| folder in the intermediate normalization.
+ ! Print the ground state wave function stored in the |EZFIO| directory
+ ! in the intermediate normalization.
  !
- ! It also prints a lot of information regarding the excitation operators from the reference determinant
+ ! It also prints a lot of information regarding the excitation
+ ! operators from the reference determinant ! and a first-order
+ ! perturbative analysis of the wave function.
  !
- ! and a first-order perturbative analysis of the wave function.
- !
- ! If the wave function strongly deviates from the first-order analysis, something funny is going on :)
+ ! If the wave function strongly deviates from the first-order analysis,
+ ! something funny is going on :)
  END_DOC
 
 
- ! this has to be done in order to be sure that N_det, psi_det and psi_coef are the wave function stored in the EZFIO folder
+ ! this has to be done in order to be sure that N_det, psi_det and
+ ! psi_coef are the wave function stored in the |EZFIO| directory.
  read_wf = .True.
  touch read_wf
  call routine

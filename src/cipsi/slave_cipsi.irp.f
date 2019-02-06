@@ -53,7 +53,7 @@ subroutine run_slave_main
 
   PROVIDE psi_det psi_coef threshold_generators state_average_weight mpi_master
   PROVIDE zmq_state N_det_selectors pt2_stoch_istate N_det pt2_e0_denominator
-  PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator
+  PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator mpi_rank
 
   IRP_IF MPI
     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
@@ -161,18 +161,17 @@ subroutine run_slave_main
         call mpi_print('zmq_get_psi')
       IRP_ENDIF
       if (zmq_get_psi(zmq_to_qp_run_socket,1) == -1) cycle
-      IRP_IF MPI_DEBUG
-        call mpi_print('zmq_get_dvector energy')
-      IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'energy',energy,N_states_diag) == -1) cycle
 
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')
 
+      !---
       call omp_set_nested(.True.)
       call davidson_slave_tcp(0)
       call omp_set_nested(.False.)
       print *,  mpi_rank, ': Davidson done'
+      !---
+
       IRP_IF MPI
         call MPI_BARRIER(MPI_COMM_WORLD, ierr)
         if (ierr /= MPI_SUCCESS) then
@@ -223,14 +222,6 @@ subroutine run_slave_main
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) cycle
       pt2_e0_denominator(1:N_states) = energy(1:N_states)
       SOFT_TOUCH pt2_e0_denominator state_average_weight pt2_stoch_istate threshold_generators
-      if (mpi_master) then
-        print *,  'N_det', N_det
-        print *,  'N_det_generators', N_det_generators
-        print *,  'N_det_selectors', N_det_selectors
-        print *,  'pt2_e0_denominator', pt2_e0_denominator
-        print *,  'pt2_stoch_istate', pt2_stoch_istate
-        print *,  'state_average_weight', state_average_weight
-      endif
 
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')
@@ -241,17 +232,78 @@ subroutine run_slave_main
         endif
       IRP_ENDIF
 
+
       IRP_IF MPI_DEBUG
         call mpi_print('Entering OpenMP section')
       IRP_ENDIF
       if (.true.) then
-        !$OMP PARALLEL PRIVATE(i)
-        i = omp_get_thread_num()
-        call run_pt2_slave(0,i,pt2_e0_denominator)
-        !$OMP END PARALLEL
+        integer :: nproc_target, ii
+        double precision :: mem_collector, mem, rss
+
+        call resident_memory(rss)
+
+        nproc_target = nthreads_pt2
+        ii = min(N_det, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
+
+        do
+          mem = rss +                             & !
+                nproc_target * 8.d0 *             & ! bytes
+                ( 0.5d0*pt2_n_tasks_max           & ! task_id
+                + 64.d0*pt2_n_tasks_max           & ! task
+                + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
+                + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
+                + 3.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
+                + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
+                + 2.0d0*(ii)                      & ! preinteresting, interesting,
+                                                    ! prefullinteresting, fullinteresting
+                + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
+                + 1.0d0*(N_states*mo_num*mo_num)  & ! mat
+                ) / 1024.d0**3
+
+          if (nproc_target == 0) then
+            call check_mem(mem,irp_here)
+            nproc_target = 1
+            exit
+          endif
+
+          if (mem+rss < qp_max_mem) then
+            exit
+          endif
+
+          nproc_target = nproc_target - 1
+
+        enddo
+        
+        if (N_det > 100000) then
+
+          if (mpi_master) then
+            print *,  'N_det', N_det
+            print *,  'N_det_generators', N_det_generators
+            print *,  'N_det_selectors', N_det_selectors
+            print *,  'pt2_e0_denominator', pt2_e0_denominator
+            print *,  'pt2_stoch_istate', pt2_stoch_istate
+            print *,  'state_average_weight', state_average_weight
+            print *,  'Number of threads', nproc_target
+          endif
+
+          if (h0_type == 'SOP') then
+            PROVIDE det_to_occ_pattern
+          endif
+
+          PROVIDE global_selection_buffer 
+          if (mpi_master) then
+            print *,  'Running PT2'
+          endif
+          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
+          i = omp_get_thread_num()
+          call run_pt2_slave(0,i,pt2_e0_denominator)
+          !$OMP END PARALLEL
+          FREE state_average_weight
+          print *,  mpi_rank, ': PT2 done'
+          print *,  '-------'
+
+        endif
       endif
-      FREE state_average_weight
-      print *,  mpi_rank, ': PT2 done'
 
       IRP_IF MPI
         call MPI_BARRIER(MPI_COMM_WORLD, ierr)

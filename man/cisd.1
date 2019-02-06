@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CISD" "1" "Jan 25, 2019" "2.0" "Quantum Package"
+.TH "CISD" "1" "Jan 29, 2019" "2.0" "Quantum Package"
 .SH NAME
 cisd \-  | Quantum Package >
 .
@@ -43,17 +43,17 @@ matrix (see \fBdeterminants n_states\fP).
 This program can be useful in many cases:
 .INDENT 0.0
 .IP \(bu 2
-GROUND STATE CALCULATION: if even after a \fBcis()\fP calculation, natural
+\fBGround state calculation\fP: if even after a \fBcis()\fP calculation, natural
 orbitals (see \fBsave_natorb()\fP) and then \fBscf()\fP optimization, you are not sure to have the lowest scf
 solution,
 do the same strategy with the \fBcisd()\fP executable instead of the \fBcis()\fP\ exectuable to generate the natural
 orbitals as a guess for the \fBscf()\fP\&.
 .IP \(bu 2
-EXCITED STATES CALCULATIONS: the lowest excited states are much likely to
+\fBExcited states calculations\fP: the lowest excited states are much likely to
 be dominanted by single\- or double\-excitations.
 Therefore, running a \fBcisd()\fP will save the “n_states” lowest states within
 the CISD space
-in the EZFIO folder, which can afterward be used as guess wave functions
+in the \fI\%EZFIO\fP directory, which can afterward be used as guess wave functions
 for a further multi\-state fci calculation if you specify “read_wf” = True
 before running the fci executable (see \fBdeterminants read_wf\fP).
 Also, if you specify “s2_eig” = True, the cisd will only retain states

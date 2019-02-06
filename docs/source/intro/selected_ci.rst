@@ -55,8 +55,6 @@ Simple Algorithm
 
 .. |SetDI| replace:: `\{|D_I\rangle\}^{(n)}`
 .. |Psi_n| replace:: `|\Psi^{(n)}\rangle`
-.. |H| replace:: `\hat H`
-.. |kalpha| replace:: `|\alpha\rangle`
 .. |kalpha_star| replace:: `\{ |\alpha \rangle \}_\star ^{(n)}`
 .. |ealpha| replace:: `e_\alpha`
 .. |EPT| replace:: `E_\text{PT2}`

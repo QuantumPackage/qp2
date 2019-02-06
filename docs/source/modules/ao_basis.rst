@@ -23,9 +23,13 @@ The |AO| coefficients are normalized as:
 
   {\tilde c}_{ki} = \frac{c_{ki}}{ \int \left( (x-X_A)^a (y-Y_A)^b (z-Z_A)^c  e^{-\gamma_{ki} |{\bf r} - {\bf R}_A|^2} \right)^2 dr}
 
-Warning: `ao_coef` contains the |AO| coefficients given in input. These do not
-include the normalization constant of the |AO|. The `ao_coef_normalized` provider includes
-this normalization factor.
+
+.. warning::
+
+  `ao_coef` contains the |AO| coefficients given in input. These do not
+  include the normalization constant of the |AO|. The `ao_coef_normalized`
+  provider includes this normalization factor.
+
 
 The |AOs| are also sorted by increasing exponent to accelerate the calculation of
 the two electron integrals.
@@ -1076,7 +1080,7 @@ Subroutines / functions
         double precision function ao_value(i,r)
 
 
-    return the value of the ith ao at point r
+    Returns the value of the i-th ao at point $\textbf{r}$
 
     Needs:
 
@@ -1101,9 +1105,12 @@ Subroutines / functions
         subroutine give_all_aos_and_grad_and_lapl_at_r(r,aos_array,aos_grad_array,aos_lapl_array)
 
 
-    input      : r(1) ==> r(1) = x, r(2) = y, r(3) = z
-    output     : aos_array(i) = ao(i) evaluated at r
-               : aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r
+    input  : r(1) ==> r(1) = x, r(2) = y, r(3) = z
+    
+    output :
+    
+    * aos_array(i) = ao(i) evaluated at $\textbf{r}$
+    * aos_grad_array(1,i) = $\nabla_x$ of the ao(i) evaluated at $\textbf{r}$
 
     Needs:
 
@@ -1138,9 +1145,13 @@ Subroutines / functions
         subroutine give_all_aos_and_grad_at_r(r,aos_array,aos_grad_array)
 
 
-    input      : r(1) ==> r(1) = x, r(2) = y, r(3) = z
-    output     : aos_array(i) = ao(i) evaluated at r
-               : aos_grad_array(1,i) = gradient X of the ao(i) evaluated at r
+    input : r(1) ==> r(1) = x, r(2) = y, r(3) = z
+    
+    output :
+    
+    * aos_array(i) = ao(i) evaluated at ro
+    * aos_grad_array(1,i) = gradient X of the ao(i) evaluated at $\textbf{r}$
+    
 
     Needs:
 
@@ -1175,8 +1186,9 @@ Subroutines / functions
         subroutine give_all_aos_at_r(r,aos_array)
 
 
-    input : r == r(1) = x and so on
-    aos_array(i) = aos(i) evaluated in r
+    input  : r == r(1) = x and so on
+    
+    output : aos_array(i) = aos(i) evaluated in $\textbf{r}$
 
     Needs:
 
@@ -1211,7 +1223,7 @@ Subroutines / functions
         subroutine give_all_aos_at_r_old(r,aos_array)
 
 
-    gives the values of aos at a given point r
+    Gives the values of |AOs| at a given point $\textbf{r}$
 
     Needs:
 
@@ -1231,7 +1243,8 @@ Subroutines / functions
         double precision function primitive_value(i,j,r)
 
 
-    return the value of the jth primitive of ith ao at point r WITHOUT THE COEF
+    Returns the value of the j-th primitive of the i-th |AO| at point $\textbf{r}
+    **without the coefficient**
 
     Needs:
 

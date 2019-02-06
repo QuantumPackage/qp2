@@ -202,9 +202,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    if (N_st_diag > 2*N_states) then
-      N_st_diag = N_st_diag-1
-    else if (itermax > 4) then
+    if (itermax > 4) then
       itermax = itermax - 1
     else if (m==1.and.disk_based_davidson) then
       m=0
@@ -325,6 +323,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       shift2 = N_st_diag*iter
 
       call ortho_qr(U,size(U,1),sze,shift2)
+      call ortho_qr(U,size(U,1),sze,shift2)
 
       ! Compute |W_k> = \sum_i |i><i|H|u_k>
       ! -----------------------------------------
@@ -394,6 +393,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 !      call dgemm('T','N', shift2, shift2, sze,                       &
 !          1.d0, U, size(U,1), S, size(S,1),                          &
 !          0.d0, s_, size(s_,1))
+
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k)
        do j=1,shift2
          do i=1,shift2
            s_(i,j) = 0.d0
@@ -402,6 +403,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
            enddo
           enddo
         enddo
+        !$OMP END PARALLEL DO
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------

@@ -50,7 +50,7 @@ let zmq_context =
   Zmq.Context.create ()
 
 let () =
-  Zmq.Context.set_io_threads zmq_context 8
+  Zmq.Context.set_io_threads zmq_context 16
 
 
 let bind_socket ~socket_type ~socket ~port =

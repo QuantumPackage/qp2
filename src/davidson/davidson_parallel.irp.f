@@ -35,50 +35,31 @@ subroutine davidson_run_slave(thread,iproc)
   integer(ZMQ_PTR)               :: zmq_socket_push
 
   integer, external              :: connect_to_taskserver
-  integer, external              :: zmq_get_N_states_diag
+  integer                        :: doexit, send, receive
 
-  PROVIDE mpi_rank
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
+
+  doexit = 0
+  if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
+    doexit=1
+  endif
+  IRP_IF MPI
+    include 'mpif.h'
+    integer :: ierr
+    send = doexit
+    call MPI_AllReduce(send, receive, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      doexit=1
+    endif
+    doexit = receive 
+  IRP_ENDIF
+  if (doexit>0) then
+    call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
+    return
+  endif
+
   zmq_socket_push      = new_zmq_push_socket(thread)
-
-
-  integer :: ierr, doexit
-  do
-    doexit = 0
-    if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-      call sleep( int(1.5+float(mpi_rank)/10.) )
-      if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
-        doexit=1
-      endif
-    endif
-
-    IRP_IF MPI
-      include 'mpif.h'
-      integer :: sendbuf, recvbuf
-      sendbuf = doexit
-      recvbuf = doexit
-      call MPI_ALLREDUCE(sendbuf, recvbuf, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        print *,  irp_here//': Unable to reduce '
-        stop -1
-      endif
-      doexit = recvbuf
-    IRP_ENDIF
-
-    if (doexit == 0) then
-        exit
-    else
-        print *,  irp_here, ': retrying connection (', doexit, ')'
-    endif
-  enddo
-
-  do
-    if (zmq_get_N_states_diag(zmq_to_qp_run_socket, 1) /= -1) then
-      exit
-    endif
-    print *,  irp_here, ': Waiting for N_states_diag'
-    call sleep(1)
-  enddo
+      
   call davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_states_diag, N_det, worker_id)
 
   integer, external :: disconnect_from_taskserver
@@ -91,7 +72,8 @@ subroutine davidson_run_slave(thread,iproc)
   endif
 
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
-  call end_zmq_push_socket(zmq_socket_push,thread)
+  call end_zmq_push_socket(zmq_socket_push)
+
 end subroutine
 
 
@@ -141,8 +123,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   endif
 
   do while (zmq_get_dmatrix(zmq_to_qp_run_socket, worker_id, 'u_t', u_t, ni, nj, size(u_t,kind=8)) == -1)
-    call sleep(1)
-    print *,  irp_here, ': waiting for u_t...'
+    print *,  'mpi_rank, N_states_diag, N_det'
+    print *,  mpi_rank, N_states_diag, N_det
+    stop 'u_t'
   enddo
 
   IRP_IF MPI
@@ -156,6 +139,8 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   ! Run tasks
   ! ---------
 
+  logical :: sending
+  sending=.False.
 
   allocate(v_t(N_st,N_det), s_t(N_st,N_det))
   do
@@ -175,9 +160,11 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
     if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id) == -1) then
         print *,  irp_here, 'Unable to send task_done'
     endif
-    call davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
+    call davidson_push_results_async_recv(zmq_socket_push, sending)
+    call davidson_push_results_async_send(zmq_socket_push, v_t, s_t, imin, imax, task_id, sending)
   end do
   deallocate(u_t,v_t, s_t)
+  call davidson_push_results_async_recv(zmq_socket_push, sending)
 
 end subroutine
 
@@ -187,7 +174,7 @@ subroutine davidson_push_results(zmq_socket_push, v_t, s_t, imin, imax, task_id)
   use f77_zmq
   implicit none
   BEGIN_DOC
-! Push the results of $H|U \rangle$ from a worker to the master.
+! Push the results of $H | U \rangle$ from a worker to the master.
   END_DOC
 
   integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
@@ -227,13 +214,80 @@ IRP_ENDIF
 
 end subroutine
 
+subroutine davidson_push_results_async_send(zmq_socket_push, v_t, s_t, imin, imax, task_id,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  integer             ,intent(in)    :: task_id, imin, imax
+  double precision    ,intent(in)    :: v_t(N_states_diag,N_det)
+  double precision    ,intent(in)    :: s_t(N_states_diag,N_det)
+  logical             ,intent(inout) :: sending
+  integer                            :: rc, sz
+  integer*8                          :: rc8
+
+  if (sending) then
+    print *,  irp_here, ': sending=true'
+    stop -1
+  endif
+  sending = .True.
+
+  sz = (imax-imin+1)*N_states_diag
+
+  rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push task_id'
+
+  rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push imin'
+
+  rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results failed to push imax'
+
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
+
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz, 0)
+  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
+
+end subroutine
+
+subroutine davidson_push_results_async_recv(zmq_socket_push,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  logical             ,intent(inout) :: sending
+
+  integer                            :: rc
+
+  if (.not.sending) return
+! Activate is zmq_socket_push is a REQ
+IRP_IF ZMQ_PUSH
+IRP_ELSE
+  character*(2) :: ok
+  rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
+  if ((rc /= 2).and.(ok(1:2)/='ok')) then
+    print *, irp_here, ': f77_zmq_recv( zmq_socket_push, ok, 2, 0)'
+    stop -1
+  endif
+IRP_ENDIF
+  sending = .False.
+
+end subroutine
+
 
 
 subroutine davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
   use f77_zmq
   implicit none
   BEGIN_DOC
-! Pull the results of $H|U \rangle$ on the master.
+! Pull the results of $H | U \rangle$ on the master.
   END_DOC
 
   integer(ZMQ_PTR)    ,intent(in)     :: zmq_socket_pull
@@ -292,23 +346,29 @@ subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze
   integer                          :: more, task_id, imin, imax
 
   double precision, allocatable :: v_t(:,:), s_t(:,:)
+  logical :: sending
   integer :: i,j
+  integer, external :: zmq_delete_task_async_send
+  integer, external :: zmq_delete_task_async_recv
 
   allocate(v_t(N_st,N_det), s_t(N_st,N_det))
   v0 = 0.d0
   s0 = 0.d0
   more = 1
+  sending = .False.
   do while (more == 1)
     call davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
+    if (zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending) == -1) then
+      stop 'davidson: Unable to delete task (send)'
+    endif
     do j=1,N_st
       do i=imin,imax
         v0(i,j) = v0(i,j) + v_t(j,i)
         s0(i,j) = s0(i,j) + s_t(j,i)
       enddo
     enddo
-    integer, external :: zmq_delete_task
-    if (zmq_delete_task(zmq_to_qp_run_socket,zmq_socket_pull,task_id,more) == -1) then
-      stop 'Unable to delete task'
+    if (zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
+      stop 'davidson: Unable to delete task (recv)'
     endif
   end do
   deallocate(v_t,s_t)
@@ -324,13 +384,13 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   use f77_zmq
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H|u_0\rangle$ and $s_0 = S^2 |u_0\rangle$
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
   !
   ! n : number of determinants
   !
-  ! H_jj : array of $\langle j|H|j \rangle$
+  ! H_jj : array of $\langle j | H | j \rangle$
   !
-  ! S2_jj : array of $\langle j|S^2|j \rangle$
+  ! S2_jj : array of $\langle j | S^2 | j \rangle$
   END_DOC
   integer, intent(in)            :: N_st, sze
   double precision, intent(out)  :: v_0(sze,N_st), s_0(sze,N_st)
@@ -347,9 +407,9 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
   call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'davidson')
 
-  integer :: N_states_diag_save
-  N_states_diag_save = N_states_diag
-  N_states_diag = N_st
+!  integer :: N_states_diag_save
+!  N_states_diag_save = N_states_diag
+!  N_states_diag = N_st
   if (zmq_put_N_states_diag(zmq_to_qp_run_socket, 1) == -1) then
     stop 'Unable to put N_states_diag on ZMQ server'
   endif
@@ -468,8 +528,8 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   !$OMP TASKWAIT
   !$OMP END PARALLEL
 
-  N_states_diag = N_states_diag_save
-  SOFT_TOUCH N_states_diag
+!  N_states_diag = N_states_diag_save
+!  SOFT_TOUCH N_states_diag
 end
 
 
@@ -582,3 +642,4 @@ integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
     endif
   IRP_ENDIF
 end
+

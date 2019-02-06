@@ -49,7 +49,7 @@ By default, the program will stop when more than one million determinants have
 been selected, or when the |PT2| energy is below :math:`10^{-4}`.
 
 The variational and |PT2| energies of the iterations are stored in the
-|EZFIO| database, in the :ref:`iterations` module.
+|EZFIO| database, in the :ref:`module_iterations` module.
 
 
 
@@ -180,55 +180,6 @@ Providers
 
 
  
-.. c:function:: pt2_collector:
-
-
-    File : :file:`cipsi/pt2_stoch_routines.irp.f`
-
-    .. code:: fortran
-
-        subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error,  &
-  variance, norm, b, N_)
-
-
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`pt2_j`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`n_states`
-       * :c:data:`pt2_f`
-       * :c:data:`pt2_w`
-       * :c:data:`n_det_generators`
-       * :c:data:`pt2_n_teeth`
-       * :c:data:`pt2_u`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`zmq_pt2`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`add_to_selection_buffer`
-       * :c:func:`check_mem`
-       * :c:func:`create_selection_buffer`
-       * :c:func:`delete_selection_buffer`
-       * :c:func:`end_zmq_to_qp_run_socket`
-       * :c:func:`pull_pt2_results`
-       * :c:func:`sleep`
-       * :c:func:`sort_selection_buffer`
-       * :c:func:`wall_time`
-
- 
 .. c:var:: pt2_cw
 
 
@@ -311,7 +262,6 @@ Providers
        * :c:data:`n_core_orb`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
-       * :c:data:`n_states`
        * :c:data:`psi_det_sorted_gen`
 
 
@@ -455,7 +405,6 @@ Providers
        * :c:data:`n_core_orb`
        * :c:data:`n_det_generators`
        * :c:data:`n_det_selectors`
-       * :c:data:`n_states`
        * :c:data:`psi_det_sorted_gen`
 
 
@@ -1164,6 +1113,54 @@ Subroutines / functions
        * :c:func:`run_slave_cipsi`
 
  
+.. c:function:: pt2_collector:
+
+
+    File : :file:`cipsi/pt2_stoch_routines.irp.f`
+
+    .. code:: fortran
+
+        subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm, b, N_)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_j`
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`n_states`
+       * :c:data:`pt2_f`
+       * :c:data:`pt2_w`
+       * :c:data:`n_det_generators`
+       * :c:data:`pt2_n_teeth`
+       * :c:data:`pt2_u`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zmq_pt2`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_to_selection_buffer`
+       * :c:func:`check_mem`
+       * :c:func:`create_selection_buffer`
+       * :c:func:`delete_selection_buffer`
+       * :c:func:`end_zmq_to_qp_run_socket`
+       * :c:func:`pull_pt2_results`
+       * :c:func:`sleep`
+       * :c:func:`sort_selection_buffer`
+       * :c:func:`wall_time`
+
+ 
 .. c:function:: pt2_find_sample:
 
 
@@ -1633,21 +1630,31 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`pt2_stoch_istate`
+       * :c:data:`psi_det`
+       * :c:data:`zmq_state`
        * :c:data:`psi_coef`
        * :c:data:`mpi_rank`
-       * :c:data:`zmq_state`
-       * :c:data:`state_average_weight`
        * :c:data:`mpi_master`
-       * :c:data:`pt2_stoch_istate`
-       * :c:data:`n_states`
        * :c:data:`n_det`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_det`
-       * :c:data:`n_states_diag`
        * :c:data:`zmq_context`
+       * :c:data:`n_det_selectors`
+       * :c:data:`psi_occ_pattern_hii`
+       * :c:data:`state_average_weight`
+       * :c:data:`mo_num`
+       * :c:data:`nthreads_pt2`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`pt2_e0_denominator`
+       * :c:data:`qp_max_mem`
+       * :c:data:`n_states_diag`
+       * :c:data:`s2_eig`
        * :c:data:`threshold_generators`
+       * :c:data:`det_to_occ_pattern`
+       * :c:data:`n_states`
+       * :c:data:`pt2_f`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_hii`
 
     Called by:
 
@@ -1661,9 +1668,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`check_mem`
        * :c:func:`davidson_slave_tcp`
        * :c:func:`mpi_print`
        * :c:func:`omp_set_nested`
+       * :c:func:`resident_memory`
        * :c:func:`run_pt2_slave`
        * :c:func:`run_selection_slave`
        * :c:func:`sleep`
@@ -1832,13 +1841,12 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`elec_alpha_num`
+       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_det_selectors`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
        * :c:data:`psi_det_generators`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det_sorted`
@@ -1859,7 +1867,6 @@ Subroutines / functions
 
        * :c:func:`apply_hole`
        * :c:func:`bitstring_to_list_ab`
-       * :c:func:`check_mem`
        * :c:func:`fill_buffer_double`
        * :c:func:`get_excitation_degree_spin`
        * :c:func:`isort`
@@ -2103,14 +2110,15 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`psi_selectors`
        * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_occ_pattern_hii`
        * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_n_teeth`
        * :c:data:`psi_selectors_coef_transp`
        * :c:data:`n_det`
+       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`s2_eig`
        * :c:data:`pt2_j`
-       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`state_average_weight`
        * :c:data:`mo_num`
@@ -2119,16 +2127,18 @@ Subroutines / functions
        * :c:data:`mo_one_e_integrals`
        * :c:data:`elec_alpha_num`
        * :c:data:`nproc`
+       * :c:data:`qp_max_mem`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`threshold_generators`
        * :c:data:`psi_det_beta_unique`
-       * :c:data:`qp_max_mem`
+       * :c:data:`det_to_occ_pattern`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_states`
        * :c:data:`pt2_f`
        * :c:data:`n_det_generators`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`n_int`
+       * :c:data:`psi_det_hii`
        * :c:data:`pt2_j`
        * :c:data:`psi_det_sorted`
        * :c:data:`pt2_w`

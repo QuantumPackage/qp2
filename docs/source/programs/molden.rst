@@ -9,7 +9,7 @@ molden
  
  
  
- Produce a Molden file 
+ Produces a Molden file 
  
  Needs: 
  
