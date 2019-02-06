@@ -66,21 +66,6 @@ double precision function primitive_value(i,j,r)
 end
 
 
-subroutine give_all_aos_at_r_old(r,aos_array)
- implicit none
- BEGIN_dOC
-! Gives the values of |AOs| at a given point $\textbf{r}$
- END_DOC
- double precision, intent(in) :: r(3)
- double precision, intent(out) :: aos_array(ao_num)
- integer :: i
- double precision :: ao_value
- do i = 1, ao_num
-  aos_array(i) = ao_value(i,r)
- enddo
-end
-
-
 subroutine give_all_aos_at_r(r,aos_array)
  implicit none
  BEGIN_dOC
@@ -89,7 +74,7 @@ subroutine give_all_aos_at_r(r,aos_array)
 ! output : aos_array(i) = aos(i) evaluated in $\textbf{r}$
  END_DOC
  double precision, intent(in) :: r(3)
- double precision, intent(out) :: aos_array(ao_num)
+ double precision, intent(out):: aos_array(ao_num)
 
  integer :: power_ao(3)
  integer :: i,j,k,l,m
