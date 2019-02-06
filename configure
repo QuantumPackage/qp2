@@ -361,23 +361,24 @@ EOF
 
 
 done
-        
+
+source quantum_package.rc
 
 NINJA=$(find_exe ninja)
 if [[ ${NINJA} = $(not_found) ]] ; then
-        error "Ninja is not installed."
+        error "Ninja (ninja) is not installed."
         fail
 fi
 
 IRPF90=$(find_exe irpf90)
 if [[ ${IRPF90} = $(not_found) ]] ; then
-        error "IRPf90 is not installed."
+        error "IRPf90 (irpf90) is not installed."
         fail
 fi
 
 ZEROMQ=$(find_lib -lzmq)
 if [[ ${ZEROMQ} = $(not_found) ]] ; then
-        error "ZeroMQ is not installed."
+        error "ZeroMQ (zeromq) is not installed."
         fail
 fi
 
@@ -395,31 +396,31 @@ fi
 
 OCAML=$(find_exe ocaml)
 if [[ ${OCAML} = $(not_found) ]] ; then
-        error "OCaml compiler is not installed."
+        error "OCaml (ocaml) compiler is not installed."
         fail
 fi
 
 EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
 if [[ ${EZFIO} = $(not_found) ]] ; then
-        error "EZFIO is not installed."
+        error "EZFIO (ezfio) is not installed."
         fail
 fi
 
 ZLIB=$(find_lib -lz)
 if [[ ${ZLIB} = $(not_found) ]] ; then
-        error "Zlib is not installed."
+        error "Zlib (zlib) is not installed."
         fail
 fi
 
 DOCOPT=$(find_python_lib docopt)
 if [[ ${DOCOPT} = $(not_found) ]] ; then
-        error "docopt is not installed."
+        error "docopt (docopt) is not installed."
         fail
 fi
 
 RESULTSFILE=$(find_python_lib resultsFile)
 if [[ ${RESULTSFILE} = $(not_found) ]] ; then
-        error "resultsFile is not installed."
+        error "resultsFile (resultsFile) is not installed."
         fail
 fi
 

@@ -359,7 +359,7 @@ subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze
   do while (more == 1)
     call davidson_pull_results(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
     if (zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending) == -1) then
-      stop 'Unable to delete task'
+      stop 'davidson: Unable to delete task (send)'
     endif
     do j=1,N_st
       do i=imin,imax
@@ -368,7 +368,7 @@ subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze
       enddo
     enddo
     if (zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
-      stop 'Unable to delete task'
+      stop 'davidson: Unable to delete task (recv)'
     endif
   end do
   deallocate(v_t,s_t)

@@ -604,11 +604,11 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
     rc = f77_zmq_send(zmq_to_qp_run_socket, 'end_job '//trim(zmq_state),8+len(trim(zmq_state)),0)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 512, 0)
     if (trim(message(1:13)) == 'error waiting') then
-      call sleep(1)
       cycle
     else if (message(1:2) == 'ok') then
       exit
     endif
+    call sleep(1)
   end do
   if (i==0) then
     print *,  '.. Forcing kill ..'
@@ -1127,6 +1127,7 @@ integer function zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending)
   integer                        :: rc
   character*(512)                :: message
   character*(64) :: reply
+  zmq_delete_task_async_recv = 0
   if (.not.sending) return
   sending = .False.
   reply = ''
@@ -1136,6 +1137,7 @@ integer function zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending)
   else if (reply(16:19) == 'done') then
     more = 0
   else
+    print *,  reply(1:rc)
     zmq_delete_task_async_recv = -1
     return
   endif

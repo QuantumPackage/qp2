@@ -198,7 +198,7 @@ subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_
   double precision, intent(inout) :: coef_pert_buffer(N_st,buffer_size),e_2_pert_buffer(N_st,buffer_size),sum_H_pert_diag(N_st)
   double precision               :: c_pert(N_st), e_2_pert(N_st),  H_pert_diag(N_st)
   integer                        :: i,k, c_ref, ni, ex
-  integer, external              :: connected_to_ref_by_mono
+  integer, external              :: connected_to_ref_by_single
   logical, external              :: is_in_wavefunction
 
   integer(bit_kind), allocatable :: minilist(:,:,:)
@@ -232,7 +232,7 @@ subroutine perturb_buffer_by_mono_$PERT(i_generator,buffer,buffer_size,e_2_pert_
 
   do i=1,buffer_size
 
-    c_ref = connected_to_ref_by_mono(buffer(1,1,i),psi_det_generators,Nint,i_generator,N_det)
+    c_ref = connected_to_ref_by_single(buffer(1,1,i),psi_det_generators,Nint,i_generator,N_det)
 
     if (c_ref /= 0) then
       cycle

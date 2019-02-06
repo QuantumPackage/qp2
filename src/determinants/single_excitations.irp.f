@@ -39,7 +39,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
  double precision, allocatable :: array_coulomb(:),array_exchange(:)
  allocate (array_coulomb(mo_num),array_exchange(mo_num))
  call bitstring_to_list_ab(key_virt, occ_virt, n_occ_ab_virt, N_int)
- ! docc ---> virt mono excitations
+ ! docc ---> virt single excitations
  do i0 = 1,  n_occ_ab(1)
   i=occ(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
@@ -57,7 +57,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
   enddo
  enddo
 
- ! virt ---> virt mono excitations
+ ! virt ---> virt single excitations
  do i0 = 1,  n_occ_ab_virt(1)
   i=occ_virt(i0,1)
   do j0 = 1, n_occ_ab_virt(1)
@@ -74,7 +74,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
   enddo
  enddo
 
- ! docc ---> docc mono excitations
+ ! docc ---> docc single excitations
  do i0 = 1,  n_occ_ab(1)
   i=occ(i0,1)
   do j0 = 1, n_occ_ab(1)
@@ -94,7 +94,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
 
 END_PROVIDER
 
-subroutine get_mono_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
+subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  use bitmasks
  implicit none
  integer,intent(in) :: h,p,spin

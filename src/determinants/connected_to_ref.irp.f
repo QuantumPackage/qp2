@@ -185,7 +185,7 @@ end
 
 
 
-logical function is_connected_to_by_mono(key,keys,Nint,Ndet)
+logical function is_connected_to_by_single(key,keys,Nint,Ndet)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -202,7 +202,7 @@ logical function is_connected_to_by_mono(key,keys,Nint,Ndet)
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
 
-  is_connected_to_by_mono = .false.
+  is_connected_to_by_single = .false.
 
   do i=1,Ndet
     degree_x2 = popcnt(xor( key(1,1), keys(1,1,i))) +              &
@@ -214,7 +214,7 @@ logical function is_connected_to_by_mono(key,keys,Nint,Ndet)
     if (degree_x2 > 2) then
       cycle
     else
-      is_connected_to_by_mono = .true.
+      is_connected_to_by_single = .true.
       return
     endif
   enddo
@@ -333,7 +333,7 @@ end
 
 
 
-integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
+integer function connected_to_ref_by_single(key,keys,Nint,N_past_in,Ndet)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -368,7 +368,7 @@ integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
 
-  connected_to_ref_by_mono = 0
+  connected_to_ref_by_single = 0
   N_past = max(1,N_past_in)
   if (Nint == 1) then
 
@@ -380,7 +380,7 @@ integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
       else if (degree_x2 == 4)then
         cycle
       else if(degree_x2 == 2)then
-        connected_to_ref_by_mono = i
+        connected_to_ref_by_single = i
         return
       endif
     enddo
@@ -400,7 +400,7 @@ integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
       else if (degree_x2 == 4)then
         cycle
       else if(degree_x2 == 2)then
-        connected_to_ref_by_mono = i
+        connected_to_ref_by_single = i
         return
       endif
     enddo
@@ -421,7 +421,7 @@ integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
       else if (degree_x2 == 4)then
         cycle
       else if(degree_x2 == 2)then
-        connected_to_ref_by_mono = i
+        connected_to_ref_by_single = i
         return
       endif
     enddo
@@ -442,7 +442,7 @@ integer function connected_to_ref_by_mono(key,keys,Nint,N_past_in,Ndet)
       else if (degree_x2 == 4)then
         cycle
       else if(degree_x2 == 2)then
-        connected_to_ref_by_mono = i
+        connected_to_ref_by_single = i
         return
       endif
     enddo
