@@ -20,6 +20,8 @@ END_PROVIDER
  END_DOC
  integer :: i,j
  HF_energy = nuclear_repulsion
+ HF_two_electron_energy = 0.d0
+ HF_one_electron_energy = 0.d0
  do j=1,ao_num
    do i=1,ao_num
     HF_two_electron_energy += 0.5d0 * ( ao_two_e_integral_alpha(i,j) * SCF_density_matrix_ao_alpha(i,j) &
