@@ -1,5 +1,5 @@
 ---
-title: "Full-CI"
+title: "Full-CI calculation"
 date: Tue Feb  5 16:39:50 CET 2019
 draft: false
 ---
@@ -8,7 +8,6 @@ draft: false
 ---------------------
 
 
-# Full-CI calculation
 
 {{< youtube 4nmdCAPkZlc >}}
 

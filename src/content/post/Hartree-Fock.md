@@ -1,5 +1,5 @@
 ---
-title: "Video Tutorials"
+title: "Hartree-Fock calculation"
 date: Tue Feb  4 16:39:50 CET 2019
 draft: false
 ---
@@ -7,8 +7,6 @@ draft: false
 
 ---------------------
 
-
-# Hartree-Fock calculation
 
 {{< youtube KIl_xq-NRLo >}}
 

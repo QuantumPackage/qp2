@@ -1,5 +1,5 @@
 ---
-title: "Video Tutorials"
+title: "Installation"
 date: Tue Feb  3 16:39:50 CET 2019
 draft: false
 ---
@@ -7,7 +7,6 @@ draft: false
 
 ---------------------
 
-# Installation
 
 {{< youtube Un69atP2-30 >}}
 
