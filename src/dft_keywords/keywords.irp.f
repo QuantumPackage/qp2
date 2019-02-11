@@ -17,3 +17,17 @@ BEGIN_PROVIDER [ character*(32), DFT_TYPE]
   DFT_TYPE = "GGA"
  endif
 END_PROVIDER
+
+BEGIN_PROVIDER [ logical, same_xc_func ]
+ BEGIN_DOC
+! true if the exchange and correlation functionals are the same
+ END_DOC
+ implicit none
+ if(trim(correlation_functional).eq.trim(exchange_functional))then 
+  same_xc_func = .True.
+ else
+  same_xc_func = .False.
+ endif
+
+
+END_PROVIDER

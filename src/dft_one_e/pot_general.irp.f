@@ -133,3 +133,70 @@ END_PROVIDER
 
 END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, Trace_v_xc_new, (N_states)]
+ implicit none
+ integer :: i,j,istate
+ double precision :: dm
+ BEGIN_DOC
+! Trace_v_xc  = \sum_{i,j} (rho_{ij}_\alpha v^{xc}_{ij}^\alpha  + rho_{ij}_\beta v^{xc}_{ij}^\beta)
+ END_DOC
+ do istate = 1, N_states
+  Trace_v_xc_new(istate) = 0.d0
+  do i = 1, mo_num
+   do j = 1, mo_num
+     Trace_v_xc_new(istate) += (potential_xc_alpha_mo(j,i,istate) ) * one_e_dm_mo_alpha_for_dft(j,i,istate)
+     Trace_v_xc_new(istate) += (potential_xc_beta_mo(j,i,istate)  ) * one_e_dm_mo_beta_for_dft(j,i,istate)
+   enddo
+  enddo
+ enddo
+
+END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, potential_xc_alpha_mo,(mo_num,mo_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_xc_beta_mo,(mo_num,mo_num,N_states)]
+ implicit none
+ integer :: istate
+ 
+ do istate = 1, N_states
+    call ao_to_mo(                                                   &
+        potential_xc_alpha_ao(1,1,istate),                                 &
+        size(potential_xc_alpha_ao,1),                                &
+        potential_xc_alpha_mo(1,1,istate),                                 &
+        size(potential_xc_alpha_mo,1)                                 &
+        )
+
+    call ao_to_mo(                                                   &
+        potential_xc_beta_ao(1,1,istate),                                  &
+        size(potential_xc_beta_ao,1),                                 &
+        potential_xc_beta_mo(1,1,istate),                                  &
+        size(potential_xc_beta_mo,1)                                  &
+        )
+ enddo
+
+END_PROVIDER
+
+
+ BEGIN_PROVIDER [double precision, potential_xc_alpha_ao,(ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_xc_beta_ao,(ao_num,ao_num,N_states)]
+ implicit none
+ BEGIN_DOC
+! general providers for the alpha/beta exchange/correlation potentials on the AO basis
+ END_DOC
+
+  if(trim(exchange_functional)=="short_range_LDA")then
+   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_LDA
+   potential_xc_beta_ao  = potential_sr_xc_beta_ao_LDA
+  else if(trim(exchange_functional)=="LDA")then
+   potential_xc_alpha_ao = potential_xc_alpha_ao_LDA
+   potential_xc_beta_ao  = potential_xc_beta_ao_LDA
+  else if(exchange_functional.EQ."None")then
+   potential_xc_alpha_ao = 0.d0
+   potential_xc_beta_ao = 0.d0
+  else
+   print*, 'Exchange functional required does not exist ...'
+   print*,'exchange_functional',exchange_functional
+   stop
+  endif
+
+END_PROVIDER
+

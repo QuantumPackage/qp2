@@ -109,10 +109,7 @@
    integer(key_kind), allocatable :: keys(:)
    double precision, allocatable  :: values(:)
 
-
-
-
-   !$OMP PARALLEL DEFAULT(NONE)                                      &
+   !$OMP PARALLEL DEFAULT(NONE) if (ao_num > 100) &
        !$OMP PRIVATE(i,j,l,k1,k,integral,ii,jj,kk,ll,i8,keys,values,n_elements_max, &
        !$OMP  n_elements,ao_two_e_integral_alpha_tmp,ao_two_e_integral_beta_tmp)&
        !$OMP SHARED(ao_num,SCF_density_matrix_ao_alpha,SCF_density_matrix_ao_beta,&
@@ -125,7 +122,7 @@
    ao_two_e_integral_alpha_tmp = 0.d0
    ao_two_e_integral_beta_tmp  = 0.d0
 
-   !$OMP DO SCHEDULE(dynamic,64)
+   !$OMP DO SCHEDULE(static,1)
    !DIR$ NOVECTOR
    do i8=0_8,ao_integrals_map%map_size
      n_elements = n_elements_max
@@ -153,8 +150,6 @@
    !$OMP END DO NOWAIT
    !$OMP CRITICAL
    ao_two_e_integral_alpha += ao_two_e_integral_alpha_tmp
-   !$OMP END CRITICAL
-   !$OMP CRITICAL
    ao_two_e_integral_beta  += ao_two_e_integral_beta_tmp
    !$OMP END CRITICAL
    deallocate(keys,values,ao_two_e_integral_alpha_tmp,ao_two_e_integral_beta_tmp)

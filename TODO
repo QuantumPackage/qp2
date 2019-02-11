@@ -58,3 +58,6 @@ Re-design de qp command
 Doc: plugins et qp_plugins
 
 Ajouter les symetries dans devel
+
+
+# Parallelize i_H_psi
