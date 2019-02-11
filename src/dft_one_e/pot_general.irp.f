@@ -12,13 +12,8 @@
    potential_x_alpha_ao = potential_sr_x_alpha_ao_LDA
    potential_x_beta_ao = potential_sr_x_beta_ao_LDA
   else if(exchange_functional.EQ."short_range_PBE")then
-!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING 
-!  potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE
-!  potential_x_beta_ao = potential_sr_x_beta_ao_PBE
-
- !!!!
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE_new
-   potential_x_beta_ao = potential_sr_x_beta_ao_PBE_new
+   potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE
+   potential_x_beta_ao = potential_sr_x_beta_ao_PBE
   else if(trim(exchange_functional)=="LDA")then
    potential_x_alpha_ao = potential_x_alpha_ao_LDA
    potential_x_beta_ao = potential_x_beta_ao_LDA
@@ -44,12 +39,8 @@
    potential_c_alpha_ao = potential_c_alpha_ao_LDA
    potential_c_beta_ao = potential_c_beta_ao_LDA
   else if(correlation_functional.EQ."short_range_PBE")then
-!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING 
-!  potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE
-!  potential_c_beta_ao = potential_sr_c_beta_ao_PBE
- !
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE_new
-   potential_c_beta_ao = potential_sr_c_beta_ao_PBE_new
+   potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE
+   potential_c_beta_ao = potential_sr_c_beta_ao_PBE
   else if(correlation_functional.EQ."PBE")then
    potential_c_alpha_ao = potential_c_alpha_ao_PBE
    potential_c_beta_ao = potential_c_beta_ao_PBE
@@ -198,6 +189,15 @@ END_PROVIDER
   else if(trim(exchange_functional)=="LDA")then
    potential_xc_alpha_ao = potential_xc_alpha_ao_LDA
    potential_xc_beta_ao  = potential_xc_beta_ao_LDA
+  else if(exchange_functional.EQ."None")then
+   potential_xc_alpha_ao = 0.d0
+   potential_xc_beta_ao = 0.d0
+  else if(trim(exchange_functional)=="short_range_PBE")then
+   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_PBE
+   potential_xc_beta_ao  = potential_sr_xc_beta_ao_PBE
+  else if(trim(exchange_functional)=="PBE")then
+   potential_xc_alpha_ao = potential_xc_alpha_ao_PBE
+   potential_xc_beta_ao  = potential_xc_beta_ao_PBE
   else if(exchange_functional.EQ."None")then
    potential_xc_alpha_ao = 0.d0
    potential_xc_beta_ao = 0.d0
