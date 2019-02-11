@@ -64,6 +64,7 @@ subroutine run_stochastic_cipsi
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(pt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(abs(variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
