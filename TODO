@@ -58,3 +58,5 @@ Doc: plugins et qp_plugins
 Ajouter les symetries dans devel
 
 Compiler ezfio avec openmp
+
+# Parallelize i_H_psi
