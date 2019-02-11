@@ -21,6 +21,10 @@
  allocate(rho_a(N_states), rho_b(N_states),grad_rho_a(3,N_states),grad_rho_b(3,N_states))
  allocate(grad_rho_a_2(N_states),grad_rho_b_2(N_states),grad_rho_a_b(N_states), ex(N_states), ec(N_states))
  allocate(contrib_grad_xa(3,N_states),contrib_grad_xb(3,N_states),contrib_grad_ca(3,N_states),contrib_grad_cb(3,N_states))
+
+ aos_dsr_vc_alpha_PBE_w = 0.d0
+ aos_dsr_vc_beta_PBE_w = 0.d0
+
  do istate = 1, N_states
   do i = 1, n_points_final_grid
    r(1) = final_grid_points(1,i)

@@ -12,8 +12,13 @@
    potential_x_alpha_ao = potential_sr_x_alpha_ao_LDA
    potential_x_beta_ao = potential_sr_x_beta_ao_LDA
   else if(exchange_functional.EQ."short_range_PBE")then
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE
-   potential_x_beta_ao = potential_sr_x_beta_ao_PBE
+!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING 
+!  potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE
+!  potential_x_beta_ao = potential_sr_x_beta_ao_PBE
+
+ !!!!
+   potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE_new
+   potential_x_beta_ao = potential_sr_x_beta_ao_PBE_new
   else if(trim(exchange_functional)=="LDA")then
    potential_x_alpha_ao = potential_x_alpha_ao_LDA
    potential_x_beta_ao = potential_x_beta_ao_LDA
@@ -39,8 +44,12 @@
    potential_c_alpha_ao = potential_c_alpha_ao_LDA
    potential_c_beta_ao = potential_c_beta_ao_LDA
   else if(correlation_functional.EQ."short_range_PBE")then
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE
-   potential_c_beta_ao = potential_sr_c_beta_ao_PBE
+!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING 
+!  potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE
+!  potential_c_beta_ao = potential_sr_c_beta_ao_PBE
+ !
+   potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE_new
+   potential_c_beta_ao = potential_sr_c_beta_ao_PBE_new
   else if(correlation_functional.EQ."PBE")then
    potential_c_alpha_ao = potential_c_alpha_ao_PBE
    potential_c_beta_ao = potential_c_beta_ao_PBE
