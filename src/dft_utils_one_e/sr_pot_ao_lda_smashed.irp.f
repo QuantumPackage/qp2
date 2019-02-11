@@ -40,15 +40,18 @@
 ! short range exchange/correlation alpha/beta potentials with LDA functional on the AO basis
  END_DOC
 
-  call dgemm('N','T',ao_num,ao_num*N_states,n_points_final_grid,1.d0,         &
+ integer :: istate 
+ do istate = 1, N_states
+  call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
       aos_in_r_array,size(aos_in_r_array,1),                         &
-      aos_sr_vxc_alpha_LDA_w,size(aos_sr_vxc_alpha_LDA_w,1),0.d0,&
-      potential_sr_xc_alpha_ao_LDA,size(potential_sr_xc_alpha_ao_LDA,1))
+      aos_sr_vxc_alpha_LDA_w(1,1,istate),size(aos_sr_vxc_alpha_LDA_w,1),0.d0,&
+      potential_sr_xc_alpha_ao_LDA(1,1,istate),size(potential_sr_xc_alpha_ao_LDA,1))
 
-  call dgemm('N','T',ao_num,ao_num*N_states,n_points_final_grid,1.d0,         &
+  call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,         &
       aos_in_r_array,size(aos_in_r_array,1),                         &
-      aos_sr_vxc_beta_LDA_w,size(aos_sr_vxc_beta_LDA_w,1),0.d0,&
-      potential_sr_xc_beta_ao_LDA,size(potential_sr_xc_beta_ao_LDA,1))
+      aos_sr_vxc_beta_LDA_w(1,1,istate),size(aos_sr_vxc_beta_LDA_w,1),0.d0,&
+      potential_sr_xc_beta_ao_LDA(1,1,istate),size(potential_sr_xc_beta_ao_LDA,1))
+ enddo
 
 
  END_PROVIDER
