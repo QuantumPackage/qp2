@@ -75,10 +75,10 @@
      aos_dvx_alpha_PBE_w(j,i,m,istate) = contrib_grad_xa(m,istate) * aos_in_r_array(j,i)
      aos_dvx_beta_PBE_w (j,i,m,istate) = contrib_grad_xb(m,istate) * aos_in_r_array(j,i)
 
-     grad_aos_dvc_alpha_PBE_w (j,i,m,istate) = contrib_grad_ca(m,istate) * aos_grad_in_r_array(m,j,i)
-     grad_aos_dvc_beta_PBE_w  (j,i,m,istate) = contrib_grad_cb(m,istate) * aos_grad_in_r_array(m,j,i)
-     grad_aos_dvx_alpha_PBE_w (j,i,m,istate) = contrib_grad_xa(m,istate) * aos_grad_in_r_array(m,j,i)
-     grad_aos_dvx_beta_PBE_w  (j,i,m,istate) = contrib_grad_xb(m,istate) * aos_grad_in_r_array(m,j,i)
+     grad_aos_dvc_alpha_PBE_w (j,i,m,istate) = contrib_grad_ca(m,istate) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     grad_aos_dvc_beta_PBE_w  (j,i,m,istate) = contrib_grad_cb(m,istate) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     grad_aos_dvx_alpha_PBE_w (j,i,m,istate) = contrib_grad_xa(m,istate) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     grad_aos_dvx_beta_PBE_w  (j,i,m,istate) = contrib_grad_xb(m,istate) * aos_grad_in_r_array_transp_xyz(m,j,i)
     enddo
    enddo
   enddo
