@@ -29,7 +29,7 @@ subroutine run_stochastic_cipsi
   pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
   norm = 0.d0
-  variance = 0.d0
+  variance = huge(1.e0)
 
   if (s2_eig) then
     call make_s2_eigenfunction
