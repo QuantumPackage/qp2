@@ -21,6 +21,7 @@ Input_nuclei.ml
 Input_perturbation.ml
 Input_pseudo.ml
 Input_scf_utils.ml
+Input_two_body_dm.ml
 qp_create_ezfio
 qp_create_ezfio.native
 qp_edit
