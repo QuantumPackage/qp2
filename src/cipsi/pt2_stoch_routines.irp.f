@@ -11,7 +11,7 @@ END_PROVIDER
   implicit none
   logical, external :: testTeethBuilding
   integer :: i,j
-  pt2_n_tasks_max = elec_beta_num*elec_beta_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
+  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
