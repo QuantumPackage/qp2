@@ -29,7 +29,7 @@ subroutine run_stochastic_cipsi
   pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
   norm = 0.d0
-  variance = 0.d0
+  variance = huge(1.e0)
 
   if (s2_eig) then
     call make_s2_eigenfunction
@@ -64,6 +64,7 @@ subroutine run_stochastic_cipsi
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(pt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(abs(variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'

@@ -4,7 +4,7 @@
  use map_module
  implicit none
  BEGIN_DOC
- ! Alpha Fock matrix in AO basis set
+ ! Alpha and Beta Fock matrices in AO basis set
  END_DOC
 
  integer                        :: i,j,k,l,k1,r,s

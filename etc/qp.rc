@@ -163,7 +163,7 @@ _qp_Complete()
       create_ezfio)
         case "${prev}" in
           create_ezfio)
-            COMPREPLY=( $(compgen -W "-b -a -c -d -h -m -o -p -x" -- $cur ) )
+            COMPREPLY=( $(compgen -W "-b -a -c -d -h -m -o -p -x $(\ls)" -- $cur ) )
             return 0
             ;;
           -m|-d|-c)

@@ -90,7 +90,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
   mem = 8.d0 * N_det * (N_int * 2.d0 * 3.d0 +  3.d0 + 5.d0) / (1024.d0**3)
   call write_double(6,mem,'Estimated memory/thread (Gb)')
   if (qp_max_mem > 0) then
-    nproc_target = max(1,int(dble(qp_max_mem)/mem))
+    nproc_target = max(1,int(dble(qp_max_mem)/(0.1d0 + mem)))
     nproc_target = min(nproc_target,nproc)
   endif
 
