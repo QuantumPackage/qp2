@@ -72,6 +72,20 @@ file by hand. Running :command:`ninja` inside a module will compile only the
 module, and running :command:`ninja` at the root of the |qp| will build all the
 modules, as well as the tools.
 
+
+Algorithms
+==========
+
+The `PhD thesis of Yann Garniron <https://doi.org/10.5281/zenodo.2558127>`_
+gives all the details about the implementation of:
+
+* The data structure for the two-electron integrals (:file:`utils/map_module.f`)
+* The Davdison diagonalization (module :ref:`davidson`)
+* The CIPSI selection (module :ref:`cipsi`)
+* The hybrid stochastic/deterministic PT2 correction (module :ref:`cipsi`)
+* The hybrid stochastic/deterministic matrix dressing (module :ref:`dressing`)
+
+
 .. cache compile
 .. interface AOs / MOs => resultsFile
 .. interface integrals => AO / MO
