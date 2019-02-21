@@ -60,7 +60,7 @@ Usually, when using the :command:`qp` command, the name of the |EZFIO| database 
 
 The advantage or using :code:`qp command` is that you can, just like in bash, have: 
 
-* the tabulation for the auto-completion for basically any command of the |QP| 
+* the :kbd:`Tab` key for the auto-completion for basically any command of the |QP| 
 
 * man pages with -h, --help or qp man 
 
