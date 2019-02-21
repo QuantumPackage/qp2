@@ -20,9 +20,15 @@ subroutine save_iterations(e_, pt2_,n_)
   END_DOC
   integer, intent(in) :: n_
   double precision, intent(in) :: e_(N_states), pt2_(N_states)
+  integer :: i
 
-  if (N_iter > 100) then
-    return
+  if (N_iter == 101) then
+    do i=2,N_iter-1
+      energy_iterations(1:N_states,N_iter-1) = energy_iterations(1:N_states,N_iter)
+      pt2_iterations(1:N_states,N_iter-1) = pt2_iterations(1:N_states,N_iter) 
+    enddo
+    N_iter = N_iter-1
+    TOUCH N_iter
   endif
 
   energy_iterations(1:N_states,N_iter) = e_(1:N_states)

@@ -1,7 +1,7 @@
 BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) ]
    implicit none
    BEGIN_DOC
-   ! Eigenvector of the Fock matrix in the MO basis obtained with level shift.
+   ! Eigenvectors of the Fock matrix in the MO basis obtained with level shift.
    END_DOC
 
    integer                        :: i,j
