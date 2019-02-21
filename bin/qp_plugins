@@ -116,9 +116,12 @@ def main(arguments):
                 d_tmp[x] = y
                 repo_of_plugin[y] = x.replace(QP_PLUGINS+'/','')
             l_repository = d_tmp.keys()
-            m_instance = ModuleHandler(l_repository)
-            l_plugins = [module for module in m_instance.l_module]
-            l_result = l_plugins
+            if l_repository == []:
+               l_result = []
+            else:
+                m_instance = ModuleHandler(l_repository)
+                l_plugins = [module for module in m_instance.l_module]
+                l_result = l_plugins
 
             if arguments["--installed"] or arguments["--uninstalled"]:
                 # Search in src all symbolic links that are modules
