@@ -81,7 +81,9 @@ fci
     * :c:data:`psi_det` 
     * :c:data:`psi_det_size` 
     * :c:data:`psi_det_sorted_bit` 
+    * :c:data:`psi_energy` 
     * :c:data:`psi_occ_pattern` 
+    * :c:data:`psi_energy` 
     * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`read_wf` 

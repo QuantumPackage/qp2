@@ -207,6 +207,7 @@ Index of Providers
 * :c:data:`element_name` 
 * :c:data:`energy_c` 
 * :c:data:`energy_c_lda` 
+* :c:data:`energy_c_new_functional` 
 * :c:data:`energy_c_pbe` 
 * :c:data:`energy_iterations` 
 * :c:data:`energy_sr_c_lda` 
@@ -215,6 +216,7 @@ Index of Providers
 * :c:data:`energy_sr_x_pbe` 
 * :c:data:`energy_x` 
 * :c:data:`energy_x_lda` 
+* :c:data:`energy_x_new_functional` 
 * :c:data:`energy_x_pbe` 
 * :c:data:`exc_degree_per_selectors` 
 * :c:data:`exchange_functional` 
@@ -256,6 +258,8 @@ Index of Providers
 * :c:data:`gga_type_functionals` 
 * :c:data:`give_polynomial_mult_center_one_e_erf` 
 * :c:data:`give_polynomial_mult_center_one_e_erf_opt` 
+* :c:data:`global_selection_buffer` 
+* :c:data:`global_selection_buffer_lock` 
 * :c:data:`grad_aos_dsr_vc_alpha_pbe_w` 
 * :c:data:`grad_aos_dsr_vc_beta_pbe_w` 
 * :c:data:`grad_aos_dsr_vx_alpha_pbe_w` 
@@ -511,6 +515,10 @@ Index of Providers
 * :c:data:`potential_c_beta_ao_lda` 
 * :c:data:`potential_c_beta_ao_pbe` 
 * :c:data:`potential_c_beta_mo` 
+* :c:data:`potential_new_functional_c_alpha_ao` 
+* :c:data:`potential_new_functional_c_beta_ao` 
+* :c:data:`potential_new_functional_x_alpha_ao` 
+* :c:data:`potential_new_functional_x_beta_ao` 
 * :c:data:`potential_sr_c_alpha_ao_lda` 
 * :c:data:`potential_sr_c_alpha_ao_pbe` 
 * :c:data:`potential_sr_c_beta_ao_lda` 
@@ -815,7 +823,7 @@ Index of Subroutines/Functions
 * :c:func:`compute_ao_two_e_integrals_erf` 
 * :c:func:`connect_to_taskserver` 
 * :c:func:`connected_to_ref` 
-* :c:func:`connected_to_ref_by_mono` 
+* :c:func:`connected_to_ref_by_single` 
 * :c:func:`copy_h_apply_buffer_to_wf` 
 * :c:func:`copy_psi_bilinear_to_psi` 
 * :c:func:`create_guess` 
@@ -831,6 +839,8 @@ Index of Subroutines/Functions
 * :c:func:`davidson_diag_hs2` 
 * :c:func:`davidson_pull_results` 
 * :c:func:`davidson_push_results` 
+* :c:func:`davidson_push_results_async_recv` 
+* :c:func:`davidson_push_results_async_send` 
 * :c:func:`davidson_run_slave` 
 * :c:func:`davidson_slave_inproc` 
 * :c:func:`davidson_slave_tcp` 
@@ -863,7 +873,7 @@ Index of Subroutines/Functions
 * :c:func:`disconnect_from_taskserver_state` 
 * :c:func:`dm_dft_alpha_beta_and_all_aos_at_r` 
 * :c:func:`dm_dft_alpha_beta_at_r` 
-* :c:func:`do_mono_excitation` 
+* :c:func:`do_single_excitation` 
 * :c:func:`dpol` 
 * :c:func:`dpold` 
 * :c:func:`dpoldd` 
@@ -957,9 +967,9 @@ Index of Subroutines/Functions
 * :c:func:`get_excitation_degree_spin` 
 * :c:func:`get_excitation_degree_vector` 
 * :c:func:`get_excitation_degree_vector_double_alpha_beta` 
-* :c:func:`get_excitation_degree_vector_mono` 
-* :c:func:`get_excitation_degree_vector_mono_or_exchange` 
-* :c:func:`get_excitation_degree_vector_mono_or_exchange_verbose` 
+* :c:func:`get_excitation_degree_vector_single` 
+* :c:func:`get_excitation_degree_vector_single_or_exchange` 
+* :c:func:`get_excitation_degree_vector_single_or_exchange_verbose` 
 * :c:func:`get_excitation_spin` 
 * :c:func:`get_index_in_psi_det_alpha_unique` 
 * :c:func:`get_index_in_psi_det_beta_unique` 
@@ -979,15 +989,15 @@ Index of Subroutines/Functions
 * :c:func:`get_mo_two_e_integrals_exch_ii` 
 * :c:func:`get_mo_two_e_integrals_i1j1` 
 * :c:func:`get_mo_two_e_integrals_ij` 
-* :c:func:`get_mono_excitation` 
-* :c:func:`get_mono_excitation_from_fock` 
-* :c:func:`get_mono_excitation_spin` 
 * :c:func:`get_occupation_from_dets` 
 * :c:func:`get_phase` 
 * :c:func:`get_phase_bi` 
 * :c:func:`get_phasemask_bit` 
 * :c:func:`get_pseudo_inverse` 
 * :c:func:`get_s2` 
+* :c:func:`get_single_excitation` 
+* :c:func:`get_single_excitation_from_fock` 
+* :c:func:`get_single_excitation_spin` 
 * :c:func:`get_task_from_taskserver` 
 * :c:func:`get_tasks_from_taskserver` 
 * :c:func:`get_two_e_integral` 
@@ -997,7 +1007,6 @@ Index of Subroutines/Functions
 * :c:func:`give_all_aos_and_grad_and_lapl_at_r` 
 * :c:func:`give_all_aos_and_grad_at_r` 
 * :c:func:`give_all_aos_at_r` 
-* :c:func:`give_all_aos_at_r_old` 
 * :c:func:`give_all_erf_kl_ao` 
 * :c:func:`give_all_mos_and_grad_and_lapl_at_r` 
 * :c:func:`give_all_mos_and_grad_at_r` 
@@ -1057,16 +1066,16 @@ Index of Subroutines/Functions
 * :c:func:`i_h_j` 
 * :c:func:`i_h_j_double_alpha_beta` 
 * :c:func:`i_h_j_double_spin` 
-* :c:func:`i_h_j_mono_spin` 
 * :c:func:`i_h_j_mono_spin_one_e` 
 * :c:func:`i_h_j_one_e` 
 * :c:func:`i_h_j_s2` 
+* :c:func:`i_h_j_single_spin` 
 * :c:func:`i_h_j_two_e` 
 * :c:func:`i_h_j_verbose` 
 * :c:func:`i_h_psi` 
 * :c:func:`i_h_psi_minilist` 
 * :c:func:`i_s2_psi_minilist` 
-* :c:func:`i_wee_j_mono` 
+* :c:func:`i_wee_j_single` 
 * :c:func:`i_x1_pol_mult` 
 * :c:func:`initialize_bitmask_to_restart_ones` 
 * :c:func:`initialize_mo_coef_begin_iteration` 
@@ -1094,7 +1103,7 @@ Index of Subroutines/Functions
 * :c:func:`is_a_2p` 
 * :c:func:`is_a_two_holes_two_particles` 
 * :c:func:`is_connected_to` 
-* :c:func:`is_connected_to_by_mono` 
+* :c:func:`is_connected_to_by_single` 
 * :c:func:`is_i_in_virtual` 
 * :c:func:`is_in_wavefunction` 
 * :c:func:`is_spin_flip_possible` 
@@ -1135,7 +1144,6 @@ Index of Subroutines/Functions
 * :c:func:`modify_bitmasks_for_hole_in_out` 
 * :c:func:`modify_bitmasks_for_particl` 
 * :c:func:`molden` 
-* :c:func:`mono_excitation_wee` 
 * :c:func:`mpi_print` 
 * :c:func:`multiply_poly` 
 * :c:func:`n_pt_sup` 
@@ -1213,6 +1221,8 @@ Index of Subroutines/Functions
 * :c:func:`push_integrals` 
 * :c:func:`push_pt2` 
 * :c:func:`push_pt2_results` 
+* :c:func:`push_pt2_results_async_recv` 
+* :c:func:`push_pt2_results_async_send` 
 * :c:func:`push_selection_results` 
 * :c:func:`qp_stop` 
 * :c:func:`qrpa` 
@@ -1249,6 +1259,8 @@ Index of Subroutines/Functions
 * :c:func:`run` 
 * :c:func:`run_cipsi` 
 * :c:func:`run_pt2_slave` 
+* :c:func:`run_pt2_slave_large` 
+* :c:func:`run_pt2_slave_small` 
 * :c:func:`run_selection_slave` 
 * :c:func:`run_slave_cipsi` 
 * :c:func:`run_slave_main` 
@@ -1285,6 +1297,7 @@ Index of Subroutines/Functions
 * :c:func:`set_natural_mos` 
 * :c:func:`set_order` 
 * :c:func:`set_order_big` 
+* :c:func:`single_excitation_wee` 
 * :c:func:`sort` 
 * :c:func:`sort_dets_ab` 
 * :c:func:`sort_dets_ab_v` 
@@ -1341,6 +1354,8 @@ Index of Subroutines/Functions
 * :c:func:`write_time` 
 * :c:func:`zmq_abort` 
 * :c:func:`zmq_delete_task` 
+* :c:func:`zmq_delete_task_async_recv` 
+* :c:func:`zmq_delete_task_async_send` 
 * :c:func:`zmq_delete_tasks` 
 * :c:func:`zmq_delete_tasks_async_recv` 
 * :c:func:`zmq_delete_tasks_async_send` 

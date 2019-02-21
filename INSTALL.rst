@@ -8,7 +8,7 @@ repository <https://github.com/LCPQ/quantum_package>`_.
 
 .. code:: bash
 
-  git clone https://github.com/LCPQ/quantum_package
+  git clone https://github.com/QuantumPackage/qp2
 
 
 Before anything, go into your :file:`quantum_package` directory and run

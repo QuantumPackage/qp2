@@ -1,19 +1,96 @@
 #!/bin/bash
-file=$1
 
+# Check the QP_ROOT directory
 if [[ -z ${QP_ROOT} ]] ; then
   >&2 echo "please source quantum_package.rc"
   exit 1
 fi
+
 source ${QP_ROOT}/quantum_package.rc
 
-qp_run print_e_conv $1
-nstates=`cat ${1}/determinants/n_states`
+TEMP=$(getopt -o h -l ,help -n $0 -- "$@") || exit 1 # get the input / options 
+eval set -- "$TEMP"
+
+function help(){
+     cat <<EOF
+
+ Check the convergence of a CIPSI calculation
+ 
+ Usage:
+   $(basename $0)  EZFIO
+ 
+ Output: 
+ 
+      For each ELECTRONIC STATE \$i, produces plain text files 
+        *  for the convergence of the TOTAL variational and E+PT2 energies
+           files  EZFIO.\$i.conv 
+        *  gnuplot file to generate pdf image of the converge
+           files  EZFIO.\$i.conv.plt 
+        *  if gnuplot is available, creates the pdf image
+           files  EZFIO.\$i.conv.pdf 
+
+      For each EXCITED STATE \$i, produces plain text files
+        *  for the convergence of the ENERGY DIFFERENCE with the ground state
+           files  EZFIO.\$i.delta_e.conv 
+        *  gnuplot file to generate pdf image of the converge
+           files  EZFIO.\$i.delta_e.conv.plt 
+        *  if gnuplot is available, creates the pdf image
+           files  EZFIO.\$i.delta_e.conv.pdf 
+
+
+ Note: 
+    If you're in qpsh mode and that a EZFIO is set, this will be taken as the EZFIO file
+
+ Options:
+   -h, --help                            Print the HELP message
+ 
+ Example: ground state calculation on the EZFIO h2o.ezfio 
+
+          $(basename $0) h2o.ezfio 
+
+          produces h2o.ezfio.1.conv, h2o.ezfio.1.conv.plt and h2o.ezfio.1.conv.pdf if gnuplot is available 
+ 
+ 
+EOF
+     exit
+}
+
+ while true ; do
+     case "$1" in
+         -h|-help|--help)
+             help
+             exit 0;;
+         --) shift  ; break ;;
+     "") help ; break ;;
+     esac
+ done
+
+ezfio=${1%/} # take off the / at the end
+
+if [[ ! -z ${EZFIO_FILE}   ]] ; then
+ file=${EZFIO_FILE}
+else 
+ file=$ezfio
+fi
+ 
+
+if [[ -z ${file} ]] ; then
+ >&2 echo "You did not specify any EZFIO directory. "
+ exit 1
+
+fi
+
+
+gnuplot_ok=`hash gnuplot`
+
+
+qp_run print_e_conv $file 
+nstates=`cat ${file}/determinants/n_states`
 echo $nstates
 
 
 for i in $(seq 1 $nstates) ; do
-  out=${1}.${i}.conv
+  out=${file}.${i}.conv
 cat << EOF > ${out}.plt
 set term pdf
 set output "$out.pdf"
@@ -25,13 +102,14 @@ plot "$out" w lp title "E_{var} state $i", "$out" u 1:3 w lp title "E_{var} + PT
 
 EOF
 
-gnuplot ${out}.plt
-#rm ${out}.plt
+if [[  -z ${gnuplot_ok} ]] ; then
+ gnuplot ${out}.plt
+fi
 
 done
 
 for i in $(seq 2 $nstates) ; do
-  out=${1}.${i}.delta_e.conv
+  out=${file}.${i}.delta_e.conv
 cat << EOF > ${out}.plt
 set term pdf
 set output "$out.pdf"
@@ -42,6 +120,7 @@ set ylabel "Energy difference (a.u.)"
 plot "$out" w lp title "Delta E_{var} state $i", "$out" u 1:3 w lp title "Delta E_{var} + PT2 state $i"
 
 EOF
+if [[  -z ${gnuplot_ok} ]] ; then
   gnuplot ${out}.plt
-# rm ${out}.plt
+fi
 done

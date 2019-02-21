@@ -36,7 +36,7 @@ subroutine check_coherence_functional
   ifound_c = index(correlation_functional,"short_range")
  endif
  print*,ifound_x,ifound_c
- if(ifound_x .eq.0 .or. ifound_c .eq. 0)then
+ if(ifound_x .ne.0 .or. ifound_c .ne. 0)then
   print*,'YOU ARE USING THE RANGE SEPARATED KS PROGRAM BUT YOUR INPUT KEYWORD FOR '
   print*,'exchange_functional is ',exchange_functional
   print*,'correlation_functional is ',correlation_functional

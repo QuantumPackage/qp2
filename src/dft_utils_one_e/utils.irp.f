@@ -68,7 +68,7 @@ subroutine GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho
  double precision :: mu_local
  mu_local = 1.d-9
  do istate = 1, N_states
-  if(exchange_functional.EQ."short_range_PBE")then
+  if(exchange_functional.EQ."PBE")then
    call ex_pbe_sr(mu_local,rho_a(istate),rho_b(istate),grad_rho_a_2(istate),grad_rho_b_2(istate),grad_rho_a_b(istate),ex(istate),vx_rho_a(istate),vx_rho_b(istate),vx_grad_rho_a_2(istate),vx_grad_rho_b_2(istate),vx_grad_rho_a_b(istate))
   else if(exchange_functional.EQ."None")then
    ex = 0.d0
@@ -84,7 +84,7 @@ subroutine GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho
   endif
 
   double precision :: rhoc,rhoo,sigmacc,sigmaco,sigmaoo,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo
-  if(correlation_functional.EQ."short_range_PBE")then
+  if(correlation_functional.EQ."PBE")then
   ! convertion from (alpha,beta) formalism to (closed, open) formalism
    call rho_ab_to_rho_oc(rho_a(istate),rho_b(istate),rhoo,rhoc)
    call grad_rho_ab_to_grad_rho_oc(grad_rho_a_2(istate),grad_rho_b_2(istate),grad_rho_a_b(istate),sigmaoo,sigmacc,sigmaco)

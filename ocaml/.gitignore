@@ -9,7 +9,6 @@ Input_ao_two_e_erf_ints.ml
 Input_ao_two_e_ints.ml
 Input_auto_generated.ml
 Input_becke_numerical_grid.ml
-Input_champ.ml
 Input_davidson.ml
 Input_density_for_dft.ml
 Input_determinants.ml
@@ -22,7 +21,6 @@ Input_nuclei.ml
 Input_perturbation.ml
 Input_pseudo.ml
 Input_scf_utils.ml
-Input_variance.ml
 qp_create_ezfio
 qp_create_ezfio.native
 qp_edit

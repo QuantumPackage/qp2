@@ -58,6 +58,7 @@ Doc: plugins et qp_plugins
 Ajouter les symetries dans devel
 
 
+# Parallelize i_H_psi
 
 
 IMPORTANT:
@@ -66,5 +67,3 @@ Davidson Diagonalization
 ------------------------
 
  Not enough memory: aborting in davidson_diag_hjj_sjj
-
-
