@@ -1,3 +1,20 @@
+BEGIN_PROVIDER [ character*(64), diag_algorithm ]
+  implicit none
+  BEGIN_DOC
+  ! Diagonalization algorithm (Davidson or Lapack)
+  END_DOC
+  if (N_det > N_det_max_full) then
+    diag_algorithm = "Davidson"
+  else
+    diag_algorithm = "Lapack"
+  endif
+
+  if (N_det < N_states) then
+    diag_algorithm = "Lapack"
+  endif
+END_PROVIDER
+
+
 BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
  implicit none
  BEGIN_DOC
