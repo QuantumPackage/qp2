@@ -114,7 +114,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   integer                        :: k_pairs, kl
 
   integer                        :: iter2, itertot
-  double precision, allocatable  :: y(:,:), h(:,:), lambda(:), s2(:)
+  double precision, allocatable  :: y(:,:), h(:,:), h_p(:,:), lambda(:), s2(:)
   real, allocatable              :: y_s(:,:)
   double precision, allocatable  :: s_(:,:), s_tmp(:,:)
   double precision               :: diag_h_mat_elem
@@ -264,6 +264,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
+      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
       s_(N_st_diag*itermax,N_st_diag*itermax),                       &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
@@ -408,27 +409,44 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
+      call dgemm('T','N', shift2, shift2, sze,                       &
+          1.d0, U, size(U,1), W, size(W,1),                          &
+          0.d0, h, size(h_p,1))
+
       ! Penalty method
       ! --------------
 
       if (s2_eig) then
-        h = s_
+        h_p = s_
         do k=1,shift2
-          h(k,k) = h(k,k) + S_z2_Sz - expected_s2
+          h_p(k,k) = h_p(k,k) + S_z2_Sz - expected_s2
         enddo
         alpha = 0.1d0
+        h_p = h + alpha*h_p
       else
+        h_p = h
         alpha = 0.d0
       endif
 
-      call dgemm('T','N', shift2, shift2, sze,                       &
-          1.d0, U, size(U,1), W, size(W,1),                          &
-          alpha , h, size(h,1))
+      ! Diagonalize h_p
+      ! ---------------
 
-      ! Diagonalize h
-      ! -------------
+      call lapack_diag(lambda,y,h_p,size(h_p,1),shift2)
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+      ! Compute Energy for each eigenvector
+      ! -----------------------------------
+
+      call dgemm('N','N',shift2,shift2,shift2,                       &
+          1.d0, h, size(h,1), y, size(y,1),                          &
+          0.d0, s_tmp, size(s_tmp,1))
+
+      call dgemm('T','N',shift2,shift2,shift2,                       &
+          1.d0, y, size(y,1), s_tmp, size(s_tmp,1),                  &
+          0.d0, h, size(h,1))
+
+      do k=1,shift2
+        lambda(k) = h(k,k)
+      enddo
 
       ! Compute S2 for each eigenvector
       ! -------------------------------
@@ -440,8 +458,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       call dgemm('T','N',shift2,shift2,shift2,                       &
           1.d0, y, size(y,1), s_tmp, size(s_tmp,1),                  &
           0.d0, s_, size(s_,1))
-
-
 
       do k=1,shift2
         s2(k) = s_(k,k) + S_z2_Sz
