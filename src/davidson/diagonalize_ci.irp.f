@@ -117,17 +117,24 @@ END_PROVIDER
        good_state_array = .False.
        call u_0_S2_u_0(s2_eigvalues,eigenvectors,N_det,psi_det,N_int,&
          N_det,size(eigenvectors,1))
-       do j=1,N_det
-         ! Select at least n_states states with S^2 values closed to "expected_s2"
-         if(dabs(s2_eigvalues(j)-expected_s2).le.0.5d0)then
-           i_state +=1
-           index_good_state_array(i_state) = j
-           good_state_array(j) = .True.
-         endif
-         if(i_state.eq.N_states) then
-           exit
-         endif
-       enddo
+       if (only_expected_s2) then
+          do j=1,N_det
+            ! Select at least n_states states with S^2 values closed to "expected_s2"
+            if(dabs(s2_eigvalues(j)-expected_s2).le.0.5d0)then
+              i_state +=1
+              index_good_state_array(i_state) = j
+              good_state_array(j) = .True.
+            endif
+            if(i_state.eq.N_states) then
+              exit
+            endif
+          enddo
+       else
+          do j=1,N_det
+             index_good_state_array(j) = j
+             good_state_array(j) = .True.
+          enddo
+       endif
        if(i_state .ne.0)then
          ! Fill the first "i_state" states that have a correct S^2 value
          do j = 1, i_state
@@ -185,6 +192,16 @@ END_PROVIDER
          CI_electronic_energy(j) = eigenvalues(j)
        enddo
      endif
+     do k=1,N_states_diag
+       CI_electronic_energy(k) = 0.d0
+       do j=1,N_det
+         do i=1,N_det
+           CI_electronic_energy(k) +=                                &
+               CI_eigenvectors(i,k) * CI_eigenvectors(j,k) *         &
+               H_matrix_all_dets(i,j)
+         enddo
+       enddo
+     enddo
      deallocate(eigenvectors,eigenvalues)
    endif
 
