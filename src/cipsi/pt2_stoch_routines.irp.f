@@ -11,7 +11,7 @@ END_PROVIDER
   implicit none
   logical, external :: testTeethBuilding
   integer :: i,j
-  pt2_n_tasks_max = elec_beta_num*elec_beta_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
+  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
@@ -609,6 +609,12 @@ BEGIN_PROVIDER[ double precision, pt2_u, (N_det_generators)]
  BEGIN_PROVIDER[ integer, pt2_J, (N_det_generators)]
 &BEGIN_PROVIDER[ integer, pt2_R, (N_det_generators)]
   implicit none
+  BEGIN_DOC
+! pt2_J contains the list of generators after ordering them according to the
+! Monte Carlo sampling.
+!
+! pt2_R(i) is the number of combs drawn when determinant i is computed.
+  END_DOC
   integer                :: N_c, N_j
   integer                :: U, t, i
   double precision       :: v

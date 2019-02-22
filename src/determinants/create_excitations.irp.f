@@ -19,12 +19,18 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   ! hole
   k = shiftr(i_hole-1,bit_kind_shift)+1
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
-  key_in(k,ispin) = ibclr(key_in(k,ispin),j)
+! check whether position j is occupied
+  if (ibits(key_in(k,ispin),j,1).eq.1) then
+   key_in(k,ispin) = ibclr(key_in(k,ispin),j)
+  else 
+   i_ok= -1
+  end if
 
   ! particle
   k = shiftr(i_particle-1,bit_kind_shift)+1
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
   key_in(k,ispin) = ibset(key_in(k,ispin),j)
+
   integer                        :: n_elec_tmp
   n_elec_tmp = 0
   do i = 1, N_int

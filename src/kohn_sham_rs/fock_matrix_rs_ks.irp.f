@@ -3,7 +3,7 @@
  use map_module
  implicit none
  BEGIN_DOC
- ! Alpha Fock matrix in AO basis set
+ ! Alpha Fock matrix in ao basis set
  END_DOC
 
  integer                        :: i,j,k,l,k1,r,s
@@ -35,7 +35,7 @@
    ao_two_e_integral_beta_tmp  = 0.d0
 
    q = ao_num*ao_num*ao_num*ao_num
-   !$OMP DO SCHEDULE(static,64)
+   !$OMP DO SCHEDULE(dynamic)
    do p=1_8,q
            call two_e_integrals_index_reverse(kk,ii,ll,jj,p)
            if ( (kk(1)>ao_num).or. &
@@ -91,6 +91,8 @@
    !$OMP END DO NOWAIT
    !$OMP CRITICAL
    ao_two_e_integral_alpha += ao_two_e_integral_alpha_tmp
+   !$OMP END CRITICAL
+   !$OMP CRITICAL
    ao_two_e_integral_beta  += ao_two_e_integral_beta_tmp
    !$OMP END CRITICAL
    deallocate(keys,values,ao_two_e_integral_alpha_tmp,ao_two_e_integral_beta_tmp)
@@ -203,19 +205,18 @@
 
 END_PROVIDER
 
-
  BEGIN_PROVIDER [ double precision, Fock_matrix_ao_alpha, (ao_num, ao_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_ao_beta,  (ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
- ! Alpha Fock matrix in AO basis set
+ ! Alpha Fock matrix in ao basis set
  END_DOC
 
  integer                        :: i,j
  do j=1,ao_num
    do i=1,ao_num
      Fock_matrix_ao_alpha(i,j) = Fock_matrix_alpha_no_xc_ao(i,j) + ao_potential_alpha_xc(i,j)
-     Fock_matrix_ao_beta (i,j) = Fock_matrix_beta_no_xc_ao(i,j)  + ao_potential_beta_xc(i,j)
+     Fock_matrix_ao_beta(i,j) = Fock_matrix_beta_no_xc_ao(i,j)  + ao_potential_beta_xc(i,j)
    enddo
  enddo
 
@@ -226,7 +227,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, Fock_matrix_beta_no_xc_ao,  (ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
- ! Mono electronic an Coulomb matrix in AO basis set
+ ! Mono electronic an Coulomb matrix in ao basis set
  END_DOC
 
  integer                        :: i,j

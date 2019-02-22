@@ -38,6 +38,9 @@
 .. |OPAM|  replace:: `OPAM`_
 .. |Python|  replace:: `Python`_
 .. |qp| replace:: *Quantum Package*
+.. |QP| replace:: |qp|
+.. |qpsh| replace:: *Quantum Package Shell*
+.. |QPSH| replace:: |qpsh|
 .. |resultsFile| replace:: `resultsFile`_
 .. |SLURM| replace:: `SLURM`_
 .. |ZeroMQ| replace:: `ZeroMQ`_
@@ -76,6 +79,8 @@
 .. |SCF| replace:: :abbr:`SCF (Self Consistent Field)`
 .. |sCI| replace:: :abbr:`sCI (Selected-CI)`
 .. |WFT| replace:: :abbr:`WFT (Wave Function Theory)`
+.. |LDA| replace:: :abbr:`LDA (Local Density Approximation)`
+.. |PBE| replace:: :abbr:`PBE (Perdew-Burke-Ernzerhof)`
 
 .. |kalpha| replace:: :math:`|\alpha \rangle`
 .. |H| replace:: :math:`\hat H`

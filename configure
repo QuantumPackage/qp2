@@ -9,6 +9,12 @@ eval set -- "$TEMP"
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
 
+# Check if the module to create new DFT functionals exists or not
+if [[ ! -d ${QP_ROOT}/src/new_functionals  ]] ; then
+   cp -r ${QP_ROOT}/scripts/functionals/do_not_touch_func ${QP_ROOT}/src/new_functionals
+fi
+
+
 
 function help()
 {
@@ -175,7 +181,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq ocaml ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp ocaml ezfio docopt resultsFile bats"
 fi
 
 
@@ -191,6 +197,21 @@ for PACKAGE in ${PACKAGES} ; do
               unzip "\${QP_ROOT}"/external/ninja.zip -d "\${QP_ROOT}"/bin
 EOF
 
+
+    elif [[ ${PACKAGE} = gmp ]] ; then
+
+            download \
+              "ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2" \
+              "${QP_ROOT}"/external/gmp.tar.bz2
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --bzip2 --extract --file gmp.tar.bz2
+              rm gmp.tar.bz2
+              cd gmp*
+              ./configure --prefix=$QP_ROOT && make -j 8
+              make install
+EOF
+    
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
@@ -380,6 +401,12 @@ if [[ ${F77ZMQ} = $(not_found) ]] ; then
         fail
 fi
 
+GMP=$(find_lib -lgmp)
+if [[ ${ZLIB} = $(not_found) ]] ; then
+        error "GMP (gmp) is not installed."
+        fail
+fi
+
 OPAM=$(find_exe opam)
 if [[ ${OPAM} = $(not_found) ]] ; then
         error "OPAM (ocaml) package manager is not installed."
@@ -443,7 +470,7 @@ else
       echo "See  ./configure --help  for more details." 
       echo ""
 fi
-   
+
 exit 0
     
 

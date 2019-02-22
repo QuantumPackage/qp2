@@ -8,7 +8,7 @@ repository <https://github.com/LCPQ/quantum_package>`_.
 
 .. code:: bash
 
-  git clone https://github.com/LCPQ/quantum_package
+  git clone https://github.com/QuantumPackage/qp2
 
 
 Before anything, go into your :file:`quantum_package` directory and run
@@ -43,6 +43,7 @@ Requirements
 - `Zlib`_
 - `GNU Patch`_
 - |ZeroMQ| : networking library
+- `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager 
 - |Ninja| : a parallel build system
 
@@ -84,6 +85,7 @@ The following packages are supported by the :command:`configure` installer:
 * irpf90 
 * zeromq 
 * f77zmq
+* gmp
 * ocaml  ( :math:`\approx` 10 minutes)
 * ezfio 
 * docopt 
@@ -110,11 +112,11 @@ If the :command:`configure` executable fails to install a specific dependency
 -----------------------------------------------------------------------------
 
 If the :command:`configure` executable does not succeed to install a specific dependency, 
-there are some proposition of how to download and install the minimal dependencies to compile and use the |QP|
+there are some proposition of how to download and install the minimal dependencies to compile and use the |QP|.
 
 
 Before doing anything below, try to install the packages with your package manager
-(:command:`apt`, :command:`yum`, etc)
+(:command:`apt`, :command:`yum`, etc).
 
 
 Ninja
@@ -216,6 +218,29 @@ With Debian or Ubuntu, you can use
 
    sudo apt install zlib1g-dev
 
+GMP
+---
+
+GMP is the GNU Multiple Precision Arithmetic Library.
+
+* Download the latest version of gmp here:
+  `<ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2>`_
+  and move it in the :file:`${QP_ROOT}/external` directory
+
+* Extract the archive, go into the :file:`gmp-*` directory and run
+  the following commands
+
+.. code:: bash
+
+   ./configure --prefix=${QP_ROOT}
+   make
+   make install
+
+With Debian or Ubuntu, you can use
+
+.. code:: bash
+
+   sudo apt install libgmp-dev
 
 
 OCaml
