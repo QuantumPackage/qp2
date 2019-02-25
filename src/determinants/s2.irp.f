@@ -33,7 +33,7 @@ subroutine get_s2(key_i,key_j,Nint,s2)
   implicit none
   use bitmasks
   BEGIN_DOC
-  ! Returns <S^2>
+  ! Returns $\langle S^2 \rangle - S_z^2 S_z$
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
