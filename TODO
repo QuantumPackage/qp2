@@ -58,6 +58,7 @@ Doc: plugins et qp_plugins
 Ajouter les symetries dans devel
 
 
+# Parallelize i_H_psi
 IMPORTANT:
 
 Davidson Diagonalization
