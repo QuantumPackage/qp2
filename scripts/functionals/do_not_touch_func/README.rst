@@ -7,7 +7,7 @@ used by the various |DFT| or |RSDFT| programs.
 
 
 .. warning::
-     This module is not tracked by GIT and therefore, the modifications performed on this module 
+     This module is not tracked by Git and therefore, the modifications performed on this module 
      can be easily lost. Keep in mind this important fact in order not to loose your own work. 
 
 
@@ -24,7 +24,7 @@ The main idea is the following:
    
   * Example: 
 
-    * In an **external plugin** named **fancy_functionals**, you create *e_c_new_fancy_func* for the energy and *pot_ao_alpha_new_func* for the alpha potential
+    * In an **external plugin** named **fancy_functionals**, you create *e_c_new_fancy_func* for the energy and *pot_ao_alpha_new_func* for the alpha potential.
 
     * If you want to be able to use the |DFT| programs already available in the |QP|, these *providers* must use the providers for the density defined in :ref:`module_density_for_dft` and :ref:`module_dft_utils_in_r`. 
 
@@ -33,7 +33,7 @@ The main idea is the following:
 
   * Example: 
 
-    * add **fancy_functionals** to the NEED file of **new_functionals** 
+    * add **fancy_functionals** to the :file:`NEED` file of **new_functionals** 
 
 3. Change the file :file:`e_xc_new_func.irp.f` and :file:`pot_xc_new_func.irp.f` to set the value of your new providers to the providers defined in **new_functionals**
 
@@ -46,13 +46,15 @@ The main idea is the following:
  
        BEGIN_PROVIDER[double precision, energy_x_new_functional, (N_states) ]
       &BEGIN_PROVIDER[double precision, energy_c_new_functional, (N_states) ]
-       implicit none
-       BEGIN_DOC
-      ! energy_x_new_functional = define here your functional 
-      ! energy_c_new_functional = define here your functional 
-       END_DOC
-        energy_c_new_functional = e_c_new_fancy_func
-        energy_x_new_functional = e_x_new_fancy_func
+         implicit none
+       
+         BEGIN_DOC
+         ! energy_x_new_functional = define here your functional 
+         ! energy_c_new_functional = define here your functional 
+         END_DOC
+       
+         energy_c_new_functional = e_c_new_fancy_func
+         energy_x_new_functional = e_x_new_fancy_func
      
        END_PROVIDER 
 
