@@ -90,6 +90,7 @@ subroutine run_stochastic_cipsi
     do k=1,N_states
       rpt2(:) = pt2(:)/(1.d0 + norm(k))
     enddo
+    call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
@@ -129,6 +130,7 @@ subroutine run_stochastic_cipsi
     do k=1,N_states
       rpt2(:) = pt2(:)/(1.d0 + norm(k))
     enddo
+    call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)

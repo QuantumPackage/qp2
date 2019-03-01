@@ -94,6 +94,7 @@ subroutine run_cipsi
     do k=1,N_states
       rpt2(:) = pt2(:)/(1.d0 + norm(k))
     enddo
+    call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
@@ -135,6 +136,9 @@ subroutine run_cipsi
       call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
         norm,0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
+      do k=1,N_states
+        rpt2(:) = pt2(:)/(1.d0 + norm(k))
+      enddo
       call save_energy(psi_energy_with_nucl_rep, pt2)
     endif
     print *,  'N_det             = ', N_det
@@ -149,6 +153,7 @@ subroutine run_cipsi
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+    call save_energy(psi_energy_with_nucl_rep, pt2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif
