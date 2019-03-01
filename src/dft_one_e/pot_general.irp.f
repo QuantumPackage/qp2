@@ -33,7 +33,7 @@
 
 BEGIN_SHELL [ /usr/bin/env python ]
 import os
-functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../dft_utils_one_e/functionals/"))
+functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
 
 prefix = ""
 for f in functionals:
@@ -86,7 +86,7 @@ END_PROVIDER
 
 BEGIN_SHELL [ /usr/bin/env python ]
 import os
-functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../dft_utils_one_e/functionals/"))
+functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
 
 prefix = ""
 for f in functionals:
