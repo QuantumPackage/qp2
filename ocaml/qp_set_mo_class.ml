@@ -1,6 +1,5 @@
 open Qputils
 open Qptypes
-open Core
 
 (*
  * Command-line arguments
@@ -46,7 +45,7 @@ let set ~core ~inact ~act ~virt ~del =
 
 
   let mo_class =
-    Array.init mo_num ~f:(fun i -> None)
+    Array.init mo_num (fun i -> None)
   in
 
   (* Check input data *)
@@ -113,7 +112,8 @@ let set ~core ~inact ~act ~virt ~del =
   and av = Excitation.create_single act virt
   in
   let single_excitations = [ ia ; aa ; av ]
-                           |> List.map ~f:Excitation.(fun x ->
+                           |> List.map (fun x ->
+                               let open Excitation in
                                match x with
                                | Single (x,y) ->
                                  ( MO_class.to_bitlist n_int (Hole.to_mo_class x),
@@ -128,7 +128,8 @@ let set ~core ~inact ~act ~virt ~del =
     Excitation.double_of_singles aa aa ;
     Excitation.double_of_singles aa av ;
     Excitation.double_of_singles av av ]
-    |> List.map ~f:Excitation.(fun x ->
+    |> List.map (fun x ->
+        let open Excitation in
         match x with
         | Single _ -> assert false
         | Double (x,y,z,t) ->
@@ -146,19 +147,20 @@ let set ~core ~inact ~act ~virt ~del =
   and extract_hole2 (_,_,h,_) = h
   and extract_particle2 (_,_,_,p) = p
   in
+  let init = Bitlist.zero n_int in
   let result = [
-    List.map ~f:extract_hole single_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
-    List.map ~f:extract_particle single_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
-    List.map ~f:extract_hole1 double_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
-    List.map ~f:extract_particle1 double_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
-    List.map ~f:extract_hole2 double_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
-    List.map ~f:extract_particle2 double_excitations
-    |>  List.fold ~init:(Bitlist.zero n_int) ~f:Bitlist.or_operator ;
+    List.map extract_hole single_excitations
+    |>  List.fold_left Bitlist.or_operator init;
+    List.map extract_particle single_excitations
+    |>  List.fold_left Bitlist.or_operator init;
+    List.map extract_hole1 double_excitations
+    |>  List.fold_left Bitlist.or_operator init;
+    List.map extract_particle1 double_excitations
+    |>  List.fold_left Bitlist.or_operator init;
+    List.map extract_hole2 double_excitations
+    |>  List.fold_left Bitlist.or_operator init;
+    List.map extract_particle2 double_excitations
+    |>  List.fold_left Bitlist.or_operator init;
   ]
   in
 
@@ -167,10 +169,11 @@ let set ~core ~inact ~act ~virt ~del =
   *)
 
   (* Write masks *)
-  let result =  List.map ~f:(fun x ->
-      let y = Bitlist.to_int64_list x in y@y )
+  let result = 
+    List.map  (fun x ->
+        let y = Bitlist.to_int64_list x in y@y )
       result
-                |> List.concat
+    |> List.concat
   in
 
   Ezfio.set_bitmasks_n_int (N_int_number.to_int n_int);
@@ -194,7 +197,7 @@ let set ~core ~inact ~act ~virt ~del =
 
   let data =
     Array.to_list mo_class
-    |> List.map ~f:(fun x -> match x with
+    |> List.map (fun x -> match x with
         |None -> assert false
         | Some x -> MO_class.to_string x
       )
@@ -274,42 +277,6 @@ let run ~q ?(core="[]") ?(inact="[]") ?(act="[]") ?(virt="[]") ?(del="[]") ezfio
      get ()
   else
      set ~core ~inact ~act ~virt ~del
-
-
-let ezfio_file =
-  let failure filename =
-        eprintf "'%s' is not an EZFIO file.\n%!" filename;
-        exit 1
-  in
-  Command.Spec.Arg_type.create
-  (fun filename ->
-    match Sys.is_directory filename with
-    | `Yes ->
-        begin
-          match Sys.is_file (filename ^ "/.version") with
-          | `Yes -> filename
-          | _ -> failure filename
-        end
-    | _ -> failure filename
-  )
-
-
-let default range =
-  let failure filename =
-        eprintf "'%s' is not a regular file.\n%!" filename;
-        exit 1
-  in
-  Command.Spec.Arg_type.create
-  (fun filename ->
-    match Sys.is_directory filename with
-    | `Yes ->
-        begin
-          match Sys.is_file (filename^"/.version") with
-          | `Yes -> filename
-          | _ -> failure filename
-        end
-    | _ -> failure filename
-  )
 
 
 
