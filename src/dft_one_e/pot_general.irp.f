@@ -1,25 +1,23 @@
 
  BEGIN_PROVIDER [double precision, potential_x_alpha_ao,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_x_beta_ao,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_alpha_ao,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_beta_ao,(ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_x_beta_ao ,(ao_num,ao_num,N_states)]
  implicit none
  BEGIN_DOC
-! general providers for the alpha/beta exchange/correlation potentials on the AO basis
+! general providers for the alpha/beta exchange potentials on the AO basis
  END_DOC
 
-  if(trim(exchange_functional)=="short_range_LDA")then
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_LDA
-   potential_x_beta_ao = potential_sr_x_beta_ao_LDA
-  else if(exchange_functional.EQ."short_range_PBE")then
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_PBE
-   potential_x_beta_ao = potential_sr_x_beta_ao_PBE
-  else if(trim(exchange_functional)=="LDA")then
-   potential_x_alpha_ao = potential_x_alpha_ao_LDA
-   potential_x_beta_ao = potential_x_beta_ao_LDA
-  else if(exchange_functional.EQ."PBE")then
-   potential_x_alpha_ao = potential_x_alpha_ao_PBE
-   potential_x_beta_ao = potential_x_beta_ao_PBE
+  if(trim(exchange_functional)=="short_range_lda")then
+   potential_x_alpha_ao = potential_sr_x_alpha_ao_lda
+   potential_x_beta_ao = potential_sr_x_beta_ao_lda
+  else if(exchange_functional.EQ."short_range_pbe")then
+   potential_x_alpha_ao = potential_sr_x_alpha_ao_pbe
+   potential_x_beta_ao = potential_sr_x_beta_ao_pbe
+  else if(trim(exchange_functional)=="lda")then
+   potential_x_alpha_ao = potential_x_alpha_ao_lda
+   potential_x_beta_ao = potential_x_beta_ao_lda
+  else if(exchange_functional.EQ."pbe")then
+   potential_x_alpha_ao = potential_x_alpha_ao_pbe
+   potential_x_beta_ao = potential_x_beta_ao_pbe
   else if(exchange_functional.EQ."my_functional")then
    potential_x_alpha_ao = potential_new_functional_x_alpha_ao
    potential_x_beta_ao  = potential_new_functional_x_beta_ao
@@ -32,18 +30,51 @@
    stop
   endif
 
-  if(trim(correlation_functional)=="short_range_LDA")then
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_LDA
-   potential_c_beta_ao = potential_sr_c_beta_ao_LDA
-  else if(trim(correlation_functional)=="LDA")then
-   potential_c_alpha_ao = potential_c_alpha_ao_LDA
-   potential_c_beta_ao = potential_c_beta_ao_LDA
-  else if(correlation_functional.EQ."short_range_PBE")then
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_PBE
-   potential_c_beta_ao = potential_sr_c_beta_ao_PBE
-  else if(correlation_functional.EQ."PBE")then
-   potential_c_alpha_ao = potential_c_alpha_ao_PBE
-   potential_c_beta_ao = potential_c_beta_ao_PBE
+
+BEGIN_SHELL [ /usr/bin/env python ]
+import os 
+import glob 
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
+functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
+
+prefix = ""
+for f in functionals:
+  print """
+  %sif (trim(exchange_functional) == '%s') then
+    potential_x_alpha_ao = potential_x_alpha_ao_%s
+    potential_x_beta_ao  = potential_x_beta_ao_%s"""%(prefix, f, f, f, f)
+  prefix = "else "
+print "endif"
+
+END_SHELL
+
+
+END_PROVIDER
+
+
+
+ BEGIN_PROVIDER [double precision, potential_c_alpha_ao,(ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_c_beta_ao,(ao_num,ao_num,N_states)]
+ implicit none
+ BEGIN_DOC
+! general providers for the alpha/beta correlation potentials on the AO basis
+ END_DOC
+
+  if(trim(correlation_functional)=="short_range_lda")then
+   potential_c_alpha_ao = potential_sr_c_alpha_ao_lda
+   potential_c_beta_ao = potential_sr_c_beta_ao_lda
+  else if(trim(correlation_functional)=="lda")then
+   potential_c_alpha_ao = potential_c_alpha_ao_lda
+   potential_c_beta_ao = potential_c_beta_ao_lda
+  else if(correlation_functional.EQ."short_range_pbe")then
+   potential_c_alpha_ao = potential_sr_c_alpha_ao_pbe
+   potential_c_beta_ao = potential_sr_c_beta_ao_pbe
+  else if(correlation_functional.EQ."pbe")then
+   potential_c_alpha_ao = potential_c_alpha_ao_pbe
+   potential_c_beta_ao = potential_c_beta_ao_pbe
   else if(correlation_functional.EQ."my_functional")then
    potential_c_alpha_ao = potential_new_functional_c_alpha_ao
    potential_c_beta_ao  = potential_new_functional_c_beta_ao
@@ -57,6 +88,27 @@
   endif
 
 
+
+BEGIN_SHELL [ /usr/bin/env python ]
+import os 
+import glob 
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
+functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
+
+prefix = ""
+for f in functionals:
+  print """
+  %sif (trim(correlation_functional) = '%s') then
+    potential_c_alpha_ao = potential_c_alpha_ao_%s
+    potential_c_beta_ao  = potential_c_beta_ao_%s"""%(prefix, f, f, f, f)
+  prefix = "else "
+print "endif"
+
+END_SHELL
+
 END_PROVIDER
 
 
@@ -64,12 +116,10 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [double precision, potential_x_alpha_mo,(mo_num,mo_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_x_beta_mo,(mo_num,mo_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_alpha_mo,(mo_num,mo_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_c_beta_mo,(mo_num,mo_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_x_beta_mo ,(mo_num,mo_num,N_states)]
  implicit none
  BEGIN_DOC
-! general providers for the alpha/beta exchange/correlation potentials on the MO basis
+! general providers for the alpha/beta exchange potentials on the MO basis
  END_DOC
  integer :: istate
  do istate = 1, N_states
@@ -86,8 +136,18 @@ END_PROVIDER
         potential_x_beta_mo(1,1,istate),                                  &
         size(potential_x_beta_mo,1)                                  &
         )
+ enddo
 
+END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, potential_c_alpha_mo,(mo_num,mo_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_c_beta_mo, (mo_num,mo_num,N_states)]
+ implicit none
+ BEGIN_DOC
+! general providers for the alpha/beta correlation potentials on the MO basis
+ END_DOC
+ integer :: istate
+ do istate = 1, N_states
     call ao_to_mo(                                                   &
         potential_c_alpha_ao(1,1,istate),                                 &
         size(potential_c_alpha_ao,1),                                &
@@ -101,7 +161,6 @@ END_PROVIDER
         potential_c_beta_mo(1,1,istate),                                  &
         size(potential_c_beta_mo,1)                                  &
         )
-
  enddo
 
 END_PROVIDER
@@ -183,27 +242,27 @@ END_PROVIDER
 ! general providers for the alpha/beta exchange/correlation potentials on the AO basis
  END_DOC
 
-  if(trim(exchange_functional)=="short_range_LDA")then
-   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_LDA
-   potential_xc_beta_ao  = potential_sr_xc_beta_ao_LDA
-  else if(trim(exchange_functional)=="LDA")then
-   potential_xc_alpha_ao = potential_xc_alpha_ao_LDA
-   potential_xc_beta_ao  = potential_xc_beta_ao_LDA
+  if(trim(exchange_functional)=="short_range_lda")then
+   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_lda
+   potential_xc_beta_ao  = potential_sr_xc_beta_ao_lda
+  else if(trim(exchange_functional)=="lda")then
+   potential_xc_alpha_ao = potential_xc_alpha_ao_lda
+   potential_xc_beta_ao  = potential_xc_beta_ao_lda
   else if(exchange_functional.EQ."None")then
    potential_xc_alpha_ao = 0.d0
    potential_xc_beta_ao = 0.d0
-  else if(trim(exchange_functional)=="short_range_PBE")then
-   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_PBE
-   potential_xc_beta_ao  = potential_sr_xc_beta_ao_PBE
-  else if(trim(exchange_functional)=="PBE")then
-   potential_xc_alpha_ao = potential_xc_alpha_ao_PBE
-   potential_xc_beta_ao  = potential_xc_beta_ao_PBE
+  else if(trim(exchange_functional)=="short_range_pbe")then
+   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_pbe
+   potential_xc_beta_ao  = potential_sr_xc_beta_ao_pbe
+  else if(trim(exchange_functional)=="pbe")then
+   potential_xc_alpha_ao = potential_xc_alpha_ao_pbe
+   potential_xc_beta_ao  = potential_xc_beta_ao_pbe
   else if(exchange_functional.EQ."None")then
    potential_xc_alpha_ao = 0.d0
    potential_xc_beta_ao = 0.d0
   else
    print*, 'Exchange functional required does not exist ...'
-   print*,'exchange_functional',exchange_functional
+   print*, 'exchange_functional',exchange_functional
    stop
   endif
 

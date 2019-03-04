@@ -1,10 +1,10 @@
- BEGIN_PROVIDER[double precision, aos_sr_vxc_alpha_PBE_w  , (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_sr_vxc_beta_PBE_w   , (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_dsr_vxc_alpha_PBE_w  , (ao_num,n_points_final_grid,N_states)]
-&BEGIN_PROVIDER[double precision, aos_dsr_vxc_beta_PBE_w   ,  (ao_num,n_points_final_grid,N_states)]
+ BEGIN_PROVIDER[double precision, aos_sr_vxc_alpha_pbe_w  , (ao_num,n_points_final_grid,N_states)]
+&BEGIN_PROVIDER[double precision, aos_sr_vxc_beta_pbe_w   , (ao_num,n_points_final_grid,N_states)]
+&BEGIN_PROVIDER[double precision, aos_dsr_vxc_alpha_pbe_w  , (ao_num,n_points_final_grid,N_states)]
+&BEGIN_PROVIDER[double precision, aos_dsr_vxc_beta_pbe_w   ,  (ao_num,n_points_final_grid,N_states)]
  implicit none
  BEGIN_DOC
-! aos_sr_vxc_alpha_PBE_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
+! aos_sr_vxc_alpha_pbe_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
  integer :: istate,i,j,m
  double precision :: r(3)
@@ -22,8 +22,8 @@
  allocate(grad_rho_a_2(N_states),grad_rho_b_2(N_states),grad_rho_a_b(N_states), ex(N_states), ec(N_states))
  allocate(contrib_grad_xa(3,N_states),contrib_grad_xb(3,N_states),contrib_grad_ca(3,N_states),contrib_grad_cb(3,N_states))
 
- aos_dsr_vxc_alpha_PBE_w = 0.d0
- aos_dsr_vxc_beta_PBE_w = 0.d0
+ aos_dsr_vxc_alpha_pbe_w = 0.d0
+ aos_dsr_vxc_beta_pbe_w = 0.d0
 
  do istate = 1, N_states
   do i = 1, n_points_final_grid
@@ -59,13 +59,13 @@
     contrib_grad_xb(m,istate) = weight * (2.d0 * vx_grad_rho_b_2(istate) *  grad_rho_b(m,istate) + vx_grad_rho_a_b(istate)  * grad_rho_a(m,istate))
    enddo
    do j = 1, ao_num
-    aos_sr_vxc_alpha_PBE_w(j,i,istate) = ( vc_rho_a(istate) + vx_rho_a(istate) ) * aos_in_r_array(j,i)
-    aos_sr_vxc_beta_PBE_w (j,i,istate) = ( vc_rho_b(istate) + vx_rho_b(istate) ) * aos_in_r_array(j,i)
+    aos_sr_vxc_alpha_pbe_w(j,i,istate) = ( vc_rho_a(istate) + vx_rho_a(istate) ) * aos_in_r_array(j,i)
+    aos_sr_vxc_beta_pbe_w (j,i,istate) = ( vc_rho_b(istate) + vx_rho_b(istate) ) * aos_in_r_array(j,i)
    enddo
    do j = 1, ao_num
     do m = 1,3
-     aos_dsr_vxc_alpha_PBE_w(j,i,istate) += ( contrib_grad_ca(m,istate) + contrib_grad_xa(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_dsr_vxc_beta_PBE_w (j,i,istate) += ( contrib_grad_cb(m,istate) + contrib_grad_xb(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_dsr_vxc_alpha_pbe_w(j,i,istate) += ( contrib_grad_ca(m,istate) + contrib_grad_xa(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_dsr_vxc_beta_pbe_w (j,i,istate) += ( contrib_grad_cb(m,istate) + contrib_grad_xb(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
     enddo
    enddo
   enddo
@@ -74,36 +74,36 @@
  END_PROVIDER
 
 
- BEGIN_PROVIDER [double precision, pot_sr_scal_xc_alpha_ao_PBE, (ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, pot_sr_scal_xc_beta_ao_PBE, (ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, pot_sr_scal_xc_alpha_ao_pbe, (ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, pot_sr_scal_xc_beta_ao_pbe, (ao_num,ao_num,N_states)]
  implicit none
  integer                        :: istate
    BEGIN_DOC
    ! intermediate quantity for the calculation of the vxc potentials for the GGA functionals  related to the scalar part of the potential 
    END_DOC
-   pot_sr_scal_xc_alpha_ao_PBE = 0.d0
-   pot_sr_scal_xc_beta_ao_PBE = 0.d0
+   pot_sr_scal_xc_alpha_ao_pbe = 0.d0
+   pot_sr_scal_xc_beta_ao_pbe = 0.d0
    double precision               :: wall_1,wall_2
    call wall_time(wall_1)
    do istate = 1, N_states
      ! exchange - correlation alpha
      call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                                                                                       &
-                 aos_sr_vxc_alpha_PBE_w(1,1,istate),size(aos_sr_vxc_alpha_PBE_w,1),                                                                   &
+                 aos_sr_vxc_alpha_pbe_w(1,1,istate),size(aos_sr_vxc_alpha_pbe_w,1),                                                                   &
                  aos_in_r_array,size(aos_in_r_array,1),1.d0,                                                                                          &
-                 pot_sr_scal_xc_alpha_ao_PBE(1,1,istate),size(pot_sr_scal_xc_alpha_ao_PBE,1))
+                 pot_sr_scal_xc_alpha_ao_pbe(1,1,istate),size(pot_sr_scal_xc_alpha_ao_pbe,1))
      ! exchange - correlation beta
      call dgemm('N','T',ao_num,ao_num,n_points_final_grid,1.d0,                                                                                         &
-                 aos_sr_vxc_beta_PBE_w(1,1,istate),size(aos_sr_vxc_beta_PBE_w,1),                                                                       &
+                 aos_sr_vxc_beta_pbe_w(1,1,istate),size(aos_sr_vxc_beta_pbe_w,1),                                                                       &
                  aos_in_r_array,size(aos_in_r_array,1),1.d0,                                                                                            &
-                 pot_sr_scal_xc_beta_ao_PBE(1,1,istate),size(pot_sr_scal_xc_beta_ao_PBE,1))
+                 pot_sr_scal_xc_beta_ao_pbe(1,1,istate),size(pot_sr_scal_xc_beta_ao_pbe,1))
    enddo
  call wall_time(wall_2)
 
 END_PROVIDER 
 
 
- BEGIN_PROVIDER [double precision, pot_sr_grad_xc_alpha_ao_PBE,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, pot_sr_grad_xc_beta_ao_PBE,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, pot_sr_grad_xc_alpha_ao_pbe,(ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, pot_sr_grad_xc_beta_ao_pbe,(ao_num,ao_num,N_states)]
    implicit none
    BEGIN_DOC
    ! intermediate quantity for the calculation of the vxc potentials for the GGA functionals  related to the gradienst of the density and orbitals 
@@ -111,27 +111,27 @@ END_PROVIDER
    integer                        :: istate
    double precision               :: wall_1,wall_2
    call wall_time(wall_1)
-   pot_sr_grad_xc_alpha_ao_PBE = 0.d0
-   pot_sr_grad_xc_beta_ao_PBE = 0.d0
+   pot_sr_grad_xc_alpha_ao_pbe = 0.d0
+   pot_sr_grad_xc_beta_ao_pbe = 0.d0
    do istate = 1, N_states
        ! exchange - correlation alpha
        call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                                                                                             &
-                  aos_dsr_vxc_alpha_PBE_w(1,1,istate),size(aos_dsr_vxc_alpha_PBE_w,1),                                                                      &
+                  aos_dsr_vxc_alpha_pbe_w(1,1,istate),size(aos_dsr_vxc_alpha_pbe_w,1),                                                                      &
                   aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,                                                                                &
-                  pot_sr_grad_xc_alpha_ao_PBE(1,1,istate),size(pot_sr_grad_xc_alpha_ao_PBE,1))
+                  pot_sr_grad_xc_alpha_ao_pbe(1,1,istate),size(pot_sr_grad_xc_alpha_ao_pbe,1))
        ! exchange - correlation beta
        call dgemm('N','N',ao_num,ao_num,n_points_final_grid,1.d0,                                                                                             &
-                  aos_dsr_vxc_beta_PBE_w(1,1,istate),size(aos_dsr_vxc_beta_PBE_w,1),                                                                      &
+                  aos_dsr_vxc_beta_pbe_w(1,1,istate),size(aos_dsr_vxc_beta_pbe_w,1),                                                                      &
                   aos_in_r_array_transp,size(aos_in_r_array_transp,1),1.d0,                                                                                &
-                  pot_sr_grad_xc_beta_ao_PBE(1,1,istate),size(pot_sr_grad_xc_beta_ao_PBE,1))
+                  pot_sr_grad_xc_beta_ao_pbe(1,1,istate),size(pot_sr_grad_xc_beta_ao_pbe,1))
    enddo
    
  call wall_time(wall_2)
 
 END_PROVIDER
 
- BEGIN_PROVIDER [double precision, potential_sr_xc_alpha_ao_PBE,(ao_num,ao_num,N_states)]
-&BEGIN_PROVIDER [double precision, potential_sr_xc_beta_ao_PBE,(ao_num,ao_num,N_states)]
+ BEGIN_PROVIDER [double precision, potential_sr_xc_alpha_ao_pbe,(ao_num,ao_num,N_states)]
+&BEGIN_PROVIDER [double precision, potential_sr_xc_beta_ao_pbe,(ao_num,ao_num,N_states)]
    implicit none
  BEGIN_DOC
  ! exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional 
@@ -140,8 +140,8 @@ END_PROVIDER
    do istate = 1, n_states 
     do i = 1, ao_num
      do j = 1, ao_num
-      potential_sr_xc_alpha_ao_PBE(j,i,istate) = pot_sr_scal_xc_alpha_ao_PBE(j,i,istate) + pot_sr_grad_xc_alpha_ao_PBE(j,i,istate) + pot_sr_grad_xc_alpha_ao_PBE(i,j,istate)
-      potential_sr_xc_beta_ao_PBE(j,i,istate)  = pot_sr_scal_xc_beta_ao_PBE(j,i,istate)  + pot_sr_grad_xc_beta_ao_PBE(j,i,istate)  + pot_sr_grad_xc_beta_ao_PBE(i,j,istate)
+      potential_sr_xc_alpha_ao_pbe(j,i,istate) = pot_sr_scal_xc_alpha_ao_pbe(j,i,istate) + pot_sr_grad_xc_alpha_ao_pbe(j,i,istate) + pot_sr_grad_xc_alpha_ao_pbe(i,j,istate)
+      potential_sr_xc_beta_ao_pbe(j,i,istate)  = pot_sr_scal_xc_beta_ao_pbe(j,i,istate)  + pot_sr_grad_xc_beta_ao_pbe(j,i,istate)  + pot_sr_grad_xc_beta_ao_pbe(i,j,istate)
      enddo
     enddo
    enddo

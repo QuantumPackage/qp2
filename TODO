@@ -57,6 +57,17 @@ Doc: plugins et qp_plugins
 
 Ajouter les symetries dans devel
 
+<<<<<<< HEAD
 Compiler ezfio avec openmp
 
 # Parallelize i_H_psi
+=======
+
+# Parallelize i_H_psi
+IMPORTANT:
+
+Davidson Diagonalization
+------------------------
+
+ Not enough memory: aborting in davidson_diag_hjj_sjj
+>>>>>>> 94bacff2d093aa9b32c653ab59bcdb79d13f3264

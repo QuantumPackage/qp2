@@ -15,6 +15,9 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
  else if (density_for_dft .EQ. "KS")then
   provide mo_coef
   one_e_dm_mo_alpha_for_dft = one_body_dm_mo_alpha_one_det
+ else if (density_for_dft .EQ. "state_average_dens")then
+  one_e_dm_mo_alpha_for_dft = 0.d0
+  one_e_dm_mo_alpha_for_dft(:,:,1) = one_e_dm_mo_alpha_average(:,:)
  endif
 
 END_PROVIDER
@@ -36,6 +39,9 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
  else if (density_for_dft .EQ. "KS")then
   provide mo_coef
   one_e_dm_mo_beta_for_dft = one_body_dm_mo_beta_one_det
+ else if (density_for_dft .EQ. "state_average_dens")then
+  one_e_dm_mo_beta_for_dft = 0.d0
+  one_e_dm_mo_beta_for_dft(:,:,1) = one_e_dm_mo_beta_average(:,:)
  endif
 END_PROVIDER
 
