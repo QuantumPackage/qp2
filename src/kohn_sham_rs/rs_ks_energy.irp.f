@@ -39,6 +39,5 @@ BEGIN_PROVIDER [double precision, extra_e_contrib_density]
  END_DOC
  
  extra_e_contrib_density = e_exchange_dft + e_correlation_dft - 0.5d0 * trace_potential_xc
- print*,'extra_e_contrib_density = ',extra_e_contrib_density
 END_PROVIDER
 
