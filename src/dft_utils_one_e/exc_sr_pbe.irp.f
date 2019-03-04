@@ -1,6 +1,6 @@
 subroutine ec_pbe_sr(mu,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo)
  BEGIN_DOC 
-! Short-range PBE correlation energy functional for erf interaction
+! Short-range pbe correlation energy functional for erf interaction
 !
 ! input : ==========
 ! 
@@ -101,7 +101,7 @@ include 'constants.include.F'
 
      zeta = (rhoa-rhob)/(rhoa+rhob)
 
-!    LDA energy density
+!    lda energy density
      double precision :: vc_a_lda,vc_b_lda
      call ec_lda(rhoa,rhob,ecclda,vc_a_lda,vc_b_lda)
      eclda = ecclda
@@ -133,7 +133,7 @@ include 'constants.include.F'
 ! Derive
 
 
-!    LDA energy density derivative
+!    lda energy density derivative
      decerfldadrho = vrhoccerflda
      decldadrho = 0.5d0 * (vc_a_lda+vc_b_lda)
 
@@ -160,7 +160,7 @@ include 'constants.include.F'
         decerfpbeddrho2=rho*gamma*phi3*arglogss/arglog
      end if
 
-!    LDA energy density derivative
+!    lda energy density derivative
      decerfldadrho = vrhoocerflda
      decldadrho = 0.5d0 * (vc_a_lda-vc_b_lda)
 
@@ -251,7 +251,7 @@ END_DOC
 ! test on density
   if (rho >= tol) then
 
-!  call srLDA Ex[2*rho_a,2*rho_a]
+!  call srlda Ex[2*rho_a,2*rho_a]
    call ex_lda_sr(mu,rho_a,rho_a,exerflda,vxerflda_a,vxerflda_b)
    dexerfldadrho = (vxerflda_a + vxerflda_b)*0.5d0
 
@@ -279,7 +279,7 @@ END_DOC
 ! test on density
   if (rho >= tol) then
 
-!  call srLDA Ex[2*rho_b,2*rho_b]
+!  call srlda Ex[2*rho_b,2*rho_b]
    call ex_lda_sr(mu,rho_b,rho_b,exerflda,vxerflda_a,vxerflda_b)
    dexerfldadrho = (vxerflda_a + vxerflda_b)*0.5d0
 
@@ -355,7 +355,7 @@ END_DOC
 ! test on density
   if (rho >= tol) then
 
-!  call srLDA Ex[2*rho_a,2*rho_a]
+!  call srlda Ex[2*rho_a,2*rho_a]
    call ex_lda_sr(mu,rho_a,rho_a,exerflda,vxerflda_a,vxerflda_b)
 
 !  square of two times spin alpha density gradient
@@ -375,7 +375,7 @@ END_DOC
 ! test on density
   if (rho >= tol) then
 
-!  call srLDA Ex[2*rho_b,2*rho_b]
+!  call srlda Ex[2*rho_b,2*rho_b]
    call ex_lda_sr(mu,rho_b,rho_b,exerflda,vxerflda_a,vxerflda_b)
 
 !  square of two times spin beta density gradient
@@ -396,7 +396,7 @@ END_DOC
 
 subroutine ec_pbe_only(mu,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec)
  BEGIN_DOC 
-! Short-range PBE correlation energy functional for erf interaction
+! Short-range pbe correlation energy functional for erf interaction
 !
 ! input : ==========
 ! 
@@ -479,7 +479,7 @@ include 'constants.include.F'
      zeta = (rhoa-rhob)/(rhoa+rhob)
      zeta = max(zeta,1.d-10)
 
-!    LDA energy density
+!    lda energy density
      double precision :: vc_a_lda,vc_b_lda
      call ec_lda(rhoa,rhob,ecclda,vc_a_lda,vc_b_lda)
      eclda = ecclda

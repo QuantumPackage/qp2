@@ -51,3 +51,21 @@ BEGIN_PROVIDER [double precision, potential_c_beta_ao_none,(ao_num,ao_num,N_stat
  potential_c_beta_ao_none  = 0.d0 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [double precision, potential_xc_alpha_ao_none ,(ao_num,ao_num,N_states)]
+ implicit none
+ BEGIN_DOC
+ ! Potential for a null exchange-correlation functional
+ END_DOC
+ potential_xc_alpha_ao_none  = 0.d0 
+END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, potential_xc_beta_ao_none ,(ao_num,ao_num,N_states)]
+ implicit none
+ BEGIN_DOC
+ ! Potential for a null exchange-correlation functional
+ END_DOC
+ potential_xc_beta_ao_none  = 0.d0 
+END_PROVIDER
+
