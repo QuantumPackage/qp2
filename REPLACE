@@ -211,6 +211,8 @@ qp_name potential_sr_c_alpha_ao_pbe --rename=potential_c_alpha_ao_sr_pbe
 qp_name potential_sr_c_beta_ao_pbe  --rename=potential_c_beta_ao_sr_pbe
 qp_name potential_sr_xc_alpha_ao_pbe --rename=potential_xc_alpha_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe  --rename=potential_xc_beta_ao_sr_pbe
+
+
 qp_name mo_mono_elec_integral --rename=mo_mono_elec_integrals
 qp_name mo_mono_elec_integral --rename=mo_mono_elec_integrals
 qp_name mo_nucl_elec_integral --rename=mo_nucl_elec_integrals
@@ -820,3 +822,15 @@ qp_name get_excitation_degree_vector_single_or_exchange_or_exchange -r get_excit
 qp_name get_excitation_degree_vector_mono_or_exchange_verbose -r get_excitation_degree_vector_single_or_exchange_verbose
 qp_name i_h_j_mono_spin -r i_h_j_single_spin
 qp_name i_Wee_j_mono -r i_Wee_j_single
+qp_name potential_sr_x_alpha_ao_lda --rename=potential_x_alpha_ao_sr_lda
+qp_name potential_sr_x_beta_ao_lda --rename=potential_x_beta_ao_sr_lda
+qp_name potential_sr_c_alpha_ao_lda --rename=potential_c_alpha_ao_sr_lda
+qp_name potential_sr_c_beta_ao_lda --rename=potential_c_beta_ao_sr_lda
+qp_name potential_sr_xc_alpha_ao_lda --rename=potential_xc_alpha_ao_sr_lda
+qp_name potential_sr_xc_beta_ao_lda --rename=potential_xc_beta_ao_sr_lda
+qp_name potential_sr_x_alpha_ao_pbe --rename=potential_x_alpha_ao_sr_pbe
+qp_name potential_sr_x_beta_ao_pbe --rename=potential_x_beta_ao_sr_pbe
+qp_name potential_sr_c_alpha_ao_pbe --rename=potential_c_alpha_ao_sr_pbe
+qp_name potential_sr_c_beta_ao_pbe --rename=potential_c_beta_ao_sr_pbe
+qp_name potential_sr_xc_alpha_ao_pbe --rename=potential_xc_alpha_ao_sr_pbe
+qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
