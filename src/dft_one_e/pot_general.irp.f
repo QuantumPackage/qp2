@@ -32,8 +32,13 @@
 
 
 BEGIN_SHELL [ /usr/bin/env python ]
-import os
-functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
+import os 
+import glob 
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
+functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 
 prefix = ""
 for f in functionals:
@@ -85,8 +90,13 @@ END_PROVIDER
 
 
 BEGIN_SHELL [ /usr/bin/env python ]
-import os
-functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
+import os 
+import glob 
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
+functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 
 prefix = ""
 for f in functionals:

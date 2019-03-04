@@ -21,10 +21,12 @@ BEGIN_PROVIDER [double precision, energy_x, (N_states)]
   endif
 
 BEGIN_SHELL [ /usr/bin/env python ]
-import os
+import os 
 import glob 
-#functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
-os.chdir("../functionals/")
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
 functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 prefix = ""
 for f in functionals:
@@ -35,6 +37,7 @@ for f in functionals:
 print "endif"
 
 END_SHELL
+
 
 END_PROVIDER
 
@@ -63,10 +66,12 @@ BEGIN_PROVIDER [double precision, energy_c, (N_states)]
   endif
 
 BEGIN_SHELL [ /usr/bin/env python ]
-import os
+import os 
 import glob 
-#functionals = map(lambda x : x.replace(".irp.f",""), os.listdir("../functionals/"))
-os.chdir("../functionals/")
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
 functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 prefix = ""
 for f in functionals:
