@@ -1,7 +1,4 @@
-open Core
 open Qptypes
-
-module StringHashtbl = Hashtbl.Make(String)
 
 type pub_state =
 | Waiting
@@ -29,15 +26,15 @@ type t =
     progress_bar      : Progress_bar.t option ;
     running           : bool;
     accepting_clients : bool;
-    data              : string StringHashtbl.t;
+    data              : (string, string) Hashtbl.t;
 }
 
 
 
 let debug_env =
-  match Sys.getenv "QP_TASK_DEBUG" with
-  | Some x -> x <> ""
-  | None   -> false
+  try
+    Sys.getenv "QP_TASK_DEBUG"; true
+  with Not_found -> false
 
 
 let debug str =
@@ -64,7 +61,7 @@ let bind_socket ~socket_type ~socket ~port =
         Zmq.Socket.bind socket @@ Printf.sprintf "tcp://*:%d" port;
         loop (-1)
       with
-      | Unix.Unix_error _ -> (Time.pause @@ Time.Span.of_sec 1. ; loop (i-1) )
+      | Unix.Unix_error _ -> (Unix.sleep 1 ; loop (i-1) )
       | other_exception -> raise other_exception
   in loop 60
 
@@ -77,28 +74,34 @@ let hostname = lazy (
 )
 
 
+external get_ipv4_address_for_interface : string -> string =
+  "get_ipv4_address_for_interface" ;;
+
 let ip_address = lazy (
-  match Sys.getenv "QP_NIC" with
+  let interface = 
+    try Some (Sys.getenv "QP_NIC")
+    with Not_found -> None
+  in    
+  match interface with
   | None ->
       begin
         try
-          Lazy.force hostname
-          |> Unix.Inet_addr.of_string_or_getbyname
-          |> Unix.Inet_addr.to_string
+          let host = 
+            Lazy.force hostname
+            |> Unix.gethostbyname
+          in
+          Unix.string_of_inet_addr host.h_addr_list.(0);
         with
         | Unix.Unix_error _ ->
             failwith "Unable to find IP address from host name."
       end
   | Some interface ->
-      begin
-        try
-          ok_exn Linux_ext.get_ipv4_address_for_interface interface
-        with
-        | Unix.Unix_error _ ->
-            Lazy.force hostname
-            |> Unix.Inet_addr.of_string_or_getbyname
-            |> Unix.Inet_addr.to_string
-      end
+        let result = get_ipv4_address_for_interface interface in
+        if String.sub result 0 5 = "error" then
+          Printf.sprintf "Unable to use network interface %s" interface
+          |> failwith
+        else
+          result
 )
 
 
@@ -209,7 +212,7 @@ let end_job msg program_state rep_socket pair_socket =
           address_inproc    = None;
           running           = true;
           accepting_clients = false;
-          data = StringHashtbl.create ();
+          data              = Hashtbl.create 23;
         }
 
     and wait n =
@@ -335,8 +338,10 @@ let del_task msg program_state rep_socket =
     and success () =
 
         let queue =
-           List.fold ~f:(fun queue task_id -> Queuing_system.del_task ~task_id queue)
-                      ~init:program_state.queue task_ids
+          List.fold_left
+            (fun queue task_id -> Queuing_system.del_task ~task_id queue)
+            program_state.queue
+            task_ids
         in
         let accepting_clients =
             (Queuing_system.number_of_queued queue > Queuing_system.number_of_clients queue)
@@ -382,11 +387,12 @@ let add_task msg program_state rep_socket =
     in
 
     let result =
-        let new_queue, new_bar =
-          List.fold ~f:(fun (queue, bar) task ->
-              Queuing_system.add_task ~task queue,
-              increment_progress_bar bar)
-            ~init:(program_state.queue, program_state.progress_bar) tasks
+      let new_queue, new_bar =
+        List.fold_left (fun (queue, bar) task ->
+            Queuing_system.add_task ~task queue,
+            increment_progress_bar bar)
+          (program_state.queue, program_state.progress_bar)
+          tasks
         in
         { program_state with
           queue = new_queue;
@@ -547,10 +553,11 @@ let task_done msg program_state rep_socket =
 
     and success () =
         let new_queue, new_bar =
-          List.fold ~f:(fun (queue, bar) task_id ->
+          List.fold_left (fun (queue, bar) task_id ->
               Queuing_system.end_task ~task_id ~client_id queue,
               increment_progress_bar bar)
-            ~init:(program_state.queue, program_state.progress_bar) task_ids
+            (program_state.queue, program_state.progress_bar)
+            task_ids
         in
 
         let accepting_clients =
@@ -593,7 +600,7 @@ let put_data msg rest_of_msg program_state rep_socket =
     in
 
     let success ()  =
-      StringHashtbl.set program_state.data ~key ~data:value ;
+      Hashtbl.add program_state.data key value ;
       Message.PutDataReply (Message.PutDataReply_msg.create ())
       |> Message.to_string
       |> Zmq.Socket.send rep_socket;
@@ -623,9 +630,8 @@ let get_data msg program_state rep_socket =
 
     let success () =
       let value =
-        match StringHashtbl.find program_state.data key with
-        | Some value -> value
-        | None -> "\000"
+        try Hashtbl.find program_state.data key with
+        | Not_found -> "\000"
       in
       Message.GetDataReply (Message.GetDataReply_msg.create ~value)
       |> Message.to_string_list
@@ -677,13 +683,16 @@ let abort program_state rep_socket =
       aux [] queue 1
     in
     let queue =
-      List.fold ~f:(fun queue task_id ->
-                  Queuing_system.end_task ~task_id ~client_id queue)
-                  ~init:queue tasks
+      List.fold_left
+        (fun queue task_id -> Queuing_system.end_task ~task_id ~client_id queue)
+        queue
+        tasks
     in
     let queue =
-      List.fold ~f:(fun queue task_id -> Queuing_system.del_task ~task_id queue)
-                          ~init:queue tasks
+      List.fold_left
+        (fun queue task_id -> Queuing_system.del_task ~task_id queue)
+        queue
+        tasks
     in
     let queue =
       Queuing_system.del_client ~client_id  queue
@@ -777,7 +786,7 @@ let run ~port =
         address_inproc = None;
         progress_bar = None ;
         accepting_clients = false;
-        data = StringHashtbl.create ();
+        data = Hashtbl.create 23;
     }
     in
 
