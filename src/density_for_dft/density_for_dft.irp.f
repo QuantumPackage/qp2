@@ -16,6 +16,16 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
   provide mo_coef
   one_e_dm_mo_alpha_for_dft = one_body_dm_mo_alpha_one_det
  endif
+ 
+ if(no_core_density .EQ. "no_core_dm")then
+  integer :: i,j
+  do i = 1, n_core_orb
+   do j = 1, mo_num
+    one_e_dm_mo_alpha_for_dft(j,i,:) = 0.d0
+    one_e_dm_mo_alpha_for_dft(i,j,:) = 0.d0
+   enddo
+  enddo
+ endif
 
 END_PROVIDER
 
@@ -36,6 +46,16 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
  else if (density_for_dft .EQ. "KS")then
   provide mo_coef
   one_e_dm_mo_beta_for_dft = one_body_dm_mo_beta_one_det
+ endif
+
+ if(no_core_density .EQ. "no_core_dm")then
+  integer :: i,j
+  do i = 1, n_core_orb
+   do j = 1, mo_num
+    one_e_dm_mo_beta_for_dft(j,i,:) = 0.d0
+    one_e_dm_mo_beta_for_dft(i,j,:) = 0.d0
+   enddo
+  enddo
  endif
 END_PROVIDER
 
