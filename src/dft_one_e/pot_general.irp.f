@@ -6,31 +6,6 @@
 ! general providers for the alpha/beta exchange potentials on the AO basis
  END_DOC
 
-  if(trim(exchange_functional)=="short_range_lda")then
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_lda
-   potential_x_beta_ao = potential_sr_x_beta_ao_lda
-  else if(exchange_functional.EQ."short_range_pbe")then
-   potential_x_alpha_ao = potential_sr_x_alpha_ao_pbe
-   potential_x_beta_ao = potential_sr_x_beta_ao_pbe
-  else if(trim(exchange_functional)=="lda")then
-   potential_x_alpha_ao = potential_x_alpha_ao_lda
-   potential_x_beta_ao = potential_x_beta_ao_lda
-  else if(exchange_functional.EQ."pbe")then
-   potential_x_alpha_ao = potential_x_alpha_ao_pbe
-   potential_x_beta_ao = potential_x_beta_ao_pbe
-  else if(exchange_functional.EQ."my_functional")then
-   potential_x_alpha_ao = potential_new_functional_x_alpha_ao
-   potential_x_beta_ao  = potential_new_functional_x_beta_ao
-  else if(exchange_functional.EQ."None")then
-   potential_x_alpha_ao = 0.d0
-   potential_x_beta_ao = 0.d0
-  else
-   print*, 'Exchange functional required does not exist ...'
-   print*,'exchange_functional',exchange_functional
-   stop
-  endif
-
-
 BEGIN_SHELL [ /usr/bin/env python ]
 import os 
 import glob 
@@ -45,8 +20,13 @@ for f in functionals:
   print """
   %sif (trim(exchange_functional) == '%s') then
     potential_x_alpha_ao = potential_x_alpha_ao_%s
-    potential_x_beta_ao  = potential_x_beta_ao_%s"""%(prefix, f, f, f, f)
+    potential_x_beta_ao  = potential_x_beta_ao_%s"""%(prefix, f, f, f)
   prefix = "else "
+print """
+  else
+   print*, 'exchange functional required does not exist ...'
+   print*,'exchange_functional ',exchange_functional
+   stop"""
 print "endif"
 
 END_SHELL
@@ -63,32 +43,6 @@ END_PROVIDER
 ! general providers for the alpha/beta correlation potentials on the AO basis
  END_DOC
 
-  if(trim(correlation_functional)=="short_range_lda")then
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_lda
-   potential_c_beta_ao = potential_sr_c_beta_ao_lda
-  else if(trim(correlation_functional)=="lda")then
-   potential_c_alpha_ao = potential_c_alpha_ao_lda
-   potential_c_beta_ao = potential_c_beta_ao_lda
-  else if(correlation_functional.EQ."short_range_pbe")then
-   potential_c_alpha_ao = potential_sr_c_alpha_ao_pbe
-   potential_c_beta_ao = potential_sr_c_beta_ao_pbe
-  else if(correlation_functional.EQ."pbe")then
-   potential_c_alpha_ao = potential_c_alpha_ao_pbe
-   potential_c_beta_ao = potential_c_beta_ao_pbe
-  else if(correlation_functional.EQ."my_functional")then
-   potential_c_alpha_ao = potential_new_functional_c_alpha_ao
-   potential_c_beta_ao  = potential_new_functional_c_beta_ao
-  else if(correlation_functional.EQ."None")then
-   potential_c_alpha_ao = 0.d0
-   potential_c_beta_ao = 0.d0
-  else
-   print*, 'Correlation functional required does not ecist ...'
-   print*,'correlation_functional',correlation_functional
-   stop
-  endif
-
-
-
 BEGIN_SHELL [ /usr/bin/env python ]
 import os 
 import glob 
@@ -101,10 +55,16 @@ functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 prefix = ""
 for f in functionals:
   print """
-  %sif (trim(correlation_functional) = '%s') then
+  %sif (trim(correlation_functional) == '%s') then
     potential_c_alpha_ao = potential_c_alpha_ao_%s
-    potential_c_beta_ao  = potential_c_beta_ao_%s"""%(prefix, f, f, f, f)
+    potential_c_beta_ao  = potential_c_beta_ao_%s"""%(prefix, f, f, f)
   prefix = "else "
+  
+print """
+  else
+   print*, 'Correlation functional required does not exist ...'
+   print*,'correlation_functional ',correlation_functional
+   stop"""
 print "endif"
 
 END_SHELL
@@ -242,29 +202,30 @@ END_PROVIDER
 ! general providers for the alpha/beta exchange/correlation potentials on the AO basis
  END_DOC
 
-  if(trim(exchange_functional)=="short_range_lda")then
-   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_lda
-   potential_xc_beta_ao  = potential_sr_xc_beta_ao_lda
-  else if(trim(exchange_functional)=="lda")then
-   potential_xc_alpha_ao = potential_xc_alpha_ao_lda
-   potential_xc_beta_ao  = potential_xc_beta_ao_lda
-  else if(exchange_functional.EQ."None")then
-   potential_xc_alpha_ao = 0.d0
-   potential_xc_beta_ao = 0.d0
-  else if(trim(exchange_functional)=="short_range_pbe")then
-   potential_xc_alpha_ao = potential_sr_xc_alpha_ao_pbe
-   potential_xc_beta_ao  = potential_sr_xc_beta_ao_pbe
-  else if(trim(exchange_functional)=="pbe")then
-   potential_xc_alpha_ao = potential_xc_alpha_ao_pbe
-   potential_xc_beta_ao  = potential_xc_beta_ao_pbe
-  else if(exchange_functional.EQ."None")then
-   potential_xc_alpha_ao = 0.d0
-   potential_xc_beta_ao = 0.d0
+BEGIN_SHELL [ /usr/bin/env python ]
+import os 
+import glob 
+import sys
+qproot=os.environ['QP_ROOT']
+funcdir='../functionals/'
+os.chdir(funcdir)
+functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
+
+prefix = ""
+for f in functionals:
+  print """
+  %sif (trim(exchange_functional) == '%s') then
+    potential_xc_alpha_ao = potential_xc_alpha_ao_%s
+    potential_xc_beta_ao  = potential_xc_beta_ao_%s"""%(prefix, f, f, f)
+  prefix = "else "
+print """
   else
-   print*, 'Exchange functional required does not exist ...'
-   print*, 'exchange_functional',exchange_functional
-   stop
-  endif
+   print*, 'exchange functional required does not exist ...'
+   print*,'exchange_functional ',exchange_functional
+   stop"""
+print "endif"
+
+END_SHELL
 
 END_PROVIDER
 

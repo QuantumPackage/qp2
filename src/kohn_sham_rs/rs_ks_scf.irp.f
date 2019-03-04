@@ -29,13 +29,13 @@ subroutine check_coherence_functional
  if(exchange_functional.eq."None")then
   ifound_x = 1
  else
-  ifound_x = index(exchange_functional,"short_range")
+  ifound_x = index(exchange_functional,"sr")
  endif
 
  if(correlation_functional.eq."None")then
   ifound_c = 1
  else
-  ifound_c = index(correlation_functional,"short_range")
+  ifound_c = index(correlation_functional,"sr")
  endif
  print*,ifound_x,ifound_c
  if(ifound_x .eq.0 .or. ifound_c .eq. 0)then

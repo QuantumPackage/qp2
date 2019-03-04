@@ -1,7 +1,7 @@
 
 
- BEGIN_PROVIDER[double precision, energy_x_lda, (N_states) ]
-&BEGIN_PROVIDER[double precision, energy_c_lda, (N_states) ]
+ BEGIN_PROVIDER[double precision, old_energy_x_lda, (N_states) ]
+&BEGIN_PROVIDER[double precision, old_energy_c_lda, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange/correlation energy with the short range lda functional
@@ -12,8 +12,8 @@
  double precision :: e_c,vc_a,vc_b,e_x,vx_a,vx_b
  double precision, allocatable :: rhoa(:),rhob(:)
  allocate(rhoa(N_states), rhob(N_states))
- energy_x_lda = 0.d0
- energy_c_lda = 0.d0
+ old_energy_x_lda = 0.d0
+ old_energy_c_lda = 0.d0
  do istate = 1, N_states
   do i = 1, n_points_final_grid
    r(1) = final_grid_points(1,i)
@@ -24,15 +24,15 @@
    rhob(istate) = one_e_dm_beta_at_r(i,istate)
    call ec_lda(rhoa(istate),rhob(istate),e_c,vc_a,vc_b)
    call ex_lda(rhoa(istate),rhob(istate),e_x,vx_a,vx_b)
-   energy_x_lda(istate) += weight * e_x
-   energy_c_lda(istate) += weight * e_c
+   old_energy_x_lda(istate) += weight * e_x
+   old_energy_c_lda(istate) += weight * e_c
   enddo
  enddo
 
  END_PROVIDER
 
- BEGIN_PROVIDER[double precision, energy_x_pbe, (N_states) ]
-&BEGIN_PROVIDER[double precision, energy_c_pbe, (N_states) ]
+ BEGIN_PROVIDER[double precision, old_energy_x_pbe, (N_states) ]
+&BEGIN_PROVIDER[double precision, old_energy_c_pbe, (N_states) ]
  implicit none
  BEGIN_DOC
 ! exchange/correlation energy with the short range pbe functional
@@ -51,8 +51,8 @@
 
  allocate(rho_a(N_states), rho_b(N_states),grad_rho_a(3,N_states),grad_rho_b(3,N_states))
  allocate(grad_rho_a_2(N_states),grad_rho_b_2(N_states),grad_rho_a_b(N_states), ex(N_states), ec(N_states))
- energy_x_pbe = 0.d0
- energy_c_pbe = 0.d0
+ old_energy_x_pbe = 0.d0
+ old_energy_c_pbe = 0.d0
  do istate = 1, N_states
   do i = 1, n_points_final_grid
    r(1) = final_grid_points(1,i)
@@ -76,8 +76,8 @@
    call GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
-   energy_x_pbe += ex * weight
-   energy_c_pbe += ec * weight
+   old_energy_x_pbe += ex * weight
+   old_energy_c_pbe += ec * weight
   enddo
  enddo
 
