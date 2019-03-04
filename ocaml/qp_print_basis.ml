@@ -1,11 +1,10 @@
-open Core
 open Qptypes
 
 let basis () =
   let ezfio_filename =
     Sys.argv.(1)
   in
-  if (not (Sys.file_exists_exn ezfio_filename)) then
+  if (not (Sys.file_exists ezfio_filename)) then
     failwith "Error reading EZFIO file";
   Ezfio.set_file ezfio_filename;
   let basis =
@@ -22,7 +21,7 @@ let mo () =
   let ezfio_filename =
     Sys.argv.(1)
   in
-  if (not (Sys.file_exists_exn ezfio_filename)) then
+  if (not (Sys.file_exists ezfio_filename)) then
     failwith "Error reading EZFIO file";
   Ezfio.set_file ezfio_filename;
   let mo_coef =
@@ -39,7 +38,7 @@ let psi_det () =
   let ezfio_filename =
     Sys.argv.(1)
   in
-  if (not (Sys.file_exists_exn ezfio_filename)) then
+  if (not (Sys.file_exists ezfio_filename)) then
     failwith "Error reading EZFIO file";
   Ezfio.set_file ezfio_filename;
   let psi_det =
