@@ -72,9 +72,6 @@ file by hand. Running :command:`ninja` inside a module will compile only the
 module, and running :command:`ninja` at the root of the |qp| will build all the
 modules, as well as the tools.
 
-<<<<<<< Updated upstream
-.. cache compile
-=======
 
 Algorithms
 ==========
@@ -110,6 +107,5 @@ There multiple major ways to do this:
   the |EZFIO| routines,
 * Write a new module for the |qp| printing the desired quantities in a suitable
   text format. The program :ref:`fcidump` is an example of such a program.
-
 
 
