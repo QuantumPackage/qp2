@@ -1,4 +1,4 @@
-program print_wf
+program print_ci_vectors
  implicit none
  BEGIN_DOC
  ! Print the ground state wave function stored in the |EZFIO| directory
