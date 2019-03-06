@@ -1,17 +1,17 @@
 
-subroutine create_selection_buffer(N, siz_, res)
+subroutine create_selection_buffer(N, size_in, res)
   use selection_types
   implicit none
   BEGIN_DOC
 ! Allocates the memory for a selection buffer.
-! The arrays have dimension siz_ and the maximum number of elements is N
+! The arrays have dimension size_in and the maximum number of elements is N
   END_DOC
 
-  integer, intent(in) :: N, siz_
+  integer, intent(in) :: N, size_in
   type(selection_buffer), intent(out) :: res
 
   integer :: siz
-  siz = max(siz_,1)
+  siz = max(size_in,1)
 
   double precision :: rss
   double precision, external :: memory_of_double

@@ -8,9 +8,9 @@ BEGIN_PROVIDER [integer, n_points_final_grid]
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
-        if(dabs(final_weight_at_r(k,i,j)) < 1.d-30)then
-          cycle
-        endif
+!       if(dabs(final_weight_at_r(k,i,j)) < 1.d-30)then
+!         cycle
+!       endif
         n_points_final_grid += 1
       enddo
     enddo
@@ -39,9 +39,9 @@ END_PROVIDER
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
-        if(dabs(final_weight_at_r(k,i,j)) < 1.d-30)then
-          cycle
-        endif
+       !if(dabs(final_weight_at_r(k,i,j)) < 1.d-30)then
+       !  cycle
+       !endif
         i_count += 1
         final_grid_points(1,i_count) = grid_points_per_atom(1,k,i,j)
         final_grid_points(2,i_count) = grid_points_per_atom(2,k,i,j)

@@ -52,8 +52,10 @@ def main(arguments):
                 pass
             elif charge < 13:
                 n_frozen += 1
-            else:
+            elif charge < 31:
                 n_frozen += 5
+            else:
+                n_frozen += 9
 
     mo_num = ezfio.mo_basis_mo_num
 

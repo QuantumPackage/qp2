@@ -23,19 +23,19 @@ function run() {
 
 
 @test "H3COH" {
-  run h3coh.ezfio short_range_PBE -115.50238225208
+  run h3coh.ezfio sr_pbe -115.50238225208
 }
 
 @test "HCN" {
-  run hcn.ezfio short_range_PBE -93.26674673761752
+  run hcn.ezfio sr_pbe -93.26674673761752
 }
 
 @test "N2" {
-  run n2.ezfio  short_range_PBE -109.404692225719
+  run n2.ezfio  sr_pbe -109.404692225719
 }
 
 @test "SiH2_3B1" {
-  run sih2_3b1.ezfio short_range_LDA -289.4398733527755
+  run sih2_3b1.ezfio sr_lda -289.4398733527755
 }
 
 
