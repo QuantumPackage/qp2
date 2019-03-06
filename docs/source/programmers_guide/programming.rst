@@ -86,11 +86,26 @@ gives all the details about the implementation of:
 * The hybrid stochastic/deterministic matrix dressing (module :ref:`dressing`)
 
 
-.. cache compile
-.. interface AOs / MOs => resultsFile
-.. interface integrals => AO / MO
-.. interface integrals MO => FCIDUMP
-.. TODO : molden module in resultsFile
+Extracting results for use with other codes
+===========================================
 
-.. include:: /work.rst
+The |AOs| and |MOs| can be seen with :ref:`qp_edit`. We also provide a utility
+to create a file which can be read by `molden` for visualizing the |MOs| (see
+:ref:`molden`). For using external |CI| solvers, we provide a utility that
+generates a file containing the two-electron integrals in the |MO| basis set
+in the `FCIDUMP` format (see :ref:`fcidump`).
+
+All the results are stored in the |EZFIO| directory, so users willing to fetch
+data such as the |MOs| or the |CI| coefficients should use the |EZFIO| API.
+There multiple major ways to do this:
+
+* Write a script in Python or OCaml and use the Python |EZFIO| API. The script
+  :file:`$QP_ROOT/bin/qp_convert_output_to_ezfio` is a good example to understand
+  how to use the |EZFIO| API in Python,
+* Write an independent program in Fortran or C, link it with the |EZFIO| library
+  located at :file:`$QP_ROOT/external/ezfio/lib/libezfio.a` and call directly
+  the |EZFIO| routines,
+* Write a new module for the |qp| printing the desired quantities in a suitable
+  text format. The program :ref:`fcidump` is an example of such a program.
+
 

@@ -140,7 +140,7 @@ END_PROVIDER
  integer :: i
  do i=1,ao_num
    ao_l(i) = ao_power(i,1) + ao_power(i,2) + ao_power(i,3)
-   ao_l_char(i) = l_to_charater(ao_l(i))
+   ao_l_char(i) = l_to_character(ao_l(i))
  enddo
  ao_l_max = maxval(ao_l)
 END_PROVIDER
@@ -159,19 +159,19 @@ integer function ao_power_index(nx,ny,nz)
 end
 
 
-BEGIN_PROVIDER [ character*(128), l_to_charater, (0:7)]
+BEGIN_PROVIDER [ character*(128), l_to_character, (0:7)]
  BEGIN_DOC
  ! Character corresponding to the "l" value of an |AO|
  END_DOC
  implicit none
- l_to_charater(0)='S'
- l_to_charater(1)='P'
- l_to_charater(2)='D'
- l_to_charater(3)='F'
- l_to_charater(4)='G'
- l_to_charater(5)='H'
- l_to_charater(6)='I'
- l_to_charater(7)='J'
+ l_to_character(0)='s'
+ l_to_character(1)='p'
+ l_to_character(2)='d'
+ l_to_character(3)='f'
+ l_to_character(4)='g'
+ l_to_character(5)='h'
+ l_to_character(6)='i'
+ l_to_character(7)='j'
 END_PROVIDER
 
 
