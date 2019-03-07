@@ -1,6 +1,10 @@
-# Quantum Package
+# Quantum Package 2.0
 
-A programming environment for wave function methods
+
+*Quantum package 2.0: an open-source determinant-driven suite of programs*\
+Y. Garniron, K. Gasperich, T. Applencourt, A. Benali, A. Ferté, J. Paquier, B. Pradines, R. Assaraf, P. Reinhardt, J. Toulouse, P. Barbaresco, N. Renon, G. David, J. P. Malrieu, M. Véril, M. Caffarel, P. F. Loos, E. Giner and A. Scemama\
+https://arxiv.org/abs/1902.08154
+
 
 ![QP](https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png)     
 
@@ -14,7 +18,8 @@ A programming environment for wave function methods
 
 * Master: [![master build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
 * Development branch : [![dev build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=develop)](https://travis-ci.org/QuantumPackage/qp2)
-* Documentation [![Doc Status](https://quantum-package.readthedocs.io/en/latest/?badge=master)
+* Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master/?badge=master)
+
 
 
 # Credits
