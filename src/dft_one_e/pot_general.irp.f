@@ -5,7 +5,7 @@
  ! general providers for the alpha/beta exchange potentials on the AO basis
   END_DOC
  
- BEGIN_SHELL [ /usr/bin/env python ]
+ BEGIN_SHELL [ /usr/bin/env python2 ]
 import os
 import glob
 from qp_path import QP_SRC
@@ -41,7 +41,7 @@ print "endif"
  ! general providers for the alpha/beta correlation potentials on the AO basis
   END_DOC
  
- BEGIN_SHELL [ /usr/bin/env python ]
+ BEGIN_SHELL [ /usr/bin/env python2 ]
 import os
 import glob
 from qp_path import QP_SRC
@@ -200,7 +200,7 @@ print "endif"
  ! general providers for the alpha/beta exchange/correlation potentials on the AO basis
   END_DOC
  
- BEGIN_SHELL [ /usr/bin/env python ]
+ BEGIN_SHELL [ /usr/bin/env python2 ]
 import os
 import glob
 from qp_path import QP_SRC
