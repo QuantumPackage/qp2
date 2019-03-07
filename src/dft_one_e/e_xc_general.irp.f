@@ -7,9 +7,8 @@ BEGIN_PROVIDER [double precision, energy_x, (N_states)]
  BEGIN_SHELL [ /usr/bin/env python ]
 import os
 import glob
-import sys
-qproot=os.environ['QP_ROOT']
-funcdir='../functionals/'
+from qp_path import QP_SRC
+funcdir=QP_SRC+'/functionals/'
 os.chdir(funcdir)
 functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 prefix = ""
@@ -42,9 +41,8 @@ print "endif"
  BEGIN_SHELL [ /usr/bin/env python ]
 import os
 import glob
-import sys
-qproot=os.environ['QP_ROOT']
-funcdir='../functionals/'
+from qp_path import QP_SRC
+funcdir=QP_SRC+'/functionals/'
 os.chdir(funcdir)
 functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 prefix = ""
