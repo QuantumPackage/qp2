@@ -16,8 +16,8 @@ https://arxiv.org/abs/1902.08154
 
 # Build status
 
-* Master: [![master build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
-* Development branch : [![dev build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=develop)](https://travis-ci.org/QuantumPackage/qp2)
+* Master [![master build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
+* Development [![dev build status](https://travis-ci.org/QuantumPackage/qp2.svg?branch=develop)](https://travis-ci.org/QuantumPackage/qp2)
 * Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master/?badge=master)
 
 
