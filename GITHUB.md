@@ -5,9 +5,16 @@ master
   The current up-to-date working branch, that users download It should
   only contain the latest release and bug fixes.
 
+develop-toto
+  Toulouse development branch  
+
+develop-manus
+  Parise development branch  
+
 develop
   It is a fork of the *master* branch with new developments that will be
-  merged in the *master* branch for the next release.
+  merged in the *master* branch for the next release. Other development
+  branches should be merged on this one.
 
 gh-pages
   This is an independent branch, containing only the web site of QP2.

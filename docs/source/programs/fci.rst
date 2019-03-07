@@ -60,7 +60,6 @@ fci
     :columns: 3 
  
     * :c:func:`run_cipsi` 
-    * :c:func:`run_slave_cipsi` 
     * :c:func:`run_stochastic_cipsi` 
  
  Touches: 
@@ -73,9 +72,9 @@ fci
     * :c:data:`ci_energy` 
     * :c:data:`ci_electronic_energy` 
     * :c:data:`n_det` 
+    * :c:data:`n_iter` 
     * :c:data:`psi_occ_pattern` 
     * :c:data:`c0_weight` 
-    * :c:data:`distributed_davidson` 
     * :c:data:`psi_coef` 
     * :c:data:`psi_det_sorted_bit` 
     * :c:data:`psi_det` 
@@ -84,8 +83,6 @@ fci
     * :c:data:`psi_energy` 
     * :c:data:`psi_occ_pattern` 
     * :c:data:`psi_energy` 
-    * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_stoch_istate` 
-    * :c:data:`read_wf` 
     * :c:data:`state_average_weight` 
     * :c:data:`threshold_generators` 

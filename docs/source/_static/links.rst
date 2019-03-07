@@ -38,7 +38,7 @@
 .. |OPAM|  replace:: `OPAM`_
 .. |Python|  replace:: `Python`_
 .. |qp| replace:: *Quantum Package*
-.. |QP| replace:: |qp|
+.. |QP| replace:: *Quantum Package* 
 .. |qpsh| replace:: *Quantum Package Shell*
 .. |QPSH| replace:: |qpsh|
 .. |resultsFile| replace:: `resultsFile`_

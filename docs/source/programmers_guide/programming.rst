@@ -80,10 +80,10 @@ The `PhD thesis of Yann Garniron <https://doi.org/10.5281/zenodo.2558127>`_
 gives all the details about the implementation of:
 
 * The data structure for the two-electron integrals (:file:`utils/map_module.f`)
-* The Davdison diagonalization (module :ref:`davidson`)
-* The CIPSI selection (module :ref:`cipsi`)
-* The hybrid stochastic/deterministic PT2 correction (module :ref:`cipsi`)
-* The hybrid stochastic/deterministic matrix dressing (module :ref:`dressing`)
+* The Davdison diagonalization (module :ref:`module_davidson`)
+* The CIPSI selection (module :ref:`module_cipsi`)
+* The hybrid stochastic/deterministic PT2 correction (module :ref:`module_cipsi`)
+* The hybrid stochastic/deterministic matrix dressing (module :ref:`module_dressing`)
 
 
 Extracting results for use with other codes
