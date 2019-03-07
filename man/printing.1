@@ -60,28 +60,26 @@ Then, look for the word \fIhand\fP when you are in the qp_edit
 mode. If the research is negative, then it means that the wave
 function stored in the \fI\%EZFIO\fP database is too large to be edited
 interactively in qp_edit mode. An alternative is to use the
-\fBprint_wf\fP command:
+print_ci_vectors program:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-qp_run print_wf file.ezfio | tee file.ezfio.fci_natorb.wf
+qp_run print_ci_vectors file.ezfio > tee file.ezfio.wf
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-This program will, by default, print out the first 10^4
-determinants whatever the size of the wave function stored in the
-\fI\%EZFIO\fP directory. If you want to change the number of printed Slater
-determinants, just change the \fBdeterminants n_det_print_wf\fP
-keyword using the qp_edit tool.
+This program will, by default, print out the full set of determinants, whatever
+the size of the wave function stored in the \fI\%EZFIO\fP directory.
 .sp
 \fBSEE ALSO:\fP
 .INDENT 0.0
 .INDENT 3.5
-The documentation of the print_wf program.
+To get some additional information on the wave function, you can use
+the print_wf program.
 .UNINDENT
 .UNINDENT
 .SH AUTHOR

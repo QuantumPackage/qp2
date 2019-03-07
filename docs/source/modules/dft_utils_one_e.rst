@@ -387,6 +387,320 @@ Providers
        * :c:data:`energy_x_sr_pbe`
 
  
+.. c:var:: potential_sr_c_alpha_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_c_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range correlation alpha/beta potentials with LDA functional on the |AO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_c_alpha_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_x_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_x_alpha_ao_pbe`
+
+
+ 
+.. c:var:: potential_sr_c_beta_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_c_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range correlation alpha/beta potentials with LDA functional on the |AO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_c_beta_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_x_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_x_alpha_ao_pbe`
+
+
+ 
+.. c:var:: potential_sr_x_alpha_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range exchange alpha/beta potentials with LDA functional on the |AO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_x_alpha_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_x_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_x_alpha_ao_pbe`
+
+
+ 
+.. c:var:: potential_sr_x_beta_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range exchange alpha/beta potentials with LDA functional on the |AO| basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_x_beta_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_x_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_x_beta_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_c_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_x_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_x_alpha_ao_pbe`
+
+
+ 
+.. c:var:: potential_sr_xc_alpha_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda_smashed.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_xc_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_xc_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range exchange/correlation alpha/beta potentials with LDA functional on the AO basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vxc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_xc_alpha_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe_smashed.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_xc_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_xc_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_xc_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_xc_alpha_ao_pbe`
+
+
+ 
+.. c:var:: potential_sr_xc_beta_ao_lda
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_lda_smashed.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_xc_alpha_ao_lda	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_xc_beta_ao_lda	(ao_num,ao_num,N_states)
+
+
+    short range exchange/correlation alpha/beta potentials with LDA functional on the AO basis
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`aos_in_r_array`
+       * :c:data:`aos_sr_vxc_alpha_lda_w`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+
+
+ 
+.. c:var:: potential_sr_xc_beta_ao_pbe
+
+
+    File : :file:`dft_utils_one_e/sr_pot_ao_pbe_smashed.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: potential_sr_xc_alpha_ao_pbe	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: potential_sr_xc_beta_ao_pbe	(ao_num,ao_num,N_states)
+
+
+    exchange / correlation potential for alpha / beta electrons  with the Perdew-Burke-Ernzerhof GGA functional
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`n_states`
+       * :c:data:`pot_sr_grad_xc_alpha_ao_pbe`
+       * :c:data:`pot_sr_scal_xc_alpha_ao_pbe`
+
+
+ 
 .. c:var:: psi_dft_energy_h_core
 
 

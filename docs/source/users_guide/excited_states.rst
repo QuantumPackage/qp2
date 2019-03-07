@@ -22,7 +22,7 @@ excited states of different symmetries may enter in the calculation.
 Note that it is possible to make state-average calculation of states
 with different symmetries and/or different spin multiplicities.
 
-To include excited state of all possible symmetries, a simple trick is
+To include excited states of all possible symmetries, a simple trick is
 to run a preliminary multi-state |CIS| calculation using the :ref:`CIS`
 program, and then running the selected |FCI| restarting from the |CIS|
 states, setting :option:`determinants read_wf` to |true|.
@@ -34,6 +34,6 @@ convergence of excitation energies.
 
 .. seealso:: 
 
-    The documentation of the :c:func:`scf`, :c:func:`cis` and
-    :c:func:`fci` programs.
+    The documentation of the :ref:`scf`, :ref:`cis` and
+    :ref:`fci` programs.
 
