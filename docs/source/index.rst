@@ -27,7 +27,6 @@
    users_guide/natural_orbitals
    users_guide/printing
    users_guide/plugins
-   users_guide/qp_plugins
    users_guide/index
 
 

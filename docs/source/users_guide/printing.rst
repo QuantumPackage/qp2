@@ -23,20 +23,18 @@ Then, look for the word *hand* when you are in the :ref:`qp_edit`
 mode. If the research is negative, then it means that the wave          
 function stored in the |EZFIO| database is too large to be edited       
 interactively in :ref:`qp_edit` mode. An alternative is to use the      
-:command:`print_wf` command:                                            
+:ref:`print_ci_vectors` program:                                            
 
 .. code::
 
-    qp_run print_wf file.ezfio | tee file.ezfio.fci_natorb.wf
+    qp_run print_ci_vectors file.ezfio > tee file.ezfio.wf
 
-This program will, by default, print out the first :math:`10^4`
-determinants whatever the size of the wave function stored in the
-|EZFIO| directory. If you want to change the number of printed Slater
-determinants, just change the :option:`determinants n_det_print_wf`
-keyword using the :ref:`qp_edit` tool.
+This program will, by default, print out the full set of determinants, whatever
+the size of the wave function stored in the |EZFIO| directory. 
 
 .. seealso:: 
 
-    The documentation of the :ref:`print_wf` program. 
+    To get some additional information on the wave function, you can use
+    the :ref:`print_wf` program. 
 
 
