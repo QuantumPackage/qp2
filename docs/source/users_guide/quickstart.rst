@@ -4,7 +4,7 @@ Quick-start guide
 
 This tutorial should teach you everything you need to get started with
 the the basics of the |qp|. As an example, we will run a frozen core
-|CIPSI| calculation on the HCN molecule in the 631-G basis set.
+|CIPSI| calculation on the HCN molecule in the 6-31G basis set.
 
 
 Demo video
@@ -33,24 +33,24 @@ Please execute in the current shell:
 
 where :code:`${QP_ROOT}` is the path to the source files of the |QP| installed on your architecture.  
 
-The |QPSH| mode: a bash-like experience for quantum chemistry
+The |QPSH| mode: a Bash-like experience for quantum chemistry
 -------------------------------------------------------------
 
 The |QP| has been designed pretty much as an *interactive* environment for quantum-chemistry calculations, 
 in order to facilitate the user experience. 
 
-Just like in bash, there are many commands in the |QP| (see for instance :ref:`qp_edit` or :ref:`qp_run`) 
+Just like in Bash, there are many commands in the |QP| (see for instance :ref:`qp_edit` or :ref:`qp_run`) 
 which help in handling useful data or running executables (see for instance :ref:`scf` or :ref:`fci`). 
 
-All commands designed within the |qp| **begins** with `qp`, and are two ways of running a **command**: 
+All commands designed within the |qp| **begin** with `qp`, and there are two ways of running a **command**: 
 
-* the *executable* associated to the command: 
+* running the *executable* associated with the command: 
 
 .. code:: bash
 
   qp_command 
 
-or the *qp* command which calls the *executable* :code:`qp_command`: 
+or executing the *qp* shell command which calls the *executable* :code:`qp_command`: 
 
 .. code:: bash
 
@@ -58,7 +58,7 @@ or the *qp* command which calls the *executable* :code:`qp_command`:
 
 Usually, when using the :command:`qp` command, the name of the |EZFIO| database is omitted.
 
-The advantage or using :code:`qp command` is that you can, just like in bash, have: 
+The advantage of using :code:`qp command` is that you can, just like in Bash, have: 
 
 * the :kbd:`Tab` key for the auto-completion for basically any command of the |QP| 
 
@@ -147,13 +147,14 @@ The expected energy is ``-92.827856698`` au.
     :ref:`scf` program.
 
 This creates the |MOs| in the |EZFIO| database that will be used to
-perform any other post-SCF method. The |qp| does not handle symmetry and
+in any other post-SCF method. The |qp| does not handle symmetry and
 the |MOs| are stored by increasing order of Fock energies.
+
 
 Choose the target |MO| space
 ----------------------------
 
-Now, we will modify the |EZFIO| database to make |CIPSI| calculation only in the
+Now, we will modify the |EZFIO| database to make a |CIPSI| calculation only in the
 full set of valence |MOs|, keeping the core |MOs| frozen. The simple
 command :ref:`qp_set_frozen_core` does this automatically:
 
@@ -167,7 +168,7 @@ In the case of HCN molecule in the 631G basis, one has 20 |MOs| in total and the
 
 .. code::
 
-    qp set_mo_class --core "[1-2]" --act "[3-20]"
+    qp set_mo_class --core="[1-2]" --act="[3-20]"
 
 
 
@@ -193,7 +194,7 @@ The program will start with a single determinant and will iteratively:
   :math:`E=E_\text{FCI} - \alpha\, E_\text{PT2}`
 
 By default, the program will stop when more than one million determinants have
-entered in the internal space, or when the |PT2| energy is below :math:`10^{-4}`.
+entered in the internal space, or when the |PT2| energy is below :math:`10^{-4}` au.
 
 To have a pictural illustration of the convergence of the |CIPSI| algorithm, just run 
 
@@ -201,7 +202,10 @@ To have a pictural illustration of the convergence of the |CIPSI| algorithm, jus
 
     qp_e_conv_fci
 
-This will create the files "hcn.fci.out.conv" containing the data of the convergence of the energy that can be plotted, together with the file "hcn.fci.out.conv.1.eps" which is obtained from the gnuplot plot file "hcn.fci.out.conv.plt". 
+This will create the files :file:`hcn.fci.out.conv` containing the data of the
+convergence of the energy that can be plotted, together with the file
+:file:`hcn.fci.out.conv.1.eps` which is obtained from the gnuplot plot file
+:file:`hcn.fci.out.conv.plt`. 
 
 
 The estimated |FCI| energy of HCN is ``-93.0501`` au.

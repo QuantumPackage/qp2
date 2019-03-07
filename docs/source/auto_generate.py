@@ -186,23 +186,28 @@ def generate_index(entities):
   with open(rst_file,'w') as f: 
     rst = [ "Index of Providers", 
             "------------------", 
-            "" ]
+            "",
+            ".. hlist::",
+            ""]
 
     for e in sorted(entities.keys()):
         e = entities[e]
         if e["type"] == 'p':
-            rst.append("* :c:data:`%s`" % (e["name"]))
+            rst.append("    * :c:data:`%s`" % (e["name"]))
 
-    rst += [ "",
+    rst += [ "","",
              "Index of Subroutines/Functions", 
              "------------------------------", 
+             "",
+             ".. hlist::",
              "" ]
 
     for e in sorted(entities.keys()):
         e = entities[e]
         if e["type"] == 's':
-            rst.append("* :c:func:`%s`" % (e["name"]))
+            rst.append("    * :c:func:`%s`" % (e["name"]))
 
+    rst.append("\n")
     f.write(" \n".join(rst))
 
 

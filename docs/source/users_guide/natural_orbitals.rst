@@ -8,7 +8,7 @@ To produce state-average natural orbitals, run ::
 
     qp_run save_natorb file.ezfio
 
-The MOs will be replaced, so the two-electron integrals and the wave
+The |MOs| will be replaced, so the two-electron integrals and the wave
 function are invalidated as well.
 
 
@@ -17,16 +17,16 @@ Extracting natural orbitals
 ---------------------------
 
 Once obtained the near |FCI| wave function, one can obtain many         
-Onquantities related to it. e of these quantities are the natural       
-Onorbitals which have the properties of diagonalizing the one-body      
-Ondensity matrix:                                                       
+quantities related to it. One of these quantities are the natural       
+orbitals which have the property of diagonalizing the one-body      
+density matrix:                                                       
 
    .. math::
 
        \rho_{ij} = \delta_{ij}
 
 where the element of the one-body density matrix :math:`\rho_{ij}` is
-define as:
+defined as:
 
 
    .. math::
@@ -50,7 +50,7 @@ Hands on
 .. important::
 
    As the |MOs| are changed, for the sake of coherence of future        
-   calculations, the save_natorb program *automatically removes the     
+   calculations, the :ref:`save_natorb` program *automatically removes the     
    current wave function* stored in the |EZFIO| database and replaces   
    it by a single Slater determinant corresponding to a |HF| occupation 
    of the new spin orbitals. Also, all the keywords to read the one-    
@@ -60,5 +60,5 @@ Hands on
 
 .. seealso:: 
 
-    The documentation of the :c:func:`save_natorb` program. 
+    The documentation of the :ref:`save_natorb` program. 
  
