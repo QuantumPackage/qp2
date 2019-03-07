@@ -3,6 +3,10 @@
 &BEGIN_PROVIDER [ double precision, ref_bitmask_kinetic_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_e_n_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_two_e_energy ]
+&BEGIN_PROVIDER [ double precision, ref_bitmask_energy_ab ]
+&BEGIN_PROVIDER [ double precision, ref_bitmask_energy_bb ]
+&BEGIN_PROVIDER [ double precision, ref_bitmask_energy_aa ]
+
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -52,6 +56,31 @@
     enddo
   enddo
   ref_bitmask_one_e_energy = ref_bitmask_kinetic_energy +   ref_bitmask_e_n_energy
+
+ ref_bitmask_energy_ab = 0.d0
+ do i = 1, elec_alpha_num
+  do j = 1, elec_beta_num
+   ref_bitmask_energy_ab += mo_two_e_integrals_jj(occ(i,1),occ(j,2))
+  enddo
+ enddo
+
+ ref_bitmask_energy_aa = 0.d0
+ do i = 1, elec_alpha_num
+  do j = 1, elec_alpha_num
+   ref_bitmask_energy_aa += mo_two_e_integrals_jj_anti(occ(i,1),occ(j,1))
+  enddo
+ enddo
+ ref_bitmask_energy_aa = ref_bitmask_energy_aa * 0.5d0
+
+ ref_bitmask_energy_bb = 0.d0
+ do i = 1, elec_beta_num
+  do j = 1, elec_beta_num
+   ref_bitmask_energy_bb += mo_two_e_integrals_jj_anti(occ(i,2),occ(j,2))
+  enddo
+ enddo
+ ref_bitmask_energy_bb = ref_bitmask_energy_bb * 0.5d0
+
+
 
 END_PROVIDER
 

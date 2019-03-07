@@ -7,7 +7,7 @@ type t =
     progress_bar      : Progress_bar.t option ;
     running           : bool;
     accepting_clients : bool;
-    data              : (string, string) Core.Hashtbl.t ;
+    data              : (string, string) Hashtbl.t ;
 }
 
 

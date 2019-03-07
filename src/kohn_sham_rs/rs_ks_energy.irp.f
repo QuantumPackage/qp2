@@ -37,6 +37,7 @@ BEGIN_PROVIDER [double precision, extra_e_contrib_density]
 !
 ! For a Kohn-Sham or Range-separated Kohn-Sham: the exchange/correlation - 1/2 trace of the V_xc potential
  END_DOC
+ 
  extra_e_contrib_density = e_exchange_dft + e_correlation_dft - 0.5d0 * trace_potential_xc
 END_PROVIDER
 

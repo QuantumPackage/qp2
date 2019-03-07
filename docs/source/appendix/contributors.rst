@@ -25,19 +25,25 @@ Thomas Applencourt
 
 
 
-The following people have contributed (by alphabetical order):
+The following people have contributed to this project (by alphabetical order):
 
+* Roland Assaraf
+* Pierrette Barbaresco
 * Anouar Benali
 * Chandler Bennet
 * Michel Caffarel
 * Grégoire David
+* Anthony Ferté
 * Madeline Galbraith 
 * Yann Garniron
 * Kevin Gasperich
 * Pierre-François Loos
+* Jean-Paul Malrieu
 * Barry Moore
 * Julien Paquier
 * Barthélémy Pradines
+* Peter Reinhardt
+* Nicolas Renon
 * Lorenzo Tenti
 * Julien Toulouse
 * Mikaël Véril
