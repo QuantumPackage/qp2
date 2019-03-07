@@ -27,5 +27,3 @@ In the core modules of the |QP|, two functionals are implemented:
  * "PBE" or "short_range_PBE" for, respectively the |PBE| and its short-range version
 
 
-If you have designed your own exchange/correlation functionals (see the documentation of the :ref:`module_new_functionals`), 
-you can use them in all |DFT|-based programs by  setting the :option:`dft_keywords exchange_functional` and :option:`dft_keywords correlation_functional` keywords to "my_functional". 
