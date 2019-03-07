@@ -24,7 +24,7 @@ The determinant-driven framework allows the programmer to include any arbitrary 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Quantum Package" />
 
-  <meta name="generator" content="Hugo 0.53" />
+  <meta name="generator" content="Hugo 0.54.0" />
   <link rel="canonical" href="https://quantumpackage.github.io/" />
   <link rel="alternate" href="https://quantumpackage.github.io/qp2/index.xml" type="application/rss+xml" title="Quantum Package">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
@@ -163,7 +163,7 @@ The determinant-driven framework allows the programmer to include any arbitrary 
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         
-          <div class="well">
+          <div class="well" align="justify">
             <p><em>Quantum Package</em> is an open-source programming environment for quantum
 chemistry specially designed for wave function methods. Its main goal is the
 development of determinant-driven selected configuration interaction (sCI)
@@ -191,107 +191,6 @@ Yann Garniron, Thomas Applencourt, Kevin Gasperich, Anouar Benali, Anthony Fert√
 <a href="https://arxiv.org/abs/1902.08154">https://arxiv.org/abs/1902.08154</a></p>
 
           </div>
-        
-
-        <div class="posts-list">
-          
-          
-            <article class="post-preview">
-              <a href="https://quantumpackage.github.io/qp2/post/full-ci/">
-                <h2 class="post-title">Full-CI calculation</h2>
-                
-              </a>
-
-              <span class="post-meta">
-  Posted on February 5, 2019
-  
-</span>
-
-
-              <div class="post-entry">
-                
-                  Enter in qpsh mode for auto completion  ~/your_path_to_qp/bin/qpsh   Create an EZFIO DATA BASE from .xyz  qp create_ezfio -b 6-31g hcn.xyz # output:: hcn.ezfio DATA BASE   Run a HF calculation on the EZFIO  qp run scf | tee output_file.scf.out # output:: create MO basis in the EZFIO   Freeze the 1s orbitals in the EZFIO  qp set_frozen_core   Run the CIPSI algorithm on the EZFIO  qp run fci | tee output_file.
-                  <a href="https://quantumpackage.github.io/qp2/post/full-ci/" class="post-read-more">[Read More]</a>
-                
-              </div>
-
-              
-            </article>
-          
-            <article class="post-preview">
-              <a href="https://quantumpackage.github.io/qp2/post/hartree-fock/">
-                <h2 class="post-title">Hartree-Fock calculation</h2>
-                
-              </a>
-
-              <span class="post-meta">
-  Posted on February 4, 2019
-  
-</span>
-
-
-              <div class="post-entry">
-                
-                  <hr />
-
-
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-  <iframe src="//www.youtube.com/embed/KIl_xq-NRLo" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
-</div>
-
-
-<ol>
-<li>Enter in qpsh mode for auto completion</li>
-</ol>
-
-<pre><code class="language-bash">~/your_path_to_qp/bin/qpsh
-</code></pre>
-
-<ol>
-<li>Create an EZFIO DATA BASE from .xyz</li>
-</ol>
-
-<pre><code class="language-bash">qp create_ezfio -b 6-31g hcn.xyz
-</code></pre>
-
-<ol>
-<li>Run a HF calculation on the EZFIO  and put the output in a file</li>
-</ol>
-
-<pre><code class="language-bash">qp run scf | tee hcn.ezfio.scf.out
-</code></pre>
-
-                
-              </div>
-
-              
-            </article>
-          
-            <article class="post-preview">
-              <a href="https://quantumpackage.github.io/qp2/post/installation/">
-                <h2 class="post-title">Installation</h2>
-                
-              </a>
-
-              <span class="post-meta">
-  Posted on February 3, 2019
-  
-</span>
-
-
-              <div class="post-entry">
-                
-                  Download the source files  git clone https://github.com/QuantumPackage/qp2.git   Install the dependencies  ./configure # tells you what to install. See in INSTALL.rst   USE AT YOUR OWN RISK, NO SUPPORT WILL BE PROVIDED  ./configure --install something   The following libraries are needed for the ocaml package
- zlib1g-dev libncurses5-dev pkg-config libgmp3-dev m4  Once the smiling cow appears, load the environment variables
-                  <a href="https://quantumpackage.github.io/qp2/post/installation/" class="post-read-more">[Read More]</a>
-                
-              </div>
-
-              
-            </article>
-          
-        </div>
-
         
       </div>
     </div>
@@ -349,7 +248,7 @@ Yann Garniron, Thomas Applencourt, Kevin Gasperich, Anouar Benali, Anthony Fert√
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="http://gohugo.io">Hugo v0.53</a> powered &nbsp;&bull;&nbsp; Theme by <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a> adapted to <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a>
+          <a href="http://gohugo.io">Hugo v0.54.0</a> powered &nbsp;&bull;&nbsp; Theme by <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a> adapted to <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a>
           
         </p>
       </div>
