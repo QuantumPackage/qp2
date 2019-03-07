@@ -18,7 +18,7 @@ Extracting natural orbitals
 
 Once obtained the near |FCI| wave function, one can obtain many         
 quantities related to it. One of these quantities are the natural       
-orbitals which have the propertiy of diagonalizing the one-body      
+orbitals which have the property of diagonalizing the one-body      
 density matrix:                                                       
 
    .. math::
