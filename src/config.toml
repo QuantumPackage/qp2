@@ -65,6 +65,6 @@ pygmentCodeFences = true
 
 [[menu.main]]
     name = "Source code"
-    url = "https://github.com/QuantumPackage/qp2"
+    url = "https://github.com/QuantumPackage/qp2/releases/latest"
     weight = 4
 
