@@ -387,7 +387,6 @@ Providers
        * :c:data:`energy_x_sr_pbe`
 
  
-
 .. c:var:: potential_sr_c_alpha_ao_lda
 
 
