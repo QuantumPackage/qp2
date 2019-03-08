@@ -17,8 +17,8 @@
    enddo
   enddo
  enddo
- accu = 0.d0
  do i = 1, N_states
+  accu = 0.d0
   do j = 1, mo_num
    accu += one_e_dm_mo_alpha_for_dft(j,j,i) + one_e_dm_mo_beta_for_dft(j,j,i)
   enddo
