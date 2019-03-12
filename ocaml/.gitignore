@@ -14,6 +14,8 @@ Input_density_for_dft.ml
 Input_determinants.ml
 Input_dft_keywords.ml
 Input_dressing.ml
+Input_firth_order_der.ml
+Input_ijkl_ints_in_r3.ml
 Input_mo_one_e_ints.ml
 Input_mo_two_e_erf_ints.ml
 Input_mo_two_e_ints.ml
