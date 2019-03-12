@@ -93,7 +93,6 @@ end
    grad_dm_a(1,istate) = u_dot_v(aos_grad_array(1,1),aos_array_bis,ao_num)
    grad_dm_a(2,istate) = u_dot_v(aos_grad_array(1,2),aos_array_bis,ao_num)
    grad_dm_a(3,istate) = u_dot_v(aos_grad_array(1,3),aos_array_bis,ao_num)
-   grad_dm_a *= 2.d0
    ! aos_grad_array_bis = \rho_ao * aos_grad_array
 
    ! beta density
@@ -104,9 +103,10 @@ end
    grad_dm_b(1,istate) = u_dot_v(aos_grad_array(1,1),aos_array_bis,ao_num)
    grad_dm_b(2,istate) = u_dot_v(aos_grad_array(1,2),aos_array_bis,ao_num)
    grad_dm_b(3,istate) = u_dot_v(aos_grad_array(1,3),aos_array_bis,ao_num)
-   grad_dm_b *= 2.d0
    ! aos_grad_array_bis = \rho_ao * aos_grad_array
  enddo
+   grad_dm_a *= 2.d0
+   grad_dm_b *= 2.d0
  end
 
  BEGIN_PROVIDER [double precision, one_e_dm_alpha_in_r, (n_points_integration_angular,n_points_radial_grid,nucl_num,N_states) ]
