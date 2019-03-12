@@ -75,4 +75,6 @@ Davidson Diagonalization
 ------------------------
 
  Not enough memory: aborting in davidson_diag_hjj_sjj
->>>>>>> 94bacff2d093aa9b32c653ab59bcdb79d13f3264
+
+
+qp man does not find the programs in external plugins
