@@ -1,5 +1,4 @@
 open Qptypes
-open Core
 
 (*
 Type for bits strings
@@ -22,15 +21,15 @@ let to_string b =
 
 
 let of_string ?(zero='0') ?(one='1') s =
-  String.to_list s
-  |> List.rev_map ~f:( fun c ->
+  List.init (String.length s) (String.get s)
+  |> List.rev_map ( fun c ->
      if (c = zero) then Bit.Zero
      else if (c = one) then Bit.One
      else (failwith ("Error in bitstring ") ) )
 
 let of_string_mp s =
-  String.to_list s
-  |> List.rev_map ~f:(function
+  List.init (String.length s) (String.get s)
+  |> List.rev_map (function
     | '-' -> Bit.Zero
     | '+' -> Bit.One
     | _   -> failwith ("Error in bitstring ") )
@@ -44,7 +43,7 @@ let of_int64 i =
   | 1L -> Bit.One  :: accu |> List.rev
   | i  ->
     let b =
-      match (Int64.bit_and i 1L ) with
+      match (Int64.logand i 1L ) with
       | 0L -> Bit.Zero
       | 1L -> Bit.One
       | _ -> raise (Failure "i land 1 not in (0,1)")
@@ -70,18 +69,18 @@ let to_int64 l =
   let rec do_work accu = function
     | [] -> accu
     | Bit.Zero::tail -> do_work Int64.(shift_left accu 1) tail
-    | Bit.One::tail  -> do_work Int64.(bit_or one (shift_left accu 1)) tail
+    | Bit.One::tail  -> do_work Int64.(logor one (shift_left accu 1)) tail
   in do_work Int64.zero (List.rev l)
 
 
 (* Create a bit list from a list of int64 *)
 let of_int64_list l =
-  List.map ~f:of_int64 l
+  List.map of_int64 l
   |> List.concat
 
 (* Create a bit list from an array of int64 *)
 let of_int64_array l =
-  Array.map ~f:of_int64 l
+  Array.map of_int64 l
   |> Array.to_list
   |> List.concat
 
@@ -116,7 +115,7 @@ let to_int64_list l =
   in
   let l = do_work [] [] 1 l
   in
-  List.rev_map ~f:to_int64 l
+  List.rev_map to_int64 l
 
 (* Create an array of int64 from a bit list *)
 let to_int64_array l =
@@ -127,8 +126,8 @@ let to_int64_array l =
 let of_mo_number_list n_int l =
   let n_int = N_int_number.to_int n_int in
   let length = n_int*64 in
-  let a = Array.create length (Bit.Zero) in
-  List.iter ~f:(fun i-> a.((MO_number.to_int i)-1) <- Bit.One) l;
+  let a = Array.make length (Bit.Zero) in
+  List.iter (fun i-> a.((MO_number.to_int i)-1) <- Bit.One) l;
   Array.to_list a
 
 
@@ -183,10 +182,10 @@ let not_operator   b = logical_operator1 Bit.not_operator   b
 
 
 let popcnt b =
-  List.fold_left b ~init:0 ~f:(fun accu -> function
+  List.fold_left (fun accu -> function
     | Bit.One -> accu+1
     | Bit.Zero -> accu
-  )
+  ) 0 b
 
 
 

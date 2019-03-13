@@ -1,4 +1,4 @@
-open Core
+open Sexplib.Std
 open Qptypes
 
 (** New job : Request to create a new multi-tasked job *)
@@ -161,7 +161,7 @@ end = struct
   }
   let create ~state ~tasks = { state = State.of_string state ; tasks }
   let to_string x =
-    Printf.sprintf "add_task %s %s" (State.to_string x.state) (String.concat ~sep:"|" x.tasks)
+    Printf.sprintf "add_task %s %s" (State.to_string x.state) (String.concat "|" x.tasks)
 end
 
 
@@ -193,12 +193,12 @@ end = struct
   }
   let create ~state ~task_ids =
     { state = State.of_string state ;
-      task_ids = List.map ~f:Id.Task.of_int task_ids
+      task_ids = List.map Id.Task.of_int task_ids
     }
   let to_string x =
     Printf.sprintf "del_task %s %s"
       (State.to_string x.state)
-      (String.concat ~sep:"|" @@ List.map ~f:Id.Task.to_string x.task_ids)
+      (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
 end
 
 
@@ -219,7 +219,7 @@ end = struct
       else "done"
     in
     Printf.sprintf "del_task_reply %s %s"
-     more (String.concat ~sep:"|" @@ List.map ~f:Id.Task.to_string x.task_ids)
+     more (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
 end
 
 
@@ -303,11 +303,11 @@ end = struct
      "get_tasks_reply ok"
   let to_string_list x =
      "get_tasks_reply ok" :: (
-     List.map x ~f:(fun (task_id, task) ->
+     List.map (fun (task_id, task) ->
        match task_id with
        | Some task_id -> Printf.sprintf "%d %s" (Id.Task.to_int task_id) task
        | None -> Printf.sprintf "0 terminate"
-     ) )
+     ) x )
 
 end
 
@@ -408,14 +408,14 @@ end = struct
   let create ~state ~client_id ~task_ids =
     { client_id = Id.Client.of_int client_id ;
       state = State.of_string state ;
-      task_ids  = List.map ~f:Id.Task.of_int task_ids;
+      task_ids  = List.map Id.Task.of_int task_ids;
     }
 
   let to_string x =
     Printf.sprintf "task_done %s %d %s"
       (State.to_string x.state)
       (Id.Client.to_int x.client_id)
-      (String.concat ~sep:"|" @@ List.map ~f:Id.Task.to_string x.task_ids)
+      (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
 end
 
 (** Terminate *)
@@ -460,7 +460,7 @@ end = struct
   type t = string
   let create x = x
   let to_string x =
-     String.concat ~sep:" "  [ "error" ; x ]
+     String.concat " "  [ "error" ; x ]
 end
 
 

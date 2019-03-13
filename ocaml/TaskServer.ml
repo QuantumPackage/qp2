@@ -33,7 +33,7 @@ type t =
 
 let debug_env =
   try
-    Sys.getenv "QP_TASK_DEBUG"; true
+    Sys.getenv "QP_TASK_DEBUG" = "1"
   with Not_found -> false
 
 

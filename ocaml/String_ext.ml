@@ -3,27 +3,6 @@ include String
 (** Split a string on a given character *)
 let split ?(on=' ') str =
   split_on_char on str
-(*
-    let rec do_work ?(accu=[]) ?(left="") = function
-    | "" -> List.rev (left::accu)
-    | s  ->
-        let new_s =
-            (length s) - 1
-            |> sub s 1
-        in
-        if (s.[0] = on) then
-            let new_accu =
-                left :: accu
-            in
-            do_work ~accu:new_accu new_s
-        else
-            let new_left =
-                concat "" [ left ; make 1 s.[0] ]
-            in
-            do_work ~accu ~left:new_left new_s
-    in
-    do_work str
-*)
 
 
 (** Strip blanks on the left of a string *)
@@ -88,7 +67,7 @@ let lsplit2_exn ?(on=' ') s =
 (** Split a string in two pieces when a character is found the 1st time from the right *)
 let rsplit2_exn ?(on=' ') s =
     let length =
-        String.length s
+        String.length s 
     in
     let rec do_work i =
         if (i = -1) then
@@ -101,7 +80,7 @@ let rsplit2_exn ?(on=' ') s =
         else
            do_work (i-1)
     in
-    do_work length
+    do_work (length-1)
 
 
 let lsplit2 ?(on=' ') s =
@@ -140,3 +119,23 @@ let is_prefix ~prefix s =
 
 let of_char c =
   String.make 1 c
+
+let tr ~target ~replacement s =
+  String.map (fun c -> if c = target then replacement else c) s
+
+
+let substr_index ?(pos=0) ~pattern s =
+  try
+    let regexp = 
+      Str.regexp pattern
+    in
+    Some (Str.search_forward regexp s pos)
+  with Not_found -> None
+
+
+let substr_replace_all ~pattern ~with_ s =
+  let regexp =
+    Str.regexp pattern
+  in
+  Str.global_replace regexp with_ s
+

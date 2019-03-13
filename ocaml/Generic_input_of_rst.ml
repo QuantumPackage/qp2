@@ -1,5 +1,6 @@
-open Core;;
-open Qptypes;;
+open Sexplib
+open Sexplib.Std
+open Qptypes
 
 
 let fail_msg str (ex,range) =
@@ -15,25 +16,25 @@ let fail_msg str (ex,range) =
     let start_pos = range.start_pos.offset
     and end_pos = range.end_pos.offset
     in
-    let pre  = String.sub ~pos:0 ~len:start_pos str
-    and mid  = String.sub ~pos:start_pos ~len:(end_pos-start_pos) str
-    and post = String.sub ~pos:(end_pos)
-      ~len:((String.length str)-(end_pos)) str
+    let pre  = String.sub str 0 start_pos 
+    and mid  = String.sub str start_pos (end_pos-start_pos) 
+    and post = String.sub str (end_pos)
+      ((String.length str)-(end_pos)) 
     in
     let str = Printf.sprintf "%s ## %s ## %s" pre mid post
     in
-    let str = String.tr str ~target:'(' ~replacement:' '
-      |> String.split ~on:')'
-      |> List.map ~f:String.strip
-      |> List.filter ~f:(fun x ->
-          match String.substr_index x ~pos:0 ~pattern:"##" with
+    let str = String_ext.tr str ~target:'(' ~replacement:' '
+      |> String_ext.split ~on:')'
+      |> List.map String_ext.strip
+      |> List.filter (fun x ->
+          match String_ext.substr_index ~pos:0 ~pattern:"##" x with
           | None -> false
           | Some _ -> true
          )
-      |> String.concat ~sep:"\n"
+      |> String.concat "\n"
     in
-    Printf.eprintf "Error:  (%s)\n\n  %s\n\n" msg str;
-;;
+    Printf.eprintf "Error:  (%s)\n\n  %s\n\n" msg str
+
 
 
 let evaluate_sexp t_of_sexp s =
@@ -41,20 +42,19 @@ let evaluate_sexp t_of_sexp s =
   match ( Sexp.of_string_conv sexp t_of_sexp ) with
   | `Result r -> Some r
   | `Error ex -> ( fail_msg sexp ex; None)
-;;
+
 
 let of_rst t_of_sexp s =
   Rst_string.to_string s
-  |> String.split ~on:'\n'
-  |> List.filter ~f:(fun line ->
-      String.contains line '=')
-  |> List.map ~f:(fun line ->
+  |> String_ext.split ~on:'\n'
+  |> List.filter (fun line -> String.contains line '=')
+  |> List.map (fun line ->
       "("^(
-      String.tr line ~target:'=' ~replacement:' '
+      String_ext.tr ~target:'=' ~replacement:' ' line
       )^")" )
-  |> String.concat
+  |> String.concat ""
   |> evaluate_sexp t_of_sexp
-;;
+
 
 
 

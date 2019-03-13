@@ -207,7 +207,7 @@ let distance_matrix molecule =
 
 
 
-open Core ;;
+
 include To_md5
 let to_md5 = to_md5 sexp_of_t
 
