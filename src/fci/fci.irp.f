@@ -48,7 +48,7 @@ program fci
   else
     PROVIDE mo_two_e_integrals_in_map
 
-   !call run_slave_cipsi
+   call run_slave_cipsi
 
   endif
 end
