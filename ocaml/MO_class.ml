@@ -33,7 +33,7 @@ let to_string  x =
 
 
 let of_string s =
-  match (String.lowercase s) with
+  match (String.lowercase_ascii s) with
   | "core"     ->  Core     []
   | "inactive" ->  Inactive []
   | "active"   ->  Active   []

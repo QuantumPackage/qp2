@@ -1,5 +1,6 @@
 (** CONTRL *)
 type scftyp_t = RHF | ROHF | MCSCF | NONE
+
 let string_of_scftyp = function
 | RHF -> "RHF"
 | ROHF -> "ROHF"
@@ -116,7 +117,7 @@ type guess_t =
 | Natural   of (int*string)
 
 let guess_of_string s =
-  match String.lowercase s with
+  match String.lowercase_ascii s with
   | "huckel" -> Huckel
   | "hcore"  -> Hcore
   | _ -> raise (Invalid_argument "Bad MO guess")

@@ -1,6 +1,6 @@
 open Qputils
 open Qptypes
-open Core
+open Sexplib.Std
 
 type element =
 | Element of Element.t
@@ -38,7 +38,7 @@ let dummy_centers ~threshold ~molecule ~nuclei =
   | _ -> assert false
   in
   aux [] (n-1,n-1)
-  |> List.map ~f:(fun (i,x,j,y,r) ->
+  |> List.map (fun (i,x,j,y,r) ->
     let f =
       x /. (x +. y)
     in
@@ -58,22 +58,22 @@ let dummy_centers ~threshold ~molecule ~nuclei =
 (** Returns the list of available basis sets *)
 let list_basis () =
   let basis_list =
-    let ic = Pervasives.open_in (Qpackage.root ^ "/data/basis/00_README.rst") in
-    let n = Pervasives.in_channel_length ic in
+    let ic = open_in (Qpackage.root ^ "/data/basis/00_README.rst") in
+    let n = in_channel_length ic in
     let s = Bytes.create n in
-    Pervasives.really_input ic s 0 n;
-    Pervasives.close_in ic;
+    really_input ic s 0 n;
+    close_in ic;
     Bytes.to_string s
-    |> String.split ~on:'\n' 
-    |> List.filter ~f:(fun line -> String.length line > 1 && line.[0] <> '#')
-    |> List.map ~f:(fun line ->
-          match String.split ~on:'\'' line with
+    |> String_ext.split ~on:'\n' 
+    |> List.filter (fun line -> String.length line > 1 && line.[0] <> '#')
+    |> List.map (fun line ->
+          match String_ext.split ~on:'\'' line with
           | file :: name :: descr :: _ ->
-              Printf.sprintf "%s\n  %s\n  %s\n\n" file name (String.strip descr)
+              Printf.sprintf "%s\n  %s\n  %s\n\n" file name (String.trim descr)
           | _ -> assert false
         )
   in
-  List.sort basis_list ~compare:String.ascending
+  List.sort compare basis_list 
 
 
 (** Run the program *)
@@ -101,7 +101,7 @@ let run ?o b au c d m p cart xyz_file =
   **********)
 
   let basis_table =
-     Hashtbl.Poly.create ()
+     Hashtbl.create 63
   in
 
   (* Open basis set channels *)
@@ -111,10 +111,7 @@ let run ?o b au c d m p cart xyz_file =
       | Element e -> Element.to_string e
       | Int_elem (i,e) -> Printf.sprintf "%d,%s" (Nucl_number.to_int i)  (Element.to_string e)
     in
-    match Hashtbl.find basis_table key with
-    | Some in_channel ->
-        in_channel
-    | None -> raise Caml.Not_found
+    Hashtbl.find basis_table key 
   in
 
   let temp_filename =
@@ -129,11 +126,11 @@ let run ?o b au c d m p cart xyz_file =
       Qpackage.root ^ "/data/basis/" ^ basis
     in
     match
-      Sys.is_file basis,
-      Sys.is_file long_basis
+      Sys.file_exists basis,
+      Sys.file_exists long_basis
     with
-    | `Yes, _    -> In_channel.create basis
-    | `No , `Yes -> In_channel.create long_basis
+    | true , _    -> open_in basis
+    | false, true -> open_in long_basis
     | _ -> failwith ("Basis "^basis^" not found")
   in
 
@@ -141,7 +138,7 @@ let run ?o b au c d m p cart xyz_file =
   | [] -> ()
   | elem_and_basis_name :: rest ->
     begin
-      match (String.lsplit2 ~on:':' elem_and_basis_name) with
+      match (String_ext.lsplit2 ~on:':' elem_and_basis_name) with
       | None -> (* Principal basis *)
         begin
           let basis =
@@ -150,14 +147,12 @@ let run ?o b au c d m p cart xyz_file =
           let new_channel =
             fetch_channel basis
           in
-          List.iter nuclei ~f:(fun elem->
+          List.iter (fun elem->
             let key =
               Element.to_string elem.Atom.element
             in
-            match Hashtbl.add basis_table ~key:key ~data:new_channel with
-            | `Ok -> ()
-            | `Duplicate -> ()
-          )
+            Hashtbl.add basis_table key new_channel
+          ) nuclei 
         end
       | Some (key, basis) -> (*Aux basis *)
         begin
@@ -166,12 +161,12 @@ let run ?o b au c d m p cart xyz_file =
               Element (Element.of_string key)
             with Element.ElementError _ ->
               let result =
-                match (String.split ~on:',' key) with
+                match (String_ext.split ~on:',' key) with
                 | i :: k :: [] -> (Nucl_number.of_int @@ int_of_string i, Element.of_string k)
                 | _ -> failwith "Expected format is int,Element:basis"
               in Int_elem result
           and basis =
-            String.lowercase basis
+            String.lowercase_ascii basis
           in
           let key =
              match elem with
@@ -181,23 +176,13 @@ let run ?o b au c d m p cart xyz_file =
           let new_channel =
             fetch_channel basis
           in
-          begin
-            match Hashtbl.add basis_table ~key:key ~data:new_channel with
-            | `Ok -> ()
-            | `Duplicate ->
-              let e =
-                match elem with
-                | Element e -> e
-                | Int_elem (_,e) -> e
-              in
-              failwith ("Duplicate definition of basis for "^(Element.to_long_string e))
-          end
+          Hashtbl.add basis_table key new_channel
        end
     end;
     build_basis rest
   in
-  String.split ~on:'|' b
-  |> List.rev_map ~f:String.strip
+  String_ext.split ~on:'|' b
+  |> List.rev_map String.trim
   |> build_basis;
 
 
@@ -207,7 +192,7 @@ let run ?o b au c d m p cart xyz_file =
   ***************)
 
   let pseudo_table =
-     Hashtbl.Poly.create ()
+     Hashtbl.create 63
   in
 
   (* Open pseudo channels *)
@@ -215,7 +200,7 @@ let run ?o b au c d m p cart xyz_file =
     let key =
       Element.to_string element
     in
-    Hashtbl.find pseudo_table key
+    Hashtbl.find_opt pseudo_table key
   in
   let temp_filename =
     Filename.temp_file "qp_create_" ".pseudo"
@@ -229,11 +214,11 @@ let run ?o b au c d m p cart xyz_file =
       Qpackage.root ^ "/data/pseudo/" ^ pseudo
     in
     match
-      Sys.is_file pseudo,
-      Sys.is_file long_pseudo
+      Sys.file_exists pseudo,
+      Sys.file_exists long_pseudo
     with
-    | `Yes, _    -> In_channel.create pseudo
-    | `No , `Yes -> In_channel.create long_pseudo
+    | true , _   -> open_in pseudo
+    | false, true-> open_in long_pseudo
     | _    -> failwith ("Pseudo file "^pseudo^" not found.")
   in
 
@@ -241,7 +226,7 @@ let run ?o b au c d m p cart xyz_file =
   | [] -> ()
   | elem_and_pseudo_name :: rest ->
     begin
-      match (String.lsplit2 ~on:':' elem_and_pseudo_name) with
+      match (String_ext.lsplit2 ~on:':' elem_and_pseudo_name) with
       | None -> (* Principal pseudo *)
         begin
           let pseudo =
@@ -250,21 +235,19 @@ let run ?o b au c d m p cart xyz_file =
           let new_channel =
             fetch_channel pseudo
           in
-          List.iter nuclei ~f:(fun elem->
+          List.iter (fun elem->
             let key =
               Element.to_string elem.Atom.element
             in
-            match Hashtbl.add pseudo_table ~key:key ~data:new_channel with
-            | `Ok -> ()
-            | `Duplicate -> ()
-          )
+            Hashtbl.add pseudo_table key new_channel
+          ) nuclei
         end
       | Some (key, pseudo) -> (*Aux pseudo *)
         begin
           let elem  =
             Element.of_string key
           and pseudo =
-            String.lowercase pseudo
+            String.lowercase_ascii pseudo
           in
           let key =
              Element.to_string elem
@@ -272,11 +255,7 @@ let run ?o b au c d m p cart xyz_file =
           let new_channel =
             fetch_channel pseudo
           in
-          begin
-            match Hashtbl.add pseudo_table ~key:key ~data:new_channel with
-            | `Ok -> ()
-            | `Duplicate -> failwith ("Duplicate definition of pseudo for "^(Element.to_long_string elem))
-          end
+          Hashtbl.add pseudo_table key new_channel
        end
     end;
     build_pseudo rest
@@ -285,8 +264,8 @@ let run ?o b au c d m p cart xyz_file =
     match p with
     | None -> ()
     | Some p ->
-      String.split ~on:'|' p
-      |> List.rev_map ~f:String.strip
+      String_ext.split ~on:'|' p
+      |> List.rev_map String.trim
       |> build_pseudo
   in
 
@@ -296,13 +275,13 @@ let run ?o b au c d m p cart xyz_file =
     | Some x -> x
     | None ->
       begin
-        match String.rsplit2 ~on:'.' xyz_file with
+        match String_ext.rsplit2 ~on:'.' xyz_file with
         | Some (x,"xyz")
         | Some (x,"zmt") -> x^".ezfio"
         | _ -> xyz_file^".ezfio"
       end
   in
-  if Sys.file_exists_exn ezfio_file then
+  if Sys.file_exists ezfio_file then
     failwith (ezfio_file^" already exists");
 
   let write_file () =
@@ -311,17 +290,17 @@ let run ?o b au c d m p cart xyz_file =
 
       (* Write Pseudo *)
       let pseudo =
-        List.map nuclei ~f:(fun x ->
+        List.map (fun x ->
             match pseudo_channel x.Atom.element with
             | Some channel -> Pseudo.read_element channel x.Atom.element
             | None -> Pseudo.empty x.Atom.element
-          )
+          ) nuclei
       in
 
       let molecule =
         let n_elec_to_remove =
-          List.fold pseudo ~init:0 ~f:(fun accu x ->
-            accu + (Positive_int.to_int x.Pseudo.n_elec))
+          List.fold_left (fun accu x ->
+            accu + (Positive_int.to_int x.Pseudo.n_elec)) 0 pseudo
         in
         { Molecule.elec_alpha =
             (Elec_alpha_number.to_int molecule.Molecule.elec_alpha)
@@ -333,14 +312,14 @@ let run ?o b au c d m p cart xyz_file =
             |> Elec_beta_number.of_int;
           Molecule.nuclei =
             let charges =
-              List.map pseudo ~f:(fun x -> Positive_int.to_int x.Pseudo.n_elec
-                |> Float.of_int)
+              List.map (fun x -> Positive_int.to_int x.Pseudo.n_elec
+                |> Float.of_int) pseudo 
               |> Array.of_list
             in
-            List.mapi molecule.Molecule.nuclei ~f:(fun i x ->
+            List.mapi (fun i x ->
               { x with Atom.charge = (Charge.to_float x.Atom.charge) -. charges.(i)
                 |> Charge.of_float }
-            )
+            ) molecule.Molecule.nuclei 
         }
       in
       let nuclei =
@@ -356,13 +335,13 @@ let run ?o b au c d m p cart xyz_file =
 
       (* Write Nuclei *)
       let labels =
-        List.map ~f:(fun x->Element.to_string x.Atom.element) nuclei
+        List.map (fun x->Element.to_string x.Atom.element) nuclei
       and charges =
-        List.map ~f:(fun x-> Atom.(Charge.to_float x.charge)) nuclei
+        List.map (fun x-> Atom.(Charge.to_float x.charge)) nuclei
       and coords  =
-        (List.map ~f:(fun x-> x.Atom.coord.Point3d.x) nuclei) @
-        (List.map ~f:(fun x-> x.Atom.coord.Point3d.y) nuclei) @
-        (List.map ~f:(fun x-> x.Atom.coord.Point3d.z) nuclei) in
+        (List.map (fun x-> x.Atom.coord.Point3d.x) nuclei) @
+        (List.map (fun x-> x.Atom.coord.Point3d.y) nuclei) @
+        (List.map (fun x-> x.Atom.coord.Point3d.z) nuclei) in
       let nucl_num = (List.length labels) in
       Ezfio.set_nuclei_nucl_num nucl_num ;
       Ezfio.set_nuclei_nucl_label (Ezfio.ezfio_array_of_list
@@ -381,40 +360,41 @@ let run ?o b au c d m p cart xyz_file =
       in
 
       let klocmax =
-        List.fold pseudo ~init:0 ~f:(fun accu x ->
+        List.fold_left (fun accu x ->
           let x =
             List.length x.Pseudo.local
           in
           if (x > accu) then x
           else accu
-        )
+        ) 0 pseudo
       and lmax =
-        List.fold pseudo ~init:0 ~f:(fun accu x ->
+        List.fold_left (fun accu x ->
           let x =
-            List.fold x.Pseudo.non_local ~init:0 ~f:(fun accu (x,_) ->
+            List.fold_left (fun accu (x,_) ->
               let x =
                 Positive_int.to_int x.Pseudo.GaussianPrimitive_non_local.proj
               in
               if (x > accu) then x
               else accu
-            )
+            ) 0 x.Pseudo.non_local 
           in
           if (x > accu) then x
           else accu
-        )
+        ) 0 pseudo 
       in
 
      let kmax =
-         Array.init (lmax+1) ~f:(fun i->
-           List.map pseudo ~f:(fun x ->
-             List.filter x.Pseudo.non_local ~f:(fun (y,_) ->
-               (Positive_int.to_int y.Pseudo.GaussianPrimitive_non_local.proj) = i)
-             |> List.length )
-           |> List.fold ~init:0 ~f:(fun accu x ->
-             if accu > x then accu else x)
-           )
-         |> Array.fold ~init:0 ~f:(fun accu i ->
-            if i > accu then i else accu)
+        Array.init (lmax+1) (fun i->
+            List.map (fun x ->
+                List.filter (fun (y,_) ->
+                    (Positive_int.to_int y.Pseudo.GaussianPrimitive_non_local.proj) = i)
+                  x.Pseudo.non_local 
+                |> List.length ) pseudo 
+            |> List.fold_left (fun accu x ->
+                if accu > x then accu else x) 0 
+          )
+        |> Array.fold_left (fun accu i ->
+            if i > accu then i else accu) 0
       in
 
 
@@ -423,12 +403,12 @@ let run ?o b au c d m p cart xyz_file =
         Ezfio.set_pseudo_pseudo_kmax kmax;
         Ezfio.set_pseudo_pseudo_lmax lmax;
         let tmp_array_v_k, tmp_array_dz_k, tmp_array_n_k =
-          Array.make_matrix ~dimx:klocmax ~dimy:nucl_num 0. ,
-          Array.make_matrix ~dimx:klocmax ~dimy:nucl_num 0. ,
-          Array.make_matrix ~dimx:klocmax ~dimy:nucl_num 0
+          Array.make_matrix klocmax nucl_num 0. ,
+          Array.make_matrix klocmax nucl_num 0. ,
+          Array.make_matrix klocmax nucl_num 0
         in
-        List.iteri pseudo ~f:(fun j x ->
-          List.iteri x.Pseudo.local ~f:(fun i (y,c) ->
+        List.iteri (fun j x ->
+          List.iteri (fun i (y,c) ->
             tmp_array_v_k.(i).(j)  <- AO_coef.to_float c;
             let y, z =
               AO_expo.to_float y.Pseudo.GaussianPrimitive_local.expo,
@@ -436,11 +416,11 @@ let run ?o b au c d m p cart xyz_file =
             in
             tmp_array_dz_k.(i).(j) <- y;
             tmp_array_n_k.(i).(j)  <- z;
-          )
-        );
+          ) x.Pseudo.local 
+        ) pseudo ;
         let concat_2d tmp_array =
           let data =
-            Array.map tmp_array ~f:Array.to_list
+            Array.map Array.to_list tmp_array 
             |> Array.to_list
             |> List.concat
           in
@@ -454,18 +434,18 @@ let run ?o b au c d m p cart xyz_file =
         |> Ezfio.set_pseudo_pseudo_n_k;
 
         let tmp_array_v_kl, tmp_array_dz_kl, tmp_array_n_kl =
-          Array.init (lmax+1) ~f:(fun _ ->
-          (Array.make_matrix ~dimx:kmax ~dimy:nucl_num 0. )),
-          Array.init (lmax+1) ~f:(fun _ ->
-          (Array.make_matrix ~dimx:kmax ~dimy:nucl_num 0. )),
-          Array.init (lmax+1) ~f:(fun _ ->
-          (Array.make_matrix ~dimx:kmax ~dimy:nucl_num 0 ))
+          Array.init (lmax+1) (fun _ ->
+          (Array.make_matrix kmax nucl_num 0. )),
+          Array.init (lmax+1) (fun _ ->
+          (Array.make_matrix kmax nucl_num 0. )),
+          Array.init (lmax+1) (fun _ ->
+          (Array.make_matrix kmax nucl_num 0 ))
         in
-        List.iteri pseudo ~f:(fun j x ->
+        List.iteri (fun j x ->
           let last_idx =
-            Array.create ~len:(lmax+1) 0
+            Array.make (lmax+1) 0
           in
-          List.iter x.Pseudo.non_local ~f:(fun (y,c) ->
+          List.iter (fun (y,c) ->
             let k, y, z =
               Positive_int.to_int y.Pseudo.GaussianPrimitive_non_local.proj,
               AO_expo.to_float y.Pseudo.GaussianPrimitive_non_local.expo,
@@ -478,14 +458,14 @@ let run ?o b au c d m p cart xyz_file =
             tmp_array_dz_kl.(k).(i).(j) <- y;
             tmp_array_n_kl.(k).(i).(j)  <- z;
             last_idx.(k) <- i+1;
-           )
-        );
+           ) x.Pseudo.non_local 
+        ) pseudo ;
         let concat_3d tmp_array =
           let data =
-            Array.map tmp_array ~f:(fun x ->
-              Array.map x ~f:Array.to_list
+            Array.map (fun x ->
+              Array.map Array.to_list x
               |> Array.to_list
-              |> List.concat)
+              |> List.concat) tmp_array 
             |> Array.to_list
             |> List.concat
           in
@@ -518,7 +498,7 @@ let run ?o b au c d m p cart xyz_file =
         in
         let result = do_work [] 1  nuclei
         |> List.rev
-        |> List.map ~f:(fun (x,i) ->
+        |> List.map (fun (x,i) ->
           try
             let e =
               match x.Atom.element with
@@ -552,37 +532,38 @@ let run ?o b au c d m p cart xyz_file =
       let ao_num = List.length long_basis in
       Ezfio.set_ao_basis_ao_num ao_num;
       Ezfio.set_ao_basis_ao_basis b;
-      let ao_prim_num = List.map long_basis ~f:(fun (_,g,_) -> List.length g.Gto.lc)
-      and ao_nucl = List.map long_basis ~f:(fun (_,_,n) -> Nucl_number.to_int n)
+      let ao_prim_num = List.map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
+      and ao_nucl = List.map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
       and ao_power=
-        let l = List.map long_basis ~f:(fun (x,_,_) -> x) in
-        (List.map l ~f:(fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) )@
-        (List.map l ~f:(fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) )@
-        (List.map l ~f:(fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) )
+        let l = List.map (fun (x,_,_) -> x) long_basis in
+        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) l)@
+        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) l)@
+        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) l)
       in
-      let ao_prim_num_max = List.fold ~init:0 ~f:(fun s x ->
+      let ao_prim_num_max = List.fold_left (fun s x ->
         if x > s then x
-        else s) ao_prim_num
+        else s) 0 ao_prim_num
       in
       let gtos =
-        List.map long_basis ~f:(fun (_,x,_) -> x)
+        List.map (fun (_,x,_) -> x) long_basis 
       in
 
       let create_expo_coef ec =
           let coefs =
             begin match ec with
-            | `Coefs -> List.map gtos ~f:(fun x->
-              List.map x.Gto.lc ~f:(fun (_,coef) -> AO_coef.to_float coef) )
-            | `Expos -> List.map gtos ~f:(fun x->
-              List.map x.Gto.lc ~f:(fun (prim,_) -> AO_expo.to_float
-              prim.GaussianPrimitive.expo) )
+            | `Coefs -> List.map (fun x->
+              List.map (fun (_,coef) ->
+                AO_coef.to_float coef) x.Gto.lc) gtos 
+            | `Expos -> List.map (fun x->
+              List.map (fun (prim,_) -> AO_expo.to_float
+              prim.GaussianPrimitive.expo) x.Gto.lc) gtos 
             end
           in
           let rec get_n n accu = function
             | [] -> List.rev accu
             | h::tail ->
                 let y =
-                begin match List.nth h n with
+                begin match List.nth_opt h n with
                 | Some x -> x
                 | None -> 0.
                 end
@@ -621,9 +602,10 @@ let run ?o b au c d m p cart xyz_file =
     | ex ->
       begin
         begin
-          match Sys.is_directory ezfio_file with
-          | `Yes ->  rmdir ezfio_file
-          | _ -> ()
+          try
+            if Sys.is_directory ezfio_file then
+              rmdir ezfio_file
+          with _ -> ()
         end;
         raise ex;
       end
@@ -730,7 +712,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
   if basis = "show" then
   begin
     list_basis ()
-    |> List.iter ~f:print_endline;
+    |> List.iter print_endline;
     exit 0
   end;
 

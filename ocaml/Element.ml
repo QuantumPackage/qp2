@@ -1,4 +1,4 @@
-open Core
+open Sexplib.Std
 open Qptypes
 
 exception ElementError of string
@@ -14,7 +14,7 @@ type t =
 [@@deriving sexp]
 
 let of_string x =
-  match (String.capitalize (String.lowercase x)) with
+  match (String.capitalize_ascii (String.lowercase_ascii x)) with
 |  "X"   |  "Dummy"       ->  X
 |  "H"   |  "Hydrogen"    ->  H
 |  "He"  |  "Helium"      ->  He

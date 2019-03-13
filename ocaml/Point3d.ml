@@ -1,5 +1,5 @@
-open Core;;
-open Qptypes;;
+open Qptypes
+open Sexplib.Std
 
 type t = {
   x : float ;
@@ -21,10 +21,10 @@ let of_string ~units s =
     | Units.Angstrom -> Units.angstrom_to_bohr
   in
   let l = s
-  |> String.split ~on:' '
-  |> List.filter ~f:(fun x -> x <> "")
-  |> List.map ~f:Float.of_string
-  |> Array.of_list
+          |> String_ext.split ~on:' '
+          |> List.filter (fun x -> x <> "")
+          |> List.map float_of_string
+          |> Array.of_list
   in
   { x = l.(0) *. f ;
     y = l.(1) *. f ;
