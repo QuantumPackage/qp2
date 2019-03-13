@@ -510,13 +510,13 @@ let run ?o b au c d m p cart xyz_file =
             in
             try
               Basis.read_element (basis_channel key) i e
-            with Caml.Not_found ->
+            with Not_found ->
               let key =
                 Element x.Atom.element
               in
               try
                 Basis.read_element (basis_channel key) i e
-              with Caml.Not_found ->
+              with Not_found ->
                 failwith (Printf.sprintf "Basis not found for atom %d (%s)" (Nucl_number.to_int i)
                  (Element.to_string x.Atom.element) )
           with

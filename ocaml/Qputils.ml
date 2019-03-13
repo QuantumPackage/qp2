@@ -50,3 +50,6 @@ let input_lines ic =
   Bytes.to_string s
   |> String_ext.split ~on:'\n'
 
+
+let string_of_string s = s
+

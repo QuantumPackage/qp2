@@ -102,6 +102,15 @@ let to_list s =
   |> Array.to_list
 
 
+let of_list l =
+  let a = Array.of_list l in
+  String.init (Array.length a) (fun i -> a.(i))
+
+let rev s =
+  to_list s
+  |> List.rev
+  |> of_list
+
 let fold ~init ~f s =
     to_list s
     |> List.fold_left f init

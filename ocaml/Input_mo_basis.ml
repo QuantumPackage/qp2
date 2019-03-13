@@ -1,6 +1,6 @@
 open Qptypes
 open Qputils
-open Core
+open Sexplib.Std
 
 
 module Mo_basis : sig
@@ -38,9 +38,10 @@ end = struct
 
   let reorder b ordering =
     { b with mo_coef =
-      Array.map ~f:(fun mo ->
-        Array.init ~f:(fun i -> mo.(ordering.(i))) (Array.length mo) )
-        b.mo_coef
+      Array.map (fun mo ->
+        Array.init (Array.length mo)
+          (fun i -> mo.(ordering.(i)))
+      ) b.mo_coef 
     }
 
   let read_ao_md5 () =
@@ -73,7 +74,7 @@ end = struct
       begin
         let mo_num = MO_number.to_int (read_mo_num ()) in
         let data =
-          Array.init mo_num ~f:(fun _ -> MO_class.(to_string (Active [])))
+          Array.init mo_num (fun _ -> MO_class.(to_string (Active [])))
           |> Array.to_list
         in
         Ezfio.ezfio_array_of_list ~rank:1
@@ -81,7 +82,7 @@ end = struct
         |> Ezfio.set_mo_basis_mo_class
       end;
     Ezfio.flattened_ezfio (Ezfio.get_mo_basis_mo_class () )
-    |> Array.map ~f:MO_class.of_string
+    |> Array.map MO_class.of_string
 
 
   let read_mo_occ () =
@@ -90,7 +91,7 @@ end = struct
         let elec_alpha_num = Ezfio.get_electrons_elec_alpha_num ()
         and elec_beta_num = Ezfio.get_electrons_elec_beta_num ()
         and mo_num = MO_number.to_int (read_mo_num ()) in
-        let data = Array.init mo_num ~f:(fun i ->
+        let data = Array.init mo_num (fun i ->
             if (i<elec_beta_num) then 2.
             else if (i < elec_alpha_num) then 1.
             else 0.) |> Array.to_list in
@@ -99,18 +100,18 @@ end = struct
         |> Ezfio.set_mo_basis_mo_occ
       end;
     Ezfio.flattened_ezfio (Ezfio.get_mo_basis_mo_occ () )
-    |> Array.map ~f:MO_occ.of_float
+    |> Array.map MO_occ.of_float
 
 
   let read_mo_coef () =
     let a = Ezfio.get_mo_basis_mo_coef ()
             |> Ezfio.flattened_ezfio
-            |> Array.map ~f:MO_coef.of_float
+            |> Array.map MO_coef.of_float
     in
     let mo_num = read_mo_num () |> MO_number.to_int in
     let ao_num = (Array.length a)/mo_num in
-    Array.init mo_num ~f:(fun j ->
-        Array.sub ~pos:(j*ao_num) ~len:(ao_num) a
+    Array.init mo_num (fun j ->
+        Array.sub a (j*ao_num) (ao_num) 
       )
 
 
@@ -136,14 +137,14 @@ end = struct
       | 1 ->
         let header = [ Printf.sprintf "  #%15d" (imin+1) ; ] in
         let new_lines =
-          List.init ao_num ~f:(fun i ->
+          List.init ao_num (fun i ->
               Printf.sprintf "  %3d %15.10f " (i+1)
                 (MO_coef.to_float mo_coef.(imin  ).(i)) )
         in header @ new_lines
       | 2 ->
         let header = [ Printf.sprintf "  #%15d %15d" (imin+1) (imin+2) ; ] in
         let new_lines =
-          List.init ao_num ~f:(fun i ->
+          List.init ao_num (fun i ->
               Printf.sprintf "  %3d %15.10f %15.10f" (i+1)
                 (MO_coef.to_float mo_coef.(imin  ).(i))
                 (MO_coef.to_float mo_coef.(imin+1).(i)) )
@@ -152,7 +153,7 @@ end = struct
         let header = [ Printf.sprintf "  #%15d %15d %15d"
                          (imin+1) (imin+2) (imin+3); ] in
         let new_lines =
-          List.init ao_num ~f:(fun i ->
+          List.init ao_num (fun i ->
               Printf.sprintf "  %3d %15.10f %15.10f %15.10f" (i+1)
                 (MO_coef.to_float mo_coef.(imin  ).(i))
                 (MO_coef.to_float mo_coef.(imin+1).(i))
@@ -162,7 +163,7 @@ end = struct
         let header = [ Printf.sprintf "  #%15d %15d %15d %15d"
                          (imin+1) (imin+2) (imin+3) (imin+4) ; ] in
         let new_lines =
-          List.init ao_num ~f:(fun i ->
+          List.init ao_num (fun i ->
               Printf.sprintf "  %3d %15.10f %15.10f %15.10f %15.10f" (i+1)
                 (MO_coef.to_float mo_coef.(imin  ).(i))
                 (MO_coef.to_float mo_coef.(imin+1).(i))
@@ -173,7 +174,7 @@ end = struct
         let header = [ Printf.sprintf "  #%15d %15d %15d %15d %15d"
                          (imin+1) (imin+2) (imin+3) (imin+4) (imin+5) ; ] in
         let new_lines =
-          List.init ao_num ~f:(fun i ->
+          List.init ao_num (fun i ->
               Printf.sprintf "  %3d %15.10f %15.10f %15.10f %15.10f %15.10f" (i+1)
                 (MO_coef.to_float mo_coef.(imin  ).(i))
                 (MO_coef.to_float mo_coef.(imin+1).(i))
@@ -185,11 +186,11 @@ end = struct
     in
     let rec create_list accu i =
       if (i+4 < mo_num) then
-        create_list ( (print_five i (i+3) |> String.concat ~sep:"\n")::accu ) (i+4)
+        create_list ( (print_five i (i+3) |> String.concat "\n")::accu ) (i+4)
       else
-        (print_five i (mo_num-1) |> String.concat ~sep:"\n")::accu |> List.rev
+        (print_five i (mo_num-1) |> String.concat "\n")::accu |> List.rev
     in
-    create_list [] 0 |> String.concat ~sep:"\n\n"
+    create_list [] 0 |> String.concat "\n\n"
 
 
   let to_rst b =
@@ -224,13 +225,13 @@ mo_coef         = %s
       (MO_label.to_string b.mo_label)
       (MO_number.to_string b.mo_num)
       (b.mo_class |> Array.to_list |> List.map
-         ~f:(MO_class.to_string) |> String.concat ~sep:", " )
+         (MO_class.to_string) |> String.concat ", " )
       (b.mo_occ |> Array.to_list |> List.map
-         ~f:(MO_occ.to_string) |> String.concat ~sep:", " )
+         (MO_occ.to_string) |> String.concat ", " )
       (b.mo_coef |> Array.map
-         ~f:(fun x-> Array.map ~f:MO_coef.to_string x |> String.concat_array
-                       ~sep:"," ) |>
-       String.concat_array ~sep:"\n" )
+         (fun x-> Array.map MO_coef.to_string x |> 
+           Array.to_list |> String.concat "," ) |>
+       Array.to_list |> String.concat "\n" )
 
 
   let write_mo_num n =
@@ -245,7 +246,7 @@ mo_coef         = %s
 
   let write_mo_class a =
     let mo_num = Array.length a in
-    let data = Array.map ~f:MO_class.to_string a
+    let data = Array.map MO_class.to_string a
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_class
@@ -253,7 +254,7 @@ mo_coef         = %s
 
   let write_mo_occ a =
     let mo_num = Array.length a in
-    let data = Array.map ~f:MO_occ.to_float a
+    let data = Array.map MO_occ.to_float a
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_occ
@@ -268,7 +269,7 @@ mo_coef         = %s
     let mo_num = Array.length a in
     let ao_num = Array.length a.(0) in
     let data =
-      Array.map ~f:(fun mo -> Array.map ~f:MO_coef.to_float mo
+      Array.map (fun mo -> Array.map MO_coef.to_float mo
       |> Array.to_list) a
     |> Array.to_list
     |> List.concat

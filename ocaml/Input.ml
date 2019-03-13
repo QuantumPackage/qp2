@@ -1,6 +1,5 @@
 open Qputils;;
 open Qptypes;;
-open Core;;
 
 include Input_ao_basis;;
 include Input_bitmasks;;

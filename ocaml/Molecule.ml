@@ -62,7 +62,7 @@ let name m =
         try
           let i = List.assoc e accu in
           build_list ( (e,i+1)::(List.remove_assoc e accu) ) rest
-        with Caml.Not_found -> build_list ( (e,1)::accu ) rest
+        with Not_found -> build_list ( (e,1)::accu ) rest
       end
   | [] -> accu
   in

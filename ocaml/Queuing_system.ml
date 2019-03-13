@@ -83,7 +83,7 @@ let pop_task ~client_id q =
       }
     and found =
       try Some (TasksMap.find task_id q.tasks)
-      with Caml.Not_found -> None
+      with Not_found -> None
     in new_q, Some task_id, found
   | [] -> q, None, None
 
@@ -104,7 +104,7 @@ let end_task ~task_id ~client_id q =
   let () =
     let client_id_check =
       try RunningMap.find task_id running with
-      Caml.Not_found -> failwith "Task already finished"
+      Not_found -> failwith "Task already finished"
     in
     assert (client_id_check = client_id)
   in

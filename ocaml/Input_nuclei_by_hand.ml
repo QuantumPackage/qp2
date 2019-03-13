@@ -1,6 +1,6 @@
 open Qptypes;;
 open Qputils;;
-open Core;;
+open Sexplib.Std;;
 
 module Nuclei_by_hand : sig
   type t =
@@ -41,7 +41,7 @@ end = struct
   let read_nucl_label () =
     Ezfio.get_nuclei_nucl_label ()
     |> Ezfio.flattened_ezfio
-    |> Array.map ~f:Element.of_string
+    |> Array.map Element.of_string
   ;;
 
   let write_nucl_label ~nucl_num labels =
@@ -50,7 +50,7 @@ end = struct
     in
     let labels =
        Array.to_list labels
-       |> List.map ~f:Element.to_string
+       |> List.map Element.to_string
     in
     Ezfio.ezfio_array_of_list ~rank:1
        ~dim:[| nucl_num |] ~data:labels
@@ -61,7 +61,7 @@ end = struct
   let read_nucl_charge () =
     Ezfio.get_nuclei_nucl_charge ()
     |> Ezfio.flattened_ezfio
-    |> Array.map ~f:Charge.of_float
+    |> Array.map Charge.of_float
   ;;
 
   let write_nucl_charge ~nucl_num charges =
@@ -70,7 +70,7 @@ end = struct
     in
     let charges =
        Array.to_list charges
-       |> List.map ~f:Charge.to_float
+       |> List.map Charge.to_float
     in
     Ezfio.ezfio_array_of_list ~rank:1
        ~dim:[| nucl_num |] ~data:charges
@@ -85,7 +85,7 @@ end = struct
     |> Ezfio.flattened_ezfio
     in
     let zero = Point3d.of_string Units.Bohr "0. 0. 0." in
-    let result = Array.create nucl_num zero in
+    let result = Array.make nucl_num zero in
     for i=0 to (nucl_num-1)
     do
       result.(i) <- Point3d.({ x=raw_data.(i);
@@ -101,9 +101,9 @@ end = struct
     in
     let coord = Array.to_list coord in
     let coord =
-       (List.map ~f:(fun x-> x.Point3d.x) coord) @
-       (List.map ~f:(fun x-> x.Point3d.y) coord) @
-       (List.map ~f:(fun x-> x.Point3d.z) coord)
+       (List.map (fun x-> x.Point3d.x) coord) @
+       (List.map (fun x-> x.Point3d.y) coord) @
+       (List.map (fun x-> x.Point3d.z) coord)
     in
     Ezfio.ezfio_array_of_list ~rank:2
        ~dim:[| nucl_num ; 3 |] ~data:coord
@@ -160,11 +160,11 @@ nucl_coord       = %s
 "
     (Nucl_number.to_string b.nucl_num)
     (b.nucl_label |> Array.to_list |> List.map
-      ~f:(Element.to_string) |> String.concat ~sep:", " )
+      (Element.to_string) |> String.concat ", " )
     (b.nucl_charge |> Array.to_list |> List.map
-      ~f:(Charge.to_string) |> String.concat ~sep:", " )
+      (Charge.to_string) |> String.concat ", " )
     (b.nucl_coord  |> Array.to_list |> List.map
-      ~f:(Point3d.to_string ~units:Units.Bohr) |> String.concat ~sep:"\n" )
+      (Point3d.to_string ~units:Units.Bohr) |> String.concat "\n" )
   ;;
 
 
@@ -174,12 +174,12 @@ nucl_coord       = %s
        ( Printf.sprintf "  %d\n  "
          nucl_num
        ) :: (
-       List.init nucl_num ~f:(fun i->
+       List.init nucl_num (fun i->
          Printf.sprintf "  %-3s  %d   %s"
           (b.nucl_label.(i)  |> Element.to_string)
           (b.nucl_charge.(i) |> Charge.to_int )
           (b.nucl_coord.(i)  |> Point3d.to_string ~units:Units.Angstrom) )
-      ) |> String.concat ~sep:"\n"
+      ) |> String.concat "\n"
      in
      Printf.sprintf "
 Nuclear coordinates in xyz format (Angstroms) ::
@@ -192,16 +192,15 @@ Nuclear coordinates in xyz format (Angstroms) ::
 
   let of_rst s =
     let l = Rst_string.to_string s
-    |> String.split ~on:'\n'
+    |> String_ext.split ~on:'\n'
     in
     (* Find lines containing the xyz data *)
     let rec extract_begin = function
-    | [] -> raise Caml.Not_found
+    | [] -> raise Not_found
     | line::tail ->
-      let line = String.strip line in
+      let line = String.trim line in
       if (String.length line > 3) &&
-        (String.sub line ~pos:((String.length line)-2)
-            ~len:2 = "::") then
+        (String.sub line ((String.length line)-2) 2 = "::") then
            tail
       else
          extract_begin tail
@@ -213,12 +212,12 @@ Nuclear coordinates in xyz format (Angstroms) ::
       | _ :: nucl_num :: title :: lines ->
         begin
           let nucl_num = nucl_num
-          |> String.strip
-          |> Int.of_string
+          |> String.trim
+          |> int_of_string
           |> Nucl_number.of_int ~max:nmax
           and lines = Array.of_list lines
           in
-          List.init (Nucl_number.to_int nucl_num) ~f:(fun i ->
+          List.init (Nucl_number.to_int nucl_num) (fun i ->
             Atom.of_string Units.Angstrom lines.(i))
         end
       | _ -> failwith "Error in xyz format"
@@ -227,12 +226,12 @@ Nuclear coordinates in xyz format (Angstroms) ::
     let result =
       { nucl_num = List.length atom_list
           |> Nucl_number.of_int ~max:nmax;
-        nucl_label = List.map atom_list ~f:(fun x ->
-          x.Atom.element) |> Array.of_list ;
-        nucl_charge = List.map atom_list ~f:(fun x ->
-          x.Atom.charge ) |> Array.of_list ;
-        nucl_coord = List.map atom_list ~f:(fun x ->
-          x.Atom.coord ) |> Array.of_list ;
+        nucl_label = List.map (fun x ->
+          x.Atom.element) atom_list |> Array.of_list ;
+        nucl_charge = List.map (fun x ->
+          x.Atom.charge ) atom_list |> Array.of_list ;
+        nucl_coord = List.map (fun x ->
+          x.Atom.coord ) atom_list |> Array.of_list ;
       }
     in Some result
   ;;

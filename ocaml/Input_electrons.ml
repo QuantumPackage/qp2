@@ -1,6 +1,6 @@
-open Qptypes;;
-open Qputils;;
-open Core;;
+open Qptypes
+open Qputils
+open Sexplib.Std
 
 module Electrons : sig
   type t =
