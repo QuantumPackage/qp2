@@ -21,8 +21,9 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
  endif
  
  if(no_core_density .EQ. "no_core_dm")then
-  integer :: i,j
-  do i = 1, n_core_orb
+  integer :: ii,i,j
+  do ii = 1, n_core_orb
+   i = list_core(ii)
    do j = 1, mo_num
     one_e_dm_mo_alpha_for_dft(j,i,:) = 0.d0
     one_e_dm_mo_alpha_for_dft(i,j,:) = 0.d0
@@ -55,8 +56,9 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
  endif
 
  if(no_core_density .EQ. "no_core_dm")then
-  integer :: i,j
-  do i = 1, n_core_orb
+  integer :: ii,i,j
+  do ii = 1, n_core_orb
+   i = list_core(ii)
    do j = 1, mo_num
     one_e_dm_mo_beta_for_dft(j,i,:) = 0.d0
     one_e_dm_mo_beta_for_dft(i,j,:) = 0.d0
@@ -119,3 +121,65 @@ END_PROVIDER
   one_body_dm_mo_beta_one_det(i,i, 1:N_states) = 1.d0
  enddo
 END_PROVIDER
+
+
+
+
+BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft_no_core, (mo_num,mo_num, N_states)]
+ implicit none
+ BEGIN_DOC
+! density matrix for alpha electrons in the MO basis without the core orbitals
+ END_DOC
+ one_e_dm_mo_alpha_for_dft_no_core = one_e_dm_mo_alpha_for_dft 
+
+ integer :: ii,i,j
+ do ii = 1, n_core_orb
+  i = list_core(ii)
+  do j = 1, mo_num
+   one_e_dm_mo_alpha_for_dft_no_core(j,i,:) = 0.d0
+   one_e_dm_mo_alpha_for_dft_no_core(i,j,:) = 0.d0
+  enddo
+ enddo
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft_no_core, (mo_num,mo_num, N_states)]
+ implicit none
+ BEGIN_DOC
+! density matrix for beta  electrons in the MO basis without the core orbitals 
+ END_DOC
+ one_e_dm_mo_beta_for_dft_no_core = one_e_dm_mo_beta_for_dft 
+ integer :: ii,i,j
+ do ii = 1, n_core_orb
+  i = list_core(ii)
+  do j = 1, mo_num
+   one_e_dm_mo_beta_for_dft_no_core(j,i,:) = 0.d0
+   one_e_dm_mo_beta_for_dft_no_core(i,j,:) = 0.d0
+  enddo
+ enddo
+END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, one_e_dm_alpha_ao_for_dft_no_core, (ao_num,ao_num,N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_beta_ao_for_dft_no_core, (ao_num,ao_num,N_states) ]
+ BEGIN_DOC
+! one body density matrix on the AO basis based on one_e_dm_mo_alpha_for_dft_no_core
+ END_DOC
+ implicit none
+ integer :: istate
+ double precision :: mo_alpha,mo_beta
+
+ one_e_dm_alpha_ao_for_dft_no_core = 0.d0
+ one_e_dm_beta_ao_for_dft_no_core = 0.d0
+ do istate = 1, N_states
+  call mo_to_ao_no_overlap( one_e_dm_mo_alpha_for_dft_no_core(1,1,istate), &
+                            size(one_e_dm_mo_alpha_for_dft_no_core,1),     &
+                            one_e_dm_alpha_ao_for_dft_no_core(1,1,istate), &
+                            size(one_e_dm_alpha_ao_for_dft_no_core,1) )
+  call mo_to_ao_no_overlap( one_e_dm_mo_beta_for_dft_no_core(1,1,istate), &
+                            size(one_e_dm_mo_beta_for_dft_no_core,1),     &
+                            one_e_dm_beta_ao_for_dft_no_core(1,1,istate), &
+                            size(one_e_dm_beta_ao_for_dft_no_core,1) )
+ enddo
+
+END_PROVIDER
+
