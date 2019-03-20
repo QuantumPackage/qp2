@@ -2,9 +2,6 @@ open Qptypes
 open Element
 
 let () =
-  let indices =
-    Array.init 78 (fun i -> i)
-  in
   let out_channel = 
     open_out (Qpackage.root ^ "/data/list_element.txt")
   in
