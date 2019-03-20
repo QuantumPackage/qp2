@@ -1,4 +1,4 @@
-open Core
+open Sexplib.Std
 open Qptypes
 
 
@@ -81,12 +81,12 @@ let to_string_local = function
 | t  ->
   "Local component:" ::
   ( Printf.sprintf "%20s %8s %20s" "Coeff." "r^n" "Exp." ) ::
-  ( List.map t ~f:(fun (l,c) -> Printf.sprintf "%20f %8d %20f"
+  ( List.map (fun (l,c) -> Printf.sprintf "%20f %8d %20f"
       (AO_coef.to_float c)
       (R_power.to_int   l.GaussianPrimitive_local.r_power)
       (AO_expo.to_float l.GaussianPrimitive_local.expo)
-  ) )
-  |> String.concat ~sep:"\n"
+  ) t )
+  |> String.concat "\n"
 
 
 (** Transform the non-local component of the pseudopotential to a string *)
@@ -95,7 +95,7 @@ let to_string_non_local = function
 | t  ->
   "Non-local component:" ::
   ( Printf.sprintf "%20s %8s %20s %8s" "Coeff." "r^n" "Exp." "Proj") ::
-  ( List.map t ~f:(fun (l,c) ->
+  ( List.map (fun (l,c) ->
       let p =
         Positive_int.to_int l.GaussianPrimitive_non_local.proj
       in
@@ -104,8 +104,8 @@ let to_string_non_local = function
       (R_power.to_int   l.GaussianPrimitive_non_local.r_power)
       (AO_expo.to_float l.GaussianPrimitive_non_local.expo)
       p p
-  ) )
-  |> String.concat ~sep:"\n"
+  ) t )
+  |> String.concat "\n"
 
 (** Transform the Pseudopotential to a string *)
 let to_string t =
@@ -116,29 +116,30 @@ let to_string t =
   :: to_string_local t.local
   :: to_string_non_local t.non_local
   :: []
-  |> List.filter ~f:(fun x -> x <> "")
-  |> String.concat ~sep:"\n"
+  |> List.filter (fun x -> x <> "")
+  |> String.concat "\n"
 
 
 (** Find an element in the file *)
 let find in_channel element =
-  In_channel.seek in_channel 0L;
+  seek_in in_channel 0;
 
   let loop, element_read, old_pos =
      ref true,
      ref None,
-     ref (In_channel.pos in_channel)
+     ref (pos_in in_channel)
   in
 
   while !loop
   do
     try
       let buffer =
-        old_pos := In_channel.pos in_channel;
-        match In_channel.input_line in_channel with
-        | Some line -> String.split ~on:' ' line
-          |> List.hd_exn
-        | None -> raise End_of_file
+        old_pos := pos_in in_channel;
+        try 
+          input_line in_channel
+          |> String_ext.split ~on:' ' 
+          |> List.hd
+        with _ -> raise End_of_file 
       in
       element_read := Some (Element.of_string buffer);
       loop := !element_read <> (Some element)
@@ -146,7 +147,7 @@ let find in_channel element =
     | Element.ElementError _ -> ()
     | End_of_file -> loop := false
   done ;
-  In_channel.seek in_channel !old_pos;
+  seek_in in_channel !old_pos;
   !element_read
 
 
@@ -156,13 +157,13 @@ let read_element in_channel element =
   | Some e when e = element ->
     begin
       let rec read result =
-        match In_channel.input_line in_channel with
-        | None -> result
-        | Some line ->
-          if (String.strip line = "") then
+        try 
+          let line = input_line in_channel in
+          if (String.trim line = "") then
             result
           else
             read (line::result)
+        with _ -> result
       in
 
       let data =
@@ -171,20 +172,20 @@ let read_element in_channel element =
       in
 
       let debug_data =
-        String.concat ~sep:"\n" data
+        String.concat "\n" data
       in
 
       let decode_first_line = function
       | first_line :: rest ->
         begin
           let first_line_split =
-            String.split first_line ~on:' '
-            |> List.filter ~f:(fun x -> (String.strip x) <> "")
+            String_ext.split first_line ~on:' '
+            |> List.filter (fun x -> (String.trim x) <> "")
           in
           match first_line_split with
           | e :: "GEN" :: n :: p ->
             {  element = Element.of_string e ;
-              n_elec  = Int.of_string n |> Positive_int.of_int ;
+              n_elec  = int_of_string n |> Positive_int.of_int ;
               local = [] ;
               non_local = []
             }, rest
@@ -200,18 +201,18 @@ let read_element in_channel element =
       | (n,line::rest) ->
         begin
           match
-            String.split line ~on:' '
-            |> List.filter ~f:(fun x -> String.strip x <> "")
+            String_ext.split line ~on:' '
+            |> List.filter (fun x -> String.trim x <> "")
           with
           | c :: i :: e :: [] ->
             let i =
-              Int.of_string i
+              int_of_string i
             in
             let elem =
               ( create_primitive
-                (Float.of_string e |> AO_expo.of_float)
+                (float_of_string e |> AO_expo.of_float)
                 (i-2 |> R_power.of_int),
-                Float.of_string c |> AO_coef.of_float
+                float_of_string c |> AO_coef.of_float
               )
             in
             loop create_primitive (elem::accu) (n-1, rest)
@@ -230,8 +231,8 @@ let read_element in_channel element =
         match data with
         | n :: rest ->
             let n =
-              String.strip n
-              |> Int.of_string
+              String.trim n
+              |> int_of_string
               |> Positive_int.of_int
             in
             decode_local_n n rest
@@ -250,8 +251,8 @@ let read_element in_channel element =
           match data with
           | n :: rest ->
               let n =
-                String.strip n
-                |> Int.of_string
+                String.trim  n
+                |> int_of_string
                 |> Positive_int.of_int
               in
               let result =

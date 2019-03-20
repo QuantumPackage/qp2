@@ -408,10 +408,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
       ! -------------------------------------------
 
-!      call dgemm('T','N', shift2, shift2, sze,                       &
-!          1.d0, U, size(U,1), S, size(S,1),                          &
-!          0.d0, s_, size(s_,1))
-
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k)
        do j=1,shift2
          do i=1,shift2
@@ -438,8 +434,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         do k=1,shift2
           h_p(k,k) = h_p(k,k) + S_z2_Sz - expected_s2
         enddo
-        alpha = 0.1d0
-        h_p = h + alpha*h_p
+        if (only_expected_s2) then
+          alpha = 0.1d0
+          h_p = h + alpha*h_p
+        else
+          alpha = 0.0001d0
+          h_p = h + alpha*h_p
+        endif
       else
         h_p = h
         alpha = 0.d0

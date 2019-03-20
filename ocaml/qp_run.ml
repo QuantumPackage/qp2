@@ -46,7 +46,7 @@ let run slave ?prefix exe ezfio_file =
   in
 
   let time_start =
-    Core.Time.now ()
+    Unix.time ()
   in
 
   if (not (Sys.file_exists ezfio_file)) then
@@ -65,7 +65,15 @@ let run slave ?prefix exe ezfio_file =
         failwith ("Executable "^exe^" not found")
     end;
 
-  Printf.printf "%s\n" (Core.Time.to_string time_start);
+  let tm = Unix.localtime time_start in
+  Printf.printf "Date: %2.2d/%2.2d/%4d %2.2d:%2.2d:%2.2d\n"
+    tm.Unix.tm_mday
+    (tm.Unix.tm_mon+1)
+    (tm.Unix.tm_year+1900)
+    (tm.Unix.tm_hour + if tm.Unix.tm_isdst then 1 else 0)
+    tm.Unix.tm_min
+    tm.Unix.tm_sec
+  ;
   Printf.printf "===============\nQuantum Package\n===============\n\n";
   Printf.printf "Git Commit: %s\n" Git.message;
   Printf.printf "Git Date  : %s\n" Git.date;
@@ -89,10 +97,12 @@ let run slave ?prefix exe ezfio_file =
     if slave then
       try
         let address =
-          Core.In_channel.read_all qp_run_address_filename
-          |> String.trim
+          let ic = open_in qp_run_address_filename in
+          let result = input_line ic in
+          close_in ic;
+          String.trim result
         in
-        Unix.putenv "QP_RUN_ADDRESS_MASTER" address
+        Unix.putenv "QP_RUN_ADDRESS_MASTER" address;
       with Sys_error _ -> failwith "No master is not running"
   in
 
@@ -110,8 +120,11 @@ let run slave ?prefix exe ezfio_file =
   Unix.putenv "QP_RUN_ADDRESS" address;
   let () =
     if (not slave) then
-      Core.Out_channel.with_file qp_run_address_filename  ~f:(
-        fun oc -> Core.Out_channel.output_lines oc [address])
+      begin
+        let oc = open_out qp_run_address_filename in
+        Printf.fprintf oc "%s\n" address;
+        close_out oc;
+      end
   in
 
 
@@ -135,9 +148,13 @@ let run slave ?prefix exe ezfio_file =
   if (not slave) then
     Sys.remove qp_run_address_filename;
 
-  let duration = Core.Time.diff (Core.Time.now()) time_start
-  |> Core.Time.Span.to_string in
-  Printf.printf "Wall time : %s\n\n" duration;
+  let duration = Unix.time () -. time_start |> Unix.gmtime in
+  let open Unix in
+  let d, h, m, s =
+    duration.tm_yday, duration.tm_hour, duration.tm_min, duration.tm_sec 
+  in
+  Printf.printf "Wall time: %d:%2.2d:%2.2d" (d*24+h) m s ;
+  Printf.printf "\n\n";
   if (exit_code <> 0) then
     exit exit_code
 

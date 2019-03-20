@@ -42,3 +42,14 @@ let rmdir dirname =
 
 
 
+let input_lines ic = 
+  let n = in_channel_length ic in
+  let s = Bytes.create n in
+  really_input ic s 0 n;                                                                    
+  close_in ic;
+  Bytes.to_string s
+  |> String_ext.split ~on:'\n'
+
+
+let string_of_string s = s
+

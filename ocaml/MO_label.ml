@@ -1,4 +1,4 @@
-open Core;;
+open Sexplib.Std
 
 type t =
 | Guess
@@ -8,7 +8,7 @@ type t =
 | Orthonormalized
 | None
 [@@deriving sexp]
-;;
+
 
 let to_string = function
   | Guess     -> "Guess"
@@ -20,7 +20,7 @@ let to_string = function
 ;;
 
 let of_string  s =
-  match String.lowercase (String.strip s) with
+  match String.lowercase_ascii (String.trim s) with
   | "guess"     -> Guess
   | "canonical" -> Canonical
   | "natural"   -> Natural
