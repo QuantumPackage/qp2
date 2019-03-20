@@ -1,4 +1,3 @@
-open Core
 open Qptypes
 
 module Hole = struct
@@ -56,7 +55,7 @@ let to_string = function
         "," ;
         (MO_class.to_string (Particle.to_mo_class p));
         "]"]
-      |> String.concat ~sep:" "
+      |> String.concat " "
   | Double (h1,p1,h2,p2) ->
       [ "Double Exc. : [" ;
         (MO_class.to_string (Hole.to_mo_class h1));
@@ -67,6 +66,6 @@ let to_string = function
         "," ;
         (MO_class.to_string (Particle.to_mo_class p2));
         "]"]
-      |> String.concat ~sep:" "
+      |> String.concat " "
 
 

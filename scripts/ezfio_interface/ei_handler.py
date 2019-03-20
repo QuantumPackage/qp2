@@ -556,7 +556,7 @@ def create_ocaml_input(dict_ezfio_cfg, module_lower):
 
     template += ["open Qptypes;;",
                  "open Qputils;;",
-                 "open Core;;",
+                 "open Sexplib.Std;;",
                  "",
                  "module {0} : sig".format(module_lower.capitalize())]
 
@@ -611,7 +611,16 @@ def create_ocaml_input(dict_ezfio_cfg, module_lower):
                  "",
                  "end"]
 
-    return "\n".join(template)
+    result = "\n".join(template)
+    result = result.replace("String.of_string","string_of_string")
+    result = result.replace("String.to_string","string_of_string")
+    result = result.replace("Int.of_string","int_of_string")
+    result = result.replace("Int.to_string","string_of_int")
+    result = result.replace("Float.of_string","float_of_string")
+    result = result.replace("Float.to_string","string_of_float")
+    result = result.replace("Bool.of_string","bool_of_string")
+    result = result.replace("Bool.to_string","string_of_bool")
+    return result
 
 
 def save_ocaml_input(module_lower, str_ocaml_input):

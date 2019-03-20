@@ -1,5 +1,3 @@
-open Core
-
 type t =
 {
   title: string;
@@ -7,14 +5,14 @@ type t =
   cur_value  : float;
   end_value  : float;
   bar_length : int;
-  init_time  : Time.t;
+  init_time  : float;
   dirty      : bool;
-  next       : Time.t;
+  next       : float;
 }
 
 let init ?(bar_length=20) ?(start_value=0.) ?(end_value=1.) ~title =
   { title ; start_value ; end_value ; bar_length ; cur_value=start_value ;
-    init_time= Time.now () ; dirty = false ; next = Time.now () }
+    init_time= Unix.time () ; dirty = false ; next = Unix.time () }
 
 let update ~cur_value bar =
   { bar with cur_value ; dirty=true }
@@ -40,23 +38,23 @@ let display_tty bar =
       |> Float.to_int
     in
     let hashes =
-      String.init bar.bar_length ~f:(fun i ->
+      String.init bar.bar_length (fun i ->
         if (i < n_hashes) then '#'
         else ' '
       )
     in
     let now =
-      Time.now ()
+      Unix.time ()
     in
     let running_time =
-      Time.abs_diff now bar.init_time
+      now -. bar.init_time
     in
-    Printf.eprintf "%s : [%s] %4.1f%% | %10s\r%!"
+    Printf.eprintf "%s : [%s] %4.1f%% | %8.0f s\r%!"
       bar.title
       hashes
       percent
-      (Time.Span.to_string running_time);
-    { bar with dirty = false ; next = Time.add now (Time.Span.of_sec 0.1) }
+      running_time;
+    { bar with dirty = false ; next = now +. 0.1 }
 
 
 let display_file bar =
@@ -65,19 +63,19 @@ let display_file bar =
               (bar.end_value -. bar.start_value)
     in
     let running_time =
-      Time.abs_diff (Time.now ()) bar.init_time
+      (Unix.time ()) -. bar.init_time
     in
-    Printf.eprintf "%5.2f %%  in  %20s \n%!"
+    Printf.eprintf "%5.2f %%  in  %20.0f seconds \n%!"
       percent
-      (Time.Span.to_string running_time);
-    { bar with dirty = false ; next = Time.add (Time.now ()) (Time.Span.of_sec 10.) }
+      running_time;
+    { bar with dirty = false ; next = (Unix.time ()) +. 10. }
 
 
 
 let display bar =
   if (not bar.dirty) then
      bar
-  else if (Time.now () < bar.next) then
+  else if (Unix.time () < bar.next) then
      bar
   else
     begin

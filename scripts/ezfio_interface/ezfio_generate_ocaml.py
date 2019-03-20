@@ -352,7 +352,6 @@ class EZFIO_ocaml(object):
 
         l_template = ['open Qputils;;',
                       'open Qptypes;;',
-                      'open Core;;',
                       '']
 
         for m in self.l_module_lower:
