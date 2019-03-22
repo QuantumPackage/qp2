@@ -1,6 +1,6 @@
 open Qptypes;;
 open Qputils;;
-open Core;;
+open Sexplib.Std;;
 
 module Determinants_by_hand : sig
   type t =
@@ -112,7 +112,7 @@ end = struct
       begin
         Ezfio.set_determinants_n_states n_states;
         let data =
-          Array.create n_states 1.
+          Array.make n_states 1.
           |> Array.to_list
         in
         Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| n_states |] ~data
@@ -126,7 +126,7 @@ end = struct
         |> States_number.to_int
       in
       let data =
-        Array.map ~f:Positive_float.to_float data
+        Array.map Positive_float.to_float data
         |> Array.to_list
       in
       Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| n_states |] ~data
@@ -142,21 +142,21 @@ end = struct
      begin
         let data =
           Array.init n_states (fun _ -> 1./.(float_of_int n_states))
-          |> Array.map ~f:Positive_float.of_float
+          |> Array.map Positive_float.of_float
         in
         write_state_average_weight data
      end;
     let result =
       Ezfio.get_determinants_state_average_weight ()
       |> Ezfio.flattened_ezfio
-      |> Array.map ~f:Positive_float.of_float
+      |> Array.map Positive_float.of_float
     in
     if Array.length result = n_states then
       result
     else
       let data =
         Array.init n_states (fun _ -> 1./.(float_of_int n_states))
-        |> Array.map ~f:Positive_float.of_float
+        |> Array.map Positive_float.of_float
       in
       (write_state_average_weight data; data)
   ;;
@@ -189,18 +189,18 @@ end = struct
           |> States_number.to_int
         in
         Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| 1 ; n_states |]
-          ~data:(List.init n_states ~f:(fun i -> if (i=0) then 1. else 0. ))
+          ~data:(List.init n_states (fun i -> if (i=0) then 1. else 0. ))
           |> Ezfio.set_determinants_psi_coef
       end;
     Ezfio.get_determinants_psi_coef ()
     |> Ezfio.flattened_ezfio
-    |> Array.map ~f:Det_coef.of_float
+    |> Array.map Det_coef.of_float
   ;;
 
   let write_psi_coef ~n_det ~n_states c =
     let n_det = Det_number.to_int n_det
     and c = Array.to_list c
-            |> List.map ~f:Det_coef.to_float
+            |> List.map Det_coef.to_float
     and n_states =
       States_number.to_int n_states
     in
@@ -242,9 +242,9 @@ end = struct
     assert (n_int = dim.(0));
     assert (dim.(1) = 2);
     assert (dim.(2) = (Det_number.to_int (read_n_det ())));
-    List.init dim.(2) ~f:(fun i ->
-      Array.sub ~pos:(2*n_int*i) ~len:(2*n_int) data)
-    |> List.map ~f:(Determinant.of_int64_array
+    List.init dim.(2) (fun i ->
+      Array.sub data (2*n_int*i) (2*n_int) )
+    |> List.map (Determinant.of_int64_array
       ~n_int:(N_int_number.of_int n_int)
       ~alpha:n_alpha ~beta:n_beta )
     |> Array.of_list
@@ -332,18 +332,19 @@ end = struct
           else
             "0."
         )
-        |> String.concat_array ~sep:"\t"
+        |> Array.to_list |> String.concat "\t"
       in
-      Array.init ndet ~f:(fun i ->
+      Array.init ndet (fun i ->
         Printf.sprintf "  %s\n%s\n"
           (coefs_string i)
           (Determinant.to_string ~mo_num:mo_num b.psi_det.(i)
-           |> String.split ~on:'\n'
-           |> List.map ~f:(fun x -> "  "^x)
-           |> String.concat ~sep:"\n"
+           |> String_ext.split ~on:'\n'
+           |> List.map (fun x -> "  "^x)
+           |> String.concat "\n"
           )
       )
-      |> String.concat_array ~sep:"\n"
+      |> Array.to_list
+      |> String.concat "\n"
     in
     Printf.sprintf "
 Force the selected wave function to be an eigenfunction of S^2.
@@ -365,7 +366,7 @@ Determinants ::
 "
      (b.expected_s2   |> Positive_float.to_string)
      (b.n_det         |> Det_number.to_string)
-     (b.state_average_weight |> Array.to_list |> List.map ~f:Positive_float.to_string |> String.concat ~sep:"\t")
+     (b.state_average_weight |> Array.to_list |> List.map Positive_float.to_string |> String.concat "\t")
      det_text
      |> Rst_string.of_string
   ;;
@@ -388,11 +389,11 @@ psi_det                = %s
      (b.n_det         |> Det_number.to_string)
      (b.n_states      |> States_number.to_string)
      (b.expected_s2   |> Positive_float.to_string)
-     (b.state_average_weight |> Array.to_list |> List.map ~f:Positive_float.to_string |> String.concat ~sep:",")
-     (b.psi_coef  |> Array.to_list |> List.map ~f:Det_coef.to_string
-      |> String.concat ~sep:", ")
-     (b.psi_det   |> Array.to_list |> List.map ~f:(Determinant.to_string
-       ~mo_num) |> String.concat ~sep:"\n\n")
+     (b.state_average_weight |> Array.to_list |> List.map Positive_float.to_string |> String.concat ",")
+     (b.psi_coef  |> Array.to_list |> List.map Det_coef.to_string
+      |> String.concat ", ")
+     (b.psi_det   |> Array.to_list |> List.map (Determinant.to_string
+       ~mo_num) |> String.concat "\n\n")
   ;;
 
   let of_rst r =
@@ -400,33 +401,36 @@ psi_det                = %s
     in
 
     (* Split into header and determinants data *)
-    let idx = String.substr_index_exn r ~pos:0 ~pattern:"\nDeterminants"
+    let idx = 
+      match String_ext.substr_index r ~pos:0 ~pattern:"\nDeterminants" with
+      | Some x -> x
+      | None -> assert false
     in
     let (header, dets) =
-       (String.prefix r idx, String.suffix r ((String.length r)-idx) )
+       (String.sub r 0 idx, String.sub r idx (String.length r - idx) )
     in
 
     (* Handle header *)
     let header = r
-    |> String.split ~on:'\n'
-    |> List.filter ~f:(fun line ->
+    |> String_ext.split ~on:'\n'
+    |> List.filter (fun line ->
         if (line = "") then
           false
         else
           ( (String.contains line '=') && (line.[0] = ' ') )
        )
-    |> List.map ~f:(fun line ->
+    |> List.map (fun line ->
         "("^(
-        String.tr line ~target:'=' ~replacement:' '
-        |> String.strip
+        String_ext.tr line ~target:'=' ~replacement:' '
+        |> String.trim
         )^")" )
-    |> String.concat
+    |> String.concat ""
     in
 
     (* Handle determinant coefs *)
     let dets = match ( dets
-      |> String.split ~on:'\n'
-      |> List.map ~f:(String.strip)
+      |> String_ext.split ~on:'\n'
+      |> List.map String.trim
     ) with
     | _::lines -> lines
     | _ -> failwith "Error in determinants"
@@ -438,8 +442,8 @@ psi_det                = %s
       | ""::""::tail -> read_coefs accu tail
       | ""::c::tail ->
           let c =
-            String.split ~on:'\t' c
-            |> List.map ~f:(fun x -> Det_coef.of_float (Float.of_string x))
+            String_ext.split ~on:'\t' c
+            |> List.map (fun x -> Det_coef.of_float (Float.of_string x))
             |> Array.of_list
           in
           read_coefs (c::accu) tail
@@ -450,15 +454,15 @@ psi_det                = %s
           read_coefs [] dets
         in
         let nstates =
-          List.hd_exn buffer
+          List.hd buffer
           |> Array.length
         in
         let extract_state i =
           let i =
             i-1
           in
-          List.map ~f:(fun x -> Det_coef.to_string x.(i)) buffer
-          |> String.concat ~sep:" "
+          List.map (fun x -> Det_coef.to_string x.(i)) buffer
+          |> String.concat " "
         in
         let rec build_result = function
         | 1 -> extract_state 1
@@ -492,21 +496,12 @@ psi_det                = %s
       | _::tail -> read_dets accu tail
       in
       let dets =
-        List.map ~f:String.rev dets
+        List.map String_ext.rev dets
       in
-      let sze =
-        List.fold ~init:0 ~f:(fun accu x -> accu + (String.length x)) dets
-      in
-      let control =
-        Gc.get ()
-      in
-      Gc.tune ~minor_heap_size:(sze) ~space_overhead:(sze/10)
-        ~max_overhead:100000 ~major_heap_increment:(sze/10) ();
       let a =
         read_dets [] dets
-        |> String.concat
+        |> String.concat ""
       in
-      Gc.set control;
       "(psi_det ("^a^"))"
     in
 
@@ -520,7 +515,7 @@ psi_det                = %s
       Printf.sprintf "(n_states %d)" (States_number.to_int @@ read_n_states ())
     in
     let s =
-       String.concat [ header ; bitkind ; n_int ; n_states ; psi_coef ; psi_det]
+       String.concat "" [ header ; bitkind ; n_int ; n_states ; psi_coef ; psi_det]
     in
 
 
@@ -603,16 +598,16 @@ psi_det                = %s
       States_number.to_int det.n_states
     in
     Range.to_int_list range
-    |> List.iter ~f:(fun istate ->
+    |> List.iter (fun istate ->
       if istate > n_states then
         failwith "State to extract should not be greater than n_states")
     ;
     let sorted_list =
       Range.to_int_list range
-      |> List.sort ~compare
+      |> List.sort compare
     in
     let state_shift = ref 0 in
-    List.iter ~f:(fun istate ->
+    List.iter (fun istate ->
       let j =
         istate - 1
       in

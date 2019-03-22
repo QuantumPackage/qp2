@@ -1,10 +1,11 @@
-open Core;;
-open Qptypes ;;
+open Qptypes 
+open Sexplib.Std
 
 type t = Strictly_positive_int.t [@@deriving sexp]
 
-let of_int = Strictly_positive_int.of_int ;;
-let to_int = Strictly_positive_int.to_int ;;
+let of_int = Strictly_positive_int.of_int 
+
+let to_int = Strictly_positive_int.to_int
 
 let to_string m =
   match (to_int m) with
@@ -18,7 +19,7 @@ let to_string m =
   | 8 -> "Octet"
   | 9 -> "Nonet"
   | i -> Printf.sprintf "%d-et" i
-;;
+
 
 let of_alpha_beta a b =
   let a = Elec_alpha_number.to_int a
@@ -26,11 +27,11 @@ let of_alpha_beta a b =
   in
   assert (a >= b);
   of_int (1 + a - b)
-;;
+
 
 let to_alpha_beta ne m =
   let ne = Elec_number.to_int ne in
   let nb = (ne-(to_int m)+1)/2 in
   let na = ne - nb in
   (Elec_alpha_number.of_int na, Elec_beta_number.of_int nb)
-;;
+

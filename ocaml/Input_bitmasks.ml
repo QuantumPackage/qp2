@@ -1,6 +1,6 @@
-open Qptypes;;
-open Qputils;;
-open Core;;
+open Qptypes
+open Qputils
+open Sexplib.Std
 
 module Bitmasks : sig
   type t =
@@ -59,7 +59,7 @@ end = struct
 
   let full_mask n_int =
       let range = "[1-"^
-        (Int.to_string (Ezfio.get_mo_basis_mo_num ()))^"]"
+        (string_of_int (Ezfio.get_mo_basis_mo_num ()))^"]"
       in
       MO_class.create_active range
       |> MO_class.to_bitlist n_int
@@ -75,7 +75,7 @@ end = struct
           full_mask n_int
         in
         let result = [ act ; act ; act ; act ; act ; act ]
-        |> List.map ~f:(fun x ->
+        |> List.map (fun x ->
            let y = Bitlist.to_int64_list x in y@y )
         |> List.concat
         in
@@ -107,7 +107,7 @@ end = struct
           full_mask n_int
         in
         let result = [ act ; act ]
-        |> List.map ~f:(fun x ->
+        |> List.map (fun x ->
            let y = Bitlist.to_int64_list x in y@y )
         |> List.concat
         in
@@ -147,12 +147,12 @@ cas                = %s
         (Bit_kind.to_string b.bit_kind)
         (Bitmask_number.to_string b.n_mask_gen)
         (Array.to_list b.generators
-         |> List.map ~f:(fun x-> Int64.to_string x)
-         |> String.concat ~sep:", ")
+         |> List.map (fun x-> Int64.to_string x)
+         |> String.concat ", ")
         (Bitmask_number.to_string b.n_mask_cas)
         (Array.to_list b.cas
-         |> List.map ~f:(fun x-> Int64.to_string x)
-         |> String.concat ~sep:", ")
+         |> List.map (fun x-> Int64.to_string x)
+         |> String.concat ", ")
 end
 
 

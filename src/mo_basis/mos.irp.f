@@ -45,9 +45,9 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   BEGIN_DOC
   ! Molecular orbital coefficients on |AO| basis set
   !
-  ! mo_coef(i,j) = coefficient of the i-th |AO| on the jth mo
+  ! mo_coef(i,j) = coefficient of the i-th |AO| on the jth |MO|
   !
-  ! mo_label : Label characterizing the MOS (local, canonical, natural, etc)
+  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC
   integer                        :: i, j
   double precision, allocatable  :: buffer(:,:)

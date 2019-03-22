@@ -4,7 +4,7 @@
 
 open Qputils
 open Qptypes
-open Core
+open Sexplib.Std
 
 (** Interactive editing of the input.
 
@@ -53,7 +53,7 @@ Editing file `%s`
 let make_header kw =
   let s = keyword_to_string kw in
   let l = String.length s in
-  "\n\n"^s^"\n"^(String.init l ~f:(fun _ -> '='))^"\n\n"
+  "\n\n"^s^"\n"^(String.init l (fun _ -> '='))^"\n\n"
 
 
 
@@ -92,19 +92,19 @@ let get s =
 (** Applies the changes from the string [str] corresponding to section [s] *)
 let set str s = 
   let header = (make_header s) in
-  match String.substr_index ~pos:0 ~pattern:header str with
+  match String_ext.substr_index ~pos:0 ~pattern:header str with
   | None -> ()
   | Some idx -> 
     begin
       let index_begin = idx + (String.length header) in
       let index_end   = 
-        match ( String.substr_index ~pos:(index_begin+(String.length header)+1)
+        match ( String_ext.substr_index ~pos:(index_begin+(String.length header)+1)
           ~pattern:"==" str) with
           | Some i -> i
           | None -> String.length str
       in
       let l = index_end - index_begin in
-      let str = String.sub ~pos:index_begin ~len:l str
+      let str = String.sub str index_begin l 
       |> Rst_string.of_string
       in
       let write (of_rst,w) s =
@@ -132,11 +132,11 @@ let set str s =
 let create_temp_file ezfio_filename fields =
   let temp_filename  = Filename.temp_file "qp_edit_" ".rst" in
   begin
-    Out_channel.with_file temp_filename ~f:(fun out_channel ->
-        (file_header ezfio_filename) :: (List.map ~f:get fields) 
-        |> String.concat ~sep:"\n" 
-        |> Out_channel.output_string out_channel 
-      );
+    let oc = open_out temp_filename in
+    (file_header ezfio_filename) :: (List.map get fields) 
+    |> String.concat "\n" 
+    |> Printf.fprintf oc "%s";
+    close_out oc;
     at_exit (fun () -> Sys.remove temp_filename);
     temp_filename
   end
@@ -155,20 +155,19 @@ let run check_only ?ndet ?state ezfio_filename =
   in
 
   (* Open EZFIO *)
-  if (not (Sys.file_exists_exn ezfio_filename)) then
+  if (not (Sys.file_exists ezfio_filename)) then
     failwith (ezfio_filename^" does not exists");
 
   Ezfio.set_file ezfio_filename;
 
   (* Clean qp_stop status *)
   [ "qpstop" ; "qpkill" ]
-  |> List.iter ~f:(fun f ->
+  |> List.iter (fun f ->
     let stopfile = 
       Filename.concat (Qpackage.ezfio_work ezfio_filename) f
     in
-    match Sys.file_exists stopfile with
-    | `Yes -> Sys.remove stopfile
-    | _ -> ()
+    if Sys.file_exists stopfile then
+      Sys.remove stopfile
   );
 
   (* Reorder basis set *)
@@ -180,7 +179,7 @@ let run check_only ?ndet ?state ezfio_filename =
     in
     let ordering = Input.Ao_basis.ordering aos in
     let test = Array.copy ordering in
-    Array.sort ~compare test ;
+    Array.sort compare test ;
     if test <> ordering then
     begin
       Printf.eprintf "Warning: Basis set is not properly ordered. Redordering.\n";
@@ -212,7 +211,7 @@ let run check_only ?ndet ?state ezfio_filename =
 
   (*
   let output = (file_header ezfio_filename) :: (
-    List.map ~f:get [
+    List.map get [
       Ao_basis ; 
       Mo_basis ; 
     ])
@@ -238,24 +237,28 @@ let run check_only ?ndet ?state ezfio_filename =
 
   (* Open the temp file with external editor *)
   let editor = 
-    match Sys.getenv "EDITOR" with
-    | Some editor -> editor
-    | None -> "vi"
+    try Sys.getenv "EDITOR"
+    with Not_found -> "vi"
   in
 
   match check_only with
   | true  -> ()
   | false -> 
     Printf.sprintf "%s %s" editor temp_filename 
-    |> Sys.command_exn 
+    |> Sys.command |> ignore
   ;
 
   (* Re-read the temp file *)
   let temp_string  =
-    In_channel.with_file temp_filename ~f:(fun in_channel ->
-      In_channel.input_all in_channel) 
+    let ic = open_in temp_filename in
+    let result =
+      input_lines ic
+      |> String.concat "\n"
+    in
+    close_in ic;
+    result
   in
-  List.iter ~f:(fun x -> set temp_string x) tasks
+  List.iter (fun x -> set temp_string x) tasks
 
 
 
@@ -281,7 +284,8 @@ let create_backup ezfio_filename =
       tar -cf .backup.tar --exclude=\"work/*\" %s && (mv .backup.tar %s || rm .backup.tar)
     "
       ezfio_filename ezfio_filename backup_filename
-    |> Sys.command_exn
+    |> Sys.command
+    |> ignore
   with _ -> ()
 
 
@@ -290,10 +294,10 @@ let restore_backup ezfio_filename =
   let filename = 
     Printf.sprintf "%s/work/backup.tar" ezfio_filename
   in
-  if Sys.file_exists_exn filename then
+  if Sys.file_exists filename then
     begin
       Printf.sprintf "tar -xf %s" filename
-      |> Sys.command_exn;
+      |> Sys.command |> ignore;
       remove_backup ezfio_filename
     end
 

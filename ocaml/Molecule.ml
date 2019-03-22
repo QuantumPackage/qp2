@@ -62,7 +62,7 @@ let name m =
         try
           let i = List.assoc e accu in
           build_list ( (e,i+1)::(List.remove_assoc e accu) ) rest
-        with Caml.Not_found -> build_list ( (e,1)::accu ) rest
+        with Not_found -> build_list ( (e,1)::accu ) rest
       end
   | [] -> accu
   in
@@ -207,7 +207,7 @@ let distance_matrix molecule =
 
 
 
-open Core ;;
+
 include To_md5
 let to_md5 = to_md5 sexp_of_t
 
