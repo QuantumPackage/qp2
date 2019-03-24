@@ -186,10 +186,10 @@ def main(arguments):
                       url.endswith(".zip"))
         os.chdir(QP_PLUGINS)
         if is_repo:
-            cmd=["git", "clone", url]
+            git_cmd=["git", "clone", url]
             if arguments["--name"]:
-               cmd=cmd+[arguments["--name"]]
-            subprocess.check_call(cmd)
+               git_cmd.append(arguments["--name"])
+            subprocess.check_call(git_cmd)
         else:
             filename = url.split('/')[-1]
 
