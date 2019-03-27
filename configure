@@ -276,6 +276,7 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
                 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
+                rm $OPAMROOT/config
                 ${QP_ROOT}/bin/opam init --disable-sandboxing --verbose \
                     --yes --comp=4.07.0
 
