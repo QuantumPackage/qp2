@@ -29,6 +29,20 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
     one_e_dm_mo_alpha_for_dft(i,j,:) = 0.d0
    enddo
   enddo
+  if(normalize_dm)then
+   double precision :: elec_alpha_frozen_num, elec_alpha_valence(N_states)
+   elec_alpha_frozen_num = elec_alpha_num - n_core_orb 
+   elec_alpha_valence = 0.d0
+   integer :: istate 
+   do istate = 1, N_states
+    do i = 1, mo_num
+     elec_alpha_valence(istate) += one_e_dm_mo_alpha_for_dft(i,i,istate)
+    enddo
+    elec_alpha_valence(istate) = elec_alpha_frozen_num/elec_alpha_valence(istate)
+    one_e_dm_mo_alpha_for_dft(:,:,istate) = one_e_dm_mo_alpha_for_dft(:,:,istate) * elec_alpha_valence(istate)
+   enddo 
+   
+  endif
  endif
 
 END_PROVIDER
@@ -64,6 +78,19 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
     one_e_dm_mo_beta_for_dft(i,j,:) = 0.d0
    enddo
   enddo
+  if(normalize_dm)then
+   double precision :: elec_beta_valence(N_states),elec_beta_frozen_num
+   elec_beta_frozen_num = elec_beta_num - n_core_orb 
+   elec_beta_valence = 0.d0
+   integer :: istate 
+   do istate = 1, N_states
+    do i = 1, mo_num
+     elec_beta_valence(istate) += one_e_dm_mo_beta_for_dft(i,i,istate)
+    enddo
+    elec_beta_valence(istate) = elec_beta_frozen_num/elec_beta_valence(istate)
+    one_e_dm_mo_beta_for_dft(:,:,istate) = one_e_dm_mo_beta_for_dft(:,:,istate) * elec_beta_valence(istate)
+   enddo 
+  endif
  endif
 END_PROVIDER
 
