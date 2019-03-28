@@ -31,6 +31,10 @@ double precision function cell_function_becke(r,atom_number)
   double precision               :: mu_ij,nu_ij
   double precision               :: distance_i,distance_j,step_function_becke
   integer                        :: j
+  if(int(nucl_charge(atom_number))==0)then
+   cell_function_becke = 0.d0
+   return
+  endif
   distance_i = (r(1) - nucl_coord_transp(1,atom_number) ) * (r(1) - nucl_coord_transp(1,atom_number))
   distance_i += (r(2) - nucl_coord_transp(2,atom_number) ) * (r(2) - nucl_coord_transp(2,atom_number))
   distance_i += (r(3) - nucl_coord_transp(3,atom_number) ) * (r(3) - nucl_coord_transp(3,atom_number))
@@ -38,6 +42,7 @@ double precision function cell_function_becke(r,atom_number)
   cell_function_becke = 1.d0
   do j = 1, nucl_num
     if(j==atom_number)cycle
+    if(int(nucl_charge(j))==0)cycle
     distance_j = (r(1) - nucl_coord_transp(1,j) ) * (r(1) - nucl_coord_transp(1,j))
     distance_j+= (r(2) - nucl_coord_transp(2,j) ) * (r(2) - nucl_coord_transp(2,j))
     distance_j+= (r(3) - nucl_coord_transp(3,j) ) * (r(3) - nucl_coord_transp(3,j))
