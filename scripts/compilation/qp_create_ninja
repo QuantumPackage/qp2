@@ -538,7 +538,7 @@ def get_binaries(path_module):
     import subprocess
 
     try:
-        cmd = 'grep -l -e "^program " {0}/*.irp.f'.format(path_module.abs)
+        cmd = 'grep -l -e "^\\s*program " {0}/*.irp.f'.format(path_module.abs)
         process = subprocess.Popen([cmd],
                                    shell=True,
                                    stdout=subprocess.PIPE,
