@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, slater_bragg_radii, (100)]
+BEGIN_PROVIDER [ double precision, slater_bragg_radii, (0:100)]
  implicit none
  BEGIN_DOC
  ! atomic radii in Angstrom defined in table I of JCP 41, 3199 (1964) Slater
@@ -54,10 +54,10 @@ BEGIN_PROVIDER [ double precision, slater_bragg_radii, (100)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, slater_bragg_radii_ua, (100)]
+BEGIN_PROVIDER [double precision, slater_bragg_radii_ua, (0:100)]
  implicit none
  integer :: i
- do i = 1, 100
+ do i = 0, 100
   slater_bragg_radii_ua(i) = slater_bragg_radii(i) * 1.889725989d0
  enddo
 END_PROVIDER
