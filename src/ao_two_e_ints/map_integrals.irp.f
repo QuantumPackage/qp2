@@ -19,6 +19,10 @@ END_PROVIDER
 subroutine two_e_integrals_index(i,j,k,l,i1)
   use map_module
   implicit none
+  BEGIN_DOC
+! Gives a unique index for i,j,k,l using permtuation symmetry.
+! i <-> k, j <-> l, and (i,k) <-> (j,l)
+  END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind), intent(out) :: i1
   integer(key_kind)              :: p,q,r,s,i2
@@ -36,14 +40,25 @@ end
 subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
   use map_module
   implicit none
+  BEGIN_DOC
+! Computes the 4 indices $i,j,k,l$ from a unique index $i_1$.
+! For 2 indices $i,j$ and $i \le j$, we have
+! $p = i(i-1)/2 + j$.
+! The key point is that because $j < i$,
+! $i(i-1)/2 < p \le i(i+1)/2$. So $i$ can be found by solving
+! $i^2 - i - 2p=0$. One obtains $i=1 + \sqrt{1+8p}/2$
+! and $j = p - i(i-1)/2$.
+! This rule is applied 3 times. First for the symmetry of the
+! pairs (i,k) and (j,l), and then for the symmetry within each pair.
+  END_DOC
   integer, intent(out)           :: i(8),j(8),k(8),l(8)
   integer(key_kind), intent(in)  :: i1
   integer(key_kind)              :: i2,i3
   i = 0
-  i2   = ceiling(0.5d0*(dsqrt(8.d0*dble(i1)+1.d0)-1.d0))
-  l(1) = ceiling(0.5d0*(dsqrt(8.d0*dble(i2)+1.d0)-1.d0))
+  i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
+  l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
   i3   = i1 - shiftr(i2*i2-i2,1)
-  k(1) = ceiling(0.5d0*(dsqrt(8.d0*dble(i3)+1.d0)-1.d0))
+  k(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
   j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
   i(1) = int(i3 - shiftr(k(1)*k(1)-k(1),1),4)
 
