@@ -110,16 +110,18 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
       endif
     enddo
   enddo
-  do ii=1,8
-    if (i(ii) /= 0) then
-      call two_e_integrals_index(i(ii),j(ii),k(ii),l(ii),i2)
-      if (i1 /= i2) then
-        print *,  i1, i2
-        print *,  i(ii), j(ii), k(ii), l(ii)
-        stop 'two_e_integrals_index_reverse failed'
-      endif
-    endif
-  enddo
+! This has been tested with up to 1000 AOs, and all the reverse indices are
+! correct ! We can remove the test
+!    do ii=1,8
+!      if (i(ii) /= 0) then
+!        call two_e_integrals_index(i(ii),j(ii),k(ii),l(ii),i2)
+!        if (i1 /= i2) then
+!          print *,  i1, i2
+!          print *,  i(ii), j(ii), k(ii), l(ii)
+!          stop 'two_e_integrals_index_reverse failed'
+!        endif
+!      endif
+!    enddo
 
 
 end
