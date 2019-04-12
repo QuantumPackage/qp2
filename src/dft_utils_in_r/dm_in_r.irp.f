@@ -227,6 +227,8 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, one_e_dm_alpha_at_r, (n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_dm_beta_at_r, (n_points_final_grid,N_states) ]
+&BEGIN_PROVIDER [double precision, elec_beta_num_grid_becke , (N_states) ]
+&BEGIN_PROVIDER [double precision, elec_alpha_num_grid_becke , (N_states) ]
  implicit none
  BEGIN_DOC
 ! one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)

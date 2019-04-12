@@ -195,6 +195,20 @@ BEGIN_PROVIDER [double precision, weight_at_r, (n_points_integration_angular,n_p
         enddo
         accu = 1.d0/accu
         weight_at_r(l,k,j) = tmp_array(j) * accu
+        if(isnan(weight_at_r(l,k,j)))then
+         print*,'isnan(weight_at_r(l,k,j))'
+         print*,l,k,j
+         accu = 0.d0
+         do i = 1, nucl_num
+           ! function defined for each atom "i" by equation (13) and (21) with k == 3
+           tmp_array(i) = cell_function_becke(r,i) ! P_n(r)
+           print*,i,tmp_array(i)
+           ! Then you compute the summ the P_n(r) function for each of the "r" points
+           accu += tmp_array(i)
+         enddo
+         write(*,'(100(F16.10,X))')tmp_array(j) , accu
+          stop
+        endif
       enddo
     enddo
   enddo
@@ -221,6 +235,12 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
         contrib_integration = derivative_knowles_function(alpha_knowles(int(nucl_charge(j))),m_knowles,x)&
             *knowles_function(alpha_knowles(int(nucl_charge(j))),m_knowles,x)**2
         final_weight_at_r(k,i,j) = weights_angular_points(k)  * weight_at_r(k,i,j) * contrib_integration * dr_radial_integral
+        if(isnan(final_weight_at_r(k,i,j)))then
+         print*,'isnan(final_weight_at_r(k,i,j))' 
+         print*,k,i,j
+         write(*,'(100(F16.10,X))')weights_angular_points(k)  , weight_at_r(k,i,j) , contrib_integration , dr_radial_integral
+         stop 
+        endif
       enddo
     enddo
   enddo
