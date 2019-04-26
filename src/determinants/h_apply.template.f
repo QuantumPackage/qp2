@@ -150,6 +150,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
   logical :: is_a_2h1p
   logical :: is_a_2h
   logical :: b_cycle
+  logical :: yes_no
   check_double_excitation = .True.
   iproc = iproc_in
 
@@ -284,6 +285,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
           $only_1h_double
           $only_1p_double
           $only_2h1p_double
+          $filter_only_connected_to_hf_double 
           key_idx += 1
           do k=1,N_int
             keys_out(k,1,key_idx) = key(k,1)
@@ -339,6 +341,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
         $only_1h_double
         $only_1p_double
         $only_2h1p_double
+        $filter_only_connected_to_hf_double
         key_idx += 1
         do k=1,N_int
           keys_out(k,1,key_idx) = key(k,1)
@@ -412,6 +415,7 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
   logical :: is_a_1h
   logical :: is_a_1p
   logical :: is_a_2p
+  logical :: yes_no
 
   do k=1,N_int
     key_mask(k,1) = 0_bit_kind
@@ -493,6 +497,7 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
       $filter_only_1h1p_single
       $filter_only_1h2p_single
       $filter_only_2h2p_single
+      $filter_only_connected_to_hf_single 
       key_idx += 1
       do k=1,N_int
         keys_out(k,1,key_idx) = hole(k,1)

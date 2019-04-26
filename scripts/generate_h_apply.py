@@ -5,6 +5,8 @@ import os
 keywords = """
 check_double_excitation
 copy_buffer
+filter_only_connected_to_hf_single
+filter_only_connected_to_hf_double
 declarations
 decls_main
 deinit_thread
@@ -256,13 +258,13 @@ class H_apply(object):
 
   def filter_only_1h1p(self):
     self["filter_only_1h1p_single"] = """
-!    ! DIR$ FORCEINLINE
      if (is_a_1h1p(hole).eqv..False.) cycle
     """
     self["filter_only_1h1p_double"] = """
-!    ! DIR$ FORCEINLINE
      if (is_a_1h1p(key).eqv..False.) cycle
     """
+
+
 
   def filter_only_2h2p(self):
     self["filter_only_2h2p_single"] = """
@@ -292,6 +294,16 @@ class H_apply(object):
     """
     self["filter2h2p_single"] = """
      if (is_a_two_holes_two_particles(hole)) cycle
+    """
+
+  def filter_only_connected_to_hf(self):
+    self["filter_only_connected_to_hf_single"] = """
+     call connected_to_hf(hole,yes_no)
+     if (yes_no.eqv..False.) cycle
+    """
+    self["filter_only_connected_to_hf_double"] = """
+     call connected_to_hf(key,yes_no)
+     if (yes_no.eqv..False.) cycle
     """
 
 
