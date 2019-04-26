@@ -618,6 +618,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
 !        endif
       end do
+      if(pseudo_sym)then
+       if(dabs(mat(1, p1, p2)).lt.thresh_sym)then 
+        sum_e_pert = 10.d0
+       endif
+      endif
 
       if(sum_e_pert <= buf%mini) then
         call add_to_selection_buffer(buf, det, sum_e_pert)
