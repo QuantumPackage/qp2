@@ -466,35 +466,17 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask, (N_int,2)]
-&BEGIN_PROVIDER [ integer, n_core_inact_act_orb ]
  implicit none
  BEGIN_DOC
  ! Reunion of the core, inactive and active bitmasks
  END_DOC
  integer :: i,j
 
- n_core_inact_act_orb = 0
  do i = 1, N_int
-  reunion_of_core_inact_act_bitmask(i,1) = ior(reunion_of_core_inact_bitmask(i,1),cas_bitmask(i,1,1))
-  reunion_of_core_inact_act_bitmask(i,2) = ior(reunion_of_core_inact_bitmask(i,2),cas_bitmask(i,2,1))
-  n_core_inact_act_orb +=popcnt(reunion_of_core_inact_act_bitmask(i,1))
+  reunion_of_core_inact_act_bitmask(i,1) = ior(reunion_of_core_inact_bitmask(i,1),act_bitmask(i,1))
+  reunion_of_core_inact_act_bitmask(i,2) = ior(reunion_of_core_inact_bitmask(i,2),act_bitmask(i,2))
  enddo
  END_PROVIDER
- BEGIN_PROVIDER [ integer, list_core_inact_act, (n_core_inact_act_orb)]
-&BEGIN_PROVIDER [ integer, list_core_inact_act_reverse, (mo_num)]
-  implicit none
- integer :: occ_inact(N_int*bit_kind_size)
- integer :: itest,i
- occ_inact = 0
- call bitstring_to_list(reunion_of_core_inact_act_bitmask(1,1), occ_inact(1), itest, N_int)
- list_inact_reverse = 0
- do i = 1, n_core_inact_act_orb
-  list_core_inact_act(i) = occ_inact(i)
-  list_core_inact_act_reverse(occ_inact(i)) = i
- enddo
-END_PROVIDER
-
-
 
 
  BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask, (N_int,2)]
@@ -563,8 +545,8 @@ END_PROVIDER
  END_DOC
  integer :: i,j
  do i = 1, N_int
-  reunion_of_cas_inact_bitmask(i,1) = ior(cas_bitmask(i,1,1),inact_bitmask(i,1))
-  reunion_of_cas_inact_bitmask(i,2) = ior(cas_bitmask(i,2,1),inact_bitmask(i,2))
+  reunion_of_cas_inact_bitmask(i,1) = ior(act_bitmask(i,1),inact_bitmask(i,1))
+  reunion_of_cas_inact_bitmask(i,2) = ior(act_bitmask(i,2),inact_bitmask(i,2))
  enddo
  END_PROVIDER
 

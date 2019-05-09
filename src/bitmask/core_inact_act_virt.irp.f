@@ -194,3 +194,53 @@ END_PROVIDER
 
 END_PROVIDER 
 
+BEGIN_PROVIDER [integer, n_inact_act ]
+ implicit none
+ n_inact_act = (n_inact_orb+n_act_orb)
+
+END_PROVIDER 
+
+BEGIN_PROVIDER [integer, list_inact_act, (n_inact_act)]
+ integer :: i,itmp
+ itmp = 0
+ do i = 1, n_inact_orb
+  itmp += 1
+  list_inact_act(itmp) = list_inact(i) 
+ enddo
+ do i = 1, n_act_orb
+  itmp += 1
+  list_inact_act(itmp) = list_act(i) 
+ enddo
+END_PROVIDER 
+
+BEGIN_PROVIDER [integer, n_core_inact_act_orb ]
+ implicit none
+ n_core_inact_act_orb = (n_core_orb + n_inact_orb + n_act_orb)
+
+END_PROVIDER 
+
+ BEGIN_PROVIDER [integer, list_core_inact_act, (n_core_inact_act_orb)]
+&BEGIN_PROVIDER [ integer, list_core_inact_act_reverse, (n_core_inact_act_orb)]
+ integer :: i,itmp
+ itmp = 0
+ do i = 1, n_core_orb
+  itmp += 1
+  list_core_inact_act(itmp) = list_core(i) 
+ enddo
+ do i = 1, n_inact_orb
+  itmp += 1
+  list_core_inact_act(itmp) = list_inact(i) 
+ enddo
+ do i = 1, n_act_orb
+  itmp += 1
+  list_core_inact_act(itmp) = list_act(i) 
+ enddo
+
+ integer :: occ_inact(N_int*bit_kind_size)
+ occ_inact = 0
+ call bitstring_to_list(reunion_of_core_inact_act_bitmask(1,1), occ_inact(1), itest, N_int)
+ list_inact_reverse = 0
+ do i = 1, n_core_inact_act_orb
+  list_core_inact_act_reverse(occ_inact(i)) = i
+ enddo
+END_PROVIDER 
