@@ -194,13 +194,13 @@ END_PROVIDER
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, n_inact_act ]
+BEGIN_PROVIDER [integer, n_inact_act_orb ]
  implicit none
- n_inact_act = (n_inact_orb+n_act_orb)
+ n_inact_act_orb = (n_inact_orb+n_act_orb)
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [integer, list_inact_act, (n_inact_act)]
+BEGIN_PROVIDER [integer, list_inact_act, (n_inact_act_orb)]
  integer :: i,itmp
  itmp = 0
  do i = 1, n_inact_orb
