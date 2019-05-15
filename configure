@@ -387,7 +387,7 @@ if [[ ${ZEROMQ} = $(not_found) ]] ; then
         fail
 fi
 
-F77ZMQ=$(find_lib -lzmq -lf77zmq)
+F77ZMQ=$(find_lib -lzmq -lf77zmq -lpthread)
 if [[ ${F77ZMQ} = $(not_found) ]] ; then
         error "Fortran binding of ZeroMQ (f77zmq) is not installed."
         fail

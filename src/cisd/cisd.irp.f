@@ -53,7 +53,11 @@ subroutine run
   implicit none
   integer :: i
 
-  call H_apply_cisd
+  if(pseudo_sym)then
+   call H_apply_cisd_sym
+  else
+   call H_apply_cisd
+  endif
   print *,  'N_det = ', N_det
   print*,'******************************'
   print *,  'Energies  of the states:'

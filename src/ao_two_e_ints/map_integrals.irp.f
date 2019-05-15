@@ -213,6 +213,7 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
+  ! physicist convention : <ij|kl> 
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze
