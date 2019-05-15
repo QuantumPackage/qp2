@@ -13,10 +13,11 @@ zero.
 
 
 Usage:
-      qp_set_frozen_core [-q|--query] EZFIO_DIR
+      qp_set_frozen_core [-q|--query] [-l|--large] EZFIO_DIR
 
 Options:
     -q --query   Prints in the standard output the number of frozen MOs
+    -l --large   Use a large core
 
 """
 
@@ -46,16 +47,47 @@ def main(arguments):
     except:
         do_pseudo = False
 
+    large = 0
+    small = 1
+
+    size = small
+    if arguments["--large"]:
+        size = large
+
     if not do_pseudo:
-        for charge in ezfio.nuclei_nucl_charge:
-            if charge < 5:
-                pass
-            elif charge < 13:
-                n_frozen += 1
-            elif charge < 31:
-                n_frozen += 5
-            else:
-                n_frozen += 9
+
+        if size == large:
+            for charge in ezfio.nuclei_nucl_charge:
+		if charge <= 2:
+		    pass 
+		elif charge <= 10:
+		    n_frozen += 1
+		elif charge <= 18:
+		    n_frozen += 5
+		elif charge <= 36:
+		    n_frozen += 9
+		elif charge <= 54:
+		    n_frozen += 18
+		elif charge <= 86:
+		    n_frozen += 27
+		elif charge <= 118:
+		    n_frozen += 43
+
+        if size == small:
+
+            for charge in ezfio.nuclei_nucl_charge:
+                if charge < 5:
+                    pass
+                elif charge < 13:
+                    n_frozen += 1
+                elif charge < 31:
+                    n_frozen += 5
+                elif charge < 49:
+                    n_frozen += 9
+                elif charge < 81:
+                    n_frozen += 18
+                elif charge < 113:
+                    n_frozen += 27
 
     mo_num = ezfio.mo_basis_mo_num
 
@@ -65,10 +97,10 @@ def main(arguments):
 
     if n_frozen == 0:
         os.system("""qp_set_mo_class -a "[1-%d]" %s""" %
-                  (mo_num, sys.argv[1]))
+                  (mo_num, filename))
     else:
         os.system("""qp_set_mo_class -c "[1-%d]" -a "[%d-%d]" %s""" %
-                  (n_frozen, n_frozen+1, mo_num, sys.argv[1]))
+                  (n_frozen, n_frozen+1, mo_num, filename))
 
 
 
