@@ -207,61 +207,61 @@ class H_apply(object):
   def filter_only_2h(self):
     self["only_2h_single"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_2h(hole).eqv. .False.) cycle
+     if (.not.is_a_2h(hole)) cycle
     """
     self["only_2h_double"] = """
 !    ! DIR$ FORCEINLINE
-     if ( is_a_2h(key).eqv. .False. )cycle
+     if (.not.is_a_2h(key))cycle
     """
 
   def filter_only_1h(self):
     self["only_1h_single"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_1h(hole) .eqv. .False.) cycle
+     if (.not.is_a_1h(hole)) cycle
     """
     self["only_1h_double"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_1h(key) .eqv. .False.) cycle
+     if (.not.is_a_1h(key)  ) cycle
     """
 
   def filter_only_1p(self):
     self["only_1p_single"] = """
 !    ! DIR$ FORCEINLINE
-     if ( is_a_1p(hole) .eqv. .False.) cycle
+     if (.not. is_a_1p(hole) ) cycle
     """
     self["only_1p_double"] = """
 !    ! DIR$ FORCEINLINE
-     if ( is_a_1p(key) .eqv. .False.) cycle
+     if (.not. is_a_1p(key) ) cycle
     """
 
   def filter_only_2h1p(self):
     self["only_2h1p_single"] = """
 !    ! DIR$ FORCEINLINE
-     if ( is_a_2h1p(hole) .eqv. .False.) cycle
+     if (.not. is_a_2h1p(hole) ) cycle
     """
     self["only_2h1p_double"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_2h1p(key) .eqv. .False.) cycle
+     if (.not.is_a_2h1p(key) ) cycle
     """
 
 
   def filter_only_2p(self):
     self["only_2p_single"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_2p(hole).eqv. .False.) cycle
+     if (.not.is_a_2p(hole)) cycle
     """
     self["only_2p_double"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_2p(key).eqv. .False.) cycle
+     if (.not.is_a_2p(key)) cycle
     """
 
 
   def filter_only_1h1p(self):
     self["filter_only_1h1p_single"] = """
-     if (is_a_1h1p(hole).eqv..False.) cycle
+     if (.not.is_a_1h1p(hole)) cycle
     """
     self["filter_only_1h1p_double"] = """
-     if (is_a_1h1p(key).eqv..False.) cycle
+     if (.not.is_a_1h1p(key)) cycle
     """
 
 
@@ -269,22 +269,22 @@ class H_apply(object):
   def filter_only_2h2p(self):
     self["filter_only_2h2p_single"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_two_holes_two_particles(hole).eqv..False.) cycle
+     if (.not.is_a_two_holes_two_particles(hole)) cycle
     """
     self["filter_only_2h2p_double"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_two_holes_two_particles(key).eqv..False.) cycle
+     if (.not.is_a_two_holes_two_particles(key)) cycle
     """
 
 
   def filter_only_1h2p(self):
     self["filter_only_1h2p_single"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_1h2p(hole).eqv..False.) cycle
+     if (.not.is_a_1h2p(hole)) cycle
     """
     self["filter_only_1h2p_double"] = """
 !    ! DIR$ FORCEINLINE
-     if (is_a_1h2p(key).eqv..False.) cycle
+     if (.not.is_a_1h2p(key)) cycle
     """
 
 
@@ -299,11 +299,11 @@ class H_apply(object):
   def filter_only_connected_to_hf(self):
     self["filter_only_connected_to_hf_single"] = """
      call connected_to_hf(hole,yes_no)
-     if (yes_no.eqv..False.) cycle
+     if (.not.yes_no) cycle
     """
     self["filter_only_connected_to_hf_double"] = """
      call connected_to_hf(key,yes_no)
-     if (yes_no.eqv..False.) cycle
+     if (.not.yes_no) cycle
     """
 
 
