@@ -16,6 +16,7 @@
 # export OMP_NUM_THREADS=16
 
 # Name of the network interface to be chosen
-  export QP_NIC=lo
+# export QP_NIC=lo
+# export QP_NIC=ib0
 
 
