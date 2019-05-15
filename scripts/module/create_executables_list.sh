@@ -15,5 +15,10 @@ EXES=$(find -L ${QP_ROOT}/src -maxdepth 2 -depth -executable -type f | grep -e "
 
 for EXE in $EXES
 do
-   printf "%-30s %s\n" $(basename $EXE) $EXE | sed "s|${QP_ROOT}|\$QP_ROOT|g" >> executables 
+   case "$(basename $EXE)" in
+     install) continue;;
+     uninstall) continue;;
+     *) 
+      printf "%-30s %s\n" $(basename $EXE) $EXE | sed "s|${QP_ROOT}|\$QP_ROOT|g" >> executables ;;
+   esac
 done
