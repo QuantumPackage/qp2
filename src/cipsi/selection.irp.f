@@ -1,11 +1,20 @@
 use bitmasks
 
+BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Weights adjusted along the selection to make the PT2 contributions
+ ! of each state coincide.
+ END_DOC
+ pt2_match_weight = 1.d0
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    implicit none
    BEGIN_DOC
    ! Weights used in the selection criterion
    END_DOC
-   selection_weight(1:N_states) = c0_weight(1:N_states)
+   selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
 END_PROVIDER
 
 
