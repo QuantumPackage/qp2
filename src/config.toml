@@ -14,7 +14,7 @@ pygmentCodeFences = true
 
 [Params]
   subtitle = "A programming environment for wave function methods"
-  logo = "img/QP2_circle.png"
+  logo = "img/qp_box.png"
   favicon = "favicon"
   dateFormat = "January 2, 2006"
   commit = false
