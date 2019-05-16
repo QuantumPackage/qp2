@@ -1,11 +1,20 @@
 use bitmasks
 
+BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Weights adjusted along the selection to make the PT2 contributions
+ ! of each state coincide.
+ END_DOC
+ pt2_match_weight = 1.d0
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    implicit none
    BEGIN_DOC
    ! Weights used in the selection criterion
    END_DOC
-   selection_weight(1:N_states) = c0_weight(1:N_states)
+   selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
 END_PROVIDER
 
 
@@ -618,6 +627,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
 !        endif
       end do
+      if(pseudo_sym)then
+       if(dabs(mat(1, p1, p2)).lt.thresh_sym)then 
+        sum_e_pert = 10.d0
+       endif
+      endif
 
       if(sum_e_pert <= buf%mini) then
         call add_to_selection_buffer(buf, det, sum_e_pert)

@@ -131,6 +131,14 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     norm(k) = norm(k) * f(k)
   enddo
 
+  ! Adjust PT2 weights for next selection
+  double precision :: pt2_avg
+  pt2_avg = sum(pt2) / dble(N_states)
+  do k=1,N_states
+    pt2_match_weight(k) *= (pt2(k)/pt2_avg)**2
+  enddo
+  SOFT_TOUCH pt2_match_weight
+
 end subroutine
 
 

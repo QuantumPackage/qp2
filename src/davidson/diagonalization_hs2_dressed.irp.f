@@ -157,7 +157,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, S, y, y_s, S_d, h, lambda
   if (N_st_diag*3 > sze) then
     print *,  'error in Davidson :'
-    print *,  'Increase n_det_max_jacobi to ', N_st_diag*3
+    print *,  'Increase n_det_max_full to ', N_st_diag*3
     stop -1
   endif
 

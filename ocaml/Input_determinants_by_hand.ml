@@ -84,7 +84,7 @@ end = struct
     let n_det_old =
       Ezfio.get_determinants_n_det ()
     in
-    min n_det_old (Det_number.to_int n)
+    Det_number.to_int n
     |> Ezfio.set_determinants_n_det
   ;;
 
