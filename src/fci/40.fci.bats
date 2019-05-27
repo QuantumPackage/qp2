@@ -48,12 +48,12 @@ function run_stoch() {
 @test "DHNO" { # 11.4721s
   qp set_file dhno.ezfio
   qp set_mo_class --core="[1-7]" --act="[8-64]" 
-  run -130.458875747063 1.e-5
+  run -130.459020029816 1.e-5
 }
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.296794173622 2.e-05 
+  run -113.297494345682 2.e-05 
 }
 
 @test "H2O2" { # 12.9214s
