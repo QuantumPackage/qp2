@@ -1,0 +1,71 @@
+#!/usr/bin/env python2
+
+
+"""
+Creates an ssh tunnel for using slaves on another network.
+Launch a server on the front-end node of the cluster on which the master
+process runs. Then start a client ont the front-end node of the distant
+cluster.
+
+Usage:
+      qp_tunnel server EZFIO_DIR
+      qp_tunnel client <address> EZFIO_DIR
+
+Options:
+    -h --help
+
+"""
+
+import os
+import sys
+import zmq
+
+try:
+    import qp_path
+except ImportError:
+    print "source .quantum_package.rc"
+    raise
+
+from docopt import docopt
+from ezfio import ezfio
+
+
+def get_address(filename):
+  with open(os.path.join(filename,'work','qp_run_address'),'r') as f:
+    a = f.readlines()[0].strip()
+  return a
+
+
+def set_address(filename,address):
+  with open(os.path.join(filename,'work','qp_run_address'),'r') as f:
+    backup = f.readlines()
+
+  with open(os.path.join(filename,'work','qp_run_address'),'w') as f:
+    f.write('\n'.join([address]+backup))
+
+
+def main_server(arguments,filename):
+    destination = get_address(filename)
+    print destination
+
+
+def main_client(arguments,filename):
+    destination = arguments["<address>"]
+    print destination
+
+
+def main(arguments):
+    """Main function"""
+
+    print arguments
+    filename = arguments["EZFIO_DIR"]
+
+    if arguments["server"]:
+        return main_server(arguments, filename)
+    if arguments["client"]:
+        return main_client(arguments, filename)
+
+    
+if __name__ == '__main__':
+    ARGUMENTS = docopt(__doc__)
+    main(ARGUMENTS)
