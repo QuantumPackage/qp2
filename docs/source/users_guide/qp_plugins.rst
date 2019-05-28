@@ -53,6 +53,10 @@ Usage
 
     Uninstall the plugin ``plugin_name``.
 
+.. option:: update 
+
+    Update the repositories of the plugins. Should be followed by a re-compilation.
+
 .. option:: -n, --name=<plugin_name>
 
     Create a new plugin named ``plugin_name`` (in local repository by default).

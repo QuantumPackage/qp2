@@ -344,6 +344,94 @@ Providers
        * :c:data:`mos_lapl_in_r_array`
 
  
+.. c:var:: elec_alpha_num_grid_becke
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_alpha_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: one_e_dm_beta_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: elec_beta_num_grid_becke	(N_states)
+        double precision, allocatable	:: elec_alpha_num_grid_becke	(N_states)
+
+
+    one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
+    one_e_dm_beta_at_r(i,istate) =  n_beta(r_i,istate)
+    where r_i is the ith point of the grid and istate is the state number
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_alpha_ao_for_dft`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`aos_sr_vxc_alpha_lda_w`
+       * :c:data:`aos_vc_alpha_lda_w`
+       * :c:data:`aos_vxc_alpha_lda_w`
+       * :c:data:`energy_c_lda`
+       * :c:data:`energy_c_sr_lda`
+       * :c:data:`energy_sr_x_lda`
+       * :c:data:`energy_x_lda`
+       * :c:data:`energy_x_sr_lda`
+
+ 
+.. c:var:: elec_beta_num_grid_becke
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_alpha_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: one_e_dm_beta_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: elec_beta_num_grid_becke	(N_states)
+        double precision, allocatable	:: elec_alpha_num_grid_becke	(N_states)
+
+
+    one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
+    one_e_dm_beta_at_r(i,istate) =  n_beta(r_i,istate)
+    where r_i is the ith point of the grid and istate is the state number
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_alpha_ao_for_dft`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_sr_vc_alpha_lda_w`
+       * :c:data:`aos_sr_vxc_alpha_lda_w`
+       * :c:data:`aos_vc_alpha_lda_w`
+       * :c:data:`aos_vxc_alpha_lda_w`
+       * :c:data:`energy_c_lda`
+       * :c:data:`energy_c_sr_lda`
+       * :c:data:`energy_sr_x_lda`
+       * :c:data:`energy_x_lda`
+       * :c:data:`energy_x_sr_lda`
+
+ 
 .. c:var:: mos_grad_in_r_array
 
 
@@ -467,6 +555,8 @@ Providers
 
         double precision, allocatable	:: one_e_dm_alpha_at_r	(n_points_final_grid,N_states)
         double precision, allocatable	:: one_e_dm_beta_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: elec_beta_num_grid_becke	(N_states)
+        double precision, allocatable	:: elec_alpha_num_grid_becke	(N_states)
 
 
     one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
@@ -628,6 +718,8 @@ Providers
 
         double precision, allocatable	:: one_e_dm_alpha_at_r	(n_points_final_grid,N_states)
         double precision, allocatable	:: one_e_dm_beta_at_r	(n_points_final_grid,N_states)
+        double precision, allocatable	:: elec_beta_num_grid_becke	(N_states)
+        double precision, allocatable	:: elec_alpha_num_grid_becke	(N_states)
 
 
     one_e_dm_alpha_at_r(i,istate) = n_alpha(r_i,istate)
@@ -685,6 +777,66 @@ Providers
        * :c:data:`n_states`
        * :c:data:`nucl_num`
        * :c:data:`one_e_dm_alpha_ao_for_dft`
+
+
+ 
+.. c:var:: one_e_dm_no_core_and_grad_alpha_in_r
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_no_core_and_grad_alpha_in_r	(4,n_points_final_grid,N_states)
+        double precision, allocatable	:: one_e_dm_no_core_and_grad_beta_in_r	(4,n_points_final_grid,N_states)
+
+
+    one_e_dm_no_core_and_grad_alpha_in_r(1,i,i_state) = d\dx n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(2,i,i_state) = d\dy n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(3,i,i_state) = d\dz n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate) without core orbitals
+    where r_i is the ith point of the grid and istate is the state number
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
+
+
+ 
+.. c:var:: one_e_dm_no_core_and_grad_beta_in_r
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_no_core_and_grad_alpha_in_r	(4,n_points_final_grid,N_states)
+        double precision, allocatable	:: one_e_dm_no_core_and_grad_beta_in_r	(4,n_points_final_grid,N_states)
+
+
+    one_e_dm_no_core_and_grad_alpha_in_r(1,i,i_state) = d\dx n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(2,i,i_state) = d\dy n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(3,i,i_state) = d\dz n_alpha(r_i,istate) without core orbitals
+    one_e_dm_no_core_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate) without core orbitals
+    where r_i is the ith point of the grid and istate is the state number
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`final_grid_points`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
 
  
@@ -783,6 +935,55 @@ Providers
  
 Subroutines / functions 
 ----------------------- 
+ 
+.. c:function:: dens_grad_a_b_no_core_and_aos_grad_aos_at_r:
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        subroutine dens_grad_a_b_no_core_and_aos_grad_aos_at_r(r,dm_a,dm_b, grad_dm_a, grad_dm_b, aos_array, grad_aos_array)
+
+
+    input:
+    
+    * r(1) ==> r(1) = x, r(2) = y, r(3) = z
+    
+    output:
+    
+    * dm_a = alpha density evaluated at r without the core orbitals
+    * dm_b = beta  density evaluated at r without the core orbitals
+    * aos_array(i) = ao(i) evaluated at r without the core orbitals
+    * grad_dm_a(1) = X gradient of the alpha density evaluated in r without the core orbitals
+    * grad_dm_a(1) = X gradient of the beta  density evaluated in r without the core orbitals
+    * grad_aos_array(1) = X gradient of the aos(i) evaluated at r
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
+       * :c:data:`n_states`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dsymv`
+       * :c:func:`give_all_aos_and_grad_at_r`
+
  
 .. c:function:: density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r:
 
@@ -896,6 +1097,38 @@ Subroutines / functions
 
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_alpha_in_r`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemv`
+       * :c:func:`give_all_aos_at_r`
+
+ 
+.. c:function:: dm_dft_alpha_beta_no_core_at_r:
+
+
+    File : :file:`dft_utils_in_r/dm_in_r.irp.f`
+
+    .. code:: fortran
+
+        subroutine dm_dft_alpha_beta_no_core_at_r(r,dm_a,dm_b)
+
+
+    input: r(1) ==> r(1) = x, r(2) = y, r(3) = z
+    output : dm_a = alpha density evaluated at r(3) without the core orbitals
+    output : dm_b = beta  density evaluated at r(3) without the core orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
+       * :c:data:`n_states`
 
     Calls:
 

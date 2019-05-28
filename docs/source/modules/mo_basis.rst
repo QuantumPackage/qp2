@@ -80,9 +80,9 @@ Providers
 
     Molecular orbital coefficients on |AO| basis set
     
-    mo_coef(i,j) = coefficient of the i-th |AO| on the jth mo
+    mo_coef(i,j) = coefficient of the i-th |AO| on the jth |MO|
     
-    mo_label : Label characterizing the MOS (local, canonical, natural, etc)
+    mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
 
     Needs:
 
@@ -286,7 +286,6 @@ Providers
        * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
        * :c:data:`int_erf_3_index`
-       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
@@ -762,8 +761,11 @@ Subroutines / functions
        * :c:func:`hcore_guess`
        * :c:func:`huckel_guess`
        * :c:func:`roothaan_hall_scf`
+       * :c:func:`rotate_mos`
        * :c:func:`save_natural_mos`
        * :c:func:`save_ortho_mos`
+       * :c:func:`sort_by_fock_energies`
+       * :c:func:`swap_mos`
 
     Calls:
 

@@ -51,6 +51,7 @@ Programs
 -------- 
  
  * :ref:`scf` 
+ * :ref:`test` 
  
 Providers 
 --------- 

@@ -6,18 +6,39 @@ Automatically finds n, the number of core electrons. Calls qp_set_mo_class
 setting all MOs as Active, except the n/2 first ones which are set as Core.
 If pseudo-potentials are used, all the MOs are set as Active.
 
-For elements on the right of the periodic table, qp_set_frozen_core will work
-as expected. But for elements on the left, a small core will be chosen. For
-example, a Carbon atom will have 2 core electrons, but a Lithium atom will have
-zero.
-
-
 Usage:
-      qp_set_frozen_core [-q|--query] [-l|--large] EZFIO_DIR
+      qp_set_frozen_core [-q|--query] [(-l|-s|--large|--small)] EZFIO_DIR
 
 Options:
     -q --query   Prints in the standard output the number of frozen MOs
-    -l --large   Use a large core
+    -l --large   Use a small core
+    -s --small   Use a large core
+
+
+Default numbers of frozen electrons:
+
+      ========== ========= ======= ======= 
+        Range     Default   Small   Large  
+      ========== ========= ======= ======= 
+       H  -> He      0        0        0   
+       Li -> Be      0        0        2   
+       B  -> Ne      2        2        2   
+       Na -> Mg      2        2       10   
+       Al -> Ar     10        2       10   
+       K  -> Ca     10       10       18   
+       Sc -> Zn     10       10       18   
+       Ga -> Kr     18       10       18   
+       Rb -> Sr     18       18       36   
+       Y  -> Cd     18       18       36   
+       In -> Xe     36       18       36   
+       Cs -> Ba     36       36       54   
+       La -> Hg     36       36       54   
+       Tl -> Rn     54       36       54   
+       Fr -> Ra     54       54       86   
+       Ac -> Cn     54       54       86   
+       Nh -> Og     86       54       86
+      ========== ========= ======= ======= 
+
 
 """
 
@@ -47,47 +68,36 @@ def main(arguments):
     except:
         do_pseudo = False
 
-    large = 0
-    small = 1
-
-    size = small
-    if arguments["--large"]:
-        size = large
 
     if not do_pseudo:
 
-        if size == large:
+        if arguments["--large"]:
             for charge in ezfio.nuclei_nucl_charge:
-		if charge <= 2:
-		    pass 
-		elif charge <= 10:
-		    n_frozen += 1
-		elif charge <= 18:
-		    n_frozen += 5
-		elif charge <= 36:
-		    n_frozen += 9
-		elif charge <= 54:
-		    n_frozen += 18
-		elif charge <= 86:
-		    n_frozen += 27
-		elif charge <= 118:
-		    n_frozen += 43
+                if   charge <=   2: pass
+                elif charge <=  10: n_frozen += 1                                             
+                elif charge <=  18: n_frozen += 5
+                elif charge <=  36: n_frozen += 9
+                elif charge <=  54: n_frozen += 18
+                elif charge <=  86: n_frozen += 27
+                elif charge <= 118: n_frozen += 43
 
-        if size == small:
+        elif arguments["--small"]:
+                if   charge <=   4: pass
+                elif charge <=  18: n_frozen += 1
+                elif charge <=  36: n_frozen += 5
+                elif charge <=  54: n_frozen += 9
+                elif charge <=  86: n_frozen += 18
+                elif charge <= 118: n_frozen += 27
 
+        else:  # default                                                                      
             for charge in ezfio.nuclei_nucl_charge:
-                if charge < 5:
-                    pass
-                elif charge < 13:
-                    n_frozen += 1
-                elif charge < 31:
-                    n_frozen += 5
-                elif charge < 49:
-                    n_frozen += 9
-                elif charge < 81:
-                    n_frozen += 18
-                elif charge < 113:
-                    n_frozen += 27
+                if   charge <=   4: pass
+                elif charge <=  12: n_frozen += 1
+                elif charge <=  30: n_frozen += 5
+                elif charge <=  48: n_frozen += 9
+                elif charge <=  80: n_frozen += 18
+                elif charge <= 112: n_frozen += 27
+
 
     mo_num = ezfio.mo_basis_mo_num
 
