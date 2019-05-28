@@ -263,4 +263,16 @@ vtz_mclean-chandler            'McLean/Chandler VTZ'                    VTZ Vale
 vtzp_binning-curtiss           'Binning/Curtiss VTZP'                   VTZP Valence Triple Zeta + Polarization
 wachters+f                     'Wachters+f'                             VDZP Valence Double Zeta + Polarization on All Atoms
 
+aug-cc-pvdz_ecp_ncsu           'aug-cc-pvdz ecp ncsu'                  augmented cc-pvDz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+aug-cc-pvtz_ecp_ncsu           'aug-cc-pvtz ecp ncsu'                  augmented cc-pvTz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+aug-cc-pvqz_ecp_ncsu           'aug-cc-pvqz ecp ncsu'                  augmented cc-pvQz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+aug-cc-pv5z_ecp_ncsu           'aug-cc-pv5z ecp ncsu'                  augmented cc-pv5z basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+cc-pvdz_ecp_ncsu               'cc-pvdz ecp ncsu'                      cc-pvDz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+cc-pvtz_ecp_ncsu               'cc-pvtz ecp ncsu'                      cc-pvTz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+cc-pvqz_ecp_ncsu               'cc-pvqz ecp ncsu'                      cc-pvQz basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+cc-pv5z_ecp_ncsu               'cc-pv5z ecp ncsu'                      cc-pv5z basis set designed for the NCSU ECP found in https://pseudopotentiallibrary.org/ 
+
+
+
+
 # ; vim::nowrap
