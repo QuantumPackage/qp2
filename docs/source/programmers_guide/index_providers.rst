@@ -168,7 +168,9 @@ Index of Providers
     * :c:data:`damping_for_rs_dft` 
     * :c:data:`data_energy_proj` 
     * :c:data:`data_energy_var` 
+    * :c:data:`data_one_e_dm_alpha_ao` 
     * :c:data:`data_one_e_dm_alpha_mo` 
+    * :c:data:`data_one_e_dm_beta_ao` 
     * :c:data:`data_one_e_dm_beta_mo` 
     * :c:data:`davidson_criterion` 
     * :c:data:`davidson_sze_max` 
@@ -214,7 +216,9 @@ Index of Providers
     * :c:data:`eigenvectors_fock_matrix_ao` 
     * :c:data:`eigenvectors_fock_matrix_mo` 
     * :c:data:`elec_alpha_num` 
+    * :c:data:`elec_alpha_num_grid_becke` 
     * :c:data:`elec_beta_num` 
+    * :c:data:`elec_beta_num_grid_becke` 
     * :c:data:`elec_num` 
     * :c:data:`elec_num_tab` 
     * :c:data:`element_mass` 
@@ -351,6 +355,7 @@ Index of Providers
     * :c:data:`list_del` 
     * :c:data:`list_del_reverse` 
     * :c:data:`list_inact` 
+    * :c:data:`list_inact_act` 
     * :c:data:`list_inact_reverse` 
     * :c:data:`list_virt` 
     * :c:data:`list_virt_reverse` 
@@ -441,6 +446,7 @@ Index of Providers
     * :c:data:`n_double_selectors` 
     * :c:data:`n_generators_bitmask` 
     * :c:data:`n_generators_bitmask_restart` 
+    * :c:data:`n_inact_act_orb` 
     * :c:data:`n_inact_orb` 
     * :c:data:`n_inact_orb_allocate` 
     * :c:data:`n_int` 
@@ -463,6 +469,7 @@ Index of Providers
     * :c:data:`no_ivvv_integrals` 
     * :c:data:`no_vvv_integrals` 
     * :c:data:`no_vvvv_integrals` 
+    * :c:data:`normalize_dm` 
     * :c:data:`nproc` 
     * :c:data:`nthreads_davidson` 
     * :c:data:`nthreads_pt2` 
@@ -487,6 +494,7 @@ Index of Providers
     * :c:data:`one_body_dm_mo_alpha_one_det` 
     * :c:data:`one_body_dm_mo_beta_one_det` 
     * :c:data:`one_e_dm_alpha_ao_for_dft` 
+    * :c:data:`one_e_dm_alpha_ao_for_dft_no_core` 
     * :c:data:`one_e_dm_alpha_at_r` 
     * :c:data:`one_e_dm_alpha_in_r` 
     * :c:data:`one_e_dm_and_grad_alpha_in_r` 
@@ -495,6 +503,7 @@ Index of Providers
     * :c:data:`one_e_dm_ao_beta` 
     * :c:data:`one_e_dm_average_mo_for_dft` 
     * :c:data:`one_e_dm_beta_ao_for_dft` 
+    * :c:data:`one_e_dm_beta_ao_for_dft_no_core` 
     * :c:data:`one_e_dm_beta_at_r` 
     * :c:data:`one_e_dm_beta_in_r` 
     * :c:data:`one_e_dm_dagger_mo_spin_index` 
@@ -502,12 +511,16 @@ Index of Providers
     * :c:data:`one_e_dm_mo_alpha` 
     * :c:data:`one_e_dm_mo_alpha_average` 
     * :c:data:`one_e_dm_mo_alpha_for_dft` 
+    * :c:data:`one_e_dm_mo_alpha_for_dft_no_core` 
     * :c:data:`one_e_dm_mo_beta` 
     * :c:data:`one_e_dm_mo_beta_average` 
     * :c:data:`one_e_dm_mo_beta_for_dft` 
+    * :c:data:`one_e_dm_mo_beta_for_dft_no_core` 
     * :c:data:`one_e_dm_mo_diff` 
     * :c:data:`one_e_dm_mo_for_dft` 
     * :c:data:`one_e_dm_mo_spin_index` 
+    * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r` 
+    * :c:data:`one_e_dm_no_core_and_grad_beta_in_r` 
     * :c:data:`one_e_energy` 
     * :c:data:`one_e_grad_2_dm_alpha_at_r` 
     * :c:data:`one_e_grad_2_dm_beta_at_r` 
@@ -556,18 +569,6 @@ Index of Providers
     * :c:data:`potential_c_beta_ao_sr_lda` 
     * :c:data:`potential_c_beta_ao_sr_pbe` 
     * :c:data:`potential_c_beta_mo` 
-    * :c:data:`potential_sr_c_alpha_ao_lda` 
-    * :c:data:`potential_sr_c_alpha_ao_pbe` 
-    * :c:data:`potential_sr_c_beta_ao_lda` 
-    * :c:data:`potential_sr_c_beta_ao_pbe` 
-    * :c:data:`potential_sr_x_alpha_ao_lda` 
-    * :c:data:`potential_sr_x_alpha_ao_pbe` 
-    * :c:data:`potential_sr_x_beta_ao_lda` 
-    * :c:data:`potential_sr_x_beta_ao_pbe` 
-    * :c:data:`potential_sr_xc_alpha_ao_lda` 
-    * :c:data:`potential_sr_xc_alpha_ao_pbe` 
-    * :c:data:`potential_sr_xc_beta_ao_lda` 
-    * :c:data:`potential_sr_xc_beta_ao_pbe` 
     * :c:data:`potential_x_alpha_ao` 
     * :c:data:`potential_x_alpha_ao_lda` 
     * :c:data:`potential_x_alpha_ao_none` 
@@ -609,6 +610,7 @@ Index of Providers
     * :c:data:`pseudo_n_k_transp` 
     * :c:data:`pseudo_n_kl` 
     * :c:data:`pseudo_n_kl_transp` 
+    * :c:data:`pseudo_sym` 
     * :c:data:`pseudo_v_k` 
     * :c:data:`pseudo_v_k_transp` 
     * :c:data:`pseudo_v_kl` 
@@ -679,6 +681,7 @@ Index of Providers
     * :c:data:`pt2_f` 
     * :c:data:`pt2_iterations` 
     * :c:data:`pt2_j` 
+    * :c:data:`pt2_match_weight` 
     * :c:data:`pt2_max` 
     * :c:data:`pt2_mindetinfirstteeth` 
     * :c:data:`pt2_n_0` 
@@ -773,6 +776,7 @@ Index of Providers
     * :c:data:`target_energy` 
     * :c:data:`theta_angular_integration_lebedev` 
     * :c:data:`thresh_scf` 
+    * :c:data:`thresh_sym` 
     * :c:data:`threshold_davidson` 
     * :c:data:`threshold_diis` 
     * :c:data:`threshold_diis_nonzero` 
@@ -891,6 +895,7 @@ Index of Subroutines/Functions
     * :c:func:`compute_ao_two_e_integrals` 
     * :c:func:`compute_ao_two_e_integrals_erf` 
     * :c:func:`connect_to_taskserver` 
+    * :c:func:`connected_to_hf` 
     * :c:func:`connected_to_ref` 
     * :c:func:`connected_to_ref_by_single` 
     * :c:func:`copy_h_apply_buffer_to_wf` 
@@ -925,6 +930,7 @@ Index of Subroutines/Functions
     * :c:func:`decode_exc` 
     * :c:func:`decode_exc_spin` 
     * :c:func:`delete_selection_buffer` 
+    * :c:func:`dens_grad_a_b_no_core_and_aos_grad_aos_at_r` 
     * :c:func:`density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r` 
     * :c:func:`derivative_knowles_function` 
     * :c:func:`det_inf` 
@@ -942,6 +948,7 @@ Index of Subroutines/Functions
     * :c:func:`disconnect_from_taskserver_state` 
     * :c:func:`dm_dft_alpha_beta_and_all_aos_at_r` 
     * :c:func:`dm_dft_alpha_beta_at_r` 
+    * :c:func:`dm_dft_alpha_beta_no_core_at_r` 
     * :c:func:`do_single_excitation` 
     * :c:func:`dpol` 
     * :c:func:`dpold` 
@@ -1093,11 +1100,21 @@ Index of Subroutines/Functions
     * :c:func:`h_apply_cis_diexcorg` 
     * :c:func:`h_apply_cis_diexcp` 
     * :c:func:`h_apply_cis_monoexc` 
+    * :c:func:`h_apply_cis_sym` 
+    * :c:func:`h_apply_cis_sym_diexc` 
+    * :c:func:`h_apply_cis_sym_diexcorg` 
+    * :c:func:`h_apply_cis_sym_diexcp` 
+    * :c:func:`h_apply_cis_sym_monoexc` 
     * :c:func:`h_apply_cisd` 
     * :c:func:`h_apply_cisd_diexc` 
     * :c:func:`h_apply_cisd_diexcorg` 
     * :c:func:`h_apply_cisd_diexcp` 
     * :c:func:`h_apply_cisd_monoexc` 
+    * :c:func:`h_apply_cisd_sym` 
+    * :c:func:`h_apply_cisd_sym_diexc` 
+    * :c:func:`h_apply_cisd_sym_diexcorg` 
+    * :c:func:`h_apply_cisd_sym_diexcp` 
+    * :c:func:`h_apply_cisd_sym_monoexc` 
     * :c:func:`h_s2_u_0_nstates_openmp` 
     * :c:func:`h_s2_u_0_nstates_openmp_work` 
     * :c:func:`h_s2_u_0_nstates_openmp_work_1` 
@@ -1321,6 +1338,7 @@ Index of Subroutines/Functions
     * :c:func:`rinteg` 
     * :c:func:`rintgauss` 
     * :c:func:`roothaan_hall_scf` 
+    * :c:func:`rotate_mos` 
     * :c:func:`routine` 
     * :c:func:`routine_e_conv` 
     * :c:func:`routine_example_psi_det` 
@@ -1369,6 +1387,7 @@ Index of Subroutines/Functions
     * :c:func:`set_order_big` 
     * :c:func:`single_excitation_wee` 
     * :c:func:`sort` 
+    * :c:func:`sort_by_fock_energies` 
     * :c:func:`sort_dets_ab` 
     * :c:func:`sort_dets_ab_v` 
     * :c:func:`sort_dets_ba_v` 
@@ -1384,10 +1403,12 @@ Index of Subroutines/Functions
     * :c:func:`spot_isinwf` 
     * :c:func:`step_function_becke` 
     * :c:func:`svd` 
+    * :c:func:`swap_mos` 
     * :c:func:`switch_qp_run_to_master` 
     * :c:func:`tamiser` 
     * :c:func:`task_done_to_taskserver` 
     * :c:func:`tasks_done_to_taskserver` 
+    * :c:func:`test` 
     * :c:func:`testteethbuilding` 
     * :c:func:`total_memory` 
     * :c:func:`two_e_integrals_index` 

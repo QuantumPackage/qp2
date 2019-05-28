@@ -6,6 +6,7 @@ Usage:
        qp_plugins download <url> [-n <name>]
        qp_plugins install <name>...
        qp_plugins uninstall <name>
+       qp_plugins update [-r <repo>]
        qp_plugins create -n <name> [-r <repo>] [<needed_modules>...]
 
 Options:
@@ -22,6 +23,8 @@ Options:
     install                   Install a plugin
 
     uninstall                 Uninstall a plugin
+
+    update                    Update the repository 
 
     create
       -n --name=<name>        Create a new plugin named <name>
@@ -89,16 +92,19 @@ def save_new_module(path, l_child):
 end
 """)
 
+def get_repositories():
+    l_result = [f for f in os.listdir(QP_PLUGINS) \
+                  if f not in [".gitignore", "local"] ]
+    return sorted(l_result)
+
+
 def main(arguments):
     """Main function"""
     arguments["<name>"] = [os.path.normpath(name) for name in arguments["<name>"]]
 
     if arguments["list"]:
         if arguments["--repositories"]:
-            l_result = [f for f in os.listdir(QP_PLUGINS) \
-                        if f not in [".gitignore", "local"] ]
-
-            for repo in sorted(l_result):
+            for repo in get_repositories():
                 print repo
 
         else:
@@ -137,6 +143,7 @@ def main(arguments):
 
             for module in sorted(l_result):
                 print "%-30s %-30s"%(module, repo_of_plugin[module])
+
 
     if arguments["create"]:
         m_instance = ModuleHandler([QP_SRC])
@@ -304,6 +311,20 @@ def main(arguments):
                 os.unlink(os.path.join(QP_SRC, module))
             except OSError:
                 print "%s is a core module which can't be removed" % module
+
+
+    elif arguments["update"]:
+
+        if arguments["--repository"]:
+            l_repositories = [ arguments["--repository"] ]
+        else:
+            l_repositories = get_repositories()
+
+        for repo in l_repositories:
+            print "Updating ", repo
+            os.chdir(os.path.join(QP_PLUGINS,repo))
+            git_cmd=["git", "pull"]
+            subprocess.check_call(git_cmd)
 
 
 if __name__ == '__main__':
