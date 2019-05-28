@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "SAVE_ORTHO_MOS" "1" "May 28, 2019" "2.0" "Quantum Package"
+.TH "PRINT_CI_VECTORS" "1" "May 28, 2019" "2.0" "Quantum Package"
 .SH NAME
-save_ortho_mos \-  | Quantum Package >
+print_ci_vectors \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -32,23 +32,35 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Save orthonormalized MOs in the EZFIO.
+Print the ground state wave function stored in the \fI\%EZFIO\fP directory
+in the intermediate normalization.
 .sp
-This program reads the current MOs, computes the corresponding overlap matrix in the MO basis
+It also prints a lot of information regarding the excitation
+operators from the reference determinant ! and a first\-order
+perturbative analysis of the wave function.
 .sp
-and perform a Lowdin orthonormalization : MO_{new} = S^{\-1/2} MO_{guess}\&.
+If the wave function strongly deviates from the first\-order analysis,
+something funny is going on :)
 .sp
-Thanks to the Lowdin orthonormalization, the new MOs are the most similar to the guess MOs.
+Needs:
+.INDENT 0.0
+.INDENT 2.0
+.IP \(bu 2
+\fBread_wf\fP
+.UNINDENT
+.INDENT 2.0
+.UNINDENT
+.INDENT 2.0
+.UNINDENT
+.UNINDENT
 .sp
 Calls:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBorthonormalize_mos()\fP
+\fBroutine()\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBsave_mos()\fP
 .UNINDENT
 .INDENT 2.0
 .UNINDENT
@@ -58,11 +70,9 @@ Touches:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBmo_coef\fP
+\fBread_wf\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBmo_label\fP
 .UNINDENT
 .INDENT 2.0
 .UNINDENT

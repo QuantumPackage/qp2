@@ -108,10 +108,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -150,8 +152,6 @@ Providers
        * :c:data:`closed_shell_ref_bitmask`
        * :c:data:`psi_cas`
        * :c:data:`reunion_of_bitmask`
-       * :c:data:`reunion_of_cas_inact_bitmask`
-       * :c:data:`reunion_of_core_inact_act_bitmask`
 
  
 .. c:var:: closed_shell_ref_bitmask
@@ -246,10 +246,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -374,10 +376,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -814,10 +818,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -943,10 +949,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1021,10 +1029,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1099,10 +1109,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1110,12 +1122,12 @@ Providers
 .. c:var:: list_core_inact_act
 
 
-    File : :file:`bitmask/bitmasks.irp.f`
+    File : :file:`bitmask/core_inact_act_virt.irp.f`
 
     .. code:: fortran
 
         integer, allocatable	:: list_core_inact_act	(n_core_inact_act_orb)
-        integer, allocatable	:: list_core_inact_act_reverse	(mo_num)
+        integer, allocatable	:: list_core_inact_act_reverse	(n_core_inact_act_orb)
 
 
 
@@ -1125,7 +1137,8 @@ Providers
        :columns: 3
 
        * :c:data:`list_inact`
-       * :c:data:`mo_num`
+       * :c:data:`n_core_inact_act_orb`
+       * :c:data:`n_core_orb`
        * :c:data:`n_int`
        * :c:data:`reunion_of_core_inact_act_bitmask`
 
@@ -1134,12 +1147,12 @@ Providers
 .. c:var:: list_core_inact_act_reverse
 
 
-    File : :file:`bitmask/bitmasks.irp.f`
+    File : :file:`bitmask/core_inact_act_virt.irp.f`
 
     .. code:: fortran
 
         integer, allocatable	:: list_core_inact_act	(n_core_inact_act_orb)
-        integer, allocatable	:: list_core_inact_act_reverse	(mo_num)
+        integer, allocatable	:: list_core_inact_act_reverse	(n_core_inact_act_orb)
 
 
 
@@ -1149,7 +1162,8 @@ Providers
        :columns: 3
 
        * :c:data:`list_inact`
-       * :c:data:`mo_num`
+       * :c:data:`n_core_inact_act_orb`
+       * :c:data:`n_core_orb`
        * :c:data:`n_int`
        * :c:data:`reunion_of_core_inact_act_bitmask`
 
@@ -1225,10 +1239,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1303,10 +1319,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1381,10 +1399,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1459,12 +1479,36 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
+
+ 
+.. c:var:: list_inact_act
+
+
+    File : :file:`bitmask/core_inact_act_virt.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: list_inact_act	(n_inact_act_orb)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_inact`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_inact_act_orb`
+
 
  
 .. c:var:: list_inact_reverse
@@ -1537,10 +1581,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1615,10 +1661,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1693,10 +1741,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 
@@ -1772,9 +1822,13 @@ Providers
        * :c:data:`dim_list_core_orb`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_mo`
+       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_core_orb_allocate`
+       * :c:data:`n_inact_act_orb`
        * :c:data:`n_inact_orb_allocate`
        * :c:data:`n_virt_orb_allocate`
        * :c:data:`pt2_f`
@@ -1813,31 +1867,26 @@ Providers
 .. c:var:: n_core_inact_act_orb
 
 
-    File : :file:`bitmask/bitmasks.irp.f`
+    File : :file:`bitmask/core_inact_act_virt.irp.f`
 
     .. code:: fortran
 
-        integer(bit_kind), allocatable	:: reunion_of_core_inact_act_bitmask	(N_int,2)
         integer	:: n_core_inact_act_orb	
 
 
-    Reunion of the core, inactive and active bitmasks
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`cas_bitmask`
-       * :c:data:`n_int`
-       * :c:data:`reunion_of_core_inact_bitmask`
+       * :c:data:`n_core_orb`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`core_inact_act_bitmask_4`
        * :c:data:`list_core_inact_act`
 
  
@@ -1919,9 +1968,13 @@ Providers
        * :c:data:`dim_list_core_orb`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_mo`
+       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_core_orb_allocate`
+       * :c:data:`n_inact_act_orb`
        * :c:data:`n_inact_orb_allocate`
        * :c:data:`n_virt_orb_allocate`
        * :c:data:`pt2_f`
@@ -2004,9 +2057,13 @@ Providers
        * :c:data:`dim_list_core_orb`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_mo`
+       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_core_orb_allocate`
+       * :c:data:`n_inact_act_orb`
        * :c:data:`n_inact_orb_allocate`
        * :c:data:`n_virt_orb_allocate`
        * :c:data:`pt2_f`
@@ -2072,6 +2129,32 @@ Providers
        * :c:data:`generators_bitmask_restart`
 
  
+.. c:var:: n_inact_act_orb
+
+
+    File : :file:`bitmask/core_inact_act_virt.irp.f`
+
+    .. code:: fortran
+
+        integer	:: n_inact_act_orb	
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_core_orb`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_inact_act`
+
+ 
 .. c:var:: n_inact_orb
 
 
@@ -2129,9 +2212,13 @@ Providers
        * :c:data:`dim_list_core_orb`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_mo`
+       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_core_orb_allocate`
+       * :c:data:`n_inact_act_orb`
        * :c:data:`n_inact_orb_allocate`
        * :c:data:`n_virt_orb_allocate`
        * :c:data:`pt2_f`
@@ -2309,9 +2396,13 @@ Providers
        * :c:data:`dim_list_core_orb`
        * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_mo`
+       * :c:data:`list_core_inact_act`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_core_orb_allocate`
+       * :c:data:`n_inact_act_orb`
        * :c:data:`n_inact_orb_allocate`
        * :c:data:`n_virt_orb_allocate`
        * :c:data:`pt2_f`
@@ -2412,7 +2503,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cas_bitmask`
        * :c:data:`list_inact`
        * :c:data:`n_int`
 
@@ -2426,7 +2516,6 @@ Providers
     .. code:: fortran
 
         integer(bit_kind), allocatable	:: reunion_of_core_inact_act_bitmask	(N_int,2)
-        integer	:: n_core_inact_act_orb	
 
 
     Reunion of the core, inactive and active bitmasks
@@ -2436,7 +2525,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`cas_bitmask`
+       * :c:data:`list_inact`
        * :c:data:`n_int`
        * :c:data:`reunion_of_core_inact_bitmask`
 
@@ -2570,10 +2659,12 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`inact_virt_bitmask`
        * :c:data:`list_core_inact_act`
+       * :c:data:`list_inact_act`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
        * :c:data:`reunion_of_bitmask`
        * :c:data:`reunion_of_cas_inact_bitmask`
+       * :c:data:`reunion_of_core_inact_act_bitmask`
        * :c:data:`reunion_of_core_inact_bitmask`
        * :c:data:`virt_bitmask_4`
 

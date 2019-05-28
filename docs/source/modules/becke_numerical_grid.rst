@@ -241,6 +241,7 @@ Providers
        * :c:data:`mos_in_r_array`
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: final_weight_at_r
@@ -339,6 +340,7 @@ Providers
        * :c:data:`mos_in_r_array`
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: grid_points_per_atom
@@ -468,6 +470,7 @@ Providers
        * :c:data:`mos_in_r_array`
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: index_final_points_reverse
@@ -532,6 +535,7 @@ Providers
        * :c:data:`mos_in_r_array`
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: m_knowles
@@ -608,6 +612,7 @@ Providers
        * :c:data:`mos_lapl_in_r_array`
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
        * :c:data:`pot_grad_x_alpha_ao_pbe`
        * :c:data:`pot_grad_xc_alpha_ao_pbe`
        * :c:data:`pot_scal_x_alpha_ao_pbe`
@@ -749,6 +754,7 @@ Providers
 
        * :c:data:`grid_points_per_atom`
        * :c:data:`n_points_radial_grid`
+       * :c:data:`nucl_charge`
        * :c:data:`nucl_coord_transp`
        * :c:data:`nucl_dist_inv`
        * :c:data:`nucl_num`
@@ -818,6 +824,7 @@ Subroutines / functions
        * :c:data:`nucl_dist_inv`
        * :c:data:`slater_bragg_type_inter_distance_ua`
        * :c:data:`nucl_coord_transp`
+       * :c:data:`nucl_charge`
        * :c:data:`nucl_num`
 
  

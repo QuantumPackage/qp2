@@ -1,0 +1,235 @@
+.\" Man page generated from reStructuredText.
+.
+.TH "QP_CREATE_EZFIO" "1" "May 28, 2019" "2.0" "Quantum Package"
+.SH NAME
+qp_create_ezfio \-  | Quantum Package >
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.sp
+This command creates an \fI\%EZFIO\fP directory from a standard \fIxyz\fP file or
+from a \fIz\-matrix\fP file in Gaussian format.
+.SH USAGE
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+qp_create_ezfio [\-a] \-b <string> [\-c <int>] [\-d <float>]
+   [\-h] [\-m <int>] [\-o EZFIO_DIR] [\-p <string>] [\-x] [\-\-] FILE
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-a, \-\-au
+If present, input geometry is in atomic units.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-b, \-\-basis=<string>
+Name of basis set. The basis set is defined as a single string if
+all the atoms are taken from the same basis set, otherwise specific
+elements can be defined as follows:
+.INDENT 7.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+\-b "cc\-pcvdz | H:cc\-pvdz | C:6\-31g"
+\-b "cc\-pvtz | 1,H:sto\-3g | 3,H:6\-31g"
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+By default, the basis set is obtained from the local database of the.
+\fIQuantum Package\fP This option is mandatory                                       .
+.sp
+If \fB<string>\fP is set to \fBshow\fP, the list of all available basis
+sets is displayed.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-c, \-\-charge=<int>
+Total charge of the molecule. Default is 0.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-d, \-\-dummy=<float>
+Add dummy atoms (X) between atoms when the distance between two atoms
+is less than x \etimes \esum R_\emathrm{cov}, the covalent radii
+of the atoms. The default is x=0, so no dummy atom is added.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-h, \-\-help
+Print the help text and exit
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-m, \-\-multiplicity=<int>
+Spin multiplicity 2S+1 of the molecule. Default is 1.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-o, \-\-output=EZFIO_DIR
+Name of the created \fI\%EZFIO\fP directory.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-p <string>, \-\-pseudo=<string>
+Name of the pseudo\-potential. Follows the same conventions as the basis set.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-x, \-\-cart
+Compute AOs in the Cartesian basis set (6d, 10f, …)
+.UNINDENT
+.SH USING CUSTOM ATOMIC BASIS SETS
+.sp
+If a file with the same name as the basis set exists, this file will
+be read. For example, if the file containing the basis set is named
+\fBcustom.basis\fP, and the \fIxyz\fP geometry is in \fBmolecule.xyz\fP, the
+following should be used:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+qp_create_ezfio \-b custom.basis molecule.xyz
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Basis set files should be given in \fI\%GAMESS\fP format, where the full
+names of the atoms are given, and the basis sets for each element are
+separated by a blank line. Here is an example
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+HYDROGEN
+S   3
+1     13.0100000              0.0196850
+2      1.9620000              0.1379770
+3      0.4446000              0.4781480
+S   1
+1      0.1220000              1.0000000
+P   1
+1      0.7270000              1.0000000
+
+BORON
+S   8
+1   4570.0000000              0.0006960
+2    685.9000000              0.0053530
+3    156.5000000              0.0271340
+4     44.4700000              0.1013800
+5     14.4800000              0.2720550
+6      5.1310000              0.4484030
+7      1.8980000              0.2901230
+8      0.3329000              0.0143220
+S   8
+1   4570.0000000             \-0.0001390
+2    685.9000000             \-0.0010970
+3    156.5000000             \-0.0054440
+4     44.4700000             \-0.0219160
+5     14.4800000             \-0.0597510
+6      5.1310000             \-0.1387320
+7      1.8980000             \-0.1314820
+8      0.3329000              0.5395260
+S   1
+1      0.1043000              1.0000000
+P   3
+1      6.0010000              0.0354810
+2      1.2410000              0.1980720
+3      0.3364000              0.5052300
+P   1
+1      0.0953800              1.0000000
+D   1
+1      0.3430000              1.0000000
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH USING CUSTOM PSEUDO-POTENTIALS
+.sp
+As for the basis set, if a file with the same name as the
+pseudo\-potential exists, this file will be read. For example, if the
+file containing the custom pseudo\-potential is named \fBcustom.pseudo\fP,
+the basis set is named \fBcustom.basis\fP, and the \fIxyz\fP geometry is in
+\fBmolecule.xyz\fP, the following command should be used
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+qp_create_ezfio \-b custom.basis \-p custom.pseudo molecule.xyz
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Pseudo\-potential files should be given in a format very close to
+\fI\%GAMESS\fP format. The first line should be formatted as \fB%s GEN %d %d\fP
+where the first string is the chemical symbol, the first integer is
+the number of core electrons to be removed and the second integer is
+LMAX+1 as in \fI\%GAMESS\fP format. The pseudo\-potential for each element are
+separated by a blank line. Here is an example
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+Ne GEN 2 1
+3
+8.00000000 1 10.74945199
+85.99561593 3 10.19801460
+\-56.79004456 2 10.18694048
+1
+55.11144535 2 12.85042963
+
+F GEN 2 1
+3
+7.00000000 1 11.39210685
+79.74474797 3 10.74911370
+\-49.45159098 2 10.45120693
+1
+50.25646328 2 11.30345826
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH AUTHOR
+A. Scemama, E. Giner
+.SH COPYRIGHT
+2019, A. Scemama, E. Giner
+.\" Generated by docutils manpage writer.
+.

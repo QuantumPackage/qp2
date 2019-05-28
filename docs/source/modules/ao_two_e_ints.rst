@@ -953,6 +953,7 @@ Subroutines / functions
 
     Gets multiple AO bi-electronic integral from the AO map .
     All i are retrieved for j,k,l fixed.
+    physicist convention : <ij|kl>
 
     Needs:
 
@@ -1224,6 +1225,8 @@ Subroutines / functions
         subroutine two_e_integrals_index(i,j,k,l,i1)
 
 
+    Gives a unique index for i,j,k,l using permtuation symmetry.
+    i <-> k, j <-> l, and (i,k) <-> (j,l)
 
     Called by:
 
@@ -1255,7 +1258,7 @@ Subroutines / functions
        * :c:data:`mo_integrals_erf_cache`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
-       * :c:func:`two_e_integrals_index_reverse`
+       * :c:func:`test`
 
  
 .. c:function:: two_e_integrals_index_reverse:
@@ -1268,6 +1271,15 @@ Subroutines / functions
         subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
 
 
+    Computes the 4 indices $i,j,k,l$ from a unique index $i_1$.
+    For 2 indices $i,j$ and $i \le j$, we have
+    $p = i(i-1)/2 + j$.
+    The key point is that because $j < i$,
+    $i(i-1)/2 < p \le i(i+1)/2$. So $i$ can be found by solving
+    $i^2 - i - 2p=0$. One obtains $i=1 + \sqrt{1+8p}/2$
+    and $j = p - i(i-1)/2$.
+    This rule is applied 3 times. First for the symmetry of the
+    pairs (i,k) and (j,l), and then for the symmetry within each pair.
 
     Called by:
 
@@ -1275,11 +1287,5 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_two_e_integral_alpha`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`two_e_integrals_index`
+       * :c:func:`test`
 

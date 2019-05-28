@@ -71,7 +71,7 @@ EZFIO parameters
  
     Thresholds on generators (fraction of the square of the norm)
  
-    Default: 0.99
+    Default: 0.999
  
 .. option:: n_int
  
@@ -118,6 +118,18 @@ EZFIO parameters
  
     Weight of the states in state-average calculations.
  
+ 
+.. option:: thresh_sym
+ 
+    Thresholds to check if a determinant is connected with HF
+ 
+    Default: 1.e-15
+ 
+.. option:: pseudo_sym
+ 
+    If |true|, discard any Slater determinants with an interaction smaller than thresh_sym with HF.
+ 
+    Default: False
  
  
 Providers 
@@ -3971,6 +3983,37 @@ Subroutines / functions
        * :c:func:`debug_det`
 
  
+.. c:function:: connected_to_hf:
+
+
+    File : :file:`determinants/slater_rules.irp.f`
+
+    .. code:: fortran
+
+        subroutine connected_to_hf(key_i,yes_no)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`thresh_sym`
+       * :c:data:`ref_bitmask`
+       * :c:data:`mo_one_e_integrals`
+       * :c:data:`n_int`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`get_excitation_degree`
+       * :c:func:`get_single_excitation`
+       * :c:func:`i_h_j`
+
+ 
 .. c:function:: connected_to_ref:
 
 
@@ -5367,6 +5410,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`connected_to_hf`
        * :c:data:`degree_max_generators`
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`example_determinants`
@@ -5699,6 +5743,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`connected_to_hf`
        * :c:func:`diag_h_mat_elem_fock`
        * :c:func:`get_excitation`
        * :c:func:`i_h_j`
@@ -5866,6 +5911,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`coef_hf_selector`
+       * :c:func:`connected_to_hf`
        * :c:func:`example_determinants`
        * :c:func:`get_d0`
        * :c:func:`get_d1`

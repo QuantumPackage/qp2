@@ -22,9 +22,12 @@ Programs
  * :ref:`print_ci_vectors` 
  * :ref:`print_e_conv` 
  * :ref:`print_wf` 
+ * :ref:`rotate_mos` 
  * :ref:`save_natorb` 
  * :ref:`save_one_e_dm` 
  * :ref:`save_ortho_mos` 
+ * :ref:`sort_by_fock_energies` 
+ * :ref:`swap_mos` 
  * :ref:`write_integrals_erf` 
  
 Subroutines / functions 
@@ -115,6 +118,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`one_e_dm_ao_alpha`
        * :c:data:`one_e_dm_mo_alpha`
 
     Called by:
@@ -129,6 +133,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_alpha_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_alpha_mo`
+       * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_mo`
 

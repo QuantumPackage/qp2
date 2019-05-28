@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "QP_SET_FROZEN_CORE" "1" "Mar 07, 2019" "2.0" "Quantum Package"
+.TH "QP_SET_FROZEN_CORE" "1" "May 28, 2019" "2.0" "Quantum Package"
 .SH NAME
 qp_set_frozen_core \-  | Quantum Package >
 .
@@ -35,6 +35,191 @@ Automatically finds \fIn\fP, the number of core electrons. Calls
 qp_set_mo_class setting all MOs as \fBActive\fP, except the
 n/2 first ones which are set as \fBCore\fP\&. If pseudo\-potentials
 are used, all the MOs are set as \fBActive\fP\&.
+.TS
+center;
+|l|l|l|l|.
+_
+T{
+Range
+T}	T{
+Default
+T}	T{
+Small
+T}	T{
+Large
+T}
+_
+T{
+H  \-> He
+T}	T{
+0
+T}	T{
+0
+T}	T{
+0
+T}
+_
+T{
+Li \-> Be
+T}	T{
+0
+T}	T{
+0
+T}	T{
+2
+T}
+_
+T{
+B  \-> Ne
+T}	T{
+2
+T}	T{
+2
+T}	T{
+2
+T}
+_
+T{
+Na \-> Mg
+T}	T{
+2
+T}	T{
+2
+T}	T{
+10
+T}
+_
+T{
+Al \-> Ar
+T}	T{
+10
+T}	T{
+2
+T}	T{
+10
+T}
+_
+T{
+K  \-> Ca
+T}	T{
+10
+T}	T{
+10
+T}	T{
+18
+T}
+_
+T{
+Sc \-> Zn
+T}	T{
+10
+T}	T{
+10
+T}	T{
+18
+T}
+_
+T{
+Ga \-> Kr
+T}	T{
+18
+T}	T{
+10
+T}	T{
+18
+T}
+_
+T{
+Rb \-> Sr
+T}	T{
+18
+T}	T{
+18
+T}	T{
+36
+T}
+_
+T{
+Y  \-> Cd
+T}	T{
+18
+T}	T{
+18
+T}	T{
+36
+T}
+_
+T{
+In \-> Xe
+T}	T{
+36
+T}	T{
+18
+T}	T{
+36
+T}
+_
+T{
+Cs \-> Ba
+T}	T{
+36
+T}	T{
+36
+T}	T{
+54
+T}
+_
+T{
+La \-> Hg
+T}	T{
+36
+T}	T{
+36
+T}	T{
+54
+T}
+_
+T{
+Tl \-> Rn
+T}	T{
+54
+T}	T{
+36
+T}	T{
+54
+T}
+_
+T{
+Fr \-> Ra
+T}	T{
+54
+T}	T{
+54
+T}	T{
+86
+T}
+_
+T{
+Ac \-> Cn
+T}	T{
+54
+T}	T{
+54
+T}	T{
+86
+T}
+_
+T{
+Nh \-> Og
+T}	T{
+86
+T}	T{
+54
+T}	T{
+86
+T}
+_
+.TE
 .sp
 For elements on the right of the periodic table, \fIqp_set_frozen_core\fP
 will work as expected. But for elements on the left, a small core will
@@ -46,15 +231,25 @@ Lithium atom will have zero.
 .sp
 .nf
 .ft C
-qp_set_frozen_core [\-q]  EZFIO_DIR
+qp_set_frozen_core [\-q|\-\-query] [(\-l|\-s|\-\-large|\-\-small)  EZFIO_DIR
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-q
+.B \-q, \-\-query
 Prints in the standard output the number of core electrons.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-s, \-\-small
+Use a small core.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-l, \-\-large
+Use a large core.
 .UNINDENT
 .SH AUTHOR
 A. Scemama, E. Giner
