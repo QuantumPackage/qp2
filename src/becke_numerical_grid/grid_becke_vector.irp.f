@@ -1,5 +1,6 @@
 
 BEGIN_PROVIDER [integer, n_points_final_grid]
+  implicit none
   BEGIN_DOC
   ! Number of points which are non zero
   END_DOC
@@ -8,7 +9,7 @@ BEGIN_PROVIDER [integer, n_points_final_grid]
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
-        if(dabs(final_weight_at_r(k,i,j)) < tresh_grid)then
+        if(dabs(final_weight_at_r(k,i,j)) < thresh_grid)then
           cycle
         endif
         n_points_final_grid += 1
