@@ -526,7 +526,7 @@ Providers
 
     .. code:: fortran
 
-        double precision, allocatable	:: slater_bragg_radii	(100)
+        double precision, allocatable	:: slater_bragg_radii	(0:100)
 
 
     atomic radii in Angstrom defined in table I of JCP 41, 3199 (1964) Slater
@@ -604,7 +604,7 @@ Providers
 
     .. code:: fortran
 
-        double precision, allocatable	:: slater_bragg_radii_ua	(100)
+        double precision, allocatable	:: slater_bragg_radii_ua	(0:100)
 
 
 

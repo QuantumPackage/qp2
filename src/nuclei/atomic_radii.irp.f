@@ -66,7 +66,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom, (nucl_num)]
  implicit none
  integer :: i
  do i = 1, nucl_num
-  slater_bragg_radii_per_atom(i) = slater_bragg_radii(int(nucl_charge(i)))
+  slater_bragg_radii_per_atom(i) = slater_bragg_radii(max(1,int(nucl_charge(i))))
  enddo
 END_PROVIDER
 
@@ -74,7 +74,7 @@ BEGIN_PROVIDER [double precision, slater_bragg_radii_per_atom_ua, (nucl_num)]
  implicit none
  integer :: i
  do i = 1, nucl_num
-  slater_bragg_radii_per_atom_ua(i) = slater_bragg_radii_ua(int(nucl_charge(i)))
+  slater_bragg_radii_per_atom_ua(i) = slater_bragg_radii_ua(max(1,int(nucl_charge(i))))
  enddo
 END_PROVIDER
 

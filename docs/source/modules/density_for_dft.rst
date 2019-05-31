@@ -44,6 +44,12 @@ EZFIO parameters
  
     Default: full_density
  
+.. option:: normalize_dm
+ 
+    if .True., then you normalize the no_core_dm to elec_alpha_num - n_core_orb  and elec_beta_num - n_core_orb
+ 
+    Default: True
+ 
  
 Providers 
 --------- 
@@ -131,6 +137,9 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
+       * :c:data:`data_one_e_dm_alpha_ao`
+       * :c:data:`data_one_e_dm_beta_ao`
+       * :c:data:`density_for_dft`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`n_states`
@@ -145,6 +154,39 @@ Providers
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+
+ 
+.. c:var:: one_e_dm_alpha_ao_for_dft_no_core
+
+
+    File : :file:`density_for_dft/density_for_dft.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_alpha_ao_for_dft_no_core	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: one_e_dm_beta_ao_for_dft_no_core	(ao_num,ao_num,N_states)
+
+
+    one body density matrix on the AO basis based on one_e_dm_mo_alpha_for_dft_no_core
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha_for_dft_no_core`
+       * :c:data:`one_e_dm_mo_beta_for_dft_no_core`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: one_e_dm_average_mo_for_dft
@@ -195,6 +237,9 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
+       * :c:data:`data_one_e_dm_alpha_ao`
+       * :c:data:`data_one_e_dm_beta_ao`
+       * :c:data:`density_for_dft`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`n_states`
@@ -209,6 +254,39 @@ Providers
        * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
+
+ 
+.. c:var:: one_e_dm_beta_ao_for_dft_no_core
+
+
+    File : :file:`density_for_dft/density_for_dft.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_alpha_ao_for_dft_no_core	(ao_num,ao_num,N_states)
+        double precision, allocatable	:: one_e_dm_beta_ao_for_dft_no_core	(ao_num,ao_num,N_states)
+
+
+    one body density matrix on the AO basis based on one_e_dm_mo_alpha_for_dft_no_core
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha_for_dft_no_core`
+       * :c:data:`one_e_dm_mo_beta_for_dft_no_core`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: one_e_dm_mo_alpha_for_dft
@@ -228,14 +306,18 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_num`
        * :c:data:`damping_for_rs_dft`
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`density_for_dft`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`n_core_orb`
        * :c:data:`n_states`
        * :c:data:`no_core_density`
+       * :c:data:`normalize_dm`
        * :c:data:`one_body_dm_mo_alpha_one_det`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_dm_mo_alpha_average`
@@ -246,10 +328,42 @@ Providers
        :columns: 3
 
        * :c:data:`one_e_dm_alpha_ao_for_dft`
+       * :c:data:`one_e_dm_mo_alpha_for_dft_no_core`
        * :c:data:`one_e_dm_mo_for_dft`
        * :c:data:`psi_dft_energy_kinetic`
        * :c:data:`trace_v_xc`
        * :c:data:`trace_v_xc_new`
+
+ 
+.. c:var:: one_e_dm_mo_alpha_for_dft_no_core
+
+
+    File : :file:`density_for_dft/density_for_dft.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_mo_alpha_for_dft_no_core	(mo_num,mo_num,N_states)
+
+
+    density matrix for alpha electrons in the MO basis without the core orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_inact`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_alpha_for_dft`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
  
 .. c:var:: one_e_dm_mo_beta_for_dft
@@ -269,14 +383,18 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_num`
        * :c:data:`damping_for_rs_dft`
        * :c:data:`data_one_e_dm_beta_mo`
        * :c:data:`density_for_dft`
+       * :c:data:`elec_beta_num`
+       * :c:data:`list_inact`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
        * :c:data:`n_core_orb`
        * :c:data:`n_states`
        * :c:data:`no_core_density`
+       * :c:data:`normalize_dm`
        * :c:data:`one_body_dm_mo_alpha_one_det`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_dm_mo_alpha_average`
@@ -287,10 +405,42 @@ Providers
        :columns: 3
 
        * :c:data:`one_e_dm_alpha_ao_for_dft`
+       * :c:data:`one_e_dm_mo_beta_for_dft_no_core`
        * :c:data:`one_e_dm_mo_for_dft`
        * :c:data:`psi_dft_energy_kinetic`
        * :c:data:`trace_v_xc`
        * :c:data:`trace_v_xc_new`
+
+ 
+.. c:var:: one_e_dm_mo_beta_for_dft_no_core
+
+
+    File : :file:`density_for_dft/density_for_dft.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: one_e_dm_mo_beta_for_dft_no_core	(mo_num,mo_num,N_states)
+
+
+    density matrix for beta  electrons in the MO basis without the core orbitals
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`list_inact`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_states`
+       * :c:data:`one_e_dm_mo_beta_for_dft`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
  
 .. c:var:: one_e_dm_mo_for_dft
