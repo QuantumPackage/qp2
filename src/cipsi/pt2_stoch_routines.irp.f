@@ -135,7 +135,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
   endif
 
-  if (N_det < max(10,N_states)) then
+  if (N_det < max(1000,N_states)) then
     pt2=0.d0
     variance=0.d0
     norm=0.d0

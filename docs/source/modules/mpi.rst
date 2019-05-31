@@ -74,7 +74,9 @@ Providers
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`data_energy_proj`
        * :c:data:`data_energy_var`
+       * :c:data:`data_one_e_dm_alpha_ao`
        * :c:data:`data_one_e_dm_alpha_mo`
+       * :c:data:`data_one_e_dm_beta_ao`
        * :c:data:`data_one_e_dm_beta_mo`
        * :c:data:`davidson_sze_max`
        * :c:data:`disk_access_nuclear_repulsion`
@@ -152,6 +154,7 @@ Providers
        * :c:data:`pseudo_lmax`
        * :c:data:`pseudo_n_k`
        * :c:data:`pseudo_n_kl`
+       * :c:data:`pseudo_sym`
        * :c:data:`pseudo_v_k`
        * :c:data:`pseudo_v_kl`
        * :c:data:`psi_cas`
@@ -174,6 +177,7 @@ Providers
        * :c:data:`state_following`
        * :c:data:`target_energy`
        * :c:data:`thresh_scf`
+       * :c:data:`thresh_sym`
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`

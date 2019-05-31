@@ -146,7 +146,7 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_
       x = grid_points_radial(j)
 
       ! value of the radial coordinate for the integration
-      r = knowles_function(alpha_knowles(int(nucl_charge(i))),m_knowles,x)
+      r = knowles_function(alpha_knowles(grid_atomic_number(i)),m_knowles,x)
 
       ! explicit values of the grid points centered around each atom
       do k = 1, n_points_integration_angular
@@ -232,8 +232,8 @@ BEGIN_PROVIDER [double precision, final_weight_at_r, (n_points_integration_angul
     do i = 1, n_points_radial_grid -1 !for each radial grid attached to the "jth" atom
       x = grid_points_radial(i) ! x value for the mapping of the [0, +\infty] to [0,1]
       do k = 1, n_points_integration_angular  ! for each angular point attached to the "jth" atom
-        contrib_integration = derivative_knowles_function(alpha_knowles(int(nucl_charge(j))),m_knowles,x)&
-            *knowles_function(alpha_knowles(int(nucl_charge(j))),m_knowles,x)**2
+        contrib_integration = derivative_knowles_function(alpha_knowles(grid_atomic_number(j)),m_knowles,x)&
+            *knowles_function(alpha_knowles(grid_atomic_number(j)),m_knowles,x)**2
         final_weight_at_r(k,i,j) = weights_angular_points(k)  * weight_at_r(k,i,j) * contrib_integration * dr_radial_integral
         if(isnan(final_weight_at_r(k,i,j)))then
          print*,'isnan(final_weight_at_r(k,i,j))' 
