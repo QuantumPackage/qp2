@@ -5,6 +5,7 @@ BEGIN_PROVIDER [integer, n_points_final_grid]
   END_DOC
   integer                        :: i,j,k,l
   n_points_final_grid = 0
+  print*,'tresh_grid = ',tresh_grid
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
@@ -36,6 +37,7 @@ END_PROVIDER
   integer                        :: i,j,k,l,i_count
   double precision               :: r(3)
   i_count = 0
+  print*,'tresh_grid = ',tresh_grid
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
