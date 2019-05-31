@@ -15,6 +15,8 @@ double precision function ao_two_e_integral_erf(i,j,k,l)
   double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
   integer                        :: iorder_p(3), iorder_q(3)
   double precision               :: ao_two_e_integral_schwartz_accel_erf
+  
+  provide mu_erf
 
    if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
      ao_two_e_integral_erf = ao_two_e_integral_schwartz_accel_erf(i,j,k,l)

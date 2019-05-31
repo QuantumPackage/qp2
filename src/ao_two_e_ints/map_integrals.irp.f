@@ -328,11 +328,12 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   use map_module
   implicit none
   BEGIN_DOC
-  ! Gets multiple AO bi-electronic integral from the AO map .
+  ! Gets multiple AO two-electron integrals from the AO map .
   ! All non-zero i are retrieved for j,k,l fixed.
   END_DOC
   double precision, intent(in)   :: thresh
-  integer, intent(in)            :: j,l, n_list,list(2,sze_max),sze_max
+  integer, intent(in)            :: sze_max
+  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
   real(integral_kind), intent(out) :: out_val(sze_max)
   integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
 
