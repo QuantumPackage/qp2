@@ -23,6 +23,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
     PROVIDE psi_bilinear_matrix_transp_order selection_weight pseudo_sym
 
+
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'selection')
 
     integer, external              :: zmq_put_psi

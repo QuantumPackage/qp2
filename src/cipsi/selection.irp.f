@@ -28,8 +28,10 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   double precision, intent(in) :: variance(N_st)
   double precision, intent(in) :: norm(N_st)
 
-  double precision :: avg, rpt2(N_st)
+  double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
+
+  dt = 2.d0 * selection_factor
 
   do k=1,N_st
     rpt2(k) = pt2(k)/(1.d0 + norm(k))                                                     
@@ -37,13 +39,21 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
 
   avg = sum(rpt2(1:N_st)) / dble(N_st)
   do k=1,N_st
-    pt2_match_weight(k) *= (rpt2(k)/avg)**2
+    element = exp(dt*(rpt2(k)/avg -1.d0))
+    element = max(0.8d0, element)
+    element = min(1.2d0 , element)
+    pt2_match_weight(k) *= element
   enddo
 
   avg = sum(variance(1:N_st)) / dble(N_st)
   do k=1,N_st
-    variance_match_weight(k) *= (variance(k)/avg)**2
+    element = exp(dt*(variance(k)/avg -1.d0))
+    element = max(0.8d0, element)
+    element = min(1.2d0 , element)
+    variance_match_weight(k) *= element
   enddo
+  print *,  "rPT2-weights:", real(pt2_match_weight(:),4)
+  print *,  "Variance-weights:", real(variance_match_weight(:),4)
 
   SOFT_TOUCH pt2_match_weight variance_match_weight
 end
