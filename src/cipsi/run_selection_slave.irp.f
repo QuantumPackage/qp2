@@ -230,6 +230,8 @@ subroutine pull_selection_results(zmq_socket_pull, pt2, variance, norm, val, det
       endif
   else
       pt2(:) = 0.d0
+      variance(:) = 0.d0
+      norm(:) = 0.d0
   endif
 
   rc = f77_zmq_recv( zmq_socket_pull, ntask, 4, 0)
