@@ -121,3 +121,26 @@
  enddo
  END_PROVIDER
 
+
+ BEGIN_PROVIDER[double precision, aos_in_r_array_per_atom, (ao_num,n_pts_max_per_atom,nucl_num)]
+&BEGIN_PROVIDER[double precision, aos_in_r_array_per_atom_transp, (n_pts_max_per_atom,ao_num,nucl_num)]
+ implicit none
+ BEGIN_DOC
+ ! aos_in_r_array_per_atom(i,j,k)        = value of the ith ao on the jth grid point attached on the kth atom 
+ END_DOC
+ integer :: i,j,k
+ double precision :: aos_array(ao_num), r(3)
+ do k = 1, nucl_num
+  do i = 1, n_pts_per_atom(k)
+   r(1) = final_grid_points_per_atom(1,i,k)
+   r(2) = final_grid_points_per_atom(2,i,k)
+   r(3) = final_grid_points_per_atom(3,i,k)
+   call give_all_aos_at_r(r,aos_array)
+   do j = 1, ao_num
+    aos_in_r_array_per_atom(j,i,k) = aos_array(j)
+    aos_in_r_array_per_atom_transp(i,j,k) = aos_array(j)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+

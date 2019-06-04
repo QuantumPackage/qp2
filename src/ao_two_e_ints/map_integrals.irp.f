@@ -279,6 +279,100 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
 end
 
 
+subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO bi-electronic integral from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: j,l, sze,sze_max
+  real(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+
+  integer                        :: i,k
+  integer(key_kind)              :: hash
+  double precision               :: tmp
+
+  PROVIDE ao_two_e_integrals_in_map
+  non_zero_int = 0
+  if (ao_overlap_abs(j,l) < thresh) then
+    out_val = 0.d0
+    return
+  endif
+
+  non_zero_int = 0
+  do k = 1, sze
+   do i = 1, sze
+     integer, external :: ao_l4
+     double precision, external :: ao_two_e_integral
+     !DIR$ FORCEINLINE
+     if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+       cycle
+     endif
+     call two_e_integrals_index(i,j,k,l,hash)
+     call map_get(ao_integrals_map, hash,tmp)
+     if (dabs(tmp) < thresh ) cycle
+     non_zero_int = non_zero_int+1
+     out_val_index(1,non_zero_int) = i
+     out_val_index(2,non_zero_int) = k
+     out_val(non_zero_int) = tmp
+   enddo
+  enddo
+
+end
+
+
+subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO two-electron integrals from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: sze_max
+  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
+  real(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+
+  integer                        :: i,k
+  integer(key_kind)              :: hash
+  double precision               :: tmp
+
+  PROVIDE ao_two_e_integrals_in_map
+  non_zero_int = 0
+  if (ao_overlap_abs(j,l) < thresh) then
+    out_val = 0.d0
+    return
+  endif
+
+  non_zero_int = 0
+ integer :: kk
+  do kk = 1, n_list
+   k = list(1,kk)
+   i = list(2,kk)
+   integer, external :: ao_l4
+   double precision, external :: ao_two_e_integral
+   !DIR$ FORCEINLINE
+   if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+     cycle
+   endif
+   call two_e_integrals_index(i,j,k,l,hash)
+   call map_get(ao_integrals_map, hash,tmp)
+   if (dabs(tmp) < thresh ) cycle
+   non_zero_int = non_zero_int+1
+   out_val_index(1,non_zero_int) = i
+   out_val_index(2,non_zero_int) = k
+   out_val(non_zero_int) = tmp
+  enddo
+
+end
+
+
+
+
 function get_ao_map_size()
   implicit none
   integer (map_size_kind) :: get_ao_map_size
