@@ -129,13 +129,13 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
-  PROVIDE psi_det_hii N_generators_bitmask
+  PROVIDE psi_det_hii N_generators_bitmask selection_weight pseudo_sym
 
   if (h0_type == 'SOP') then
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
   endif
 
-  if (N_det < max(1000,N_states)) then
+  if (N_det < max(4,N_states)) then
     pt2=0.d0
     variance=0.d0
     norm=0.d0

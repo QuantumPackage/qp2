@@ -21,7 +21,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
     PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
     PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-    PROVIDE psi_bilinear_matrix_transp_order
+    PROVIDE psi_bilinear_matrix_transp_order selection_weight pseudo_sym
 
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'selection')
 
@@ -86,7 +86,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
 
   integer :: nproc_target
   if (N_det < 3*nproc) then
-    nproc_target = N_det/3
+    nproc_target = N_det/4
   else
     nproc_target = nproc
   endif
@@ -157,9 +157,9 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm)
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N
-  double precision, intent(inout)    :: pt2(N_states)
-  double precision, intent(inout)    :: variance(N_states)
-  double precision, intent(inout)    :: norm(N_states)
+  double precision, intent(out)      :: pt2(N_states)
+  double precision, intent(out)      :: variance(N_states)
+  double precision, intent(out)      :: norm(N_states)
   double precision                   :: pt2_mwen(N_states)
   double precision                   :: variance_mwen(N_states)
   double precision                   :: norm_mwen(N_states)
