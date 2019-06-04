@@ -352,12 +352,13 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, one_e_dm_and_grad_beta_in_r,  (4,n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_grad_2_dm_alpha_at_r, (n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_grad_2_dm_beta_at_r, (n_points_final_grid,N_states) ]
+&BEGIN_PROVIDER [double precision, one_e_grad_dm_squared_at_r, (3,n_points_final_grid,N_states) ]
  BEGIN_DOC
 ! one_e_dm_and_grad_alpha_in_r(1,i,i_state) = d\dx n_alpha(r_i,istate)
 ! one_e_dm_and_grad_alpha_in_r(2,i,i_state) = d\dy n_alpha(r_i,istate)
 ! one_e_dm_and_grad_alpha_in_r(3,i,i_state) = d\dz n_alpha(r_i,istate)
 ! one_e_dm_and_grad_alpha_in_r(4,i,i_state) = n_alpha(r_i,istate)
-! one_e_grad_2_dm_alpha_at_r(i,istate)      = d\dx n_alpha(r_i,istate)^2 + d\dy n_alpha(r_i,istate)^2 + d\dz n_alpha(r_i,istate)^2
+! one_e_grad_2_dm_alpha_at_r(i,istate)      = (d\dx n_alpha(r_i,istate))^2 + (d\dy n_alpha(r_i,istate))^2 + (d\dz n_alpha(r_i,istate))^2
 ! where r_i is the ith point of the grid and istate is the state number
  END_DOC
  implicit none
@@ -386,6 +387,9 @@ END_PROVIDER
    one_e_dm_and_grad_beta_in_r(3,i,istate)  =  dm_b_grad(3,istate)
    one_e_dm_and_grad_beta_in_r(4,i,istate)  =  dm_b(istate)
    one_e_grad_2_dm_beta_at_r(i,istate) = dm_b_grad(1,istate) * dm_b_grad(1,istate) + dm_b_grad(2,istate) * dm_b_grad(2,istate) + dm_b_grad(3,istate) * dm_b_grad(3,istate)
+   one_e_grad_dm_squared_at_r(1,i,istate) = 2.D0 * (dm_a_grad(1,istate) + dm_b_grad(1,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
+   one_e_grad_dm_squared_at_r(2,i,istate) = 2.D0 * (dm_a_grad(2,istate) + dm_b_grad(2,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
+   one_e_grad_dm_squared_at_r(3,i,istate) = 2.D0 * (dm_a_grad(3,istate) + dm_b_grad(3,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
   enddo
  enddo
 
