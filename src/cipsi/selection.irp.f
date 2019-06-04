@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
  ! Weights adjusted along the selection to make the PT2 contributions
  ! of each state coincide.
  END_DOC
- pt2_match_weight = 1.d0
+ pt2_match_weight(:) = 1.d0
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
@@ -15,10 +15,10 @@ BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
  ! Weights adjusted along the selection to make the variances 
  ! of each state coincide.
  END_DOC
- variance_match_weight = 1.d0
+ variance_match_weight(:) = 1.d0
 END_PROVIDER
 
-subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_states)
+subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   implicit none
   BEGIN_DOC
 ! Updates the rPT2- and Variance- matching weights.
@@ -36,12 +36,12 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_states)
   enddo
 
   avg = sum(rpt2(1:N_st)) / dble(N_st)
-  do k=1,N_states
+  do k=1,N_st
     pt2_match_weight(k) *= (rpt2(k)/avg)**2
   enddo
 
   avg = sum(variance(1:N_st)) / dble(N_st)
-  do k=1,N_states
+  do k=1,N_st
     variance_match_weight(k) *= (variance(k)/avg)**2
   enddo
 
@@ -54,10 +54,10 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    BEGIN_DOC
    ! Weights used in the selection criterion
    END_DOC
-   select (weight_selection)
+   select case (weight_selection)
 
      case (0)
-      selection_weight(1:N_states) = weight_one_e_dm(1:N_states)
+      selection_weight(1:N_states) = state_average_weight(1:N_states)
 
      case (1)
       selection_weight(1:N_states) = c0_weight(1:N_states) 
@@ -682,11 +682,13 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef * coef
 
-!        if (h0_type == "Variance") then
-!          sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
-!        else
+        if (weight_selection /= 5) then
+          ! Energy selection
           sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
-!        endif
+        else
+          ! Variance selection
+          sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
+        endif
       end do
       if(pseudo_sym)then
        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then 

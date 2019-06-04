@@ -333,7 +333,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     pt2(k) = 0.d0
   enddo
 
-  call update_pt2_and_variance_weights(pt2, variance, norm)
+  call update_pt2_and_variance_weights(pt2, variance, norm, N_states)
 
 end subroutine
 

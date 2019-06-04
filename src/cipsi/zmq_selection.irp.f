@@ -85,7 +85,11 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
   endif
 
   integer :: nproc_target
-  nproc_target = nproc
+  if (N_det < 3*nproc) then
+    nproc_target = N_det/3
+  else
+    nproc_target = nproc
+  endif
   double precision :: mem
   mem = 8.d0 * N_det * (N_int * 2.d0 * 3.d0 +  3.d0 + 5.d0) / (1024.d0**3)
   call write_double(6,mem,'Estimated memory/thread (Gb)')
@@ -131,13 +135,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     norm(k) = norm(k) * f(k)
   enddo
 
-  ! Adjust PT2 weights for next selection
-  double precision :: pt2_avg
-  pt2_avg = sum(pt2) / dble(N_states)
-  do k=1,N_states
-    pt2_match_weight(k) *= (pt2(k)/pt2_avg)**2
-  enddo
-  SOFT_TOUCH pt2_match_weight
+  call update_pt2_and_variance_weights(pt2, variance, norm, N_states)
 
 end subroutine
 
