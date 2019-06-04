@@ -65,7 +65,7 @@ subroutine run_cipsi
 
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
-        (maxval(abs(pt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(abs(rpt2(1:N_states))) > pt2_max) .and.               &
         (correlation_energy_ratio <= correlation_energy_ratio_max)    &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
