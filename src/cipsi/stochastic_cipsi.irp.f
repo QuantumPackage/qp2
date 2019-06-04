@@ -70,7 +70,7 @@ subroutine run_stochastic_cipsi
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 
-    to_select = N_det*int(sqrt(dble(N_states)))
+    to_select = N_det*int(sqrt(dble(N_states)))*selection_factor
     to_select = max(N_states_diag, to_select)
 
     pt2 = 0.d0
