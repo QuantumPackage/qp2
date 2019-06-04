@@ -9,12 +9,73 @@ BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
  pt2_match_weight = 1.d0
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Weights adjusted along the selection to make the variances 
+ ! of each state coincide.
+ END_DOC
+ variance_match_weight = 1.d0
+END_PROVIDER
+
+subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_states)
+  implicit none
+  BEGIN_DOC
+! Updates the rPT2- and Variance- matching weights.
+  END_DOC
+  integer, intent(in)          :: N_st
+  double precision, intent(in) :: pt2(N_st)
+  double precision, intent(in) :: variance(N_st)
+  double precision, intent(in) :: norm(N_st)
+
+  double precision :: avg, rpt2(N_st)
+  integer          :: k
+
+  do k=1,N_st
+    rpt2(k) = pt2(k)/(1.d0 + norm(k))                                                     
+  enddo
+
+  avg = sum(rpt2(1:N_st)) / dble(N_st)
+  do k=1,N_states
+    pt2_match_weight(k) *= (rpt2(k)/avg)**2
+  enddo
+
+  avg = sum(variance(1:N_st)) / dble(N_st)
+  do k=1,N_states
+    variance_match_weight(k) *= (variance(k)/avg)**2
+  enddo
+
+  SOFT_TOUCH pt2_match_weight variance_match_weight
+end
+
+
 BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    implicit none
    BEGIN_DOC
    ! Weights used in the selection criterion
    END_DOC
-   selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
+   select (weight_selection)
+
+     case (0)
+      selection_weight(1:N_states) = weight_one_e_dm(1:N_states)
+
+     case (1)
+      selection_weight(1:N_states) = c0_weight(1:N_states) 
+
+     case (2)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
+
+     case (3)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
+
+     case (4)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)
+
+     case (5)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
+
+    end select
+
 END_PROVIDER
 
 

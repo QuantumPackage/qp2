@@ -333,13 +333,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     pt2(k) = 0.d0
   enddo
 
-  ! Adjust PT2 weights for next selection
-  double precision :: pt2_avg
-  pt2_avg = sum(pt2) / dble(N_states)
-  do k=1,N_states
-    pt2_match_weight(k) *= (pt2(k)/pt2_avg)**2
-  enddo
-  SOFT_TOUCH pt2_match_weight
+  call update_pt2_and_variance_weights(pt2, variance, norm)
 
 end subroutine
 
