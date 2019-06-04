@@ -88,7 +88,7 @@ subroutine run_stochastic_cipsi
     call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
 
     do k=1,N_states
-      rpt2(:) = pt2(:)/(1.d0 + norm(k))
+      rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
@@ -128,7 +128,7 @@ subroutine run_stochastic_cipsi
       norm,0) ! Stochastic PT2
 
     do k=1,N_states
-      rpt2(:) = pt2(:)/(1.d0 + norm(k))
+      rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
