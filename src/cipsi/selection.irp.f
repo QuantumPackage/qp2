@@ -31,7 +31,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
 
-  dt = 2.d0 * selection_factor
+  dt = n_iter * selection_factor
 
   do k=1,N_st
     rpt2(k) = pt2(k)/(1.d0 + norm(k))                                                     
@@ -40,7 +40,6 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(rpt2(1:N_st)) / dble(N_st)
   do k=1,N_st
     element = exp(dt*(rpt2(k)/avg -1.d0))
-    element = max(0.8d0, element)
     element = min(1.2d0 , element)
     pt2_match_weight(k) *= element
   enddo
@@ -48,12 +47,9 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(variance(1:N_st)) / dble(N_st)
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
-    element = max(0.8d0, element)
     element = min(1.2d0 , element)
     variance_match_weight(k) *= element
   enddo
-  print *,  "rPT2-weights:", real(pt2_match_weight(:),4)
-  print *,  "Variance-weights:", real(variance_match_weight(:),4)
 
   SOFT_TOUCH pt2_match_weight variance_match_weight
 end
@@ -67,21 +63,27 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
    select case (weight_selection)
 
      case (0)
+      print *,  'Using input weights in selection'
       selection_weight(1:N_states) = state_average_weight(1:N_states)
 
      case (1)
+      print *,  'Using 1/c_max^2 weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) 
 
      case (2)
+      print *,  'Using pt2-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
 
      case (3)
+      print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
 
      case (4)
+      print *,  'Using variance- and pt2-matching weights in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)
 
      case (5)
+      print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
 
     end select
