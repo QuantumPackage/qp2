@@ -182,6 +182,9 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       if (zmq_put_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) then
         stop 'Unable to put state_average_weight on ZMQ server'
       endif
+      if (zmq_put_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) then
+        stop 'Unable to put selection_weight on ZMQ server'
+      endif
       if (zmq_put_ivector(zmq_to_qp_run_socket,1,'pt2_stoch_istate',pt2_stoch_istate,1) == -1) then
         stop 'Unable to put pt2_stoch_istate on ZMQ server'
       endif
