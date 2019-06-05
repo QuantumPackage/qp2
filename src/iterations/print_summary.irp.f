@@ -31,18 +31,19 @@ subroutine print_summary(e_,pt2_,error_,variance_,norm_,n_det_,n_occ_pattern_,n_
 
   write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
   write(*,fmt)
-  write(fmt,*) '(12X,', N_states_p, '(6X,A7,1X,I6,10X))'
+  write(fmt,*) '(13X,', N_states_p, '(6X,A7,1X,I6,10X))'
   write(*,fmt) ('State',k, k=1,N_states_p)
   write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
   write(*,fmt)
-  write(fmt,*) '(A12,', N_states_p, '(1X,F14.8,15X))'
+  write(fmt,*) '(A13,', N_states_p, '(1X,F14.8,15X))'
   write(*,fmt) '# E          ', e_(1:N_states_p)
   if (N_states_p > 1) then
     write(*,fmt) '# Excit. (au)', e_(1:N_states_p)-e_(1)
     write(*,fmt) '# Excit. (eV)', (e_(1:N_states_p)-e_(1))*27.211396641308d0
   endif
   write(fmt,*) '(A13,', 2*N_states_p, '(1X,F14.8))'
-  write(*,fmt) '# PT2'//pt2_string, (pt2_(k), error_(k), k=1,N_states_p)
+  write(*,fmt) '# PT2 '//pt2_string, (pt2_(k), error_(k), k=1,N_states_p)
+  write(*,fmt) '# rPT2'//pt2_string, (pt2_(k)*f(k), error_(k)*f(k), k=1,N_states_p)
   write(*,'(A)') '#'
   write(*,fmt) '# E+PT2      ', (e_(k)+pt2_(k),error_(k), k=1,N_states_p)
   write(*,fmt) '# E+rPT2     ', (e_(k)+pt2_(k)*f(k),error_(k)*f(k), k=1,N_states_p)
@@ -96,6 +97,8 @@ subroutine print_summary(e_,pt2_,error_,variance_,norm_,n_det_,n_occ_pattern_,n_
         (e_(i)+ pt2_(i)*f(i) - (e_(1) + pt2_(1)*f(1))) * 27.211396641308d0
     enddo
   endif
+
+  call print_energy_components()
 
 end subroutine
 
