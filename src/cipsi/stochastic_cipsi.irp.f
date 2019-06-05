@@ -4,7 +4,7 @@ subroutine run_stochastic_cipsi
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
   END_DOC
   integer                        :: i,j,k
-  double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:)
+  double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:), zeros(:)
   integer                        :: to_select
   logical, external :: qp_stop
 
@@ -18,7 +18,7 @@ subroutine run_stochastic_cipsi
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
-  allocate (pt2(N_states), rpt2(N_states), norm(N_states), variance(N_states))
+  allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm(N_states), variance(N_states))
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -26,6 +26,7 @@ subroutine run_stochastic_cipsi
 
   relative_error=PT2_relative_error
 
+  zeros = 0.d0
   pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
   norm = 0.d0
@@ -63,14 +64,14 @@ subroutine run_stochastic_cipsi
 
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
-        (maxval(abs(pt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(abs(rpt2(1:N_states))) > pt2_max) .and.               &
         (maxval(abs(variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 
-    to_select = int(sqrt(dble(N_states)*dble(N_det))*selection_factor)
+    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
 
     pt2 = 0.d0
@@ -79,17 +80,17 @@ subroutine run_stochastic_cipsi
     call ZMQ_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
       norm, to_select) ! Stochastic PT2 and selection
 
-    correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
-                    (psi_energy_with_nucl_rep(1) + pt2(1) - hf_energy_ref)
-    correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
-
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
-    call write_double(6,correlation_energy_ratio, 'Correlation ratio')
-    call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
-
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
+
+    correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
+                    (psi_energy_with_nucl_rep(1) + rpt2(1) - hf_energy_ref)
+    correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
+
+    call write_double(6,correlation_energy_ratio, 'Correlation ratio')
+    call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
@@ -108,8 +109,7 @@ subroutine run_stochastic_cipsi
 
     call diagonalize_CI
     call save_wavefunction
-    rpt2(:) = 0.d0
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
+    call save_energy(psi_energy_with_nucl_rep, zeros)
     if (qp_stop()) exit 
   enddo
 
@@ -117,20 +117,18 @@ subroutine run_stochastic_cipsi
     if (N_det < N_det_max) then
         call diagonalize_CI
         call save_wavefunction
-        rpt2(:) = 0.d0
-        call save_energy(psi_energy_with_nucl_rep, rpt2)
+        call save_energy(psi_energy_with_nucl_rep, zeros)
     endif
 
-    pt2 = 0.d0
-    variance = 0.d0
-    norm = 0.d0
+    pt2(:) = 0.d0
+    variance(:) = 0.d0
+    norm(:) = 0.d0
     call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
       norm,0) ! Stochastic PT2
 
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)

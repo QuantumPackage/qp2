@@ -5,7 +5,7 @@ subroutine run_cipsi
 ! stochastic PT2.
   END_DOC
   integer                        :: i,j,k
-  double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:)
+  double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:), zeros(:)
   integer                        :: n_det_before, to_select
 
   double precision :: rss
@@ -13,7 +13,7 @@ subroutine run_cipsi
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
-  allocate (pt2(N_states), rpt2(N_states), norm(N_states), variance(N_states))
+  allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm(N_states), variance(N_states))
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -23,10 +23,11 @@ subroutine run_cipsi
 
   relative_error=PT2_relative_error
 
+  zeros = 0.d0
   pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
   norm = 0.d0
-  variance = 0.d0
+  variance = huge(1.e0)
 
   if (s2_eig) then
     call make_s2_eigenfunction
@@ -66,6 +67,7 @@ subroutine run_cipsi
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(rpt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(variance(1:N_states)) > variance_max) .and.               &
         (correlation_energy_ratio <= correlation_energy_ratio_max)    &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
@@ -83,17 +85,17 @@ subroutine run_cipsi
       SOFT_TOUCH threshold_generators
     endif
 
+    do k=1,N_states
+      rpt2(k) = pt2(k)/(1.d0 + norm(k))
+    enddo
 
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
-                    (psi_energy_with_nucl_rep(1) + pt2(1) - hf_energy_ref)
+                    (psi_energy_with_nucl_rep(1) + rpt2(1) - hf_energy_ref)
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
 
-    do k=1,N_states
-      rpt2(k) = pt2(k)/(1.d0 + norm(k))
-    enddo
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
@@ -103,7 +105,7 @@ subroutine run_cipsi
     if (qp_stop()) exit 
 
     n_det_before = N_det
-    to_select = int(sqrt(dble(N_states)*dble(N_det))*selection_factor)
+    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
     call ZMQ_selection(to_select, pt2, variance, norm)
 
@@ -113,32 +115,30 @@ subroutine run_cipsi
 
     call diagonalize_CI
     call save_wavefunction
-    rpt2(:) = 0.d0
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
+    call save_energy(psi_energy_with_nucl_rep, zeros)
     if (qp_stop()) exit 
+print *,  (N_det < N_det_max)
+print *,  (maxval(abs(rpt2(1:N_states))) > pt2_max)
+print *,  (maxval(variance(1:N_states)) > variance_max)
+print *,  (correlation_energy_ratio <= correlation_energy_ratio_max)
   enddo
 
   if (.not.qp_stop()) then
     if (N_det < N_det_max) then
         call diagonalize_CI
         call save_wavefunction
-        rpt2(:) = 0.d0
-        call save_energy(psi_energy_with_nucl_rep, rpt2)
+        call save_energy(psi_energy_with_nucl_rep, zeros)
     endif
 
     if (do_pt2) then
-      pt2 = 0.d0
-      variance = 0.d0
-      norm = 0.d0
+      pt2(:) = 0.d0
+      variance(:) = 0.d0
+      norm(:) = 0.d0
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
       call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
         norm,0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
-      do k=1,N_states
-        rpt2(k) = pt2(k)/(1.d0 + norm(k))
-      enddo
-      call save_energy(psi_energy_with_nucl_rep, pt2)
     endif
     print *,  'N_det             = ', N_det
     print *,  'N_sop             = ', N_occ_pattern
@@ -149,10 +149,9 @@ subroutine run_cipsi
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
 
     call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
-    call save_energy(psi_energy_with_nucl_rep, pt2)
+    call save_energy(psi_energy_with_nucl_rep, rpt2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif
