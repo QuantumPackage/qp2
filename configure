@@ -206,6 +206,19 @@ EOF
               make install
 EOF
     
+    elif [[ ${PACKAGE} = libcap ]] ; then
+
+            download \
+              "https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz" \
+              "${QP_ROOT}"/external/libcap.tar.gz
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --gunzip --extract --file libcap.tar.gz
+              rm libcap.tar.gz
+              cd libcap-*/libcap
+              prefix=$QP_ROOT make install
+EOF
+
     elif [[ ${PACKAGE} = bwrap ]] ; then
 
             download \
@@ -218,19 +231,6 @@ EOF
               cd bubblewrap*
               ./configure --prefix=$QP_ROOT && make -j 8
               make install-exec-am
-EOF
-
-    elif [[ ${PACKAGE} = libcap ]] ; then
-
-            download \
-              "https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz" \
-              "${QP_ROOT}"/external/libcap.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file libcap.tar.gz
-              rm libcap.tar.gz
-              cd libcap-*/libcap
-              prefix=$QP_ROOT make install
 EOF
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
