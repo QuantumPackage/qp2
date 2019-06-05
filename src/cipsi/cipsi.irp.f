@@ -103,7 +103,7 @@ subroutine run_cipsi
     if (qp_stop()) exit 
 
     n_det_before = N_det
-    to_select = N_det*int(sqrt(dble(N_states)))*selection_factor
+    to_select = int(sqrt(dble(N_states)*dble(N_det))*selection_factor)
     to_select = max(N_states_diag, to_select)
     call ZMQ_selection(to_select, pt2, variance, norm)
 
