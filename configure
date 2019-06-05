@@ -175,7 +175,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="bwrap libcap zlib ninja irpf90 zeromq f77zmq gmp ocaml ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp libcap bwrap ocaml ezfio docopt resultsFile bats"
 fi
 
 
@@ -302,7 +302,7 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
                 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
-                ${QP_ROOT}/bin/opam init --disable-sandboxing --verbose --yes 
+                ${QP_ROOT}/bin/opam init --verbose --yes 
 
                 eval $(${QP_ROOT}/bin/opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -316,7 +316,7 @@ EOF
                   | sh \${QP_ROOT}/external/opam_installer.sh 
                   rm \${QP_ROOT}/external/opam_installer.sh
                   source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-                  \${QP_ROOT}/bin/opam init --disable-sandboxing --verbose --yes
+                  \${QP_ROOT}/bin/opam init --verbose --yes
                   eval \$(\${QP_ROOT}/bin/opam env)
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
