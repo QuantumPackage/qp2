@@ -305,9 +305,9 @@ BEGIN_PROVIDER [ double precision, state_average_weight, (N_states) ]
    logical                        :: exists
 
    state_average_weight(:) = 1.d0
-   if (used_weight == 0) then
+   if (weight_one_e_dm == 0) then
      state_average_weight(:) = c0_weight(:)
-   else if (used_weight == 1) then
+   else if (weight_one_e_dm == 1) then
      state_average_weight(:) = 1./N_states
    else
      call ezfio_has_determinants_state_average_weight(exists)

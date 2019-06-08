@@ -45,6 +45,8 @@ Requirements
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager 
+- `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
+- `libcap https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
 
 
@@ -86,6 +88,8 @@ The following packages are supported by the :command:`configure` installer:
 * zeromq 
 * f77zmq
 * gmp
+* libcap
+* bwrap
 * ocaml  ( :math:`\approx` 10 minutes)
 * ezfio 
 * docopt 
@@ -241,6 +245,55 @@ With Debian or Ubuntu, you can use
 .. code:: bash
 
    sudo apt install libgmp-dev
+
+
+libcap
+------
+
+Libcap is a library for getting and setting POSIX.1e draft 15 capabilities.
+
+* Download the latest version of libcap here:
+  `<https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz>`_
+  and move it in the :file:`${QP_ROOT}/external` directory
+
+* Extract the archive, go into the :file:`libcap-*/libcap` directory and run
+  the following command
+
+.. code:: bash
+
+   prefix=$QP_ROOT make install
+
+With Debian or Ubuntu, you can use
+
+.. code:: bash
+
+   sudo apt install libcap-dev
+
+
+Bubblewrap
+----------
+
+Bubblewrap is an unprivileged sandboxing tool.
+
+* Download Bubblewrap here:
+  `<https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz>`_
+  and move it in the :file:`${QP_ROOT}/external` directory
+
+* Extract the archive, go into the :file:`bubblewrap-*` directory and run
+  the following commands
+
+.. code:: bash
+
+    ./configure --prefix=$QP_ROOT && make -j 8
+    make install-exec-am
+
+
+With Debian or Ubuntu, you can use
+
+.. code:: bash
+
+   sudo apt install bubblewrap
+
 
 
 OCaml

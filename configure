@@ -175,7 +175,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp ocaml ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp libcap bwrap ocaml ezfio docopt resultsFile bats"
 fi
 
 
@@ -206,6 +206,32 @@ EOF
               make install
 EOF
     
+    elif [[ ${PACKAGE} = libcap ]] ; then
+
+            download \
+              "https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz" \
+              "${QP_ROOT}"/external/libcap.tar.gz
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --gunzip --extract --file libcap.tar.gz
+              rm libcap.tar.gz
+              cd libcap-*/libcap
+              prefix=$QP_ROOT make install
+EOF
+
+    elif [[ ${PACKAGE} = bwrap ]] ; then
+
+            download \
+              "https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz" \
+              "${QP_ROOT}"/external/bwrap.tar.xz
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --xz --extract --file bwrap.tar.xz
+              rm bwrap.tar.xz
+              cd bubblewrap*
+              ./configure --prefix=$QP_ROOT && make -j 8
+              make install-exec-am
+EOF
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
@@ -276,7 +302,7 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
                 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
-                ${QP_ROOT}/bin/opam init --disable-sandboxing --verbose --yes 
+                ${QP_ROOT}/bin/opam init --verbose --yes 
 
                 eval $(${QP_ROOT}/bin/opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -290,7 +316,7 @@ EOF
                   | sh \${QP_ROOT}/external/opam_installer.sh 
                   rm \${QP_ROOT}/external/opam_installer.sh
                   source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-                  \${QP_ROOT}/bin/opam init --disable-sandboxing --verbose --yes
+                  \${QP_ROOT}/bin/opam init --verbose --yes
                   eval \$(\${QP_ROOT}/bin/opam env)
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
@@ -396,6 +422,18 @@ fi
 GMP=$(find_lib -lgmp)
 if [[ ${ZLIB} = $(not_found) ]] ; then
         error "GMP (gmp) is not installed."
+        fail
+fi
+
+BWRAP=$(find_exe bwrap)
+if [[ ${BWRAP} = $(not_found) ]] ; then
+        error "Bubblewrap (bwrap) is not installed."
+        fail
+fi
+
+LIBCAP=$(find_lib -lcap)
+if [[ ${LIBCAP} = $(not_found) ]] ; then
+        error "Libcap (libcap) is not installed."
         fail
 fi
 
