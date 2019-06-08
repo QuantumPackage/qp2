@@ -1,12 +1,13 @@
 # Quantum Package 2.0
 
 
-*Quantum package 2.0: an open-source determinant-driven suite of programs*\
+[*Quantum package 2.0: an open-source determinant-driven suite of programs*](https://pubs.acs.org/doi/10.1021/acs.jctc.9b00176)\
 Y. Garniron, K. Gasperich, T. Applencourt, A. Benali, A. Ferté, J. Paquier, B. Pradines, R. Assaraf, P. Reinhardt, J. Toulouse, P. Barbaresco, N. Renon, G. David, J. P. Malrieu, M. Véril, M. Caffarel, P. F. Loos, E. Giner and A. Scemama\
+J. Chem. Theory Comput. (2019)\
 https://arxiv.org/abs/1902.08154
 
 
-![QP](https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png)     
+<img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250">
 
 # Getting started
 
