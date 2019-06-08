@@ -30,8 +30,22 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
 
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
+  integer, save    :: i_iter=0
+  integer, parameter :: i_itermax = 3
+  double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
 
-  dt = n_iter * selection_factor
+  if (i_iter == 0) then
+    allocate(memo_variance(N_st,i_itermax), memo_pt2(N_st,i_itermax))
+    memo_pt2(:,:) = 1.d0
+    memo_variance(:,:) = 1.d0
+  endif
+
+  i_iter = i_iter+1
+  if (i_iter > i_itermax) then
+    i_iter = 1
+  endif
+
+  dt = 4.d0 
 
   do k=1,N_st
     rpt2(k) = pt2(k)/(1.d0 + norm(k))                                                     
@@ -40,17 +54,23 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(rpt2(1:N_st)) / dble(N_st)
   do k=1,N_st
     element = exp(dt*(rpt2(k)/avg -1.d0))
-    element = min(1.2d0 , element)
-    pt2_match_weight(k) *= element
+    element = min(1.5d0 , element)
+    element = max(0.5d0 , element)
+    memo_pt2(k,i_iter) = element
+    pt2_match_weight(k) = product(memo_pt2(k,:))
   enddo
 
   avg = sum(variance(1:N_st)) / dble(N_st)
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
-    element = min(1.2d0 , element)
-    variance_match_weight(k) *= element
+    element = min(1.5d0 , element)
+    element = max(0.5d0 , element)
+    memo_variance(k,i_iter) = element
+    variance_match_weight(k) = product(memo_variance(k,:))
   enddo
 
+  print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+  print *, '# var weight ', real(variance_match_weight(:),4)
   SOFT_TOUCH pt2_match_weight variance_match_weight
 end
 
