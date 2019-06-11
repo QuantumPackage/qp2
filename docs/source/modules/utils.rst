@@ -997,6 +997,7 @@ Subroutines / functions
        * :c:func:`make_selection_buffer_s2`
        * :c:data:`psi_det_sorted`
        * :c:func:`reorder_core_orb`
+       * :c:func:`sort_by_fock_energies`
        * :c:func:`sort_selection_buffer`
 
     Calls:

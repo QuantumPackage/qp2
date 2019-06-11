@@ -43,4 +43,3 @@ BEGIN_PROVIDER [ double precision, S2_matrix_all_dets,(N_det,N_det) ]
  !$OMP END PARALLEL DO
 END_PROVIDER
 
-

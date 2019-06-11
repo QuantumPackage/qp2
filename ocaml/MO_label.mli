@@ -4,6 +4,7 @@ type t =
   | Natural
   | Localized
   | Orthonormalized
+  | MCSCF
   | None
 [@@deriving sexp]
 

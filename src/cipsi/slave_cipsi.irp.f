@@ -17,7 +17,7 @@ subroutine provide_everything
   PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
   PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
   PROVIDE psi_det psi_coef threshold_generators state_average_weight
-  PROVIDE N_det_selectors pt2_stoch_istate N_det
+  PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
 end
 
 subroutine run_slave_main
@@ -220,8 +220,12 @@ subroutine run_slave_main
         call mpi_print('zmq_get_dvector state_average_weight')
       IRP_ENDIF
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) cycle
+      IRP_IF MPI_DEBUG
+        call mpi_print('zmq_get_dvector selection_weight')
+      IRP_ENDIF
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) cycle
       pt2_e0_denominator(1:N_states) = energy(1:N_states)
-      SOFT_TOUCH pt2_e0_denominator state_average_weight pt2_stoch_istate threshold_generators
+      SOFT_TOUCH pt2_e0_denominator state_average_weight pt2_stoch_istate threshold_generators selection_weight
 
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')

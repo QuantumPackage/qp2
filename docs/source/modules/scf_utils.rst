@@ -165,7 +165,7 @@ Providers
         double precision, allocatable	:: eigenvectors_fock_matrix_mo	(ao_num,mo_num)
 
 
-    Eigenvectors of the Fock matrix in the MO basis obtained with level shift.
+    Eigenvectors of the Fock matrix in the |MO| basis obtained with level shift.
 
     Needs:
 

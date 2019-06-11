@@ -2257,3 +2257,38 @@ subroutine i_H_j_double_alpha_beta(key_i,key_j,Nint,hij)
 end
 
 
+subroutine connected_to_hf(key_i,yes_no)
+ implicit none 
+ use bitmasks
+ integer(bit_kind), intent(in)  :: key_i(N_int,2)
+ logical , intent(out) :: yes_no
+ double precision :: hij,phase
+ integer          :: exc(0:2,2,2)
+ integer          :: degree
+ integer          :: m,p
+ yes_no = .True.
+ call get_excitation_degree(ref_bitmask,key_i,degree,N_int)
+ if(degree == 2)then
+  call i_H_j(ref_bitmask,key_i,N_int,hij)
+  if(dabs(hij) .lt. thresh_sym)then
+   yes_no = .False. 
+  endif
+ else if(degree == 1)then  
+  call get_single_excitation(ref_bitmask,key_i,exc,phase,N_int)
+  ! Single alpha
+  if (exc(0,1,1) == 1) then
+    m = exc(1,1,1)
+    p = exc(1,2,1)
+  ! Single beta
+  else
+    m = exc(1,1,2)
+    p = exc(1,2,2)
+  endif
+  hij = mo_one_e_integrals(m,p)
+  if(dabs(hij) .lt. thresh_sym)then
+   yes_no = .False. 
+  endif
+ else if(degree == 0)then
+  yes_no = .True.
+ endif
+end

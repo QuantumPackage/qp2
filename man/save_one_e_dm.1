@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "SAVE_ONE_E_DM" "1" "Mar 07, 2019" "2.0" "Quantum Package"
+.TH "SAVE_ONE_E_DM" "1" "May 28, 2019" "2.0" "Quantum Package"
 .SH NAME
 save_one_e_dm \-  | Quantum Package >
 .
@@ -32,15 +32,15 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Program that computes the one body density on the MO basis
+Program that computes the one body density on the MO and AO basis
 for $alpha$ and $beta$ electrons from the wave function
 stored in the \fI\%EZFIO\fP directory, and then saves it into the
 module_aux_quantities\&.
 .sp
 Then, the global variable \fBaux_quantities data_one_e_dm_alpha_mo\fP
-and \fBaux_quantities data_one_e_dm_beta_mo\fP will automatically
-read this density in the next calculation. This can be used to perform
-damping on the density in RSDFT calculations (see
+and \fBaux_quantities data_one_e_dm_beta_mo\fP (and the corresponding for AO)
+will automatically ! read this density in the next calculation.
+This can be used to perform damping on the density in RSDFT calculations (see
 module_density_for_dft).
 .sp
 Needs:

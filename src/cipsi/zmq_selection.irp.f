@@ -21,7 +21,8 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
     PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
     PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-    PROVIDE psi_bilinear_matrix_transp_order
+    PROVIDE psi_bilinear_matrix_transp_order selection_weight pseudo_sym
+
 
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'selection')
 
@@ -44,6 +45,9 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     endif
     if (zmq_put_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) then
       stop 'Unable to put state_average_weight on ZMQ server'
+    endif
+    if (zmq_put_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) then
+      stop 'Unable to put selection_weight on ZMQ server'
     endif
     if (zmq_put_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) then
       stop 'Unable to put threshold_generators on ZMQ server'
@@ -85,7 +89,11 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
   endif
 
   integer :: nproc_target
-  nproc_target = nproc
+  if (N_det < 3*nproc) then
+    nproc_target = N_det/4
+  else
+    nproc_target = nproc
+  endif
   double precision :: mem
   mem = 8.d0 * N_det * (N_int * 2.d0 * 3.d0 +  3.d0 + 5.d0) / (1024.d0**3)
   call write_double(6,mem,'Estimated memory/thread (Gb)')
@@ -131,6 +139,8 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
     norm(k) = norm(k) * f(k)
   enddo
 
+  call update_pt2_and_variance_weights(pt2, variance, norm, N_states)
+
 end subroutine
 
 
@@ -151,9 +161,9 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm)
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N
-  double precision, intent(inout)    :: pt2(N_states)
-  double precision, intent(inout)    :: variance(N_states)
-  double precision, intent(inout)    :: norm(N_states)
+  double precision, intent(out)      :: pt2(N_states)
+  double precision, intent(out)      :: variance(N_states)
+  double precision, intent(out)      :: norm(N_states)
   double precision                   :: pt2_mwen(N_states)
   double precision                   :: variance_mwen(N_states)
   double precision                   :: norm_mwen(N_states)

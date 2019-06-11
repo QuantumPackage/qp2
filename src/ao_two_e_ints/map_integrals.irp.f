@@ -19,6 +19,10 @@ END_PROVIDER
 subroutine two_e_integrals_index(i,j,k,l,i1)
   use map_module
   implicit none
+  BEGIN_DOC
+! Gives a unique index for i,j,k,l using permtuation symmetry.
+! i <-> k, j <-> l, and (i,k) <-> (j,l)
+  END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind), intent(out) :: i1
   integer(key_kind)              :: p,q,r,s,i2
@@ -36,14 +40,25 @@ end
 subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
   use map_module
   implicit none
+  BEGIN_DOC
+! Computes the 4 indices $i,j,k,l$ from a unique index $i_1$.
+! For 2 indices $i,j$ and $i \le j$, we have
+! $p = i(i-1)/2 + j$.
+! The key point is that because $j < i$,
+! $i(i-1)/2 < p \le i(i+1)/2$. So $i$ can be found by solving
+! $i^2 - i - 2p=0$. One obtains $i=1 + \sqrt{1+8p}/2$
+! and $j = p - i(i-1)/2$.
+! This rule is applied 3 times. First for the symmetry of the
+! pairs (i,k) and (j,l), and then for the symmetry within each pair.
+  END_DOC
   integer, intent(out)           :: i(8),j(8),k(8),l(8)
   integer(key_kind), intent(in)  :: i1
   integer(key_kind)              :: i2,i3
   i = 0
-  i2   = ceiling(0.5d0*(dsqrt(8.d0*dble(i1)+1.d0)-1.d0))
-  l(1) = ceiling(0.5d0*(dsqrt(8.d0*dble(i2)+1.d0)-1.d0))
+  i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
+  l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
   i3   = i1 - shiftr(i2*i2-i2,1)
-  k(1) = ceiling(0.5d0*(dsqrt(8.d0*dble(i3)+1.d0)-1.d0))
+  k(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
   j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
   i(1) = int(i3 - shiftr(k(1)*k(1)-k(1),1),4)
 
@@ -95,16 +110,18 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
       endif
     enddo
   enddo
-  do ii=1,8
-    if (i(ii) /= 0) then
-      call two_e_integrals_index(i(ii),j(ii),k(ii),l(ii),i2)
-      if (i1 /= i2) then
-        print *,  i1, i2
-        print *,  i(ii), j(ii), k(ii), l(ii)
-        stop 'two_e_integrals_index_reverse failed'
-      endif
-    endif
-  enddo
+! This has been tested with up to 1000 AOs, and all the reverse indices are
+! correct ! We can remove the test
+!    do ii=1,8
+!      if (i(ii) /= 0) then
+!        call two_e_integrals_index(i(ii),j(ii),k(ii),l(ii),i2)
+!        if (i1 /= i2) then
+!          print *,  i1, i2
+!          print *,  i(ii), j(ii), k(ii), l(ii)
+!          stop 'two_e_integrals_index_reverse failed'
+!        endif
+!      endif
+!    enddo
 
 
 end
@@ -196,6 +213,7 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
+  ! physicist convention : <ij|kl> 
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze
@@ -259,6 +277,100 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
   enddo
 
 end
+
+
+subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO bi-electronic integral from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: j,l, sze,sze_max
+  real(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+
+  integer                        :: i,k
+  integer(key_kind)              :: hash
+  double precision               :: tmp
+
+  PROVIDE ao_two_e_integrals_in_map
+  non_zero_int = 0
+  if (ao_overlap_abs(j,l) < thresh) then
+    out_val = 0.d0
+    return
+  endif
+
+  non_zero_int = 0
+  do k = 1, sze
+   do i = 1, sze
+     integer, external :: ao_l4
+     double precision, external :: ao_two_e_integral
+     !DIR$ FORCEINLINE
+     if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+       cycle
+     endif
+     call two_e_integrals_index(i,j,k,l,hash)
+     call map_get(ao_integrals_map, hash,tmp)
+     if (dabs(tmp) < thresh ) cycle
+     non_zero_int = non_zero_int+1
+     out_val_index(1,non_zero_int) = i
+     out_val_index(2,non_zero_int) = k
+     out_val(non_zero_int) = tmp
+   enddo
+  enddo
+
+end
+
+
+subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO two-electron integrals from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: sze_max
+  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
+  real(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+
+  integer                        :: i,k
+  integer(key_kind)              :: hash
+  double precision               :: tmp
+
+  PROVIDE ao_two_e_integrals_in_map
+  non_zero_int = 0
+  if (ao_overlap_abs(j,l) < thresh) then
+    out_val = 0.d0
+    return
+  endif
+
+  non_zero_int = 0
+ integer :: kk
+  do kk = 1, n_list
+   k = list(1,kk)
+   i = list(2,kk)
+   integer, external :: ao_l4
+   double precision, external :: ao_two_e_integral
+   !DIR$ FORCEINLINE
+   if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+     cycle
+   endif
+   call two_e_integrals_index(i,j,k,l,hash)
+   call map_get(ao_integrals_map, hash,tmp)
+   if (dabs(tmp) < thresh ) cycle
+   non_zero_int = non_zero_int+1
+   out_val_index(1,non_zero_int) = i
+   out_val_index(2,non_zero_int) = k
+   out_val(non_zero_int) = tmp
+  enddo
+
+end
+
+
 
 
 function get_ao_map_size()

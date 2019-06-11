@@ -344,6 +344,34 @@ Providers
 
 
  
+.. c:var:: pt2_match_weight
+
+
+    File : :file:`cipsi/selection.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: pt2_match_weight	(N_states)
+
+
+    Weights adjusted along the selection to make the PT2 contributions
+    of each state coincide.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`selection_weight`
+
+ 
 .. c:var:: pt2_mindetinfirstteeth
 
 
@@ -698,6 +726,7 @@ Providers
 
        * :c:data:`c0_weight`
        * :c:data:`n_states`
+       * :c:data:`pt2_match_weight`
 
 
  
@@ -854,6 +883,8 @@ Subroutines / functions
        * :c:data:`psi_det_hii`
        * :c:data:`do_only_1h1p`
        * :c:data:`h0_type`
+       * :c:data:`thresh_sym`
+       * :c:data:`pseudo_sym`
        * :c:data:`psi_det_generators`
 
     Called by:
@@ -1584,6 +1615,7 @@ Subroutines / functions
        * :c:data:`psi_energy`
        * :c:data:`psi_occ_pattern`
        * :c:data:`psi_energy`
+       * :c:data:`pt2_match_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
@@ -1805,6 +1837,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`fci`
        * :c:func:`pt2`
 
     Calls:
@@ -1991,6 +2024,7 @@ Subroutines / functions
        * :c:data:`psi_energy`
        * :c:data:`psi_occ_pattern`
        * :c:data:`psi_energy`
+       * :c:data:`pt2_match_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
@@ -2344,6 +2378,7 @@ Subroutines / functions
        * :c:data:`state_average_weight`
        * :c:data:`n_det`
        * :c:data:`s2_eig`
+       * :c:data:`pt2_match_weight`
        * :c:data:`pt2_j`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`psi_bilinear_matrix_transp_values`
@@ -2415,6 +2450,7 @@ Subroutines / functions
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`pt2_match_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
 
@@ -2441,6 +2477,7 @@ Subroutines / functions
        * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`n_det_selectors`
+       * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`state_average_weight`
@@ -2456,7 +2493,7 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`pt2_f`
        * :c:data:`n_det_generators`
-       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`pt2_match_weight`
        * :c:data:`n_int`
 
     Called by:
@@ -2496,4 +2533,5 @@ Subroutines / functions
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
+       * :c:data:`pt2_match_weight`
 
