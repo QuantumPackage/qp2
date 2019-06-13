@@ -23,7 +23,11 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  cst_3pi2 = 3.d0 * pi*pi
  drho2    = max(grad_rho_2,thr)
  drho     = dsqrt(drho2)
- spin_d   = max(nup-ndo,thr) 
+ if((nup-ndo).gt.0.d0)then
+  spin_d  = max(nup-ndo,thr) 
+ else
+  spin_d  = min(nup-ndo,-thr) 
+ endif
  c_1c     = 0.64d0
  c_2c     = 1.5d0
  d_c      = 0.7d0
@@ -37,20 +41,24 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  xi       = spin_d/rho
  rs       = (cst_43 * pi * rho)**(-cst_13)
  s        = drho/( 2.d0 * cst_3pi2**(cst_13) * rho**cst_43  )
- t_w      = drho2 * cst_18
+ t_w      = drho2 * cst_18 * rho_inv
  ds_xi    = 0.5d0 * ( (1.d0+xi)**cst_53 + (1.d0 - xi)**cst_53)
  t_unif   = 0.3d0 * (cst_3pi2)**cst_23 * rho**cst_53*ds_xi
  t_unif   = max(t_unif,thr)
  alpha    = (tau - t_w)/t_unif
  cst_1alph= 1.d0 - alpha
- cst_1alph= max(cst_1alph,thr)
+ if(cst_1alph.gt.0.d0)then
+  cst_1alph= max(cst_1alph,thr)
+ else
+  cst_1alph= min(cst_1alph,-thr)
+ endif
  inv_1alph= 1.d0/cst_1alph
  phi      = 0.5d0 * ( (1.d0+xi)**cst_23 + (1.d0 - xi)**cst_23)
  phi_3    = phi*phi*phi
  t        = (cst_3pi2/16.d0)**cst_13 * s / (phi * rs**0.5d0)
- w_1      = dexp(-e_c_lsda1/(gama * phi_3))
+ w_1      = dexp(-e_c_lsda1/(gama * phi_3)) - 1.d0
  a        = beta_rs(rs) /(gama * w_1)
- g_at2    = 1.d0/(1.d0 + 4.d0 * a*t*t)
+ g_at2    = 1.d0/(1.d0 + 4.d0 * a*t*t)**0.25d0
  h1       = gama * phi_3 * dlog(1.d0 + w_1 * (1.d0 - g_at2))
  ! interpolation function 
  fc_alpha = dexp(-c_1c * alpha * inv_1alph) * step_f(cst_1alph) - d_c * dexp(c_2c * inv_1alph) * step_f(-cst_1alph) 
@@ -64,24 +72,14 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  beta_inf = 0.066725d0 * 0.1d0 / 0.1778d0
  cx_xi    = -3.d0/(4.d0*pi) * (9.d0 * pi/4.d0)**cst_13 * dx_xi
 
- if(dabs(xi).lt.thr)then
-  x_inf   = 0.128026d0
- else
-  x_inf   = (cst_3pi2/16.d0)**cst_23 * beta_inf * phi/(cx_xi - f0)
- endif
+ x_inf   = 0.128026d0
  f0       = -0.9d0
  g_inf    = 1.d0/(1.d0 + 4.d0 * x_inf * s*s)**0.25d0
  
- h0       = b_1c * dlog(1.d0 + w_0 * (1.d0 * g_inf)) 
+ h0       = b_1c * dlog(1.d0 + w_0 * (1.d0 - g_inf)) 
  e_c_0    = (e_c_lsda0 + h0) * gc_xi
 
  ec_scan = e_c_1 + fc_alpha * (e_c_0 - e_c_1)
- if(isnan(ec_scan))then
-  print*,'isnan(ec_scan)'
-  print*,'e_c_1 + fc_alpha *  e_c_0'
-  print*, e_c_1 , fc_alpha ,  e_c_0 
-  stop
- endif
 end
 
 double precision function step_f(x)
