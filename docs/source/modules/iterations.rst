@@ -160,6 +160,13 @@ Subroutines / functions
        * :c:func:`run_cipsi`
        * :c:func:`run_stochastic_cipsi`
 
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_energy_components`
+
  
 .. c:function:: save_iterations:
 

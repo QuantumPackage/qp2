@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PT2" "1" "Jun 15, 2019" "2.0" "Quantum Package"
+.TH "SORT_BY_FOCK_ENERGIES" "1" "Jun 15, 2019" "2.0" "Quantum Package"
 .SH NAME
-pt2 \-  | Quantum Package >
+sort_by_fock_energies \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -32,35 +32,25 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Second order perturbative correction to the wave function contained
-in the \fI\%EZFIO\fP directory.
+Program that saves the current MOs ordered by diagonal element of the Fock operator.
 .sp
-This programs runs the stochastic PT2 correction on all
-\fBdeterminants n_states\fP wave functions stored in the \fI\%EZFIO\fP
-directory.
-.sp
-The main option for the PT2 correction is the
-\fBperturbation pt2_relative_error\fP which is the relative
-stochastic error on the PT2 to reach before stopping the
-sampling.
+Warning : the Fock operator, and therefore its matrix elements, depends on the occupancy.
 .sp
 Needs:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBis_zmq_slave\fP
+\fBfock_matrix_mo\fP
 .IP \(bu 2
-\fBmo_two_e_integrals_in_map\fP
+\fBao_num\fP
 .UNINDENT
 .INDENT 2.0
 .IP \(bu 2
-\fBpsi_energy\fP
-.IP \(bu 2
-\fBthreshold_generators\fP
+\fBmo_num\fP
 .UNINDENT
 .INDENT 2.0
 .IP \(bu 2
-\fBread_wf\fP
+\fBmo_coef\fP
 .UNINDENT
 .UNINDENT
 .sp
@@ -68,11 +58,11 @@ Calls:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBrun()\fP
+\fBdsort()\fP
 .UNINDENT
 .INDENT 2.0
 .IP \(bu 2
-\fBrun_slave_cipsi()\fP
+\fBsave_mos()\fP
 .UNINDENT
 .INDENT 2.0
 .UNINDENT
@@ -82,33 +72,11 @@ Touches:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.IP \(bu 2
 \fBmo_coef\fP
-.IP \(bu 2
-\fBdistributed_davidson\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBlevel_shift\fP
-.IP \(bu 2
-\fBmo_coef\fP
-.IP \(bu 2
-\fBpt2_e0_denominator\fP
-.IP \(bu 2
-\fBpt2_stoch_istate\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBread_wf\fP
-.IP \(bu 2
-\fBselection_weight\fP
-.IP \(bu 2
-\fBstate_average_weight\fP
-.IP \(bu 2
-\fBthreshold_generators\fP
 .UNINDENT
 .UNINDENT
 .UNINDENT
