@@ -93,6 +93,12 @@ EZFIO parameters
     Total number of grid points
  
  
+.. option:: thresh_grid
+ 
+    threshold on the weight of a given grid point
+ 
+    Default: 1.e-20
+ 
  
 Providers 
 --------- 
@@ -210,6 +216,7 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
 
     Needed by:
 
@@ -244,6 +251,40 @@ Providers
        * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
+.. c:var:: final_grid_points_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+
+ 
 .. c:var:: final_weight_at_r
 
 
@@ -263,10 +304,10 @@ Providers
 
        * :c:data:`alpha_knowles`
        * :c:data:`angular_quadrature_points`
+       * :c:data:`grid_atomic_number`
        * :c:data:`grid_points_radial`
        * :c:data:`m_knowles`
        * :c:data:`n_points_radial_grid`
-       * :c:data:`nucl_charge`
        * :c:data:`nucl_num`
        * :c:data:`weight_at_r`
 
@@ -276,6 +317,9 @@ Providers
        :columns: 3
 
        * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_per_atom`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_pts_per_atom`
 
  
 .. c:var:: final_weight_at_r_vector
@@ -309,6 +353,7 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
 
     Needed by:
 
@@ -343,6 +388,69 @@ Providers
        * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
+.. c:var:: final_weight_at_r_vector_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+
+ 
+.. c:var:: grid_atomic_number
+
+
+    File : :file:`becke_numerical_grid/atomic_number.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: grid_atomic_number	(nucl_num)
+
+
+    Atomic number used to adjust the grid
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`nucl_charge`
+       * :c:data:`nucl_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+
+ 
 .. c:var:: grid_points_per_atom
 
 
@@ -362,10 +470,10 @@ Providers
 
        * :c:data:`alpha_knowles`
        * :c:data:`angular_quadrature_points`
+       * :c:data:`grid_atomic_number`
        * :c:data:`grid_points_radial`
        * :c:data:`m_knowles`
        * :c:data:`n_points_radial_grid`
-       * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
 
@@ -375,6 +483,7 @@ Providers
        :columns: 3
 
        * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_per_atom`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
@@ -439,6 +548,7 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
 
     Needed by:
 
@@ -473,6 +583,74 @@ Providers
        * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
+.. c:var:: index_final_points_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+
+ 
+.. c:var:: index_final_points_per_atom_reverse
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: final_grid_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: final_weight_at_r_vector_per_atom	(n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom	(3,n_pts_max_per_atom,nucl_num)
+        integer, allocatable	:: index_final_points_per_atom_reverse	(n_points_integration_angular,n_points_radial_grid,nucl_num)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+
+ 
 .. c:var:: index_final_points_reverse
 
 
@@ -504,6 +682,7 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
 
     Needed by:
 
@@ -576,8 +755,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`final_weight_at_r`
        * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
 
     Needed by:
 
@@ -681,11 +862,13 @@ Providers
 
        * :c:data:`angular_quadrature_points`
        * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_per_atom`
        * :c:data:`final_weight_at_r`
        * :c:data:`grid_points_per_atom`
        * :c:data:`grid_points_radial`
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_grid_per_atom`
+       * :c:data:`n_pts_per_atom`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
@@ -721,13 +904,79 @@ Providers
 
        * :c:data:`angular_quadrature_points`
        * :c:data:`final_grid_points`
+       * :c:data:`final_grid_points_per_atom`
        * :c:data:`final_weight_at_r`
        * :c:data:`grid_points_per_atom`
        * :c:data:`grid_points_radial`
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_grid_per_atom`
+       * :c:data:`n_pts_per_atom`
        * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
+
+ 
+.. c:var:: n_pts_max_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_pts_per_atom	(nucl_num)
+        integer	:: n_pts_max_per_atom	
+
+
+    Number of points which are non zero
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+       * :c:data:`final_grid_points_per_atom`
+
+ 
+.. c:var:: n_pts_per_atom
+
+
+    File : :file:`becke_numerical_grid/grid_becke_per_atom.irp.f`
+
+    .. code:: fortran
+
+        integer, allocatable	:: n_pts_per_atom	(nucl_num)
+        integer	:: n_pts_max_per_atom	
+
+
+    Number of points which are non zero
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`final_weight_at_r`
+       * :c:data:`n_points_radial_grid`
+       * :c:data:`nucl_num`
+       * :c:data:`thresh_grid`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`aos_in_r_array_per_atom`
+       * :c:data:`final_grid_points_per_atom`
 
  
 .. c:var:: weight_at_r
@@ -754,7 +1003,6 @@ Providers
 
        * :c:data:`grid_points_per_atom`
        * :c:data:`n_points_radial_grid`
-       * :c:data:`nucl_charge`
        * :c:data:`nucl_coord_transp`
        * :c:data:`nucl_dist_inv`
        * :c:data:`nucl_num`
@@ -824,7 +1072,6 @@ Subroutines / functions
        * :c:data:`nucl_dist_inv`
        * :c:data:`slater_bragg_type_inter_distance_ua`
        * :c:data:`nucl_coord_transp`
-       * :c:data:`nucl_charge`
        * :c:data:`nucl_num`
 
  

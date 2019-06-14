@@ -46,7 +46,7 @@ Requirements
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager 
 - `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
-- `libcap https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git`_ : POSIX capabilities required by Bubblewrap
+- `libcap <https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git>`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
 
 

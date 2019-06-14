@@ -176,6 +176,7 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
+       * :c:data:`mu_erf`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
@@ -214,6 +215,7 @@ Providers
        * :c:data:`ao_prim_num`
        * :c:data:`ezfio_filename`
        * :c:data:`io_ao_two_e_integrals_erf`
+       * :c:data:`mu_erf`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nproc`
        * :c:data:`nucl_coord`
@@ -290,6 +292,7 @@ Subroutines / functions
        * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_prim_num`
+       * :c:data:`mu_erf`
        * :c:data:`ao_nucl`
        * :c:data:`nucl_coord`
 

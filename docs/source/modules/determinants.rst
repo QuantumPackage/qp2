@@ -61,11 +61,17 @@ EZFIO parameters
  
     Default: True
  
-.. option:: used_weight
+.. option:: weight_one_e_dm
  
     Weight used in the calculation of the one-electron density matrix. 0: 1./(c_0^2), 1: 1/N_states, 2: input state-average weight, 3: 1/(Norm_L3(Psi))
  
     Default: 1
+ 
+.. option:: weight_selection
+ 
+    Weight used in the selection. 0: input state-average weight, 1: 1./(c_0^2), 2: rPT2 matching, 3: variance matching, 4: variance and rPT2 matching, 5: variance minimization and matching
+ 
+    Default: 2
  
 .. option:: threshold_generators
  
@@ -118,6 +124,12 @@ EZFIO parameters
  
     Weight of the states in state-average calculations.
  
+ 
+.. option:: selection_factor
+ 
+    f such that the number of determinants to add is f * N_det * sqrt(N_states)
+ 
+    Default: 1.
  
 .. option:: thresh_sym
  
@@ -3638,7 +3650,7 @@ Providers
 
        * :c:data:`c0_weight`
        * :c:data:`n_states`
-       * :c:data:`used_weight`
+       * :c:data:`weight_one_e_dm`
 
     Needed by:
 
@@ -3648,6 +3660,7 @@ Providers
        * :c:data:`det_alpha_norm`
        * :c:data:`one_e_dm_mo_alpha_average`
        * :c:data:`psi_average_norm_contrib`
+       * :c:data:`selection_weight`
 
  
 .. c:var:: weight_occ_pattern

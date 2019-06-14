@@ -727,7 +727,38 @@ Providers
        * :c:data:`c0_weight`
        * :c:data:`n_states`
        * :c:data:`pt2_match_weight`
+       * :c:data:`state_average_weight`
+       * :c:data:`variance_match_weight`
+       * :c:data:`weight_selection`
 
+
+ 
+.. c:var:: variance_match_weight
+
+
+    File : :file:`cipsi/selection.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: variance_match_weight	(N_states)
+
+
+    Weights adjusted along the selection to make the variances
+    of each state coincide.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`selection_weight`
 
  
  
@@ -879,6 +910,7 @@ Subroutines / functions
        * :c:data:`selection_weight`
        * :c:data:`mo_num`
        * :c:data:`n_states`
+       * :c:data:`weight_selection`
        * :c:data:`n_int`
        * :c:data:`psi_det_hii`
        * :c:data:`do_only_1h1p`
@@ -1551,6 +1583,7 @@ Subroutines / functions
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`n_iter`
        * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`selection_factor`
        * :c:data:`psi_occ_pattern`
        * :c:data:`n_det_max`
        * :c:data:`n_states`
@@ -1619,6 +1652,7 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: run_pt2_slave:
@@ -1959,6 +1993,7 @@ Subroutines / functions
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`n_iter`
        * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`selection_factor`
        * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_max`
        * :c:data:`n_det_max`
@@ -2028,6 +2063,7 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: select_connected:
@@ -2351,6 +2387,42 @@ Subroutines / functions
        * :c:func:`check_mem`
 
  
+.. c:function:: update_pt2_and_variance_weights:
+
+
+    File : :file:`cipsi/selection.irp.f`
+
+    .. code:: fortran
+
+        subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
+
+
+    Updates the rPT2- and Variance- matching weights.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`variance_match_weight`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zmq_pt2`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`variance_match_weight`
+
+ 
 .. c:function:: zmq_pt2:
 
 
@@ -2378,7 +2450,6 @@ Subroutines / functions
        * :c:data:`state_average_weight`
        * :c:data:`n_det`
        * :c:data:`s2_eig`
-       * :c:data:`pt2_match_weight`
        * :c:data:`pt2_j`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`psi_bilinear_matrix_transp_values`
@@ -2434,6 +2505,7 @@ Subroutines / functions
        * :c:func:`pt2_slave_inproc`
        * :c:func:`remove_duplicates_in_selection_buffer`
        * :c:func:`resident_memory`
+       * :c:func:`update_pt2_and_variance_weights`
        * :c:func:`write_double`
        * :c:func:`write_int`
        * :c:func:`zmq_selection`
@@ -2453,6 +2525,7 @@ Subroutines / functions
        * :c:data:`pt2_match_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: zmq_selection:

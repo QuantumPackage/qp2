@@ -91,3 +91,4 @@ fci
     * :c:data:`read_wf` 
     * :c:data:`state_average_weight` 
     * :c:data:`threshold_generators` 
+    * :c:data:`variance_match_weight` 

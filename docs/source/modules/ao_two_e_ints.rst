@@ -1016,6 +1016,70 @@ Subroutines / functions
        * :c:func:`two_e_integrals_index`
 
  
+.. c:function:: get_ao_two_e_integrals_non_zero_jl:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+
+
+    Gets multiple AO bi-electronic integral from the AO map .
+    All non-zero i are retrieved for j,k,l fixed.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`map_get`
+       * :c:func:`two_e_integrals_index`
+
+ 
+.. c:function:: get_ao_two_e_integrals_non_zero_jl_from_list:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+
+
+    Gets multiple AO two-electron integrals from the AO map .
+    All non-zero i are retrieved for j,k,l fixed.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`map_get`
+       * :c:func:`two_e_integrals_index`
+
+ 
 .. c:function:: give_polynom_mult_center_x:
 
 
@@ -1243,6 +1307,8 @@ Subroutines / functions
        * :c:func:`get_ao_two_e_integral_erf`
        * :c:func:`get_ao_two_e_integrals_erf_non_zero`
        * :c:func:`get_ao_two_e_integrals_non_zero`
+       * :c:func:`get_ao_two_e_integrals_non_zero_jl`
+       * :c:func:`get_ao_two_e_integrals_non_zero_jl_from_list`
        * :c:func:`get_mo_two_e_integral_erf`
        * :c:func:`get_mo_two_e_integrals_coulomb_ii`
        * :c:func:`get_mo_two_e_integrals_erf`
