@@ -748,10 +748,11 @@ integer function add_task_to_taskserver(zmq_to_qp_run_socket,task)
   character*(*), intent(in)      :: task
 
   integer                        :: rc, sze
-  character(len=:), allocatable :: message
+  character(len=:), allocatable  :: message
 
   add_task_to_taskserver = 0
 
+  allocate(character(len=len(task)+10+len(zmq_state)) :: message)
   message='add_task '//trim(zmq_state)//' '//trim(task)
   sze = len(message)
   rc = f77_zmq_send(zmq_to_qp_run_socket, message, sze, 0)
