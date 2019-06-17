@@ -146,6 +146,7 @@ Providers
        * :c:data:`read_wf`
        * :c:data:`s2_eig`
        * :c:data:`scf_algorithm`
+       * :c:data:`selection_factor`
        * :c:data:`state_following`
        * :c:data:`target_energy`
        * :c:data:`thresh_scf`
@@ -153,8 +154,9 @@ Providers
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
-       * :c:data:`used_weight`
        * :c:data:`variance_max`
+       * :c:data:`weight_one_e_dm`
+       * :c:data:`weight_selection`
 
  
 .. c:var:: ezfio_work_dir
@@ -296,6 +298,7 @@ Providers
        * :c:data:`read_wf`
        * :c:data:`s2_eig`
        * :c:data:`scf_algorithm`
+       * :c:data:`selection_factor`
        * :c:data:`state_following`
        * :c:data:`target_energy`
        * :c:data:`thresh_scf`
@@ -303,8 +306,9 @@ Providers
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
-       * :c:data:`used_weight`
        * :c:data:`variance_max`
+       * :c:data:`weight_one_e_dm`
+       * :c:data:`weight_selection`
 
  
 .. c:var:: output_wall_time_0
@@ -411,6 +415,7 @@ Providers
        * :c:data:`read_wf`
        * :c:data:`s2_eig`
        * :c:data:`scf_algorithm`
+       * :c:data:`selection_factor`
        * :c:data:`state_following`
        * :c:data:`target_energy`
        * :c:data:`thresh_scf`
@@ -418,8 +423,9 @@ Providers
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
-       * :c:data:`used_weight`
        * :c:data:`variance_max`
+       * :c:data:`weight_one_e_dm`
+       * :c:data:`weight_selection`
 
  
 .. c:var:: qp_kill_filename
@@ -764,6 +770,7 @@ Subroutines / functions
        * :c:func:`roothaan_hall_scf`
        * :c:data:`s2_eig`
        * :c:data:`scf_algorithm`
+       * :c:data:`selection_factor`
        * :c:data:`state_following`
        * :c:data:`target_energy`
        * :c:data:`thresh_scf`
@@ -771,8 +778,9 @@ Subroutines / functions
        * :c:data:`threshold_davidson`
        * :c:data:`threshold_diis`
        * :c:data:`threshold_generators`
-       * :c:data:`used_weight`
        * :c:data:`variance_max`
+       * :c:data:`weight_one_e_dm`
+       * :c:data:`weight_selection`
 
     Calls:
 

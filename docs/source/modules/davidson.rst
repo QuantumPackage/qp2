@@ -1756,6 +1756,40 @@ Subroutines / functions
        * :c:func:`i_wee_j_single`
 
  
+.. c:function:: print_energy_components:
+
+
+    File : :file:`davidson/print_e_components.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_energy_components()
+
+
+    Prints the different components of the energy.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_integrals_n_e`
+       * :c:data:`n_states`
+       * :c:data:`mo_pseudo_integrals`
+       * :c:data:`mo_kinetic_integrals`
+       * :c:data:`mo_num`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`psi_energy`
+       * :c:data:`one_e_dm_mo_alpha`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_summary`
+
+ 
 .. c:function:: u_0_h_u_0:
 
 

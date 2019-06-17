@@ -727,7 +727,38 @@ Providers
        * :c:data:`c0_weight`
        * :c:data:`n_states`
        * :c:data:`pt2_match_weight`
+       * :c:data:`state_average_weight`
+       * :c:data:`variance_match_weight`
+       * :c:data:`weight_selection`
 
+
+ 
+.. c:var:: variance_match_weight
+
+
+    File : :file:`cipsi/selection.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: variance_match_weight	(N_states)
+
+
+    Weights adjusted along the selection to make the variances
+    of each state coincide.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`selection_weight`
 
  
  
@@ -879,6 +910,7 @@ Subroutines / functions
        * :c:data:`selection_weight`
        * :c:data:`mo_num`
        * :c:data:`n_states`
+       * :c:data:`weight_selection`
        * :c:data:`n_int`
        * :c:data:`psi_det_hii`
        * :c:data:`do_only_1h1p`
@@ -1181,6 +1213,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`generators_bitmask`
+       * :c:data:`selection_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`psi_selectors`
        * :c:data:`psi_det`
@@ -1203,6 +1236,7 @@ Subroutines / functions
        * :c:data:`n_det_generators`
        * :c:data:`psi_det_generators`
        * :c:data:`n_int`
+       * :c:data:`pseudo_sym`
        * :c:data:`psi_det_generators`
 
     Called by:
@@ -1551,12 +1585,14 @@ Subroutines / functions
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`n_iter`
        * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`selection_factor`
        * :c:data:`psi_occ_pattern`
        * :c:data:`n_det_max`
        * :c:data:`n_states`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
        * :c:data:`s2_eig`
+       * :c:data:`variance_max`
        * :c:data:`do_pt2`
        * :c:data:`psi_energy`
        * :c:data:`pt2_relative_error`
@@ -1619,6 +1655,7 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: run_pt2_slave:
@@ -1776,16 +1813,18 @@ Subroutines / functions
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`mo_num`
+       * :c:data:`psi_det_sorted`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_states`
        * :c:data:`pt2_f`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`elec_alpha_num`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`weight_selection`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`n_int`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_det_sorted`
-       * :c:data:`psi_det_sorted`
+       * :c:data:`pseudo_sym`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`psi_selectors_coef_transp`
 
@@ -1859,6 +1898,7 @@ Subroutines / functions
        * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`read_wf`
+       * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
 
@@ -1879,6 +1919,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`selection_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`psi_det`
        * :c:data:`zmq_state`
@@ -1935,6 +1976,7 @@ Subroutines / functions
 
        * :c:data:`pt2_e0_denominator`
        * :c:data:`pt2_stoch_istate`
+       * :c:data:`selection_weight`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
 
@@ -1959,6 +2001,7 @@ Subroutines / functions
        * :c:data:`correlation_energy_ratio_max`
        * :c:data:`n_iter`
        * :c:data:`psi_energy_with_nucl_rep`
+       * :c:data:`selection_factor`
        * :c:data:`psi_occ_pattern`
        * :c:data:`pt2_max`
        * :c:data:`n_det_max`
@@ -2028,6 +2071,7 @@ Subroutines / functions
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
        * :c:data:`threshold_generators`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: select_connected:
@@ -2351,6 +2395,43 @@ Subroutines / functions
        * :c:func:`check_mem`
 
  
+.. c:function:: update_pt2_and_variance_weights:
+
+
+    File : :file:`cipsi/selection.irp.f`
+
+    .. code:: fortran
+
+        subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
+
+
+    Updates the rPT2- and Variance- matching weights.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`variance_match_weight`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`zmq_pt2`
+       * :c:func:`zmq_selection`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`pt2_match_weight`
+       * :c:data:`variance_match_weight`
+
+ 
 .. c:function:: zmq_pt2:
 
 
@@ -2368,6 +2449,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`psi_det_sorted`
+       * :c:data:`selection_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`psi_selectors`
        * :c:data:`psi_bilinear_matrix_values`
@@ -2378,7 +2460,7 @@ Subroutines / functions
        * :c:data:`state_average_weight`
        * :c:data:`n_det`
        * :c:data:`s2_eig`
-       * :c:data:`pt2_match_weight`
+       * :c:data:`psi_det_sorted`
        * :c:data:`pt2_j`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`psi_bilinear_matrix_transp_values`
@@ -2396,7 +2478,7 @@ Subroutines / functions
        * :c:data:`threshold_generators`
        * :c:data:`psi_det_beta_unique`
        * :c:data:`det_to_occ_pattern`
-       * :c:data:`psi_det_sorted`
+       * :c:data:`global_selection_buffer`
        * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_states`
        * :c:data:`pt2_f`
@@ -2405,7 +2487,7 @@ Subroutines / functions
        * :c:data:`n_int`
        * :c:data:`psi_det_hii`
        * :c:data:`pt2_j`
-       * :c:data:`global_selection_buffer`
+       * :c:data:`pseudo_sym`
        * :c:data:`pt2_w`
        * :c:data:`pt2_u`
 
@@ -2434,6 +2516,7 @@ Subroutines / functions
        * :c:func:`pt2_slave_inproc`
        * :c:func:`remove_duplicates_in_selection_buffer`
        * :c:func:`resident_memory`
+       * :c:func:`update_pt2_and_variance_weights`
        * :c:func:`write_double`
        * :c:func:`write_int`
        * :c:func:`zmq_selection`
@@ -2453,6 +2536,7 @@ Subroutines / functions
        * :c:data:`pt2_match_weight`
        * :c:data:`pt2_stoch_istate`
        * :c:data:`state_average_weight`
+       * :c:data:`variance_match_weight`
 
  
 .. c:function:: zmq_selection:
@@ -2472,12 +2556,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`psi_det_sorted`
+       * :c:data:`selection_weight`
        * :c:data:`psi_selectors`
        * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_columns_loc`
        * :c:data:`n_det_selectors`
-       * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_det_alpha_unique`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`state_average_weight`
@@ -2493,8 +2577,9 @@ Subroutines / functions
        * :c:data:`n_states`
        * :c:data:`pt2_f`
        * :c:data:`n_det_generators`
-       * :c:data:`pt2_match_weight`
+       * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`n_int`
+       * :c:data:`pseudo_sym`
 
     Called by:
 
@@ -2519,6 +2604,7 @@ Subroutines / functions
        * :c:func:`save_wavefunction`
        * :c:func:`selection_collector`
        * :c:func:`selection_slave_inproc`
+       * :c:func:`update_pt2_and_variance_weights`
        * :c:func:`write_double`
 
     Touches:
@@ -2534,4 +2620,5 @@ Subroutines / functions
        * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted_bit`
        * :c:data:`pt2_match_weight`
+       * :c:data:`variance_match_weight`
 

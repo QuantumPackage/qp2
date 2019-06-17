@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "RS_KS_SCF" "1" "Jun 15, 2019" "2.0" "Quantum Package"
+.TH "SWAP_MOS" "1" "Jun 15, 2019" "2.0" "Quantum Package"
 .SH NAME
-rs_ks_scf \-  | Quantum Package >
+swap_mos \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -32,28 +32,19 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Produce \fIRange_separated_Kohn_Sham\fP MO orbital
-output: mo_basis.mo_num mo_basis.mo_label mo_basis.ao_md5 mo_basis.mo_coef mo_basis.mo_occ
-output: kohn_sham.energy
-optional: mo_basis.mo_coef
+Swaps the indices of two molecular orbitals
 .sp
 Needs:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBio_mo_one_e_integrals\fP
-.IP \(bu 2
-\fBmu_erf_dft\fP
+\fBao_num\fP
 .UNINDENT
 .INDENT 2.0
 .IP \(bu 2
-\fBdensity_for_dft\fP
-.IP \(bu 2
-\fBio_ao_one_e_integrals\fP
+\fBmo_coef\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBread_wf\fP
 .UNINDENT
 .UNINDENT
 .sp
@@ -61,49 +52,11 @@ Calls:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBcheck_coherence_functional()\fP
-.IP \(bu 2
-\fBcreate_guess()\fP
+\fBsave_mos()\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBorthonormalize_mos()\fP
 .UNINDENT
 .INDENT 2.0
-.IP \(bu 2
-\fBrun()\fP
-.UNINDENT
-.UNINDENT
-.sp
-Touches:
-.INDENT 0.0
-.INDENT 2.0
-.IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.IP \(bu 2
-\fBfock_matrix_ao_alpha\fP
-.UNINDENT
-.INDENT 2.0
-.IP \(bu 2
-\fBmo_coef\fP
-.IP \(bu 2
-\fBdensity_for_dft\fP
-.IP \(bu 2
-\fBio_ao_one_e_integrals\fP
-.IP \(bu 2
-\fBio_mo_one_e_integrals\fP
-.UNINDENT
-.INDENT 2.0
-.IP \(bu 2
-\fBlevel_shift\fP
-.IP \(bu 2
-\fBmo_coef\fP
-.IP \(bu 2
-\fBmo_label\fP
 .UNINDENT
 .UNINDENT
 .UNINDENT

@@ -103,6 +103,8 @@ Index of Providers
     * :c:data:`aos_grad_in_r_array_transp` 
     * :c:data:`aos_grad_in_r_array_transp_xyz` 
     * :c:data:`aos_in_r_array` 
+    * :c:data:`aos_in_r_array_per_atom` 
+    * :c:data:`aos_in_r_array_per_atom_transp` 
     * :c:data:`aos_in_r_array_transp` 
     * :c:data:`aos_lapl_in_r_array` 
     * :c:data:`aos_lapl_in_r_array_transp` 
@@ -251,8 +253,10 @@ Index of Providers
     * :c:data:`fact_inv` 
     * :c:data:`file_lock` 
     * :c:data:`final_grid_points` 
+    * :c:data:`final_grid_points_per_atom` 
     * :c:data:`final_weight_at_r` 
     * :c:data:`final_weight_at_r_vector` 
+    * :c:data:`final_weight_at_r_vector_per_atom` 
     * :c:data:`fock_matrix_alpha_no_xc_ao` 
     * :c:data:`fock_matrix_ao` 
     * :c:data:`fock_matrix_ao_alpha` 
@@ -282,6 +286,7 @@ Index of Providers
     * :c:data:`give_polynomial_mult_center_one_e_erf_opt` 
     * :c:data:`global_selection_buffer` 
     * :c:data:`global_selection_buffer_lock` 
+    * :c:data:`grid_atomic_number` 
     * :c:data:`grid_points_per_atom` 
     * :c:data:`grid_points_radial` 
     * :c:data:`grid_type_sgn` 
@@ -313,6 +318,8 @@ Index of Providers
     * :c:data:`inact_bitmask` 
     * :c:data:`inact_virt_bitmask` 
     * :c:data:`index_final_points` 
+    * :c:data:`index_final_points_per_atom` 
+    * :c:data:`index_final_points_per_atom_reverse` 
     * :c:data:`index_final_points_reverse` 
     * :c:data:`index_holes_bitmask` 
     * :c:data:`index_particl_bitmask` 
@@ -460,6 +467,8 @@ Index of Providers
     * :c:data:`n_points_radial_grid` 
     * :c:data:`n_pt_max_i_x` 
     * :c:data:`n_pt_max_integrals` 
+    * :c:data:`n_pts_max_per_atom` 
+    * :c:data:`n_pts_per_atom` 
     * :c:data:`n_single_exc_bitmasks` 
     * :c:data:`n_states` 
     * :c:data:`n_states_diag` 
@@ -754,6 +763,7 @@ Index of Providers
     * :c:data:`selection_criterion` 
     * :c:data:`selection_criterion_factor` 
     * :c:data:`selection_criterion_min` 
+    * :c:data:`selection_factor` 
     * :c:data:`selection_weight` 
     * :c:data:`short_range_hartree` 
     * :c:data:`short_range_hartree_operator` 
@@ -775,6 +785,7 @@ Index of Providers
     * :c:data:`state_following` 
     * :c:data:`target_energy` 
     * :c:data:`theta_angular_integration_lebedev` 
+    * :c:data:`thresh_grid` 
     * :c:data:`thresh_scf` 
     * :c:data:`thresh_sym` 
     * :c:data:`threshold_davidson` 
@@ -792,11 +803,14 @@ Index of Providers
     * :c:data:`unpaired_alpha_electrons` 
     * :c:data:`used_weight` 
     * :c:data:`var_pt2_ratio` 
+    * :c:data:`variance_match_weight` 
     * :c:data:`variance_max` 
     * :c:data:`virt_bitmask` 
     * :c:data:`virt_bitmask_4` 
     * :c:data:`weight_at_r` 
     * :c:data:`weight_occ_pattern` 
+    * :c:data:`weight_one_e_dm` 
+    * :c:data:`weight_selection` 
     * :c:data:`weights_angular_integration_lebedev` 
     * :c:data:`weights_angular_points` 
     * :c:data:`write_ao_integrals_e_n` 
@@ -1033,6 +1047,8 @@ Index of Subroutines/Functions
     * :c:func:`get_ao_two_e_integrals_erf` 
     * :c:func:`get_ao_two_e_integrals_erf_non_zero` 
     * :c:func:`get_ao_two_e_integrals_non_zero` 
+    * :c:func:`get_ao_two_e_integrals_non_zero_jl` 
+    * :c:func:`get_ao_two_e_integrals_non_zero_jl_from_list` 
     * :c:func:`get_d0` 
     * :c:func:`get_d1` 
     * :c:func:`get_d2` 
@@ -1280,6 +1296,7 @@ Index of Subroutines/Functions
     * :c:func:`print_ci_vectors` 
     * :c:func:`print_det` 
     * :c:func:`print_e_conv` 
+    * :c:func:`print_energy_components` 
     * :c:func:`print_extrapolated_energy` 
     * :c:func:`print_generators_bitmasks_holes` 
     * :c:func:`print_generators_bitmasks_holes_for_one_generator` 
@@ -1418,6 +1435,7 @@ Index of Subroutines/Functions
     * :c:func:`u_0_s2_u_0` 
     * :c:func:`u_dot_u` 
     * :c:func:`u_dot_v` 
+    * :c:func:`update_pt2_and_variance_weights` 
     * :c:func:`v_e_n` 
     * :c:func:`v_grad_rho_oc_to_v_grad_rho_ab` 
     * :c:func:`v_phi` 

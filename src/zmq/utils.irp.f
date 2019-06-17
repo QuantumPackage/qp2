@@ -301,7 +301,6 @@ function new_zmq_push_socket(thread)
   END_DOC
   integer, intent(in)            :: thread
   integer                        :: rc
-  character*(8), external        :: zmq_port
   integer(ZMQ_PTR)               :: new_zmq_push_socket
 
   call omp_set_lock(zmq_lock)
@@ -425,7 +424,6 @@ subroutine end_zmq_pair_socket(zmq_socket_pair)
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pair
   integer                        :: rc
-  character*(8), external        :: zmq_port
 
   call omp_set_lock(zmq_lock)
   rc = f77_zmq_close(zmq_socket_pair)
@@ -445,7 +443,6 @@ subroutine end_zmq_pull_socket(zmq_socket_pull)
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   integer                        :: rc
-  character*(8), external        :: zmq_port
 
 !  rc = f77_zmq_setsockopt(zmq_socket_pull,ZMQ_LINGER,0,4)
 !  if (rc /= 0) then
@@ -472,7 +469,6 @@ subroutine end_zmq_push_socket(zmq_socket_push,thread)
   integer, intent(in)            :: thread
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
   integer                        :: rc
-  character*(8), external        :: zmq_port
 
   rc = f77_zmq_setsockopt(zmq_socket_push,ZMQ_LINGER,300000,4)
   if (rc /= 0) then
@@ -1032,7 +1028,6 @@ subroutine end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
 ! Terminate the socket from the application to qp_run
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
-  character*(8), external        :: zmq_port
   integer                        :: rc
 
   rc = f77_zmq_setsockopt(zmq_to_qp_run_socket,ZMQ_LINGER,300000,4)

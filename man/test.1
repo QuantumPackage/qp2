@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "DIAGONALIZE_H" "1" "Jun 15, 2019" "2.0" "Quantum Package"
+.TH "TEST" "1" "Jun 15, 2019" "2.0" "Quantum Package"
 .SH NAME
-diagonalize_h \-  | Quantum Package >
+test \-  | Quantum Package >
 .
 .nr rst2man-indent-level 0
 .
@@ -32,45 +32,15 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .INDENT 0.0
 .INDENT 3.5
-Program that extracts the \fBdeterminants n_states\fP lowest
-states of the Hamiltonian within the set of Slater determinants stored
-in the \fI\%EZFIO\fP directory.
-.sp
-If \fBdeterminants s2_eig\fP = \fBtrue\fP, it will retain only states
-which correspond to the desired value of
-\fBdeterminants expected_s2\fP\&.
-.sp
-Needs:
-.INDENT 0.0
-.INDENT 2.0
-.IP \(bu 2
-\fBread_wf\fP
-.UNINDENT
-.INDENT 2.0
-.UNINDENT
-.INDENT 2.0
-.UNINDENT
-.UNINDENT
-.sp
 Calls:
 .INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBroutine()\fP
+\fBtwo_e_integrals_index()\fP
 .UNINDENT
-.INDENT 2.0
-.UNINDENT
-.INDENT 2.0
-.UNINDENT
-.UNINDENT
-.sp
-Touches:
-.INDENT 0.0
 .INDENT 2.0
 .IP \(bu 2
-\fBread_wf\fP
-.UNINDENT
-.INDENT 2.0
+\fBtwo_e_integrals_index_reverse()\fP
 .UNINDENT
 .INDENT 2.0
 .UNINDENT

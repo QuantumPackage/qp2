@@ -199,6 +199,70 @@ Providers
        * :c:data:`potential_xc_alpha_ao_sr_lda`
 
  
+.. c:var:: aos_in_r_array_per_atom
+
+
+    File : :file:`dft_utils_in_r/ao_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: aos_in_r_array_per_atom	(ao_num,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: aos_in_r_array_per_atom_transp	(n_pts_max_per_atom,ao_num,nucl_num)
+
+
+    aos_in_r_array_per_atom(i,j,k)        = value of the ith ao on the jth grid point attached on the kth atom
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
+       * :c:data:`final_grid_points_per_atom`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_aos_transposed`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
+       * :c:data:`nucl_num`
+
+
+ 
+.. c:var:: aos_in_r_array_per_atom_transp
+
+
+    File : :file:`dft_utils_in_r/ao_in_r.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: aos_in_r_array_per_atom	(ao_num,n_pts_max_per_atom,nucl_num)
+        double precision, allocatable	:: aos_in_r_array_per_atom_transp	(n_pts_max_per_atom,ao_num,nucl_num)
+
+
+    aos_in_r_array_per_atom(i,j,k)        = value of the ith ao on the jth grid point attached on the kth atom
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
+       * :c:data:`final_grid_points_per_atom`
+       * :c:data:`n_pts_per_atom`
+       * :c:data:`nucl_aos_transposed`
+       * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
+       * :c:data:`nucl_num`
+
+
+ 
 .. c:var:: aos_in_r_array_transp
 
 
