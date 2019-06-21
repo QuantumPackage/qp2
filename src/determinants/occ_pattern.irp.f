@@ -53,7 +53,17 @@ subroutine occ_pattern_to_dets(o,d,sze,n_alpha,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Generate all possible determinants for a give occ_pattern
+  ! Generate all possible determinants for a given occ_pattern
+  ! 
+  ! Input :
+  !    o   : occupation pattern : (doubly occupied, singly occupied)
+  !    sze : Number of produced determinants, computed by `occ_pattern_to_dets_size`
+  !    n_alpha : Number of $\alpha$ electrons
+  !    Nint    : N_int
+  !
+  ! Output:
+  !    d : determinants 
+  !
   END_DOC
   integer          ,intent(in)   :: Nint
   integer          ,intent(in)   :: n_alpha        ! Number of alpha electrons
