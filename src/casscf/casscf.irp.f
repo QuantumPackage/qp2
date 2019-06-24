@@ -10,7 +10,20 @@ end
 
 subroutine run
   implicit none
-  call run_cipsi
-  call driver_wdens
+  double precision               :: energy_old, energy
+  logical                        :: converged
+  converged = .False.
+
+  energy = 0.d0
+!  do while (.not.converged)
+    N_det = 1
+    TOUCH N_det psi_det psi_coef 
+    call run_cipsi
+    call driver_wdens
+    call driver_optorb
+    energy_old = energy
+    energy = eone+etwo+ecore
+    converged = dabs(energy - energy_old) < 1.d-10
+!  enddo
 
 end
