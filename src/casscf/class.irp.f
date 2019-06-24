@@ -3,10 +3,10 @@
 &BEGIN_PROVIDER [ logical, do_ddci ]
  implicit none
  BEGIN_DOC
- ! In the FCI case, all those are always false
+ ! In the CAS case, all those are always false except do_only_cas
  END_DOC
+ do_only_cas  = .True.
  do_only_1h1p = .False.
- do_only_cas  = .False.
  do_ddci = .False.
 END_PROVIDER
 
