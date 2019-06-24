@@ -1,4 +1,4 @@
-program casscf_new
+program casscf
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
@@ -11,4 +11,6 @@ end
 subroutine run
   implicit none
   call run_cipsi
+  call driver_wdens
+
 end
