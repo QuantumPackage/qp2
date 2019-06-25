@@ -1,72 +1,19 @@
 use bitmasks
 
 BEGIN_PROVIDER [real*8, D0tu, (n_act_orb,n_act_orb) ]
-  BEGIN_DOC
-  ! the first-order density matrix in the basis of the starting MOs
-  ! matrices are state averaged
-  !
-  ! we use the spin-free generators of mono-excitations
-  ! E_pq destroys q and creates p
-  ! D_pq   =     <0|E_pq|0> = D_qp
-  !
-  END_DOC
   implicit none
-  integer                        :: t,u,v,x,mu,nu,istate,ispin,jspin,ihole,ipart,jhole,jpart
-  integer                        :: ierr
-  integer(bit_kind)              :: det_mu(N_int,2)
-  integer(bit_kind)              :: det_mu_ex(N_int,2)
-  integer(bit_kind)              :: det_mu_ex1(N_int,2)
-  integer(bit_kind)              :: det_mu_ex2(N_int,2)
-  real*8                         :: phase1,phase2,term
-  integer                        :: nu1,nu2
-  integer                        :: ierr1,ierr2
-  real*8                         :: cI_mu(N_states)
+  BEGIN_DOC
+  ! the first-order density matrix in the basis of the starting MOs.
+  ! matrix is state averaged.
+  END_DOC
+  integer                        :: t,u
   
-  if (bavard) then
-    write(6,*) ' providing density matrix D0'
-  endif
-  
-  D0tu = 0.d0
-  
-  ! first loop: we apply E_tu, once for D_tu, once for -P_tvvu
-  do mu=1,n_det
-    call det_extract(det_mu,mu,N_int)
-    do istate=1,n_states
-      cI_mu(istate)=psi_coef(mu,istate)
-    end do
+  do u=1,n_act_orb
     do t=1,n_act_orb
-      ipart=list_act(t)
-      do u=1,n_act_orb
-        ihole=list_act(u)
-        ! apply E_tu
-        call det_copy(det_mu,det_mu_ex1,N_int)
-        call det_copy(det_mu,det_mu_ex2,N_int)
-        call do_spinfree_mono_excitation(det_mu,det_mu_ex1           &
-            ,det_mu_ex2,nu1,nu2,ihole,ipart,phase1,phase2,ierr1,ierr2)
-        ! det_mu_ex1 is in the list
-        if (nu1.ne.-1) then
-          do istate=1,n_states
-            term=cI_mu(istate)*psi_coef(nu1,istate)*phase1
-            D0tu(t,u)+=term
-          end do
-        end if
-        ! det_mu_ex2 is in the list
-        if (nu2.ne.-1) then
-          do istate=1,n_states
-            term=cI_mu(istate)*psi_coef(nu2,istate)*phase2
-            D0tu(t,u)+=term
-          end do
-        end if
-      end do
-    end do
-  end do
-  
-  ! we average by just dividing by the number of states
-  do x=1,n_act_orb
-    do v=1,n_act_orb
-      D0tu(v,x)*=1.0D0/dble(N_states)
-    end do
-  end do
+      D0tu(t,u) = one_e_dm_mo_alpha_average( list_act(t), list_act(u) ) + &
+                  one_e_dm_mo_beta_average ( list_act(t), list_act(u) ) 
+    enddo
+  enddo
   
 END_PROVIDER
 

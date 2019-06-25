@@ -31,6 +31,8 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
     ! get the number in the list
     found=.false.
     nu=0
+
+    !TODO BOTTLENECK
     do while (.not.found)
       nu+=1
       if (nu.gt.N_det) then
@@ -50,13 +52,6 @@ subroutine do_signed_mono_excitation(key1,key2,nu,ihole,ipart,       &
         end do
       end if
     end do
-    !         if (found) then
-    !          if (nu.eq.-1) then
-    !           write(6,*) ' image not found in the list, thus nu = ',nu
-    !          else
-    !           write(6,*) ' found in the list as No ',nu,' phase = ',phase
-    !          end if
-    !         end if
   end if
   !
   ! we found the new string, the phase, and possibly the number in the list
