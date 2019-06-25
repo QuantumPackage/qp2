@@ -21,10 +21,6 @@ subroutine run
     call run_cipsi
 
     write(6,*) ' total energy = ',eone+etwo+ecore
-    mo_label = "MCSCF"
-    mo_label = "Natural"
-    mo_coef(:,:) = NatOrbsFCI(:,:)
-    call save_mos
 
     call driver_optorb
     energy_old = energy
