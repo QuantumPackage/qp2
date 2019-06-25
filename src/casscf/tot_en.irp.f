@@ -42,8 +42,6 @@
        end do
      end do
    end do
-   write(6,*) ' e_one_all = ',e_one_all
-   write(6,*) ' e_two_all = ',e_two_all
    ecore    =nuclear_repulsion
    ecore_bis=nuclear_repulsion
    do i=1,n_core_orb
@@ -97,24 +95,6 @@
        end do
      end do
    end do
-   
-   write(6,*) ' energy contributions '
-   write(6,*) '     core energy       = ',ecore,' using PQxx integrals '
-   write(6,*) '     core energy (bis) = ',ecore,' using PxxQ integrals '
-   write(6,*) '     1el  energy       = ',eone ,' using PQxx integrals '
-   write(6,*) '     1el  energy (bis) = ',eone ,' using PxxQ integrals '
-   write(6,*) '     2el  energy       = ',etwo    ,' using PQxx integrals '
-   write(6,*) '     2el  energy (bis) = ',etwo_bis,' using PxxQ integrals '
-   write(6,*) '     2el  energy (ter) = ',etwo_ter,' using tuvP integrals '
-   write(6,*) ' ----------------------------------------- '
-   write(6,*) '     sum of all        = ',eone+etwo+ecore
-   write(6,*)
-   write(6,*) ' nuclear     (qp)      = ',nuclear_repulsion
-   write(6,*) ' core energy (qp)      = ',core_energy
-   write(6,*) ' 1el  energy (qp)      = ',psi_energy_h_core(1)
-   write(6,*) ' 2el  energy (qp)      = ',psi_energy_two_e(1)
-   write(6,*) ' nuc + 1 + 2 (qp)      = ',nuclear_repulsion+psi_energy_h_core(1)+psi_energy_two_e(1)
-   write(6,*) ' <0|H|0>     (qp)      = ',psi_energy_with_nucl_rep(1)
    
 END_PROVIDER
  

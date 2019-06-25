@@ -22,7 +22,9 @@ BEGIN_PROVIDER [real*8, D0tu, (n_act_orb,n_act_orb) ]
   integer                        :: ierr1,ierr2
   real*8                         :: cI_mu(N_states)
   
-  write(6,*) ' providing density matrices D0 and P0 '
+  if (bavard) then
+    write(6,*) ' providing density matrix D0'
+  endif
   
   D0tu = 0.d0
   
@@ -90,7 +92,9 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex1, det_mu_ex11, det_mu_ex12
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex2, det_mu_ex21, det_mu_ex22
    
-   write(6,*) ' providing density matrices D0 and P0 '
+  if (bavard) then
+    write(6,*) ' providing density matrix P0'
+  endif
 
    P0tuvx = 0.d0
    

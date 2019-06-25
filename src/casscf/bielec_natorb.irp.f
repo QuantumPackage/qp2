@@ -84,7 +84,6 @@
       end do
     end do
   end do
-  write(6,*) ' transformed PQxx'
 
 END_PROVIDER
 
@@ -176,7 +175,6 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_orb+n_act_orb,n_core_orb+
       end do
     end do
   end do
-  write(6,*) ' transformed PxxQ '
 
 END_PROVIDER
 
@@ -267,7 +265,6 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
       end do 
     end do  
   end do  
-  write(6,*) ' transformed tuvP '
 
 END_PROVIDER
 

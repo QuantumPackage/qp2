@@ -51,14 +51,16 @@ END_PROVIDER
   integer                        :: ierr,matz,i
   real*8                         :: c0
   
-  write(6,*) ' SXdiag : lowest 5 eigenvalues '
-  write(6,*) ' 1 - ',SXeigenval(1),SXeigenvec(1,1)
-  write(6,*) ' 2 - ',SXeigenval(2),SXeigenvec(1,2)
-  write(6,*) ' 3 - ',SXeigenval(3),SXeigenvec(1,3)
-  write(6,*) ' 4 - ',SXeigenval(4),SXeigenvec(1,4)
-  write(6,*) ' 5 - ',SXeigenval(5),SXeigenvec(1,5)
-  write(6,*)
-  write(6,*) ' SXdiag : lowest eigenvalue = ',SXeigenval(1)
+  if (bavard) then
+    write(6,*) ' SXdiag : lowest 5 eigenvalues '
+    write(6,*) ' 1 - ',SXeigenval(1),SXeigenvec(1,1)
+    write(6,*) ' 2 - ',SXeigenval(2),SXeigenvec(1,2)
+    write(6,*) ' 3 - ',SXeigenval(3),SXeigenvec(1,3)
+    write(6,*) ' 4 - ',SXeigenval(4),SXeigenvec(1,4)
+    write(6,*) ' 5 - ',SXeigenval(5),SXeigenvec(1,5)
+    write(6,*)
+    write(6,*) ' SXdiag : lowest eigenvalue = ',SXeigenval(1)
+  endif
   energy_improvement = SXeigenval(1)
   
   integer                        :: best_vector
@@ -73,16 +75,20 @@ END_PROVIDER
     end if
   end do
   
-  write(6,*) ' SXdiag : eigenvalue for best overlap with '
-  write(6,*) '  previous orbitals = ',SXeigenval(best_vector)
   energy_improvement = SXeigenval(best_vector)
   
+  if (bavard) then
+    write(6,*) ' SXdiag : eigenvalue for best overlap with '
+    write(6,*) '  previous orbitals = ',SXeigenval(best_vector)
+    write(6,*) ' weight of the 1st element ',c0
+  endif
+
   c0=SXeigenvec(1,best_vector)
-  write(6,*) ' weight of the 1st element ',c0
+
   do i=1,nMonoEx+1
     SXvector(i)=SXeigenvec(i,best_vector)/c0
-    !      write(6,*) ' component No ',i,' : ',SXvector(i)
   end do
+
   
 END_PROVIDER
 

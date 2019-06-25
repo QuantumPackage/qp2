@@ -55,7 +55,6 @@
     end do
   end do
 
-  write(6,*) ' provided integrals (PQ|xx) '
 END_PROVIDER
 
 
@@ -116,7 +115,6 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_orb+n_act_orb,n_core_orb+n_a
       end do
     end do
   end do
-  write(6,*) ' provided integrals (Px|xQ) '
 END_PROVIDER
 
 
@@ -146,6 +144,5 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
       end do
     end do
   end do
-  write(6,*) ' provided integrals (tu|xP) '
 END_PROVIDER
 

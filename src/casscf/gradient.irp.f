@@ -6,7 +6,6 @@ BEGIN_PROVIDER [ integer, nMonoEx ]
   END_DOC
   implicit none
   nMonoEx=n_core_orb*n_act_orb+n_core_orb*n_virt_orb+n_act_orb*n_virt_orb
-  write(6,*) ' nMonoEx = ',nMonoEx
 END_PROVIDER
 
  BEGIN_PROVIDER [integer, excit, (2,nMonoEx)]
@@ -87,9 +86,11 @@ BEGIN_PROVIDER [real*8, gradvec, (nMonoEx)]
     norm_grad+=gradvec(indx)*gradvec(indx)
   end do
   norm_grad=sqrt(norm_grad)
-  write(6,*)
-  write(6,*) ' Norm of the orbital gradient (via <0|EH|0>) : ', norm_grad
-  write(6,*)
+  if (bavard) then
+    write(6,*)
+    write(6,*) ' Norm of the orbital gradient (via <0|EH|0>) : ', norm_grad
+    write(6,*)
+  endif
   
   
 END_PROVIDER
@@ -118,17 +119,11 @@ subroutine calc_grad_elem(ihole,ipart,res)
       call do_signed_mono_excitation(det_mu,det_mu_ex,nu             &
           ,ihole,ipart,ispin,phase,ierr)
       if (ierr.eq.1) then
-        !       write(6,*)
-        !       write(6,*) ' mu = ',mu
-        !       call print_det(det_mu,N_int)
-        !         write(6,*) ' generated nu = ',nu,' for excitation ',ihole,' -> ',ipart,' ierr = ',ierr,' phase = ',phase,' ispin = ',ispin
-        !         call print_det(det_mu_ex,N_int)
         call i_H_psi(det_mu_ex,psi_det,psi_coef,N_int                &
             ,N_det,N_det,N_states,i_H_psi_array)
         do istate=1,N_states
           res+=i_H_psi_array(istate)*psi_coef(mu,istate)*phase
         end do
-        !         write(6,*) ' contribution = ',i_H_psi_array(1)*psi_coef(mu,1)*phase,res
       end if
     end do
   end do
@@ -176,9 +171,11 @@ BEGIN_PROVIDER [real*8, gradvec2, (nMonoEx)]
     norm_grad+=gradvec2(indx)*gradvec2(indx)
   end do
   norm_grad=sqrt(norm_grad)
-  write(6,*)
-  write(6,*) ' Norm of the orbital gradient (via D, P and integrals): ', norm_grad
-  write(6,*)
+  if (bavard) then
+    write(6,*)
+    write(6,*) ' Norm of the orbital gradient (via D, P and integrals): ', norm_grad
+    write(6,*)
+  endif
   
 END_PROVIDER
 

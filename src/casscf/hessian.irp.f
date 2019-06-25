@@ -14,8 +14,10 @@ BEGIN_PROVIDER [real*8, hessmat, (nMonoEx,nMonoEx)]
   character*3                    :: iexc,jexc
   real*8                         :: res
   
-  write(6,*) ' providing Hessian matrix hessmat '
-  write(6,*) '  nMonoEx = ',nMonoEx
+  if (bavard) then
+    write(6,*) ' providing Hessian matrix hessmat '
+    write(6,*) '  nMonoEx = ',nMonoEx
+  endif
   
   do indx=1,nMonoEx
     do jndx=1,nMonoEx
@@ -32,8 +34,6 @@ BEGIN_PROVIDER [real*8, hessmat, (nMonoEx,nMonoEx)]
       jpart=excit(2,jndx)
       jexc=excit_class(jndx)
       call calc_hess_elem(ihole,ipart,jhole,jpart,res)
-      !      write(6,*) ' Hessian ',ihole,'->',ipart                 &
-      !           ,' (',iexc,')',jhole,'->',jpart,' (',jexc,')',res
       hessmat(indx,jndx)=res
       hessmat(jndx,indx)=res
     end do
@@ -198,8 +198,10 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
   real*8                         :: hessmat_iatb
   real*8                         :: hessmat_taub
   
-  write(6,*) ' providing Hessian matrix hessmat2 '
-  write(6,*) '  nMonoEx = ',nMonoEx
+  if (bavard) then
+    write(6,*) ' providing Hessian matrix hessmat2 '
+    write(6,*) '  nMonoEx = ',nMonoEx
+  endif
   
   indx=1
   do i=1,n_core_orb
@@ -214,7 +216,6 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
         do u=ustart,n_act_orb
           hessmat2(indx,jndx)=hessmat_itju(i,t,j,u)
           hessmat2(jndx,indx)=hessmat2(indx,jndx)
-          !          write(6,*) ' result I :',i,t,j,u,indx,jndx,hessmat(indx,jndx),hessmat2(indx,jndx)
           jndx+=1
         end do
       end do
@@ -294,7 +295,6 @@ real*8 function hessmat_itju(i,t,j,u)
   integer                        :: i,t,j,u,ii,tt,uu,v,vv,x,xx,y,jj
   real*8                         :: term,t2
   
-  !      write(6,*) ' hessmat_itju ',i,t,j,u
   ii=list_core(i)
   tt=list_act(t)
   if (i.eq.j) then
@@ -340,8 +340,6 @@ real*8 function hessmat_itju(i,t,j,u)
           end do
         end do
       end do
-      !!!         write(6,*) ' direct diff ',i,t,j,u,term,term2
-      !!!         term=term2
     end if
   else
     ! it/ju
@@ -382,7 +380,6 @@ real*8 function hessmat_itja(i,t,j,a)
   integer                        :: i,t,j,a,ii,tt,jj,aa,v,vv,x,y
   real*8                         :: term
   
-  !      write(6,*) ' hessmat_itja ',i,t,j,a
   ! it/ja
   ii=list_core(i)
   tt=list_act(t)
@@ -416,7 +413,6 @@ real*8 function hessmat_itua(i,t,u,a)
   integer                        :: i,t,u,a,ii,tt,uu,aa,v,vv,x,xx,u3,t3,v3
   real*8                         :: term
   
-  !      write(6,*) ' hessmat_itua ',i,t,u,a
   ii=list_core(i)
   tt=list_act(t)
   t3=t+n_core_orb
@@ -457,7 +453,6 @@ real*8 function hessmat_iajb(i,a,j,b)
   implicit none
   integer                        :: i,a,j,b,ii,aa,jj,bb
   real*8                         :: term
-  !      write(6,*) ' hessmat_iajb ',i,a,j,b
   
   ii=list_core(i)
   aa=list_virt(a)
@@ -495,7 +490,6 @@ real*8 function hessmat_iatb(i,a,t,b)
   integer                        :: i,a,t,b,ii,aa,tt,bb,v,vv,x,y,v3,t3
   real*8                         :: term
   
-  !      write(6,*) ' hessmat_iatb ',i,a,t,b
   ii=list_core(i)
   aa=list_virt(a)
   tt=list_act(t)
@@ -552,7 +546,6 @@ real*8 function hessmat_taub(t,a,u,b)
         end do
       end do
       term=t1+t2+t3
-      !        write(6,*) ' Hess taub ',t,a,t1,t2,t3
     else
       bb=list_virt(b)
       ! ta/tb b/=a
