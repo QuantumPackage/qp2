@@ -19,7 +19,13 @@ subroutine run
     N_det = 1
     TOUCH N_det psi_det psi_coef 
     call run_cipsi
-    call driver_wdens
+
+    write(6,*) ' total energy = ',eone+etwo+ecore
+    mo_label = "MCSCF"
+    mo_label = "Natural"
+    mo_coef(:,:) = NatOrbsFCI(:,:)
+    call save_mos
+
     call driver_optorb
     energy_old = energy
     energy = eone+etwo+ecore

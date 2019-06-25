@@ -7,7 +7,7 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
    
    do q=1,mo_num
      do p=1,mo_num
-       Fipq(p,q)=one_ints(p,q)
+       Fipq(p,q)=one_ints_no(p,q)
      end do
    end do
    

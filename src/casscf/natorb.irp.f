@@ -158,14 +158,14 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, onetrf, (mo_num,mo_num)]
+BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
   implicit none
   BEGIN_DOC
   ! Transformed one-e integrals
   END_DOC
   integer :: i,j, p, pp, q
   real*8 :: d(n_act_orb)
-  onetrf(:,:)=mo_one_e_integrals(:,:)
+  one_ints_no(:,:)=mo_one_e_integrals(:,:)
 
   ! 1st half-trf
   do j=1,mo_num
@@ -175,11 +175,11 @@ BEGIN_PROVIDER [real*8, onetrf, (mo_num,mo_num)]
     do p=1,n_act_orb
       pp=n_act_orb-p+1
       do q=1,n_act_orb
-        d(pp)+=onetrf(list_act(q),j)*natorbsCI(q,p)
+        d(pp)+=one_ints_no(list_act(q),j)*natorbsCI(q,p)
       end do
     end do
     do p=1,n_act_orb
-      onetrf(list_act(p),j)=d(p)
+      one_ints_no(list_act(p),j)=d(p)
     end do
   end do
 
@@ -191,14 +191,14 @@ BEGIN_PROVIDER [real*8, onetrf, (mo_num,mo_num)]
     do p=1,n_act_orb
       pp=n_act_orb-p+1
       do q=1,n_act_orb
-        d(pp)+=onetrf(j,list_act(q))*natorbsCI(q,p)
+        d(pp)+=one_ints_no(j,list_act(q))*natorbsCI(q,p)
       end do
     end do
     do p=1,n_act_orb
-      onetrf(j,list_act(p))=d(p)
+      one_ints_no(j,list_act(p))=d(p)
     end do
   end do
-  write(6,*) ' transformed onetrf '
+  write(6,*) ' transformed one_ints '
 END_PROVIDER
 
 
@@ -271,7 +271,7 @@ subroutine trf_to_natorb()
   e_two_all=0.D0
   do i=1,n_core_orb
     ii=list_core(i)
-    e_one_all+=2.D0*onetrf(ii,ii)
+    e_one_all+=2.D0*one_ints_no(ii,ii)
     do j=1,n_core_orb
       jj=list_core(j)
       e_two_all+=2.D0*bielec_PQxx_no(ii,ii,j,j)-bielec_PQxx_no(ii,jj,j,i)
@@ -288,7 +288,7 @@ subroutine trf_to_natorb()
 
   do t=1,n_act_orb
     tt=list_act(t)
-    e_one_all += occnum(list_act(t))*onetrf(tt,tt)
+    e_one_all += occnum(list_act(t))*one_ints_no(tt,tt)
     do u=1,n_act_orb
       uu=list_act(u)
       do v=1,n_act_orb
@@ -306,8 +306,8 @@ subroutine trf_to_natorb()
   ecore_bis=nuclear_repulsion
   do i=1,n_core_orb
     ii=list_core(i)
-    ecore    +=2.D0*onetrf(ii,ii)
-    ecore_bis+=2.D0*onetrf(ii,ii)
+    ecore    +=2.D0*one_ints_no(ii,ii)
+    ecore_bis+=2.D0*one_ints_no(ii,ii)
     do j=1,n_core_orb
       jj=list_core(j)
       ecore    +=2.D0*bielec_PQxx_no(ii,ii,j,j)-bielec_PQxx_no(ii,jj,j,i)
@@ -322,8 +322,8 @@ subroutine trf_to_natorb()
   do t=1,n_act_orb
     tt=list_act(t)
     t3=t+n_core_orb
-    eone     += occnum(list_act(t))*onetrf(tt,tt)
-    eone_bis += occnum(list_act(t))*onetrf(tt,tt)
+    eone     += occnum(list_act(t))*one_ints_no(tt,tt)
+    eone_bis += occnum(list_act(t))*one_ints_no(tt,tt)
     do i=1,n_core_orb
       ii=list_core(i)
       eone     += occnum(list_act(t)) * &
