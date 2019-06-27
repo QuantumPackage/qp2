@@ -8,11 +8,11 @@ program print_two_rdm
 
   double precision :: accu,twodm
   accu = 0.d0
-  do i=1,mo_num
-    do j=1,mo_num
-      do k=1,mo_num
-        do l=1,mo_num
-         twodm = coussin_peter_two_rdm_mo(i,j,k,l,1)
+  do i=1,n_act_orb
+    do j=1,n_act_orb
+      do k=1,n_act_orb
+        do l=1,n_act_orb
+         twodm = coussin_peter_two_rdm_mo(list_act(i),list_act(j),list_act(k),list_act(l))
             if(dabs(twodm - P0tuvx(i,j,k,l)).gt.thr)then
              print*,''
              print*,'sum'
