@@ -25,7 +25,7 @@ BEGIN_PROVIDER [real*8, SXmatrix, (nMonoEx+1,nMonoEx+1)]
   end do
   
   if (bavard) then
-    do i=2,nMonoEx+1
+    do i=2,nMonoEx
       write(6,*) ' diagonal of the Hessian : ',i,hessmat2(i,i)
     end do
   end if
@@ -77,13 +77,13 @@ END_PROVIDER
   
   energy_improvement = SXeigenval(best_vector)
   
+  c0=SXeigenvec(1,best_vector)
+
   if (bavard) then
     write(6,*) ' SXdiag : eigenvalue for best overlap with '
     write(6,*) '  previous orbitals = ',SXeigenval(best_vector)
     write(6,*) ' weight of the 1st element ',c0
   endif
-
-  c0=SXeigenvec(1,best_vector)
 
   do i=1,nMonoEx+1
     SXvector(i)=SXeigenvec(i,best_vector)/c0

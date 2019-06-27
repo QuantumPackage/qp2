@@ -3,8 +3,8 @@ program casscf
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
-  no_vvvv_integrals = .True.
-  SOFT_TOUCH no_vvvv_integrals
+!  no_vvvv_integrals = .True.
+!  SOFT_TOUCH no_vvvv_integrals
   call run
 end
 
@@ -13,6 +13,7 @@ subroutine run
   double precision               :: energy_old, energy
   logical                        :: converged
   integer                        :: iteration
+  PROVIDE mo_two_e_integrals_in_map
   converged = .False.
 
   energy = 0.d0
