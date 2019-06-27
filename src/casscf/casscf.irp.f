@@ -3,8 +3,8 @@ program casscf
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
-!  no_vvvv_integrals = .True.
-!  SOFT_TOUCH no_vvvv_integrals
+  no_vvvv_integrals = .True.
+  SOFT_TOUCH no_vvvv_integrals
   call run
 end
 
@@ -13,15 +13,13 @@ subroutine run
   double precision               :: energy_old, energy
   logical                        :: converged
   integer                        :: iteration
-  PROVIDE mo_two_e_integrals_in_map
   converged = .False.
 
   energy = 0.d0
   mo_label = "MCSCF"
   iteration = 1
   do while (.not.converged)
-    call run_cipsi
-
+    call run_stochastic_cipsi
     energy_old = energy
     energy = eone+etwo+ecore
 
@@ -39,6 +37,7 @@ subroutine run
     iteration += 1
     FREE mo_integrals_map mo_two_e_integrals_in_map psi_det psi_coef
     SOFT_TOUCH mo_coef N_det
+
   enddo
 
 end

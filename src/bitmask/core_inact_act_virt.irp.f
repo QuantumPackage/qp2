@@ -141,6 +141,10 @@ END_PROVIDER
  n_act_orb_tmp = 0
  n_virt_orb_tmp = 0
  n_del_orb_tmp = 0
+ core_bitmask = 0_bit_kind
+ inact_bitmask = 0_bit_kind
+ act_bitmask = 0_bit_kind
+ virt_bitmask = 0_bit_kind
  do i = 1, mo_num
   if(mo_class(i) == 'Core')then
    n_core_orb_tmp += 1
