@@ -55,6 +55,7 @@ END_PROVIDER
       nongen(inongen) = i
     endif
   enddo
+  ASSERT (m == N_det_generators)
 
   psi_det_sorted_gen(:,:,:N_det_generators) = psi_det_generators(:,:,:N_det_generators)
   psi_coef_sorted_gen(:N_det_generators, :) = psi_coef_generators(:N_det_generators, :)

@@ -135,7 +135,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
   endif
 
-  if (N_det < max(4,N_states)) then
+  if (N_det <= max(4,N_states)) then
     pt2=0.d0
     variance=0.d0
     norm=0.d0
@@ -719,6 +719,15 @@ END_PROVIDER
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
+  if (N_det_generators == 1) then
+    pt2_w = 1.d0
+    pt2_cw = 1.d0
+    pt2_W_T = 1.d0
+    pt2_u_0 = 1.d0
+    pt2_n_0 = 1
+    return
+  endif
+
   rss = memory_of_double(2*N_det_generators+1)
   call check_mem(rss,irp_here)
 
@@ -754,7 +763,7 @@ END_PROVIDER
     end if
     pt2_n_0(1) += 1
     if(N_det_generators - pt2_n_0(1) < pt2_minDetInFirstTeeth * pt2_N_teeth) then
-      stop "teeth building failed"
+      print *, "teeth building failed"
     end if
   end do
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

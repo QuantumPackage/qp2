@@ -12,6 +12,7 @@ subroutine run_stochastic_cipsi
   double precision, external :: memory_of_double
   PROVIDE H_apply_buffer_allocated N_generators_bitmask
 
+  N_iter = 1
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 

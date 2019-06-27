@@ -1,27 +1,3 @@
-BEGIN_PROVIDER [double precision, coussin_peter_two_rdm_mo, (mo_num,mo_num,mo_num,mo_num,N_states)]
-  implicit none
-  BEGIN_DOC
-  !  coussin_peter_two_rdm_mo(i,j,k,l) = the two rdm that peter wants for his CASSCF
-  END_DOC
-  integer                        :: i,j,k,l, istate
-  do istate = 1,N_states
-    do l = 1, mo_num
-      do k = 1, mo_num
-        do j = 1, mo_num
-          do i = 1, mo_num
-            coussin_peter_two_rdm_mo  (i,j,k,l,istate) =             &
-                two_rdm_alpha_beta_mo (i,j,k,l,istate) +             &
-                two_rdm_alpha_alpha_mo(i,j,k,l,istate) +             &
-                two_rdm_beta_beta_mo  (i,j,k,l,istate)
-          enddo
-        enddo
-      enddo
-    enddo
-  enddo
-  
-END_PROVIDER
-
-
  BEGIN_PROVIDER [double precision, two_rdm_alpha_beta_mo, (mo_num,mo_num,mo_num,mo_num,N_states)]
 &BEGIN_PROVIDER [double precision, two_rdm_alpha_alpha_mo, (mo_num,mo_num,mo_num,mo_num,N_states)]
 &BEGIN_PROVIDER [double precision, two_rdm_beta_beta_mo, (mo_num,mo_num,mo_num,mo_num,N_states)]
