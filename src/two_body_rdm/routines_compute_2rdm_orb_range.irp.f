@@ -18,7 +18,7 @@
   h1 = occ(i,1)
   do j = 1, n_occ_ab(2)
    h2 = occ(j,2)
-   big_array(h1,h1,h2,h2) += c_1
+   big_array(h1,h2,h1,h2) += c_1
   enddo 
  enddo
  end
@@ -61,7 +61,7 @@
    h1 = occ(i,1)
    do j = 1, n_occ_ab(2)
     h2 = occ(j,2)
-    big_array(h1,h1,h2,h2) += c_1 
+    big_array(h1,h2,h1,h2) += c_1 
    enddo 
   enddo
  else if (alpha_alpha)then
@@ -69,7 +69,7 @@
    h1 = occ(i,1)
    do j = 1, n_occ_ab(1)
     h2 = occ(j,1)
-    big_array(h1,h1,h2,h2) += 0.5d0 * c_1 
+    big_array(h1,h2,h1,h2) += 0.5d0 * c_1 
     big_array(h1,h2,h2,h1) -= 0.5d0 * c_1 
    enddo
   enddo
@@ -78,7 +78,7 @@
    h1 = occ(i,2)
    do j = 1, n_occ_ab(2)
     h2 = occ(j,2)
-    big_array(h1,h1,h2,h2) += 0.5d0 * c_1 
+    big_array(h1,h2,h1,h2) += 0.5d0 * c_1 
     big_array(h1,h2,h2,h1) -= 0.5d0 * c_1 
    enddo
   enddo
@@ -88,25 +88,23 @@
    h1 = occ(i,1)
    do j = 1, n_occ_ab(2)
     h2 = occ(j,2)
-    big_array(h1,h1,h2,h2) += 0.5d0 * (c_1 )
-    big_array(h2,h2,h1,h1) += 0.5d0 * (c_1 )
+    big_array(h1,h2,h1,h2) += 0.5d0 * (c_1 )
+    big_array(h2,h1,h2,h1) += 0.5d0 * (c_1 )
    enddo 
   enddo
-  ! alpha alpha
   do i = 1, n_occ_ab(1)
    h1 = occ(i,1)
    do j = 1, n_occ_ab(1)
     h2 = occ(j,1)
-    big_array(h1,h1,h2,h2) += 0.5d0 * c_1 
+    big_array(h1,h2,h1,h2) += 0.5d0 * c_1 
     big_array(h1,h2,h2,h1) -= 0.5d0 * c_1 
    enddo
   enddo
-  ! beta beta
   do i = 1, n_occ_ab(2)
    h1 = occ(i,2)
    do j = 1, n_occ_ab(2)
     h2 = occ(j,2)
-    big_array(h1,h1,h2,h2) += 0.5d0 * c_1 
+    big_array(h1,h2,h1,h2) += 0.5d0 * c_1 
     big_array(h1,h2,h2,h1) -= 0.5d0 * c_1 
    enddo
   enddo
@@ -147,10 +145,10 @@
  p1 = exc(1,2,1)
  p2 = exc(1,2,2)
  if(alpha_beta)then
-   big_array(h1,p1,h2,p2) += c_1 * phase 
+   big_array(h1,h2,p1,p2) += c_1 * phase 
  else if(spin_trace)then
-   big_array(h1,p1,h2,p2) += 0.5d0 * c_1 * phase 
-   big_array(h2,p2,h1,p1) += 0.5d0 * c_1 * phase 
+   big_array(h1,h2,p1,p2) += 0.5d0 * c_1 * phase 
+   big_array(p1,p2,h1,h2) += 0.5d0 * c_1 * phase 
  endif
  end
 
@@ -195,7 +193,7 @@
    p1 = exc(1,2,1)
     do i = 1, n_occ_ab(2)
      h2 = occ(i,2)
-     big_array(h1,p1,h2,h2) += c_1 * phase
+     big_array(h1,h2,p1,h2) += c_1 * phase
     enddo 
   else 
    ! Mono beta
@@ -203,7 +201,7 @@
    p1 = exc(1,2,2)
     do i = 1, n_occ_ab(1)
      h2 = occ(i,1)
-     big_array(h2,h2,h1,p1) += c_1 * phase
+     big_array(h2,h1,h2,p1) += c_1 * phase
     enddo 
   endif
  else if(spin_trace)then
@@ -213,8 +211,8 @@
    p1 = exc(1,2,1)
     do i = 1, n_occ_ab(2)
      h2 = occ(i,2)
-     big_array(h1,p1,h2,h2) +=  0.5d0 * c_1 * phase
-     big_array(h2,h2,h1,p1) +=  0.5d0 * c_1 * phase
+     big_array(h1,h2,p1,h2) +=  0.5d0 * c_1 * phase
+     big_array(h2,h1,h2,p1) +=  0.5d0 * c_1 * phase
     enddo 
   else 
    ! Mono beta
@@ -222,8 +220,8 @@
    p1 = exc(1,2,2)
     do i = 1, n_occ_ab(1)
      h2 = occ(i,1)
-     big_array(h1,p1,h2,h2) +=  0.5d0 * c_1 * phase
-     big_array(h2,h2,h1,p1) +=  0.5d0 * c_1 * phase
+     big_array(h1,h2,p1,h2) +=  0.5d0 * c_1 * phase
+     big_array(h2,h1,h2,p1) +=  0.5d0 * c_1 * phase
     enddo 
   endif
  endif
@@ -270,11 +268,11 @@
    p1 = exc(1,2,1)
     do i = 1, n_occ_ab(1)
      h2 = occ(i,1)
-     big_array(h1,p1,h2,h2) += 0.5d0 * c_1 * phase
+     big_array(h1,h2,p1,h2) += 0.5d0 * c_1 * phase
      big_array(h1,h2,h2,p1) -= 0.5d0 * c_1 * phase
  
-     big_array(h2,h2,h1,p1) += 0.5d0 * c_1 * phase
-     big_array(h2,p1,h1,h2) -= 0.5d0 * c_1 * phase
+     big_array(h2,h1,h2,p1) += 0.5d0 * c_1 * phase
+     big_array(h2,h1,p1,h2) -= 0.5d0 * c_1 * phase
     enddo 
   else 
    return
@@ -327,11 +325,11 @@
    do istate = 1, N_states
     do i = 1, n_occ_ab(2)
      h2 = occ(i,2)
-     big_array(h1,p1,h2,h2) += 0.5d0 * c_1 * phase
+     big_array(h1,h2,p1,h2) += 0.5d0 * c_1 * phase
      big_array(h1,h2,h2,p1) -= 0.5d0 * c_1 * phase
  
-     big_array(h2,h2,h1,p1) += 0.5d0 * c_1 * phase
-     big_array(h2,p1,h1,h2) -= 0.5d0 * c_1 * phase
+     big_array(h2,h1,h2,p1) += 0.5d0 * c_1 * phase
+     big_array(h2,h1,p1,h2) -= 0.5d0 * c_1 * phase
      enddo 
    enddo
   endif
@@ -375,11 +373,11 @@
  p2 =exc(2,2)
  if(alpha_alpha.or.spin_trace)then
   do istate = 1, N_states
-   big_array(h1,p1,h2,p2) += 0.5d0 * c_1 * phase
-   big_array(h1,p2,h2,p1) -= 0.5d0 * c_1 * phase
+   big_array(h1,h2,p1,p2) += 0.5d0 * c_1 * phase
+   big_array(h1,h2,p2,p1) -= 0.5d0 * c_1 * phase
                                          
-   big_array(h2,p2,h1,p1) += 0.5d0 * c_1 * phase
-   big_array(h2,p1,h1,p2) -= 0.5d0 * c_1 * phase
+   big_array(h2,h1,p2,p1) += 0.5d0 * c_1 * phase
+   big_array(h2,h1,p1,p2) -= 0.5d0 * c_1 * phase
   enddo
  endif
  end
@@ -420,11 +418,11 @@
  p1 =exc(1,2)
  p2 =exc(2,2)
  if(beta_beta.or.spin_trace)then
-  big_array(h1,p1,h2,p2) += 0.5d0 * c_1* phase 
-  big_array(h1,p2,h2,p1) -= 0.5d0 * c_1* phase 
+  big_array(h1,h2,p1,p2) += 0.5d0 * c_1* phase 
+  big_array(h1,h2,p2,p1) -= 0.5d0 * c_1* phase 
 
-  big_array(h2,p2,h1,p1) += 0.5d0 * c_1* phase 
-  big_array(h2,p1,h1,p2) -= 0.5d0 * c_1* phase 
+  big_array(h2,h1,p2,p1) += 0.5d0 * c_1* phase 
+  big_array(h2,h1,p1,p2) -= 0.5d0 * c_1* phase 
  endif
  end
 
