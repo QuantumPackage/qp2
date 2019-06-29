@@ -19,14 +19,15 @@ END_PROVIDER
 
 BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    BEGIN_DOC
-   ! the second-order density matrix in the basis of the starting MOs
-   ! matrices are state averaged
+   ! The second-order density matrix in the basis of the starting MOs ONLY IN THE RANGE OF ACTIVE MOS
+   ! The values are state averaged
    !
-   ! we use the spin-free generators of mono-excitations
+   ! We use the spin-free generators of mono-excitations
    ! E_pq destroys q and creates p
    ! D_pq   =     <0|E_pq|0> = D_qp
    ! P_pqrs = 1/2 <0|E_pq E_rs - delta_qr E_ps|0>
    !
+   ! P0tuvx(p,q,r,s) = chemist notation : 1/2 <0|E_pq E_rs - delta_qr E_ps|0>
    END_DOC
    implicit none
    integer                        :: t,u,v,x
