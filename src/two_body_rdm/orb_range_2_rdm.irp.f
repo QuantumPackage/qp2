@@ -4,6 +4,10 @@
  BEGIN_PROVIDER [double precision, act_two_rdm_alpha_alpha_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
  implicit none
  double precision, allocatable :: state_weights(:) 
+ BEGIN_DOC
+! act_two_rdm_alpha_alpha_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha-alpha electron pairs
+!                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
+ END_DOC 
  allocate(state_weights(N_states))
  state_weights = 1.d0/dble(N_states)
  integer :: ispin
@@ -17,6 +21,10 @@
  BEGIN_PROVIDER [double precision, act_two_rdm_beta_beta_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
  implicit none
  double precision, allocatable :: state_weights(:) 
+ BEGIN_DOC
+! act_two_rdm_beta_beta_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for beta-beta electron pairs
+!                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
+ END_DOC 
  allocate(state_weights(N_states))
  state_weights = 1.d0/dble(N_states)
  integer :: ispin
@@ -30,6 +38,10 @@
  BEGIN_PROVIDER [double precision, act_two_rdm_alpha_beta_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
  implicit none
  double precision, allocatable :: state_weights(:) 
+ BEGIN_DOC
+! act_two_rdm_alpha_beta_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha-beta electron pairs
+!                                     = <Psi| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi>
+ END_DOC 
  allocate(state_weights(N_states))
  state_weights = 1.d0/dble(N_states)
  integer :: ispin
@@ -48,6 +60,14 @@
 
  BEGIN_PROVIDER [double precision, act_two_rdm_spin_trace_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
  implicit none
+ BEGIN_DOC
+! act_two_rdm_spin_trace_mo(i,j,k,l) = state average physicist spin trace two-body rdm restricted to the ACTIVE indices
+! The active part of the two-electron energy can be computed as:
+!
+!   \sum_{i,j,k,l = 1, n_act_orb} act_two_rdm_spin_trace_mo(i,j,k,l) * < ii jj | kk ll > 
+!
+!   with ii = list_act(i), jj = list_act(j), kk = list_act(k), ll = list_act(l)
+ END_DOC
  double precision, allocatable :: state_weights(:) 
  allocate(state_weights(N_states))
  state_weights = 1.d0/dble(N_states)

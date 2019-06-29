@@ -2,7 +2,7 @@ subroutine all_two_rdm_dm_nstates_openmp(big_array_aa,big_array_bb,big_array_ab,
    use bitmasks
    implicit none
    BEGIN_DOC
-   ! Computes v_0 = H|u_0> and s_0 = S^2 |u_0>
+   ! Computes the alpha/alpha, beta/beta and alpha/beta part of the two-body density matrix IN CHEMIST NOTATIONS 
    !
    ! Assumes that the determinants are in psi_det
    !

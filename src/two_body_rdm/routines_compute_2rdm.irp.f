@@ -3,7 +3,7 @@
  subroutine diagonal_contrib_to_two_rdm_ab_dm(det_1,c_1,big_array,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the DIAGONAL PART of the alpha/beta two body rdm 
+! routine that update the DIAGONAL PART of the alpha/beta two body rdm IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4
@@ -31,7 +31,7 @@
  subroutine diagonal_contrib_to_all_two_rdm_dm(det_1,c_1,big_array_aa,big_array_bb,big_array_ab,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the DIAGONAL PART of ALL THREE two body rdm 
+! routine that update the DIAGONAL PART of ALL THREE two body rdm IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4
@@ -77,7 +77,7 @@
  subroutine off_diagonal_double_to_two_rdm_ab_dm(det_1,det_2,c_1,c_2,big_array,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the OFF DIAGONAL PART of the alpha/beta 2RDM only for DOUBLE EXCITATIONS 
+! routine that update the OFF DIAGONAL PART of the alpha/beta 2RDM only for DOUBLE EXCITATIONS  IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4
@@ -101,7 +101,7 @@
  subroutine off_diagonal_single_to_two_rdm_ab_dm(det_1,det_2,c_1,c_2,big_array,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the OFF DIAGONAL PART of the alpha/beta 2RDM only for SINGLE EXCITATIONS 
+! routine that update the OFF DIAGONAL PART of the alpha/beta 2RDM only for SINGLE EXCITATIONS IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4
@@ -140,7 +140,7 @@
 
  subroutine off_diagonal_single_to_two_rdm_aa_dm(det_1,det_2,c_1,c_2,big_array,dim1,dim2,dim3,dim4)
  BEGIN_DOC
-! routine that update the OFF DIAGONAL PART of the alpha/alpha 2RDM only for SINGLE EXCITATIONS 
+! routine that update the OFF DIAGONAL PART of the alpha/alpha 2RDM only for SINGLE EXCITATIONS IN CHEMIST NOTATIONS 
  END_DOC
  use bitmasks
  implicit none
@@ -177,7 +177,7 @@
  subroutine off_diagonal_single_to_two_rdm_bb_dm(det_1,det_2,c_1,c_2,big_array,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the OFF DIAGONAL PART of the beta /beta  2RDM only for SINGLE EXCITATIONS 
+! routine that update the OFF DIAGONAL PART of the beta /beta  2RDM only for SINGLE EXCITATIONS IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4
@@ -214,7 +214,7 @@
  subroutine off_diagonal_double_to_two_rdm_aa_dm(det_1,det_2,c_1,c_2,big_array,dim1,dim2,dim3,dim4)
  use bitmasks
  BEGIN_DOC
-! routine that update the OFF DIAGONAL PART of the alpha/alpha 2RDM only for DOUBLE EXCITATIONS 
+! routine that update the OFF DIAGONAL PART of the alpha/alpha 2RDM only for DOUBLE EXCITATIONS IN CHEMIST NOTATIONS 
  END_DOC
  implicit none
  integer, intent(in) :: dim1,dim2,dim3,dim4

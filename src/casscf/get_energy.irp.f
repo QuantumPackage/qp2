@@ -1,5 +1,10 @@
 program print_2rdm
  implicit none
+ BEGIN_DOC
+ ! get the active part of the bielectronic energy on a given wave function.
+ !
+ ! useful to test the active part of the spin trace 2 rdms
+ END_DOC
  read_wf = .True.
  touch read_wf
  call routine
@@ -23,18 +28,9 @@ subroutine routine
      i = list_act(ii)
      integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
      accu(1) += act_two_rdm_spin_trace_mo(ii,jj,kk,ll) * integral
-    !if(dabs(act_two_rdm_spin_trace_mo(ii,jj,kk,ll)).gt.thr)then
-    !print*,'',ii,jj,kk,ll,act_two_rdm_spin_trace_mo(ii,jj,kk,ll)*integral
-    !print*,'accu',accu(1)
-    !endif
     enddo
    enddo
   enddo
  enddo
  print*,'accu             = ',accu(1)
- print*,'psi_energy_two_e = ',psi_energy_two_e
-!double precision :: hij
-!call i_H_j_double_alpha_beta(psi_det(1,1,1),psi_det(1,1,2),N_int,hij)
-!print*,'hij * 2',hij * psi_coef(1,1) * psi_coef(2,1) * 2.d0
-!print*,'psi diag         = ',psi_energy_two_e - hij * psi_coef(1,1) * psi_coef(2,1) * 2.d0
 end

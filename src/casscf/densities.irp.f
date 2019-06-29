@@ -42,7 +42,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex2, det_mu_ex21, det_mu_ex22
    
   if (bavard) then
-    write(6,*) ' providing density matrix P0'
+    write(6,*) ' providing the 2 body RDM on the active part'
   endif
 
   P0tuvx= 0.d0
@@ -55,11 +55,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
       uu = list_act(u)
       do t = 1, n_act_orb
        tt = list_act(t)
-       P0tuvx(t,u,v,x) =                                   &
-         state_average_weight(istate) *                    &
-         ( two_rdm_alpha_beta_mo (tt,uu,vv,xx,istate) +    &
-           two_rdm_alpha_alpha_mo(tt,uu,vv,xx,istate) +    &
-           two_rdm_beta_beta_mo  (tt,uu,vv,xx,istate) )
+       P0tuvx(t,u,v,x) = act_two_rdm_spin_trace_mo(t,v,u,x)
       enddo
      enddo 
     enddo
