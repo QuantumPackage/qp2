@@ -5,10 +5,7 @@
   END_DOC
   implicit none
   integer                        :: i,j,ii,jj,p,q,i3,j3,t3,v3
-  double precision, allocatable  :: integrals_array(:,:)
   real*8                         :: mo_two_e_integral
-  
-  allocate(integrals_array(mo_num,mo_num))
   
   bielec_PQxx = 0.d0
   
@@ -16,24 +13,14 @@
     ii=list_core(i)
     do j=i,n_core_orb
       jj=list_core(j)
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
-          bielec_PQxx(p,q,i,j)=integrals_array(p,q)
-          bielec_PQxx(p,q,j,i)=integrals_array(p,q)
-        end do
-      end do
+      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i,j),mo_integrals_map)
+      bielec_PQxx(:,:,j,i)=bielec_PQxx(:,:,i,j)
     end do
     do j=1,n_act_orb
       jj=list_act(j)
       j3=j+n_core_orb
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
-          bielec_PQxx(p,q,i,j3)=integrals_array(p,q)
-          bielec_PQxx(p,q,j3,i)=integrals_array(p,q)
-        end do
-      end do
+      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i,j3),mo_integrals_map)
+      bielec_PQxx(:,:,j3,i)=bielec_PQxx(:,:,i,j3)
     end do
   end do
 
@@ -45,13 +32,8 @@
     do j=i,n_act_orb
       jj=list_act(j)
       j3=j+n_core_orb
-      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
-          bielec_PQxx(p,q,i3,j3)=integrals_array(p,q)
-          bielec_PQxx(p,q,j3,i3)=integrals_array(p,q)
-        end do
-      end do
+      call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i3,j3),mo_integrals_map)
+      bielec_PQxx(:,:,j3,i3)=bielec_PQxx(:,:,i3,j3)
     end do
   end do
 
