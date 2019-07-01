@@ -1,4 +1,4 @@
-subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_0,N_st,sze)
+subroutine orb_range_all_states_two_rdm_openmp(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_0,N_st,sze)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -14,8 +14,8 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_o
    integer, intent(in)             :: N_st,sze
    integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
    integer, intent(in)             :: list_orb_reverse(mo_num)
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
-   double precision, intent(in)    :: u_0(sze,N_st),state_weights(N_st)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
+   double precision, intent(in)    :: u_0(sze,N_st)
 
    integer                        :: k
    double precision, allocatable  :: u_t(:,:)
@@ -31,7 +31,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_o
        size(u_t, 1),                                                 &
        N_det, N_st)
    
-   call orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
+   call orb_range_all_states_two_rdm_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,1,N_det,0,1)
    deallocate(u_t)
    
    do k=1,N_st
@@ -40,7 +40,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_o
    
 end
 
-subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_all_states_two_rdm_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -51,8 +51,8 @@ subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,l
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
    integer, intent(in)             :: dim1,norb,list_orb(norb),ispin
    integer, intent(in)             :: list_orb_reverse(mo_num)
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
-   double precision, intent(in)   :: u_t(N_st,N_det),state_weights(N_st)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
+   double precision, intent(in)   :: u_t(N_st,N_det)
    
    integer :: k
    
@@ -60,15 +60,15 @@ subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,l
    
    select case (N_int)
      case (1)
-       call orb_range_two_rdm_state_av_openmp_work_1(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_all_states_two_rdm_openmp_work_1(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (2)
-       call orb_range_two_rdm_state_av_openmp_work_2(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_all_states_two_rdm_openmp_work_2(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (3)
-       call orb_range_two_rdm_state_av_openmp_work_3(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_all_states_two_rdm_openmp_work_3(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (4)
-       call orb_range_two_rdm_state_av_openmp_work_4(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_all_states_two_rdm_openmp_work_4(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
        case default
-       call orb_range_two_rdm_state_av_openmp_work_N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_all_states_two_rdm_openmp_work_N_int(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    end select
 end
  
@@ -76,7 +76,7 @@ end
  
 
  BEGIN_TEMPLATE
-subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_all_states_two_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,list_orb_reverse,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -86,14 +86,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    !          == 3 :: alpha/beta  2rdm 
    !          == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
    ! The 2rdm will be computed only on the list of orbitals list_orb, which contains norb
-   ! In any cases, the state average weights will be used with an array state_weights
    ! Default should be 1,N_det,0,1 for istart,iend,ishift,istep
    END_DOC
    integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
-   double precision, intent(in)   :: u_t(N_st,N_det),state_weights(N_st)
+   double precision, intent(in)   :: u_t(N_st,N_det)
    integer, intent(in)            :: dim1,norb,list_orb(norb),ispin
    integer, intent(in)             :: list_orb_reverse(mo_num)
-   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1)
+   double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
    
    integer                        :: i,j,k,l
    integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
@@ -113,7 +112,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    integer, allocatable           :: idx(:), idx0(:)
    integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
    integer*8                      :: k8
-   double precision               :: c_average
+   double precision,allocatable   :: c_contrib(:)
 
    logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
    integer(bit_kind)              :: orb_bitmask($N_int)
@@ -130,7 +129,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    else if(ispin == 4)then
     spin_trace  = .True.
    else
-    print*,'Wrong parameter for ispin in general_two_rdm_state_av_openmp_work'
+    print*,'Wrong parameter for ispin in general_two_rdm_dm_nstates_openmp_work'
     print*,'ispin = ',ispin
     stop
    endif
@@ -177,7 +176,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
        singles_a(maxab),                                             &
        singles_b(maxab),                                             &
        doubles(maxab),                                               &
-       idx(maxab))
+       idx(maxab),c_contrib(N_st))
    
    kcol_prev=-1
    
@@ -244,13 +243,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
          ASSERT (lrow <= N_det_alpha_unique)
          
          tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-         c_average = 0.d0
+         c_contrib = 0.d0
          do l= 1, N_states
            c_1(l) = u_t(l,l_a)
            c_2(l) = u_t(l,k_a)
-           c_average += c_1(l) * c_2(l) * state_weights(l)
+           c_contrib(l)  = c_1(l) * c_2(l) 
          enddo
-         call orb_range_off_diagonal_double_to_two_rdm_ab_dm(tmp_det,tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+         call orb_range_off_diagonal_double_to_two_rdm_ab_dm(tmp_det,tmp_det2,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        enddo
       endif
        
@@ -319,17 +318,17 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
        ASSERT (lrow <= N_det_alpha_unique)
        
        tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-       c_average = 0.d0
+       c_contrib = 0.d0
        do l= 1, N_states
          c_1(l) = u_t(l,l_a)
          c_2(l) = u_t(l,k_a)
-         c_average += c_1(l) * c_2(l) * state_weights(l)
+         c_contrib(l) = c_1(l) * c_2(l) 
        enddo
        if(alpha_beta.or.spin_trace.or.alpha_alpha)then
        ! increment the alpha/beta part for single excitations
-       call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+       call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        ! increment the alpha/alpha part for single excitations
-       call orb_range_off_diagonal_single_to_two_rdm_aa_dm(tmp_det,tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+       call orb_range_off_diagonal_single_to_two_rdm_aa_dm(tmp_det,tmp_det2,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        endif
        
      enddo
@@ -346,13 +345,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
         
-        c_average = 0.d0
+        c_contrib = 0.d0
         do l= 1, N_states
           c_1(l) = u_t(l,l_a)
           c_2(l) = u_t(l,k_a)
-          c_average += c_1(l) * c_2(l) * state_weights(l)
+          c_contrib(l) += c_1(l) * c_2(l) 
         enddo
-        call orb_range_off_diagonal_double_to_two_rdm_aa_dm(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        call orb_range_off_diagonal_double_to_two_rdm_aa_dm(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
       enddo
      endif
      
@@ -411,17 +410,17 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
        
        tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
        l_a = psi_bilinear_matrix_transp_order(l_b)
-       c_average = 0.d0
+       c_contrib = 0.d0
        do l= 1, N_states
          c_1(l) = u_t(l,l_a)
          c_2(l) = u_t(l,k_a)
-         c_average += c_1(l) * c_2(l) * state_weights(l)
+         c_contrib(l) = c_1(l) * c_2(l) 
        enddo
        if(alpha_beta.or.spin_trace.or.beta_beta)then
         ! increment the alpha/beta  part for single excitations
-        call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
         ! increment the beta /beta  part for single excitations
-        call orb_range_off_diagonal_single_to_two_rdm_bb_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        call orb_range_off_diagonal_single_to_two_rdm_bb_dm(tmp_det, tmp_det2,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        endif
      enddo
      
@@ -437,13 +436,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
         ASSERT (lcol <= N_det_beta_unique)
         
         l_a = psi_bilinear_matrix_transp_order(l_b)
-        c_average = 0.d0
+        c_contrib = 0.d0
         do l= 1, N_states
           c_1(l) = u_t(l,l_a)
           c_2(l) = u_t(l,k_a)
-          c_average += c_1(l) * c_2(l) * state_weights(l)
+          c_contrib(l) = c_1(l) * c_2(l) 
         enddo
-        call orb_range_off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_alpha_unique(1, lcol),c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        call orb_range_off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_alpha_unique(1, lcol),c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
         ASSERT (l_a <= N_det)
         
       enddo
@@ -469,13 +468,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
      double precision, external     :: diag_wee_mat_elem, diag_S_mat_elem
      
      double precision               :: c_1(N_states),c_2(N_states)
-     c_average = 0.d0
+     c_contrib = 0.d0
      do l = 1, N_states
        c_1(l) = u_t(l,k_a)
-       c_average += c_1(l) * c_1(l) * state_weights(l) 
+       c_contrib(l) += c_1(l) * c_1(l) 
      enddo
      
-     call orb_range_diagonal_contrib_to_all_two_rdm_dm(tmp_det,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+     call orb_range_diagonal_contrib_to_all_two_rdm_dm(tmp_det,c_contrib,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
      
    end do
    !!$OMP END DO
