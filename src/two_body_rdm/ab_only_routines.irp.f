@@ -1,9 +1,9 @@
 
- subroutine two_rdm_dm_nstates_openmp(big_array,dim1,dim2,dim3,dim4,u_0,N_st,sze)
+ subroutine two_rdm_ab_nstates_openmp(big_array,dim1,dim2,dim3,dim4,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes v_0 = H|u_0> and s_0 = S^2 |u_0>
+  ! Computes the alpha/beta part of the two-body density matrix IN CHEMIST NOTATIONS 
   !
   ! Assumes that the determinants are in psi_det
   !
@@ -27,7 +27,7 @@
       size(u_t, 1),                                                  &
       N_det, N_st)
 
-  call two_rdm_dm_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,1,N_det,0,1)
+  call two_rdm_ab_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
   do k=1,N_st
@@ -37,11 +37,11 @@
  end
 
 
- subroutine two_rdm_dm_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+ subroutine two_rdm_ab_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes v_0 = H|u_0> and s_0 = S^2 |u_0>
+  ! Computes the alpha/beta part of the two-body density matrix
   !
   ! Default should be 1,N_det,0,1
   END_DOC
@@ -55,20 +55,20 @@
 
   select case (N_int)
     case (1)
-      call two_rdm_dm_nstates_openmp_work_1(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_openmp_work_1(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (2)
-      call two_rdm_dm_nstates_openmp_work_2(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_openmp_work_2(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (3)
-      call two_rdm_dm_nstates_openmp_work_3(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_openmp_work_3(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (4)
-      call two_rdm_dm_nstates_openmp_work_4(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_openmp_work_4(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case default
-      call two_rdm_dm_nstates_openmp_work_N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_openmp_work_N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   end select
  end
  BEGIN_TEMPLATE
 
- subroutine two_rdm_dm_nstates_openmp_work_$N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+ subroutine two_rdm_ab_nstates_openmp_work_$N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep

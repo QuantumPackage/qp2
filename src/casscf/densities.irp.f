@@ -19,14 +19,15 @@ END_PROVIDER
 
 BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    BEGIN_DOC
-   ! the second-order density matrix in the basis of the starting MOs
-   ! matrices are state averaged
+   ! The second-order density matrix in the basis of the starting MOs ONLY IN THE RANGE OF ACTIVE MOS
+   ! The values are state averaged
    !
-   ! we use the spin-free generators of mono-excitations
+   ! We use the spin-free generators of mono-excitations
    ! E_pq destroys q and creates p
    ! D_pq   =     <0|E_pq|0> = D_qp
    ! P_pqrs = 1/2 <0|E_pq E_rs - delta_qr E_ps|0>
    !
+   ! P0tuvx(p,q,r,s) = chemist notation : 1/2 <0|E_pq E_rs - delta_qr E_ps|0>
    END_DOC
    implicit none
    integer                        :: t,u,v,x
@@ -42,7 +43,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    integer(bit_kind), dimension(N_int,2) :: det_mu_ex2, det_mu_ex21, det_mu_ex22
    
   if (bavard) then
-    write(6,*) ' providing density matrix P0'
+    write(6,*) ' providing the 2 body RDM on the active part'
   endif
 
   P0tuvx= 0.d0
@@ -55,11 +56,7 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
       uu = list_act(u)
       do t = 1, n_act_orb
        tt = list_act(t)
-       P0tuvx(t,u,v,x) =                                   &
-         state_average_weight(istate) *                    &
-         ( two_rdm_alpha_beta_mo (tt,uu,vv,xx,istate) +    &
-           two_rdm_alpha_alpha_mo(tt,uu,vv,xx,istate) +    &
-           two_rdm_beta_beta_mo  (tt,uu,vv,xx,istate) )
+       P0tuvx(t,u,v,x) = act_two_rdm_spin_trace_mo(t,v,u,x)
       enddo
      enddo 
     enddo
