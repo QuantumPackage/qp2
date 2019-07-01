@@ -5,7 +5,7 @@
 ! routine that update the DIAGONAL PART of the alpha/beta two body rdm in a specific range of orbitals 
  END_DOC
  implicit none
- integer, intent(in) :: dim1
+ integer, intent(in) :: dim1,N_st
  double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
  integer(bit_kind), intent(in)  :: det_1(N_int,2)
  integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
@@ -123,8 +123,8 @@
      i2 = occ(j,2)
      h1 = list_orb_reverse(i1)
      h2 = list_orb_reverse(i2)
-     big_array(h1,h2,h1,h2,istate) += 0.5d0 * (c_1 )
-     big_array(h2,h1,h2,h1,istate) += 0.5d0 * (c_1 )
+     big_array(h1,h2,h1,h2,istate) += 0.5d0 * c_1(istate)
+     big_array(h2,h1,h2,h1,istate) += 0.5d0 * c_1(istate)
     enddo 
    enddo
    do i = 1, n_occ_ab(1)
@@ -334,6 +334,7 @@
    p1 = exc(1,2,2)
    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
    p1 = list_orb_reverse(p1)
+   do istate = 1, N_st
     do i = 1, n_occ_ab(1)
      h2 = occ(i,1)
      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
@@ -341,6 +342,7 @@
      big_array(h1,h2,p1,h2,istate) +=  0.5d0 * c_1(istate) * phase
      big_array(h2,h1,h2,p1,istate) +=  0.5d0 * c_1(istate) * phase
     enddo 
+   enddo
   endif
  endif
  end

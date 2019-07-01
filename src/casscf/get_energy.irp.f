@@ -27,7 +27,7 @@ subroutine routine
     do ii = 1, n_act_orb
      i = list_act(ii)
      integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
-     accu(1) += act_two_rdm_spin_trace_mo(ii,jj,kk,ll) * integral
+     accu(1) += state_av_act_two_rdm_spin_trace_mo(ii,jj,kk,ll) * integral
     enddo
    enddo
   enddo
