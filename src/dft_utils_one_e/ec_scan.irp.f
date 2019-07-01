@@ -95,6 +95,6 @@ end
 double precision function beta_rs(rs)
  implicit none
  double precision, intent(in) ::rs
- beta_rs(rs) = 0.066725d0 * (1.d0 + 0.1d0 * rs)/(1.d0 + 0.1778d0 * rs)
+ beta_rs = 0.066725d0 * (1.d0 + 0.1d0 * rs)/(1.d0 + 0.1778d0 * rs)
 
 end
