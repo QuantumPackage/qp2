@@ -106,11 +106,30 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, one_e_dm_average_mo_for_dft, (mo_num,mo_num)]
  implicit none
  integer :: i
- one_e_dm_average_mo_for_dft = 0.d0
+ one_e_dm_average_mo_for_dft = one_e_dm_average_alpha_mo_for_dft + one_e_dm_average_beta_mo_for_dft
+END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, one_e_dm_average_alpha_mo_for_dft, (mo_num,mo_num)]
+ implicit none
+ integer :: i
+ one_e_dm_average_alpha_mo_for_dft = 0.d0
  do i = 1, N_states
-  one_e_dm_average_mo_for_dft(:,:) +=  one_e_dm_mo_for_dft(:,:,i) * state_average_weight(i)
+  one_e_dm_average_alpha_mo_for_dft(:,:) +=  one_e_dm_mo_alpha_for_dft(:,:,i) * state_average_weight(i)
  enddo
 END_PROVIDER
+
+
+BEGIN_PROVIDER [double precision, one_e_dm_average_beta_mo_for_dft, (mo_num,mo_num)]
+ implicit none
+ integer :: i
+ one_e_dm_average_beta_mo_for_dft = 0.d0
+ do i = 1, N_states
+  one_e_dm_average_beta_mo_for_dft(:,:) +=  one_e_dm_mo_beta_for_dft(:,:,i) * state_average_weight(i)
+ enddo
+END_PROVIDER
+
+
 
  BEGIN_PROVIDER [ double precision, one_e_dm_alpha_ao_for_dft, (ao_num,ao_num,N_states) ]
 &BEGIN_PROVIDER [ double precision, one_e_dm_beta_ao_for_dft, (ao_num,ao_num,N_states) ]
