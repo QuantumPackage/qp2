@@ -363,6 +363,12 @@ let () =
                |> Zmq.Socket.send socket_in
       in
 
+      Printf.printf "On remote hosts, create ssh tunnel using:
+ssh -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s\n%!" 
+                (port  ) localhost (localport  )
+                (port+1) localhost (localport+1)
+                (port+9) localhost (localport+9)
+                (Unix.gethostname ());
       Printf.printf "Ready\n%!";
       while !run_status do
 

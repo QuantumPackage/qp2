@@ -13,6 +13,7 @@ subroutine run_cipsi
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
+  N_iter = 1
   allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm(N_states), variance(N_states))
 
   double precision               :: hf_energy_ref

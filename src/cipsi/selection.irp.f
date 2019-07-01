@@ -683,6 +683,16 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       if( sum(abs(mat(1:N_states, p1, p2))) == 0d0) cycle
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
 
+      if (do_only_cas) then
+        integer, external :: number_of_holes, number_of_particles
+        if (number_of_particles(det)>0) then
+          cycle
+        endif
+        if (number_of_holes(det)>0) then
+          cycle
+        endif
+      endif
+
       if (do_ddci) then
         logical, external  :: is_a_two_holes_two_particles
         if (is_a_two_holes_two_particles(det)) then
