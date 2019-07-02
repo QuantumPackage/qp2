@@ -1,4 +1,4 @@
- BEGIN_PROVIDER [real*8, bielec_PQxx, (mo_num, mo_num,n_core_orb+n_act_orb,n_core_orb+n_act_orb)]
+BEGIN_PROVIDER [real*8, bielec_PQxx, (mo_num, mo_num,n_core_inact_orb+n_act_orb,n_core_inact_orb+n_act_orb)]
   BEGIN_DOC
   ! bielec_PQxx : integral (pq|xx) with p,q arbitrary, x core or active
   ! indices are unshifted orbital numbers
@@ -9,16 +9,16 @@
   
   bielec_PQxx = 0.d0
   
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     ii=list_core(i)
-    do j=i,n_core_orb
+    do j=i,n_core_inact_orb
       jj=list_core(j)
       call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i,j),mo_integrals_map)
       bielec_PQxx(:,:,j,i)=bielec_PQxx(:,:,i,j)
     end do
     do j=1,n_act_orb
       jj=list_act(j)
-      j3=j+n_core_orb
+      j3=j+n_core_inact_orb
       call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i,j3),mo_integrals_map)
       bielec_PQxx(:,:,j3,i)=bielec_PQxx(:,:,i,j3)
     end do
@@ -28,10 +28,10 @@
   ! (ij|pq)
   do i=1,n_act_orb
     ii=list_act(i)
-    i3=i+n_core_orb
+    i3=i+n_core_inact_orb
     do j=i,n_act_orb
       jj=list_act(j)
-      j3=j+n_core_orb
+      j3=j+n_core_inact_orb
       call get_mo_two_e_integrals_i1j1(ii,jj,mo_num,bielec_PQxx(1,1,i3,j3),mo_integrals_map)
       bielec_PQxx(:,:,j3,i3)=bielec_PQxx(:,:,i3,j3)
     end do
@@ -41,7 +41,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_orb+n_act_orb,n_core_orb+n_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_orb+n_act_orb,n_core_inact_orb+n_act_orb, mo_num)]
   BEGIN_DOC
   ! bielec_PxxQ : integral (px|xq) with p,q arbitrary, x core or active
   ! indices are unshifted orbital numbers
@@ -55,9 +55,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_orb+n_act_orb,n_core_orb+n_a
   
   bielec_PxxQ = 0.d0
   
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     ii=list_core(i)
-    do j=i,n_core_orb
+    do j=i,n_core_inact_orb
       jj=list_core(j)
       call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
       do p=1,mo_num
@@ -69,7 +69,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_orb+n_act_orb,n_core_orb+n_a
     end do
     do j=1,n_act_orb
       jj=list_act(j)
-      j3=j+n_core_orb
+      j3=j+n_core_inact_orb
       call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
       do p=1,mo_num
         do q=1,mo_num
@@ -84,10 +84,10 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_orb+n_act_orb,n_core_orb+n_a
   ! (ip|qj)
   do i=1,n_act_orb
     ii=list_act(i)
-    i3=i+n_core_orb
+    i3=i+n_core_inact_orb
     do j=i,n_act_orb
       jj=list_act(j)
-      j3=j+n_core_orb
+      j3=j+n_core_inact_orb
       call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
       do p=1,mo_num
         do q=1,mo_num
