@@ -122,8 +122,8 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
   ! the orbital rotation matrix T
   Tmat(:,:)=0.D0
   indx=1
-  do i=1,n_core_orb
-    ii=list_core(i)
+  do i=1,n_core_inact_orb
+    ii=list_core_inact(i)
     do t=1,n_act_orb
       tt=list_act(t)
       indx+=1
@@ -131,8 +131,8 @@ BEGIN_PROVIDER [real*8, Umat, (mo_num,mo_num) ]
       Tmat(tt,ii)=-SXvector(indx)
     end do
   end do
-  do i=1,n_core_orb
-    ii=list_core(i)
+  do i=1,n_core_inact_orb
+    ii=list_core_inact(i)
     do a=1,n_virt_orb
       aa=list_virt(a)
       indx+=1
