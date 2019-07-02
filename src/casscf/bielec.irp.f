@@ -59,9 +59,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_orb+n_act_orb,n_core_i
     ii=list_core_inact(i)
     do j=i,n_core_inact_orb
       jj=list_core_inact(j)
-      call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
+      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+      do q=1,mo_num
+        do p=1,mo_num
           bielec_PxxQ(p,i,j,q)=integrals_array(p,q)
           bielec_PxxQ(p,j,i,q)=integrals_array(q,p)
         end do
@@ -70,9 +70,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_orb+n_act_orb,n_core_i
     do j=1,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
+      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+      do q=1,mo_num
+        do p=1,mo_num
           bielec_PxxQ(p,i,j3,q)=integrals_array(p,q)
           bielec_PxxQ(p,j3,i,q)=integrals_array(q,p)
         end do
@@ -88,9 +88,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_orb+n_act_orb,n_core_i
     do j=i,n_act_orb
       jj=list_act(j)
       j3=j+n_core_inact_orb
-      call get_mo_two_e_integrals_ij  (ii,jj,mo_num,integrals_array,mo_integrals_map)
-      do p=1,mo_num
-        do q=1,mo_num
+      call get_mo_two_e_integrals_ij(ii,jj,mo_num,integrals_array,mo_integrals_map)
+      do q=1,mo_num
+        do p=1,mo_num
           bielec_PxxQ(p,i3,j3,q)=integrals_array(p,q)
           bielec_PxxQ(p,j3,i3,q)=integrals_array(q,p)
         end do
@@ -107,24 +107,19 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   END_DOC
   implicit none
   integer                        :: i,j,k,p,t,u,v
-  double precision, allocatable  :: integrals_array(:)
-  real*8                         :: mo_two_e_integral
+  double precision, external     :: mo_two_e_integral
   
-  allocate(integrals_array(mo_num))
-  
-  do i=1,n_act_orb
-    t=list_act(i)
+  do p=1,mo_num
     do j=1,n_act_orb
       u=list_act(j)
       do k=1,n_act_orb
         v=list_act(k)
-        ! (tu|vp)
-        call get_mo_two_e_integrals(t,u,v,mo_num,integrals_array,mo_integrals_map)
-        do p=1,mo_num
-          bielecCI(i,k,j,p)=integrals_array(p)
+        do i=1,n_act_orb
+          t=list_act(i)
+          bielecCI(i,k,j,p) = mo_two_e_integral(t,u,v,p)
         end do
       end do
     end do
   end do
 END_PROVIDER
-
+  
