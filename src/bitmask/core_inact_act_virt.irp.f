@@ -228,6 +228,8 @@ END_PROVIDER
        list_core_reverse(i) = n
      endif
    enddo
+   print *,  'Core MOs:'
+   print *,  list_core(1:n_core_orb)
    
 END_PROVIDER
  
@@ -249,6 +251,8 @@ END_PROVIDER
        list_inact_reverse(i) = n
      endif
    enddo
+   print *,  'Inactive MOs:'
+   print *,  list_inact(1:n_inact_orb)
    
 END_PROVIDER
  
@@ -270,6 +274,8 @@ END_PROVIDER
        list_virt_reverse(i) = n
      endif
    enddo
+   print *,  'Virtual MOs:'
+   print *,  list_virt(1:n_virt_orb)
    
 END_PROVIDER
  
@@ -291,6 +297,8 @@ END_PROVIDER
        list_del_reverse(i) = n
      endif
    enddo
+   print *,  'Deleted MOs:'
+   print *,  list_del(1:n_del_orb)
    
 END_PROVIDER
  
@@ -312,6 +320,8 @@ END_PROVIDER
        list_act_reverse(i) = n
      endif
    enddo
+   print *,  'Active MOs:'
+   print *,  list_act(1:n_act_orb)
    
 END_PROVIDER
  
@@ -330,6 +340,8 @@ END_PROVIDER
    do i = 1, n_core_inact_orb
      list_core_inact_reverse(list_core_inact(i)) = i
    enddo
+   print *,  'Core and Inactive MOs:'
+   print *,  list_core_inact(1:n_core_inact_orb)
 END_PROVIDER
  
  
@@ -346,6 +358,8 @@ END_PROVIDER
    do i = 1, n_core_inact_act_orb
      list_core_inact_act_reverse(list_core_inact_act(i)) = i
    enddo
+   print *,  'Core, Inactive and Active MOs:'
+   print *,  list_core_inact_act(1:n_core_inact_act_orb)
 END_PROVIDER
  
  
@@ -362,5 +376,7 @@ END_PROVIDER
    do i = 1, n_inact_act_orb
      list_inact_act_reverse(list_inact_act(i)) = i
    enddo
+   print *,  'Inactive and Active MOs:'
+   print *,  list_inact_act(1:n_inact_act_orb)
 END_PROVIDER
  
