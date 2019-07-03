@@ -155,7 +155,6 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
   allocate (f(n_act_orb,mo_num,n_core_inact_act_orb), &
     d(n_act_orb,mo_num,n_core_inact_act_orb))
 
-  ! 3rd quarter
   do k=1,mo_num
     do l=1,n_core_inact_act_orb
       do j=1,mo_num
@@ -179,40 +178,53 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
     end do
   end do
 
-  ! 4th quarter
+  deallocate(f,d)
+
+  allocate(f(mo_num,n_core_inact_act_orb,n_act_orb), &
+    d(mo_num,n_core_inact_act_orb,n_act_orb) )
+
   do k=1,mo_num
-    do l=1,n_core_inact_act_orb
-      do j=1,mo_num
-        do p=1,n_act_orb
-          d(p,1,1)=0.D0
+    do p=1,n_act_orb
+      do l=1,n_core_inact_act_orb
+        do j=1,mo_num
+          f(j,l,p) = bielec_PxxQ_no(j,l,n_core_inact_orb+p,k)
         end do
-        do p=1,n_act_orb
-          do q=1,n_act_orb
-            d(p,1,1)+=bielec_PxxQ_no(j,l,n_core_inact_orb+q,k)*natorbsCI(q,p)
-          end do
-        end do
-        do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielec_PxxQ_no(j,l,n_core_inact_orb+p,k)=d(pp,1,1)
+      end do
+    end do
+    call dgemm('N','N',mo_num*n_core_inact_act_orb,n_act_orb,n_act_orb,1.d0,  &
+          f, mo_num*n_core_inact_act_orb,                                       &
+          natorbsCI, size(natorbsCI,1),                              &
+          0.d0,                                                      &
+          d, mo_num*n_core_inact_act_orb)
+    do p=1,n_act_orb
+      pp=n_act_orb-p+1
+      do l=1,n_core_inact_act_orb
+        do j=1,mo_num
+          bielec_PxxQ_no(j,l,n_core_inact_orb+p,k)=d(j,l,pp)
         end do
       end do
     end do
   end do
-  ! 2nd quarter
-  do k=1,n_core_inact_act_orb
-    do l=1,n_core_inact_act_orb
-      do j=1,mo_num
-        do p=1,n_act_orb
-          d(p,1,1)=0.D0
+
+
+  do l=1,n_core_inact_act_orb
+    do p=1,n_act_orb
+      do k=1,n_core_inact_act_orb
+        do j=1,mo_num
+          f(j,k,p) = bielec_PxxQ_no(j,k,l,n_core_inact_orb+p)
         end do
-        do p=1,n_act_orb
-          do q=1,n_act_orb
-            d(p,1,1)+=bielec_PxxQ_no(j,k,l,list_act(q))*natorbsCI(q,p)
-          end do
-        end do
-        do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielec_PxxQ_no(j,k,l,list_act(p))=d(pp,1,1)
+      end do
+    end do
+    call dgemm('N','N',mo_num*n_core_inact_act_orb,n_act_orb,n_act_orb,1.d0,  &
+          f, mo_num*n_core_inact_act_orb,                                       &
+          natorbsCI, size(natorbsCI,1),                              &
+          0.d0,                                                      &
+          d, mo_num*n_core_inact_act_orb)
+    do p=1,n_act_orb
+      pp=n_act_orb-p+1
+      do k=1,n_core_inact_act_orb
+        do j=1,mo_num
+          bielec_PxxQ_no(j,k,l,n_core_inact_orb+p)=d(j,k,pp)
         end do
       end do
     end do
@@ -232,28 +244,32 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   
   bielecCI_no(:,:,:,:) = bielecCI(:,:,:,:)
 
-  allocate (f(n_act_orb,mo_num,n_act_orb), &
-      d(n_act_orb,mo_num,n_act_orb))
+  allocate (f(n_act_orb,n_act_orb,mo_num), &
+      d(n_act_orb,n_act_orb,mo_num))
 
-  do j=1,n_act_orb
+  do l=1,mo_num
     do k=1,n_act_orb
-      do l=1,mo_num
+      do j=1,n_act_orb
         do p=1,n_act_orb
-          d(p,1,1)=0.D0
+          f(p,j,k)=bielecCI_no(p,j,k,l)
         end do
-        do p=1,n_act_orb
-          do q=1,n_act_orb
-            d(p,1,1)+=bielecCI_no(q,j,k,l)*natorbsCI(q,p)
-          end do
-        end do
+      end do
+    end do
+    call dgemm('T','N',n_act_orb,n_act_orb*n_act_orb,n_act_orb,1.d0,  &
+          natorbsCI, size(natorbsCI,1),                              &
+          f, n_act_orb,                                              &
+          0.d0,                                                      &
+          d, n_act_orb)
+    do k=1,n_act_orb
+      do j=1,n_act_orb
         do p=1,n_act_orb
           pp=n_act_orb-p+1
-          bielecCI_no(p,j,k,l)=d(pp,1,1)
+          bielecCI_no(p,j,k,l)=d(pp,j,k)
         end do
       end do
     end do
   end do
-  ! 2nd quarter
+
   do j=1,n_act_orb
     do k=1,n_act_orb
       do l=1,mo_num
@@ -291,10 +307,55 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
       end do 
     end do  
   end do  
-  ! 4th quarter
-  do j=1,n_act_orb
+
+!  do l=1,mo_num
+!    do k=1,n_act_orb
+!      do p=1,n_act_orb
+!        do j=1,n_act_orb
+!          f(j,p,k)=bielecCI_no(j,p,k,l)
+!        end do
+!      end do
+!    end do
+!    call dgemm('T','N',n_act_orb,n_act_orb*n_act_orb,n_act_orb,1.d0,  &
+!          natorbsCI, n_act_orb,                                      &
+!          f, n_act_orb,                                              &
+!          0.d0,                                                      &
+!          d, n_act_orb)
+!    do k=1,n_act_orb
+!      do p=1,n_act_orb
+!        pp=n_act_orb-p+1
+!        do j=1,n_act_orb
+!          bielecCI_no(j,p,k,l)=d(j,pp,k)
+!        end do
+!      end do
+!    end do
+!
+!    do p=1,n_act_orb
+!      do k=1,n_act_orb
+!        do j=1,n_act_orb
+!          f(j,k,p)=bielecCI_no(j,k,p,l)
+!        end do
+!      end do
+!    end do
+!    call dgemm('N','N',n_act_orb*n_act_orb,n_act_orb,n_act_orb,1.d0,       &
+!          f, n_act_orb*n_act_orb,                                          &
+!          natorbsCI, n_act_orb,                                      &
+!          0.d0,                                                      &
+!          d, n_act_orb*n_act_orb)
+!
+!    do p=1,n_act_orb
+!      pp=n_act_orb-p+1
+!      do k=1,n_act_orb
+!        do j=1,n_act_orb
+!          bielecCI_no(j,k,p,l)=d(j,k,pp)
+!        end do
+!      end do 
+!    end do  
+!  end do  
+!
+  do l=1,n_act_orb
     do k=1,n_act_orb
-      do l=1,n_act_orb
+      do j=1,n_act_orb
         do p=1,n_act_orb
           d(p,1,1)=0.D0
         end do
