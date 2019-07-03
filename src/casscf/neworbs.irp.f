@@ -66,6 +66,7 @@ END_PROVIDER
   integer                        :: best_vector
   real*8                         :: best_overlap
   best_overlap=0.D0
+  best_vector = -1000
   do i=1,nMonoEx+1
     if (SXeigenval(i).lt.0.D0) then
       if (abs(SXeigenvec(1,i)).gt.best_overlap) then
@@ -74,7 +75,9 @@ END_PROVIDER
       end if
     end if
   end do
-  
+  if(best_vector.lt.0)then 
+   best_vector = minloc(SXeigenval,nMonoEx+1) 
+  endif
   energy_improvement = SXeigenval(best_vector)
   
   c0=SXeigenvec(1,best_vector)
