@@ -32,6 +32,7 @@ subroutine run
     converged = dabs(energy_improvement) < thresh_scf
     pt2_max = dabs(energy_improvement / pt2_relative_error)
 
+    call update_integrals
     mo_coef = NewOrbs
     call save_mos
     call map_deinit(mo_integrals_map)

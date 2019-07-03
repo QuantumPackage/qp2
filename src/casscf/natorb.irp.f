@@ -11,7 +11,7 @@
   end do
   
   do i=1,n_act_orb
-    occnum(list_act(i))=occ_act(n_act_orb-i+1)
+    occnum(list_act(i))=occ_act(i)
   end do
 
   if (bavard) then
@@ -31,8 +31,10 @@ END_PROVIDER
  ! Natural orbitals of CI
  END_DOC
  integer                        :: i, j
+ double precision               :: Vt(n_act_orb,n_act_orb)
  
- call lapack_diag(occ_act,natorbsCI,D0tu,n_act_orb,n_act_orb)
+! call lapack_diag(occ_act,natorbsCI,D0tu,n_act_orb,n_act_orb)
+ call svd(D0tu, size(D0tu,1), natorbsCI,size(natorbsCI,1), occ_act, Vt, size(Vt,1),n_act_orb,n_act_orb) 
  
  if (bavard) then
    write(6,*) ' found occupation numbers as '
@@ -70,7 +72,7 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
   BEGIN_DOC
   ! 4-index transformation of 2part matrices
   END_DOC
-  integer                        :: i,j,k,l,p,q,pp
+  integer                        :: i,j,k,l,p,q
   real*8                         :: d(n_act_orb)
 
   ! index per index
@@ -84,9 +86,8 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
           d(p)=0.D0
         end do
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
           do q=1,n_act_orb
-            d(pp)+=P0tuvx_no(q,j,k,l)*natorbsCI(q,p)
+            d(p)+=P0tuvx_no(q,j,k,l)*natorbsCI(q,p)
           end do
         end do
         do p=1,n_act_orb
@@ -103,9 +104,8 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
           d(p)=0.D0
         end do
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
           do q=1,n_act_orb
-            d(pp)+=P0tuvx_no(j,q,k,l)*natorbsCI(q,p)
+            d(p)+=P0tuvx_no(j,q,k,l)*natorbsCI(q,p)
           end do
         end do
         do p=1,n_act_orb
@@ -122,9 +122,8 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
           d(p)=0.D0
         end do
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
           do q=1,n_act_orb
-            d(pp)+=P0tuvx_no(j,k,q,l)*natorbsCI(q,p)
+            d(p)+=P0tuvx_no(j,k,q,l)*natorbsCI(q,p)
           end do
         end do
         do p=1,n_act_orb
@@ -141,9 +140,8 @@ BEGIN_PROVIDER [real*8, P0tuvx_no, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
           d(p)=0.D0
         end do
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
           do q=1,n_act_orb
-            d(pp)+=P0tuvx_no(j,k,l,q)*natorbsCI(q,p)
+            d(p)+=P0tuvx_no(j,k,l,q)*natorbsCI(q,p)
           end do
         end do
         do p=1,n_act_orb
@@ -162,7 +160,7 @@ BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
   BEGIN_DOC
   ! Transformed one-e integrals
   END_DOC
-  integer :: i,j, p, pp, q
+  integer :: i,j, p, q
   real*8 :: d(n_act_orb)
   one_ints_no(:,:)=mo_one_e_integrals(:,:)
 
@@ -172,9 +170,8 @@ BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
       d(p)=0.D0
     end do
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do q=1,n_act_orb
-        d(pp)+=one_ints_no(list_act(q),j)*natorbsCI(q,p)
+        d(p)+=one_ints_no(list_act(q),j)*natorbsCI(q,p)
       end do
     end do
     do p=1,n_act_orb
@@ -188,9 +185,8 @@ BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
       d(p)=0.D0
     end do
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do q=1,n_act_orb
-        d(pp)+=one_ints_no(j,list_act(q))*natorbsCI(q,p)
+        d(p)+=one_ints_no(j,list_act(q))*natorbsCI(q,p)
       end do
     end do
     do p=1,n_act_orb
@@ -205,7 +201,7 @@ BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num,mo_num)]
   BEGIN_DOC
 ! FCI natural orbitals
   END_DOC
-  integer :: i,j, p, pp, q
+  integer :: i,j, p, q
   real*8 :: d(n_act_orb)
 
   NatOrbsFCI(:,:)=mo_coef(:,:)
@@ -215,14 +211,18 @@ BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num,mo_num)]
       d(p)=0.D0
     end do
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do q=1,n_act_orb
-        d(pp)+=NatOrbsFCI(j,list_act(q))*natorbsCI(q,p)
+        d(p)+=NatOrbsFCI(j,list_act(q))*natorbsCI(q,p)
       end do
     end do
     do p=1,n_act_orb
       NatOrbsFCI(j,list_act(p))=d(p)
     end do
   end do
+
+!  call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
+!      NatOrbsFCI, size(NatOrbsFCI,1),                                &
+!      Umat, size(Umat,1), 0.d0,                                      &
+!      NewOrbs, size(NewOrbs,1))
 END_PROVIDER
 
