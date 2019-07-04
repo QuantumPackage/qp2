@@ -353,7 +353,11 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
        enddo
        if(alpha_beta.or.spin_trace.or.alpha_alpha)then
        ! increment the alpha/beta part for single excitations
-!!!!   call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        if (nkeys+norb .ge. size(values)) then
+          call update_keys_values(keys,values,size(values),nkeys,dim1,big_array)
+          nkeys = 0
+        endif
+       call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        ! increment the alpha/alpha part for single excitations
 !!!!   call orb_range_off_diagonal_single_to_two_rdm_aa_dm(tmp_det,tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        endif
@@ -445,7 +449,11 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
        enddo
        if(alpha_beta.or.spin_trace.or.beta_beta)then
         ! increment the alpha/beta  part for single excitations
-!!!!    call orb_range_off_diagonal_single_to_two_rdm_ab_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        if (nkeys+norb .ge. size(values)) then
+          call update_keys_values(keys,values,size(values),nkeys,dim1,big_array)
+          nkeys = 0
+        endif
+        call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
         ! increment the beta /beta  part for single excitations
 !!!!    call orb_range_off_diagonal_single_to_two_rdm_bb_dm(tmp_det, tmp_det2,c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
        endif
