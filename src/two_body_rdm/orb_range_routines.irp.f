@@ -1,4 +1,4 @@
-subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_0,N_st,sze)
+subroutine orb_range_two_rdm_state_av(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_0,N_st,sze)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -31,7 +31,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_o
        size(u_t, 1),                                                 &
        N_det, N_st)
    
-   call orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
+   call orb_range_two_rdm_state_av_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
    deallocate(u_t)
    
    do k=1,N_st
@@ -40,7 +40,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,list_o
    
 end
 
-subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_two_rdm_state_av_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -60,15 +60,15 @@ subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,l
    
    select case (N_int)
      case (1)
-       call orb_range_two_rdm_state_av_openmp_work_1(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_two_rdm_state_av_work_1(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (2)
-       call orb_range_two_rdm_state_av_openmp_work_2(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_two_rdm_state_av_work_2(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (3)
-       call orb_range_two_rdm_state_av_openmp_work_3(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_two_rdm_state_av_work_3(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (4)
-       call orb_range_two_rdm_state_av_openmp_work_4(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_two_rdm_state_av_work_4(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
        case default
-       call orb_range_two_rdm_state_av_openmp_work_N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_two_rdm_state_av_work_N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    end select
 end
  
@@ -76,7 +76,7 @@ end
  
 
  BEGIN_TEMPLATE
-subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_two_rdm_state_av_work_$N_int(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -130,7 +130,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    else if(ispin == 4)then
     spin_trace  = .True.
    else
-    print*,'Wrong parameter for ispin in general_two_rdm_state_av_openmp_work'
+    print*,'Wrong parameter for ispin in general_two_rdm_state_av_work'
     print*,'ispin = ',ispin
     stop
    endif

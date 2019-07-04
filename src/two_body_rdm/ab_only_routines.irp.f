@@ -1,5 +1,5 @@
 
- subroutine two_rdm_ab_nstates_openmp(big_array,dim1,dim2,dim3,dim4,u_0,N_st,sze)
+ subroutine two_rdm_ab_nstates(big_array,dim1,dim2,dim3,dim4,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -27,7 +27,7 @@
       size(u_t, 1),                                                  &
       N_det, N_st)
 
-  call two_rdm_ab_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,1,N_det,0,1)
+  call two_rdm_ab_nstates_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
   do k=1,N_st
@@ -37,7 +37,7 @@
  end
 
 
- subroutine two_rdm_ab_nstates_openmp_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+ subroutine two_rdm_ab_nstates_work(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -55,20 +55,20 @@
 
   select case (N_int)
     case (1)
-      call two_rdm_ab_nstates_openmp_work_1(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_work_1(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (2)
-      call two_rdm_ab_nstates_openmp_work_2(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_work_2(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (3)
-      call two_rdm_ab_nstates_openmp_work_3(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_work_3(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case (4)
-      call two_rdm_ab_nstates_openmp_work_4(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_work_4(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
     case default
-      call two_rdm_ab_nstates_openmp_work_N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+      call two_rdm_ab_nstates_work_N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   end select
  end
  BEGIN_TEMPLATE
 
- subroutine two_rdm_ab_nstates_openmp_work_$N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
+ subroutine two_rdm_ab_nstates_work_$N_int(big_array,dim1,dim2,dim3,dim4,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep

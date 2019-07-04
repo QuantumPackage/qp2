@@ -19,7 +19,7 @@
   two_rdm_beta_beta_mo  = 0.d0
   print*,'providing two_rdm_alpha_beta ...'
   call wall_time(cpu_0)
-  call all_two_rdm_dm_nstates_openmp(two_rdm_alpha_alpha_mo,two_rdm_beta_beta_mo,two_rdm_alpha_beta_mo,dim1,dim2,dim3,dim4,psi_coef,size(psi_coef,2),size(psi_coef,1))
+  call all_two_rdm_dm_nstates(two_rdm_alpha_alpha_mo,two_rdm_beta_beta_mo,two_rdm_alpha_beta_mo,dim1,dim2,dim3,dim4,psi_coef,size(psi_coef,2),size(psi_coef,1))
   call wall_time(cpu_1)
   print*,'two_rdm_alpha_beta provided in',dabs(cpu_1-cpu_0)
   

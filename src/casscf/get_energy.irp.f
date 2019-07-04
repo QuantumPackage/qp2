@@ -33,4 +33,23 @@ subroutine routine
   enddo
  enddo
  print*,'accu             = ',accu(1)
+
+ accu = 0.d0
+ do ll = 1, n_act_orb
+  l = list_act(ll)
+  do kk = 1, n_act_orb
+   k = list_act(kk)
+   do jj = 1, n_act_orb
+    j = list_act(jj)
+    do ii = 1, n_act_orb
+     i = list_act(ii)
+     integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
+     accu(1) += state_av_act_two_rdm_openmp_spin_trace_mo(ii,jj,kk,ll) * integral
+    enddo
+   enddo
+  enddo
+ enddo
+ print*,'accu             = ',accu(1)
+ print*,'psi_energy_two_e = ',psi_energy_two_e
+
 end
