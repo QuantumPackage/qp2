@@ -204,10 +204,10 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
   endif
   
   indx=1
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do t=1,n_act_orb
       jndx=indx
-      do j=i,n_core_orb
+      do j=i,n_core_inact_orb
         if (i.eq.j) then
           ustart=t
         else
@@ -219,7 +219,7 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
           jndx+=1
         end do
       end do
-      do j=1,n_core_orb
+      do j=1,n_core_inact_orb
         do a=1,n_virt_orb
           hessmat2(indx,jndx)=hessmat_itja(i,t,j,a)
           hessmat2(jndx,indx)=hessmat2(indx,jndx)
@@ -237,10 +237,10 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
     end do
   end do
   
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do a=1,n_virt_orb
       jndx=indx
-      do j=i,n_core_orb
+      do j=i,n_core_inact_orb
         if (i.eq.j) then
           bstart=a
         else
@@ -286,7 +286,7 @@ END_PROVIDER
 
 real*8 function hessmat_itju(i,t,j,u)
   BEGIN_DOC
-  ! the orbital hessian for core->act,core->act
+  ! the orbital hessian for core/inactive -> active, core/inactive -> active
   ! i, t, j, u are list indices, the corresponding orbitals are ii,tt,jj,uu
   !
   ! we assume natural orbitals
@@ -295,7 +295,7 @@ real*8 function hessmat_itju(i,t,j,u)
   integer                        :: i,t,j,u,ii,tt,uu,v,vv,x,xx,y,jj
   real*8                         :: term,t2
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   tt=list_act(t)
   if (i.eq.j) then
     if (t.eq.u) then
@@ -343,7 +343,7 @@ real*8 function hessmat_itju(i,t,j,u)
     end if
   else
     ! it/ju
-    jj=list_core(j)
+    jj=list_core_inact(j)
     uu=list_act(u)
     if (t.eq.u) then
       term=occnum(tt)*Fipq(ii,jj)
@@ -374,16 +374,16 @@ end function hessmat_itju
 
 real*8 function hessmat_itja(i,t,j,a)
   BEGIN_DOC
-  ! the orbital hessian for core->act,core->virt
+  ! the orbital hessian for core/inactive -> active, core/inactive -> virtual
   END_DOC
   implicit none
   integer                        :: i,t,j,a,ii,tt,jj,aa,v,vv,x,y
   real*8                         :: term
   
   ! it/ja
-  ii=list_core(i)
+  ii=list_core_inact(i)
   tt=list_act(t)
-  jj=list_core(j)
+  jj=list_core_inact(j)
   aa=list_virt(a)
   term=2.D0*(4.D0*bielec_pxxq_no(aa,j,i,tt)                             &
       -bielec_pqxx_no(aa,tt,i,j) -bielec_pxxq_no(aa,i,j,tt))
@@ -407,17 +407,17 @@ end function hessmat_itja
 
 real*8 function hessmat_itua(i,t,u,a)
   BEGIN_DOC
-  ! the orbital hessian for core->act,act->virt
+  ! the orbital hessian for core/inactive -> active, active -> virtual
   END_DOC
   implicit none
   integer                        :: i,t,u,a,ii,tt,uu,aa,v,vv,x,xx,u3,t3,v3
   real*8                         :: term
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   tt=list_act(t)
-  t3=t+n_core_orb
+  t3=t+n_core_inact_orb
   uu=list_act(u)
-  u3=u+n_core_orb
+  u3=u+n_core_inact_orb
   aa=list_virt(a)
   if (t.eq.u) then
     term=-occnum(tt)*Fipq(aa,ii)
@@ -428,11 +428,11 @@ real*8 function hessmat_itua(i,t,u,a)
       +bielec_pxxq_no(aa,t3,u3,ii))
   do v=1,n_act_orb
     vv=list_act(v)
-    v3=v+n_core_orb
+    v3=v+n_core_inact_orb
     do x=1,n_act_orb
       integer                        :: x3
       xx=list_act(x)
-      x3=x+n_core_orb
+      x3=x+n_core_inact_orb
       term-=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,ii,v3,x3)        &
           +(P0tuvx_no(t,v,u,x)+P0tuvx_no(t,v,x,u))                   &
           *bielec_pqxx_no(aa,xx,v3,i))
@@ -448,13 +448,13 @@ end function hessmat_itua
 
 real*8 function hessmat_iajb(i,a,j,b)
   BEGIN_DOC
-  ! the orbital hessian for core->virt,core->virt
+  ! the orbital hessian for core/inactive -> virtual, core/inactive -> virtual
   END_DOC
   implicit none
   integer                        :: i,a,j,b,ii,aa,jj,bb
   real*8                         :: term
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   aa=list_virt(a)
   if (i.eq.j) then
     if (a.eq.b) then
@@ -469,7 +469,7 @@ real*8 function hessmat_iajb(i,a,j,b)
     end if
   else
     ! ia/jb
-    jj=list_core(j)
+    jj=list_core_inact(j)
     bb=list_virt(b)
     term=2.D0*(4.D0*bielec_pxxq_no(aa,i,j,bb)-bielec_pqxx_no(aa,bb,i,j)    &
         -bielec_pxxq_no(aa,j,i,bb))
@@ -484,17 +484,17 @@ end function hessmat_iajb
 
 real*8 function hessmat_iatb(i,a,t,b)
   BEGIN_DOC
-  ! the orbital hessian for core->virt,act->virt
+  ! the orbital hessian for core/inactive -> virtual, active -> virtual
   END_DOC
   implicit none
   integer                        :: i,a,t,b,ii,aa,tt,bb,v,vv,x,y,v3,t3
   real*8                         :: term
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   aa=list_virt(a)
   tt=list_act(t)
   bb=list_virt(b)
-  t3=t+n_core_orb
+  t3=t+n_core_inact_orb
   term=occnum(tt)*(4.D0*bielec_pxxq_no(aa,i,t3,bb)-bielec_pxxq_no(aa,t3,i,bb)&
       -bielec_pqxx_no(aa,bb,i,t3))
   if (a.eq.b) then
@@ -533,10 +533,10 @@ real*8 function hessmat_taub(t,a,u,b)
       t1-=occnum(tt)*Fipq(tt,tt)
       do v=1,n_act_orb
         vv=list_act(v)
-        v3=v+n_core_orb
+        v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
-          x3=x+n_core_orb
+          x3=x+n_core_inact_orb
           t2+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)      &
               +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
               bielec_pxxq_no(aa,x3,v3,aa))
@@ -552,10 +552,10 @@ real*8 function hessmat_taub(t,a,u,b)
       term=occnum(tt)*Fipq(aa,bb)
       do v=1,n_act_orb
         vv=list_act(v)
-        v3=v+n_core_orb
+        v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
-          x3=x+n_core_orb
+          x3=x+n_core_inact_orb
           term+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)    &
               +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
               *bielec_pxxq_no(aa,x3,v3,bb))
@@ -569,10 +569,10 @@ real*8 function hessmat_taub(t,a,u,b)
     term=0.D0
     do v=1,n_act_orb
       vv=list_act(v)
-      v3=v+n_core_orb
+      v3=v+n_core_inact_orb
       do x=1,n_act_orb
         xx=list_act(x)
-        x3=x+n_core_orb
+        x3=x+n_core_inact_orb
         term+=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,bb,v3,x3)      &
             +(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))                 &
             *bielec_pxxq_no(aa,x3,v3,bb))
@@ -606,14 +606,14 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
   real*8                         :: hessmat_itju,hessmat_iajb,hessmat_taub
   
   indx=0
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do t=1,n_act_orb
       indx+=1
       hessdiag(indx)=hessmat_itju(i,t,i,t)
     end do
   end do
   
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do a=1,n_virt_orb
       indx+=1
       hessdiag(indx)=hessmat_iajb(i,a,i,a)

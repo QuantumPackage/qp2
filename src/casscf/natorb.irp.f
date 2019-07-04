@@ -6,8 +6,8 @@
   
   integer :: i
   occnum=0.D0
-  do i=1,n_core_orb
-    occnum(list_core(i))=2.D0
+  do i=1,n_core_inact_orb
+    occnum(list_core_inact(i))=2.D0
   end do
   
   do i=1,n_act_orb

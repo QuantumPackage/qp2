@@ -12,8 +12,8 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
    end do
    
    ! the inactive Fock matrix
-   do k=1,n_core_orb
-     kk=list_core(k)
+   do k=1,n_core_inact_orb
+     kk=list_core_inact(k)
      do q=1,mo_num
        do p=1,mo_num
          Fipq(p,q)+=2.D0*bielec_pqxx_no(p,q,k,k) -bielec_pxxq_no(p,k,k,q)

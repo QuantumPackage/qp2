@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ integer, nMonoEx ]
   ! Number of single excitations
   END_DOC
   implicit none
-  nMonoEx=n_core_orb*n_act_orb+n_core_orb*n_virt_orb+n_act_orb*n_virt_orb
+  nMonoEx=n_core_inact_orb*n_act_orb+n_core_inact_orb*n_virt_orb+n_act_orb*n_virt_orb
 END_PROVIDER
 
  BEGIN_PROVIDER [integer, excit, (2,nMonoEx)]
@@ -17,8 +17,8 @@ END_PROVIDER
   implicit none
   integer                        :: i,t,a,ii,tt,aa,indx
   indx=0
-  do ii=1,n_core_orb
-    i=list_core(ii)
+  do ii=1,n_core_inact_orb
+    i=list_core_inact(ii)
     do tt=1,n_act_orb
       t=list_act(tt)
       indx+=1
@@ -28,8 +28,8 @@ END_PROVIDER
     end do
   end do
   
-  do ii=1,n_core_orb
-    i=list_core(ii)
+  do ii=1,n_core_inact_orb
+    i=list_core_inact(ii)
     do aa=1,n_virt_orb
       a=list_virt(aa)
       indx+=1
@@ -145,14 +145,14 @@ BEGIN_PROVIDER [real*8, gradvec2, (nMonoEx)]
   real*8                         :: norm_grad
   
   indx=0
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do t=1,n_act_orb
       indx+=1
       gradvec2(indx)=gradvec_it(i,t)
     end do
   end do
   
-  do i=1,n_core_orb
+  do i=1,n_core_inact_orb
     do a=1,n_virt_orb
       indx+=1
       gradvec2(indx)=gradvec_ia(i,a)
@@ -181,7 +181,7 @@ END_PROVIDER
 
 real*8 function gradvec_it(i,t)
   BEGIN_DOC
-  ! the orbital gradient core -> active
+  ! the orbital gradient core/inactive -> active
   ! we assume natural orbitals
   END_DOC
   implicit none
@@ -190,16 +190,16 @@ real*8 function gradvec_it(i,t)
   integer                        :: ii,tt,v,vv,x,y
   integer                        :: x3,y3
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   tt=list_act(t)
   gradvec_it=2.D0*(Fipq(tt,ii)+Fapq(tt,ii))
   gradvec_it-=occnum(tt)*Fipq(ii,tt)
   do v=1,n_act_orb
     vv=list_act(v)
     do x=1,n_act_orb
-      x3=x+n_core_orb
+      x3=x+n_core_inact_orb
       do y=1,n_act_orb
-        y3=y+n_core_orb
+        y3=y+n_core_inact_orb
         gradvec_it-=2.D0*P0tuvx_no(t,v,x,y)*bielec_PQxx_no(ii,vv,x3,y3)
       end do
     end do
@@ -209,12 +209,12 @@ end function gradvec_it
 
 real*8 function gradvec_ia(i,a)
   BEGIN_DOC
-  ! the orbital gradient core -> virtual
+  ! the orbital gradient core/inactive -> virtual
   END_DOC
   implicit none
   integer                        :: i,a,ii,aa
   
-  ii=list_core(i)
+  ii=list_core_inact(i)
   aa=list_virt(a)
   gradvec_ia=2.D0*(Fipq(aa,ii)+Fapq(aa,ii))
   gradvec_ia*=2.D0
