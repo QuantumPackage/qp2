@@ -322,6 +322,7 @@ END_PROVIDER
    enddo
    print *,  'Active MOs:'
    print *,  list_act(1:n_act_orb)
+   print*,   list_act_reverse(1:n_act_orb)
    
 END_PROVIDER
  

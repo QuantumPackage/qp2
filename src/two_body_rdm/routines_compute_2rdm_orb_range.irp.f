@@ -13,7 +13,7 @@
  double precision, intent(in)   :: c_1
  integer                        :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate
+ integer :: i,j,h1,h2
  call bitstring_to_list_ab(det_1, occ, n_occ_ab, N_int)
  do i = 1, n_occ_ab(1)
   h1 = occ(i,1)
@@ -53,7 +53,7 @@
 
  integer                        :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate
+ integer :: i,j,h1,h2
  integer(bit_kind) :: det_1_act(N_int,2)
  logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
  do i = 1, N_int
@@ -193,7 +193,7 @@
  integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
  integer, intent(in) :: list_orb_reverse(mo_num)
  double precision, intent(in)   :: c_1
- integer :: i,j,h1,h2,p1,p2,istate
+ integer :: i,j,h1,h2,p1,p2
  integer                        :: exc(0:2,2,2)
  double precision               :: phase
  logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -278,7 +278,7 @@
 
  integer                        :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate,p1
+ integer :: i,j,h1,h2,p1
  integer                        :: exc(0:2,2,2)
  double precision               :: phase
 
@@ -397,7 +397,7 @@
 
  integer                        :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate,p1
+ integer :: i,j,h1,h2,p1
  integer                        :: exc(0:2,2,2)
  double precision               :: phase
 
@@ -477,7 +477,7 @@
 
  integer                        :: occ(N_int*bit_kind_size,2)
  integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate,p1
+ integer :: i,j,h1,h2,p1
  integer                        :: exc(0:2,2,2)
  double precision               :: phase
  logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -510,18 +510,16 @@
    p1 =  exc(1,2,2)
    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
    p1 = list_orb_reverse(p1)
-   do istate = 1, N_states
-    do i = 1, n_occ_ab(2)
-     h2 = occ(i,2)
-     if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
-     h2 = list_orb_reverse(h2)
-     big_array(h1,h2,p1,h2) += 0.5d0 * c_1 * phase
-     big_array(h1,h2,h2,p1) -= 0.5d0 * c_1 * phase
+   do i = 1, n_occ_ab(2)
+    h2 = occ(i,2)
+    if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
+    h2 = list_orb_reverse(h2)
+    big_array(h1,h2,p1,h2) += 0.5d0 * c_1 * phase
+    big_array(h1,h2,h2,p1) -= 0.5d0 * c_1 * phase
  
-     big_array(h2,h1,h2,p1) += 0.5d0 * c_1 * phase
-     big_array(h2,h1,p1,h2) -= 0.5d0 * c_1 * phase
-     enddo 
-   enddo
+    big_array(h2,h1,h2,p1) += 0.5d0 * c_1 * phase
+    big_array(h2,h1,p1,h2) -= 0.5d0 * c_1 * phase
+   enddo 
   endif
  endif
  end
@@ -557,7 +555,7 @@
  integer, intent(in) :: list_orb_reverse(mo_num)
  double precision, intent(in)   :: c_1
 
- integer :: i,j,h1,h2,p1,p2,istate
+ integer :: i,j,h1,h2,p1,p2
  integer                        :: exc(0:2,2)
  double precision               :: phase
 
@@ -590,13 +588,11 @@
  if(.not.is_integer_in_string(p2,orb_bitmask,N_int))return
  p2 = list_orb_reverse(p2)
  if(alpha_alpha.or.spin_trace)then
-  do istate = 1, N_states
    big_array(h1,h2,p1,p2) += 0.5d0 * c_1 * phase
    big_array(h1,h2,p2,p1) -= 0.5d0 * c_1 * phase
                                          
    big_array(h2,h1,p2,p1) += 0.5d0 * c_1 * phase
    big_array(h2,h1,p1,p2) -= 0.5d0 * c_1 * phase
-  enddo
  endif
  end
 
@@ -631,7 +627,7 @@
  integer, intent(in) :: list_orb_reverse(mo_num)
  double precision, intent(in)   :: c_1
 
- integer :: i,j,h1,h2,p1,p2,istate
+ integer :: i,j,h1,h2,p1,p2
  integer                        :: exc(0:2,2)
  double precision               :: phase
  logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace

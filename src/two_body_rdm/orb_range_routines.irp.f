@@ -30,6 +30,7 @@ subroutine orb_range_two_rdm_state_av(big_array,dim1,norb,list_orb,list_orb_reve
        u_t,                                                          &
        size(u_t, 1),                                                 &
        N_det, N_st)
+
    
    call orb_range_two_rdm_state_av_work(big_array,dim1,norb,list_orb,list_orb_reverse,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
    deallocate(u_t)
@@ -135,6 +136,7 @@ subroutine orb_range_two_rdm_state_av_work_$N_int(big_array,dim1,norb,list_orb,l
     stop
    endif
    
+     
    PROVIDE N_int
 
    call list_to_bitstring( orb_bitmask, list_orb, norb, N_int)
