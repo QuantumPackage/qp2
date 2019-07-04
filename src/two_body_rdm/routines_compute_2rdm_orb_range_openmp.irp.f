@@ -639,7 +639,7 @@
   END_DOC
   implicit none
  integer, intent(in) :: ispin,sze_buff
- integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
+ integer(bit_kind), intent(in)  :: det_1(N_int),det_2(N_int)
  integer, intent(in) :: list_orb_reverse(mo_num)
  double precision, intent(in)   :: c_1
  double precision, intent(out)  :: values(sze_buff)
@@ -735,7 +735,7 @@
   implicit none
  
  integer, intent(in) :: ispin,sze_buff
- integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
+ integer(bit_kind), intent(in)  :: det_1(N_int),det_2(N_int)
  integer, intent(in) :: list_orb_reverse(mo_num)
  double precision, intent(in)   :: c_1
  double precision, intent(out)  :: values(sze_buff)

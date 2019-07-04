@@ -445,7 +445,7 @@ subroutine orb_range_two_rdm_state_av_work_$N_int(big_array,dim1,norb,list_orb,l
           c_2(l) = u_t(l,k_a)
           c_average += c_1(l) * c_2(l) * state_weights(l)
         enddo
-        call orb_range_off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_alpha_unique(1, lcol),c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
+        call orb_range_off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_average,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
         ASSERT (l_a <= N_det)
         
       enddo

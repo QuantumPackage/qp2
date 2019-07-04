@@ -392,7 +392,7 @@ subroutine all_two_rdm_dm_nstates_work_$N_int(big_array_aa,big_array_bb,big_arra
          c_1(l) = u_t(l,l_a)
          c_2(l) = u_t(l,k_a)
        enddo
-       call off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_alpha_unique(1, lcol),c_1,c_2,big_array_bb,dim1,dim2,dim3,dim4)
+       call off_diagonal_double_to_two_rdm_bb_dm(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_1,c_2,big_array_bb,dim1,dim2,dim3,dim4)
        ASSERT (l_a <= N_det)
        
      enddo
