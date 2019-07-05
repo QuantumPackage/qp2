@@ -1,6 +1,4 @@
 
-
-
  BEGIN_PROVIDER [double precision, state_av_act_two_rdm_openmp_alpha_alpha_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb)]
  implicit none
  double precision, allocatable :: state_weights(:) 

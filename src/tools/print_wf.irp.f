@@ -51,7 +51,7 @@ subroutine routine
   if(degree == 0)then
    print*,'Reference determinant '
    call i_H_j(psi_det(1,1,i),psi_det(1,1,i),N_int,h00)
-  else
+  else if(degree .le. 2)then
    call i_H_j(psi_det(1,1,i),psi_det(1,1,i),N_int,hii)
    call i_H_j(psi_det(1,1,1),psi_det(1,1,i),N_int,hij)
    delta_e = hii - h00
