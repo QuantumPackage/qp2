@@ -153,4 +153,3 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   !$OMP END PARALLEL DO
 
 END_PROVIDER
-  

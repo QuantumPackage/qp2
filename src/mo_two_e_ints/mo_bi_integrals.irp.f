@@ -120,10 +120,6 @@ subroutine add_integrals_to_map(mask_ijkl)
   call bitstring_to_list( mask_ijkl(1,2), list_ijkl(1,2), n_j, N_int )
   call bitstring_to_list( mask_ijkl(1,3), list_ijkl(1,3), n_k, N_int )
   call bitstring_to_list( mask_ijkl(1,4), list_ijkl(1,4), n_l, N_int )
-  character*(2048)               :: output(1)
-  print *, 'i'
-  call bitstring_to_str( output(1), mask_ijkl(1,1), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijkl(i,1))
@@ -132,9 +128,6 @@ subroutine add_integrals_to_map(mask_ijkl)
     return
   endif
 
-  print*, 'j'
-  call bitstring_to_str( output(1), mask_ijkl(1,2), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijkl(i,2))
@@ -143,9 +136,6 @@ subroutine add_integrals_to_map(mask_ijkl)
     return
   endif
 
-  print*, 'k'
-  call bitstring_to_str( output(1), mask_ijkl(1,3), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijkl(i,3))
@@ -154,9 +144,6 @@ subroutine add_integrals_to_map(mask_ijkl)
     return
   endif
 
-  print*, 'l'
-  call bitstring_to_str( output(1), mask_ijkl(1,4), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijkl(i,4))
@@ -171,6 +158,7 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   double precision               :: accu_bis
   accu_bis = 0.d0
+  call wall_time(wall_1)
 
   !$OMP PARALLEL PRIVATE(l1,k1,j1,i1,i2,i3,i4,i,j,k,l,c, ii1,kmax,   &
       !$OMP  two_e_tmp_0_idx, two_e_tmp_0, two_e_tmp_1,two_e_tmp_2,two_e_tmp_3,&
@@ -414,10 +402,6 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
   call bitstring_to_list( mask_ijk(1,1), list_ijkl(1,1), n_i, N_int )
   call bitstring_to_list( mask_ijk(1,2), list_ijkl(1,2), n_j, N_int )
   call bitstring_to_list( mask_ijk(1,3), list_ijkl(1,3), n_k, N_int )
-  character*(2048)               :: output(1)
-  print*, 'i'
-  call bitstring_to_str( output(1), mask_ijk(1,1), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijk(i,1))
@@ -426,9 +410,6 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
     return
   endif
 
-  print*, 'j'
-  call bitstring_to_str( output(1), mask_ijk(1,2), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijk(i,2))
@@ -437,9 +418,6 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
     return
   endif
 
-  print*, 'k'
-  call bitstring_to_str( output(1), mask_ijk(1,3), N_int )
-  print *,  trim(output(1))
   j = 0
   do i = 1, N_int
     j += popcnt(mask_ijk(i,3))

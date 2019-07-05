@@ -4,10 +4,8 @@ program casscf
 ! TODO : Put the documentation of the program here
   END_DOC
   no_vvvv_integrals = .True.
-  no_ivvv_integrals = .True.
-  no_vvv_integrals  = .True.
   pt2_max = 0.02
-  SOFT_TOUCH no_vvvv_integrals no_vvv_integrals pt2_max
+  SOFT_TOUCH no_vvvv_integrals pt2_max
   call run
 end
 
@@ -41,8 +39,7 @@ subroutine run
     psi_det = psi_det_sorted
     psi_coef = psi_coef_sorted
     read_wf = .True.
-    call map_deinit(mo_integrals_map)
-    FREE mo_two_e_integrals_in_map mo_integrals_map
+    call clear_mo_map
     SOFT_TOUCH mo_coef N_det pt2_max  psi_det psi_coef 
 
   enddo
