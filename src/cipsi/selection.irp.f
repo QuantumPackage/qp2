@@ -1,5 +1,10 @@
 use bitmasks
 
+BEGIN_PROVIDER [logical , pert_2rdm ]
+ implicit none
+ pert_2rdm = .False.
+END_PROVIDER 
+
 BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
  implicit none
  BEGIN_DOC
@@ -248,6 +253,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   integer,allocatable               :: tmp_array(:)
   integer(bit_kind), allocatable :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable           :: banned(:,:,:), bannedOrb(:,:)
+  double precision, allocatable  :: coef_fullminilist(:,:)
 
 
   double precision, allocatable   :: mat(:,:,:)
@@ -546,6 +552,12 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
+      if(pert_2rdm)then
+       allocate(coef_fullminilist(fullinteresting(0),N_states)) 
+       do i=1,fullinteresting(0)
+         coef_fullminilist(i,:) = psi_coef_sorted(fullinteresting(i),:)
+       enddo
+      endif
       do i=1,fullinteresting(0)
         fullminilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,fullinteresting(i))
       enddo
@@ -597,12 +609,19 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
             
-            call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+            if(.not.pert_2rdm)then
+             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+            else 
+             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist, fullinteresting(0))
+            endif
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
       deallocate(fullminilist,minilist)
+      if(pert_2rdm)then
+       deallocate(coef_fullminilist)
+      endif
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
@@ -633,6 +652,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision :: E_shift
 
   logical, external :: detEq
+  double precision, allocatable :: values(:)
+  integer, allocatable          :: keys(:,;)
+  integer,                      :: nkeys
+  
 
   if(sp == 3) then
     s1 = 1
@@ -737,6 +760,147 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         sum_e_pert = 10.d0
        endif
       endif
+
+      if(sum_e_pert <= buf%mini) then
+        call add_to_selection_buffer(buf, det, sum_e_pert)
+      end if
+    end do
+  end do
+end
+
+
+subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection, n_det_connection)
+  use bitmasks
+  use selection_types
+  implicit none
+  
+  integer, intent(in)           :: n_det_connection
+  double precision, intent(in)  :: psi_coef_connection(n_det_connection,N_states)
+  integer(bit_kind), intent(in) :: psi_det_connection(N_int,2,n_det_connection)
+  integer, intent(in) :: i_generator, sp, h1, h2
+  double precision, intent(in) :: mat(N_states, mo_num, mo_num)
+  logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
+  double precision, intent(in)           :: fock_diag_tmp(mo_num)
+  double precision, intent(in)    :: E0(N_states)
+  double precision, intent(inout) :: pt2(N_states)
+  double precision, intent(inout) :: variance(N_states)
+  double precision, intent(inout) :: norm(N_states)
+  type(selection_buffer), intent(inout) :: buf
+  logical :: ok
+  integer :: s1, s2, p1, p2, ib, j, istate
+  integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
+  double precision :: e_pert, delta_E, val, Hii, sum_e_pert, tmp, alpha_h_psi, coef(N_states)
+  double precision, external :: diag_H_mat_elem_fock
+  double precision :: E_shift
+
+  logical, external :: detEq
+  double precision, allocatable :: values(:)
+  integer, allocatable          :: keys(:,;)
+  integer,                      :: nkeys
+  integer :: sze_buffer
+  sze_buffer = 5 * mo_num ** 2 
+  allocate(keys(4,sze_buffer),values(sze_buffer))
+  nkeys = 0
+  if(sp == 3) then
+    s1 = 1
+    s2 = 2
+  else
+    s1 = sp
+    s2 = sp
+  end if
+  call apply_holes(psi_det_generators(1,1,i_generator), s1, h1, s2, h2, mask, ok, N_int)
+  E_shift = 0.d0
+
+  if (h0_type == 'SOP') then
+    j = det_to_occ_pattern(i_generator)
+    E_shift = psi_det_Hii(i_generator) - psi_occ_pattern_Hii(j)
+  endif
+
+  do p1=1,mo_num
+    if(bannedOrb(p1, s1)) cycle
+    ib = 1
+    if(sp /= 3) ib = p1+1
+
+    do p2=ib,mo_num
+
+! -----
+! /!\ Generating only single excited determinants doesn't work because a
+! determinant generated by a single excitation may be doubly excited wrt
+! to a determinant of the future. In that case, the determinant will be
+! detected as already generated when generating in the future with a
+! double excitation.
+!     
+!      if (.not.do_singles) then
+!        if ((h1 == p1) .or. (h2 == p2)) then
+!          cycle
+!        endif
+!      endif
+!
+!      if (.not.do_doubles) then
+!        if ((h1 /= p1).and.(h2 /= p2)) then
+!          cycle
+!        endif
+!      endif
+! -----
+
+      if(bannedOrb(p2, s2)) cycle
+      if(banned(p1,p2)) cycle
+
+
+      if( sum(abs(mat(1:N_states, p1, p2))) == 0d0) cycle
+      call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
+
+      if (do_only_cas) then
+        integer, external :: number_of_holes, number_of_particles
+        if (number_of_particles(det)>0) then
+          cycle
+        endif
+        if (number_of_holes(det)>0) then
+          cycle
+        endif
+      endif
+
+      if (do_ddci) then
+        logical, external  :: is_a_two_holes_two_particles
+        if (is_a_two_holes_two_particles(det)) then
+          cycle
+        endif
+      endif
+
+      if (do_only_1h1p) then
+        logical, external :: is_a_1h1p
+        if (.not.is_a_1h1p(det)) cycle
+      endif
+
+
+      Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
+
+      sum_e_pert = 0d0
+
+      do istate=1,N_states
+        delta_E = E0(istate) - Hii + E_shift
+        alpha_h_psi = mat(istate, p1, p2)
+        val = alpha_h_psi + alpha_h_psi
+        tmp = dsqrt(delta_E * delta_E + val * val)
+        if (delta_E < 0.d0) then
+            tmp = -tmp
+        endif
+        e_pert = 0.5d0 * (tmp - delta_E)
+        coef(istate) = e_pert / alpha_h_psi
+        pt2(istate) = pt2(istate) + e_pert
+        variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
+        norm(istate) = norm(istate) + coef * coef
+
+        if (weight_selection /= 5) then
+          ! Energy selection
+          sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
+        else
+          ! Variance selection
+          sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
+        endif
+      end do
+      
+      call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection,n_det_connection,nkeys,keys,values,sze_buff)
 
       if(sum_e_pert <= buf%mini) then
         call add_to_selection_buffer(buf, det, sum_e_pert)
