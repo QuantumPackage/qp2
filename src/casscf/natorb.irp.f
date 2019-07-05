@@ -196,33 +196,36 @@ BEGIN_PROVIDER [real*8, one_ints_no, (mo_num,mo_num)]
 END_PROVIDER
 
 
+BEGIN_PROVIDER [ double precision, NatOrbsCI_mos, (mo_num, mo_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Rotation matrix from current MOs to the CI natural MOs
+  END_DOC
+  integer :: p,q
+
+  NatOrbsCI_mos(:,:) = 0.d0
+
+  do q = 1,mo_num
+   NatOrbsCI_mos(q,q) = 1.d0
+  enddo
+
+  do q = 1,n_act_orb
+    do p = 1,n_act_orb
+      NatOrbsCI_mos(list_act(p),list_act(q)) = natorbsCI(p,q)
+    enddo
+  enddo
+END_PROVIDER
+
+
 BEGIN_PROVIDER [real*8, NatOrbsFCI, (ao_num,mo_num)]
   implicit none
   BEGIN_DOC
 ! FCI natural orbitals
   END_DOC
-  integer :: i,j, p, q
-  real*8 :: d(n_act_orb)
 
-  NatOrbsFCI(:,:)=mo_coef(:,:)
-  
-  do j=1,ao_num
-    do p=1,n_act_orb
-      d(p)=0.D0
-    end do
-    do p=1,n_act_orb
-      do q=1,n_act_orb
-        d(p)+=NatOrbsFCI(j,list_act(q))*natorbsCI(q,p)
-      end do
-    end do
-    do p=1,n_act_orb
-      NatOrbsFCI(j,list_act(p))=d(p)
-    end do
-  end do
-
-!  call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
-!      NatOrbsFCI, size(NatOrbsFCI,1),                                &
-!      Umat, size(Umat,1), 0.d0,                                      &
-!      NewOrbs, size(NewOrbs,1))
+  call dgemm('N','N', ao_num,mo_num,mo_num,1.d0,                     &
+      mo_coef, size(mo_coef,1),                                      &
+      NatOrbsCI_mos, size(NatOrbsCI_mos,1), 0.d0,                    &
+      NatOrbsFCI, size(NatOrbsFCI,1))
 END_PROVIDER
 

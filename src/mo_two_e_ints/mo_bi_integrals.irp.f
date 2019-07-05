@@ -22,16 +22,13 @@ end
 BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   use map_module
   implicit none
-  integer(bit_kind)              :: mask_ijkl(N_int,4)
-  integer(bit_kind)              :: mask_ijk(N_int,3)
-
   BEGIN_DOC
   ! If True, the map of MO two-electron integrals is provided
   END_DOC
+  integer(bit_kind)              :: mask_ijkl(N_int,4)
+  integer(bit_kind)              :: mask_ijk(N_int,3)
+  double precision               :: cpu_1, cpu_2, wall_1, wall_2
 
-  ! The following line avoids a subsequent crash when the memory used is more
-  ! than half of the virtual memory, due to a fork in zcat when reading arrays
-  ! with EZFIO
   PROVIDE mo_class
 
   mo_two_e_integrals_in_map = .True.
@@ -49,106 +46,28 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   print *,  '---------------------------------'
   print *,  ''
 
+  call wall_time(wall_1)
+  call cpu_time(cpu_1)
+
   if(no_vvvv_integrals)then
-    integer                        :: i,j,k,l
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  I I I I !!!!!!!!!!!!!!!!!!!!
-    ! (core+inact+act) ^ 4
-    ! <ii|ii>
-    print*, ''
-    print*, '<ii|ii>'
-    do i = 1,N_int
-      mask_ijkl(i,1) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,2) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,3) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,4) =  core_inact_act_bitmask_4(i,1)
-    enddo
-    call add_integrals_to_map(mask_ijkl)
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  I I V V !!!!!!!!!!!!!!!!!!!!
-    ! (core+inact+act) ^ 2  (virt) ^2
-    ! <iv|iv>  = J_iv
-    print*, ''
-    print*, '<iv|iv>'
-    do i = 1,N_int
-      mask_ijkl(i,1) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,2) =  virt_bitmask(i,1)
-      mask_ijkl(i,3) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,4) =  virt_bitmask(i,1)
-    enddo
-    call add_integrals_to_map(mask_ijkl)
-
-    ! (core+inact+act) ^ 2  (virt) ^2
-    ! <ii|vv> = (iv|iv)
-    print*, ''
-    print*, '<ii|vv>'
-    do i = 1,N_int
-      mask_ijkl(i,1) = core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,2) = core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,3) = virt_bitmask(i,1)
-      mask_ijkl(i,4) = virt_bitmask(i,1)
-    enddo
-    call add_integrals_to_map(mask_ijkl)
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! V V V !!!!!!!!!!!!!!!!!!!!!!!
-    if(.not.no_vvv_integrals)then
-      print*, ''
-      print*, '<rv|sv> and <rv|vs>'
-      do i = 1,N_int
-        mask_ijk(i,1) =  virt_bitmask(i,1)
-        mask_ijk(i,2) =  virt_bitmask(i,1)
-        mask_ijk(i,3) =  virt_bitmask(i,1)
-      enddo
-      call add_integrals_to_map_three_indices(mask_ijk)
-    endif
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  I I I V !!!!!!!!!!!!!!!!!!!!
-    ! (core+inact+act) ^ 3  (virt) ^1
-    ! <iv|ii>
-    print*, ''
-    print*, '<iv|ii>'
-    do i = 1,N_int
-      mask_ijkl(i,1) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,2) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,3) =  core_inact_act_bitmask_4(i,1)
-      mask_ijkl(i,4) =  virt_bitmask(i,1)
-    enddo
-    call add_integrals_to_map(mask_ijkl)
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  I V V V !!!!!!!!!!!!!!!!!!!!
-    ! (core+inact+act) ^ 1  (virt) ^3
-    ! <iv|vv>
-    if(.not.no_ivvv_integrals)then
-      print*, ''
-      print*, '<iv|vv>'
-      do i = 1,N_int
-        mask_ijkl(i,1) =  core_inact_act_bitmask_4(i,1)
-        mask_ijkl(i,2) =  virt_bitmask(i,1)
-        mask_ijkl(i,3) =  virt_bitmask(i,1)
-        mask_ijkl(i,4) =  virt_bitmask(i,1)
-      enddo
-      call add_integrals_to_map_no_exit_34(mask_ijkl)
-    endif
-
+    call four_idx_novvvv
   else
     call add_integrals_to_map(full_ijkl_bitmask_4)
-
-!     call four_index_transform_zmq(ao_integrals_map,mo_integrals_map, &
-!         mo_coef, size(mo_coef,1),                                      &
-!         1, 1, 1, 1, ao_num, ao_num, ao_num, ao_num,                    &
-!         1, 1, 1, 1, mo_num, mo_num, mo_num, mo_num)
-!
-!     call four_index_transform_block(ao_integrals_map,mo_integrals_map, &
-!         mo_coef, size(mo_coef,1),                                      &
-!         1, 1, 1, 1, ao_num, ao_num, ao_num, ao_num,                    &
-!         1, 1, 1, 1, mo_num, mo_num, mo_num, mo_num)
-!
-!     call four_index_transform(ao_integrals_map,mo_integrals_map, &
-!         mo_coef, size(mo_coef,1),                                      &
-!         1, 1, 1, 1, ao_num, ao_num, ao_num, ao_num,                    &
-!         1, 1, 1, 1, mo_num, mo_num, mo_num, mo_num)
-
-    integer*8                      :: get_mo_map_size, mo_map_size
-    mo_map_size = get_mo_map_size()
-
-    print*,'Molecular integrals provided'
   endif
+
+  call wall_time(wall_2)
+  call cpu_time(cpu_2)
+
+  integer*8                      :: get_mo_map_size, mo_map_size
+  mo_map_size = get_mo_map_size()
+
+  double precision, external     :: map_mb
+  print*,'Molecular integrals provided:'
+  print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
+  print*,' Number of MO integrals: ',  mo_map_size
+  print*,' cpu  time :',cpu_2 - cpu_1, 's'
+  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+
   if (write_mo_two_e_integrals.and.mpi_master) then
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
@@ -185,7 +104,7 @@ subroutine add_integrals_to_map(mask_ijkl)
   integer                        :: size_buffer
   integer(key_kind),allocatable  :: buffer_i(:)
   real(integral_kind),allocatable :: buffer_value(:)
-  double precision               :: map_mb
+  double precision, external     :: map_mb
 
   integer                        :: i1,j1,k1,l1, ii1, kmax, thread_num
   integer                        :: i2,i3,i4
@@ -247,12 +166,9 @@ subroutine add_integrals_to_map(mask_ijkl)
   endif
 
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
-  print*, 'Providing the molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
-  call wall_time(wall_1)
-  call cpu_time(cpu_1)
   double precision               :: accu_bis
   accu_bis = 0.d0
 
@@ -451,12 +367,6 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   deallocate(list_ijkl)
 
-
-  print*,'Molecular integrals provided:'
-  print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
-  print*,' Number of MO integrals: ',  mo_map_size
-  print*,' cpu  time :',cpu_2 - cpu_1, 's'
-  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 
 end
 
