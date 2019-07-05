@@ -23,6 +23,12 @@ BEGIN_PROVIDER [integer, list_orb_pert_rdm, (n_orb_pert_rdm)]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)]
+ implicit none
+ pert_2rdm_provider = 0.d0
+
+END_PROVIDER
+
 subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection, n_det_connection)
   use bitmasks
   use selection_types

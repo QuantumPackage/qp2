@@ -155,7 +155,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    ! Prepare the array of all alpha single excitations
    ! -------------------------------------------------
    
-   PROVIDE N_int nthreads_davidson
+   PROVIDE N_int nthreads_davidson elec_alpha_num 
     !$OMP PARALLEL DEFAULT(NONE) NUM_THREADS(nthreads_davidson)      &
             !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,lock_2rdm,&
             !$OMP          psi_bilinear_matrix_columns,              &
@@ -166,7 +166,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
             !$OMP          psi_bilinear_matrix_transp_order, N_st,   &
             !$OMP          psi_bilinear_matrix_order_transp_reverse, &
             !$OMP          psi_bilinear_matrix_columns_loc,          &
-            !$OMP          psi_bilinear_matrix_transp_rows_loc, &
+            !$OMP          psi_bilinear_matrix_transp_rows_loc,elec_alpha_num, &
             !$OMP          istart, iend, istep, irp_here,list_orb_reverse, n_states, state_weights, dim1, & 
             !$OMP          ishift, idx0, u_t, maxab, alpha_alpha,beta_beta,alpha_beta,spin_trace,ispin,big_array,sze_buff,orb_bitmask)     &
             !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,c_1, c_2, &
