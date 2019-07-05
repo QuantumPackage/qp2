@@ -653,8 +653,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
   logical, external :: detEq
   double precision, allocatable :: values(:)
-  integer, allocatable          :: keys(:,;)
-  integer,                      :: nkeys
+  integer, allocatable          :: keys(:,:)
+  integer                       :: nkeys
   
 
   if(sp == 3) then
@@ -795,11 +795,11 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
 
   logical, external :: detEq
   double precision, allocatable :: values(:)
-  integer, allocatable          :: keys(:,;)
-  integer,                      :: nkeys
-  integer :: sze_buffer
-  sze_buffer = 5 * mo_num ** 2 
-  allocate(keys(4,sze_buffer),values(sze_buffer))
+  integer, allocatable          :: keys(:,:)
+  integer                       :: nkeys
+  integer :: sze_buff
+  sze_buff = 5 * mo_num ** 2 
+  allocate(keys(4,sze_buff),values(sze_buff))
   nkeys = 0
   if(sp == 3) then
     s1 = 1
@@ -889,7 +889,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         coef(istate) = e_pert / alpha_h_psi
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
-        norm(istate) = norm(istate) + coef * coef
+        norm(istate) = norm(istate) + coef(istate) * coef(istate)
 
         if (weight_selection /= 5) then
           ! Energy selection
