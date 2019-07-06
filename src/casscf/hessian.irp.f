@@ -536,6 +536,9 @@ real*8 function hessmat_taub(t,a,u,b)
   integer                        :: v3,x3
   real*8                         :: term,t1,t2,t3
   
+  double precision,allocatable :: P0tuvx_no_t(:,:,:)
+  double precision :: bielec_pqxx_no_2(n_act_orb,n_act_orb)
+  double precision :: bielec_pxxq_no_2(n_act_orb,n_act_orb)
   tt=list_act(t)
   aa=list_virt(a)
   if (t == u) then
@@ -545,59 +548,87 @@ real*8 function hessmat_taub(t,a,u,b)
       t2=0.D0
       t3=0.D0
       t1-=occnum(tt)*Fipq(tt,tt)
+      do x=1,n_act_orb
+        xx=list_act(x)
+        x3=x+n_core_inact_orb
+        do v=1,n_act_orb
+          vv=list_act(v)
+          v3=v+n_core_inact_orb
+          t2+=P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)
+        end do
+      end do
       do v=1,n_act_orb
         vv=list_act(v)
         v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
           x3=x+n_core_inact_orb
-          t2+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)      &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
-              bielec_pxxq_no(aa,x3,v3,aa))
-          do y=1,n_act_orb
-            t3-=2.D0*P0tuvx_no(t,v,x,y)*bielecCI_no(t,v,y,xx)
+          t2+=(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
+              bielec_pxxq_no(aa,x3,v3,aa)
+        end do
+      end do
+      do y=1,n_act_orb
+        do x=1,n_act_orb
+          xx=list_act(x)
+          do v=1,n_act_orb
+            t3-=P0tuvx_no(t,v,x,y)*bielecCI_no(t,v,y,xx)
           end do
         end do
       end do
-      term=t1+t2+t3
+      term=t1+2.d0*(t2+t3)
     else
       bb=list_virt(b)
       ! ta/tb b/=a
-      term=occnum(tt)*Fipq(aa,bb)
+      term=0.5d0*occnum(tt)*Fipq(aa,bb)
+      do x=1,n_act_orb
+        xx=list_act(x)
+          x3=x+n_core_inact_orb
+        do v=1,n_act_orb
+          vv=list_act(v)
+          v3=v+n_core_inact_orb
+          term = term + P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)
+        end do
+      end do
       do v=1,n_act_orb
         vv=list_act(v)
         v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
           x3=x+n_core_inact_orb
-          term+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)    &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
-              *bielec_pxxq_no(aa,x3,v3,bb))
+          term= term + (P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
+              *bielec_pxxq_no(aa,x3,v3,bb)
         end do
       end do
+      term += term
     end if
   else
     ! ta/ub t/=u
     uu=list_act(u)
     bb=list_virt(b)
-    term=0.D0
-    do v=1,n_act_orb
-      vv=list_act(v)
-      v3=v+n_core_inact_orb
-      do x=1,n_act_orb
-        xx=list_act(x)
-        x3=x+n_core_inact_orb
-        term+=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,bb,v3,x3)      &
-            +(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))                 &
-            *bielec_pxxq_no(aa,x3,v3,bb))
+    allocate(P0tuvx_no_t(n_act_orb,n_act_orb,n_act_orb))
+    P0tuvx_no_t(:,:,:) = P0tuvx_no(t,:,:,:)
+    do x=1,n_act_orb
+      x3=x+n_core_inact_orb
+      do v=1,n_act_orb
+        v3=v+n_core_inact_orb
+        bielec_pqxx_no_2(v,x) = bielec_pqxx_no(aa,bb,v3,x3)
+        bielec_pxxq_no_2(v,x) = bielec_pxxq_no(aa,v3,x3,bb)
       end do
     end do
+    term=0.D0
+    do x=1,n_act_orb
+      do v=1,n_act_orb
+        term += P0tuvx_no_t(u,v,x)*bielec_pqxx_no_2(v,x)
+        term += bielec_pxxq_no_2(x,v) * (P0tuvx_no_t(x,v,u)+P0tuvx_no_t(x,u,v))
+      end do
+    end do
+    term = 6.d0*term
     if (a.eq.b) then
       term-=0.5D0*(occnum(tt)*Fipq(uu,tt)+occnum(uu)*Fipq(tt,uu))
       do v=1,n_act_orb
         do y=1,n_act_orb
           do x=1,n_act_orb
-            term-=P0tuvx_no(t,v,x,y)*bielecCI_no(x,y,v,uu)
+            term-=P0tuvx_no_t(v,x,y)*bielecCI_no(x,y,v,uu)
             term-=P0tuvx_no(u,v,x,y)*bielecCI_no(x,y,v,tt)
           end do
         end do
