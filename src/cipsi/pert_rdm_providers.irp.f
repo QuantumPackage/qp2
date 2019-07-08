@@ -1,5 +1,12 @@
 
 use bitmasks
+use omp_lib
+
+BEGIN_PROVIDER [ integer(omp_lock_kind), pert_2rdm_lock]
+  use f77_zmq
+  implicit none
+  call omp_init_lock(pert_2rdm_lock)
+END_PROVIDER
 
 BEGIN_PROVIDER [logical , pert_2rdm ]
  implicit none
@@ -29,13 +36,13 @@ BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert
 
 END_PROVIDER
 
-subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection, n_det_connection)
+subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
   use bitmasks
   use selection_types
   implicit none
   
   integer, intent(in)           :: n_det_connection
-  double precision, intent(in)  :: psi_coef_connection(n_det_connection,N_states)
+  double precision, intent(in)  :: psi_coef_connection_reverse(N_states,n_det_connection)
   integer(bit_kind), intent(in) :: psi_det_connection(N_int,2,n_det_connection)
   integer, intent(in) :: i_generator, sp, h1, h2
   double precision, intent(in) :: mat(N_states, mo_num, mo_num)
@@ -136,7 +143,9 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       sum_e_pert = 0d0
-
+      integer :: degree
+      call get_excitation_degree(det,HF_bitmask,degree,N_int)
+      if(degree == 2)cycle
       do istate=1,N_states
         delta_E = E0(istate) - Hii + E_shift
         alpha_h_psi = mat(istate, p1, p2)
@@ -147,6 +156,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
         coef(istate) = e_pert / alpha_h_psi
+        print*,e_pert,coef,alpha_h_psi
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef(istate) * coef(istate)
@@ -154,19 +164,20 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         if (weight_selection /= 5) then
           ! Energy selection
           sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
+
         else
           ! Variance selection
           sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
         endif
       end do
-      
-      call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection,n_det_connection,nkeys,keys,values,sze_buff)
+      call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection_reverse,n_det_connection,nkeys,keys,values,sze_buff)
 
       if(sum_e_pert <= buf%mini) then
         call add_to_selection_buffer(buf, det, sum_e_pert)
       end if
     end do
   end do
+  call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
 end
 
 

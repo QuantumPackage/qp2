@@ -249,7 +249,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   integer,allocatable               :: tmp_array(:)
   integer(bit_kind), allocatable :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable           :: banned(:,:,:), bannedOrb(:,:)
-  double precision, allocatable  :: coef_fullminilist(:,:)
+  double precision, allocatable  :: coef_fullminilist_rev(:,:)
 
 
   double precision, allocatable   :: mat(:,:,:)
@@ -549,9 +549,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
       if(pert_2rdm)then
-       allocate(coef_fullminilist(fullinteresting(0),N_states)) 
+       allocate(coef_fullminilist_rev(N_states,fullinteresting(0))) 
        do i=1,fullinteresting(0)
-         coef_fullminilist(i,:) = psi_coef_sorted(fullinteresting(i),:)
+        do j = 1, N_states
+          coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+        enddo
        enddo
       endif
       do i=1,fullinteresting(0)
@@ -608,7 +610,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             if(.not.pert_2rdm)then
              call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
             else 
-             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist, fullinteresting(0))
+             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
             endif
           end if
         enddo
@@ -616,7 +618,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       enddo
       deallocate(fullminilist,minilist)
       if(pert_2rdm)then
-       deallocate(coef_fullminilist)
+       deallocate(coef_fullminilist_rev)
       endif
     enddo
   enddo
