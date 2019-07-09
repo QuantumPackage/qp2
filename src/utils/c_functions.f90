@@ -2,7 +2,7 @@ module c_functions
   use iso_c_binding
 
   interface
-    subroutine usleep_c(us) bind (C,name="usleep")
+    subroutine usleep_c(us) bind (C,name="usleep_c")
       use iso_c_binding
       integer(c_int), value :: us
     end subroutine usleep_c
