@@ -15,6 +15,7 @@ BEGIN_PROVIDER [ integer, qp_max_mem ]
 END_PROVIDER
 
 subroutine resident_memory(value)
+  use c_functions
   implicit none
   BEGIN_DOC
 ! Returns the current used memory in gigabytes used by the current process.
@@ -25,6 +26,8 @@ subroutine resident_memory(value)
   double precision, intent(out) :: value
 
   call omp_set_lock(file_lock)
+  call usleep(10)
+
   value = 0.d0
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
