@@ -18,7 +18,7 @@ export EDITOR=vim
 **You may need to tell your web browser you accept to load insecure scripts to
 see the terminal**.
 
-<iframe id="shellframe" src="http://irssv2.ups-tlse.fr/siab/" width="800" height="600" frameBorder="1" scrolling="no">Browser not compatible.</iframe>
+<iframe id="shellframe" src="https://lcpq.ups-tlse.fr/qpterm/" width="800" height="600" frameBorder="1" scrolling="no">Browser not compatible.</iframe>
 </body>
 
 
