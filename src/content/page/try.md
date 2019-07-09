@@ -15,7 +15,7 @@ set the ``EDITOR`` environment variable:
 export EDITOR=vim
 ```
 
-<iframe id="shellframe" src="https://lcpq.ups-tlse.fr/qpterm/" width="800" height="600" frameBorder="1" scrolling="no">Browser not compatible.</iframe>
+<iframe id="shellframe" src="https://www.lcpq.ups-tlse.fr/qpterm/" width="800" height="600" frameBorder="1" scrolling="no">Browser not compatible.</iframe>
 </body>
 
 
