@@ -15,5 +15,7 @@ subroutine usleep(us)
   use iso_c_binding
   implicit none
   integer, intent(in) :: us
-  call usleep_c(int(us,c_int))
+  integer(c_int) :: u
+  u = us
+  call usleep_c(u)
 end
