@@ -275,7 +275,6 @@ IRP_ENDIF
     rc = f77_zmq_bind(new_zmq_pull_socket, zmq_socket_pull_tcp_address)
     if (rc /= 0) then
       icount = icount-1
-!      call sleep(3)
       zmq_socket_pull_tcp_address    = 'tcp://*:'//zmq_port(2+icount*100)//' '
       zmq_socket_push_tcp_address    = trim(qp_run_address)//':'//zmq_port(2+icount*100)//' '
     else
