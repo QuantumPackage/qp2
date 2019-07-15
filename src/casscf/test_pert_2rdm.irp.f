@@ -2,7 +2,7 @@ program test_pert_2rdm
  implicit none
  read_wf = .True.
  touch read_wf
- call get_pert_2rdm
+!call get_pert_2rdm
  integer :: i,j,k,l,ii,jj,kk,ll
  double precision :: accu , get_two_e_integral, integral
  accu = 0.d0

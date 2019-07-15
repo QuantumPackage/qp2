@@ -6,6 +6,10 @@ subroutine cisd_scf_iteration(converged,iteration,energy,thr)
  double precision, intent(out) :: energy
  converged = .False.
  call only_act_bitmask
+ N_det = N_det_generators
+ psi_coef = psi_coef_generators
+ psi_det  = psi_det_generators
+ touch  N_det psi_coef psi_det
  call run_cisd
  call change_orb_cisd(converged,iteration,energy,thr)
 end
