@@ -34,7 +34,7 @@ END_PROVIDER
  end do
 
  psi_det_generators_HF(:,:,1) = psi_det(:,:,j)
- psi_coef_generators_HF(1,:) = psi_coef_generators_HF(j,:)
+ psi_coef_generators_HF(1,:) = 1.d0
 
 END_PROVIDER
 

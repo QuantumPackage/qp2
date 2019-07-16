@@ -182,9 +182,6 @@ subroutine copy_H_apply_buffer_to_wf
     ASSERT (sum(popcnt(psi_det(:,2,i+N_det_old))) == elec_beta_num )
   enddo
   do k=1,N_states
-    print*,"H_apply_buffer(j)%N_det",H_apply_buffer(j)%N_det
-    print*,'N_det_old = ',N_det_old
-    print*,'size(psi_coef,1)', size(psi_coef,1)
     do i=1,H_apply_buffer(j)%N_det
       psi_coef(i+N_det_old,k) = H_apply_buffer(j)%coef(i,k)
     enddo
