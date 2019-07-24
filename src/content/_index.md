@@ -21,5 +21,5 @@ range-separated density-functional theory.
 
 **Quantum Package 2.0: An Open-Source Determinant-Driven Suite of Programs**\
 Yann Garniron, Thomas Applencourt, Kevin Gasperich, Anouar Benali, Anthony Ferté, Julien Paquier, Barthélémy Pradines, Roland Assaraf, Peter Reinhardt, Julien Toulouse, Pierrette Barbaresco, Nicolas Renon, Grégoire David, Jean-Paul Malrieu, Mickaël Véril, Michel Caffarel, Pierre-François Loos, Emmanuel Giner, Anthony Scemama\
-[J. Chem. Theory Comput. 2019, 15, 6, 3591-3609](https://doi.org/10.1021/acs.jctc.9b00176)
+[J. Chem. Theory Comput. 2019, 15, 6, 3591-3609](https://doi.org/10.1021/acs.jctc.9b00176)\
 https://arxiv.org/abs/1902.08154
