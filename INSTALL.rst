@@ -143,7 +143,7 @@ IRPF90
 to Parameters (IRP) method. 
 
 * Download the latest version of IRPF90
-  here : `<https://github.com/scemama/irpf90/releases/latest>`_ and move
+  here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
   the downloaded archive in the :file:`${QP_ROOT}/external` directory
 
 * Extract the archive and go into the :file:`irpf90-*` directory to run
@@ -328,7 +328,7 @@ OCaml
      echo ${QP_ROOT}/bin
      ${QP_ROOT}/external/opam_installer.sh --no-backup --fresh
 
-  You the :command:`opam` command can be installed in the :file:`${QP_ROOT}/bin`
+  The :command:`opam` command can be installed in the :file:`${QP_ROOT}/bin`
   directory. To do this, take the output of ``echo ${QP_ROOT}/bin`` and
   use it as an answer to where :command:`opam` should be installed.
   
@@ -337,7 +337,14 @@ OCaml
 
   .. code:: bash
 
-      opam init --disable-sandboxing --comp=4.07.0
+      opam init --comp=4.07.1
+      eval `${QP_ROOT}/bin/opam env`
+
+  If the installation fails because of bwrap, you can initialize opam using:
+
+  .. code:: bash
+
+      opam init --disable-sandboxing --comp=4.07.1
       eval `${QP_ROOT}/bin/opam env`
 
 * Install the required external OCaml libraries

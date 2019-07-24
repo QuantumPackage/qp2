@@ -148,7 +148,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
   integer, external :: disconnect_from_taskserver
   do i=1,300
     if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) /= -2) exit
-    call sleep(1)
+    call usleep(500)
     print *,  'Retry disconnect...'
   end do
 

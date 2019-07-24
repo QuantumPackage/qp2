@@ -74,7 +74,7 @@ subroutine run_selection_slave(thread,iproc,energy)
     if(done .or. ctask == size(task_id)) then
       do i=1, ctask
          if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id(i)) == -1) then
-           call sleep(1)
+           call usleep(100)
           if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id(i)) == -1) then
             ctask = 0
             done = .true.
@@ -85,6 +85,7 @@ subroutine run_selection_slave(thread,iproc,energy)
       if(ctask > 0) then
         call sort_selection_buffer(buf)
 !        call merge_selection_buffers(buf,buf2)
+print *, task_id(1), pt2(1), buf%cur, ctask
         call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
 !        buf%mini = buf2%mini
         pt2(:) = 0d0
@@ -132,22 +133,23 @@ subroutine push_selection_results(zmq_socket_push, pt2, variance, norm, b, task_
     print *,  'f77_zmq_send( zmq_socket_push, b%cur, 4, ZMQ_SNDMORE)'
   endif
 
+
+  rc = f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)'
+  endif
+
+  rc = f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)'
+  endif
+
+  rc = f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)'
+  endif
+
   if (b%cur > 0) then
-
-      rc = f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)'
-      endif
-
-      rc = f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)'
-      endif
-
-      rc = f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)'
-      endif
 
       rc = f77_zmq_send( zmq_socket_push, b%val(1), 8*b%cur, ZMQ_SNDMORE)
       if(rc /= 8*b%cur) then
@@ -203,22 +205,26 @@ subroutine pull_selection_results(zmq_socket_pull, pt2, variance, norm, val, det
     print *,  'f77_zmq_recv( zmq_socket_pull, N, 4, 0)'
   endif
 
+  pt2(:) = 0.d0
+  variance(:) = 0.d0
+  norm(:) = 0.d0
+
+  rc = f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)'
+  endif
+
+  rc = f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)'
+  endif
+
+  rc = f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)
+  if(rc /= 8*N_states) then
+    print *,  'f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)'
+  endif
+
   if (N>0) then
-      rc = f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)'
-      endif
-
-      rc = f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)'
-      endif
-
-      rc = f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)
-      if(rc /= 8*N_states) then
-        print *,  'f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)'
-      endif
-
       rc = f77_zmq_recv( zmq_socket_pull, val(1), 8*N, 0)
       if(rc /= 8*N) then
         print *,  'f77_zmq_recv( zmq_socket_pull, val(1), 8*N, 0)'
@@ -228,10 +234,6 @@ subroutine pull_selection_results(zmq_socket_pull, pt2, variance, norm, val, det
       if(rc /= bit_kind*N_int*2*N) then
         print *,  'f77_zmq_recv( zmq_socket_pull, det(1,1,1), bit_kind*N_int*2*N, 0)'
       endif
-  else
-      pt2(:) = 0.d0
-      variance(:) = 0.d0
-      norm(:) = 0.d0
   endif
 
   rc = f77_zmq_recv( zmq_socket_pull, ntask, 4, 0)
