@@ -2,19 +2,22 @@ GitHub Branches
 ===============
 
 master:
-  The current up-to-date working branch, that users download It should
-  only contain the latest release and bug fixes.
+  The current up-to-date working branch, that users download. It should
+  only contain the latest stable release and bug fixes.
 
-develop-lcpq:
-  Toulouse development branch  
-
-develop-lct:
-  Paris development branch  
-
-develop:
+dev:
   It is a fork of the *master* branch with new developments that will be
   merged in the *master* branch for the next release. Other development
   branches should be merged on this one.
+
+bugfix:
+  A fork of the *master* on which the bug fixes are made.
+
+dev-lcpq:
+  Toulouse development branch  
+
+dev-lct:
+  Paris development branch  
 
 gh-pages:
   This is an independent branch, containing only the web site of QP2.
