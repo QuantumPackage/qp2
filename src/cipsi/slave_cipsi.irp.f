@@ -63,7 +63,7 @@ subroutine run_slave_main
     if (mpi_master) then
       call wait_for_states(states,zmq_state,size(states))
       if (zmq_state(1:64) == old_state(1:64)) then
-        call sleep(1)
+        call usleep(200)
         cycle
       else
         old_state(1:64) = zmq_state(1:64)
