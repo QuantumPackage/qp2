@@ -303,23 +303,31 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
                 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
-                ${QP_ROOT}/bin/opam init --verbose --yes --comp=4.07.1 --disable-sandboxing
+                opam switch create ocaml-base-compiler.4.07.1
+                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
 
-                eval $(${QP_ROOT}/bin/opam env)
+                eval $(opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
+
             else
                 # Conventional commands
                 execute << EOF
                   chmod +x "\${QP_ROOT}"/external/opam_installer.sh
                   "\${QP_ROOT}"/external/opam_installer.sh --no-backup 
+EOF
+                execute << EOF
                   rm --force \${QP_ROOT}/bin/opam
                   export OPAMROOT=\${OPAMROOT:-\${QP_ROOT}/external/opam}
                   echo \${QP_ROOT}/bin \
                   | sh \${QP_ROOT}/external/opam_installer.sh 
-                  rm \${QP_ROOT}/external/opam_installer.sh
-                  source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-                  \${QP_ROOT}/bin/opam init --verbose --yes --comp=4.07.1 --disable-sandboxing
-                  eval \$(\${QP_ROOT}/bin/opam env)
+EOF
+                rm \${QP_ROOT}/external/opam_installer.sh
+                source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
+                opam switch create ocaml-base-compiler.4.07.1     || exit 1
+                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+                eval $(opam env)
+EOF
+                execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
             fi

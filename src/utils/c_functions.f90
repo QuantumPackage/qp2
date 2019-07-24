@@ -2,7 +2,7 @@ module c_functions
   use iso_c_binding
 
   interface
-    subroutine usleep_c(us) bind (C,name="usleep")
+    subroutine usleep_c(us) bind (C,name="usleep_c")
       use iso_c_binding
       integer(c_int), value :: us
     end subroutine usleep_c
@@ -15,5 +15,7 @@ subroutine usleep(us)
   use iso_c_binding
   implicit none
   integer, intent(in) :: us
-  call usleep_c(int(us,c_int))
+  integer(c_int) :: u
+  u = us
+  call usleep_c(u)
 end
