@@ -340,7 +340,7 @@ OCaml
       opam init --comp=4.07.1
       eval `${QP_ROOT}/bin/opam env`
 
-  If the installation fails because of bwrap, the you can initialize opam using:
+  If the installation fails because of bwrap, you can initialize opam using:
 
   .. code:: bash
 
