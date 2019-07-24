@@ -304,7 +304,7 @@ EOF
                 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
                 execute << EOF
-                opam switch 4.07.1  || exit 1
+                opam switch create ocaml-base-compiler.4.07.1     || exit 1
                 ${QP_ROOT}/bin/opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
 
                 eval $(${QP_ROOT}/bin/opam env)
@@ -325,7 +325,7 @@ EOF
                 execute << EOF
                   rm \${QP_ROOT}/external/opam_installer.sh
                   source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-                  opam switch 4.07.1  || exit 1
+                  opam switch create ocaml-base-compiler.4.07.1     || exit 1
                   \${QP_ROOT}/bin/opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
 EOF
                 execute << EOF
