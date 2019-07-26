@@ -321,8 +321,8 @@ EOF
                   echo \${QP_ROOT}/bin \
                   | sh \${QP_ROOT}/external/opam_installer.sh 
 EOF
-                rm \${QP_ROOT}/external/opam_installer.sh
-                source \${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
+                rm ${QP_ROOT}/external/opam_installer.sh
+                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
                 opam switch create ocaml-base-compiler.4.07.1     || exit 1
                 opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
                 eval $(opam env)
