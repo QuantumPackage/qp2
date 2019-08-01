@@ -145,8 +145,8 @@ let () =
     let socket_in, socket_out =
       match req_or_sub with
       | REQ ->
-          create_socket  Zmq.Socket.rep  Zmq.Socket.bind     addr_in,
-          create_socket  Zmq.Socket.req  Zmq.Socket.connect  addr_out
+          create_socket  Zmq.Socket.router  Zmq.Socket.bind     addr_in,
+          create_socket  Zmq.Socket.dealer  Zmq.Socket.connect  addr_out
       | SUB ->
           create_socket  Zmq.Socket.sub  Zmq.Socket.connect  addr_in,
           create_socket  Zmq.Socket.pub  Zmq.Socket.bind     addr_out
@@ -156,6 +156,7 @@ let () =
         Zmq.Socket.subscribe  socket_in  "";
 
 
+    (*
     let action = 
       if verbose then
         begin
@@ -193,11 +194,23 @@ let () =
                     Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
         end
     in
+    *)
 
+   let action_in = 
+      match req_or_sub with
+        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+        | SUB -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+    in
+
+    let action_out = 
+      match req_or_sub with
+        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
+        | SUB -> (fun () -> () )
+    in
 
     let pollitem =
       Zmq.Poll.mask_of
-      [| (socket_in, Zmq.Poll.In) |]
+        [| (socket_in,  Zmq.Poll.In) ; (socket_out, Zmq.Poll.In) |]
     in
 
 
@@ -207,11 +220,11 @@ let () =
           Zmq.Poll.poll  ~timeout:1000  pollitem
         in
 
-        match polling.(0) with
-          | Some Zmq.Poll.In     -> action ()
-          | None                 -> ()
-          | Some Zmq.Poll.In_out 
-          | Some Zmq.Poll.Out    -> ()
+        match polling with
+          | [| Some Zmq.Poll.In ; Some Zmq.Poll.In |]     -> ( action_out () ; action_in () )
+          | [| _                ; Some Zmq.Poll.In |]     ->   action_out () 
+          | [| Some Zmq.Poll.In ; _                |]     ->   action_in  () 
+          | _                    -> ()
     done;
 
     Zmq.Socket.close  socket_in;
@@ -405,9 +418,9 @@ let () =
 
       Printf.printf "
 On remote hosts, create ssh tunnel using:
- ssh -n -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s &
+ ssh -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s &
 Or from this host connect to clients using:
- ssh -n -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d <host> &
+ ssh -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d <host> &
 %!" 
                 (port  ) localhost (localport  )
                 (port+1) localhost (localport+1)
