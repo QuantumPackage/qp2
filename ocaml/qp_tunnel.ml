@@ -330,7 +330,7 @@ let () =
         match arg with
         | EZFIO x -> 
           begin
-            Printf.sprintf "tar -zcf %s %s" temp_file x
+            Printf.sprintf "tar --exclude=\"*.gz.*\" -zcf %s %s" temp_file x
             |> Sys.command |> ignore;
             let fd =
               Unix.openfile  temp_file  [Unix.O_RDONLY]  0o640
