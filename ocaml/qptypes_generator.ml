@@ -58,7 +58,7 @@ let input_data = "
 
 * Det_number_max : int
   assert (x > 0) ;
-  if (x > 50_00_000_000) then
+  if (x > 50_000_000_000) then
     warning \"More than 50 billion determinants\";
 
 * States_number : int
