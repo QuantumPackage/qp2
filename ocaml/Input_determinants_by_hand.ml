@@ -472,6 +472,7 @@ psi_det                = %s
 
     (* Handle determinants *)
     let psi_det =
+      let n_int = N_int_number.of_int @@ (MO_number.get_max () - 1) / 64 + 1 in
       let n_alpha = Ezfio.get_electrons_elec_alpha_num ()
         |> Elec_alpha_number.of_int
       and n_beta = Ezfio.get_electrons_elec_beta_num ()
@@ -483,8 +484,8 @@ psi_det                = %s
           begin
             let newdet =
                (Bitlist.of_string ~zero:'-' ~one:'+' alpha ,
-               Bitlist.of_string ~zero:'-' ~one:'+' beta)
-               |> Determinant.of_bitlist_couple  ~alpha:n_alpha ~beta:n_beta
+                Bitlist.of_string ~zero:'-' ~one:'+' beta)
+               |> Determinant.of_bitlist_couple ~n_int ~alpha:n_alpha ~beta:n_beta
                |> Determinant.sexp_of_t
                |> Sexplib.Sexp.to_string
             in
@@ -492,9 +493,11 @@ psi_det                = %s
           end
       | _::tail -> read_dets accu tail
       in
+      (*
       let dets =
         List.map String_ext.rev dets
       in
+      *)
       let a =
         read_dets [] dets
         |> String.concat ""
