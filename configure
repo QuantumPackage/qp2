@@ -330,7 +330,6 @@ EOF
 
                 opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
                 eval $(opam env)
-EOF
                 execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
