@@ -3,7 +3,8 @@ open Sexplib.Std
 
 type t = int64 array [@@deriving sexp]
 
-let to_int64_array (x:t) = (x:int64 array)
+external to_int64_array : t -> int64 array = "%identity"
+external of_int64_array_no_check : int64 array -> t = "%identity"
 
 
 let to_alpha_beta x =
@@ -61,7 +62,6 @@ let of_int64_array ~n_int ~alpha ~beta x =
      end;
    x
 
-let of_int64_array_no_check x = x
 
 let of_bitlist_couple ?n_int ~alpha ~beta (xa,xb) =
   let ba, bb =
