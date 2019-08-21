@@ -43,7 +43,7 @@ $(QP_ROOT)/data/executables: remake_executables element_create_db.byte Qptypes.m
 	$(QP_ROOT)/ocaml/element_create_db.byte
 
 external_libs:
-	opam install cryptokit core
+	opam install cryptokit sexplib
 
 qpackage.odocl: $(MLIFILES)
 	ls $(MLIFILES) | sed "s/\.mli//" > qpackage.odocl
