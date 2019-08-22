@@ -7,14 +7,14 @@ module Determinants_by_hand : sig
     { n_int                  : N_int_number.t;
       bit_kind               : Bit_kind.t;
       n_det                  : Det_number.t;
+      n_det_qp_edit          : Det_number.t;
       n_states               : States_number.t;
       expected_s2            : Positive_float.t;
       psi_coef               : Det_coef.t array;
       psi_det                : Determinant.t array;
       state_average_weight   : Positive_float.t array;
     } [@@deriving sexp]
-  val read  : unit -> t
-  val read_maybe  : unit -> t option
+  val read  : unit -> t option
   val write : t -> unit
   val to_string : t -> string
   val to_rst : t -> Rst_string.t
@@ -28,6 +28,7 @@ end = struct
     { n_int                  : N_int_number.t;
       bit_kind               : Bit_kind.t;
       n_det                  : Det_number.t;
+      n_det_qp_edit          : Det_number.t;
       n_states               : States_number.t;
       expected_s2            : Positive_float.t;
       psi_coef               : Det_coef.t array;
@@ -37,8 +38,6 @@ end = struct
   ;;
 
   let get_default = Qpackage.get_ezfio_default "determinants";;
-
-  let n_det_read_max = 10_000 ;;
 
   let read_n_int () =
     if not (Ezfio.has_determinants_n_int()) then
@@ -80,9 +79,24 @@ end = struct
     |> Det_number.of_int
   ;;
 
+  let read_n_det_qp_edit () =
+    let n_det = read_n_det () |> Det_number.to_int in
+    if not (Ezfio.has_determinants_n_det_qp_edit ()) then
+      Ezfio.set_determinants_n_det_qp_edit n_det
+    ;
+    Ezfio.get_determinants_n_det_qp_edit ()
+    |> Det_number.of_int
+  ;;
+
   let write_n_det n =
     Det_number.to_int n
     |> Ezfio.set_determinants_n_det
+  ;;
+
+  let write_n_det_qp_edit n =
+    let n_det = read_n_det () |> Det_number.to_int in
+    min n_det (Det_number.to_int n)
+    |> Ezfio.set_determinants_n_det_qp_edit
   ;;
 
   let read_n_states () =
@@ -178,7 +192,7 @@ end = struct
     |> Ezfio.set_determinants_expected_s2
   ;;
 
-  let read_psi_coef () =
+  let read_psi_coef ~read_only () =
     if not (Ezfio.has_determinants_psi_coef ()) then
       begin
         let n_states =
@@ -189,7 +203,12 @@ end = struct
           ~data:(List.init n_states (fun i -> if (i=0) then 1. else 0. ))
           |> Ezfio.set_determinants_psi_coef
       end;
-    Ezfio.get_determinants_psi_coef ()
+    begin
+      if read_only then
+        Ezfio.get_determinants_psi_coef_qp_edit ()
+      else
+        Ezfio.get_determinants_psi_coef ()
+    end
     |> Ezfio.flattened_ezfio
     |> Array.map Det_coef.of_float
   ;;
@@ -202,12 +221,15 @@ end = struct
     and n_states =
       States_number.to_int n_states
     in
-    Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| n_det ; n_states |] ~data:c
-    |> Ezfio.set_determinants_psi_coef
+    let r = 
+      Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| n_det ; n_states |] ~data:c
+    in
+    Ezfio.set_determinants_psi_coef r;
+    Ezfio.set_determinants_psi_coef_qp_edit r
   ;;
 
 
-  let read_psi_det () =
+  let read_psi_det ~read_only () =
     let n_int = read_n_int ()
     and n_alpha = Ezfio.get_electrons_elec_alpha_num ()
         |> Elec_alpha_number.of_int
@@ -233,13 +255,18 @@ end = struct
           |> Ezfio.set_determinants_psi_det ;
       end  ;
     let n_int = N_int_number.to_int n_int in
-    let psi_det_array = Ezfio.get_determinants_psi_det () in
+    let psi_det_array =
+      if read_only then
+        Ezfio.get_determinants_psi_det_qp_edit ()
+      else
+        Ezfio.get_determinants_psi_det ()
+    in
     let dim = psi_det_array.Ezfio.dim
     and data =  Ezfio.flattened_ezfio psi_det_array
     in
     assert (n_int = dim.(0));
     assert (dim.(1) = 2);
-    assert (dim.(2) = (Det_number.to_int (read_n_det ())));
+    assert (dim.(2) = (Det_number.to_int (read_n_det_qp_edit ())));
     Array.init dim.(2) (fun i ->
       Array.sub data (2*n_int*i) (2*n_int) )
     |> Array.map (Determinant.of_int64_array
@@ -252,40 +279,43 @@ end = struct
       |> Array.concat
       |> Array.to_list
     in
-    Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| N_int_number.to_int n_int ; 2 ; Det_number.to_int n_det |] ~data:data
-    |> Ezfio.set_determinants_psi_det
+    let r = 
+      Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| N_int_number.to_int n_int ; 2 ; Det_number.to_int n_det |] ~data:data
+    in
+    Ezfio.set_determinants_psi_det r;
+    Ezfio.set_determinants_psi_det_qp_edit r
   ;;
 
 
   let read () =
+
+    let n_det_qp_edit = read_n_det_qp_edit () in
+    let n_det         = read_n_det         () in
+    let read_only = n_det_qp_edit <> n_det    in
+
     if (Ezfio.has_mo_basis_mo_num ()) then
+      try
+        Some
         { n_int                  = read_n_int ()                ;
           bit_kind               = read_bit_kind ()             ;
           n_det                  = read_n_det ()                ;
+          n_det_qp_edit          = read_n_det_qp_edit ()        ;
           expected_s2            = read_expected_s2 ()          ;
-          psi_coef               = read_psi_coef ()             ;
-          psi_det                = read_psi_det ()              ;
+          psi_coef               = read_psi_coef ~read_only ()  ;
+          psi_det                = read_psi_det ~read_only  ()  ;
           n_states               = read_n_states ()             ;
           state_average_weight   = read_state_average_weight () ;
         }
+      with _ -> None
     else
-      failwith "No molecular orbitals, so no determinants"
-  ;;
-
-  let read_maybe () =
-    let n_det =
-       read_n_det ()
-    in
-    if ( (Det_number.to_int n_det) < n_det_read_max ) then
-      try Some (read ()) with
-      | Failure _ -> None
-    else
+      (* No molecular orbitals, so no determinants *)
       None
   ;;
 
   let write { n_int                ;
               bit_kind             ;
               n_det                ;
+              n_det_qp_edit        ;
               expected_s2          ;
               psi_coef             ;
               psi_det              ;
@@ -297,9 +327,13 @@ end = struct
      write_n_det n_det;
      write_n_states n_states;
      write_expected_s2 expected_s2;
-     write_psi_coef ~n_det:n_det ~n_states:n_states psi_coef ;
-     write_psi_det ~n_int:n_int ~n_det:n_det psi_det;
-     write_state_average_weight state_average_weight;
+     if n_det <= n_det_qp_edit then
+        begin
+          write_n_det_qp_edit n_det;
+          write_psi_coef ~n_det:n_det ~n_states:n_states psi_coef ;
+          write_psi_det ~n_int:n_int ~n_det:n_det psi_det
+        end;
+     write_state_average_weight state_average_weight
   ;;
 
 
@@ -316,11 +350,13 @@ end = struct
         |> States_number.to_int
       and ndet =
         Det_number.to_int b.n_det
+      and ndet_qp_edit =
+        Det_number.to_int b.n_det_qp_edit
       in
       let coefs_string i =
         Array.init nstates (fun j ->
           let ishift =
-            j*ndet
+            j*ndet_qp_edit
           in
           if (ishift < Array.length b.psi_coef) then
             b.psi_coef.(i+ishift)
@@ -331,7 +367,7 @@ end = struct
         )
         |> Array.to_list |> String.concat "\t"
       in
-      Array.init ndet (fun i ->
+      Array.init ndet_qp_edit (fun i ->
         Printf.sprintf "  %s\n%s\n"
           (coefs_string i)
           (Determinant.to_string ~mo_num:mo_num b.psi_det.(i)
@@ -493,11 +529,6 @@ psi_det                = %s
           end
       | _::tail -> read_dets accu tail
       in
-      (*
-      let dets =
-        List.map String_ext.rev dets
-      in
-      *)
       let a =
         read_dets [] dets
         |> String.concat ""
@@ -513,9 +544,11 @@ psi_det                = %s
       Printf.sprintf "(n_int %d)" (N_int_number.get_max ())
     and n_states =
       Printf.sprintf "(n_states %d)" (States_number.to_int @@ read_n_states ())
+    and n_det_qp_edit =
+      Printf.sprintf "(n_det_qp_edit %d)" (Det_number.to_int @@ read_n_det_qp_edit ())
     in
     let s =
-       String.concat "" [ header ; bitkind ; n_int ; n_states ; psi_coef ; psi_det]
+       String.concat "" [ header ; bitkind ; n_int ; n_states ; psi_coef ; psi_det ; n_det_qp_edit ]
     in
 
 
@@ -530,7 +563,9 @@ psi_det                = %s
       Det_number.to_int n_det_new
     in
     let det =
-      read ()
+      match read () with
+      | Some x -> x
+      | None   -> failwith "No determinants in file"
     in
     let n_det_old, n_states =
       Det_number.to_int det.n_det,
@@ -561,7 +596,9 @@ psi_det                = %s
   let extract_state istate =
     Printf.printf "Extracting state %d\n" (States_number.to_int istate);
     let det =
-      read ()
+      match read () with
+      | Some x -> x
+      | None   -> failwith "No determinants in file"
     in
     let n_det, n_states =
       Det_number.to_int det.n_det,
@@ -591,7 +628,9 @@ psi_det                = %s
   let extract_states range =
     Printf.printf "Extracting states %s\n" (Range.to_string range);
     let det =
-      read ()
+      match read () with
+      | Some x -> x
+      | None   -> failwith "No determinants in file"
     in
     let n_det, n_states =
       Det_number.to_int det.n_det,
