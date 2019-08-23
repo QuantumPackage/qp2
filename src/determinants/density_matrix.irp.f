@@ -269,7 +269,6 @@ subroutine save_natural_mos
    END_DOC
    call set_natural_mos
    call save_mos
-
 end
 
 
