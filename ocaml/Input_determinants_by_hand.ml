@@ -14,7 +14,7 @@ module Determinants_by_hand : sig
       psi_det                : Determinant.t array;
       state_average_weight   : Positive_float.t array;
     } [@@deriving sexp]
-  val read  : unit -> t option
+  val read : ?full:bool -> unit -> t option
   val write : t -> unit
   val to_string : t -> string
   val to_rst : t -> Rst_string.t
@@ -80,10 +80,11 @@ end = struct
   ;;
 
   let read_n_det_qp_edit () =
-    let n_det = read_n_det () |> Det_number.to_int in
     if not (Ezfio.has_determinants_n_det_qp_edit ()) then
-      Ezfio.set_determinants_n_det_qp_edit n_det
-    ;
+      begin
+        let n_det = read_n_det () |> Det_number.to_int in
+        Ezfio.set_determinants_n_det_qp_edit n_det
+      end;
     Ezfio.get_determinants_n_det_qp_edit ()
     |> Det_number.of_int
   ;;
@@ -266,7 +267,10 @@ end = struct
     in
     assert (n_int = dim.(0));
     assert (dim.(1) = 2);
-    assert (dim.(2) = (Det_number.to_int (read_n_det_qp_edit ())));
+    if read_only then
+      assert (dim.(2) = (Det_number.to_int (read_n_det_qp_edit ())))
+    else
+      assert (dim.(2) = (Det_number.to_int (read_n_det ())));
     Array.init dim.(2) (fun i ->
       Array.sub data (2*n_int*i) (2*n_int) )
     |> Array.map (Determinant.of_int64_array
@@ -287,11 +291,13 @@ end = struct
   ;;
 
 
-  let read () =
+  let read ?(full=true) () =
 
     let n_det_qp_edit = read_n_det_qp_edit () in
     let n_det         = read_n_det         () in
-    let read_only = n_det_qp_edit <> n_det    in
+    let read_only = 
+      if full then false else n_det_qp_edit <> n_det
+    in
 
     if (Ezfio.has_mo_basis_mo_num ()) then
       try
@@ -656,7 +662,8 @@ psi_det                = %s
             j*n_det
           in
           for i=0 to (n_det-1) do
-            det.psi_coef.(!state_shift+i) <- det.psi_coef.(i+ishift)
+            det.psi_coef.(!state_shift+i) <-
+            det.psi_coef.(i+ishift)
           done
       end;
       state_shift := !state_shift + n_det
