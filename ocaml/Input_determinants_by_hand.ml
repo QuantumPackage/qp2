@@ -196,8 +196,9 @@ end = struct
 
   let write_psi_coef ~n_det ~n_states c =
     let n_det = Det_number.to_int n_det
-    and c = Array.to_list c
-            |> List.map Det_coef.to_float
+    and c =
+      Array.map Det_coef.to_float c
+      |> Array.to_list
     and n_states =
       States_number.to_int n_states
     in
@@ -239,12 +240,11 @@ end = struct
     assert (n_int = dim.(0));
     assert (dim.(1) = 2);
     assert (dim.(2) = (Det_number.to_int (read_n_det ())));
-    List.init dim.(2) (fun i ->
+    Array.init dim.(2) (fun i ->
       Array.sub data (2*n_int*i) (2*n_int) )
-    |> List.map (Determinant.of_int64_array
+    |> Array.map (Determinant.of_int64_array
       ~n_int:(N_int_number.of_int n_int)
       ~alpha:n_alpha ~beta:n_beta )
-    |> Array.of_list
   ;;
 
   let write_psi_det ~n_int ~n_det d =
@@ -363,7 +363,7 @@ Determinants ::
 "
      (b.expected_s2   |> Positive_float.to_string)
      (b.n_det         |> Det_number.to_string)
-     (b.state_average_weight |> Array.to_list |> List.map Positive_float.to_string |> String.concat "\t")
+     (b.state_average_weight |> Array.map Positive_float.to_string |> Array.to_list |> String.concat "\t")
      det_text
      |> Rst_string.of_string
   ;;
@@ -387,10 +387,10 @@ psi_det                = %s
      (b.n_states      |> States_number.to_string)
      (b.expected_s2   |> Positive_float.to_string)
      (b.state_average_weight |> Array.to_list |> List.map Positive_float.to_string |> String.concat ",")
-     (b.psi_coef  |> Array.to_list |> List.map Det_coef.to_string
+     (b.psi_coef  |> Array.map Det_coef.to_string |> Array.to_list
       |> String.concat ", ")
-     (b.psi_det   |> Array.to_list |> List.map (Determinant.to_string
-       ~mo_num) |> String.concat "\n\n")
+     (b.psi_det   |> Array.map (Determinant.to_string ~mo_num) |> Array.to_list
+      |> String.concat "\n\n")
   ;;
 
   let of_rst r =
