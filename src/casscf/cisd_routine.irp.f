@@ -14,6 +14,22 @@ subroutine cisd_scf_iteration(converged,iteration,energy,thr)
  call change_orb_cisd(converged,iteration,energy,thr)
 end
 
+
+subroutine cisd_guess_wf
+ implicit none 
+ call only_act_bitmask
+ N_det = N_det_generators
+ psi_coef = psi_coef_generators
+ psi_det  = psi_det_generators
+ touch  N_det psi_coef psi_det
+ generators_type = "HF"
+ touch generators_type
+ call run_cisd
+ touch N_det psi_coef psi_det psi_coef_sorted psi_det_sorted
+end
+
+
+
 subroutine change_orb_cisd(converged,iteration,energy,thr)
  implicit none 
  double precision, intent(in) :: thr

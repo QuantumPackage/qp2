@@ -78,8 +78,6 @@ program casscf
      enddo
     endif
   endif
-  generators_type = "CAS"
-  touch generators_type
   read_wf = .False.
   touch read_wf 
   pt2_max = 0.015d0

@@ -19,6 +19,9 @@ subroutine run_cipsi_scf
     print*,''
     call write_int(6,iteration,'CI STEP OF THE ITERATION = ')
     call write_double(6,pt2_max,'PT2 MAX = ')
+   !call cisd_guess_wf
+    generators_type = "CAS"
+    touch generators_type
     call run_stochastic_cipsi
     call change_orb_cipsi(converged,iteration,energy)
     if(iteration.gt.n_it_scf_max.and..not.converged)then
