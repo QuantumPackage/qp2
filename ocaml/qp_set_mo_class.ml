@@ -112,9 +112,9 @@ let set ~core ~inact ~act ~virt ~del =
   and av = Excitation.create_single act virt
   in
   let single_excitations = [ ia ; aa ; av ]
-                           |> List.map (fun x ->
+                           |> List.map (fun z ->
                                let open Excitation in
-                               match x with
+                               match z with
                                | Single (x,y) ->
                                  ( MO_class.to_bitlist n_int (Hole.to_mo_class x),
                                    MO_class.to_bitlist n_int (Particle.to_mo_class y) )
@@ -187,9 +187,10 @@ let set ~core ~inact ~act ~virt ~del =
     match aa with
     | Double _ -> assert false
     | Single (x,y) ->
-      ( MO_class.to_bitlist n_int (Hole.to_mo_class x) ) @
-      ( MO_class.to_bitlist n_int (Particle.to_mo_class y) )
-      |> Bitlist.to_int64_list
+      Bitlist.to_int64_list
+        ( MO_class.to_bitlist n_int (    Hole.to_mo_class x) )  @
+      Bitlist.to_int64_list
+        ( MO_class.to_bitlist n_int (Particle.to_mo_class y) )
   in
   Ezfio.set_bitmasks_n_mask_cas 1;
   Ezfio.ezfio_array_of_list ~rank:3 ~dim:([| (N_int_number.to_int n_int) ; 2; 1|]) ~data:result

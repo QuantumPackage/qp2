@@ -438,15 +438,15 @@ if [[ ${ZLIB} = $(not_found) ]] ; then
         fail
 fi
 
-BWRAP=$(find_exe bwrap)
-if [[ ${BWRAP} = $(not_found) ]] ; then
-        error "Bubblewrap (bwrap) is not installed."
-        fail
-fi
-
 LIBCAP=$(find_lib -lcap)
 if [[ ${LIBCAP} = $(not_found) ]] ; then
         error "Libcap (libcap) is not installed."
+        fail
+fi
+
+BWRAP=$(find_exe bwrap)
+if [[ ${BWRAP} = $(not_found) ]] ; then
+        error "Bubblewrap (bwrap) is not installed."
         fail
 fi
 
