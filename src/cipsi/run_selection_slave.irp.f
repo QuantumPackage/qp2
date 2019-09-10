@@ -85,7 +85,7 @@ subroutine run_selection_slave(thread,iproc,energy)
       if(ctask > 0) then
         call sort_selection_buffer(buf)
 !        call merge_selection_buffers(buf,buf2)
-print *, task_id(1), pt2(1), buf%cur, ctask
+!print *, task_id(1), pt2(1), buf%cur, ctask
         call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
 !        buf%mini = buf2%mini
         pt2(:) = 0d0

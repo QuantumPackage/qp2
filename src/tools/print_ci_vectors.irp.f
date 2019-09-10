@@ -24,6 +24,7 @@ subroutine routine
  implicit none
  integer :: i,k
  integer :: degree
+ call print_energy_components
  do i = 1, N_det
   print *, 'Determinant ', i
   call debug_det(psi_det(1,1,i),N_int)

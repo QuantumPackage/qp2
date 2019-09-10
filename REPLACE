@@ -834,3 +834,4 @@ qp_name potential_sr_c_alpha_ao_pbe --rename=potential_c_alpha_ao_sr_pbe
 qp_name potential_sr_c_beta_ao_pbe --rename=potential_c_beta_ao_sr_pbe
 qp_name potential_sr_xc_alpha_ao_pbe --rename=potential_xc_alpha_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
+qp_name disk_access_nuclear_repulsion --rename=io_nuclear_repulsion
