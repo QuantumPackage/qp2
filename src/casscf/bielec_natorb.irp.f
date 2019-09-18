@@ -4,13 +4,13 @@
   ! indices are unshifted orbital numbers
   END_DOC
   implicit none
-  integer                        :: i,j,k,l,t,u,p,q,pp
+  integer                        :: i,j,k,l,t,u,p,q
   double precision, allocatable  :: f(:,:,:), d(:,:,:)
 
 
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP PRIVATE(j,k,l,p,pp,d,f) &
+  !$OMP PRIVATE(j,k,l,p,d,f) &
   !$OMP SHARED(n_core_inact_act_orb,mo_num,n_act_orb,n_core_inact_orb, &
   !$OMP   bielec_PQxx_no,bielec_PQxx,list_act,natorbsCI)
 
@@ -36,8 +36,7 @@
     do k=1,n_core_inact_act_orb
       do j=1,mo_num
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielec_PQxx_no(list_act(p),j,k,l)=d(pp,j,k)
+          bielec_PQxx_no(list_act(p),j,k,l)=d(p,j,k)
         end do
       end do
 
@@ -54,9 +53,8 @@
           d, n_act_orb)
     do k=1,n_core_inact_act_orb
       do p=1,n_act_orb
-        pp=n_act_orb-p+1
         do j=1,mo_num
-          bielec_PQxx_no(j,list_act(p),k,l)=d(pp,j,k)
+          bielec_PQxx_no(j,list_act(p),k,l)=d(p,j,k)
         end do
       end do
     end do
@@ -83,10 +81,9 @@
           0.d0,                                                      &
           d, mo_num*mo_num)
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do k=1,mo_num
         do j=1,mo_num
-          bielec_PQxx_no(j,k,n_core_inact_orb+p,l)=d(j,k,pp)
+          bielec_PQxx_no(j,k,n_core_inact_orb+p,l)=d(j,k,p)
         end do
       end do
     end do
@@ -110,10 +107,9 @@
           0.d0,                                                      &
           d, mo_num*mo_num)
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do k=1,mo_num
         do j=1,mo_num
-          bielec_PQxx_no(j,k,l,n_core_inact_orb+p)=d(j,k,pp)
+          bielec_PQxx_no(j,k,l,n_core_inact_orb+p)=d(j,k,p)
         end do
       end do
     end do
@@ -133,11 +129,11 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
   ! indices are unshifted orbital numbers
   END_DOC
   implicit none
-  integer                        :: i,j,k,l,t,u,p,q,pp
+  integer                        :: i,j,k,l,t,u,p,q
   double precision, allocatable  :: f(:,:,:), d(:,:,:)
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP PRIVATE(j,k,l,p,pp,d,f) &
+  !$OMP PRIVATE(j,k,l,p,d,f) &
   !$OMP SHARED(n_core_inact_act_orb,mo_num,n_act_orb,n_core_inact_orb, &
   !$OMP   bielec_PxxQ_no,bielec_PxxQ,list_act,natorbsCI)
 
@@ -163,8 +159,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
     do l=1,n_core_inact_act_orb
       do k=1,n_core_inact_act_orb
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielec_PxxQ_no(list_act(p),k,l,j)=d(pp,k,l)
+          bielec_PxxQ_no(list_act(p),k,l,j)=d(p,k,l)
         end do
       end do
     end do
@@ -193,8 +188,7 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
     do l=1,n_core_inact_act_orb
       do j=1,mo_num
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielec_PxxQ_no(j,n_core_inact_orb+p,l,k)=d(pp,j,l)
+          bielec_PxxQ_no(j,n_core_inact_orb+p,l,k)=d(p,j,l)
         end do
       end do
     end do
@@ -221,10 +215,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
           0.d0,                                                      &
           d, mo_num*n_core_inact_act_orb)
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do l=1,n_core_inact_act_orb
         do j=1,mo_num
-          bielec_PxxQ_no(j,l,n_core_inact_orb+p,k)=d(j,l,pp)
+          bielec_PxxQ_no(j,l,n_core_inact_orb+p,k)=d(j,l,p)
         end do
       end do
     end do
@@ -248,10 +241,9 @@ BEGIN_PROVIDER [real*8, bielec_PxxQ_no, (mo_num,n_core_inact_act_orb,n_core_inac
           0.d0,                                                      &
           d, mo_num*n_core_inact_act_orb)
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do k=1,n_core_inact_act_orb
         do j=1,mo_num
-          bielec_PxxQ_no(j,k,l,n_core_inact_orb+p)=d(j,k,pp)
+          bielec_PxxQ_no(j,k,l,n_core_inact_orb+p)=d(j,k,p)
         end do
       end do
     end do
@@ -269,11 +261,11 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   ! index p runs over the whole basis, t,u,v only over the active orbitals
   END_DOC
   implicit none
-  integer                        :: i,j,k,l,t,u,p,q,pp
+  integer                        :: i,j,k,l,t,u,p,q
   double precision, allocatable  :: f(:,:,:), d(:,:,:)
   
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP PRIVATE(j,k,l,p,pp,d,f) &
+  !$OMP PRIVATE(j,k,l,p,d,f) &
   !$OMP SHARED(n_core_inact_act_orb,mo_num,n_act_orb,n_core_inact_orb, &
   !$OMP   bielecCI_no,bielecCI,list_act,natorbsCI)
 
@@ -298,8 +290,7 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
     do k=1,n_act_orb
       do j=1,n_act_orb
         do p=1,n_act_orb
-          pp=n_act_orb-p+1
-          bielecCI_no(p,j,k,l)=d(pp,j,k)
+          bielecCI_no(p,j,k,l)=d(p,j,k)
         end do
       end do
 
@@ -316,9 +307,8 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
           d, n_act_orb)
     do k=1,n_act_orb
       do p=1,n_act_orb
-        pp=n_act_orb-p+1
         do j=1,n_act_orb
-          bielecCI_no(j,p,k,l)=d(pp,j,k)
+          bielecCI_no(j,p,k,l)=d(p,j,k)
         end do
       end do
     end do
@@ -337,10 +327,9 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
           d, n_act_orb*n_act_orb)
 
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do k=1,n_act_orb
         do j=1,n_act_orb
-          bielecCI_no(j,k,p,l)=d(j,k,pp)
+          bielecCI_no(j,k,p,l)=d(j,k,p)
         end do
       end do 
     end do  
@@ -363,10 +352,9 @@ BEGIN_PROVIDER [real*8, bielecCI_no, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
           d, n_act_orb*n_act_orb)
 
     do p=1,n_act_orb
-      pp=n_act_orb-p+1
       do k=1,n_act_orb
         do j=1,n_act_orb
-          bielecCI_no(j,k,l,list_act(p))=d(j,k,pp)
+          bielecCI_no(j,k,l,list_act(p))=d(j,k,p)
         end do
       end do 
     end do  

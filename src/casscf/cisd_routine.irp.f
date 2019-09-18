@@ -25,7 +25,8 @@ subroutine cisd_guess_wf
  generators_type = "HF"
  touch generators_type
  call run_cisd
- touch N_det psi_coef psi_det psi_coef_sorted psi_det_sorted
+ touch N_det psi_coef psi_det psi_coef_sorted psi_det_sorted psi_det_sorted_order  psi_average_norm_contrib_sorted
+
 end
 
 

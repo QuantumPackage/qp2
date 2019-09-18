@@ -189,7 +189,7 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
   !
   END_DOC
   implicit none
-  integer                        :: i,j,t,u,a,b,indx,jndx,bstart,ustart
+  integer                        :: i,j,t,u,a,b,indx,jndx,bstart,ustart,indx_shift
   
   real*8                         :: hessmat_itju
   real*8                         :: hessmat_itja
@@ -203,9 +203,14 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
     write(6,*) '  nMonoEx = ',nMonoEx
   endif
   
-  indx=1
+  !$OMP PARALLEL DEFAULT(NONE) &
+  !$OMP SHARED(hessmat2,n_core_inact_orb,n_act_orb,n_virt_orb,nMonoEx) &
+  !$OMP PRIVATE(i,indx,jndx,j,ustart,t,u,a,bstart,indx_shift)
+
+  !$OMP DO
   do i=1,n_core_inact_orb
     do t=1,n_act_orb
+      indx = t + (i-1)*n_act_orb
       jndx=indx
       do j=i,n_core_inact_orb
         if (i.eq.j) then
@@ -214,31 +219,31 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
           ustart=1
         end if
         do u=ustart,n_act_orb
-          hessmat2(indx,jndx)=hessmat_itju(i,t,j,u)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_itju(i,t,j,u)
           jndx+=1
         end do
       end do
       do j=1,n_core_inact_orb
         do a=1,n_virt_orb
-          hessmat2(indx,jndx)=hessmat_itja(i,t,j,a)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_itja(i,t,j,a)
           jndx+=1
         end do
       end do
       do u=1,n_act_orb
         do a=1,n_virt_orb
-          hessmat2(indx,jndx)=hessmat_itua(i,t,u,a)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_itua(i,t,u,a)
           jndx+=1
         end do
       end do
-      indx+=1
     end do
   end do
+  !$OMP END DO NOWAIT
   
-  do i=1,n_core_inact_orb
-    do a=1,n_virt_orb
+  indx_shift = n_core_inact_orb*n_act_orb
+  !$OMP DO
+  do a=1,n_virt_orb
+    do i=1,n_core_inact_orb
+      indx = a + (i-1)*n_virt_orb + indx_shift
       jndx=indx
       do j=i,n_core_inact_orb
         if (i.eq.j) then
@@ -247,24 +252,25 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
           bstart=1
         end if
         do b=bstart,n_virt_orb
-          hessmat2(indx,jndx)=hessmat_iajb(i,a,j,b)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_iajb(i,a,j,b)
           jndx+=1
         end do
       end do
       do t=1,n_act_orb
         do b=1,n_virt_orb
-          hessmat2(indx,jndx)=hessmat_iatb(i,a,t,b)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_iatb(i,a,t,b)
           jndx+=1
         end do
       end do
-      indx+=1
     end do
   end do
+  !$OMP END DO NOWAIT
   
-  do t=1,n_act_orb
-    do a=1,n_virt_orb
+  indx_shift += n_core_inact_orb*n_virt_orb
+  !$OMP DO 
+  do a=1,n_virt_orb
+    do t=1,n_act_orb
+      indx = a + (t-1)*n_virt_orb + indx_shift
       jndx=indx
       do u=t,n_act_orb
         if (t.eq.u) then
@@ -273,14 +279,22 @@ BEGIN_PROVIDER [real*8, hessmat2, (nMonoEx,nMonoEx)]
           bstart=1
         end if
         do b=bstart,n_virt_orb
-          hessmat2(indx,jndx)=hessmat_taub(t,a,u,b)
-          hessmat2(jndx,indx)=hessmat2(indx,jndx)
+          hessmat2(jndx,indx)=hessmat_taub(t,a,u,b)
           jndx+=1
         end do
       end do
-      indx+=1
     end do
   end do
+  !$OMP END DO 
+
+  !$OMP END PARALLEL
+  
+  do jndx=1,nMonoEx
+    do indx=1,jndx-1
+      hessmat2(indx,jndx) = hessmat2(jndx,indx)
+    enddo
+  enddo
+
   
 END_PROVIDER
 
@@ -522,68 +536,99 @@ real*8 function hessmat_taub(t,a,u,b)
   integer                        :: v3,x3
   real*8                         :: term,t1,t2,t3
   
+  double precision,allocatable :: P0tuvx_no_t(:,:,:)
+  double precision :: bielec_pqxx_no_2(n_act_orb,n_act_orb)
+  double precision :: bielec_pxxq_no_2(n_act_orb,n_act_orb)
   tt=list_act(t)
   aa=list_virt(a)
-  if (t.eq.u) then
-    if (a.eq.b) then
+  if (t == u) then
+    if (a == b) then
       ! ta/ta
       t1=occnum(tt)*Fipq(aa,aa)
       t2=0.D0
       t3=0.D0
       t1-=occnum(tt)*Fipq(tt,tt)
+      do x=1,n_act_orb
+        xx=list_act(x)
+        x3=x+n_core_inact_orb
+        do v=1,n_act_orb
+          vv=list_act(v)
+          v3=v+n_core_inact_orb
+          t2+=P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)
+        end do
+      end do
       do v=1,n_act_orb
         vv=list_act(v)
         v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
           x3=x+n_core_inact_orb
-          t2+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,aa,v3,x3)      &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
-              bielec_pxxq_no(aa,x3,v3,aa))
-          do y=1,n_act_orb
-            t3-=2.D0*P0tuvx_no(t,v,x,y)*bielecCI_no(t,v,y,xx)
+          t2+=(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))*              &
+              bielec_pxxq_no(aa,x3,v3,aa)
+        end do
+      end do
+      do y=1,n_act_orb
+        do x=1,n_act_orb
+          xx=list_act(x)
+          do v=1,n_act_orb
+            t3-=P0tuvx_no(t,v,x,y)*bielecCI_no(t,v,y,xx)
           end do
         end do
       end do
-      term=t1+t2+t3
+      term=t1+2.d0*(t2+t3)
     else
       bb=list_virt(b)
       ! ta/tb b/=a
-      term=occnum(tt)*Fipq(aa,bb)
+      term=0.5d0*occnum(tt)*Fipq(aa,bb)
+      do x=1,n_act_orb
+        xx=list_act(x)
+          x3=x+n_core_inact_orb
+        do v=1,n_act_orb
+          vv=list_act(v)
+          v3=v+n_core_inact_orb
+          term = term + P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)
+        end do
+      end do
       do v=1,n_act_orb
         vv=list_act(v)
         v3=v+n_core_inact_orb
         do x=1,n_act_orb
           xx=list_act(x)
           x3=x+n_core_inact_orb
-          term+=2.D0*(P0tuvx_no(t,t,v,x)*bielec_pqxx_no(aa,bb,v3,x3)    &
-              +(P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
-              *bielec_pxxq_no(aa,x3,v3,bb))
+          term= term + (P0tuvx_no(t,x,v,t)+P0tuvx_no(t,x,t,v))               &
+              *bielec_pxxq_no(aa,x3,v3,bb)
         end do
       end do
+      term += term
     end if
   else
     ! ta/ub t/=u
     uu=list_act(u)
     bb=list_virt(b)
-    term=0.D0
-    do v=1,n_act_orb
-      vv=list_act(v)
-      v3=v+n_core_inact_orb
-      do x=1,n_act_orb
-        xx=list_act(x)
-        x3=x+n_core_inact_orb
-        term+=2.D0*(P0tuvx_no(t,u,v,x)*bielec_pqxx_no(aa,bb,v3,x3)      &
-            +(P0tuvx_no(t,x,v,u)+P0tuvx_no(t,x,u,v))                 &
-            *bielec_pxxq_no(aa,x3,v3,bb))
+    allocate(P0tuvx_no_t(n_act_orb,n_act_orb,n_act_orb))
+    P0tuvx_no_t(:,:,:) = P0tuvx_no(t,:,:,:)
+    do x=1,n_act_orb
+      x3=x+n_core_inact_orb
+      do v=1,n_act_orb
+        v3=v+n_core_inact_orb
+        bielec_pqxx_no_2(v,x) = bielec_pqxx_no(aa,bb,v3,x3)
+        bielec_pxxq_no_2(v,x) = bielec_pxxq_no(aa,v3,x3,bb)
       end do
     end do
+    term=0.D0
+    do x=1,n_act_orb
+      do v=1,n_act_orb
+        term += P0tuvx_no_t(u,v,x)*bielec_pqxx_no_2(v,x)
+        term += bielec_pxxq_no_2(x,v) * (P0tuvx_no_t(x,v,u)+P0tuvx_no_t(x,u,v))
+      end do
+    end do
+    term = 6.d0*term
     if (a.eq.b) then
       term-=0.5D0*(occnum(tt)*Fipq(uu,tt)+occnum(uu)*Fipq(tt,uu))
       do v=1,n_act_orb
-        do x=1,n_act_orb
-          do y=1,n_act_orb
-            term-=P0tuvx_no(t,v,x,y)*bielecCI_no(x,y,v,uu)
+        do y=1,n_act_orb
+          do x=1,n_act_orb
+            term-=P0tuvx_no_t(v,x,y)*bielecCI_no(x,y,v,uu)
             term-=P0tuvx_no(u,v,x,y)*bielecCI_no(x,y,v,tt)
           end do
         end do
@@ -602,29 +647,41 @@ BEGIN_PROVIDER [real*8, hessdiag, (nMonoEx)]
   ! the diagonal of the Hessian, needed for the Davidson procedure
   END_DOC
   implicit none
-  integer                        :: i,t,a,indx
+  integer                        :: i,t,a,indx,indx_shift
   real*8                         :: hessmat_itju,hessmat_iajb,hessmat_taub
   
-  indx=0
+  !$OMP PARALLEL DEFAULT(NONE) &
+  !$OMP SHARED(hessdiag,n_core_inact_orb,n_act_orb,n_virt_orb,nMonoEx) &
+  !$OMP PRIVATE(i,indx,t,a,indx_shift)
+
+  !$OMP DO
   do i=1,n_core_inact_orb
     do t=1,n_act_orb
-      indx+=1
+      indx = t + (i-1)*n_act_orb
       hessdiag(indx)=hessmat_itju(i,t,i,t)
     end do
   end do
+  !$OMP END DO NOWAIT
   
-  do i=1,n_core_inact_orb
-    do a=1,n_virt_orb
-      indx+=1
+  indx_shift = n_core_inact_orb*n_act_orb
+  !$OMP DO 
+  do a=1,n_virt_orb
+    do i=1,n_core_inact_orb
+      indx = a + (i-1)*n_virt_orb + indx_shift
       hessdiag(indx)=hessmat_iajb(i,a,i,a)
     end do
   end do
+  !$OMP END DO NOWAIT
   
-  do t=1,n_act_orb
-    do a=1,n_virt_orb
-      indx+=1
+  indx_shift += n_core_inact_orb*n_virt_orb
+  !$OMP DO 
+  do a=1,n_virt_orb
+    do t=1,n_act_orb
+      indx = a + (t-1)*n_virt_orb + indx_shift
       hessdiag(indx)=hessmat_taub(t,a,t,a)
     end do
   end do
+  !$OMP END DO
+  !$OMP END PARALLEL
   
 END_PROVIDER

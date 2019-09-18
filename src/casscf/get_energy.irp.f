@@ -5,8 +5,9 @@ program print_2rdm
  !
  ! useful to test the active part of the spin trace 2 rdms
  END_DOC
+ no_vvvv_integrals = .True.
  read_wf = .True.
- touch read_wf
+ touch read_wf no_vvvv_integrals
  call routine
 end
 
@@ -52,4 +53,5 @@ subroutine routine
  print*,'accu             = ',accu(1)
  print*,'psi_energy_two_e = ',psi_energy_two_e
 
+ print *,  psi_energy_with_nucl_rep
 end

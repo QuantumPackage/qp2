@@ -52,7 +52,7 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_orb+n_act_orb,n_core_inact_orb+n_act_orb, mo_num)]
+BEGIN_PROVIDER [real*8, bielec_PxxQ, (mo_num,n_core_inact_act_orb,n_core_inact_act_orb, mo_num)]
   BEGIN_DOC
   ! bielec_PxxQ : integral (px|xq) with p,q arbitrary, x core or active
   ! indices are unshifted orbital numbers
@@ -153,4 +153,3 @@ BEGIN_PROVIDER [real*8, bielecCI, (n_act_orb,n_act_orb,n_act_orb, mo_num)]
   !$OMP END PARALLEL DO
 
 END_PROVIDER
-  
