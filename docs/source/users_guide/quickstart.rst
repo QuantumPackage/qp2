@@ -115,7 +115,7 @@ create an |EZFIO| database with the 6-31G basis set:
 
 .. code:: bash
 
-  qp create_ezfio -b "6-31G" hcn.xyz -o hcn
+  qp create_ezfio -b "6-31g" hcn.xyz -o hcn
 
 The EZFIO database now contains data relative to the nuclear coordinates
 and the atomic basis set:
