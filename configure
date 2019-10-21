@@ -9,6 +9,8 @@ eval set -- "$TEMP"
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
 
+# When updating version, update also etc files
+
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
