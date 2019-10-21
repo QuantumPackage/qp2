@@ -65,8 +65,15 @@ end = struct
 
 
   let read_mo_num () =
-    Ezfio.get_mo_basis_mo_num ()
-    |> MO_number.of_int
+    let elec_alpha_num =
+      Ezfio.get_electrons_elec_alpha_num ()
+    in
+    let result = 
+      Ezfio.get_mo_basis_mo_num ()
+    in
+    if result < elec_alpha_num then
+      failwith "More alpha electrons than MOs";
+    MO_number.of_int result
 
 
   let read_mo_class () =

@@ -6,6 +6,10 @@ type req_or_sub = REQ | SUB
 
 let localport = 42379
 
+
+let in_time_sum = ref 1.e-9
+and in_size_sum = ref 0.
+
 let () =
   let open Command_line in
   begin
@@ -15,6 +19,10 @@ let () =
 
     [ { short='g' ; long="get-input" ; opt=Optional ;
         doc="Downloads the EZFIO directory." ;
+        arg=Without_arg; } ;
+
+      { short='v' ; long="verbose" ; opt=Optional ;
+        doc="Prints the transfer speed." ;
         arg=Without_arg; } ;
 
       anonymous
@@ -39,6 +47,9 @@ let () =
       ADDRESS x
   in
 
+  let verbose =
+    Command_line.get_bool "verbose"
+  in
 
 
 
@@ -133,8 +144,8 @@ let () =
     let socket_in, socket_out =
       match req_or_sub with
       | REQ ->
-          create_socket  Zmq.Socket.rep  Zmq.Socket.bind     addr_in,
-          create_socket  Zmq.Socket.req  Zmq.Socket.connect  addr_out
+          create_socket  Zmq.Socket.router  Zmq.Socket.bind     addr_in,
+          create_socket  Zmq.Socket.dealer  Zmq.Socket.connect  addr_out
       | SUB ->
           create_socket  Zmq.Socket.sub  Zmq.Socket.connect  addr_in,
           create_socket  Zmq.Socket.pub  Zmq.Socket.bind     addr_out
@@ -144,19 +155,61 @@ let () =
         Zmq.Socket.subscribe  socket_in  "";
 
 
+    (*
     let action = 
+      if verbose then
+        begin
+          match req_or_sub with
+          | REQ -> (fun () ->
+                    let msg = 
+                      Zmq.Socket.recv_all  socket_in
+                    in
+                    let t0 = Unix.gettimeofday () in
+                    Zmq.Socket.send_all socket_out  msg;
+                    let in_size =
+                      float_of_int ( List.fold_left (fun accu x -> accu + String.length x) 0 msg )
+                      /. 8192. /. 1024.
+                    in
+                    let msg = 
+                      Zmq.Socket.recv_all  socket_out
+                    in
+                    let t1 = Unix.gettimeofday () in
+                    Zmq.Socket.send_all  socket_in msg;
+                    let in_time = t1 -. t0 in
+                    in_time_sum := !in_time_sum +. in_time;
+                    in_size_sum := !in_size_sum +. in_size;
+                    Printf.printf " %16.2f MiB/s  --  %16.2f MiB/s\n%!" (in_size /. in_time) (!in_size_sum /. !in_time_sum);
+                    )
+          | SUB -> (fun () ->
+                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+        end
+      else
+        begin
+          match req_or_sub with
+          | REQ -> (fun () ->
+                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out;
+                    Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
+          | SUB -> (fun () ->
+                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+        end
+    in
+    *)
+
+   let action_in = 
       match req_or_sub with
-      | REQ -> (fun () ->
-                Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out;
-                Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
-      | SUB -> (fun () ->
-                Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+        | SUB -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
     in
 
+    let action_out = 
+      match req_or_sub with
+        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
+        | SUB -> (fun () -> () )
+    in
 
     let pollitem =
       Zmq.Poll.mask_of
-      [| (socket_in, Zmq.Poll.In) |]
+        [| (socket_in,  Zmq.Poll.In) ; (socket_out, Zmq.Poll.In) |]
     in
 
 
@@ -166,12 +219,11 @@ let () =
           Zmq.Poll.poll  ~timeout:1000  pollitem
         in
 
-        match polling.(0) with
-          | Some Zmq.Poll.In     -> action ()
-          | None                 -> ()
-          | Some Zmq.Poll.In_out 
-          | Some Zmq.Poll.Out    -> ()
-
+        match polling with
+          | [| Some Zmq.Poll.In ; Some Zmq.Poll.In |]     -> ( action_out () ; action_in () )
+          | [| _                ; Some Zmq.Poll.In |]     ->   action_out () 
+          | [| Some Zmq.Poll.In ; _                |]     ->   action_in  () 
+          | _                    -> ()
     done;
 
     Zmq.Socket.close  socket_in;
@@ -277,7 +329,7 @@ let () =
         match arg with
         | EZFIO x -> 
           begin
-            Printf.sprintf "tar -zcf %s %s" temp_file x
+            Printf.sprintf "tar --exclude=\"*.gz.*\" -zcf %s %s" temp_file x
             |> Sys.command |> ignore;
             let fd =
               Unix.openfile  temp_file  [Unix.O_RDONLY]  0o640
@@ -363,12 +415,21 @@ let () =
                |> Zmq.Socket.send socket_in
       in
 
-      Printf.printf "On remote hosts, create ssh tunnel using:
-ssh -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s\n%!" 
+      Printf.printf "
+On remote hosts, create ssh tunnel using:
+ ssh -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s &
+Or from this host connect to clients using:
+ ssh -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d <host> &
+%!" 
                 (port  ) localhost (localport  )
                 (port+1) localhost (localport+1)
+                (port+2) localhost (localport+2)
                 (port+9) localhost (localport+9)
-                (Unix.gethostname ());
+                (Unix.gethostname ())
+                (port  ) (localport  )
+                (port+1) (localport+1)
+                (port+2) (localport+2)
+                (port+9) (localport+9);
       Printf.printf "Ready\n%!";
       while !run_status do
 

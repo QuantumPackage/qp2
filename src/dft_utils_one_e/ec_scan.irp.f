@@ -37,6 +37,7 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  gama     = 0.031091d0
  ! correlation energy lsda1
  call ec_only_lda_sr(0.d0,nup,ndo,e_c_lsda1)
+
  ! correlation energy per particle 
  e_c_lsda1 = e_c_lsda1/rho         
  xi       = spin_d/rho
@@ -62,6 +63,7 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  g_at2    = 1.d0/(1.d0 + 4.d0 * a*t*t)**0.25d0
  h1       = gama * phi_3 * dlog(1.d0 + w_1 * (1.d0 - g_at2))
  ! interpolation function 
+
  if(cst_1alph.gt.0.d0)then
   fc_alpha = dexp(-c_1c * alpha * inv_1alph) 
  else
@@ -86,6 +88,7 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
 
  ec_scan = e_c_1 + fc_alpha * (e_c_0 - e_c_1)
 end
+
 
 double precision function beta_rs(rs)
  implicit none
