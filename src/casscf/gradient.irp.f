@@ -171,11 +171,9 @@ BEGIN_PROVIDER [real*8, gradvec2, (nMonoEx)]
     norm_grad+=gradvec2(indx)*gradvec2(indx)
   end do
   norm_grad=sqrt(norm_grad)
-! if (bavard) then
     write(6,*)
     write(6,*) ' Norm of the orbital gradient (via D, P and integrals): ', norm_grad
     write(6,*)
-! endif
   
 END_PROVIDER
 
