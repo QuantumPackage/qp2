@@ -24,7 +24,7 @@ val to_alpha_beta : t -> (int64 array)*(int64 array)
 val to_bitlist_couple : t -> Bitlist.t * Bitlist.t
 
 (** Create from a bit list *)
-val of_bitlist_couple : ?n_int:Qptypes.N_int_number.t ->
+val of_bitlist_couple : n_int:Qptypes.N_int_number.t ->
   alpha:Qptypes.Elec_alpha_number.t ->
   beta:Qptypes.Elec_beta_number.t ->
   Bitlist.t * Bitlist.t -> t

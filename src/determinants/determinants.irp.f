@@ -44,6 +44,16 @@ BEGIN_PROVIDER [ integer, N_det ]
   ASSERT (N_det > 0)
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ integer, N_det_qp_edit  ]
+  implicit none
+  BEGIN_DOC
+! Number of determinants to print in qp_edit
+  END_DOC
+
+  N_det_qp_edit = min(N_det,10000)
+END_PROVIDER
+
 BEGIN_PROVIDER [integer, max_degree_exc]
   implicit none
   integer                        :: i,degree
@@ -476,7 +486,7 @@ subroutine save_wavefunction
   endif
   if (mpi_master) then
     call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
-    endif
+  endif
 end
 
 
@@ -504,12 +514,16 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
   integer*8, allocatable         :: psi_det_save(:,:,:)
   double precision, allocatable  :: psi_coef_save(:,:)
 
-  integer                        :: i,j,k
+  double precision               :: accu_norm
+  integer                        :: i,j,k, ndet_qp_edit
 
   if (mpi_master) then
+    ndet_qp_edit = min(ndet,N_det_qp_edit)
+
     call ezfio_set_determinants_N_int(N_int)
     call ezfio_set_determinants_bit_kind(bit_kind)
     call ezfio_set_determinants_N_det(ndet)
+    call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
     call ezfio_set_determinants_n_states(nstates)
     call ezfio_set_determinants_mo_label(mo_label)
 
@@ -522,10 +536,10 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
       enddo
     enddo
     call ezfio_set_determinants_psi_det(psi_det_save)
+    call ezfio_set_determinants_psi_det_qp_edit(psi_det_save)
     deallocate (psi_det_save)
 
     allocate (psi_coef_save(ndet,nstates))
-    double precision               :: accu_norm
     do k=1,nstates
       do i=1,ndet
         psi_coef_save(i,k) = psicoef(i,k)
@@ -535,6 +549,18 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
 
     call ezfio_set_determinants_psi_coef(psi_coef_save)
     deallocate (psi_coef_save)
+
+    allocate (psi_coef_save(ndet_qp_edit,nstates))
+    do k=1,nstates
+      do i=1,ndet_qp_edit
+        psi_coef_save(i,k) = psicoef(i,k)
+      enddo
+      call normalize(psi_coef_save(1,k),ndet_qp_edit)
+    enddo
+
+    call ezfio_set_determinants_psi_coef_qp_edit(psi_coef_save)
+    deallocate (psi_coef_save)
+
     call write_int(6,ndet,'Saved determinants')
   endif
 end
@@ -559,54 +585,80 @@ subroutine save_wavefunction_specified(ndet,nstates,psidet,psicoef,ndetsave,inde
   integer                        :: N_int2
   equivalence (det_8, det_bk)
 
-  integer                        :: i,k
+  integer                        :: i,j,k, ndet_qp_edit
 
-  call ezfio_set_determinants_N_int(N_int)
-  call ezfio_set_determinants_bit_kind(bit_kind)
-  call ezfio_set_determinants_N_det(ndetsave)
-  call ezfio_set_determinants_n_states(nstates)
-  call ezfio_set_determinants_mo_label(mo_label)
+  if (mpi_master) then
+    ndet_qp_edit = min(ndetsave,N_det_qp_edit)
+    call ezfio_set_determinants_N_int(N_int)
+    call ezfio_set_determinants_bit_kind(bit_kind)
+    call ezfio_set_determinants_N_det(ndetsave)
+    call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
+    call ezfio_set_determinants_n_states(nstates)
+    call ezfio_set_determinants_mo_label(mo_label)
 
-  N_int2 = (N_int*bit_kind)/8
-  allocate (psi_det_save(N_int2,2,ndetsave))
-  do i=1,ndetsave
-    do k=1,N_int
-      det_bk(k) = psidet(k,1,index_det_save(i))
-    enddo
-    do k=1,N_int2
-      psi_det_save(k,1,i) = det_8(k)
-    enddo
-    do k=1,N_int
-      det_bk(k) = psidet(k,2,index_det_save(i))
-    enddo
-    do k=1,N_int2
-      psi_det_save(k,2,i) = det_8(k)
-    enddo
-  enddo
-  call ezfio_set_determinants_psi_det(psi_det_save)
-  deallocate (psi_det_save)
-
-  allocate (psi_coef_save(ndetsave,nstates))
-  double precision               :: accu_norm(nstates)
-  accu_norm = 0.d0
-  do k=1,nstates
+    N_int2 = (N_int*bit_kind)/8
+    allocate (psi_det_save(N_int2,2,ndetsave))
     do i=1,ndetsave
-      accu_norm(k) = accu_norm(k) + psicoef(index_det_save(i),k) * psicoef(index_det_save(i),k)
-      psi_coef_save(i,k) = psicoef(index_det_save(i),k)
+      do k=1,N_int
+        det_bk(k) = psidet(k,1,index_det_save(i))
+      enddo
+      do k=1,N_int2
+        psi_det_save(k,1,i) = det_8(k)
+      enddo
+      do k=1,N_int
+        det_bk(k) = psidet(k,2,index_det_save(i))
+      enddo
+      do k=1,N_int2
+        psi_det_save(k,2,i) = det_8(k)
+      enddo
     enddo
-  enddo
-  do k = 1, nstates
-    accu_norm(k) = 1.d0/dsqrt(accu_norm(k))
-  enddo
-  do k=1,nstates
-    do i=1,ndetsave
-      psi_coef_save(i,k) = psi_coef_save(i,k) * accu_norm(k)
-    enddo
-  enddo
+    call ezfio_set_determinants_psi_det(psi_det_save)
+    call ezfio_set_determinants_psi_det_qp_edit(psi_det_save)
+    deallocate (psi_det_save)
 
-  call ezfio_set_determinants_psi_coef(psi_coef_save)
-  call write_int(6,ndet,'Saved determinants')
-  deallocate (psi_coef_save)
+    allocate (psi_coef_save(ndetsave,nstates))
+    double precision               :: accu_norm(nstates)
+    accu_norm = 0.d0
+    do k=1,nstates
+      do i=1,ndetsave
+        accu_norm(k) = accu_norm(k) + psicoef(index_det_save(i),k) * psicoef(index_det_save(i),k)
+        psi_coef_save(i,k) = psicoef(index_det_save(i),k)
+      enddo
+    enddo
+    do k = 1, nstates
+      accu_norm(k) = 1.d0/dsqrt(accu_norm(k))
+    enddo
+    do k=1,nstates
+      do i=1,ndetsave
+        psi_coef_save(i,k) = psi_coef_save(i,k) * accu_norm(k)
+      enddo
+    enddo
+
+    call ezfio_set_determinants_psi_coef(psi_coef_save)
+    deallocate (psi_coef_save)
+
+    allocate (psi_coef_save(ndet_qp_edit,nstates))
+    accu_norm = 0.d0
+    do k=1,nstates
+      do i=1,ndet_qp_edit
+        accu_norm(k) = accu_norm(k) + psicoef(index_det_save(i),k) * psicoef(index_det_save(i),k)
+        psi_coef_save(i,k) = psicoef(index_det_save(i),k)
+      enddo
+    enddo
+    do k = 1, nstates
+      accu_norm(k) = 1.d0/dsqrt(accu_norm(k))
+    enddo
+    do k=1,nstates
+      do i=1,ndet_qp_edit
+        psi_coef_save(i,k) = psi_coef_save(i,k) * accu_norm(k)
+      enddo
+    enddo
+
+    call ezfio_set_determinants_psi_coef(psi_coef_save)
+    deallocate (psi_coef_save)
+
+    call write_int(6,ndet,'Saved determinants')
+  endif
 end
 
 
