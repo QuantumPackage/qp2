@@ -143,7 +143,7 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
    END_DOC
 
    PROVIDE mpi_master nucl_coord nucl_charge nucl_num
-   if (disk_access_nuclear_repulsion.EQ.'Read') then
+   if (io_nuclear_repulsion == 'Read') then
      logical                        :: has
 
      if (mpi_master) then
@@ -194,7 +194,7 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
    call write_time(6)
    call write_double(6,nuclear_repulsion,'Nuclear repulsion energy')
 
-   if (disk_access_nuclear_repulsion.EQ.'Write') then
+   if (io_nuclear_repulsion == 'Write') then
      if (mpi_master) then
        call ezfio_set_nuclei_nuclear_repulsion(nuclear_repulsion)
      endif

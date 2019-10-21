@@ -35,19 +35,14 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  include 'constants.include.F'
 
 ! Input variables
-
  double precision, intent(in) :: rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_2
-
 ! Local variables
-
  double precision :: a,b,c,d,c_f,omega,delta
  double precision :: rho_13,rho_inv_13,rho_83,rho_113,rho_inv_113,denom
  double precision :: thr,huge_num,rho_inv
  double precision :: cst_2_113,cst_8_3,rho_2,rho_a_2,rho_b_2
  double precision :: tmp1,tmp2,tmp3,tmp4
  double precision :: big1,big2,big3
-
-! Output variables
 
 
 ! Constants of the LYP correlation functional
@@ -57,15 +52,25 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  c = 0.2533d0
  d = 0.349d0
 
- thr = 1d-10
+ ec_lyp_88 = 0.d0
+
+ thr = 1d-15
  huge_num = 1.d0/thr
+ if(dabs(rho_a).lt.thr)then
+  return 
+ endif
+
+ if(dabs(rho_b).lt.thr)then
+  return 
+ endif
 
  if(rho.lt.0.d0)then
   print*,'pb !! rho.lt.0.d0'
   stop
  endif
- rho_13  = rho**(1d0/3d0)
- rho_113 = rho**(11d0/3d0)
+
+ rho_13  = rho**(1.d0/3.d0)
+ rho_113 = rho**(11.d0/3.d0)
 
  if(dabs(rho_13) < thr) then
   rho_inv_13 = huge_num
@@ -76,13 +81,13 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  if (dabs(rho_113) < thr) then
   rho_inv_113 = huge_num
  else
-  rho_inv_113 = 1d0/rho_113
+  rho_inv_113 = 1.d0/rho_113
  endif
 
  if (dabs(rho) < thr) then
   rho_inv = huge_num
  else
-  rho_inv = 1d0/rho
+  rho_inv = 1.d0/rho
  endif
 
 ! Useful quantities to predefine
@@ -90,21 +95,21 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  denom = 1d0/(1d0 + d*rho_inv_13)
  omega = rho_inv_113*exp(-c*rho_inv_13)*denom
  delta = c*rho_inv_13 + d*rho_inv_13*denom
- c_f   = 0.3d0*(3d0*pi*pi)**(2d0/3d0)
+ c_f   = 0.3d0*(3.d0*pi*pi)**(2.d0/3.d0)
 
  rho_2   = rho  *rho
  rho_a_2 = rho_a*rho_a
  rho_b_2 = rho_b*rho_b
 
- cst_2_113 = 2d0**(11d0/3d0)
- cst_8_3   = 8d0/3d0
+ cst_2_113 = 2.d0**(11.d0/3.d0)
+ cst_8_3   = 8.d0/3.d0
 
  ! first term in the equation (2) of Preuss CPL, 1989
 
- big1 = 4d0*denom*rho_a*rho_b*rho_inv
+ big1 = 4.d0*denom*rho_a*rho_b*rho_inv
 
  tmp1 = cst_2_113*c_f*(rho_a**cst_8_3 + rho_b**cst_8_3)
- tmp2 = (47d0/18d0 - 7d0/18d0*delta)*grad_rho_2
+ tmp2 = (47.d0/18.d0 - 7.d0/18.d0*delta)*grad_rho_2
  tmp3 = - (5d0/2d0 - 1.d0/18d0*delta)*(grad_rho_a_2 + grad_rho_b_2)
  tmp4 = - (delta - 11d0)/9d0*(rho_a*rho_inv*grad_rho_a_2 + rho_b*rho_inv*grad_rho_b_2)
  big2 = rho_a*rho_b*(tmp1 + tmp2 + tmp3 + tmp4)
@@ -113,7 +118,6 @@ double precision function ec_lyp_88(rho,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,gr
  tmp2 = grad_rho_b_2*(2d0/3d0*rho_2 - rho_a_2)
  tmp3 = grad_rho_a_2*(2d0/3d0*rho_2 - rho_b_2)
  big3 = tmp1 + tmp2 + tmp3
-
 
  ec_lyp_88 = -a*big1 -a*b*omega*big2 -a*b*omega*big3
 

@@ -1,4 +1,4 @@
-type t = Bit.t list
+type t
 
 (** The zero bit list *)
 val zero : Qptypes.N_int_number.t -> t

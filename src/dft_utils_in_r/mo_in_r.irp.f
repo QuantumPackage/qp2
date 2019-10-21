@@ -22,6 +22,7 @@
 
 
  BEGIN_PROVIDER[double precision, mos_grad_in_r_array,(mo_num,n_points_final_grid,3)]
+&BEGIN_PROVIDER[double precision, mos_grad_in_r_array_tranp,(3,mo_num,n_points_final_grid)]
  implicit none
  BEGIN_DOC
  ! mos_grad_in_r_array(i,j,k)          = value of the kth component of the gradient of ith mo on the jth grid point
@@ -35,7 +36,36 @@
  do m=1,3
   call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_grad_in_r_array(1,1,m),ao_num,0.d0,mos_grad_in_r_array(1,1,m),mo_num)
  enddo
+ integer  :: i,j
+ do i = 1, n_points_final_grid
+  do j = 1, mo_num
+   do m = 1, 3
+     mos_grad_in_r_array_tranp(m,j,i) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
  END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
+ implicit none
+ integer  :: i,m,j
+ alpha_dens_kin_in_r = 0.d0
+ beta_dens_kin_in_r = 0.d0
+ do i = 1, n_points_final_grid
+  do j = 1, elec_alpha_num
+   do m = 1, 3
+    alpha_dens_kin_in_r(i) += 0.5d0 * mos_grad_in_r_array_tranp(m,j,i)**2.d0 
+   enddo
+  enddo
+  do j = 1, elec_beta_num
+   do m = 1, 3
+    beta_dens_kin_in_r(i)  += 0.5d0 * mos_grad_in_r_array_tranp(m,j,i)**2.d0
+   enddo
+  enddo
+ enddo
+ 
+ END_PROVIDER 
 
  BEGIN_PROVIDER[double precision, mos_lapl_in_r_array,(mo_num,n_points_final_grid,3)]
  implicit none

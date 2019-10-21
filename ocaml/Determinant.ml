@@ -3,7 +3,8 @@ open Sexplib.Std
 
 type t = int64 array [@@deriving sexp]
 
-let to_int64_array (x:t) = (x:int64 array)
+external to_int64_array : t -> int64 array = "%identity"
+external of_int64_array_no_check : int64 array -> t = "%identity"
 
 
 let to_alpha_beta x =
@@ -24,19 +25,6 @@ let to_bitlist_couple x =
   in (xa,xb)
 
 
-let bitlist_to_string ~mo_num x =
-  let len =
-    MO_number.to_int mo_num
-  in
-  let s =
-    List.map (function
-        | Bit.Zero -> "-"
-        | Bit.One  -> "+"
-    ) x
-    |> String.concat ""
-  in
-  String.sub s 0 len
-
 
 
 let of_int64_array ~n_int ~alpha ~beta x =
@@ -47,38 +35,29 @@ let of_int64_array ~n_int ~alpha ~beta x =
    in
    if ( (Bitlist.popcnt a) <> alpha) then
      begin
-       let mo_num = MO_number.get_max () in
-       let mo_num = MO_number.of_int mo_num ~max:mo_num  in
        failwith (Printf.sprintf "Expected %d electrons in alpha determinant
-%s" alpha (bitlist_to_string ~mo_num:mo_num a) )
+%s" alpha (Bitlist.to_string a) )
      end;
    if ( (Bitlist.popcnt b) <> beta ) then
      begin
-       let mo_num = MO_number.get_max () in
-       let mo_num = MO_number.of_int mo_num ~max:mo_num  in
        failwith (Printf.sprintf "Expected %d electrons in beta determinant
-%s" beta (bitlist_to_string ~mo_num:mo_num b) )
+%s" beta (Bitlist.to_string b) )
      end;
    x
 
-let of_int64_array_no_check x = x
 
-let of_bitlist_couple ?n_int ~alpha ~beta (xa,xb) =
+let of_bitlist_couple ~n_int ~alpha ~beta (xa,xb) =
   let ba, bb =
     Bitlist.to_int64_array xa ,
     Bitlist.to_int64_array xb
-  and n_int =
-    match n_int with
-    | Some x -> x
-    | None -> Bitlist.n_int_of_mo_num (List.length xa)
   in
   of_int64_array ~n_int ~alpha ~beta (Array.concat [ba;bb])
 
 
 let to_string ~mo_num x =
   let (xa,xb) = to_bitlist_couple x in
-  [ "  " ; bitlist_to_string ~mo_num xa ; "\n" ;
-    "  " ; bitlist_to_string ~mo_num xb ]
+  [ "  " ; Bitlist.to_string xa ; "\n" ;
+    "  " ; Bitlist.to_string xb ]
   |> String.concat ""
 
 
