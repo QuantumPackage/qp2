@@ -64,7 +64,7 @@
  enddo
 
  ! Ga-Kr
- do i = 31, 36
+ do i = 31, 100
   alpha_knowles(i) = 7.d0
  enddo
 

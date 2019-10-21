@@ -37,7 +37,9 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  gama     = 0.031091d0
  ! correlation energy lsda1
  call ec_only_lda_sr(0.d0,nup,ndo,e_c_lsda1)
-          
+
+ ! correlation energy per particle 
+ e_c_lsda1 = e_c_lsda1/rho         
  xi       = spin_d/rho
  rs       = (cst_43 * pi * rho)**(-cst_13)
  s        = drho/( 2.d0 * cst_3pi2**(cst_13) * rho**cst_43  )
@@ -61,7 +63,12 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  g_at2    = 1.d0/(1.d0 + 4.d0 * a*t*t)**0.25d0
  h1       = gama * phi_3 * dlog(1.d0 + w_1 * (1.d0 - g_at2))
  ! interpolation function 
- fc_alpha = dexp(-c_1c * alpha * inv_1alph) * step_f(cst_1alph) - d_c * dexp(c_2c * inv_1alph) * step_f(-cst_1alph) 
+
+ if(cst_1alph.gt.0.d0)then
+  fc_alpha = dexp(-c_1c * alpha * inv_1alph) 
+ else
+  fc_alpha = - d_c * dexp(c_2c * inv_1alph) 
+ endif
  ! first part of the correlation energy 
  e_c_1    = e_c_lsda1 + h1
  
@@ -82,15 +89,6 @@ double precision function ec_scan(rho_a,rho_b,tau,grad_rho_2)
  ec_scan = e_c_1 + fc_alpha * (e_c_0 - e_c_1)
 end
 
-double precision function step_f(x)
- implicit none
- double precision, intent(in) :: x
- if(x.lt.0.d0)then
-  step_f = 0.d0
- else
-  step_f = 1.d0 
- endif
-end             
 
 double precision function beta_rs(rs)
  implicit none
@@ -98,3 +96,4 @@ double precision function beta_rs(rs)
  beta_rs = 0.066725d0 * (1.d0 + 0.1d0 * rs)/(1.d0 + 0.1778d0 * rs)
 
 end
+

@@ -33,7 +33,7 @@ subroutine bitstring_to_list( string, list, n_elements, Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Gives the inidices(+1) of the bits set to 1 in the bit string
+  ! Gives the indices(+1) of the bits set to 1 in the bit string
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
@@ -212,4 +212,35 @@ subroutine print_spindet(string,Nint)
   call bitstring_to_str( output(1), string(1,1), Nint )
   print *,  trim(output(1))
 
+end
+
+logical function is_integer_in_string(bite,string,Nint)
+  use bitmasks
+ implicit none
+ integer, intent(in) :: bite,Nint
+ integer(bit_kind), intent(in) :: string(Nint)
+ integer(bit_kind) :: string_bite(Nint)
+ integer   :: i,itot,itot_and
+ character*(2048)                :: output(1)
+ string_bite = 0_bit_kind
+ call set_bit_to_integer(bite,string_bite,Nint)
+ itot = 0
+ itot_and = 0
+ is_integer_in_string = .False.
+!print*,''
+!print*,''
+!print*,'bite = ',bite
+!call bitstring_to_str( output(1), string_bite, Nint )
+! print *,  trim(output(1))
+!call bitstring_to_str( output(1), string, Nint )
+! print *,  trim(output(1))
+ do i = 1, Nint
+  itot += popcnt(string(i))
+  itot_and += popcnt(ior(string(i),string_bite(i)))
+ enddo
+!print*,'itot,itot_and',itot,itot_and
+ if(itot == itot_and)then
+  is_integer_in_string = .True. 
+ endif
+!pause 
 end

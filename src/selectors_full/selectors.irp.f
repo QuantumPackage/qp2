@@ -38,35 +38,18 @@ END_PROVIDER
   END_DOC
   integer                        :: i,k
 
-!  if (threshold_selectors == 1.d0) then
-!
-!    do i=1,N_det_selectors
-!      do k=1,N_int
-!        psi_selectors(k,1,i) = psi_det(k,1,i)
-!        psi_selectors(k,2,i) = psi_det(k,2,i)
-!      enddo
-!    enddo
-!    do k=1,N_states
-!      do i=1,N_det_selectors
-!        psi_selectors_coef(i,k) = psi_coef(i,k)
-!      enddo
-!    enddo
-!
-!  else
-
+  do i=1,N_det_selectors
+    do k=1,N_int
+      psi_selectors(k,1,i) = psi_det_sorted(k,1,i)
+      psi_selectors(k,2,i) = psi_det_sorted(k,2,i)
+    enddo
+  enddo
+  do k=1,N_states
     do i=1,N_det_selectors
-      do k=1,N_int
-        psi_selectors(k,1,i) = psi_det_sorted(k,1,i)
-        psi_selectors(k,2,i) = psi_det_sorted(k,2,i)
-      enddo
+      psi_selectors_coef(i,k) = psi_coef_sorted(i,k)
     enddo
-    do k=1,N_states
-      do i=1,N_det_selectors
-        psi_selectors_coef(i,k) = psi_coef_sorted(i,k)
-      enddo
-    enddo
+  enddo
 
-!  endif
 END_PROVIDER
 
 

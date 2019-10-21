@@ -1,3 +1,4 @@
+
 use bitmasks
 
 BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
@@ -248,6 +249,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   integer,allocatable               :: tmp_array(:)
   integer(bit_kind), allocatable :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable           :: banned(:,:,:), bannedOrb(:,:)
+  double precision, allocatable  :: coef_fullminilist_rev(:,:)
 
 
   double precision, allocatable   :: mat(:,:,:)
@@ -546,6 +548,14 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
+      if(pert_2rdm)then
+       allocate(coef_fullminilist_rev(N_states,fullinteresting(0))) 
+       do i=1,fullinteresting(0)
+        do j = 1, N_states
+          coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+        enddo
+       enddo
+      endif
       do i=1,fullinteresting(0)
         fullminilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,fullinteresting(i))
       enddo
@@ -597,12 +607,19 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
             
-            call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+            if(.not.pert_2rdm)then
+             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+            else 
+             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
+            endif
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
       deallocate(fullminilist,minilist)
+      if(pert_2rdm)then
+       deallocate(coef_fullminilist_rev)
+      endif
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
@@ -633,6 +650,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision :: E_shift
 
   logical, external :: detEq
+  double precision, allocatable :: values(:)
+  integer, allocatable          :: keys(:,:)
+  integer                       :: nkeys
+  
 
   if(sp == 3) then
     s1 = 1
@@ -682,6 +703,16 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       if( sum(abs(mat(1:N_states, p1, p2))) == 0d0) cycle
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
+
+      if (do_only_cas) then
+        integer, external :: number_of_holes, number_of_particles
+        if (number_of_particles(det)>0) then
+          cycle
+        endif
+        if (number_of_holes(det)>0) then
+          cycle
+        endif
+      endif
 
       if (do_ddci) then
         logical, external  :: is_a_two_holes_two_particles
@@ -734,7 +765,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
     end do
   end do
 end
-
 
 subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting)
   use bitmasks
