@@ -44,9 +44,12 @@ let psi_det () =
   let psi_det =
     Input.Determinants_by_hand.read ()
   in
-  Input.Determinants_by_hand.to_rst psi_det
-  |> Rst_string.to_string
-  |> print_endline
+  match psi_det with
+  | Some psi_det -> 
+      Input.Determinants_by_hand.to_rst psi_det
+      |> Rst_string.to_string
+      |> print_endline
+  | None -> ()
 
 
 
