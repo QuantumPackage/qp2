@@ -6,19 +6,23 @@ program casscf
   no_vvvv_integrals = .True.
   pt2_max = 0.02
   SOFT_TOUCH no_vvvv_integrals pt2_max
+  call run_stochastic_cipsi
   call run
 end
 
 subroutine run
   implicit none
   double precision               :: energy_old, energy
-  logical                        :: converged
+  logical                        :: converged,state_following_casscf_save
   integer                        :: iteration
   converged = .False.
 
   energy = 0.d0
   mo_label = "MCSCF"
   iteration = 1
+  state_following_casscf_save = state_following_casscf
+  state_following_casscf = .True.
+  touch state_following_casscf
   do while (.not.converged)
     call run_stochastic_cipsi
     energy_old = energy
@@ -35,12 +39,16 @@ subroutine run
     mo_coef = NewOrbs
     call save_mos
     iteration += 1
-    N_det = N_det/2
+    N_det = N_det/2 
     psi_det = psi_det_sorted
     psi_coef = psi_coef_sorted
     read_wf = .True.
     call clear_mo_map
     SOFT_TOUCH mo_coef N_det pt2_max  psi_det psi_coef 
+    if(iteration .gt. 3)then
+     state_following_casscf = state_following_casscf_save 
+     touch state_following_casscf
+    endif
 
   enddo
 

@@ -24,6 +24,9 @@ BEGIN_PROVIDER [real*8, SXmatrix, (nMonoEx+1,nMonoEx+1)]
     end do
   end do
   
+  do i = 1, nMonoEx
+   SXmatrix(i+1,i+1) += level_shift_casscf
+  enddo
   if (bavard) then
     do i=2,nMonoEx
       write(6,*) ' diagonal of the Hessian : ',i,hessmat2(i,i)
@@ -86,7 +89,7 @@ END_PROVIDER
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
   if (bavard) then
     write(6,*) ' SXdiag : eigenvalue for best overlap with '
-    write(6,*) '  previous orbitals = ',SXeigenval(best_vector_ovrlp_casscf)
+    write(6,*) ' previous orbitals = ',SXeigenval(best_vector_ovrlp_casscf)
     write(6,*) ' weight of the 1st element ',c0
   endif
  END_PROVIDER 
@@ -99,8 +102,10 @@ END_PROVIDER
   integer           :: i
   double precision  :: c0
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
+  print*,'c0 = ',c0
   do i=1,nMonoEx+1
     SXvector(i)=SXeigenvec(i,best_vector_ovrlp_casscf)/c0
+    print*,'',i,SXvector(i)
   end do
  END_PROVIDER
 
@@ -113,12 +118,31 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
   integer                        :: i,j,ialph
   
   if(state_following_casscf)then
+   print*,'Using the state following casscf '
    call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
        NatOrbsFCI, size(NatOrbsFCI,1),                                &
        Umat, size(Umat,1), 0.d0,                                      &
        NewOrbs, size(NewOrbs,1))
   else
-   NewOrbs = superci_natorb
+   double precision :: damp
+   print*,'Taking the lowest root for the CASSCF'
+   if(best_vector_ovrlp_casscf.ne.1)then
+    provide n_orb_swap
+   !call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
+   !    NatOrbsFCI, size(NatOrbsFCI,1),                                &
+   !    Umat, size(Umat,1), 0.d0,                                      &
+   !    NewOrbs, size(NewOrbs,1))
+     NewOrbs = switch_mo_coef
+     mo_coef = switch_mo_coef
+     soft_touch mo_coef
+     call save_mos_no_occ
+     stop
+   else 
+    call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
+        NatOrbsFCI, size(NatOrbsFCI,1),                                &
+        Umat, size(Umat,1), 0.d0,                                      &
+        NewOrbs, size(NewOrbs,1))
+   endif
   endif
   
 END_PROVIDER

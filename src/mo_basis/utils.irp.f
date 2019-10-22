@@ -4,7 +4,7 @@ subroutine save_mos
   integer                        :: i,j
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
-
+  print*,'Saving MOs'
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
@@ -18,6 +18,31 @@ subroutine save_mos
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
   deallocate (buffer)
+  print*,'End Saving MOs'
+
+end
+
+
+subroutine save_mos_no_occ
+  implicit none
+  double precision, allocatable  :: buffer(:,:)
+  integer                        :: i,j
+
+  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
+  print*,'Saving MOs'
+ !call ezfio_set_mo_basis_mo_num(mo_num)
+ !call ezfio_set_mo_basis_mo_label(mo_label)
+ !call ezfio_set_mo_basis_ao_md5(ao_md5)
+  allocate ( buffer(ao_num,mo_num) )
+  buffer = 0.d0
+  do j = 1, mo_num
+    do i = 1, ao_num
+      buffer(i,j) = mo_coef(i,j)
+    enddo
+  enddo
+  call ezfio_set_mo_basis_mo_coef(buffer)
+  deallocate (buffer)
+  print*,'End Saving MOs'
 
 end
 
@@ -217,10 +242,10 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
 end
 
 
-subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,mo_coef_new)
+subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
   implicit none
   integer,intent(in)             :: lda,m,n
-  double precision, intent(in)   :: matrix(lda,n)
+  double precision, intent(in)   :: matrix(lda,n),mo_coef_before(ao_num,m)
   double precision, intent(out)  :: eig(m),mo_coef_new(ao_num,m)
 
   integer :: i,j
@@ -241,7 +266,7 @@ subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,ei
       A(i,j) = matrix(i,j)
     enddo
   enddo
-  mo_coef_tmp = mo_coef
+  mo_coef_tmp = mo_coef_before
 
   call svd(A,lda,U,lda,D,Vt,lda,m,n)
 
@@ -261,7 +286,7 @@ subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,ei
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  ''
 
-  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_tmp,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef_new,size(mo_coef,1))
+  call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_tmp,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef_new,size(mo_coef_new,1))
 
   do i=1,m
     eig(i) = D(i)

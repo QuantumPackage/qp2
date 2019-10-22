@@ -16,30 +16,34 @@ subroutine routine_bis
  implicit none
  integer :: i,j
  double precision :: accu_d,accu_od
- accu_d  = 0.d0
- accu_od = 0.d0
- print*,''
- print*,''
- print*,''
- do i = 1, mo_num
+!accu_d  = 0.d0
+!accu_od = 0.d0
+!print*,''
+!print*,''
+!print*,''
+!do i = 1, mo_num
 ! write(*,'(100(F8.5,X))')super_ci_dm(i,:)
-  accu_d += super_ci_dm(i,i)
-  do j = i+1, mo_num
-   accu_od += dabs(super_ci_dm(i,j) - super_ci_dm(j,i))
-  enddo
- enddo
- print*,''
- print*,''
- print*,'accu_d = ',accu_d
- print*,'n_elec = ',elec_num
- print*,'accu_od= ',accu_od 
- print*,''
- accu_d = 0.d0
- do i = 1, N_det
-  accu_d += psi_coef(i,1)**2
- enddo
- print*,'accu_d = ',accu_d
- provide superci_natorb
+! accu_d += super_ci_dm(i,i)
+! do j = i+1, mo_num
+!  accu_od += dabs(super_ci_dm(i,j) - super_ci_dm(j,i))
+! enddo
+!enddo
+!print*,''
+!print*,''
+!print*,'accu_d = ',accu_d
+!print*,'n_elec = ',elec_num
+!print*,'accu_od= ',accu_od 
+!print*,''
+!accu_d = 0.d0
+!do i = 1, N_det
+! accu_d += psi_coef(i,1)**2
+!enddo
+!print*,'accu_d = ',accu_d
+!provide superci_natorb
+
+ provide switch_mo_coef
+ mo_coef = switch_mo_coef
+ call save_mos
 end
 
 subroutine routine
