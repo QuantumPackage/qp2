@@ -40,6 +40,18 @@ END_PROVIDER
   ! Eigenvectors/eigenvalues of the single-excitation matrix
   END_DOC
   call lapack_diag(SXeigenval,SXeigenvec,SXmatrix,nMonoEx+1,nMonoEx+1)
+  if (bavard) then
+    write(6,*) ' SXdiag : lowest 5 eigenvalues '
+    write(6,*) ' 1 - ',SXeigenval(1),SXeigenvec(1,1)
+    if(nmonoex.gt.0)then
+     write(6,*) ' 2 - ',SXeigenval(2),SXeigenvec(1,2)
+     write(6,*) ' 3 - ',SXeigenval(3),SXeigenvec(1,3)
+     write(6,*) ' 4 - ',SXeigenval(4),SXeigenvec(1,4)
+     write(6,*) ' 5 - ',SXeigenval(5),SXeigenvec(1,5)
+    endif
+    write(6,*)
+    write(6,*) ' SXdiag : lowest eigenvalue = ',SXeigenval(1)
+  endif
 END_PROVIDER
 
  BEGIN_PROVIDER [real*8, SXvector, (nMonoEx+1)]
@@ -51,16 +63,6 @@ END_PROVIDER
   integer                        :: ierr,matz,i
   real*8                         :: c0
   
-  if (bavard) then
-    write(6,*) ' SXdiag : lowest 5 eigenvalues '
-    write(6,*) ' 1 - ',SXeigenval(1),SXeigenvec(1,1)
-    write(6,*) ' 2 - ',SXeigenval(2),SXeigenvec(1,2)
-    write(6,*) ' 3 - ',SXeigenval(3),SXeigenvec(1,3)
-    write(6,*) ' 4 - ',SXeigenval(4),SXeigenvec(1,4)
-    write(6,*) ' 5 - ',SXeigenval(5),SXeigenvec(1,5)
-    write(6,*)
-    write(6,*) ' SXdiag : lowest eigenvalue = ',SXeigenval(1)
-  endif
   energy_improvement = SXeigenval(1)
   
   integer                        :: best_vector

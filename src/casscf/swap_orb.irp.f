@@ -25,13 +25,11 @@
    do a = 1, n_virt_orb
     aorb = list_virt(a)
     super_ci_dm(jorb,iorb) += -2.d0 * lowest_super_ci_coef_mo(aorb,iorb) * lowest_super_ci_coef_mo(aorb,jorb) ! second term in B3.a
-    super_ci_dm(iorb,jorb) += -2.d0 * lowest_super_ci_coef_mo(aorb,iorb) * lowest_super_ci_coef_mo(aorb,jorb) ! second term in B3.a
    enddo
    do t = 1, n_act_orb
     torb = list_act(t)
     ! thrid term of the B3.a 
     super_ci_dm(jorb,iorb) += - lowest_super_ci_coef_mo(iorb,torb) * lowest_super_ci_coef_mo(jorb,torb) * (2.d0 - occ_act(t))
-    super_ci_dm(iorb,jorb) += - lowest_super_ci_coef_mo(iorb,torb) * lowest_super_ci_coef_mo(jorb,torb) * (2.d0 - occ_act(t))
    enddo
   enddo
  enddo
@@ -44,7 +42,7 @@
    super_ci_dm(iorb,torb) = c0 * lowest_super_ci_coef_mo(torb,iorb) * (2.d0 - occ_act(t))
    super_ci_dm(torb,iorb) = c0 * lowest_super_ci_coef_mo(torb,iorb) * (2.d0 - occ_act(t))
    do a = 1, n_virt_orb
-    aorb = list_act(a)
+    aorb = list_virt(a)
     super_ci_dm(iorb,torb) += - lowest_super_ci_coef_mo(aorb,iorb) * lowest_super_ci_coef_mo(aorb,torb) * occ_act(t)
     super_ci_dm(torb,iorb) += - lowest_super_ci_coef_mo(aorb,iorb) * lowest_super_ci_coef_mo(aorb,torb) * occ_act(t)
    enddo
@@ -67,7 +65,7 @@
   super_ci_dm(torb,torb) = occ_act(t) ! first term of equation B3.d 
   do x = 1, n_act_orb
    xorb = list_act(x) 
-   super_ci_dm(torb,uorb) += - occ_act(x) * occ_act(t)* mat_tmp_dm_super_ci(x,x) ! second term involving the ONE-rdm 
+   super_ci_dm(torb,torb) += - occ_act(x) * occ_act(t)* mat_tmp_dm_super_ci(x,x) ! second term involving the ONE-rdm 
   enddo
   do u = 1, n_act_orb
    uorb = list_act(u)
@@ -77,7 +75,7 @@
     xorb = list_act(x) 
     do v = 1, n_act_orb
      vorb = list_act(v) 
-     super_ci_dm(torb,uorb) +=  2.d0 * P0tuvx(v,x,t,u) * mat_tmp_dm_super_ci(v,x) ! second term involving the TWO-rdm 
+     super_ci_dm(torb,uorb) +=  2.d0 * P0tuvx_no(v,x,t,u) * mat_tmp_dm_super_ci(v,x) ! second term involving the TWO-rdm 
     enddo
    enddo
    
@@ -143,7 +141,7 @@
   do x = 1, n_act_orb
    xorb = list_act(x)
    do a = 1, n_virt_orb
-    aorb = list_act(a)
+    aorb = list_virt(a)
     mat_tmp_dm_super_ci(x,v) += lowest_super_ci_coef_mo(aorb,vorb) * lowest_super_ci_coef_mo(aorb,xorb)
    enddo
    do i = 1, n_core_inact_orb

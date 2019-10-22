@@ -34,6 +34,11 @@ subroutine routine_bis
  print*,'n_elec = ',elec_num
  print*,'accu_od= ',accu_od 
  print*,''
+ accu_d = 0.d0
+ do i = 1, N_det
+  accu_d += psi_coef(i,1)**2
+ enddo
+ print*,'accu_d = ',accu_d
 end
 
 subroutine routine
