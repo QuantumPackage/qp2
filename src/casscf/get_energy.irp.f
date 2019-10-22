@@ -22,7 +22,7 @@ subroutine routine_bis
  print*,''
  print*,''
  do i = 1, mo_num
-  write(*,'(100(F8.5,X))')super_ci_dm(i,:)
+! write(*,'(100(F8.5,X))')super_ci_dm(i,:)
   accu_d += super_ci_dm(i,i)
   do j = i+1, mo_num
    accu_od += dabs(super_ci_dm(i,j) - super_ci_dm(j,i))
