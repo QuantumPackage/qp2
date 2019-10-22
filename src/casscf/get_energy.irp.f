@@ -39,6 +39,7 @@ subroutine routine_bis
   accu_d += psi_coef(i,1)**2
  enddo
  print*,'accu_d = ',accu_d
+ provide superci_natorb
 end
 
 subroutine routine

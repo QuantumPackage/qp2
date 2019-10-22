@@ -52,8 +52,8 @@
  ! equation B3.c of the annex B of Roos et. al. Chemical Physics 48 (1980) 157-173
  do i = 1, n_core_inact_orb
   iorb = list_core_inact(i)
-  do a = 1, n_act_orb
-   aorb = list_act(a)
+  do a = 1, n_virt_orb
+   aorb = list_virt(a)
    super_ci_dm(aorb,iorb) = 2.d0 * c0 * lowest_super_ci_coef_mo(aorb,iorb)
    super_ci_dm(iorb,aorb) = 2.d0 * c0 * lowest_super_ci_coef_mo(aorb,iorb)
   enddo
@@ -125,6 +125,12 @@
 
  END_PROVIDER 
 
+ BEGIN_PROVIDER [double precision, superci_natorb, (ao_num,mo_num)
+&BEGIN_PROVIDER [double precision, superci_nat_occ, (mo_num)
+ implicit none
+ call general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(super_ci_dm,mo_num,mo_num,mo_num,superci_nat_occ,superci_natorb)
+
+END_PROVIDER 
 
  BEGIN_PROVIDER [double precision, mat_tmp_dm_super_ci, (n_act_orb,n_act_orb)]
  implicit none
