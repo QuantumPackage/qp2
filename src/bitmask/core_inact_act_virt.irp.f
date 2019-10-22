@@ -129,6 +129,15 @@ BEGIN_PROVIDER [integer, dim_list_inact_orb]
    dim_list_inact_orb = max(n_inact_orb,1)
 END_PROVIDER
 
+BEGIN_PROVIDER [integer, dim_list_core_inact_orb]
+  implicit none
+  BEGIN_DOC
+  ! dimensions for the allocation of list_core.
+  ! it is at least 1
+  END_DOC
+   dim_list_core_inact_orb = max(n_core_inact_orb,1)
+END_PROVIDER
+
 BEGIN_PROVIDER [integer, dim_list_act_orb]
    implicit none
    BEGIN_DOC
@@ -328,7 +337,7 @@ END_PROVIDER
  
 
  
- BEGIN_PROVIDER [ integer, list_core_inact        , (n_core_inact_orb) ]
+ BEGIN_PROVIDER [ integer, list_core_inact        , (dim_list_core_inact_orb) ]
 &BEGIN_PROVIDER [ integer, list_core_inact_reverse, (mo_num) ]
    implicit none
    BEGIN_DOC
