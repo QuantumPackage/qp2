@@ -123,12 +123,14 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
        NewOrbs, size(NewOrbs,1))
 
     level_shift_casscf *= 0.5D0
+    level_shift_casscf = max(level_shift_casscf,0.002d0)
    !touch level_shift_casscf
   else
    if(best_vector_ovrlp_casscf.ne.1.and.n_orb_swap.ne.0)then
      print*,'Taking the lowest root for the CASSCF'
      print*,'!!! SWAPPING MOS !!!!!!'
      level_shift_casscf *= 2.D0
+    level_shift_casscf = min(level_shift_casscf,0.5d0)
      print*,'level_shift_casscf = ',level_shift_casscf
      NewOrbs = switch_mo_coef
     !mo_coef = switch_mo_coef
@@ -137,6 +139,7 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
     !stop
    else 
     level_shift_casscf *= 0.5D0
+    level_shift_casscf = max(level_shift_casscf,0.002d0)
    !touch level_shift_casscf
     call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
         NatOrbsFCI, size(NatOrbsFCI,1),                                &
