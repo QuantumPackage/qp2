@@ -102,10 +102,8 @@ END_PROVIDER
   integer           :: i
   double precision  :: c0
   c0=SXeigenvec(1,best_vector_ovrlp_casscf)
-  print*,'c0 = ',c0
   do i=1,nMonoEx+1
     SXvector(i)=SXeigenvec(i,best_vector_ovrlp_casscf)/c0
-    print*,'',i,SXvector(i)
   end do
  END_PROVIDER
 
@@ -123,21 +121,23 @@ BEGIN_PROVIDER [double precision, NewOrbs, (ao_num,mo_num) ]
        NatOrbsFCI, size(NatOrbsFCI,1),                                &
        Umat, size(Umat,1), 0.d0,                                      &
        NewOrbs, size(NewOrbs,1))
+
+    level_shift_casscf *= 0.5D0
+   !touch level_shift_casscf
   else
-   double precision :: damp
-   print*,'Taking the lowest root for the CASSCF'
-   if(best_vector_ovrlp_casscf.ne.1)then
-    provide n_orb_swap
-   !call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
-   !    NatOrbsFCI, size(NatOrbsFCI,1),                                &
-   !    Umat, size(Umat,1), 0.d0,                                      &
-   !    NewOrbs, size(NewOrbs,1))
+   if(best_vector_ovrlp_casscf.ne.1.and.n_orb_swap.ne.0)then
+     print*,'Taking the lowest root for the CASSCF'
+     print*,'!!! SWAPPING MOS !!!!!!'
+     level_shift_casscf *= 2.D0
+     print*,'level_shift_casscf = ',level_shift_casscf
      NewOrbs = switch_mo_coef
-     mo_coef = switch_mo_coef
-     soft_touch mo_coef
-     call save_mos_no_occ
-     stop
+    !mo_coef = switch_mo_coef
+    !soft_touch mo_coef
+    !call save_mos_no_occ
+    !stop
    else 
+    level_shift_casscf *= 0.5D0
+   !touch level_shift_casscf
     call dgemm('N','T', ao_num,mo_num,mo_num,1.d0,                     &
         NatOrbsFCI, size(NatOrbsFCI,1),                                &
         Umat, size(Umat,1), 0.d0,                                      &

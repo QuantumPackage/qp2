@@ -13,6 +13,7 @@
 
  BEGIN_PROVIDER [integer, max_overlap, (nMonoEx)]
 &BEGIN_PROVIDER [integer, n_max_overlap]
+&BEGIN_PROVIDER [integer, dim_n_max_overlap]
  implicit none
  double precision, allocatable :: vec_tmp(:)
  integer, allocatable :: iorder(:)
@@ -21,20 +22,22 @@
  do i = 1, nMonoEx
   iorder(i)  = i
   vec_tmp(i) = -dabs(SXvector_lowest(i))
-  print*,'vec_tmp(i) = ',i,vec_tmp(i)
+ !print*,'vec_tmp(i) = ',i,vec_tmp(i)
  enddo
  call dsort(vec_tmp,iorder,nMonoEx)
  n_max_overlap = 0
  do i = 1, nMonoEx
   if(dabs(vec_tmp(i)).gt.thresh_overlap_switch)then
-   print*,vec_tmp(i),iorder(i)
+ ! print*,vec_tmp(i),iorder(i)
    n_max_overlap += 1
    max_overlap(n_max_overlap) = iorder(i)
   endif
  enddo
+ dim_n_max_overlap = max(1,n_max_overlap)
  END_PROVIDER 
 
- BEGIN_PROVIDER [integer, orb_swap, (2,n_max_overlap)]
+ BEGIN_PROVIDER [integer, orb_swap, (2,dim_n_max_overlap)]
+&BEGIN_PROVIDER [integer, index_orb_swap, (dim_n_max_overlap)]
 &BEGIN_PROVIDER [integer, n_orb_swap ]
  implicit none
  use bitmasks ! you need to include the bitmasks_module.f90 features
@@ -44,27 +47,33 @@
   imono = max_overlap(i)
   iorb = excit(1,imono)
   jorb = excit(2,imono)
-  if (excit_class(imono) == "c-a")then ! core --> active rotation
+  if (excit_class(imono) == "c-a" .and.hessmat2(imono,imono).gt.0.d0)then ! core --> active rotation
    n_orb_swap += 1
    orb_swap(1,n_orb_swap) = iorb ! core 
    orb_swap(2,n_orb_swap) = jorb ! active
-  else if (excit_class(imono) == "a-v")then ! active --> virtual rotation
+   index_orb_swap(n_orb_swap) = imono
+  else if (excit_class(imono) == "a-v" .and.hessmat2(imono,imono).gt.0.d0)then ! active --> virtual rotation
    n_orb_swap += 1
    orb_swap(1,n_orb_swap) = jorb ! virtual 
    orb_swap(2,n_orb_swap) = iorb ! active
+   index_orb_swap(n_orb_swap) = imono
   endif
  enddo
- print*,'n_orb_swap = ',n_orb_swap
- do i = 1, n_orb_swap
-  print*,orb_swap(1,i),'-->',orb_swap(2,i)
- enddo
 
- orb_swap_tmp = orb_swap
- integer :: orb_swap_tmp(2,n_max_overlap)
+ integer,allocatable :: orb_swap_tmp(:,:)
+ allocate(orb_swap_tmp(2,dim_n_max_overlap))
+ do i = 1, n_orb_swap
+  orb_swap_tmp(1,i) = orb_swap(1,i)
+  orb_swap_tmp(2,i) = orb_swap(2,i)
+ enddo
+ 
  integer(bit_kind), allocatable :: det_i(:),det_j(:)
  allocate(det_i(N_int),det_j(N_int))
  logical, allocatable :: good_orb_rot(:)
  allocate(good_orb_rot(n_orb_swap))
+ integer, allocatable ::  index_orb_swap_tmp(:) 
+ allocate(index_orb_swap_tmp(dim_n_max_overlap))
+ index_orb_swap_tmp = index_orb_swap
  good_orb_rot = .True.
  integer :: icount,k
  do i = 1, n_orb_swap
@@ -92,14 +101,15 @@
  do i = 1, icount
   if(good_orb_rot(i))then
    n_orb_swap += 1
+   index_orb_swap(n_orb_swap) = index_orb_swap_tmp(i)
    orb_swap(1,n_orb_swap) = orb_swap_tmp(1,i)
    orb_swap(2,n_orb_swap) = orb_swap_tmp(2,i)
   endif
  enddo
 
- print*,'Cleaning !!'
  print*,'n_orb_swap = ',n_orb_swap
  do i = 1, n_orb_swap
+  print*,'imono = ',index_orb_swap(i)
   print*,orb_swap(1,i),'-->',orb_swap(2,i)
  enddo
  END_PROVIDER 

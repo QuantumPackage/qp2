@@ -4,7 +4,6 @@ subroutine save_mos
   integer                        :: i,j
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
-  print*,'Saving MOs'
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
@@ -18,7 +17,6 @@ subroutine save_mos
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
   deallocate (buffer)
-  print*,'End Saving MOs'
 
 end
 
@@ -29,7 +27,6 @@ subroutine save_mos_no_occ
   integer                        :: i,j
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
-  print*,'Saving MOs'
  !call ezfio_set_mo_basis_mo_num(mo_num)
  !call ezfio_set_mo_basis_mo_label(mo_label)
  !call ezfio_set_mo_basis_ao_md5(ao_md5)
@@ -42,7 +39,6 @@ subroutine save_mos_no_occ
   enddo
   call ezfio_set_mo_basis_mo_coef(buffer)
   deallocate (buffer)
-  print*,'End Saving MOs'
 
 end
 
