@@ -11,6 +11,8 @@ eval set -- "$TEMP"
 
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
+unset CC
+unset CCXX
 
 # When updating version, update also etc files
 

@@ -17,6 +17,10 @@ function run() {
 }
 
 
+@test "B-B" { # 3s
+  run b2_stretched.ezfio -48.9950585752809
+}
+
 @test "SiH2_3B1" { # 0.539000  1.51094s
   run sih2_3b1.ezfio -289.9654718650881
 }

@@ -102,7 +102,7 @@ subroutine run_stochastic_cipsi
 
     ! Add selected determinants
     call copy_H_apply_buffer_to_wf()
-    call save_wavefunction
+!    call save_wavefunction
 
     PROVIDE  psi_coef
     PROVIDE  psi_det

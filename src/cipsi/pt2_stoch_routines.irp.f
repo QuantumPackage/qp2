@@ -156,7 +156,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     do pt2_stoch_istate=1,N_states
       state_average_weight(:) = 0.d0
       state_average_weight(pt2_stoch_istate) = 1.d0
-      TOUCH state_average_weight pt2_stoch_istate
+      TOUCH state_average_weight pt2_stoch_istate selection_weight
 
       PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals pt2_w
       PROVIDE psi_selectors pt2_u pt2_J pt2_R
@@ -720,92 +720,95 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ double precision,     pt2_w, (N_det_generators) ]
-&BEGIN_PROVIDER [ double precision,     pt2_cW, (0:N_det_generators) ]
-&BEGIN_PROVIDER [ double precision,     pt2_W_T ]
-&BEGIN_PROVIDER [ double precision,     pt2_u_0 ]
-&BEGIN_PROVIDER [ integer,              pt2_n_0, (pt2_N_teeth+1) ]
-  implicit none
-  integer :: i, t
-  double precision, allocatable :: tilde_w(:), tilde_cW(:)
-  double precision :: r, tooth_width
-  integer, external :: pt2_find_sample
+ BEGIN_PROVIDER [ double precision, pt2_w, (N_det_generators) ]
+&BEGIN_PROVIDER [ double precision, pt2_cW, (0:N_det_generators) ]
+&BEGIN_PROVIDER [ double precision, pt2_W_T ]
+&BEGIN_PROVIDER [ double precision, pt2_u_0 ]
+&BEGIN_PROVIDER [ integer,          pt2_n_0, (pt2_N_teeth+1) ]
+   implicit none
+   integer                        :: i, t
+   double precision, allocatable  :: tilde_w(:), tilde_cW(:)
+   double precision               :: r, tooth_width
+   integer, external              :: pt2_find_sample
+   
+   double precision               :: rss
+   double precision, external     :: memory_of_double, memory_of_int
+   rss = memory_of_double(2*N_det_generators+1)
+   call check_mem(rss,irp_here)
+   
+   if (N_det_generators == 1) then
+     
+     pt2_w(1)   = 1.d0
+     pt2_cw(1)  = 1.d0
+     pt2_u_0    = 1.d0
+     pt2_W_T    = 0.d0
+     pt2_n_0(1) = 0
+     pt2_n_0(2) = 1
+     
+   else
+     
+     allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
+     
+     tilde_cW(0) = 0d0
+     
+     do i=1,N_det_generators
+       tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
+     enddo
+     
+     double precision               :: norm
+     norm = 0.d0
+     do i=N_det_generators,1,-1
+       norm += tilde_w(i)
+     enddo
+     
+     tilde_w(:) = tilde_w(:) / norm
+     
+     tilde_cW(0) = -1.d0
+     do i=1,N_det_generators
+       tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
+     enddo
+     tilde_cW(:) = tilde_cW(:) + 1.d0
+     
+     pt2_n_0(1) = 0
+     do
+     pt2_u_0 = tilde_cW(pt2_n_0(1))
+     r = tilde_cW(pt2_n_0(1) + pt2_minDetInFirstTeeth)
+     pt2_W_T = (1d0 - pt2_u_0) / dble(pt2_N_teeth)
+     if(pt2_W_T >= r - pt2_u_0) then
+       exit
+     end if
+     pt2_n_0(1) += 1
+     if(N_det_generators - pt2_n_0(1) < pt2_minDetInFirstTeeth * pt2_N_teeth) then
+       print *, "teeth building failed"
+       stop -1
+     end if
+   end do
+   
+   do t=2, pt2_N_teeth
+     r = pt2_u_0 + pt2_W_T * dble(t-1)
+     pt2_n_0(t) = pt2_find_sample(r, tilde_cW)
+   end do
+   pt2_n_0(pt2_N_teeth+1) = N_det_generators
+   
+   pt2_w(:pt2_n_0(1)) = tilde_w(:pt2_n_0(1))
+   do t=1, pt2_N_teeth
+     tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
+     if (tooth_width == 0.d0) then
+       tooth_width = sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1)))
+     endif
+     ASSERT(tooth_width > 0.d0)
+     do i=pt2_n_0(t)+1, pt2_n_0(t+1)
+       pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
+     end do
+   end do
+   
+   pt2_cW(0) = 0d0
+   do i=1,N_det_generators
+     pt2_cW(i) = pt2_cW(i-1) + pt2_w(i)
+   end do
+   pt2_n_0(pt2_N_teeth+1) = N_det_generators
 
-  double precision :: rss
-  double precision, external :: memory_of_double, memory_of_int
-  if (N_det_generators == 1) then
-    pt2_w = 1.d0
-    pt2_cw = 1.d0
-    pt2_W_T = 1.d0
-    pt2_u_0 = 1.d0
-    pt2_n_0 = 1
-    return
-  endif
-
-  rss = memory_of_double(2*N_det_generators+1)
-  call check_mem(rss,irp_here)
-
-  allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
-
-  tilde_cW(0) = 0d0
-
-  do i=1,N_det_generators
-    tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
-  enddo
-
-  double precision :: norm
-  norm = 0.d0
-  do i=N_det_generators,1,-1
-    norm += tilde_w(i)
-  enddo
-
-  tilde_w(:) = tilde_w(:) / norm
-
-  tilde_cW(0) = -1.d0
-  do i=1,N_det_generators
-    tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
-  enddo
-  tilde_cW(:) = tilde_cW(:) + 1.d0
-
-  pt2_n_0(1) = 0
-  do
-    pt2_u_0 = tilde_cW(pt2_n_0(1))
-    r = tilde_cW(pt2_n_0(1) + pt2_minDetInFirstTeeth)
-    pt2_W_T = (1d0 - pt2_u_0) / dble(pt2_N_teeth)
-    if(pt2_W_T >= r - pt2_u_0) then
-      exit
-    end if
-    pt2_n_0(1) += 1
-    if(N_det_generators - pt2_n_0(1) < pt2_minDetInFirstTeeth * pt2_N_teeth) then
-      print *, "teeth building failed"
-    end if
-  end do
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  do t=2, pt2_N_teeth
-    r = pt2_u_0 + pt2_W_T * dble(t-1)
-    pt2_n_0(t) = pt2_find_sample(r, tilde_cW)
-  end do
-  pt2_n_0(pt2_N_teeth+1) = N_det_generators
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  pt2_w(:pt2_n_0(1)) = tilde_w(:pt2_n_0(1))
-  do t=1, pt2_N_teeth
-    tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
-    if (tooth_width == 0.d0) then
-      tooth_width = sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1)))
-    endif
-    ASSERT(tooth_width > 0.d0)
-    do i=pt2_n_0(t)+1, pt2_n_0(t+1)
-      pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
-    end do
-  end do
-
-  pt2_cW(0) = 0d0
-  do i=1,N_det_generators
-    pt2_cW(i) = pt2_cW(i-1) + pt2_w(i)
-  end do
-  pt2_n_0(pt2_N_teeth+1) = N_det_generators
+ endif
 END_PROVIDER
 
 
