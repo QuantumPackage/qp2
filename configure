@@ -3,6 +3,9 @@
 # Quantum Package configuration script
 #
 
+unset CC
+unset CXX
+
 TEMP=$(getopt -o c:i:h -l config:,install:,help -n $0 -- "$@") || exit 1
 eval set -- "$TEMP"
 

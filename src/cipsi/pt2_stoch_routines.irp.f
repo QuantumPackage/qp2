@@ -523,10 +523,24 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       exit
     else
       call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
+      if(n_tasks > pt2_n_tasks_max)then
+       print*,'PB !!!'
+       print*,'If you see this, send an email to Anthony scemama with the following content'
+       print*,irp_here
+       print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max  
+       stop -1 
+      endif
       if (zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending) == -1) then
           stop 'PT2: Unable to delete tasks (send)'
       endif
       do i=1,n_tasks
+        if(index(i).gt.size(eI,2).or.index(i).lt.1)then
+         print*,'PB !!!'
+         print*,'If you see this, send an email to Anthony scemama with the following content'
+         print*,irp_here
+         print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
+         stop -1 
+        endif
         eI(1:N_states, index(i)) += eI_task(1:N_states,i)
         vI(1:N_states, index(i)) += vI_task(1:N_states,i)
         nI(1:N_states, index(i)) += nI_task(1:N_states,i)

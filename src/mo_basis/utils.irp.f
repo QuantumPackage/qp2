@@ -238,8 +238,13 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
 end
 
 
-subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
+subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
   implicit none
+  BEGIN_DOC
+! You enter with matrix in the MO basis defined with the mo_coef_before. 
+!
+! You SVD the matrix and set the eigenvectors as mo_coef_new ordered by increasing singular values 
+  END_DOC
   integer,intent(in)             :: lda,m,n
   double precision, intent(in)   :: matrix(lda,n),mo_coef_before(ao_num,m)
   double precision, intent(out)  :: eig(m),mo_coef_new(ao_num,m)
@@ -247,7 +252,7 @@ subroutine general_mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo
   integer :: i,j
   double precision :: accu
   double precision, allocatable  ::  mo_coef_tmp(:,:), U(:,:),D(:), A(:,:), Vt(:,:), work(:)
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, U, Vt, A
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, Vt, A
 
   call write_time(6)
   if (m /= mo_num) then
