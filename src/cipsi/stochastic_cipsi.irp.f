@@ -10,7 +10,7 @@ subroutine run_stochastic_cipsi
 
   double precision :: rss
   double precision, external :: memory_of_double
-  PROVIDE H_apply_buffer_allocated N_generators_bitmask
+  PROVIDE H_apply_buffer_allocated 
 
   N_iter = 1
   threshold_generators = 1.d0

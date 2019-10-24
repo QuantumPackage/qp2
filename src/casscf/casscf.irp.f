@@ -3,6 +3,7 @@ program casscf
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
   END_DOC
+  call reorder_orbitals_for_casscf
   no_vvvv_integrals = .True.
   pt2_max = 0.02
   SOFT_TOUCH no_vvvv_integrals pt2_max
@@ -37,6 +38,7 @@ subroutine run
     pt2_max = dabs(energy_improvement / pt2_relative_error)
 
     mo_coef = NewOrbs
+    mo_occ  = occnum  
     call save_mos
     iteration += 1
     N_det = N_det/2 

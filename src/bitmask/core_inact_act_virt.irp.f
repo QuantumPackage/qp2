@@ -177,43 +177,67 @@ END_PROVIDER
 
  
  BEGIN_PROVIDER [ integer(bit_kind), core_bitmask , (N_int,2) ]
-&BEGIN_PROVIDER [ integer(bit_kind), inact_bitmask, (N_int,2) ]
-&BEGIN_PROVIDER [ integer(bit_kind), act_bitmask  , (N_int,2) ]
-&BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask , (N_int,2) ]
-&BEGIN_PROVIDER [ integer(bit_kind), del_bitmask  , (N_int,2) ]
    implicit none
    BEGIN_DOC
-   ! Bitmask identifying the core/inactive/active/virtual/deleted MOs 
+   ! Bitmask identifying the core MOs 
    END_DOC
-
    core_bitmask  = 0_bit_kind
-   inact_bitmask = 0_bit_kind
-   act_bitmask   = 0_bit_kind
-   virt_bitmask  = 0_bit_kind
-   del_bitmask   = 0_bit_kind
-   
    if(n_core_orb > 0)then
      call list_to_bitstring( core_bitmask(1,1), list_core, n_core_orb, N_int)
      call list_to_bitstring( core_bitmask(1,2), list_core, n_core_orb, N_int)
    endif
+ END_PROVIDER
+
+ BEGIN_PROVIDER [ integer(bit_kind), inact_bitmask, (N_int,2) ]
+   implicit none
+   BEGIN_DOC
+   ! Bitmask identifying the  inactive MOs 
+   END_DOC
+   inact_bitmask = 0_bit_kind
    if(n_inact_orb > 0)then
      call list_to_bitstring( inact_bitmask(1,1), list_inact, n_inact_orb, N_int)
      call list_to_bitstring( inact_bitmask(1,2), list_inact, n_inact_orb, N_int)
    endif
+ END_PROVIDER
+
+ BEGIN_PROVIDER [ integer(bit_kind), act_bitmask  , (N_int,2) ]
+   implicit none
+   BEGIN_DOC
+   ! Bitmask identifying the active MOs 
+   END_DOC
+   act_bitmask   = 0_bit_kind
    if(n_act_orb > 0)then
      call list_to_bitstring( act_bitmask(1,1), list_act, n_act_orb, N_int)
      call list_to_bitstring( act_bitmask(1,2), list_act, n_act_orb, N_int)
    endif
+  END_PROVIDER
+
+ BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask , (N_int,2) ]
+   implicit none
+   BEGIN_DOC
+   ! Bitmask identifying the virtual MOs 
+   END_DOC
+   virt_bitmask  = 0_bit_kind
    if(n_virt_orb > 0)then
      call list_to_bitstring( virt_bitmask(1,1), list_virt, n_virt_orb, N_int)
      call list_to_bitstring( virt_bitmask(1,2), list_virt, n_virt_orb, N_int)
    endif
+ END_PROVIDER
+
+ BEGIN_PROVIDER [ integer(bit_kind), del_bitmask  , (N_int,2) ]
+   implicit none
+   BEGIN_DOC
+   ! Bitmask identifying the deleted MOs 
+   END_DOC
+
+   del_bitmask   = 0_bit_kind
+   
    if(n_del_orb > 0)then
      call list_to_bitstring( del_bitmask(1,1), list_del, n_del_orb, N_int)
      call list_to_bitstring( del_bitmask(1,2), list_del, n_del_orb, N_int)
    endif
    
-END_PROVIDER
+ END_PROVIDER
 
 
 
@@ -331,7 +355,6 @@ END_PROVIDER
    enddo
    print *,  'Active MOs:'
    print *,  list_act(1:n_act_orb)
-   print*,   list_act_reverse(1:n_act_orb)
    
 END_PROVIDER
  
