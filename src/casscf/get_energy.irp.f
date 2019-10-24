@@ -5,11 +5,17 @@ program print_2rdm
  !
  ! useful to test the active part of the spin trace 2 rdms
  END_DOC
- no_vvvv_integrals = .True.
+!no_vvvv_integrals = .True.
  read_wf = .True.
- touch read_wf no_vvvv_integrals
+!touch read_wf no_vvvv_integrals
 !call routine
- call routine_bis
+!call routine_bis
+ call print_grad
+end
+
+subroutine print_grad
+ implicit none
+ 
 end
 
 subroutine routine_bis

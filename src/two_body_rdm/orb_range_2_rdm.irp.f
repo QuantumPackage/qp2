@@ -9,7 +9,7 @@
 !                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 1 
@@ -26,7 +26,7 @@
 !                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 2
@@ -43,7 +43,7 @@
 !                                     = <Psi| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  print*,''
@@ -70,7 +70,7 @@
  END_DOC
  double precision, allocatable :: state_weights(:) 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 4 
