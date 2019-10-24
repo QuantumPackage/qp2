@@ -16,6 +16,7 @@ subroutine save_mos
   enddo
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
+  call ezfio_set_mo_basis_mo_class(mo_class)
   deallocate (buffer)
 
 end
@@ -61,6 +62,7 @@ subroutine save_mos_truncated(n)
   enddo
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
+  call ezfio_set_mo_basis_mo_class(mo_class)
   deallocate (buffer)
 
 end
