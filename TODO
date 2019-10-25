@@ -24,6 +24,8 @@
   * Example  : Simple Hartree-Fock program from scratch
   * Examples : subroutine example_module
 
+# enleverle psi_det_size for all complicated stuffs with dimension of psi_coef
+
 # Config file for Cray
 
 # Documentation de /etc

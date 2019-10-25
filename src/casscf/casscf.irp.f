@@ -41,7 +41,7 @@ subroutine run
     mo_occ  = occnum  
     call save_mos
     iteration += 1
-    N_det = N_det/2 
+    N_det = max(N_det/2 ,N_states)
     psi_det = psi_det_sorted
     psi_coef = psi_coef_sorted
     read_wf = .True.

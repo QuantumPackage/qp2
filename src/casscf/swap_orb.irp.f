@@ -22,13 +22,11 @@
  do i = 1, nMonoEx
   iorder(i)  = i
   vec_tmp(i) = -dabs(SXvector_lowest(i))
- !print*,'vec_tmp(i) = ',i,vec_tmp(i)
  enddo
  call dsort(vec_tmp,iorder,nMonoEx)
  n_max_overlap = 0
  do i = 1, nMonoEx
   if(dabs(vec_tmp(i)).gt.thresh_overlap_switch)then
- ! print*,vec_tmp(i),iorder(i)
    n_max_overlap += 1
    max_overlap(n_max_overlap) = iorder(i)
   endif
@@ -107,7 +105,9 @@
   endif
  enddo
 
- print*,'n_orb_swap = ',n_orb_swap
+ if(n_orb_swap.gt.0)then
+  print*,'n_orb_swap = ',n_orb_swap
+ endif
  do i = 1, n_orb_swap
   print*,'imono = ',index_orb_swap(i)
   print*,orb_swap(1,i),'-->',orb_swap(2,i)

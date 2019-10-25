@@ -15,7 +15,13 @@ end
 
 subroutine print_grad
  implicit none
- 
+ integer :: i 
+ do i = 1, nMonoEx
+  if(dabs(gradvec2(i)).gt.1.d-5)then
+   print*,''
+   print*,i,gradvec2(i),excit(:,i)
+  endif
+ enddo
 end
 
 subroutine routine_bis

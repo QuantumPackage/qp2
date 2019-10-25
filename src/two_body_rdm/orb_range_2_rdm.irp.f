@@ -79,7 +79,9 @@
  double precision :: wall_0,wall_1
  call wall_time(wall_0)
  print*,'providing the  state average TWO-RDM ...'
- call orb_range_two_rdm_state_av(state_av_act_two_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ print*,'psi_det_size = ',psi_det_size
+ print*,'N_det        = ',N_det
+ call orb_range_two_rdm_state_av(state_av_act_two_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,state_weights,ispin,psi_coef,N_states,size(psi_coef,1))
 
  call wall_time(wall_1)
  print*,'Time to provide the state average TWO-RDM',wall_1 - wall_0

@@ -147,6 +147,7 @@ subroutine orb_range_two_rdm_state_av_work_$N_int(big_array,dim1,norb,list_orb,l
    do i=1,maxab
      idx0(i) = i
    enddo
+
    
    ! Prepare the array of all alpha single excitations
    ! -------------------------------------------------
