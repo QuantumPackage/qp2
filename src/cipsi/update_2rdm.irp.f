@@ -18,7 +18,7 @@ subroutine give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connectio
   if(degree.gt.2)cycle
   contrib = 0.d0
   do j = 1, N_states
-   contrib += state_average_weight(j) * psi_coef_connection_reverse(j,i) * phase * coef(j)
+   contrib += state_average_weight(j) * psi_coef_connection_reverse(j,i)  * coef(j)
   enddo
   ! case of single excitations 
   if(degree == 1)then
@@ -36,8 +36,8 @@ subroutine give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connectio
    call update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_buff)
   endif
  enddo
-!call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
-!nkeys = 0
+ call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
+ nkeys = 0
 
 end
 
@@ -69,7 +69,7 @@ subroutine update_buffer_single_exc_rdm(det1,det2,exc,phase,contrib,nkeys,keys,v
   ispin = 2
   other_spin = 1
  endif
- print*,'h1,p1,s1',h1,p1,ispin
+!print*,'h1,p1,s1',h1,p1,ispin
  if(list_orb_reverse_pert_rdm(h1).lt.0)return
  h1 = list_orb_reverse_pert_rdm(h1)
  if(list_orb_reverse_pert_rdm(p1).lt.0)return
@@ -94,39 +94,41 @@ subroutine update_buffer_single_exc_rdm(det1,det2,exc,phase,contrib,nkeys,keys,v
   keys(4,nkeys) = p1
  enddo 
  !update the same spin part 
-!do i = 1, n_occ_ab(ispin)
-! h2 = occ(i,ispin)
-! if(list_orb_reverse_pert_rdm(h2).lt.0)return
-! h2 = list_orb_reverse_pert_rdm(h2)
+ do i = 1, n_occ_ab(ispin)
+  h2 = occ(i,ispin)
+  if(list_orb_reverse_pert_rdm(h2).lt.0)return
+  h2 = list_orb_reverse_pert_rdm(h2)
 
-! nkeys += 1
-! values(nkeys) = 0.5d0 * contrib * phase
-! keys(1,nkeys) = h1
-! keys(2,nkeys) = h2
-! keys(3,nkeys) = p1
-! keys(4,nkeys) = h2
+  nkeys += 1
+  values(nkeys) = 0.5d0 * contrib * phase
+  keys(1,nkeys) = h1
+  keys(2,nkeys) = h2
+  keys(3,nkeys) = p1
+  keys(4,nkeys) = h2
 
-! nkeys += 1
-! values(nkeys) = - 0.5d0 * contrib * phase
-! keys(1,nkeys) = h1
-! keys(2,nkeys) = h2
-! keys(3,nkeys) = h2
-! keys(4,nkeys) = p1
-!
-! nkeys += 1
-! values(nkeys) = 0.5d0 * contrib * phase
-! keys(1,nkeys) = h2
-! keys(2,nkeys) = h1
-! keys(3,nkeys) = h2
-! keys(4,nkeys) = p1
+  nkeys += 1
+  values(nkeys) = - 0.5d0 * contrib * phase
+  keys(1,nkeys) = h1
+  keys(2,nkeys) = h2
+  keys(3,nkeys) = h2
+  keys(4,nkeys) = p1
+ 
+  nkeys += 1
+  values(nkeys) = 0.5d0 * contrib * phase
+  keys(1,nkeys) = h2
+  keys(2,nkeys) = h1
+  keys(3,nkeys) = h2
+  keys(4,nkeys) = p1
 
-! nkeys += 1
-! values(nkeys) = - 0.5d0 * contrib * phase
-! keys(1,nkeys) = h2
-! keys(2,nkeys) = h1
-! keys(3,nkeys) = p1
-! keys(4,nkeys) = h2
-!enddo 
+  nkeys += 1
+  values(nkeys) = - 0.5d0 * contrib * phase
+  keys(1,nkeys) = h2
+  keys(2,nkeys) = h1
+  keys(3,nkeys) = p1
+  keys(4,nkeys) = h2
+ enddo 
+ call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
+ nkeys = 0
 
 end
 
@@ -160,12 +162,14 @@ subroutine update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_
   keys(2,nkeys) = h2
   keys(3,nkeys) = p1
   keys(4,nkeys) = p2
+! print*,contrib 
   nkeys += 1
   values(nkeys) = 0.5d0 * contrib * phase
   keys(1,nkeys) = p1
   keys(2,nkeys) = p2
   keys(3,nkeys) = h1
   keys(4,nkeys) = h2 
+! print*,contrib 
 
  else 
   if (exc(0,1,1) == 2) then
@@ -218,6 +222,8 @@ subroutine update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_
   keys(3,nkeys) = p1
   keys(4,nkeys) = p2
  endif
+ call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
+ nkeys = 0
  
 end
 

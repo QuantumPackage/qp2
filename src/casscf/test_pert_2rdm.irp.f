@@ -24,7 +24,7 @@ program test_pert_2rdm
      integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
 !    if(dabs(pert_2rdm_provider(ii,jj,kk,ll) * integral).gt.1.d-12)then
 !     print*,i,j,k,l
-!     print*,pert_2rdm_provider(ii,jj,kk,ll) * integral,pert_2rdm_provider(ii,jj,kk,ll), pert_2rdm_provider(ii,jj,kk,ll), integral
+!     print*,pert_2rdm_provider(ii,jj,kk,ll) , integral, pert_2rdm_provider(ii,jj,kk,ll)* integral
 !    endif
      accu    += pert_2rdm_provider(ii,jj,kk,ll) * integral
     enddo

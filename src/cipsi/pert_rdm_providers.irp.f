@@ -174,9 +174,13 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       sum_e_pert = 0d0
-      integer :: degree
+      integer                        :: exc(0:2,2,2)
+      integer                        :: degree
+      double precision               :: phase
+      call get_excitation(det,HF_bitmask,exc,degree,phase,N_int) 
       call get_excitation_degree(det,HF_bitmask,degree,N_int)
-      if(degree == 2)cycle
+      if(degree == 1)cycle
+!     if (exc(0,1,1) .ne. 1) cycle !only double alpha/beta
       do istate=1,N_states
         delta_E = E0(istate) - Hii + E_shift
         alpha_h_psi = mat(istate, p1, p2)
@@ -187,7 +191,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
         coef(istate) = e_pert / alpha_h_psi
-        print*,e_pert,coef,alpha_h_psi
+!       print*,coef,alpha_h_psi,e_pert
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef(istate) * coef(istate)
