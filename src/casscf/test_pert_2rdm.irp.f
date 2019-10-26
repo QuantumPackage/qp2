@@ -2,7 +2,13 @@ program test_pert_2rdm
  implicit none
  read_wf = .True.
  touch read_wf
-!call get_pert_2rdm
+
+!provide is_pert_2rdm_provided
+ call test
+ end
+
+ subroutine test
+ implicit none
  integer :: i,j,k,l,ii,jj,kk,ll
  double precision :: accu , get_two_e_integral, integral
  accu = 0.d0
@@ -23,6 +29,13 @@ program test_pert_2rdm
      accu    += pert_2rdm_provider(ii,jj,kk,ll) * integral
     enddo
    enddo
+  enddo
+ enddo
+ do ii = 1, n_orb_pert_rdm
+  i = list_orb_pert_rdm(ii) 
+  do jj = 1, n_orb_pert_rdm
+   j = list_orb_pert_rdm(jj) 
+   accu +=  pert_1rdm_provider(j,i) * mo_one_e_integrals(j,i)
   enddo
  enddo
  print*,'accu = ',accu

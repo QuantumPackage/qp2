@@ -28,12 +28,12 @@ subroutine give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connectio
    endif
    call update_buffer_single_exc_rdm(det,psi_det_connection(1,1,i),exc,phase,contrib,nkeys,keys,values,sze_buff)
   else 
- !! case of double excitations 
- ! if (nkeys + 4 .ge. sze_buff)then
- !  call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
- !  nkeys = 0
- ! endif
- ! call update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_buff)
+  ! case of double excitations 
+   if (nkeys + 4 .ge. sze_buff)then
+    call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
+    nkeys = 0
+   endif
+   call update_buffer_double_exc_rdm(exc,phase,contrib,nkeys,keys,values,sze_buff)
   endif
  enddo
 !call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
@@ -69,6 +69,7 @@ subroutine update_buffer_single_exc_rdm(det1,det2,exc,phase,contrib,nkeys,keys,v
   ispin = 2
   other_spin = 1
  endif
+ print*,'h1,p1,s1',h1,p1,ispin
  if(list_orb_reverse_pert_rdm(h1).lt.0)return
  h1 = list_orb_reverse_pert_rdm(h1)
  if(list_orb_reverse_pert_rdm(p1).lt.0)return

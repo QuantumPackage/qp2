@@ -10,7 +10,23 @@ END_PROVIDER
 
 BEGIN_PROVIDER [logical , pert_2rdm ]
  implicit none
- pert_2rdm = .False.
+ pert_2rdm = .True.
+END_PROVIDER 
+
+BEGIN_PROVIDER [logical, is_pert_2rdm_provided ]
+ implicit none
+ is_pert_2rdm_provided = .True.
+ provide pert_2rdm_provider
+ if(.True.)then
+
+  double precision :: pt2(N_states),relative_error, error(N_states),variance(N_states),norm(N_states)
+  relative_error = 0.d0
+  pert_2rdm_provider = 0.d0
+  call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &                                         
+          norm,0) ! Stochastic PT2
+  print*,'is_pert_2rdm_provided = ',is_pert_2rdm_provided
+  print*,'pt2 = ',pt2
+ endif
 END_PROVIDER 
 
 BEGIN_PROVIDER [integer, n_orb_pert_rdm]
@@ -30,9 +46,24 @@ BEGIN_PROVIDER [integer, list_orb_pert_rdm, (n_orb_pert_rdm)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)]
+BEGIN_PROVIDER [double precision, pert_1rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm)]
  implicit none
- pert_2rdm_provider = 0.d0
+ integer :: i,j,k,l
+ if(is_pert_2rdm_provided)then
+  pert_1rdm_provider = 0.d0
+  do i = 1, n_orb_pert_rdm
+   do j = 1, n_orb_pert_rdm
+    do k = 1, n_orb_pert_rdm
+     pert_1rdm_provider(j,i) += 2.d0 * pert_2rdm_provider(i,k,j,k)
+    enddo
+   enddo
+  enddo
+ endif
+END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)]
+&BEGIN_PROVIDER [double precision, pert_1rdm_provider_bis, (n_orb_pert_rdm,n_orb_pert_rdm)]
+ implicit none
 
 END_PROVIDER
 
