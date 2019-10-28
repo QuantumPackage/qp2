@@ -8,11 +8,6 @@ BEGIN_PROVIDER [ integer(omp_lock_kind), pert_2rdm_lock]
   call omp_init_lock(pert_2rdm_lock)
 END_PROVIDER
 
-BEGIN_PROVIDER [logical , pert_2rdm ]
- implicit none
- pert_2rdm = .False.
-END_PROVIDER 
-
 BEGIN_PROVIDER [integer, n_orb_pert_rdm]
  implicit none
  n_orb_pert_rdm = n_act_orb
