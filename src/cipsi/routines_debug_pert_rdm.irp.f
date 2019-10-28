@@ -1,68 +1,5 @@
 
-use bitmasks
-use omp_lib
-
-BEGIN_PROVIDER [ integer(omp_lock_kind), pert_2rdm_lock]
-  use f77_zmq
-  implicit none
-  call omp_init_lock(pert_2rdm_lock)
-END_PROVIDER
-
-BEGIN_PROVIDER [ integer(omp_lock_kind), pert_1rdm_lock]
-  use f77_zmq
-  implicit none
-  call omp_init_lock(pert_1rdm_lock)
-END_PROVIDER
-
-!BEGIN_PROVIDER [logical , pert_2rdm ]
-! implicit none
-! pert_2rdm = .False.
-!END_PROVIDER 
-
- BEGIN_PROVIDER [logical, is_pert_2rdm_provided ]
-&BEGIN_PROVIDER [double precision, pt2_pert_2rdm, (N_states)]
- implicit none
- is_pert_2rdm_provided = .True.
- provide pert_2rdm_provider 
- if(.True.)then
-
-  double precision :: pt2(N_states),relative_error, error(N_states),variance(N_states),norm(N_states)
-  relative_error = 0.d0
-  pert_2rdm_provider = 0.d0
-  pert_1rdm_provider = 0.d0
-  pert_1rdm_provider_bis = 0.d0
-  call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_pert_2rdm,relative_error,error,variance, &
-          norm,0) ! Stochastic PT2
-  print*,'is_pert_2rdm_provided = ',is_pert_2rdm_provided
-  print*,'pt2 = ',pt2_pert_2rdm
- endif
-END_PROVIDER 
-
-BEGIN_PROVIDER [integer, n_orb_pert_rdm]
- implicit none
- n_orb_pert_rdm = n_act_orb
-END_PROVIDER 
-
-BEGIN_PROVIDER [integer, list_orb_reverse_pert_rdm, (mo_num)]
- implicit none
- list_orb_reverse_pert_rdm = list_act_reverse
-
-END_PROVIDER 
-
-BEGIN_PROVIDER [integer, list_orb_pert_rdm, (n_orb_pert_rdm)]
- implicit none
- list_orb_pert_rdm = list_act
-
-END_PROVIDER
-
- BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)]
-&BEGIN_PROVIDER [double precision, pert_1rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm)]
-&BEGIN_PROVIDER [double precision, pert_1rdm_provider_bis, (n_orb_pert_rdm,n_orb_pert_rdm)]
- implicit none
-
-END_PROVIDER
-
-subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
+subroutine fill_buffer_double_rdm_debug(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
   use bitmasks
   use selection_types
   implicit none
@@ -176,8 +113,23 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       sum_e_pert = 0d0
+      integer                        :: exc(0:2,2,2)
+      integer                        :: degree
+      double precision               :: phase,hij1,hij2
+      integer                        :: hh1,pp1,hh2,pp2,ss1,ss2
+!     call get_excitation_degree(HF_bitmask,det,degree,N_int)
+!     if(degree.gt.2)cycle
+!     call get_excitation_degree(psi_det_generators(1,1,2),det,degree,N_int)
+!     if(degree.gt.2)cycle
+!     call get_excitation(HF_bitmask,det,exc,degree,phase,N_int) 
+!     call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+!     if(hh1 .ne. 1)cycle
+!     if(pp1 .ne. 6)cycle
+!     if(ss1 .ne. 1)cycle
+!     if (exc(0,1,1) .ne. 1) cycle !only double alpha/beta
 !!!!!!!!!!!!!!!!!! LOOP OVER STATES
-      do istate=1,N_states
+!     do istate=1,N_states
+        istate=1
         delta_E = E0(istate) - Hii + E_shift
         alpha_h_psi = mat(istate, p1, p2)
         val = alpha_h_psi + alpha_h_psi
@@ -186,21 +138,91 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
             tmp = -tmp
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
+!       if(dabs(e_pert).lt.1.d-07)cycle
+!       if(dabs(e_pert).gt.1.d-06)cycle
+!       write(*,*),'----'
+!     print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+!     print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+!     call get_excitation(psi_det_generators(1,1,2),det,exc,degree,phase,N_int) 
+!     call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
 
         coef(istate) = e_pert / alpha_h_psi
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef(istate) * coef(istate)
 
-      end do
+        integer :: igen_tmp
+        double precision :: alphahpsi
+        alphahpsi = 0.d0
+        hij = 0.d0
+        do igen_tmp = 1, N_det_generators
+         call get_excitation_degree(psi_det_generators(1,1,igen_tmp),det,degree,N_int)
+         if(degree.gt.2)cycle
+         call i_H_j(psi_det_generators(1,1,igen_tmp),det,N_int,hij(igen_tmp))
+         alphahpsi += psi_coef_generators(igen_tmp,istate) * hij(igen_tmp)
+        enddo
+        if(dabs(alphahpsi - alpha_h_psi).gt.1.d-12)then
+         print*,''
+         print*,''
+         print*,'alphhpsi   = ',alphahpsi,alpha_h_psi
+         print*,'<igen|H|k> = ',psi_coef_generators(i_generator,istate) * hij(i_generator)
+         call debug_det(det,N_int)
+         stop
+!        call get_excitation_degree(psi_det_generators(1,1,1),psi_det_generators(1,1,2),degree,N_int)
+!        if(degree.gt.2)cycle
+!        call get_excitation(psi_det_generators(1,1,1),det,exc,degree,phase,N_int) 
+!        call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+!        print*,'excitation between generators '
+!        print*,'degree = ',degree
+!        print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+!        if(hh2.ne.0)then
+!        print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+!        print*,''
+!        endif
+!        print*,''
+!        call get_excitation_degree(psi_det_generators(1,1,1),det,degree,N_int)
+!        if(degree.gt.2)cycle
+!        call get_excitation(psi_det_generators(1,1,1),det,exc,degree,phase,N_int) 
+!        call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+!        print*,'degree = ',degree
+!        print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+!        print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+!        print*,'coef, hij = ',psi_coef_generators(1,istate),hij1
+
+!        call get_excitation_degree(psi_det_generators(1,1,2),det,degree,N_int)
+!        if(degree.gt.2)cycle
+!        call get_excitation(psi_det_generators(1,1,2),det,exc,degree,phase,N_int) 
+!        call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+!        print*,'degree = ',degree
+!        print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+!        print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+!        print*,'coef, hij = ',psi_coef_generators(2,istate),hij2
+
+!        print*,'delta 1 = ',hij1 * psi_coef_generators(1,istate) * coef
+!        print*,'delta 2 = ',hij2* psi_coef_generators(2,istate) * coef
+         write(*,'(100(F16.13,X))')coef,alpha_h_psi,e_pert,coef * alpha_h_psi
+        endif
+
+        if (weight_selection /= 5) then
+          ! Energy selection
+          sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
+
+        else
+          ! Variance selection
+          sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
+        endif
+!     end do
+!     call give_2rdm_pert_contrib(det,coef,psi_det_generators,psi_coef_generators_reverse,n_det,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
+!     call give_2rdm_pert_contrib(det,coef,psi_det_sorted,psi_coef_sorted_reverse,n_det,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
       call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection_reverse,n_det_connection,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
 
+     !if(sum_e_pert <= buf%mini) then
+     !  call add_to_selection_buffer(buf, det, sum_e_pert)
+     !end if
     end do
   end do
   call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
-  nkeys = 0
   call update_keys_values_1e(keys_1e,values_1e,nkeys_1e,n_orb_pert_rdm,pert_1rdm_provider,pert_1rdm_lock)
-  nkeys_1e = 0
 end
 
 

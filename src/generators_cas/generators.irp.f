@@ -82,3 +82,12 @@ BEGIN_PROVIDER [ double precision, select_max, (size_select_max) ]
   select_max = huge(1.d0)
 END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, psi_coef_generators_reverse, (N_states,psi_det_size)
+ implicit none
+ integer :: i,j
+ do i = 1, N_states
+  do j = 1, N_det_generators
+   psi_coef_generators_reverse(i,j) = psi_coef_generators(j,i)
+  enddo
+ enddo
+ END_PROVIDER 

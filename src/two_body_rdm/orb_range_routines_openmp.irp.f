@@ -578,10 +578,12 @@ subroutine update_keys_values_1e(keys_1e,values_1e,nkeys_1e,dim1,big_array,lock_
  integer(omp_lock_kind),intent(inout):: lock_1rdm
  integer :: i,h1,p1
  call omp_set_lock(lock_1rdm)
+!print*,'coucoucoucocu'
  do i = 1, nkeys_1e
   h1 = keys_1e(1,i)
   p1 = keys_1e(2,i)
   big_array(h1,p1) += values_1e(i)
+! print*,h1,p1,big_array(h1,p1)
  enddo
  call omp_unset_lock(lock_1rdm)
 
