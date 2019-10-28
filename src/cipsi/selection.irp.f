@@ -616,6 +616,10 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             if(.not.pert_2rdm)then
              call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
             else 
+!            print*,'fullinteresting(0) just before ',fullinteresting(0)
+!            print*,'i_generator = ',i_generator
+!            call debug_det(psi_det_generators(1,1,i_generator),N_int)
+!            pause
              call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
             endif
           end if

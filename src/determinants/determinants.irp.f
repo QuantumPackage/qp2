@@ -306,6 +306,16 @@ END_PROVIDER
 
 END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, psi_coef_sorted_reverse, (N_states,psi_det_size)
+ implicit none
+ integer :: i,j
+ do i = 1, N_states
+  do j = 1, N_det
+   psi_coef_sorted_reverse(i,j) = psi_coef_sorted(j,i)
+  enddo
+ enddo
+ END_PROVIDER 
+
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
    implicit none

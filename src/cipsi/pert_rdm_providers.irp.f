@@ -8,24 +8,33 @@ BEGIN_PROVIDER [ integer(omp_lock_kind), pert_2rdm_lock]
   call omp_init_lock(pert_2rdm_lock)
 END_PROVIDER
 
-BEGIN_PROVIDER [logical , pert_2rdm ]
- implicit none
- pert_2rdm = .True.
-END_PROVIDER 
+BEGIN_PROVIDER [ integer(omp_lock_kind), pert_1rdm_lock]
+  use f77_zmq
+  implicit none
+  call omp_init_lock(pert_1rdm_lock)
+END_PROVIDER
 
-BEGIN_PROVIDER [logical, is_pert_2rdm_provided ]
+!BEGIN_PROVIDER [logical , pert_2rdm ]
+! implicit none
+! pert_2rdm = .False.
+!END_PROVIDER 
+
+ BEGIN_PROVIDER [logical, is_pert_2rdm_provided ]
+&BEGIN_PROVIDER [double precision, pt2_pert_2rdm, (N_states)]
  implicit none
  is_pert_2rdm_provided = .True.
- provide pert_2rdm_provider
+ provide pert_2rdm_provider 
  if(.True.)then
 
   double precision :: pt2(N_states),relative_error, error(N_states),variance(N_states),norm(N_states)
   relative_error = 0.d0
   pert_2rdm_provider = 0.d0
-  call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &                                         
+  pert_1rdm_provider = 0.d0
+  pert_1rdm_provider_bis = 0.d0
+  call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_pert_2rdm,relative_error,error,variance, &                                         
           norm,0) ! Stochastic PT2
   print*,'is_pert_2rdm_provided = ',is_pert_2rdm_provided
-  print*,'pt2 = ',pt2
+  print*,'pt2 = ',pt2_pert_2rdm
  endif
 END_PROVIDER 
 
@@ -46,22 +55,8 @@ BEGIN_PROVIDER [integer, list_orb_pert_rdm, (n_orb_pert_rdm)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, pert_1rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm)]
- implicit none
- integer :: i,j,k,l
- if(is_pert_2rdm_provided)then
-  pert_1rdm_provider = 0.d0
-  do i = 1, n_orb_pert_rdm
-   do j = 1, n_orb_pert_rdm
-    do k = 1, n_orb_pert_rdm
-     pert_1rdm_provider(j,i) += 2.d0 * pert_2rdm_provider(i,k,j,k)
-    enddo
-   enddo
-  enddo
- endif
-END_PROVIDER
-
  BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm,n_orb_pert_rdm)]
+&BEGIN_PROVIDER [double precision, pert_1rdm_provider, (n_orb_pert_rdm,n_orb_pert_rdm)]
 &BEGIN_PROVIDER [double precision, pert_1rdm_provider_bis, (n_orb_pert_rdm,n_orb_pert_rdm)]
  implicit none
 
@@ -95,10 +90,14 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
   double precision, allocatable :: values(:)
   integer, allocatable          :: keys(:,:)
   integer                       :: nkeys
+  double precision, allocatable :: values_1e(:)
+  integer, allocatable          :: keys_1e(:,:)
+  integer                       :: nkeys_1e
   integer :: sze_buff
   sze_buff = 5 * mo_num ** 2 
-  allocate(keys(4,sze_buff),values(sze_buff))
+  allocate(keys(4,sze_buff),values(sze_buff),keys_1e(2,sze_buff),values_1e(sze_buff))
   nkeys = 0
+  nkeys_1e = 0
   if(sp == 3) then
     s1 = 1
     s2 = 2
@@ -176,12 +175,21 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
       sum_e_pert = 0d0
       integer                        :: exc(0:2,2,2)
       integer                        :: degree
-      double precision               :: phase
-      call get_excitation(det,HF_bitmask,exc,degree,phase,N_int) 
-      call get_excitation_degree(det,HF_bitmask,degree,N_int)
-      if(degree == 1)cycle
+      double precision               :: phase,hij,hij2
+      integer                        :: hh1,pp1,hh2,pp2,ss1,ss2
+      call get_excitation_degree(HF_bitmask,det,degree,N_int)
+      if(degree.ne.2)cycle
+      call get_excitation_degree(psi_det_generators(1,1,2),det,degree,N_int)
+      if(degree.ne.1)cycle
+      call get_excitation(HF_bitmask,det,exc,degree,phase,N_int) 
+      call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+      if(hh1 .ne. 1)cycle
+      if(pp1 .ne. 6)cycle
+      if(ss1 .ne. 1)cycle
 !     if (exc(0,1,1) .ne. 1) cycle !only double alpha/beta
-      do istate=1,N_states
+!!!!!!!!!!!!!!!!!! LOOP OVER STATES
+!     do istate=1,N_states
+        istate=1
         delta_E = E0(istate) - Hii + E_shift
         alpha_h_psi = mat(istate, p1, p2)
         val = alpha_h_psi + alpha_h_psi
@@ -190,11 +198,25 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
             tmp = -tmp
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
+        if(dabs(e_pert).lt.1.d-07)cycle
+!       if(dabs(e_pert).gt.1.d-06)cycle
+        write(*,*),'----'
+      print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+      print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+      call get_excitation(psi_det_generators(1,1,2),det,exc,degree,phase,N_int) 
+      call decode_exc(exc,degree,hh1,pp1,hh2,pp2,ss1,ss2)
+      print*,'hh1',hh1,'pp1',pp1,'ss1',ss1
+      print*,'hh2',hh2,'pp2',pp2,'ss2',ss2
+
         coef(istate) = e_pert / alpha_h_psi
-!       print*,coef,alpha_h_psi,e_pert
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef(istate) * coef(istate)
+
+!       call i_H_j(HF_bitmask,det,N_int,hij)
+!       call i_H_j(psi_det_generators(1,1,2),det,N_int,hij2)
+        write(*,'(100(F16.13,X))'),hij,hij2
+        write(*,'(100(F16.13,X))'),phase,coef,alpha_h_psi,hij,e_pert
 
         if (weight_selection /= 5) then
           ! Energy selection
@@ -204,8 +226,8 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
           ! Variance selection
           sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
         endif
-      end do
-      call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection_reverse,n_det_connection,nkeys,keys,values,sze_buff)
+!     end do
+      call give_2rdm_pert_contrib(det,coef,psi_det_sorted,psi_coef_sorted_reverse,n_det,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
 
       if(sum_e_pert <= buf%mini) then
         call add_to_selection_buffer(buf, det, sum_e_pert)
@@ -213,6 +235,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
     end do
   end do
   call update_keys_values(keys,values,nkeys,n_orb_pert_rdm,pert_2rdm_provider,pert_2rdm_lock)
+  call update_keys_values_1e(keys_1e,values_1e,nkeys_1e,n_orb_pert_rdm,pert_1rdm_provider,pert_1rdm_lock)
 end
 
 

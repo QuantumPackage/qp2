@@ -566,3 +566,24 @@ subroutine update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
 
 end
 
+
+subroutine update_keys_values_1e(keys_1e,values_1e,nkeys_1e,dim1,big_array,lock_1rdm)
+ use omp_lib
+ implicit none
+ integer, intent(in) :: nkeys_1e,dim1
+ integer, intent(in) :: keys_1e(2,nkeys_1e)
+ double precision, intent(in) :: values_1e(nkeys_1e)
+ double precision, intent(inout) :: big_array(dim1,dim1)
+ 
+ integer(omp_lock_kind),intent(inout):: lock_1rdm
+ integer :: i,h1,p1
+ call omp_set_lock(lock_1rdm)
+ do i = 1, nkeys_1e
+  h1 = keys_1e(1,i)
+  p1 = keys_1e(2,i)
+  big_array(h1,p1) += values_1e(i)
+ enddo
+ call omp_unset_lock(lock_1rdm)
+
+end
+
