@@ -15,7 +15,7 @@ module Determinants_by_hand : sig
       state_average_weight   : Positive_float.t array;
     } [@@deriving sexp]
   val read : ?full:bool -> unit -> t option
-  val write : t -> unit
+  val write : ?force:bool -> t -> unit
   val to_string : t -> string
   val to_rst : t -> Rst_string.t
   val of_rst : Rst_string.t -> t option
@@ -318,22 +318,23 @@ end = struct
       None
   ;;
 
-  let write { n_int                ;
-              bit_kind             ;
-              n_det                ;
-              n_det_qp_edit        ;
-              expected_s2          ;
-              psi_coef             ;
-              psi_det              ;
-              n_states             ;
-              state_average_weight ;
-            } =
+  let write ?(force=false)
+    { n_int                ;
+      bit_kind             ;
+      n_det                ;
+      n_det_qp_edit        ;
+      expected_s2          ;
+      psi_coef             ;
+      psi_det              ;
+      n_states             ;
+      state_average_weight ;
+    } =
      write_n_int n_int ;
      write_bit_kind bit_kind;
      write_n_det n_det;
      write_n_states n_states;
      write_expected_s2 expected_s2;
-     if n_det <= n_det_qp_edit then
+     if force || (n_det <= n_det_qp_edit) then
         begin
           write_n_det_qp_edit n_det;
           write_psi_coef ~n_det:n_det ~n_states:n_states psi_coef ;
@@ -596,7 +597,7 @@ psi_det                = %s
     let new_det =
       { det with n_det = (Det_number.of_int n_det_new) }
     in
-    write new_det
+    write ~force:true new_det
   ;;
 
   let extract_state istate =
@@ -628,7 +629,7 @@ psi_det                = %s
     let new_det =
       { det with n_states = (States_number.of_int 1) }
     in
-    write new_det
+    write ~force:true new_det
   ;;
 
   let extract_states range =
@@ -665,6 +666,7 @@ psi_det                = %s
             det.psi_coef.(!state_shift+i) <-
             det.psi_coef.(i+ishift)
           done
+          ; Printf.printf "OK\n%!" ;
       end;
       state_shift := !state_shift + n_det
     ) sorted_list
@@ -672,7 +674,7 @@ psi_det                = %s
     let new_det =
       { det with n_states = (States_number.of_int @@ List.length sorted_list) }
     in
-    write new_det
+    write ~force:true new_det
   ;;
 
 end

@@ -70,8 +70,6 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     variance_match_weight(k) = product(memo_variance(k,:))
   enddo
 
-  print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-  print *, '# var weight ', real(variance_match_weight(:),4)
   SOFT_TOUCH pt2_match_weight variance_match_weight
 end
 
@@ -85,7 +83,7 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
 
      case (0)
       print *,  'Using input weights in selection'
-      selection_weight(1:N_states) = state_average_weight(1:N_states)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * state_average_weight(1:N_states)
 
      case (1)
       print *,  'Using 1/c_max^2 weight in selection'
@@ -94,20 +92,30 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
      case (2)
       print *,  'Using pt2-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
+      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
 
      case (3)
       print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
+      print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (4)
       print *,  'Using variance- and pt2-matching weights in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)
+      selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states))
+      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (5)
       print *,  'Using variance-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
+      print *, '# var weight ', real(variance_match_weight(:),4)
+
+     case (6)
+      print *,  'Using CI coefficient weight in selection'
+      selection_weight(1:N_states) = c0_weight(1:N_states)
 
     end select
+     print *, '# Total weight ', real(selection_weight(:),4)
 
 END_PROVIDER
 
@@ -165,15 +173,13 @@ subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
 
   call build_fock_tmp(fock_diag_tmp,psi_det_generators(1,1,i_generator),N_int)
 
-  do l=1,N_generators_bitmask
-    do k=1,N_int
-      hole_mask(k,1) = iand(generators_bitmask(k,1,s_hole,l), psi_det_generators(k,1,i_generator))
-      hole_mask(k,2) = iand(generators_bitmask(k,2,s_hole,l), psi_det_generators(k,2,i_generator))
-      particle_mask(k,1) = iand(generators_bitmask(k,1,s_part,l), not(psi_det_generators(k,1,i_generator)) )
-      particle_mask(k,2) = iand(generators_bitmask(k,2,s_part,l), not(psi_det_generators(k,2,i_generator)) )
-    enddo
-    call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm,b,subset,csubset)
+  do k=1,N_int
+      hole_mask(k,1) = iand(generators_bitmask(k,1,s_hole), psi_det_generators(k,1,i_generator))
+      hole_mask(k,2) = iand(generators_bitmask(k,2,s_hole), psi_det_generators(k,2,i_generator))
+      particle_mask(k,1) = iand(generators_bitmask(k,1,s_part), not(psi_det_generators(k,1,i_generator)) )
+      particle_mask(k,2) = iand(generators_bitmask(k,2,s_part), not(psi_det_generators(k,2,i_generator)) )
   enddo
+  call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm,b,subset,csubset)
   deallocate(fock_diag_tmp)
 end subroutine
 
@@ -645,7 +651,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
-  double precision :: e_pert, delta_E, val, Hii, sum_e_pert, tmp, alpha_h_psi, coef
+  double precision :: e_pert, delta_E, val, Hii, w, tmp, alpha_h_psi, coef
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
 
@@ -726,10 +732,13 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (.not.is_a_1h1p(det)) cycle
       endif
 
-
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
-      sum_e_pert = 0d0
+      w = 0d0
+
+!      integer(bit_kind) :: occ(N_int,2), n
+!      call occ_pattern_of_det(det,occ,N_int)
+!      call occ_pattern_to_dets_size(occ,n,elec_alpha_num,N_int)
 
       do istate=1,N_states
         delta_E = E0(istate) - Hii + E_shift
@@ -740,27 +749,43 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             tmp = -tmp
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
-        coef = e_pert / alpha_h_psi
+        if (dabs(alpha_h_psi) > 1.d-4) then
+          coef = e_pert / alpha_h_psi
+        else
+          coef = alpha_h_psi / delta_E
+        endif
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
         norm(istate) = norm(istate) + coef * coef
 
-        if (weight_selection /= 5) then
-          ! Energy selection
-          sum_e_pert = sum_e_pert + e_pert * selection_weight(istate)
-        else
-          ! Variance selection
-          sum_e_pert = sum_e_pert - alpha_h_psi * alpha_h_psi * selection_weight(istate)
-        endif
+
+        select case (weight_selection)
+
+          case(0:4)
+            ! Energy selection
+            w = w + e_pert * selection_weight(istate)
+
+          case(5)
+            ! Variance selection
+            w = w - alpha_h_psi * alpha_h_psi * selection_weight(istate)
+
+          case(6)
+            w = w - coef * coef * selection_weight(istate)
+
+        end select
       end do
+
+
       if(pseudo_sym)then
-       if(dabs(mat(1, p1, p2)).lt.thresh_sym)then 
-        sum_e_pert = 10.d0
-       endif
+        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then 
+          w = 0.d0
+        endif
       endif
 
-      if(sum_e_pert <= buf%mini) then
-        call add_to_selection_buffer(buf, det, sum_e_pert)
+!      w = dble(n) * w
+
+      if(w <= buf%mini) then
+        call add_to_selection_buffer(buf, det, w)
       end if
     end do
   end do

@@ -9,7 +9,7 @@
 !                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 1 
@@ -26,7 +26,7 @@
 !                                     = <Psi| a^{\dagger}_i a^{\dagger}_j a_l a_k |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 2
@@ -43,7 +43,7 @@
 !                                     = <Psi| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi>
  END_DOC 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  print*,''
@@ -70,7 +70,7 @@
  END_DOC
  double precision, allocatable :: state_weights(:) 
  allocate(state_weights(N_states))
- state_weights = 1.d0/dble(N_states)
+ state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
  ispin = 4 
@@ -79,7 +79,9 @@
  double precision :: wall_0,wall_1
  call wall_time(wall_0)
  print*,'providing the  state average TWO-RDM ...'
- call orb_range_two_rdm_state_av(state_av_act_two_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ print*,'psi_det_size = ',psi_det_size
+ print*,'N_det        = ',N_det
+ call orb_range_two_rdm_state_av(state_av_act_two_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,state_weights,ispin,psi_coef,N_states,size(psi_coef,1))
 
  call wall_time(wall_1)
  print*,'Time to provide the state average TWO-RDM',wall_1 - wall_0

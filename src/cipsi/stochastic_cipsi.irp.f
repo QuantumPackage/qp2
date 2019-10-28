@@ -10,7 +10,7 @@ subroutine run_stochastic_cipsi
 
   double precision :: rss
   double precision, external :: memory_of_double
-  PROVIDE H_apply_buffer_allocated N_generators_bitmask
+  PROVIDE H_apply_buffer_allocated 
 
   N_iter = 1
   threshold_generators = 1.d0
@@ -102,7 +102,7 @@ subroutine run_stochastic_cipsi
 
     ! Add selected determinants
     call copy_H_apply_buffer_to_wf()
-    call save_wavefunction
+!    call save_wavefunction
 
     PROVIDE  psi_coef
     PROVIDE  psi_det
