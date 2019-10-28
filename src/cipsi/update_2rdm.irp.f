@@ -22,6 +22,7 @@ subroutine give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connectio
    print*,'PB !! there is a perturbative determinant already in the WF !!'
    call debug_det(det,N_int)
    call debug_det(psi_det_connection(1,1,i),N_int)
+   stop
   endif
   call get_excitation(det,psi_det_connection(1,1,i),exc,degree,phase,N_int) 
 

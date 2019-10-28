@@ -177,9 +177,13 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
 
       sum_e_pert = 0d0
 !!!!!!!!!!!!!!!!!! LOOP OVER STATES
+      double precision :: i_H_psi_array(N_states)
+      call i_H_psi(det,psi_det,psi_coef,N_int,N_det,psi_det_size,N_states,i_H_psi_array)
       do istate=1,N_states
         delta_E = E0(istate) - Hii + E_shift
-        alpha_h_psi = mat(istate, p1, p2)
+        integer :: k
+!       alpha_h_psi = mat(istate, p1, p2)
+        alpha_h_psi = i_H_psi_array(istate)
         val = alpha_h_psi + alpha_h_psi
         tmp = dsqrt(delta_E * delta_E + val * val)
         if (delta_E < 0.d0) then
@@ -194,6 +198,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
 
       end do
       call give_2rdm_pert_contrib(det,coef,psi_det_connection,psi_coef_connection_reverse,n_det_connection,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
+!     call give_2rdm_pert_contrib(det,coef,psi_det_sorted,psi_coef_sorted_reverse,N_det,nkeys,keys,values,nkeys_1e,keys_1e,values_1e,sze_buff)
 
     end do
   end do
