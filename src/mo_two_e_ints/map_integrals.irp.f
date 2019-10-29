@@ -153,12 +153,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   integer(key_kind)              :: p,q,r,s,i2
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
 
-!TODO
-do i=1,sze
-  out_val(i) = get_two_e_integral(i,j,k,l,map)
-enddo
-return
-
   ii0 = l-mo_integrals_cache_min
   ii0 = ior(ii0, k-mo_integrals_cache_min)
   ii0 = ior(ii0, j-mo_integrals_cache_min)
