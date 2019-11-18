@@ -108,6 +108,11 @@ subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  integer :: occ_partcl(N_int*bit_kind_size,2)
  integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
  integer :: i0,i
+ double precision :: buffer_c(mo_num),buffer_x(mo_num)
+ do i=1, mo_num
+   buffer_c(i) = big_array_coulomb_integrals(i,h,p)
+   buffer_x(i) = big_array_exchange_integrals(i,h,p)
+ enddo
  do i = 1, N_int
   differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask(i,1))
   differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask(i,2))
@@ -122,33 +127,33 @@ subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  ! holes :: direct terms
  do i0 = 1, n_occ_ab_hole(1)
   i = occ_hole(i0,1)
-  hij -= big_array_coulomb_integrals(i,h,p)
+  hij -= buffer_c(i)
  enddo
  do i0 = 1, n_occ_ab_hole(2)
   i = occ_hole(i0,2)
-  hij -= big_array_coulomb_integrals(i,h,p)
+  hij -= buffer_c(i)
  enddo
 
  ! holes :: exchange terms
  do i0 = 1, n_occ_ab_hole(spin)
   i = occ_hole(i0,spin)
-  hij += big_array_exchange_integrals(i,h,p)
+  hij += buffer_x(i)
  enddo
 
  ! particles :: direct terms
  do i0 = 1, n_occ_ab_partcl(1)
   i = occ_partcl(i0,1)
-  hij += big_array_coulomb_integrals(i,h,p)
+  hij += buffer_c(i)
  enddo
  do i0 = 1, n_occ_ab_partcl(2)
   i = occ_partcl(i0,2)
-  hij += big_array_coulomb_integrals(i,h,p)
+  hij += buffer_c(i)
  enddo
 
  ! particles :: exchange terms
  do i0 = 1, n_occ_ab_partcl(spin)
   i = occ_partcl(i0,spin)
-  hij -= big_array_exchange_integrals(i,h,p)
+  hij -= buffer_x(i)
  enddo
  hij = hij * phase
 

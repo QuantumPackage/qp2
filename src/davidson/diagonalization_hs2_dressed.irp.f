@@ -219,7 +219,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    if (itermax > 3) then
+    if (itermax > 4) then
       itermax = itermax - 1
     else if (m==1.and.disk_based_davidson) then
       m=0
@@ -417,7 +417,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
       ! -------------------------------------------
 
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k)
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k) COLLAPSE(2)
        do j=1,shift2
          do i=1,shift2
            s_(i,j) = 0.d0
@@ -572,6 +572,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
+      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k=1,N_st_diag
         do i=1,sze
           U(i,shift2+k) =  &
@@ -586,6 +587,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           to_print(3,k) = residual_norm(k)
         endif
       enddo
+      !$OMP END PARALLEL DO
 
 
       if ((itertot>1).and.(iter == 1)) then
