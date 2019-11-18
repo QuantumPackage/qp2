@@ -99,6 +99,7 @@ subroutine check_mem(rss_in,routine)
   rss += rss_in
   if (int(rss)+1 > qp_max_mem) then
     print *,  'Not enough memory: aborting in ', routine
+    print *,  int(rss)+1, ' GB required'
     stop -1
   endif
   !$OMP END CRITICAL

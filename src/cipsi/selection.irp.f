@@ -1132,7 +1132,7 @@ subroutine get_d1(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
     call get_mo_two_e_integrals(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map)
     call get_mo_two_e_integrals(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map)
     putj = p1
-    do puti=1,mo_num
+    do puti=1,mo_num !HOT
       if(lbanned(puti,mi)) cycle
       !p1 fixed
       putj = p1

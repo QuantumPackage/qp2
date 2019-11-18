@@ -138,18 +138,27 @@ subroutine ortho_qr(A,LDA,m,n)
   double precision, intent(inout) :: A(LDA,n)
 
   integer                        :: lwork, info
-  integer, allocatable           :: jpvt(:)
-  double precision, allocatable  :: tau(:), work(:)
+  double precision, allocatable  :: TAU(:), WORK(:)
 
-  allocate (jpvt(n), tau(n), work(1))
+  allocate (TAU(n), WORK(1))
+
   LWORK=-1
   call dgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  LWORK=2*int(WORK(1))
+  LWORK=int(WORK(1))
+
   deallocate(WORK)
   allocate(WORK(LWORK))
   call dgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  call dorgqr(m, n, n, A, LDA, tau, WORK, LWORK, INFO)
-  deallocate(WORK,jpvt,tau)
+
+  LWORK=-1
+  call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+  LWORK=int(WORK(1))
+
+  deallocate(WORK)
+  allocate(WORK(LWORK))
+  call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+
+  deallocate(WORK,TAU)
 end
 
 subroutine ortho_qr_unblocked(A,LDA,m,n)
@@ -170,13 +179,12 @@ subroutine ortho_qr_unblocked(A,LDA,m,n)
   double precision, intent(inout) :: A(LDA,n)
 
   integer                        :: info
-  integer, allocatable           :: jpvt(:)
-  double precision, allocatable  :: tau(:), work(:)
+  double precision, allocatable  :: TAU(:), WORK(:)
 
-  allocate (jpvt(n), tau(n), work(n))
+  allocate (TAU(n), WORK(n))
   call dgeqr2( m, n, A, LDA, TAU, WORK, INFO )
-  call dorg2r(m, n, n, A, LDA, tau, WORK, INFO)
-  deallocate(WORK,jpvt,tau)
+  call dorg2r(m, n, n, A, LDA, TAU, WORK, INFO)
+  deallocate(WORK,TAU)
 end
 
 subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m)
