@@ -210,6 +210,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   integer*8                      :: last_found, left, right, right_max
   double precision               :: rss, mem, ratio
   double precision, allocatable  :: utl(:,:)
+  integer, parameter             :: block_size=128
 
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
@@ -261,7 +262,7 @@ compute_singles=.True.
       singles_a(maxab),                                              &
       singles_b(maxab),                                              &
       doubles(maxab),                                                &
-      idx(maxab), utl(N_st,32))
+      idx(maxab), utl(N_st,block_size))
 
   kcol_prev=-1
 
@@ -399,9 +400,9 @@ compute_singles=.True.
       ! -----------------------
 
       !DIR$ LOOP COUNT avg(1000)
-      do k = 1,n_singles_a,32
+      do k = 1,n_singles_a,block_size
         ! Prefetch u_t(:,l_a)
-        do kk=0,31
+        do kk=0,block_size-1
           if (k+kk > n_singles_a) exit
           l_a = singles_a(k+kk)
           ASSERT (l_a <= N_det)
@@ -411,7 +412,7 @@ compute_singles=.True.
           enddo
         enddo
 
-        do kk=0,31
+        do kk=0,block_size-1
           if (k+kk > n_singles_a) exit
           l_a = singles_a(k+kk)
           lrow = psi_bilinear_matrix_rows(l_a)
@@ -488,9 +489,9 @@ compute_singles=.True.
 
     tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
     !DIR$ LOOP COUNT avg(1000)
-    do i=1,n_singles_a,32
+    do i=1,n_singles_a,block_size
       ! Prefetch u_t(:,l_a)
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_singles_a) exit
         l_a = singles_a(i+kk)
         ASSERT (l_a <= N_det)
@@ -500,7 +501,7 @@ compute_singles=.True.
         enddo
       enddo
 
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_singles_a) exit
         l_a = singles_a(i+kk)
         lrow = psi_bilinear_matrix_rows(l_a)
@@ -522,9 +523,9 @@ compute_singles=.True.
     ! ----------------------------------
 
     !DIR$ LOOP COUNT avg(50000)
-    do i=1,n_doubles,32
+    do i=1,n_doubles,block_size
       ! Prefetch u_t(:,l_a)
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_doubles) exit
         l_a = doubles(i+kk)
         ASSERT (l_a <= N_det)
@@ -534,7 +535,7 @@ compute_singles=.True.
         enddo
       enddo
 
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_doubles) exit
         l_a = doubles(i+kk)
         lrow = psi_bilinear_matrix_rows(l_a)
@@ -597,8 +598,8 @@ compute_singles=.True.
 
     tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
     !DIR$ LOOP COUNT avg(1000)
-    do i=1,n_singles_b,32
-      do kk=0,31
+    do i=1,n_singles_b,block_size
+      do kk=0,block_size-1
         if (i+kk > n_singles_b) exit
         l_b = singles_b(i+kk)
         ASSERT (l_b <= N_det)
@@ -611,7 +612,7 @@ compute_singles=.True.
         enddo
       enddo
 
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_singles_b) exit
         l_b = singles_b(i+kk)
         l_a = psi_bilinear_matrix_transp_order(l_b)
@@ -632,8 +633,8 @@ compute_singles=.True.
     ! ----------------------------------
 
     !DIR$ LOOP COUNT avg(50000)
-    do i=1,n_doubles,32
-      do kk=0,31
+    do i=1,n_doubles,block_size
+      do kk=0,block_size-1
         if (i+kk > n_doubles) exit
         l_b = doubles(i+kk)
         ASSERT (l_b <= N_det)
@@ -645,7 +646,7 @@ compute_singles=.True.
         enddo
       enddo
 
-      do kk=0,31
+      do kk=0,block_size-1
         if (i+kk > n_doubles) exit
         l_b = doubles(i+kk)
         l_a = psi_bilinear_matrix_transp_order(l_b)
