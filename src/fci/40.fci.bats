@@ -71,7 +71,7 @@ function run_stoch() {
 @test "HBO" { # 13.3144s
   [[ -n $TRAVIS ]] && skip
   qp set_file hbo.ezfio
-  run -100.213733051634 1.e-4  100000
+  run -100.212721540746 1.e-3  100000
 }
 
 @test "H2O" { # 11.3727s
@@ -89,7 +89,7 @@ function run_stoch() {
 @test "SO" { # 13.4952s
   [[ -n $TRAVIS ]] && skip
   qp set_file so.ezfio
-  run -26.011918121362  3.e-4  100000
+  run -26.0060656855457 1.e-3  100000
 }
 
 @test "H2S" { # 13.6745s
