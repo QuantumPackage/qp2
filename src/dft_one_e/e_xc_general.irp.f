@@ -15,7 +15,7 @@ prefix = ""
 for f in functionals:
   print """
   %sif (trim(exchange_functional) == '%s') then
-    energy_x = energy_x_%s"""%(prefix, f, f)
+    energy_x = (1.d0 - HF_exchange ) * energy_x_%s"""%(prefix, f, f)
   prefix = "else "
 print """
   else

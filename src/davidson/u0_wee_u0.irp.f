@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ double precision, psi_energy_two_e, (N_states) ]
   integer :: i,j
   call u_0_H_u_0_two_e(psi_energy_two_e,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
   do i=N_det+1,N_states
-    psi_energy(i) = 0.d0
+    psi_energy_two_e(i) = 0.d0
   enddo
 END_PROVIDER
 

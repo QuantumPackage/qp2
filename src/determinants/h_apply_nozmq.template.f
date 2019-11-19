@@ -33,22 +33,22 @@ subroutine $subroutine($params_main)
     do ispin=1,2
       do k=1,N_int
         mask(k,ispin,s_hole) =                                      &
-            iand(generators_bitmask(k,ispin,s_hole,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,s_hole),  &
             psi_det_generators(k,ispin,i_generator) )
         mask(k,ispin,s_part) =                                      &
-            iand(generators_bitmask(k,ispin,s_part,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,s_part),  &
             not(psi_det_generators(k,ispin,i_generator)) )
         mask(k,ispin,d_hole1) =                                      &
-            iand(generators_bitmask(k,ispin,d_hole1,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,d_hole1),  &
             psi_det_generators(k,ispin,i_generator) )
         mask(k,ispin,d_part1) =                                      &
-            iand(generators_bitmask(k,ispin,d_part1,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,d_part1),  &
             not(psi_det_generators(k,ispin,i_generator)) )
         mask(k,ispin,d_hole2) =                                      &
-            iand(generators_bitmask(k,ispin,d_hole2,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,d_hole2),  &
             psi_det_generators(k,ispin,i_generator) )
         mask(k,ispin,d_part2) =                                      &
-            iand(generators_bitmask(k,ispin,d_part2,i_bitmask_gen),  &
+            iand(generators_bitmask(k,ispin,d_part2),  &
             not(psi_det_generators(k,ispin,i_generator)) )
       enddo
     enddo

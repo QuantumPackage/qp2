@@ -91,7 +91,6 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
       enddo
     enddo
   endif
-
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]

@@ -52,7 +52,7 @@ run_only_test() {
       skip
     fi
   fi
-  sleep 3
+#  sleep 1
 }
 
 setup() {

@@ -44,6 +44,7 @@ program cisd
   !   * "del" orbitals which will be never occupied
   !
   END_DOC
+  PROVIDE N_states
   read_wf = .False.
   SOFT_TOUCH read_wf
   call run
@@ -51,29 +52,52 @@ end
 
 subroutine run
   implicit none
-  integer :: i
+  integer                        :: i,k
+  double precision               :: cisdq(N_states), delta_e
+  double precision,external      :: diag_h_mat_elem
 
   if(pseudo_sym)then
    call H_apply_cisd_sym
   else
    call H_apply_cisd
   endif
-  print *,  'N_det = ', N_det
-  print*,'******************************'
-  print *,  'Energies  of the states:'
-  do i = 1,N_states
-    print *,  i, CI_energy(i)
-  enddo
-  if (N_states > 1) then
-    print*,'******************************'
-    print*,'Excitation energies '
-    do i = 2, N_states
-      print*, i ,CI_energy(i) - CI_energy(1)
-    enddo
-  endif
   psi_coef = ci_eigenvectors
   SOFT_TOUCH psi_coef
   call save_wavefunction
   call ezfio_set_cisd_energy(CI_energy)
+
+  do i = 1,N_states
+    k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
+    delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
+    cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
+  enddo
+  print *,  'N_det = ', N_det
+  print*,''
+  print*,'******************************'
+  print *,  'CISD Energies'
+  do i = 1,N_states
+    print *,  i, CI_energy(i)
+  enddo
+  print*,''
+  print*,'******************************'
+  print *,  'CISD+Q Energies'
+  do i = 1,N_states
+    print *,  i, cisdq(i)
+  enddo
+  if (N_states > 1) then
+    print*,''
+    print*,'******************************'
+    print*,'Excitation energies (au)    (CISD+Q)'
+    do i = 2, N_states
+      print*, i ,CI_energy(i) - CI_energy(1), cisdq(i) - cisdq(1)
+    enddo
+    print*,''
+    print*,'******************************'
+    print*,'Excitation energies (eV)    (CISD+Q)'
+    do i = 2, N_states
+      print*, i ,(CI_energy(i) - CI_energy(1))/0.0367502d0, &
+        (cisdq(i) - cisdq(1)) / 0.0367502d0
+    enddo
+  endif
 
 end

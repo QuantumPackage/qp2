@@ -57,6 +57,8 @@ BEGIN_TEMPLATE
   $type                          :: c, tmp
   integer                        :: itmp
   integer                        :: i, j
+ 
+  if(isize<2)return
 
   c = x( shiftr(first+last,1) )
   i = first
