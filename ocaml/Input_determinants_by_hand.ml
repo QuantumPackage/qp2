@@ -355,8 +355,6 @@ end = struct
       let nstates =
         read_n_states ()
         |> States_number.to_int
-      and ndet =
-        Det_number.to_int b.n_det
       and ndet_qp_edit =
         Det_number.to_int b.n_det_qp_edit
       in
