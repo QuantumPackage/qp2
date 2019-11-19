@@ -161,7 +161,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     stop -1
   endif
 
-  itermax = max(3,min(davidson_sze_max, sze/N_st_diag))
+  itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
   itertot = 0
 
   if (state_following) then
@@ -322,6 +322,12 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     call normalize(u_in(1,k),sze)
   enddo
 
+  do k=1,N_st_diag
+    do i=1,sze
+      U(i,k) = u_in(i,k)
+    enddo
+  enddo
+
 
   do while (.not.converged)
     itertot = itertot+1
@@ -329,30 +335,33 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    do k=1,N_st_diag
-      do i=1,sze
-        U(i,k) = u_in(i,k)
-      enddo
-    enddo
-
     do iter=1,itermax-1
 
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      call ortho_qr(U,size(U,1),sze,shift2)
-      call ortho_qr(U,size(U,1),sze,shift2)
+      if ((iter > 1).or.(itertot == 1)) then
+        ! Compute |W_k> = \sum_i |i><i|H|u_k>
+        ! -----------------------------------
 
-      ! Compute |W_k> = \sum_i |i><i|H|u_k>
-      ! -----------------------------------------
+        if (disk_based) then
+          call ortho_qr_unblocked(U,size(U,1),sze,shift2)
+          call ortho_qr_unblocked(U,size(U,1),sze,shift2)
+        else
+          call ortho_qr(U,size(U,1),sze,shift2)
+          call ortho_qr(U,size(U,1),sze,shift2)
+        endif
 
-
-      if ((sze > 100000).and.distributed_davidson) then
-          call H_S2_u_0_nstates_zmq   (W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+        if ((sze > 100000).and.distributed_davidson) then
+            call H_S2_u_0_nstates_zmq   (W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+        else
+            call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+        endif
+        S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
       else
-          call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+         ! Already computed in update below
+         continue
       endif
-      S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
 
       if (dressing_state > 0) then
 
@@ -408,7 +417,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
       ! -------------------------------------------
 
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k)
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k) COLLAPSE(2)
        do j=1,shift2
          do i=1,shift2
            s_(i,j) = 0.d0
@@ -563,6 +572,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
+      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k=1,N_st_diag
         do i=1,sze
           U(i,shift2+k) =  &
@@ -577,9 +587,15 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           to_print(3,k) = residual_norm(k)
         endif
       enddo
+      !$OMP END PARALLEL DO
 
 
-      write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter, to_print(1:3,1:N_st)
+      if ((itertot>1).and.(iter == 1)) then
+        !don't print 
+        continue
+      else
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:3,1:N_st)
+      endif
       call davidson_converged(lambda,residual_norm,wall,iter,cpu,N_st,converged)
       do k=1,N_st
         if (residual_norm(k) > 1.e8) then
@@ -600,11 +616,56 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
     enddo
 
-    ! Re-contract to u_in
-    ! -----------
+    ! Re-contract U and update S and W
+    ! --------------------------------
+
+    call sgemm('N','N', sze, N_st_diag, shift2, 1.,      &
+        S, size(S,1), y_s, size(y_s,1), 0., S(1,shift2+1), size(S,1))
+    do k=1,N_st_diag
+      do i=1,sze
+        S(i,k) = S(i,shift2+k)
+      enddo
+    enddo
+
+    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
+        W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    do k=1,N_st_diag
+      do i=1,sze
+        W(i,k) = u_in(i,k)
+      enddo
+    enddo
 
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    do k=1,N_st_diag
+      do i=1,sze
+        U(i,k) = u_in(i,k)
+      enddo
+    enddo
+    if (disk_based) then
+      call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
+      call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
+    else
+      call ortho_qr(U,size(U,1),sze,N_st_diag)
+      call ortho_qr(U,size(U,1),sze,N_st_diag)
+    endif
+    do j=1,N_st_diag
+      k=1
+      do while ((k<sze).and.(U(k,j) == 0.d0))
+        k = k+1
+      enddo
+      if (U(k,j) * u_in(k,j) < 0.d0) then
+        do i=1,sze
+          W(i,j) = -W(i,j)
+          S(i,j) = -S(i,j)
+        enddo
+      endif
+    enddo
+    do j=1,N_st_diag
+      do i=1,sze
+        S_d(i,j) = dble(S(i,j))
+      enddo
+    enddo
 
   enddo
 
@@ -626,7 +687,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 8, fd_w, ptr_w )
     fd_w = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_w','r')
     close(fd_w,status='delete')
-    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 8, fd_s, ptr_s )
+    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 4, fd_s, ptr_s )
     fd_s = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_s','r')
     close(fd_s,status='delete')
   else

@@ -15,7 +15,7 @@ BEGIN_PROVIDER [ integer, n_states_diag  ]
       print *, 'davidson/n_states_diag not found in EZFIO file'
       stop 1
     endif
-    n_states_diag = max(N_states, N_states_diag)
+    n_states_diag = max(2,N_states * N_states_diag)
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
