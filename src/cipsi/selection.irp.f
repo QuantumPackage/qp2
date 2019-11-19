@@ -346,6 +346,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   call isort(indices,iorder,nmax)
   deallocate(iorder)
   
+  ! Start with 32 elements. Size will double along with the filtering.
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
       interesting(0:32), fullinteresting(0:32))
   preinteresting(:) = 0
@@ -477,7 +478,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
                 if (nt > 4) exit
               endif
             end do
-            case default
+          case default
             mobMask(1:N_int,1) = iand(negMask(1:N_int,1), psi_det_sorted(1:N_int,1,preinteresting(ii)))
             mobMask(1:N_int,2) = iand(negMask(1:N_int,2), psi_det_sorted(1:N_int,2,preinteresting(ii)))
             nt = 0

@@ -117,8 +117,12 @@ subroutine run_slave_main
         call mpi_print('zmq_get_dvector state_average_weight')
       IRP_ENDIF
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) cycle
+      IRP_IF MPI_DEBUG
+        call mpi_print('zmq_get_dvector selection_weight')
+      IRP_ENDIF
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) cycle
       pt2_e0_denominator(1:N_states) = energy(1:N_states)
-      TOUCH pt2_e0_denominator state_average_weight threshold_generators
+      TOUCH pt2_e0_denominator state_average_weight threshold_generators selection_weight
 
       if (mpi_master) then
         print *,  'N_det', N_det
@@ -127,6 +131,7 @@ subroutine run_slave_main
         print *,  'pt2_e0_denominator', pt2_e0_denominator
         print *,  'pt2_stoch_istate', pt2_stoch_istate
         print *,  'state_average_weight', state_average_weight
+        print *,  'selection_weight', selection_weight
       endif
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')
