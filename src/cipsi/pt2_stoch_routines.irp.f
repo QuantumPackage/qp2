@@ -77,6 +77,7 @@ logical function testTeethBuilding(minF, N)
     tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
   enddo
   tilde_cW(:) = tilde_cW(:) + 1.d0
+  deallocate(tilde_w)
 
   n0 = 0
   testTeethBuilding = .false.
@@ -89,19 +90,19 @@ logical function testTeethBuilding(minF, N)
     r = tilde_cW(n0 + minF)
     Wt = (1d0 - u0) * f 
     if (dabs(Wt) <= 1.d-3) then
-      return
+      exit
     endif
     if(Wt >= r - u0) then
        testTeethBuilding = .true.
-       return
+       exit
     end if
     n0 += 1
-!    if(N_det_generators - n0 < minF * N) then
     if(n0 > minFN) then
-      return
+      exit
     end if
   end do
-  stop "exited testTeethBuilding"
+  deallocate(tilde_cW)
+
 end function
 
 
@@ -768,7 +769,7 @@ END_PROVIDER
        tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
      enddo
      tilde_cW(:) = tilde_cW(:) + 1.d0
-     
+
      pt2_n_0(1) = 0
      do
      pt2_u_0 = tilde_cW(pt2_n_0(1))
