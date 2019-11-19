@@ -21,7 +21,6 @@ function run() {
   eq $energy $3 $thresh
 }
 
-
 @test "H3COH" {
   run h3coh.ezfio sr_pbe -115.50238225208
 }

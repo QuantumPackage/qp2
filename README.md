@@ -1,6 +1,10 @@
-# Quantum Package 2.0
+# Quantum Package 2.1
 
 <img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250">
+
+
+[![DOI](https://zenodo.org/badge/167513335.svg)](https://zenodo.org/badge/latestdoi/167513335)
+
 
 
 [*Quantum package 2.0: an open-source determinant-driven suite of programs*](https://pubs.acs.org/doi/10.1021/acs.jctc.9b00176)\

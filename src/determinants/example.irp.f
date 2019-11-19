@@ -151,7 +151,7 @@ subroutine routine_example_psi_det
     print*,'Determinant connected'
     call debug_det(psi_det(1,1,idx(i)),N_int)
     print*,'excitation degree = ',degree_list(i)
-    call i_H_j(psi_det(1,1,1) , psi_det(1,1,idx(i)),hij,N_int)
+    call i_H_j(psi_det(1,1,1) , psi_det(1,1,idx(i)),N_int,hij)
     do j = 1, N_states
       i_H_psi(j) += hij * psi_coef(idx(i),j)
     enddo

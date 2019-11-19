@@ -32,6 +32,7 @@
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
+ print*,'mo_num,n_points_final_grid',mo_num,n_points_final_grid
  mos_grad_in_r_array = 0.d0
  do m=1,3
   call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_grad_in_r_array(1,1,m),ao_num,0.d0,mos_grad_in_r_array(1,1,m),mo_num)

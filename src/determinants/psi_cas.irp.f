@@ -16,19 +16,17 @@ use bitmasks
     do l = 1, N_states
      psi_cas_coef(i,l) = 0.d0
     enddo
-    do l=1,n_cas_bitmask
-      good = .True.
-      do k=1,N_int
-        good = good .and. (                                          &
-            iand(not(cas_bitmask(k,1,l)), psi_det(k,1,i)) ==         &
-            iand(not(cas_bitmask(k,1,l)), hf_bitmask(k,1)) ) .and. (  &
-            iand(not(cas_bitmask(k,2,l)), psi_det(k,2,i)) ==         &
-            iand(not(cas_bitmask(k,2,l)), hf_bitmask(k,2)) )
-      enddo
-      if (good) then
-        exit
-      endif
+    good = .True.
+    do k=1,N_int
+      good = good .and. (                                          &
+          iand(not(act_bitmask(k,1)), psi_det(k,1,i)) ==         &
+          iand(not(act_bitmask(k,1)), hf_bitmask(k,1)) ) .and. (  &
+          iand(not(act_bitmask(k,2)), psi_det(k,2,i)) ==         &
+          iand(not(act_bitmask(k,2)), hf_bitmask(k,2)) )
     enddo
+    if (good) then
+      exit
+    endif
     if (good) then
       N_det_cas = N_det_cas+1
       do k=1,N_int

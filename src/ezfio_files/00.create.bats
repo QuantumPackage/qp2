@@ -24,6 +24,11 @@ function run {
 }
 
 
+@test "B-B" {
+  qp set_file b2_stretched.ezfio
+  run b2_stretched.zmt 1 0 6-31g
+}
+
 @test "C2H2" {
   run c2h2.xyz 1 0 cc-pvdz_ecp_bfd bfd
 }

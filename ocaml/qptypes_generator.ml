@@ -78,9 +78,6 @@ let input_data = "
   | _ -> raise (Invalid_argument \"Bit_kind should be (1|2|4|8).\")
   end;
 
-* Bitmask_number : int
-  assert (x > 0) ;
-
 * MO_coef : float
 
 * MO_occ : float
