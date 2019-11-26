@@ -70,7 +70,10 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     variance_match_weight(k) = product(memo_variance(k,:))
   enddo
 
-  SOFT_TOUCH pt2_match_weight variance_match_weight
+  threshold_davidson_pt2 = min(1.d-6, &
+     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(rpt2(1:N_states)))) )
+
+  SOFT_TOUCH pt2_match_weight variance_match_weight threshold_davidson_pt2
 end
 
 

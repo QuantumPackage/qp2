@@ -14,6 +14,16 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
+ implicit none
+ BEGIN_DOC
+ ! Threshold of Davidson's algorithm, using PT2 as a guide
+ END_DOC
+ threshold_davidson_pt2 = threshold_davidson
+
+END_PROVIDER
+
+
 
 BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
  implicit none
@@ -171,11 +181,9 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   endif
   overlap = 0.d0
 
-  PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse
+  PROVIDE nuclear_repulsion expected_s2 psi_bilinear_matrix_order psi_bilinear_matrix_order_reverse threshold_davidson_pt2
 
   call write_time(6)
-  call wall_time(wall)
-  call cpu_time(cpu)
   write(6,'(A)') ''
   write(6,'(A)') 'Davidson Diagonalization'
   write(6,'(A)') '------------------------'
@@ -224,6 +232,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     else if (m==1.and.disk_based_davidson) then
       m=0
       disk_based = .True.
+      itermax = 6
     else
       nproc_target = nproc_target - 1
     endif
@@ -596,11 +605,17 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       else
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:3,1:N_st)
       endif
-      call davidson_converged(lambda,residual_norm,wall,iter,cpu,N_st,converged)
+
+      ! Check convergence
+      if (iter > 1) then
+          converged = dabs(maxval(residual_norm(1:N_st))) < threshold_davidson_pt2
+      endif   
+      
+
       do k=1,N_st
         if (residual_norm(k) > 1.e8) then
-        print *,  ''
-          stop 'Davidson failed'
+          print *, 'Davidson failed'
+          stop -1
         endif
       enddo
       if (converged) then
