@@ -389,13 +389,13 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
          if (idx_re /= idx_im) then
            call map_get(ao_integrals_map,idx_im,tmp_im)
            if (idx1 < idx2) then
-             integral = cmplx(tmp_re,tmp_im)
+             integral = dcmplx(tmp_re,tmp_im)
            else
-             integral = cmplx(tmp_re,-tmp_im)
+             integral = dcmplx(tmp_re,-tmp_im)
            endif
          else
            tmp_im = 0.d0
-           integral = cmplx(tmp_re,tmp_im)
+           integral = dcmplx(tmp_re,tmp_im)
          endif
          
          ii = l-ao_integrals_cache_min
@@ -448,13 +448,13 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
          if (idx_re /= idx_im) then
            call map_get(ao_integrals_map,idx_im,tmp_im)
            if (idx1 < idx2) then
-             tmp = cmplx(tmp_re,tmp_im)
+             tmp = dcmplx(tmp_re,tmp_im)
            else
-             tmp = cmplx(tmp_re,-tmp_im)
+             tmp = dcmplx(tmp_re,-tmp_im)
            endif
          else
            tmp_im = 0.d0
-           tmp = cmplx(tmp_re,tmp_im)
+           tmp = dcmplx(tmp_re,tmp_im)
          endif
     else
       ii = l-ao_integrals_cache_min

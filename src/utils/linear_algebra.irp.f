@@ -609,9 +609,9 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
     print *, irp_here, ': ZHEEVD: the ',-info,'-th argument had an illegal value'
     stop 2
   endif
-  lwork  = int( work( 1 ) )
+  lwork  = max(int( work( 1 ) ),lwork)
   liwork = iwork(1)
-  lrwork = rwork(1)
+  lrwork = max(int(rwork(1),4),lrwork)
   deallocate (work,iwork,rwork)
 
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
