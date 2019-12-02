@@ -292,6 +292,7 @@ subroutine run_slave_main
             print *,  'pt2_e0_denominator', pt2_e0_denominator
             print *,  'pt2_stoch_istate', pt2_stoch_istate
             print *,  'state_average_weight', state_average_weight
+            print *,  'selection_weight', selection_weight
             print *,  'Number of threads', nproc_target
           endif
 

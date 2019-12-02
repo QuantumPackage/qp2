@@ -26,7 +26,8 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   lwork = -1
   call dgesvd('A','A', m, n, A_tmp, LDA,                             &
       D, U, LDU, Vt, LDVt, work, lwork, info)
-  lwork = int(work(1))
+  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+  lwork = max(int(work(1)), 5*MIN(M,N))
   deallocate(work)
 
   allocate(work(lwork))
@@ -129,22 +130,23 @@ subroutine ortho_qr(A,LDA,m,n)
   !
   ! LDA : leftmost dimension of A
   !
-  ! n : Number of rows of A
+  ! m : Number of rows of A
   !
-  ! m : Number of columns of A
+  ! n : Number of columns of A
   !
   END_DOC
   integer, intent(in)            :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
 
-  integer                        :: lwork, info
+  integer                        :: LWORK, INFO
   double precision, allocatable  :: TAU(:), WORK(:)
 
-  allocate (TAU(n), WORK(1))
+  allocate (TAU(min(m,n)), WORK(1))
 
   LWORK=-1
   call dgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  LWORK=int(WORK(1))
+  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+  LWORK=max(n,int(WORK(1)))
 
   deallocate(WORK)
   allocate(WORK(LWORK))
@@ -152,8 +154,9 @@ subroutine ortho_qr(A,LDA,m,n)
 
   LWORK=-1
   call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
-  LWORK=int(WORK(1))
-
+  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+  LWORK=max(n,int(WORK(1)))
+  
   deallocate(WORK)
   allocate(WORK(LWORK))
   call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
@@ -323,7 +326,7 @@ subroutine get_pseudo_inverse(A,LDA,m,n,C,LDC)
     print *,  info, ': SVD failed'
     stop
   endif
-  lwork = int(work(1))
+  LWORK=max(5*min(m,n),int(WORK(1)))
   deallocate(work)
   allocate(work(lwork))
   call dgesvd('S','A', m, n, A_tmp, m,D,U,m,Vt,n,work,lwork,info)
@@ -411,8 +414,8 @@ subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
   ! print*,'n = ',n
 
   A=H
-  lwork = max(1000,2*n*n + 6*n+ 1)
-  liwork = max(5*n + 3,1000)
+  lwork = 1
+  liwork = 1
   allocate (work(lwork),iwork(liwork))
 
   lwork = -1
@@ -423,8 +426,9 @@ subroutine lapack_diagd(eigvalues,eigvectors,H,nmax,n)
     print *, irp_here, ': DSYEVD: the ',-info,'-th argument had an illegal value'
     stop 2
   endif
-  lwork  = int( work( 1 ) )
-  liwork = iwork(1)
+  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+  LWORK  = max(int(work(1)), 2*n*n + 6*n+ 1)
+  liwork = max(iwork(1), 5*n + 3)
   deallocate (work,iwork)
 
   allocate (work(lwork),iwork(liwork))
@@ -475,7 +479,7 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
   allocate(A(nmax,n),eigenvalues(n))
 
   A=H
-  lwork = 2*n*n + 6*n+ 1
+  lwork = 1
   allocate (work(lwork))
 
   lwork = -1
@@ -485,7 +489,8 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
     print *, irp_here, ': DSYEV: the ',-info,'-th argument had an illegal value'
     stop 2
   endif
-  lwork  = int( work( 1 ) )
+  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+  LWORK  = max(int(work(1)), 2*n*n + 6*n+ 1)
   deallocate (work)
 
   allocate (work(lwork))
