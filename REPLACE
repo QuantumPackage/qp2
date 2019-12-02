@@ -463,7 +463,7 @@ qp_name ao_nucl_elec_integrals_per_atom -r ao_integrals_n_e_per_atom
 qp_name bi_elec_ref_bitmask_energy -r ref_bitmask_two_e_energy
 qp_name mono_elec_ref_bitmask_energy -r ref_bitmask_one_e_energy
 qp_name kinetic_ref_bitmask_energy -r ref_bitmask_kinetic_energy
-qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_e_n_energy
+qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
 qp_name disk_access_ao_integrals_erf
 qp_name mo_bielec_integral_jj
 qp_name mo_bielec_integral_jj -r mo_two_e_integrals_jj
@@ -835,3 +835,7 @@ qp_name potential_sr_c_beta_ao_pbe --rename=potential_c_beta_ao_sr_pbe
 qp_name potential_sr_xc_alpha_ao_pbe --rename=potential_xc_alpha_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
 qp_name disk_access_nuclear_repulsion --rename=io_nuclear_repulsion
+qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
+qp_name ref_bitmask_e_n_energy -r ref_bitmask_n_e_energy
+qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
+qp_name write_ao_integrals_e_n -r write_ao_integrals_n_e
