@@ -10,7 +10,7 @@ module Mo_basis : sig
         mo_class        : MO_class.t array;
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
-        mo_coef_imag    : (MO_coef.t array) array;
+        mo_coef_imag    : (MO_coef.t array) array option;
         ao_md5          : MD5.t;
       } [@@deriving sexp]
   val read : unit -> t option
@@ -25,7 +25,7 @@ end = struct
         mo_class        : MO_class.t array;
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
-        mo_coef_imag    : (MO_coef.t array) array;
+        mo_coef_imag    : (MO_coef.t array) array option;
         ao_md5          : MD5.t;
       } [@@deriving sexp]
   let get_default = Qpackage.get_ezfio_default "mo_basis"
@@ -40,16 +40,17 @@ end = struct
 
   let reorder b ordering =
     { b with
-      mo_coef =
-      Array.map (fun mo ->
-        Array.init (Array.length mo)
-          (fun i -> mo.(ordering.(i)))
-      ) b.mo_coef  ;
+      mo_coef = Array.map (fun mo ->
+          Array.init (Array.length mo)
+            (fun i -> mo.(ordering.(i)))
+        ) b.mo_coef  ;
       mo_coef_imag =
-      Array.map (fun mo ->
-        Array.init (Array.length mo)
-          (fun i -> mo.(ordering.(i)))
-      ) b.mo_coef_imag 
+        match b.mo_coef_imag with
+        | None -> None
+        | Some x -> Some ( Array.map (fun mo ->
+              Array.init (Array.length mo)
+                (fun i -> mo.(ordering.(i)))
+            ) x )
     }
 
   let read_ao_md5 () =
@@ -130,15 +131,18 @@ end = struct
       )
 
   let read_mo_coef_imag () =
-    let a = Ezfio.get_mo_basis_mo_coef_imag ()
-            |> Ezfio.flattened_ezfio
-            |> Array.map MO_coef.of_float
-    in
-    let mo_num = read_mo_num () |> MO_number.to_int in
-    let ao_num = (Array.length a)/mo_num in
-    Array.init mo_num (fun j ->
-        Array.sub a (j*ao_num) (ao_num) 
-      )
+    if Ezfio.has_mo_basis_mo_coef_imag () then
+      let a =
+          Ezfio.get_mo_basis_mo_coef_imag ()
+                  |> Ezfio.flattened_ezfio
+                  |> Array.map MO_coef.of_float 
+      in
+      let mo_num = read_mo_num () |> MO_number.to_int in
+      let ao_num = (Array.length a)/mo_num in
+      Some (Array.init mo_num (fun j ->
+          Array.sub a (j*ao_num) (ao_num) 
+        ) )
+    else None
 
 
   let read () =
@@ -266,12 +270,12 @@ mo_coef         = %s
   let write_mo_num n =
     MO_number.to_int n
     |> Ezfio.set_mo_basis_mo_num
-  ;;
+
 
   let write_mo_label a =
     MO_label.to_string a
     |> Ezfio.set_mo_basis_mo_label
-  ;;
+
 
   let write_mo_class a =
     let mo_num = Array.length a in
@@ -279,7 +283,7 @@ mo_coef         = %s
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_class
-  ;;
+
 
   let write_mo_occ a =
     let mo_num = Array.length a in
@@ -287,12 +291,12 @@ mo_coef         = %s
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_occ
-  ;;
+
 
   let write_md5 a =
     MD5.to_string a
     |> Ezfio.set_mo_basis_ao_md5
-  ;;
+
 
   let write_mo_coef a =
     let mo_num = Array.length a in
@@ -303,20 +307,25 @@ mo_coef         = %s
     |> Array.to_list
     |> List.concat
     in Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| ao_num ; mo_num |] ~data
-    |> Ezfio.set_mo_basis_mo_coef;
-  ;;
+    |> Ezfio.set_mo_basis_mo_coef
+
 
   let write_mo_coef_imag a =
-    let mo_num = Array.length a in
-    let ao_num = Array.length a.(0) in
-    let data =
-      Array.map (fun mo -> Array.map MO_coef.to_float mo
-      |> Array.to_list) a
-    |> Array.to_list
-    |> List.concat
-    in Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| ao_num ; mo_num |] ~data
-    |> Ezfio.set_mo_basis_mo_coef_imag;
-  ;;
+    match a with
+    | None -> ()
+    | Some a -> 
+      begin
+        let mo_num = Array.length a in
+        let ao_num = Array.length a.(0) in
+        let data =
+          Array.map (fun mo -> Array.map MO_coef.to_float mo
+          |> Array.to_list) a
+        |> Array.to_list
+        |> List.concat
+        in Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| ao_num ; mo_num |] ~data
+        |> Ezfio.set_mo_basis_mo_coef_imag
+      end
+
 
   let write 
       { mo_num          : MO_number.t ;
@@ -324,7 +333,7 @@ mo_coef         = %s
         mo_class        : MO_class.t array;
         mo_occ          : MO_occ.t array;
         mo_coef         : (MO_coef.t array) array;
-        mo_coef_imag    : (MO_coef.t array) array;
+        mo_coef_imag    : (MO_coef.t array) array option;
         ao_md5          : MD5.t;
       } =
       write_mo_num mo_num;
@@ -334,7 +343,7 @@ mo_coef         = %s
       write_mo_coef mo_coef;
       write_mo_coef_imag mo_coef_imag;
       write_md5 ao_md5
-  ;;
+
 
 end
 
