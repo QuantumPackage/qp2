@@ -109,7 +109,7 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]
   double precision :: A_center(3), B_center(3)
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx
-  if (periodic) then
+  if (is_periodic) then
     do j=1,ao_num
       do i= 1,ao_num
         ao_overlap_abs(i,j)= cdabs(ao_overlap_complex(i,j))
