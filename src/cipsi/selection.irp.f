@@ -114,8 +114,14 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (6)
-      print *,  'Using CI coefficient weight in selection'
+      print *,  'Using CI coefficient-based selection' 
       selection_weight(1:N_states) = c0_weight(1:N_states)
+
+     case (7)
+      print *,  'Input weights multiplied by variance- and pt2-matching'
+      selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)) * state_average_weight(1:N_states)
+      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+      print *, '# var weight ', real(variance_match_weight(:),4)
 
     end select
      print *, '# Total weight ', real(selection_weight(:),4)
@@ -784,16 +790,16 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
         select case (weight_selection)
 
-          case(0:4)
-            ! Energy selection
-            w = w + e_pert * selection_weight(istate)
-
           case(5)
             ! Variance selection
             w = w - alpha_h_psi * alpha_h_psi * selection_weight(istate)
 
           case(6)
             w = w - coef * coef * selection_weight(istate)
+
+          case(default)
+            ! Energy selection
+            w = w + e_pert * selection_weight(istate)
 
         end select
       end do
