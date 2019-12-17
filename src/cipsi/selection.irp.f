@@ -797,7 +797,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           case(6)
             w = w - coef * coef * selection_weight(istate)
 
-          case(default)
+          case default
             ! Energy selection
             w = w + e_pert * selection_weight(istate)
 
