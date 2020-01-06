@@ -10,7 +10,6 @@ let localport = 42379
 let in_time_sum = ref 1.e-9
 and in_size_sum = ref 0.
 
-
 let () =
   let open Command_line in
   begin

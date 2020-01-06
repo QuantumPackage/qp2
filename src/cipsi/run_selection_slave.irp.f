@@ -61,7 +61,6 @@ subroutine run_selection_slave(thread,iproc,energy)
         ! Only first time
         bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
         call create_selection_buffer(bsize, bsize*2, buf)
-!        call create_selection_buffer(N, N*2, buf2)
         buffer_ready = .True.
       else
         ASSERT (N == buf%N)

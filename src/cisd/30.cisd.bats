@@ -18,6 +18,11 @@ function run() {
 }
 
 
+@test "B-B" { # 
+  qp set_file b2_stretched.ezfio
+  run  -49.120607088648597 -49.055152453388231
+}
+
 @test "SiH2_3B1" { # 1.53842s 3.53856s
   qp set_file sih2_3b1.ezfio
   run -290.015949171697 -289.805036176618
