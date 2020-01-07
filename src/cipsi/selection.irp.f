@@ -123,6 +123,16 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       print *, '# PT2 weight ', real(pt2_match_weight(:),4)
       print *, '# var weight ', real(variance_match_weight(:),4)
 
+     case (8)
+      print *,  'Input weights multiplied by pt2-matching'
+      selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states) * state_average_weight(1:N_states)
+      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
+
+     case (9)
+      print *,  'Input weights multiplied by variance-matching'
+      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * state_average_weight(1:N_states)
+      print *, '# var weight ', real(variance_match_weight(:),4)
+
     end select
      print *, '# Total weight ', real(selection_weight(:),4)
 
