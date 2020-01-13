@@ -16,6 +16,19 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
   print*,  'AO map initialized : ', sze
 END_PROVIDER
 
+BEGIN_PROVIDER [ type(map_type), ao_integrals_map_periodic ]
+  implicit none
+  BEGIN_DOC
+  ! AO integrals
+  END_DOC
+  integer(key_kind)              :: key_max
+  integer(map_size_kind)         :: sze
+  call two_e_integrals_index_2fold(ao_num,ao_num,ao_num,ao_num,key_max)
+  sze = key_max
+  call map_init(ao_integrals_map_periodic,sze)
+  print*,  'complex AO map initialized : ', sze
+END_PROVIDER
+
 subroutine two_e_integrals_index(i,j,k,l,i1)
   use map_module
   implicit none
@@ -425,7 +438,7 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
   type(map_type), intent(inout)  :: map
   integer                        :: ii
   complex(integral_kind)         :: tmp
-  PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
+  PROVIDE ao_two_e_integrals_in_map_periodic ao_integrals_cache_periodic ao_integrals_cache_min
   !DIR$ FORCEINLINE
   if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
     tmp = (0.d0,0.d0)
@@ -507,7 +520,7 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze
-  complex(integral_kind), intent(out) :: out_val(sze)
+  complex*16, intent(out) :: out_val(sze)
 
   integer                        :: i
   integer(key_kind)              :: hash
@@ -515,14 +528,14 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
   thresh = ao_integrals_threshold
 
-  if (ao_overlap_abs(j,l) < thresh) then
-    out_val = 0.d0
+  if (ao_overlap_abs_periodic(j,l) < thresh) then
+    out_val = (0.d0,0.d0)
     return
   endif
 
-  double precision :: get_ao_two_e_integral
+  complex*16 :: get_ao_two_e_integral_periodic
   do i=1,sze
-    out_val(i) = get_ao_two_e_integral(i,j,k,l,ao_integrals_map)
+    out_val(i) = get_ao_two_e_integral_periodic(i,j,k,l,ao_integrals_map)
   enddo
 
 end
