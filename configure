@@ -82,7 +82,7 @@ function execute () {
 }
 
 PACKAGES=""
-OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib.v0.11.0 ppx_sexp_conv ppx_deriving getopt"
+OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
 
 while true ; do
     case "$1" in
