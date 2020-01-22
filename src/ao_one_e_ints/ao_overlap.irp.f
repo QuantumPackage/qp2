@@ -75,7 +75,16 @@ BEGIN_PROVIDER [ double precision, ao_overlap_imag, (ao_num, ao_num) ]
  BEGIN_DOC
  ! Imaginary part of the overlap
  END_DOC
- ao_overlap_imag = 0.d0
+  if (read_ao_integrals_overlap) then
+     call ezfio_get_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
+     print *,  'AO overlap integrals read from disk'
+  else
+    ao_overlap_imag = 0.d0
+  endif
+  if (write_ao_integrals_overlap) then
+     call ezfio_set_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
+     print *,  'AO overlap integrals written to disk'
+  endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, ao_overlap_complex, (ao_num, ao_num) ]

@@ -17,9 +17,13 @@ subroutine run
   double precision, allocatable :: A(:,:), B(:,:)
   double precision :: tmp_re, tmp_im
 
-  integer             :: n_integrals 
-  integer(key_kind), allocatable   :: buffer_i(:) 
-  real(integral_kind), allocatable :: buffer_values(:)
+  integer             :: n_integrals_1, n_integrals_2 
+  integer(key_kind), allocatable   :: buffer_i_1(:), buffer_i_2(:) 
+  real(integral_kind), allocatable :: buffer_values_1(:), buffer_values_2(:)
+  logical :: use_map1
+  integer(key_kind) :: idx_tmp
+  double precision :: sign
+
 
   call ezfio_set_ao_basis_ao_num(ao_num)
 
@@ -107,31 +111,66 @@ subroutine run
   call ezfio_set_ao_one_e_ints_ao_integrals_n_e_imag(B(1:ao_num, 1:ao_num))
   call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e("Read")
 
-!  allocate(buffer_i(ao_num**3), buffer_values(ao_num**3))
-!  iunit = getunitandopen('W.qp','r')
-!  n_integrals=0
-!  buffer_values = 0.d0
-!  do 
-!    read (iunit,*,end=13) i,j,k,l, integral
-!    n_integrals += 1
-!    call two_e_integrals_index(i, j, k, l, buffer_i(n_integrals) )
-!    buffer_values(n_integrals) = integral
-!    if (n_integrals == size(buffer_i)) then
-!      call insert_into_ao_integrals_map(n_integrals,buffer_i,buffer_values)
-!      n_integrals = 0
-!    endif
-!  enddo
-!  13 continue
-!  close(iunit)
-!  
-!  if (n_integrals > 0) then
-!    call insert_into_ao_integrals_map(n_integrals,buffer_i,buffer_values)
-!  endif
-!
-!  call map_sort(ao_integrals_map)
-!  call map_unique(ao_integrals_map)
-!
-!  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-!  call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
+  allocate(buffer_i_1(ao_num**3), buffer_values_1(ao_num**3))
+  allocate(buffer_i_2(ao_num**3), buffer_values_2(ao_num**3))
+  iunit = getunitandopen('W.qp','r')
+  n_integrals_1=0
+  n_integrals_2=0
+  buffer_values_1 = 0.d0
+  buffer_values_2 = 0.d0
+  do 
+    read (iunit,*,end=13) i,j,k,l, tmp_re, tmp_im
+    call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
+    print'(4(I4),(L3),(I6),(F7.1))',i,j,k,l,use_map1,idx_tmp,sign
+    if (use_map1) then
+      n_integrals_1 += 1
+      buffer_i_1(n_integrals_1)=idx_tmp
+      buffer_values_1(n_integrals_1)=tmp_re
+      print'(A,4(I4),(I6),(E15.7))','map1',i,j,k,l,idx_tmp,tmp_re
+      if (sign.ne.0.d0) then 
+        n_integrals_1 += 1
+        buffer_i_1(n_integrals_1)=idx_tmp+1
+        buffer_values_1(n_integrals_1)=tmp_im*sign
+        print'(A,4(I4),(I6),(E15.7))','map1',i,j,k,l,idx_tmp+1,tmp_im*sign
+      endif 
+      if (n_integrals_1 >= size(buffer_i_1)-1) then
+        call insert_into_ao_integrals_map(n_integrals_1,buffer_i_1,buffer_values_1)
+        n_integrals_1 = 0
+      endif
+    else
+      n_integrals_2 += 1
+      buffer_i_2(n_integrals_2)=idx_tmp
+      buffer_values_2(n_integrals_2)=tmp_re
+      print'(A,4(I4),(I6),(E15.7))','map2',i,j,k,l,idx_tmp,tmp_re
+      if (sign.ne.0.d0) then
+        n_integrals_2 += 1
+        buffer_i_2(n_integrals_2)=idx_tmp+1
+        buffer_values_2(n_integrals_2)=tmp_im*sign
+        print'(A,4(I4),(I6),(E15.7))','map2',i,j,k,l,idx_tmp+1,tmp_im*sign
+      endif 
+      if (n_integrals_2 >= size(buffer_i_2)-1) then
+        call insert_into_ao_integrals_map_2(n_integrals_2,buffer_i_2,buffer_values_2)
+        n_integrals_2 = 0
+      endif
+    endif
+  enddo
+  13 continue
+  close(iunit)
+  
+  if (n_integrals_1 > 0) then
+    call insert_into_ao_integrals_map(n_integrals_1,buffer_i_1,buffer_values_1)
+  endif
+  if (n_integrals_2 > 0) then
+    call insert_into_ao_integrals_map_2(n_integrals_2,buffer_i_2,buffer_values_2)
+  endif
+
+  call map_sort(ao_integrals_map)
+  call map_unique(ao_integrals_map)
+  call map_sort(ao_integrals_map_2)
+  call map_unique(ao_integrals_map_2)
+
+  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_1',ao_integrals_map)
+  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_2',ao_integrals_map_2)
+  call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
   
 end

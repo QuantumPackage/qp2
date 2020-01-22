@@ -531,11 +531,28 @@ subroutine map_get(map, key, value)
   real(integral_kind), intent(out) :: value
   integer(map_size_kind)         :: idx_cache
   integer(cache_map_size_kind)   :: idx
-
+  idx=1
   ! index in tha pointers array
   idx_cache = shiftr(key,map_shift)
   !DIR$ FORCEINLINE
   call cache_map_get_interval(map%map(idx_cache), key, value, 1, map%map(idx_cache)%n_elements,idx)
+end
+
+subroutine map_get_2(map, key, value1, value2)
+  use map_module
+  implicit none
+  type (map_type), intent(inout) :: map
+  integer(key_kind), intent(in)  :: key
+  real(integral_kind), intent(out) :: value1, value2
+  integer(map_size_kind)         :: idx_cache
+  integer(cache_map_size_kind)   :: idx
+
+  idx=1
+  ! index in tha pointers array
+  idx_cache = shiftr(key,map_shift)
+  !DIR$ FORCEINLINE
+  call cache_map_get_interval(map%map(idx_cache), key, value1, 1, map%map(idx_cache)%n_elements,idx)
+  call cache_map_get_interval(map%map(idx_cache), key+1, value2, idx+1, idx+2, idx)
 end
 
 subroutine cache_map_get_interval(map, key, value, ibegin, iend, idx)

@@ -160,13 +160,13 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
   integer                        :: i,j,k,l
 
   if (read_ao_integrals_kinetic) then
-    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals_imag)
+    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic_imag(ao_kinetic_integrals_imag)
     print *,  'AO kinetic integrals read from disk'
   else
     print *,  irp_here, ': Not yet implemented'
   endif
   if (write_ao_integrals_kinetic) then
-    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals_imag)
+    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_imag(ao_kinetic_integrals_imag)
     print *,  'AO kinetic integrals written to disk'
   endif
 END_PROVIDER
