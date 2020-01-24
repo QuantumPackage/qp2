@@ -101,18 +101,45 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   call ao_to_mo(Fock_matrix_ao_alpha,size(Fock_matrix_ao_alpha,1), &
+   if (is_periodic) then
+     print*,'error',irp_here
+     stop -1
+   else
+     call ao_to_mo(Fock_matrix_ao_alpha,size(Fock_matrix_ao_alpha,1), &
                  Fock_matrix_mo_alpha,size(Fock_matrix_mo_alpha,1))
+   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, Fock_matrix_mo_alpha_complex, (mo_num,mo_num) ]
+   implicit none
+   BEGIN_DOC
+   ! Fock matrix on the MO basis
+   END_DOC
+   call ao_to_mo_complex(Fock_matrix_ao_alpha_complex,size(Fock_matrix_ao_alpha_complex,1), &
+                 Fock_matrix_mo_alpha_complex,size(Fock_matrix_mo_alpha_complex,1))
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
    implicit none
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   call ao_to_mo(Fock_matrix_ao_beta,size(Fock_matrix_ao_beta,1), &
+   if (is_periodic) then
+     print*,'error',irp_here
+     stop -1
+   else
+     call ao_to_mo(Fock_matrix_ao_beta,size(Fock_matrix_ao_beta,1), &
                  Fock_matrix_mo_beta,size(Fock_matrix_mo_beta,1))
+   endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, Fock_matrix_mo_beta_complex, (mo_num,mo_num) ]
+   implicit none
+   BEGIN_DOC
+   ! Fock matrix on the MO basis
+   END_DOC
+   call ao_to_mo_complex(Fock_matrix_ao_beta_complex,size(Fock_matrix_ao_beta_complex,1), &
+                 Fock_matrix_mo_beta_complex,size(Fock_matrix_mo_beta_complex,1))
 END_PROVIDER
 
 
@@ -138,6 +165,33 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
    else
      call mo_to_ao(Fock_matrix_mo,size(Fock_matrix_mo,1),            &
          Fock_matrix_ao,size(Fock_matrix_ao,1))
+   endif
+ endif
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ complex*16, Fock_matrix_ao_complex, (ao_num, ao_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Fock matrix in AO basis set
+ END_DOC
+
+ if(frozen_orb_scf)then
+   call mo_to_ao_complex(Fock_matrix_mo_complex,size(Fock_matrix_mo_complex,1),              &
+       Fock_matrix_ao_complex,size(Fock_matrix_ao_complex,1))
+ else
+   if ( (elec_alpha_num == elec_beta_num).and.                       &
+         (level_shift == 0.) )                                       &
+         then
+     integer                        :: i,j
+     do j=1,ao_num
+       do i=1,ao_num
+         Fock_matrix_ao_complex(i,j) = Fock_matrix_ao_alpha_complex(i,j)
+       enddo
+     enddo
+   else
+     call mo_to_ao_complex(Fock_matrix_mo_complex,size(Fock_matrix_mo_complex,1),            &
+         Fock_matrix_ao_complex,size(Fock_matrix_ao_complex,1))
    endif
  endif
 END_PROVIDER

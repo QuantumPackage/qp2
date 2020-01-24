@@ -153,6 +153,14 @@ provide ao_two_e_integrals_in_map
     call map_get(ao_integrals_map_2,idx_tmp+1,tmp6)
     print*,tmp3,tmp4
     print*,tmp5,tmp6
+    integer*8 :: ii
+          ii = l-ao_integrals_cache_min
+          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
+          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
+          ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+    print*,'cache(pbc)=', ao_integrals_cache_periodic(ii)
+    print*,'cache(old)=', ao_integrals_cache(ii)
+    print*
 !    if (use_map1) then
 !      n_integrals_1 += 1
 !      buffer_i_1(n_integrals_1-1)=idx_tmp

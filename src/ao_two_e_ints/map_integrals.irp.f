@@ -258,6 +258,7 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
  complex(integral_kind)         :: integral
   integer(key_kind)              :: p,q,r,s,ik,jl
   logical :: ilek, jlel, iklejl
+  complex*16 :: get_ao_two_e_integral_periodic_simple
 
 
  !$OMP PARALLEL DO PRIVATE (ilek,jlel,p,q,r,s, ik,jl,iklejl, &
@@ -267,36 +268,8 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
      do j=ao_integrals_cache_min,ao_integrals_cache_max
        do i=ao_integrals_cache_min,ao_integrals_cache_max
          !DIR$ FORCEINLINE
-         call two_e_integrals_index(i,j,k,l,idx1)
-         ilek = (i.le.k)
-         jlel = (j.le.l)
-         idx1 = 2*idx1 - 1
-         if (ilek.eqv.jlel) then !map1
-           !TODO: merge these calls using map_get_2
-           call map_get(ao_integrals_map,idx1,tmp_re)
-           call map_get(ao_integrals_map,idx1+1,tmp_im)
-           if (ilek) then
-             integral = dcmplx(tmp_re,tmp_im)
-           else
-             integral = dcmplx(tmp_re,-tmp_im)
-           endif
-         else !map2
-           !TODO: merge these calls using map_get_2
-           call map_get(ao_integrals_map_2,idx1,tmp_re)
-           call map_get(ao_integrals_map_2,idx1+1,tmp_im)
-           p = min(i,k)
-           r = max(i,k)
-           ik = p+shiftr(r*r-r,1)
-           q = min(j,l)
-           s = max(j,l)
-           jl = q+shiftr(s*s-s,1)
-           iklejl = (ik.le.jl)
-           if (ilek.eqv.iklejl) then
-             integral = dcmplx(tmp_re,tmp_im)
-           else
-             integral = dcmplx(tmp_re,-tmp_im)
-           endif
-        endif
+         integral = get_ao_two_e_integral_periodic_simple(i,j,k,l,&
+                    ao_integrals_map,ao_integrals_map_2)
          
          ii = l-ao_integrals_cache_min
          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
@@ -324,35 +297,61 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   integer(key_kind), intent(out) :: idx
   logical, intent(out)           :: use_map1
   double precision, intent(out)  :: sign
-  integer(key_kind)              :: p,q,r,s,ik,jl
-  logical :: ilek, jlel, iklejl, ikeqjl
+  integer(key_kind)              :: p,q,r,s,ik,jl,ij,kl
+  logical :: iltk, jltl, ikltjl, ieqk, jeql, ikeqjl, ijeqkl
   ! i.le.k, j.le.l, tri(i,k).le.tri(j,l)
   !DIR$ FORCEINLINE
   call two_e_integrals_index_periodic(i,j,k,l,idx,ik,jl)
-  ilek = (i.le.k)
-  jlel = (j.le.l)
+  p = min(i,j)
+  r = max(i,j)
+  ij = p+shiftr(r*r-r,1)
+  q = min(k,l)
+  s = max(k,l)
+  kl = q+shiftr(s*s-s,1)
+
+
   idx = 2*idx-1
-  ikeqjl = (ik.eq.jl)
-  if (ilek.eqv.jlel) then !map1
+
+  if (ij==kl) then !real, map1
+    sign=0.d0
     use_map1=.True.
+  else
+    iltk = (i.lt.k)
+    jltl = (j.lt.l)
+    ieqk = (i.eq.k)
+    jeql = (j.eq.l)
+    ikltjl = (ik.lt.jl)
+    ikeqjl = (ik.eq.jl)
     if (ikeqjl) then
-      sign=0.d0
-    else if (ilek) then
-      sign=1.d0
-    else
-      sign=-1.d0
-    endif
-  else !map2
-    use_map1=.False.
-    if (ikeqjl) then
-      sign=0.d0
-    else
-      iklejl = (ik.le.jl)
-      if (ilek.eqv.iklejl) then
-        sign=1.d0 
+      if (iltk) then
+        sign=1.d0
+        use_map1=.False.
       else
         sign=-1.d0
+        use_map1=.False.
       endif
+    else if (ieqk) then
+      if (jltl) then
+        sign=1.d0
+        use_map1=.True.
+      else
+        sign=-1.d0
+        use_map1=.True.
+      endif
+    else if (jeql) then
+      if (iltk) then
+        sign=1.d0
+        use_map1=.True.
+      else
+        sign=-1.d0
+        use_map1=.True.
+      endif
+    else if (iltk.eqv.ikltjl) then
+      sign=1.d0
+      use_map1=.False.
+    else
+      sign=-1.d0
+      use_map1=.False.
     endif
   endif
 end
@@ -364,48 +363,33 @@ complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) resu
   ! Gets one AO bi-electronic integral from the AO map
   END_DOC
   integer, intent(in)            :: i,j,k,l
-  integer(key_kind)              :: idx1,idx2
+  integer(key_kind)              :: idx1,idx2,idx
   real(integral_kind)            :: tmp_re, tmp_im
   integer(key_kind)              :: idx_re,idx_im
   type(map_type), intent(inout)  :: map,map2
   integer                        :: ii
   complex(integral_kind)         :: tmp
   integer(key_kind)              :: p,q,r,s,ik,jl
-  logical :: ilek, jlel, iklejl
+  logical :: ilek, jlel, iklejl,use_map1
+  double precision :: sign
   ! a.le.c, b.le.d, tri(a,c).le.tri(b,d)
-  PROVIDE ao_two_e_integrals_in_map 
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index(i,j,k,l,idx1)
-         ilek = (i.le.k)
-         jlel = (j.le.l)
-         idx1 = idx1*2-1
-         if (ilek.eqv.jlel) then !map1
-           !TODO: merge these calls using map_get_2
-           call map_get(map,idx1,tmp_re)
-           call map_get(map,idx1+1,tmp_im)
-           if (ilek) then
-             tmp = dcmplx(tmp_re,tmp_im)
-           else
-             tmp = dcmplx(tmp_re,-tmp_im)
-           endif
-         else !map2
-           !TODO: merge these calls using map_get_2
-           call map_get(map2,idx1,tmp_re)
-           call map_get(map2,idx1+1,tmp_im)
-           p = min(i,k)
-           r = max(i,k)
-           ik = p+shiftr(r*r-r,1)
-           q = min(j,l)
-           s = max(j,l)
-           jl = q+shiftr(s*s-s,1)
-           iklejl = (ik.le.jl)
-           if (ilek.eqv.iklejl) then
-             tmp = dcmplx(tmp_re,tmp_im)
-           else
-             tmp = dcmplx(tmp_re,-tmp_im)
-           endif
-        endif
-    result = tmp
+  PROVIDE ao_two_e_integrals_in_map
+  call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
+  if (use_map1) then
+    call map_get(map,idx,tmp_re)
+    if (sign/=0.d0) then
+      call map_get(map,idx+1,tmp_im)
+      tmp_im *= sign
+    else
+      tmp_im=0.d0
+    endif
+  else
+    call map_get(map2,idx,tmp_re)
+    call map_get(map2,idx+1,tmp_im)
+    tmp_im *= sign
+  endif
+  tmp = dcmplx(tmp_re,tmp_im)
+  result = tmp
 end
 
 
@@ -428,11 +412,12 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map,map2) result(resu
   ! a.le.c, b.le.d, tri(a,c).le.tri(b,d)
   PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
   !DIR$ FORCEINLINE
-  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
-    tmp = (0.d0,0.d0)
-  else if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < ao_integrals_threshold) then
-    tmp = (0.d0,0.d0)
-  else
+!  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
+!    tmp = (0.d0,0.d0)
+!  else if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < ao_integrals_threshold) then
+!    tmp = (0.d0,0.d0)
+!  else
+  if (.True.) then
     ii = l-ao_integrals_cache_min
     ii = ior(ii, k-ao_integrals_cache_min)
     ii = ior(ii, j-ao_integrals_cache_min)
