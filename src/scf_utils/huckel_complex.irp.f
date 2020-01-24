@@ -1,4 +1,4 @@
-subroutine huckel_guess
+subroutine huckel_guess_complex
   implicit none
   BEGIN_DOC
 ! Build the MOs using the extended Huckel model
