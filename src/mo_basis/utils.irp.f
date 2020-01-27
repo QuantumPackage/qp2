@@ -83,7 +83,7 @@ subroutine save_mos_truncated(n)
   call ezfio_set_mo_basis_mo_class(mo_class)
   if (is_periodic) then
     buffer = 0.d0
-    do j = 1, mo_num
+    do j = 1, n
       do i = 1, ao_num
         buffer(i,j) = mo_coef_imag(i,j)
       enddo
