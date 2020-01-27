@@ -110,15 +110,6 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
    endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ complex*16, Fock_matrix_mo_alpha_complex, (mo_num,mo_num) ]
-   implicit none
-   BEGIN_DOC
-   ! Fock matrix on the MO basis
-   END_DOC
-   call ao_to_mo_complex(Fock_matrix_ao_alpha_complex,size(Fock_matrix_ao_alpha_complex,1), &
-                 Fock_matrix_mo_alpha_complex,size(Fock_matrix_mo_alpha_complex,1))
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
    implicit none
    BEGIN_DOC
@@ -132,16 +123,6 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
                  Fock_matrix_mo_beta,size(Fock_matrix_mo_beta,1))
    endif
 END_PROVIDER
-
-BEGIN_PROVIDER [ complex*16, Fock_matrix_mo_beta_complex, (mo_num,mo_num) ]
-   implicit none
-   BEGIN_DOC
-   ! Fock matrix on the MO basis
-   END_DOC
-   call ao_to_mo_complex(Fock_matrix_ao_beta_complex,size(Fock_matrix_ao_beta_complex,1), &
-                 Fock_matrix_mo_beta_complex,size(Fock_matrix_mo_beta_complex,1))
-END_PROVIDER
-
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
  implicit none
@@ -169,34 +150,6 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
  endif
 END_PROVIDER
 
-
-BEGIN_PROVIDER [ complex*16, Fock_matrix_ao_complex, (ao_num, ao_num) ]
- implicit none
- BEGIN_DOC
- ! Fock matrix in AO basis set
- END_DOC
-
- if(frozen_orb_scf)then
-   call mo_to_ao_complex(Fock_matrix_mo_complex,size(Fock_matrix_mo_complex,1),              &
-       Fock_matrix_ao_complex,size(Fock_matrix_ao_complex,1))
- else
-   if ( (elec_alpha_num == elec_beta_num).and.                       &
-         (level_shift == 0.) )                                       &
-         then
-     integer                        :: i,j
-     do j=1,ao_num
-       do i=1,ao_num
-         Fock_matrix_ao_complex(i,j) = Fock_matrix_ao_alpha_complex(i,j)
-       enddo
-     enddo
-   else
-     call mo_to_ao_complex(Fock_matrix_mo_complex,size(Fock_matrix_mo_complex,1),            &
-         Fock_matrix_ao_complex,size(Fock_matrix_ao_complex,1))
-   endif
- endif
-END_PROVIDER
-
-
 BEGIN_PROVIDER [ double precision, SCF_energy ]
  implicit none
  BEGIN_DOC
@@ -205,13 +158,27 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  SCF_energy = nuclear_repulsion
 
  integer                        :: i,j
- do j=1,ao_num
-   do i=1,ao_num
-     SCF_energy += 0.5d0 * (                                          &
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) )
+ if (is_periodic) then
+   complex*16 :: scf_e_tmp
+   scf_e_tmp = (0.d0,0.d0)
+   do j=1,ao_num
+     do i=1,ao_num
+       scf_e_tmp += 0.5d0 * (                                          &
+           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_alpha_complex(i,j) ) *  SCF_density_matrix_ao_alpha_complex(i,j) +&
+           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_beta_complex (i,j) ) *  SCF_density_matrix_ao_beta_complex (i,j) )
+     enddo
    enddo
- enddo
+   !TODO: add check for imaginary part? (should be zero)
+   SCF_energy = dble(scf_e_tmp)
+ else
+   do j=1,ao_num
+     do i=1,ao_num
+       SCF_energy += 0.5d0 * (                                          &
+           (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
+           (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) )
+     enddo
+   enddo
+ endif
  SCF_energy += extra_e_contrib_density
 
 END_PROVIDER
