@@ -17,6 +17,15 @@ subroutine save_mos
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
   call ezfio_set_mo_basis_mo_class(mo_class)
+  if (is_periodic) then
+    buffer = 0.d0
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef_imag(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef_imag(buffer)
+  endif
   deallocate (buffer)
 
 end
@@ -39,6 +48,15 @@ subroutine save_mos_no_occ
     enddo
   enddo
   call ezfio_set_mo_basis_mo_coef(buffer)
+  if (is_periodic) then
+    buffer = 0.d0
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef_imag(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef_imag(buffer)
+  endif
   deallocate (buffer)
 
 end
@@ -63,6 +81,15 @@ subroutine save_mos_truncated(n)
   call ezfio_set_mo_basis_mo_coef(buffer)
   call ezfio_set_mo_basis_mo_occ(mo_occ)
   call ezfio_set_mo_basis_mo_class(mo_class)
+  if (is_periodic) then
+    buffer = 0.d0
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef_imag(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef_imag(buffer)
+  endif
   deallocate (buffer)
 
 end

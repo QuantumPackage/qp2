@@ -146,6 +146,29 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Molecular orbital coefficients on |AO| basis set
+  !
+  ! mo_coef_complex(i,j) = coefficient of the i-th |AO| on the jth |MO|
+  !
+  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
+  END_DOC
+  integer                        :: i, j
+  double precision, allocatable  :: buffer(:,:)
+  logical                        :: exists
+  PROVIDE ezfio_filename
+
+  provide mo_coef mo_coef_imag
+  
+  do i=1,mo_num
+    do j=1,ao_num
+      mo_coef_complex(j,i) = dcmplx(mo_coef(j,i),mo_coef_imag(j,i))
+    enddo
+  enddo
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  implicit none
  BEGIN_DOC
