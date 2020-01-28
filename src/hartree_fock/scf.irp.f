@@ -48,16 +48,31 @@ subroutine create_guess
   call ezfio_has_mo_basis_mo_coef(exists)
   if (.not.exists) then
     if (mo_guess_type == "HCore") then
-      mo_coef = ao_ortho_lowdin_coef
-      TOUCH mo_coef
-      mo_label = 'Guess'
-      call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
-          size(mo_one_e_integrals,1),                            &
-          size(mo_one_e_integrals,2),                            &
-          mo_label,1,.false.)
-      SOFT_TOUCH mo_coef mo_label
+      if (is_periodic) then
+        mo_coef_complex = ao_ortho_lowdin_coef_complex
+        TOUCH mo_coef_complex
+        mo_label = 'Guess'
+        call mo_as_eigvectors_of_mo_matrix_complex(mo_one_e_integrals_complex,     &
+            size(mo_one_e_integrals_complex,1),                            &
+            size(mo_one_e_integrals_complex,2),                            &
+            mo_label,1,.false.)
+        SOFT_TOUCH mo_coef_complex mo_label
+      else
+        mo_coef = ao_ortho_lowdin_coef
+        TOUCH mo_coef
+        mo_label = 'Guess'
+        call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
+            size(mo_one_e_integrals,1),                            &
+            size(mo_one_e_integrals,2),                            &
+            mo_label,1,.false.)
+        SOFT_TOUCH mo_coef mo_label
+      endif
     else if (mo_guess_type == "Huckel") then
-      call huckel_guess
+      if (is_periodic) then
+        call huckel_guess_complex
+      else
+        call huckel_guess
+      endif
     else
       print *,  'Unrecognized MO guess type : '//mo_guess_type
       stop 1
@@ -78,7 +93,7 @@ subroutine run
 
   mo_label = "Orthonormalized"
 
-  call Roothaan_Hall_SCF
+  call roothaan_hall_scf
   call ezfio_set_hartree_fock_energy(SCF_energy)
 
 end
