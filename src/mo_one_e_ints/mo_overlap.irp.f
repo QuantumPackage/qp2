@@ -53,7 +53,7 @@ BEGIN_PROVIDER [ complex*16, mo_overlap_complex,(mo_num,mo_num) ]
   !$OMP    mo_num,ao_num,lmax)
   do j=1,mo_num
    do i= 1,mo_num
-    mo_overlap(i,j) = (0.d0,0.d0)
+    mo_overlap_complex(i,j) = (0.d0,0.d0)
     do n = 1, lmax,4
      do l = 1, ao_num
       mo_overlap_complex(i,j) = mo_overlap_complex(i,j) + dconjg(mo_coef_complex(l,i)) * &
