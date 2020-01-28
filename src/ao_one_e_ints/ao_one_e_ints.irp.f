@@ -60,7 +60,8 @@ BEGIN_PROVIDER [ complex*16, ao_one_e_integrals_complex,(ao_num,ao_num)]
   
   do i=1,ao_num
     do j=1,ao_num
-      ao_one_e_integrals_complex(j,i)=ao_one_e_integrals(j,i)+(0.d0,1.d0)*ao_one_e_integrals_imag(j,i)
+      ao_one_e_integrals_complex(j,i)=dcmplx(ao_one_e_integrals(j,i), &
+                                             ao_one_e_integrals_imag(j,i))
     enddo
   enddo
 

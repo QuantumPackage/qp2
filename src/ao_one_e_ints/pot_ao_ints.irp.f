@@ -105,6 +105,21 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [complex*16, ao_integrals_n_e_complex, (ao_num,ao_num)]
+  implicit none
+  BEGIN_DOC
+  !  Nucleus-electron interaction, in the |AO| basis set.
+  !
+  !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+  END_DOC
+  integer                        :: i,j
+  do i=1,ao_num
+    do j=1,ao_num
+      ao_integrals_n_e_complex(j,i) = dcmplx(ao_integrals_n_e(j,i), &
+                                             ao_integrals_n_e_imag(j,i))
+    enddo
+  enddo
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nucl_num)]
   BEGIN_DOC

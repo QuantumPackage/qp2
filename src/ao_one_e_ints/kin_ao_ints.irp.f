@@ -171,3 +171,19 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [complex*16, ao_kinetic_integrals_complex, (ao_num,ao_num)]
+  implicit none
+  BEGIN_DOC
+  ! Kinetic energy integrals in the |AO| basis.
+  !
+  ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
+  !
+  END_DOC
+  integer                        :: i,j
+  do i=1,ao_num
+    do j=1,ao_num
+      ao_kinetic_integrals_complex(j,i) = dcmplx(ao_kinetic_integrals(j,i), &
+                                                 ao_kinetic_integrals_imag(j,i))
+    enddo
+  enddo
+END_PROVIDER
