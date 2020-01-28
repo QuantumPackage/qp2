@@ -2,7 +2,10 @@ subroutine save_mos
   implicit none
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j
-
+  !TODO: change this for periodic?
+  !      save real/imag parts of mo_coef_complex
+  !      otherwise need to make sure mo_coef and mo_coef_imag
+  !      are updated whenever mo_coef_complex changes
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
