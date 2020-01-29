@@ -234,7 +234,7 @@ END_DOC
       endif
     enddo
   enddo
-
+  deallocate(scratch)
 ! Pad B matrix and build the X matrix
 
   do i=1,dim_DIIS
@@ -254,8 +254,8 @@ END_DOC
     ipiv(dim_DIIS+1) &
   )
 
-  double precision, allocatable :: AF(:,:)
-  allocate (AF(dim_DIIS+1,dim_DIIS+1))
+  double precision, allocatable :: AF(:,:),scratch_d1(:)
+  allocate (AF(dim_DIIS+1,dim_DIIS+1),scratch_d1(1))
   double precision :: rcond, ferr, berr
   integer :: iwork(dim_DIIS+1), lwork
 
@@ -268,13 +268,13 @@ END_DOC
     rcond,                               &
     ferr,                                &
     berr,                                &
-    scratch,-1,                          &
+    scratch_d1,-1,                       &
     iwork,                               &
     info                                 &
   )
-  lwork = int(scratch(1,1))
-  deallocate(scratch)
-  allocate(scratch(lwork,1))
+  lwork = int(scratch_d1(1))
+  deallocate(scratch_d1)
+  allocate(scratch_d1(lwork))
 
   call dsysvx('N','U',dim_DIIS+1,1,      &
     B_matrix_DIIS,size(B_matrix_DIIS,1), &
@@ -285,11 +285,11 @@ END_DOC
     rcond,                               &
     ferr,                                &
     berr,                                &
-    scratch,size(scratch),               &
+    scratch_d1,size(scratch_d1),         &
     iwork,                               &
     info                                 &
   )
-  deallocate(scratch,ipiv)
+  deallocate(scratch_d1,ipiv)
 
  if(info < 0) then
    stop 'bug in DIIS'
