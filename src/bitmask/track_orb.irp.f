@@ -7,18 +7,32 @@ BEGIN_PROVIDER [ double precision, mo_coef_begin_iteration, (ao_num,mo_num) ]
    END_DOC
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, mo_coef_begin_iteration_complex, (ao_num,mo_num) ]
+   implicit none
+   BEGIN_DOC
+   ! Void provider to store the coefficients of the |MO| basis at the beginning of the SCF iteration
+   !
+   ! Useful to track some orbitals
+   END_DOC
+END_PROVIDER
+
 subroutine initialize_mo_coef_begin_iteration
  implicit none
  BEGIN_DOC
  !
  ! Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
  END_DOC
- mo_coef_begin_iteration = mo_coef
+ if (is_periodic) then
+   mo_coef_begin_iteration_complex = mo_coef_complex
+ else
+   mo_coef_begin_iteration = mo_coef
+ endif
 end
 
 subroutine reorder_core_orb
  implicit none
  BEGIN_DOC
+ ! TODO: modify for complex
 ! routines that takes the current :c:data:`mo_coef` and reorder the core orbitals (see :c:data:`list_core` and :c:data:`n_core_orb`) according to the overlap with :c:data:`mo_coef_begin_iteration`
  END_DOC
  integer :: i,j,iorb
