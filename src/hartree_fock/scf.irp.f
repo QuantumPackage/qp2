@@ -92,8 +92,11 @@ subroutine run
   integer                        :: i_it, i, j, k
 
   mo_label = "Orthonormalized"
-
-  call roothaan_hall_scf
+  if (is_periodic) then
+    call roothan_hall_scf_complex
+  else
+    call roothaan_hall_scf
+  endif
   call ezfio_set_hartree_fock_energy(SCF_energy)
 
 end
