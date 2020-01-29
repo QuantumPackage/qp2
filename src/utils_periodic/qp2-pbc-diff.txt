@@ -23,15 +23,10 @@ mo_basis
 scf
 	finish complex DIIS
 	finish ao_two_e_integral_{alpha,beta}_complex (need reverse index?)
-	finish extrapolate_Fock_matrix_complex
 	finish eigenvectors_Fock_matrix_AO_complex
 	
 mo_two_e_ints
 	not started
-
-done:
-mo_one_e_ints
-	make separate providers for real/imag/complex parts for periodic
 
 
 
@@ -341,9 +336,6 @@ src/scf_utils/roothaan_hall_scf_complex.irp.f
 	subroutine Roothaan_Hall_SCF_complex
 		similar to real
 		has soft_touch mo_coef_complex and call to save_mos (see other notes on real/imag parts)
-	subroutine extrapolate_Fock_matrix_complex
-		TODO: check variable types?
-		complex scratch is being used in dsysvx, should be real
 
 src/scf_utils/scf_density_matrix_ao_complex.irp.f
 	complex versions of providers
