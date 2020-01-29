@@ -5,7 +5,6 @@ compare master-features_periodic
 TODO:
 ao_ints
 	reverse index
-	s_half_inv_complex
 	ao_overlap_abs for complex
 	ao_integrals_n_e_per_atom_complex?
 	not implemented for periodic:
@@ -16,14 +15,10 @@ ao_ints
 		compute_ao_integrals_jl
 
 mo_basis
-	decide how to handle real/imag/complex parts of mo_coef (maybe just need to chage save_mos?)
 	reorder_core_orb: implement for periodic
-	save_mos_no_occ: implement for periodic
 
 scf
-	finish complex DIIS
 	finish ao_two_e_integral_{alpha,beta}_complex (need reverse index?)
-	finish eigenvectors_Fock_matrix_AO_complex
 	
 mo_two_e_ints
 	not started

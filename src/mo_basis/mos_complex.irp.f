@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
+BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
   implicit none
   BEGIN_DOC
   ! Molecular orbital coefficients on |AO| basis set
@@ -8,14 +8,16 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC
   integer                        :: i, j
-  double precision, allocatable  :: buffer(:,:)
-  logical                        :: exists
+  double precision, allocatable  :: buffer_re(:,:),buffer_im(:,:)
+  logical                        :: exists_re,exists_im,exists
   PROVIDE ezfio_filename
 
 
   if (mpi_master) then
     ! Coefs
-    call ezfio_has_mo_basis_mo_coef_imag(exists)
+    call ezfio_has_mo_basis_mo_coef_real(exists_re)
+    call ezfio_has_mo_basis_mo_coef_imag(exists_im)
+    exists = (exists_re.and.exists_im)
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
@@ -26,51 +28,106 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
     integer :: ierr
     call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_coef_imag with MPI'
+      stop 'Unable to read mo_coef_real/imag with MPI'
     endif
   IRP_ENDIF
-
+  
   if (exists) then
     if (mpi_master) then
-      call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
-      write(*,*) 'Read  mo_coef_imag'
+      allocate(buffer_re(ao_num,mo_num),buffer_im(ao_num,mo_num))
+      call ezfio_get_mo_basis_mo_coef_real(buffer_re)
+      call ezfio_get_mo_basis_mo_coef_imag(buffer_im)
+      write(*,*) 'Read  mo_coef_real/imag'
+      do i=1,mo_num
+        do j=1,ao_num
+          mo_coef_complex(j,i) = dcmplx(buffer_re(j,i),buffer_im(j,i))
+        enddo
+      enddo
+      deallocate(buffer_re,buffer_im)
     endif
     IRP_IF MPI
-      call MPI_BCAST( mo_coef_imag, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+      call MPI_BCAST( mo_coef_complex, mo_num*ao_num, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
       if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_coef_imag with MPI'
+        stop 'Unable to read mo_coef_real with MPI'
       endif
     IRP_ENDIF
   else
     ! Orthonormalized AO basis
     do i=1,mo_num
       do j=1,ao_num
-        mo_coef_imag(j,i) = 0.d0
+        mo_coef_complex(j,i) = ao_ortho_canonical_coef_complex(j,i)
       enddo
     enddo
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
-  implicit none
-  BEGIN_DOC
-  ! Molecular orbital coefficients on |AO| basis set
-  !
-  ! mo_coef_complex(i,j) = coefficient of the i-th |AO| on the jth |MO|
-  !
-  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
-  END_DOC
-  integer                        :: i, j
-  PROVIDE ezfio_filename
+! BEGIN_PROVIDER [ double precision, mo_coef_real, (ao_num,mo_num) ]
+!&BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
+!&BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
+!  implicit none
+!  BEGIN_DOC
+!  ! Molecular orbital coefficients on |AO| basis set
+!  !
+!  ! mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
+!  !
+!  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
+!  END_DOC
+!  integer                        :: i, j
+!  double precision, allocatable  :: buffer_re(:,:),buffer_im(:,:)
+!  logical                        :: exists_re,exists_im,exists
+!  PROVIDE ezfio_filename
+!
+!
+!  if (mpi_master) then
+!    ! Coefs
+!    call ezfio_has_mo_basis_mo_coef_real(exists_re)
+!    call ezfio_has_mo_basis_mo_coef_imag(exists_im)
+!    exists = (exists_re.and.exists_im)
+!  endif
+!  IRP_IF MPI_DEBUG
+!    print *,  irp_here, mpi_rank
+!    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+!  IRP_ENDIF
+!  IRP_IF MPI
+!    include 'mpif.h'
+!    integer :: ierr
+!    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+!    if (ierr /= MPI_SUCCESS) then
+!      stop 'Unable to read mo_coef_real/imag with MPI'
+!    endif
+!  IRP_ENDIF
+!
+!  if (exists) then
+!    if (mpi_master) then
+!      call ezfio_get_mo_basis_mo_coef_real(mo_coef_real)
+!      call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
+!      write(*,*) 'Read  mo_coef_real/imag'
+!    endif
+!    IRP_IF MPI
+!      call MPI_BCAST( mo_coef_real, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+!      if (ierr /= MPI_SUCCESS) then
+!        stop 'Unable to read mo_coef_real with MPI'
+!      endif
+!      call MPI_BCAST( mo_coef_imag, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+!      if (ierr /= MPI_SUCCESS) then
+!        stop 'Unable to read mo_coef_imag with MPI'
+!      endif
+!    IRP_ENDIF
+!    do i=1,mo_num
+!      do j=1,ao_num
+!        mo_coef_complex(j,i) = dcmplx(mo_coef_real(j,i),mo_coef_imag(j,i))
+!      enddo
+!    enddo
+!  else
+!    ! Orthonormalized AO basis
+!    do i=1,mo_num
+!      do j=1,ao_num
+!        mo_coef_complex(j,i) = ao_ortho_canonical_coef_complex(j,i)
+!      enddo
+!    enddo
+!  endif
+!END_PROVIDER
 
-  provide mo_coef mo_coef_imag
-  
-  do i=1,mo_num
-    do j=1,ao_num
-      mo_coef_complex(j,i) = dcmplx(mo_coef(j,i),mo_coef_imag(j,i))
-    enddo
-  enddo
-END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, mo_coef_in_ao_ortho_basis_complex, (ao_num, mo_num) ]
  implicit none
