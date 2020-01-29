@@ -241,6 +241,65 @@ BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, S_half_inv_complex, (AO_num,AO_num) ]
+
+  BEGIN_DOC
+!   :math:`X = S^{-1/2}` obtained by SVD
+  END_DOC
+
+  implicit none
+
+  integer                         :: num_linear_dependencies
+  integer                         :: LDA, LDC
+  double precision, allocatable   :: D(:)
+  complex*16, allocatable   :: U(:,:),Vt(:,:)
+  integer                         :: info, i, j, k
+  double precision, parameter     :: threshold_overlap_AO_eigenvalues = 1.d-6
+
+  LDA = size(AO_overlap,1)
+  LDC = size(S_half_inv_complex,1)
+
+  allocate(         &
+    U(LDC,AO_num),  &
+    Vt(LDA,AO_num), &
+    D(AO_num))
+
+  call svd_complex(    &
+       ao_overlap_complex,LDA, &
+       U,LDC,          &
+       D,              &
+       Vt,LDA,         &
+       AO_num,AO_num)
+
+  num_linear_dependencies = 0
+  do i=1,AO_num
+    print*,D(i)
+    if(abs(D(i)) <= threshold_overlap_AO_eigenvalues) then
+      D(i) = 0.d0
+      num_linear_dependencies += 1
+    else
+      ASSERT (D(i) > 0.d0)
+      D(i) = 1.d0/sqrt(D(i))
+    endif
+    do j=1,AO_num
+      S_half_inv_complex(j,i) = 0.d0
+    enddo
+  enddo
+  write(*,*) 'linear dependencies',num_linear_dependencies
+
+  do k=1,AO_num
+    if(D(k) /= 0.d0) then
+      do j=1,AO_num
+        do i=1,AO_num
+          S_half_inv_complex(i,j) = S_half_inv_complex(i,j) + U(i,k)*D(k)*Vt(k,j)
+        enddo
+      enddo
+    endif
+  enddo
+
+
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
  implicit none
@@ -268,6 +327,40 @@ BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
       do j=1,ao_num
         do i=1,ao_num
           S_half(i,j) = S_half(i,j) + U(i,k)*D(k)*Vt(k,j)
+        enddo
+      enddo
+  enddo
+
+  deallocate(U,Vt,D)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, S_half_complex, (ao_num,ao_num)  ]
+ implicit none
+ BEGIN_DOC
+ ! :math:`S^{1/2}`
+ END_DOC
+
+  integer :: i,j,k
+  complex*16, allocatable  :: U(:,:)
+  complex*16, allocatable  :: Vt(:,:)
+  double precision, allocatable  :: D(:)
+
+  allocate(U(ao_num,ao_num),Vt(ao_num,ao_num),D(ao_num))
+
+  call svd_complex(ao_overlap_complex,size(ao_overlap_complex,1),U,size(U,1),D,Vt,size(Vt,1),ao_num,ao_num)
+
+  do i=1,ao_num
+    D(i) = dsqrt(D(i))
+    do j=1,ao_num
+      S_half_complex(j,i) = (0.d0,0.d0)
+    enddo
+  enddo
+
+  do k=1,ao_num
+      do j=1,ao_num
+        do i=1,ao_num
+          S_half_complex(i,j) = S_half_complex(i,j) + U(i,k)*D(k)*Vt(k,j)
         enddo
       enddo
   enddo
