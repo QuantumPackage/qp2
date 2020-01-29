@@ -212,6 +212,14 @@ src/mo_one_e_ints/mo_overlap.irp.f
 src/mo_one_e_ints/pot_mo_ints.irp.f
 src/mo_one_e_ints/pot_mo_pseudo_ints.irp.f
 	TODO: decide how to handle these providers
+  for periodic AOs, we always read (can't compute)
+  for MOs, we can either read from disk or transform from AOs
+  simplest way might be to link all three providers (integrals{,_imag,_complex})
+  if (.not.is_periodic), just ignore imag and complex arrays?
+  if (is_periodic)
+    either read real/imag from disk and combine to form complex
+    or transform complex MO ints from complex AO ints and also assign real/imag parts to separate arrays?
+
 
 
 
