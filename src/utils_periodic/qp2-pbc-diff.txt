@@ -1,0 +1,226 @@
+changed, but not by me
+ocaml/Input_determinants_by_hand.ml
+ocaml/qp_set_mo_class.ml
+src/cipsi/run_pt2_slave.irp.f
+src/cipsi/selection.irp.f
+src/cipsi/slave_cipsi.irp.f
+src/davidson/EZFIO.cfg
+src/davidson/davidson_parallel.irp.f
+src/davidson/diagonalization_hs2_dressed.irp.f
+src/davidson/input.irp.f
+src/davidson/parameters.irp.f
+src/davidson/u0_h_u0.irp.f
+src/determinants/EZFIO.cfg
+src/determinants/single_excitations.irp.f
+
+src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
+	no {dump,load}_ao_integrals
+
+periodic:
+ocaml/Input_mo_basis.ml
+	added mo_coef_imag array (real)
+	still needs mo_coef_to_string and to_string?
+
+
+
+src/ao_one_e_ints/EZFIO.cfg
+	[ao_integrals_n_e_imag]
+	[ao_integrals_kinetic_imag]
+	[ao_integrals_pseudo_imag]
+	[ao_integrals_overlap_imag]
+	[ao_one_e_integrals_imag]
+
+
+src/ao_one_e_ints/ao_one_e_ints.irp.f
+	ao_one_e_integrals_imag
+		can only be read (not calculated)
+	ao_one_e_integrals_complex
+		formed from dcmplx(ao_one_e_integrals,ao_one_e_integrals_imag)
+		
+src/ao_one_e_ints/ao_overlap.irp.f
+src/ao_one_e_ints/kin_ao_ints.irp.f
+src/ao_one_e_ints/pot_ao_ints.irp.f
+src/ao_one_e_ints/pot_ao_pseudo_ints.irp.f
+	added _imag and _complex versions of all AO 1-e ints
+	each complex array is formed by combining real and imag arrays
+	imag arrays can only be read from disk
+	no complex/imag versions of ao_integrals_n_e_per_atom, but this should be straightforward if we need it later?
+	changed ao_overlap_abs so that it is set to cdabs(ao_overlap_complex) if (is_periodic)
+		(maybe not the behavior we want)
+	added S_inv_complex
+	(no S_half_inv_complex yet)
+
+src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
+	ao_cart_to_sphe_coef_complex
+		just a copy of ao_cart_to_sphe_coef_complex with complex type for easier zgemm
+		(with different size if ao_cart_to_sphe_num is less than ao_num)
+		depends on ao_cart_to_sphe_coef_complex
+	ao_cart_to_sphe_overlap_complex
+		similar to real version, but uses ao_overlap_complex instead of ao_overlap
+	ao_ortho_canonical_coef_inv_complex
+		self-explanatory
+	ao_ortho_canonical_coef_complex
+	ao_ortho_canonical_num_complex
+		similar to real version
+		providers are linked, so easier to just make num_complex instead of using original num (even though they will both have the same value)
+		need to make sure this doesn't require any other downstream changes (i.e. replace ao_ortho_canonical_num with complex version if (is_periodic))
+	ao_ortho_canonical_overlap_complex
+		similar to real version
+
+
+src/ao_two_e_ints/map_integrals.irp.f
+	added ao_integrals_map_2 (provider linked to ao_integrals_map)
+	double size of both maps if (is_periodic)
+	subroutine two_e_integrals_index_periodic
+		same as real version, but return compound (2) indices to avoid recomputing
+	ao_integrals_cache_periodic
+		similar to real version
+	subroutine ao_two_e_integral_periodic_map_idx_sign
+		from i,j,k,l, return which map to use (T->1, F->2), location of real part of integral, sign of imaginary part of integral
+	complex*16 function get_ao_two_e_integral_periodic_simple
+		args i,j,k,l,map1,map2
+		return complex integral composed of correct elements from one of the maps
+	complex*16 function get_ao_two_e_integral_periodic
+		same behavior as _simple version, but checks cache first
+		returns integral from cache if possible, otherwise retrieves from map
+	subroutine get_ao_two_e_integrals_periodic
+		same functionality as real version
+	subroutine insert_into_ao_integrals_map_2
+		needed for second map
+	get_ao_map_size, clear_ao_map
+		no new functions, but now these also handle map2
+	not implemented for periodic:
+		subroutine get_ao_two_e_integrals_non_zero
+		subroutine get_ao_two_e_integrals_non_zero_jl
+		subroutine get_ao_two_e_integrals_non_zero_jl_from_list
+	
+	
+src/ao_two_e_ints/two_e_integrals.irp.f
+	
+	
+	not implemented for periodic:
+		double precision function ao_two_e_integral
+		double precision function ao_two_e_integral_schwartz_accel
+		subroutine compute_ao_two_e_integrals
+		[ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
+		subroutine compute_ao_integrals_jl
+		(and other integral calculation functions)
+	modified for periodic:
+		[ logical, ao_two_e_integrals_in_map ]
+			complex AO ints can only be read from disk (not calculated)
+	
+	
+src/mo_basis/track_orb.irp.f → src/bitmask/track_orb.irp.f
+	not implemented for periodic:
+		subroutine reorder_core_orb (should be modified for periodic)
+	modified for periodic:
+		subroutine initialize_mo_coef_begin_iteration
+	added for periodic:
+		[ complex*16, mo_coef_begin_iteration_complex, (ao_num,mo_num) ]
+			similar to real version
+	
+	
+src/hartree_fock/fock_matrix_hf_complex.irp.f
+	TODO for periodic:
+		[ complex*16, ao_two_e_integral_{alpha,beta}_complex, (ao_num, ao_num) ]
+			finish implementation (might need new version of two_e_integrals_index_reverse)
+	added for periodic:
+		[ complex*16, Fock_matrix_ao_{alpha,beta}_complex, (ao_num, ao_num) ]
+	
+	
+src/hartree_fock/scf.irp.f
+	modified for periodic:
+		subroutine create_guess
+			should work for periodic
+			TODO: decide what to do about mo_coef_complex and imag/real parts for touch/save!!!
+
+src/mo_basis/EZFIO.cfg
+	[mo_coef_imag]
+
+
+src/mo_basis/mos.irp.f
+	modifieed for periodic:
+		subroutine mix_mo_jk
+		
+src/mo_basis/mos_complex.irp.f
+	added for periodic:
+		[ double precision, mo_coef_imag, (ao_num,mo_num) ]
+		[ complex*16, mo_coef_complex, (ao_num,mo_num) ]
+		[ complex*16, mo_coef_in_ao_ortho_basis_complex, (ao_num, mo_num) ]
+		[ complex*16, mo_coef_transp_complex, (mo_num,ao_num) ]
+		[ complex*16, mo_coef_transp_complex_conjg, (mo_num,ao_num) ]
+			maybe not necessary?
+			might cause confusion having both of these?
+			maybe should add _noconjg to name of _transp so it's clear that it's just the transpose, and not the adjoint
+		subroutine ao_to_mo_complex
+		subroutine ao_ortho_cano_to_ao_complex
+	
+src/mo_basis/utils.irp.f
+	not modified:
+		subroutine save_mos_no_occ (should be changed for periodic)
+		
+	subroutine save_mos_truncated(n)
+	subroutine save_mos
+		modified to write mo_coef_imag to disk
+		need to make sure this is handled correctly
+		either update mo_coef{,_imag} whenever mo_coef_complex changes, or just make sure they're updated before writing to disk
+		(or just put real/imag parts of mo_coef_complex into buffer to save and avoid directly working with mo_coef{,_imag})
+	
+	
+src/mo_basis/utils_periodic.irp.f
+	complex versions of functions from utils
+		mo_as_eigvectors_of_mo_matrix_complex
+		mo_as_svd_vectors_of_mo_matrix_complex
+		mo_as_svd_vectors_of_mo_matrix_eig_complex
+			these three subroutines modify mo_coef_complex, decide whether to update mo_coef{,_imag} here or elsewhere
+		mo_coef_new_as_svd_vectors_of_mo_matrix_eig_complex
+
+
+src/mo_guess/h_core_guess_routine.irp.f
+	subroutine hcore_guess
+		modified for periodic, but need to decide how to handle separate parts of mo_coef_complex when updated
+		(also has soft_touch mo_coef_complex)
+
+src/mo_guess/mo_ortho_lowdin_complex.irp.f
+	[complex*16, ao_ortho_lowdin_coef_complex, (ao_num,ao_num)]
+	[complex*16, ao_ortho_lowdin_overlap_complex, (ao_num,ao_num)]
+
+src/mo_guess/pot_mo_ortho_canonical_ints.irp.f
+	[complex*16, ao_ortho_canonical_nucl_elec_integrals_complex, (mo_num,mo_num)]
+src/mo_guess/pot_mo_ortho_lowdin_ints.irp.f
+	[complex*16, ao_ortho_lowdin_nucl_elec_integrals_complex, (mo_num,mo_num)]
+
+
+src/mo_one_e_ints/EZFIO.cfg
+	[mo_integrals_e_n_imag]
+	[mo_integrals_kinetic_imag] 
+	[mo_integrals_pseudo_imag]
+	[mo_integrals_pseudo_imag]
+
+src/mo_one_e_ints/ao_to_mo_complex.irp.f
+	mo_to_ao_complex
+	mo_to_ao_no_overlap_complex
+	[ complex*16, S_mo_coef_complex, (ao_num, mo_num) ]
+
+src/mo_one_e_ints/orthonormalize.irp.f
+	subroutine orthonormalize_mos
+		same issue as above with modification of mo_coef_complex
+
+src/mo_one_e_ints/mo_one_e_ints.irp.f
+src/mo_one_e_ints/kin_mo_ints.irp.f
+src/mo_one_e_ints/mo_overlap.irp.f
+src/mo_one_e_ints/pot_mo_ints.irp.f
+src/mo_one_e_ints/pot_mo_pseudo_ints.irp.f
+	TODO: decide how to handle these providers
+
+
+
+src/mo_one_e_ints/mo_overlap.irp.f
+	[ complex*16, mo_overlap_complex,(mo_num,mo_num) ]
+		TODO: add option to read from disk?
+		typical workflow from pyscf might include reading MO 1,2-e ints, ovlp, mo_coef
+		maybe just add check to converter to ensure they're orthonormal, and don't save them after that?
+
+
+	
+	
