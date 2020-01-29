@@ -15,9 +15,6 @@ ao_ints
 		[ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
 		compute_ao_integrals_jl
 
-mo_one_e_ints
-	make separate providers for real/imag/complex parts for periodic
-
 mo_basis
 	decide how to handle real/imag/complex parts of mo_coef (maybe just need to chage save_mos?)
 	reorder_core_orb: implement for periodic
@@ -31,6 +28,10 @@ scf
 	
 mo_two_e_ints
 	not started
+
+done:
+mo_one_e_ints
+	make separate providers for real/imag/complex parts for periodic
 
 
 
