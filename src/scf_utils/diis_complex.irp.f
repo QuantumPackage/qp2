@@ -47,7 +47,7 @@ BEGIN_PROVIDER [complex*16, FPS_SPF_Matrix_AO_complex, (AO_num, AO_num)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [complex*16, FPS_SPF_Matrix_MO, (mo_num, mo_num)]
+BEGIN_PROVIDER [complex*16, FPS_SPF_Matrix_MO_complex, (mo_num, mo_num)]
   implicit none
   begin_doc
 !   Commutator FPS - SPF in MO basis
@@ -66,14 +66,13 @@ END_PROVIDER
 
    implicit none
 
-   double precision, allocatable  :: scratch(:,:),work(:),Xt(:,:)
-   integer                        :: lwork,info
+   double precision, allocatable  :: rwork(:)
+   integer                        :: lwork,info,lrwork
+   complex*16, allocatable        :: scratch(:,:),Xt(:,:),work(:)
    integer                        :: i,j
 
-   lwork = 3*AO_num - 1
    allocate(                                                         &
        scratch(AO_num,AO_num),                                 &
-       work(lwork),                                                  &
        Xt(AO_num,AO_num)                                             &
        )
 
@@ -81,46 +80,63 @@ END_PROVIDER
 
   do i=1,AO_num
     do j=1,AO_num
-      Xt(i,j) = S_half_inv(j,i)
+      Xt(i,j) = dconjg(S_half_inv_complex(j,i))
     enddo
   enddo
 
 ! Calculate Fock matrix in orthogonal basis: F' = Xt.F.X
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,     &
-       1.d0,                                   &
-       Fock_matrix_AO,size(Fock_matrix_AO,1),  &
-       S_half_inv,size(S_half_inv,1),        &
-       0.d0,                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
+  call zgemm('N','N',AO_num,AO_num,AO_num,     &
+       (1.d0,0.d0),                                   &
+       Fock_matrix_AO_complex,size(Fock_matrix_AO_complex,1),  &
+       S_half_inv_complex,size(s_half_inv_complex,1),        &
+       (0.d0,0.d0),                                   &
+       eigenvectors_Fock_matrix_AO_complex, &
+       size(eigenvectors_Fock_matrix_AO_complex,1))
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,                              &
-       1.d0,                                                            &
+  call zgemm('N','N',AO_num,AO_num,AO_num,                              &
+       (1.d0,0.d0),                                                            &
        Xt,size(Xt,1),                                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1), &
-       0.d0,                                                            &
+       eigenvectors_Fock_matrix_AO_complex, &
+       size(eigenvectors_Fock_matrix_AO_complex,1), &
+       (0.d0,0.d0),                                                            &
        scratch,size(scratch,1))
 
 ! Diagonalize F' to obtain eigenvectors in orthogonal basis C' and eigenvalues
+   lrwork = 3*ao_num - 2
+   allocate(rwork(lrwork), work(1))
+   lwork = -1
 
-   call dsyev('V','U',AO_num,       &
-        scratch,size(scratch,1),    &
-        eigenvalues_Fock_matrix_AO, &
-        work,lwork,info)
+   call zheev('V','U',ao_num, &
+        scratch,size(scratch,1), &
+        eigenvalues_Fock_matrix_AO_complex, &
+        work,lwork,rwork,info)
+
+   lwork = int(work(1))
+   deallocate(work)
+   allocate(work(lwork))
+
+   call zheev('V','U',ao_num, &
+        scratch,size(scratch,1), &
+        eigenvalues_Fock_matrix_AO_complex, &
+        work,lwork,rwork,info)
 
    if(info /= 0) then
      print *,  irp_here//' failed : ', info
      stop 1
    endif
-
+   
+   deallocate(work,rwork)
 ! Back-transform eigenvectors: C =X.C'
 
-  call dgemm('N','N',AO_num,AO_num,AO_num,     &
-       1.d0,                                   &
-       S_half_inv,size(S_half_inv,1),        &
+  call zgemm('N','N',AO_num,AO_num,AO_num,     &
+       (1.d0,0.d0),                                   &
+       S_half_inv_complex,size(S_half_inv_complex,1),        &
        scratch,size(scratch,1),                &
-       0.d0,                                   &
-       eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
+       (0.d0,0.d0),                                   &
+       eigenvectors_Fock_matrix_AO_complex, &
+       size(eigenvectors_Fock_matrix_AO_complex,1))
 
+  deallocate(scratch)
 END_PROVIDER
 
