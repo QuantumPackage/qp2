@@ -292,14 +292,30 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   ! use_map1: true if integral is in first ao map, false if integral is in second ao map
   ! idx: position of real part of integral in map (imag part is at idx+1)
   ! sign: sign of imaginary part
+  !
+  !
+  !  for <ab|cd>, conditionals are [a<c, b<d, ac<bd]
+  !  last three rows are real (ab==cd)
+  ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+  ! |         | <ij|kl> | <ji|lk> | <kl|ij> | <lk|ji> | <kj|il> | <jk|li> | <il|kj> | <li|jk> |
+  ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+  ! |         |         m1        |         m1*       |         m2        |         m2*       |
+  ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+  ! | <ij|kl> | TTT     | TTF     | FFT     | FFF     | FTT     | TFF     | TFT     | FTF     |
+  ! | <ij|il> | 0TT     | T0F     | 0FT     | F0F     |         |         |         |         |
+  ! | <ij|kj> | T0T     | 0TF     | F0T     | 0FF     |         |         |         |         |
+  ! | <ii|jj> |         |         |         |         | TT0     |         | FF0     |         |
+  ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
+  ! | <ji|ij> | FT0     | TF0     |         |         |         |         |         |         |
+  ! | <ij|ij> | 00T     | 00F     |         |         |         |         |         |         |
+  ! | <ii|ii> | 000     |         |         |         |         |         |         |         |
+  ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind), intent(out) :: idx
   logical, intent(out)           :: use_map1
   double precision, intent(out)  :: sign
   integer(key_kind)              :: p,q,r,s,ik,jl,ij,kl
-  logical :: iltk, jltl, ikltjl, ieqk, jeql, ikeqjl, ijeqkl
-  ! i.le.k, j.le.l, tri(i,k).le.tri(j,l)
   !DIR$ FORCEINLINE
   call two_e_integrals_index_periodic(i,j,k,l,idx,ik,jl)
   p = min(i,j)
@@ -309,45 +325,38 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   s = max(k,l)
   kl = q+shiftr(s*s-s,1)
 
-
   idx = 2*idx-1
 
   if (ij==kl) then !real, map1
     sign=0.d0
     use_map1=.True.
   else
-    iltk = (i.lt.k)
-    jltl = (j.lt.l)
-    ieqk = (i.eq.k)
-    jeql = (j.eq.l)
-    ikltjl = (ik.lt.jl)
-    ikeqjl = (ik.eq.jl)
-    if (ikeqjl) then
-      if (iltk) then
+    if (ik.eq.jl) then
+      if (i.lt.k) then   !TT0
         sign=1.d0
-        use_map1=.False.
-      else
+        use_map1=.False. 
+      else               !FF0
         sign=-1.d0
         use_map1=.False.
       endif
-    else if (ieqk) then
-      if (jltl) then
+    else if (i.eq.k) then
+      if (j.lt.l) then   !0T* 
+        sign=1.d0
+        use_map1=.True.
+      else               !0F*
+        sign=-1.d0
+        use_map1=.True.
+      endif
+    else if (j.eq.l) then
+      if (i.lt.k) then
         sign=1.d0
         use_map1=.True.
       else
         sign=-1.d0
         use_map1=.True.
       endif
-    else if (jeql) then
-      if (iltk) then
-        sign=1.d0
-        use_map1=.True.
-      else
-        sign=-1.d0
-        use_map1=.True.
-      endif
-    else if (iltk.eqv.jltl) then
-      if (iltk) then
+    else if ((i.lt.k).eqv.(j.lt.l)) then
+      if (i.lt.k) then
         sign=1.d0
         use_map1=.True.
       else
@@ -355,7 +364,7 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
         use_map1=.True.
       endif
     else
-      if (jltl.eqv.ikltjl) then
+      if ((j.lt.l).eqv.(ik.lt.jl)) then
         sign=1.d0
         use_map1=.False.
       else
