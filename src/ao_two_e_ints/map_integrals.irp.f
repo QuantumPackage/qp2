@@ -364,18 +364,17 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   !
   !
   !  for <ab|cd>, conditionals are [a<c, b<d, ac<bd]
-  !  last three rows are real (ab==cd)
+  !  last two rows are real (ab==cd)
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
-  ! |         | <ij|kl> | <ji|lk> | <kl|ij> | <lk|ji> | <kj|il> | <jk|li> | <il|kj> | <li|jk> |
+  ! | NEW     | <ij|kl> | <ji|lk> | <kl|ij> | <lk|ji> | <kj|il> | <jk|li> | <il|kj> | <li|jk> |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
   ! |         |         m1        |         m1*       |         m2        |         m2*       |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
   ! | <ij|kl> | TTT     | TTF     | FFT     | FFF     | FTT     | TFF     | TFT     | FTF     |
   ! | <ij|il> | 0TT     | T0F     | 0FT     | F0F     |         |         |         |         |
   ! | <ij|kj> | T0T     | 0TF     | F0T     | 0FF     |         |         |         |         |
-  ! | <ii|jj> |         |         |         |         | TT0     |         | FF0     |         |
+  ! | <ii|jj> | TT0     |         | FF0     |         | FT0(r)  | TF0(r)  |         |         |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
-  ! | <ji|ij> | FT0     | TF0     |         |         |         |         |         |         |
   ! | <ij|ij> | 00T     | 00F     |         |         |         |         |         |         |
   ! | <ii|ii> | 000     |         |         |         |         |         |         |         |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
@@ -396,17 +395,21 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
 
   idx = 2*idx-1
 
-  if (ij==kl) then !real, map1
+  if (ij==kl) then !real, J -> map1, K -> map2
     sign=0.d0
-    use_map1=.True.
+    if (i==k) then
+      use_map1=.True.
+    else
+      use_map1=.False.
+    endif
   else
     if (ik.eq.jl) then
       if (i.lt.k) then   !TT0
         sign=1.d0
-        use_map1=.False. 
+        use_map1=.True. 
       else               !FF0
         sign=-1.d0
-        use_map1=.False.
+        use_map1=.True.
       endif
     else if (i.eq.k) then
       if (j.lt.l) then   !0T* 
