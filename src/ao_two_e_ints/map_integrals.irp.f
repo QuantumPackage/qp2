@@ -346,12 +346,22 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
         sign=-1.d0
         use_map1=.True.
       endif
-    else if (iltk.eqv.ikltjl) then
-      sign=1.d0
-      use_map1=.False.
+    else if (iltk.eqv.jltl) then
+      if (iltk) then
+        sign=1.d0
+        use_map1=.True.
+      else
+        sign=-1.d0
+        use_map1=.True.
+      endif
     else
-      sign=-1.d0
-      use_map1=.False.
+      if (jltl.eqv.ikltjl) then
+        sign=1.d0
+        use_map1=.False.
+      else
+        sign=-1.d0
+        use_map1=.False.
+      endif
     endif
   endif
 end
