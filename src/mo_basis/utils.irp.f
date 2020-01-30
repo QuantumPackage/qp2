@@ -79,7 +79,6 @@ end
 subroutine save_mos_truncated(n)
   implicit none
   double precision, allocatable  :: buffer(:,:),buffer_im(:,:)
-  double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j,n
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))

@@ -130,8 +130,10 @@ provide ao_two_e_integrals_in_map
 !  call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A(1:ao_num, 1:ao_num))
 !  call ezfio_set_ao_one_e_ints_ao_integrals_n_e_imag(B(1:ao_num, 1:ao_num))
 !  call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e("Read")
-  complex*16 :: int2e_tmp1,int2e_tmp2,get_ao_two_e_integral_periodic_simple,get_ao_two_e_integral_periodic
+  complex*16 :: int2e_tmp1,int2e_tmp2,get_ao_two_e_integral_periodic_simple,get_ao_two_e_integral_periodic, tmp_cmplx
   double precision :: tmp3,tmp4,tmp5,tmp6
+  double precision :: thr0
+  thr0 = 1.d-10
   allocate(buffer_i_1(ao_num**3), buffer_values_1(ao_num**3))
   allocate(buffer_i_2(ao_num**3), buffer_values_2(ao_num**3))
   iunit = getunitandopen('W.qp','r')
@@ -141,26 +143,30 @@ provide ao_two_e_integrals_in_map
   buffer_values_2 = 0.d0
   do 
     read (iunit,*,end=13) i,j,k,l, tmp_re, tmp_im
+    tmp_cmplx = dcmplx(tmp_re,tmp_im)
     int2e_tmp1 = get_ao_two_e_integral_periodic_simple(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
     int2e_tmp2 = get_ao_two_e_integral_periodic(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
-    print'(4(I4),3(E15.7))',i,j,k,l,tmp_re,real(int2e_tmp1),real(int2e_tmp2)
-    print'(4(I4),3(E15.7))',i,j,k,l,tmp_im,imag(int2e_tmp1),imag(int2e_tmp2)
+  !  print'(4(I4),3(E15.7))',i,j,k,l,tmp_re,real(int2e_tmp1),real(int2e_tmp2)
+ !   print'(4(I4),3(E15.7))',i,j,k,l,tmp_im,imag(int2e_tmp1),imag(int2e_tmp2)
     call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
-    print*,use_map1,idx_tmp,sign
+!    print*,use_map1,idx_tmp,sign
     call map_get(ao_integrals_map,idx_tmp,tmp3)
     call map_get(ao_integrals_map_2,idx_tmp,tmp4)
     call map_get(ao_integrals_map,idx_tmp+1,tmp5)
     call map_get(ao_integrals_map_2,idx_tmp+1,tmp6)
-    print*,tmp3,tmp4
-    print*,tmp5,tmp6
+   ! print*,tmp3,tmp4
+   ! print*,tmp5,tmp6
+   if (cdabs(tmp_cmplx-int2e_tmp1).gt.thr0) then
+     print'(4(I4),4(E15.7))',i,j,k,l,tmp_cmplx,int2e_tmp1
+   endif
     integer*8 :: ii
           ii = l-ao_integrals_cache_min
           ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-    print*,'cache(pbc)=', ao_integrals_cache_periodic(ii)
-    print*,'cache(old)=', ao_integrals_cache(ii)
-    print*
+!    print*,'cache(pbc)=', ao_integrals_cache_periodic(ii)
+!    print*,'cache(old)=', ao_integrals_cache(ii)
+!    print*
 !    if (use_map1) then
 !      n_integrals_1 += 1
 !      buffer_i_1(n_integrals_1-1)=idx_tmp
