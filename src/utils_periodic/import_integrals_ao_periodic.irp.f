@@ -1,7 +1,4 @@
-program print_integrals
-  print *, 'Number of AOs?'
-  read(*,*) ao_num
-  TOUCH ao_num
+program import_ao_integrals_periodic
   call run
 end
 
@@ -25,7 +22,7 @@ subroutine run
   double precision :: sign
 
 
-  call ezfio_set_ao_basis_ao_num(ao_num)
+!  call ezfio_set_ao_basis_ao_num(ao_num)
 
   allocate (A(ao_num,ao_num), B(ao_num,ao_num) )
   
