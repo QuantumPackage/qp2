@@ -159,7 +159,7 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
 
 end
 
-subroutine two_e_integrals_index_reverse_periodic_1(i,j,k,l,i1)
+subroutine two_e_integrals_index_reverse_complex_1(i,j,k,l,i1)
   use map_module
   implicit none
   BEGIN_DOC
@@ -191,15 +191,15 @@ subroutine two_e_integrals_index_reverse_periodic_1(i,j,k,l,i1)
   k(2) = l(1)
   l(2) = k(1)
 
-  i(3) = i(1) !ilkj a-ib
+  i(3) = k(1) !klij a-ib
   j(3) = l(1)
-  k(3) = k(1)
+  k(3) = i(1)
   l(3) = j(1)
 
-  i(4) = l(1) !lijk a-ib
-  j(4) = i(1)
+  i(4) = l(1) !lkji a-ib
+  j(4) = k(1)
   k(4) = j(1)
-  l(4) = k(1)
+  l(4) = i(1)
 
   integer :: ii, jj
   do ii=2,4
@@ -213,20 +213,62 @@ subroutine two_e_integrals_index_reverse_periodic_1(i,j,k,l,i1)
       endif
     enddo
   enddo
-! This has been tested with up to 1000 AOs, and all the reverse indices are
-! correct ! We can remove the test
-!    do ii=1,8
-!      if (i(ii) /= 0) then
-!        call two_e_integrals_index(i(ii),j(ii),k(ii),l(ii),i2)
-!        if (i1 /= i2) then
-!          print *,  i1, i2
-!          print *,  i(ii), j(ii), k(ii), l(ii)
-!          stop 'two_e_integrals_index_reverse failed'
-!        endif
-!      endif
-!    enddo
+end
 
+subroutine two_e_integrals_index_reverse_complex_2(i,j,k,l,i1)
+  use map_module
+  implicit none
+  BEGIN_DOC
+! Computes the 4 indices $i,j,k,l$ from a unique index $i_1$.
+! For 2 indices $i,j$ and $i \le j$, we have
+! $p = i(i-1)/2 + j$.
+! The key point is that because $j < i$,
+! $i(i-1)/2 < p \le i(i+1)/2$. So $i$ can be found by solving
+! $i^2 - i - 2p=0$. One obtains $i=1 + \sqrt{1+8p}/2$
+! and $j = p - i(i-1)/2$.
+! This rule is applied 3 times. First for the symmetry of the
+! pairs (i,k) and (j,l), and then for the symmetry within each pair.
+! always returns first set such that k<=i, j<=l, ik<=jl
+  END_DOC
+  integer, intent(out)           :: i(4),j(4),k(4),l(4)
+  integer(key_kind), intent(in)  :: i1
+  integer(key_kind)              :: i2,i3
+  i = 0
+  i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
+  l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
+  i3   = i1 - shiftr(i2*i2-i2,1)
+  i(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
+  j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
+  k(1) = int(i3 - shiftr(i(1)*i(1)-i(1),1),4)
 
+              !kjil a+ib
+  i(2) = j(1) !jkli a+ib
+  j(2) = i(1)
+  k(2) = l(1)
+  l(2) = k(1)
+
+  i(3) = k(1) !ilkj a-ib
+  j(3) = l(1)
+  k(3) = i(1)
+  l(3) = j(1)
+
+  i(4) = l(1) !lijk a-ib
+  j(4) = k(1)
+  k(4) = j(1)
+  l(4) = i(1)
+
+  integer :: ii, jj
+  do ii=2,4
+    do jj=1,ii-1
+      if ( (i(ii) == i(jj)).and. &
+           (j(ii) == j(jj)).and. &
+           (k(ii) == k(jj)).and. &
+           (l(ii) == l(jj)) ) then
+         i(ii) = 0
+         exit
+      endif
+    enddo
+  enddo
 end
 
 
