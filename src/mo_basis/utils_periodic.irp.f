@@ -52,6 +52,11 @@ subroutine mo_as_eigvectors_of_mo_matrix_complex(matrix,n,m,label,sign,output)
     enddo
     write (6,'(A)') '======== ================'
     write (6,'(A)')  ''
+    write (6,'(A)')  'Fock Matrix'
+    write (6,'(A)') '-----------'
+    do i=1,n
+      write(*,'(200(E24.15))') A(i,:)
+    enddo
   endif
 
   call zgemm('N','N',ao_num,m,m,(1.d0,0.d0),mo_coef_new,size(mo_coef_new,1),R,size(R,1),(0.d0,0.d0),mo_coef_complex,size(mo_coef_complex,1))

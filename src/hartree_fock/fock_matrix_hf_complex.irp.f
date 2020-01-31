@@ -11,7 +11,7 @@
   integer                        :: i,j,k,l,k1,r,s
   integer                        :: i0,j0,k0,l0
   integer*8                      :: p,q
-  double precision               :: integral, c0
+  complex*16               :: integral, c0
   double precision               :: ao_two_e_integral, local_threshold
   double precision, allocatable  :: ao_two_e_integral_alpha_tmp(:,:)
   double precision, allocatable  :: ao_two_e_integral_beta_tmp(:,:)
@@ -41,18 +41,23 @@
   allocate(keys(n_elements_max), values(n_elements_max))
   allocate(ao_two_e_integral_alpha_tmp(ao_num,ao_num), &
            ao_two_e_integral_beta_tmp(ao_num,ao_num))
-  ao_two_e_integral_alpha_tmp = 0.d0
-  ao_two_e_integral_beta_tmp  = 0.d0
+  ao_two_e_integral_alpha_tmp = (0.d0,0.d0)
+  ao_two_e_integral_beta_tmp  = (0.d0,0.d0)
  
   !$OMP DO SCHEDULE(static,1)
   do i8=0_8,ao_integrals_map%map_size
     n_elements = n_elements_max
     call get_cache_map(ao_integrals_map,i8,keys,values,n_elements)
     do k1=1,n_elements
+      ! get original key
+      ! reverse of 2*key (imag part) and 2*key-1 (real part)
       key1 = shiftr(keys(k1)+1,1)
 
       call two_e_integrals_index_reverse_complex_1(ii,jj,kk,ll,key1)
-      if (shiftl(key1,1)==keys(k1)) then !imaginary part
+      ! i<=k, j<=l, ik<=jl
+      ! ijkl, jilk, klij*, lkji*
+
+      if (shiftl(key1,1)==keys(k1)) then !imaginary part (even)
         do k2=1,4
           if (ii(k2)==0) then
             cycle
@@ -61,7 +66,12 @@
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          integral = i_sign(k2)*values(k1)
+          integral = i_sign(k2)*values(k1) !for klij and lkji, take complex conjugate
+
+          !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
+          !G_b(i,k) += D_{ab}(l,j)*(<ij|kl>)
+          !G_a(i,l) -= D_a   (k,j)*(<ij|kl>)
+          !G_b(i,l) -= D_b   (k,j)*(<ij|kl>)
 
           c0 = (scf_density_matrix_ao_alpha_complex(l,j)+scf_density_matrix_ao_beta_complex(l,j)) * integral
 
@@ -71,7 +81,7 @@
           ao_two_e_integral_alpha_tmp(i,l) -= SCF_density_matrix_ao_alpha_complex(k,j) * integral
           ao_two_e_integral_beta_tmp (i,l) -= scf_density_matrix_ao_beta_complex (k,j) * integral
         enddo
-      else
+      else ! real part
         do k2=1,4
           if (ii(k2)==0) then
             cycle
@@ -114,17 +124,21 @@
   allocate(keys(n_elements_max), values(n_elements_max))
   allocate(ao_two_e_integral_alpha_tmp(ao_num,ao_num), &
            ao_two_e_integral_beta_tmp(ao_num,ao_num))
-  ao_two_e_integral_alpha_tmp = 0.d0
-  ao_two_e_integral_beta_tmp  = 0.d0
+  ao_two_e_integral_alpha_tmp = (0.d0,0.d0)
+  ao_two_e_integral_beta_tmp  = (0.d0,0.d0)
  
   !$OMP DO SCHEDULE(static,1)
   do i8=0_8,ao_integrals_map_2%map_size
     n_elements = n_elements_max
     call get_cache_map(ao_integrals_map_2,i8,keys,values,n_elements)
     do k1=1,n_elements
+      ! get original key
+      ! reverse of 2*key (imag part) and 2*key-1 (real part)
       key1 = shiftr(keys(k1)+1,1)
 
       call two_e_integrals_index_reverse_complex_2(ii,jj,kk,ll,key1)
+      ! i>=k, j<=l, ik<=jl
+      ! ijkl, jilk, klij*, lkji*
       if (shiftl(key1,1)==keys(k1)) then !imaginary part
         do k2=1,4
           if (ii(k2)==0) then
@@ -134,7 +148,12 @@
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          integral = i_sign(k2)*values(k1)
+          integral = i_sign(k2)*values(k1) ! for klij and lkji, take conjugate
+
+          !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
+          !G_b(i,k) += D_{ab}(l,j)*(<ij|kl>)
+          !G_a(i,l) -= D_a   (k,j)*(<ij|kl>)
+          !G_b(i,l) -= D_b   (k,j)*(<ij|kl>)
 
           c0 = (scf_density_matrix_ao_alpha_complex(l,j)+scf_density_matrix_ao_beta_complex(l,j)) * integral
 
@@ -144,7 +163,7 @@
           ao_two_e_integral_alpha_tmp(i,l) -= SCF_density_matrix_ao_alpha_complex(k,j) * integral
           ao_two_e_integral_beta_tmp (i,l) -= scf_density_matrix_ao_beta_complex (k,j) * integral
         enddo
-      else
+      else ! real part
         do k2=1,4
           if (ii(k2)==0) then
             cycle
