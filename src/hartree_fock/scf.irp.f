@@ -93,7 +93,7 @@ subroutine run
 
   mo_label = "Orthonormalized"
   if (is_periodic) then
-    call roothan_hall_scf_complex
+    call roothaan_hall_scf_complex
   else
     call roothaan_hall_scf
   endif
