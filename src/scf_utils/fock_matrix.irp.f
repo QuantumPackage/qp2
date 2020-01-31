@@ -160,7 +160,7 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  integer                        :: i,j
  if (is_periodic) then
    complex*16 :: scf_e_tmp
-   scf_e_tmp = (0.d0,0.d0)
+   scf_e_tmp = dcmplx(SCF_energy,0.d0)
    do j=1,ao_num
      do i=1,ao_num
        scf_e_tmp += 0.5d0 * (                                          &
