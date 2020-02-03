@@ -100,8 +100,8 @@ END_DOC
     max_error_DIIS = maxval(cdabs(FPS_SPF_Matrix_MO_complex))
 
 !   SCF energy
-
-    energy_SCF = SCF_energy
+!    call print_debug_scf_complex
+    energy_SCF = scf_energy
     Delta_Energy_SCF = energy_SCF - energy_SCF_previous
     if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0) ) then
       Fock_matrix_AO_complex(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
@@ -121,7 +121,7 @@ END_DOC
         level_shift = level_shift * 3.0d0
       endif
       TOUCH mo_coef_complex level_shift
-      mo_coef_complex(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO_complex(1:ao_num,1:mo_num)
+      mo_coef_complex(1:ao_num,1:mo_num) = eigenvectors_fock_matrix_mo_complex(1:ao_num,1:mo_num)
       if(frozen_orb_scf)then
         call reorder_core_orb
         call initialize_mo_coef_begin_iteration
@@ -143,7 +143,7 @@ END_DOC
 !   Print results at the end of each iteration
 
     write(6,'(I4, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, I3)')  &
-      iteration_SCF, energy_SCF, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
+      iteration_SCF, energy_scf, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
 
     if (Delta_energy_SCF < 0.d0) then
       call save_mos

@@ -15,7 +15,7 @@ BEGIN_PROVIDER [ complex*16, eigenvectors_Fock_matrix_mo_complex, (ao_num,mo_num
 
    do j=1,mo_num
      do i=1,mo_num
-       F(i,j) = Fock_matrix_mo_complex(i,j)
+       F(i,j) = fock_matrix_mo_complex(i,j)
      enddo
    enddo
 
