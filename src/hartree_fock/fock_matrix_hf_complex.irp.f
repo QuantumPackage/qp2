@@ -12,9 +12,8 @@
   integer                        :: i0,j0,k0,l0
   integer*8                      :: p,q
   complex*16               :: integral, c0
-  double precision               :: ao_two_e_integral, local_threshold
-  double precision, allocatable  :: ao_two_e_integral_alpha_tmp(:,:)
-  double precision, allocatable  :: ao_two_e_integral_beta_tmp(:,:)
+  complex*16, allocatable  :: ao_two_e_integral_alpha_tmp(:,:)
+  complex*16, allocatable  :: ao_two_e_integral_beta_tmp(:,:)
  
   ao_two_e_integral_alpha_complex = (0.d0,0.d0)
   ao_two_e_integral_beta_complex  = (0.d0,0.d0)
