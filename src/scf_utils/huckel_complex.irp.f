@@ -25,9 +25,9 @@ subroutine huckel_guess_complex
 
 !  Fock_matrix_ao_alpha(1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
 !  Fock_matrix_ao_beta (1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
-  call zlacp2('X', ao_num, ao_num, A, size(A,1), &
+  call zlacpy('X', ao_num, ao_num, A, size(A,1), &
          Fock_matrix_ao_alpha_complex, size(Fock_matrix_ao_alpha_complex,1))
-  call zlacp2('X', ao_num, ao_num, A, size(A,1), &
+  call zlacpy('X', ao_num, ao_num, A, size(A,1), &
          Fock_matrix_ao_beta_complex,  size(Fock_matrix_ao_beta_complex, 1))
   
 
