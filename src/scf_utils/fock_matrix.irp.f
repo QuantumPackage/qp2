@@ -164,8 +164,8 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
    do j=1,ao_num
      do i=1,ao_num
        scf_e_tmp += 0.5d0 * (                                          &
-           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_alpha_complex(i,j) ) *  SCF_density_matrix_ao_alpha_complex(i,j) +&
-           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_beta_complex (i,j) ) *  SCF_density_matrix_ao_beta_complex (i,j) )
+           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_alpha_complex(i,j) ) *  SCF_density_matrix_ao_alpha_complex(j,i) +&
+           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_beta_complex (i,j) ) *  SCF_density_matrix_ao_beta_complex (j,i) )
      enddo
    enddo
    !TODO: add check for imaginary part? (should be zero)
