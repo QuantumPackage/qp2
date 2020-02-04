@@ -199,8 +199,8 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   ! | <ij|kj> | T0T     | 0TF     | F0T     | 0FF     |         |         |         |         |
   ! | <ii|jj> | TT0     |         | FF0     |         | FT0(r)  | TF0(r)  |         |         |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
-  ! | <ij|ij> | 00T     | 00F     |         |         |         |         |         |         |
-  ! | <ii|ii> | 000     |         |         |         |         |         |         |         |
+  ! | <ij|ij> |         |         |         |         | 00T(r)  | 00F(r)  |         |         |
+  ! | <ii|ii> |         |         |         |         | 000     |         |         |         |
   ! +---------+---------+---------+---------+---------+---------+---------+---------+---------+
   END_DOC
   integer, intent(in)            :: i,j,k,l
@@ -221,11 +221,7 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
 
   if (ij==kl) then !real, J -> map1, K -> map2
     sign=0.d0
-    if (i==k) then
-      use_map1=.True.
-    else
-      use_map1=.False.
-    endif
+    use_map1=.False.
   else
     if (ik.eq.jl) then
       if (i.lt.k) then   !TT0
@@ -292,12 +288,8 @@ complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) resu
   call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   if (use_map1) then
     call map_get(map,idx,tmp_re)
-    if (sign/=0.d0) then
-      call map_get(map,idx+1,tmp_im)
-      tmp_im *= sign
-    else
-      tmp_im=0.d0
-    endif
+    call map_get(map,idx+1,tmp_im)
+    tmp_im *= sign
   else
     call map_get(map2,idx,tmp_re)
     if (sign/=0.d0) then

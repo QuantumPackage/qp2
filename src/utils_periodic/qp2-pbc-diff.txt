@@ -28,8 +28,8 @@ MO 2e ints:
   maybe good idea to make map_get for two neighboring vals? (re/im parts)
 
 mapping:
-  should change so that all of the real ints are in map2
-    (will make some things simpler when retrieving exchange ints <ij|ji> (currently, all of these are in map2 except when i==j))
+  changed so that all real ints (Jij, Kij, Jii) are in map2
+    <ij|ij>, <ij|ji>, <ii|ii>
 
 
 TODO:

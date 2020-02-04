@@ -73,12 +73,8 @@ complex*16 function get_two_e_integral_periodic_simple(i,j,k,l,map,map2) result(
   call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   if (use_map1) then
     call map_get(map,idx,tmp_re)
-    if (sign/=0.d0) then
-      call map_get(map,idx+1,tmp_im)
-      tmp_im *= sign
-    else
-      tmp_im=0.d0
-    endif
+    call map_get(map,idx+1,tmp_im)
+    tmp_im *= sign
   else
     call map_get(map2,idx,tmp_re)
     if (sign/=0.d0) then
@@ -291,20 +287,22 @@ end
 !  deallocate(pairs,hash,iorder,tmp_val)
 !end
 
-subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map)
+subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map,map2)
   use map_module
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ki|li>
   ! k(1)i(2) 1/r12 l(1)i(2) :: out_val(i1)
   ! for k,l fixed.
-  ! always in map1, take conjugate if k>l, real if k==l
+  ! real and in map2 if k==l
+  ! complex and in map1 otherwise
+  ! take conjugate if k>l
   ! TODO: determine best way to structure code 
   !       to account for single/double integral_kind, real/complex, and +/- imag part
   END_DOC
   integer, intent(in)            :: k,l, sze
   complex*16, intent(out)  :: out_val(sze)
-  type(map_type), intent(inout)  :: map
+  type(map_type), intent(inout)  :: map,map2
   integer                        :: i
   integer(key_kind)              :: hash(sze),hash_re(sze),hash_im(sze)
   real(integral_kind)            :: tmp_re(sze),tmp_im(sze)
@@ -313,7 +311,7 @@ subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map)
   PROVIDE mo_two_e_integrals_in_map
 
   if (k.eq.l) then ! real, call other function
-    call get_mo_two_e_integrals_coulomb_ijij_periodic(k,sze,out_re,map)
+    call get_mo_two_e_integrals_coulomb_ijij_periodic(k,sze,out_re,map2)
     do i=1,sze
       out_val(i) = dcmplx(out_re(i),0.d0)
     enddo
@@ -349,18 +347,18 @@ subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map)
   endif
 end
 
-subroutine get_mo_two_e_integrals_coulomb_ijij_periodic(j,sze,out_val,map)
+subroutine get_mo_two_e_integrals_coulomb_ijij_periodic(j,sze,out_val,map2)
   use map_module
   implicit none
   BEGIN_DOC
   ! Returns multiple integrals <ij|ij>
   ! i*(1)j*(2) 1/r12 i(1)j(2) :: out_val(i)
   ! for j fixed.
-  ! always in map1, always real
+  ! always in map2, always real
   END_DOC
   integer, intent(in)            :: j, sze
   double precision, intent(out)  :: out_val(sze)
-  type(map_type), intent(inout)  :: map
+  type(map_type), intent(inout)  :: map2
   integer                        :: i
   integer(key_kind)              :: hash(sze),hash_re(sze)
   real(integral_kind)            :: tmp_re(sze)
@@ -374,9 +372,9 @@ subroutine get_mo_two_e_integrals_coulomb_ijij_periodic(j,sze,out_val,map)
   enddo
 
   if (integral_kind == 8) then
-    call map_get_many(map, hash_re, out_val, sze)
+    call map_get_many(map2, hash_re, out_val, sze)
   else
-    call map_get_many(map, hash_re, tmp_re, sze)
+    call map_get_many(map2, hash_re, tmp_re, sze)
     ! Conversion to double complex
     do i=1,sze
       out_val(i) = dble(tmp_re(i))
@@ -401,7 +399,7 @@ subroutine get_mo_two_e_integrals_exch_ii_periodic(k,l,sze,out_val,map,map2)
   END_DOC
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_val(sze)
-  type(map_type), intent(inout)  :: map
+  type(map_type), intent(inout)  :: map,map2
   integer                        :: i
   integer(key_kind)              :: hash(sze),hash_re(sze),hash_im(sze)
   real(integral_kind)            :: tmp_re(sze),tmp_im(sze)
@@ -466,7 +464,7 @@ subroutine get_mo_two_e_integrals_exch_ijji_periodic(j,sze,out_val,map,map2)
   ! Returns multiple integrals <ij|ji>
   ! i*(1)j*(2) 1/r12 j(1)i(2) :: out_val(i)
   ! for j fixed.
-  ! always real, always in map2 (except when j==i, then in map1)
+  ! always real, always in map2 
   END_DOC
   integer, intent(in)            :: j, sze
   double precision, intent(out)  :: out_val(sze)
@@ -485,10 +483,8 @@ subroutine get_mo_two_e_integrals_exch_ijji_periodic(j,sze,out_val,map,map2)
 
   if (integral_kind == 8) then
     call map_get_many(map2, hash_re, out_val, sze)
-    call map_get(map,hash_re(j), out_val(j))
   else
     call map_get_many(map2, hash_re, tmp_val, sze)
-    call map_get(map, hash_re(j), tmp_val(j))
     ! Conversion to double precision
     do i=1,sze
       out_val(i) = dble(tmp_val(i))
