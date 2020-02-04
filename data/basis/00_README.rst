@@ -1,4 +1,11 @@
-# Basis sets obtained from EMSL Basis Set Exchange : https://bse.pnl.gov/bse/portal
+# IMPORTANT NOTICE:
+# Basis sets were obtained from the old EMSL Basis Set Exchange web site
+# (https://bse.pnl.gov/bse/portal) in 2015. Today, the new web site
+# https://www.basissetexchange.org contains updated versions of the basis
+# sets with eventually the same name, but different data.
+# 
+# Users are advised to use data from www.basissetexchange.org instead of the
+# file provided in this directory.
 
 # File                         Name on EMSL BSE                         Description
 
