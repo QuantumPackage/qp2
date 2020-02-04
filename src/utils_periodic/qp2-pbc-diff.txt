@@ -23,6 +23,13 @@ AO 2e ints:
   see doc for map index details
   see src/hartree_fock/fock_matrix_hf_complex.irp.f for example of iterating over values in map
 
+MO 2e ints:
+  similar to AO 2e ints
+  maybe good idea to make map_get for two neighboring vals? (re/im parts)
+
+mapping:
+  should change so that all of the real ints are in map2
+    (will make some things simpler when retrieving exchange ints <ij|ji> (currently, all of these are in map2 except when i==j))
 
 
 TODO:
@@ -44,7 +51,7 @@ ao_ints
 
 	
 mo_two_e_ints
-	not started
+	incomplete
 
 
 
