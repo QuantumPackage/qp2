@@ -38,11 +38,6 @@ let set ~core ~inact ~act ~virt ~del =
   let mo_num =
     Ezfio.get_mo_basis_mo_num ()
   in
-  let n_int =
-    try  N_int_number.of_int (Ezfio.get_determinants_n_int ())
-    with _ -> Bitlist.n_int_of_mo_num mo_num
-  in
-
 
   let mo_class =
     Array.init mo_num (fun i -> None)

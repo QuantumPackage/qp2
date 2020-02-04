@@ -55,26 +55,6 @@ let dummy_centers ~threshold ~molecule ~nuclei =
     )
 
 
-(** Returns the list of available basis sets *)
-let list_basis () =
-  let basis_list =
-    let ic = open_in (Qpackage.root ^ "/data/basis/00_README.rst") in
-    let n = in_channel_length ic in
-    let s = Bytes.create n in
-    really_input ic s 0 n;
-    close_in ic;
-    Bytes.to_string s
-    |> String_ext.split ~on:'\n' 
-    |> List.filter (fun line -> String.length line > 1 && line.[0] <> '#')
-    |> List.map (fun line ->
-          match String_ext.split ~on:'\'' line with
-          | file :: name :: descr :: _ ->
-              Printf.sprintf "%s\n  %s\n  %s\n\n" file name (String.trim descr)
-          | _ -> assert false
-        )
-  in
-  List.sort compare basis_list 
-
 
 (** Run the program *)
 let run ?o b au c d m p cart xyz_file =
@@ -636,7 +616,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
       { opt=Mandatory; short='b'; long="basis";
         arg=With_arg "<string>";
-        doc="Name of basis set. If <string>=show, the list of all basis sets is displayed."} ;
+        doc="Name of basis set file. Searched in ${QP_ROOT}/data/basis if not found."} ;
 
       { opt=Optional ; short='a'; long="au";
         arg=Without_arg;
@@ -711,13 +691,6 @@ If a file with the same name as the basis set exists, this file will be read.  O
   let cart =
     Command_line.get_bool "cartesian"
   in
-
-  if basis = "show" then
-  begin
-    list_basis ()
-    |> List.iter print_endline;
-    exit 0
-  end;
 
   let xyz_filename =
     match Command_line.anon_args () with

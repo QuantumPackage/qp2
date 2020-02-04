@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-conversion =  [
+"""Installs the default basis set files from the BSE command-line tool."""
+
+conversion =  {
 "3-21g"                     :  "3-21G",
 "4-31g"                     :  "4-31G",
 "6-311g"                    :  "6-311G",
@@ -38,7 +40,6 @@ conversion =  [
 "aug-cc-pwcvqz"             :  "aug-cc-pwCVQZ",
 "aug-cc-pwcvtz"             :  "aug-cc-pwCVTZ",
 "cc-pcv5z"                  :  "cc-pCV5Z",
-"cc-pcv6z"                  :  "cc-pCV6Z",
 "cc-pcvdz"                  :  "cc-pCVDZ",
 "cc-pcvqz"                  :  "cc-pCVQZ",
 "cc-pcvtz"                  :  "cc-pCVTZ",
@@ -90,15 +91,17 @@ conversion =  [
 "pvdz_ahlrichs"             :  "Ahlrichs pVDZ",
 "sto-2g"                    :  "STO-2G",
 "sto-3g"                    :  "STO-3G",
+"sto-4g"                    :  "STO-4G",
+"sto-5g"                    :  "STO-5G",
 "sto-6g"                    :  "STO-6G",
 "sto-3g_star"               :  "STO-3G*",
-"sto-6g_star"               :  "STO-6G*",
-]
+}
 
 import basis_set_exchange as bse
 
 for filename in conversion.keys():
-  data = bse.get_basis(conversion[filename], fmt='gamess_us')
+  print(filename)
+  data = bse.get_basis(conversion[filename], fmt='gamess_us',uncontract_general=True,uncontract_spdf=True)
   with open(filename,'w') as f:
     f.write(data)
     
