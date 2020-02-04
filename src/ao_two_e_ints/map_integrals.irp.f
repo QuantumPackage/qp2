@@ -518,8 +518,12 @@ complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) resu
     endif
   else
     call map_get(map2,idx,tmp_re)
-    call map_get(map2,idx+1,tmp_im)
-    tmp_im *= sign
+    if (sign/=0.d0) then
+      call map_get(map2,idx+1,tmp_im)
+      tmp_im *= sign
+    else
+      tmp_im=0.d0
+    endif
   endif
   tmp = dcmplx(tmp_re,tmp_im)
   result = tmp
