@@ -28,9 +28,60 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   integer(bit_kind)              :: mask_ijkl(N_int,4)
   integer(bit_kind)              :: mask_ijk(N_int,3)
   double precision               :: cpu_1, cpu_2, wall_1, wall_2
+  integer*8                      :: get_mo_map_size, mo_map_size
+  double precision, external     :: map_mb
 
   PROVIDE mo_class
 
+  if (is_periodic) then
+    mo_two_e_integrals_in_map = .True.
+    if (read_mo_two_e_integrals) then
+      print*,'Reading the MO integrals'
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_1',mo_integrals_map)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_2',mo_integrals_map_2)
+      print*, 'MO integrals provided (periodic)'
+      return
+    else
+      PROVIDE ao_two_e_integrals_in_map
+    endif
+    
+    print *,  ''
+    print *,  'AO -> MO integrals transformation (periodic)'
+    print *,  '---------------------------------'
+    print *,  ''
+  
+    call wall_time(wall_1)
+    call cpu_time(cpu_1)
+  
+    if(no_vvvv_integrals)then
+      print*,'not implemented for periodic',irp_here
+      stop -1
+      call four_idx_novvvv_periodic
+    else
+      print*,'not implemented for periodic',irp_here
+      stop -1
+      call add_integrals_to_map_periodic(full_ijkl_bitmask_4)
+    endif
+  
+    call wall_time(wall_2)
+    call cpu_time(cpu_2)
+  
+    mo_map_size = get_mo_map_size()
+  
+    print*,'Molecular integrals provided:'
+    print*,' Size of MO map 1         ', map_mb(mo_integrals_map) ,'MB'
+    print*,' Size of MO map 2         ', map_mb(mo_integrals_map_2) ,'MB'
+    print*,' Number of MO integrals: ',  mo_map_size
+    print*,' cpu  time :',cpu_2 - cpu_1, 's'
+    print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+  
+    if (write_mo_two_e_integrals.and.mpi_master) then
+      call ezfio_set_work_empty(.False.)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_1',mo_integrals_map)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_2',mo_integrals_map_2)
+      call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+    endif
+  else
   mo_two_e_integrals_in_map = .True.
   if (read_mo_two_e_integrals) then
     print*,'Reading the MO integrals'
@@ -58,10 +109,8 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call wall_time(wall_2)
   call cpu_time(cpu_2)
 
-  integer*8                      :: get_mo_map_size, mo_map_size
   mo_map_size = get_mo_map_size()
 
-  double precision, external     :: map_mb
   print*,'Molecular integrals provided:'
   print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
   print*,' Number of MO integrals: ',  mo_map_size
@@ -72,6 +121,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
     call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+  endif
   endif
 
 END_PROVIDER

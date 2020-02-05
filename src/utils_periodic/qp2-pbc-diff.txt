@@ -54,6 +54,18 @@ mo_two_e_ints
 	incomplete
 
 
+NOTES:
+  number of unique 4-tuples with 8-fold symmetry is a8(n)=n*(n+1)*(n^2+n+2)/8
+  number of unique 4-tuples with 4-fold symmetry is a4(n)=n^2*(n^2+3)/4
+  a8 is number of unique real 2e ints with n mos
+  a4 is number of unique* complex 2e ints with n mos (where p+i*q and p-i*q are counted as one, not two)
+  a4(n) = a8(n) + a8(n-1)
+  
+  we can already generate the list of <ij|kl> with unique values for the 8-fold case
+  the set of these for 4-fold symmetry is the union of the 8-fold set for n and the 8-fold set for n-1 with a simple transformation
+  <ij|kl>_{4,n} = <ij|kl>_{8,n} + <(k+1)j|i(l+1)>_{8,n-1}
+
+
 
 
 ############################
