@@ -74,7 +74,7 @@ function run {
 }
 
 @test "HCO" {
-  run hco.xyz 2 0 vdz_ahlrichs
+  run hco.xyz 2 0 6-31+g
 }
 
 @test "NH3" {

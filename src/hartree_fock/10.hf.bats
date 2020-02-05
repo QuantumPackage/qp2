@@ -30,7 +30,7 @@ function run() {
 }
 
 @test "HCO" { # 0.636700  1.55279s
-  run hco.ezfio -113.0862778269114
+  run hco.ezfio -113.1841002944744
 }
 
 @test "HBO" { # 0.805600 1.4543s
