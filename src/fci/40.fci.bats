@@ -117,9 +117,7 @@ function run_stoch() {
 }
 
 @test "SiH3" { # 15.99s
-  [[ -n $TRAVIS ]] && s
-
-kip
+  [[ -n $TRAVIS ]] && skip
   qp set_file sih3.ezfio
   run -5.57241217753818 3.e-4   100000
 }
