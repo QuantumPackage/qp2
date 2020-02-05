@@ -22,7 +22,7 @@ function run() {
 }
 
 @test "SiH2_3B1" { # 0.539000  1.51094s
-  run sih2_3b1.ezfio -289.9654718650881
+  run sih2_3b1.ezfio -289.9654718453571
 }
 
 @test "SO" { # 0.539000  5.70403s
