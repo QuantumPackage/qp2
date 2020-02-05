@@ -166,7 +166,7 @@ subroutine ao_to_mo_complex(A_ao,LDA_ao,A_mo,LDA_mo)
   ! Transform A from the AO basis to the MO basis
   ! where A is complex in the AO basis
   !
-  ! Ct.A_ao.C
+  ! C^\dagger.A_ao.C
   END_DOC
   integer, intent(in)            :: LDA_ao,LDA_mo
   complex*16, intent(in)   :: A_ao(LDA_ao,ao_num)
@@ -182,6 +182,36 @@ subroutine ao_to_mo_complex(A_ao,LDA_ao,A_mo,LDA_mo)
       (0.d0,0.d0), T, size(T,1))
   
   call zgemm('C','N', mo_num, mo_num, ao_num,                &
+      (1.d0,0.d0), mo_coef_complex,size(mo_coef_complex,1),                          &
+      T, ao_num,                                                     &   
+      (0.d0,0.d0), A_mo, size(A_mo,1))
+  
+  deallocate(T)
+end
+
+subroutine ao_to_mo_noconjg_complex(A_ao,LDA_ao,A_mo,LDA_mo)
+  implicit none
+  BEGIN_DOC
+  ! Transform A from the AO basis to the MO basis
+  ! where A is complex in the AO basis
+  !
+  ! C^T.A_ao.C
+  ! needed for 4idx tranform in four_idx_novvvv
+  END_DOC
+  integer, intent(in)            :: LDA_ao,LDA_mo
+  complex*16, intent(in)   :: A_ao(LDA_ao,ao_num)
+  complex*16, intent(out)  :: A_mo(LDA_mo,mo_num)
+  complex*16, allocatable  :: T(:,:)
+  
+  allocate ( T(ao_num,mo_num) )
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: T
+  
+  call zgemm('N','N', ao_num, mo_num, ao_num,                    &
+      (1.d0,0.d0), A_ao,LDA_ao,                                      &
+      mo_coef_complex, size(mo_coef_complex,1),                                      &
+      (0.d0,0.d0), T, size(T,1))
+  
+  call zgemm('T','N', mo_num, mo_num, ao_num,                &
       (1.d0,0.d0), mo_coef_complex,size(mo_coef_complex,1),                          &
       T, ao_num,                                                     &   
       (0.d0,0.d0), A_mo, size(A_mo,1))

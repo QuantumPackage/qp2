@@ -306,7 +306,7 @@ subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map,map2)
   integer                        :: i
   integer(key_kind)              :: hash(sze),hash_re(sze),hash_im(sze)
   real(integral_kind)            :: tmp_re(sze),tmp_im(sze)
-  complex*16                     :: out_re(sze),out_im(sze)
+  double precision               :: out_re(sze),out_im(sze)
   double precision :: sign
   PROVIDE mo_two_e_integrals_in_map
 
@@ -400,10 +400,10 @@ subroutine get_mo_two_e_integrals_exch_ii_periodic(k,l,sze,out_val,map,map2)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map,map2
-  integer                        :: i
+  integer                        :: i,klmin,klmax
   integer(key_kind)              :: hash(sze),hash_re(sze),hash_im(sze)
   real(integral_kind)            :: tmp_re(sze),tmp_im(sze)
-  complex*16                     :: out_re(sze),out_im(sze)
+  double precision               :: out_re(sze),out_im(sze)
   double precision :: sign,sign2(sze)
 
   PROVIDE mo_two_e_integrals_in_map
