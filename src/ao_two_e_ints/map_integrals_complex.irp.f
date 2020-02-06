@@ -424,7 +424,9 @@ subroutine get_ao_two_e_integrals_non_zero_periodic(j,k,l,sze,out_val,out_val_in
 end
 
 
-!subroutine get_ao_two_e_integrals_non_zero_jl_periodic(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+subroutine get_ao_two_e_integrals_non_zero_jl_periodic(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+  print*,'not implemented for periodic',irp_here
+  stop -1
 !  use map_module
 !  implicit none
 !  BEGIN_DOC
@@ -469,11 +471,13 @@ end
 !     out_val(non_zero_int) = tmp
 !   enddo
 !  enddo
-!
-!end
+
+end
 
 
-!subroutine get_ao_two_e_integrals_non_zero_jl_from_list_periodic(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+subroutine get_ao_two_e_integrals_non_zero_jl_from_list_periodic(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+  print*,'not implemented for periodic',irp_here
+  stop -1
 !  use map_module
 !  implicit none
 !  BEGIN_DOC
@@ -520,8 +524,8 @@ end
 !   out_val_index(2,non_zero_int) = k
 !   out_val(non_zero_int) = tmp
 !  enddo
-!
-!end
+
+end
 
 subroutine insert_into_ao_integrals_map_2(n_integrals,buffer_i, buffer_values)
   use map_module
