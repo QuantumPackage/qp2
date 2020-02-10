@@ -19,7 +19,8 @@ ezfio.electrons_elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
 
 nucl_num = qph5['nuclei'].attrs['nucl_num']
 kpt_num = qph5['nuclei'].attrs['kpt_num']
-#df_num = qph5['???'].attrs['df_num']
+df_num = qph5['ao_basis'].attrs['df_num']
+ao_num = qph5['ao_basis'].attrs['ao_num']
 
 mo_num = qph5['mo_basis'].attrs['mo_num']
 ezfio.set_mo_basis_mo_num(mo_num)
