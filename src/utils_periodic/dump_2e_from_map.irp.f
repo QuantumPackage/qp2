@@ -50,7 +50,7 @@ subroutine run
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          print'((A),4(I4),1(E15.7),2(I),2(E9.1))','imag1  ',i,j,k,l,values(k1),k1,k2,i_sign(k2)
+          print'((A),4(I4),1(E15.7),2(I4),2(E9.1))','imag1  ',i,j,k,l,values(k1),k1,k2,i_sign(k2)
 
           !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
           !G_b(i,k) += D_{ab}(l,j)*(<ij|kl>)
@@ -67,7 +67,7 @@ subroutine run
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          print'((A),4(I4),1(E15.7),2(I))','real1  ',i,j,k,l,values(k1),k1,k2
+          print'((A),4(I4),1(E15.7),2(I4))','real1  ',i,j,k,l,values(k1),k1,k2
         enddo
       endif
     enddo
@@ -98,7 +98,7 @@ subroutine run
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          print'((A),4(I4),1(E15.7),2(I),2(E9.1))','imag2  ',i,j,k,l,values(k1),k1,k2,i_sign(k2)
+          print'((A),4(I4),1(E15.7),2(I4),2(E9.1))','imag2  ',i,j,k,l,values(k1),k1,k2,i_sign(k2)
         enddo
       else ! real part
         do k2=1,4
@@ -109,7 +109,7 @@ subroutine run
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          print'((A),4(I4),1(E15.7),2(I))','real2  ',i,j,k,l,values(k1),k1,k2
+          print'((A),4(I4),1(E15.7),2(I4))','real2  ',i,j,k,l,values(k1),k1,k2
         enddo
       endif
     enddo
