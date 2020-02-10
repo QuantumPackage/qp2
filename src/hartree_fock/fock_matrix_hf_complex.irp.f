@@ -33,7 +33,7 @@
       !$OMP  n_elements,ao_two_e_integral_alpha_tmp,ao_two_e_integral_beta_tmp, &
       !$OMP  c0,key1)&
       !$OMP SHARED(ao_num,SCF_density_matrix_ao_alpha_complex, &
-      !$OMP  SCF_density_matrix_ao_beta_complex,i_sign, &
+      !$OMP  SCF_density_matrix_ao_beta_complex, &
       !$OMP  ao_integrals_map, ao_two_e_integral_alpha_complex, ao_two_e_integral_beta_complex)
  
   call get_cache_map_n_elements_max(ao_integrals_map,n_elements_max)
@@ -116,7 +116,7 @@
       !$OMP  n_elements,ao_two_e_integral_alpha_tmp,ao_two_e_integral_beta_tmp, &
       !$OMP  c0,key1)&
       !$OMP SHARED(ao_num,SCF_density_matrix_ao_alpha_complex, &
-      !$OMP   SCF_density_matrix_ao_beta_complex,i_sign, &
+      !$OMP   SCF_density_matrix_ao_beta_complex, &
       !$OMP  ao_integrals_map_2, ao_two_e_integral_alpha_complex, ao_two_e_integral_beta_complex)
  
   call get_cache_map_n_elements_max(ao_integrals_map_2,n_elements_max)
