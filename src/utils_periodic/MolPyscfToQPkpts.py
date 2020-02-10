@@ -560,19 +560,28 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #                 _|                              
    
     if mf.cell.pseudo:
-        ao_n_e = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
+        v_kpts_ao = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
     else:
         v_kpts_ao = np.reshape(mf.with_df.get_nuc(kpts=kpts),(Nk,nao,nao))
     if len(cell._ecpbas) > 0:
         v_kpts_ao += np.reshape(ecp.ecp_int(cell, kpts),(Nk,nao,nao))
       
-    ne_ao = ('ne',v_kpts_ao,ne_threshold)
-    ovlp_ao = ('overlap',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
-    kin_ao = ('kinetic',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
+    ne_ao = ('V',v_kpts_ao,ne_threshold)
+    ovlp_ao = ('S',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
+    kin_ao = ('T',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
+
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic',     data=kin_ao[1].real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao[1].imag)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap',     data=ovlp_ao[1].real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao[1].imag)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e',         data=v_kpts_ao.real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=v_kpts_ao.imag)
+    
+
 
     for name, intval_kpts_ao, thresh in (ne_ao, ovlp_ao, kin_ao):
         if print_ao_ints_mono:
-            with open('%s_ao_complex' % name,'w') as outfile:
+            with open('%s.qp' % name,'w') as outfile:
                 for ik in range(Nk):
                     shift=ik*nao+1
                     for i in range(nao):
@@ -582,7 +591,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                                 outfile.write('%s %s %s %s\n' % (i+shift, j+shift, int_ij.real, int_ij.imag))
         if print_mo_ints_mono:
             intval_kpts_mo = np.einsum('kim,kij,kjn->kmn',mo_k.conj(),intval_kpts_ao,mo_k)
-            with open('%s_mo_complex' % name,'w') as outfile:
+            with open('%s_mo.qp' % name,'w') as outfile:
                 for ik in range(Nk):
                     shift=ik*nmo+1
                     for i in range(nmo):
@@ -598,8 +607,16 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #                 _|                    
     #
     kconserv = tools.get_kconserv(cell, kpts)
+    qph5.create_dataset('nuclei/kconserv',data=np.transpose(kconserv+1,(0,2,1)))
+    kcon_test = np.zeros((Nk,Nk,Nk),dtype=int)
+    for a in range(Nk):
+        for b in range(Nk):
+            for c in range(Nk):
+                kcon_test[a,c,b] = kconserv[a,b,c]+1
+    qph5.create_dataset('nuclei/kconserv_test',data=kcon_test)
 
-    with open('kconserv_complex','w') as outfile:
+    
+    with open('K.qp','w') as outfile:
         for a in range(Nk):
             for b in range(Nk):
                 for c in range(Nk):
@@ -630,17 +647,22 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
 
     nkpt_pairs = j3arr.shape[0]
+    df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
 
     if print_ao_ints_df:
-        with open('df_ao_integral_array','w') as outfile:
+        with open('D.qp','w') as outfile:
             pass
-        with open('df_ao_integral_array','a') as outfile:
+        with open('D.qp','a') as outfile:
             for k,kpt_pair in enumerate(j3arr):
                 for iaux,dfbasfunc in enumerate(kpt_pair):
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
                                 outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                df_ao_tmp[i,j,iaux,k]=v
+        
+        qph5.create_dataset('ao_two_e_ints/df_ao_array_real',data=df_ao_tmp.real)
+        qph5.create_dataset('ao_two_e_ints/df_ao_array_imag',data=df_ao_tmp.imag)
 
     if print_mo_ints_df:
         kpair_list=[]
@@ -649,15 +671,19 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                 if(i>=j):
                     kpair_list.append((i,j,idx2_tri((i,j))))
         j3mo = np.array([np.einsum('mij,ik,jl->mkl',j3arr[kij],mo_k[ki].conj(),mo_k[kj]) for ki,kj,kij in kpair_list])
-        with open('df_mo_integral_array','w') as outfile:
+        df_mo_tmp = np.zeros((nmo,nmo,naux,nkpt_pairs),dtype=np.complex128)
+        with open('D_mo.qp','w') as outfile:
             pass
-        with open('df_mo_integral_array','a') as outfile:
+        with open('D_mo.qp','a') as outfile:
             for k,kpt_pair in enumerate(j3mo):
                 for iaux,dfbasfunc in enumerate(kpt_pair):
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
                                 outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                df_mo_tmp[i,j,iaux,k]=v
+        qph5.create_dataset('mo_two_e_ints/df_mo_array_real',data=df_mo_tmp.real)
+        qph5.create_dataset('mo_two_e_ints/df_mo_array_imag',data=df_mo_tmp.imag)
 
 
 
@@ -681,10 +707,10 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     if (print_ao_ints_bi or print_mo_ints_bi):
         if print_ao_ints_bi:
-            with open('bielec_ao_complex','w') as outfile: 
+            with open('W.qp','w') as outfile: 
                 pass
         if print_mo_ints_bi:
-            with open('bielec_mo_complex','w') as outfile: 
+            with open('W_mo.qp','w') as outfile: 
                 pass
         for d, kd in enumerate(kpts):
             for c, kc in enumerate(kpts):
@@ -698,7 +724,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                     ka = kpts[a]
 
                     if print_ao_ints_bi:
-                        with open('bielec_ao_complex','a') as outfile:
+                        with open('W.qp','a') as outfile:
                             eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
                             eri_4d_ao_kpt *= 1./Nk
                             for l in range(nao):
@@ -719,7 +745,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                                                 outfile.write('%s %s %s %s %s %s\n' % (ii+1,jj+1,kk+1,ll+1,v.real,v.imag))
             
                     if print_mo_ints_bi:
-                        with open('bielec_mo_complex','a') as outfile:
+                        with open('W_mo.qp','a') as outfile:
                             eri_4d_mo_kpt = mf.with_df.ao2mo([mo_k[a], mo_k[b], mo_k[c], mo_k[d]],
                                                               [ka,kb,kc,kd],compact=False).reshape((nmo,)*4)
                             eri_4d_mo_kpt *= 1./Nk
