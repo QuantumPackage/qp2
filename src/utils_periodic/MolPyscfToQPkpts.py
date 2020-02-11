@@ -489,6 +489,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     from pyscf.pbc import ao2mo
     from pyscf.pbc import tools
     from pyscf.pbc.gto import ecp
+    from pyscf.data import nist
     import h5py
     import scipy
 
@@ -507,9 +508,21 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     natom = cell.natm
     nelec = cell.nelectron
+    atom_xyz = mf.cell.atom_coords()
+    if not(mf.cell.unit.startswith(('B','b','au','AU'))):
+        atom_xyz /= nist.BOHR # always convert to au
+    
+    strtype=h5py.special_dtype(vlen=str)
+    atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
+    for i in range(natom):
+        atom_dset[i] = mf.cell.atom_pure_symbol(i)
+    qph5.create_dataset('nuclei/nucl_coord',data=atom_xyz)
+    qph5.create_dataset('nuclei/nucl_charge',data=mf.cell.atom_charges())
+
+
     print('n_atom per kpt',   natom)
     print('num_elec per kpt', nelec)
-  
+
     mo_coeff = mf.mo_coeff
     # Mo_coeff actif
     mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
@@ -523,14 +536,20 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     naux = mf.with_df.auxcell.nao
     print("n df fitting functions", naux)
   
-    #in old version: param < nelec*Nk, nmo*Nk, natom*Nk
+    #in old version: param << nelec*Nk, nmo*Nk, natom*Nk
     qph5['electrons'].attrs['elec_alpha_num']=nelec*Nk 
     qph5['electrons'].attrs['elec_beta_num']=nelec*Nk
     qph5['mo_basis'].attrs['mo_num']=Nk*nmo
     qph5['ao_basis'].attrs['ao_num']=Nk*nao
     qph5['nuclei'].attrs['nucl_num']=Nk*natom
     qph5['nuclei'].attrs['kpt_num']=Nk
-    qph5['ao_basis'].attrs['df_num']=naux
+    qph5.create_group('ao_two_e_ints')
+    qph5['ao_two_e_ints'].attrs['df_num']=naux
+
+    qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
+    ao_nucl=[mf.cell.bas_atom(i)+1 for i in range(nao)]
+    qph5.create_dataset('ao_basis/ao_nucl',data=Nk*ao_nucl)
+
 
     #                             _                             
     # |\ |      _ |  _   _. ._   |_)  _  ._      |  _ o  _  ._  
