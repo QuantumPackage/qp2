@@ -1,3 +1,11 @@
+BEGIN_PROVIDER [ integer, mo_kpt_num ]
+ implicit none
+ BEGIN_DOC
+ ! number of mos per kpt.
+ END_DOC
+ mo_kpt_num = mo_num/kpt_num
+END_PROVIDER
+
 BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
   implicit none
   BEGIN_DOC

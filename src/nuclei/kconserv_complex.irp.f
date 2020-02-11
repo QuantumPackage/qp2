@@ -1,3 +1,8 @@
+BEGIN_PROVIDER [integer, kpt_pair_num]
+  implicit none
+  kpt_pair_num = shiftr(kpt_num*kpt_num+kpt_num,1)
+END_PROVIDER
+
 BEGIN_PROVIDER [integer, kconserv, (kpt_num,kpt_num,kpt_num)]
   implicit none
   BEGIN_DOC
