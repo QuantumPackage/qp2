@@ -50,12 +50,12 @@ ao_one_e_ints
 	ao_integrals_n_e_per_atom_complex (should be simple, but currently we only use dummy nuclei)
 
 ao_two_e_ints (todo)
- get_ao_two_e_integrals_non_zero_periodic 
- get_ao_two_e_integrals_non_zero_jl_periodic 
- get_ao_two_e_integrals_non_zero_jl_from_list_periodic 
+ get_ao_two_e_integrals_non_zero_complex 
+ get_ao_two_e_integrals_non_zero_jl_complex 
+ get_ao_two_e_integrals_non_zero_jl_from_list_complex 
 
 mo_two_e_ints (todo)
-  get_mo_two_e_integrals_ij_periodic
+  get_mo_two_e_integrals_ij_complex
   add_integrals_to_map_complex
 	add_integrals_to_map_three_indices_complex
 	add_integrals_to_map_no_exit_34_complex
@@ -103,7 +103,7 @@ ocaml/Input_mo_basis.ml
 	still needs mo_coef_to_string and to_string?
 
 src/nuclei/EZFIO.cfg
-	[is_periodic]
+	[is_complex]
 		if true use periodic parts of code
 
 src/utils/linear_algebra.irp.f
@@ -123,7 +123,7 @@ src/utils_periodic/import_integrals_ao_periodic.irp.f
 	read ints from pyscf
 	TODO: don't read ao_num from stdin
 
-src/utils_periodic/import_mo_coef_periodic.irp.f
+src/utils_periodic/import_mo_coef_complex.irp.f
 	read mo_coef from pyscf
 	
 
@@ -154,7 +154,7 @@ src/ao_one_e_ints/pot_ao_pseudo_ints.irp.f
 	each complex array is formed by combining real and imag arrays
 	imag arrays can only be read from disk
 	no complex/imag versions of ao_integrals_n_e_per_atom, but this should be straightforward if we need it later?
-	changed ao_overlap_abs so that it is set to cdabs(ao_overlap_complex) if (is_periodic)
+	changed ao_overlap_abs so that it is set to cdabs(ao_overlap_complex) if (is_complex)
 		TODO: (maybe not the behavior we want)
 	added S_inv_complex
 		TODO: (no S_half_inv_complex yet)
@@ -172,7 +172,7 @@ src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
 	ao_ortho_canonical_num_complex
 		similar to real version
 		providers are linked, so easier to just make num_complex instead of using original num (even though they will both have the same value)
-		need to make sure this doesn't require any other downstream changes (i.e. replace ao_ortho_canonical_num with complex version if (is_periodic))
+		need to make sure this doesn't require any other downstream changes (i.e. replace ao_ortho_canonical_num with complex version if (is_complex))
 	ao_ortho_canonical_overlap_complex
 		similar to real version
 
@@ -184,20 +184,20 @@ src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
 
 src/ao_two_e_ints/map_integrals.irp.f
 	added ao_integrals_map_2 (provider linked to ao_integrals_map)
-	double size of both maps if (is_periodic)
-	subroutine two_e_integrals_index_periodic
+	double size of both maps if (is_complex)
+	subroutine two_e_integrals_index_complex
 		same as real version, but return compound (2) indices to avoid recomputing
-	ao_integrals_cache_periodic
+	ao_integrals_cache_complex
 		similar to real version
-	subroutine ao_two_e_integral_periodic_map_idx_sign
+	subroutine ao_two_e_integral_complex_map_idx_sign
 		from i,j,k,l, return which map to use (T->1, F->2), location of real part of integral, sign of imaginary part of integral
-	complex*16 function get_ao_two_e_integral_periodic_simple
+	complex*16 function get_ao_two_e_integral_complex_simple
 		args i,j,k,l,map1,map2
 		return complex integral composed of correct elements from one of the maps
-	complex*16 function get_ao_two_e_integral_periodic
+	complex*16 function get_ao_two_e_integral_complex
 		same behavior as _simple version, but checks cache first
 		returns integral from cache if possible, otherwise retrieves from map
-	subroutine get_ao_two_e_integrals_periodic
+	subroutine get_ao_two_e_integrals_complex
 		same functionality as real version
 	subroutine insert_into_ao_integrals_map_2
 		needed for second map
@@ -323,8 +323,8 @@ src/mo_one_e_ints/pot_mo_pseudo_ints.irp.f
   for periodic AOs, we always read (can't compute)
   for MOs, we can either read from disk or transform from AOs
   simplest way might be to link all three providers (integrals{,_imag,_complex})
-  if (.not.is_periodic), just ignore imag and complex arrays?
-  if (is_periodic)
+  if (.not.is_complex), just ignore imag and complex arrays?
+  if (is_complex)
     either read real/imag from disk and combine to form complex
     or transform complex MO ints from complex AO ints and also assign real/imag parts to separate arrays?
 
@@ -354,7 +354,7 @@ src/hartree_fock/scf.irp.f
 		subroutine create_guess
 			should work for periodic
 			TODO: decide what to do about mo_coef_complex and imag/real parts for touch/save!!!
-		TODO: call roothaan_hall_scf_complex if (is_periodic)
+		TODO: call roothaan_hall_scf_complex if (is_complex)
 
 
 src/scf_utils/diagonalize_fock_complex.irp.f
@@ -373,7 +373,7 @@ src/scf_utils/diis_complex.irp.f
 			
 
 src/scf_utils/fock_matrix.irp.f
-	added checks to make sure we don't end up in real providers if (is_periodic)
+	added checks to make sure we don't end up in real providers if (is_complex)
 		probably not necessary?
 	[ double precision, SCF_energy ]
 		modified for periodic
@@ -391,7 +391,7 @@ src/scf_utils/fock_matrix_complex.irp.f
 
 src/scf_utils/huckel_complex.irp.f
 	similar to real version
-	could just put if (is_periodic) branch in real version? (instead of making separate subroutine)
+	could just put if (is_complex) branch in real version? (instead of making separate subroutine)
 	has soft_touch mo_coef_complex and call to save_mos (see other notes on real/imag parts)
 
 

@@ -22,7 +22,7 @@ END_PROVIDER
  HF_energy = nuclear_repulsion
  HF_two_electron_energy = 0.d0
  HF_one_electron_energy = 0.d0
-  if (is_periodic) then
+  if (is_complex) then
     complex*16 :: hf_1e_tmp, hf_2e_tmp
     hf_1e_tmp = (0.d0,0.d0)
     hf_2e_tmp = (0.d0,0.d0)

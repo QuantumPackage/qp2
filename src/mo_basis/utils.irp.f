@@ -10,7 +10,7 @@ subroutine save_mos
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
-  if (is_periodic) then
+  if (is_complex) then
     allocate ( buffer(ao_num,mo_num),buffer_im(ao_num,mo_num))
     buffer = 0.d0
     buffer_im = 0.d0
@@ -49,7 +49,7 @@ subroutine save_mos_no_occ
  !call ezfio_set_mo_basis_mo_num(mo_num)
  !call ezfio_set_mo_basis_mo_label(mo_label)
  !call ezfio_set_mo_basis_ao_md5(ao_md5)
-  if (is_periodic) then
+  if (is_complex) then
     allocate ( buffer(ao_num,mo_num),buffer_im(ao_num,mo_num))
     buffer = 0.d0
     buffer_im = 0.d0
@@ -86,7 +86,7 @@ subroutine save_mos_truncated(n)
   call ezfio_set_mo_basis_mo_num(n)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
-  if (is_periodic) then
+  if (is_complex) then
     allocate ( buffer(ao_num,n),buffer_im(ao_num,n))
     buffer = 0.d0
     buffer_im = 0.d0

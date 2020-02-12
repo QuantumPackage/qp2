@@ -1,7 +1,7 @@
 use map_module
 
 
-subroutine two_e_integrals_index_periodic(i,j,k,l,i1,p,q)
+subroutine two_e_integrals_index_complex(i,j,k,l,i1,p,q)
   use map_module
   implicit none
   BEGIN_DOC
@@ -138,7 +138,7 @@ subroutine two_e_integrals_index_reverse_complex_2(i,j,k,l,i1)
 end
 
 
-BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
+BEGIN_PROVIDER [ complex*16, ao_integrals_cache_complex, (0:64*64*64*64) ]
  implicit none
  BEGIN_DOC
  ! Cache of AO integrals for fast access
@@ -151,7 +151,7 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
  complex(integral_kind)         :: integral
   integer(key_kind)              :: p,q,r,s,ik,jl
   logical :: ilek, jlel, iklejl
-  complex*16 :: get_ao_two_e_integral_periodic_simple
+  complex*16 :: get_ao_two_e_integral_complex_simple
 
 
  !$OMP PARALLEL DO PRIVATE (ilek,jlel,p,q,r,s, ik,jl,iklejl, &
@@ -161,14 +161,14 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
      do j=ao_integrals_cache_min,ao_integrals_cache_max
        do i=ao_integrals_cache_min,ao_integrals_cache_max
          !DIR$ FORCEINLINE
-         integral = get_ao_two_e_integral_periodic_simple(i,j,k,l,&
+         integral = get_ao_two_e_integral_complex_simple(i,j,k,l,&
                     ao_integrals_map,ao_integrals_map_2)
          
          ii = l-ao_integrals_cache_min
          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
          ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-         ao_integrals_cache_periodic(ii) = integral
+         ao_integrals_cache_complex(ii) = integral
        enddo
      enddo
    enddo
@@ -177,7 +177,7 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
 
 END_PROVIDER
 
-subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign) 
+subroutine ao_two_e_integral_complex_map_idx_sign(i,j,k,l,use_map1,idx,sign) 
   use map_module
   implicit none
   BEGIN_DOC
@@ -209,7 +209,7 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   double precision, intent(out)  :: sign
   integer(key_kind)              :: p,q,r,s,ik,jl,ij,kl
   !DIR$ FORCEINLINE
-  call two_e_integrals_index_periodic(i,j,k,l,idx,ik,jl)
+  call two_e_integrals_index_complex(i,j,k,l,idx,ik,jl)
   p = min(i,j)
   r = max(i,j)
   ij = p+shiftr(r*r-r,1)
@@ -267,7 +267,7 @@ subroutine ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   endif
 end
 
-complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) result(result)
+complex*16 function get_ao_two_e_integral_complex_simple(i,j,k,l,map,map2) result(result)
   use map_module
   implicit none
   BEGIN_DOC
@@ -285,7 +285,7 @@ complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) resu
   double precision :: sign
   ! a.le.c, b.le.d, tri(a,c).le.tri(b,d)
   PROVIDE ao_two_e_integrals_in_map
-  call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
+  call ao_two_e_integral_complex_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   if (use_map1) then
     call map_get(map,idx,tmp_re)
     call map_get(map,idx+1,tmp_im)
@@ -304,7 +304,7 @@ complex*16 function get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2) resu
 end
 
 
-complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map,map2) result(result)
+complex*16 function get_ao_two_e_integral_complex(i,j,k,l,map,map2) result(result)
   use map_module
   implicit none
   BEGIN_DOC
@@ -317,11 +317,11 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map,map2) result(resu
   type(map_type), intent(inout)  :: map,map2
   integer                        :: ii
   complex(integral_kind)         :: tmp
-  complex(integral_kind)         :: get_ao_two_e_integral_periodic_simple
+  complex(integral_kind)         :: get_ao_two_e_integral_complex_simple
   integer(key_kind)              :: p,q,r,s,ik,jl
   logical :: ilek, jlel, iklejl
   ! a.le.c, b.le.d, tri(a,c).le.tri(b,d)
-  PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
+  PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_complex ao_integrals_cache_min
   !DIR$ FORCEINLINE
 !  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
 !    tmp = (0.d0,0.d0)
@@ -334,20 +334,20 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map,map2) result(resu
     ii = ior(ii, j-ao_integrals_cache_min)
     ii = ior(ii, i-ao_integrals_cache_min)
     if (iand(ii, -64) /= 0) then
-      tmp = get_ao_two_e_integral_periodic_simple(i,j,k,l,map,map2)
+      tmp = get_ao_two_e_integral_complex_simple(i,j,k,l,map,map2)
     else
       ii = l-ao_integrals_cache_min
       ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-      tmp = ao_integrals_cache_periodic(ii)
+      tmp = ao_integrals_cache_complex(ii)
     endif
     result = tmp
   endif
 end
 
 
-subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
+subroutine get_ao_two_e_integrals_complex(j,k,l,sze,out_val)
   use map_module
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
@@ -369,14 +369,14 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
     return
   endif
 
-  complex*16 :: get_ao_two_e_integral_periodic
+  complex*16 :: get_ao_two_e_integral_complex
   do i=1,sze
-    out_val(i) = get_ao_two_e_integral_periodic(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
+    out_val(i) = get_ao_two_e_integral_complex(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
   enddo
 
 end
 
-subroutine get_ao_two_e_integrals_non_zero_periodic(j,k,l,sze,out_val,out_val_index,non_zero_int)
+subroutine get_ao_two_e_integrals_non_zero_complex(j,k,l,sze,out_val,out_val_index,non_zero_int)
   print*,'not implemented for periodic',irp_here
   stop -1
 !  use map_module
@@ -392,7 +392,7 @@ subroutine get_ao_two_e_integrals_non_zero_periodic(j,k,l,sze,out_val,out_val_in
 !  integer                        :: i
 !  integer(key_kind)              :: hash
 !  double precision               :: thresh,tmp
-!  if(is_periodic) then
+!  if(is_complex) then
 !    print*,'not implemented for periodic:',irp_here
 !    stop -1
 !  endif
@@ -424,7 +424,7 @@ subroutine get_ao_two_e_integrals_non_zero_periodic(j,k,l,sze,out_val,out_val_in
 end
 
 
-subroutine get_ao_two_e_integrals_non_zero_jl_periodic(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+subroutine get_ao_two_e_integrals_non_zero_jl_complex(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
   print*,'not implemented for periodic',irp_here
   stop -1
 !  use map_module
@@ -442,7 +442,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_periodic(j,l,thresh,sze_max,sze,ou
 !  integer(key_kind)              :: hash
 !  double precision               :: tmp
 !
-!  if(is_periodic) then
+!  if(is_complex) then
 !    print*,'not implemented for periodic:',irp_here
 !    stop -1
 !  endif
@@ -475,7 +475,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_periodic(j,l,thresh,sze_max,sze,ou
 end
 
 
-subroutine get_ao_two_e_integrals_non_zero_jl_from_list_periodic(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+subroutine get_ao_two_e_integrals_non_zero_jl_from_list_complex(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
   print*,'not implemented for periodic',irp_here
   stop -1
 !  use map_module
@@ -494,7 +494,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list_periodic(j,l,thresh,list
 !  integer(key_kind)              :: hash
 !  double precision               :: tmp
 !
-!  if(is_periodic) then
+!  if(is_complex) then
 !    print*,'not implemented for periodic:',irp_here
 !    stop -1
 !  endif

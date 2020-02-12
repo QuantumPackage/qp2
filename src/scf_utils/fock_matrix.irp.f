@@ -101,7 +101,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_alpha, (mo_num,mo_num) ]
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   if (is_periodic) then
+   if (is_complex) then
      print*,'error',irp_here
      stop -1
    else
@@ -115,7 +115,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_mo_beta, (mo_num,mo_num) ]
    BEGIN_DOC
    ! Fock matrix on the MO basis
    END_DOC
-   if (is_periodic) then
+   if (is_complex) then
      print*,'error',irp_here
      stop -1
    else
@@ -158,7 +158,7 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  SCF_energy = nuclear_repulsion
 
  integer                        :: i,j
- if (is_periodic) then
+ if (is_complex) then
    complex*16 :: scf_e_tmp
    scf_e_tmp = dcmplx(SCF_energy,0.d0)
    do j=1,ao_num

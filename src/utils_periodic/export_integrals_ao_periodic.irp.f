@@ -130,7 +130,7 @@ provide ao_two_e_integrals_in_map
 !  call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A(1:ao_num, 1:ao_num))
 !  call ezfio_set_ao_one_e_ints_ao_integrals_n_e_imag(B(1:ao_num, 1:ao_num))
 !  call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e("Read")
-  complex*16 :: int2e_tmp1,int2e_tmp2,get_ao_two_e_integral_periodic_simple,get_ao_two_e_integral_periodic, tmp_cmplx
+  complex*16 :: int2e_tmp1,int2e_tmp2,get_ao_two_e_integral_complex_simple,get_ao_two_e_integral_complex, tmp_cmplx
   double precision :: tmp3,tmp4,tmp5,tmp6
   double precision :: thr0
   thr0 = 1.d-10
@@ -144,11 +144,11 @@ provide ao_two_e_integrals_in_map
   do 
     read (iunit,*,end=13) i,j,k,l, tmp_re, tmp_im
     tmp_cmplx = dcmplx(tmp_re,tmp_im)
-    int2e_tmp1 = get_ao_two_e_integral_periodic_simple(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
-    int2e_tmp2 = get_ao_two_e_integral_periodic(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
+    int2e_tmp1 = get_ao_two_e_integral_complex_simple(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
+    int2e_tmp2 = get_ao_two_e_integral_complex(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
   !  print'(4(I4),3(E15.7))',i,j,k,l,tmp_re,real(int2e_tmp1),real(int2e_tmp2)
  !   print'(4(I4),3(E15.7))',i,j,k,l,tmp_im,imag(int2e_tmp1),imag(int2e_tmp2)
-    call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
+    call ao_two_e_integral_complex_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
 !    print*,use_map1,idx_tmp,sign
     call map_get(ao_integrals_map,idx_tmp,tmp3)
     call map_get(ao_integrals_map_2,idx_tmp,tmp4)
@@ -164,7 +164,7 @@ provide ao_two_e_integrals_in_map
           ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-!    print*,'cache(pbc)=', ao_integrals_cache_periodic(ii)
+!    print*,'cache(pbc)=', ao_integrals_cache_complex(ii)
 !    print*,'cache(old)=', ao_integrals_cache(ii)
 !    print*
 !    if (use_map1) then
@@ -210,8 +210,8 @@ provide ao_two_e_integrals_in_map
 !  call map_sort(ao_integrals_map_2)
 !  call map_unique(ao_integrals_map_2)
 !
-!  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_1',ao_integrals_map)
-!  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_2',ao_integrals_map_2)
+!  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_complex_1',ao_integrals_map)
+!  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_complex_2',ao_integrals_map_2)
 !  call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read'
 print*,'map1'
   do i=0,ao_integrals_map%map_size

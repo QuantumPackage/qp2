@@ -351,11 +351,11 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
 
   double precision               :: map_mb
   PROVIDE read_ao_two_e_integrals io_ao_two_e_integrals
-  if (is_periodic) then
+  if (is_complex) then
     if (read_ao_two_e_integrals) then
       print*,'Reading the AO integrals (periodic)'
-      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_1',ao_integrals_map)
-      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_2',ao_integrals_map_2)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_complex_1',ao_integrals_map)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_complex_2',ao_integrals_map_2)
       print*, 'AO integrals provided (periodic)'
       ao_two_e_integrals_in_map = .True.
       return

@@ -5,7 +5,7 @@ subroutine hcore_guess
   implicit none
   character*(64)                 :: label
   label = "Guess"
-  if (is_periodic) then
+  if (is_complex) then
     call mo_as_eigvectors_of_mo_matrix_complex(mo_one_e_integrals_complex,  &
                                        size(mo_one_e_integrals_complex,1),  &
                                        size(mo_one_e_integrals_complex,2),label,1,.false.)

@@ -48,7 +48,7 @@ subroutine create_guess
   call ezfio_has_mo_basis_mo_coef(exists)
   if (.not.exists) then
     if (mo_guess_type == "HCore") then
-      if (is_periodic) then
+      if (is_complex) then
         mo_coef_complex = ao_ortho_lowdin_coef_complex
         TOUCH mo_coef_complex
         mo_label = 'Guess'
@@ -68,7 +68,7 @@ subroutine create_guess
         SOFT_TOUCH mo_coef mo_label
       endif
     else if (mo_guess_type == "Huckel") then
-      if (is_periodic) then
+      if (is_complex) then
         call huckel_guess_complex
       else
         call huckel_guess
@@ -92,7 +92,7 @@ subroutine run
   integer                        :: i_it, i, j, k
 
   mo_label = "Orthonormalized"
-  if (is_periodic) then
+  if (is_complex) then
     call roothaan_hall_scf_complex
   else
     call roothaan_hall_scf

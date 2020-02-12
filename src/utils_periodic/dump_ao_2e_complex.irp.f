@@ -9,12 +9,12 @@ subroutine run
   integer ::i,j,k,l
 
   provide ao_two_e_integrals_in_map
-  complex*16 :: get_ao_two_e_integral_periodic, tmp_cmplx
+  complex*16 :: get_ao_two_e_integral_complex, tmp_cmplx
   do i=1,ao_num 
     do j=1,ao_num 
       do k=1,ao_num 
         do l=1,ao_num 
-          tmp_cmplx = get_ao_two_e_integral_periodic(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
+          tmp_cmplx = get_ao_two_e_integral_complex(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
           print'(4(I4),2(E15.7))',i,j,k,l,tmp_cmplx
         enddo
       enddo

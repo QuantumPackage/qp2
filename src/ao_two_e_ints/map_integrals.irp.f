@@ -12,7 +12,7 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
   call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
-  if (is_periodic) then
+  if (is_complex) then
     sze = key_max*2
     call map_init(ao_integrals_map,sze)
     call map_init(ao_integrals_map_2,sze) 
@@ -263,7 +263,7 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
   integer                        :: i
   integer(key_kind)              :: hash
   double precision               :: thresh,tmp
-  if(is_periodic) then
+  if(is_complex) then
     print*,'not implemented for periodic:',irp_here
     stop -1
   endif
@@ -311,7 +311,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
   integer(key_kind)              :: hash
   double precision               :: tmp
 
-  if(is_periodic) then
+  if(is_complex) then
     print*,'not implemented for periodic:',irp_here
     stop -1
   endif
@@ -361,7 +361,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   integer(key_kind)              :: hash
   double precision               :: tmp
 
-  if(is_periodic) then
+  if(is_complex) then
     print*,'not implemented for periodic:',irp_here
     stop -1
   endif

@@ -12,7 +12,7 @@ BEGIN_PROVIDER [ type(map_type), mo_integrals_map ]
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
   call two_e_integrals_index(mo_num,mo_num,mo_num,mo_num,key_max)
-  if (is_periodic) then
+  if (is_complex) then
     sze = key_max*2
     call map_init(mo_integrals_map,sze)
     call map_init(mo_integrals_map_2,sze)
@@ -379,7 +379,7 @@ integer*8 function get_mo_map_size()
   ! Return the number of elements in the MO map
   END_DOC
   get_mo_map_size = mo_integrals_map % n_elements
-  if (is_periodic) then
+  if (is_complex) then
     get_mo_map_size += mo_integrals_map_2 % n_elements
   endif
 end

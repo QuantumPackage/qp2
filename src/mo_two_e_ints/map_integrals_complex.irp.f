@@ -16,7 +16,7 @@ subroutine insert_into_mo_integrals_map_2(n_integrals,               &
   call map_update(mo_integrals_map_2, buffer_i, buffer_values, n_integrals, thr)
 end
 
-BEGIN_PROVIDER [ complex*16, mo_integrals_cache_periodic, (0_8:128_8*128_8*128_8*128_8) ]
+BEGIN_PROVIDER [ complex*16, mo_integrals_cache_complex, (0_8:128_8*128_8*128_8*128_8) ]
  implicit none
  BEGIN_DOC
  ! Cache of MO integrals for fast access
@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ complex*16, mo_integrals_cache_periodic, (0_8:128_8*128_8*128_8
  integer*8                      :: ii
  integer(key_kind)              :: idx
  complex(integral_kind)            :: integral
- complex*16 :: get_two_e_integral_periodic_simple
+ complex*16 :: get_two_e_integral_complex_simple
  FREE ao_integrals_cache
  !$OMP PARALLEL DO PRIVATE (i,j,k,l,i4,j4,k4,l4,idx,ii,integral)
  do l=mo_integrals_cache_min_8,mo_integrals_cache_max_8
@@ -39,13 +39,13 @@ BEGIN_PROVIDER [ complex*16, mo_integrals_cache_periodic, (0_8:128_8*128_8*128_8
        do i=mo_integrals_cache_min_8,mo_integrals_cache_max_8
          i4 = int(i,4)
          !DIR$ FORCEINLINE
-         integral = get_two_e_integral_periodic_simple(i,j,k,l,&
+         integral = get_two_e_integral_complex_simple(i,j,k,l,&
                     mo_integrals_map,mo_integrals_map_2)
          ii = l-mo_integrals_cache_min_8
          ii = ior( shiftl(ii,7), k-mo_integrals_cache_min_8)
          ii = ior( shiftl(ii,7), j-mo_integrals_cache_min_8)
          ii = ior( shiftl(ii,7), i-mo_integrals_cache_min_8)
-         mo_integrals_cache_periodic(ii) = integral
+         mo_integrals_cache_complex(ii) = integral
        enddo
      enddo
    enddo
@@ -55,7 +55,7 @@ BEGIN_PROVIDER [ complex*16, mo_integrals_cache_periodic, (0_8:128_8*128_8*128_8
 END_PROVIDER
 
 
-complex*16 function get_two_e_integral_periodic_simple(i,j,k,l,map,map2) result(result)
+complex*16 function get_two_e_integral_complex_simple(i,j,k,l,map,map2) result(result)
   use map_module
   implicit none
   BEGIN_DOC
@@ -70,7 +70,7 @@ complex*16 function get_two_e_integral_periodic_simple(i,j,k,l,map,map2) result(
   logical                        :: use_map1
   double precision               :: sign
   PROVIDE mo_two_e_integrals_in_map
-  call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx,sign)
+  call ao_two_e_integral_complex_map_idx_sign(i,j,k,l,use_map1,idx,sign)
   if (use_map1) then
     call map_get(map,idx,tmp_re)
     call map_get(map,idx+1,tmp_im)
@@ -88,7 +88,7 @@ complex*16 function get_two_e_integral_periodic_simple(i,j,k,l,map,map2) result(
   result = tmp
 end
 
-complex*16 function get_two_e_integral_periodic(i,j,k,l,map,map2)
+complex*16 function get_two_e_integral_complex(i,j,k,l,map,map2)
   use map_module
   implicit none
   BEGIN_DOC
@@ -101,39 +101,39 @@ complex*16 function get_two_e_integral_periodic(i,j,k,l,map,map2)
   integer*8                      :: ii_8
   type(map_type), intent(inout)  :: map,map2
   complex(integral_kind)         :: tmp
-  complex(integral_kind)         :: get_two_e_integral_periodic_simple
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_periodic
+  complex(integral_kind)         :: get_two_e_integral_complex_simple
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_complex
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
   ii = ior(ii, i-mo_integrals_cache_min)
   if (iand(ii, -128) /= 0) then
-    tmp = get_two_e_integral_periodic_simple(i,j,k,l,map,map2)
+    tmp = get_two_e_integral_complex_simple(i,j,k,l,map,map2)
   else
     ii_8 = int(l,8)-mo_integrals_cache_min_8
     ii_8 = ior( shiftl(ii_8,7), int(k,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(j,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(i,8)-mo_integrals_cache_min_8)
-    tmp = mo_integrals_cache_periodic(ii_8)
+    tmp = mo_integrals_cache_complex(ii_8)
   endif
-  get_two_e_integral_periodic = tmp
+  get_two_e_integral_complex = tmp
 end
 
-complex*16 function mo_two_e_integral_periodic(i,j,k,l)
+complex*16 function mo_two_e_integral_complex(i,j,k,l)
   implicit none
   BEGIN_DOC
   ! Returns one integral <ij|kl> in the MO basis
   END_DOC
   integer, intent(in)            :: i,j,k,l
-  complex*16                     :: get_two_e_integral_periodic
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_periodic
+  complex*16                     :: get_two_e_integral_complex
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_complex
   PROVIDE mo_two_e_integrals_in_map
   !DIR$ FORCEINLINE
-  mo_two_e_integral_periodic = get_two_e_integral_periodic(i,j,k,l,mo_integrals_map,mo_integrals_map_2)
+  mo_two_e_integral_complex = get_two_e_integral_complex(i,j,k,l,mo_integrals_map,mo_integrals_map_2)
   return
 end
 
-subroutine get_mo_two_e_integrals_periodic(j,k,l,sze,out_val,map,map2)
+subroutine get_mo_two_e_integrals_complex(j,k,l,sze,out_val,map,map2)
   use map_module
   implicit none
   BEGIN_DOC
@@ -144,18 +144,18 @@ subroutine get_mo_two_e_integrals_periodic(j,k,l,sze,out_val,map,map2)
   complex*16, intent(out)        :: out_val(sze)
   type(map_type), intent(inout)  :: map,map2
   integer                        :: i
-  complex*16, external           :: get_two_e_integral_periodic_simple
+  complex*16, external           :: get_two_e_integral_complex_simple
 
   integer                        :: ii, ii0
   integer*8                      :: ii_8, ii0_8
   complex(integral_kind)         :: tmp
   integer(key_kind)              :: i1, idx
   integer(key_kind)              :: p,q,r,s,i2
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_periodic
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_complex
 
 !DEBUG
 !  do i=1,sze
-!    out_val(i) = get_two_e_integral_periodic(i,j,k,l,map,map2)
+!    out_val(i) = get_two_e_integral_complex(i,j,k,l,map,map2)
 !  enddo
 !  return
 !DEBUG
@@ -172,14 +172,14 @@ subroutine get_mo_two_e_integrals_periodic(j,k,l,sze,out_val,map,map2)
     ii = ior(ii0, i-mo_integrals_cache_min)
     if (iand(ii, -128) == 0) then
       ii_8 = ior( shiftl(ii0_8,7), int(i,8)-mo_integrals_cache_min_8)
-      out_val(i) = mo_integrals_cache_periodic(ii_8)
+      out_val(i) = mo_integrals_cache_complex(ii_8)
     else
-      out_val(i) = get_two_e_integral_periodic_simple(i,j,k,l,map,map2)
+      out_val(i) = get_two_e_integral_complex_simple(i,j,k,l,map,map2)
     endif
   enddo
 end
 
-!subroutine get_mo_two_e_integrals_ij_periodic(k,l,sze,out_array,map)
+!subroutine get_mo_two_e_integrals_ij_complex(k,l,sze,out_array,map)
 !  use map_module
 !  implicit none
 !  BEGIN_DOC
@@ -233,7 +233,7 @@ end
 !  deallocate(pairs,hash,iorder,tmp_val)
 !end
 
-!subroutine get_mo_two_e_integrals_i1j1_periodic(k,l,sze,out_array,map)
+!subroutine get_mo_two_e_integrals_i1j1_complex(k,l,sze,out_array,map)
 !  use map_module
 !  implicit none
 !  BEGIN_DOC
@@ -287,7 +287,7 @@ end
 !  deallocate(pairs,hash,iorder,tmp_val)
 !end
 
-subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map,map2)
+subroutine get_mo_two_e_integrals_coulomb_ii_complex(k,l,sze,out_val,map,map2)
   use map_module
   implicit none
   BEGIN_DOC
@@ -311,7 +311,7 @@ subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map,map2)
   PROVIDE mo_two_e_integrals_in_map
 
   if (k.eq.l) then ! real, call other function
-    call get_mo_two_e_integrals_coulomb_ijij_periodic(k,sze,out_re,map2)
+    call get_mo_two_e_integrals_coulomb_ijij_complex(k,sze,out_re,map2)
     do i=1,sze
       out_val(i) = dcmplx(out_re(i),0.d0)
     enddo
@@ -347,7 +347,7 @@ subroutine get_mo_two_e_integrals_coulomb_ii_periodic(k,l,sze,out_val,map,map2)
   endif
 end
 
-subroutine get_mo_two_e_integrals_coulomb_ijij_periodic(j,sze,out_val,map2)
+subroutine get_mo_two_e_integrals_coulomb_ijij_complex(j,sze,out_val,map2)
   use map_module
   implicit none
   BEGIN_DOC
@@ -382,7 +382,7 @@ subroutine get_mo_two_e_integrals_coulomb_ijij_periodic(j,sze,out_val,map2)
   endif
 end
 
-subroutine get_mo_two_e_integrals_exch_ii_periodic(k,l,sze,out_val,map,map2)
+subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
   use map_module
   implicit none
   BEGIN_DOC
@@ -410,7 +410,7 @@ subroutine get_mo_two_e_integrals_exch_ii_periodic(k,l,sze,out_val,map,map2)
 
   
   if (k.eq.l) then ! real, call other function
-    call get_mo_two_e_integrals_exch_ijji_periodic(k,sze,out_re,map,map2)
+    call get_mo_two_e_integrals_exch_ijji_complex(k,sze,out_re,map,map2)
     do i=1,sze
       out_val(i) = dcmplx(out_re(i),0.d0)
     enddo
@@ -457,7 +457,7 @@ subroutine get_mo_two_e_integrals_exch_ii_periodic(k,l,sze,out_val,map,map2)
   endif
 end
 
-subroutine get_mo_two_e_integrals_exch_ijji_periodic(j,sze,out_val,map,map2)
+subroutine get_mo_two_e_integrals_exch_ijji_complex(j,sze,out_val,map,map2)
   use map_module
   implicit none
   BEGIN_DOC

@@ -79,7 +79,7 @@ subroutine four_idx_novvvv_complex
   integer                        :: i,j,k,l,n_integrals1,n_integrals2
   logical                        :: use_map1
   complex*16, allocatable        :: f(:,:,:), f2(:,:,:), d(:,:), T(:,:,:,:), T2(:,:,:,:)
-  complex*16, external           :: get_ao_two_e_integral_periodic
+  complex*16, external           :: get_ao_two_e_integral_complex
   integer(key_kind), allocatable :: idx1(:),idx2(:)
   complex(integral_kind), allocatable :: values1(:),values2(:)
   double precision               :: sign_tmp
@@ -107,8 +107,8 @@ subroutine four_idx_novvvv_complex
     do r=1,ao_num
       do q=1,ao_num
         do p=1,r
-          f (p,q,r) = get_ao_two_e_integral_periodic(p,q,r,s,ao_integrals_map,ao_integrals_map_2)
-          f (r,q,p) = get_ao_two_e_integral_periodic(r,q,p,s,ao_integrals_map,ao_integrals_map_2)
+          f (p,q,r) = get_ao_two_e_integral_complex(p,q,r,s,ao_integrals_map,ao_integrals_map_2)
+          f (r,q,p) = get_ao_two_e_integral_complex(r,q,p,s,ao_integrals_map,ao_integrals_map_2)
         enddo
       enddo
     enddo
@@ -146,7 +146,7 @@ subroutine four_idx_novvvv_complex
       n_integrals2 = 0
       do l=1,mo_num
         do k=1,mo_num
-          call ao_two_e_integral_periodic_map_idx_sign(list_core_inact_act(i),list_core_inact_act(j),k,l,use_map1,idx_tmp,sign_tmp)
+          call ao_two_e_integral_complex_map_idx_sign(list_core_inact_act(i),list_core_inact_act(j),k,l,use_map1,idx_tmp,sign_tmp)
           if (use_map1) then
             n_integrals1+=1
             values1(n_integrals1) = dble(d(k,l))
@@ -176,7 +176,7 @@ subroutine four_idx_novvvv_complex
       n_integrals2 = 0
       do l=1,mo_num
         do k=1,mo_num
-          call ao_two_e_integral_periodic_map_idx_sign(list_core_inact_act(i),k,list_core_inact_act(j),l,use_map1,idx_tmp,sign_tmp)
+          call ao_two_e_integral_complex_map_idx_sign(list_core_inact_act(i),k,list_core_inact_act(j),l,use_map1,idx_tmp,sign_tmp)
           if (use_map1) then
             n_integrals1+=1
             values1(n_integrals1) = dble(d(k,l))

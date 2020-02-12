@@ -1,4 +1,4 @@
-program import_ao_integrals_periodic
+program import_ao_integrals_complex
   call run
 end
 
@@ -117,7 +117,7 @@ subroutine run
   buffer_values_2 = 0.d0
   do 
     read (iunit,*,end=13) i,j,k,l, tmp_re, tmp_im
-    call ao_two_e_integral_periodic_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
+    call ao_two_e_integral_complex_map_idx_sign(i,j,k,l,use_map1,idx_tmp,sign)
     print'(4(I4),(L3),(I6),(F7.1))',i,j,k,l,use_map1,idx_tmp,sign
     if (use_map1) then
       n_integrals_1 += 1
@@ -166,8 +166,8 @@ subroutine run
   call map_sort(ao_integrals_map_2)
   call map_unique(ao_integrals_map_2)
 
-  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_1',ao_integrals_map)
-  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_periodic_2',ao_integrals_map_2)
+  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_complex_1',ao_integrals_map)
+  call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_complex_2',ao_integrals_map_2)
   call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
   
 end

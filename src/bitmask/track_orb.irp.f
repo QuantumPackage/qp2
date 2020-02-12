@@ -22,7 +22,7 @@ subroutine initialize_mo_coef_begin_iteration
  !
  ! Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
  END_DOC
- if (is_periodic) then
+ if (is_complex) then
    mo_coef_begin_iteration_complex = mo_coef_complex
  else
    mo_coef_begin_iteration = mo_coef
@@ -40,7 +40,7 @@ subroutine reorder_core_orb
   integer, allocatable :: index_core_orb(:),iorder(:)
   double precision, allocatable :: accu(:)
   integer :: i1,i2
-  if (is_periodic) then
+  if (is_complex) then
     complex*16, allocatable :: accu_c(:)
     allocate(accu(mo_num),accu_c(mo_num),index_core_orb(n_core_orb),iorder(mo_num))
     do i = 1, n_core_orb

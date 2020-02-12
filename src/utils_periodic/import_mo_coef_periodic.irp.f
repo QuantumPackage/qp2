@@ -1,4 +1,4 @@
-program import_mo_coef_periodic
+program import_mo_coef_complex
 
   PROVIDE ezfio_filename
   call run

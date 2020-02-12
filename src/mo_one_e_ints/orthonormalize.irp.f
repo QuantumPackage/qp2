@@ -1,7 +1,7 @@
 subroutine orthonormalize_mos
   implicit none
   integer :: m,p,s
-  if (is_periodic) then
+  if (is_complex) then
     m = size(mo_coef_complex,1)
     p = size(mo_overlap_complex,1)
     call ortho_lowdin_complex(mo_overlap_complex,p,mo_num,mo_coef_complex,m,ao_num)

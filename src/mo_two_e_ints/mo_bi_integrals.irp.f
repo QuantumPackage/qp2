@@ -33,12 +33,12 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
 
   PROVIDE mo_class
 
-  if (is_periodic) then
+  if (is_complex) then
     mo_two_e_integrals_in_map = .True.
     if (read_mo_two_e_integrals) then
       print*,'Reading the MO integrals'
-      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_1',mo_integrals_map)
-      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_2',mo_integrals_map_2)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_complex_1',mo_integrals_map)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_complex_2',mo_integrals_map_2)
       print*, 'MO integrals provided (periodic)'
       return
     else
@@ -77,8 +77,8 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   
     if (write_mo_two_e_integrals.and.mpi_master) then
       call ezfio_set_work_empty(.False.)
-      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_1',mo_integrals_map)
-      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_periodic_2',mo_integrals_map_2)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_complex_1',mo_integrals_map)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_complex_2',mo_integrals_map_2)
       call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
     endif
   else
@@ -986,7 +986,7 @@ end
   double precision               :: c
   integer                        :: n, pp
   integer, allocatable           :: int_idx(:)
-  if (is_periodic) then
+  if (is_complex) then
     complex(integral_kind)            :: integral2
     complex(integral_kind), allocatable :: int_value2(:)
     complex*16 :: cz
@@ -1022,7 +1022,7 @@ end
 
 
           do r=1,ao_num
-            call get_ao_two_e_integrals_non_zero_periodic(q,r,s,ao_num,int_value2,int_idx,n)
+            call get_ao_two_e_integrals_non_zero_complex(q,r,s,ao_num,int_value2,int_idx,n)
             do pp=1,n
               p = int_idx(pp)
               integral2 = int_value2(pp)
@@ -1032,7 +1032,7 @@ end
                 enddo
               endif
             enddo
-            call get_ao_two_e_integrals_non_zero_periodic(q,s,r,ao_num,int_value2,int_idx,n)
+            call get_ao_two_e_integrals_non_zero_complex(q,s,r,ao_num,int_value2,int_idx,n)
             do pp=1,n
               p = int_idx(pp)
               integral2 = int_value2(pp)
@@ -1196,7 +1196,7 @@ END_PROVIDER
   integer                        :: n, pp
   integer, allocatable           :: int_idx(:)
 
-  if (is_periodic) then
+  if (is_complex) then
     complex*16                     :: cz
     complex(integral_kind)            :: integral2
     complex(integral_kind), allocatable :: int_value2(:)
@@ -1236,7 +1236,7 @@ END_PROVIDER
 
 
           do r=1,ao_num
-            call get_ao_two_e_integrals_non_zero_periodic(q,r,s,ao_num,int_value2,int_idx,n)
+            call get_ao_two_e_integrals_non_zero_complex(q,r,s,ao_num,int_value2,int_idx,n)
             do pp=1,n
               p = int_idx(pp)
               integral2 = int_value2(pp)
@@ -1247,7 +1247,7 @@ END_PROVIDER
                 enddo
               endif
             enddo
-            call get_ao_two_e_integrals_non_zero_periodic(q,s,r,ao_num,int_value2,int_idx,n)
+            call get_ao_two_e_integrals_non_zero_complex(q,s,r,ao_num,int_value2,int_idx,n)
             do pp=1,n
               p = int_idx(pp)
               integral2 = int_value2(pp)
@@ -1428,13 +1428,13 @@ END_PROVIDER
   PROVIDE mo_two_e_integrals_in_map
   mo_two_e_integrals_jj = 0.d0
   mo_two_e_integrals_jj_exchange = 0.d0
-  if (is_periodic) then
-    complex*16 :: get_two_e_integral_periodic
+  if (is_complex) then
+    complex*16 :: get_two_e_integral_complex
     do j=1,mo_num
       do i=1,mo_num
-        mo_two_e_integrals_jj(i,j) = dble(get_two_e_integral_periodic(i,j,i,j,&
+        mo_two_e_integrals_jj(i,j) = dble(get_two_e_integral_complex(i,j,i,j,&
                                        mo_integrals_map,mo_integrals_map_2))
-        mo_two_e_integrals_jj_exchange(i,j) = dble(get_two_e_integral_periodic(i,j,j,i,&
+        mo_two_e_integrals_jj_exchange(i,j) = dble(get_two_e_integral_complex(i,j,j,i,&
                                                 mo_integrals_map,mo_integrals_map_2))
         mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
       enddo
@@ -1458,7 +1458,7 @@ subroutine clear_mo_map
   ! Frees the memory of the MO map
   END_DOC
   call map_deinit(mo_integrals_map)
-  if (is_periodic) then
+  if (is_complex) then
     call map_deinit(mo_integrals_map_2)
   endif
   FREE mo_integrals_map mo_two_e_integrals_jj mo_two_e_integrals_jj_anti

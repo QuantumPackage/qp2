@@ -252,7 +252,7 @@ subroutine mix_mo_jk(j,k)
   dsqrt_2 = 1.d0/dsqrt(2.d0)
   i_plus = min(j,k)
   i_minus = max(j,k)
-  if (is_periodic) then
+  if (is_complex) then
     complex*16               :: array_tmp_c(ao_num,2)
     array_tmp_c = (0.d0,0.d0)
     do i = 1, ao_num
