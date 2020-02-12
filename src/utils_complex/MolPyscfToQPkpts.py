@@ -588,13 +588,16 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     ne_ao = ('V',v_kpts_ao,ne_threshold)
     ovlp_ao = ('S',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
     kin_ao = ('T',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
-
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic',     data=kin_ao[1].real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao[1].imag)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap',     data=ovlp_ao[1].real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao[1].imag)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e',         data=v_kpts_ao.real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=v_kpts_ao.imag)
+    
+    kin_ao_blocked=scipy.linalg.block_diag(*kin_ao[1])
+    ovlp_ao_blocked=scipy.linalg.block_diag(*ovlp_ao[1])
+    ne_ao_blocked=scipy.linalg.block_diag(*v_kpts_ao)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_real',data=kin_ao_blocked.real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao_blocked.imag)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_real',data=ovlp_ao_blocked.real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao_blocked.imag)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_real',    data=ne_ao_blocked.real)
+    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=ne_ao_blocked.imag)
     
 
 
@@ -680,8 +683,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                                 outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
                                 df_ao_tmp[i,j,iaux,k]=v
         
-        qph5.create_dataset('ao_two_e_ints/df_ao_array_real',data=df_ao_tmp.real)
-        qph5.create_dataset('ao_two_e_ints/df_ao_array_imag',data=df_ao_tmp.imag)
+        qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=df_ao_tmp.real)
+        qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=df_ao_tmp.imag)
 
     if print_mo_ints_df:
         kpair_list=[]
@@ -701,8 +704,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                             if (abs(v) > bielec_int_threshold):
                                 outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
                                 df_mo_tmp[i,j,iaux,k]=v
-        qph5.create_dataset('mo_two_e_ints/df_mo_array_real',data=df_mo_tmp.real)
-        qph5.create_dataset('mo_two_e_ints/df_mo_array_imag',data=df_mo_tmp.imag)
+        qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=df_mo_tmp.real)
+        qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=df_mo_tmp.imag)
 
 
 

@@ -17,6 +17,8 @@ qph5=h5py.File(h5filename,'r')
 
 kpt_num = qph5['nuclei'].attrs['kpt_num']
 ezfio.set_nuclei_kpt_num(kpt_num)
+kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
+ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
 
 # should this be in ao_basis? ao_two_e_ints?
 df_num = qph5['ao_two_e_ints'].attrs['df_num']
@@ -110,4 +112,30 @@ ezfio.set_mo_basis_mo_coef_imag(qph5['mo_basis/mo_coef_imag'][()].tolist())
 #maybe fix qp so we don't need this?
 ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
 
-ezfio.set_nuclei_is_periodic(True)
+ezfio.set_nuclei_is_complex(True)
+
+
+kin_ao_re=qph5['ao_one_e_ints/ao_integrals_kinetic_real'][()].T.tolist()
+kin_ao_im=qph5['ao_one_e_ints/ao_integrals_kinetic_imag'][()].T.tolist()
+ovlp_ao_re=qph5['ao_one_e_ints/ao_integrals_overlap_real'][()].T.tolist()
+ovlp_ao_im=qph5['ao_one_e_ints/ao_integrals_overlap_imag'][()].T.tolist()
+ne_ao_re=qph5['ao_one_e_ints/ao_integrals_n_e_real'][()].T.tolist()
+ne_ao_im=qph5['ao_one_e_ints/ao_integrals_n_e_imag'][()].T.tolist()
+
+ezfio.set_ao_one_e_ints_ao_integrals_kinetic(kin_ao_re)
+ezfio.set_ao_one_e_ints_ao_integrals_kinetic_imag(kin_ao_im)
+ezfio.set_ao_one_e_ints_ao_integrals_overlap(ovlp_ao_re)
+ezfio.set_ao_one_e_ints_ao_integrals_overlap_imag(ovlp_ao_im)
+ezfio.set_ao_one_e_ints_ao_integrals_n_e(ne_ao_re)
+ezfio.set_ao_one_e_ints_ao_integrals_n_e_imag(ne_ao_im)
+
+dfao_re=qph5['ao_two_e_ints/df_ao_integrals_real'][()].transpose((3,2,1,0)).tolist()
+dfao_im=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0)).tolist()
+ezfio.set_ao_two_e_ints_df_ao_integrals_real(dfao_re)
+ezfio.set_ao_two_e_ints_df_ao_integrals_imag(dfao_im)
+
+#TODO: add check and only do this if ints exist
+#dfmo_re=qph5['mo_two_e_ints/df_mo_integrals_real'][()].transpose((3,2,1,0)).tolist()
+#dfmo_im=qph5['mo_two_e_ints/df_mo_integrals_imag'][()].transpose((3,2,1,0)).tolist()
+#ezfio.set_mo_two_e_ints_df_mo_integrals_real(dfmo_re)
+#ezfio.set_mo_two_e_ints_df_mo_integrals_imag(dfmo_im)
