@@ -383,8 +383,8 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file resultsFile.tar.gz 
-              mv resultsFile-master/resultsFile "\${QP_ROOT}/external/Python/"
-              rm --recursive --force resultsFile-master resultsFile.tar.gz
+              mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
+              rm --recursive --force resultsFile-* resultsFile.tar.gz
 EOF
 
     elif [[ ${PACKAGE} = bats ]] ; then
