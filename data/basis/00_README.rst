@@ -5,5 +5,4 @@ Basis sets can be easily downloaded from the Basis Set Exchange Website
 https://www.basissetexchange.org , or using the command-line tool they
 provide.
 
-
-
+In addition, you can use the qp_basis tool to install new basis sets.
