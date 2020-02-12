@@ -83,27 +83,27 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
-  BEGIN_DOC
-  !  Nucleus-electron interaction, in the |AO| basis set.
-  !
-  !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
-  END_DOC
-  implicit none
-  double precision               :: alpha, beta, gama, delta
-  integer                        :: num_A,num_B
-  double precision               :: A_center(3),B_center(3),C_center(3)
-  integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,n_pt_in,m
-  double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
-
-  if (read_ao_integrals_n_e) then
-    call ezfio_get_ao_one_e_ints_ao_integrals_n_e_imag(ao_integrals_n_e_imag)
-    print *,  'AO N-e integrals read from disk'
-  else
-   print *,  irp_here, ': Not yet implemented'
-  endif
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
+!  BEGIN_DOC
+!  !  Nucleus-electron interaction, in the |AO| basis set.
+!  !
+!  !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+!  END_DOC
+!  implicit none
+!  double precision               :: alpha, beta, gama, delta
+!  integer                        :: num_A,num_B
+!  double precision               :: A_center(3),B_center(3),C_center(3)
+!  integer                        :: power_A(3),power_B(3)
+!  integer                        :: i,j,k,l,n_pt_in,m
+!  double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
+!
+!  if (read_ao_integrals_n_e) then
+!    call ezfio_get_ao_one_e_ints_ao_integrals_n_e_imag(ao_integrals_n_e_imag)
+!    print *,  'AO N-e integrals read from disk'
+!  else
+!   print *,  irp_here, ': Not yet implemented'
+!  endif
+!END_PROVIDER
 
 BEGIN_PROVIDER [complex*16, ao_integrals_n_e_complex, (ao_num,ao_num)]
   implicit none
@@ -112,13 +112,12 @@ BEGIN_PROVIDER [complex*16, ao_integrals_n_e_complex, (ao_num,ao_num)]
   !
   !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
   END_DOC
-  integer                        :: i,j
-  do i=1,ao_num
-    do j=1,ao_num
-      ao_integrals_n_e_complex(j,i) = dcmplx(ao_integrals_n_e(j,i), &
-                                             ao_integrals_n_e_imag(j,i))
-    enddo
-  enddo
+  if (read_ao_integrals_n_e) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_n_e_complex(ao_integrals_n_e_complex)
+    print *,  'AO N-e integrals read from disk'
+  else
+   print *,  irp_here, ': Not yet implemented'
+  endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nucl_num)]

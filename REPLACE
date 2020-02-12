@@ -869,3 +869,6 @@ qp_name mo_two_e_integral_periodic -r mo_two_e_integral_complex
 qp_name get_mo_two_e_integrals_ij_periodic -r get_mo_two_e_integrals_ij_complex
 qp_name get_mo_two_e_integrals_coulomb_ii_periodic -r get_mo_two_e_integrals_coulomb_ii_complex
 qp_name get_mo_two_e_integrals_coulomb_ijij_periodic -r get_mo_two_e_integrals_coulomb_ijij_complex
+qp_name ao_kpt_num -r ao_num_per_kpt
+qp_name mo_kpt_num -r mo_num_per_kpt
+qp_name num_kpts -r kpt_num

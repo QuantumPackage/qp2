@@ -1,6 +1,6 @@
- BEGIN_PROVIDER [double precision, df_mo_integrals_real, (mo_kpt_num,mo_kpt_num,df_num,kpt_pair_num)]
-&BEGIN_PROVIDER [double precision, df_mo_integrals_imag, (mo_kpt_num,mo_kpt_num,df_num,kpt_pair_num)]
-&BEGIN_PROVIDER [complex*16,    df_mo_integrals_complex, (mo_kpt_num,mo_kpt_num,df_num,kpt_pair_num)]
+ BEGIN_PROVIDER [double precision, df_mo_integrals_real, (mo_num_per_kpt,mo_num_per_kpt,df_num,kpt_pair_num)]
+&BEGIN_PROVIDER [double precision, df_mo_integrals_imag, (mo_num_per_kpt,mo_num_per_kpt,df_num,kpt_pair_num)]
+&BEGIN_PROVIDER [complex*16,    df_mo_integrals_complex, (mo_num_per_kpt,mo_num_per_kpt,df_num,kpt_pair_num)]
   implicit none
   BEGIN_DOC
   !  df AO integrals
@@ -15,8 +15,8 @@
     print *,  'df AO integrals read from disk'
     do l=1,kpt_pair_num
       do k=1,df_num
-        do j=1,mo_kpt_num
-          do i=1,mo_kpt_num
+        do j=1,mo_num_per_kpt
+          do i=1,mo_num_per_kpt
             df_mo_integrals_complex(i,j,k,l) = dcmplx(df_mo_integrals_real(i,j,k,l), &
                                                       df_mo_integrals_imag(i,j,k,l))
           enddo
@@ -24,14 +24,14 @@
       enddo
     enddo
   else
-    call df_mo_from_df_ao(df_mo_integrals_complex,df_ao_integrals_complex,mo_kpt_num,ao_kpt_num,df_num,kpt_pair_num)
+    call df_mo_from_df_ao(df_mo_integrals_complex,df_ao_integrals_complex,mo_num_per_kpt,ao_num_per_kpt,df_num,kpt_pair_num)
   endif
 
   if (write_df_mo_integrals) then
     do l=1,kpt_pair_num
       do k=1,df_num
-        do j=1,mo_kpt_num
-          do i=1,mo_kpt_num
+        do j=1,mo_num_per_kpt
+          do i=1,mo_num_per_kpt
             df_mo_integrals_real(i,j,k,l) = dble(df_mo_integrals_complex(i,j,k,l))
             df_mo_integrals_imag(i,j,k,l) = dimag(df_mo_integrals_complex(i,j,k,l))
           enddo

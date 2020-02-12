@@ -70,34 +70,38 @@
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_overlap_imag, (ao_num, ao_num) ]
- implicit none
- BEGIN_DOC
- ! Imaginary part of the overlap
- END_DOC
-  if (read_ao_integrals_overlap) then
-     call ezfio_get_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
-     print *,  'AO overlap integrals read from disk'
-  else
-    ao_overlap_imag = 0.d0
-  endif
-  if (write_ao_integrals_overlap) then
-     call ezfio_set_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
-     print *,  'AO overlap integrals written to disk'
-  endif
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, ao_overlap_imag, (ao_num, ao_num) ]
+! implicit none
+! BEGIN_DOC
+! ! Imaginary part of the overlap
+! END_DOC
+!  if (read_ao_integrals_overlap) then
+!     call ezfio_get_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
+!     print *,  'AO overlap integrals read from disk'
+!  else
+!    ao_overlap_imag = 0.d0
+!  endif
+!  if (write_ao_integrals_overlap) then
+!     call ezfio_set_ao_one_e_ints_ao_integrals_overlap_imag(ao_overlap_imag(1:ao_num, 1:ao_num))
+!     print *,  'AO overlap integrals written to disk'
+!  endif
+!END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, ao_overlap_complex, (ao_num, ao_num) ]
   implicit none
   BEGIN_DOC
   ! Overlap for complex AOs
   END_DOC
-  integer                        :: i,j
-  do j=1,ao_num
-    do i=1,ao_num
-      ao_overlap_complex(i,j) = dcmplx( ao_overlap(i,j), ao_overlap_imag(i,j) )
-    enddo
-  enddo
+  if (read_ao_integrals_overlap) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_overlap_complex(ao_overlap_complex)
+    print *,  'AO overlap integrals read from disk'
+  else
+    print*,'complex AO overlap ints must be provided',irp_here
+  endif
+  if (write_ao_integrals_overlap) then
+     call ezfio_set_ao_one_e_ints_ao_integrals_overlap_complex(ao_overlap_complex)
+     print *,  'AO overlap integrals written to disk'
+  endif
 END_PROVIDER
 
 

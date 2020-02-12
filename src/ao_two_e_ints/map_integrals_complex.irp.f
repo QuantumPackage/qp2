@@ -1,6 +1,26 @@
 use map_module
 
 
+subroutine idx2_tri_int(i,j,ij)
+  implicit none
+  integer, intent(in)  :: i,j
+  integer, intent(out) :: ij
+  integer :: p,q
+  p = max(i,j)
+  q = min(i,j)
+  ij = q+ishft(p*p-p,-1)
+end
+
+subroutine idx2_tri_key(i,j,ij)
+  use map_module
+  implicit none
+  integer, intent(in)  :: i,j
+  integer(key_kind), intent(out) :: ij
+  integer(key_kind) :: p,q
+  p = max(i,j)
+  q = min(i,j)
+  ij = q+ishft(p*p-p,-1)
+end
 subroutine two_e_integrals_index_complex(i,j,k,l,i1,p,q)
   use map_module
   implicit none

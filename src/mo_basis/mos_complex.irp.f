@@ -1,10 +1,73 @@
-BEGIN_PROVIDER [ integer, mo_kpt_num ]
+BEGIN_PROVIDER [ integer, mo_num_per_kpt ]
  implicit none
  BEGIN_DOC
  ! number of mos per kpt.
  END_DOC
- mo_kpt_num = mo_num/kpt_num
+ mo_num_per_kpt = mo_num/kpt_num
 END_PROVIDER
+
+!BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
+!  implicit none
+!  BEGIN_DOC
+!  ! Molecular orbital coefficients on |AO| basis set
+!  !
+!  ! mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
+!  !
+!  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
+!  END_DOC
+!  integer                        :: i, j
+!  double precision, allocatable  :: buffer_re(:,:),buffer_im(:,:)
+!  logical                        :: exists_re,exists_im,exists
+!  PROVIDE ezfio_filename
+!
+!
+!  if (mpi_master) then
+!    ! Coefs
+!    call ezfio_has_mo_basis_mo_coef_real(exists_re)
+!    call ezfio_has_mo_basis_mo_coef_imag(exists_im)
+!    exists = (exists_re.and.exists_im)
+!  endif
+!  IRP_IF MPI_DEBUG
+!    print *,  irp_here, mpi_rank
+!    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+!  IRP_ENDIF
+!  IRP_IF MPI
+!    include 'mpif.h'
+!    integer :: ierr
+!    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+!    if (ierr /= MPI_SUCCESS) then
+!      stop 'Unable to read mo_coef_real/imag with MPI'
+!    endif
+!  IRP_ENDIF
+!  
+!  if (exists) then
+!    if (mpi_master) then
+!      allocate(buffer_re(ao_num,mo_num),buffer_im(ao_num,mo_num))
+!      call ezfio_get_mo_basis_mo_coef_real(buffer_re)
+!      call ezfio_get_mo_basis_mo_coef_imag(buffer_im)
+!      write(*,*) 'Read  mo_coef_real/imag'
+!      do i=1,mo_num
+!        do j=1,ao_num
+!          mo_coef_complex(j,i) = dcmplx(buffer_re(j,i),buffer_im(j,i))
+!        enddo
+!      enddo
+!      deallocate(buffer_re,buffer_im)
+!    endif
+!    IRP_IF MPI
+!      call MPI_BCAST( mo_coef_complex, mo_num*ao_num, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
+!      if (ierr /= MPI_SUCCESS) then
+!        stop 'Unable to read mo_coef_real with MPI'
+!      endif
+!    IRP_ENDIF
+!  else
+!    ! Orthonormalized AO basis
+!    do i=1,mo_num
+!      do j=1,ao_num
+!        mo_coef_complex(j,i) = ao_ortho_canonical_coef_complex(j,i)
+!      enddo
+!    enddo
+!  endif
+!END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
   implicit none
@@ -16,16 +79,13 @@ BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
   ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
   END_DOC
   integer                        :: i, j
-  double precision, allocatable  :: buffer_re(:,:),buffer_im(:,:)
-  logical                        :: exists_re,exists_im,exists
+  logical                        :: exists
   PROVIDE ezfio_filename
 
 
   if (mpi_master) then
     ! Coefs
-    call ezfio_has_mo_basis_mo_coef_real(exists_re)
-    call ezfio_has_mo_basis_mo_coef_imag(exists_im)
-    exists = (exists_re.and.exists_im)
+    call ezfio_has_mo_basis_mo_coef_complex(exists)
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
@@ -36,27 +96,19 @@ BEGIN_PROVIDER [ complex*16, mo_coef_complex, (ao_num,mo_num) ]
     integer :: ierr
     call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_coef_real/imag with MPI'
+      stop 'Unable to read mo_coef_complex with MPI'
     endif
   IRP_ENDIF
   
   if (exists) then
     if (mpi_master) then
-      allocate(buffer_re(ao_num,mo_num),buffer_im(ao_num,mo_num))
-      call ezfio_get_mo_basis_mo_coef_real(buffer_re)
-      call ezfio_get_mo_basis_mo_coef_imag(buffer_im)
-      write(*,*) 'Read  mo_coef_real/imag'
-      do i=1,mo_num
-        do j=1,ao_num
-          mo_coef_complex(j,i) = dcmplx(buffer_re(j,i),buffer_im(j,i))
-        enddo
-      enddo
-      deallocate(buffer_re,buffer_im)
+      call ezfio_get_mo_basis_mo_coef_complex(mo_coef_complex)
+      write(*,*) 'Read  mo_coef_complex'
     endif
     IRP_IF MPI
       call MPI_BCAST( mo_coef_complex, mo_num*ao_num, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
       if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_coef_real with MPI'
+        stop 'Unable to read mo_coef_complex with MPI'
       endif
     IRP_ENDIF
   else

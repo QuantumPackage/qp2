@@ -251,7 +251,7 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
   
     with open('num_ao','w') as f:
         f.write(str(nao*Nk))
-    with open('num_kpts','w') as f:
+    with open('kpt_num','w') as f:
         f.write(str(Nk))
     #                             _                             
     # |\ |      _ |  _   _. ._   |_)  _  ._      |  _ o  _  ._  

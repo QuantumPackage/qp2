@@ -15,9 +15,9 @@ subroutine huckel_guess_complex
   A = 0.d0
   do j=1,ao_num
     do i=1,ao_num
-      A(i,j) = c * ao_overlap_complex(i,j) * (ao_one_e_integrals_diag(i) + ao_one_e_integrals_diag(j))
+      A(i,j) = c * ao_overlap_complex(i,j) * (ao_one_e_integrals_diag_complex(i) + ao_one_e_integrals_diag_complex(j))
     enddo
-    A(j,j) = ao_one_e_integrals_diag(j) + dble(ao_two_e_integral_alpha_complex(j,j))
+    A(j,j) = ao_one_e_integrals_diag_complex(j) + dble(ao_two_e_integral_alpha_complex(j,j))
     if (dabs(dimag(ao_two_e_integral_alpha_complex(j,j))) .gt. 1.0d-10) then
       stop 'diagonal elements of ao_bi_elec_integral_alpha should be real'
     endif

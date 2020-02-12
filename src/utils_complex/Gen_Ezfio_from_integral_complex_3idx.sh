@@ -9,16 +9,16 @@ echo 'Create EZFIO'
 #read nel nmo natom <<< $(cat param) 
 #read e_nucl <<< $(cat e_nuc)
 #read nao <<< $(cat num_ao)
-#read nkpts <<< $(cat num_kpts)
+#read nkpts <<< $(cat kpt_num)
 #read ndf <<< $(cat num_df)
 ##./create_ezfio_complex_4idx.py $ezfio $nel $natom $nmo $e_nucl $nao $nkpts
 ./create_ezfio_complex_3idx.py $ezfio $h5file #$nel $natom $nmo $e_nucl $nao $nkpts $ndf
 #Handle the orbital consitensy check
 qp_edit -c $ezfio &> /dev/null
-cp $ezfio/{ao,mo}_basis/ao_md5 
+#cp $ezfio/{ao,mo}_basis/ao_md5 
 
 #Read the integral
-echo 'Read Integral'
+#echo 'Read Integral'
 
 
 ################################################
