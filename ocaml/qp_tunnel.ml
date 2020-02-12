@@ -47,11 +47,6 @@ let () =
       ADDRESS x
   in
 
-  let verbose =
-    Command_line.get_bool "verbose"
-  in
-
-
 
   let localhost = 
      Lazy.force TaskServer.ip_address
