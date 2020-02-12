@@ -5,7 +5,7 @@ source $QP_ROOT/quantum_package.rc
 
 
 function run() {
-  thresh=1.e-8
+  thresh=1.e-7
   test_exe scf || skip
   qp set_file $1
   qp edit --check
@@ -18,11 +18,11 @@ function run() {
 
 
 @test "B-B" { # 3s
-  run b2_stretched.ezfio -48.9950585752809
+  run b2_stretched.ezfio -48.9950585434279
 }
 
 @test "SiH2_3B1" { # 0.539000  1.51094s
-  run sih2_3b1.ezfio -289.9654718650881
+  run sih2_3b1.ezfio -289.9654718453571
 }
 
 @test "SO" { # 0.539000  5.70403s
@@ -30,7 +30,7 @@ function run() {
 }
 
 @test "HCO" { # 0.636700  1.55279s
-  run hco.ezfio -113.0862778269114
+  run hco.ezfio -113.1841002944744
 }
 
 @test "HBO" { # 0.805600 1.4543s
