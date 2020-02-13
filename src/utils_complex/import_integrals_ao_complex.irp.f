@@ -11,7 +11,7 @@ subroutine run
 
   integer ::i,j,k,l
   double precision :: integral
-  double precision, allocatable :: A(:,:), B(:,:)
+  complex*16, allocatable       :: C(:,:)
   double precision :: tmp_re, tmp_im
 
   integer             :: n_integrals_1, n_integrals_2 
@@ -24,89 +24,75 @@ subroutine run
 
 !  call ezfio_set_ao_basis_ao_num(ao_num)
 
-  allocate (A(ao_num,ao_num), B(ao_num,ao_num) )
+  allocate (C(ao_num,ao_num))
   
-  A(1,1) = huge(1.d0)
+  integral = huge(1.d0)
   iunit = getunitandopen('E.qp','r')
-  read (iunit,*,end=9) A(1,1)
+  read (iunit,*,end=9) integral
   9 continue
   close(iunit)
-  if (A(1,1) /= huge(1.d0)) then
-    call ezfio_set_nuclei_nuclear_repulsion(A(1,1))
+  if (integral /= huge(1.d0)) then
+    call ezfio_set_nuclei_nuclear_repulsion(integral)
     call ezfio_set_nuclei_io_nuclear_repulsion("Read")
   endif
 
-  A = 0.d0
-  B = 0.d0
+  C = (0.d0,0.d0)
   iunit = getunitandopen('T.qp','r')
   do 
     read (iunit,*,end=10) i,j, tmp_re, tmp_im
-    A(i,j) = tmp_re
-    B(i,j) = tmp_im
+    C(i,j) = dcmplx(tmp_re,tmp_im)
     if (i.ne.j) then
-      A(j,i) =  tmp_re
-      B(j,i) = -tmp_im
+      C(j,i) = dcmplx(tmp_re,-tmp_im)
     endif
   enddo
   10 continue
   close(iunit)
-  call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(A(1:ao_num, 1:ao_num))
-  call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_imag(B(1:ao_num, 1:ao_num))
+  call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_complex(C)
   call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic("Read")
 
-  A = 0.d0
-  B = 0.d0
+  C = (0.d0,0.d0)
   iunit = getunitandopen('S.qp','r')
   do 
     read (iunit,*,end=11) i,j, tmp_re, tmp_im
-    A(i,j) = tmp_re
-    B(i,j) = tmp_im
+    C(i,j) = dcmplx(tmp_re,tmp_im)
     if (i.ne.j) then
-      A(j,i) =  tmp_re
-      B(j,i) = -tmp_im
+      C(j,i) = dcmplx(tmp_re,-tmp_im)
     endif
   enddo
   11 continue
   close(iunit)
-  call ezfio_set_ao_one_e_ints_ao_integrals_overlap(A(1:ao_num, 1:ao_num))
-  call ezfio_set_ao_one_e_ints_ao_integrals_overlap_imag(B(1:ao_num, 1:ao_num))
+  call ezfio_set_ao_one_e_ints_ao_integrals_overlap_complex(C)
   call ezfio_set_ao_one_e_ints_io_ao_integrals_overlap("Read")
 
-  A = 0.d0
-  B = 0.d0
+  C = (0.d0,0.d0)
   iunit = getunitandopen('P.qp','r')
   do 
     read (iunit,*,end=14) i,j, tmp_re, tmp_im
-    A(i,j) = tmp_re
-    B(i,j) = tmp_im
+    C(i,j) = dcmplx(tmp_re,tmp_im)
     if (i.ne.j) then
-      A(j,i) =  tmp_re
-      B(j,i) = -tmp_im
+      C(j,i) = dcmplx(tmp_re,-tmp_im)
     endif
   enddo
   14 continue
   close(iunit)
-  call ezfio_set_ao_one_e_ints_ao_integrals_pseudo(A(1:ao_num,1:ao_num))
-  call ezfio_set_ao_one_e_ints_ao_integrals_pseudo_imag(B(1:ao_num,1:ao_num))
+  call ezfio_set_ao_one_e_ints_ao_integrals_pseudo_complex(C)
   call ezfio_set_ao_one_e_ints_io_ao_integrals_pseudo("Read")
 
-  A = 0.d0
-  B = 0.d0
+  C = (0.d0,0.d0)
   iunit = getunitandopen('V.qp','r')
   do 
     read (iunit,*,end=12) i,j, tmp_re, tmp_im
-    A(i,j) = tmp_re
-    B(i,j) = tmp_im
+    C(i,j) = dcmplx(tmp_re,tmp_im)
     if (i.ne.j) then
-      A(j,i) =  tmp_re
-      B(j,i) = -tmp_im
+      C(j,i) = dcmplx(tmp_re,-tmp_im)
     endif
   enddo
   12 continue
   close(iunit)
-  call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A(1:ao_num, 1:ao_num))
-  call ezfio_set_ao_one_e_ints_ao_integrals_n_e_imag(B(1:ao_num, 1:ao_num))
+  call ezfio_set_ao_one_e_ints_ao_integrals_n_e_complex(C)
   call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e("Read")
+
+  deallocate(C)
 
   allocate(buffer_i_1(ao_num**3), buffer_values_1(ao_num**3))
   allocate(buffer_i_2(ao_num**3), buffer_values_2(ao_num**3))

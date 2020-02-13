@@ -116,6 +116,7 @@ subroutine ao_map_fill_from_df
   do kl=1, kpt_num
     do kj=1, kl
       call idx2_tri_int(kj,kl,kjkl2)
+      print*,'kj,kl,kjkl2',kj,kl,kjkl2
       ints_jl = df_ao_integrals_complex(:,:,:,kjkl2)
 
   !$OMP PARALLEL PRIVATE(i,k,j,l,ki,kk,ii,ik,ij,il,kikk2,jl2,ik2, &
@@ -142,12 +143,15 @@ subroutine ao_map_fill_from_df
         ki=kconserv(kl,kk,kj)
         if ((kl == kj) .and. (ki > kk)) cycle
         call idx2_tri_int(ki,kk,kikk2)
+        print*,'ki,kk,kikk2',ki,kk,kikk2
         if (kikk2 > kjkl2) cycle
         if (ki >= kk) then
+        !if (ki < kk) then !this didn't fix the problem
           do i_ao=1,ao_num_per_kpt
             do j_ao=1,ao_num_per_kpt
               do i_df=1,df_num
                 ints_ik(i_ao,j_ao,i_df) = dconjg(df_ao_integrals_complex(j_ao,i_ao,i_df,kikk2))
+                !ints_ik(j_ao,i_ao,i_df) = dconjg(df_ao_integrals_complex(j_ao,i_ao,i_df,kikk2))
               enddo
             enddo
           enddo

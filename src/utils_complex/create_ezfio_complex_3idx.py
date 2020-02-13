@@ -78,12 +78,12 @@ ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
 
 # Ao num
 #ao_num = mo_num
-ezfio.set_ao_basis_ao_basis("Dummy one. We read MO")
+#ezfio.set_ao_basis_ao_basis("Dummy one. We read MO")
 ezfio.set_ao_basis_ao_num(ao_num)
-ezfio.set_ao_basis_ao_nucl([1]*ao_num) #Maybe put a realy incorrect stuff
+#ezfio.set_ao_basis_ao_nucl([1]*ao_num) #Maybe put a realy incorrect stuff
 
-#ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
-#ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
+ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
+ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
 
 
 #Just need one (can clean this up later)
@@ -111,7 +111,7 @@ mo_coef_cmplx0 = np.stack((mo_coef_re0,mo_coef_im0),axis=-1).tolist()
 ezfio.set_mo_basis_mo_coef_complex(mo_coef_cmplx0)
 
 #maybe fix qp so we don't need this?
-ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
+#ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
 
 ezfio.set_nuclei_is_complex(True)
 
@@ -131,26 +131,13 @@ ne_ao_im0=qph5['ao_one_e_ints/ao_integrals_n_e_imag'][()].T
 #test where to stack? (axis=0 or -1?)
 ne_ao_cmplx0=np.stack((ne_ao_re0,ne_ao_im0),axis=-1).tolist()
 
-kin_ao_re=kin_ao_re0.tolist()
-kin_ao_im=kin_ao_im0.tolist()
-ovlp_ao_re=ovlp_ao_re0.tolist()
-ovlp_ao_im=ovlp_ao_im0.tolist()
-ne_ao_re=ne_ao_re0.tolist()
-ne_ao_im=ne_ao_im0.tolist()
-
-#kin_ao_c = np.stack(kin_ao_re0,kin_ao_im0
-
-#ezfio.set_ao_one_e_ints_ao_integrals_kinetic(kin_ao_re)
-#ezfio.set_ao_one_e_ints_ao_integrals_kinetic_imag(kin_ao_im)
 ezfio.set_ao_one_e_ints_ao_integrals_kinetic_complex(kin_ao_cmplx0)
-
-#ezfio.set_ao_one_e_ints_ao_integrals_overlap(ovlp_ao_re)
-#ezfio.set_ao_one_e_ints_ao_integrals_overlap_imag(ovlp_ao_im)
 ezfio.set_ao_one_e_ints_ao_integrals_overlap_complex(ovlp_ao_cmplx0)
-
-#ezfio.set_ao_one_e_ints_ao_integrals_n_e(ne_ao_re)
-#ezfio.set_ao_one_e_ints_ao_integrals_n_e_imag(ne_ao_im)
 ezfio.set_ao_one_e_ints_ao_integrals_n_e_complex(ne_ao_cmplx0)
+
+ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
 
 dfao_re0=qph5['ao_two_e_ints/df_ao_integrals_real'][()].transpose((3,2,1,0))
 dfao_im0=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0))
@@ -158,6 +145,7 @@ dfao_im0=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0))
 #ezfio.set_ao_two_e_ints_df_ao_integrals_imag(dfao_im.tolist())
 dfao_cmplx0 = np.stack((dfao_re0,dfao_im0),axis=-1).tolist()
 ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
+ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
 
 
 #TODO: add check and only do this if ints exist
