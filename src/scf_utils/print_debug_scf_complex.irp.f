@@ -15,25 +15,35 @@ subroutine print_debug_scf_complex
   do i=1,ao_num
     write(*,'(200(E24.15))') scf_density_matrix_ao_alpha_complex(i,:)
   enddo
-  write(*,'(A)') 'scf_density_matrix_ao_beta_complex'
+  write(*,'(A)') 'ao_one_e_integrals_complex'
   write(*,'(A)') '---------------'
   do i=1,ao_num
-    write(*,'(200(E24.15))') scf_density_matrix_ao_beta_complex(i,:)
+    write(*,'(200(E24.15))') ao_one_e_integrals_complex(i,:)
   enddo
   write(*,'(A)') 'ao_two_e_integral_alpha_complex'
   write(*,'(A)') '---------------'
   do i=1,ao_num
     write(*,'(200(E24.15))') ao_two_e_integral_alpha_complex(i,:)
   enddo
-  write(*,'(A)') 'ao_two_e_integral_beta_complex'
-  write(*,'(A)') '---------------'
-  do i=1,ao_num
-    write(*,'(200(E24.15))') ao_two_e_integral_beta_complex(i,:)
-  enddo
   write(*,'(A)') 'fock_matrix_ao_alpha_complex'
   write(*,'(A)') '---------------'
   do i=1,ao_num
     write(*,'(200(E24.15))') fock_matrix_ao_alpha_complex(i,:)
+  enddo
+  write(*,'(A)') 'ao_overlap_complex'
+  write(*,'(A)') '---------------'
+  do i=1,ao_num
+    write(*,'(200(E24.15))') ao_overlap_complex(i,:)
+  enddo
+  write(*,'(A)') 'scf_density_matrix_ao_beta_complex'
+  write(*,'(A)') '---------------'
+  do i=1,ao_num
+    write(*,'(200(E24.15))') scf_density_matrix_ao_beta_complex(i,:)
+  enddo
+  write(*,'(A)') 'ao_two_e_integral_beta_complex'
+  write(*,'(A)') '---------------'
+  do i=1,ao_num
+    write(*,'(200(E24.15))') ao_two_e_integral_beta_complex(i,:)
   enddo
   write(*,'(A)') 'fock_matrix_ao_beta_complex'
   write(*,'(A)') '---------------'

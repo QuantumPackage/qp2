@@ -508,6 +508,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     natom = cell.natm
     nelec = cell.nelectron
+    neleca,nelecb = cell.nelec
     atom_xyz = mf.cell.atom_coords()
     if not(mf.cell.unit.startswith(('B','b','au','AU'))):
         atom_xyz /= nist.BOHR # always convert to au
@@ -537,8 +538,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     print("n df fitting functions", naux)
   
     #in old version: param << nelec*Nk, nmo*Nk, natom*Nk
-    qph5['electrons'].attrs['elec_alpha_num']=nelec*Nk 
-    qph5['electrons'].attrs['elec_beta_num']=nelec*Nk
+    qph5['electrons'].attrs['elec_alpha_num']=neleca*Nk 
+    qph5['electrons'].attrs['elec_beta_num']=nelecb*Nk
     qph5['mo_basis'].attrs['mo_num']=Nk*nmo
     qph5['ao_basis'].attrs['ao_num']=Nk*nao
     qph5['nuclei'].attrs['nucl_num']=Nk*natom
@@ -572,6 +573,18 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     qph5.create_dataset('mo_basis/mo_coef_imag',data=mo_coef_blocked.imag)
     qph5.create_dataset('mo_basis/mo_coef_kpts_real',data=mo_k.real)
     qph5.create_dataset('mo_basis/mo_coef_kpts_imag',data=mo_k.imag)
+    
+    with open('C.qp','w') as outfile:
+        c_kpts = np.reshape(mo_k,(Nk,nao,nmo))
+
+        for ik in range(Nk):
+            shift1=ik*nao+1
+            shift2=ik*nmo+1
+            for i in range(nao):
+                for j in range(nmo):
+                    cij = c_kpts[ik,i,j]
+                    if abs(cij) > mo_coef_threshold:
+                        outfile.write('%s %s %s %s\n' % (i+shift1, j+shift2, cij.real, cij.imag))
 
     # ___                                              
     #  |  ._ _|_  _   _  ._ _. |  _   |\/|  _  ._   _  

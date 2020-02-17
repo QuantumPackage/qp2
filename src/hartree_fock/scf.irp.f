@@ -98,6 +98,10 @@ subroutine run
     call roothaan_hall_scf
   endif
   call ezfio_set_hartree_fock_energy(SCF_energy)
+  print*,'hf 1e,2e,total energy'
+  print*,hf_one_electron_energy
+  print*,hf_two_electron_energy
+  print*,hf_energy
 
 end
 

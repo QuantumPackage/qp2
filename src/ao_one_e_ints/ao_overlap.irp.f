@@ -260,7 +260,7 @@ BEGIN_PROVIDER [ complex*16, S_half_inv_complex, (AO_num,AO_num) ]
   integer                         :: info, i, j, k
   double precision, parameter     :: threshold_overlap_AO_eigenvalues = 1.d-6
 
-  LDA = size(AO_overlap,1)
+  LDA = size(AO_overlap_complex,1)
   LDC = size(S_half_inv_complex,1)
 
   allocate(         &

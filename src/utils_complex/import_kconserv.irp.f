@@ -22,7 +22,7 @@ subroutine run
   allocate(A(kpt_num,kpt_num,kpt_num))
   
   A = 0
-  iunit = getunitandopen('kconserv','r')
+  iunit = getunitandopen('K.qp','r')
   do 
     read (iunit,*,end=10) i,j,k,l
     A(i,j,k) = l
