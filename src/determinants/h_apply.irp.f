@@ -124,39 +124,49 @@ subroutine copy_H_apply_buffer_to_wf
 
   PROVIDE H_apply_buffer_allocated
 
+
   ASSERT (N_int > 0)
   ASSERT (N_det > 0)
 
   allocate ( buffer_det(N_int,2,N_det), buffer_coef(N_det,N_states) )
 
+  ! Backup determinants
+  j=0
   do i=1,N_det
-    do k=1,N_int
-      ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
-      ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num)
-      buffer_det(k,1,i) = psi_det(k,1,i)
-      buffer_det(k,2,i) = psi_det(k,2,i)
-    enddo
+    if (pruned(i)) cycle  ! Pruned determinants
+    j+=1
+    ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
+    ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num)
+    buffer_det(:,:,j) = psi_det(:,:,i)
   enddo
+  N_det_old = j
+
+  ! Backup coefficients
   do k=1,N_states
+    j=0
     do i=1,N_det
-      buffer_coef(i,k) = psi_coef(i,k)
+      if (pruned(i)) cycle  ! Pruned determinants
+      j += 1
+      buffer_coef(j,k) = psi_coef(i,k)
     enddo
+    ASSERT ( j == N_det_old )
   enddo
 
-  N_det_old = N_det
+  ! Update N_det
+  N_det = N_det_old
   do j=0,nproc-1
     N_det = N_det + H_apply_buffer(j)%N_det
   enddo
 
+  ! Update array sizes
   if (psi_det_size < N_det) then
     psi_det_size = N_det
     TOUCH psi_det_size
   endif
+
+  ! Restore backup in resized array
   do i=1,N_det_old
-    do k=1,N_int
-      psi_det(k,1,i) = buffer_det(k,1,i)
-      psi_det(k,2,i) = buffer_det(k,2,i)
-    enddo
+    psi_det(:,:,i) = buffer_det(:,:,i)
     ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
     ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num )
   enddo
@@ -165,6 +175,9 @@ subroutine copy_H_apply_buffer_to_wf
       psi_coef(i,k) = buffer_coef(i,k)
     enddo
   enddo
+
+  ! Copy new buffers
+
   !$OMP PARALLEL DEFAULT(SHARED)                                     &
       !$OMP PRIVATE(j,k,i) FIRSTPRIVATE(N_det_old)                   &
       !$OMP SHARED(N_int,H_apply_buffer,psi_det,psi_coef,N_states,psi_det_size)

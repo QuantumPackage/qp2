@@ -839,21 +839,6 @@ if __name__ == "__main__":
     l_module = d_binaries.keys()
 
 
-    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-    # C h e c k _ c o h e r e n c y #
-    # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~ #
-
-    for module in dict_root_path.values():
-
-        if module not in d_binaries:
-            l_msg = ["{0} is a root module but does not contain a main file.",
-                     "- Create it in {0}",
-                     "- Or delete {0} `qp_module uninstall {0}`",
-                     "- Or install a module that needs {0} with a main "]
-
-            print "\n".join(l_msg).format(module.rel)
-            sys.exit(1)
-
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
     # G l o b a l _ b u i l d #
     # ~#~#~#~#~#~#~#~#~#~#~#~ #

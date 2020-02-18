@@ -644,7 +644,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
       { opt=Optional ; short='c'; long="charge";
         arg=With_arg "<int>";
-        doc="Total charge of the molecule. Default is 0."} ;
+        doc="Total charge of the molecule. Default is 0. For negative values, use m instead of -, for ex m1"} ;
 
       { opt=Optional ; short='d'; long="dummy";
         arg=With_arg "<float>";
@@ -686,7 +686,10 @@ If a file with the same name as the basis set exists, this file will be read.  O
   let charge =
     match Command_line.get "charge" with
     | None -> 0
-    | Some x -> int_of_string x
+    | Some x -> ( if x.[0] = 'm' then
+                    ~- (int_of_string (String.sub x 1 (String.length x - 1)))
+                  else                                                                                                                                                       
+                    int_of_string x )
   in
 
   let dummy =

@@ -143,7 +143,7 @@ IRPF90
 to Parameters (IRP) method. 
 
 * Download the latest version of IRPF90
-  here : `<https://github.com/scemama/irpf90/releases/latest>`_ and move
+  here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
   the downloaded archive in the :file:`${QP_ROOT}/external` directory
 
 * Extract the archive and go into the :file:`irpf90-*` directory to run

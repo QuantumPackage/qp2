@@ -6,6 +6,7 @@ program molden
   character*(128)                :: output
   integer                        :: i_unit_output,getUnitAndOpen
   integer                        :: i,j,k,l
+  double precision, parameter :: a0 = 0.529177249d0
 
   PROVIDE ezfio_filename
 
@@ -22,7 +23,7 @@ program molden
         trim(element_name(int(nucl_charge(i)))),                     &
         i,                                                           &
         int(nucl_charge(i)),                                         &
-        nucl_coord(i,1), nucl_coord(i,2), nucl_coord(i,3)
+        nucl_coord(i,1)*a0, nucl_coord(i,2)*a0, nucl_coord(i,3)*a0
   enddo
 
   write(i_unit_output,'(A)') '[GTO]'

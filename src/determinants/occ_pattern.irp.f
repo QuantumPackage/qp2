@@ -53,7 +53,17 @@ subroutine occ_pattern_to_dets(o,d,sze,n_alpha,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Generate all possible determinants for a give occ_pattern
+  ! Generate all possible determinants for a given occ_pattern
+  ! 
+  ! Input :
+  !    o   : occupation pattern : (doubly occupied, singly occupied)
+  !    sze : Number of produced determinants, computed by `occ_pattern_to_dets_size`
+  !    n_alpha : Number of $\alpha$ electrons
+  !    Nint    : N_int
+  !
+  ! Output:
+  !    d : determinants 
+  !
   END_DOC
   integer          ,intent(in)   :: Nint
   integer          ,intent(in)   :: n_alpha        ! Number of alpha electrons
@@ -397,6 +407,51 @@ BEGIN_PROVIDER [ double precision, weight_occ_pattern, (N_occ_pattern,N_states) 
     weight_occ_pattern(j,k) += psi_coef(i,k) * psi_coef(i,k)
   enddo
  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, weight_occ_pattern_average, (N_occ_pattern) ]
+ implicit none
+ BEGIN_DOC
+ ! State-average weight of the occupation patterns in the wave function
+ END_DOC
+ integer :: i,j,k
+ weight_occ_pattern_average(:) = 0.d0
+ do i=1,N_det
+  j = det_to_occ_pattern(i)
+  do k=1,N_states
+    weight_occ_pattern_average(j) += psi_coef(i,k) * psi_coef(i,k) * state_average_weight(k)
+  enddo
+ enddo
+END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, psi_occ_pattern_sorted, (N_int,2,N_occ_pattern) ]
+&BEGIN_PROVIDER [ double precision, weight_occ_pattern_average_sorted, (N_occ_pattern) ]
+&BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order, (N_occ_pattern) ]
+&BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order_reverse, (N_occ_pattern) ]
+ implicit none
+ BEGIN_DOC
+ ! Occupation patterns sorted by weight 
+ END_DOC
+ integer                        :: i,j,k
+ integer, allocatable           :: iorder(:)
+ allocate ( iorder(N_occ_pattern) )
+ do i=1,N_occ_pattern
+   weight_occ_pattern_average_sorted(i) = -weight_occ_pattern_average(i)
+   iorder(i) = i
+ enddo
+ call dsort(weight_occ_pattern_average_sorted,iorder,N_occ_pattern)
+ do i=1,N_occ_pattern
+   do j=1,N_int
+     psi_occ_pattern_sorted(j,1,i) = psi_occ_pattern(j,1,iorder(i)) 
+     psi_occ_pattern_sorted(j,2,i) = psi_occ_pattern(j,2,iorder(i)) 
+   enddo
+   psi_occ_pattern_sorted_order(iorder(i)) = i
+   psi_occ_pattern_sorted_order_reverse(i) = iorder(i)
+   weight_occ_pattern_average_sorted(i) = -weight_occ_pattern_average_sorted(i)
+ enddo
+
+ deallocate(iorder)
+
 END_PROVIDER
 
 
