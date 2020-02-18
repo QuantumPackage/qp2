@@ -116,7 +116,6 @@ subroutine ao_map_fill_from_df
   do kl=1, kpt_num
     do kj=1, kl
       call idx2_tri_int(kj,kl,kjkl2)
-      !print*,'kj,kl,kjkl2',kj,kl,kjkl2
       if (kj < kl) then
         do i_ao=1,ao_num_per_kpt
           do j_ao=1,ao_num_per_kpt
