@@ -472,6 +472,199 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                                                 outfile.write('%s %s %s %s %s %s\n' % (ii+1,jj+1,kk+1,ll+1,v.real,v.imag))
 
 
+def testprintbi(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8): 
+    '''
+    kpts = List of kpoints coordinates. Cannot be null, for gamma is other script
+    kmesh = Mesh of kpoints (optional)
+    cas_idx = List of active MOs. If not specified all MOs are actives
+    int_threshold = The integral will be not printed in they are bellow that
+    '''
+  
+    from pyscf.pbc import ao2mo
+    from pyscf.pbc import tools
+    from pyscf.pbc.gto import ecp
+    from pyscf.data import nist
+    import h5py
+    import scipy
+
+    
+    bielec_int_threshold = int_threshold
+
+    natom = cell.natm
+    nelec = cell.nelectron
+    neleca,nelecb = cell.nelec
+    atom_xyz = mf.cell.atom_coords()
+    if not(mf.cell.unit.startswith(('B','b','au','AU'))):
+        atom_xyz /= nist.BOHR # always convert to au
+    
+    strtype=h5py.special_dtype(vlen=str)
+    atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
+    for i in range(natom):
+        atom_dset[i] = mf.cell.atom_pure_symbol(i)
+    qph5.create_dataset('nuclei/nucl_coord',data=atom_xyz)
+    qph5.create_dataset('nuclei/nucl_charge',data=mf.cell.atom_charges())
+
+
+    print('n_atom per kpt',   natom)
+    print('num_elec per kpt', nelec)
+
+    mo_coeff = mf.mo_coeff
+    # Mo_coeff actif
+    mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
+    e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
+  
+    Nk, nao, nmo = mo_k.shape
+    print("n Kpts", Nk)
+    print("n active Mos per kpt", nmo)
+    print("n AOs per kpt", nao)
+
+    naux = mf.with_df.auxcell.nao
+    print("n df fitting functions", naux)
+  
+    #in old version: param << nelec*Nk, nmo*Nk, natom*Nk
+  
+
+  
+    # ___                              _    
+    #  |  ._ _|_  _   _  ._ _. |  _   |_) o 
+    # _|_ | | |_ (/_ (_| | (_| | _>   |_) | 
+    #                 _|                    
+    #
+    kconserv = tools.get_kconserv(cell, kpts)
+    qph5.create_dataset('nuclei/kconserv',data=np.transpose(kconserv+1,(0,2,1)))
+    kcon_test = np.zeros((Nk,Nk,Nk),dtype=int)
+    for a in range(Nk):
+        for b in range(Nk):
+            for c in range(Nk):
+                kcon_test[a,c,b] = kconserv[a,b,c]+1
+    qph5.create_dataset('nuclei/kconserv_test',data=kcon_test)
+
+    
+    with open('K.qp','w') as outfile:
+        for a in range(Nk):
+            for b in range(Nk):
+                for c in range(Nk):
+                    d = kconserv[a,b,c]
+                    outfile.write('%s %s %s %s\n' % (a+1,c+1,b+1,d+1))
+    
+
+    intfile=h5py.File(mf.with_df._cderi,'r')
+
+    j3c = intfile.get('j3c')
+    naosq = nao*nao
+    naotri = (nao*(nao+1))//2
+    j3ckeys = list(j3c.keys())
+    j3ckeys.sort(key=lambda strkey:int(strkey))
+
+    # in new(?) version of PySCF, there is an extra layer of groups before the datasets
+    # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
+    # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
+    j3clist = [j3c.get(i+'/0') for i in j3ckeys]
+    if j3clist==[None]*len(j3clist):
+    # if using older version, stop before last level
+        j3clist = [j3c.get(i) for i in j3ckeys]
+
+    nkinvsq = 1./np.sqrt(Nk)
+
+    # dimensions are (kikj,iaux,jao,kao), where kikj is compound index of kpts i and j
+    # output dimensions should be reversed (nao, nao, naux, nkptpairs)
+    j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
+
+    nkpt_pairs = j3arr.shape[0]
+    df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
+
+    if print_ao_ints_df:
+        with open('D.qp','w') as outfile:
+            pass
+        with open('D.qp','a') as outfile:
+            for k,kpt_pair in enumerate(j3arr):
+                for iaux,dfbasfunc in enumerate(kpt_pair):
+                    for i,i0 in enumerate(dfbasfunc):
+                        for j,v in enumerate(i0):
+                            if (abs(v) > bielec_int_threshold):
+                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                df_ao_tmp[i,j,iaux,k]=v
+        
+        qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=df_ao_tmp.real)
+        qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=df_ao_tmp.imag)
+
+    if print_mo_ints_df:
+        kpair_list=[]
+        for i in range(Nk):
+            for j in range(Nk):
+                if(i>=j):
+                    kpair_list.append((i,j,idx2_tri((i,j))))
+        j3mo = np.array([np.einsum('mij,ik,jl->mkl',j3arr[kij],mo_k[ki].conj(),mo_k[kj]) for ki,kj,kij in kpair_list])
+        df_mo_tmp = np.zeros((nmo,nmo,naux,nkpt_pairs),dtype=np.complex128)
+        with open('D_mo.qp','w') as outfile:
+            pass
+        with open('D_mo.qp','a') as outfile:
+            for k,kpt_pair in enumerate(j3mo):
+                for iaux,dfbasfunc in enumerate(kpt_pair):
+                    for i,i0 in enumerate(dfbasfunc):
+                        for j,v in enumerate(i0):
+                            if (abs(v) > bielec_int_threshold):
+                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                df_mo_tmp[i,j,iaux,k]=v
+        qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=df_mo_tmp.real)
+        qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=df_mo_tmp.imag)
+
+
+
+#    eri_4d_ao = np.zeros((Nk,nao,Nk,nao,Nk,nao,Nk,nao), dtype=np.complex)
+#    for d, kd in enumerate(kpts):
+#        for c, kc in enumerate(kpts):
+#            if c > d: break
+#            idx2_cd = idx2_tri(c,d)
+#            for b, kb in enumerate(kpts):
+#                if b > d: break
+#                a = kconserv[b,c,d]
+#                if idx2_tri(a,b) > idx2_cd: continue
+#                if ((c==d) and (a>b)): continue
+#                ka = kpts[a]
+#                v = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
+#                v *= 1./Nk
+#                eri_4d_ao[a,:,b,:,c,:,d] = v
+#    
+#    eri_4d_ao = eri_4d_ao.reshape([Nk*nao]*4)
+
+
+        with open('W.qp','w') as outfile: 
+            pass
+        for d, kd in enumerate(kpts):
+            for c, kc in enumerate(kpts):
+                if c > d: break
+                idx2_cd = idx2_tri((c,d))
+                for b, kb in enumerate(kpts):
+                    if b > d: break
+                    a = kconserv[b,c,d]
+                    #if idx2_tri((a,b)) > idx2_cd: continue
+                    if a>d: continue
+                    #if ((c==d) and (a>b)): continue
+                    ka = kpts[a]
+
+                    with open('W.qp','a') as outfile:
+                        eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
+                        eri_4d_ao_kpt *= 1./Nk
+                        for l in range(nao):
+                            ll=l+d*nao
+                            for j in range(nao):
+                                jj=j+c*nao
+                                if jj>ll: break
+                                idx2_jjll = idx2_tri((jj,ll))
+                                for k in range(nao):
+                                    kk=k+b*nao
+                                    if kk>ll: break
+                                    for i in range(nao):
+                                        ii=i+a*nao
+                                        if idx2_tri((ii,kk)) > idx2_jjll: break
+                                        if ((jj==ll) and (ii>kk)): break
+                                        v=eri_4d_ao_kpt[i,k,j,l]
+                                        if (abs(v) > bielec_int_threshold):
+                                            outfile.write('%s %s %s %s %s %s\n' % (ii+1,jj+1,kk+1,ll+1,v.real,v.imag))
+            
+    
+  
 def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8, 
         print_ao_ints_bi=False, 
         print_mo_ints_bi=False, 
@@ -754,8 +947,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                 for b, kb in enumerate(kpts):
                     if b > d: break
                     a = kconserv[b,c,d]
-                    if idx2_tri((a,b)) > idx2_cd: continue
-                    if ((c==d) and (a>b)): continue
+                    #if idx2_tri((a,b)) > idx2_cd: continue
+                    if a > d: continue
+                    #if ((c==d) and (a>b)): continue
                     ka = kpts[a]
 
                     if print_ao_ints_bi:

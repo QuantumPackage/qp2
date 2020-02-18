@@ -150,9 +150,10 @@ subroutine ao_map_fill_from_df
   !$OMP DO SCHEDULE(guided)
       do kk=1,kl
         ki=kconserv(kl,kk,kj)
-        if ((kl == kj) .and. (ki > kk)) cycle
+        if (ki>kl) cycle
+      !  if ((kl == kj) .and. (ki > kk)) cycle
         call idx2_tri_int(ki,kk,kikk2)
-        if (kikk2 > kjkl2) cycle
+      !  if (kikk2 > kjkl2) cycle
         if (ki < kk) then
           do i_ao=1,ao_num_per_kpt
             do j_ao=1,ao_num_per_kpt

@@ -31,7 +31,7 @@ subroutine run_ao_dump
   allocate( ints_jl(ao_num_per_kpt,ao_num_per_kpt,df_num))
 
   do kl=1, kpt_num
-    do kj=1, kl
+    do kj=1, kpt_num
       call idx2_tri_int(kj,kl,kjkl2)
       if (kj < kl) then
         do i_ao=1,ao_num_per_kpt
@@ -50,12 +50,11 @@ subroutine run_ao_dump
     ints_ikjl(ao_num_per_kpt,ao_num_per_kpt,ao_num_per_kpt,ao_num_per_kpt) &
   )
 
-      do kk=1,kl
+      do kk=1,kpt_num
         ki=kconserv(kl,kk,kj)
-        if (ki > kl) cycle
-        !if ((kl == kj) .and. (ki > kk)) cycle
+!        if ((kl == kj) .and. (ki > kk)) cycle
         call idx2_tri_int(ki,kk,kikk2)
-        !if (kikk2 > kjkl2) cycle
+!        if (kikk2 > kjkl2) cycle
         if (ki < kk) then
           do i_ao=1,ao_num_per_kpt
             do j_ao=1,ao_num_per_kpt
@@ -78,24 +77,25 @@ subroutine run_ao_dump
           l=il+(kl-1)*ao_num_per_kpt
           do ij=1,ao_num_per_kpt
             j=ij+(kj-1)*ao_num_per_kpt
-            if (j>l) exit
+!            if (j>l) exit
             call idx2_tri_int(j,l,jl2)
             do ik=1,ao_num_per_kpt
               k=ik+(kk-1)*ao_num_per_kpt
-              if (k>l) exit
+!              if (k>l) exit
               do ii=1,ao_num_per_kpt
                 i=ii+(ki-1)*ao_num_per_kpt
-                if ((j==l) .and. (i>k)) exit
-                call idx2_tri_int(i,k,ik2)
-                if (ik2 > jl2) exit
+!                if ((j==l) .and. (i>k)) exit
+!                call idx2_tri_int(i,k,ik2)
+!                if (ik2 > jl2) exit
                 integral = ints_ikjl(ii,ik,ij,il)
                 intmap = get_ao_two_e_integral_complex(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
 !                print*,i,k,j,l,real(integral),imag(integral)
                 if ((cdabs(integral) + cdabs(intmap)) < ao_integrals_threshold) then
                   cycle
                 endif
-                if (cdabs(integral-intmap) < 1.d-8) then
-                  print'(4(I4),4(E15.7))',i,j,k,l,integral,intmap
+                if (cdabs(integral-intmap) < 1.d-14) then
+                  cycle
+                  !print'(4(I4),4(E15.7))',i,j,k,l,integral,intmap
                 else
                   print'(4(I4),4(E15.7),(A))',i,j,k,l,integral,intmap,'***'
                 endif
