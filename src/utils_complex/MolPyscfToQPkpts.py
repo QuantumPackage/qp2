@@ -36,6 +36,9 @@ def idx4(i,j,k,l):
 def stri4z(i,j,k,l,zr,zi):
     return (4*'{:5d}'+2*'{:25.16e}').format(i,j,k,l,zr,zi)
 
+def stri2z(i,j,zr,zi):
+    return (2*'{:5d}'+2*'{:25.16e}').format(i,j,zr,zi)
+
 def strijklikjli4z(i,j,k,l,zr,zi):
     return ('{:10d}'+ 2*'{:8d}'+4*'{:5d}'+2*'{:25.16e}').format(idx4(i,j,k,l),idx2_tri((i-1,k-1))+1,idx2_tri((j-1,l-1))+1,i,j,k,l,zr,zi)
 
@@ -322,7 +325,7 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                         for j in range(i,nao):
                             int_ij = intval_kpts_ao[ik,i,j]
                             if abs(int_ij) > thresh:
-                                outfile.write('%s %s %s %s\n' % (i+shift, j+shift, int_ij.real, int_ij.imag))
+                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
         if print_mo_ints_mono:
             intval_kpts_mo = np.einsum('kim,kij,kjn->kmn',mo_k.conj(),intval_kpts_ao,mo_k)
             with open('%s_mo_complex' % name,'w') as outfile:
@@ -332,7 +335,7 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                         for j in range(i,nmo):
                             int_ij = intval_kpts_mo[ik,i,j]
                             if abs(int_ij) > thresh:
-                                outfile.write('%s %s %s %s\n' % (i+shift, j+shift, int_ij.real, int_ij.imag))
+                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
 
   
     # ___                              _    
@@ -383,7 +386,7 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
-                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
 
     if print_mo_ints_df:
         kpair_list=[]
@@ -400,27 +403,8 @@ def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
-                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
 
-
-
-
-#    eri_4d_ao = np.zeros((Nk,nao,Nk,nao,Nk,nao,Nk,nao), dtype=np.complex)
-#    for d, kd in enumerate(kpts):
-#        for c, kc in enumerate(kpts):
-#            if c > d: break
-#            idx2_cd = idx2_tri(c,d)
-#            for b, kb in enumerate(kpts):
-#                if b > d: break
-#                a = kconserv[b,c,d]
-#                if idx2_tri(a,b) > idx2_cd: continue
-#                if ((c==d) and (a>b)): continue
-#                ka = kpts[a]
-#                v = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
-#                v *= 1./Nk
-#                eri_4d_ao[a,:,b,:,c,:,d] = v
-#    
-#    eri_4d_ao = eri_4d_ao.reshape([Nk*nao]*4)
 
     if (print_ao_ints_bi):
         print_ao_bi(mf,kconserv,'bielec_ao_complex',bielec_int_threshold)
@@ -446,19 +430,17 @@ def print_mo_bi(mf,kconserv=None,outfilename='W.mo.qp',cas_idx=None,bielec_int_t
         kconserv = tools.get_kconserv(cell, kpts)
 
     with open(outfilename,'w') as outfile:
-        pass
-    for d, kd in enumerate(kpts):
-        for c, kc in enumerate(kpts):
-            if c > d: break
-            #idx2_cd = idx2_tri((c,d))
-            for b, kb in enumerate(kpts):
-                if b > d: break
-                a = kconserv[b,c,d]
-                if a > d: continue
-                #if idx2_tri((a,b)) > idx2_cd: continue
-                #if ((c==d) and (a>b)): continue
-                ka = kpts[a]
-                with open(outfilename,'a') as outfile:
+        for d, kd in enumerate(kpts):
+            for c, kc in enumerate(kpts):
+                if c > d: break
+                #idx2_cd = idx2_tri((c,d))
+                for b, kb in enumerate(kpts):
+                    if b > d: break
+                    a = kconserv[b,c,d]
+                    if a > d: continue
+                    #if idx2_tri((a,b)) > idx2_cd: continue
+                    #if ((c==d) and (a>b)): continue
+                    ka = kpts[a]
                     eri_4d_mo_kpt = mf.with_df.ao2mo([mo_k[a], mo_k[b], mo_k[c], mo_k[d]],
                                                       [ka,kb,kc,kd],compact=False).reshape((nmo,)*4)
                     eri_4d_mo_kpt *= 1./Nk
@@ -477,7 +459,8 @@ def print_mo_bi(mf,kconserv=None,outfilename='W.mo.qp',cas_idx=None,bielec_int_t
                                     if ((jj==ll) and (ii>kk)): break
                                     v=eri_4d_mo_kpt[i,k,j,l]
                                     if (abs(v) > bielec_int_threshold):
-                                        outfile.write(stri4z(ii+1,jj+1,kk+1,ll+1,v.real,v.imag)+'\n')
+                                        outfile.write(stri4z(ii+1,jj+1,kk+1,ll+1,
+                                                             v.real,v.imag)+'\n')
 
 
 def print_ao_bi(mf,kconserv=None,outfilename='W.ao.qp',bielec_int_threshold = 1E-8):
@@ -492,21 +475,20 @@ def print_ao_bi(mf,kconserv=None,outfilename='W.ao.qp',bielec_int_threshold = 1E
         kconserv = tools.get_kconserv(cell, kpts)
 
     with open(outfilename,'w') as outfile:
-        pass
-    for d, kd in enumerate(kpts):
-        for c, kc in enumerate(kpts):
-            if c > d: break
-            #idx2_cd = idx2_tri((c,d))
-            for b, kb in enumerate(kpts):
-                if b > d: break
-                a = kconserv[b,c,d]
-                if a > d: continue
-                #if idx2_tri((a,b)) > idx2_cd: continue
-                #if ((c==d) and (a>b)): continue
-                ka = kpts[a]
+        for d, kd in enumerate(kpts):
+            for c, kc in enumerate(kpts):
+                if c > d: break
+                #idx2_cd = idx2_tri((c,d))
+                for b, kb in enumerate(kpts):
+                    if b > d: break
+                    a = kconserv[b,c,d]
+                    if a > d: continue
+                    #if idx2_tri((a,b)) > idx2_cd: continue
+                    #if ((c==d) and (a>b)): continue
+                    ka = kpts[a]
 
-                with open(outfilename,'a') as outfile:
-                    eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
+                    eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],
+                                                          compact=False).reshape((nao,)*4)
                     eri_4d_ao_kpt *= 1./Nk
                     for l in range(nao):
                         ll=l+d*nao
@@ -523,7 +505,8 @@ def print_ao_bi(mf,kconserv=None,outfilename='W.ao.qp',bielec_int_threshold = 1E
                                     if ((jj==ll) and (ii>kk)): break
                                     v=eri_4d_ao_kpt[i,k,j,l]
                                     if (abs(v) > bielec_int_threshold):
-                                        outfile.write(stri4z(ii+1,jj+1,kk+1,ll+1,v.real,v.imag)+'\n')
+                                        outfile.write(stri4z(ii+1,jj+1,kk+1,ll+1,
+                                                             v.real,v.imag)+'\n')
 
 
     
@@ -640,7 +623,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                 for j in range(nmo):
                     cij = c_kpts[ik,i,j]
                     if abs(cij) > mo_coef_threshold:
-                        outfile.write('%s %s %s %s\n' % (i+shift1, j+shift2, cij.real, cij.imag))
+                        outfile.write(stri2z(i+shift1, j+shift2, cij.real, cij.imag)+'\n')
 
     # ___                                              
     #  |  ._ _|_  _   _  ._ _. |  _   |\/|  _  ._   _  
@@ -679,7 +662,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                         for j in range(i,nao):
                             int_ij = intval_kpts_ao[ik,i,j]
                             if abs(int_ij) > thresh:
-                                outfile.write('%s %s %s %s\n' % (i+shift, j+shift, int_ij.real, int_ij.imag))
+                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
         if print_mo_ints_mono:
             intval_kpts_mo = np.einsum('kim,kij,kjn->kmn',mo_k.conj(),intval_kpts_ao,mo_k)
             with open('%s_mo.qp' % name,'w') as outfile:
@@ -689,7 +672,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                         for j in range(i,nmo):
                             int_ij = intval_kpts_mo[ik,i,j]
                             if abs(int_ij) > thresh:
-                                outfile.write('%s %s %s %s\n' % (i+shift, j+shift, int_ij.real, int_ij.imag))
+                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
 
   
     # ___                              _    
@@ -749,7 +732,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
-                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
                                 df_ao_tmp[i,j,iaux,k]=v
         
         qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=df_ao_tmp.real)
@@ -771,92 +754,15 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
                     for i,i0 in enumerate(dfbasfunc):
                         for j,v in enumerate(i0):
                             if (abs(v) > bielec_int_threshold):
-                                outfile.write('%s %s %s %s %s %s\n' % (i+1,j+1,iaux+1,k+1,v.real,v.imag))
+                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
                                 df_mo_tmp[i,j,iaux,k]=v
         qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=df_mo_tmp.real)
         qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=df_mo_tmp.imag)
 
-
-
-#    eri_4d_ao = np.zeros((Nk,nao,Nk,nao,Nk,nao,Nk,nao), dtype=np.complex)
-#    for d, kd in enumerate(kpts):
-#        for c, kc in enumerate(kpts):
-#            if c > d: break
-#            idx2_cd = idx2_tri(c,d)
-#            for b, kb in enumerate(kpts):
-#                if b > d: break
-#                a = kconserv[b,c,d]
-#                if idx2_tri(a,b) > idx2_cd: continue
-#                if ((c==d) and (a>b)): continue
-#                ka = kpts[a]
-#                v = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
-#                v *= 1./Nk
-#                eri_4d_ao[a,:,b,:,c,:,d] = v
-#    
-#    eri_4d_ao = eri_4d_ao.reshape([Nk*nao]*4)
-
-
-    if (print_ao_ints_bi or print_mo_ints_bi):
-        if print_ao_ints_bi:
-            with open('W.qp','w') as outfile: 
-                pass
-        if print_mo_ints_bi:
-            with open('W_mo.qp','w') as outfile: 
-                pass
-        for d, kd in enumerate(kpts):
-            for c, kc in enumerate(kpts):
-                if c > d: break
-                idx2_cd = idx2_tri((c,d))
-                for b, kb in enumerate(kpts):
-                    if b > d: break
-                    a = kconserv[b,c,d]
-                    #if idx2_tri((a,b)) > idx2_cd: continue
-                    if a > d: continue
-                    #if ((c==d) and (a>b)): continue
-                    ka = kpts[a]
-
-                    if print_ao_ints_bi:
-                        with open('W.qp','a') as outfile:
-                            eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
-                            eri_4d_ao_kpt *= 1./Nk
-                            for l in range(nao):
-                                ll=l+d*nao
-                                for j in range(nao):
-                                    jj=j+c*nao
-                                    if jj>ll: break
-                                    idx2_jjll = idx2_tri((jj,ll))
-                                    for k in range(nao):
-                                        kk=k+b*nao
-                                        if kk>ll: break
-                                        for i in range(nao):
-                                            ii=i+a*nao
-                                            if idx2_tri((ii,kk)) > idx2_jjll: break
-                                            if ((jj==ll) and (ii>kk)): break
-                                            v=eri_4d_ao_kpt[i,k,j,l]
-                                            if (abs(v) > bielec_int_threshold):
-                                                outfile.write('%s %s %s %s %s %s\n' % (ii+1,jj+1,kk+1,ll+1,v.real,v.imag))
-            
-                    if print_mo_ints_bi:
-                        with open('W_mo.qp','a') as outfile:
-                            eri_4d_mo_kpt = mf.with_df.ao2mo([mo_k[a], mo_k[b], mo_k[c], mo_k[d]],
-                                                              [ka,kb,kc,kd],compact=False).reshape((nmo,)*4)
-                            eri_4d_mo_kpt *= 1./Nk
-                            for l in range(nmo):
-                                ll=l+d*nmo
-                                for j in range(nmo):
-                                    jj=j+c*nmo
-                                    if jj>ll: break
-                                    idx2_jjll = idx2_tri((jj,ll))
-                                    for k in range(nmo):
-                                        kk=k+b*nmo
-                                        if kk>ll: break
-                                        for i in range(nmo):
-                                            ii=i+a*nmo
-                                            if idx2_tri((ii,kk)) > idx2_jjll: break
-                                            if ((jj==ll) and (ii>kk)): break
-                                            v=eri_4d_mo_kpt[i,k,j,l]
-                                            if (abs(v) > bielec_int_threshold):
-                                                outfile.write('%s %s %s %s %s %s\n' % (ii+1,jj+1,kk+1,ll+1,v.real,v.imag))
+    if (print_ao_ints_bi):
+        print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
+    if (print_mo_ints_bi):
+        print_mo_bi(mf,kconserv,'W.mo.qp',cas_idx,bielec_int_threshold)
 
     
   

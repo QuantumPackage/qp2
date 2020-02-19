@@ -21,9 +21,6 @@ ezfio.set_nuclei_kpt_num(kpt_num)
 kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
 ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
 
-# should this be in ao_basis? ao_two_e_ints?
-df_num = qph5['ao_two_e_ints'].attrs['df_num']
-ezfio.set_ao_two_e_ints_df_num(df_num)
 
 # these are totals (kpt_num * num_per_kpt)
 # need to change if we want to truncate orbital space within pyscf
@@ -139,13 +136,24 @@ ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
 ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
 ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
 
-dfao_re0=qph5['ao_two_e_ints/df_ao_integrals_real'][()].transpose((3,2,1,0))
-dfao_im0=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0))
-#ezfio.set_ao_two_e_ints_df_ao_integrals_real(dfao_re.tolist())
-#ezfio.set_ao_two_e_ints_df_ao_integrals_imag(dfao_im.tolist())
-dfao_cmplx0 = np.stack((dfao_re0,dfao_im0),axis=-1).tolist()
-ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
-ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
+# should this be in ao_basis? ao_two_e_ints?
+if 'ao_two_e_ints' in qph5.keys():
+    df_num = qph5['ao_two_e_ints'].attrs['df_num']
+    ezfio.set_ao_two_e_ints_df_num(df_num)
+    if 'df_ao_integrals_real' in qph5['ao_two_e_ints'].keys():
+        dfao_re0=qph5['ao_two_e_ints/df_ao_integrals_real'][()].transpose((3,2,1,0))
+        dfao_im0=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0))
+        dfao_cmplx0 = np.stack((dfao_re0,dfao_im0),axis=-1).tolist()
+        ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
+        ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
+
+if 'mo_two_e_ints' in qph5.keys():
+    df_num = qph5['ao_two_e_ints'].attrs['df_num']
+    dfmo_re0=qph5['mo_two_e_ints/df_mo_integrals_real'][()].transpose((3,2,1,0))
+    dfmo_im0=qph5['mo_two_e_ints/df_mo_integrals_imag'][()].transpose((3,2,1,0))
+    dfmo_cmplx0 = np.stack((dfmo_re0,dfmo_im0),axis=-1).tolist()
+    ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_cmplx0)
+    ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
 
 
 #TODO: add check and only do this if ints exist
