@@ -25,7 +25,11 @@ BEGIN_PROVIDER [ logical, pruned, (N_det) ]
  else
 
   ndet_new = max(1,int( dble(N_det) * (1.d0 - pruning) + 0.5d0 ))
+  if (is_complex) then
+    thr = psi_average_norm_contrib_sorted_complex(ndet_new)
+  else
   thr = psi_average_norm_contrib_sorted(ndet_new)
+  endif
   do i=1, N_det
     pruned(i) = psi_average_norm_contrib(i) < thr
   enddo

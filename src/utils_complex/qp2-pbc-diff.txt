@@ -13,12 +13,14 @@ determinants:
       ezfio_set_determinants_psi_coef_complex_qp_edit? (need ocaml?)
       psi_coef_{max,min}?
       save_wavefunction_specified{,_complex} qp_edit save?
-
+    psi_energy_mono_elec
     diag_h_mat_elem for complex
+    ...
 
   DONE
     create_excitations
       build_singly_excited_wavefunction{_complex}
+    ...
 
 
 -------------------------------------------------------------------------------------
