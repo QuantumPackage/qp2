@@ -29,7 +29,67 @@ subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
     call debug_det(det_ref,N_int)
     stop -1
   endif
+  
+  if (is_complex) then
+    ! Occupied MOs
+    do ii=1,elec_alpha_num
+      i = occ(ii,1)
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + dble(mo_one_e_integrals_complex(i,i))
+      E0 = E0 + dble(mo_one_e_integrals_complex(i,i))
+      do jj=1,elec_alpha_num
+        j = occ(jj,1)
+        if (i==j) cycle
+        fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj_anti(i,j)
+        E0 = E0 + 0.5d0*mo_two_e_integrals_jj_anti(i,j)
+      enddo
+      do jj=1,elec_beta_num
+        j = occ(jj,2)
+        fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj(i,j)
+        E0 = E0 + mo_two_e_integrals_jj(i,j)
+      enddo
+    enddo
+    do ii=1,elec_beta_num
+      i = occ(ii,2)
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + dble(mo_one_e_integrals_complex(i,i))
+      E0 = E0 + dble(mo_one_e_integrals_complex(i,i))
+      do jj=1,elec_beta_num
+        j = occ(jj,2)
+        if (i==j) cycle
+        fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj_anti(i,j)
+        E0 = E0 + 0.5d0*mo_two_e_integrals_jj_anti(i,j)
+      enddo
+      do jj=1,elec_alpha_num
+        j = occ(jj,1)
+        fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj(i,j)
+      enddo
+    enddo
 
+    ! Virtual MOs
+    do i=1,mo_num
+      if (fock_diag_tmp(1,i) /= 0.d0) cycle
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + dble(mo_one_e_integrals_complex(i,i))
+      do jj=1,elec_alpha_num
+        j = occ(jj,1)
+        fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj_anti(i,j)
+      enddo
+      do jj=1,elec_beta_num
+        j = occ(jj,2)
+        fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj(i,j)
+      enddo
+    enddo
+    do i=1,mo_num
+      if (fock_diag_tmp(2,i) /= 0.d0) cycle
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + dble(mo_one_e_integrals_complex(i,i))
+      do jj=1,elec_beta_num
+        j = occ(jj,2)
+        fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj_anti(i,j)
+      enddo
+      do jj=1,elec_alpha_num
+        j = occ(jj,1)
+        fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj(i,j)
+      enddo
+    enddo
+  else
   ! Occupied MOs
   do ii=1,elec_alpha_num
     i = occ(ii,1)
@@ -88,6 +148,7 @@ subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
       fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj(i,j)
     enddo
   enddo
+  endif
 
   fock_diag_tmp(1,mo_num+1) = E0
   fock_diag_tmp(2,mo_num+1) = E0

@@ -401,12 +401,21 @@ BEGIN_PROVIDER [ double precision, weight_occ_pattern, (N_occ_pattern,N_states) 
  END_DOC
  integer :: i,j,k
  weight_occ_pattern = 0.d0
+ if (is_complex) then
+ do i=1,N_det
+  j = det_to_occ_pattern(i)
+  do k=1,N_states
+    weight_occ_pattern(j,k) += cdabs(psi_coef_complex(i,k) * psi_coef_complex(i,k))
+  enddo
+ enddo
+ else
  do i=1,N_det
   j = det_to_occ_pattern(i)
   do k=1,N_states
     weight_occ_pattern(j,k) += psi_coef(i,k) * psi_coef(i,k)
   enddo
  enddo
+ endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, weight_occ_pattern_average, (N_occ_pattern) ]
@@ -416,12 +425,21 @@ BEGIN_PROVIDER [ double precision, weight_occ_pattern_average, (N_occ_pattern) ]
  END_DOC
  integer :: i,j,k
  weight_occ_pattern_average(:) = 0.d0
+ if (is_complex) then
+  do i=1,N_det
+   j = det_to_occ_pattern(i)
+   do k=1,N_states
+     weight_occ_pattern_average(j) += cdabs(psi_coef_complex(i,k) * psi_coef_complex(i,k)) * state_average_weight(k)
+   enddo
+  enddo
+ else
  do i=1,N_det
   j = det_to_occ_pattern(i)
   do k=1,N_states
     weight_occ_pattern_average(j) += psi_coef(i,k) * psi_coef(i,k) * state_average_weight(k)
   enddo
  enddo
+ endif
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, psi_occ_pattern_sorted, (N_int,2,N_occ_pattern) ]

@@ -21,11 +21,19 @@ BEGIN_PROVIDER [ double precision, barycentric_electronic_energy, (N_states) ]
 
  barycentric_electronic_energy(:) = 0.d0
 
+ if (is_complex) then
+   do istate=1,N_states
+     do i=1,N_det
+       barycentric_electronic_energy(istate) += cdabs(psi_coef_complex(i,istate)*psi_coef_complex(i,istate))*diagonal_H_matrix_on_psi_det(i)
+     enddo
+   enddo
+ else
  do istate=1,N_states
    do i=1,N_det
      barycentric_electronic_energy(istate) += psi_coef(i,istate)*psi_coef(i,istate)*diagonal_H_matrix_on_psi_det(i)
    enddo
  enddo
+ endif
 
 END_PROVIDER
 
