@@ -4,20 +4,13 @@
 mo energies from pyscf include ewald correction; in qp we just fold that into the nuclear repulsion
 this may need to change for addition/removal of electrons (shift in enuc depends on number of electrons)
 
-mo_coef is not used in the periodic part of the code
-  use mo_coef_{real,imag,complex}
-  real and imag only used for I/O
-  mo_save routines handle this correctly (put real,imag parts of mo_coef_complex into two dble buffers; use ezfio_set to save real,imag parts to disk)
 
-AO 1e ints:
-  reuse old (real) provider as real part of ints
-  added new provider (double precision) for imag parts (mostly just for I/O?)
-  added new provider (complex) for real+i*imag
 
-MO 1e ints:
-  don't reuse old (real) provider for real part of ints
-  three linked providers (real,imag,complex) for each array of MO 1e ints
-  either read from disk or obtain via AO-to-MO transformation
+for complex data, add extra dim (size 2) and treat as real in EZFIO.cfg
+
+no reuse of old provider for real part of complex arrays
+
+mo_coef_complex_kpts has nonzero blocks of mo_coef_complex
 
 AO 2e ints:
   see doc for map index details
@@ -26,6 +19,8 @@ AO 2e ints:
 MO 2e ints:
   similar to AO 2e ints
   maybe good idea to make map_get for two neighboring vals? (re/im parts)
+  only built from 3idx (not from 4idx transform)
+
 
 mapping:
   changed so that all real ints (Jij, Kij, Jii) are in map2
@@ -44,6 +39,9 @@ symmetry
   restructure arrays?
     mo coef and mo 1e ints already separate from real part of code (easy to add extra dimension)
     ao 1e ints could also be handled in same way as mo 1e ints
+  change to allow different numbers of frozen/virtual mos for different kpts
+    for now, all kpts must have same number of aos/mos
+  bitmasks for kpts?
 
 ao_one_e_ints
 	ao_overlap_abs for complex? <abs(i)|abs(j)> vs abs(<i|j>)
@@ -79,6 +77,7 @@ NOTES:
     if i>k, take conjugate transpose in first two dimensions
 
     df_mo(:,:,mu,kjkl) = C(:,:,kj)^\dagger.df_ao(:,:,mu,kjkl).C(:,:,kl)
+    (note: might need to switch j/l depending on how we decide to store this)
 
   2e int compound indexing
     number of unique 4-tuples with 8-fold symmetry is a8(n)=n*(n+1)*(n^2+n+2)/8
