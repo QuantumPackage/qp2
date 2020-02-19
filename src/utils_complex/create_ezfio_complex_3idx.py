@@ -149,6 +149,7 @@ if 'ao_two_e_ints' in qph5.keys():
 
 if 'mo_two_e_ints' in qph5.keys():
     df_num = qph5['ao_two_e_ints'].attrs['df_num']
+    ezfio.set_ao_two_e_ints_df_num(df_num)
     dfmo_re0=qph5['mo_two_e_ints/df_mo_integrals_real'][()].transpose((3,2,1,0))
     dfmo_im0=qph5['mo_two_e_ints/df_mo_integrals_imag'][()].transpose((3,2,1,0))
     dfmo_cmplx0 = np.stack((dfmo_re0,dfmo_im0),axis=-1).tolist()

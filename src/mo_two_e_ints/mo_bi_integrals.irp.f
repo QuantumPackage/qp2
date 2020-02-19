@@ -41,7 +41,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
       call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_complex_2',mo_integrals_map_2)
       print*, 'MO integrals provided (periodic)'
       return
-    else if (read_df_mo_integrals) then
+    else if (read_df_mo_integrals.or.read_df_ao_integrals) then
       PROVIDE df_mo_integrals_complex
       call mo_map_fill_from_df
       return

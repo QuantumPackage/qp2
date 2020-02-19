@@ -265,13 +265,13 @@ subroutine df_mo_from_df_ao(df_mo,df_ao,n_mo,n_ao,n_df,n_k_pairs)
       do mu=1, df_num
         ints_jl = df_ao(:,:,mu,kjkl2)
         call zgemm('C','N',n_mo,n_ao,n_ao, &
-              (1.d0,0.d0), coef_j, n_ao, &
+              (1.d0,0.d0), coef_l, n_ao, &
               ints_jl, n_ao, &
               (0.d0,0.d0), ints_tmp, n_mo)
 
         call zgemm('N','N',n_mo,n_mo,n_ao, &
               (1.d0,0.d0), ints_tmp, n_mo, &
-              coef_l, n_ao, &
+              coef_j, n_ao, &
               (0.d0,0.d0), df_mo(:,:,mu,kjkl2), n_mo)
       enddo
     enddo
