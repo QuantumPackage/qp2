@@ -317,6 +317,35 @@ double precision function u_dot_v(u,v,sze)
 
 end
 
+complex*16 function u_dot_v_complex(u,v,sze)
+  implicit none
+  BEGIN_DOC
+  ! Compute u^H . v
+  END_DOC
+  integer, intent(in)            :: sze
+  complex*16, intent(in)   :: u(sze),v(sze)
+  complex*16, external     :: zdotc
+  
+  !DIR$ FORCEINLINE
+  u_dot_v_complex = zdotc(sze,u,1,v,1)
+  
+end
+
+complex*16 function u_dot_v_complex_noconj(u,v,sze)
+  implicit none
+  BEGIN_DOC
+  ! Compute u^T . v (don't take complex conjugate of elements of u)
+  ! use this if u is already stored as <u| (rather than as |u>)
+  END_DOC
+  integer, intent(in)            :: sze
+  complex*16, intent(in)   :: u(sze),v(sze)
+  complex*16, external     :: zdotu
+  
+  !DIR$ FORCEINLINE
+  u_dot_v_complex_noconj = zdotu(sze,u,1,v,1)
+  
+end
+
 double precision function u_dot_u(u,sze)
   implicit none
   BEGIN_DOC
@@ -329,6 +358,20 @@ double precision function u_dot_u(u,sze)
   !DIR$ FORCEINLINE
   u_dot_u = ddot(sze,u,1,u,1)
 
+end
+
+double precision function u_dot_u_complex(u,sze)
+  implicit none
+  BEGIN_DOC
+  ! Compute <u|u>
+  END_DOC
+  integer, intent(in)            :: sze
+  complex*16, intent(in)   :: u(sze)
+  complex*16, external     :: zdotc
+  
+  !DIR$ FORCEINLINE
+  u_dot_u_complex = real(zdotc(sze,u,1,u,1))
+  
 end
 
 subroutine normalize(u,sze)
@@ -350,6 +393,28 @@ subroutine normalize(u,sze)
   if (d /= 1.d0) then
     !DIR$ FORCEINLINE
     call dscal(sze,d,u,1)
+  endif
+end
+
+subroutine normalize_complex(u,sze)
+  implicit none
+  BEGIN_DOC
+  ! Normalizes vector u
+  END_DOC
+  integer, intent(in)            :: sze
+  complex*16, intent(inout):: u(sze)
+  double precision               :: d
+  double precision, external     :: dznrm2
+  integer                        :: i
+  
+  !DIR$ FORCEINLINE
+  d = dznrm2(sze,u,1)
+  if (d /= 0.d0) then
+    d = 1.d0/d
+  endif
+  if (d /= 1.d0) then
+    !DIR$ FORCEINLINE
+    call zdscal(sze,d,u,1)
   endif
 end
 

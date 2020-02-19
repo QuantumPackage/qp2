@@ -113,7 +113,12 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
   logical                        :: exists
   character*(64)                 :: label
 
-  PROVIDE read_wf N_det mo_label ezfio_filename HF_bitmask mo_coef
+  PROVIDE read_wf N_det mo_label ezfio_filename HF_bitmask
+  if (is_complex) then
+    PROVIDE mo_coef_complex
+  else
+    PROVIDE mo_coef
+  endif
   psi_det = 0_bit_kind
   if (mpi_master) then
     if (read_wf) then
@@ -244,12 +249,21 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   double precision               :: f
 
   psi_average_norm_contrib(:) = 0.d0
+  if (is_complex) then
+    do k=1,N_states
+      do i=1,N_det
+        psi_average_norm_contrib(i) = psi_average_norm_contrib(i) +    &
+            cdabs(psi_coef_complex(i,k)*psi_coef_complex(i,k))*state_average_weight(k)
+      enddo
+    enddo
+  else
   do k=1,N_states
     do i=1,N_det
       psi_average_norm_contrib(i) = psi_average_norm_contrib(i) +    &
           psi_coef(i,k)*psi_coef(i,k)*state_average_weight(k)
     enddo
   enddo
+  endif
   f = 1.d0/sum(psi_average_norm_contrib(1:N_det))
   do i=1,N_det
     psi_average_norm_contrib(i) = psi_average_norm_contrib(i)*f
@@ -442,10 +456,17 @@ end
 subroutine save_ref_determinant
   implicit none
   use bitmasks
+  if (is_complex) then
+    complex*16 :: buffer_c(1,N_states)
+    buffer_c = (0.d0,0.d0)
+    buffer_c(1,1) = (1.d0,0.d0)
+    call save_wavefunction_general_complex(1,N_states,ref_bitmask,1,buffer_c)
+  else
   double precision               :: buffer(1,N_states)
   buffer = 0.d0
   buffer(1,1) = 1.d0
   call save_wavefunction_general(1,N_states,ref_bitmask,1,buffer)
+  endif
 end
 
 
@@ -467,7 +488,12 @@ subroutine save_wavefunction_truncated(thr)
     endif
   enddo
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det_save,min(N_states,N_det_save),&
+                psi_det_sorted_complex,size(psi_coef_sorted_complex,1),psi_coef_sorted_complex)
+    else
     call save_wavefunction_general(N_det_save,min(N_states,N_det_save),psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    endif
   endif
 end
 
@@ -485,7 +511,12 @@ subroutine save_wavefunction
     return
   endif
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det,N_states,&
+                  psi_det_sorted_complex,size(psi_coef_sorted_complex,1),psi_coef_sorted_complex)
+    else
     call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    endif
   endif
 end
 
@@ -497,7 +528,12 @@ subroutine save_wavefunction_unsorted
   !  Save the wave function into the |EZFIO| file
   END_DOC
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det,min(N_states,N_det),&
+                   psi_det,size(psi_coef_complex,1),psi_coef_complex)
+    else
     call save_wavefunction_general(N_det,min(N_states,N_det),psi_det,size(psi_coef,1),psi_coef)
+    endif
   endif
 end
 

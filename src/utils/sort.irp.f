@@ -346,6 +346,7 @@ SUBST [ X, type ]
  i ; integer ;;
  i8; integer*8 ;;
  i2; integer*2 ;;
+ cd; complex*16 ;;
 END_TEMPLATE
 
 

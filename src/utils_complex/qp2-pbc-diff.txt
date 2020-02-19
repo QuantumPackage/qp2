@@ -9,7 +9,12 @@ determinants:
         use symmetry rules to simplify?
         should this be general, or should we only allow singles that conserve momentum?
     density_matrix
-    ...
+    determinants
+      ezfio_set_determinants_psi_coef_complex_qp_edit? (need ocaml?)
+      psi_coef_{max,min}?
+      save_wavefunction_specified{,_complex} qp_edit save?
+
+    diag_h_mat_elem for complex
 
   DONE
     create_excitations
