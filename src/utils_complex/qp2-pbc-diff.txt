@@ -1,10 +1,22 @@
 
+-------------------------------------------------------------------------------------
+current:
 
-2e integrals printed from pyscf are in physicists' notation
-mo energies from pyscf include ewald correction; in qp we just fold that into the nuclear repulsion
-this may need to change for addition/removal of electrons (shift in enuc depends on number of electrons)
+determinants:
+  TODO
+    create_excitations
+      do_single_excitation
+        use symmetry rules to simplify?
+        should this be general, or should we only allow singles that conserve momentum?
+    density_matrix
+    ...
+
+  DONE
+    create_excitations
+      build_singly_excited_wavefunction{_complex}
 
 
+-------------------------------------------------------------------------------------
 
 for complex data, add extra dim (size 2) and treat as real in EZFIO.cfg
 
@@ -33,6 +45,8 @@ translational symmetry:
   k_i + k_j = k_k + k_l
   I + J = K + L
   kconserv(I,J,K)=L
+
+------------------------------------------------------------------------------
 
 TODO:
 symmetry
@@ -71,6 +85,12 @@ later:
 
 
 NOTES:
+  2e integrals printed from pyscf are in physicists' notation
+  
+  mo energies from pyscf include ewald correction; in qp we just fold that into the nuclear repulsion
+    this may need to change for addition/removal of electrons
+      (shift in enuc depends on number of electrons)
+
   3-index integrals
     <ij|kl> = \sum_\mu (ik|\mu)(jl|\mu)
     store (ik|\mu) for I<=K
