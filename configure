@@ -184,7 +184,7 @@ if [[ ${EZFIO} = $(not_found) ]] ; then
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file ${EZFIO_TGZ} 
               rm -rf ezfio
-              mv EZFIO-* ezfio
+              mv EZFIO ezfio
 EOF
 fi
 
