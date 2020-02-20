@@ -15,12 +15,12 @@ unset CCXX
 export CC=gcc
 
 
-# When updating version, update also etc files
+# /!\ When updating version, update also etc files
 
+EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
-EZFIO_URL="https://gitlab.com/scemama/EZFIO/-/archive/v1.6.1/EZFIO-v1.6.1.tar.gz"
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
 GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
 IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
@@ -175,6 +175,19 @@ function find_dir() {
                 not_found
         fi
 }
+
+
+# Extract EZFIO if needed
+EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
+if [[ ${EZFIO} = $(not_found) ]] ; then
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --gunzip --extract --file ${EZFIO_TGZ} 
+              rm -rf ezfio
+              mv EZFIO-* ezfio
+EOF
+fi
+
 
 
 if [[ "${PACKAGES}.x" != ".x" ]] ; then
@@ -342,16 +355,6 @@ EOF
             fi
 
             
-    elif [[ ${PACKAGE} = ezfio ]] ; then
-
-            download ${EZFIO_URL} "${QP_ROOT}"/external/ezfio.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ezfio.tar.gz
-              rm -rf ezfio
-              mv EZFIO-* ezfio
-EOF
-
 
     elif [[ ${PACKAGE} = zlib ]] ; then
 
@@ -455,12 +458,6 @@ fi
 OCAML=$(find_exe ocaml)
 if [[ ${OCAML} = $(not_found) ]] ; then
         error "OCaml (ocaml) compiler is not installed."
-        fail
-fi
-
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-        error "EZFIO (ezfio) is not installed."
         fail
 fi
 
