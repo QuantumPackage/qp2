@@ -5,25 +5,14 @@ BEGIN_PROVIDER [double precision, core_energy]
  END_DOC
  integer :: i,j,k,l
  core_energy = 0.d0
- if (is_complex) then
-  do i = 1, n_core_orb
-   j = list_core(i)
-   core_energy += 2.d0 * dble(mo_one_e_integrals_complex(j,j)) + mo_two_e_integrals_jj(j,j)
-   do k = i+1, n_core_orb
-    l = list_core(k)
-    core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
-   enddo
-  enddo
- else
  do i = 1, n_core_orb
   j = list_core(i)
-  core_energy += 2.d0 * mo_one_e_integrals(j,j) + mo_two_e_integrals_jj(j,j)
+  core_energy += 2.d0 * mo_one_e_integrals_diag(j) + mo_two_e_integrals_jj(j,j)
   do k = i+1, n_core_orb
    l = list_core(k)
    core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
   enddo
  enddo
- endif
  core_energy += nuclear_repulsion
 
 END_PROVIDER

@@ -225,7 +225,7 @@ double precision function diag_H_mat_elem_one_e(det_in,Nint)
   call bitstring_to_list_ab(det_in, occ_particle, tmp, Nint)
   do ispin = 1,2
    do i = 1, tmp(ispin)
-    diag_H_mat_elem_one_e +=  mo_one_e_integrals(occ_particle(i,ispin),occ_particle(i,ispin))
+    diag_H_mat_elem_one_e +=  mo_one_e_integrals_diag(occ_particle(i,ispin))
    enddo
   enddo
 

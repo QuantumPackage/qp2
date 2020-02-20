@@ -24,3 +24,23 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
   ENDIF
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, mo_one_e_integrals_diag,(mo_num)]
+  implicit none
+  integer                        :: i
+  BEGIN_DOC
+  ! diagonal elements of mo_one_e_integrals or mo_one_e_integrals_complex
+  END_DOC
+  
+  if (is_complex) then
+    PROVIDE mo_one_e_integrals_complex
+    do i=1,mo_num
+      mo_one_e_integrals_diag(i) = dble(mo_one_e_integrals_complex(i,i))
+    enddo
+  else
+    PROVIDE mo_one_e_integrals
+    do i=1,mo_num
+      mo_one_e_integrals_diag(i) = mo_one_e_integrals(i,i)
+    enddo
+  endif
+END_PROVIDER

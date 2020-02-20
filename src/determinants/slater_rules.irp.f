@@ -1745,7 +1745,7 @@ subroutine a_operator(iorb,ispin,key,hjj,Nint,na,nb)
   call bitstring_to_list_ab(key, occ, tmp, Nint)
   na = na-1
 
-  hjj = hjj - mo_one_e_integrals(iorb,iorb)
+  hjj = hjj - mo_one_e_integrals_diag(iorb)
 
   ! Same spin
   do i=1,na
@@ -1803,7 +1803,7 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   key(k,ispin) = ibset(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
 
-  hjj = hjj + mo_one_e_integrals(iorb,iorb)
+  hjj = hjj + mo_one_e_integrals_diag(iorb)
 
   ! Same spin
   do i=1,na
