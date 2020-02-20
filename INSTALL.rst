@@ -41,7 +41,6 @@ Requirements
 - |EZFIO| : Easy Fortran Input/Output library generator
 - |BLAS| and |LAPACK|
 - `Zlib`_
-- `GNU Patch`_
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager 
@@ -70,6 +69,16 @@ architecture. Modify it if needed, and run :command:`configure` with
 
 Help for installing external dependencies
 =========================================
+
+All the dependencies can be installed using ![Spack](https://github.com/spack/spack).
+This is the recommended installation procedure:
+
+```bash
+git clone https://github.com/spack/spack.git
+source spack/share/spack/setup-env.sh
+spack install quantum_package
+```
+
 
 Using the :command:`configure` executable
 -----------------------------------------
@@ -104,7 +113,7 @@ Example:
 
 .. note::
 
-   When installing the ocaml package, you will be asked the location of where it should be installed.
+   When installing the OCaml package, you will be asked the location of where it should be installed.
    A safe option is to enter the path proposed by the |QP|:
 
    QP>> Please install it here: /your_quantum_package_directory/bin
@@ -141,6 +150,14 @@ IRPF90
 
 *IRPF90* is a Fortran code generator for programming using the Implicit Reference
 to Parameters (IRP) method. 
+
+If you have *pip* for Python2, you can do 
+
+.. code:: bash
+
+   python2 -m pip install --user irpf90
+
+Otherwise,
 
 * Download the latest version of IRPF90
   here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
@@ -374,7 +391,7 @@ If you have *pip* for Python2, you can do
 
 .. code:: bash
 
-   pip2 install --user docopt
+   python2 -m pip install --user docopt
 
 Otherwise,
 
@@ -383,5 +400,19 @@ Otherwise,
 * Extract the archive
 
 * Copy :file:`docopt-0.6.2/docopt.py` in the :file:`${QP_ROOT}/scripts` directory
+
+
+resultsFile
+-----------
+
+*resultsFile* is a Python package to extract data from output files of quantum chemistry
+codes.
+
+If you have *pip* for Python2, you can do 
+
+.. code:: bash
+
+   python2 -m pip install --user resultsFile
+
 
 

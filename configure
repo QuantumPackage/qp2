@@ -8,11 +8,7 @@ eval set -- "$TEMP"
 
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
-unset CC
-unset CCXX
 
-# Force GCC instead of ICC for dependencies
-export CC=gcc
 
 
 # When updating version, update also etc files
@@ -101,7 +97,7 @@ while true ; do
         -i|--install)
             case "$2" in
                 "") help ; break;;
-                *) PACKAGES="${PACKAGE} $2"
+                *) PACKAGES="${PACKAGES} $2"
             esac 
             shift 2;;
         -h|-help|--help) 
@@ -265,6 +261,8 @@ EOF
 
             download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
             execute << EOF
+              export CC=gcc
+              export CXX=g++
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zeromq.tar.gz
               rm zeromq.tar.gz
