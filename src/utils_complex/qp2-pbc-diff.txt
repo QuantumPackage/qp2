@@ -2,25 +2,57 @@
 -------------------------------------------------------------------------------------
 current:
 
-determinants:
-  TODO
-    create_excitations
-      do_single_excitation
-        use symmetry rules to simplify?
-        should this be general, or should we only allow singles that conserve momentum?
-    density_matrix
-    determinants
-      ezfio_set_determinants_psi_coef_complex_qp_edit? (need ocaml?)
-      psi_coef_{max,min}?
-      save_wavefunction_specified{,_complex} qp_edit save?
-    psi_energy_mono_elec
-    diag_h_mat_elem for complex
-    ...
+general:
+  i_h_j_complex
+  diag_h_mat_elem if is_complex
 
-  DONE
-    create_excitations
-      build_singly_excited_wavefunction{_complex}
-    ...
+
+determinants:
+  (done) connected_to_ref.irp.f
+  (done) create_excitations.irp.f
+  (****) density_matrix.irp.f
+  (done) determinants_bitmasks.irp.f
+  (****) determinants{_complex}.irp.f
+           mostly done
+           could separate/combine some providers instead of copying
+             for psi_{det,coef}_sorted:
+               use same linked provider for psi_average_norm_contrib_sorted
+                                            psi_det_sorted_order
+                                            psi_det_sorted
+               different providers for psi_coef{,_complex}_sorted
+           need to figure out {,abs_}psi_coef_{min,max}
+           need to modify ocaml for psi_coef_complex_qp_edit?
+           save_wavefunction_specified? qp_edit save? (wrong for real?)
+  (done) energy.irp.f
+           needs diag_h_mat_elem function to be modified for complex
+  (????) example.irp.f
+  (****) EZFIO.cfg
+  (done) filter_connected.irp.f
+  (done) fock_diag.irp.f
+  (****) h_apply.irp.f
+  (****) h_apply_nozmq.template.f
+  (****) h_apply.template.f
+  (****) h_apply_zmq.template.f
+  (****) occ_pattern.irp.f
+           mostly done?
+           might need to change calls to fill_h_apply_buffer_no_selection?
+           check again after modifying h_apply for complex
+  (done) prune_wf.irp.f
+  (done) psi_cas{,_complex}.irp.f
+           might be able to combine some providers??
+  (done) psi_energy_mono_elec.irp.f
+  (****) ref_bitmask.irp.f
+  (****) s2{,_complex}.irp.f
+  (****) single_excitations.irp.f
+  (****) single_excitation_two_e.irp.f
+  (****) slater_rules.irp.f
+  (****) slater_rules_wee_mono.irp.f
+  (done) sort_dets_ab.irp.f
+  spindeterminants.ezfio_config
+  (****) spindeterminants.irp.f
+  (****) two_e_density_matrix.irp.pouet
+  (done) utils.irp.f
+  (****) zmq.irp.f
 
 
 -------------------------------------------------------------------------------------
