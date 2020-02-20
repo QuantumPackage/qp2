@@ -79,7 +79,7 @@ let get s =
          | Ao_basis ->
            f Ao_basis.(read, to_rst)
          | Determinants_by_hand ->
-           f Determinants_by_hand.(read_maybe, to_rst)
+           f Determinants_by_hand.(read ~full:false, to_rst)
 {section_to_rst}
       end
     with
@@ -120,7 +120,7 @@ let set str s =
         match s with
 {write}
         | Electrons        -> write Electrons.(of_rst, write) s
-        | Determinants_by_hand     -> write Determinants_by_hand.(of_rst, write) s
+        | Determinants_by_hand     -> write Determinants_by_hand.(of_rst, write ~force:false) s
         | Nuclei_by_hand           -> write Nuclei_by_hand.(of_rst, write) s
         | Ao_basis         -> () (* TODO *)
         | Mo_basis         -> () (* TODO *)

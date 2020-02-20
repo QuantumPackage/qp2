@@ -14,7 +14,7 @@ program print_wf
 
 
  ! this has to be done in order to be sure that N_det, psi_det and
- ! psi_coef are the wave function stored in the |EZFIO| directory.
+ ! psi_coef_sorted are the wave function stored in the |EZFIO| directory.
  read_wf = .True.
  touch read_wf
  call routine
@@ -45,15 +45,15 @@ subroutine routine
  do i = 1, min(N_det_print_wf,N_det)
   print*,''
   print*,'i = ',i
-  call debug_det(psi_det(1,1,i),N_int)
-  call get_excitation_degree(psi_det(1,1,i),psi_det(1,1,1),degree,N_int)
+  call debug_det(psi_det_sorted(1,1,i),N_int)
+  call get_excitation_degree(psi_det_sorted(1,1,i),psi_det_sorted(1,1,1),degree,N_int)
   print*,'degree = ',degree
   if(degree == 0)then
    print*,'Reference determinant '
-   call i_H_j(psi_det(1,1,i),psi_det(1,1,i),N_int,h00)
-  else
-   call i_H_j(psi_det(1,1,i),psi_det(1,1,i),N_int,hii)
-   call i_H_j(psi_det(1,1,1),psi_det(1,1,i),N_int,hij)
+   call i_H_j(psi_det_sorted(1,1,i),psi_det_sorted(1,1,i),N_int,h00)
+  else if(degree .le. 2)then
+   call i_H_j(psi_det_sorted(1,1,i),psi_det_sorted(1,1,i),N_int,hii)
+   call i_H_j(psi_det_sorted(1,1,1),psi_det_sorted(1,1,i),N_int,hij)
    delta_e = hii - h00
    coef_1 = hij/(h00-hii)
    if(hij.ne.0.d0)then
@@ -65,25 +65,25 @@ subroutine routine
    else
     coef_2_2 = 0.d0
    endif
-   call get_excitation(psi_det(1,1,1),psi_det(1,1,i),exc,degree,phase,N_int)
+   call get_excitation(psi_det_sorted(1,1,1),psi_det_sorted(1,1,i),exc,degree,phase,N_int)
    call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
    print*,'phase = ',phase
    if(degree == 1)then
     print*,'s1',s1
     print*,'h1,p1 = ',h1,p1
     if(s1 == 1)then
-     norm_mono_a += dabs(psi_coef(i,1)/psi_coef(1,1))
-     norm_mono_a_2 += dabs(psi_coef(i,1)/psi_coef(1,1))**2
+     norm_mono_a += dabs(psi_coef_sorted(i,1)/psi_coef_sorted(1,1))
+     norm_mono_a_2 += dabs(psi_coef_sorted(i,1)/psi_coef_sorted(1,1))**2
      norm_mono_a_pert += dabs(coef_1)
      norm_mono_a_pert_2 += dabs(coef_1)**2
     else
-     norm_mono_b += dabs(psi_coef(i,1)/psi_coef(1,1))
-     norm_mono_b_2 += dabs(psi_coef(i,1)/psi_coef(1,1))**2
+     norm_mono_b += dabs(psi_coef_sorted(i,1)/psi_coef_sorted(1,1))
+     norm_mono_b_2 += dabs(psi_coef_sorted(i,1)/psi_coef_sorted(1,1))**2
      norm_mono_b_pert += dabs(coef_1)
      norm_mono_b_pert_2 += dabs(coef_1)**2
     endif
     double precision :: hmono,hdouble
-    call  i_H_j_verbose(psi_det(1,1,1),psi_det(1,1,i),N_int,hij,hmono,hdouble,phase)
+    call  i_H_j_verbose(psi_det_sorted(1,1,1),psi_det_sorted(1,1,i),N_int,hij,hmono,hdouble,phase)
     print*,'hmono         = ',hmono
     print*,'hdouble       = ',hdouble
     print*,'hmono+hdouble = ',hmono+hdouble
@@ -99,9 +99,9 @@ subroutine routine
    print*,'Delta E       = ',h00-hii
    print*,'coef pert (1) = ',coef_1
    print*,'coef 2x2      = ',coef_2_2
-   print*,'Delta E_corr  = ',psi_coef(i,1)/psi_coef(1,1) * hij
+   print*,'Delta E_corr  = ',psi_coef_sorted(i,1)/psi_coef_sorted(1,1) * hij
   endif
-   print*,'amplitude     = ',psi_coef(i,1)/psi_coef(1,1)
+   print*,'amplitude     = ',psi_coef_sorted(i,1)/psi_coef_sorted(1,1)
 
  enddo
 

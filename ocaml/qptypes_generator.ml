@@ -58,7 +58,7 @@ let input_data = "
 
 * Det_number_max : int
   assert (x > 0) ;
-  if (x > 50_00_000_000) then
+  if (x > 50_000_000_000) then
     warning \"More than 50 billion determinants\";
 
 * States_number : int
@@ -77,9 +77,6 @@ let input_data = "
   | 1 | 2 | 4 | 8 -> ()
   | _ -> raise (Invalid_argument \"Bit_kind should be (1|2|4|8).\")
   end;
-
-* Bitmask_number : int
-  assert (x > 0) ;
 
 * MO_coef : float
 

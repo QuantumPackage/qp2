@@ -8,6 +8,28 @@ eval set -- "$TEMP"
 
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
+unset CC
+unset CCXX
+
+# Force GCC instead of ICC for dependencies
+export CC=gcc
+
+
+# /!\ When updating version, update also etc files
+
+EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
+BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
+BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
+DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
+F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
+GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
+IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
+LIBCAP_URL="https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz"
+NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
+OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
+RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v1.0/resultsFile-v1.0.tar.gz"
+ZEROMQ_URL="https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.gz"
+ZLIB_URL="https://www.zlib.net/zlib-1.2.11.tar.gz"
 
 
 function help()
@@ -60,7 +82,7 @@ function execute () {
 }
 
 PACKAGES=""
-OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib.v0.11.0 ppx_sexp_conv ppx_deriving getopt"
+OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
 
 while true ; do
     case "$1" in
@@ -155,6 +177,19 @@ function find_dir() {
 }
 
 
+# Extract EZFIO if needed
+EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
+if [[ ${EZFIO} = $(not_found) ]] ; then
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --gunzip --extract --file ${EZFIO_TGZ} 
+              rm -rf ezfio
+              mv EZFIO ezfio
+EOF
+fi
+
+
+
 if [[ "${PACKAGES}.x" != ".x" ]] ; then
         printf "\e[0;31m"
         echo ""
@@ -183,9 +218,7 @@ for PACKAGE in ${PACKAGES} ; do
 
     if [[ ${PACKAGE} = ninja ]] ; then
 
-            download \
-              "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip" \
-              "${QP_ROOT}"/external/ninja.zip
+            download ${NINJA_URL} "${QP_ROOT}"/external/ninja.zip
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
               unzip "\${QP_ROOT}"/external/ninja.zip -d "\${QP_ROOT}"/bin
@@ -194,9 +227,7 @@ EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
-            download \
-              "ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2" \
-              "${QP_ROOT}"/external/gmp.tar.bz2
+            download ${GMP_URL} "${QP_ROOT}"/external/gmp.tar.bz2
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --bzip2 --extract --file gmp.tar.bz2
@@ -208,9 +239,7 @@ EOF
     
     elif [[ ${PACKAGE} = libcap ]] ; then
 
-            download \
-              "https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz" \
-              "${QP_ROOT}"/external/libcap.tar.gz
+            download ${LIBCAP_URL} "${QP_ROOT}"/external/libcap.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file libcap.tar.gz
@@ -221,9 +250,7 @@ EOF
 
     elif [[ ${PACKAGE} = bwrap ]] ; then
 
-            download \
-              "https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz" \
-              "${QP_ROOT}"/external/bwrap.tar.xz
+            download ${BUBBLE_URL} "${QP_ROOT}"/external/bwrap.tar.xz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --xz --extract --file bwrap.tar.xz
@@ -236,9 +263,7 @@ EOF
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
             # When changing version of irpf90, don't forget to update etc/irpf90.rc
-            download \
-              "https://gitlab.com/scemama/irpf90/-/archive/v1.7.5/irpf90-v1.7.5.tar.gz" \
-              "${QP_ROOT}"/external/irpf90.tar.gz
+            download ${IRPF90_URL} "${QP_ROOT}"/external/irpf90.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file irpf90.tar.gz
@@ -250,9 +275,7 @@ EOF
 
     elif [[ ${PACKAGE} = zeromq ]] ; then
 
-            download \
-              "https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.gz" \
-              "${QP_ROOT}"/external/zeromq.tar.gz
+            download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zeromq.tar.gz
@@ -266,9 +289,7 @@ EOF
 
     elif [[ ${PACKAGE} = f77zmq ]] ; then
 
-            download \
-              "https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz" \
-              "${QP_ROOT}"/external/f77_zmq.tar.gz
+            download ${F77ZMQ_URL} "${QP_ROOT}"/external/f77_zmq.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file f77_zmq.tar.gz
@@ -284,9 +305,7 @@ EOF
     
     elif [[ ${PACKAGE} = ocaml ]] ; then
 
-            download \
-              "https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh" \
-              "${QP_ROOT}"/external/opam_installer.sh
+            download ${OCAML_URL} "${QP_ROOT}"/external/opam_installer.sh
 
             if [[ -n ${TRAVIS} ]] ; then
                 # Special commands for Travis CI
@@ -336,24 +355,10 @@ EOF
             fi
 
             
-    elif [[ ${PACKAGE} = ezfio ]] ; then
-
-            download \
-              "https://gitlab.com/scemama/EZFIO/-/archive/v1.4.0/EZFIO-v1.4.0.tar.gz" \
-              "${QP_ROOT}"/external/ezfio.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ezfio.tar.gz
-              rm -rf ezfio
-              mv EZFIO-* ezfio
-EOF
-
 
     elif [[ ${PACKAGE} = zlib ]] ; then
 
-            download \
-              "https://www.zlib.net/zlib-1.2.11.tar.gz" \
-              "${QP_ROOT}"/external/zlib.tar.gz
+            download ${ZLIB_URL} "${QP_ROOT}"/external/zlib.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zlib.tar.gz
@@ -366,9 +371,7 @@ EOF
             
     elif [[ ${PACKAGE} = docopt ]] ; then
 
-            download \
-              "https://github.com/docopt/docopt/archive/0.6.2.tar.gz" \
-              "${QP_ROOT}"/external/docopt.tar.gz
+            download ${DOCOPT_URL} "${QP_ROOT}"/external/docopt.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file docopt.tar.gz 
@@ -379,21 +382,17 @@ EOF
 
     elif [[ ${PACKAGE} = resultsFile ]] ; then
 
-            download \
-              "https://gitlab.com/scemama/resultsFile/-/archive/master/resultsFile-master.tar.gz" \
-              "${QP_ROOT}"/external/resultsFile.tar.gz
+            download ${RESULTS_URL} "${QP_ROOT}"/external/resultsFile.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file resultsFile.tar.gz 
-              mv resultsFile-master/resultsFile "\${QP_ROOT}/external/Python/"
-              rm --recursive --force resultsFile-master resultsFile.tar.gz
+              mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
+              rm --recursive --force resultsFile-* resultsFile.tar.gz
 EOF
 
     elif [[ ${PACKAGE} = bats ]] ; then
 
-            download \
-              "https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz" \
-              "${QP_ROOT}"/external/bats.tar.gz
+            download ${BATS_URL} "${QP_ROOT}"/external/bats.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar -zxf bats.tar.gz 
@@ -438,15 +437,15 @@ if [[ ${ZLIB} = $(not_found) ]] ; then
         fail
 fi
 
-BWRAP=$(find_exe bwrap)
-if [[ ${BWRAP} = $(not_found) ]] ; then
-        error "Bubblewrap (bwrap) is not installed."
-        fail
-fi
-
 LIBCAP=$(find_lib -lcap)
 if [[ ${LIBCAP} = $(not_found) ]] ; then
         error "Libcap (libcap) is not installed."
+        fail
+fi
+
+BWRAP=$(find_exe bwrap)
+if [[ ${BWRAP} = $(not_found) ]] ; then
+        error "Bubblewrap (bwrap) is not installed."
         fail
 fi
 
@@ -459,12 +458,6 @@ fi
 OCAML=$(find_exe ocaml)
 if [[ ${OCAML} = $(not_found) ]] ; then
         error "OCaml (ocaml) compiler is not installed."
-        fail
-fi
-
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-        error "EZFIO (ezfio) is not installed."
         fail
 fi
 

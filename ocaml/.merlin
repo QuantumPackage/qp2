@@ -1,4 +1,4 @@
-PKG core ZMQ cryptokit
+PKG core zmq cryptokit
 B _build/
 
 

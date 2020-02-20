@@ -17,8 +17,8 @@ prefix = ""
 for f in functionals:
   print """
   %sif (trim(exchange_functional) == '%s') then
-    potential_x_alpha_ao = potential_x_alpha_ao_%s
-    potential_x_beta_ao  = potential_x_beta_ao_%s"""%(prefix, f, f, f)
+    potential_x_alpha_ao = ( 1.d0 - HF_exchange ) * potential_x_alpha_ao_%s
+    potential_x_beta_ao  = ( 1.d0 - HF_exchange ) * potential_x_beta_ao_%s"""%(prefix, f, f, f)
   prefix = "else "
 print """
   else
