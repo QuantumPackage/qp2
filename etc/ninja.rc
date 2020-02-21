@@ -1,13 +1,18 @@
 # Configuration for the Ninja package
 
-export NINJA=${QP_ROOT}/bin/ninja
+NINJA=$(command -v ninja)
+
+if [[ ${NINJA}.x == ".x" ]] ; then
+  NINJA=${QP_ROOT}/bin/ninja
+fi
+
+export NINJA
 
 function ninja () {
   if [[ -f ${QP_ROOT}/build.ninja ]] ; then
-	${QP_ROOT}/bin/ninja "$@"
+        ${QP_ROOT}/bin/ninja "$@"
   else
-	>&2 echo "Error: build.ninja does not exists.
+        >&2 echo "Error: build.ninja does not exists.
 You need to run ./configure  first."
   fi
-
 }
