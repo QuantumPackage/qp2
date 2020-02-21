@@ -248,6 +248,11 @@ BEGIN_PROVIDER [ double precision, one_e_spin_density_mo, (mo_num,mo_num) ]
 END_PROVIDER
 
 subroutine set_natural_mos
+  !todo: modify/implement for complex
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
    implicit none
    BEGIN_DOC
    ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
@@ -274,6 +279,11 @@ subroutine set_natural_mos
 
 end
 subroutine save_natural_mos
+  !todo: modify/implement for complex
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
    implicit none
    BEGIN_DOC
    ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
@@ -292,11 +302,19 @@ BEGIN_PROVIDER [ double precision, c0_weight, (N_states) ]
    if (N_states > 1) then
      integer                        :: i
      double precision               :: c
+     if (is_complex) then
+       do i=1,N_states
+         c0_weight(i) = 1.d-31
+         c = maxval(cdabs(psi_coef_complex(:,i) * psi_coef_complex(:,i)))
+         c0_weight(i) = 1.d0/(c+1.d-20)
+       enddo
+     else
      do i=1,N_states
        c0_weight(i) = 1.d-31
        c = maxval(psi_coef(:,i) * psi_coef(:,i))
        c0_weight(i) = 1.d0/(c+1.d-20)
      enddo
+     endif
      c = 1.d0/minval(c0_weight(:))
      do i=1,N_states
        c0_weight(i) = c0_weight(i) * c
@@ -398,8 +416,23 @@ subroutine get_occupation_from_dets(istate,occupation)
   ASSERT (istate <= N_states)
 
   occupation = 0.d0
-  double precision, external :: u_dot_u
+  
+  if (is_complex) then
+    double precision, external :: u_dot_u_complex
+    norm_2 = 1.d0/u_dot_u_complex(psi_coef_complex(1,istate),N_det)
 
+    do i=1,N_det
+      c = cdabs(psi_coef_complex(i,istate)*psi_coef_complex(i,istate))*norm_2
+      call bitstring_to_list_ab(psi_det(1,1,i), list, n_elements, N_int)
+      do ispin=1,2
+        do j=1,n_elements(ispin)
+          ASSERT ( list(j,ispin) < mo_num )
+          occupation( list(j,ispin) ) += c
+        enddo
+      enddo
+    enddo
+  else
+  double precision, external :: u_dot_u
   norm_2 = 1.d0/u_dot_u(psi_coef(1,istate),N_det)
 
   do i=1,N_det
@@ -412,5 +445,6 @@ subroutine get_occupation_from_dets(istate,occupation)
       enddo
     enddo
   enddo
+  endif
 end
 

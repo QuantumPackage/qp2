@@ -409,6 +409,7 @@ BEGIN_TEMPLATE
 SUBST [ X, type ]
    ; real ;;
  d ; double precision ;;
+ cd; complex*16 ;;
  i ; integer ;;
  i8; integer*8 ;;
  i2; integer*2 ;;

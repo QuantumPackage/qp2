@@ -1,4 +1,5 @@
 subroutine u_0_S2_u_0_complex(e_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
+  !todo: modify/implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
 !  use bitmasks
@@ -28,6 +29,7 @@ end
 
 
 subroutine S2_u_0_complex(v_0,u_0,n,keys_tmp,Nint)
+  !todo: modify/implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
 !  use bitmasks
@@ -46,6 +48,7 @@ subroutine S2_u_0_complex(v_0,u_0,n,keys_tmp,Nint)
 end
 
 subroutine S2_u_0_nstates_complex(v_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
+  !todo: modify/implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
 !  use bitmasks
@@ -180,6 +183,7 @@ end
 
 
 subroutine get_uJ_s2_uI_complex(psi_keys_tmp,psi_coefs_tmp,n,nmax_coefs,nmax_keys,s2,nstates)
+  !todo: modify/implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
 !  implicit none
@@ -232,6 +236,7 @@ end
 
 
 subroutine i_S2_psi_minilist_complex(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_S2_psi_array)
+  !todo: modify/implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
 !  use bitmasks
