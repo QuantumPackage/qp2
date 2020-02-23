@@ -308,7 +308,7 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
 end
 
 subroutine write_spindeterminants
-  !todo: modify for complex
+  !todo: modify for complex (not called anywhere?)
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -568,11 +568,11 @@ BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_transp_values, (N_det,N_
   ! Rows are $\alpha$ determinants and columns are $\beta$, but the matrix is stored in row major
   ! format.
   END_DOC
-  integer                        :: i,j,k,l
+  integer                        :: k,l
 
   PROVIDE psi_bilinear_matrix_transp_rows
 
-  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l)
+  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,l)
   do l=1,N_states
     !$OMP DO
     do k=1,N_det
@@ -600,11 +600,11 @@ BEGIN_PROVIDER  [ complex*16, psi_bilinear_matrix_transp_values_complex, (N_det,
   ! Rows are $\alpha$ determinants and columns are $\beta$, but the matrix is stored in row major
   ! format.
   END_DOC
-  integer                        :: i,j,k,l
+  integer                        :: k,l
 
   PROVIDE psi_bilinear_matrix_transp_rows
 
-  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l)
+  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,l)
   do l=1,N_states
     !$OMP DO
     do k=1,N_det
@@ -758,7 +758,7 @@ BEGIN_PROVIDER [ complex*16, psi_bilinear_matrix_complex, (N_det_alpha_unique,N_
 END_PROVIDER
 
 subroutine create_wf_of_psi_bilinear_matrix(truncate)
-  !todo: modify for complex
+  !todo: modify for complex (not called anywhere?)
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -834,7 +834,7 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
 end
 
 subroutine generate_all_alpha_beta_det_products
-  !todo: modify for complex
+  !todo: modify for complex (only used by create_wf_of_psi_bilinear_matrix?)
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -982,7 +982,7 @@ end
 
 
 subroutine copy_psi_bilinear_to_psi(psi, isize)
-  !todo: modify for complex
+  !todo: modify for complex (not called anywhere?)
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -1423,7 +1423,7 @@ END_TEMPLATE
 
 
 subroutine wf_of_psi_bilinear_matrix(truncate)
-  !todo: modify for complex
+  !todo: modify for complex (not called anywhere?)
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
