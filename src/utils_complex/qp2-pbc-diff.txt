@@ -24,7 +24,6 @@ determinants:
            need to modify ocaml for psi_coef_complex_qp_edit?
            save_wavefunction_specified? qp_edit save? (wrong for real?)
   (done) energy.irp.f
-           needs diag_h_mat_elem function to be modified for complex
   (????) example.irp.f
   (****) EZFIO.cfg
   (done) filter_connected.irp.f
@@ -46,7 +45,7 @@ determinants:
            made copies of needed functions for complex
            still need to do implementation
   (done) single_excitations.irp.f
-  (****) single_excitation_two_e.irp.f
+  (done?)single_excitation_two_e.irp.f
   (****) slater_rules.irp.f
            made copies of needed functions for complex
            still need to do implementation
@@ -59,6 +58,7 @@ determinants:
            new provider for psi_bilinear_matrix_values_complex
            same for bilinear matrix transp (no conjugate)
            done except for specific functions that are commented with todo
+           remaining functions aren't called anywhere, so don't worry about them for now
   (****) two_e_density_matrix.irp.pouet
   (done) utils.irp.f
   (****) zmq.irp.f
