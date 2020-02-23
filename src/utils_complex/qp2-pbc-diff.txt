@@ -8,7 +8,7 @@ general:
 determinants:
   (done) connected_to_ref.irp.f
   (done) create_excitations.irp.f
-  (done?)density_matrix{,_complex}.irp.f
+  (done?) density_matrix{,_complex}.irp.f
            no one_e_dm_dagger_mo_spin_index_complex
            need to test for complex
   (done) determinants_bitmasks.irp.f
@@ -45,11 +45,11 @@ determinants:
            made copies of needed functions for complex
            still need to do implementation
   (done) single_excitations.irp.f
-  (done?)single_excitation_two_e.irp.f
+  (done?) single_excitation_two_e.irp.f
   (****) slater_rules.irp.f
            made copies of needed functions for complex
            still need to do implementation
-  (****) slater_rules_wee_mono.irp.f
+  (done?) slater_rules_wee_mono.irp.f
   (done) sort_dets_ab.irp.f
   spindeterminants.ezfio_config
            need svd complex?
