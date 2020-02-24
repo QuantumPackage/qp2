@@ -2305,7 +2305,7 @@ end
 
 
 subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
-  !todo: modify/implement for complex
+  !todo: check hole/particle index ordering for complex
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -2318,17 +2318,18 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hij, s2
+  complex*16, intent(out)  :: hij
+  double precision, intent(out)  :: s2
 
   integer                        :: exc(0:2,2,2)
   integer                        :: degree
-  double precision               :: get_two_e_integral
+  complex*16               :: get_two_e_integral_complex
   integer                        :: m,n,p,q
   integer                        :: i,j,k
   integer                        :: occ(Nint*bit_kind_size,2)
-  double precision               :: diag_H_mat_elem, phase
+  double precision               :: diag_h_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals_complex
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -2337,8 +2338,8 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
   ASSERT (sum(popcnt(key_j(:,1))) == elec_alpha_num)
   ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
 
-  hij = 0.d0
-  s2 = 0d0
+  hij = (0.d0,0.d0)
+  s2 = 0.d0
   !DIR$ FORCEINLINE
   call get_excitation_degree(key_i,key_j,degree,Nint)
   integer :: spin
@@ -2351,40 +2352,42 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
           s2 =  -phase
         endif
         if(exc(1,1,1) == exc(1,2,2) )then
-          hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+          !TODO: check indices
+          hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          hij = phase * big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+          !TODO: check indices
+          hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
         else
-          hij = phase*get_two_e_integral(                          &
+          hij = phase*get_two_e_integral_complex(                      &
               exc(1,1,1),                                              &
               exc(1,1,2),                                              &
               exc(1,2,1),                                              &
-              exc(1,2,2) ,mo_integrals_map)
+              exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
         endif
       ! Double alpha
       else if (exc(0,1,1) == 2) then
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(1,2,1),                                              &
-            exc(2,2,1) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(2,2,1),                                              &
-            exc(1,2,1) ,mo_integrals_map) )
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
       ! Double beta
       else if (exc(0,1,2) == 2) then
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(1,2,2),                                              &
-            exc(2,2,2) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(2,2,2),                                              &
-            exc(1,2,2) ,mo_integrals_map) )
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
       endif
     case (1)
       call get_single_excitation(key_i,key_j,exc,phase,Nint)
@@ -2401,19 +2404,20 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
         p = exc(1,2,2)
         spin = 2
       endif
-      call get_single_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
+      !TODO: check indices
+      call get_single_excitation_from_fock_complex(key_i,key_j,p,m,spin,phase,hij)
 
     case (0)
       double precision, external :: diag_S_mat_elem
       s2 = diag_S_mat_elem(key_i,Nint)
-      hij = diag_H_mat_elem(key_i,Nint)
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
   end select
 end
 
 
 
 subroutine i_H_j_complex(key_i,key_j,Nint,hij)
-  !todo: modify/implement for complex
+  !todo: check index ordering for complex
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -2425,17 +2429,17 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hij
+  complex*16, intent(out)  :: hij
 
   integer                        :: exc(0:2,2,2)
   integer                        :: degree
-  double precision               :: get_two_e_integral
+  complex*16               :: get_two_e_integral_complex
   integer                        :: m,n,p,q
   integer                        :: i,j,k
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals_complex
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -2445,7 +2449,7 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
   ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
 
 
-  hij = 0.d0
+  hij = (0.d0,0.d0)
   !DIR$ FORCEINLINE
   call get_excitation_degree(key_i,key_j,degree,Nint)
   integer :: spin
@@ -2455,40 +2459,42 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
       if (exc(0,1,1) == 1) then
         ! Single alpha, single beta
         if(exc(1,1,1) == exc(1,2,2) )then
-          hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+          !todo: check indices
+          hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          hij = phase * big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+          !todo: check indices
+          hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
         else
-          hij = phase*get_two_e_integral(                          &
-              exc(1,1,1),                                              &
-              exc(1,1,2),                                              &
-              exc(1,2,1),                                              &
-              exc(1,2,2) ,mo_integrals_map)
+          hij = phase*get_two_e_integral_complex(                     &
+              exc(1,1,1),                                             &
+              exc(1,1,2),                                             &
+              exc(1,2,1),                                             &
+              exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
         endif
       else if (exc(0,1,1) == 2) then
         ! Double alpha
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(1,2,1),                                              &
-            exc(2,2,1) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(2,2,1),                                              &
-            exc(1,2,1) ,mo_integrals_map) )
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
       else if (exc(0,1,2) == 2) then
         ! Double beta
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(1,2,2),                                              &
-            exc(2,2,2) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(2,2,2),                                              &
-            exc(1,2,2) ,mo_integrals_map) )
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
       endif
     case (1)
       call get_single_excitation(key_i,key_j,exc,phase,Nint)
@@ -2505,10 +2511,11 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
         p = exc(1,2,2)
         spin = 2
       endif
-      call get_single_excitation_from_fock(key_i,key_j,p,m,spin,phase,hij)
+          !todo: check indices
+      call get_single_excitation_from_fock_complex(key_i,key_j,p,m,spin,phase,hij)
 
     case (0)
-      hij = diag_H_mat_elem(key_i,Nint)
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
   end select
 end
 
@@ -2517,7 +2524,7 @@ end
 
 
 subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
-  !todo: modify/implement for complex
+  !todo: check index ordering for complex
   if (is_complex) then
     print*,irp_here,' not implemented for complex'
     stop -1
@@ -2529,11 +2536,12 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hij,hmono,hdouble,phase
+  complex*16, intent(out)  :: hij,hmono,hdouble
+  double precision, intent(out)  :: phase
 
   integer                        :: exc(0:2,2,2)
   integer                        :: degree
-  double precision               :: get_two_e_integral
+  complex*16               :: get_two_e_integral_complex
   integer                        :: m,n,p,q
   integer                        :: i,j,k
   integer                        :: occ(Nint*bit_kind_size,2)
@@ -2550,9 +2558,9 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
   ASSERT (sum(popcnt(key_j(:,1))) == elec_alpha_num)
   ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
 
-  hij = 0.d0
-  hmono = 0.d0
-  hdouble = 0.d0
+  hij = (0.d0,0.d0)
+  hmono = (0.d0,0.d0)
+  hdouble = (0.d0,0.d0)
   !DIR$ FORCEINLINE
   call get_excitation_degree(key_i,key_j,degree,Nint)
   select case (degree)
@@ -2560,36 +2568,36 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
       call get_double_excitation(key_i,key_j,exc,phase,Nint)
       if (exc(0,1,1) == 1) then
         ! Single alpha, single beta
-        hij = phase*get_two_e_integral(                          &
+        hij = phase*get_two_e_integral_complex(                      &
             exc(1,1,1),                                              &
             exc(1,1,2),                                              &
             exc(1,2,1),                                              &
-            exc(1,2,2) ,mo_integrals_map)
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
       else if (exc(0,1,1) == 2) then
         ! Double alpha
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(1,2,1),                                              &
-            exc(2,2,1) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,1),                                              &
             exc(2,1,1),                                              &
             exc(2,2,1),                                              &
-            exc(1,2,1) ,mo_integrals_map) )
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
 
       else if (exc(0,1,2) == 2) then
         ! Double beta
-        hij = phase*(get_two_e_integral(                         &
+        hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(1,2,2),                                              &
-            exc(2,2,2) ,mo_integrals_map) -                          &
-            get_two_e_integral(                                  &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
             exc(1,1,2),                                              &
             exc(2,1,2),                                              &
             exc(2,2,2),                                              &
-            exc(1,2,2) ,mo_integrals_map) )
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
       endif
     case (1)
       call get_single_excitation(key_i,key_j,exc,phase,Nint)
@@ -2603,15 +2611,15 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
         do k = 1, elec_alpha_num
           i = occ(k,1)
           if (.not.has_mipi(i)) then
-            mipi(i) = get_two_e_integral(m,i,p,i,mo_integrals_map)
-            miip(i) = get_two_e_integral(m,i,i,p,mo_integrals_map)
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            miip(i) = get_two_e_integral_complex(m,i,i,p,mo_integrals_map,mo_integrals_map_2)
             has_mipi(i) = .True.
           endif
         enddo
         do k = 1, elec_beta_num
           i = occ(k,2)
           if (.not.has_mipi(i)) then
-            mipi(i) = get_two_e_integral(m,i,p,i,mo_integrals_map)
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
             has_mipi(i) = .True.
           endif
         enddo
@@ -2630,15 +2638,15 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
         do k = 1, elec_beta_num
           i = occ(k,2)
           if (.not.has_mipi(i)) then
-            mipi(i) = get_two_e_integral(m,i,p,i,mo_integrals_map)
-            miip(i) = get_two_e_integral(m,i,i,p,mo_integrals_map)
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            miip(i) = get_two_e_integral_complex(m,i,i,p,mo_integrals_map,mo_integrals_map_2)
             has_mipi(i) = .True.
           endif
         enddo
         do k = 1, elec_alpha_num
           i = occ(k,1)
           if (.not.has_mipi(i)) then
-            mipi(i) = get_two_e_integral(m,i,p,i,mo_integrals_map)
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
             has_mipi(i) = .True.
           endif
         enddo
@@ -2651,12 +2659,12 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
         enddo
 
       endif
-      hmono = mo_one_e_integrals(m,p)
+      hmono = mo_one_e_integrals_complex(m,p)
       hij = phase*(hdouble + hmono)
 
     case (0)
       phase = 1.d0
-      hij = diag_H_mat_elem(key_i,Nint)
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
   end select
 end
 

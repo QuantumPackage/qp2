@@ -49,7 +49,9 @@ determinants:
   (****) slater_rules.irp.f
            made copies of needed functions for complex
            still need to do implementation
+           check indices for complex
   (done?) slater_rules_wee_mono.irp.f
+            check indices for complex
   (done) sort_dets_ab.irp.f
   spindeterminants.ezfio_config
            need svd complex?
