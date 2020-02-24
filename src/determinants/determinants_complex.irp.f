@@ -15,9 +15,9 @@ BEGIN_PROVIDER [ complex*16, psi_coef_complex, (psi_det_size,N_states) ]
   character*(64)                 :: label
 
   PROVIDE read_wf N_det mo_label ezfio_filename
-  psi_coef = (0.d0,0.d0)
+  psi_coef_complex = (0.d0,0.d0)
   do i=1,min(N_states,psi_det_size)
-    psi_coef(i,i) = (1.d0,0.d0)
+    psi_coef_complex(i,i) = (1.d0,0.d0)
   enddo
 
   if (mpi_master) then

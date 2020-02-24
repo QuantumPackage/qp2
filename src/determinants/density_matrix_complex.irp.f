@@ -106,7 +106,7 @@ END_PROVIDER
   complex*16, allocatable  :: tmp_a(:,:,:), tmp_b(:,:,:)
   integer                        :: krow, kcol, lrow, lcol
 
-  PROVIDE psi_det
+  PROVIDE psi_det psi_coef_complex
 
   one_e_dm_mo_alpha_complex = (0.d0,0.d0)
   one_e_dm_mo_beta_complex  = (0.d0,0.d0)
