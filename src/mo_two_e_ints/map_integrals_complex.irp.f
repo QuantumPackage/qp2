@@ -39,7 +39,7 @@ BEGIN_PROVIDER [ complex*16, mo_integrals_cache_complex, (0_8:128_8*128_8*128_8*
        do i=mo_integrals_cache_min_8,mo_integrals_cache_max_8
          i4 = int(i,4)
          !DIR$ FORCEINLINE
-         integral = get_two_e_integral_complex_simple(i,j,k,l,&
+         integral = get_two_e_integral_complex_simple(i4,j4,k4,l4,&
                     mo_integrals_map,mo_integrals_map_2)
          ii = l-mo_integrals_cache_min_8
          ii = ior( shiftl(ii,7), k-mo_integrals_cache_min_8)
