@@ -1,6 +1,6 @@
 # Configuration for the Ninja package
 
-NINJA=$(command -v ninja)
+NINJA=${NINJA:-$(command -v ninja)}
 
 if [[ ${NINJA}.x == ".x" ]] ; then
   NINJA=${QP_ROOT}/bin/ninja
