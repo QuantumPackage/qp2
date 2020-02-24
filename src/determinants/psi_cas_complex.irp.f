@@ -59,7 +59,7 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas_complex,  (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ complex*16, psi_non_cas_coef,_complex (psi_det_size,n_states) ]
+&BEGIN_PROVIDER [ complex*16, psi_non_cas_coef_complex, (psi_det_size,n_states) ]
 &BEGIN_PROVIDER [ integer, idx_non_cas_complex,  (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_det_non_cas_complex ]
  implicit none
