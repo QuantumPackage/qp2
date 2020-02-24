@@ -34,14 +34,12 @@ determinants:
            might be able to combine some providers??
   (done) psi_energy_mono_elec.irp.f
   (done) ref_bitmask.irp.f
-  (****) s2{,_complex}.irp.f
-           made copies of needed functions for complex
-           still need to do implementation
+  (done?) s2{,_complex}.irp.f
+           remaining functions not needed?
   (done) single_excitations.irp.f
   (done?) single_excitation_two_e.irp.f
   (done?) slater_rules.irp.f
   (done?) slater_rules_wee_mono.irp.f
-            check indices for complex
   (done) sort_dets_ab.irp.f
   spindeterminants.ezfio_config
            need svd complex?
