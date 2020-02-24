@@ -2761,11 +2761,6 @@ end
 
 
 subroutine i_H_j_single_spin_complex(key_i,key_j,Nint,spin,hij)
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2774,12 +2769,12 @@ subroutine i_H_j_single_spin_complex(key_i,key_j,Nint,spin,hij)
   END_DOC
   integer, intent(in)            :: Nint, spin
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hij
+  complex*16, intent(out)  :: hij
 
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
 
   call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
   call get_single_excitation_from_fock(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
