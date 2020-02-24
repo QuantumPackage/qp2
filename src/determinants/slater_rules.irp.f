@@ -2781,11 +2781,6 @@ subroutine i_H_j_single_spin_complex(key_i,key_j,Nint,spin,hij)
 end
 
 subroutine i_H_j_double_spin_complex(key_i,key_j,Nint,hij)
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2794,32 +2789,27 @@ subroutine i_H_j_double_spin_complex(key_i,key_j,Nint,hij)
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint), key_j(Nint)
-  double precision, intent(out)  :: hij
+  complex*16, intent(out)  :: hij
 
   integer                        :: exc(0:2,2)
   double precision               :: phase
-  double precision, external     :: get_two_e_integral
+  complex*16, external     :: get_two_e_integral_complex
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
   call get_double_excitation_spin(key_i,key_j,exc,phase,Nint)
-  hij = phase*(get_two_e_integral(                             &
+  hij = phase*(get_two_e_integral_complex(                             &
       exc(1,1),                                                    &
       exc(2,1),                                                    &
       exc(1,2),                                                    &
-      exc(2,2), mo_integrals_map) -                                &
-      get_two_e_integral(                                      &
+      exc(2,2), mo_integrals_map,mo_integrals_map_2) -                                &
+      get_two_e_integral_complex(                                      &
       exc(1,1),                                                    &
       exc(2,1),                                                    &
       exc(2,2),                                                    &
-      exc(1,2), mo_integrals_map) )
+      exc(1,2), mo_integrals_map,mo_integrals_map_2) )
 end
 
 subroutine i_H_j_double_alpha_beta_complex(key_i,key_j,Nint,hij)
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2828,26 +2818,26 @@ subroutine i_H_j_double_alpha_beta_complex(key_i,key_j,Nint,hij)
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hij
+  complex*16, intent(out)  :: hij
 
   integer                        :: exc(0:2,2,2)
   double precision               :: phase, phase2
-  double precision, external     :: get_two_e_integral
+  complex*16, external     :: get_two_e_integral_complex
 
-  PROVIDE big_array_exchange_integrals mo_two_e_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
 
   call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
   call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
   phase = phase*phase2
   if (exc(1,1,1) == exc(1,2,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+    hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
   else if (exc(1,2,1) == exc(1,1,2)) then
-    hij = phase * big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+    hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
   else
-    hij = phase*get_two_e_integral(                              &
+    hij = phase*get_two_e_integral_complex(                              &
         exc(1,1,1),                                                  &
         exc(1,1,2),                                                  &
         exc(1,2,1),                                                  &
-        exc(1,2,2) ,mo_integrals_map)
+        exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
   endif
 end
