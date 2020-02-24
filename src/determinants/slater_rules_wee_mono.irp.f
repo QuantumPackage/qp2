@@ -389,11 +389,6 @@ end
 
 
 subroutine i_H_j_mono_spin_one_e_complex(key_i,key_j,Nint,spin,hij)
-  !todo: check hole/particle m/p ordering?
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -415,11 +410,6 @@ subroutine i_H_j_mono_spin_one_e_complex(key_i,key_j,Nint,spin,hij)
 end
 
 subroutine i_H_j_one_e_complex(key_i,key_j,Nint,hij)
-  !todo: check hole/particle m/p ordering?
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -438,7 +428,7 @@ subroutine i_H_j_one_e_complex(key_i,key_j,Nint,hij)
    return
   endif
   if(degree==0)then
-   hij = dcmplx(diag_H_mat_elem_one_e(key_i,N_int),0.d0)
+   hij = dcmplx(diag_h_mat_elem_one_e(key_i,N_int),0.d0)
   else
    call get_single_excitation(key_i,key_j,exc,phase,Nint)
    if (exc(0,1,1) == 1) then
@@ -456,11 +446,6 @@ subroutine i_H_j_one_e_complex(key_i,key_j,Nint,hij)
 end
 
 subroutine i_H_j_two_e_complex(key_i,key_j,Nint,hij)
-  !todo: check hole/particle m/p ordering?
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -547,7 +532,7 @@ subroutine i_H_j_two_e_complex(key_i,key_j,Nint,hij)
         p = exc(1,2,2)
         spin = 2
       endif
-      call single_excitation_wee_complex(key_i,key_j,p,m,spin,phase,hij)
+      call single_excitation_wee_complex(key_i,key_j,m,p,spin,phase,hij)
     case (0)
       double precision :: diag_wee_mat_elem
       hij = dcmplx(diag_wee_mat_elem(key_i,Nint),0.d0)

@@ -39,10 +39,7 @@ determinants:
            still need to do implementation
   (done) single_excitations.irp.f
   (done?) single_excitation_two_e.irp.f
-  (****) slater_rules.irp.f
-           made copies of needed functions for complex
-           still need to do implementation
-           check indices for complex
+  (done?) slater_rules.irp.f
   (done?) slater_rules_wee_mono.irp.f
             check indices for complex
   (done) sort_dets_ab.irp.f
@@ -157,6 +154,7 @@ NOTES:
   indices out of order; needed to switch for complex:
     i_h_j_s2 for singles
     i_h_j for singles
+    i_h_j_two_e for singles
 
 ############################
 #      utils, ezfio, ...   #
