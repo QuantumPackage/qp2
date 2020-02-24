@@ -1582,11 +1582,6 @@ end
 
 
 double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2305,11 +2300,6 @@ end
 
 
 subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
-  !todo: check hole/particle index ordering for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2352,10 +2342,8 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
           s2 =  -phase
         endif
         if(exc(1,1,1) == exc(1,2,2) )then
-          !TODO: check indices
           hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          !TODO: check indices
           hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
         else
           hij = phase*get_two_e_integral_complex(                      &
@@ -2404,8 +2392,7 @@ subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
         p = exc(1,2,2)
         spin = 2
       endif
-      !TODO: check indices
-      call get_single_excitation_from_fock_complex(key_i,key_j,p,m,spin,phase,hij)
+      call get_single_excitation_from_fock_complex(key_i,key_j,m,p,spin,phase,hij)
 
     case (0)
       double precision, external :: diag_S_mat_elem
@@ -2417,11 +2404,6 @@ end
 
 
 subroutine i_H_j_complex(key_i,key_j,Nint,hij)
-  !todo: check index ordering for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -2459,10 +2441,8 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
       if (exc(0,1,1) == 1) then
         ! Single alpha, single beta
         if(exc(1,1,1) == exc(1,2,2) )then
-          !todo: check indices
           hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          !todo: check indices
           hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
         else
           hij = phase*get_two_e_integral_complex(                     &
@@ -2511,8 +2491,7 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
         p = exc(1,2,2)
         spin = 2
       endif
-          !todo: check indices
-      call get_single_excitation_from_fock_complex(key_i,key_j,p,m,spin,phase,hij)
+      call get_single_excitation_from_fock_complex(key_i,key_j,m,p,spin,phase,hij)
 
     case (0)
       hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
@@ -2524,11 +2503,6 @@ end
 
 
 subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
-  !todo: check index ordering for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   BEGIN_DOC

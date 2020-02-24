@@ -154,7 +154,9 @@ NOTES:
     <ij|kl>_{4,n} = <ij|kl>_{8,n} + <(k+1)j|i(l+1)>_{8,n-1}
   
 
-
+  indices out of order; needed to switch for complex:
+    i_h_j_s2 for singles
+    i_h_j for singles
 
 ############################
 #      utils, ezfio, ...   #
