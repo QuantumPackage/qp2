@@ -70,62 +70,69 @@ END_PROVIDER
 !                                                                              !
 !==============================================================================!
 
-!TODO: implement for complex (new psi_det_sorted? reuse? combine complex provider with real?)
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_complex, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ complex*16, psi_coef_sorted_complex, (psi_det_size,N_states) ]
-&BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted_complex, (psi_det_size) ]
-&BEGIN_PROVIDER [ integer, psi_det_sorted_order_complex, (psi_det_size) ]
-   implicit none
-   BEGIN_DOC
-   ! Wave function sorted by determinants contribution to the norm (state-averaged)
-   !
-   ! psi_det_sorted_order(i) -> k : index in psi_det
-   END_DOC
-   integer                        :: i,j,k
-   integer, allocatable           :: iorder(:)
-   allocate ( iorder(N_det) )
-   do i=1,N_det
-     psi_average_norm_contrib_sorted_complex(i) = -psi_average_norm_contrib(i)
-     iorder(i) = i
-   enddo
-   call dsort(psi_average_norm_contrib_sorted_complex,iorder,N_det)
-   do i=1,N_det
-     do j=1,N_int
-       psi_det_sorted_complex(j,1,i) = psi_det(j,1,iorder(i))
-       psi_det_sorted_complex(j,2,i) = psi_det(j,2,iorder(i))
-     enddo
-     do k=1,N_states
-       psi_coef_sorted_complex(i,k) = psi_coef_complex(iorder(i),k)
-     enddo
-     psi_average_norm_contrib_sorted_complex(i) = -psi_average_norm_contrib_sorted_complex(i)
-   enddo
-   do i=1,N_det
-     psi_det_sorted_order_complex(iorder(i)) = i
-   enddo
-
-   psi_det_sorted_complex(:,:,N_det+1:psi_det_size) = 0_bit_kind
-   psi_coef_sorted_complex(N_det+1:psi_det_size,:) = (0.d0,0.d0)
-   psi_average_norm_contrib_sorted_complex(N_det+1:psi_det_size) = 0.d0
-   psi_det_sorted_order_complex(N_det+1:psi_det_size) = 0
-
-   deallocate(iorder)
-
+BEGIN_PROVIDER [ complex*16, psi_coef_sorted_complex, (psi_det_size,N_states) ]
+  implicit none
+  integer                        :: i,j,k
+  do i=1,N_det
+    j=psi_det_sorted_order(i)
+    do k=1,N_states
+      psi_coef_sorted_complex(j,k) = psi_coef_complex(i,k)
+    enddo
+  enddo
+  psi_coef_sorted_complex(N_det+1:psi_det_size,:) = (0.d0,0.d0)
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit_complex, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ complex*16, psi_coef_sorted_bit_complex, (psi_det_size,N_states) ]
-   implicit none
-   BEGIN_DOC
-   ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
-   ! They are sorted by determinants interpreted as integers. Useful
-   ! to accelerate the search of a random determinant in the wave
-   ! function.
-   END_DOC
+!!TODO: implement for complex (new psi_det_sorted? reuse? combine complex provider with real?)
+! BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_complex, (N_int,2,psi_det_size) ]
+!&BEGIN_PROVIDER [ complex*16, psi_coef_sorted_complex, (psi_det_size,N_states) ]
+!&BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted_complex, (psi_det_size) ]
+!&BEGIN_PROVIDER [ integer, psi_det_sorted_order_complex, (psi_det_size) ]
+!   implicit none
+!   BEGIN_DOC
+!   ! Wave function sorted by determinants contribution to the norm (state-averaged)
+!   !
+!   ! psi_det_sorted_order(i) -> k : index in psi_det
+!   END_DOC
+!   integer                        :: i,j,k
+!   integer, allocatable           :: iorder(:)
+!   allocate ( iorder(N_det) )
+!   do i=1,N_det
+!     psi_average_norm_contrib_sorted_complex(i) = -psi_average_norm_contrib(i)
+!     iorder(i) = i
+!   enddo
+!   call dsort(psi_average_norm_contrib_sorted_complex,iorder,N_det)
+!   do i=1,N_det
+!     do j=1,N_int
+!       psi_det_sorted_complex(j,1,i) = psi_det(j,1,iorder(i))
+!       psi_det_sorted_complex(j,2,i) = psi_det(j,2,iorder(i))
+!     enddo
+!     do k=1,N_states
+!       psi_coef_sorted_complex(i,k) = psi_coef_complex(iorder(i),k)
+!     enddo
+!     psi_average_norm_contrib_sorted_complex(i) = -psi_average_norm_contrib_sorted_complex(i)
+!   enddo
+!   do i=1,N_det
+!     psi_det_sorted_order_complex(iorder(i)) = i
+!   enddo
+!
+!   psi_det_sorted_complex(:,:,N_det+1:psi_det_size) = 0_bit_kind
+!   psi_coef_sorted_complex(N_det+1:psi_det_size,:) = (0.d0,0.d0)
+!   psi_average_norm_contrib_sorted_complex(N_det+1:psi_det_size) = 0.d0
+!   psi_det_sorted_order_complex(N_det+1:psi_det_size) = 0
+!
+!   deallocate(iorder)
+!
+!END_PROVIDER
 
-   call sort_dets_by_det_search_key_complex(N_det, psi_det, psi_coef_complex, &
-                                 size(psi_coef_complex,1), psi_det_sorted_bit_complex, &
-                                 psi_coef_sorted_bit_complex, N_states)
 
+BEGIN_PROVIDER [ complex*16, psi_coef_sorted_bit_complex, (psi_det_size,N_states) ]
+  implicit none
+  integer :: i,k
+  do i=1,N_det
+    do k=1,N_states
+      psi_coef_sorted_bit_complex(i,k) = psi_coef_complex(psi_det_sorted_bit_order(i),k)
+    enddo
+  enddo
 END_PROVIDER
 
 subroutine sort_dets_by_det_search_key_complex(Ndet, det_in, coef_in, sze, det_out, coef_out, N_st)
