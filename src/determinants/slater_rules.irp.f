@@ -2702,23 +2702,18 @@ end
 
 
 subroutine i_H_psi_minilist_complex(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
   use bitmasks
   implicit none
   integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate,idx_key(Ndet), N_minilist
   integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
   integer(bit_kind), intent(in)  :: key(Nint,2)
-  double precision, intent(in)   :: coef(Ndet_max,Nstate)
-  double precision, intent(out)  :: i_H_psi_array(Nstate)
+  complex*16, intent(in)   :: coef(Ndet_max,Nstate)
+  complex*16, intent(out)  :: i_H_psi_array(Nstate)
 
   integer                        :: i, ii,j, i_in_key, i_in_coef
   double precision               :: phase
   integer                        :: exc(0:2,2,2)
-  double precision               :: hij
+  complex*16               :: hij
   integer, allocatable           :: idx(:)
   BEGIN_DOC
 ! Computes $\langle i|H|\Psi \rangle = \sum_J c_J \langle i|H|J\rangle$.
@@ -2735,14 +2730,14 @@ subroutine i_H_psi_minilist_complex(key,keys,idx_key,N_minilist,coef,Nint,Ndet,N
   allocate(idx(0:Ndet))
   i_H_psi_array = 0.d0
 
-  call filter_connected_i_H_psi0(keys,key,Nint,N_minilist,idx)
+  call filter_connected_i_h_psi0(keys,key,Nint,N_minilist,idx)
   if (Nstate == 1) then
 
     do ii=1,idx(0)
       i_in_key = idx(ii)
       i_in_coef = idx_key(idx(ii))
       !DIR$ FORCEINLINE
-      call i_H_j(keys(1,1,i_in_key),key,Nint,hij)
+      call i_h_j_complex(key,keys(1,1,i_in_key),Nint,hij)
       ! TODO : Cache misses
       i_H_psi_array(1) = i_H_psi_array(1) + coef(i_in_coef,1)*hij
     enddo
@@ -2753,7 +2748,7 @@ subroutine i_H_psi_minilist_complex(key,keys,idx_key,N_minilist,coef,Nint,Ndet,N
       i_in_key = idx(ii)
       i_in_coef = idx_key(idx(ii))
       !DIR$ FORCEINLINE
-      call i_H_j(keys(1,1,i_in_key),key,Nint,hij)
+      call i_h_j_complex(key,keys(1,1,i_in_key),Nint,hij)
       do j = 1, Nstate
         i_H_psi_array(j) = i_H_psi_array(j) + coef(i_in_coef,j)*hij
       enddo
