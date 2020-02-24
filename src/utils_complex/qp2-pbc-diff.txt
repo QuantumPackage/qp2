@@ -51,7 +51,11 @@ determinants:
            remaining functions aren't called anywhere, so don't worry about them for now
   (****) two_e_density_matrix.irp.pouet
   (done) utils.irp.f
-  (****) zmq.irp.f
+  (done?) zmq.irp.f
+           make sure template is correct for put/get psi_coef_complex
+           (why is limit 2^23? is this specific for doubles? should we divide by 2 for complex*16?)
+           also depends on zmq_{put,get}_cdmatrix in zmq/put_get.irp.f
+           and broadcast_chunks_complex_double in mpi/mpi.irp.f
 
 
 -------------------------------------------------------------------------------------

@@ -93,6 +93,7 @@ SUBST [ double, type, 8, DOUBLE_PRECISION ]
 double    ; double precision  ; 8 ; DOUBLE_PRECISION ;;
 integer   ; integer           ; 4  ; INTEGER ;;
 integer8  ; integer*8         ; 8  ; INTEGER8 ;;
+complex_double  ; complex*16  ; 16 ; DOUBLE_COMPLEX ;;
 
 END_TEMPLATE
 

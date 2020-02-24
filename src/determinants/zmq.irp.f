@@ -13,6 +13,7 @@ integer function zmq_put_psi(zmq_to_qp_run_socket,worker_id)
   integer, external              :: zmq_put_psi_det_size
   integer*8, external            :: zmq_put_psi_det
   integer*8, external            :: zmq_put_psi_coef
+  integer*8, external            :: zmq_put_psi_coef_complex
 
   zmq_put_psi = 0
   if (zmq_put_N_states(zmq_to_qp_run_socket, worker_id) == -1) then
@@ -31,11 +32,17 @@ integer function zmq_put_psi(zmq_to_qp_run_socket,worker_id)
     zmq_put_psi = -1
     return
   endif
+  if (is_complex) then
+    if (zmq_put_psi_coef_complex(zmq_to_qp_run_socket, worker_id) == -1) then
+      zmq_put_psi = -1
+      return
+    endif
+  else
   if (zmq_put_psi_coef(zmq_to_qp_run_socket, worker_id) == -1) then
     zmq_put_psi = -1
     return
   endif
-
+  endif
 end
 
 
@@ -54,6 +61,7 @@ integer function zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
   integer, external              :: zmq_get_psi_det_size
   integer*8, external            :: zmq_get_psi_det
   integer*8, external            :: zmq_get_psi_coef
+  integer*8, external            :: zmq_get_psi_coef_complex
 
   zmq_get_psi_notouch = 0
 
@@ -75,18 +83,34 @@ integer function zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
     allocate(psi_det(N_int,2,psi_det_size))
   endif
 
+  if (is_complex) then
+    !todo: check this
+    if (size(psi_coef_complex,kind=8) /= psi_det_size*N_states) then
+      deallocate(psi_coef_complex)
+      allocate(psi_coef_complex(psi_det_size,N_states))
+    endif
+  else
   if (size(psi_coef,kind=8) /= psi_det_size*N_states) then
     deallocate(psi_coef)
     allocate(psi_coef(psi_det_size,N_states))
+  endif
   endif
 
   if (zmq_get_psi_det(zmq_to_qp_run_socket, worker_id) == -1_8) then
     zmq_get_psi_notouch = -1
     return
   endif
+
+  if (is_complex) then
+    if (zmq_get_psi_coef_complex(zmq_to_qp_run_socket, worker_id) == -1_8) then
+      zmq_get_psi_notouch = -1
+      return
+    endif
+  else
   if (zmq_get_psi_coef(zmq_to_qp_run_socket, worker_id) == -1_8) then
     zmq_get_psi_notouch = -1
     return
+  endif
   endif
 
 end
@@ -102,8 +126,11 @@ integer function zmq_get_psi(zmq_to_qp_run_socket, worker_id)
   integer, intent(in)            :: worker_id
   integer, external :: zmq_get_psi_notouch
   zmq_get_psi = zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
+  if (is_complex) then
+    SOFT_TOUCH psi_det psi_coef_complex psi_det_size N_det N_states
+  else
   SOFT_TOUCH psi_det psi_coef psi_det_size N_det N_states
-
+  endif
 end
 
 
@@ -146,11 +173,19 @@ integer function zmq_put_psi_bilinear(zmq_to_qp_run_socket,worker_id)
     zmq_put_psi_bilinear = -1
     return
   endif
-
+  
+  if (is_complex) then
+    integer*8, external            :: zmq_put_psi_bilinear_matrix_values_complex
+    if (zmq_put_psi_bilinear_matrix_values_complex(zmq_to_qp_run_socket, worker_id) == -1) then
+      zmq_put_psi_bilinear = -1
+      return
+    endif
+  else
   integer*8, external            :: zmq_put_psi_bilinear_matrix_values
   if (zmq_put_psi_bilinear_matrix_values(zmq_to_qp_run_socket, worker_id) == -1) then
     zmq_put_psi_bilinear = -1
     return
+  endif
   endif
 
   integer, external            :: zmq_put_N_det_alpha_unique
@@ -197,9 +232,16 @@ integer function zmq_get_psi_bilinear(zmq_to_qp_run_socket, worker_id)
 
   zmq_get_psi_bilinear= 0
 
+  if (is_complex) then
+    if (size(psi_bilinear_matrix_values_complex,kind=8) /= N_det*N_states) then
+      deallocate(psi_bilinear_matrix_values_complex)
+      allocate(psi_bilinear_matrix_values_complex(N_det,N_states))
+    endif
+  else
   if (size(psi_bilinear_matrix_values,kind=8) /= N_det*N_states) then
     deallocate(psi_bilinear_matrix_values)
     allocate(psi_bilinear_matrix_values(N_det,N_states))
+  endif
   endif
 
   if (size(psi_bilinear_matrix_rows,kind=8) /= N_det) then
@@ -216,11 +258,19 @@ integer function zmq_get_psi_bilinear(zmq_to_qp_run_socket, worker_id)
     deallocate(psi_bilinear_matrix_order)
     allocate(psi_bilinear_matrix_order(N_det))
   endif
-
+  
+  if (is_complex) then
+    integer*8, external            :: zmq_get_psi_bilinear_matrix_values_complex
+    if (zmq_get_psi_bilinear_matrix_values_complex(zmq_to_qp_run_socket, worker_id) == -1_8) then
+      zmq_get_psi_bilinear = -1
+      return
+    endif
+  else
   integer*8, external            :: zmq_get_psi_bilinear_matrix_values
   if (zmq_get_psi_bilinear_matrix_values(zmq_to_qp_run_socket, worker_id) == -1_8) then
     zmq_get_psi_bilinear = -1
     return
+  endif
   endif
 
   integer*8, external            :: zmq_get_psi_bilinear_matrix_rows
@@ -266,7 +316,11 @@ integer function zmq_get_psi_bilinear(zmq_to_qp_run_socket, worker_id)
     return
   endif
 
+  if (is_complex) then
+    SOFT_TOUCH psi_bilinear_matrix_values_complex psi_bilinear_matrix_rows psi_bilinear_matrix_columns psi_bilinear_matrix_order psi_det psi_coef_complex psi_det_size N_det N_states psi_det_beta_unique psi_det_alpha_unique N_det_beta_unique N_det_alpha_unique
+  else
   SOFT_TOUCH psi_bilinear_matrix_values psi_bilinear_matrix_rows psi_bilinear_matrix_columns psi_bilinear_matrix_order psi_det psi_coef psi_det_size N_det N_states psi_det_beta_unique psi_det_alpha_unique N_det_beta_unique N_det_alpha_unique
+  endif
 
 end
 
@@ -560,6 +614,69 @@ SUBST [ X ]
 
 psi_coef ;;
 psi_bilinear_matrix_values ;;
+
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+integer*8 function zmq_put_$X(zmq_to_qp_run_socket,worker_id)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Put $X on the qp_run scheduler
+  END_DOC
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+  integer, intent(in)            :: worker_id
+  integer*8                      :: rc8
+  character*(256)                :: msg
+
+  zmq_put_$X = 0
+
+  integer*8 :: zmq_put_cdmatrix
+  integer   :: ni, nj
+
+  if (size($X,kind=8) <= 8388608_8) then
+    ni = size($X,kind=4)
+    nj = 1
+  else
+    ni = 8388608
+    nj = int(size($X,kind=8)/8388608_8,4) + 1
+  endif
+  rc8 = zmq_put_cdmatrix(zmq_to_qp_run_socket, 1, '$X', $X, ni, nj, size($X,kind=8) )
+  zmq_put_$X = rc8
+end
+
+integer*8 function zmq_get_$X(zmq_to_qp_run_socket,worker_id)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! get $X on the qp_run scheduler
+  END_DOC
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+  integer, intent(in)            :: worker_id
+  integer*8                      :: rc8
+  character*(256)                :: msg
+
+  zmq_get_$X = 0_8
+
+  integer*8 :: zmq_get_cdmatrix
+  integer   :: ni, nj
+
+  if (size($X,kind=8) <= 8388608_8) then
+    ni = size($X,kind=4)
+    nj = 1
+  else
+    ni = 8388608
+    nj = int(size($X,kind=8)/8388608_8,4) + 1
+  endif
+  rc8 = zmq_get_cdmatrix(zmq_to_qp_run_socket, 1, '$X', $X, ni, nj, size($X,kind=8) )
+  zmq_get_$X = rc8
+end
+
+SUBST [ X ]
+
+psi_coef_complex ;;
+psi_bilinear_matrix_values_complex ;;
 
 END_TEMPLATE
 
