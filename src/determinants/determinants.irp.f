@@ -424,24 +424,46 @@ end
 
  BEGIN_PROVIDER [ double precision, psi_coef_max, (N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_min, (N_states) ]
-&BEGIN_PROVIDER [ double precision, abs_psi_coef_max, (N_states) ]
-&BEGIN_PROVIDER [ double precision, abs_psi_coef_min, (N_states) ]
-   implicit none
-   BEGIN_DOC
-   ! Max and min values of the coefficients
-   END_DOC
-   integer                        :: i
-   do i=1,N_states
-     psi_coef_min(i) = minval(psi_coef(:,i))
-     psi_coef_max(i) = maxval(psi_coef(:,i))
-     abs_psi_coef_min(i) = minval( dabs(psi_coef(:,i)) )
-     abs_psi_coef_max(i) = maxval( dabs(psi_coef(:,i)) )
-     call write_double(6,psi_coef_max(i), 'Max coef')
-     call write_double(6,psi_coef_min(i), 'Min coef')
-     call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
-     call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
-   enddo
+  implicit none
+  BEGIN_DOC
+  ! Max and min values of the coefficients
+  END_DOC
+  integer                        :: i
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
+  do i=1,N_states
+    psi_coef_min(i) = minval(psi_coef(:,i))
+    psi_coef_max(i) = maxval(psi_coef(:,i))
+    call write_double(6,psi_coef_max(i), 'Max coef')
+    call write_double(6,psi_coef_min(i), 'Min coef')
+  enddo
+END_PROVIDER
 
+
+ BEGIN_PROVIDER [ double precision, abs_psi_coef_max, (N_states) ]
+&BEGIN_PROVIDER [ double precision, abs_psi_coef_min, (N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Max and min magnitudes of the coefficients
+  END_DOC
+  integer                        :: i
+  if (is_complex) then
+    do i=1,N_states
+      abs_psi_coef_min(i) = minval( cdabs(psi_coef_complex(:,i)) )
+      abs_psi_coef_max(i) = maxval( cdabs(psi_coef_complex(:,i)) )
+      call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
+      call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
+    enddo
+  else
+    do i=1,N_states
+      abs_psi_coef_min(i) = minval( dabs(psi_coef(:,i)) )
+      abs_psi_coef_max(i) = maxval( dabs(psi_coef(:,i)) )
+      call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
+      call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
+    enddo
+  endif
 END_PROVIDER
 
 

@@ -14,13 +14,6 @@ determinants:
   (done) determinants_bitmasks.irp.f
   (****) determinants{_complex}.irp.f
            mostly done
-           could separate/combine some providers instead of copying
-             for psi_{det,coef}_sorted:
-               use same linked provider for psi_average_norm_contrib_sorted
-                                            psi_det_sorted_order
-                                            psi_det_sorted
-               different providers for psi_coef{,_complex}_sorted
-           need to figure out {,abs_}psi_coef_{min,max}
            need to modify ocaml for psi_coef_complex_qp_edit?
            save_wavefunction_specified? qp_edit save? (wrong for real?)
   (done) energy.irp.f
