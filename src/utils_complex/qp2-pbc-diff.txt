@@ -1,6 +1,28 @@
 
 -------------------------------------------------------------------------------------
 current:
+  h_apply.irp.f
+    push/pull_pt2
+      pt2,norm_pert,h_pert_diag
+        types?
+        if complex, do we need to keep imag part? (should imag sum to zero?)
+  h_apply_{,{,no}zmq}.template.f
+    see generate_h_apply.py script
+    may need to modify
+  selectors
+    (looks like nothing in e_corr_selectors.irp.f is used elsewhere?)
+    (only e_corr_per_sel outside of src (provided in h apply gen script))
+    coef_hf_selector (inv, invsquared)
+      for real, is sign important, or just magnitude?
+    e_corr_per_selectors (is this used anywhere?)
+      provided in generate_h_apply.py?
+      <Di|H|HF> * c(Di) / c(HF)
+      complex, but does this matter?
+      is magnitude important or just real part?
+    i_H_HF_per_selectors
+      <Di|H|HF>
+      not used anywhere else, so no additional concerns other than for e_corr_per_selectors 
+    delta_E_per_selector
 
 general:
   check for dependence on psi_det_sorted, clean up providers
@@ -30,10 +52,8 @@ determinants:
   (****) h_apply_nozmq.template.f
   (****) h_apply.template.f
   (****) h_apply_zmq.template.f
-  (****) occ_pattern.irp.f
-           mostly done?
-           might need to change calls to fill_h_apply_buffer_no_selection?
-           check again after modifying h_apply for complex
+  (done) occ_pattern.irp.f
+           (might need to change if we change h_apply)
   (done) prune_wf.irp.f
   (done) psi_cas{,_complex}.irp.f
            might be able to combine some providers??
