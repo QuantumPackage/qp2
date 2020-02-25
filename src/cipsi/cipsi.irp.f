@@ -45,13 +45,19 @@ subroutine run_cipsi
 
   if (N_det > N_det_max) then
     psi_det = psi_det_sorted
-    psi_coef = psi_coef_sorted
-    N_det = N_det_max
-    soft_touch N_det psi_det psi_coef
+    if (is_complex) then
+      psi_coef_complex = psi_coef_sorted_complex
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef_complex
+    else
+      psi_coef = psi_coef_sorted
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef
+    endif
     if (s2_eig) then
       call make_s2_eigenfunction
     endif
-    call diagonalize_CI
+    call diagonalize_ci
     call save_wavefunction
   endif
 
@@ -109,8 +115,11 @@ subroutine run_cipsi
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
     call ZMQ_selection(to_select, pt2, variance, norm)
-
-    PROVIDE  psi_coef
+    if (is_complex) then
+      PROVIDE  psi_coef_complex
+    else
+      PROVIDE  psi_coef
+    endif
     PROVIDE  psi_det
     PROVIDE  psi_det_sorted
 
