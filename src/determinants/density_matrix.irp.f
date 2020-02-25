@@ -248,11 +248,6 @@ BEGIN_PROVIDER [ double precision, one_e_spin_density_mo, (mo_num,mo_num) ]
 END_PROVIDER
 
 subroutine set_natural_mos
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
    implicit none
    BEGIN_DOC
    ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
@@ -263,6 +258,20 @@ subroutine set_natural_mos
 
    label = "Natural"
     integer :: i,j,iorb,jorb
+    if (is_complex) then
+    do i = 1, n_virt_orb
+     iorb = list_virt(i)
+     do j = 1, n_core_inact_act_orb
+      jorb = list_core_inact_act(j)
+      if(cdabs(one_e_dm_mo_complex(iorb,jorb)).ne. 0.d0)then
+        print*,'AHAHAH'
+        print*,iorb,jorb,one_e_dm_mo_complex(iorb,jorb)
+        stop
+      endif
+     enddo
+    enddo
+   call mo_as_svd_vectors_of_mo_matrix_eig_complex(one_e_dm_mo_complex,size(one_e_dm_mo_complex,1),mo_num,mo_num,mo_occ,label)
+    else
     do i = 1, n_virt_orb
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
@@ -275,15 +284,11 @@ subroutine set_natural_mos
      enddo
     enddo
    call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
+    endif
    soft_touch mo_occ
 
 end
 subroutine save_natural_mos
-  !todo: modify/implement for complex
-  if (is_complex) then
-    print*,irp_here,' not implemented for complex'
-    stop -1
-  endif
    implicit none
    BEGIN_DOC
    ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
