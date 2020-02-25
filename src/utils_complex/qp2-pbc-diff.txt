@@ -22,6 +22,11 @@ determinants:
   (done) filter_connected.irp.f
   (done) fock_diag.irp.f
   (****) h_apply.irp.f
+           added coef_complex to h_apply_buffer_type
+           either coef or coef_complex will remain unallocated
+           (if this causes problems (it shouldn't), maybe just allocate unused one with size 1?)
+           check {push,pull}_pt2
+             pt2, norm_pert, h_pert_diag types? (should be real? documentation?)
   (****) h_apply_nozmq.template.f
   (****) h_apply.template.f
   (****) h_apply_zmq.template.f

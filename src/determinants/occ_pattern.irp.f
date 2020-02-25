@@ -513,7 +513,7 @@ subroutine make_s2_eigenfunction
       N_det_new += 1
       det_buffer(:,:,N_det_new) = d(:,:,j)
       if (N_det_new == bufsze) then
-        call fill_H_apply_buffer_no_selection(bufsze,det_buffer,N_int,ithread)
+        call fill_h_apply_buffer_no_selection(bufsze,det_buffer,N_int,ithread)
         N_det_new = 0
       endif
     enddo
@@ -528,7 +528,7 @@ subroutine make_s2_eigenfunction
   !$OMP END PARALLEL
 
   if (update) then
-    call copy_H_apply_buffer_to_wf
+    call copy_h_apply_buffer_to_wf
     if (is_complex) then
       TOUCH N_det psi_coef_complex psi_det psi_occ_pattern N_occ_pattern
     else
