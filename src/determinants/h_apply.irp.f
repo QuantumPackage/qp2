@@ -27,7 +27,7 @@ type(H_apply_buffer_type), pointer :: H_apply_buffer(:)
     allocate(H_apply_buffer(0:nproc-1))
     iproc = 0
     !$OMP PARALLEL PRIVATE(iproc) DEFAULT(NONE)  &
-    !$OMP SHARED(H_apply_buffer,N_int,sze,N_states,H_apply_buffer_lock)
+    !$OMP SHARED(H_apply_buffer,N_int,sze,N_states,H_apply_buffer_lock,is_complex)
     !$   iproc = omp_get_thread_num()
     H_apply_buffer(iproc)%N_det = 0
     H_apply_buffer(iproc)%sze = sze
@@ -225,6 +225,7 @@ subroutine copy_H_apply_buffer_to_wf
   endif
 
   ! Copy new buffers
+  logical :: found_duplicates
 
   if (is_complex) then
     !$OMP PARALLEL DEFAULT(SHARED)                                     &
@@ -253,7 +254,6 @@ subroutine copy_H_apply_buffer_to_wf
     !$OMP END PARALLEL
     SOFT_TOUCH N_det psi_det psi_coef_complex
 
-    logical :: found_duplicates
     call remove_duplicates_in_psi_det(found_duplicates)
     do k=1,N_states
       call normalize(psi_coef_complex(1,k),N_det)
@@ -287,7 +287,6 @@ subroutine copy_H_apply_buffer_to_wf
   !$OMP END PARALLEL
   SOFT_TOUCH N_det psi_det psi_coef
 
-  logical :: found_duplicates
   call remove_duplicates_in_psi_det(found_duplicates)
   do k=1,N_states
     call normalize(psi_coef(1,k),N_det)
