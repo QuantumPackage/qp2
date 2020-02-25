@@ -104,6 +104,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
 
 !  integer, external :: zmq_get_dvector
   integer, external :: zmq_get_dmatrix
+  integer, external :: zmq_get_cdmatrix
  
   if (is_complex) then
     complex*16, allocatable  :: v_tc(:,:), s_tc(:,:), u_tc(:,:)

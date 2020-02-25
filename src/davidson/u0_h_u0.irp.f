@@ -746,12 +746,12 @@ subroutine u_0_H_u_0_complex(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
     u_1(:,:) = (0.d0,0.d0)
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-    call h_s2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
+    call h_s2_u_0_nstates_zmq_complex(v_0,s_vec,u_1,N_states_diag,n)
   else if (n < n_det_max_full) then
     allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
-    v_0(:,:) = 0.d0
-    u_1(:,:) = 0.d0
-    s_vec(:,:) = 0.d0
+    v_0(:,:) = (0.d0,0.d0)
+    u_1(:,:) = (0.d0,0.d0)
+    s_vec(:,:) = (0.d0,0.d0)
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     do istate = 1,N_st
       do j=1,n
@@ -763,19 +763,20 @@ subroutine u_0_H_u_0_complex(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     enddo
   else
     allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
-    u_1(:,:) = 0.d0
+    u_1(:,:) = (0.d0,0.d0)
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-    call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
+    call h_s2_u_0_nstates_openmp_complex(v_0,s_vec,u_1,N_st,n)
   endif
   u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
   deallocate(u_1)
   double precision :: norm
   !$OMP PARALLEL DO PRIVATE(i,norm) DEFAULT(SHARED)
   do i=1,N_st
-    norm = u_dot_u(u_0(1,i),n)
+    norm = u_dot_u_complex(u_0(1,i),n)
     if (norm /= 0.d0) then
-      e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)
-      s_0(i) = u_dot_v(s_vec(1,i),u_0(1,i),n)
+      !todo: should these be normalized? is u_0 already normalized? (if so, where?)
+      e_0(i) = dble(u_dot_v_complex(v_0(1,i),u_0(1,i),n))
+      s_0(i) = dble(u_dot_v_complex(s_vec(1,i),u_0(1,i),n))
     else
       e_0(i) = 0.d0
       s_0(i) = 0.d0
@@ -800,34 +801,36 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
   integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
+  complex*16, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
   integer :: k
-  double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
+  complex*16, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
   allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
 
   do k=1,N_st
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
+    call cdset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
-  v_t = 0.d0
-  s_t = 0.d0
-  call dtranspose(                                                   &
+  v_t = (0.d0,0.d0)
+  s_t = (0.d0,0.d0)
+  !todo: just transpose, no conjg?
+  call cdtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
       u_t,                                                           &
       size(u_t, 1),                                                  &
       N_det, N_st)
 
-  call H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,1,N_det,0,1)
+  call h_s2_u_0_nstates_openmp_work_complex(v_t,s_t,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
-  call dtranspose(                                                   &
+  !todo: just transpose, no conjg?
+  call cdtranspose(                                                   &
       v_t,                                                           &
       size(v_t, 1),                                                  &
       v_0,                                                           &
       size(v_0, 1),                                                  &
       N_st, N_det)
-  call dtranspose(                                                   &
+  call cdtranspose(                                                   &
       s_t,                                                           &
       size(s_t, 1),                                                  &
       s_0,                                                           &
@@ -836,13 +839,13 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   deallocate(v_t,s_t)
 
   do k=1,N_st
-    call dset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
-    call dset_order(s_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
-    call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call cdset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call cdset_order(s_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call cdset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
   enddo
 
 end
-subroutine H_S2_u_0_nstates_openmp_work_complex(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine h_s2_u_0_nstates_openmp_work_complex(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
   !todo: implement for complex
   print*,irp_here,' not implemented for complex'
   stop -1
@@ -1123,10 +1126,12 @@ compute_singles=.True.
           ASSERT (lrow <= N_det_alpha_unique)
 
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-          call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
-          call get_s2(tmp_det,tmp_det2,$N_int,sij)
+          !todo: check arg order conjg/noconjg
+          call i_h_j_double_alpha_beta_complex(tmp_det,tmp_det2,$N_int,hij)
+          call get_s2_complex(tmp_det,tmp_det2,$N_int,sij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
+          !todo: check arg order conjg/noconjg
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
             s_t(l,k_a) = s_t(l,k_a) + sij * utl(l,kk+1)
           enddo
@@ -1212,10 +1217,12 @@ compute_singles=.True.
         ASSERT (lrow <= N_det_alpha_unique)
 
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+        !todo: check arg order conjg/noconjg
+        call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 1, hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
+        !todo: check arg order conjg/noconjg
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
         enddo
@@ -1245,9 +1252,11 @@ compute_singles=.True.
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
 
-        call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
+        !todo: check arg order conjg/noconjg
+        call i_h_j_double_spin_complex( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
+        !todo: check arg order conjg/noconjg
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
         enddo
@@ -1324,9 +1333,10 @@ compute_singles=.True.
         ASSERT (lcol <= N_det_beta_unique)
 
         tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+        call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 2, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
+          !todo: check arg order conjg/noconjg
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
         enddo
@@ -1357,10 +1367,12 @@ compute_singles=.True.
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
-        call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
+        !todo: check arg order conjg/noconjg
+        call i_h_j_double_spin_complex( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
+          !todo: check arg order conjg/noconjg
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
         enddo
@@ -1386,10 +1398,11 @@ compute_singles=.True.
 
     double precision, external :: diag_H_mat_elem, diag_S_mat_elem
 
-    hij = diag_H_mat_elem(tmp_det,$N_int)
-    sij = diag_S_mat_elem(tmp_det,$N_int)
+    hij = dcmplx(diag_H_mat_elem(tmp_det,$N_int),0.d0)
+    sij = dcmplx(diag_S_mat_elem(tmp_det,$N_int),0.d0)
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
+      !todo: check arg order conjg/noconjg
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
       s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)
     enddo
