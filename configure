@@ -3,30 +3,66 @@
 # Quantum Package configuration script
 #
 
-TEMP=$(getopt -o c:i:h -l config:,install:,help -n $0 -- "$@") || exit 1
-eval set -- "$TEMP"
-
-export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
-echo "QP_ROOT="$QP_ROOT
-
-
-# Check if spack is installed. If not, donwload it in external.
-
-# /!\ When updating version, update also etc files
-
 EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
-BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
-BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
-DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
-BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
-F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
-GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
-IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
-NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
-OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
-RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v1.0/resultsFile-v1.0.tar.gz"
-ZEROMQ_URL="https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.gz"
-ZLIB_URL="https://www.zlib.net/zlib-1.2.11.tar.gz"
+
+
+
+# --------- Functions ----------------------------------------------------------------
+
+function not_found() {
+   echo 'not_found'
+}
+
+
+function find_exe() {
+   command -v $1 2> /dev/null || not_found
+}
+
+
+function find_python2_lib() {
+   python2 -c "import $1" &> /dev/null && echo "$1" || not_found
+}
+
+
+function find_python3_lib() {
+   python3 -c "import $1" &> /dev/null && echo "$1" || not_found
+}
+
+
+function find_lib() {
+   echo "int main() { return 0; }" > "${QP_ROOT}"/external/tmp.c
+   gcc $@ "${QP_ROOT}"/external/tmp.c -o "${QP_ROOT}"/external/tmp.exe 2> /dev/null
+   if [[ -x "${QP_ROOT}"/external/tmp.exe ]] ; then
+           rm "${QP_ROOT}"/external/tmp.exe "${QP_ROOT}"/external/tmp.c
+           echo "$lib"
+   else
+           rm "${QP_ROOT}"/external/tmp.c
+           not_found
+   fi
+}
+
+
+function find_dir() {
+   if [[ -d $1 ]] ; then
+           echo "$1"
+   else
+           not_found
+   fi
+}
+
+
+function fail() {
+   echo ""
+   echo "Configuration failed"
+   exit 1
+}
+
+
+function success() {
+   echo ""
+   echo "Configuration successful"
+   exit 0
+}
 
 
 function help()
@@ -37,15 +73,11 @@ Quantum Package configuration script.
 Usage:
   $(basename $0) -c <file>    | --config=<file>
   $(basename $0) -h           | --help
-  $(basename $0) -i <package> | --install=<package>
 
 Options:
   -c, --config=<file>      Define a COMPILATION configuration file,
                            in "${QP_ROOT}/config/". 
   -h, --help               Print the HELP message
-  -i, --install=<package>  INSTALL <package>. Use at your OWN RISK:
-                           no support will be provided for the installation of
-                           dependencies.
 
 Example:
   ./$(basename $0) -c config/gfortran.cfg
@@ -58,10 +90,12 @@ EOF
     exit
 }
 
-function error() {
+
+function failwith() {
     >&2 echo "$(basename $0): $@"
-    exit 2
+    fail
 }
+
 
 function execute () {
     local _command
@@ -78,393 +112,181 @@ function execute () {
     echo ""
 }
 
-PACKAGES=""
-OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
 
-while true ; do
-    case "$1" in
-        -c|--config) 
-            case "$2" in
-                "") help ; break;;
-                *) if [[ -f $2 ]] ; then
-                      CONFIG="$2"
-                   else
-                      error "error: configuration file $2 not found."
-                      exit 1
-                   fi
-            esac 
-            shift 2;;
-        -i|--install)
-            case "$2" in
-                "") help ; break;;
-                *) PACKAGES="${PACKAGES} $2"
-            esac 
-            shift 2;;
-        -h|-help|--help) 
-            help
-            exit 0;;
-        --) shift ; break ;;
-        *)
-            error $(basename $0)": unknown option $1, try --help"
-            exit 2;;
-    esac
-done
+function check_if_git_is_installed() {
+  if [[ $(find_exe git) == "no" ]] ; then
+     failwith "git command not found"
+  fi
+}
 
-# Trim leading and trailing spaces
-PACKAGES=$(echo $PACKAGES | xargs)
 
-echo "export QP_ROOT=\"$QP_ROOT\"" > ${QP_ROOT}/etc/00.qp_root.rc
+function set_qp_root() {
+  export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
+  echo "QP_ROOT="${QP_ROOT}
+  echo "export QP_ROOT=\"$QP_ROOT\"" > ${QP_ROOT}/etc/00.qp_root.rc
+}
 
+
+function parse_command_line() {
+  TEMP=$(getopt -o c:i:h -l config:,install:,help -n $0 -- "$@") || exit 1
+  eval set -- "$TEMP"
+
+  while true ; do
+      case "$1" in
+          -c|--config) 
+              case "$2" in
+                  "") help ; break;;
+                  *) if [[ -f $2 ]] ; then
+                        CONFIG="$2"
+                    else
+                        failwith "Configuration file $2 not found."
+                    fi
+              esac 
+              shift 2;;
+          -h|-help|--help) 
+              help
+              exit 0;;
+          --) shift ; break ;;
+          *)
+              failwith "Unknown option $1, try --help"
+              exit 2;;
+      esac
+  done
+}
+
+
+function update_submodules() {
+  if [[ $(find_dir "${QP_ROOT}"/external/spack/bin) = $(not_found) ]] ; then
+      check_if_git_is_installed
+      git submodule update --init --recursive
+  fi
+
+  # Extract EZFIO if needed
+  EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
+  if [[ ${EZFIO} = $(not_found) ]] ; then
+      cd "${QP_ROOT}"/external || failwith "Unable to extract EZFIO"
+      tar --gunzip --extract --file ${EZFIO_TGZ} 
+      rm -rf ezfio
+      mv EZFIO ezfio
+  fi
+}
+
+
+function source_spack() {
+  source ${QP_ROOT}/external/spack/share/spack/setup-env.sh
+}
+
+
+function install_exe() {
+  NAME=$1
+  shift
+  if [[ $(find_exe $@) = $(not_found) ]] ; then
+#    spack add $NAME
+     SPACK_LINE+="^$NAME"
+  fi
+}
+
+
+function install_lib() {
+  NAME=$1
+  shift
+  if [[ $(find_lib $@) = $(not_found) ]] ; then
+#    spack add $NAME
+     SPACK_LINE+="^$NAME"
+  fi
+}
+
+
+function install_python_lib() {
+  NAME=$1
+  shift
+  if [[ $(find_python2_lib $@) = $(not_found) ]] ; then
+#    spack add $NAME
+     SPACK_LINE+="^$NAME"
+  fi
+}
+
+function install_spack_packages() {
+  spack env deactivate 
+  spack env create qp || :
+  spack env activate qp
+  SPACK_LINE="py-pip^python@2.7:2.7.999"
+#  spack add py-pip^python@2.7:2.7.999 
+  install_exe bats bats
+  install_exe ninja ninja
+  install_lib libzmq~libsodium -lzmq
+  install_lib f77-zmq -lzmq -lf77zmq -lpthread
+  install_lib gmp -lgmp
+  install_lib zlib -lz
+  install_exe opam opam
+  echo $SPACK_LINE
+  spack add $SPACK_LINE
+  spack concretize -f
+  spack install
+}
+
+function install_python_packages() {
+  PYTHON_PACKAGES="pip install irpf90 docopt resultsFile"
+  pip install $PYTHON_PACKAGES 
+  if [[ $? -ne 0 ]] ; then
+    pip install --user $PYTHON_PACKAGES 
+  fi
+}
+
+
+function install_ocaml_packages() {
+  OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
+  OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
+  mkdir -p $OPAMROOT
+  opam init --disable-sandboxing --compiler=4.10.0 --no-setup --root=$OPAMROOT 
+  eval $(opam env)
+  opam install -y ${OCAML_PACKAGES}
+}
+
+
+install_bse() {
+  if [[ $(find_exe pip) ]] ; then
+    pip install --user basis_set_exchange
+  fi
+}
+
+function configure_ninja_build() {
+  if [[ -n $CONFIG ]] ; then
+    "${QP_ROOT}"/scripts/compilation/qp_create_ninja create --development "${CONFIG}"
+  fi
+}
+
+function set_environment_variables() {
+  FILE=${QP_ROOT}/etc/local.rc
+  if [[ ! -z $QP_MAXMEM ]] ; then
+    echo "export QP_MAXMEM=$QP_MAXMEM" >> $FILE
+  fi
+  if [[ ! -z $QP_NTHREADS_DAVIDSON ]] ; then
+    echo "export QP_NTHREADS_DAVIDSON=$QP_NTHREADS_DAVIDSON" >> $FILE
+  fi
+  if [[ ! -z $QP_NTHREADS_PT2 ]] ; then
+    echo "export QP_NTHREADS_PT2=$QP_NTHREADS_PT2" >> $FILE
+  fi
+  if [[ ! -z $QP_NIC ]] ; then
+    echo "export QP_NIC=$QP_NIC" >> $FILE
+  fi
+}
+
+# ------------------------------------------------------------------------------------
+
+
+set_qp_root
+parse_command_line
+update_submodules
+source_spack
+install_spack_packages
+install_ocaml_packages
 source quantum_package.rc
-
-
-
-function fail() {
-        echo "You can try to install it using the -i option."
-        echo "Please refer to INSTALL.rst to install the missing dependencies."
-        exit 1
-}
-
-function success() {
-        echo ""
-        echo "Configuration successful."
-        exit 1
-}
-
-function download() {
-        echo "Downloading $1"
-        echo ""
-        printf "\e[0;34m"
-        wget --no-check-certificate $1 --output-document=$2 || error "Unable to download $1"
-        printf "\e[m"
-        echo "Saved dowloaded file as $2"
-        echo ""
-}
-
-function not_found() {
-   echo 'not_found'
-}
-
-function find_exe() {
-        which $1 2> /dev/null || not_found
-}
-
-function find_python_lib() {
-        python2 -c "import $1" &> /dev/null && echo "$1" || not_found
-}
-
-function find_lib() {
-        echo "int main() { return 0; }" > "${QP_ROOT}"/external/tmp.c
-        gcc $@ "${QP_ROOT}"/external/tmp.c -o "${QP_ROOT}"/external/tmp.exe 2> /dev/null
-        if [[ -x "${QP_ROOT}"/external/tmp.exe ]] ; then
-                rm "${QP_ROOT}"/external/tmp.exe "${QP_ROOT}"/external/tmp.c
-                echo "$lib"
-        else
-                rm "${QP_ROOT}"/external/tmp.c
-                not_found
-        fi
-}
-
-function find_dir() {
-        if [[ -d $1 ]] ; then
-                echo "$1"
-        else
-                not_found
-        fi
-}
-
-
-# Extract EZFIO if needed
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ${EZFIO_TGZ} 
-              rm -rf ezfio
-              mv EZFIO ezfio
-EOF
+if [[ -n $CONFIG ]] ; then
+  configure_ninja_build
+  set_environment_variables
 fi
 
-
-
-if [[ "${PACKAGES}.x" != ".x" ]] ; then
-        printf "\e[0;31m"
-        echo ""
-      echo "#########################################################"
-      echo "#                                                       #"
-      echo "#       Automatic installation of dependencies          #"
-      echo "#                                                       #"
-      echo "# USE AT YOUR OWN RISK :                                #"
-      echo "# No support will be provided by the quantum package    #"
-      echo "# developers for the installation of external software. #"
-      echo "#                                                       #"
-      echo "# You may refer to the INSTALL.rst file for help.       #"
-      echo "#                                                       #"
-      echo "#########################################################"
-        printf "\e[m"
-        echo ""
-        sleep 1
-fi
-
-if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp bwrap opam opam_packages ezfio docopt resultsFile bats"
-fi
-
-
-for PACKAGE in ${PACKAGES} ; do
-
-    if [[ ${PACKAGE} = ninja ]] ; then
-
-            download ${NINJA_URL} "${QP_ROOT}"/external/ninja.zip
-            execute << EOF
-              rm -f "\${QP_ROOT}"/bin/ninja
-              unzip "\${QP_ROOT}"/external/ninja.zip -d "\${QP_ROOT}"/bin
-EOF
-
-
-    elif [[ ${PACKAGE} = gmp ]] ; then
-
-            download ${GMP_URL} "${QP_ROOT}"/external/gmp.tar.bz2
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --bzip2 --extract --file gmp.tar.bz2
-              rm gmp.tar.bz2
-              cd gmp*
-              ./configure --prefix=$QP_ROOT && make -j 8
-              make install
-EOF
-    
-    elif [[ ${PACKAGE} = bwrap ]] ; then
-
-            download ${BUBBLE_URL} "${QP_ROOT}"/external/bwrap.tar.xz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --xz --extract --file bwrap.tar.xz
-              rm bwrap.tar.xz
-              cd bubblewrap*
-              ./configure --prefix=$QP_ROOT && make -j 8
-              make install-exec-am
-EOF
-
-    elif [[ ${PACKAGE} = irpf90 ]] ; then
-
-            # When changing version of irpf90, don't forget to update etc/irpf90.rc
-            download ${IRPF90_URL} "${QP_ROOT}"/external/irpf90.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file irpf90.tar.gz
-              rm irpf90.tar.gz
-              cd irpf90-*
-              make
-EOF
-    
-
-    elif [[ ${PACKAGE} = zeromq ]] ; then
-
-            download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
-            execute << EOF
-              export CC=gcc
-              export CXX=g++
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file zeromq.tar.gz
-              rm zeromq.tar.gz
-              cd zeromq-*
-              ./configure --prefix="\$QP_ROOT" --without-libsodium --enable-libunwind=no
-              make
-              make install
-EOF
-
-
-    elif [[ ${PACKAGE} = f77zmq ]] ; then
-
-            download ${F77ZMQ_URL} "${QP_ROOT}"/external/f77_zmq.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file f77_zmq.tar.gz
-              rm f77_zmq.tar.gz
-              cd f77_zmq-*
-              export ZMQ_H="\$QP_ROOT"/include/zmq.h
-              make
-              cp libf77zmq.a "\${QP_ROOT}"/lib
-              cp libf77zmq.so "\${QP_ROOT}"/lib
-              cp f77_zmq_free.h "\${QP_ROOT}"/include
-EOF
-
-    
-    elif [[ ${PACKAGE} = ocaml || ${PACKAGE} = opam ]] ; then
-
-            download ${OCAML_URL} "${QP_ROOT}"/external/opam_installer.sh
-
-            if [[ -n ${TRAVIS} ]] ; then
-                # Special commands for Travis CI
-                chmod +x "${QP_ROOT}"/external/opam_installer.sh
-                rm --force ${QP_ROOT}/bin/opam
-                if [[ -n ${NO_CACHE} ]] ; then
-                        rm -rf ${HOME}/.opam
-                fi
-                export OPAMROOT=${HOME}/.opam
-                cat << EOF | bash ${QP_ROOT}/external/opam_installer.sh --no-backup 
-${QP_ROOT}/bin
-
-
-
-EOF
-
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
-
-                eval $(opam env)
-
-            else
-                # Conventional commands
-                execute << EOF
-                  chmod +x "${QP_ROOT}"/external/opam_installer.sh
-                  "${QP_ROOT}"/external/opam_installer.sh --no-backup 
-EOF
-                execute << EOF
-                  rm --force ${QP_ROOT}/bin/opam
-                  export OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
-                  echo ${QP_ROOT}/bin \
-                  | sh ${QP_ROOT}/external/opam_installer.sh 
-EOF
-                rm ${QP_ROOT}/external/opam_installer.sh
-
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
-                eval $(opam env)
-EOF
-            fi
-
-            
-    elif [[ ${PACKAGE} = ocaml || ${PACKAGE} = opam_packages ]] ; then
-
-
-            execute << EOF
-                opam install -y \${OCAML_PACKAGES}  || exit 1
-EOF
-            
-    elif [[ ${PACKAGE} = bse ]] ; then
-
-            download ${BSE_URL} "${QP_ROOT}"/external/bse.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file bse.tar.gz
-              pip install -e basis_set_exchange-*
-EOF
-    elif [[ ${PACKAGE} = zlib ]] ; then
-
-            download ${ZLIB_URL} "${QP_ROOT}"/external/zlib.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file zlib.tar.gz
-              rm zlib.tar.gz && \
-              cd zlib-*/
-              ./configure --prefix=${QP_ROOT} && \
-              make && make install
-EOF
-
-            
-    elif [[ ${PACKAGE} = docopt ]] ; then
-
-            download ${DOCOPT_URL} "${QP_ROOT}"/external/docopt.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file docopt.tar.gz 
-              mv docopt-*/docopt.py "\${QP_ROOT}/external/Python"
-              rm --recursive --force -- docopt-*/ docopt.tar.gz
-EOF
-
-
-    elif [[ ${PACKAGE} = resultsFile ]] ; then
-
-            download ${RESULTS_URL} "${QP_ROOT}"/external/resultsFile.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file resultsFile.tar.gz 
-              mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
-              rm --recursive --force resultsFile-* resultsFile.tar.gz
-EOF
-
-    elif [[ ${PACKAGE} = bats ]] ; then
-
-            download ${BATS_URL} "${QP_ROOT}"/external/bats.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar -zxf bats.tar.gz 
-              ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
-              rm --recursive --force -- bats-core-1.1.0 \  "\${QP_ROOT}"/external/bats.tar.gz
-EOF
-
-    fi
-
-
-done
-
-source quantum_package.rc
-
-NINJA=$(find_exe ninja)
-if [[ ${NINJA} = $(not_found) ]] ; then
-        error "Ninja (ninja) is not installed."
-        fail
-fi
-
-IRPF90=$(find_exe irpf90)
-if [[ ${IRPF90} = $(not_found) ]] ; then
-        error "IRPf90 (irpf90) is not installed."
-        fail
-fi
-
-ZEROMQ=$(find_lib -lzmq)
-if [[ ${ZEROMQ} = $(not_found) ]] ; then
-        error "ZeroMQ (zeromq) is not installed."
-        fail
-fi
-
-F77ZMQ=$(find_lib -lzmq -lf77zmq -lpthread)
-if [[ ${F77ZMQ} = $(not_found) ]] ; then
-        error "Fortran binding of ZeroMQ (f77zmq) is not installed."
-        fail
-fi
-
-GMP=$(find_lib -lgmp)
-if [[ ${ZLIB} = $(not_found) ]] ; then
-        error "GMP (gmp) is not installed."
-        fail
-fi
-
-BWRAP=$(find_exe bwrap)
-if [[ ${BWRAP} = $(not_found) ]] ; then
-        error "Bubblewrap (bwrap) is not installed."
-        fail
-fi
-
-OPAM=$(find_exe opam)
-if [[ ${OPAM} = $(not_found) ]] ; then
-        error "OPAM (ocaml) package manager is not installed."
-        fail
-fi
-
-OCAML=$(find_exe ocaml)
-if [[ ${OCAML} = $(not_found) ]] ; then
-        error "OCaml (ocaml) compiler is not installed."
-        fail
-fi
-
-ZLIB=$(find_lib -lz)
-if [[ ${ZLIB} = $(not_found) ]] ; then
-        error "Zlib (zlib) is not installed."
-        fail
-fi
-
-DOCOPT=$(find_python_lib docopt)
-if [[ ${DOCOPT} = $(not_found) ]] ; then
-        error "docopt (docopt) is not installed."
-        fail
-fi
-
-RESULTSFILE=$(find_python_lib resultsFile)
-if [[ ${RESULTSFILE} = $(not_found) ]] ; then
-        error "resultsFile (resultsFile) is not installed."
-        fail
-fi
 
 printf "\e[0;34m"
 echo "  ___________________________  "
@@ -476,33 +298,34 @@ echo "             (__)\       )\/\. "
 echo "                 ||----w |     "
 echo "                 ||     ||     "
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo ""
-echo "If you have PIP, you can install the Basis Sex Exchange command-line tool:"
-echo ""
-echo "  ./configure -i bse"
-echo ""
-echo "This will enable the usage of qp_basis to install extra basis sets."
-echo ""
+if [[ -z ${QP_NIC} ]] ; then
+  echo ""
+  echo "Now, set edit the $QP_ROOT/etc/local.rc file to"
+  echo "enter the correct network interface to be used for parallel calculations"
+  echo "with the QP_NIC environment variable."
+fi
+if [[ $(find_exe bse) = $(not_found) ]] ; then
+  echo ""
+  echo "If you have PIP, you can install the Basis Set Exchange command-line tool:"
+  echo ""
+  echo "  pip install basis-set-exchange"
+  echo ""
+  echo "This will enable the usage of qp_basis to install extra basis sets."
+fi
 echo ""
 printf "\e[m\n"
 
 
-if [[ -n $CONFIG ]] ; then
-
-        "${QP_ROOT}"/scripts/compilation/qp_create_ninja create --development "${CONFIG}"
-fi
-
 if [[ -f ${QP_ROOT}/build.ninja ]] ; then
-  [[ -z ${TRAVIS} ]] && echo "You can now run ./bin/qpsh to enter in the QP shell mode :)"
+  [[ -z ${TRAVIS} ]] && echo "You can now run ${QP_ROOT}/bin/qpsh to enter in the QP shell mode :)"
 else 
       echo ""
       echo "${QP_ROOT}/build.ninja does not exist,"
       echo "you need to specify the COMPILATION configuration file."
-      echo "See  ./configure --help  for more details." 
+      echo "See  ./configure --help for more detail." 
       echo ""
 fi
 
 exit 0
     
-
 
