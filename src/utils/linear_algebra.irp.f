@@ -167,7 +167,7 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m)
 end   
     
   
-subroutine ortho_qr_complex(A,LDA,m,n)
+subroutine ortho_qr_complex_old(A,LDA,m,n)
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -199,6 +199,45 @@ subroutine ortho_qr_complex(A,LDA,m,n)
   deallocate(WORK,jpvt,tau)
 end
 
+subroutine ortho_qr_complex(A,LDA,m,n)
+  implicit none
+  BEGIN_DOC
+  ! Orthogonalization using Q.R factorization
+  !   
+  ! A : matrix to orthogonalize
+  !
+  ! LDA : leftmost dimension of A
+  !
+  ! n : Number of columns? of A
+  !
+  ! m : Number of rows? of A
+  !
+  END_DOC
+  integer, intent(in)            :: m,n, LDA
+  complex*16, intent(inout) :: A(LDA,n)
+  
+  integer                        :: lwork, info
+  complex*16, allocatable  :: tau(:), work(:)
+
+  allocate(tau(n), work(1))
+  lwork=-1
+  call  zgeqrf( m, n, A, LDA, tau, work, lwork, info )
+  lwork=int(work(1))
+  deallocate(work)
+  allocate(work(lwork))
+  call  zgeqrf(m, n, A, LDA, tau, work, lwork, info )
+  deallocate(work)
+
+  lwork=-1
+  allocate(work(1))
+  call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
+  lwork=int(work(1))
+  deallocate(work)
+  allocate(work(lwork))
+  call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
+  deallocate(work,tau)
+end
+
 subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   implicit none
   BEGIN_DOC
@@ -208,25 +247,21 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   !
   ! LDA : leftmost dimension of A
   !
-  ! n : Number of rows of A
+  ! n : Number of columns of A
   !
-  ! m : Number of columns of A
+  ! m : Number of rows of A
   !
   END_DOC
   integer, intent(in)            :: m,n, LDA
-  double precision, intent(inout) :: A(LDA,n)
+  complex*16, intent(inout)      :: A(LDA,n)
   
   integer                        :: info
-  integer, allocatable           :: jpvt(:)
-  double precision, allocatable  :: tau(:), work(:)
+  complex*16, allocatable        :: tau(:), work(:)
 
-  print *, irp_here, ': TO DO'
-  stop -1
-
-!  allocate (jpvt(n), tau(n), work(n))
-!  call  dgeqr2( m, n, A, LDA, TAU, WORK, INFO )
-!  call dorg2r(m, n, n, A, LDA, tau, WORK, INFO)
-!  deallocate(WORK,jpvt,tau)
+  allocate(tau(n),work(n))
+  call zgeqr2(m,n,A,LDA,tau,work,info)
+  call zung2r(m,n,n,A,LDA,tau,work,info)
+  deallocate(work,tau)
 end
   
 subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
