@@ -10,6 +10,7 @@ export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
 
 
+# Check if spack is installed. If not, donwload it in external.
 
 # /!\ When updating version, update also etc files
 
@@ -21,7 +22,6 @@ BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
 GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
 IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
-LIBCAP_URL="https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz"
 NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
 OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
 RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v1.0/resultsFile-v1.0.tar.gz"
@@ -207,7 +207,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp libcap bwrap opam opam_packages ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp bwrap opam opam_packages ezfio docopt resultsFile bats"
 fi
 
 
@@ -234,17 +234,6 @@ EOF
               make install
 EOF
     
-    elif [[ ${PACKAGE} = libcap ]] ; then
-
-            download ${LIBCAP_URL} "${QP_ROOT}"/external/libcap.tar.gz
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file libcap.tar.gz
-              rm libcap.tar.gz
-              cd libcap-*/libcap
-              prefix=$QP_ROOT make install
-EOF
-
     elif [[ ${PACKAGE} = bwrap ]] ; then
 
             download ${BUBBLE_URL} "${QP_ROOT}"/external/bwrap.tar.xz
@@ -438,12 +427,6 @@ fi
 GMP=$(find_lib -lgmp)
 if [[ ${ZLIB} = $(not_found) ]] ; then
         error "GMP (gmp) is not installed."
-        fail
-fi
-
-LIBCAP=$(find_lib -lcap)
-if [[ ${LIBCAP} = $(not_found) ]] ; then
-        error "Libcap (libcap) is not installed."
         fail
 fi
 

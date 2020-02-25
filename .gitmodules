@@ -1,0 +1,3 @@
+[submodule "external/spack"]
+	path = external/spack
+	url = https://github.com/spack/spack.git
