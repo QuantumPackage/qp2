@@ -835,40 +835,42 @@ qp_name potential_sr_c_beta_ao_pbe --rename=potential_c_beta_ao_sr_pbe
 qp_name potential_sr_xc_alpha_ao_pbe --rename=potential_xc_alpha_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
 qp_name disk_access_nuclear_repulsion --rename=io_nuclear_repulsion
-qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
-qp_name ref_bitmask_e_n_energy -r ref_bitmask_n_e_energy
-qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
-qp_name write_ao_integrals_e_n -r write_ao_integrals_n_e
-qp_name is_periodic -r is_complex
-qp_name two_e_integrals_index_periodic -r two_e_integrals_index_complex
-qp_name get_ao_two_e_integral_periodic -r get_ao_two_e_integral_complex
-qp_name import_ao_integrals_periodic -r import_ao_integrals_complex
-qp_name ao_two_e_integral_periodic_map_idx_sign -r ao_two_e_integral_complex_map_idx_sign
-qp_name ao_ints_periodic_1 -r ao_ints_complex_1
-qp_name ao_ints_periodic_2 -r ao_ints_complex_2
-qp_name import_mo_coef_periodic -r import_mo_coef_complex
-qp_name is_periodic -r is_complex
-qp_name get_ao_two_e_integral_periodic_simple -r get_ao_two_e_integral_complex_simple
-qp_name ao_integrals_cache_periodic -r ao_integrals_cache_complex
-qp_name get_two_e_integral_periodic -r get_two_e_integral_complex
-qp_name get_ao_two_e_integrals_non_zero_periodic -r get_ao_two_e_integrals_non_zero_complex
-qp_name get_mo_two_e_integrals_exch_ii_periodic -r get_mo_two_e_integrals_exch_ii_complex
-qp_name mo_ints_periodic_2 -r mo_ints_complex_2
-qp_name mo_ints_periodic_1 -r mo_ints_complex_1
-qp_name get_mo_two_e_integrals_i1j1_periodic -r get_mo_two_e_integrals_i1j1_complex
-qp_name get_mo_two_e_integrals_exch_ijji_periodic -r get_mo_two_e_integrals_exch_ijji_complex
-qp_name get_mo_two_e_integrals_periodic -r get_mo_two_e_integrals_complex
-qp_name mo_integrals_cache_periodic -r mo_integrals_cache_complex
-qp_name get_two_e_integral_periodic_simple -r get_two_e_integral_complex_simple
-qp_name big_array_coulomb_integrals_periodic -r big_array_coulomb_integrals_complex
-qp_name big_array_exchange_integrals_periodic -r big_array_exchange_integrals_complex
-qp_name get_ao_two_e_integrals_periodic -r get_ao_two_e_integrals_complex
-qp_name get_ao_two_e_integrals_non_zero_jl_periodic -r get_ao_two_e_integrals_non_zero_jl_complex
-qp_name get_ao_two_e_integrals_non_zero_jl_from_list_periodic -r get_ao_two_e_integrals_non_zero_jl_from_list_complex
-qp_name mo_two_e_integral_periodic -r mo_two_e_integral_complex
-qp_name get_mo_two_e_integrals_ij_periodic -r get_mo_two_e_integrals_ij_complex
-qp_name get_mo_two_e_integrals_coulomb_ii_periodic -r get_mo_two_e_integrals_coulomb_ii_complex
-qp_name get_mo_two_e_integrals_coulomb_ijij_periodic -r get_mo_two_e_integrals_coulomb_ijij_complex
-qp_name ao_kpt_num -r ao_num_per_kpt
-qp_name mo_kpt_num -r mo_num_per_kpt
-qp_name num_kpts -r kpt_num
+
+
+# qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
+# qp_name ref_bitmask_e_n_energy -r ref_bitmask_n_e_energy
+# qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
+# qp_name write_ao_integrals_e_n -r write_ao_integrals_n_e
+# qp_name is_periodic -r is_complex
+# qp_name two_e_integrals_index_periodic -r two_e_integrals_index_complex
+# qp_name get_ao_two_e_integral_periodic -r get_ao_two_e_integral_complex
+# qp_name import_ao_integrals_periodic -r import_ao_integrals_complex
+# qp_name ao_two_e_integral_periodic_map_idx_sign -r ao_two_e_integral_complex_map_idx_sign
+# qp_name ao_ints_periodic_1 -r ao_ints_complex_1
+# qp_name ao_ints_periodic_2 -r ao_ints_complex_2
+# qp_name import_mo_coef_periodic -r import_mo_coef_complex
+# qp_name is_periodic -r is_complex
+# qp_name get_ao_two_e_integral_periodic_simple -r get_ao_two_e_integral_complex_simple
+# qp_name ao_integrals_cache_periodic -r ao_integrals_cache_complex
+# qp_name get_two_e_integral_periodic -r get_two_e_integral_complex
+# qp_name get_ao_two_e_integrals_non_zero_periodic -r get_ao_two_e_integrals_non_zero_complex
+# qp_name get_mo_two_e_integrals_exch_ii_periodic -r get_mo_two_e_integrals_exch_ii_complex
+# qp_name mo_ints_periodic_2 -r mo_ints_complex_2
+# qp_name mo_ints_periodic_1 -r mo_ints_complex_1
+# qp_name get_mo_two_e_integrals_i1j1_periodic -r get_mo_two_e_integrals_i1j1_complex
+# qp_name get_mo_two_e_integrals_exch_ijji_periodic -r get_mo_two_e_integrals_exch_ijji_complex
+# qp_name get_mo_two_e_integrals_periodic -r get_mo_two_e_integrals_complex
+# qp_name mo_integrals_cache_periodic -r mo_integrals_cache_complex
+# qp_name get_two_e_integral_periodic_simple -r get_two_e_integral_complex_simple
+# qp_name big_array_coulomb_integrals_periodic -r big_array_coulomb_integrals_complex
+# qp_name big_array_exchange_integrals_periodic -r big_array_exchange_integrals_complex
+# qp_name get_ao_two_e_integrals_periodic -r get_ao_two_e_integrals_complex
+# qp_name get_ao_two_e_integrals_non_zero_jl_periodic -r get_ao_two_e_integrals_non_zero_jl_complex
+# qp_name get_ao_two_e_integrals_non_zero_jl_from_list_periodic -r get_ao_two_e_integrals_non_zero_jl_from_list_complex
+# qp_name mo_two_e_integral_periodic -r mo_two_e_integral_complex
+# qp_name get_mo_two_e_integrals_ij_periodic -r get_mo_two_e_integrals_ij_complex
+# qp_name get_mo_two_e_integrals_coulomb_ii_periodic -r get_mo_two_e_integrals_coulomb_ii_complex
+# qp_name get_mo_two_e_integrals_coulomb_ijij_periodic -r get_mo_two_e_integrals_coulomb_ijij_complex
+# qp_name ao_kpt_num -r ao_num_per_kpt
+# qp_name mo_kpt_num -r mo_num_per_kpt
+# qp_name num_kpts -r kpt_num
