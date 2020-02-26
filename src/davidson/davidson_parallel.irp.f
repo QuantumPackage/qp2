@@ -916,7 +916,7 @@ end subroutine
 
 
 subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
-  !todo: implement for complex
+  !todo: maybe make separate zmq_put_psi_complex?
   print*,irp_here,' not implemented for complex'
   stop -1
   use omp_lib
@@ -1019,7 +1019,6 @@ subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
 
   integer, external :: zmq_put_dvector, zmq_put_psi, zmq_put_N_states_diag
   integer, external :: zmq_put_cdmatrix
-  !todo: size/2 for complex?
   if (size(u_t) < 8388608) then
     ni = size(u_t)
     nj = 1

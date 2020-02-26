@@ -719,9 +719,7 @@ END_TEMPLATE
 !==============================================================================!
 
 subroutine u_0_H_u_0_complex(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
-  !todo: implement for complex
-  print*,irp_here,' not implemented for complex'
-  stop -1
+  !todo: check normalization for complex
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -788,9 +786,6 @@ end
 
 
 subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
-  !todo: implement for complex
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -812,7 +807,6 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   enddo
   v_t = (0.d0,0.d0)
   s_t = (0.d0,0.d0)
-  !todo: just transpose, no conjg?
   call cdtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
@@ -823,7 +817,6 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   call h_s2_u_0_nstates_openmp_work_complex(v_t,s_t,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
-  !todo: just transpose, no conjg?
   call cdtranspose(                                                   &
       v_t,                                                           &
       size(v_t, 1),                                                  &
@@ -846,9 +839,6 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
 
 end
 subroutine h_s2_u_0_nstates_openmp_work_complex(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
-  !todo: implement for complex
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -880,9 +870,6 @@ end
 BEGIN_TEMPLATE
 
 subroutine H_S2_u_0_nstates_openmp_work_complex_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
-  !todo: implement for complex
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -1128,7 +1115,7 @@ compute_singles=.True.
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
           !todo: check arg order conjg/noconjg
           call i_h_j_double_alpha_beta_complex(tmp_det,tmp_det2,$N_int,hij)
-          call get_s2_complex(tmp_det,tmp_det2,$N_int,sij)
+          call get_s2(tmp_det,tmp_det2,$N_int,sij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
           !todo: check arg order conjg/noconjg
