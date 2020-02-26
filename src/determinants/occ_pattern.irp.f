@@ -442,7 +442,7 @@ BEGIN_PROVIDER [ double precision, weight_occ_pattern_average, (N_occ_pattern) ]
  endif
 END_PROVIDER
 
- BEGIN_PROVIDER [ double precision, psi_occ_pattern_sorted, (N_int,2,N_occ_pattern) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_occ_pattern_sorted, (N_int,2,N_occ_pattern) ]
 &BEGIN_PROVIDER [ double precision, weight_occ_pattern_average_sorted, (N_occ_pattern) ]
 &BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order, (N_occ_pattern) ]
 &BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order_reverse, (N_occ_pattern) ]
