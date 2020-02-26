@@ -140,7 +140,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     pt2=0.d0
     variance=0.d0
     norm=0.d0
-    call ZMQ_selection(N_in, pt2, variance, norm)
+    call zmq_selection(N_in, pt2, variance, norm)
     error(:) = 0.d0
   else
 

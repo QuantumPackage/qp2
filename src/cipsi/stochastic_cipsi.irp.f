@@ -36,7 +36,7 @@ subroutine run_stochastic_cipsi
   if (s2_eig) then
     call make_s2_eigenfunction
   endif
-  call diagonalize_CI
+  call diagonalize_ci
   call save_wavefunction
 
   call ezfio_has_hartree_fock_energy(has)
@@ -48,9 +48,15 @@ subroutine run_stochastic_cipsi
 
   if (N_det > N_det_max) then
     psi_det = psi_det_sorted
-    psi_coef = psi_coef_sorted
-    N_det = N_det_max
-    soft_touch N_det psi_det psi_coef
+    if (is_complex) then
+      psi_coef_complex = psi_coef_sorted_complex
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef_complex
+    else
+      psi_coef = psi_coef_sorted
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef
+    endif
     if (s2_eig) then
       call make_s2_eigenfunction
     endif
@@ -78,7 +84,7 @@ subroutine run_stochastic_cipsi
     pt2 = 0.d0
     variance = 0.d0
     norm = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
+    call zmq_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
       norm, to_select) ! Stochastic PT2 and selection
 
     do k=1,N_states
