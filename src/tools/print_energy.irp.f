@@ -1,4 +1,4 @@
-program print_wf
+program print_energy
  implicit none
  BEGIN_DOC
  ! Prints the energy of the wave function stored in the |EZFIO| directory.
