@@ -355,7 +355,6 @@ EOF
 EOF
             fi
 
-
     elif [[ ${PACKAGE} = bse ]] ; then
 
             download ${BSE_URL} "${QP_ROOT}"/external/bse.tar.gz
