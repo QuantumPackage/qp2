@@ -197,8 +197,6 @@ function install_lib() {
 }
 
 
-function install_python_lib() {
-  NAME=$1
   shift
   if [[ $(find_python2_lib $@) = $(not_found) ]] ; then
 #    spack add $NAME
@@ -210,23 +208,21 @@ function install_spack_packages() {
   spack env deactivate 
   spack env create qp || :
   spack env activate qp
-  SPACK_LINE="py-pip^python@2.7:2.7.999"
-#  spack add py-pip^python@2.7:2.7.999 
-  install_exe bats bats
-  install_exe ninja ninja
-  install_lib libzmq~libsodium -lzmq
-  install_lib f77-zmq -lzmq -lf77zmq -lpthread
-  install_lib gmp -lgmp
-  install_lib zlib -lz
-  install_exe opam opam
-  echo $SPACK_LINE
-  spack add $SPACK_LINE
+  spack add python@2.7:2.8
+  spack add py-docopt ^python@2.7:2.8
+  spack add py-resultsfile ^python@2.7:2.8
+  spack add py-irpf90 ^python@2.7:2.8
+  spack add bats
+  spack add ninja ^python@2.7:2.8
+  spack add f77-zmq ^libzmq~libsodium ^python@2.7:2.8
+  spack add opam^ocaml@4.09.0
+  spack add openblas threads=openmp
   spack concretize -f
   spack install
 }
 
 function install_python_packages() {
-  PYTHON_PACKAGES="pip install irpf90 docopt resultsFile"
+  PYTHON_PACKAGES="irpf90 docopt resultsFile basis-set-exchange"
   pip install $PYTHON_PACKAGES 
   if [[ $? -ne 0 ]] ; then
     pip install --user $PYTHON_PACKAGES 
