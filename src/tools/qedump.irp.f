@@ -125,9 +125,13 @@ subroutine edump
   integer, save :: ifirst = 0
   double precision :: Vee, Ven, Vnn, Vecp, T, f
   integer  :: i,j,k
+  provide n_states
 
+  double precision :: e(n_states), ept2(n_states), pt2(n_states)
   Vnn = nuclear_repulsion
 
+  call ezfio_get_fci_energy(e)
+  call ezfio_get_fci_energy_pt2(ept2)
   write(iunit,*) 'Energy components'
   write(iunit,*) '================='
   write(iunit,*) ''
@@ -165,6 +169,9 @@ subroutine edump
     write(iunit,*) 'Vee  = ', Vee
     write(iunit,*) 'Vecp = ', Vecp
     write(iunit,*) 'T    = ', T
+    write(iunit,*) 'Evar = ',e(k)
+    write(iunit,*) 'E+pt2= ',ept2(k)
+    write(iunit,*) 'pt2  = ',ept2(k) - e(k)
     write(iunit,*) ''
   enddo
 
