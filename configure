@@ -181,8 +181,7 @@ function install_exe() {
   NAME=$1
   shift
   if [[ $(find_exe $@) = $(not_found) ]] ; then
-#    spack add $NAME
-     SPACK_LINE+="^$NAME"
+     spack add $NAME
   fi
 }
 
@@ -191,38 +190,33 @@ function install_lib() {
   NAME=$1
   shift
   if [[ $(find_lib $@) = $(not_found) ]] ; then
-#    spack add $NAME
-     SPACK_LINE+="^$NAME"
+     spack add $NAME
   fi
 }
 
 
-  shift
-  if [[ $(find_python2_lib $@) = $(not_found) ]] ; then
-#    spack add $NAME
-     SPACK_LINE+="^$NAME"
-  fi
-}
 
 function install_spack_packages() {
   spack env deactivate 
   spack env create qp || :
   spack env activate qp
   spack add python@2.7:2.8
-  spack add py-docopt ^python@2.7:2.8
-  spack add py-resultsfile@1.0 ^python@2.7:2.8
-  spack add py-irpf90 ^python@2.7:2.8
+#  spack add py-docopt ^python@2.7:2.8
+#  spack add py-resultsfile@1.0 ^python@2.7:2.8
+#  spack add py-irpf90 ^python@2.7:2.8
   spack add bats
   spack add ninja ^python@2.7:2.8
   spack add f77-zmq ^libzmq~libsodium ^python@2.7:2.8
-  spack add opam@2.0:
-  spack add openblas threads=openmp
+  spack add opam@2.0: ^ocaml@4.09.0
+  if [[ $(find_exe ifort) = $(not_found) ]] ; then
+    spack add openblas threads=openmp
+  fi
   spack concretize -f
   spack install
 }
 
 function install_python_packages() {
-  PYTHON_PACKAGES="irpf90 docopt resultsFile basis-set-exchange"
+  PYTHON_PACKAGES="irpf90 docopt resultsFile" # basis-set-exchange"
   pip install $PYTHON_PACKAGES 
   if [[ $? -ne 0 ]] ; then
     pip install --user $PYTHON_PACKAGES 
@@ -232,7 +226,7 @@ function install_python_packages() {
 
 function install_ocaml_packages() {
   OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
-  OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
+  export OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
   mkdir -p $OPAMROOT
   opam init --disable-sandboxing --compiler=4.10.0 --no-setup --root=$OPAMROOT 
   eval $(opam env)
@@ -280,8 +274,8 @@ install_ocaml_packages
 source quantum_package.rc
 if [[ -n $CONFIG ]] ; then
   configure_ninja_build
-  set_environment_variables
 fi
+set_environment_variables
 
 
 printf "\e[0;34m"
