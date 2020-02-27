@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #
 # Quantum Package configuration script
 #
@@ -76,7 +76,7 @@ Usage:
 
 Options:
   -c, --config=<file>      Define a COMPILATION configuration file,
-                           in "${QP_ROOT}/config/". 
+                           in "${QP_ROOT}/config/".
   -h, --help               Print the HELP message
 
 Example:
@@ -103,7 +103,7 @@ function execute () {
     while read -r line; do
       echo "  " $line
       _command+="${line} ;"
-    done 
+    done
     sleep 1
     echo ""
     printf "\e[0;94m"
@@ -314,14 +314,12 @@ printf "\e[m\n"
 
 if [[ -f ${QP_ROOT}/build.ninja ]] ; then
   [[ -z ${TRAVIS} ]] && echo "You can now run ${QP_ROOT}/bin/qpsh to enter in the QP shell mode :)"
-else 
       echo ""
       echo "${QP_ROOT}/build.ninja does not exist,"
       echo "you need to specify the COMPILATION configuration file."
-      echo "See  ./configure --help for more detail." 
+      echo "See  ./configure --help  for more detail."
       echo ""
 fi
 
 exit 0
-    
 

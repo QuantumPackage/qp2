@@ -11,7 +11,6 @@ declarations
 decls_main
 deinit_thread
 init_main
-filter_integrals
 filter2p
 filter2h2p_double
 filter2h2p_single
@@ -105,12 +104,6 @@ class H_apply(object):
     s["do_mono_excitations"] = d[do_mono_exc]
     s["do_double_excitations"] = d[do_double_exc]
     s["keys_work"]  += "call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc)"
-
-    s["filter_integrals"] = "array_pairs = .True."
-    if SingleRef:
-      s["filter_integrals"] = """
-      call get_mo_bielec_integrals_existing_ik(i_a,j_a,mo_num,array_pairs,mo_integrals_map)
-      """
 
     s["generate_psi_guess"]  = """
   ! Sort H_jj to find the N_states lowest states
