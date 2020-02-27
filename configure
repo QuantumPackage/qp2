@@ -210,12 +210,12 @@ function install_spack_packages() {
   spack env activate qp
   spack add python@2.7:2.8
   spack add py-docopt ^python@2.7:2.8
-  spack add py-resultsfile ^python@2.7:2.8
+  spack add py-resultsfile@1.0 ^python@2.7:2.8
   spack add py-irpf90 ^python@2.7:2.8
   spack add bats
   spack add ninja ^python@2.7:2.8
   spack add f77-zmq ^libzmq~libsodium ^python@2.7:2.8
-  spack add opam^ocaml@4.09.0
+  spack add opam@2.0:
   spack add openblas threads=openmp
   spack concretize -f
   spack install
