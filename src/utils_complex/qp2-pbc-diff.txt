@@ -1,7 +1,18 @@
 
 -------------------------------------------------------------------------------------
 current:
+  fci
+    run_cipsi
+      zmq_pt2_complex
+        selection buffer? (val, mini)?
+        selection_slave_inproc
+      zmq_selection_complex
+    run_slave_cipsi
+    run_stochastic_cipsi
 
+-------------------------------------------------------------------------------------
+
+old:
   irp_align for complex?
   zmq_put_psi_complex instead of branch inside zmq_put_psi?
     are there cases where we call this without already being on a complex branch of code?

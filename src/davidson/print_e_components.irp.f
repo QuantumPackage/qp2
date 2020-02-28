@@ -17,15 +17,26 @@ subroutine print_energy_components()
     Ven  = 0.d0
     Vecp = 0.d0
     T    = 0.d0
-
-    do j=1,mo_num
-      do i=1,mo_num
-        f = one_e_dm_mo_alpha(i,j,k) + one_e_dm_mo_beta(i,j,k)
-        Ven  = Ven  + f * mo_integrals_n_e(i,j)
-        Vecp = Vecp + f * mo_pseudo_integrals(i,j)
-        T    = T    + f * mo_kinetic_integrals(i,j)
+    
+    if (is_complex) then
+      do j=1,mo_num
+        do i=1,mo_num
+          f = one_e_dm_mo_alpha_complex(i,j,k) + one_e_dm_mo_beta_complex(i,j,k)
+          Ven  = Ven  + dble(f * mo_integrals_n_e_complex(j,i))
+          Vecp = Vecp + dble(f * mo_pseudo_integrals_complex(j,i))
+          T    = T    + dble(f * mo_kinetic_integrals_complex(j,i))
+        enddo
       enddo
-    enddo
+    else
+      do j=1,mo_num
+        do i=1,mo_num
+          f = one_e_dm_mo_alpha(i,j,k) + one_e_dm_mo_beta(i,j,k)
+          Ven  = Ven  + f * mo_integrals_n_e(i,j)
+          Vecp = Vecp + f * mo_pseudo_integrals(i,j)
+          T    = T    + f * mo_kinetic_integrals(i,j)
+        enddo
+      enddo
+    endif
     Vee = psi_energy(k) - Ven - Vecp - T
     
     if (ifirst == 0) then

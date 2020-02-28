@@ -173,6 +173,7 @@ end subroutine
 
 
 subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
+  !todo: simplify for kpts
   use bitmasks
   use selection_types
   implicit none
@@ -275,9 +276,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   integer(bit_kind), allocatable :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable           :: banned(:,:,:), bannedOrb(:,:)
   double precision, allocatable  :: coef_fullminilist_rev(:,:)
+  double precision, allocatable  :: coef_fullminilist_rev_complex(:,:)
 
 
   double precision, allocatable   :: mat(:,:,:)
+  double precision, allocatable   :: mat_complex(:,:,:)
 
   logical :: monoAdo, monoBdo
   integer :: maskInd

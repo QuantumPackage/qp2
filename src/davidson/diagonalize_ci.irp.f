@@ -410,6 +410,24 @@ END_PROVIDER
 
 END_PROVIDER
 
+subroutine diagonalize_CI_complex
+  implicit none
+  BEGIN_DOC
+!  Replace the coefficients of the |CI| states by the coefficients of the
+!  eigenstates of the |CI| matrix.
+  END_DOC
+  integer :: i,j
+  do j=1,N_states
+    do i=1,N_det
+      psi_coef_complex(i,j) = ci_eigenvectors_complex(i,j)
+    enddo
+  enddo
+  psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
+  psi_s2(1:N_states) = CI_s2(1:N_states)
+  !todo: touch ci_{sc,electronic_energy}?
+  SOFT_TOUCH psi_coef_complex CI_electronic_energy_complex ci_energy CI_eigenvectors_complex CI_s2_complex psi_energy psi_s2
+end
+
 subroutine diagonalize_CI
   implicit none
   BEGIN_DOC
@@ -417,17 +435,6 @@ subroutine diagonalize_CI
 !  eigenstates of the |CI| matrix.
   END_DOC
   integer :: i,j
-  if (is_complex) then
-    do j=1,N_states
-      do i=1,N_det
-        psi_coef_complex(i,j) = ci_eigenvectors_complex(i,j)
-      enddo
-    enddo
-    psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
-    psi_s2(1:N_states) = CI_s2(1:N_states)
-    !todo: touch complex?
-    SOFT_TOUCH psi_coef_complex CI_electronic_energy ci_energy CI_eigenvectors_complex CI_s2 psi_energy psi_s2
-  else
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors(i,j)
@@ -436,7 +443,6 @@ subroutine diagonalize_CI
   psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
   psi_s2(1:N_states) = CI_s2(1:N_states)
 
-  !todo: touch real?
-  SOFT_TOUCH psi_coef CI_electronic_energy CI_energy CI_eigenvectors CI_s2 psi_energy psi_s2
-  endif
+  !todo: touch ci_{sc,electronic_energy}?
+  SOFT_TOUCH psi_coef CI_electronic_energy_real ci_energy CI_eigenvectors CI_s2_real psi_energy psi_s2
 end

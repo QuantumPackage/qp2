@@ -5,6 +5,7 @@
 ! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
 ! 
 ! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
+! real and complex
   END_DOC
   if (is_complex) then
     call u_0_h_u_0_complex(psi_energy,psi_s2,psi_coef_complex,N_det,psi_det,N_int,N_states,psi_det_size)
