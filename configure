@@ -165,8 +165,8 @@ function update_submodules() {
   EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
   if [[ ${EZFIO} = $(not_found) ]] ; then
       cd "${QP_ROOT}"/external || failwith "Unable to extract EZFIO"
-      tar --gunzip --extract --file ${EZFIO_TGZ} 
       rm -rf ezfio
+      tar --gunzip --extract --file ${EZFIO_TGZ} 
       mv EZFIO ezfio
   fi
 }
@@ -175,7 +175,6 @@ function update_submodules() {
 function source_spack() {
   source ${QP_ROOT}/external/spack/share/spack/setup-env.sh
 }
-
 
 function install_exe() {
   NAME=$1
@@ -200,19 +199,18 @@ function install_spack_packages() {
   spack env deactivate 
   spack env create qp || :
   spack env activate qp
-  spack add python@2.7:2.8
-#  spack add py-docopt ^python@2.7:2.8
-#  spack add py-resultsfile@1.0 ^python@2.7:2.8
-#  spack add py-irpf90 ^python@2.7:2.8
-  spack add bats
-  spack add ninja ^python@2.7:2.8
-  spack add f77-zmq ^libzmq~libsodium ^python@2.7:2.8
-  spack add opam@2.0: ^ocaml@4.09.0
+  spack install python@2.7:2.8 %gcc
+  spack load python
+  spack install py-docopt ^python@2.7:2.8
+  spack install py-resultsfile@1.0 ^python@2.7:2.8
+  spack install py-irpf90 ^python@2.7:2.8
+  spack install bats
+  spack install ninja %gcc ^python@2.7:2.8
+  spack install f77-zmq %gcc ^libzmq~libsodium ^python@2.7:2.8 
+  spack install opam@2.0: %gcc ^ocaml@4.09.0
   if [[ $(find_exe ifort) = $(not_found) ]] ; then
-    spack add openblas threads=openmp
+    spack install openblas %gcc threads=openmp
   fi
-  spack concretize -f
-  spack install
 }
 
 function install_python_packages() {
