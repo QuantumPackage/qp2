@@ -21,7 +21,8 @@ subroutine run_selection_slave(thread,iproc,energy)
   double precision :: pt2(N_states)
   double precision :: variance(N_states)
   double precision :: norm(N_states)
-
+  
+  !todo: check for providers that are now unlinked for real/complex
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns

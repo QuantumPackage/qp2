@@ -758,7 +758,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (.not.is_a_1h1p(det)) cycle
       endif
 
-      Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
+      Hii = diag_h_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       w = 0d0
 

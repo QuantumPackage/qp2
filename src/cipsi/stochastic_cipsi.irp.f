@@ -36,7 +36,11 @@ subroutine run_stochastic_cipsi
   if (s2_eig) then
     call make_s2_eigenfunction
   endif
-  call diagonalize_ci
+  if (is_complex) then
+    call diagonalize_ci_complex
+  else
+    call diagonalize_ci
+  endif
   call save_wavefunction
 
   call ezfio_has_hartree_fock_energy(has)
@@ -60,7 +64,11 @@ subroutine run_stochastic_cipsi
     if (s2_eig) then
       call make_s2_eigenfunction
     endif
-    call diagonalize_CI
+    if (is_complex) then
+      call diagonalize_ci_complex
+    else
+      call diagonalize_CI
+    endif
     call save_wavefunction
   endif
 
@@ -84,8 +92,13 @@ subroutine run_stochastic_cipsi
     pt2 = 0.d0
     variance = 0.d0
     norm = 0.d0
-    call zmq_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-      norm, to_select) ! Stochastic PT2 and selection
+    if (is_complex) then
+      call zmq_pt2_complex(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
+        norm, to_select) ! Stochastic PT2 and selection
+    else
+      call zmq_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
+        norm, to_select) ! Stochastic PT2 and selection
+    endif
 
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
@@ -107,14 +120,22 @@ subroutine run_stochastic_cipsi
     if (qp_stop()) exit 
 
     ! Add selected determinants
-    call copy_H_apply_buffer_to_wf()
+    call copy_h_apply_buffer_to_wf()
 !    call save_wavefunction
 
-    PROVIDE  psi_coef
+    if (is_complex) then
+      PROVIDE  psi_coef_complex
+    else
+      PROVIDE  psi_coef
+    endif
     PROVIDE  psi_det
     PROVIDE  psi_det_sorted
 
-    call diagonalize_CI
+    if (is_complex) then
+      call diagonalize_ci_complex
+    else
+      call diagonalize_CI
+    endif
     call save_wavefunction
     call save_energy(psi_energy_with_nucl_rep, zeros)
     if (qp_stop()) exit 
@@ -122,7 +143,11 @@ subroutine run_stochastic_cipsi
 
   if (.not.qp_stop()) then
     if (N_det < N_det_max) then
-        call diagonalize_CI
+        if (is_complex) then
+          call diagonalize_ci_complex
+        else
+          call diagonalize_CI
+        endif
         call save_wavefunction
         call save_energy(psi_energy_with_nucl_rep, zeros)
     endif
@@ -130,8 +155,13 @@ subroutine run_stochastic_cipsi
     pt2(:) = 0.d0
     variance(:) = 0.d0
     norm(:) = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
-      norm,0) ! Stochastic PT2
+    if (is_complex) then
+      call zmq_pt2_complex(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
+        norm,0) ! Stochastic PT2
+    else
+      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
+        norm,0) ! Stochastic PT2
+    endif
 
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))

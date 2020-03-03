@@ -1,14 +1,41 @@
 
 -------------------------------------------------------------------------------------
 current:
+  select_connected
+    select_singles_and_doubles (this should be separated real/complex)
+      spot_isinwf (same for real/complex)
+      splash_pq (separate real/complex)
+        get_d{0,1,2} (separate real/complex)
+      fill_buffer_double (separate real/complex)
+      
   fci
-    run_cipsi
-      zmq_pt2_complex
-        selection buffer? (val, mini)?
-        selection_slave_inproc
-      zmq_selection_complex
+    run_{,stochastic_}cipsi
+      everything okay except:
+        zmq_pt2{,_complex} (todo: combine real/complex)
+          selection buffer? (val, mini)?
+          selection_slave_inproc
+            run_selection_slave
+              select_connected
+              
+          pt2_slave_inproc
+            run_pt2_slave{,_large,_small}
+              select_connected
+
+        zmq_selection_complex
+          selection_collector
+            pull_selection_results
+            add_to_selection_buffer
+          selection_slave_inproc
+            run_selection_slave (has split for complex?)
+              select_connected
     run_slave_cipsi
-    run_stochastic_cipsi
+      run_slave_main
+        change memory allocation for complex (first see how many arrays will need to change type)
+        run_pt2_slave (large/small?)
+          select_connected
+     selection_buffer:
+       if anything complex, need to change zmq calls
+         {push,pull}_pt2_results
 
 -------------------------------------------------------------------------------------
 

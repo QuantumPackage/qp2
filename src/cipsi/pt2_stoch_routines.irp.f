@@ -63,11 +63,19 @@ logical function testTeethBuilding(minF, N)
 
   norm = 0.d0
   double precision :: norm
-  do i=N_det_generators,1,-1
-    tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate) * &
-                  psi_coef_sorted_gen(i,pt2_stoch_istate)
-    norm = norm + tilde_w(i)
-  enddo
+  if (is_complex) then
+    do i=N_det_generators,1,-1
+      tilde_w(i)  = cdabs(psi_coef_sorted_gen_complex(i,pt2_stoch_istate) * &
+                    psi_coef_sorted_gen_complex(i,pt2_stoch_istate))
+      norm = norm + tilde_w(i)
+    enddo
+  else
+    do i=N_det_generators,1,-1
+      tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate) * &
+                    psi_coef_sorted_gen(i,pt2_stoch_istate)
+      norm = norm + tilde_w(i)
+    enddo
+  endif
 
   f = 1.d0/norm
   tilde_w(:) = tilde_w(:) * f
@@ -126,11 +134,19 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   integer(ZMQ_PTR), external     :: new_zmq_to_qp_run_socket
   type(selection_buffer)         :: b
 
-  PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
-  PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
-  PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-  PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
-  PROVIDE psi_det_hii selection_weight pseudo_sym
+  if (is_complex) then
+    PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
+    PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
+    PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
+    PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp_complex psi_det_sorted
+    PROVIDE psi_det_hii selection_weight pseudo_sym
+  else
+    PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
+    PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
+    PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
+    PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
+    PROVIDE psi_det_hii selection_weight pseudo_sym
+  endif
 
   if (h0_type == 'SOP') then
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
@@ -159,8 +175,15 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       state_average_weight(pt2_stoch_istate) = 1.d0
       TOUCH state_average_weight pt2_stoch_istate selection_weight
 
-      PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals pt2_w
-      PROVIDE psi_selectors pt2_u pt2_J pt2_R
+      if (is_complex) then
+        !todo: psi_selectors isn't linked to psi_selectors_coef anymore; should we provide both?
+        PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals_complex pt2_w
+        PROVIDE psi_selectors pt2_u pt2_J pt2_R
+      else
+        PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals pt2_w
+        PROVIDE psi_selectors pt2_u pt2_J pt2_R
+      endif
+
       call new_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
 
       integer, external              :: zmq_put_psi
@@ -242,6 +265,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
       double precision :: mem_collector, mem, rss
 
+      !todo: check memory allocation for complex
       call resident_memory(rss)
 
       mem_collector = 8.d0 *                  & ! bytes
@@ -751,10 +775,16 @@ END_PROVIDER
      allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
      
      tilde_cW(0) = 0d0
-     
-     do i=1,N_det_generators
-       tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
-     enddo
+    
+     if (is_complex) then
+       do i=1,N_det_generators
+         tilde_w(i)  = cdabs(psi_coef_sorted_gen_complex(i,pt2_stoch_istate))**2 !+ 1.d-20
+       enddo
+     else
+       do i=1,N_det_generators
+         tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
+       enddo
+     endif
      
      double precision               :: norm
      norm = 0.d0
@@ -773,7 +803,7 @@ END_PROVIDER
      pt2_n_0(1) = 0
      do
      pt2_u_0 = tilde_cW(pt2_n_0(1))
-     r = tilde_cW(pt2_n_0(1) + pt2_minDetInFirstTeeth)
+     r = tilde_cW(pt2_n_0(1) + pt2_mindetinfirstteeth)
      pt2_W_T = (1d0 - pt2_u_0) / dble(pt2_N_teeth)
      if(pt2_W_T >= r - pt2_u_0) then
        exit
@@ -799,7 +829,7 @@ END_PROVIDER
      endif
      ASSERT(tooth_width > 0.d0)
      do i=pt2_n_0(t)+1, pt2_n_0(t+1)
-       pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
+       pt2_w(i) = tilde_w(i) * pt2_w_t / tooth_width
      end do
    end do
    

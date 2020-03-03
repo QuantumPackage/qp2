@@ -20,7 +20,7 @@ subroutine run_cipsi
   logical                        :: has
   double precision               :: relative_error
 
-  PROVIDE H_apply_buffer_allocated
+  PROVIDE h_apply_buffer_allocated
 
   relative_error=PT2_relative_error
 
@@ -34,7 +34,7 @@ subroutine run_cipsi
     call make_s2_eigenfunction
   endif
   if (is_complex) then
-    call diagonalize_CI_complex
+    call diagonalize_ci_complex
   else
     call diagonalize_CI
   endif
@@ -94,13 +94,13 @@ subroutine run_cipsi
       norm = 0.d0
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      if (is_complex) then
-        call zmq_pt2_complex(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-          norm, 0) ! Stochastic PT2
-      else
+!      if (is_complex) then
+!        call zmq_pt2_complex(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
+!          norm, 0) ! Stochastic PT2
+!      else
         call zmq_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
           norm, 0) ! Stochastic PT2
-      endif
+!      endif
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     endif
@@ -127,11 +127,12 @@ subroutine run_cipsi
     n_det_before = N_det
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
+    call zmq_selection(to_select, pt2, variance, norm)
     if (is_complex) then
-      call zmq_selection_complex(to_select, pt2, variance, norm)
+!      call zmq_selection_complex(to_select, pt2, variance, norm)
       PROVIDE  psi_coef_complex
     else
-      call zmq_selection(to_select, pt2, variance, norm)
+!      call zmq_selection(to_select, pt2, variance, norm)
       PROVIDE  psi_coef
     endif
     PROVIDE  psi_det
@@ -168,13 +169,13 @@ print *,  (correlation_energy_ratio <= correlation_energy_ratio_max)
       norm(:) = 0.d0
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
-      if (is_complex) then
-        call zmq_pt2_complex(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
-          norm,0) ! Stochastic PT2
-      else
+!      if (is_complex) then
+!        call zmq_pt2_complex(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
+!          norm,0) ! Stochastic PT2
+!      else
         call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
           norm,0) ! Stochastic PT2
-      endif
+!      endif
       SOFT_TOUCH threshold_generators
     endif
     print *,  'N_det             = ', N_det
