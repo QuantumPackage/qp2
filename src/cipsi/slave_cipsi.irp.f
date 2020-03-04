@@ -267,6 +267,7 @@ subroutine run_slave_main
         nproc_target = nthreads_pt2
         ii = min(N_det, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
 
+        !todo: change memory estimate for complex
         do
           mem = rss +                             & !
                 nproc_target * 8.d0 *             & ! bytes

@@ -7,6 +7,9 @@ current:
       splash_pq (separate real/complex)
         get_d{0,1,2} (separate real/complex)
       fill_buffer_double (separate real/complex)
+    started splash_pq, get_d{0,1,2}, fill_buffer_double for complex
+      need to check hole particle index ordering (also in select_singles_and_doubles)
+      need to check for coef dconjg
       
   fci
     run_{,stochastic_}cipsi

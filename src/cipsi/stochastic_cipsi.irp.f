@@ -92,13 +92,13 @@ subroutine run_stochastic_cipsi
     pt2 = 0.d0
     variance = 0.d0
     norm = 0.d0
-    if (is_complex) then
-      call zmq_pt2_complex(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-        norm, to_select) ! Stochastic PT2 and selection
-    else
+!    if (is_complex) then
+!      call zmq_pt2_complex(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
+!        norm, to_select) ! Stochastic PT2 and selection
+!    else
       call zmq_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
         norm, to_select) ! Stochastic PT2 and selection
-    endif
+!    endif
 
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
@@ -155,13 +155,13 @@ subroutine run_stochastic_cipsi
     pt2(:) = 0.d0
     variance(:) = 0.d0
     norm(:) = 0.d0
-    if (is_complex) then
-      call zmq_pt2_complex(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
-        norm,0) ! Stochastic PT2
-    else
+  !  if (is_complex) then
+  !    call zmq_pt2_complex(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
+  !      norm,0) ! Stochastic PT2
+  !  else
       call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
         norm,0) ! Stochastic PT2
-    endif
+  !  endif
 
     do k=1,N_states
       rpt2(k) = pt2(k)/(1.d0 + norm(k))

@@ -276,11 +276,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   integer(bit_kind), allocatable :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable           :: banned(:,:,:), bannedOrb(:,:)
   double precision, allocatable  :: coef_fullminilist_rev(:,:)
-  double precision, allocatable  :: coef_fullminilist_rev_complex(:,:)
+  complex*16, allocatable  :: coef_fullminilist_rev_complex(:,:)
 
 
   double precision, allocatable   :: mat(:,:,:)
-  double precision, allocatable   :: mat_complex(:,:,:)
+  complex*16, allocatable   :: mat_complex(:,:,:)
 
   logical :: monoAdo, monoBdo
   integer :: maskInd
@@ -288,7 +288,12 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-  PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp
+  PROVIDE psi_bilinear_matrix_transp_order
+  if (is_complex) then
+    PROVIDE psi_selectors_coef_transp_complex
+  else
+    PROVIDE psi_selectors_coef_transp
+  endif
 
   monoAdo = .true.
   monoBdo = .true.
@@ -425,9 +430,18 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 !  !$OMP CRITICAL
 !  print *,  'Step1: ', i_generator, preinteresting(0)
 !  !$OMP END CRITICAL
-    
+
+!------------------------------------------------------------|
+!                                                            |
+!                          Real                              |
+!                                                            |
+!------------------------------------------------------------|
   allocate(banned(mo_num, mo_num,2), bannedOrb(mo_num, 2))
+  if (is_complex) then
+  allocate (mat_complex(N_states, mo_num, mo_num))
+  else
   allocate (mat(N_states, mo_num, mo_num))
+  endif
   maskInd = -1
   
   integer                        :: nb_count, maskInd_save
@@ -636,7 +650,17 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 ! !$OMP CRITICAL
 !  print *,  'Step3: ', i_generator, h1, interesting(0)
 ! !$OMP END CRITICAL
-            
+            if (is_complex) then
+              call splash_pq_complex(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat_complex, interesting)
+              
+              if(.not.pert_2rdm)then
+               call fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat_complex, buf)
+              else
+                print*,irp_here,' not implemented for complex'
+                stop -1
+               !call fill_buffer_double_rdm_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat_complex, buf,fullminilist, coef_fullminilist_rev_complex, fullinteresting(0))
+              endif
+            else
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
             
             if(.not.pert_2rdm)then
@@ -644,6 +668,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             else 
              call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
             endif
+            endif!complex
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
@@ -655,7 +680,12 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
-  deallocate(banned, bannedOrb,mat)
+  deallocate(banned, bannedOrb)
+  if (is_complex) then
+    deallocate(mat_complex)
+  else
+    deallocate(mat)
+  endif
 end subroutine
 
 
@@ -1910,4 +1940,797 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
   end if
 end 
 
+
+!==============================================================================!
+!                                                                              !
+!                                    Complex                                   !
+!                                                                              !
+!==============================================================================!
+
+subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+  !todo: check indices for complex?
+  use bitmasks
+  use selection_types
+  implicit none
+
+  integer, intent(in) :: i_generator, sp, h1, h2
+  complex*16, intent(in) :: mat(N_states, mo_num, mo_num)
+  logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
+  double precision, intent(in)           :: fock_diag_tmp(mo_num)
+  double precision, intent(in)    :: E0(N_states)
+  double precision, intent(inout) :: pt2(N_states)
+  double precision, intent(inout) :: variance(N_states)
+  double precision, intent(inout) :: norm(N_states)
+  type(selection_buffer), intent(inout) :: buf
+  logical :: ok
+  integer :: s1, s2, p1, p2, ib, j, istate
+  integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
+  double precision :: e_pert, delta_E, val, Hii, w, tmp
+  complex*16 ::  alpha_h_psi, coef, val_c
+  double precision, external :: diag_H_mat_elem_fock
+  double precision :: E_shift
+
+!  logical, external :: detEq
+!  double precision, allocatable :: values(:)
+!  integer, allocatable          :: keys(:,:)
+!  integer                       :: nkeys
+  
+
+  if(sp == 3) then
+    s1 = 1
+    s2 = 2
+  else
+    s1 = sp
+    s2 = sp
+  end if
+  call apply_holes(psi_det_generators(1,1,i_generator), s1, h1, s2, h2, mask, ok, N_int)
+  E_shift = 0.d0
+
+  if (h0_type == 'SOP') then
+    j = det_to_occ_pattern(i_generator)
+    E_shift = psi_det_Hii(i_generator) - psi_occ_pattern_Hii(j)
+  endif
+
+  do p1=1,mo_num
+    if(bannedOrb(p1, s1)) cycle
+    ib = 1
+    if(sp /= 3) ib = p1+1
+
+    do p2=ib,mo_num
+
+! -----
+! /!\ Generating only single excited determinants doesn't work because a
+! determinant generated by a single excitation may be doubly excited wrt
+! to a determinant of the future. In that case, the determinant will be
+! detected as already generated when generating in the future with a
+! double excitation.
+!     
+!      if (.not.do_singles) then
+!        if ((h1 == p1) .or. (h2 == p2)) then
+!          cycle
+!        endif
+!      endif
+!
+!      if (.not.do_doubles) then
+!        if ((h1 /= p1).and.(h2 /= p2)) then
+!          cycle
+!        endif
+!      endif
+! -----
+
+      if(bannedOrb(p2, s2)) cycle
+      if(banned(p1,p2)) cycle
+
+      val = maxval(cdabs(mat(1:N_states, p1, p2)))
+      if( val == 0d0) cycle
+      call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
+
+      if (do_only_cas) then
+        integer, external :: number_of_holes, number_of_particles
+        if (number_of_particles(det)>0) then
+          cycle
+        endif
+        if (number_of_holes(det)>0) then
+          cycle
+        endif
+      endif
+
+      if (do_ddci) then
+        logical, external  :: is_a_two_holes_two_particles
+        if (is_a_two_holes_two_particles(det)) then
+          cycle
+        endif
+      endif
+
+      if (do_only_1h1p) then
+        logical, external :: is_a_1h1p
+        if (.not.is_a_1h1p(det)) cycle
+      endif
+
+      Hii = diag_h_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
+
+      w = 0d0
+
+!      integer(bit_kind) :: occ(N_int,2), n
+!      call occ_pattern_of_det(det,occ,N_int)
+!      call occ_pattern_to_dets_size(occ,n,elec_alpha_num,N_int)
+
+
+      do istate=1,N_states
+        delta_E = E0(istate) - Hii + E_shift
+        alpha_h_psi = mat(istate, p1, p2)
+        val_c = alpha_h_psi + alpha_h_psi
+        tmp = dsqrt(delta_E * delta_E + cdabs(val_c * val_c))
+        if (delta_E < 0.d0) then
+            tmp = -tmp
+        endif
+        e_pert = 0.5d0 * (tmp - delta_E)
+        if (dabs(alpha_h_psi) > 1.d-4) then
+          coef = e_pert / alpha_h_psi
+        else
+          coef = alpha_h_psi / delta_E
+        endif
+        pt2(istate) = pt2(istate) + e_pert
+        variance(istate) = variance(istate) + cdabs(alpha_h_psi * alpha_h_psi)
+        norm(istate) = norm(istate) + cdabs(coef * coef)
+
+!!!DEBUG
+!        integer :: k
+!        double precision :: alpha_h_psi_2,hij
+!        alpha_h_psi_2 = 0.d0
+!        do k = 1,N_det_selectors
+!         call i_H_j(det,psi_selectors(1,1,k),N_int,hij)
+!         alpha_h_psi_2 = alpha_h_psi_2 + psi_selectors_coef(k,istate) * hij
+!        enddo
+!        if(dabs(alpha_h_psi_2 - alpha_h_psi).gt.1.d-12)then
+!         call debug_det(psi_det_generators(1,1,i_generator),N_int)
+!         call debug_det(det,N_int)                                                                                        
+!         print*,'alpha_h_psi,alpha_h_psi_2 = ',alpha_h_psi,alpha_h_psi_2
+!         stop
+!        endif
+!!!DEBUG
+
+        select case (weight_selection)
+
+          case(5)
+            ! Variance selection
+            w = w - cdabs(alpha_h_psi * alpha_h_psi) * selection_weight(istate)
+
+          case(6)
+            w = w - cdabs(coef * coef) * selection_weight(istate)
+
+          case default
+            ! Energy selection
+            w = w + e_pert * selection_weight(istate)
+
+        end select
+      end do
+
+
+      if(pseudo_sym)then
+        if(cdabs(mat(1, p1, p2)).lt.thresh_sym)then 
+          w = 0.d0
+        endif
+      endif
+
+!      w = dble(n) * w
+
+      if(w <= buf%mini) then
+        call add_to_selection_buffer(buf, det, w)
+      end if
+    end do
+  end do
+end
+
+subroutine splash_pq_complex(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting)
+  !todo: check indices for complex?
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+! Computes the contributions A(r,s) by
+! comparing the external determinant to all the internal determinants det(i).
+! an applying two particles (r,s) to the mask.
+  END_DOC
+
+  integer, intent(in)            :: sp, i_gen, N_sel
+  integer, intent(in)            :: interesting(0:N_sel)
+  integer(bit_kind),intent(in)   :: mask(N_int, 2), det(N_int, 2, N_sel)
+  logical, intent(inout)         :: bannedOrb(mo_num, 2), banned(mo_num, mo_num, 2)
+  complex*16, intent(inout) :: mat(N_states, mo_num, mo_num)
+
+  integer                        :: i, ii, j, k, l, h(0:2,2), p(0:4,2), nt
+  integer(bit_kind)              :: perMask(N_int, 2), mobMask(N_int, 2), negMask(N_int, 2)
+  integer(bit_kind)             :: phasemask(N_int,2)
+
+  PROVIDE psi_selectors_coef_transp_complex psi_det_sorted
+  mat = 0d0
+
+  do i=1,N_int
+    negMask(i,1) = not(mask(i,1))
+    negMask(i,2) = not(mask(i,2))
+  end do
+
+  do i=1, N_sel 
+    if (interesting(i) < 0) then
+      stop 'prefetch interesting(i) and det(i)'
+    endif
+
+    mobMask(1,1) = iand(negMask(1,1), det(1,1,i))
+    mobMask(1,2) = iand(negMask(1,2), det(1,2,i))
+    nt = popcnt(mobMask(1, 1)) + popcnt(mobMask(1, 2))
+
+    if(nt > 4) cycle
+
+    do j=2,N_int
+      mobMask(j,1) = iand(negMask(j,1), det(j,1,i))
+      mobMask(j,2) = iand(negMask(j,2), det(j,2,i))
+      nt = nt + popcnt(mobMask(j, 1)) + popcnt(mobMask(j, 2))
+    end do
+
+    if(nt > 4) cycle
+
+    if (interesting(i) == i_gen) then
+        if(sp == 3) then
+          do k=1,mo_num
+            do j=1,mo_num
+              banned(j,k,2) = banned(k,j,1)
+            enddo
+          enddo
+        else
+          do k=1,mo_num
+          do l=k+1,mo_num
+            banned(l,k,1) = banned(k,l,1)
+          end do
+          end do
+        end if
+    end if
+
+    if (interesting(i) >= i_gen) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+
+        perMask(1,1) = iand(mask(1,1), not(det(1,1,i)))
+        perMask(1,2) = iand(mask(1,2), not(det(1,2,i)))
+        do j=2,N_int
+          perMask(j,1) = iand(mask(j,1), not(det(j,1,i)))
+          perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
+        end do
+
+        call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
+        call bitstring_to_list_in_selection(perMask(1,2), h(1,2), h(0,2), N_int)
+
+        call get_mask_phase(psi_det_sorted(1,1,interesting(i)), phasemask,N_int)
+        if(nt == 4) then
+!          call get_d2_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+          call get_d2_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+        else if(nt == 3) then
+!          call get_d1_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+          call get_d1_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+        else
+!          call get_d0_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+          call get_d0_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+        end if
+    else if(nt == 4) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+        call past_d2(banned, p, sp)
+    else if(nt == 3) then
+        call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
+        call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
+        call past_d1(bannedOrb, p)
+    end if
+  end do
+
+end
+
+
+subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
+  !todo: check all indices for complex; check coef conjg for complex
+  use bitmasks
+  implicit none
+
+  integer(bit_kind), intent(in) :: mask(N_int, 2), gen(N_int, 2)
+  integer(bit_kind), intent(in) :: phasemask(N_int,2)
+  logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
+  complex*16, intent(in) :: coefs(N_states)
+  complex*16, intent(inout) :: mat(N_states, mo_num, mo_num)
+  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+
+  double precision, external :: get_phase_bi
+  complex*16, external :: mo_two_e_integral_complex
+
+  integer :: i, j, k, tip, ma, mi, puti, putj
+  integer :: h1, h2, p1, p2, i1, i2
+  double precision :: phase
+  complex*16 :: hij
+
+  integer, parameter:: turn2d(2,3,4) = reshape((/0,0, 0,0, 0,0,  3,4, 0,0, 0,0,  2,4, 1,4, 0,0,  2,3, 1,3, 1,2 /), (/2,3,4/))
+  integer, parameter :: turn2(2) = (/2, 1/)
+  integer, parameter :: turn3(2,3) = reshape((/2,3,  1,3, 1,2/), (/2,3/))
+
+  integer :: bant
+  bant = 1
+
+  tip = p(0,1) * p(0,2)
+
+  ma = sp
+  if(p(0,1) > p(0,2)) ma = 1
+  if(p(0,1) < p(0,2)) ma = 2
+  mi = mod(ma, 2) + 1
+
+  if(sp == 3) then
+    if(ma == 2) bant = 2
+
+    if(tip == 3) then
+      puti = p(1, mi)
+      if(bannedOrb(puti, mi)) return
+      h1 = h(1, ma)
+      h2 = h(2, ma)
+
+      do i = 1, 3
+        putj = p(i, ma)
+        if(banned(putj,puti,bant)) cycle
+        i1 = turn3(1,i)
+        i2 = turn3(2,i)
+        p1 = p(i1, ma)
+        p2 = p(i2, ma)
+
+        hij = mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2, p1, h1, h2)
+        if (hij == (0.d0,0.d0)) cycle
+
+        hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+
+        if(ma == 1) then
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, putj, puti) = mat(k, putj, puti) + coefs(k) * hij
+          enddo
+        else
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
+          enddo
+        end if
+      end do
+    else
+      h1 = h(1,1)
+      h2 = h(1,2)
+      do j = 1,2
+        putj = p(j, 2)
+        if(bannedOrb(putj, 2)) cycle
+        p2 = p(turn2(j), 2)
+        do i = 1,2
+          puti = p(i, 1)
+
+          if(banned(puti,putj,bant) .or. bannedOrb(puti,1)) cycle
+          p1 = p(turn2(i), 1)
+
+          hij = mo_two_e_integral_complex(p1, p2, h1, h2)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
+            !DIR$ LOOP COUNT AVG(4)
+            do k=1,N_states
+              mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
+            enddo
+          endif
+        end do
+      end do
+    end if
+
+  else
+    if(tip == 0) then
+      h1 = h(1, ma)
+      h2 = h(2, ma)
+      do i=1,3
+        puti = p(i, ma)
+        if(bannedOrb(puti,ma)) cycle
+        do j=i+1,4
+          putj = p(j, ma)
+          if(bannedOrb(putj,ma)) cycle
+          if(banned(puti,putj,1)) cycle
+
+          i1 = turn2d(1, i, j)
+          i2 = turn2d(2, i, j)
+          p1 = p(i1, ma)
+          p2 = p(i2, ma)
+          hij = mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2,p1, h1, h2)
+          if (hij == (0.d0,0.d0)) cycle
+
+          hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, puti, putj) = mat(k, puti, putj) +coefs(k) * hij
+          enddo
+        end do
+      end do
+    else if(tip == 3) then
+      h1 = h(1, mi)
+      h2 = h(1, ma)
+      p1 = p(1, mi)
+      do i=1,3
+        puti = p(turn3(1,i), ma)
+        if(bannedOrb(puti,ma)) cycle
+        putj = p(turn3(2,i), ma)
+        if(bannedOrb(putj,ma)) cycle
+        if(banned(puti,putj,1)) cycle
+        p2 = p(i, ma)
+
+        hij = mo_two_e_integral_complex(p1, p2, h1, h2)
+        if (hij == (0.d0,0.d0)) cycle
+
+        hij = hij * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
+        if (puti < putj) then
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
+          enddo
+        else
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, putj, puti) = mat(k, putj, puti) + coefs(k) * hij
+          enddo
+        endif
+      end do
+    else ! tip == 4
+      puti = p(1, sp)
+      putj = p(2, sp)
+      if(.not. banned(puti,putj,1)) then
+        p1 = p(1, mi)
+        p2 = p(2, mi)
+        h1 = h(1, mi)
+        h2 = h(2, mi)
+        hij = (mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2,p1, h1, h2))
+        if (hij /= (0.d0,0.d0)) then
+          hij = hij * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
+          enddo
+        end if
+      end if
+    end if
+  end if
+end
+
+
+subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
+  !todo: check all indices for complex; check coef conjg for complex
+  use bitmasks
+  implicit none
+
+  integer(bit_kind), intent(in)  :: mask(N_int, 2), gen(N_int, 2)
+  integer(bit_kind), intent(in)  :: phasemask(N_int,2)
+  logical, intent(in)            :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
+  integer(bit_kind)              :: det(N_int, 2)
+  complex*16, intent(in)   :: coefs(N_states)
+  complex*16, intent(inout) :: mat(N_states, mo_num, mo_num)
+  integer, intent(in)            :: h(0:2,2), p(0:4,2), sp
+  double precision, external     :: get_phase_bi
+  complex*16, external     :: mo_two_e_integral_complex
+  logical                        :: ok
+
+  logical, allocatable           :: lbanned(:,:)
+  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j
+  integer                        :: hfix, pfix, h1, h2, p1, p2, ib, k, l
+
+  integer, parameter             :: turn2(2) = (/2,1/)
+  integer, parameter             :: turn3(2,3) = reshape((/2,3,  1,3, 1,2/), (/2,3/))
+
+  integer                        :: bant
+  complex*16, allocatable :: hij_cache(:,:)
+  complex*16               :: hij, tmp_row(N_states, mo_num), tmp_row2(N_states, mo_num)
+  PROVIDE mo_integrals_map N_int
+
+  allocate (lbanned(mo_num, 2))
+  allocate (hij_cache(mo_num,2))
+  lbanned = bannedOrb
+
+  do i=1, p(0,1)
+    lbanned(p(i,1), 1) = .true.
+  end do
+  do i=1, p(0,2)
+    lbanned(p(i,2), 2) = .true.
+  end do
+
+  ma = 1
+  if(p(0,2) >= 2) ma = 2
+  mi = turn2(ma)
+
+  bant = 1
+
+  if(sp == 3) then
+    !move MA
+    if(ma == 2) bant = 2
+    puti = p(1,mi)
+    hfix = h(1,ma)
+    p1 = p(1,ma)
+    p2 = p(2,ma)
+    if(.not. bannedOrb(puti, mi)) then
+      call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map)
+      call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map)
+      tmp_row = (0.d0,0.d0)
+      do putj=1, hfix-1
+        if(lbanned(putj, ma)) cycle
+        if(banned(putj, puti,bant)) cycle
+        hij = hij_cache(putj,1) - hij_cache(putj,2)
+        if (hij /= (0.d0,0.d0)) then
+          hij = hij * get_phase_bi(phasemask, ma, ma, putj, p1, hfix, p2, N_int)
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            tmp_row(k,putj) = tmp_row(k,putj) + hij * coefs(k)
+          enddo
+        endif
+      end do
+      do putj=hfix+1, mo_num
+        if(lbanned(putj, ma)) cycle
+        if(banned(putj, puti,bant)) cycle
+        hij = hij_cache(putj,2) - hij_cache(putj,1)
+        if (hij /= (0.d0,0.d0)) then
+          hij = hij * get_phase_bi(phasemask, ma, ma, hfix, p1, putj, p2, N_int)
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            tmp_row(k,putj) = tmp_row(k,putj) + hij * coefs(k)
+          enddo
+        endif
+      end do
+
+      if(ma == 1) then
+        mat(1:N_states,1:mo_num,puti) = mat(1:N_states,1:mo_num,puti) + tmp_row(1:N_states,1:mo_num)
+      else
+        do l=1,mo_num
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k,puti,l) = mat(k,puti,l) + tmp_row(k,l)
+          enddo
+        enddo
+      end if
+    end if
+
+    !MOVE MI
+    pfix = p(1,mi)
+    tmp_row = (0.d0,0.d0)
+    tmp_row2 = (0.d0,0.d0)
+    call get_mo_two_e_integrals_complex(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map)
+    call get_mo_two_e_integrals_complex(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map)
+    putj = p1
+    do puti=1,mo_num !HOT
+      if(lbanned(puti,mi)) cycle
+      !p1 fixed
+      putj = p1
+      if(.not. banned(putj,puti,bant)) then
+        hij = hij_cache(puti,2)
+        if (hij /= (0.d0,0.d0)) then
+          hij = hij * get_phase_bi(phasemask, ma, mi, hfix, p2, puti, pfix, N_int)
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            tmp_row(k,puti) = tmp_row(k,puti) + hij * coefs(k)
+          enddo
+        endif
+      end if
+!    enddo
+!      
+      putj = p2
+!    do puti=1,mo_num !HOT
+      if(.not. banned(putj,puti,bant)) then
+        hij = hij_cache(puti,1)
+        if (hij /= (0.d0,0.d0)) then
+          hij = hij * get_phase_bi(phasemask, ma, mi, hfix, p1, puti, pfix, N_int)
+          do k=1,N_states
+            tmp_row2(k,puti) = tmp_row2(k,puti) + hij * coefs(k)
+          enddo
+        endif
+      end if
+    end do
+
+    if(mi == 1) then
+      mat(:,:,p1) = mat(:,:,p1) + tmp_row(:,:)
+      mat(:,:,p2) = mat(:,:,p2) + tmp_row2(:,:)
+    else
+      do l=1,mo_num
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k,p1,l) = mat(k,p1,l) + tmp_row(k,l)
+          mat(k,p2,l) = mat(k,p2,l) + tmp_row2(k,l)
+        enddo
+      enddo
+    end if
+
+  else  ! sp /= 3
+
+    if(p(0,ma) == 3) then
+      do i=1,3
+        hfix = h(1,ma)
+        puti = p(i, ma)
+        p1 = p(turn3(1,i), ma)
+        p2 = p(turn3(2,i), ma)
+        call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map)
+        call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map)
+        tmp_row = (0.d0,0.d0)
+        do putj=1,hfix-1
+          if(banned(putj,puti,1)) cycle
+          if(lbanned(putj,ma)) cycle
+          hij = hij_cache(putj,1) - hij_cache(putj,2)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, ma, ma, putj, p1, hfix, p2, N_int)
+            tmp_row(:,putj) = tmp_row(:,putj) + hij * coefs(:)
+          endif
+        end do
+        do putj=hfix+1,mo_num
+          if(banned(putj,puti,1)) cycle
+          if(lbanned(putj,ma)) cycle
+          hij = hij_cache(putj,2) - hij_cache(putj,1)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, ma, ma, hfix, p1, putj, p2, N_int)
+            tmp_row(:,putj) = tmp_row(:,putj) + hij * coefs(:)
+          endif
+        end do
+
+        mat(:, :puti-1, puti) = mat(:, :puti-1, puti) + tmp_row(:,:puti-1)
+        do l=puti,mo_num
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            mat(k, puti, l) = mat(k, puti,l) + tmp_row(k,l)
+          enddo
+        enddo
+      end do
+    else
+      hfix = h(1,mi)
+      pfix = p(1,mi)
+      p1 = p(1,ma)
+      p2 = p(2,ma)
+      tmp_row = (0.d0,0.d0)
+      tmp_row2 = (0.d0,0.d0)
+      call get_mo_two_e_integrals_complex(hfix,p1,pfix,mo_num,hij_cache(1,1),mo_integrals_map)
+      call get_mo_two_e_integrals_complex(hfix,p2,pfix,mo_num,hij_cache(1,2),mo_integrals_map)
+      putj = p2
+      do puti=1,mo_num
+        if(lbanned(puti,ma)) cycle
+        putj = p2
+        if(.not. banned(puti,putj,1)) then
+          hij = hij_cache(puti,1)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p1, N_int)
+            !DIR$ LOOP COUNT AVG(4)
+            do k=1,N_states
+              tmp_row(k,puti) = tmp_row(k,puti) + hij * coefs(k)
+            enddo
+          endif
+        end if
+
+        putj = p1
+        if(.not. banned(puti,putj,1)) then
+          hij = hij_cache(puti,2)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p2, N_int)
+            do k=1,N_states
+              tmp_row2(k,puti) = tmp_row2(k,puti) + hij * coefs(k)
+            enddo
+          endif
+        end if
+      end do
+      mat(:,:p2-1,p2) = mat(:,:p2-1,p2) + tmp_row(:,:p2-1)
+      do l=p2,mo_num
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k,p2,l) = mat(k,p2,l) + tmp_row(k,l)
+        enddo
+      enddo
+      mat(:,:p1-1,p1) = mat(:,:p1-1,p1) + tmp_row2(:,:p1-1)
+      do l=p1,mo_num
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k,p1,l) = mat(k,p1,l) + tmp_row2(k,l)
+        enddo
+      enddo
+    end if
+  end if
+  deallocate(lbanned,hij_cache)
+
+ !! MONO
+    if(sp == 3) then
+      s1 = 1
+      s2 = 2
+    else
+      s1 = sp
+      s2 = sp
+    end if
+
+    do i1=1,p(0,s1)
+      ib = 1
+      if(s1 == s2) ib = i1+1
+      do i2=ib,p(0,s2)
+        p1 = p(i1,s1)
+        p2 = p(i2,s2)
+        if(bannedOrb(p1, s1) .or. bannedOrb(p2, s2) .or. banned(p1, p2, 1)) cycle
+        call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
+        call i_h_j_complex(gen, det, N_int, hij)
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k, p1, p2) = mat(k, p1, p2) + coefs(k) * hij
+        enddo
+      end do
+    end do
+end
+
+
+
+
+subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
+  !todo: check all indices for complex; check coef conjg for complex
+  use bitmasks
+  implicit none
+
+  integer(bit_kind), intent(in) :: gen(N_int, 2), mask(N_int, 2)
+  integer(bit_kind), intent(in) :: phasemask(N_int,2)
+  logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num,2)
+  integer(bit_kind) :: det(N_int, 2)
+  complex*16, intent(in) :: coefs(N_states)
+  complex*16, intent(inout) :: mat(N_states, mo_num, mo_num)
+  integer, intent(in) :: h(0:2,2), p(0:4,2), sp
+
+  integer :: i, j, k, s, h1, h2, p1, p2, puti, putj
+  double precision :: phase
+  complex*16 :: hij
+  double precision, external :: get_phase_bi
+  double precision, external :: mo_two_e_integral_complex
+  logical :: ok
+
+  integer, parameter :: bant=1
+  complex*16, allocatable :: hij_cache1(:), hij_cache2(:)
+  allocate (hij_cache1(mo_num),hij_cache2(mo_num))
+
+
+  if(sp == 3) then ! AB
+    h1 = p(1,1)
+    h2 = p(1,2)
+    do p1=1, mo_num
+      if(bannedOrb(p1, 1)) cycle
+      call get_mo_two_e_integrals_complex(p1,h2,h1,mo_num,hij_cache1,mo_integrals_map)
+      do p2=1, mo_num
+        if(bannedOrb(p2,2)) cycle
+        if(banned(p1, p2, bant)) cycle ! rentable?
+        if(p1 == h1 .or. p2 == h2) then
+          call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
+          call i_h_j_complex(gen, det, N_int, hij)
+        else
+          phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
+          hij = hij_cache1(p2) * phase
+        end if
+        if (hij == 0.d0) cycle
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k, p1, p2) = mat(k, p1, p2) + coefs(k) * hij  ! HOTSPOT
+        enddo
+      end do
+    end do
+
+  else ! AA BB
+    p1 = p(1,sp)
+    p2 = p(2,sp)
+    do puti=1, mo_num
+      if(bannedOrb(puti, sp)) cycle
+      call get_mo_two_e_integrals_complex(puti,p2,p1,mo_num,hij_cache1,mo_integrals_map)
+      call get_mo_two_e_integrals_complex(puti,p1,p2,mo_num,hij_cache2,mo_integrals_map)
+      do putj=puti+1, mo_num
+        if(bannedOrb(putj, sp)) cycle
+        if(banned(puti, putj, bant)) cycle ! rentable?
+        if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
+          call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
+          call i_h_j_complex(gen, det, N_int, hij)
+          if (hij == 0.d0) cycle
+        else
+          hij = (mo_two_e_integral_complex(p1, p2, puti, putj) -  mo_two_e_integral_complex(p2, p1, puti, putj))
+          if (hij == 0.d0) cycle
+          hij = hij * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
+        end if
+        !DIR$ LOOP COUNT AVG(4)
+        do k=1,N_states
+          mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
+        enddo
+      end do
+    end do
+  end if
+
+  deallocate(hij_cache1,hij_cache2)
+end
 
