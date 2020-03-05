@@ -278,6 +278,8 @@ EOF
 
             download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
             execute << EOF
+              export CC=gcc
+              export CXX=g++
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zeromq.tar.gz
               rm zeromq.tar.gz
@@ -326,8 +328,8 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 #
-#                opam switch create ocaml-base-compiler.4.07.1
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+#                opam switch create ocaml-base-compiler.4.10.0
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
 
                 eval $(opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -346,9 +348,9 @@ EOF
 EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#                opam switch create ocaml-base-compiler.4.07.1     || exit 1
+#                opam switch create ocaml-base-compiler.4.10.0     || exit 1
 
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
                 eval $(opam env)
                 execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1

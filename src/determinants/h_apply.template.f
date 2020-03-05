@@ -240,9 +240,6 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
       !   hole = a^(+)_j_a(ispin) a_i_a(ispin)|key_in> : single exc :: orb(i_a,ispin) --> orb(j_a,ispin)
       hole_save = hole
 
-      ! Build array of the non-zero integrals of second excitation
-      $filter_integrals
-
       if (ispin == 1) then
         integer                        :: jjj
 
