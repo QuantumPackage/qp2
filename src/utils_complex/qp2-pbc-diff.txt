@@ -446,7 +446,7 @@ src/mo_guess/mo_ortho_lowdin_complex.irp.f
 	[complex*16, ao_ortho_lowdin_overlap_complex, (ao_num,ao_num)]
 
 src/mo_guess/pot_mo_ortho_canonical_ints.irp.f
-	[complex*16, ao_ortho_canonical_nucl_elec_integrals_complex, (mo_num,mo_num)]
+	[complex*16, ao_ortho_cano_n_e_ints_cplx, (mo_num,mo_num)]
 src/mo_guess/pot_mo_ortho_lowdin_ints.irp.f
 	[complex*16, ao_ortho_lowdin_n_e_ints_cplx, (mo_num,mo_num)]
 
