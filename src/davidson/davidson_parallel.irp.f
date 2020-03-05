@@ -122,7 +122,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
 
     allocate(u_tc(N_st,N_det))
     
-    !todo: resize for complex?
+    !todo: resize for complex? (should be okay)
     ! Warning : dimensions are modified for efficiency, It is OK since we get the
     ! full matrix
     if (size(u_tc,kind=8) < 8388608_8) then
@@ -718,9 +718,6 @@ end
 !==============================================================================!
 
 subroutine davidson_push_results_complex(zmq_socket_push, v_t, s_t, imin, imax, task_id)
-  !todo: implement for complex; check double sz
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -745,12 +742,12 @@ subroutine davidson_push_results_complex(zmq_socket_push, v_t, s_t, imin, imax, 
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
   if(rc /= 4) stop 'davidson_push_results failed to push imax'
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
   if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz, 0)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
   if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
 
 ! Activate is zmq_socket_push is a REQ
@@ -767,9 +764,6 @@ IRP_ENDIF
 end subroutine
 
 subroutine davidson_push_results_async_send_complex(zmq_socket_push, v_t, s_t, imin, imax, task_id,sending)
-  !todo: implement for complex; check double sz
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -801,21 +795,18 @@ subroutine davidson_push_results_async_send_complex(zmq_socket_push, v_t, s_t, i
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
   if(rc /= 4) stop 'davidson_push_results failed to push imax'
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
   if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz, 0)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
   if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
 
 end subroutine
 
 
 subroutine davidson_pull_results_complex(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
-  !todo: implement for complex; check double sz
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -841,12 +832,12 @@ subroutine davidson_pull_results_complex(zmq_socket_pull, v_t, s_t, imin, imax, 
 
   sz = (imax-imin+1)*N_states_diag
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_recv8( zmq_socket_pull, v_t(1,imin), 8_8*sz, 0)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_recv8( zmq_socket_pull, v_t(1,imin), 8_8*sz*2, 0)
   if(rc8 /= 8*sz) stop 'davidson_pull_results failed to pull v_t'
 
-  !todo: double sz for complex?
-  rc8 = f77_zmq_recv8( zmq_socket_pull, s_t(1,imin), 8_8*sz, 0)
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_recv8( zmq_socket_pull, s_t(1,imin), 8_8*sz*2, 0)
   if(rc8 /= 8*sz) stop 'davidson_pull_results failed to pull s_t'
 
 ! Activate if zmq_socket_pull is a REP
@@ -863,9 +854,6 @@ end subroutine
 
 
 subroutine davidson_collector_complex(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze, N_st)
-  !todo: implement for complex; check conjg v_t s_t
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use f77_zmq
   implicit none
   BEGIN_DOC
@@ -899,8 +887,6 @@ subroutine davidson_collector_complex(zmq_to_qp_run_socket, zmq_socket_pull, v0,
     endif
     do j=1,N_st
       do i=imin,imax
-        !todo: conjg or no?
-        print*,irp_here,' not implemented for complex (conjg?)'
         v0(i,j) = v0(i,j) + v_t(j,i)
         s0(i,j) = s0(i,j) + s_t(j,i)
       enddo

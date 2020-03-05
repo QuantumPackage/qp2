@@ -1114,12 +1114,12 @@ compute_singles=.True.
           ASSERT (lrow <= N_det_alpha_unique)
 
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-          !todo: check arg order conjg/noconjg
+          !todo: check arg order conjg/noconjg (should be okay)
           call i_h_j_double_alpha_beta_complex(tmp_det,tmp_det2,$N_int,hij)
           call get_s2(tmp_det,tmp_det2,$N_int,sij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
-          !todo: check arg order conjg/noconjg
+          !todo: check arg order conjg/noconjg (should be okay)
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
             s_t(l,k_a) = s_t(l,k_a) + sij * utl(l,kk+1)
           enddo
@@ -1205,12 +1205,12 @@ compute_singles=.True.
         ASSERT (lrow <= N_det_alpha_unique)
 
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-        !todo: check arg order conjg/noconjg
+        !todo: check arg order conjg/noconjg (should be okay)
         call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 1, hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
-        !todo: check arg order conjg/noconjg
+        !todo: check arg order conjg/noconjg (should be okay)
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
         enddo
@@ -1240,11 +1240,11 @@ compute_singles=.True.
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
 
-        !todo: check arg order conjg/noconjg
+        !todo: check arg order conjg/noconjg (should be okay)
         call i_h_j_double_spin_complex( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
-        !todo: check arg order conjg/noconjg
+        !todo: check arg order conjg/noconjg (should be okay)
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
         enddo
@@ -1324,7 +1324,7 @@ compute_singles=.True.
         call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 2, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
-          !todo: check arg order conjg/noconjg
+          !todo: check arg order conjg/noconjg (should be okay)
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! single => sij = 0
         enddo
@@ -1355,12 +1355,12 @@ compute_singles=.True.
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
-        !todo: check arg order conjg/noconjg
+        !todo: check arg order conjg/noconjg (should be okay)
         call i_h_j_double_spin_complex( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
 
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
-          !todo: check arg order conjg/noconjg
+          !todo: check arg order conjg/noconjg (should be okay)
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
           ! same spin => sij = 0
         enddo
@@ -1390,7 +1390,6 @@ compute_singles=.True.
     sij = dcmplx(diag_S_mat_elem(tmp_det,$N_int),0.d0)
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
-      !todo: check arg order conjg/noconjg
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
       s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)
     enddo

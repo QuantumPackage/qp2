@@ -2037,7 +2037,7 @@ end
 !==============================================================================!
 
 subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
-  !todo: check indices for complex?
+  !todo: should be okay for complex
   use bitmasks
   use selection_types
   implicit none
@@ -2212,7 +2212,6 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
 end
 
 subroutine splash_pq_complex(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting)
-  !todo: check indices for complex?
   use bitmasks
   implicit none
   BEGIN_DOC

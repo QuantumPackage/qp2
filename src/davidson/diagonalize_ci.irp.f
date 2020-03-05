@@ -424,7 +424,7 @@ subroutine diagonalize_CI_complex
   enddo
   psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
   psi_s2(1:N_states) = CI_s2(1:N_states)
-  !todo: touch ci_{sc,electronic_energy}?
+  !todo: touch ci_{s2,electronic_energy}?
   SOFT_TOUCH psi_coef_complex CI_electronic_energy_complex ci_energy CI_eigenvectors_complex CI_s2_complex psi_energy psi_s2
 end
 
@@ -443,6 +443,6 @@ subroutine diagonalize_CI
   psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
   psi_s2(1:N_states) = CI_s2(1:N_states)
 
-  !todo: touch ci_{sc,electronic_energy}?
+  !todo: touch ci_{s2,electronic_energy}?
   SOFT_TOUCH psi_coef CI_electronic_energy_real ci_energy CI_eigenvectors CI_s2_real psi_energy psi_s2
 end
