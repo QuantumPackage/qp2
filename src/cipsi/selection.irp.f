@@ -193,6 +193,9 @@ subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
 
   call build_fock_tmp(fock_diag_tmp,psi_det_generators(1,1,i_generator),N_int)
 
+  ! possible holes and particles for this generator
+  ! hole_mask: occupied in this generator   .AND. occupied in generators_bitmask_hole
+  ! part_mask: unoccupied in this generator .AND. occupied in generators_bitmask_part
   do k=1,N_int
       hole_mask(k,1) = iand(generators_bitmask(k,1,s_hole), psi_det_generators(k,1,i_generator))
       hole_mask(k,2) = iand(generators_bitmask(k,2,s_hole), psi_det_generators(k,2,i_generator))
@@ -298,7 +301,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   monoAdo = .true.
   monoBdo = .true.
   
-  
+  !todo: this is already done in select_connected? why repeat?
   do k=1,N_int
     hole    (k,1) = iand(psi_det_generators(k,1,i_generator), hole_mask(k,1))
     hole    (k,2) = iand(psi_det_generators(k,2,i_generator), hole_mask(k,2))
@@ -319,19 +322,39 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
   
+  
+  ! S_s = selectors
+  ! S_0 = {|D_G>}                                       (i_generator determinant)
+  ! S_j = {|D_k> : |D_k> \in T_j|D_G> }                 (i.e. S_2 is all dets connected to |D_G> by a double excitation)
+  ! S_2b = S_2 \intersection {|D_k> : a_{h1}|D_k> != 0} (in S_2 and h1 is occupied)
+  ! S_2' = S_2 \ {|D_k> : a_{h1}|D_k> != 0}             (in S_2 and h1 is not occupied)
+  ! S_4b = S_4 \intersection {|D_k> : a_{h1}|D_k> != 0} (in S_4 and h1 is occupied)
+  ! S_4' = S_4 \ {|D_k> : a_{h1}|D_k> != 0}             (in S_4 and h1 is not occupied)
+
+  ! construct the following sets of determinants:
+  !   preinteresting: S_pi = (U_{j=0..4} S_j) \intersection S_s
+  !   prefullinteresting: S_pfi = (U_{j=0..2} S_j) \ S_s
+  !   interesting: S_i = S_pi \ S_4b = ( (U_{j=0..3} S_j) U S_4' ) \intersection S_s
+  !   fullinteresting: S_fi = S_i U (S_pfi \ S_2b) = (S_0 U S_1 U S_2') 
+  !     (in order, first elements are in S_s, later elements are not in S_s) 
+
+
+  ! get indices of all unique dets for which total excitation degree (relative to i_generator) is <= 4
   k=1
+  ! get exc_degree(i) for each unique alpha det(i) from i_generator(alpha)
   do i=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,i),       &
         psi_det_generators(1,1,i_generator), exc_degree(i), N_int)
   enddo
   
+  ! get exc_degree (= nt) for each unique beta det(j) from i_generator(beta)
   do j=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,j),        &
         psi_det_generators(1,2,i_generator), nt, N_int)
-    if (nt > 2) cycle
+    if (nt > 2) cycle ! don't keep anything more than double beta exc
     do l_a=psi_bilinear_matrix_columns_loc(j), psi_bilinear_matrix_columns_loc(j+1)-1
       i = psi_bilinear_matrix_rows(l_a)
-      if (nt + exc_degree(i) <= 4) then
+      if (nt + exc_degree(i) <= 4) then ! don't keep anything more than 4-fold total exc
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
         if (psi_average_norm_contrib_sorted(idx) > 1.d-12) then
           indices(k) = idx
@@ -341,6 +364,23 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
     enddo
   enddo
   
+
+  !  indices now contains det indices (in psi_det_sorted) of dets which differ from generator by:
+  !  (exc_alpha,exc_beta) in
+  !  (4,0)
+  !  (3,0), (3,1)
+  !  (2,0), (2,1), (2,2)
+  !  (1,0), (1,1), (1,2)
+  !  (0,0), (0,1), (0,2)
+  !
+  !                              (4,0)
+  !                       (3,0), (3,1)
+  !                (2,0), (2,1), (2,2)
+  !         (1,0), (1,1), (1,2)
+  !  (0,0), (0,1), (0,2)
+  !
+  !  below, add (0,3), (0,4), (1,3)
+
   do i=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,i),        &
         psi_det_generators(1,2,i_generator), exc_degree(i), N_int)
@@ -374,6 +414,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   enddo
   call isort(indices,iorder,nmax)
   deallocate(iorder)
+  ! sort indices by location in psi_det_sorted
   
   ! Start with 32 elements. Size will double along with the filtering.
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
@@ -388,6 +429,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   
   do k=1,nmax
     i = indices(k)
+    ! mobMask in psi_det(i) but not in i_generator
+    ! nt = popcnt(mobMask)
     mobMask(1,1) = iand(negMask(1,1), psi_det_sorted(1,1,i))
     mobMask(1,2) = iand(negMask(1,2), psi_det_sorted(1,2,i))
     nt = popcnt(mobMask(1, 1)) + popcnt(mobMask(1, 2))
@@ -397,6 +440,9 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       nt = nt + popcnt(mobMask(j, 1)) + popcnt(mobMask(j, 2))
     end do
     
+    ! preinteresting:     within a 4-fold excitation from i_generator; in selectors
+    ! prefullinteresting: within a double excitation from i_generator; not in selectors
+
     if(nt <= 4) then
       if(i <= N_det_selectors) then
         sze = preinteresting(0) 
@@ -431,11 +477,6 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 !  print *,  'Step1: ', i_generator, preinteresting(0)
 !  !$OMP END CRITICAL
 
-!------------------------------------------------------------|
-!                                                            |
-!                          Real                              |
-!                                                            |
-!------------------------------------------------------------|
   allocate(banned(mo_num, mo_num,2), bannedOrb(mo_num, 2))
   if (is_complex) then
   allocate (mat_complex(N_states, mo_num, mo_num))
@@ -470,10 +511,13 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       maskInd = maskInd_save
       
       h1 = hole_list(i1,s1)
+!todo      kpt1 = (h1-1)/mo_num_per_kpt + 1
+      ! pmask is i_generator det with bit at h1 set to zero
       call apply_hole(psi_det_generators(1,1,i_generator), s1,h1, pmask, ok, N_int)
       
       negMask = not(pmask)
       
+      ! see set definitions above 
       interesting(0) = 0
       fullinteresting(0) = 0
       
@@ -533,6 +577,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             end do
         end select
         
+        ! nt = ( orbs occupied in preinteresting(ii) and not occupied in i_gen(after removing elec from h1) )
         if(nt <= 4) then
           sze = interesting(0) 
           if (sze+1 == size(interesting)) then
@@ -594,12 +639,17 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
       if(pert_2rdm)then
-        allocate(coef_fullminilist_rev(N_states,fullinteresting(0))) 
-        do i=1,fullinteresting(0)
-          do j = 1, N_states
-            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+        if (is_complex) then
+          print*,irp_here,' not implemented for complex: pert_2rdm'
+          stop -1
+        else
+          allocate(coef_fullminilist_rev(N_states,fullinteresting(0))) 
+          do i=1,fullinteresting(0)
+            do j = 1, N_states
+              coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+            enddo
           enddo
-        enddo
+        endif
       endif
 
       do i=1,fullinteresting(0)
@@ -621,23 +671,54 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         do i2=N_holes(s2),ib,-1   ! Generate low excitations first
 
           h2 = hole_list(i2,s2)
-          call apply_hole(pmask, s2,h2, mask, ok, N_int)
-          banned = .false.
+          if (is_complex) then
+!=============================================================
+!!todo use this once kpts are implemented
+!            kpt2 = (h2-1)/mo_num_per_kpt + 1
+!            kpt12 = kconserv(kpt1,kpt2,1)
+!            ! mask is gen_i with (h1,s1),(h2,s2) removed
+!            call apply_hole(pmask, s2,h2, mask, ok, N_int)
+!            banned = .true.
+!            ! only allow excitations that conserve momentum
+!            do kk1=1,kpt_num
+!              ! equivalent to kk2 = kconserv(kpt1,kpt2,kk1)
+!              kk2 = kconserv(kpt12,1,kk1)
+!              ik01 = (kk1-1) * mo_num_per_kpt + 1 !first mo in kk1
+!              ik02 = (kk2-1) * mo_num_per_kpt + 1 !first mo in kk2
+!              do ik1 = ik01, ik01 + mo_num_per_kpt - 1 !loop over mos in kk1
+!                do ik2 = ik02, ik02 + mo_num_per_kpt - 1 !loop over mos in kk2
+!                  ! depending on sp, might not need both of these?
+!                  ! sp=1 (a,a) or sp=2 (b,b): only use banned(:,:,1)
+!                  ! sp=3 (a,b): banned(alpha,beta,1) is transpose of banned(beta,alpha,2)
+!                  banned(ik1,ik2,1) = .false.
+!                  banned(ik1,ik2,2) = .false.
+!                enddo
+!              enddo
+!            enddo
+!=============================================================
+            ! mask is gen_i with (h1,s1),(h2,s2) removed
+            call apply_hole(pmask, s2,h2, mask, ok, N_int)
+            banned = .false.
+!=============================================================
+          else
+            call apply_hole(pmask, s2,h2, mask, ok, N_int)
+            banned = .false.
+          endif
           do j=1,mo_num
             bannedOrb(j, 1) = .true.
             bannedOrb(j, 2) = .true.
           enddo
           do s3=1,2
             do i=1,N_particles(s3)
-              bannedOrb(particle_list(i,s3), s3) = .false.
+              bannedOrb(particle_list(i,s3), s3) = .false. ! allow excitation into orbitals in particle_list
             enddo
           enddo
           if(s1 /= s2) then
             if(monoBdo) then
-              bannedOrb(h1,s1) = .false.
+              bannedOrb(h1,s1) = .false. ! allow alpha elec to go back into alpha hole
             end if
             if(monoAdo) then
-              bannedOrb(h2,s2) = .false.
+              bannedOrb(h2,s2) = .false. ! allow beta elec to go back into beta hole
               monoAdo = .false.
             end if
           end if
@@ -656,7 +737,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
               if(.not.pert_2rdm)then
                call fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat_complex, buf)
               else
-                print*,irp_here,' not implemented for complex'
+                print*,irp_here,' not implemented for complex (fill_buffer_double_rdm_complex)'
                 stop -1
                !call fill_buffer_double_rdm_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat_complex, buf,fullminilist, coef_fullminilist_rev_complex, fullinteresting(0))
               endif
@@ -670,15 +751,20 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             endif
             endif!complex
           end if
-        enddo
+        enddo !i2
         if(s1 /= s2) monoBdo = .false.
-      enddo
+      enddo !s2
       deallocate(fullminilist,minilist)
       if(pert_2rdm)then
-        deallocate(coef_fullminilist_rev)
+        if (is_complex) then
+          print*,irp_here,' not implemented for complex: pert_2rdm'
+          stop -1
+        else
+          deallocate(coef_fullminilist_rev)
+        endif
       endif
-    enddo
-  enddo
+    enddo ! i1
+  enddo ! s1
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
   deallocate(banned, bannedOrb)
   if (is_complex) then
@@ -1536,7 +1622,7 @@ subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
 
   genl : do i=1, N
     ! If det(i) can't be generated by the mask, cycle
-    do j=1, N_int
+    do j=1, N_int  ! if all occupied orbs in mask are not also occupied in det(i), go to next det
       if(iand(det(j,1,i), mask(j,1)) /= mask(j, 1)) cycle genl
       if(iand(det(j,2,i), mask(j,2)) /= mask(j, 2)) cycle genl
     end do
@@ -1548,11 +1634,14 @@ subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
     end if
 
     ! Identify the particles
-    do j=1, N_int
+    do j=1, N_int ! if electrons are excited into the orbs given by myMask, resulting determinant will be det(i)
       myMask(j, 1) = iand(det(j, 1, i), negMask(j, 1))
       myMask(j, 2) = iand(det(j, 2, i), negMask(j, 2))
     end do
 
+    ! don't allow excitations into this pair of orbitals?
+    ! should 'banned' have dimensions (mo_num,mo_num,2)?
+    ! is it always true that popcnt(myMask) = 2 ? (sum over N_int and alpha/beta spins)
     call bitstring_to_list_in_selection(myMask(1,1), list(1), na, N_int)
     call bitstring_to_list_in_selection(myMask(1,2), list(na+1), nb, N_int)
     banned(list(1), list(2)) = .true.
@@ -2065,7 +2154,7 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
             tmp = -tmp
         endif
         e_pert = 0.5d0 * (tmp - delta_E)
-        if (dabs(alpha_h_psi) > 1.d-4) then
+        if (cdabs(alpha_h_psi) > 1.d-4) then
           coef = e_pert / alpha_h_psi
         else
           coef = alpha_h_psi / delta_E
@@ -2136,6 +2225,7 @@ subroutine splash_pq_complex(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat
   integer, intent(in)            :: interesting(0:N_sel)
   integer(bit_kind),intent(in)   :: mask(N_int, 2), det(N_int, 2, N_sel)
   logical, intent(inout)         :: bannedOrb(mo_num, 2), banned(mo_num, mo_num, 2)
+  ! mat should be out, not inout? (if only called from select_singles_and_doubles)
   complex*16, intent(inout) :: mat(N_states, mo_num, mo_num)
 
   integer                        :: i, ii, j, k, l, h(0:2,2), p(0:4,2), nt
@@ -2185,7 +2275,8 @@ subroutine splash_pq_complex(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat
         end if
     end if
 
-    if (interesting(i) >= i_gen) then
+    ! p contains orbs in det that are not in the doubly ionized generator
+    if (interesting(i) >= i_gen) then ! det past i_gen
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
         call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
 
@@ -2196,25 +2287,23 @@ subroutine splash_pq_complex(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat
           perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
         end do
 
+      ! h contains orbs in the doubly ionized generator that are not in det
         call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
         call bitstring_to_list_in_selection(perMask(1,2), h(1,2), h(0,2), N_int)
 
         call get_mask_phase(psi_det_sorted(1,1,interesting(i)), phasemask,N_int)
-        if(nt == 4) then
-!          call get_d2_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-          call get_d2_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        else if(nt == 3) then
-!          call get_d1_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-          call get_d1_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        else
-!          call get_d0_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-          call get_d0_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
+        if(nt == 4) then ! differ by 6 (2,4)
+          call get_d2_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp_complex(1, interesting(i)))
+        else if(nt == 3) then ! differ by 4 (1,3)
+          call get_d1_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp_complex(1, interesting(i)))
+        else ! differ by 2 (0,2) 
+          call get_d0_complex(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp_complex(1, interesting(i)))
         end if
-    else if(nt == 4) then
+    else if(nt == 4) then ! differ by 6 (2,4); i_gen past det
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
         call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
         call past_d2(banned, p, sp)
-    else if(nt == 3) then
+    else if(nt == 3) then ! differ by 4 (1,3); i_gen past det
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
         call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
         call past_d1(bannedOrb, p)
@@ -2225,7 +2314,7 @@ end
 
 
 subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
-  !todo: check all indices for complex; check coef conjg for complex
+  !todo: indices/conjg should be correct for complex
   use bitmasks
   implicit none
 
@@ -2251,51 +2340,63 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
   integer :: bant
   bant = 1
 
-  tip = p(0,1) * p(0,2)
+  tip = p(0,1) * p(0,2) ! number of alpha particles times number of beta particles
 
-  ma = sp
-  if(p(0,1) > p(0,2)) ma = 1
-  if(p(0,1) < p(0,2)) ma = 2
+  ma = sp !1:(alpha,alpha); 2:(b,b); 3:(a,b)
+  if(p(0,1) > p(0,2)) ma = 1 ! more alpha particles than beta particles
+  if(p(0,1) < p(0,2)) ma = 2 ! fewer alpha particles than beta particles
   mi = mod(ma, 2) + 1
 
-  if(sp == 3) then
-    if(ma == 2) bant = 2
+  if(sp == 3) then ! if one alpha and one beta xhole 
+    !(where xholes refer to the ionizations from the generator, not the holes occupied in the ionized generator)
+    if(ma == 2) bant = 2 ! if more beta particles than alpha particles
 
-    if(tip == 3) then
+    if(tip == 3) then ! if 3 of one particle spin and 1 of the other particle spin
       puti = p(1, mi)
       if(bannedOrb(puti, mi)) return
       h1 = h(1, ma)
       h2 = h(2, ma)
 
-      do i = 1, 3
+      do i = 1, 3    ! loop over all 3 combinations of 2 particles with spin ma
         putj = p(i, ma)
         if(banned(putj,puti,bant)) cycle
         i1 = turn3(1,i)
         i2 = turn3(2,i)
         p1 = p(i1, ma)
         p2 = p(i2, ma)
-
+        
+     ! |G> = |psi_{gen,i}>
+     ! |G'> = a_{x1} a_{x2} |G>
+     ! |alpha> = a_{puti}^{\dagger} a_{putj}^{\dagger} |G'>
+     ! |alpha> = t_{x1,x2}^{puti,putj} |G>
+     ! hij = <psi_{selectors,i}|H|alpha>
+     ! |alpha> = t_{p1,p2}^{h1,h2}|psi_{selectors,i}>
+        !todo: <i|H|j>  =  (<h1,h2|p1,p2> - <h1,h2|p2,p1>) * phase
+        !    <psi|H|j> +=  dconjg(c_i) * <i|H|j>
+        !      <j|H|i>  =  (<p1,p2|h1,h2> - <p2,p1|h1,h2>) * phase
+        !    <j|H|psi> +=  <j|H|i> * c_i
         hij = mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2, p1, h1, h2)
         if (hij == (0.d0,0.d0)) cycle
 
-        hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+        ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+        hij = dconjg(hij) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
 
-        if(ma == 1) then
+        if(ma == 1) then ! if particle spins are (alpha,alpha,alpha,beta), then puti is beta and putj is alpha
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat(k, putj, puti) = mat(k, putj, puti) + coefs(k) * hij
           enddo
-        else
+        else            ! if particle spins are (beta,beta,beta,alpha), then puti is alpha and putj is beta
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
           enddo
         end if
       end do
-    else
+    else ! if 2 alpha and 2 beta particles
       h1 = h(1,1)
       h2 = h(1,2)
-      do j = 1,2
+      do j = 1,2 ! loop over all 4 combinations of one alpha and one beta particle
         putj = p(j, 2)
         if(bannedOrb(putj, 2)) cycle
         p2 = p(turn2(j), 2)
@@ -2305,9 +2406,11 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
           if(banned(puti,putj,bant) .or. bannedOrb(puti,1)) cycle
           p1 = p(turn2(i), 1)
 
+    ! hij = <psi_{selectors,i}|H|alpha> 
           hij = mo_two_e_integral_complex(p1, p2, h1, h2)
           if (hij /= (0.d0,0.d0)) then
-            hij = hij * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
+            ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+            hij = dconjg(hij) * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
             !DIR$ LOOP COUNT AVG(4)
             do k=1,N_states
               mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
@@ -2317,8 +2420,8 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
       end do
     end if
 
-  else
-    if(tip == 0) then
+  else ! if holes are (a,a) or (b,b)
+    if(tip == 0) then ! if particles are (a,a,a,a) or (b,b,b,b)
       h1 = h(1, ma)
       h2 = h(2, ma)
       do i=1,3
@@ -2336,14 +2439,15 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
           hij = mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2,p1, h1, h2)
           if (hij == (0.d0,0.d0)) cycle
 
-          hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+          ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+          hij = dconjg(hij) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat(k, puti, putj) = mat(k, puti, putj) +coefs(k) * hij
           enddo
         end do
       end do
-    else if(tip == 3) then
+    else if(tip == 3) then ! if particles are (a,a,a,b) (ma=1,mi=2) or (a,b,b,b) (ma=2,mi=1)
       h1 = h(1, mi)
       h2 = h(1, ma)
       p1 = p(1, mi)
@@ -2358,7 +2462,8 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         hij = mo_two_e_integral_complex(p1, p2, h1, h2)
         if (hij == (0.d0,0.d0)) cycle
 
-        hij = hij * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
+        ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+        hij = dconjg(hij) * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
         if (puti < putj) then
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
@@ -2371,7 +2476,7 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
           enddo
         endif
       end do
-    else ! tip == 4
+    else ! tip == 4  (a,a,b,b)
       puti = p(1, sp)
       putj = p(2, sp)
       if(.not. banned(puti,putj,1)) then
@@ -2381,7 +2486,8 @@ subroutine get_d2_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         h2 = h(2, mi)
         hij = (mo_two_e_integral_complex(p1, p2, h1, h2) - mo_two_e_integral_complex(p2,p1, h1, h2))
         if (hij /= (0.d0,0.d0)) then
-          hij = hij * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
+          ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+          hij = dconjg(hij) * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat(k, puti, putj) = mat(k, puti, putj) + coefs(k) * hij
@@ -2394,7 +2500,7 @@ end
 
 
 subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
-  !todo: check all indices for complex; check coef conjg for complex
+  !todo: indices should be okay for complex?
   use bitmasks
   implicit none
 
@@ -2446,8 +2552,8 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
     p1 = p(1,ma)
     p2 = p(2,ma)
     if(.not. bannedOrb(puti, mi)) then
-      call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map)
-      call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map)
+      call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
+      call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
       tmp_row = (0.d0,0.d0)
       do putj=1, hfix-1
         if(lbanned(putj, ma)) cycle
@@ -2490,8 +2596,8 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
     pfix = p(1,mi)
     tmp_row = (0.d0,0.d0)
     tmp_row2 = (0.d0,0.d0)
-    call get_mo_two_e_integrals_complex(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map)
-    call get_mo_two_e_integrals_complex(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map)
+    call get_mo_two_e_integrals_complex(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
+    call get_mo_two_e_integrals_complex(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
     putj = p1
     do puti=1,mo_num !HOT
       if(lbanned(puti,mi)) cycle
@@ -2543,8 +2649,8 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         puti = p(i, ma)
         p1 = p(turn3(1,i), ma)
         p2 = p(turn3(2,i), ma)
-        call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map)
-        call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map)
+        call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
+        call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
         tmp_row = (0.d0,0.d0)
         do putj=1,hfix-1
           if(banned(putj,puti,1)) cycle
@@ -2580,8 +2686,8 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
       p2 = p(2,ma)
       tmp_row = (0.d0,0.d0)
       tmp_row2 = (0.d0,0.d0)
-      call get_mo_two_e_integrals_complex(hfix,p1,pfix,mo_num,hij_cache(1,1),mo_integrals_map)
-      call get_mo_two_e_integrals_complex(hfix,p2,pfix,mo_num,hij_cache(1,2),mo_integrals_map)
+      call get_mo_two_e_integrals_complex(hfix,p1,pfix,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
+      call get_mo_two_e_integrals_complex(hfix,p2,pfix,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
       putj = p2
       do puti=1,mo_num
         if(lbanned(puti,ma)) cycle
@@ -2643,10 +2749,13 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         p2 = p(i2,s2)
         if(bannedOrb(p1, s1) .or. bannedOrb(p2, s2) .or. banned(p1, p2, 1)) cycle
         call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
+        ! gen is a selector; mask is ionized generator; det is alpha
+        ! hij is contribution to <psi|H|alpha>
         call i_h_j_complex(gen, det, N_int, hij)
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
-          mat(k, p1, p2) = mat(k, p1, p2) + coefs(k) * hij
+          ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
+          mat(k, p1, p2) = mat(k, p1, p2) + coefs(k) * dconjg(hij)
         enddo
       end do
     end do
@@ -2656,7 +2765,7 @@ end
 
 
 subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, coefs)
-  !todo: check all indices for complex; check coef conjg for complex
+  !todo: indices/conjg should be okay for complex
   use bitmasks
   implicit none
 
@@ -2672,7 +2781,7 @@ subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
   double precision :: phase
   complex*16 :: hij
   double precision, external :: get_phase_bi
-  double precision, external :: mo_two_e_integral_complex
+  complex*16, external :: mo_two_e_integral_complex
   logical :: ok
 
   integer, parameter :: bant=1
@@ -2691,12 +2800,13 @@ subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         if(banned(p1, p2, bant)) cycle ! rentable?
         if(p1 == h1 .or. p2 == h2) then
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
-          call i_h_j_complex(gen, det, N_int, hij)
+          ! call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
+          call i_h_j_complex(det, gen, N_int, hij)
         else
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
           hij = hij_cache1(p2) * phase
         end if
-        if (hij == 0.d0) cycle
+        if (hij == (0.d0,0.d0)) cycle
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
           mat(k, p1, p2) = mat(k, p1, p2) + coefs(k) * hij  ! HOTSPOT
@@ -2709,19 +2819,20 @@ subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
     p2 = p(2,sp)
     do puti=1, mo_num
       if(bannedOrb(puti, sp)) cycle
-      call get_mo_two_e_integrals_complex(puti,p2,p1,mo_num,hij_cache1,mo_integrals_map)
-      call get_mo_two_e_integrals_complex(puti,p1,p2,mo_num,hij_cache2,mo_integrals_map)
+      call get_mo_two_e_integrals_complex(puti,p2,p1,mo_num,hij_cache1,mo_integrals_map,mo_integrals_map_2)
+      call get_mo_two_e_integrals_complex(puti,p1,p2,mo_num,hij_cache2,mo_integrals_map,mo_integrals_map_2)
       do putj=puti+1, mo_num
         if(bannedOrb(putj, sp)) cycle
         if(banned(puti, putj, bant)) cycle ! rentable?
         if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
           call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
-          call i_h_j_complex(gen, det, N_int, hij)
-          if (hij == 0.d0) cycle
+          !call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
+          call i_h_j_complex(det, gen, N_int, hij)
+          if (hij == (0.d0,0.d0)) cycle
         else
           hij = (mo_two_e_integral_complex(p1, p2, puti, putj) -  mo_two_e_integral_complex(p2, p1, puti, putj))
-          if (hij == 0.d0) cycle
-          hij = hij * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
+          if (hij == (0.d0,0.d0)) cycle
+          hij = dconjg(hij) * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
         end if
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
