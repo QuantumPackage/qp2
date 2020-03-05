@@ -43,7 +43,7 @@ end = struct
       mo_coef = Array.map (fun mo ->
           Array.init (Array.length mo)
             (fun i -> mo.(ordering.(i)))
-        ) b.mo_coef  
+        ) b.mo_coef
     }
 
   let read_ao_md5 () =
@@ -73,7 +73,7 @@ end = struct
     let elec_alpha_num =
       Ezfio.get_electrons_elec_alpha_num ()
     in
-    let result = 
+    let result =
       Ezfio.get_mo_basis_mo_num ()
     in
     if result < elec_alpha_num then
@@ -116,7 +116,7 @@ end = struct
 
 
   let read_mo_coef () =
-    let a = 
+    let a =
       (
         if Lazy.force is_complex then
            Ezfio.get_mo_basis_mo_coef_complex  ()
@@ -129,7 +129,7 @@ end = struct
     let mo_num = read_mo_num () |> MO_number.to_int in
     let ao_num = (Array.length a)/mo_num in
       Array.init mo_num (fun j ->
-          Array.sub a (j*ao_num) (ao_num) 
+          Array.sub a (j*ao_num) (ao_num)
         )
 
 
@@ -247,7 +247,7 @@ mo_coef         = %s
       (b.mo_occ |> Array.to_list |> List.map
          (MO_occ.to_string) |> String.concat ", " )
       (b.mo_coef |> Array.map
-         (fun x-> Array.map MO_coef.to_string x |> 
+         (fun x-> Array.map MO_coef.to_string x |>
            Array.to_list |> String.concat "," ) |>
        Array.to_list |> String.concat "\n" )
 
@@ -285,7 +285,7 @@ mo_coef         = %s
 
   let write_mo_coef a =
     let mo_num = Array.length a in
-    let ao_num = 
+    let ao_num =
       let x = Array.length a.(0) in
       if Lazy.force is_complex then x/2 else x
     in
@@ -303,7 +303,7 @@ mo_coef         = %s
         |> Ezfio.set_mo_basis_mo_coef )
 
 
-  let write 
+  let write
       { mo_num          : MO_number.t ;
         mo_label        : MO_label.t;
         mo_class        : MO_class.t array;
