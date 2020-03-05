@@ -511,7 +511,7 @@ def ninja_irpf90_make_build(path_module, l_needed_molule, d_irp):
     # N i n j a _ b u i l d #
     # ~#~#~#~#~#~#~#~#~#~#~ #
 
-    l_include_dir = ["-I {0}".format(m.rel) for m in l_needed_molule]
+    l_include_dir  = ["-I {0}".format(m.rel) for m in l_needed_molule]
 
     l_string = [
         "build {0}: build_irpf90.ninja {1}".format(str_creation, str_depend),
