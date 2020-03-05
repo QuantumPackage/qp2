@@ -34,13 +34,13 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ complex*16, ao_ortho_canonical_coef_inv_complex, (ao_num,ao_num)]
+BEGIN_PROVIDER [ complex*16, ao_ortho_cano_coef_inv_cplx, (ao_num,ao_num)]
  implicit none
  BEGIN_DOC
 ! ao_ortho_canonical_coef_complex^(-1)
  END_DOC
  call get_inverse_complex(ao_ortho_canonical_coef_complex,size(ao_ortho_canonical_coef_complex,1),&
-     ao_num, ao_ortho_canonical_coef_inv_complex, size(ao_ortho_canonical_coef_inv_complex,1))
+     ao_num, ao_ortho_cano_coef_inv_cplx, size(ao_ortho_cano_coef_inv_cplx,1))
 END_PROVIDER
 
  BEGIN_PROVIDER [ complex*16, ao_ortho_canonical_coef_complex, (ao_num,ao_num)]

@@ -66,7 +66,7 @@ BEGIN_PROVIDER [ complex*16, mo_coef_in_ao_ortho_basis_complex, (ao_num, mo_num)
  ! $C^{-1}.C_{mo}$
  END_DOC
  call zgemm('N','N',ao_num,mo_num,ao_num,(1.d0,0.d0),                   &
-     ao_ortho_canonical_coef_inv_complex, size(ao_ortho_canonical_coef_inv_complex,1),&
+     ao_ortho_cano_coef_inv_cplx, size(ao_ortho_cano_coef_inv_cplx,1),&
      mo_coef_complex, size(mo_coef_complex,1), (0.d0,0.d0),                                 &
      mo_coef_in_ao_ortho_basis_complex, size(mo_coef_in_ao_ortho_basis_complex,1))
 
@@ -170,7 +170,7 @@ subroutine ao_to_mo_noconjg_complex(A_ao,LDA_ao,A_mo,LDA_mo)
 end
 
 
-subroutine ao_ortho_cano_to_ao_complex(A_ao,LDA_ao,A,LDA)
+subroutine ao_ortho_cano_to_ao_cplx(A_ao,LDA_ao,A,LDA)
   implicit none
   BEGIN_DOC
   ! Transform A from the |AO| basis to the orthogonal |AO| basis
@@ -186,13 +186,13 @@ subroutine ao_ortho_cano_to_ao_complex(A_ao,LDA_ao,A,LDA)
 
   call zgemm('C','N', ao_num, ao_num, ao_num,                        &
       (1.d0,0.d0),                                                     &
-      ao_ortho_canonical_coef_inv_complex, size(ao_ortho_canonical_coef_inv_complex,1),&
+      ao_ortho_cano_coef_inv_cplx, size(ao_ortho_cano_coef_inv_cplx,1),&
       A_ao,size(A_ao,1),                                             &
       (0.d0,0.d0), T, size(T,1))
 
   call zgemm('N','N', ao_num, ao_num, ao_num, (1.d0,0.d0),             &
       T, size(T,1),                                                  &
-      ao_ortho_canonical_coef_inv_complex,size(ao_ortho_canonical_coef_inv_complex,1),&
+      ao_ortho_cano_coef_inv_cplx,size(ao_ortho_cano_coef_inv_cplx,1),&
       (0.d0,0.d0), A, size(A,1))
 
   deallocate(T)

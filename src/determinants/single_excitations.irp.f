@@ -19,7 +19,7 @@ BEGIN_PROVIDER [integer(bit_kind), ref_closed_shell_bitmask, (N_int,2)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_num, mo_num) ]
+BEGIN_PROVIDER [double precision, fock_op_cshell_ref_bitmask, (mo_num, mo_num) ]
  implicit none
  integer :: i0,j0,i,j,k0,k
  integer :: n_occ_ab(2)
@@ -52,8 +52,8 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask(i,j) = accu + mo_one_e_integrals(i,j)
-   fock_operator_closed_shell_ref_bitmask(j,i) = accu + mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(i,j) = accu + mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(j,i) = accu + mo_one_e_integrals(i,j)
   enddo
  enddo
 
@@ -69,8 +69,8 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
-   fock_operator_closed_shell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)
   enddo
  enddo
 
@@ -86,8 +86,8 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
-   fock_operator_closed_shell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(i,j) = accu+ mo_one_e_integrals(i,j)
+   fock_op_cshell_ref_bitmask(j,i) = accu+ mo_one_e_integrals(i,j)
   enddo
  enddo
  deallocate(array_coulomb,array_exchange)
@@ -123,7 +123,7 @@ subroutine get_single_excitation_from_fock(det_1,det_2,h,p,spin,phase,hij)
  enddo
  call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
  call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
- hij = fock_operator_closed_shell_ref_bitmask(h,p)
+ hij = fock_op_cshell_ref_bitmask(h,p)
  ! holes :: direct terms
  do i0 = 1, n_occ_ab_hole(1)
   i = occ_hole(i0,1)
@@ -161,7 +161,7 @@ end
 
 
 
-BEGIN_PROVIDER [complex*16, fock_operator_closed_shell_ref_bitmask_complex, (mo_num, mo_num) ]
+BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_cplx, (mo_num, mo_num) ]
  implicit none
  integer :: i0,j0,i,j,k0,k
  integer :: n_occ_ab(2)
@@ -196,9 +196,9 @@ BEGIN_PROVIDER [complex*16, fock_operator_closed_shell_ref_bitmask_complex, (mo_
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask_complex(i,j) = accu + mo_one_e_integrals_complex(i,j)
-   !fock_operator_closed_shell_ref_bitmask_complex(j,i) = dconjg(accu) + mo_one_e_integrals_complex(j,i)
-   fock_operator_closed_shell_ref_bitmask_complex(j,i) = dconjg(fock_operator_closed_shell_ref_bitmask_complex(i,j))
+   fock_op_cshell_ref_bitmask_cplx(i,j) = accu + mo_one_e_integrals_complex(i,j)
+   !fock_op_cshell_ref_bitmask_cplx(j,i) = dconjg(accu) + mo_one_e_integrals_complex(j,i)
+   fock_op_cshell_ref_bitmask_cplx(j,i) = dconjg(fock_op_cshell_ref_bitmask_cplx(i,j))
   enddo
  enddo
 
@@ -214,8 +214,8 @@ BEGIN_PROVIDER [complex*16, fock_operator_closed_shell_ref_bitmask_complex, (mo_
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask_complex(i,j) = accu+ mo_one_e_integrals_complex(i,j)
-   fock_operator_closed_shell_ref_bitmask_complex(j,i) = dconjg(accu)+ mo_one_e_integrals_complex(j,i)
+   fock_op_cshell_ref_bitmask_cplx(i,j) = accu+ mo_one_e_integrals_complex(i,j)
+   fock_op_cshell_ref_bitmask_cplx(j,i) = dconjg(accu)+ mo_one_e_integrals_complex(j,i)
   enddo
  enddo
 
@@ -231,8 +231,8 @@ BEGIN_PROVIDER [complex*16, fock_operator_closed_shell_ref_bitmask_complex, (mo_
     k = occ(k0,1)
     accu += 2.d0 * array_coulomb(k) - array_exchange(k)
    enddo
-   fock_operator_closed_shell_ref_bitmask_complex(i,j) = accu+ mo_one_e_integrals_complex(i,j)
-   fock_operator_closed_shell_ref_bitmask_complex(j,i) = dconjg(accu)+ mo_one_e_integrals_complex(j,i)
+   fock_op_cshell_ref_bitmask_cplx(i,j) = accu+ mo_one_e_integrals_complex(i,j)
+   fock_op_cshell_ref_bitmask_cplx(j,i) = dconjg(accu)+ mo_one_e_integrals_complex(j,i)
   enddo
  enddo
  deallocate(array_coulomb,array_exchange)
@@ -268,7 +268,7 @@ subroutine get_single_excitation_from_fock_complex(det_1,det_2,h,p,spin,phase,hi
  enddo
  call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
  call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
- hij = fock_operator_closed_shell_ref_bitmask_complex(h,p)
+ hij = fock_op_cshell_ref_bitmask_cplx(h,p)
  ! holes :: direct terms
  do i0 = 1, n_occ_ab_hole(1)
   i = occ_hole(i0,1)

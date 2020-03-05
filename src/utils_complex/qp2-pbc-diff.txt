@@ -322,7 +322,7 @@ src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
 		depends on ao_cart_to_sphe_coef_complex
 	ao_cart_to_sphe_overlap_complex
 		similar to real version, but uses ao_overlap_complex instead of ao_overlap
-	ao_ortho_canonical_coef_inv_complex
+	ao_ortho_cano_coef_inv_cplx
 		self-explanatory
 	ao_ortho_canonical_coef_complex
 	ao_ortho_canonical_num_complex
@@ -413,7 +413,7 @@ src/mo_basis/mos_complex.irp.f
 			might cause confusion having both of these?
 			maybe should add _noconjg to name of _transp so it's clear that it's just the transpose, and not the adjoint
 		subroutine ao_to_mo_complex
-		subroutine ao_ortho_cano_to_ao_complex
+		subroutine ao_ortho_cano_to_ao_cplx
 	
 src/mo_basis/utils.irp.f
 	not modified:
@@ -448,7 +448,7 @@ src/mo_guess/mo_ortho_lowdin_complex.irp.f
 src/mo_guess/pot_mo_ortho_canonical_ints.irp.f
 	[complex*16, ao_ortho_canonical_nucl_elec_integrals_complex, (mo_num,mo_num)]
 src/mo_guess/pot_mo_ortho_lowdin_ints.irp.f
-	[complex*16, ao_ortho_lowdin_nucl_elec_integrals_complex, (mo_num,mo_num)]
+	[complex*16, ao_ortho_lowdin_n_e_ints_cplx, (mo_num,mo_num)]
 
 
 #######################

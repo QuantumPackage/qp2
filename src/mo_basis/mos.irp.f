@@ -101,7 +101,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  ! $C^{-1}.C_{mo}$
  END_DOC
  call dgemm('N','N',ao_num,mo_num,ao_num,1.d0,                   &
-     ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+     ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
      mo_coef, size(mo_coef,1), 0.d0,                                 &
      mo_coef_in_ao_ortho_basis, size(mo_coef_in_ao_ortho_basis,1))
 
@@ -295,13 +295,13 @@ subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
 
   call dgemm('T','N', ao_num, ao_num, ao_num,                        &
       1.d0,                                                          &
-      ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
       A_ao,size(A_ao,1),                                             &
       0.d0, T, size(T,1))
 
   call dgemm('N','N', ao_num, ao_num, ao_num, 1.d0,                  &
       T, size(T,1),                                                  &
-      ao_ortho_canonical_coef_inv,size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv,size(ao_ortho_cano_coef_inv,1),&
       0.d0, A, size(A,1))
 
   deallocate(T)
