@@ -84,7 +84,6 @@ integer function zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
   endif
 
   if (is_complex) then
-    !todo: check this
     if (size(psi_coef_complex,kind=8) /= psi_det_size*N_states) then
       deallocate(psi_coef_complex)
       allocate(psi_coef_complex(psi_det_size,N_states))

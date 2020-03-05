@@ -735,8 +735,6 @@ end
 !==============================================================================!
 
 subroutine davidson_diag_hs2_complex(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_diag,Nint,dressing_state,converged)
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -784,6 +782,7 @@ subroutine davidson_diag_hs2_complex(dets_in,u_in,s2_out,dim_in,energies,sze,N_s
   !$OMP END PARALLEL
 
   if (dressing_state > 0) then
+    !todo: implement for complex
     print*,irp_here,' not implemented for complex if dressing_state > 0'
     stop -1
     do k=1,N_st
@@ -799,8 +798,6 @@ end
 
 
 subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
-  print*,irp_here,' not implemented for complex'
-  stop -1
   use bitmasks
   use mmap_module
   implicit none
@@ -1024,7 +1021,6 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       y_s(N_st_diag*itermax,N_st_diag*itermax),                      &
       lambda(N_st_diag*itermax))
 
-  !todo: complex types
   h = (0.d0,0.d0)
   U = (0.d0,0.d0)
   y = (0.d0,0.d0)
@@ -1103,20 +1099,23 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       endif
 
       if (dressing_state > 0) then
+        !todo: implement for complex
         print*,irp_here,' not implemented for complex (dressed)'
         stop -1
 !
 !        if (N_st == 1) then
 !
 !          l = dressed_column_idx(1)
-!          double precision :: f
-!          f = 1.0d0/psi_coef(l,1)
+!          complex*16 :: f
+!          !todo: check for complex
+!          f = (1.0d0,0.d0)/psi_coef(l,1)
 !          do istate=1,N_st_diag
 !            do i=1,sze
-!              W(i,shift+istate) += dressing_column_h(i,1) *f * U(l,shift+istate)
-!              W(l,shift+istate) += dressing_column_h(i,1) *f * U(i,shift+istate)
-!              S(i,shift+istate) += real(dressing_column_s(i,1) *f * U(l,shift+istate))
-!              S(l,shift+istate) += real(dressing_column_s(i,1) *f * U(i,shift+istate))
+!              !todo: conjugate?
+!              W(i,shift+istate) += dressing_column_h_complex(i,1) *f * U(l,shift+istate)
+!              W(l,shift+istate) += dressing_column_h_complex(i,1) *f * U(i,shift+istate)
+!              S(i,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(l,shift+istate))
+!              S(l,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(i,shift+istate))
 !            enddo
 !
 !          enddo
@@ -1404,6 +1403,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       enddo
       !if (U(k,j) * u_in(k,j) < 0.d0) then
       !todo: complex! maybe change criterion here?
+      ! if U is close to u_in, then arg(conjg(U)*u_in) will be near zero
       if (dble(dconjg(U(k,j)) * u_in(k,j)) < 0.d0) then
         do i=1,sze
           W(i,j) = -W(i,j)
@@ -1432,7 +1432,6 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
   call write_time(6)
 
   if (disk_based)then
-    !todo: already resized, but do we need to change c_f_pointer for complex?
     ! Remove temp files
     integer, external :: getUnitAndOpen
     call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 2*8, fd_w, ptr_w )

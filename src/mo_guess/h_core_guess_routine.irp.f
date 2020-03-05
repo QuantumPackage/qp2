@@ -10,7 +10,6 @@ subroutine hcore_guess
                                        size(mo_one_e_integrals_complex,1),  &
                                        size(mo_one_e_integrals_complex,2),label,1,.false.)
     call save_mos
-    !TODO: is this correct? decide how to handle separate real/imag parts of mo_coef
     SOFT_TOUCH mo_coef_complex mo_label
 
   else

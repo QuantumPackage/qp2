@@ -1,5 +1,5 @@
 subroutine mo_as_eigvectors_of_mo_matrix_complex(matrix,n,m,label,sign,output)
-  !TODO: test this; should we assign values to mo_coef and mo_coef_imag here?
+  !TODO: test this
   implicit none
   integer,intent(in)             :: n,m, sign
   character*(64), intent(in)     :: label
@@ -67,7 +67,7 @@ subroutine mo_as_eigvectors_of_mo_matrix_complex(matrix,n,m,label,sign,output)
 end
 
 subroutine mo_as_svd_vectors_of_mo_matrix_complex(matrix,lda,m,n,label)
-  !TODO: test this; should we assign values to mo_coef and mo_coef_imag here?
+  !TODO: test this
   implicit none
   integer,intent(in)             :: lda,m,n
   character*(64), intent(in)     :: label
@@ -122,7 +122,7 @@ end
 
 
 subroutine mo_as_svd_vectors_of_mo_matrix_eig_complex(matrix,lda,m,n,eig,label)
-  !TODO: test this; should we assign values to mo_coef and mo_coef_imag here?
+  !TODO: test this
   implicit none
   integer,intent(in)             :: lda,m,n
   character*(64), intent(in)     :: label

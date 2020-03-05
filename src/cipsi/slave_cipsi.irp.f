@@ -267,7 +267,6 @@ subroutine run_slave_main
         nproc_target = nthreads_pt2
         ii = min(N_det, (elec_alpha_num*(mo_num-elec_alpha_num))**2)
 
-        !todo: change memory estimate for complex
         do
           mem = rss +                             & !
                 nproc_target * 8.d0 *             & ! bytes
@@ -282,6 +281,10 @@ subroutine run_slave_main
                 + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
                 + 1.0d0*(N_states*mo_num*mo_num)  & ! mat
                 ) / 1024.d0**3
+          if (is_complex) then
+            ! mat is complex
+            mem = mem + (nproc_target * 8.d0 * (n_states*mo_num*mo_num)) / 1024.d0**3
+          endif
 
           if (nproc_target == 0) then
             call check_mem(mem,irp_here)
