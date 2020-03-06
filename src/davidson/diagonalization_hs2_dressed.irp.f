@@ -1092,7 +1092,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
         else
             call h_s2_u_0_nstates_openmp_complex(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
         endif
-        S(1:sze,shift+1:shift+N_st_diag) = cmplx(S_d(1:sze,1:N_st_diag),kind(1.e0))
+        S(1:sze,shift+1:shift+N_st_diag) = cmplx(S_d(1:sze,1:N_st_diag))
       else
          ! Already computed in update below
          continue
@@ -1162,7 +1162,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
          do i=1,shift2
            s_(i,j) = (0.d0,0.d0)
            do k=1,sze
-             s_(i,j) = s_(i,j) + dconjg(U(k,i)) * cmplx(S(k,j),kind(1.d0))
+             s_(i,j) = s_(i,j) + dconjg(U(k,i)) * cmplx(S(k,j))
            enddo
           enddo
         enddo
@@ -1306,7 +1306,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       call zgemm('N','N', sze, N_st_diag, shift2,                    &
           (1.d0,0.d0), W, size(W,1), y, size(y,1), (0.d0,0.d0), W(1,shift2+1), size(W,1))
 
-      y_s(:,:) = cmplx(y(:,:),kind(1.e0))
+      y_s(:,:) = cmplx(y(:,:))
       call cgemm('N','N', sze, N_st_diag, shift2,                    &
           (1.e0,0.e0), S, size(S,1), y_s, size(y_s,1), (0.e0,0.e0), S(1,shift2+1), size(S,1))
 
@@ -1413,7 +1413,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
     enddo
     do j=1,N_st_diag
       do i=1,sze
-        S_d(i,j) = cmplx(S(i,j),kind(1.d0))
+        S_d(i,j) = cmplx(S(i,j))
       enddo
     enddo
 
