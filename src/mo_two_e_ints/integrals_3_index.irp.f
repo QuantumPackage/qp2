@@ -45,10 +45,10 @@ END_PROVIDER
    do j = 1, mo_num
      l = j
      integral = get_two_e_integral_complex(i,j,k,l,mo_integrals_map,mo_integrals_map_2)
-     big_array_coulomb_integrals(j,i,k) = integral
+     big_array_coulomb_integrals_complex(j,i,k) = integral
      l = j
      integral = get_two_e_integral_complex(i,j,l,k,mo_integrals_map,mo_integrals_map_2)
-     big_array_exchange_integrals(j,i,k) = integral
+     big_array_exchange_integrals_complex(j,i,k) = integral
    enddo
   enddo
  enddo

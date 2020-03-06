@@ -5,6 +5,7 @@ subroutine print_energy_components()
   END_DOC
   integer, save :: ifirst = 0
   double precision :: Vee, Ven, Vnn, Vecp, T, f
+  complex*16 :: fc
   integer  :: i,j,k
 
   Vnn = nuclear_repulsion
@@ -21,10 +22,10 @@ subroutine print_energy_components()
     if (is_complex) then
       do j=1,mo_num
         do i=1,mo_num
-          f = one_e_dm_mo_alpha_complex(i,j,k) + one_e_dm_mo_beta_complex(i,j,k)
-          Ven  = Ven  + dble(f * mo_integrals_n_e_complex(j,i))
-          Vecp = Vecp + dble(f * mo_pseudo_integrals_complex(j,i))
-          T    = T    + dble(f * mo_kinetic_integrals_complex(j,i))
+          fc = one_e_dm_mo_alpha_complex(i,j,k) + one_e_dm_mo_beta_complex(i,j,k)
+          Ven  = Ven  + dble(fc * mo_integrals_n_e_complex(j,i))
+          Vecp = Vecp + dble(fc * mo_pseudo_integrals_complex(j,i))
+          T    = T    + dble(fc * mo_kinetic_integrals_complex(j,i))
         enddo
       enddo
     else
