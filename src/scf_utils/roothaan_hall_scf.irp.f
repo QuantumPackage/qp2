@@ -299,6 +299,7 @@ END_DOC
           Fock_matrix_AO_(i,j) = 0.d0
         enddo
         do k=1,dim_DIIS
+          if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
           do i=1,ao_num
             Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
                 X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)

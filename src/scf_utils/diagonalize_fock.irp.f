@@ -7,11 +7,11 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    integer                        :: i,j
    integer                        :: liwork, lwork, n, info
    integer, allocatable           :: iwork(:)
-   double precision, allocatable  :: work(:), F(:,:), S(:,:)
+   double precision, allocatable  :: work(:), F(:,:), F_save(:,:)
    double precision, allocatable  :: diag(:)
 
 
-   allocate( F(mo_num,mo_num) )
+   allocate( F(mo_num,mo_num), F_save(mo_num,mo_num)  )
    allocate (diag(mo_num) )
 
    do j=1,mo_num
@@ -51,6 +51,7 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    lwork = -1
    liwork = -1
 
+   F_save = F
    call dsyevd( 'V', 'U', mo_num, F,                             &
        size(F,1), diag, work, lwork, iwork, liwork, info)
 
@@ -71,6 +72,7 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
 
 
    if (info /= 0) then
+     F = F_save
      call dsyev( 'V', 'L', mo_num, F,                            &
          size(F,1), diag, work, lwork, info)
 
