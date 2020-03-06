@@ -312,8 +312,8 @@ END_PROVIDER
        do j=1,N_det
          H_prime(j,j) = H_prime(j,j) + alpha*(s_z2_sz - expected_s2)
        enddo
-       call lapack_diag(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
-       ci_electronic_energy_complex(:) = 0.d0
+       call lapack_diag_complex(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
+       ci_electronic_energy_complex(:) = (0.d0,0.d0)
        i_state = 0
        allocate (s2_eigvalues(N_det))
        allocate(index_good_state_array(N_det),good_state_array(N_det))
@@ -399,9 +399,10 @@ END_PROVIDER
        ci_electronic_energy_complex(k) = 0.d0
        do j=1,N_det
          do i=1,N_det
+           !todo: accumulate imag parts to test? (should sum to zero)
            ci_electronic_energy_complex(k) +=                                &
-               ci_eigenvectors_complex(i,k) * ci_eigenvectors_complex(j,k) *         &
-               H_matrix_all_dets_complex(i,j)
+               dble(dconjg(ci_eigenvectors_complex(i,k)) * ci_eigenvectors_complex(j,k) *  &
+               H_matrix_all_dets_complex(i,j))
          enddo
        enddo
      enddo

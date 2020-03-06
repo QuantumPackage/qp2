@@ -398,7 +398,7 @@ subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
   ! if l<k, then same maps as above, but take complex conjugate
   END_DOC
   integer, intent(in)            :: k,l, sze
-  double precision, intent(out)  :: out_val(sze)
+  complex*16, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map,map2
   integer                        :: i,klmin,klmax
   integer(key_kind)              :: hash(sze),hash_re(sze),hash_im(sze)

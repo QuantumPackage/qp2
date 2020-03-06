@@ -2522,7 +2522,7 @@ subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
   double precision               :: diag_H_mat_elem
   integer                        :: n_occ_ab(2)
   logical                        :: has_mipi(Nint*bit_kind_size)
-  double precision               :: mipi(Nint*bit_kind_size), miip(Nint*bit_kind_size)
+  complex*16               :: mipi(Nint*bit_kind_size), miip(Nint*bit_kind_size)
   PROVIDE mo_two_e_integrals_in_map mo_integrals_map
 
   ASSERT (Nint > 0)
