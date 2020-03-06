@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    double precision, allocatable  :: diag(:)
 
 
-   allocate( F(mo_num,mo_num), F_save(mo_num,mo_num) )
+   allocate( F(mo_num,mo_num), F_save(mo_num,mo_num)  )
    allocate (diag(mo_num) )
 
    do j=1,mo_num
