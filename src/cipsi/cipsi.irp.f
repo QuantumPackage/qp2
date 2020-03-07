@@ -108,6 +108,7 @@ subroutine run_cipsi
     n_det_before = N_det
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
+    to_select = max(to_select,1)
     call ZMQ_selection(to_select, pt2, variance, norm)
 
     PROVIDE  psi_coef
