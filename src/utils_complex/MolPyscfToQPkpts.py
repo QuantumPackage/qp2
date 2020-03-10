@@ -509,8 +509,74 @@ def print_ao_bi(mf,kconserv=None,outfilename='W.ao.qp',bielec_int_threshold = 1E
                                                              v.real,v.imag)+'\n')
 
 
-    
-  
+def print_kpts_unblocked(ints_k,outfilename,thresh):
+    '''
+    for ints_k of shape (Nk,n1,n2),
+    print the elements of the corresponding block-diagonal matrix of shape (Nk*n1,Nk*n2) in file
+    '''
+    Nk,n1,n2 = ints_k.shape
+    with open(outfilename,'w') as outfile:
+        for ik in range(Nk):
+            shift1 = ik*n1+1
+            shift2 = ik*n2+1
+            for i1 in range(n1):
+                for i2 in range(n2):
+                    int_ij = ints_k[ik,i1,i2]
+                    if abs(int_ij) > thresh:
+                        outfile.write(stri2z(i1+shift1, i2+shift2, int_ij.real, int_ij.imag)+'\n')
+    return
+
+def print_kpts_unblocked_upper(ints_k,outfilename,thresh):
+    '''
+    for hermitian ints_k of shape (Nk,n1,n1),
+    print the elements of the corresponding block-diagonal matrix of shape (Nk*n1,Nk*n1) in file
+    (only upper triangle is printed)
+    '''
+    Nk,n1,n2 = ints_k.shape
+    if (n1!=n2):
+        raise Exception('print_kpts_unblocked_upper called with non-square matrix')
+
+    with open(outfilename,'w') as outfile:
+        for ik in range(Nk):
+            shift = ik*n1+1
+            for i1 in range(n1):
+                for i2 in range(i1,n1):
+                    int_ij = ints_k[ik,i1,i2]
+                    if abs(int_ij) > thresh:
+                        outfile.write(stri2z(i1+shift, i2+shift, int_ij.real, int_ij.imag)+'\n')
+    return
+
+
+
+def get_kin_ao(mf):
+    nao = mf.cell.nao_nr()
+    Nk = len(mf.kpts)
+    return np.reshape(mf.cell.pbc_intor('int1e_kin',1,1,kpts=mf.kpts),(Nk,nao,nao))
+
+def get_ovlp_ao(mf):
+    nao = mf.cell.nao_nr()
+    Nk = len(mf.kpts)
+    return np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao))
+
+def get_pot_ao(mf):
+    nao = mf.cell.nao_nr()
+    Nk = len(mf.kpts)
+
+    if mf.cell.pseudo:
+        v_kpts_ao = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
+    else:
+        v_kpts_ao = np.reshape(mf.with_df.get_nuc(kpts=kpts),(Nk,nao,nao))
+
+    if len(cell._ecpbas) > 0:
+        from pyscf.pbc.gto import ecp
+        v_kpts_ao += np.reshape(ecp.ecp_int(cell, kpts),(Nk,nao,nao))
+
+    return v_kpts_ao
+
+def ao_to_mo_1e(ao_kpts,mo_coef):
+    return np.einsum('kim,kij,kjn->kmn',mo_coef.conj(),ao_kpts_ao,mo_coef)
+
+
 def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8, 
         print_ao_ints_bi=False, 
         print_mo_ints_bi=False, 
@@ -532,19 +598,23 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     import h5py
     import scipy
 
-    qph5=h5py.File('qpdat.h5')
-    qph5.create_group('nuclei')
-    qph5.create_group('electrons')
-    qph5.create_group('ao_basis')
-    qph5.create_group('mo_basis')
-
-    
     mo_coef_threshold = int_threshold
     ovlp_threshold = int_threshold
     kin_threshold = int_threshold
     ne_threshold = int_threshold
     bielec_int_threshold = int_threshold
+    thresh_mono = int_threshold
+    
+    
+    qph5path = 'qpdat.h5'
+    # create hdf5 file, delete old data if exists
+    with h5py.File(qph5path,'w') as qph5:
+        qph5.create_group('nuclei')
+        qph5.create_group('electrons')
+        qph5.create_group('ao_basis')
+        qph5.create_group('mo_basis')
 
+    qph5 = h5py.File(qph5path,'a')
     natom = cell.natm
     nelec = cell.nelectron
     neleca,nelecb = cell.nelec
@@ -573,18 +643,19 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     print("n active Mos per kpt", nmo)
     print("n AOs per kpt", nao)
 
-    naux = mf.with_df.auxcell.nao
-    print("n df fitting functions", naux)
+#    naux = mf.with_df.auxcell.nao
+#    print("n df fitting functions", naux)
   
     #in old version: param << nelec*Nk, nmo*Nk, natom*Nk
     qph5['electrons'].attrs['elec_alpha_num']=neleca*Nk 
     qph5['electrons'].attrs['elec_beta_num']=nelecb*Nk
     qph5['mo_basis'].attrs['mo_num']=Nk*nmo
     qph5['ao_basis'].attrs['ao_num']=Nk*nao
-    qph5['nuclei'].attrs['nucl_num']=Nk*natom
+    #qph5['nuclei'].attrs['nucl_num']=Nk*natom
+    qph5['nuclei'].attrs['nucl_num']=natom
     qph5['nuclei'].attrs['kpt_num']=Nk
     qph5.create_group('ao_two_e_ints')
-    qph5['ao_two_e_ints'].attrs['df_num']=naux
+#    qph5['ao_two_e_ints'].attrs['df_num']=naux
 
     qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
     ao_nucl=[mf.cell.bas_atom(i)+1 for i in range(nao)]
@@ -612,67 +683,52 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     qph5.create_dataset('mo_basis/mo_coef_imag',data=mo_coef_blocked.imag)
     qph5.create_dataset('mo_basis/mo_coef_kpts_real',data=mo_k.real)
     qph5.create_dataset('mo_basis/mo_coef_kpts_imag',data=mo_k.imag)
-    
-    with open('C.qp','w') as outfile:
-        c_kpts = np.reshape(mo_k,(Nk,nao,nmo))
-
-        for ik in range(Nk):
-            shift1=ik*nao+1
-            shift2=ik*nmo+1
-            for i in range(nao):
-                for j in range(nmo):
-                    cij = c_kpts[ik,i,j]
-                    if abs(cij) > mo_coef_threshold:
-                        outfile.write(stri2z(i+shift1, j+shift2, cij.real, cij.imag)+'\n')
+   
+    print_kpts_unblocked(mo_k,'C.qp',mo_coef_threshold)   
 
     # ___                                              
     #  |  ._ _|_  _   _  ._ _. |  _   |\/|  _  ._   _  
     # _|_ | | |_ (/_ (_| | (_| | _>   |  | (_) | | (_) 
     #                 _|                              
-   
-    if mf.cell.pseudo:
-        v_kpts_ao = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
-    else:
-        v_kpts_ao = np.reshape(mf.with_df.get_nuc(kpts=kpts),(Nk,nao,nao))
-    if len(cell._ecpbas) > 0:
-        v_kpts_ao += np.reshape(ecp.ecp_int(cell, kpts),(Nk,nao,nao))
-      
-    ne_ao = ('V',v_kpts_ao,ne_threshold)
-    ovlp_ao = ('S',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
-    kin_ao = ('T',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
     
-    kin_ao_blocked=scipy.linalg.block_diag(*kin_ao[1])
-    ovlp_ao_blocked=scipy.linalg.block_diag(*ovlp_ao[1])
-    ne_ao_blocked=scipy.linalg.block_diag(*v_kpts_ao)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_real',data=kin_ao_blocked.real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao_blocked.imag)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_real',data=ovlp_ao_blocked.real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao_blocked.imag)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_real',    data=ne_ao_blocked.real)
-    qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=ne_ao_blocked.imag)
-    
+    ne_ao = get_pot_ao(mf)
+    kin_ao = get_kin_ao(mf)
+    ovlp_ao = get_ovlp_ao(mf)
 
+    if print_ao_ints_mono:
+        kin_ao_blocked=scipy.linalg.block_diag(*kin_ao)
+        ovlp_ao_blocked=scipy.linalg.block_diag(*ovlp_ao)
+        ne_ao_blocked=scipy.linalg.block_diag(*ne_ao)
 
-    for name, intval_kpts_ao, thresh in (ne_ao, ovlp_ao, kin_ao):
-        if print_ao_ints_mono:
-            with open('%s.qp' % name,'w') as outfile:
-                for ik in range(Nk):
-                    shift=ik*nao+1
-                    for i in range(nao):
-                        for j in range(i,nao):
-                            int_ij = intval_kpts_ao[ik,i,j]
-                            if abs(int_ij) > thresh:
-                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
-        if print_mo_ints_mono:
-            intval_kpts_mo = np.einsum('kim,kij,kjn->kmn',mo_k.conj(),intval_kpts_ao,mo_k)
-            with open('%s_mo.qp' % name,'w') as outfile:
-                for ik in range(Nk):
-                    shift=ik*nmo+1
-                    for i in range(nmo):
-                        for j in range(i,nmo):
-                            int_ij = intval_kpts_mo[ik,i,j]
-                            if abs(int_ij) > thresh:
-                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_real',data=kin_ao_blocked.real)
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao_blocked.imag)
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_real',data=ovlp_ao_blocked.real)
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao_blocked.imag)
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_real',    data=ne_ao_blocked.real)
+        qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=ne_ao_blocked.imag)
+
+        for fname,ints in zip(('S.qp','V.qp','T.qp'),
+                              (ovlp_ao, ne_ao, kin_ao)):
+            print_kpts_unblocked_upper(ints,fname,thresh_mono)
+
+    if print_mo_ints_mono:
+        kin_mo = ao_to_mo_1e(kin_ao,mo_k)
+        ovlp_mo = ao_to_mo_1e(ovlp_ao,mo_k)
+        ne_mo = ao_to_mo_1e(ne_ao,mo_k)
+
+        kin_mo_blocked=scipy.linalg.block_diag(*kin_mo)
+        ovlp_mo_blocked=scipy.linalg.block_diag(*ovlp_mo)
+        ne_mo_blocked=scipy.linalg.block_diag(*ne_mo)
+
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_real',data=kin_mo_blocked.real)
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_imag',data=kin_mo_blocked.imag)
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_real',data=ovlp_mo_blocked.real)
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_imag',data=ovlp_mo_blocked.imag)
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_real',    data=ne_mo_blocked.real)
+        qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_imag',    data=ne_mo_blocked.imag)
+        for fname,ints in zip(('S.mo.qp','V.mo.qp','T.mo.qp'),
+                              (ovlp_mo, ne_mo, kin_mo)):
+            print_kpts_unblocked_upper(ints,fname,thresh_mono)
 
   
     # ___                              _    
@@ -721,6 +777,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
 
     nkpt_pairs = j3arr.shape[0]
+    naux = max(i.shape[0] for i in j3arr)
+    print("n df fitting functions", naux)
+    qph5['ao_two_e_ints'].attrs['df_num']=naux
     df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
 
     if print_ao_ints_df:
@@ -763,6 +822,88 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
     if (print_mo_ints_bi):
         print_mo_bi(mf,kconserv,'W.mo.qp',cas_idx,bielec_int_threshold)
+
+  
+def getj3ao(cell,mf, kpts, cas_idx=None, int_threshold = 1E-8):
+    '''
+    kpts = List of kpoints coordinates. Cannot be null, for gamma is other script
+    kmesh = Mesh of kpoints (optional)
+    cas_idx = List of active MOs. If not specified all MOs are actives
+    int_threshold = The integral will be not printed in they are bellow that
+    '''
+  
+    from pyscf.pbc import ao2mo
+    from pyscf.pbc import tools
+    from pyscf.pbc.gto import ecp
+    from pyscf.data import nist
+    import h5py
+    import scipy
+
+
+    
+    mo_coef_threshold = int_threshold
+    ovlp_threshold = int_threshold
+    kin_threshold = int_threshold
+    ne_threshold = int_threshold
+    bielec_int_threshold = int_threshold
+    
+    mo_coeff = mf.mo_coeff
+    # Mo_coeff actif
+    mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
+    e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
+  
+    Nk, nao, nmo = mo_k.shape
+    print("n Kpts", Nk)
+    print("n active Mos per kpt", nmo)
+    print("n AOs per kpt", nao)
+
+#    naux = mf.with_df.auxcell.nao
+#    print("n df fitting functions", naux)
+
+  
+
+  
+
+    with h5py.File(mf.with_df._cderi) as intfile:
+#    intfile=h5py.File(mf.with_df._cderi,'r')
+
+        j3c = intfile.get('j3c')
+        naosq = nao*nao
+        naotri = (nao*(nao+1))//2
+        j3ckeys = list(j3c.keys())
+        j3ckeys.sort(key=lambda strkey:int(strkey))
+
+        # in new(?) version of PySCF, there is an extra layer of groups before the datasets
+        # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
+        # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
+        j3clist = [j3c.get(i+'/0') for i in j3ckeys]
+        if j3clist==[None]*len(j3clist):
+        # if using older version, stop before last level
+            j3clist = [j3c.get(i) for i in j3ckeys]
+
+        nkinvsq = 1./np.sqrt(Nk)
+
+        # dimensions are (kikj,iaux,jao,kao), where kikj is compound index of kpts i and j
+        # output dimensions should be reversed (nao, nao, naux, nkptpairs)
+        j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
+
+    return j3arr
+        #nkpt_pairs = j3arr.shape[0]
+        #df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
+
+        #if print_ao_ints_df:
+        #    with open('D.qp','w') as outfile:
+        #        pass
+        #    with open('D.qp','a') as outfile:
+        #        for k,kpt_pair in enumerate(j3arr):
+        #            for iaux,dfbasfunc in enumerate(kpt_pair):
+        #                for i,i0 in enumerate(dfbasfunc):
+        #                    for j,v in enumerate(i0):
+        #                        if (abs(v) > bielec_int_threshold):
+        #                            outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
+        #                            df_ao_tmp[i,j,iaux,k]=v
+            
+
 
     
   
