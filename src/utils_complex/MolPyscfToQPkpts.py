@@ -434,6 +434,8 @@ def get_j3ao(fname,nao,Nk):
     '''
     returns padded df AO array
     fills in zeros when functions are dropped due to linear dependency
+    last AO index corresponds to smallest kpt index?
+    (k, mu, i, j) where i.kpt >= j.kpt
     '''
     import h5py
     with h5py.File(fname,'r') as intfile:
@@ -461,8 +463,48 @@ def get_j3ao(fname,nao,Nk):
             iaux,dim2 = j3c[kpair+keysub].shape
             if (dim2==naosq):
                 j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]) * nkinvsq
+                #j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
             else:
                 j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()],nao) * nkinvsq
+                #j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()].conj(),nao) * nkinvsq
+
+        return j3arr
+
+def get_j3ao_new(fname,nao,Nk):
+    '''
+    returns padded df AO array
+    fills in zeros when functions are dropped due to linear dependency
+    last AO index corresponds to largest kpt index?
+    (k, mu, j, i) where i.kpt >= j.kpt
+    '''
+    import h5py
+    with h5py.File(fname,'r') as intfile:
+        j3c = intfile.get('j3c')
+        j3ckeys = list(j3c.keys())
+        nkpairs = len(j3ckeys)
+
+        # get num order instead of lex order
+        j3ckeys.sort(key=lambda strkey:int(strkey))
+
+        # in new(?) version of PySCF, there is an extra layer of groups before the datasets
+        # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
+        # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
+        keysub = '/0' if bool(j3c.get('0/0',getclass=True)) else ''
+
+        naux = max(map(lambda k: j3c[k+keysub].shape[0],j3c.keys()))
+
+        naosq = nao*nao
+        naotri = (nao*(nao+1))//2
+        nkinvsq = 1./np.sqrt(Nk)
+
+        j3arr = np.zeros((nkpairs,naux,nao,nao),dtype=np.complex128)
+
+        for i,kpair in enumerate(j3ckeys):
+            iaux,dim2 = j3c[kpair+keysub].shape
+            if (dim2==naosq):
+                j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
+            else:
+                j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()].conj(),nao) * nkinvsq
 
         return j3arr
 
@@ -493,6 +535,16 @@ def df_ao_to_mo(j3ao,mo_coef):
     return np.array([
         np.einsum('mij,ik,jl->mkl',j3ao[kij],mo_coef[ki].conj(),mo_coef[kj])
         for ki,kj,kij in kpair_list])
+
+    
+def df_ao_to_mo_new(j3ao,mo_coef):
+    #TODO: fix this (C/F ordering, conj, transpose, view cmplx->float)
+
+    from itertools import product
+    Nk = mo_coef.shape[0]
+    return np.array([
+        np.einsum('mji,ik,jl->mlk',j3ao[idx2_tri((ki,kj))],mo_coef[ki].conj(),mo_coef[kj])
+        for ki,kj in product(range(Nk),repeat=2) if (ki>=kj)])
 
 def df_ao_to_mo_test(j3ao,mo_coef):
     from itertools import product
@@ -627,13 +679,17 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #               MO Coef                  #
     #                                        #
     ##########################################
-
-    mo_coef_blocked=block_diag(*mo_k)
+    
     with h5py.File(qph5path,'a') as qph5:
+        mo_coef_f = np.array(mo_k.transpose((0,2,1)),order='c')
+        mo_coef_blocked=block_diag(*mo_k)
+        mo_coef_blocked_f = block_diag(*mo_coef_f)
         qph5.create_dataset('mo_basis/mo_coef_real',data=mo_coef_blocked.real)
         qph5.create_dataset('mo_basis/mo_coef_imag',data=mo_coef_blocked.imag)
         qph5.create_dataset('mo_basis/mo_coef_kpts_real',data=mo_k.real)
         qph5.create_dataset('mo_basis/mo_coef_kpts_imag',data=mo_k.imag)
+        qph5.create_dataset('mo_basis/mo_coef',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
+        qph5.create_dataset('mo_basis/mo_coef_kpts',data=mo_coef_f.view(dtype=np.float64).reshape((Nk,nmo,nao,2)))
    
     print_kpts_unblocked(mo_k,'C.qp',mo_coef_threshold)   
 
@@ -714,12 +770,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     j3arr = get_j3ao(mf.with_df._cderi,nao,Nk)
 
-    # test? should be (Nk*(Nk+1))//2
-    nkpt_pairs = j3arr.shape[0]
+    # test? nkpt_pairs should be (Nk*(Nk+1))//2
+    nkpt_pairs, naux, _, _ = j3arr.shape
 
-    # mf.with_df.get_naoaux() gives correct naux if no linear dependency in auxbasis
-    # this should work even with linear dependency
-    naux = max(i.shape[0] for i in j3arr)
     print("n df fitting functions", naux)
     with h5py.File(qph5path,'a') as qph5:
         qph5.create_group('ao_two_e_ints')
@@ -727,36 +780,24 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     if print_ao_ints_df:
         print_df(j3arr,'D.qp',bielec_int_threshold)
+        j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
 
-        df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
-        for i,di in enumerate(j3arr):
-            df_ao_tmp[:,:,:di.shape[0],i] = np.transpose(di,(1,2,0))
-        
-        #df_ao_old = df_pad_ref_test(j3arr,nao,naux,nkpt_pairs)
-        #assert(abs(df_ao_tmp - df_ao_old).max() <= 1e-12)
-        
         with h5py.File(qph5path,'a') as qph5:
-            qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=df_ao_tmp.real)
-            qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=df_ao_tmp.imag)
+            qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=j3arr.transpose((2,3,1,0)).real)
+            qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=j3arr.transpose((2,3,1,0)).imag)
+            qph5.create_dataset('ao_two_e_ints/df_ao_integrals',data=j3ao_new.view(dtype=np.float64).reshape((nkpt_pairs,naux,nao,nao,2)))
 
     if print_mo_ints_df:
 
         j3mo = df_ao_to_mo(j3arr,mo_k)
-        #j3mo_test = df_ao_to_mo_test(j3arr,mo_k)
-        #assert(all([abs(i-j).max() <= 1e-12 for (i,j) in zip(j3mo,j3mo_test)]))
+        j3mo_new = df_ao_to_mo_new(j3ao_new,mo_k)
 
         print_df(j3mo,'D.mo.qp',bielec_int_threshold)
 
-        df_mo_tmp = np.zeros((nmo,nmo,naux,nkpt_pairs),dtype=np.complex128)
-        for i,di in enumerate(j3mo):
-            df_mo_tmp[:,:,:di.shape[0],i] = np.transpose(di,(1,2,0))
-
-        #df_mo_old = df_pad_ref_test(j3mo,nmo,naux,nkpt_pairs)
-        #assert(abs(df_mo_tmp - df_mo_old).max() <= 1e-12)
-
         with h5py.File(qph5path,'a') as qph5:
-            qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=df_mo_tmp.real)
-            qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=df_mo_tmp.imag)
+            qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=j3mo.transpose((2,3,1,0)).real)
+            qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=j3mo.transpose((2,3,1,0)).imag)
+            qph5.create_dataset('mo_two_e_ints/df_mo_integrals',data=j3mo_new.view(dtype=np.float64).reshape((nkpt_pairs,naux,nmo,nmo,2)))
 
     if (print_ao_ints_bi):
         print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
