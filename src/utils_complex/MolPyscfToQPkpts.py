@@ -218,203 +218,6 @@ def qp2rename():
         shutil.move(old,new)
     shutil.copy('e_nuc','E.qp')
 
-def pyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8, 
-        print_ao_ints_bi=False, 
-        print_mo_ints_bi=False, 
-        print_ao_ints_df=True, 
-        print_mo_ints_df=False, 
-        print_ao_ints_mono=True, 
-        print_mo_ints_mono=False):
-    '''
-    kpts = List of kpoints coordinates. Cannot be null, for gamma is other script
-    kmesh = Mesh of kpoints (optional)
-    cas_idx = List of active MOs. If not specified all MOs are actives
-    int_threshold = The integral will be not printed in they are bellow that
-    '''
-  
-    from pyscf.pbc import ao2mo
-    from pyscf.pbc import tools
-    from pyscf.pbc.gto import ecp
-    import h5py
-    
-    mo_coef_threshold = int_threshold
-    ovlp_threshold = int_threshold
-    kin_threshold = int_threshold
-    ne_threshold = int_threshold
-    bielec_int_threshold = int_threshold
-
-    natom = len(cell.atom_coords())
-    print('n_atom per kpt',   natom)
-    print('num_elec per kpt', cell.nelectron)
-  
-    mo_coeff = mf.mo_coeff
-    # Mo_coeff actif
-    mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
-    e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
-  
-    Nk, nao, nmo = mo_k.shape
-    print("n Kpts", Nk)
-    print("n active Mos per kpt", nmo)
-    print("n AOs per kpt", nao)
-
-    naux = mf.with_df.auxcell.nao
-    print("n df fitting functions", naux)
-    with open('num_df','w') as f:
-        f.write(str(naux))
-  
-    # Write all the parameter need to creat a dummy EZFIO folder who will containt the integral after.
-    # More an implentation detail than a real thing
-    with open('param','w') as f:
-    # Note the use of nmo_tot
-        f.write(' '.join(map(str,(cell.nelectron*Nk, Nk*nmo, natom*Nk))))
-  
-    with open('num_ao','w') as f:
-        f.write(str(nao*Nk))
-    with open('kpt_num','w') as f:
-        f.write(str(Nk))
-    #                             _                             
-    # |\ |      _ |  _   _. ._   |_)  _  ._      |  _ o  _  ._  
-    # | \| |_| (_ | (/_ (_| |    | \ (/_ |_) |_| | _> | (_) | | 
-    #                                    |                      
-    
-    #Total energy shift due to Ewald probe charge = -1/2 * Nelec*madelung/cell.vol =
-    shift = tools.pbc.madelung(cell, kpts)*cell.nelectron * -.5 
-    e_nuc = (cell.energy_nuc() + shift)*Nk
-  
-    print('nucl_repul', e_nuc)
-    with open('e_nuc','w') as f:
-        f.write(str(e_nuc))
-  
-  
-  
-    #       __    __          _                                 
-    # |\/| |  |  |    _   _  |_  _ 
-    # |  | |__|  |__ (_) (/_ |  _> 
-    #                                               
-    with open('mo_coef_complex','w') as outfile:
-        c_kpts = np.reshape(mo_k,(Nk,nao,nmo))
-
-        for ik in range(Nk):
-            shift1=ik*nao+1
-            shift2=ik*nmo+1
-            for i in range(nao):
-                for j in range(nmo):
-                    cij = c_kpts[ik,i,j]
-                    if abs(cij) > mo_coef_threshold:
-                        outfile.write('%s %s %s %s\n' % (i+shift1, j+shift2, cij.real, cij.imag))
-    
-    # ___                                              
-    #  |  ._ _|_  _   _  ._ _. |  _   |\/|  _  ._   _  
-    # _|_ | | |_ (/_ (_| | (_| | _>   |  | (_) | | (_) 
-    #                 _|                              
-   
-    if mf.cell.pseudo:
-        v_kpts_ao = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
-    else:
-        v_kpts_ao = np.reshape(mf.with_df.get_nuc(kpts=kpts),(Nk,nao,nao))
-    if len(cell._ecpbas) > 0:
-        v_kpts_ao += np.reshape(ecp.ecp_int(cell, kpts),(Nk,nao,nao))
-
-    ne_ao = ('ne',v_kpts_ao,ne_threshold)
-    ovlp_ao = ('overlap',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
-    kin_ao = ('kinetic',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
-
-    for name, intval_kpts_ao, thresh in (ne_ao, ovlp_ao, kin_ao):
-        if print_ao_ints_mono:
-            with open('%s_ao_complex' % name,'w') as outfile:
-                for ik in range(Nk):
-                    shift=ik*nao+1
-                    for i in range(nao):
-                        for j in range(i,nao):
-                            int_ij = intval_kpts_ao[ik,i,j]
-                            if abs(int_ij) > thresh:
-                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
-        if print_mo_ints_mono:
-            intval_kpts_mo = np.einsum('kim,kij,kjn->kmn',mo_k.conj(),intval_kpts_ao,mo_k)
-            with open('%s_mo_complex' % name,'w') as outfile:
-                for ik in range(Nk):
-                    shift=ik*nmo+1
-                    for i in range(nmo):
-                        for j in range(i,nmo):
-                            int_ij = intval_kpts_mo[ik,i,j]
-                            if abs(int_ij) > thresh:
-                                outfile.write(stri2z(i+shift, j+shift, int_ij.real, int_ij.imag)+'\n')
-
-  
-    # ___                              _    
-    #  |  ._ _|_  _   _  ._ _. |  _   |_) o 
-    # _|_ | | |_ (/_ (_| | (_| | _>   |_) | 
-    #                 _|                    
-    #
-    kconserv = tools.get_kconserv(cell, kpts)
-
-    with open('kconserv_complex','w') as outfile:
-        for a in range(Nk):
-            for b in range(Nk):
-                for c in range(Nk):
-                    d = kconserv[a,b,c]
-                    outfile.write('%s %s %s %s\n' % (a+1,c+1,b+1,d+1))
-    
-
-    intfile=h5py.File(mf.with_df._cderi,'r')
-
-    j3c = intfile.get('j3c')
-    naosq = nao*nao
-    naotri = (nao*(nao+1))//2
-    j3ckeys = list(j3c.keys())
-    j3ckeys.sort(key=lambda strkey:int(strkey))
-
-    # in new(?) version of PySCF, there is an extra layer of groups before the datasets
-    # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
-    # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
-    j3clist = [j3c.get(i+'/0') for i in j3ckeys]
-    if j3clist==[None]*len(j3clist):
-    # if using older version, stop before last level
-        j3clist = [j3c.get(i) for i in j3ckeys]
-
-    nkinvsq = 1./np.sqrt(Nk)
-
-    # dimensions are (kikj,iaux,jao,kao), where kikj is compound index of kpts i and j
-    # output dimensions should be reversed (nao, nao, naux, nkptpairs)
-    j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
-
-    nkpt_pairs = j3arr.shape[0]
-
-    if print_ao_ints_df:
-        with open('df_ao_integral_array','w') as outfile:
-            pass
-        with open('df_ao_integral_array','a') as outfile:
-            for k,kpt_pair in enumerate(j3arr):
-                for iaux,dfbasfunc in enumerate(kpt_pair):
-                    for i,i0 in enumerate(dfbasfunc):
-                        for j,v in enumerate(i0):
-                            if (abs(v) > bielec_int_threshold):
-                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
-
-    if print_mo_ints_df:
-        kpair_list=[]
-        for i in range(Nk):
-            for j in range(Nk):
-                if(i>=j):
-                    kpair_list.append((i,j,idx2_tri((i,j))))
-        j3mo = np.array([np.einsum('mij,ik,jl->mkl',j3arr[kij],mo_k[ki].conj(),mo_k[kj]) for ki,kj,kij in kpair_list])
-        with open('df_mo_integral_array','w') as outfile:
-            pass
-        with open('df_mo_integral_array','a') as outfile:
-            for k,kpt_pair in enumerate(j3mo):
-                for iaux,dfbasfunc in enumerate(kpt_pair):
-                    for i,i0 in enumerate(dfbasfunc):
-                        for j,v in enumerate(i0):
-                            if (abs(v) > bielec_int_threshold):
-                                outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
-
-
-    if (print_ao_ints_bi):
-        print_ao_bi(mf,kconserv,'bielec_ao_complex',bielec_int_threshold)
-    if (print_mo_ints_bi):
-        print_mo_bi(mf,kconserv,'bielec_mo_complex',cas_idx,bielec_int_threshold)
-
-
 def print_mo_bi(mf,kconserv=None,outfilename='W.mo.qp',cas_idx=None,bielec_int_threshold = 1E-8):
 
     cell = mf.cell
@@ -474,8 +277,8 @@ def print_ao_bi(mf,kconserv=None,outfilename='W.ao.qp',bielec_int_threshold = 1E
     Nk = kpts.shape[0]
 
     if (kconserv is None):
-        from pyscf.pbc import tools
-        kconserv = tools.get_kconserv(cell, kpts)
+        from pyscf.pbc.tools import get_kconserv
+        kconserv = get_kconserv(cell, kpts)
 
     with open(outfilename,'w') as outfile:
         for d, kd in enumerate(kpts):
@@ -598,7 +401,12 @@ def get_pot_ao(mf):
 def ao_to_mo_1e(ao_kpts,mo_coef):
     return np.einsum('kim,kij,kjn->kmn',mo_coef.conj(),ao_kpts_ao,mo_coef)
 
-def get_j3ao(fname,nao,Nk):
+def get_j3ao_old(fname,nao,Nk):
+    '''
+    returns list of Nk_pair arrays of shape (naux,nao,nao)
+    if naux is the same for each pair, returns numpy array
+    if naux is not the same for each pair, returns array of arrays
+    '''
     import h5py
     with h5py.File(fname,'r') as intfile:
         j3c = intfile.get('j3c')
@@ -622,6 +430,42 @@ def get_j3ao(fname,nao,Nk):
         # output dimensions should be reversed (nao, nao, naux, nkptpairs)
         return np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
 
+def get_j3ao(fname,nao,Nk):
+    '''
+    returns padded df AO array
+    fills in zeros when functions are dropped due to linear dependency
+    '''
+    import h5py
+    with h5py.File(fname,'r') as intfile:
+        j3c = intfile.get('j3c')
+        j3ckeys = list(j3c.keys())
+        nkpairs = len(j3ckeys)
+
+        # get num order instead of lex order
+        j3ckeys.sort(key=lambda strkey:int(strkey))
+
+        # in new(?) version of PySCF, there is an extra layer of groups before the datasets
+        # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
+        # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
+        keysub = '/0' if bool(j3c.get('0/0',getclass=True)) else ''
+
+        naux = max(map(lambda k: j3c[k+keysub].shape[0],j3c.keys()))
+
+        naosq = nao*nao
+        naotri = (nao*(nao+1))//2
+        nkinvsq = 1./np.sqrt(Nk)
+
+        j3arr = np.zeros((nkpairs,naux,nao,nao),dtype=np.complex128)
+
+        for i,kpair in enumerate(j3ckeys):
+            iaux,dim2 = j3c[kpair+keysub].shape
+            if (dim2==naosq):
+                j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]) * nkinvsq
+            else:
+                j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()],nao) * nkinvsq
+
+        return j3arr
+
 def print_df(j3arr,fname,thresh):
     with open(fname,'w') as outfile:
         for k,kpt_pair in enumerate(j3arr):
@@ -641,6 +485,21 @@ def df_pad_ref_test(j3arr,nao,naux,nkpt_pairs):
                     df_ao_tmp[i,j,iaux,k]=v
     return df_ao_tmp
 
+
+def df_ao_to_mo(j3ao,mo_coef):
+    from itertools import product
+    Nk = mo_coef.shape[0]
+    kpair_list = ((i,j,idx2_tri((i,j))) for (i,j) in product(range(Nk),repeat=2) if (i>=j))
+    return np.array([
+        np.einsum('mij,ik,jl->mkl',j3ao[kij],mo_coef[ki].conj(),mo_coef[kj])
+        for ki,kj,kij in kpair_list])
+
+def df_ao_to_mo_test(j3ao,mo_coef):
+    from itertools import product
+    Nk = mo_coef.shape[0]
+    return np.array([
+        np.einsum('mij,ik,jl->mkl',j3ao[idx2_tri((ki,kj))],mo_coef[ki].conj(),mo_coef[kj])
+        for ki,kj in product(range(Nk),repeat=2) if (ki>=kj)])
 
 
 def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8, 
@@ -853,11 +712,13 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #                                        #
     ##########################################
 
-#    qph5['ao_two_e_ints'].attrs['df_num']=naux
-
     j3arr = get_j3ao(mf.with_df._cderi,nao,Nk)
 
+    # test? should be (Nk*(Nk+1))//2
     nkpt_pairs = j3arr.shape[0]
+
+    # mf.with_df.get_naoaux() gives correct naux if no linear dependency in auxbasis
+    # this should work even with linear dependency
     naux = max(i.shape[0] for i in j3arr)
     print("n df fitting functions", naux)
     with h5py.File(qph5path,'a') as qph5:
@@ -879,10 +740,11 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
             qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=df_ao_tmp.imag)
 
     if print_mo_ints_df:
-        from itertools import product
-        # WARNING: this is a generator, not a list; don't use it more than once
-        kpair_list = ((i,j,idx2_tri((i,j))) for (i,j) in product(range(Nk),repeat=2) if (i>=j))
-        j3mo = np.array([np.einsum('mij,ik,jl->mkl',j3arr[kij],mo_k[ki].conj(),mo_k[kj]) for ki,kj,kij in kpair_list])
+
+        j3mo = df_ao_to_mo(j3arr,mo_k)
+        #j3mo_test = df_ao_to_mo_test(j3arr,mo_k)
+        #assert(all([abs(i-j).max() <= 1e-12 for (i,j) in zip(j3mo,j3mo_test)]))
+
         print_df(j3mo,'D.mo.qp',bielec_int_threshold)
 
         df_mo_tmp = np.zeros((nmo,nmo,naux,nkpt_pairs),dtype=np.complex128)
@@ -900,224 +762,4 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
     if (print_mo_ints_bi):
         print_mo_bi(mf,kconserv,'W.mo.qp',cas_idx,bielec_int_threshold)
-
-  
-def getj3ao(cell,mf, kpts, cas_idx=None, int_threshold = 1E-8):
-    '''
-    kpts = List of kpoints coordinates. Cannot be null, for gamma is other script
-    kmesh = Mesh of kpoints (optional)
-    cas_idx = List of active MOs. If not specified all MOs are actives
-    int_threshold = The integral will be not printed in they are bellow that
-    '''
-  
-    from pyscf.pbc import ao2mo
-    from pyscf.pbc import tools
-    from pyscf.pbc.gto import ecp
-    import h5py
-    import scipy
-
-
-    
-    mo_coef_threshold = int_threshold
-    ovlp_threshold = int_threshold
-    kin_threshold = int_threshold
-    ne_threshold = int_threshold
-    bielec_int_threshold = int_threshold
-    
-    mo_coeff = mf.mo_coeff
-    # Mo_coeff actif
-    mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
-    e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
-  
-    Nk, nao, nmo = mo_k.shape
-    print("n Kpts", Nk)
-    print("n active Mos per kpt", nmo)
-    print("n AOs per kpt", nao)
-
-#    naux = mf.with_df.auxcell.nao
-#    print("n df fitting functions", naux)
-
-  
-
-  
-
-    with h5py.File(mf.with_df._cderi) as intfile:
-#    intfile=h5py.File(mf.with_df._cderi,'r')
-
-        j3c = intfile.get('j3c')
-        naosq = nao*nao
-        naotri = (nao*(nao+1))//2
-        j3ckeys = list(j3c.keys())
-        j3ckeys.sort(key=lambda strkey:int(strkey))
-
-        # in new(?) version of PySCF, there is an extra layer of groups before the datasets
-        # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
-        # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
-        j3clist = [j3c.get(i+'/0') for i in j3ckeys]
-        if j3clist==[None]*len(j3clist):
-        # if using older version, stop before last level
-            j3clist = [j3c.get(i) for i in j3ckeys]
-
-        nkinvsq = 1./np.sqrt(Nk)
-
-        # dimensions are (kikj,iaux,jao,kao), where kikj is compound index of kpts i and j
-        # output dimensions should be reversed (nao, nao, naux, nkptpairs)
-        j3arr=np.array([(i.value.reshape([-1,nao,nao]) if (i.shape[1] == naosq) else makesq3(i.value,nao)) * nkinvsq for i in j3clist])
-
-    return j3arr
-        #nkpt_pairs = j3arr.shape[0]
-        #df_ao_tmp = np.zeros((nao,nao,naux,nkpt_pairs),dtype=np.complex128)
-
-        #if print_ao_ints_df:
-        #    with open('D.qp','w') as outfile:
-        #        pass
-        #    with open('D.qp','a') as outfile:
-        #        for k,kpt_pair in enumerate(j3arr):
-        #            for iaux,dfbasfunc in enumerate(kpt_pair):
-        #                for i,i0 in enumerate(dfbasfunc):
-        #                    for j,v in enumerate(i0):
-        #                        if (abs(v) > bielec_int_threshold):
-        #                            outfile.write(stri4z(i+1,j+1,iaux+1,k+1,v.real,v.imag)+'\n')
-        #                            df_ao_tmp[i,j,iaux,k]=v
-            
-
-
-    
-  
-#def testpyscf2QP(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8):
-#    '''
-#    kpts = List of kpoints coordinates. Cannot be null, for gamma is other script
-#    kmesh = Mesh of kpoints (optional)
-#    cas_idx = List of active MOs. If not specified all MOs are actives
-#    int_threshold = The integral will be not printed in they are bellow that
-#    '''
-#
-#    from pyscf.pbc import ao2mo
-#    from pyscf.pbc import tools
-#    from pyscf.pbc.gto import ecp
-#
-#    mo_coef_threshold = int_threshold
-#    ovlp_threshold = int_threshold
-#    kin_threshold = int_threshold
-#    ne_threshold = int_threshold
-#    bielec_int_threshold = int_threshold
-#
-#    natom = len(cell.atom_coords())
-#    print('n_atom per kpt',   natom)
-#    print('num_elec per kpt', cell.nelectron)
-#
-#    mo_coeff = mf.mo_coeff
-#    # Mo_coeff actif
-#    mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
-#    e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
-#
-#    Nk, nao, nmo = mo_k.shape
-#    print("n Kpts", Nk)
-#    print("n active Mos per kpt", nmo)
-#    print("n AOs per kpt", nao)
-#
-#    naux = mf.with_df.get_naoaux()
-#    print("n df fitting functions", naux)
-#
-#    #                             _
-#    # |\ |      _ |  _   _. ._   |_)  _  ._      |  _ o  _  ._
-#    # | \| |_| (_ | (/_ (_| |    | \ (/_ |_) |_| | _> | (_) | |
-#    #                                    |
-#
-#    #Total energy shift due to Ewald probe charge = -1/2 * Nelec*madelung/cell.vol =
-#    shift = tools.pbc.madelung(cell, kpts)*cell.nelectron * -.5
-#    e_nuc = (cell.energy_nuc() + shift)*Nk
-#
-#    print('nucl_repul', e_nuc)
-#
-#
-#    # ___
-#    #  |  ._ _|_  _   _  ._ _. |  _   |\/|  _  ._   _  
-#    # _|_ | | |_ (/_ (_| | (_| | _>   |  | (_) | | (_) 
-#    #                 _|                              
-#   
-#    if mf.cell.pseudo:
-#        v_kpts_ao = np.reshape(mf.with_df.get_pp(kpts=kpts),(Nk,nao,nao))
-#    else:
-#        v_kpts_ao = np.reshape(mf.with_df.get_nuc(kpts=kpts),(Nk,nao,nao))
-#    if len(cell._ecpbas) > 0:
-#        v_kpts_ao += np.reshape(ecp.ecp_int(cell, kpts),(Nk,nao,nao))
-#
-#    ne_ao = ('ne',v_kpts_ao,ne_threshold)
-#    ovlp_ao = ('overlap',np.reshape(mf.get_ovlp(cell=cell,kpts=kpts),(Nk,nao,nao)),ovlp_threshold)
-#    kin_ao = ('kinetic',np.reshape(cell.pbc_intor('int1e_kin',1,1,kpts=kpts),(Nk,nao,nao)),kin_threshold)
-#
-#  
-#    # ___                              _    
-#    #  |  ._ _|_  _   _  ._ _. |  _   |_) o 
-#    # _|_ | | |_ (/_ (_| | (_| | _>   |_) | 
-#    #                 _|                    
-#    #
-#    kconserv = tools.get_kconserv(cell, kpts)
-#
-#    
-#    import h5py
-#
-#    intfile=h5py.File(mf.with_df._cderi,'r')
-#
-#    j3c = intfile.get('j3c')
-#    naosq = nao*nao
-#    naotri = (nao*(nao+1))//2
-#    j3keys = list(j3c.keys())
-#    j3keys.sort(key=lambda x:int(x))
-#    j3clist = [j3c.get(i) for i in j3keys]
-#    nkinvsq = 1./np.sqrt(Nk)
-#    
-#    # dimensions are (kikj,iaux,jao,kao), where kikj is compound index of kpts i and j
-#    # output dimensions should be reversed (nao, nao, naux, nkptpairs)
-#    j3arr=np.array([(pad(i.value.reshape([-1,nao,nao]),[naux,nao,nao]) if (i.shape[1] == naosq) else makesq(i.value,naux,nao)) * nkinvsq for i in j3clist])
-#
-#    nkpt_pairs = j3arr.shape[0]
-#
-#    kpair_list=[]
-#    for i in range(Nk):
-#        for j in range(Nk):
-#            if(i>=j):
-#                kpair_list.append((i,j,idx2_tri((i,j))))
-#    j3mo = np.array([np.einsum('mij,ik,jl->mkl',j3arr[kij,:,:,:],mo_k[ki,:,:].conj(),mo_k[kj,:,:]) for ki,kj,kij in kpair_list])
-#
-#
-#
-#    eri_mo = np.zeros(4*[nmo*Nk],dtype=np.complex128)
-#    eri_ao = np.zeros(4*[nao*Nk],dtype=np.complex128)
-#
-#    for d, kd in enumerate(kpts):
-#        for c, kc in enumerate(kpts):
-#            for b, kb in enumerate(kpts):
-#                a = kconserv[b,c,d]
-#                ka = kpts[a]
-#                eri_4d_ao_kpt = mf.with_df.get_ao_eri(kpts=[ka,kb,kc,kd],compact=False).reshape((nao,)*4)
-#                eri_4d_ao_kpt *= 1./Nk
-#                for l in range(nao):
-#                    ll=l+d*nao
-#                    for j in range(nao):
-#                        jj=j+c*nao
-#                        for k in range(nao):
-#                            kk=k+b*nao
-#                            for i in range(nao):
-#                                ii=i+a*nao
-#                                v=eri_4d_ao_kpt[i,k,j,l]
-#                                eri_ao[ii,kk,jj,ll]=v
-#        
-#                eri_4d_mo_kpt = mf.with_df.ao2mo([mo_k[a], mo_k[b], mo_k[c], mo_k[d]],
-#                                                  [ka,kb,kc,kd],compact=False).reshape((nmo,)*4)
-#                eri_4d_mo_kpt *= 1./Nk
-#                for l in range(nmo):
-#                    ll=l+d*nmo
-#                    for j in range(nmo):
-#                        jj=j+c*nmo
-#                        for k in range(nmo):
-#                            kk=k+b*nmo
-#                            for i in range(nmo):
-#                                ii=i+a*nmo
-#                                v=eri_4d_mo_kpt[i,k,j,l]
-#                                eri_mo[ii,kk,jj,ll]=v
-#        
-#    return (mo_k,j3arr,j3mo,eri_ao,eri_mo,kpair_list)
-    
-  
+    return
