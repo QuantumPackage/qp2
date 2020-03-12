@@ -78,23 +78,14 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   END_DOC
   integer                        :: i,j,n
   integer                        :: occ(elec_alpha_num)
-  integer                        :: occb(elec_beta_num)
   
   HF_bitmask = 0_bit_kind
-  if (is_complex) then
+  !if (is_complex) then
+  if (.False.) then
     integer :: kpt,korb
     kpt=1
     korb=1
-    do i=1,elec_beta_num
-      occ(i) = korb + (kpt-1) * ao_num_per_kpt
-      occb(i) = korb + (kpt-1) * ao_num_per_kpt
-      kpt += 1
-      if (kpt > kpt_num) then
-        kpt = 1
-        korb += 1
-      endif
-    enddo
-    do i=elec_beta_num+1,elec_alpha_num
+    do i=1,elec_alpha_num
       occ(i) = korb + (kpt-1) * ao_num_per_kpt
       kpt += 1
       if (kpt > kpt_num) then
@@ -109,7 +100,7 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   endif
   call list_to_bitstring( HF_bitmask(1,1), occ, elec_alpha_num, N_int)
   ! elec_alpha_num <= elec_beta_num, so occ is already OK.
-  call list_to_bitstring( HF_bitmask(1,2), occb, elec_beta_num, N_int)
+  call list_to_bitstring( HF_bitmask(1,2), occ, elec_beta_num, N_int)
   
 END_PROVIDER
 
