@@ -437,8 +437,10 @@ subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
       call map_get_many(map2, hash_im(1:klmin-1),   out_im(1:klmin-1),   klmin-1)
       call map_get_many(map,  hash_re(klmin:klmax), out_re(klmin:klmax), klmax-klmin+1)
       call map_get_many(map,  hash_im(klmin:klmax), out_im(klmin:klmax), klmax-klmin+1)
-      call map_get_many(map2, hash_re(klmax+1:sze), out_re(klmax+1:sze), sze-klmax)
-      call map_get_many(map2, hash_im(klmax+1:sze), out_im(klmax+1:sze), sze-klmax)
+      if (klmax.lt.size) then
+        call map_get_many(map2, hash_re(klmax+1:sze), out_re(klmax+1:sze), sze-klmax)
+        call map_get_many(map2, hash_im(klmax+1:sze), out_im(klmax+1:sze), sze-klmax)
+      endif
       do i=1,sze
         out_val(i) = dcmplx(out_re(i),sign*sign2(i)*out_im(i))
       enddo
@@ -447,8 +449,10 @@ subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
       call map_get_many(map2, hash_im(1:klmin-1),   tmp_im(1:klmin-1),   klmin-1)
       call map_get_many(map,  hash_re(klmin:klmax), tmp_re(klmin:klmax), klmax-klmin+1)
       call map_get_many(map,  hash_im(klmin:klmax), tmp_im(klmin:klmax), klmax-klmin+1)
-      call map_get_many(map2, hash_re(klmax+1:sze), tmp_re(klmax+1:sze), sze-klmax)
-      call map_get_many(map2, hash_im(klmax+1:sze), tmp_im(klmax+1:sze), sze-klmax)
+      if (klmax.lt.size) then
+        call map_get_many(map2, hash_re(klmax+1:sze), tmp_re(klmax+1:sze), sze-klmax)
+        call map_get_many(map2, hash_im(klmax+1:sze), tmp_im(klmax+1:sze), sze-klmax)
+      endif
       ! Conversion to double complex
       do i=1,sze
         out_val(i) = dcmplx(tmp_re(i),sign*sign2(i)*tmp_im(i))
