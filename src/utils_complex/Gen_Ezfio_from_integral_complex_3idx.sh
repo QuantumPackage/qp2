@@ -17,7 +17,6 @@ echo 'Create EZFIO'
 qp_edit -c $ezfio &> /dev/null
 #cp $ezfio/{ao,mo}_basis/ao_md5 
 
-qp_run import_kconserv $ezfio 
 #qp_run import_ao_2e_complex $ezfio 
 #qp_run dump_ao_2e_from_df $ezfio
 #Read the integral

@@ -13,6 +13,16 @@ subroutine run
   do i=1,ao_num
     write(*,'(200(E24.15))') ao_one_e_integrals_complex(i,:)
   enddo
+  write(*,'(A)') 'ao_kinetic_integrals_complex'
+  write(*,'(A)') '---------------'
+  do i=1,ao_num
+    write(*,'(200(E24.15))') ao_kinetic_integrals_complex(i,:)
+  enddo
+  write(*,'(A)') 'ao_ne_integrals_complex'
+  write(*,'(A)') '---------------'
+  do i=1,ao_num
+    write(*,'(200(E24.15))') ao_integrals_n_e_complex(i,:)
+  enddo
   write(*,'(A)') 'ao_overlap_complex'
   write(*,'(A)') '---------------'
   do i=1,ao_num
