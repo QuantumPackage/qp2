@@ -82,3 +82,33 @@ END_PROVIDER
   ENDIF
 END_PROVIDER
 
+ BEGIN_PROVIDER [ complex*16, ao_one_e_integrals_kpts,(ao_num_per_kpt,ao_num_per_kpt,kpt_num)]
+&BEGIN_PROVIDER [ double precision, ao_one_e_integrals_diag_kpts,(ao_num_per_kpt,kpt_num)]
+  implicit none
+  integer :: j,k
+  BEGIN_DOC
+ ! One-electron Hamiltonian in the |AO| basis.
+  END_DOC
+  
+  if (read_ao_one_e_integrals) then
+     call ezfio_get_ao_one_e_ints_ao_one_e_integrals_kpts(ao_one_e_integrals_kpts)
+  else
+        ao_one_e_integrals_kpts = ao_integrals_n_e_kpts + ao_kinetic_integrals_kpts
+
+        if (do_pseudo) then
+              ao_one_e_integrals_kpts += ao_pseudo_integrals_kpts
+        endif
+  endif
+
+  do k = 1, kpt_num
+    do j = 1, ao_num_per_kpt
+      ao_one_e_integrals_diag_kpts(j,k) = dble(ao_one_e_integrals_kpts(j,j,k))
+    enddo
+  enddo
+
+  if (write_ao_one_e_integrals) then
+       call ezfio_set_ao_one_e_ints_ao_one_e_integrals_kpts(ao_one_e_integrals_kpts)
+       print *,  'AO one-e integrals written to disk'
+  endif
+END_PROVIDER
+

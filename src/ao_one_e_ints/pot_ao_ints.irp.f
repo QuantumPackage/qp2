@@ -120,6 +120,21 @@ BEGIN_PROVIDER [complex*16, ao_integrals_n_e_complex, (ao_num,ao_num)]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [complex*16, ao_integrals_n_e_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  !  Nucleus-electron interaction, in the |AO| basis set.
+  !
+  !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+  END_DOC
+  if (read_ao_integrals_n_e) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_n_e_kpts(ao_integrals_n_e_kpts)
+    print *,  'AO N-e integrals read from disk'
+  else
+   print *,  irp_here, ': Not yet implemented'
+  endif
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nucl_num)]
   BEGIN_DOC
 ! Nucleus-electron interaction in the |AO| basis set, per atom A.

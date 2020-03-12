@@ -104,6 +104,23 @@ BEGIN_PROVIDER [ complex*16, ao_overlap_complex, (ao_num, ao_num) ]
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, ao_overlap_kpts, (ao_num_per_kpt, ao_num_per_kpt, kpt_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex AOs
+  END_DOC
+  if (read_ao_integrals_overlap) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_overlap_kpts(ao_overlap_kpts)
+    print *,  'AO overlap integrals read from disk'
+  else
+    print*,'complex AO overlap ints must be provided',irp_here
+  endif
+  if (write_ao_integrals_overlap) then
+     call ezfio_set_ao_one_e_ints_ao_integrals_overlap_kpts(ao_overlap_kpts)
+     print *,  'AO overlap integrals written to disk'
+  endif
+END_PROVIDER
+
 
 
 
@@ -123,9 +140,14 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx
   if (is_complex) then
-    do j=1,ao_num
-      do i= 1,ao_num
-        ao_overlap_abs(i,j)= cdabs(ao_overlap_complex(i,j))
+    ao_overlap_abs = 0.d0
+    integer :: k, ishift
+    do k=1,kpt_num
+      ishift = (k-1)*ao_num_per_kpt
+      do j=1,ao_num_per_kpt
+        do i= 1,ao_num_per_kpt
+          ao_overlap_abs(ishift+i,ishift+j)= cdabs(ao_overlap_kpts(i,j,k))
+        enddo
       enddo
     enddo
   else
