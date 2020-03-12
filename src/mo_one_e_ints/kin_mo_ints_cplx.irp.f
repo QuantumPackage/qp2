@@ -5,10 +5,12 @@ BEGIN_PROVIDER [complex*16, mo_kinetic_integrals_complex, (mo_num,mo_num)]
   END_DOC
   integer :: i,j
 
+  print *, 'Providing MO kinetic integrals'
   if (read_mo_integrals_kinetic) then
     call ezfio_get_mo_one_e_ints_mo_integrals_kinetic_complex(mo_kinetic_integrals_complex)
     print *,  'MO kinetic integrals read from disk'
   else
+  print *, 'Providing MO kinetic integrals from AO kinetic integrals'
     call ao_to_mo_complex(                                            &
         ao_kinetic_integrals_complex,                                 &
         size(ao_kinetic_integrals_complex,1),                         &

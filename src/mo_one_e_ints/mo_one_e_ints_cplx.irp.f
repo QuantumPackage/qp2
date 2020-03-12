@@ -12,7 +12,7 @@ BEGIN_PROVIDER [ complex*16, mo_one_e_integrals_complex,(mo_num,mo_num)]
   ELSE
     mo_one_e_integrals_complex  = mo_integrals_n_e_complex + mo_kinetic_integrals_complex
 
-    IF (DO_PSEUDO) THEN
+    IF (do_pseudo) THEN
       mo_one_e_integrals_complex  += mo_pseudo_integrals_complex
     ENDIF
 
@@ -22,6 +22,7 @@ BEGIN_PROVIDER [ complex*16, mo_one_e_integrals_complex,(mo_num,mo_num)]
     call ezfio_set_mo_one_e_ints_mo_one_e_integrals_complex(mo_one_e_integrals_complex)
     print *,  'MO one-e integrals written to disk'
   ENDIF
+  print*,'Provided the one-electron integrals'
 
 END_PROVIDER
 
