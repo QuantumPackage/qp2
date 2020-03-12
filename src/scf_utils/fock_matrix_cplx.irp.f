@@ -80,7 +80,7 @@
      if (dabs(dimag(Fock_matrix_mo_complex(i,i))) .gt. 1.0d-12) then
        !stop 'diagonal elements of Fock matrix should be real'
        print *, 'diagonal elements of Fock matrix should be real',i,Fock_matrix_mo_complex(i,i)
-       stop -1
+       !stop -1
      endif
    enddo
 
