@@ -45,7 +45,11 @@ subroutine create_guess
   END_DOC
   logical                        :: exists
   PROVIDE ezfio_filename
-  call ezfio_has_mo_basis_mo_coef(exists)
+  if (is_complex) then
+    call ezfio_has_mo_basis_mo_coef_complex(exists)
+  else
+    call ezfio_has_mo_basis_mo_coef(exists)
+  endif
   if (.not.exists) then
     if (mo_guess_type == "HCore") then
       if (is_complex) then
