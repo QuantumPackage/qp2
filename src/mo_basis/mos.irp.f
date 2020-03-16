@@ -101,7 +101,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  ! $C^{-1}.C_{mo}$
  END_DOC
  call dgemm('N','N',ao_num,mo_num,ao_num,1.d0,                   &
-     ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+     ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
      mo_coef, size(mo_coef,1), 0.d0,                                 &
      mo_coef_in_ao_ortho_basis, size(mo_coef_in_ao_ortho_basis,1))
 
@@ -242,27 +242,42 @@ subroutine mix_mo_jk(j,k)
   ! by convention, the '+' |MO| is in the lowest  index (min(j,k))
   ! by convention, the '-' |MO| is in the highest index (max(j,k))
   END_DOC
-  double precision               :: array_tmp(ao_num,2),dsqrt_2
   if(j==k)then
     print*,'You want to mix two orbitals that are the same !'
     print*,'It does not make sense ... '
     print*,'Stopping ...'
     stop
   endif
-  array_tmp = 0.d0
+  double precision               :: dsqrt_2
   dsqrt_2 = 1.d0/dsqrt(2.d0)
-  do i = 1, ao_num
-    array_tmp(i,1) = dsqrt_2 * (mo_coef(i,j) + mo_coef(i,k))
-    array_tmp(i,2) = dsqrt_2 * (mo_coef(i,j) - mo_coef(i,k))
-  enddo
   i_plus = min(j,k)
   i_minus = max(j,k)
-  do i = 1, ao_num
-    mo_coef(i,i_plus) = array_tmp(i,1)
-    mo_coef(i,i_minus) = array_tmp(i,2)
-  enddo
+  if (is_complex) then
+    complex*16               :: array_tmp_c(ao_num,2)
+    array_tmp_c = (0.d0,0.d0)
+    do i = 1, ao_num
+      array_tmp_c(i,1) = dsqrt_2 * (mo_coef_complex(i,j) + mo_coef_complex(i,k))
+      array_tmp_c(i,2) = dsqrt_2 * (mo_coef_complex(i,j) - mo_coef_complex(i,k))
+    enddo
+    do i = 1, ao_num
+      mo_coef_complex(i,i_plus) = array_tmp_c(i,1)
+      mo_coef_complex(i,i_minus) = array_tmp_c(i,2)
+    enddo
+  else
+    double precision               :: array_tmp(ao_num,2)
+    array_tmp = 0.d0
+    do i = 1, ao_num
+      array_tmp(i,1) = dsqrt_2 * (mo_coef(i,j) + mo_coef(i,k))
+      array_tmp(i,2) = dsqrt_2 * (mo_coef(i,j) - mo_coef(i,k))
+    enddo
+    do i = 1, ao_num
+      mo_coef(i,i_plus) = array_tmp(i,1)
+      mo_coef(i,i_minus) = array_tmp(i,2)
+    enddo
+  endif
 
 end
+
 
 subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
   implicit none
@@ -280,13 +295,13 @@ subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
 
   call dgemm('T','N', ao_num, ao_num, ao_num,                        &
       1.d0,                                                          &
-      ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
       A_ao,size(A_ao,1),                                             &
       0.d0, T, size(T,1))
 
   call dgemm('N','N', ao_num, ao_num, ao_num, 1.d0,                  &
       T, size(T,1),                                                  &
-      ao_ortho_canonical_coef_inv,size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv,size(ao_ortho_cano_coef_inv,1),&
       0.d0, A, size(A,1))
 
   deallocate(T)

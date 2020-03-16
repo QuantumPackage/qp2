@@ -25,4 +25,23 @@ BEGIN_PROVIDER [double precision, mo_pseudo_integrals, (mo_num,mo_num)]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, mo_pseudo_integrals_diag,(mo_num)]
+  implicit none
+  integer                        :: i
+  BEGIN_DOC
+  ! diagonal elements of mo_pseudo_integrals or mo_pseudo_integrals_complex
+  END_DOC
+  
+  if (is_complex) then
+    PROVIDE mo_pseudo_integrals_complex
+    do i=1,mo_num
+      mo_pseudo_integrals_diag(i) = dble(mo_pseudo_integrals_complex(i,i))
+    enddo
+  else
+    PROVIDE mo_pseudo_integrals
+    do i=1,mo_num
+      mo_pseudo_integrals_diag(i) = mo_pseudo_integrals(i,i)
+    enddo
+  endif
+END_PROVIDER
 

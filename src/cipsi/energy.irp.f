@@ -17,7 +17,11 @@ BEGIN_PROVIDER [ double precision, pt2_E0_denominator, (N_states) ]
      pt2_E0_denominator(1:N_states) = psi_energy(1:N_states)
    else if (h0_type == "HF") then
      do i=1,N_states
-       j = maxloc(abs(psi_coef(:,i)),1)
+       if (is_complex) then
+         j = maxloc(cdabs(psi_coef_complex(:,i)),1)
+       else
+         j = maxloc(abs(psi_coef(:,i)),1)
+       endif
        pt2_E0_denominator(i) = psi_det_hii(j)
      enddo
    else if (h0_type == "Barycentric") then

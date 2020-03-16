@@ -40,8 +40,11 @@ let read_one in_channel =
     try input_line in_channel with
     | End_of_file -> raise End_Of_Basis
   in
-  if ( (String_ext.strip buffer) = "" ) then
-     raise End_Of_Basis;
+  let () = 
+    match String_ext.strip buffer with
+    | "" | "$END" -> raise End_Of_Basis
+    | _ -> ()
+  in
   let sym_str = String.sub buffer 0 2 in
   let   n_str = String.sub buffer 2 ((String.length buffer)-2) in
   let sym = Symmetry.of_string (String_ext.strip sym_str) in

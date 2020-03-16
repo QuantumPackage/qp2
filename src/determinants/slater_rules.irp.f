@@ -1581,8 +1581,6 @@ subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
 end
 
 
-
-
 double precision function diag_H_mat_elem_fock(det_ref,det_pert,fock_diag_tmp,Nint)
   use bitmasks
   implicit none
@@ -1745,7 +1743,7 @@ subroutine a_operator(iorb,ispin,key,hjj,Nint,na,nb)
   call bitstring_to_list_ab(key, occ, tmp, Nint)
   na = na-1
 
-  hjj = hjj - mo_one_e_integrals(iorb,iorb)
+  hjj = hjj - mo_one_e_integrals_diag(iorb)
 
   ! Same spin
   do i=1,na
@@ -1803,7 +1801,7 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   key(k,ispin) = ibset(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
 
-  hjj = hjj + mo_one_e_integrals(iorb,iorb)
+  hjj = hjj + mo_one_e_integrals_diag(iorb)
 
   ! Same spin
   do i=1,na
@@ -2291,4 +2289,555 @@ subroutine connected_to_hf(key_i,yes_no)
  else if(degree == 0)then
   yes_no = .True.
  endif
+end
+
+
+!==============================================================================!
+!                                                                              !
+!                                    Complex                                   !
+!                                                                              !
+!==============================================================================!
+
+
+subroutine i_H_j_s2_complex(key_i,key_j,Nint,hij,s2)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ and $\langle i|S^2|j \rangle$
+  ! where $i$ and $j$ are determinants.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  complex*16, intent(out)  :: hij
+  double precision, intent(out)  :: s2
+
+  integer                        :: exc(0:2,2,2)
+  integer                        :: degree
+  complex*16               :: get_two_e_integral_complex
+  integer                        :: m,n,p,q
+  integer                        :: i,j,k
+  integer                        :: occ(Nint*bit_kind_size,2)
+  double precision               :: diag_h_mat_elem, phase
+  integer                        :: n_occ_ab(2)
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals_complex
+
+  ASSERT (Nint > 0)
+  ASSERT (Nint == N_int)
+  ASSERT (sum(popcnt(key_i(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_i(:,2))) == elec_beta_num)
+  ASSERT (sum(popcnt(key_j(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
+
+  hij = (0.d0,0.d0)
+  s2 = 0.d0
+  !DIR$ FORCEINLINE
+  call get_excitation_degree(key_i,key_j,degree,Nint)
+  integer :: spin
+  select case (degree)
+    case (2)
+      call get_double_excitation(key_i,key_j,exc,phase,Nint)
+      ! Single alpha, single beta
+      if (exc(0,1,1) == 1) then
+        if ( (exc(1,1,1) == exc(1,2,2)).and.(exc(1,1,2) == exc(1,2,1)) ) then
+          s2 =  -phase
+        endif
+        if(exc(1,1,1) == exc(1,2,2) )then
+          hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+        else if (exc(1,2,1) ==exc(1,1,2))then
+          hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+        else
+          hij = phase*get_two_e_integral_complex(                      &
+              exc(1,1,1),                                              &
+              exc(1,1,2),                                              &
+              exc(1,2,1),                                              &
+              exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
+        endif
+      ! Double alpha
+      else if (exc(0,1,1) == 2) then
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(1,2,1),                                              &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(2,2,1),                                              &
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
+      ! Double beta
+      else if (exc(0,1,2) == 2) then
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(1,2,2),                                              &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(2,2,2),                                              &
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
+      endif
+    case (1)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
+      !DIR$ FORCEINLINE
+      call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
+      ! Single alpha
+      if (exc(0,1,1) == 1) then
+        m = exc(1,1,1)
+        p = exc(1,2,1)
+        spin = 1
+      ! Single beta
+      else
+        m = exc(1,1,2)
+        p = exc(1,2,2)
+        spin = 2
+      endif
+      call get_single_excitation_from_fock_complex(key_i,key_j,m,p,spin,phase,hij)
+
+    case (0)
+      double precision, external :: diag_S_mat_elem
+      s2 = diag_S_mat_elem(key_i,Nint)
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
+  end select
+end
+
+
+
+subroutine i_H_j_complex(key_i,key_j,Nint,hij)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  complex*16, intent(out)  :: hij
+
+  integer                        :: exc(0:2,2,2)
+  integer                        :: degree
+  complex*16               :: get_two_e_integral_complex
+  integer                        :: m,n,p,q
+  integer                        :: i,j,k
+  integer                        :: occ(Nint*bit_kind_size,2)
+  double precision               :: diag_H_mat_elem, phase
+  integer                        :: n_occ_ab(2)
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals_complex
+
+  ASSERT (Nint > 0)
+  ASSERT (Nint == N_int)
+  ASSERT (sum(popcnt(key_i(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_i(:,2))) == elec_beta_num)
+  ASSERT (sum(popcnt(key_j(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
+
+
+  hij = (0.d0,0.d0)
+  !DIR$ FORCEINLINE
+  call get_excitation_degree(key_i,key_j,degree,Nint)
+  integer :: spin
+  select case (degree)
+    case (2)
+      call get_double_excitation(key_i,key_j,exc,phase,Nint)
+      if (exc(0,1,1) == 1) then
+        ! Single alpha, single beta
+        if(exc(1,1,1) == exc(1,2,2) )then
+          hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+        else if (exc(1,2,1) ==exc(1,1,2))then
+          hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+        else
+          hij = phase*get_two_e_integral_complex(                     &
+              exc(1,1,1),                                             &
+              exc(1,1,2),                                             &
+              exc(1,2,1),                                             &
+              exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
+        endif
+      else if (exc(0,1,1) == 2) then
+        ! Double alpha
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(1,2,1),                                              &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(2,2,1),                                              &
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
+      else if (exc(0,1,2) == 2) then
+        ! Double beta
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(1,2,2),                                              &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(2,2,2),                                              &
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
+      endif
+    case (1)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
+      !DIR$ FORCEINLINE
+      call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
+      if (exc(0,1,1) == 1) then
+        ! Single alpha
+        m = exc(1,1,1)
+        p = exc(1,2,1)
+        spin = 1
+      else
+        ! Single beta
+        m = exc(1,1,2)
+        p = exc(1,2,2)
+        spin = 2
+      endif
+      call get_single_excitation_from_fock_complex(key_i,key_j,m,p,spin,phase,hij)
+
+    case (0)
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
+  end select
+end
+
+
+
+
+
+subroutine i_H_j_verbose_complex(key_i,key_j,Nint,hij,hmono,hdouble,phase)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  complex*16, intent(out)  :: hij,hmono,hdouble
+  double precision, intent(out)  :: phase
+
+  integer                        :: exc(0:2,2,2)
+  integer                        :: degree
+  complex*16               :: get_two_e_integral_complex
+  integer                        :: m,n,p,q
+  integer                        :: i,j,k
+  integer                        :: occ(Nint*bit_kind_size,2)
+  double precision               :: diag_H_mat_elem
+  integer                        :: n_occ_ab(2)
+  logical                        :: has_mipi(Nint*bit_kind_size)
+  complex*16               :: mipi(Nint*bit_kind_size), miip(Nint*bit_kind_size)
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map
+
+  ASSERT (Nint > 0)
+  ASSERT (Nint == N_int)
+  ASSERT (sum(popcnt(key_i(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_i(:,2))) == elec_beta_num)
+  ASSERT (sum(popcnt(key_j(:,1))) == elec_alpha_num)
+  ASSERT (sum(popcnt(key_j(:,2))) == elec_beta_num)
+
+  hij = (0.d0,0.d0)
+  hmono = (0.d0,0.d0)
+  hdouble = (0.d0,0.d0)
+  !DIR$ FORCEINLINE
+  call get_excitation_degree(key_i,key_j,degree,Nint)
+  select case (degree)
+    case (2)
+      call get_double_excitation(key_i,key_j,exc,phase,Nint)
+      if (exc(0,1,1) == 1) then
+        ! Single alpha, single beta
+        hij = phase*get_two_e_integral_complex(                      &
+            exc(1,1,1),                                              &
+            exc(1,1,2),                                              &
+            exc(1,2,1),                                              &
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
+      else if (exc(0,1,1) == 2) then
+        ! Double alpha
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(1,2,1),                                              &
+            exc(2,2,1) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,1),                                              &
+            exc(2,1,1),                                              &
+            exc(2,2,1),                                              &
+            exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
+
+      else if (exc(0,1,2) == 2) then
+        ! Double beta
+        hij = phase*(get_two_e_integral_complex(                     &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(1,2,2),                                              &
+            exc(2,2,2) ,mo_integrals_map,mo_integrals_map_2) -       &
+            get_two_e_integral_complex(                              &
+            exc(1,1,2),                                              &
+            exc(2,1,2),                                              &
+            exc(2,2,2),                                              &
+            exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2) )
+      endif
+    case (1)
+      call get_single_excitation(key_i,key_j,exc,phase,Nint)
+      !DIR$ FORCEINLINE
+      call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
+      has_mipi = .False.
+      if (exc(0,1,1) == 1) then
+        ! Single alpha
+        m = exc(1,1,1)
+        p = exc(1,2,1)
+        do k = 1, elec_alpha_num
+          i = occ(k,1)
+          if (.not.has_mipi(i)) then
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            miip(i) = get_two_e_integral_complex(m,i,i,p,mo_integrals_map,mo_integrals_map_2)
+            has_mipi(i) = .True.
+          endif
+        enddo
+        do k = 1, elec_beta_num
+          i = occ(k,2)
+          if (.not.has_mipi(i)) then
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            has_mipi(i) = .True.
+          endif
+        enddo
+
+        do k = 1, elec_alpha_num
+          hdouble = hdouble + mipi(occ(k,1)) - miip(occ(k,1))
+        enddo
+        do k = 1, elec_beta_num
+          hdouble = hdouble + mipi(occ(k,2))
+        enddo
+
+      else
+        ! Single beta
+        m = exc(1,1,2)
+        p = exc(1,2,2)
+        do k = 1, elec_beta_num
+          i = occ(k,2)
+          if (.not.has_mipi(i)) then
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            miip(i) = get_two_e_integral_complex(m,i,i,p,mo_integrals_map,mo_integrals_map_2)
+            has_mipi(i) = .True.
+          endif
+        enddo
+        do k = 1, elec_alpha_num
+          i = occ(k,1)
+          if (.not.has_mipi(i)) then
+            mipi(i) = get_two_e_integral_complex(m,i,p,i,mo_integrals_map,mo_integrals_map_2)
+            has_mipi(i) = .True.
+          endif
+        enddo
+
+        do k = 1, elec_alpha_num
+          hdouble = hdouble + mipi(occ(k,1))
+        enddo
+        do k = 1, elec_beta_num
+          hdouble = hdouble + mipi(occ(k,2)) - miip(occ(k,2))
+        enddo
+
+      endif
+      hmono = mo_one_e_integrals_complex(m,p)
+      hij = phase*(hdouble + hmono)
+
+    case (0)
+      phase = 1.d0
+      hij = dcmplx(diag_H_mat_elem(key_i,Nint),0.d0)
+  end select
+end
+
+
+subroutine i_H_psi_complex(key,keys,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+! Computes $\langle i|H|Psi \rangle  = \sum_J c_J \langle i | H | J \rangle$.
+!
+! Uses filter_connected_i_H_psi0 to get all the $|J \rangle$ to which $|i \rangle$
+! is connected.
+! The i_H_psi_minilist is much faster but requires to build the
+! minilists.
+  END_DOC
+  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate
+  integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
+  integer(bit_kind), intent(in)  :: key(Nint,2)
+  complex*16, intent(in)   :: coef(Ndet_max,Nstate)
+  complex*16, intent(out)  :: i_H_psi_array(Nstate)
+
+  integer                        :: i, ii,j
+  double precision               :: phase
+  integer                        :: exc(0:2,2,2)
+  complex*16               :: hij
+  integer, allocatable           :: idx(:)
+
+  ASSERT (Nint > 0)
+  ASSERT (N_int == Nint)
+  ASSERT (Nstate > 0)
+  ASSERT (Ndet > 0)
+  ASSERT (Ndet_max >= Ndet)
+  allocate(idx(0:Ndet))
+
+  i_H_psi_array = (0.d0,0.d0)
+
+  call filter_connected_i_h_psi0(keys,key,Nint,Ndet,idx)
+  if (Nstate == 1) then
+
+    do ii=1,idx(0)
+      i = idx(ii)
+      !DIR$ FORCEINLINE
+      call i_h_j_complex(key,keys(1,1,i),Nint,hij)
+      i_H_psi_array(1) = i_H_psi_array(1) + coef(i,1)*hij
+    enddo
+
+  else
+
+    do ii=1,idx(0)
+      i = idx(ii)
+      !DIR$ FORCEINLINE
+      call i_h_j_complex(key,keys(1,1,i),Nint,hij)
+      do j = 1, Nstate
+        i_H_psi_array(j) = i_H_psi_array(j) + coef(i,j)*hij
+      enddo
+    enddo
+
+  endif
+
+end
+
+
+subroutine i_H_psi_minilist_complex(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
+  use bitmasks
+  implicit none
+  integer, intent(in)            :: Nint, Ndet,Ndet_max,Nstate,idx_key(Ndet), N_minilist
+  integer(bit_kind), intent(in)  :: keys(Nint,2,Ndet)
+  integer(bit_kind), intent(in)  :: key(Nint,2)
+  complex*16, intent(in)   :: coef(Ndet_max,Nstate)
+  complex*16, intent(out)  :: i_H_psi_array(Nstate)
+
+  integer                        :: i, ii,j, i_in_key, i_in_coef
+  double precision               :: phase
+  integer                        :: exc(0:2,2,2)
+  complex*16               :: hij
+  integer, allocatable           :: idx(:)
+  BEGIN_DOC
+! Computes $\langle i|H|\Psi \rangle = \sum_J c_J \langle i|H|J\rangle$.
+!
+! Uses filter_connected_i_H_psi0 to get all the $|J \rangle$ to which $|i \rangle$
+! is connected. The $|J\rangle$ are searched in short pre-computed lists.
+  END_DOC
+
+  ASSERT (Nint > 0)
+  ASSERT (N_int == Nint)
+  ASSERT (Nstate > 0)
+  ASSERT (Ndet > 0)
+  ASSERT (Ndet_max >= Ndet)
+  allocate(idx(0:Ndet))
+  i_H_psi_array = 0.d0
+
+  call filter_connected_i_h_psi0(keys,key,Nint,N_minilist,idx)
+  if (Nstate == 1) then
+
+    do ii=1,idx(0)
+      i_in_key = idx(ii)
+      i_in_coef = idx_key(idx(ii))
+      !DIR$ FORCEINLINE
+      call i_h_j_complex(key,keys(1,1,i_in_key),Nint,hij)
+      ! TODO : Cache misses
+      i_H_psi_array(1) = i_H_psi_array(1) + coef(i_in_coef,1)*hij
+    enddo
+
+  else
+
+    do ii=1,idx(0)
+      i_in_key = idx(ii)
+      i_in_coef = idx_key(idx(ii))
+      !DIR$ FORCEINLINE
+      call i_h_j_complex(key,keys(1,1,i_in_key),Nint,hij)
+      do j = 1, Nstate
+        i_H_psi_array(j) = i_H_psi_array(j) + coef(i_in_coef,j)*hij
+      enddo
+    enddo
+
+  endif
+
+end
+
+
+
+subroutine i_H_j_single_spin_complex(key_i,key_j,Nint,spin,hij)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! a single excitation.
+  END_DOC
+  integer, intent(in)            :: Nint, spin
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  complex*16, intent(out)  :: hij
+
+  integer                        :: exc(0:2,2)
+  double precision               :: phase
+
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
+
+  call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
+  call get_single_excitation_from_fock(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
+end
+
+subroutine i_H_j_double_spin_complex(key_i,key_j,Nint,hij)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! a same-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint), key_j(Nint)
+  complex*16, intent(out)  :: hij
+
+  integer                        :: exc(0:2,2)
+  double precision               :: phase
+  complex*16, external     :: get_two_e_integral_complex
+
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
+  call get_double_excitation_spin(key_i,key_j,exc,phase,Nint)
+  hij = phase*(get_two_e_integral_complex(                             &
+      exc(1,1),                                                    &
+      exc(2,1),                                                    &
+      exc(1,2),                                                    &
+      exc(2,2), mo_integrals_map,mo_integrals_map_2) -                                &
+      get_two_e_integral_complex(                                      &
+      exc(1,1),                                                    &
+      exc(2,1),                                                    &
+      exc(2,2),                                                    &
+      exc(1,2), mo_integrals_map,mo_integrals_map_2) )
+end
+
+subroutine i_H_j_double_alpha_beta_complex(key_i,key_j,Nint,hij)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Returns $\langle i|H|j \rangle$ where $i$ and $j$ are determinants differing by
+  ! an opposite-spin double excitation.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
+  complex*16, intent(out)  :: hij
+
+  integer                        :: exc(0:2,2,2)
+  double precision               :: phase, phase2
+  complex*16, external     :: get_two_e_integral_complex
+
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
+
+  call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
+  call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
+  phase = phase*phase2
+  if (exc(1,1,1) == exc(1,2,2)) then
+    hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+  else if (exc(1,2,1) == exc(1,1,2)) then
+    hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+  else
+    hij = phase*get_two_e_integral_complex(                              &
+        exc(1,1,1),                                                  &
+        exc(1,1,2),                                                  &
+        exc(1,2,1),                                                  &
+        exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
+  endif
 end

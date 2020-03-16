@@ -23,6 +23,7 @@ logical function qp_stop()
     INQUIRE(FILE=trim(qp_kill_filename), EXIST=qp_stop)
     if (qp_stop) then
       qp_stop_variable = 1
+      ! qp_stop is true
       return
     endif
 

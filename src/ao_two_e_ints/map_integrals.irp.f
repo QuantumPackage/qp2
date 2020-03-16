@@ -4,6 +4,7 @@ use map_module
 !! ======
 
 BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
+&BEGIN_PROVIDER [ type(map_type), ao_integrals_map_2 ]
   implicit none
   BEGIN_DOC
   ! AO integrals
@@ -11,9 +12,17 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
   call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
-  sze = key_max
-  call map_init(ao_integrals_map,sze)
-  print*,  'AO map initialized : ', sze
+  if (is_complex) then
+    sze = key_max*2
+    call map_init(ao_integrals_map,sze)
+    call map_init(ao_integrals_map_2,sze) 
+    print*,  'AO maps initialized (complex): ', 2*sze
+  else
+    sze = key_max
+    call map_init(ao_integrals_map,sze)
+    call map_init(ao_integrals_map_2,1_map_size_kind) 
+    print*,  'AO map initialized : ', sze
+  endif
 END_PROVIDER
 
 subroutine two_e_integrals_index(i,j,k,l,i1)
@@ -21,7 +30,7 @@ subroutine two_e_integrals_index(i,j,k,l,i1)
   implicit none
   BEGIN_DOC
 ! Gives a unique index for i,j,k,l using permtuation symmetry.
-! i <-> k, j <-> l, and (i,k) <-> (j,l)
+! i <-> k, j <-> l, and (i,k) <-> (j,l) 
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind), intent(out) :: i1
@@ -144,28 +153,30 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
  END_DOC
  PROVIDE ao_two_e_integrals_in_map
  integer                        :: i,j,k,l,ii
- integer(key_kind)              :: idx
+ integer(key_kind)              :: idx, idx2
  real(integral_kind)            :: integral
- !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
- do l=ao_integrals_cache_min,ao_integrals_cache_max
-   do k=ao_integrals_cache_min,ao_integrals_cache_max
-     do j=ao_integrals_cache_min,ao_integrals_cache_max
-       do i=ao_integrals_cache_min,ao_integrals_cache_max
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index(i,j,k,l,idx)
-         !DIR$ FORCEINLINE
-         call map_get(ao_integrals_map,idx,integral)
-         ii = l-ao_integrals_cache_min
-         ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-         ao_integrals_cache(ii) = integral
-       enddo
-     enddo
-   enddo
- enddo
- !$OMP END PARALLEL DO
+ real(integral_kind)            :: tmp_re, tmp_im
+ integer(key_kind)              :: idx_re,idx_im
 
+  !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
+  do l=ao_integrals_cache_min,ao_integrals_cache_max
+    do k=ao_integrals_cache_min,ao_integrals_cache_max
+      do j=ao_integrals_cache_min,ao_integrals_cache_max
+        do i=ao_integrals_cache_min,ao_integrals_cache_max
+          !DIR$ FORCEINLINE
+          call two_e_integrals_index(i,j,k,l,idx)
+          !DIR$ FORCEINLINE
+          call map_get(ao_integrals_map,idx,integral)
+          ii = l-ao_integrals_cache_min
+          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
+          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
+          ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+          ao_integrals_cache(ii) = integral
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 END_PROVIDER
 
 
@@ -207,7 +218,6 @@ double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
   result = tmp
 end
 
-
 subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   use map_module
   BEGIN_DOC
@@ -237,6 +247,8 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
 
 end
 
+
+
 subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_zero_int)
   use map_module
   implicit none
@@ -251,6 +263,10 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
   integer                        :: i
   integer(key_kind)              :: hash
   double precision               :: thresh,tmp
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
   thresh = ao_integrals_threshold
 
@@ -295,6 +311,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
   integer(key_kind)              :: hash
   double precision               :: tmp
 
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
   if (ao_overlap_abs(j,l) < thresh) then
@@ -341,6 +361,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   integer(key_kind)              :: hash
   double precision               :: tmp
 
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
   if (ao_overlap_abs(j,l) < thresh) then
@@ -379,7 +403,7 @@ function get_ao_map_size()
   BEGIN_DOC
   ! Returns the number of elements in the AO map
   END_DOC
-  get_ao_map_size = ao_integrals_map % n_elements
+  get_ao_map_size = ao_integrals_map % n_elements + ao_integrals_map_2 % n_elements
 end
 
 subroutine clear_ao_map
@@ -389,6 +413,9 @@ subroutine clear_ao_map
   END_DOC
   call map_deinit(ao_integrals_map)
   FREE ao_integrals_map
+  call map_deinit(ao_integrals_map_2)
+  FREE ao_integrals_map_2
+  
 end
 
 
@@ -406,82 +433,4 @@ subroutine insert_into_ao_integrals_map(n_integrals,buffer_i, buffer_values)
   call map_append(ao_integrals_map, buffer_i, buffer_values, n_integrals)
 end
 
-
-subroutine dump_ao_integrals(filename)
-  use map_module
-  implicit none
-  BEGIN_DOC
-  ! Save to disk the |AO| integrals
-  END_DOC
-  character*(*), intent(in)      :: filename
-  integer(cache_key_kind), pointer :: key(:)
-  real(integral_kind), pointer   :: val(:)
-  integer*8                      :: i,j, n
-  if (.not.mpi_master) then
-    return
-  endif
-  call ezfio_set_work_empty(.False.)
-  open(unit=66,file=filename,FORM='unformatted')
-  write(66) integral_kind, key_kind
-  write(66) ao_integrals_map%sorted, ao_integrals_map%map_size,    &
-      ao_integrals_map%n_elements
-  do i=0_8,ao_integrals_map%map_size
-    write(66) ao_integrals_map%map(i)%sorted, ao_integrals_map%map(i)%map_size,&
-        ao_integrals_map%map(i)%n_elements
-  enddo
-  do i=0_8,ao_integrals_map%map_size
-    key => ao_integrals_map%map(i)%key
-    val => ao_integrals_map%map(i)%value
-    n = ao_integrals_map%map(i)%n_elements
-    write(66) (key(j), j=1,n), (val(j), j=1,n)
-  enddo
-  close(66)
-
-end
-
-
-integer function load_ao_integrals(filename)
-  implicit none
-  BEGIN_DOC
-  ! Read from disk the |AO| integrals
-  END_DOC
-  character*(*), intent(in)      :: filename
-  integer*8                      :: i
-  integer(cache_key_kind), pointer :: key(:)
-  real(integral_kind), pointer   :: val(:)
-  integer                        :: iknd, kknd
-  integer*8                      :: n, j
-  load_ao_integrals = 1
-  open(unit=66,file=filename,FORM='unformatted',STATUS='UNKNOWN')
-  read(66,err=98,end=98) iknd, kknd
-  if (iknd /= integral_kind) then
-    print *,  'Wrong integrals kind in file :', iknd
-    stop 1
-  endif
-  if (kknd /= key_kind) then
-    print *,  'Wrong key kind in file :', kknd
-    stop 1
-  endif
-  read(66,err=98,end=98) ao_integrals_map%sorted, ao_integrals_map%map_size,&
-      ao_integrals_map%n_elements
-  do i=0_8, ao_integrals_map%map_size
-    read(66,err=99,end=99) ao_integrals_map%map(i)%sorted,          &
-        ao_integrals_map%map(i)%map_size, ao_integrals_map%map(i)%n_elements
-    call cache_map_reallocate(ao_integrals_map%map(i),ao_integrals_map%map(i)%map_size)
-  enddo
-  do i=0_8, ao_integrals_map%map_size
-    key => ao_integrals_map%map(i)%key
-    val => ao_integrals_map%map(i)%value
-    n = ao_integrals_map%map(i)%n_elements
-    read(66,err=99,end=99) (key(j), j=1,n), (val(j), j=1,n)
-  enddo
-  call map_sort(ao_integrals_map)
-  load_ao_integrals = 0
-  return
-  99 continue
-  call map_deinit(ao_integrals_map)
-  98 continue
-  stop 'Problem reading ao_integrals_map file in work/'
-
-end
 

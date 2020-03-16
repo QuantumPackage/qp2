@@ -1,0 +1,565 @@
+
+-------------------------------------------------------------------------------------
+current:
+  select_connected
+    select_singles_and_doubles (this should be separated real/complex)
+      spot_isinwf (same for real/complex)
+      splash_pq (separate real/complex)
+        get_d{0,1,2} (separate real/complex)
+      fill_buffer_double (separate real/complex)
+    started splash_pq, get_d{0,1,2}, fill_buffer_double for complex
+      need to check hole particle index ordering (also in select_singles_and_doubles)
+      need to check for coef dconjg
+      
+  fci
+    run_{,stochastic_}cipsi
+      everything okay except:
+        zmq_pt2{,_complex} (todo: combine real/complex)
+          selection buffer? (val, mini)?
+          selection_slave_inproc
+            run_selection_slave
+              select_connected
+              
+          pt2_slave_inproc
+            run_pt2_slave{,_large,_small}
+              select_connected
+
+        zmq_selection_complex
+          selection_collector
+            pull_selection_results
+            add_to_selection_buffer
+          selection_slave_inproc
+            run_selection_slave (has split for complex?)
+              select_connected
+    run_slave_cipsi
+      run_slave_main
+        change memory allocation for complex (first see how many arrays will need to change type)
+        run_pt2_slave (large/small?)
+          select_connected
+     selection_buffer:
+       if anything complex, need to change zmq calls
+         {push,pull}_pt2_results
+
+-------------------------------------------------------------------------------------
+
+old:
+  irp_align for complex?
+  zmq_put_psi_complex instead of branch inside zmq_put_psi?
+    are there cases where we call this without already being on a complex branch of code?
+
+  h_apply.irp.f
+    push/pull_pt2
+      pt2,norm_pert,h_pert_diag
+        types?
+        if complex, do we need to keep imag part? (should imag sum to zero?)
+  h_apply_{,{,no}zmq}.template.f
+    see generate_h_apply.py script
+    may need to modify
+  selectors
+    (looks like nothing in e_corr_selectors.irp.f is used elsewhere?)
+    (only e_corr_per_sel outside of src (provided in h apply gen script))
+    coef_hf_selector (inv, invsquared)
+      for real, is sign important, or just magnitude?
+    e_corr_per_selectors (is this used anywhere?)
+      provided in generate_h_apply.py?
+      <Di|H|HF> * c(Di) / c(HF)
+      complex, but does this matter?
+      is magnitude important or just real part?
+    i_H_HF_per_selectors
+      <Di|H|HF>
+      not used anywhere else, so no additional concerns other than for e_corr_per_selectors 
+    delta_E_per_selector
+
+general:
+  check for dependence on psi_det_sorted, clean up providers
+
+determinants:
+  (done) connected_to_ref.irp.f
+  (done) create_excitations.irp.f
+  (done?) density_matrix{,_complex}.irp.f
+           no one_e_dm_dagger_mo_spin_index_complex
+           need to test for complex
+  (done) determinants_bitmasks.irp.f
+  (****) determinants{_complex}.irp.f
+           mostly done
+           need to modify ocaml for psi_coef_complex_qp_edit?
+           save_wavefunction_specified? qp_edit save? (wrong for real?)
+  (done) energy.irp.f
+  (????) example.irp.f
+  (****) EZFIO.cfg
+  (done) filter_connected.irp.f
+  (done) fock_diag.irp.f
+  (****) h_apply.irp.f
+           added coef_complex to h_apply_buffer_type
+           either coef or coef_complex will remain unallocated
+           (if this causes problems (it shouldn't), maybe just allocate unused one with size 1?)
+           check {push,pull}_pt2
+             pt2, norm_pert, h_pert_diag types? (should be real? documentation?)
+  (****) h_apply_nozmq.template.f
+  (****) h_apply.template.f
+  (****) h_apply_zmq.template.f
+  (done) occ_pattern.irp.f
+           (might need to change if we change h_apply)
+  (done) prune_wf.irp.f
+  (done) psi_cas{,_complex}.irp.f
+           might be able to combine some providers??
+  (done) psi_energy_mono_elec.irp.f
+  (done) ref_bitmask.irp.f
+  (done?) s2{,_complex}.irp.f
+           remaining functions not needed?
+  (done) single_excitations.irp.f
+  (done?) single_excitation_two_e.irp.f
+  (done?) slater_rules.irp.f
+  (done?) slater_rules_wee_mono.irp.f
+  (done) sort_dets_ab.irp.f
+  spindeterminants.ezfio_config
+           need svd complex?
+  (done?) spindeterminants.irp.f
+           separated psi_bilinear_matrix_values from psi_bilinear_matrix_{rows,columns,order}
+           new provider for psi_bilinear_matrix_values_complex
+           same for bilinear matrix transp (no conjugate)
+           done except for specific functions that are commented with todo
+           remaining functions aren't called anywhere, so don't worry about them for now
+  (****) two_e_density_matrix.irp.pouet
+  (done) utils.irp.f
+  (done?) zmq.irp.f
+           make sure template is correct for put/get psi_coef_complex
+           (why is limit 2^23? is this specific for doubles? should we divide by 2 for complex*16?)
+           also depends on zmq_{put,get}_cdmatrix in zmq/put_get.irp.f
+           and broadcast_chunks_complex_double in mpi/mpi.irp.f
+
+
+davidson	
+  (****)  davidson_parallel.irp.f
+            davidson_slave_work
+              branch inside or outside?
+                (currently inside)
+              same broadcast size issue as in h_apply (2^23 elements)
+              needs h_s2_u_0_nstates_openmp_work_complex (be careful with transp/conjg)
+              needs davidson_push_results_async_send_complex
+            davidson_pu{sh,ll}_results{,_async_send}_complex
+              double sz?
+              does f77_zmq_send8 know about types, or just send raw data?
+            davidson_collector_complex
+              is {v,s}_t conjugate transpose or just transpose?
+  (****)  diagonalization_hs2_dressed.irp.f
+  (****)  diagonalize_ci.irp.f
+  (****)  EZFIO.cfg
+  (****)  ezfio_interface.irp.f
+  (****)  input.irp.f
+  (****)  print_e_components.irp.f
+  (****)  u0_h_u0.irp.f
+  (****)  u0_wee_u0.irp.f
+-------------------------------------------------------------------------------------
+
+for complex data, add extra dim (size 2) and treat as real in EZFIO.cfg
+
+no reuse of old provider for real part of complex arrays
+
+mo_coef_complex_kpts has nonzero blocks of mo_coef_complex
+
+AO 2e ints:
+  see doc for map index details
+  see src/hartree_fock/fock_matrix_hf_complex.irp.f for example of iterating over values in map
+
+MO 2e ints:
+  similar to AO 2e ints
+  maybe good idea to make map_get for two neighboring vals? (re/im parts)
+  only built from 3idx (not from 4idx transform)
+
+
+mapping:
+  changed so that all real ints (Jij, Kij, Jii) are in map2
+    <ij|ij>, <ij|ji>, <ii|ii>
+  some places in code assume that map1 ints can be real
+    (can remove once we are sure we like this mapping)
+
+translational symmetry:
+  kconserv array gives quartets <ij|kl> which are symmetry-allowed
+  k_i + k_j = k_k + k_l
+  I + J = K + L
+  kconserv(I,J,K)=L
+
+------------------------------------------------------------------------------
+
+TODO:
+symmetry
+  restructure arrays?
+    mo coef and mo 1e ints already separate from real part of code (easy to add extra dimension)
+    ao 1e ints could also be handled in same way as mo 1e ints
+  change to allow different numbers of frozen/virtual mos for different kpts
+    for now, all kpts must have same number of aos/mos
+  bitmasks for kpts?
+
+ao_one_e_ints
+	ao_overlap_abs for complex? <abs(i)|abs(j)> vs abs(<i|j>)
+	ao_integrals_n_e_per_atom_complex (should be simple, but currently we only use dummy nuclei)
+
+ao_two_e_ints (todo)
+ get_ao_two_e_integrals_non_zero_complex 
+ get_ao_two_e_integrals_non_zero_jl_complex 
+ get_ao_two_e_integrals_non_zero_jl_from_list_complex 
+
+mo_two_e_ints (todo)
+  get_mo_two_e_integrals_ij_complex
+  add_integrals_to_map_complex
+	add_integrals_to_map_three_indices_complex
+	add_integrals_to_map_no_exit_34_complex
+
+
+later:
+  calculation of pbc integrals in QP
+		ao_two_e_integral
+		ao_two_e_integral_schwartz_accel
+		compute_ao_two_e_integrals
+		[ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
+		compute_ao_integrals_jl
+    ...
+
+
+
+NOTES:
+  2e integrals printed from pyscf are in physicists' notation
+  
+  mo energies from pyscf include ewald correction; in qp we just fold that into the nuclear repulsion
+    this may need to change for addition/removal of electrons
+      (shift in enuc depends on number of electrons)
+
+  3-index integrals
+    <ij|kl> = \sum_\mu (ik|\mu)(jl|\mu)
+    store (ik|\mu) for I<=K
+    if i>k, take conjugate transpose in first two dimensions
+
+    df_mo(:,:,mu,kjkl) = C(:,:,kj)^\dagger.df_ao(:,:,mu,kjkl).C(:,:,kl)
+    (note: might need to switch j/l depending on how we decide to store this)
+
+  2e int compound indexing
+    number of unique 4-tuples with 8-fold symmetry is a8(n)=n*(n+1)*(n^2+n+2)/8
+    number of unique 4-tuples with 4-fold symmetry is a4(n)=n^2*(n^2+3)/4
+    a8 is number of unique real 2e ints with n mos
+    a4 is number of unique* complex 2e ints with n mos (where p+i*q and p-i*q are counted as one, not two)
+    a4(n) = a8(n) + a8(n-1)
+    
+    we can already generate the list of <ij|kl> with unique values for the 8-fold case
+    the set of these for 4-fold symmetry is the union of the 8-fold set for n and the 8-fold set for n-1 with a simple transformation
+    <ij|kl>_{4,n} = <ij|kl>_{8,n} + <(k+1)j|i(l+1)>_{8,n-1}
+  
+
+  indices out of order; needed to switch for complex:
+    i_h_j_s2 for singles
+    i_h_j for singles
+    i_h_j_two_e for singles
+
+############################
+#      utils, ezfio, ...   #
+############################
+
+ocaml/Input_mo_basis.ml
+	added mo_coef_imag array (real)
+	still needs mo_coef_to_string and to_string?
+
+src/nuclei/EZFIO.cfg
+	[is_complex]
+		if true use periodic parts of code
+
+src/utils/linear_algebra.irp.f
+	complex versions of utils
+		(maybe put in separate file?)
+
+src/utils/map_module.f90
+	subroutine map_get_2
+		get two neighboring values from map
+		not tested or used
+
+
+src/utils_periodic/export_integrals_ao_periodic.irp.f
+	dump ints for testing
+
+src/utils_periodic/import_integrals_ao_periodic.irp.f
+	read ints from pyscf
+	TODO: don't read ao_num from stdin
+
+src/utils_periodic/import_mo_coef_complex.irp.f
+	read mo_coef from pyscf
+	
+
+
+#######################
+#    ao_one_e_ints    #
+#######################
+
+src/ao_one_e_ints/EZFIO.cfg
+	[ao_integrals_n_e_imag]
+	[ao_integrals_kinetic_imag]
+	[ao_integrals_pseudo_imag]
+	[ao_integrals_overlap_imag]
+	[ao_one_e_integrals_imag]
+
+
+src/ao_one_e_ints/ao_one_e_ints.irp.f
+	ao_one_e_integrals_imag
+		can only be read (not calculated)
+	ao_one_e_integrals_complex
+		formed from dcmplx(ao_one_e_integrals,ao_one_e_integrals_imag)
+		
+src/ao_one_e_ints/ao_overlap.irp.f
+src/ao_one_e_ints/kin_ao_ints.irp.f
+src/ao_one_e_ints/pot_ao_ints.irp.f
+src/ao_one_e_ints/pot_ao_pseudo_ints.irp.f
+	added _imag and _complex versions of all AO 1-e ints
+	each complex array is formed by combining real and imag arrays
+	imag arrays can only be read from disk
+	no complex/imag versions of ao_integrals_n_e_per_atom, but this should be straightforward if we need it later?
+	changed ao_overlap_abs so that it is set to cdabs(ao_overlap_complex) if (is_complex)
+		TODO: (maybe not the behavior we want)
+	added S_inv_complex
+		TODO: (no S_half_inv_complex yet)
+
+src/ao_one_e_ints/ao_ortho_canonical_complex.irp.f
+	ao_cart_to_sphe_coef_complex
+		just a copy of ao_cart_to_sphe_coef_complex with complex type for easier zgemm
+		(with different size if ao_cart_to_sphe_num is less than ao_num)
+		depends on ao_cart_to_sphe_coef_complex
+	ao_cart_to_sphe_overlap_complex
+		similar to real version, but uses ao_overlap_complex instead of ao_overlap
+	ao_ortho_cano_coef_inv_cplx
+		self-explanatory
+	ao_ortho_canonical_coef_complex
+	ao_ortho_canonical_num_complex
+		similar to real version
+		providers are linked, so easier to just make num_complex instead of using original num (even though they will both have the same value)
+		need to make sure this doesn't require any other downstream changes (i.e. replace ao_ortho_canonical_num with complex version if (is_complex))
+	ao_ortho_canonical_overlap_complex
+		similar to real version
+
+
+#######################
+#    ao_two_e_ints    #
+#######################
+
+
+src/ao_two_e_ints/map_integrals.irp.f
+	added ao_integrals_map_2 (provider linked to ao_integrals_map)
+	double size of both maps if (is_complex)
+	subroutine two_e_integrals_index_complex
+		same as real version, but return compound (2) indices to avoid recomputing
+	ao_integrals_cache_complex
+		similar to real version
+	subroutine ao_two_e_integral_complex_map_idx_sign
+		from i,j,k,l, return which map to use (T->1, F->2), location of real part of integral, sign of imaginary part of integral
+	complex*16 function get_ao_two_e_integral_complex_simple
+		args i,j,k,l,map1,map2
+		return complex integral composed of correct elements from one of the maps
+	complex*16 function get_ao_two_e_integral_complex
+		same behavior as _simple version, but checks cache first
+		returns integral from cache if possible, otherwise retrieves from map
+	subroutine get_ao_two_e_integrals_complex
+		same functionality as real version
+	subroutine insert_into_ao_integrals_map_2
+		needed for second map
+	get_ao_map_size, clear_ao_map
+		no new functions, but now these also handle map2
+	not implemented for periodic:
+		subroutine get_ao_two_e_integrals_non_zero
+		subroutine get_ao_two_e_integrals_non_zero_jl
+		subroutine get_ao_two_e_integrals_non_zero_jl_from_list
+	
+	
+src/ao_two_e_ints/two_e_integrals.irp.f
+	not implemented for periodic:
+		double precision function ao_two_e_integral
+		double precision function ao_two_e_integral_schwartz_accel
+		subroutine compute_ao_two_e_integrals
+		[ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
+		subroutine compute_ao_integrals_jl
+		(and other integral calculation functions)
+	modified for periodic:
+		[ logical, ao_two_e_integrals_in_map ]
+			complex AO ints can only be read from disk (not calculated)
+	
+
+
+#######################
+#      mo_basis       #
+#######################
+
+
+src/mo_basis/track_orb.irp.f → src/bitmask/track_orb.irp.f
+	not implemented for periodic:
+		subroutine reorder_core_orb (should be modified for periodic)
+	modified for periodic:
+		subroutine initialize_mo_coef_begin_iteration
+	added for periodic:
+		[ complex*16, mo_coef_begin_iteration_complex, (ao_num,mo_num) ]
+			similar to real version
+	
+
+src/mo_basis/EZFIO.cfg
+	[mo_coef_imag]
+
+
+src/mo_basis/mos.irp.f
+	modified for periodic:
+		subroutine mix_mo_jk
+		
+src/mo_basis/mos_complex.irp.f
+	added for periodic:
+		[ double precision, mo_coef_imag, (ao_num,mo_num) ]
+		[ complex*16, mo_coef_complex, (ao_num,mo_num) ]
+		[ complex*16, mo_coef_in_ao_ortho_basis_complex, (ao_num, mo_num) ]
+		[ complex*16, mo_coef_transp_complex, (mo_num,ao_num) ]
+		[ complex*16, mo_coef_transp_complex_conjg, (mo_num,ao_num) ]
+			maybe not necessary?
+			might cause confusion having both of these?
+			maybe should add _noconjg to name of _transp so it's clear that it's just the transpose, and not the adjoint
+		subroutine ao_to_mo_complex
+		subroutine ao_ortho_cano_to_ao_cplx
+	
+src/mo_basis/utils.irp.f
+	not modified:
+		subroutine save_mos_no_occ (should be changed for periodic)
+		
+	subroutine save_mos_truncated(n)
+	subroutine save_mos
+		modified to write mo_coef_imag to disk
+		need to make sure this is handled correctly
+		either update mo_coef{,_imag} whenever mo_coef_complex changes, or just make sure they're updated before writing to disk
+		(or just put real/imag parts of mo_coef_complex into buffer to save and avoid directly working with mo_coef{,_imag})
+	
+	
+src/mo_basis/utils_periodic.irp.f
+	complex versions of functions from utils
+		mo_as_eigvectors_of_mo_matrix_complex
+		mo_as_svd_vectors_of_mo_matrix_complex
+		mo_as_svd_vectors_of_mo_matrix_eig_complex
+			these three subroutines modify mo_coef_complex, decide whether to update mo_coef{,_imag} here or elsewhere
+		mo_coef_new_as_svd_vectors_of_mo_matrix_eig_complex
+
+
+src/mo_guess/h_core_guess_routine.irp.f
+	subroutine hcore_guess
+		modified for periodic, but need to decide how to handle separate parts of mo_coef_complex when updated
+		(also has soft_touch mo_coef_complex)
+
+src/mo_guess/mo_ortho_lowdin_complex.irp.f
+	[complex*16, ao_ortho_lowdin_coef_complex, (ao_num,ao_num)]
+	[complex*16, ao_ortho_lowdin_overlap_complex, (ao_num,ao_num)]
+
+src/mo_guess/pot_mo_ortho_canonical_ints.irp.f
+	[complex*16, ao_ortho_cano_n_e_ints_cplx, (mo_num,mo_num)]
+src/mo_guess/pot_mo_ortho_lowdin_ints.irp.f
+	[complex*16, ao_ortho_lowdin_n_e_ints_cplx, (mo_num,mo_num)]
+
+
+#######################
+#    mo_one_e_ints    #
+#######################
+
+src/mo_one_e_ints/EZFIO.cfg
+	[mo_integrals_e_n_imag]
+	[mo_integrals_kinetic_imag] 
+	[mo_integrals_pseudo_imag]
+	[mo_integrals_pseudo_imag]
+
+src/mo_one_e_ints/ao_to_mo_complex.irp.f
+	mo_to_ao_complex
+	mo_to_ao_no_overlap_complex
+	[ complex*16, S_mo_coef_complex, (ao_num, mo_num) ]
+
+src/mo_one_e_ints/orthonormalize.irp.f
+	subroutine orthonormalize_mos
+		same issue as above with modification of mo_coef_complex
+
+src/mo_one_e_ints/mo_one_e_ints.irp.f
+src/mo_one_e_ints/kin_mo_ints.irp.f
+src/mo_one_e_ints/mo_overlap.irp.f
+src/mo_one_e_ints/pot_mo_ints.irp.f
+src/mo_one_e_ints/pot_mo_pseudo_ints.irp.f
+	TODO: decide how to handle these providers
+  for periodic AOs, we always read (can't compute)
+  for MOs, we can either read from disk or transform from AOs
+  simplest way might be to link all three providers (integrals{,_imag,_complex})
+  if (.not.is_complex), just ignore imag and complex arrays?
+  if (is_complex)
+    either read real/imag from disk and combine to form complex
+    or transform complex MO ints from complex AO ints and also assign real/imag parts to separate arrays?
+
+
+src/mo_one_e_ints/mo_overlap.irp.f
+	[ complex*16, mo_overlap_complex,(mo_num,mo_num) ]
+		TODO: add option to read from disk?
+		typical workflow from pyscf might include reading MO 1,2-e ints, ovlp, mo_coef
+		maybe just add check to converter to ensure they're orthonormal, and don't save them after that?
+
+
+
+#######################
+#         SCF         #
+#######################
+	
+src/hartree_fock/fock_matrix_hf_complex.irp.f
+	TODO for periodic:
+		[ complex*16, ao_two_e_integral_{alpha,beta}_complex, (ao_num, ao_num) ]
+			finish implementation (might need new version of two_e_integrals_index_reverse)
+	added for periodic:
+		[ complex*16, Fock_matrix_ao_{alpha,beta}_complex, (ao_num, ao_num) ]
+	
+	
+src/hartree_fock/scf.irp.f
+	modified for periodic:
+		subroutine create_guess
+			should work for periodic
+			TODO: decide what to do about mo_coef_complex and imag/real parts for touch/save!!!
+		TODO: call roothaan_hall_scf_complex if (is_complex)
+
+
+src/scf_utils/diagonalize_fock_complex.irp.f
+	[ complex*16, eigenvectors_Fock_matrix_mo_complex, (ao_num,mo_num) ]
+		similar to real version
+		make separate function in utils for lapack calls
+
+src/scf_utils/diis_complex.irp.f
+	[complex*16, FPS_SPF_Matrix_AO_complex, (AO_num, AO_num)]
+	[complex*16, FPS_SPF_Matrix_MO, (mo_num, mo_num)]
+	linked providers:
+		[ double precision, eigenvalues_Fock_matrix_AO_complex, (AO_num) ]
+		[ complex*16, eigenvectors_Fock_matrix_AO_complex, (AO_num,AO_num) ]
+			TODO: finish implementing (need s_half_inv_complex)
+			note: eigvals is same type/size as real version
+			
+
+src/scf_utils/fock_matrix.irp.f
+	added checks to make sure we don't end up in real providers if (is_complex)
+		probably not necessary?
+	[ double precision, SCF_energy ]
+		modified for periodic
+		could also add check to ensure imaginary part is zero?
+
+src/scf_utils/fock_matrix_complex.irp.f
+	[ complex*16, Fock_matrix_mo_complex, (mo_num,mo_num) ]
+	[ double precision, Fock_matrix_diag_mo_complex, (mo_num)]
+		similar to real versions
+		added check to make sure diagonal elements of fock matrix are real
+	[ complex*16, Fock_matrix_mo_alpha_complex, (mo_num,mo_num) ]
+	[ complex*16, Fock_matrix_mo_beta_complex, (mo_num,mo_num) ]
+	[ complex*16, Fock_matrix_ao_complex, (ao_num, ao_num) ]
+
+
+src/scf_utils/huckel_complex.irp.f
+	similar to real version
+	could just put if (is_complex) branch in real version? (instead of making separate subroutine)
+	has soft_touch mo_coef_complex and call to save_mos (see other notes on real/imag parts)
+
+
+src/scf_utils/roothaan_hall_scf_complex.irp.f
+	subroutine Roothaan_Hall_SCF_complex
+		similar to real
+		has soft_touch mo_coef_complex and call to save_mos (see other notes on real/imag parts)
+
+src/scf_utils/scf_density_matrix_ao_complex.irp.f
+	complex versions of providers
+		[complex*16, SCF_density_matrix_ao_alpha_complex, (ao_num,ao_num) ]
+		[ complex*16, SCF_density_matrix_ao_beta_complex,  (ao_num,ao_num) ]
+		[ complex*16, SCF_density_matrix_ao_complex, (ao_num,ao_num) ]
+	
+

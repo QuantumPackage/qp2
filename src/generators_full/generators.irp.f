@@ -22,20 +22,35 @@ BEGIN_PROVIDER [ integer, N_det_generators ]
  call write_int(6,N_det_generators,'Number of generators')
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size,N_states) ]
+BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,psi_det_size) ]
  implicit none
  BEGIN_DOC
  ! For Single reference wave functions, the generator is the
  ! Hartree-Fock determinant
  END_DOC
  psi_det_generators(1:N_int,1:2,1:N_det) = psi_det_sorted(1:N_int,1:2,1:N_det)
- psi_coef_generators(1:N_det,1:N_states) = psi_coef_sorted(1:N_det,1:N_states)
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size,N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! For Single reference wave functions, the generator is the
+ ! Hartree-Fock determinant
+ END_DOC
+ psi_coef_generators(1:N_det,1:N_states) = psi_coef_sorted(1:N_det,1:N_states)
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, psi_coef_generators_complex, (psi_det_size,N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! For Single reference wave functions, the generator is the
+ ! Hartree-Fock determinant
+ END_DOC
+ psi_coef_generators_complex(1:N_det,1:N_states) = psi_coef_sorted_complex(1:N_det,1:N_states)
+END_PROVIDER
+
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_gen, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (psi_det_size,N_states) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_gen_order,     (psi_det_size)  ]
 
  implicit none
@@ -44,10 +59,26 @@ END_PROVIDER
  ! Hartree-Fock determinant
  END_DOC
  psi_det_sorted_gen = psi_det_sorted
- psi_coef_sorted_gen = psi_coef_sorted
  psi_det_sorted_gen_order = psi_det_sorted_order
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (psi_det_size,N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! For Single reference wave functions, the generator is the
+ ! Hartree-Fock determinant
+ END_DOC
+ psi_coef_sorted_gen = psi_coef_sorted
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, psi_coef_sorted_gen_complex, (psi_det_size,N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! For Single reference wave functions, the generator is the
+ ! Hartree-Fock determinant
+ END_DOC
+ psi_coef_sorted_gen_complex = psi_coef_sorted_complex
+END_PROVIDER
 
 BEGIN_PROVIDER [integer, degree_max_generators]
  implicit none

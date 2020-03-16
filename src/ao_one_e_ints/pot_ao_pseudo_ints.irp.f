@@ -27,6 +27,59 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
 
 END_PROVIDER
 
+!BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_imag, (ao_num, ao_num) ]
+! implicit none
+! BEGIN_DOC
+! ! Imaginary part of the pseudo_integrals
+! END_DOC
+!  if (read_ao_integrals_pseudo) then
+!     call ezfio_get_ao_one_e_ints_ao_integrals_pseudo_imag(ao_pseudo_integrals_imag(1:ao_num, 1:ao_num))
+!     print *,  'AO pseudo_integrals integrals read from disk'
+!  else
+!    ao_pseudo_integrals_imag = 0.d0
+!  endif
+!  if (write_ao_integrals_pseudo) then
+!     call ezfio_set_ao_one_e_ints_ao_integrals_pseudo_imag(ao_pseudo_integrals_imag(1:ao_num, 1:ao_num))
+!     print *,  'AO pseudo_integrals integrals written to disk'
+!  endif
+!END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, ao_pseudo_integrals_complex, (ao_num, ao_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex AOs
+  END_DOC
+  if (read_ao_integrals_pseudo) then
+     call ezfio_get_ao_one_e_ints_ao_integrals_pseudo_complex(ao_pseudo_integrals_complex)
+     print *,  'AO pseudo_integrals integrals read from disk'
+  else
+    print*,irp_here,'not implemented'
+    stop -1
+  endif
+  if (write_ao_integrals_pseudo) then
+     call ezfio_set_ao_one_e_ints_ao_integrals_pseudo_complex(ao_pseudo_integrals_complex)
+     print *,  'AO pseudo_integrals integrals written to disk'
+  endif
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, ao_pseudo_integrals_kpts, (ao_num_per_kpt, ao_num_per_kpt, kpt_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex AOs
+  END_DOC
+  if (read_ao_integrals_pseudo) then
+     call ezfio_get_ao_one_e_ints_ao_integrals_pseudo_kpts(ao_pseudo_integrals_kpts)
+     print *,  'AO pseudo_integrals integrals read from disk'
+  else
+    print*,irp_here,'not implemented'
+    stop -1
+  endif
+  if (write_ao_integrals_pseudo) then
+     call ezfio_set_ao_one_e_ints_ao_integrals_pseudo_kpts(ao_pseudo_integrals_kpts)
+     print *,  'AO pseudo_integrals integrals written to disk'
+  endif
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   implicit none
   BEGIN_DOC

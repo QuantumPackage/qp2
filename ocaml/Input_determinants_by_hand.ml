@@ -37,7 +37,9 @@ end = struct
     } [@@deriving sexp]
   ;;
 
-  let get_default = Qpackage.get_ezfio_default "determinants";;
+  let get_default = Qpackage.get_ezfio_default "determinants"
+
+  let is_complex = lazy (Ezfio.get_nuclei_is_complex () )
 
   let read_n_int () =
     if not (Ezfio.has_determinants_n_int()) then
@@ -48,12 +50,12 @@ end = struct
     ;
     Ezfio.get_determinants_n_int ()
     |> N_int_number.of_int
-  ;;
+
 
   let write_n_int n =
     N_int_number.to_int n
     |> Ezfio.set_determinants_n_int
-  ;;
+
 
 
   let read_bit_kind () =
@@ -64,12 +66,12 @@ end = struct
     ;
     Ezfio.get_determinants_bit_kind ()
     |> Bit_kind.of_int
-  ;;
+
 
   let write_bit_kind b =
     Bit_kind.to_int b
     |> Ezfio.set_determinants_bit_kind
-  ;;
+
 
   let read_n_det () =
     if not (Ezfio.has_determinants_n_det ()) then
@@ -77,7 +79,7 @@ end = struct
     ;
     Ezfio.get_determinants_n_det ()
     |> Det_number.of_int
-  ;;
+
 
   let read_n_det_qp_edit () =
     if not (Ezfio.has_determinants_n_det_qp_edit ()) then
@@ -87,18 +89,18 @@ end = struct
       end;
     Ezfio.get_determinants_n_det_qp_edit ()
     |> Det_number.of_int
-  ;;
+
 
   let write_n_det n =
     Det_number.to_int n
     |> Ezfio.set_determinants_n_det
-  ;;
+
 
   let write_n_det_qp_edit n =
     let n_det = read_n_det () |> Det_number.to_int in
     min n_det (Det_number.to_int n)
     |> Ezfio.set_determinants_n_det_qp_edit
-  ;;
+
 
   let read_n_states () =
     if not (Ezfio.has_determinants_n_states ()) then
@@ -106,7 +108,7 @@ end = struct
     ;
     Ezfio.get_determinants_n_states ()
     |> States_number.of_int
-  ;;
+
 
   let write_n_states n =
     let n_states =
@@ -130,7 +132,7 @@ end = struct
         Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| n_states |] ~data
         |> Ezfio.set_determinants_state_average_weight
       end
-  ;;
+
 
   let write_state_average_weight data =
       let n_states =
@@ -143,7 +145,7 @@ end = struct
       in
       Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| n_states |] ~data
       |> Ezfio.set_determinants_state_average_weight
-  ;;
+
 
   let read_state_average_weight () =
     let n_states =
@@ -171,7 +173,7 @@ end = struct
         |> Array.map Positive_float.of_float
       in
       (write_state_average_weight data; data)
-  ;;
+
 
   let read_expected_s2 () =
     if not (Ezfio.has_determinants_expected_s2 ()) then
@@ -186,12 +188,12 @@ end = struct
     ;
     Ezfio.get_determinants_expected_s2 ()
     |> Positive_float.of_float
-  ;;
+
 
   let write_expected_s2 s2 =
     Positive_float.to_float s2
     |> Ezfio.set_determinants_expected_s2
-  ;;
+
 
   let read_psi_coef ~read_only () =
     if not (Ezfio.has_determinants_psi_coef ()) then
@@ -200,19 +202,36 @@ end = struct
           read_n_states ()
           |> States_number.to_int
         in
-        Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| 1 ; n_states |]
-          ~data:(List.init n_states (fun i -> if (i=0) then 1. else 0. ))
+        (
+        if Lazy.force is_complex then
+          Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| 1 ; n_states |]
+            ~data:(List.init (2*n_states) (fun i -> if (i=0) then 1. else 0. ))
           |> Ezfio.set_determinants_psi_coef
+        else
+          Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| 2 ; 1 ; n_states |]
+            ~data:(List.init n_states (fun i -> if (i=0) then 1. else 0. ))
+          |> Ezfio.set_determinants_psi_coef_complex
+        )
       end;
     begin
       if read_only then
-        Ezfio.get_determinants_psi_coef_qp_edit ()
+        begin
+          if Lazy.force is_complex then
+            Ezfio.get_determinants_psi_coef_complex_qp_edit ()
+          else
+            Ezfio.get_determinants_psi_coef_qp_edit ()
+        end
       else
-        Ezfio.get_determinants_psi_coef ()
+        begin
+          if Lazy.force is_complex then
+            Ezfio.get_determinants_psi_coef_complex ()
+          else
+            Ezfio.get_determinants_psi_coef ()
+        end
     end
     |> Ezfio.flattened_ezfio
     |> Array.map Det_coef.of_float
-  ;;
+
 
   let write_psi_coef ~n_det ~n_states c =
     let n_det = Det_number.to_int n_det
@@ -222,12 +241,23 @@ end = struct
     and n_states =
       States_number.to_int n_states
     in
-    let r = 
-      Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| n_det ; n_states |] ~data:c
-    in
-    Ezfio.set_determinants_psi_coef r;
-    Ezfio.set_determinants_psi_coef_qp_edit r
-  ;;
+    if Lazy.force is_complex then
+      begin
+        let r = 
+          Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| 2 ; n_det ; n_states |] ~data:c
+        in
+        Ezfio.set_determinants_psi_coef_complex r;
+        Ezfio.set_determinants_psi_coef_complex_qp_edit r
+      end
+    else
+      begin
+        let r = 
+          Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| n_det ; n_states |] ~data:c
+        in
+        Ezfio.set_determinants_psi_coef r;
+        Ezfio.set_determinants_psi_coef_qp_edit r
+      end
+
 
 
   let read_psi_det ~read_only () =
@@ -276,7 +306,7 @@ end = struct
     |> Array.map (Determinant.of_int64_array
       ~n_int:(N_int_number.of_int n_int)
       ~alpha:n_alpha ~beta:n_beta )
-  ;;
+
 
   let write_psi_det ~n_int ~n_det d =
     let data = Array.to_list d
@@ -288,7 +318,7 @@ end = struct
     in
     Ezfio.set_determinants_psi_det r;
     Ezfio.set_determinants_psi_det_qp_edit r
-  ;;
+
 
 
   let read ?(full=true) () =
@@ -316,7 +346,7 @@ end = struct
     else
       (* No molecular orbitals, so no determinants *)
       None
-  ;;
+
 
   let write ?(force=false)
     { n_int                ;
@@ -341,7 +371,7 @@ end = struct
           write_psi_det ~n_int:n_int ~n_det:n_det psi_det
         end;
      write_state_average_weight state_average_weight
-  ;;
+
 
 
   let to_rst b =
@@ -355,8 +385,6 @@ end = struct
       let nstates =
         read_n_states ()
         |> States_number.to_int
-      and ndet =
-        Det_number.to_int b.n_det
       and ndet_qp_edit =
         Det_number.to_int b.n_det_qp_edit
       in
@@ -559,10 +587,8 @@ psi_det                = %s
     in
 
 
-
-
     Generic_input_of_rst.evaluate_sexp t_of_sexp s
-  ;;
+
 
   let update_ndet n_det_new =
     Printf.printf "Reducing n_det to %d\n" (Det_number.to_int n_det_new);
@@ -598,7 +624,7 @@ psi_det                = %s
       { det with n_det = (Det_number.of_int n_det_new) }
     in
     write ~force:true new_det
-  ;;
+
 
   let extract_state istate =
     Printf.printf "Extracting state %d\n" (States_number.to_int istate);
@@ -630,7 +656,7 @@ psi_det                = %s
       { det with n_states = (States_number.of_int 1) }
     in
     write ~force:true new_det
-  ;;
+
 
   let extract_states range =
     Printf.printf "Extracting states %s\n" (Range.to_string range);
@@ -675,7 +701,7 @@ psi_det                = %s
       { det with n_states = (States_number.of_int @@ List.length sorted_list) }
     in
     write ~force:true new_det
-  ;;
+
 
 end
 

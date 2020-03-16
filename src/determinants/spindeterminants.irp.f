@@ -307,8 +307,12 @@ integer function get_index_in_psi_det_beta_unique(key,Nint)
 
 end
 
-
 subroutine write_spindeterminants
+  !todo: modify for complex (not called anywhere?)
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
   use bitmasks
   implicit none
   integer(8), allocatable        :: tmpdet(:,:)
@@ -349,8 +353,12 @@ subroutine write_spindeterminants
   enddo
   call ezfio_set_spindeterminants_psi_det_beta(psi_det_beta_unique)
   deallocate(tmpdet)
-
+  
+  if (is_complex) then
+    call ezfio_set_spindeterminants_psi_coef_matrix_values_complex(psi_bilinear_matrix_values_complex)
+  else
   call ezfio_set_spindeterminants_psi_coef_matrix_values(psi_bilinear_matrix_values)
+  endif
   call ezfio_set_spindeterminants_psi_coef_matrix_rows(psi_bilinear_matrix_rows)
   call ezfio_set_spindeterminants_psi_coef_matrix_columns(psi_bilinear_matrix_columns)
 
@@ -370,6 +378,18 @@ end
 
   det_alpha_norm = 0.d0
   det_beta_norm  = 0.d0
+  if (is_complex) then
+    do k=1,N_det
+      i = psi_bilinear_matrix_rows(k)
+      j = psi_bilinear_matrix_columns(k)
+      f = 0.d0
+      do l=1,N_states
+        f += cdabs(psi_bilinear_matrix_values_complex(k,l)*psi_bilinear_matrix_values_complex(k,l)) * state_average_weight(l)
+      enddo
+      det_alpha_norm(i) += f
+      det_beta_norm(j)  += f
+    enddo
+  else
   do k=1,N_det
     i = psi_bilinear_matrix_rows(k)
     j = psi_bilinear_matrix_columns(k)
@@ -380,6 +400,7 @@ end
     det_alpha_norm(i) += f
     det_beta_norm(j)  += f
   enddo
+  endif
   det_alpha_norm = det_alpha_norm
   det_beta_norm = det_beta_norm
 
@@ -392,8 +413,35 @@ END_PROVIDER
 !                                                                              !
 !==============================================================================!
 
- BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_values, (N_det,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_rows   , (N_det) ]
+BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_values, (N_det,N_states) ]
+  use bitmasks
+  PROVIDE psi_bilinear_matrix_rows
+  do k=1,N_det
+    do l=1,N_states
+      psi_bilinear_matrix_values(k,l) = psi_coef(k,l)
+    enddo
+  enddo
+  do l=1,N_states
+    call dset_order(psi_bilinear_matrix_values(1,l),psi_bilinear_matrix_order,N_det)
+  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER  [ complex*16, psi_bilinear_matrix_values_complex, (N_det,N_states) ]
+  use bitmasks
+  PROVIDE psi_bilinear_matrix_rows
+  do k=1,N_det
+    do l=1,N_states
+      psi_bilinear_matrix_values_complex(k,l) = psi_coef_complex(k,l)
+    enddo
+  enddo
+  do l=1,N_states
+    call cdset_order(psi_bilinear_matrix_values_complex(1,l),psi_bilinear_matrix_order,N_det)
+  enddo
+END_PROVIDER
+
+
+
+ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_rows   , (N_det) ]
 &BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns, (N_det) ]
 &BEGIN_PROVIDER [ integer, psi_bilinear_matrix_order  , (N_det) ]
   use bitmasks
@@ -408,10 +456,13 @@ END_PROVIDER
   END_DOC
   integer                        :: i,j,k, l
   integer(bit_kind)              :: tmp_det(N_int,2)
-  integer, external              :: get_index_in_psi_det_sorted_bit
+!  integer, external              :: get_index_in_psi_det_sorted_bit
 
-
-  PROVIDE psi_coef_sorted_bit
+  if (is_complex) then
+    PROVIDE psi_coef_sorted_bit_complex
+  else
+    PROVIDE psi_coef_sorted_bit
+  endif
 
   integer*8, allocatable         :: to_sort(:)
   integer, external              :: get_index_in_psi_det_alpha_unique
@@ -427,9 +478,6 @@ END_PROVIDER
     ASSERT (j>0)
     ASSERT (j<=N_det_beta_unique)
 
-    do l=1,N_states
-      psi_bilinear_matrix_values(k,l) = psi_coef(k,l)
-    enddo
     psi_bilinear_matrix_rows(k) = i
     psi_bilinear_matrix_columns(k) = j
     to_sort(k) = int(N_det_alpha_unique,8) * int(j-1,8) + int(i,8)
@@ -445,11 +493,6 @@ END_PROVIDER
   !$OMP SINGLE
   call iset_order(psi_bilinear_matrix_columns,psi_bilinear_matrix_order,N_det)
   !$OMP END SINGLE
-  !$OMP DO
-  do l=1,N_states
-    call dset_order(psi_bilinear_matrix_values(1,l),psi_bilinear_matrix_order,N_det)
-  enddo
-  !$OMP END DO
   !$OMP END PARALLEL
   deallocate(to_sort)
   ASSERT (minval(psi_bilinear_matrix_rows) == 1)
@@ -514,8 +557,71 @@ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_columns_loc, (N_det_beta_unique+1)
 
 END_PROVIDER
 
- BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_transp_values, (N_det,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_rows   , (N_det) ]
+BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_transp_values, (N_det,N_states) ]
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Transpose of :c:data:`psi_bilinear_matrix`
+  !
+  ! $D_\beta^\dagger.C^\dagger.D_\alpha$
+  !
+  ! Rows are $\alpha$ determinants and columns are $\beta$, but the matrix is stored in row major
+  ! format.
+  END_DOC
+  integer                        :: k,l
+
+  PROVIDE psi_bilinear_matrix_transp_rows
+
+  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,l)
+  do l=1,N_states
+    !$OMP DO
+    do k=1,N_det
+      psi_bilinear_matrix_transp_values (k,l) = psi_bilinear_matrix_values (k,l)
+    enddo
+    !$OMP ENDDO NOWAIT
+  enddo
+  !$OMP END PARALLEL
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(l)
+  do l=1,N_states
+    call dset_order(psi_bilinear_matrix_transp_values(1,l),psi_bilinear_matrix_transp_order,N_det)
+  enddo
+  !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+BEGIN_PROVIDER  [ complex*16, psi_bilinear_matrix_transp_values_complex, (N_det,N_states) ]
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Transpose of :c:data:`psi_bilinear_matrix`
+  !
+  ! $D_\beta^\dagger.C^\dagger.D_\alpha$
+  !
+  ! Rows are $\alpha$ determinants and columns are $\beta$, but the matrix is stored in row major
+  ! format.
+  END_DOC
+  integer                        :: k,l
+
+  PROVIDE psi_bilinear_matrix_transp_rows
+
+  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,l)
+  do l=1,N_states
+    !$OMP DO
+    do k=1,N_det
+      psi_bilinear_matrix_transp_values_complex (k,l) = psi_bilinear_matrix_values_complex (k,l)
+    enddo
+    !$OMP ENDDO NOWAIT
+  enddo
+  !$OMP END PARALLEL
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(l)
+  do l=1,N_states
+    call cdset_order(psi_bilinear_matrix_transp_values_complex(1,l),psi_bilinear_matrix_transp_order,N_det)
+  enddo
+  !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+ BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_rows   , (N_det) ]
 &BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_columns, (N_det) ]
 &BEGIN_PROVIDER [ integer, psi_bilinear_matrix_transp_order  , (N_det) ]
   use bitmasks
@@ -530,18 +636,15 @@ END_PROVIDER
   END_DOC
   integer                        :: i,j,k,l
 
-  PROVIDE psi_coef_sorted_bit
+  if (is_complex) then
+    PROVIDE psi_coef_sorted_bit_complex
+  else
+    PROVIDE psi_coef_sorted_bit
+  endif
 
   integer*8, allocatable         :: to_sort(:)
   allocate(to_sort(N_det))
   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l)
-  do l=1,N_states
-    !$OMP DO
-    do k=1,N_det
-      psi_bilinear_matrix_transp_values (k,l) = psi_bilinear_matrix_values (k,l)
-    enddo
-    !$OMP ENDDO NOWAIT
-  enddo
   !$OMP DO
   do k=1,N_det
     psi_bilinear_matrix_transp_columns(k) = psi_bilinear_matrix_columns(k)
@@ -563,11 +666,6 @@ END_PROVIDER
   call i8radix_sort(to_sort, psi_bilinear_matrix_transp_order, N_det,-1)
   call iset_order(psi_bilinear_matrix_transp_rows,psi_bilinear_matrix_transp_order,N_det)
   call iset_order(psi_bilinear_matrix_transp_columns,psi_bilinear_matrix_transp_order,N_det)
-  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(l)
-  do l=1,N_states
-    call dset_order(psi_bilinear_matrix_transp_values(1,l),psi_bilinear_matrix_transp_order,N_det)
-  enddo
-  !$OMP END PARALLEL DO
   deallocate(to_sort)
   ASSERT (minval(psi_bilinear_matrix_transp_columns) == 1)
   ASSERT (minval(psi_bilinear_matrix_transp_rows) == 1)
@@ -641,7 +739,30 @@ BEGIN_PROVIDER [ double precision, psi_bilinear_matrix, (N_det_alpha_unique,N_de
   enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, psi_bilinear_matrix_complex, (N_det_alpha_unique,N_det_beta_unique,N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Coefficient matrix if the wave function is expressed in a bilinear form :
+  !
+  ! $D_\alpha^\dagger.C.D_\beta$
+  END_DOC
+  integer                        :: i,j,k,istate
+  psi_bilinear_matrix_complex = (0.d0,0.d0)
+  do k=1,N_det
+    i = psi_bilinear_matrix_rows(k)
+    j = psi_bilinear_matrix_columns(k)
+    do istate=1,N_states
+      psi_bilinear_matrix_complex(i,j,istate) = psi_bilinear_matrix_values_complex(k,istate)
+    enddo
+  enddo
+END_PROVIDER
+
 subroutine create_wf_of_psi_bilinear_matrix(truncate)
+  !todo: modify for complex (not called anywhere?)
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -713,6 +834,11 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
 end
 
 subroutine generate_all_alpha_beta_det_products
+  !todo: modify for complex (only used by create_wf_of_psi_bilinear_matrix?)
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
   implicit none
   BEGIN_DOC
   ! Creates a wave function from all possible $\alpha \times \beta$ determinants
@@ -856,6 +982,11 @@ end
 
 
 subroutine copy_psi_bilinear_to_psi(psi, isize)
+  !todo: modify for complex (not called anywhere?)
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
   implicit none
   BEGIN_DOC
   ! Overwrites :c:data:`psi_det` and :c:data:`psi_coef` with the wave function
@@ -1292,6 +1423,11 @@ END_TEMPLATE
 
 
 subroutine wf_of_psi_bilinear_matrix(truncate)
+  !todo: modify for complex (not called anywhere?)
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
   use bitmasks
   implicit none
   BEGIN_DOC

@@ -2,7 +2,6 @@ open Qptypes
 open Qputils
 open Sexplib.Std
 
-
 module Mo_basis : sig
   type t =
       { mo_num          : MO_number.t ;
@@ -26,7 +25,10 @@ end = struct
         mo_coef         : (MO_coef.t array) array;
         ao_md5          : MD5.t;
       } [@@deriving sexp]
+
   let get_default = Qpackage.get_ezfio_default "mo_basis"
+
+  let is_complex = lazy (Ezfio.get_nuclei_is_complex () )
 
   let read_mo_label () =
     if not (Ezfio.has_mo_basis_mo_label ()) then
@@ -37,11 +39,11 @@ end = struct
 
 
   let reorder b ordering =
-    { b with mo_coef =
-      Array.map (fun mo ->
-        Array.init (Array.length mo)
-          (fun i -> mo.(ordering.(i)))
-      ) b.mo_coef 
+    { b with
+      mo_coef = Array.map (fun mo ->
+          Array.init (Array.length mo)
+            (fun i -> mo.(ordering.(i)))
+        ) b.mo_coef
     }
 
   let read_ao_md5 () =
@@ -60,7 +62,10 @@ end = struct
       |> MD5.of_string
     in
     if (ao_md5 <> result) then
-      failwith "The current MOs don't correspond to the current AOs.";
+      begin
+        Printf.eprintf ":%s:\n:%s:\n%!" (MD5.to_string ao_md5) (MD5.to_string result);
+        failwith "The current MOs don't correspond to the current AOs."
+      end;
     result
 
 
@@ -68,7 +73,7 @@ end = struct
     let elec_alpha_num =
       Ezfio.get_electrons_elec_alpha_num ()
     in
-    let result = 
+    let result =
       Ezfio.get_mo_basis_mo_num ()
     in
     if result < elec_alpha_num then
@@ -111,15 +116,21 @@ end = struct
 
 
   let read_mo_coef () =
-    let a = Ezfio.get_mo_basis_mo_coef ()
-            |> Ezfio.flattened_ezfio
-            |> Array.map MO_coef.of_float
+    let a =
+      (
+        if Lazy.force is_complex then
+           Ezfio.get_mo_basis_mo_coef_complex  ()
+        else
+           Ezfio.get_mo_basis_mo_coef ()
+      )
+      |> Ezfio.flattened_ezfio
+      |> Array.map MO_coef.of_float
     in
     let mo_num = read_mo_num () |> MO_number.to_int in
     let ao_num = (Array.length a)/mo_num in
-    Array.init mo_num (fun j ->
-        Array.sub a (j*ao_num) (ao_num) 
-      )
+      Array.init mo_num (fun j ->
+          Array.sub a (j*ao_num) (ao_num)
+        )
 
 
   let read () =
@@ -236,7 +247,7 @@ mo_coef         = %s
       (b.mo_occ |> Array.to_list |> List.map
          (MO_occ.to_string) |> String.concat ", " )
       (b.mo_coef |> Array.map
-         (fun x-> Array.map MO_coef.to_string x |> 
+         (fun x-> Array.map MO_coef.to_string x |>
            Array.to_list |> String.concat "," ) |>
        Array.to_list |> String.concat "\n" )
 
@@ -244,12 +255,12 @@ mo_coef         = %s
   let write_mo_num n =
     MO_number.to_int n
     |> Ezfio.set_mo_basis_mo_num
-  ;;
+
 
   let write_mo_label a =
     MO_label.to_string a
     |> Ezfio.set_mo_basis_mo_label
-  ;;
+
 
   let write_mo_class a =
     let mo_num = Array.length a in
@@ -257,7 +268,7 @@ mo_coef         = %s
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_class
-  ;;
+
 
   let write_mo_occ a =
     let mo_num = Array.length a in
@@ -265,26 +276,34 @@ mo_coef         = %s
     |> Array.to_list
     in Ezfio.ezfio_array_of_list ~rank:1 ~dim:[| mo_num |] ~data
     |> Ezfio.set_mo_basis_mo_occ
-  ;;
+
 
   let write_md5 a =
     MD5.to_string a
     |> Ezfio.set_mo_basis_ao_md5
-  ;;
+
 
   let write_mo_coef a =
     let mo_num = Array.length a in
-    let ao_num = Array.length a.(0) in
+    let ao_num =
+      let x = Array.length a.(0) in
+      if Lazy.force is_complex then x/2 else x
+    in
     let data =
       Array.map (fun mo -> Array.map MO_coef.to_float mo
       |> Array.to_list) a
     |> Array.to_list
     |> List.concat
-    in Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| ao_num ; mo_num |] ~data
-    |> Ezfio.set_mo_basis_mo_coef
-  ;;
+    in
+    if Lazy.force is_complex then
+      (Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| 2 ; ao_num ; mo_num |] ~data
+        |> Ezfio.set_mo_basis_mo_coef_complex )
+    else
+       (Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| ao_num ; mo_num |] ~data
+        |> Ezfio.set_mo_basis_mo_coef )
 
-  let write 
+
+  let write
       { mo_num          : MO_number.t ;
         mo_label        : MO_label.t;
         mo_class        : MO_class.t array;
@@ -298,7 +317,7 @@ mo_coef         = %s
       write_mo_occ mo_occ;
       write_mo_coef mo_coef;
       write_md5 ao_md5
-  ;;
+
 
 end
 

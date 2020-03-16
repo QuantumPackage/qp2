@@ -4,6 +4,7 @@ use map_module
 !! ======
 
 BEGIN_PROVIDER [ type(map_type), mo_integrals_map ]
+&BEGIN_PROVIDER [ type(map_type), mo_integrals_map_2 ]
   implicit none
   BEGIN_DOC
   ! MO integrals
@@ -11,9 +12,17 @@ BEGIN_PROVIDER [ type(map_type), mo_integrals_map ]
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
   call two_e_integrals_index(mo_num,mo_num,mo_num,mo_num,key_max)
-  sze = key_max
-  call map_init(mo_integrals_map,sze)
-  print*, 'MO map initialized: ', sze
+  if (is_complex) then
+    sze = key_max*2
+    call map_init(mo_integrals_map,sze)
+    call map_init(mo_integrals_map_2,sze)
+    print*,  'MO maps initialized (complex): ', 2*sze
+  else
+    sze = key_max
+    call map_init(mo_integrals_map,sze)
+    call map_init(mo_integrals_map_2,1_map_size_kind)
+    print*, 'MO map initialized: ', sze
+  endif
 END_PROVIDER
 
 subroutine insert_into_mo_integrals_map(n_integrals,                 &
@@ -85,7 +94,6 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:128_8*128_8*128_8*12
 
 END_PROVIDER
 
-
 double precision function get_two_e_integral(i,j,k,l,map)
   use map_module
   implicit none
@@ -117,7 +125,6 @@ double precision function get_two_e_integral(i,j,k,l,map)
     get_two_e_integral = mo_integrals_cache(ii_8)
   endif
 end
-
 
 double precision function mo_two_e_integral(i,j,k,l)
   implicit none
@@ -366,13 +373,15 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   endif
 end
 
-
 integer*8 function get_mo_map_size()
   implicit none
   BEGIN_DOC
   ! Return the number of elements in the MO map
   END_DOC
   get_mo_map_size = mo_integrals_map % n_elements
+  if (is_complex) then
+    get_mo_map_size += mo_integrals_map_2 % n_elements
+  endif
 end
 
 

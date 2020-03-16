@@ -28,9 +28,64 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   integer(bit_kind)              :: mask_ijkl(N_int,4)
   integer(bit_kind)              :: mask_ijk(N_int,3)
   double precision               :: cpu_1, cpu_2, wall_1, wall_2
+  integer*8                      :: get_mo_map_size, mo_map_size
+  double precision, external     :: map_mb
 
   PROVIDE mo_class
 
+  if (is_complex) then
+    mo_two_e_integrals_in_map = .True.
+    if (read_mo_two_e_integrals) then
+      print*,'Reading the MO integrals'
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_complex_1',mo_integrals_map)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_complex_2',mo_integrals_map_2)
+      print*, 'MO integrals provided (periodic)'
+      return
+    else if (read_df_mo_integrals.or.read_df_ao_integrals) then
+      PROVIDE df_mo_integrals_complex
+      call mo_map_fill_from_df
+      return
+    else
+      PROVIDE ao_two_e_integrals_in_map
+    endif
+    
+    print *,  ''
+    print *,  'AO -> MO integrals transformation (periodic)'
+    print *,  '---------------------------------'
+    print *,  ''
+  
+    call wall_time(wall_1)
+    call cpu_time(cpu_1)
+  
+    if(no_vvvv_integrals)then
+      print*,'not implemented for periodic',irp_here
+      stop -1
+      call four_idx_novvvv_complex
+    else
+      print*,'not implemented for periodic',irp_here
+      stop -1
+      call add_integrals_to_map_complex(full_ijkl_bitmask_4)
+    endif
+  
+    call wall_time(wall_2)
+    call cpu_time(cpu_2)
+  
+    mo_map_size = get_mo_map_size()
+  
+    print*,'Molecular integrals provided:'
+    print*,' Size of MO map 1         ', map_mb(mo_integrals_map) ,'MB'
+    print*,' Size of MO map 2         ', map_mb(mo_integrals_map_2) ,'MB'
+    print*,' Number of MO integrals: ',  mo_map_size
+    print*,' cpu  time :',cpu_2 - cpu_1, 's'
+    print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+  
+    if (write_mo_two_e_integrals.and.mpi_master) then
+      call ezfio_set_work_empty(.False.)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_complex_1',mo_integrals_map)
+      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_complex_2',mo_integrals_map_2)
+      call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+    endif
+  else
   mo_two_e_integrals_in_map = .True.
   if (read_mo_two_e_integrals) then
     print*,'Reading the MO integrals'
@@ -58,10 +113,8 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call wall_time(wall_2)
   call cpu_time(cpu_2)
 
-  integer*8                      :: get_mo_map_size, mo_map_size
   mo_map_size = get_mo_map_size()
 
-  double precision, external     :: map_mb
   print*,'Molecular integrals provided:'
   print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
   print*,' Number of MO integrals: ',  mo_map_size
@@ -72,6 +125,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
     call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+  endif
   endif
 
 END_PROVIDER
@@ -931,13 +985,94 @@ end
   ! mo_two_e_integrals_jj_exchange_from_ao(i,j) = J_ij
   ! mo_two_e_integrals_jj_anti_from_ao(i,j) = J_ij - K_ij
   END_DOC
-
+  
   integer                        :: i,j,p,q,r,s
   double precision               :: c
-  real(integral_kind)            :: integral
   integer                        :: n, pp
-  real(integral_kind), allocatable :: int_value(:)
   integer, allocatable           :: int_idx(:)
+  if (is_complex) then
+    complex(integral_kind)            :: integral2
+    complex(integral_kind), allocatable :: int_value2(:)
+    complex*16 :: cz
+
+    complex*16, allocatable  :: iqrs2(:,:), iqsr2(:,:), iqis2(:), iqri2(:)
+    PROVIDE ao_two_e_integrals_in_map mo_coef_complex
+    mo_two_e_integral_jj_from_ao = 0.d0
+    mo_two_e_integrals_jj_exchange_from_ao = 0.d0
+    !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: iqrs2, iqsr2
+
+
+    !$OMP PARALLEL DEFAULT(NONE)                                       &
+        !$OMP PRIVATE (i,j,p,q,r,s,integral2,c,n,pp,int_value2,int_idx,  &
+        !$OMP  iqrs2, iqsr2,iqri2,iqis2,cz)                                   &
+        !$OMP SHARED(mo_num,mo_coef_transp_complex,mo_coef_transp_complex_conjg,ao_num,    &
+        !$OMP  ao_integrals_threshold)             &
+        !$OMP REDUCTION(+:mo_two_e_integral_jj_from_ao,mo_two_e_integrals_jj_exchange_from_ao)
+
+    allocate( int_value2(ao_num), int_idx(ao_num),                      &
+        iqrs2(mo_num,ao_num), iqis2(mo_num), iqri2(mo_num),   &
+        iqsr2(mo_num,ao_num) )
+
+    !$OMP DO SCHEDULE (guided)
+    do s=1,ao_num
+      do q=1,ao_num
+
+        do j=1,ao_num
+          do i=1,mo_num
+            iqrs2(i,j) = (0.d0,0.d0)
+            iqsr2(i,j) = (0.d0,0.d0)
+          enddo
+        enddo
+
+
+          do r=1,ao_num
+            call get_ao_two_e_integrals_non_zero_complex(q,r,s,ao_num,int_value2,int_idx,n)
+            do pp=1,n
+              p = int_idx(pp)
+              integral2 = int_value2(pp)
+              if (cdabs(integral2) > ao_integrals_threshold) then
+                do i=1,mo_num
+                  iqrs2(i,r) += mo_coef_transp_complex_conjg(i,p) * integral2
+                enddo
+              endif
+            enddo
+            call get_ao_two_e_integrals_non_zero_complex(q,s,r,ao_num,int_value2,int_idx,n)
+            do pp=1,n
+              p = int_idx(pp)
+              integral2 = int_value2(pp)
+              if (cdabs(integral2) > ao_integrals_threshold) then
+                do i=1,mo_num
+                  iqsr2(i,r) += mo_coef_transp_complex_conjg(i,p) * integral2
+                enddo
+              endif
+            enddo
+          enddo
+        iqis2 = (0.d0,0.d0)
+        iqri2 = (0.d0,0.d0)
+        do r=1,ao_num
+          do i=1,mo_num
+            iqis2(i) += mo_coef_transp_complex(i,r) * iqrs2(i,r)
+            iqri2(i) += mo_coef_transp_complex(i,r) * iqsr2(i,r)
+          enddo
+        enddo
+        do i=1,mo_num
+          do j=1,mo_num
+            cz = mo_coef_transp_complex_conjg(j,q)*mo_coef_transp_complex(j,s)
+            mo_two_e_integral_jj_from_ao(j,i) += dble(cz * iqis2(i))
+            mo_two_e_integrals_jj_exchange_from_ao(j,i) += dble(cz * iqri2(i))
+          enddo
+        enddo
+
+      enddo
+    enddo
+    !$OMP END DO NOWAIT
+    deallocate(iqrs2,iqsr2,int_value2,int_idx)
+    !$OMP END PARALLEL
+
+
+  else
+  real(integral_kind)            :: integral
+  real(integral_kind), allocatable :: int_value(:)
 
   double precision, allocatable  :: iqrs(:,:), iqsr(:,:), iqis(:), iqri(:)
 
@@ -1042,7 +1177,7 @@ end
   !$OMP END DO NOWAIT
   deallocate(iqrs,iqsr,int_value,int_idx)
   !$OMP END PARALLEL
-
+  endif
   mo_two_e_integrals_jj_anti_from_ao = mo_two_e_integral_jj_from_ao - mo_two_e_integrals_jj_exchange_from_ao
 
 
@@ -1062,11 +1197,100 @@ END_PROVIDER
   integer                        :: i,j,p,q,r,s
   integer                        :: i0,j0
   double precision               :: c
-  real(integral_kind)            :: integral
   integer                        :: n, pp
-  real(integral_kind), allocatable :: int_value(:)
   integer, allocatable           :: int_idx(:)
 
+  if (is_complex) then
+    complex*16                     :: cz
+    complex(integral_kind)            :: integral2
+    complex(integral_kind), allocatable :: int_value2(:)
+    complex*16, allocatable  :: iqrs2(:,:), iqsr2(:,:), iqis2(:), iqri2(:)
+
+    PROVIDE ao_two_e_integrals_in_map mo_coef_complex
+
+    mo_two_e_integrals_vv_from_ao = 0.d0
+    mo_two_e_integrals_vv_exchange_from_ao = 0.d0
+
+    !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: iqrs2, iqsr2
+
+
+    !$OMP PARALLEL DEFAULT(NONE)                                            &
+        !$OMP PRIVATE (i0,j0,i,j,p,q,r,s,integral2,c,n,pp,int_value2,int_idx, &
+        !$OMP  iqrs2, iqsr2,iqri2,iqis2,cz)                                   &
+        !$OMP SHARED(n_virt_orb,mo_num,list_virt,mo_coef_transp_complex,ao_num, &
+        !$OMP  mo_coef_transp_complex_conjg,                  &
+        !$OMP  ao_integrals_threshold,do_direct_integrals)                  &
+        !$OMP REDUCTION(+:mo_two_e_integrals_vv_from_ao,mo_two_e_integrals_vv_exchange_from_ao)
+
+    allocate( int_value2(ao_num), int_idx(ao_num),                      &
+        iqrs2(mo_num,ao_num), iqis2(mo_num), iqri2(mo_num),&
+        iqsr2(mo_num,ao_num) )
+
+    !$OMP DO SCHEDULE (guided)
+    do s=1,ao_num
+      do q=1,ao_num
+
+        do j=1,ao_num
+          do i0=1,n_virt_orb
+            i = list_virt(i0)
+            iqrs2(i,j) = (0.d0,0.d0)
+            iqsr2(i,j) = (0.d0,0.d0)
+          enddo
+        enddo
+
+
+          do r=1,ao_num
+            call get_ao_two_e_integrals_non_zero_complex(q,r,s,ao_num,int_value2,int_idx,n)
+            do pp=1,n
+              p = int_idx(pp)
+              integral2 = int_value2(pp)
+              if (cdabs(integral2) > ao_integrals_threshold) then
+                do i0=1,n_virt_orb
+                  i =list_virt(i0)
+                  iqrs2(i,r) += mo_coef_transp_complex_conjg(i,p) * integral2
+                enddo
+              endif
+            enddo
+            call get_ao_two_e_integrals_non_zero_complex(q,s,r,ao_num,int_value2,int_idx,n)
+            do pp=1,n
+              p = int_idx(pp)
+              integral2 = int_value2(pp)
+              if (cdabs(integral2) > ao_integrals_threshold) then
+                do i0=1,n_virt_orb
+                  i = list_virt(i0)
+                  iqsr2(i,r) += mo_coef_transp_complex_conjg(i,p) * integral2
+                enddo
+              endif
+            enddo
+          enddo
+
+        iqis2 = (0.d0,0.d0)
+        iqri2 = (0.d0,0.d0)
+        do r=1,ao_num
+          do i0=1,n_virt_orb
+            i = list_virt(i0)
+            iqis2(i) += mo_coef_transp_complex(i,r) * iqrs2(i,r)
+            iqri2(i) += mo_coef_transp_complex(i,r) * iqsr2(i,r)
+          enddo
+        enddo
+        do i0=1,n_virt_orb
+          i= list_virt(i0)
+          do j0=1,n_virt_orb
+            j = list_virt(j0)
+            cz = mo_coef_transp_complex_conjg(j,q)*mo_coef_transp_complex(j,s)
+            mo_two_e_integrals_vv_from_ao(j,i) += dble(cz * iqis2(i))
+            mo_two_e_integrals_vv_exchange_from_ao(j,i) += dble(cz * iqri2(i))
+          enddo
+        enddo
+
+      enddo
+    enddo
+    !$OMP END DO NOWAIT
+    deallocate(iqrs2,iqsr2,iqis2,iqri2,int_value2,int_idx)
+    !$OMP END PARALLEL
+  else
+  real(integral_kind)            :: integral
+  real(integral_kind), allocatable :: int_value(:)
   double precision, allocatable  :: iqrs(:,:), iqsr(:,:), iqis(:), iqri(:)
 
   if (.not.do_direct_integrals) then
@@ -1178,6 +1402,7 @@ END_PROVIDER
   !$OMP END DO NOWAIT
   deallocate(iqrs,iqsr,int_value,int_idx)
   !$OMP END PARALLEL
+  endif
 
   mo_two_e_integrals_vv_anti_from_ao = mo_two_e_integrals_vv_from_ao - mo_two_e_integrals_vv_exchange_from_ao
   ! print*, '**********'
@@ -1207,7 +1432,18 @@ END_PROVIDER
   PROVIDE mo_two_e_integrals_in_map
   mo_two_e_integrals_jj = 0.d0
   mo_two_e_integrals_jj_exchange = 0.d0
-
+  if (is_complex) then
+    complex*16 :: get_two_e_integral_complex
+    do j=1,mo_num
+      do i=1,mo_num
+        mo_two_e_integrals_jj(i,j) = dble(get_two_e_integral_complex(i,j,i,j,&
+                                       mo_integrals_map,mo_integrals_map_2))
+        mo_two_e_integrals_jj_exchange(i,j) = dble(get_two_e_integral_complex(i,j,j,i,&
+                                                mo_integrals_map,mo_integrals_map_2))
+        mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
+      enddo
+    enddo
+  else
   do j=1,mo_num
     do i=1,mo_num
       mo_two_e_integrals_jj(i,j) = get_two_e_integral(i,j,i,j,mo_integrals_map)
@@ -1215,6 +1451,7 @@ END_PROVIDER
       mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
     enddo
   enddo
+  endif
 
 END_PROVIDER
 
@@ -1225,6 +1462,9 @@ subroutine clear_mo_map
   ! Frees the memory of the MO map
   END_DOC
   call map_deinit(mo_integrals_map)
+  if (is_complex) then
+    call map_deinit(mo_integrals_map_2)
+  endif
   FREE mo_integrals_map mo_two_e_integrals_jj mo_two_e_integrals_jj_anti
   FREE mo_two_e_integrals_jj_exchange mo_two_e_integrals_in_map
 end

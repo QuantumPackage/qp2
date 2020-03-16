@@ -1,7 +1,7 @@
  BEGIN_PROVIDER [ double precision, ref_bitmask_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_one_e_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_kinetic_energy ]
-&BEGIN_PROVIDER [ double precision, ref_bitmask_e_n_energy ]
+&BEGIN_PROVIDER [ double precision, ref_bitmask_n_e_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_two_e_energy ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_energy_ab ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_energy_bb ]
@@ -23,19 +23,19 @@
   ref_bitmask_energy = 0.d0
   ref_bitmask_one_e_energy = 0.d0
   ref_bitmask_kinetic_energy   = 0.d0
-  ref_bitmask_e_n_energy = 0.d0
+  ref_bitmask_n_e_energy = 0.d0
   ref_bitmask_two_e_energy = 0.d0
 
   do i = 1, elec_beta_num
-    ref_bitmask_energy += mo_one_e_integrals(occ(i,1),occ(i,1)) + mo_one_e_integrals(occ(i,2),occ(i,2))
-    ref_bitmask_kinetic_energy += mo_kinetic_integrals(occ(i,1),occ(i,1)) + mo_kinetic_integrals(occ(i,2),occ(i,2))
-    ref_bitmask_e_n_energy += mo_integrals_n_e(occ(i,1),occ(i,1)) + mo_integrals_n_e(occ(i,2),occ(i,2))
+    ref_bitmask_energy += mo_one_e_integrals_diag(occ(i,1)) + mo_one_e_integrals_diag(occ(i,2))
+    ref_bitmask_kinetic_energy += mo_kinetic_integrals_diag(occ(i,1)) + mo_kinetic_integrals_diag(occ(i,2))
+    ref_bitmask_n_e_energy += mo_integrals_n_e_diag(occ(i,1)) + mo_integrals_n_e_diag(occ(i,2))
   enddo
 
   do i = elec_beta_num+1,elec_alpha_num
-    ref_bitmask_energy += mo_one_e_integrals(occ(i,1),occ(i,1))
-    ref_bitmask_kinetic_energy += mo_kinetic_integrals(occ(i,1),occ(i,1))
-    ref_bitmask_e_n_energy += mo_integrals_n_e(occ(i,1),occ(i,1))
+    ref_bitmask_energy += mo_one_e_integrals_diag(occ(i,1))
+    ref_bitmask_kinetic_energy += mo_kinetic_integrals_diag(occ(i,1))
+    ref_bitmask_n_e_energy += mo_integrals_n_e_diag(occ(i,1))
   enddo
 
   do j= 1, elec_alpha_num
@@ -55,7 +55,7 @@
       ref_bitmask_energy += mo_two_e_integrals_jj(occ(i,1),occ(j,2))
     enddo
   enddo
-  ref_bitmask_one_e_energy = ref_bitmask_kinetic_energy +   ref_bitmask_e_n_energy
+  ref_bitmask_one_e_energy = ref_bitmask_kinetic_energy +   ref_bitmask_n_e_energy
 
  ref_bitmask_energy_ab = 0.d0
  do i = 1, elec_alpha_num

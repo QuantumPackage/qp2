@@ -258,6 +258,20 @@ subroutine set_natural_mos
 
    label = "Natural"
     integer :: i,j,iorb,jorb
+    if (is_complex) then
+    do i = 1, n_virt_orb
+     iorb = list_virt(i)
+     do j = 1, n_core_inact_act_orb
+      jorb = list_core_inact_act(j)
+      if(cdabs(one_e_dm_mo_complex(iorb,jorb)).ne. 0.d0)then
+        print*,'AHAHAH'
+        print*,iorb,jorb,one_e_dm_mo_complex(iorb,jorb)
+        stop
+      endif
+     enddo
+    enddo
+   call mo_as_svd_vectors_of_mo_matrix_eig_complex(one_e_dm_mo_complex,size(one_e_dm_mo_complex,1),mo_num,mo_num,mo_occ,label)
+    else
     do i = 1, n_virt_orb
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
@@ -270,6 +284,7 @@ subroutine set_natural_mos
      enddo
     enddo
    call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
+    endif
    soft_touch mo_occ
 
 end
@@ -292,11 +307,19 @@ BEGIN_PROVIDER [ double precision, c0_weight, (N_states) ]
    if (N_states > 1) then
      integer                        :: i
      double precision               :: c
+     if (is_complex) then
+       do i=1,N_states
+         c0_weight(i) = 1.d-31
+         c = maxval(cdabs(psi_coef_complex(:,i) * psi_coef_complex(:,i)))
+         c0_weight(i) = 1.d0/(c+1.d-20)
+       enddo
+     else
      do i=1,N_states
        c0_weight(i) = 1.d-31
        c = maxval(psi_coef(:,i) * psi_coef(:,i))
        c0_weight(i) = 1.d0/(c+1.d-20)
      enddo
+     endif
      c = 1.d0/minval(c0_weight(:))
      do i=1,N_states
        c0_weight(i) = c0_weight(i) * c
@@ -398,8 +421,23 @@ subroutine get_occupation_from_dets(istate,occupation)
   ASSERT (istate <= N_states)
 
   occupation = 0.d0
-  double precision, external :: u_dot_u
+  
+  if (is_complex) then
+    double precision, external :: u_dot_u_complex
+    norm_2 = 1.d0/u_dot_u_complex(psi_coef_complex(1,istate),N_det)
 
+    do i=1,N_det
+      c = cdabs(psi_coef_complex(i,istate)*psi_coef_complex(i,istate))*norm_2
+      call bitstring_to_list_ab(psi_det(1,1,i), list, n_elements, N_int)
+      do ispin=1,2
+        do j=1,n_elements(ispin)
+          ASSERT ( list(j,ispin) < mo_num )
+          occupation( list(j,ispin) ) += c
+        enddo
+      enddo
+    enddo
+  else
+  double precision, external :: u_dot_u
   norm_2 = 1.d0/u_dot_u(psi_coef(1,istate),N_det)
 
   do i=1,N_det
@@ -412,5 +450,6 @@ subroutine get_occupation_from_dets(istate,occupation)
       enddo
     enddo
   enddo
+  endif
 end
 

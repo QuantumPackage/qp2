@@ -80,9 +80,24 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   integer                        :: occ(elec_alpha_num)
   
   HF_bitmask = 0_bit_kind
-  do i=1,elec_alpha_num
-    occ(i) = i
-  enddo
+  !if (is_complex) then
+  if (.False.) then
+    integer :: kpt,korb
+    kpt=1
+    korb=1
+    do i=1,elec_alpha_num
+      occ(i) = korb + (kpt-1) * ao_num_per_kpt
+      kpt += 1
+      if (kpt > kpt_num) then
+        kpt = 1
+        korb += 1
+      endif
+    enddo
+  else
+    do i=1,elec_alpha_num
+      occ(i) = i
+    enddo
+  endif
   call list_to_bitstring( HF_bitmask(1,1), occ, elec_alpha_num, N_int)
   ! elec_alpha_num <= elec_beta_num, so occ is already OK.
   call list_to_bitstring( HF_bitmask(1,2), occ, elec_beta_num, N_int)
