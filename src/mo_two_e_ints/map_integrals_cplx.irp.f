@@ -437,7 +437,7 @@ subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
       call map_get_many(map2, hash_im(1:klmin-1),   out_im(1:klmin-1),   klmin-1)
       call map_get_many(map,  hash_re(klmin:klmax), out_re(klmin:klmax), klmax-klmin+1)
       call map_get_many(map,  hash_im(klmin:klmax), out_im(klmin:klmax), klmax-klmin+1)
-      if (klmax.lt.size) then
+      if (klmax.lt.sze) then
         call map_get_many(map2, hash_re(klmax+1:sze), out_re(klmax+1:sze), sze-klmax)
         call map_get_many(map2, hash_im(klmax+1:sze), out_im(klmax+1:sze), sze-klmax)
       endif
@@ -449,7 +449,7 @@ subroutine get_mo_two_e_integrals_exch_ii_complex(k,l,sze,out_val,map,map2)
       call map_get_many(map2, hash_im(1:klmin-1),   tmp_im(1:klmin-1),   klmin-1)
       call map_get_many(map,  hash_re(klmin:klmax), tmp_re(klmin:klmax), klmax-klmin+1)
       call map_get_many(map,  hash_im(klmin:klmax), tmp_im(klmin:klmax), klmax-klmin+1)
-      if (klmax.lt.size) then
+      if (klmax.lt.sze) then
         call map_get_many(map2, hash_re(klmax+1:sze), tmp_re(klmax+1:sze), sze-klmax)
         call map_get_many(map2, hash_im(klmax+1:sze), tmp_im(klmax+1:sze), sze-klmax)
       endif
