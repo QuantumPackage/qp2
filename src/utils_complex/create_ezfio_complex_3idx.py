@@ -120,17 +120,35 @@ ezfio.set_mo_basis_mo_coef_complex(mo_coef_reim)
 ##########################################
     
 with h5py.File(qph5path,'r') as qph5:
-    kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic'][()].tolist()
-    ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap'][()].tolist()
-    ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e'][()].tolist()
+    if 'ao_one_e_ints' in qph5.keys():
+        kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic'][()].tolist()
+        ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap'][()].tolist()
+        ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e'][()].tolist()
 
-ezfio.set_ao_one_e_ints_ao_integrals_kinetic_complex(kin_ao_reim)
-ezfio.set_ao_one_e_ints_ao_integrals_overlap_complex(ovlp_ao_reim)
-ezfio.set_ao_one_e_ints_ao_integrals_n_e_complex(ne_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_kinetic_complex(kin_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_overlap_complex(ovlp_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_n_e_complex(ne_ao_reim)
+        
+        ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+  
+    
+with h5py.File(qph5path,'r') as qph5:
+    if 'mo_one_e_ints' in qph5.keys():
+        kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic'][()].tolist()
+        #ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap'][()].tolist()
+        ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e'][()].tolist()
 
-ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
-ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
-ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+        ezfio.set_mo_one_e_ints_mo_integrals_kinetic_complex(kin_mo_reim)
+        #ezfio.set_mo_one_e_ints_mo_integrals_overlap_complex(ovlp_mo_reim)
+        #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
+        ezfio.set_mo_one_e_ints_mo_integrals_e_n_complex(ne_mo_reim)
+        
+        ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
+        #ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
+        #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
+        ezfio.set_mo_one_e_ints_io_mo_integrals_e_n('Read')
   
 ##########################################
 #                                        #

@@ -399,7 +399,7 @@ def get_pot_ao(mf):
     return v_kpts_ao
 
 def ao_to_mo_1e(ao_kpts,mo_coef):
-    return np.einsum('kim,kij,kjn->kmn',mo_coef.conj(),ao_kpts_ao,mo_coef)
+    return np.einsum('kim,kij,kjn->kmn',mo_coef.conj(),ao_kpts,mo_coef)
 
 def get_j3ao_old(fname,nao,Nk):
     '''
@@ -744,12 +744,22 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         ne_mo_blocked=block_diag(*ne_mo)
 
         with h5py.File(qph5path,'a') as qph5:
+            kin_mo_f =  np.array(kin_mo.transpose((0,2,1)),order='c')
+            ovlp_mo_f = np.array(ovlp_mo.transpose((0,2,1)),order='c')
+            ne_mo_f =   np.array(ne_mo.transpose((0,2,1)),order='c')
+
+            kin_mo_blocked_f = block_diag(*kin_mo_f)
+            ovlp_mo_blocked_f = block_diag(*ovlp_mo_f)
+            ne_mo_blocked_f = block_diag(*ne_mo_f)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_real',data=kin_mo_blocked.real)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_imag',data=kin_mo_blocked.imag)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_real',data=ovlp_mo_blocked.real)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_imag',data=ovlp_mo_blocked.imag)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_real',    data=ne_mo_blocked.real)
             qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_imag',    data=ne_mo_blocked.imag)
+            qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic',data=kin_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
+            qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap',data=ovlp_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
+            qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e',    data=ne_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
         for fname,ints in zip(('S.mo.qp','V.mo.qp','T.mo.qp'),
                               (ovlp_mo, ne_mo, kin_mo)):
             print_kpts_unblocked_upper(ints,fname,thresh_mono)
@@ -785,9 +795,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5.create_group('ao_two_e_ints')
         qph5['ao_two_e_ints'].attrs['df_num']=naux
 
+    j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
     if print_ao_ints_df:
         print_df(j3arr,'D.qp',bielec_int_threshold)
-        j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
 
         with h5py.File(qph5path,'a') as qph5:
             #qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=j3arr.transpose((2,3,1,0)).real)
