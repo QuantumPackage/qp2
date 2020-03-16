@@ -80,8 +80,7 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   integer                        :: occ(elec_alpha_num)
   
   HF_bitmask = 0_bit_kind
-  !if (is_complex) then
-  if (.False.) then
+  if (is_complex) then
     integer :: kpt,korb
     kpt=1
     korb=1
