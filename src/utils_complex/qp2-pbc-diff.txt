@@ -1,6 +1,10 @@
 
+
+todo:
+change everything to be blocked by kpt
+
 -------------------------------------------------------------------------------------
-current:
+old:
   select_connected
     select_singles_and_doubles (this should be separated real/complex)
       spot_isinwf (same for real/complex)
