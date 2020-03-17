@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import random
 
@@ -131,8 +131,8 @@ _  __ `/___  __ \__  ___/__  __ \
 
 """ ]
 
-  print random.choice(hello)
-  print "\n   -- Quantum  Package  Shell --\n"
+  print(random.choice(hello))
+  print("\n   -- Quantum  Package  Shell --\n")
 
 
 

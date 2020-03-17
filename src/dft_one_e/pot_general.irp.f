@@ -4,8 +4,8 @@
   BEGIN_DOC
  ! general providers for the alpha/beta exchange potentials on the AO basis
   END_DOC
- 
- BEGIN_SHELL [ /usr/bin/env python2 ]
+
+ BEGIN_SHELL [ /usr/bin/env python3 ]
 import os
 import glob
 from qp_path import QP_SRC
@@ -15,33 +15,33 @@ functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 
 prefix = ""
 for f in functionals:
-  print """
+  print("""
   %sif (trim(exchange_functional) == '%s') then
     potential_x_alpha_ao = ( 1.d0 - HF_exchange ) * potential_x_alpha_ao_%s
-    potential_x_beta_ao  = ( 1.d0 - HF_exchange ) * potential_x_beta_ao_%s"""%(prefix, f, f, f)
+    potential_x_beta_ao  = ( 1.d0 - HF_exchange ) * potential_x_beta_ao_%s"""%(prefix, f, f, f) )
   prefix = "else "
-print """
+print("""
   else
    print*, 'exchange functional required does not exist ...'
    print*,'exchange_functional ',exchange_functional
-   stop"""
-print "endif"
+   stop""")
+print("endif")
 
  END_SHELL
- 
- 
+
+
  END_PROVIDER
- 
- 
- 
+
+
+
   BEGIN_PROVIDER [double precision, potential_c_alpha_ao,(ao_num,ao_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_c_beta_ao,(ao_num,ao_num,N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta correlation potentials on the AO basis
   END_DOC
- 
- BEGIN_SHELL [ /usr/bin/env python2 ]
+
+ BEGIN_SHELL [ /usr/bin/env python3 ]
 import os
 import glob
 from qp_path import QP_SRC
@@ -51,27 +51,27 @@ functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 
 prefix = ""
 for f in functionals:
-  print """
+  print("""
   %sif (trim(correlation_functional) == '%s') then
     potential_c_alpha_ao = potential_c_alpha_ao_%s
-    potential_c_beta_ao  = potential_c_beta_ao_%s"""%(prefix, f, f, f)
+    potential_c_beta_ao  = potential_c_beta_ao_%s"""%(prefix, f, f, f) )
   prefix = "else "
 
-print """
+print("""
   else
    print*, 'Correlation functional required does not exist ...'
    print*,'correlation_functional ',correlation_functional
-   stop"""
-print "endif"
+   stop""" )
+print("endif")
 
  END_SHELL
- 
+
  END_PROVIDER
- 
- 
- 
- 
- 
+
+
+
+
+
   BEGIN_PROVIDER [double precision, potential_x_alpha_mo,(mo_num,mo_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_x_beta_mo ,(mo_num,mo_num,N_states)]
   implicit none
@@ -86,7 +86,7 @@ print "endif"
          potential_x_alpha_mo(1,1,istate),                                 &
          size(potential_x_alpha_mo,1)                                 &
          )
- 
+
      call ao_to_mo(                                                   &
          potential_x_beta_ao(1,1,istate),                                  &
          size(potential_x_beta_ao,1),                                 &
@@ -94,9 +94,9 @@ print "endif"
          size(potential_x_beta_mo,1)                                  &
          )
   enddo
- 
+
  END_PROVIDER
- 
+
   BEGIN_PROVIDER [double precision, potential_c_alpha_mo,(mo_num,mo_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_c_beta_mo, (mo_num,mo_num,N_states)]
   implicit none
@@ -111,7 +111,7 @@ print "endif"
          potential_c_alpha_mo(1,1,istate),                                 &
          size(potential_c_alpha_mo,1)                                 &
          )
- 
+
      call ao_to_mo(                                                   &
          potential_c_beta_ao(1,1,istate),                                  &
          size(potential_c_beta_ao,1),                                 &
@@ -119,7 +119,7 @@ print "endif"
          size(potential_c_beta_mo,1)                                  &
          )
   enddo
- 
+
  END_PROVIDER
 
 
@@ -147,9 +147,9 @@ print "endif"
    enddo
    Trace_v_Hxc(istate) = Trace_v_xc(istate) + Trace_v_H(istate)
   enddo
- 
+
  END_PROVIDER
- 
+
   BEGIN_PROVIDER [double precision, Trace_v_xc_new, (N_states)]
   implicit none
   integer :: i,j,istate
@@ -166,14 +166,14 @@ print "endif"
     enddo
    enddo
   enddo
- 
+
  END_PROVIDER
- 
+
   BEGIN_PROVIDER [double precision, potential_xc_alpha_mo,(mo_num,mo_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_xc_beta_mo,(mo_num,mo_num,N_states)]
   implicit none
   integer :: istate
- 
+
   do istate = 1, N_states
      call ao_to_mo(                                                   &
          potential_xc_alpha_ao(1,1,istate),                                 &
@@ -181,7 +181,7 @@ print "endif"
          potential_xc_alpha_mo(1,1,istate),                                 &
          size(potential_xc_alpha_mo,1)                                 &
          )
- 
+
      call ao_to_mo(                                                   &
          potential_xc_beta_ao(1,1,istate),                                  &
          size(potential_xc_beta_ao,1),                                 &
@@ -189,18 +189,18 @@ print "endif"
          size(potential_xc_beta_mo,1)                                  &
          )
   enddo
- 
+
  END_PROVIDER
- 
- 
+
+
   BEGIN_PROVIDER [double precision, potential_xc_alpha_ao,(ao_num,ao_num,N_states)]
  &BEGIN_PROVIDER [double precision, potential_xc_beta_ao,(ao_num,ao_num,N_states)]
   implicit none
   BEGIN_DOC
  ! general providers for the alpha/beta exchange/correlation potentials on the AO basis
   END_DOC
- 
- BEGIN_SHELL [ /usr/bin/env python2 ]
+
+ BEGIN_SHELL [ /usr/bin/env python3 ]
 import os
 import glob
 from qp_path import QP_SRC
@@ -210,19 +210,19 @@ functionals = map(lambda x : x.replace(".irp.f",""), glob.glob("*.irp.f"))
 
 prefix = ""
 for f in functionals:
-  print """
+  print("""
   %sif (trim(exchange_functional) == '%s') then
     potential_xc_alpha_ao = potential_xc_alpha_ao_%s
-    potential_xc_beta_ao  = potential_xc_beta_ao_%s"""%(prefix, f, f, f)
+    potential_xc_beta_ao  = potential_xc_beta_ao_%s"""%(prefix, f, f, f) )
   prefix = "else "
-print """
+print("""
   else
    print*, 'exchange functional required does not exist ...'
    print*,'exchange_functional ',exchange_functional
-   stop"""
-print "endif"
+   stop""")
+print("endif")
 
 END_SHELL
- 
+
  END_PROVIDER
 

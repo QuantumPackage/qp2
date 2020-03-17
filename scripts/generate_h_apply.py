@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import os
 
@@ -155,7 +155,7 @@ class H_apply(object):
 
   def __repr__(self):
     buffer = self.template
-    for key,value in self.data.items():
+    for key,value in list(self.data.items()):
       buffer = buffer.replace('$'+key, value)
     return buffer
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 __author__ = "Applencourt PEP8"
 __date__ = "jeudi 26 mars 2015, 12:49:35 (UTC+0100)"
@@ -88,7 +88,7 @@ END_PROVIDER
     def __init__(self):
         self.values = "type doc name ezfio_dir ezfio_name write output".split()
         for v in self.values:
-            exec "self.{0} = None".format(v)
+            exec("self.{0} = None".format(v))
 
     def __repr__(self):
         self.set_write()
@@ -96,7 +96,7 @@ END_PROVIDER
         for v in self.values:
             if not v:
                 msg = "Error : %s is not set in EZFIO.cfg" % (v)
-                print >>sys.stderr, msg
+                print(msg, file=sys.stderr)
                 sys.exit(1)
         if "size" not in self.__dict__:
             self.__dict__["size"] = ""
@@ -167,7 +167,7 @@ def test_module():
     T.set_ezfio_dir("Hartree_Fock")
     T.set_ezfio_name("thresh_SCF")
     T.set_output("output_Hartree_Fock")
-    print T
+    print(T)
 
 if __name__ == '__main__':
     test_module()
