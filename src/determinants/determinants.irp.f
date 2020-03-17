@@ -489,25 +489,6 @@ subroutine save_wavefunction
   endif
 end
 
-subroutine save_wavefunction_qmcpack
-  implicit none
-  use bitmasks
-  BEGIN_DOC
-  !  Save the wave function into the |EZFIO| file
-  END_DOC
-
-  ! Trick to avoid re-reading the wave function every time N_det changes
-  ! This Trick destroys determinants when saving for qmcpack
-  !read_wf = .False.
-
-  if (N_det < N_states) then
-    return
-  endif
-  if (mpi_master) then
-    call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
-    endif
-end
-
 
 subroutine save_wavefunction_unsorted
   implicit none
@@ -790,7 +771,7 @@ subroutine apply_excitation(det, exc, res, ok, Nint)
       case default
       print *, degree
       print *, "apply ex"
-!      print *,  1.d0/0.d0 ! For traceback
+      print *,  1.d0/0.d0 ! For traceback
       STOP
   end select
   ! END INLINE

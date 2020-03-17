@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #
 # Quantum Package configuration script
 #
@@ -15,12 +15,13 @@ unset CCXX
 export CC=gcc
 
 
-# When updating version, update also etc files
+# /!\ When updating version, update also etc files
 
+EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
-EZFIO_URL="https://gitlab.com/scemama/EZFIO/-/archive/v2.0.1/EZFIO-v2.0.1.tar.gz"
+BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
 GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
 IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
@@ -44,7 +45,7 @@ Usage:
 
 Options:
   -c, --config=<file>      Define a COMPILATION configuration file,
-                           in "${QP_ROOT}/config/". 
+                           in "${QP_ROOT}/config/".
   -h, --help               Print the HELP message
   -i, --install=<package>  INSTALL <package>. Use at your OWN RISK:
                            no support will be provided for the installation of
@@ -72,7 +73,7 @@ function execute () {
     while read -r line; do
       echo "  " $line
       _command+="${line} ;"
-    done 
+    done
     sleep 1
     echo ""
     printf "\e[0;94m"
@@ -86,7 +87,7 @@ OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving geto
 
 while true ; do
     case "$1" in
-        -c|--config) 
+        -c|--config)
             case "$2" in
                 "") help ; break;;
                 *) if [[ -f $2 ]] ; then
@@ -95,15 +96,15 @@ while true ; do
                       error "error: configuration file $2 not found."
                       exit 1
                    fi
-            esac 
+            esac
             shift 2;;
         -i|--install)
             case "$2" in
                 "") help ; break;;
                 *) PACKAGES="${PACKAGE} $2"
-            esac 
+            esac
             shift 2;;
-        -h|-help|--help) 
+        -h|-help|--help)
             help
             exit 0;;
         --) shift ; break ;;
@@ -177,6 +178,19 @@ function find_dir() {
 }
 
 
+# Extract EZFIO if needed
+EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
+if [[ ${EZFIO} = $(not_found) ]] ; then
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              tar --gunzip --extract --file ${EZFIO_TGZ}
+              rm -rf ezfio
+              mv EZFIO ezfio
+EOF
+fi
+
+
+
 if [[ "${PACKAGES}.x" != ".x" ]] ; then
         printf "\e[0;31m"
         echo ""
@@ -223,7 +237,7 @@ EOF
               ./configure --prefix=$QP_ROOT && make -j 8
               make install
 EOF
-    
+
     elif [[ ${PACKAGE} = libcap ]] ; then
 
             download ${LIBCAP_URL} "${QP_ROOT}"/external/libcap.tar.gz
@@ -258,12 +272,14 @@ EOF
               cd irpf90-*
               make
 EOF
-    
+
 
     elif [[ ${PACKAGE} = zeromq ]] ; then
 
             download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
             execute << EOF
+              export CC=gcc
+              export CXX=g++
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zeromq.tar.gz
               rm zeromq.tar.gz
@@ -289,7 +305,7 @@ EOF
               cp f77_zmq_free.h "\${QP_ROOT}"/include
 EOF
 
-    
+
     elif [[ ${PACKAGE} = ocaml ]] ; then
 
             download ${OCAML_URL} "${QP_ROOT}"/external/opam_installer.sh
@@ -302,7 +318,7 @@ EOF
                         rm -rf ${HOME}/.opam
                 fi
                 export OPAMROOT=${HOME}/.opam
-                cat << EOF | bash ${QP_ROOT}/external/opam_installer.sh --no-backup 
+                cat << EOF | bash ${QP_ROOT}/external/opam_installer.sh --no-backup
 ${QP_ROOT}/bin
 
 
@@ -312,8 +328,8 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 #
-#                opam switch create ocaml-base-compiler.4.07.1
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+#                opam switch create ocaml-base-compiler.4.10.0
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
 
                 eval $(opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -322,37 +338,34 @@ EOF
                 # Conventional commands
                 execute << EOF
                   chmod +x "${QP_ROOT}"/external/opam_installer.sh
-                  "${QP_ROOT}"/external/opam_installer.sh --no-backup 
+                  "${QP_ROOT}"/external/opam_installer.sh --no-backup
 EOF
                 execute << EOF
                   rm --force ${QP_ROOT}/bin/opam
                   export OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
                   echo ${QP_ROOT}/bin \
-                  | sh ${QP_ROOT}/external/opam_installer.sh 
+                  | sh ${QP_ROOT}/external/opam_installer.sh
 EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#                opam switch create ocaml-base-compiler.4.07.1     || exit 1
+#                opam switch create ocaml-base-compiler.4.10.0     || exit 1
 
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
                 eval $(opam env)
                 execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
             fi
 
-            
-    elif [[ ${PACKAGE} = ezfio ]] ; then
 
-            download ${EZFIO_URL} "${QP_ROOT}"/external/ezfio.tar.gz
+    elif [[ ${PACKAGE} = bse ]] ; then
+
+            download ${BSE_URL} "${QP_ROOT}"/external/bse.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ezfio.tar.gz
-              rm -rf ezfio
-              mv EZFIO-* ezfio
+              tar --gunzip --extract --file bse.tar.gz
+              pip install -e basis_set_exchange-*
 EOF
-
-
     elif [[ ${PACKAGE} = zlib ]] ; then
 
             download ${ZLIB_URL} "${QP_ROOT}"/external/zlib.tar.gz
@@ -365,13 +378,13 @@ EOF
               make && make install
 EOF
 
-            
+
     elif [[ ${PACKAGE} = docopt ]] ; then
 
             download ${DOCOPT_URL} "${QP_ROOT}"/external/docopt.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file docopt.tar.gz 
+              tar --gunzip --extract --file docopt.tar.gz
               mv docopt-*/docopt.py "\${QP_ROOT}/external/Python"
               rm --recursive --force -- docopt-*/ docopt.tar.gz
 EOF
@@ -382,9 +395,9 @@ EOF
             download ${RESULTS_URL} "${QP_ROOT}"/external/resultsFile.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file resultsFile.tar.gz 
-              mv resultsFile-master/resultsFile "\${QP_ROOT}/external/Python/"
-              rm --recursive --force resultsFile-master resultsFile.tar.gz
+              tar --gunzip --extract --file resultsFile.tar.gz
+              mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
+              rm --recursive --force resultsFile-* resultsFile.tar.gz
 EOF
 
     elif [[ ${PACKAGE} = bats ]] ; then
@@ -392,7 +405,7 @@ EOF
             download ${BATS_URL} "${QP_ROOT}"/external/bats.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar -zxf bats.tar.gz 
+              tar -zxf bats.tar.gz
               ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
               rm --recursive --force -- bats-core-1.1.0 \  "\${QP_ROOT}"/external/bats.tar.gz
 EOF
@@ -458,12 +471,6 @@ if [[ ${OCAML} = $(not_found) ]] ; then
         fail
 fi
 
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-        error "EZFIO (ezfio) is not installed."
-        fail
-fi
-
 ZLIB=$(find_lib -lz)
 if [[ ${ZLIB} = $(not_found) ]] ; then
         error "Zlib (zlib) is not installed."
@@ -492,6 +499,14 @@ echo "             (__)\       )\/\. "
 echo "                 ||----w |     "
 echo "                 ||     ||     "
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo ""
+echo "If you have PIP, you can install the Basis Sex Exchange command-line tool:"
+echo ""
+echo "  ./configure -i bse"
+echo ""
+echo "This will enable the usage of qp_basis to install extra basis sets."
+echo ""
+echo ""
 printf "\e[m\n"
 
 
@@ -502,15 +517,15 @@ fi
 
 if [[ -f ${QP_ROOT}/build.ninja ]] ; then
   [[ -z ${TRAVIS} ]] && echo "You can now run ./bin/qpsh to enter in the QP shell mode :)"
-else 
+else
       echo ""
       echo "${QP_ROOT}/build.ninja does not exist,"
       echo "you need to specify the COMPILATION configuration file."
-      echo "See  ./configure --help  for more details." 
+      echo "See  ./configure --help  for more details."
       echo ""
 fi
 
 exit 0
-    
+
 
 

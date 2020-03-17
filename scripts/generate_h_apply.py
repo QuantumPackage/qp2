@@ -105,7 +105,6 @@ class H_apply(object):
     s["do_mono_excitations"] = d[do_mono_exc]
     s["do_double_excitations"] = d[do_double_exc]
     s["keys_work"]  += "call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc)"
-
     s["filter_integrals"] = "array_pairs = .True."
     if SingleRef:
       s["filter_integrals"] = """
