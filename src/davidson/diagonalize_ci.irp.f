@@ -118,22 +118,22 @@ END_PROVIDER
        call u_0_S2_u_0(s2_eigvalues,eigenvectors,N_det,psi_det,N_int,&
          N_det,size(eigenvectors,1))
        if (only_expected_s2) then
-          do j=1,N_det
-            ! Select at least n_states states with S^2 values closed to "expected_s2"
-            if(dabs(s2_eigvalues(j)-expected_s2).le.0.5d0)then
-              i_state +=1
-              index_good_state_array(i_state) = j
-              good_state_array(j) = .True.
-            endif
-            if(i_state.eq.N_states) then
-              exit
-            endif
-          enddo
-       else
-          do j=1,N_det
-             index_good_state_array(j) = j
+         do j=1,N_det
+           ! Select at least n_states states with S^2 values closed to "expected_s2"
+           if(dabs(s2_eigvalues(j)-expected_s2).le.0.5d0)then
+             i_state +=1
+             index_good_state_array(i_state) = j
              good_state_array(j) = .True.
-          enddo
+           endif
+           if(i_state.eq.N_states) then
+             exit
+           endif
+         enddo
+       else
+         do j=1,N_det
+           index_good_state_array(j) = j
+           good_state_array(j) = .True.
+         enddo
        endif
        if(i_state .ne.0)then
          ! Fill the first "i_state" states that have a correct S^2 value
@@ -163,7 +163,7 @@ END_PROVIDER
          print*,'!!!!!!!!   WARNING  !!!!!!!!!'
          print*,'  Within the ',N_det,'determinants selected'
          print*,'  and the ',N_states_diag,'states requested'
-         print*,'  We did not find any state with S^2 values close to ',expected_s2
+         print*,'  We did not find only states with S^2 values close to ',expected_s2
          print*,'  We will then set the first N_states eigenvectors of the H matrix'
          print*,'  as the CI_eigenvectors'
          print*,'  You should consider more states and maybe ask for s2_eig to be .True. or just enlarge the CI space'
@@ -179,11 +179,11 @@ END_PROVIDER
        deallocate(index_good_state_array,good_state_array)
        deallocate(s2_eigvalues)
      else
-       call lapack_diag(eigenvalues,eigenvectors,                      &
+       call lapack_diag(eigenvalues,eigenvectors,                    &
            H_matrix_all_dets,size(H_matrix_all_dets,1),N_det)
        CI_electronic_energy(:) = 0.d0
-       call u_0_S2_u_0(CI_s2,eigenvectors,N_det,psi_det,N_int,&
-          min(N_det,N_states_diag),size(eigenvectors,1))
+       call u_0_S2_u_0(CI_s2,eigenvectors,N_det,psi_det,N_int,       &
+           min(N_det,N_states_diag),size(eigenvectors,1))
        ! Select the "N_states_diag" states of lowest energy
        do j=1,min(N_det,N_states_diag)
          do i=1,N_det
@@ -213,7 +213,7 @@ subroutine diagonalize_CI
 !  Replace the coefficients of the |CI| states by the coefficients of the
 !  eigenstates of the |CI| matrix.
   END_DOC
-  integer :: i,j
+  integer                        :: i,j
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors(i,j)
