@@ -12,7 +12,7 @@
   integer                        :: ibegin,j,k
   integer                        :: prev
   prev = 0
-  ao_cart_to_sphe_coefi_kpts(:,:) = (0.d0,0.d0)
+  ao_cart_to_sphe_coef_kpts(:,:) = (0.d0,0.d0)
   ! Assume order provided by ao_power_index
   i = 1
   ao_cart_to_sphe_num_per_kpt = 0
@@ -79,13 +79,13 @@ BEGIN_PROVIDER [ complex*16, ao_cart_to_sphe_overlap_kpts, (ao_cart_to_sphe_num_
    
     call zgemm('T','N',ao_cart_to_sphe_num_per_kpt,ao_num_per_kpt,ao_num_per_kpt, (1.d0,0.d0), &
       ao_cart_to_sphe_coef_kpts,size(ao_cart_to_sphe_coef_kpts,1), &
-      ao_overlap_kpts(1,1,k),size(ao_overlap_kpts,1), (0.d0,0.d0), &
+      ao_overlap_kpts(:,:,k),size(ao_overlap_kpts,1), (0.d0,0.d0), &
       S, size(S,1))
    
     call zgemm('N','N',ao_cart_to_sphe_num_per_kpt,ao_cart_to_sphe_num_per_kpt,ao_num_per_kpt, (1.d0,0.d0), &
       S, size(S,1), &
       ao_cart_to_sphe_coef_kpts,size(ao_cart_to_sphe_coef_kpts,1), (0.d0,0.d0), &
-      ao_cart_to_sphe_overlap_kpts(1,1,k),size(ao_cart_to_sphe_overlap_kpts,1))
+      ao_cart_to_sphe_overlap_kpts(:,:,k),size(ao_cart_to_sphe_overlap_kpts,1))
   enddo 
   deallocate(S)
 
@@ -106,7 +106,7 @@ BEGIN_PROVIDER [ complex*16, ao_ortho_cano_coef_inv_kpts, (ao_num_per_kpt,ao_num
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ complex*16, ao_ortho_canonical_coef_kpts, (ao_num_per_kpt,ao_num_per_kpt)]
+ BEGIN_PROVIDER [ complex*16, ao_ortho_canonical_coef_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num)]
 &BEGIN_PROVIDER [ integer, ao_ortho_canonical_num_per_kpt, (kpt_num) ]
 &BEGIN_PROVIDER [ integer, ao_ortho_canonical_num_per_kpt_max ]
   implicit none
@@ -155,14 +155,14 @@ END_PROVIDER
         ao_cart_to_sphe_num_per_kpt, S, size(S,1), ao_ortho_canonical_num_per_kpt(k))
 
       call zgemm('N','N', ao_num_per_kpt, ao_ortho_canonical_num_per_kpt(k), ao_cart_to_sphe_num_per_kpt, (1.d0,0.d0), &
-        ao_cart_to_sphe_coef_kpts(:,:,k), size(ao_cart_to_sphe_coef_kpts,1), &
+        ao_cart_to_sphe_coef_kpts, size(ao_cart_to_sphe_coef_kpts,1), &
         S, size(S,1), &
         (0.d0,0.d0), ao_ortho_canonical_coef_kpts(:,:,k), size(ao_ortho_canonical_coef_kpts,1))
     enddo
 
     deallocate(S)
   endif
-  ao_ortho_canonical_num_per_kpt_max = max(ao_ortho_canonical_num_per_kpt)
+  ao_ortho_canonical_num_per_kpt_max = maxval(ao_ortho_canonical_num_per_kpt)
 END_PROVIDER
 
 BEGIN_PROVIDER [complex*16, ao_ortho_canonical_overlap_kpts, (ao_ortho_canonical_num_per_kpt_max,ao_ortho_canonical_num_per_kpt_max,kpt_num)]
@@ -176,7 +176,7 @@ BEGIN_PROVIDER [complex*16, ao_ortho_canonical_overlap_kpts, (ao_ortho_canonical
   do k=1,kpt_num
     do j=1, ao_ortho_canonical_num_per_kpt_max
       do i=1, ao_ortho_canonical_num_per_kpt_max
-        ao_ortho_canonical_overlap_complex(i,j,k) = (0.d0,0.d0)
+        ao_ortho_canonical_overlap_kpts(i,j,k) = (0.d0,0.d0)
       enddo
     enddo
   enddo

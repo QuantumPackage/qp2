@@ -1,7 +1,9 @@
 
 
 todo:
-change everything to be blocked by kpt
+  change everything to be blocked by kpt
+  elec_alpha_num_per_kpt (maybe add to mo_basis?)
+  bitmasks per kpt? (or at least occ/act/virt num and list)
 
 -------------------------------------------------------------------------------------
 old:
