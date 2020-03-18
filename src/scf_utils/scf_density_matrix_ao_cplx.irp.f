@@ -73,3 +73,54 @@ BEGIN_PROVIDER [ complex*16, scf_density_matrix_ao_complex, (ao_num,ao_num) ]
 
 END_PROVIDER
 
+!============================================!
+!                                            !
+!                    kpts                    !
+!                                            !
+!============================================!
+
+BEGIN_PROVIDER [ complex*16, scf_density_matrix_ao_alpha_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num) ]
+   implicit none
+   BEGIN_DOC
+   ! $C.C^t$ over $\alpha$ MOs
+   END_DOC
+   
+   integer :: k
+   do k=1,kpt_num
+     call zgemm('N','C',ao_num_per_kpt,ao_num_per_kpt,elec_alpha_num_kpts(k),(1.d0,0.d0), &
+          mo_coef_kpts(1,1,k), size(mo_coef_kpts,1), &
+          mo_coef_kpts(1,1,k), size(mo_coef_kpts,1), (0.d0,0.d0), &
+          scf_density_matrix_ao_alpha_kpts(1,1,k), size(scf_density_matrix_ao_alpha_kpts,1))
+   enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, scf_density_matrix_ao_beta_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num) ]
+   implicit none
+   BEGIN_DOC
+   ! $C.C^t$ over $\beta$ MOs
+   END_DOC
+   
+   integer :: k
+   do k=1,kpt_num
+     call zgemm('N','C',ao_num_per_kpt,ao_num_per_kpt,elec_beta_num_kpts(k),(1.d0,0.d0), &
+          mo_coef_kpts(1,1,k), size(mo_coef_kpts,1), &
+          mo_coef_kpts(1,1,k), size(mo_coef_kpts,1), (0.d0,0.d0), &
+          scf_density_matrix_ao_beta_kpts(1,1,k), size(scf_density_matrix_ao_beta_kpts,1))
+   enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, scf_density_matrix_ao_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num) ]
+   implicit none
+   BEGIN_DOC
+   ! Sum of $\alpha$ and $\beta$ density matrices
+   END_DOC
+   ASSERT (size(scf_density_matrix_ao_kpts,1) == size(scf_density_matrix_ao_alpha_kpts,1))
+   if (elec_alpha_num== elec_beta_num) then
+     scf_density_matrix_ao_kpts = scf_density_matrix_ao_alpha_kpts + scf_density_matrix_ao_alpha_kpts
+   else
+     ASSERT (size(scf_density_matrix_ao_kpts,1) == size(scf_density_matrix_ao_beta_kpts ,1))
+     scf_density_matrix_ao_kpts = scf_density_matrix_ao_alpha_kpts + scf_density_matrix_ao_beta_kpts
+   endif
+
+END_PROVIDER
+

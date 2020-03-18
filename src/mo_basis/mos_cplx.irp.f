@@ -317,7 +317,7 @@ subroutine ao_to_mo_kpts(A_ao,LDA_ao,A_mo,LDA_mo)
 
   do k=1,kpt_num
     call zgemm('N','N', ao_num_per_kpt, mo_num_per_kpt, ao_num_per_kpt,   &
-        (1.d0,0.d0), A_ao,LDA_ao,                                      &
+        (1.d0,0.d0), A_ao(:,:,k),LDA_ao,                                      &
         mo_coef_kpts(:,:,k), size(mo_coef_kpts,1),                                      &
         (0.d0,0.d0), T, size(T,1))
     

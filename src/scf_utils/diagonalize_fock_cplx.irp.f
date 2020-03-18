@@ -94,11 +94,11 @@ BEGIN_PROVIDER [ complex*16, eigenvectors_Fock_matrix_mo_kpts, (ao_num_per_kpt,m
   
     ! Insert level shift here
     !todo: elec per kpt
-    do i = elec_beta_num_per_kpt(k)+1, elec_alpha_num_per_kpt(k)
+    do i = elec_beta_num_kpts(k)+1, elec_alpha_num_kpts(k)
       F(i,i) += 0.5d0*level_shift
     enddo
   
-    do i = elec_alpha_num_per_kpt(k)+1, mo_num_per_kpt
+    do i = elec_alpha_num_kpts(k)+1, mo_num_per_kpt
       F(i,i) += level_shift
     enddo
   
