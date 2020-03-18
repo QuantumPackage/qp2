@@ -3,7 +3,7 @@
 # Quantum Package configuration script
 #
 
-EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
+EZFIO_TGZ="EZFIO.2.0.2.tar.gz"
 
 
 
@@ -314,4 +314,5 @@ if [[ -f ${QP_ROOT}/build.ninja ]] ; then
 fi
 
 exit 0
+
 

@@ -219,22 +219,19 @@ module Perturbation : sig
 end = struct
   type t =
   | EN
-  | Barycentric
-  | Variance
+  | HF
   | SOP
   [@@deriving sexp]
 
   let to_string = function
   | EN -> \"EN\"
-  | Variance -> \"Variance\"
-  | Barycentric -> \"Barycentric\"
+  | HF -> \"HF\"
   | SOP -> \"SOP\"
   let of_string  s =
     match (String.lowercase_ascii s) with
     | \"sop\" -> SOP
     | \"en\"  -> EN
-    | \"variance\"  -> Variance
-    | \"barycentric\" -> Barycentric
+    | \"hf\"  -> HF
     | _ -> raise (Invalid_argument (\"Wrong Perturbation type : \"^s))
 end
 "

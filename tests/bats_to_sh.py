@@ -1,11 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 
 with open(sys.argv[1],'r') as f:
   raw_data = f.read()
 
-print "set -x"
+print("set -x")
 
 output = []
 inside = False
@@ -25,9 +25,9 @@ for i in raw_data:
     level -= 1
   output.append(new_i)
 
-print "".join(output).replace("@test ",
+print("".join(output).replace("@test ",
 """[[ -z $BATS_TEST_NUMBER ]] && BATS_TEST_NUMBER=0 || ((++BATS_TEST_NUMBER)) ;
-export BATS_TEST_DESCRIPTION=""").replace("skip","return")
+export BATS_TEST_DESCRIPTION=""").replace("skip","return"))
 
 
 

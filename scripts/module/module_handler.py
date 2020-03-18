@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Module utilitary
@@ -25,7 +25,7 @@ try:
     from docopt import docopt
     from qp_path import QP_SRC, QP_ROOT, QP_PLUGINS, QP_EZFIO
 except ImportError:
-    print "source .quantum_package.rc"
+    print("source .quantum_package.rc")
     raise
 
 
@@ -50,6 +50,7 @@ def get_binaries(path_module):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
+        stdout = stdout.decode()
     except OSError:
         return []
     else:
@@ -106,9 +107,9 @@ def get_l_module_descendant(d_child, l_module):
             try:
                 l.extend(get_l_module_descendant(d_child, d_child[module]))
             except KeyError:
-                print >> sys.stderr, "Error: "
-                print >> sys.stderr, "`{0}` is not a submodule".format(module)
-                print >> sys.stderr, "Check the typo (spelling, case, '/', etc.) "
+                print("Error: ", file=sys.stderr)
+                print("`{0}` is not a submodule".format(module), file=sys.stderr)
+                print("Check the typo (spelling, case, '/', etc.) ", file=sys.stderr)
                 sys.exit(1)
 
     return list(set(l))
@@ -120,7 +121,7 @@ class ModuleHandler():
 
     @property
     def l_module(self):
-        return self.dict_child.keys()
+        return list(self.dict_child.keys())
 
     @property
     def dict_parent(self):
@@ -132,7 +133,7 @@ class ModuleHandler():
         d = {}
 
         for module_name in d_child:
-            d[module_name] = [i for i in d_child.keys()
+            d[module_name] = [i for i in list(d_child.keys())
                               if module_name in d_child[i]]
 
         return d
@@ -151,8 +152,8 @@ class ModuleHandler():
                 d[module_name] = get_l_module_descendant(d_child,
                                                          d_child[module_name])
             except KeyError:
-                print "Check NEED for {0}".format(
-                    module_name)
+                print("Check NEED for {0}".format(
+                    module_name))
                 sys.exit(1)
 
         return d
@@ -185,7 +186,7 @@ class ModuleHandler():
             for e in d_desc[module]:
                 d[e] = 1
 
-        return d.keys()
+        return list(d.keys())
 
     def l_reduce_tree(self, l_module):
         """For a list of module in input return only the root"""
@@ -218,8 +219,8 @@ if __name__ == '__main__':
 
     for module in l_module:
         if not is_module(module):
-            print "{0} is not a valid module. Abort".format(module)
-            print "No NEED in it"
+            print("{0} is not a valid module. Abort".format(module))
+            print("No NEED in it")
             sys.exit(1)
 
     m = ModuleHandler()
@@ -227,7 +228,7 @@ if __name__ == '__main__':
     if arguments['print_descendant']:
 
         for module in l_module:
-            print " ".join(sorted(m.l_descendant_unique([module])))
+            print(" ".join(sorted(m.l_descendant_unique([module]))))
 
     if arguments["clean"]:
 
