@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 
-from __future__ import print_function
+
 import os
 import sys
-import ConfigParser
+import configparser
 
 from module_handler import get_binaries
 
@@ -27,7 +27,7 @@ def generate_modules(abs_module, entities):
   EZFIO = os.path.join(abs_module,'EZFIO.cfg')
   if os.path.exists(EZFIO):
     rst += ["", "EZFIO parameters", "----------------", ""]
-    config_file = ConfigParser.ConfigParser()
+    config_file = configparser.ConfigParser()
     with open(EZFIO, 'r') as f:
         config_file.readfp(f)
         for section in config_file.sections():

@@ -38,5 +38,6 @@ export LD_LIBRARY_PATH=$(qp_prepend_export "LD_LIBRARY_PATH" "${QP_ROOT}"/lib)
 export LIBRARY_PATH=$(qp_prepend_export "LIBRARY_PATH" "${QP_ROOT}"/lib:"${QP_ROOT}"/lib64)
 
 export C_INCLUDE_PATH=$(qp_prepend_export "C_INCLUDE_PATH" "${QP_ROOT}"/include)
+export CPATH=$(qp_prepend_export "CPATH" "${QP_ROOT}"/include)
 
 

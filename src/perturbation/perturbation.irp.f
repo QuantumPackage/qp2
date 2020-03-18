@@ -1,4 +1,4 @@
-BEGIN_SHELL [ /usr/bin/env python2 ]
+BEGIN_SHELL [ /usr/bin/env python3 ]
 from perturbation import perturbations
 import os
 
@@ -8,6 +8,6 @@ template = file.read()
 file.close()
 
 for p in perturbations:
-  print template.replace("$PERT",p)
+  print(template.replace("$PERT",p))
 
 END_SHELL

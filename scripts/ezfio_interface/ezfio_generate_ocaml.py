@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 This program generates all the
 OCaml templates needed by qp_edit
@@ -17,12 +17,12 @@ class EZFIO_ocaml(object):
 
     def __init__(self, **kwargs):
 
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
 
             try:
-                exec "self.{0} = {1}".format(k, v)
+                exec("self.{0} = {1}".format(k, v))
             except NameError:
-                exec "self.{0} = '{1}'".format(k, v)
+                exec("self.{0} = '{1}'".format(k, v))
 
     @property
     def Ocaml_type(self):
@@ -39,7 +39,7 @@ class EZFIO_ocaml(object):
     def check_if_init(self, l_arg, name):
         for i in l_arg:
             try:
-                exec "self.{0}".format(i)
+                exec("self.{0}".format(i))
             except AttributeError:
                 msg = "You need to provide a '{0}' for creating {1}"
                 raise KeyError(msg.format(i, name))
