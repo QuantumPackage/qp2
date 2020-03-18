@@ -771,7 +771,7 @@ subroutine apply_excitation(det, exc, res, ok, Nint)
       case default
       print *, degree
       print *, "apply ex"
-      print *,  1.d0/0.d0 ! For traceback
+!      print *,  1.d0/0.d0 ! For traceback
       STOP
   end select
   ! END INLINE
