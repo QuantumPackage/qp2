@@ -1,8 +1,8 @@
 subroutine save_mos
   implicit none
   double precision, allocatable  :: buffer(:,:)
-  complex*16, allocatable        :: buffer_c(:,:)
-  integer                        :: i,j
+  complex*16, allocatable        :: buffer_c(:,:),buffer_k(:,:,:)
+  integer                        :: i,j,k
   !TODO: change this for periodic?
   !      save real/imag parts of mo_coef_complex
   !      otherwise need to make sure mo_coef and mo_coef_imag
@@ -13,14 +13,18 @@ subroutine save_mos
   call ezfio_set_mo_basis_ao_md5(ao_md5)
   if (is_complex) then
     allocate ( buffer_c(ao_num,mo_num))
-    buffer_c = (0.d0,0.d0)
-    do j = 1, mo_num
-      do i = 1, ao_num
-        buffer_c(i,j) = mo_coef_complex(i,j)
+    allocate ( buffer_k(ao_num_per_kpt,mo_num_per_kpt,kpt_num))
+    buffer_k = (0.d0,0.d0)
+    do k=1,kpt_num
+      do j = 1, mo_num_per_kpt
+        do i = 1, ao_num_per_kpt
+          buffer_k(i,j,k) = mo_coef_kpts(i,j,k)
+        enddo
       enddo
     enddo
-    call ezfio_set_mo_basis_mo_coef_complex(buffer_c)
-    deallocate (buffer_c)
+    call ezfio_set_mo_basis_mo_coef_kpts(buffer_k)
+    deallocate (buffer_k)
+    call ezfio_set_mo_basis_mo_occ_kpts(mo_occ_kpts)
   else
     allocate ( buffer(ao_num,mo_num) )
     buffer = 0.d0
@@ -31,8 +35,8 @@ subroutine save_mos
     enddo
     call ezfio_set_mo_basis_mo_coef(buffer)
     deallocate (buffer)
+    call ezfio_set_mo_basis_mo_occ(mo_occ)
   endif
-  call ezfio_set_mo_basis_mo_occ(mo_occ)
   call ezfio_set_mo_basis_mo_class(mo_class)
 
 end

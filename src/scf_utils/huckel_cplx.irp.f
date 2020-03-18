@@ -84,7 +84,7 @@ subroutine huckel_guess_kpts
   !TOUCH fock_matrix_ao_alpha_complex fock_matrix_ao_beta_kpts
   TOUCH fock_matrix_ao_alpha_kpts fock_matrix_ao_beta_kpts
   mo_coef_kpts = eigenvectors_fock_matrix_mo_kpts
-  SOFT_TOUCH mo_coef_complex
+  SOFT_TOUCH mo_coef_kpts
   call save_mos
   deallocate(A)
 

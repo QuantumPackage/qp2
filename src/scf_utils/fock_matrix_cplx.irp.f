@@ -543,7 +543,7 @@ END_PROVIDER
  
   ao_two_e_integral_alpha_kpts = (0.d0,0.d0)
   ao_two_e_integral_beta_kpts  = (0.d0,0.d0)
-  PROVIDE ao_two_e_integrals_in_map
+  PROVIDE ao_two_e_integrals_in_map scf_density_matrix_ao_alpha_kpts scf_density_matrix_ao_beta_kpts
  
   integer(omp_lock_kind) :: lck(ao_num)
   integer(map_size_kind)     :: i8
