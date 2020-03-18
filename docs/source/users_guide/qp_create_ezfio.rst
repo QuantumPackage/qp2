@@ -34,9 +34,6 @@ Usage
    By default, the basis set is obtained from the local database of the.
    |qp| This option is mandatory                                       .
 
-   If ``<string>`` is set to ``show``, the list of all available basis
-   sets is displayed.
-
 
 .. option:: -c, --charge=<int>
 
@@ -83,8 +80,8 @@ following should be used::
 
     qp_create_ezfio -b custom.basis molecule.xyz
 
-Basis set files should be given in |GAMESS| format, where the full
-names of the atoms are given, and the basis sets for each element are
+Basis set files should be given in |GAMESS| format, without combined sp, spd, ...
+contractions. The full names of the atoms are given, and the basis sets for each element are
 separated by a blank line. Here is an example ::
 
       HYDROGEN
@@ -126,6 +123,12 @@ separated by a blank line. Here is an example ::
       1      0.0953800              1.0000000
       D   1
       1      0.3430000              1.0000000
+
+
+Files can be extracted from the Basis Set Exchange database 
+https://www.basissetexchange.org , with the ``qp_basis`` tool.
+
+
 
 
 Using custom pseudo-potentials
