@@ -290,8 +290,8 @@ END_PROVIDER
    integer                        :: i,j,k,l
    complex*16               :: mo_alpha,mo_beta
 
-   one_e_dm_ao_alpha = (0.d0,0.d0)
-   one_e_dm_ao_beta = (0.d0,0.d0)
+   one_e_dm_ao_alpha_complex = (0.d0,0.d0)
+   one_e_dm_ao_beta_complex = (0.d0,0.d0)
    do k = 1, ao_num
      do l = 1, ao_num
        do i = 1, mo_num
