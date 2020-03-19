@@ -59,7 +59,7 @@
   det_1_act(i,1) =   iand(det_1(i,1),orb_bitmask(i)) 
   det_1_act(i,2) =   iand(det_1(i,2),orb_bitmask(i)) 
  enddo
- 
+
  alpha_alpha = .False.   
  beta_beta   = .False.
  alpha_beta  = .False.
@@ -73,6 +73,7 @@
  else if(ispin == 4)then
   spin_trace  = .True.
  endif
+! call debug_det(det_1_act,N_int)
  call bitstring_to_list_ab(det_1_act, occ, n_occ_ab, N_int)
  logical :: is_integer_in_string
  integer :: i1,i2
@@ -84,7 +85,9 @@
      i2 = occ(j,2)
      h1 = list_orb_reverse(i1)
      h2 = list_orb_reverse(i2)
-     big_array(h1,h2,h1,h2,istate) += c_1(istate) 
+     ! If alpha/beta, electron 1 is alpha, electron 2 is beta
+     ! Therefore you don't necessayr have symmetry between electron 1 and 2 
+     big_array(h1,h2,h1,h2,istate) += 1.0d0 * c_1(istate) 
     enddo 
    enddo
   enddo
@@ -101,6 +104,7 @@
     enddo
    enddo
   enddo
+!  pause
  else if (beta_beta)then
   do istate = 1, N_st
    do i = 1, n_occ_ab(2)
