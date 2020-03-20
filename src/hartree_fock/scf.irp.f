@@ -102,7 +102,8 @@ subroutine run
 
   mo_label = "Orthonormalized"
   if (is_complex) then
-    call roothaan_hall_scf_complex
+    !call roothaan_hall_scf_complex
+    call roothaan_hall_scf_kpts
   else
     call roothaan_hall_scf
   endif

@@ -593,14 +593,14 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/kpt_num +1
-          kpt_j = (j-1)/kpt_num +1
-          kpt_k = (k-1)/kpt_num +1
-          kpt_l = (l-1)/kpt_num +1
-          idx_i = mod(i,kpt_num)
-          idx_j = mod(j,kpt_num)
-          idx_k = mod(k,kpt_num)
-          idx_l = mod(l,kpt_num)
+          kpt_i = (i-1)/ao_num_per_kpt +1
+          kpt_j = (j-1)/ao_num_per_kpt +1
+          kpt_k = (k-1)/ao_num_per_kpt +1
+          kpt_l = (l-1)/ao_num_per_kpt +1
+          idx_i = mod(i-1,ao_num_per_kpt)+1
+          idx_j = mod(j-1,ao_num_per_kpt)+1
+          idx_k = mod(k-1,ao_num_per_kpt)+1
+          idx_l = mod(l-1,ao_num_per_kpt)+1
           integral = i_sign(k2)*values(k1) !for klij and lkji, take complex conjugate
 
           !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
@@ -611,7 +611,7 @@ END_PROVIDER
           if (kpt_l.eq.kpt_j) then
             c0 = (scf_density_matrix_ao_alpha_kpts(idx_l,idx_j,kpt_j)+scf_density_matrix_ao_beta_kpts(idx_l,idx_j,kpt_j))*integral
             if(kpt_i.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_k,kpt_i) += c0
@@ -620,7 +620,7 @@ END_PROVIDER
 
           if (kpt_l.eq.kpt_i) then
             if(kpt_j.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_l,kpt_i) -= SCF_density_matrix_ao_alpha_kpts(idx_k,idx_j,kpt_j) * integral
@@ -636,20 +636,20 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/kpt_num +1
-          kpt_j = (j-1)/kpt_num +1
-          kpt_k = (k-1)/kpt_num +1
-          kpt_l = (l-1)/kpt_num +1
-          idx_i = mod(i,kpt_num)
-          idx_j = mod(j,kpt_num)
-          idx_k = mod(k,kpt_num)
-          idx_l = mod(l,kpt_num)
+          kpt_i = (i-1)/ao_num_per_kpt +1
+          kpt_j = (j-1)/ao_num_per_kpt +1
+          kpt_k = (k-1)/ao_num_per_kpt +1
+          kpt_l = (l-1)/ao_num_per_kpt +1
+          idx_i = mod(i-1,ao_num_per_kpt)+1
+          idx_j = mod(j-1,ao_num_per_kpt)+1
+          idx_k = mod(k-1,ao_num_per_kpt)+1
+          idx_l = mod(l-1,ao_num_per_kpt)+1
           integral = values(k1)
 
           if (kpt_l.eq.kpt_j) then
             c0 = (scf_density_matrix_ao_alpha_kpts(idx_l,idx_j,kpt_j)+scf_density_matrix_ao_beta_kpts(idx_l,idx_j,kpt_j))*integral
             if(kpt_i.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_k,kpt_i) += c0
@@ -658,7 +658,7 @@ END_PROVIDER
 
           if (kpt_l.eq.kpt_i) then
             if(kpt_j.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_l,kpt_i) -= SCF_density_matrix_ao_alpha_kpts(idx_k,idx_j,kpt_j) * integral
@@ -714,14 +714,14 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/kpt_num +1
-          kpt_j = (j-1)/kpt_num +1
-          kpt_k = (k-1)/kpt_num +1
-          kpt_l = (l-1)/kpt_num +1
-          idx_i = mod(i,kpt_num)
-          idx_j = mod(j,kpt_num)
-          idx_k = mod(k,kpt_num)
-          idx_l = mod(l,kpt_num)
+          kpt_i = (i-1)/ao_num_per_kpt +1
+          kpt_j = (j-1)/ao_num_per_kpt +1
+          kpt_k = (k-1)/ao_num_per_kpt +1
+          kpt_l = (l-1)/ao_num_per_kpt +1
+          idx_i = mod(i-1,ao_num_per_kpt)+1
+          idx_j = mod(j-1,ao_num_per_kpt)+1
+          idx_k = mod(k-1,ao_num_per_kpt)+1
+          idx_l = mod(l-1,ao_num_per_kpt)+1
           integral = i_sign(k2)*values(k1) ! for klij and lkji, take conjugate
 
           !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
@@ -732,7 +732,7 @@ END_PROVIDER
           if (kpt_l.eq.kpt_j) then
             c0 = (scf_density_matrix_ao_alpha_kpts(idx_l,idx_j,kpt_j)+scf_density_matrix_ao_beta_kpts(idx_l,idx_j,kpt_j))*integral
             if(kpt_i.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_k,kpt_i) += c0
@@ -741,7 +741,7 @@ END_PROVIDER
 
           if (kpt_l.eq.kpt_i) then
             if(kpt_j.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_l,kpt_i) -= SCF_density_matrix_ao_alpha_kpts(idx_k,idx_j,kpt_j) * integral
@@ -757,20 +757,20 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/kpt_num +1
-          kpt_j = (j-1)/kpt_num +1
-          kpt_k = (k-1)/kpt_num +1
-          kpt_l = (l-1)/kpt_num +1
-          idx_i = mod(i,kpt_num)
-          idx_j = mod(j,kpt_num)
-          idx_k = mod(k,kpt_num)
-          idx_l = mod(l,kpt_num)
+          kpt_i = (i-1)/ao_num_per_kpt +1
+          kpt_j = (j-1)/ao_num_per_kpt +1
+          kpt_k = (k-1)/ao_num_per_kpt +1
+          kpt_l = (l-1)/ao_num_per_kpt +1
+          idx_i = mod(i-1,ao_num_per_kpt)+1
+          idx_j = mod(j-1,ao_num_per_kpt)+1
+          idx_k = mod(k-1,ao_num_per_kpt)+1
+          idx_l = mod(l-1,ao_num_per_kpt)+1
           integral = values(k1)
 
           if (kpt_l.eq.kpt_j) then
             c0 = (scf_density_matrix_ao_alpha_kpts(idx_l,idx_j,kpt_j)+scf_density_matrix_ao_beta_kpts(idx_l,idx_j,kpt_j))*integral
             if(kpt_i.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_k,kpt_i) += c0
@@ -779,7 +779,7 @@ END_PROVIDER
 
           if (kpt_l.eq.kpt_i) then
             if(kpt_j.ne.kpt_k) then
-              print*,'problem in ',irp_here
+              print*,'problem in ',irp_here,' ikjl: ',kpt_i,kpt_k,kpt_j,kpt_l
               stop 1
             endif
             ao_two_e_integral_alpha_tmp(idx_i,idx_l,kpt_i) -= SCF_density_matrix_ao_alpha_kpts(idx_k,idx_j,kpt_j) * integral

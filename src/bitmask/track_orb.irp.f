@@ -16,6 +16,15 @@ BEGIN_PROVIDER [ complex*16, mo_coef_begin_iteration_complex, (ao_num,mo_num) ]
    END_DOC
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, mo_coef_begin_iteration_kpts, (ao_num_per_kpt,mo_num_per_kpt,kpt_num) ]
+   implicit none
+   BEGIN_DOC
+   ! Void provider to store the coefficients of the |MO| basis at the beginning of the SCF iteration
+   !
+   ! Useful to track some orbitals
+   END_DOC
+END_PROVIDER
+
 subroutine initialize_mo_coef_begin_iteration
  implicit none
  BEGIN_DOC
@@ -23,7 +32,8 @@ subroutine initialize_mo_coef_begin_iteration
  ! Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
  END_DOC
  if (is_complex) then
-   mo_coef_begin_iteration_complex = mo_coef_complex
+   !mo_coef_begin_iteration_complex = mo_coef_complex
+   mo_coef_begin_iteration_kpts = mo_coef_kpts
  else
    mo_coef_begin_iteration = mo_coef
  endif
@@ -42,37 +52,71 @@ subroutine reorder_core_orb
   integer :: i1,i2
   if (is_complex) then
     complex*16, allocatable :: accu_c(:)
-    allocate(accu(mo_num),accu_c(mo_num),index_core_orb(n_core_orb),iorder(mo_num))
-    do i = 1, n_core_orb
-      iorb = list_core(i)
-      do j = 1, mo_num
-        accu(j) = 0.d0
-        accu_c(j) = (0.d0,0.d0)
-        iorder(j) = j
-        do k = 1, ao_num
-          do l = 1, ao_num
-            accu_c(j) += dconjg(mo_coef_begin_iteration_complex(k,iorb)) * &
-                         mo_coef_complex(l,j) * ao_overlap_complex(k,l)
-          enddo
-        enddo
-        accu(j) = -cdabs(accu_c(j))
-      enddo
-      call dsort(accu,iorder,mo_num)
-      index_core_orb(i) = iorder(1)
-    enddo
+    !allocate(accu(mo_num),accu_c(mo_num),index_core_orb(n_core_orb),iorder(mo_num))
+    !do i = 1, n_core_orb
+    !  iorb = list_core(i)
+    !  do j = 1, mo_num
+    !    accu(j) = 0.d0
+    !    accu_c(j) = (0.d0,0.d0)
+    !    iorder(j) = j
+    !    do k = 1, ao_num
+    !      do l = 1, ao_num
+    !        accu_c(j) += dconjg(mo_coef_begin_iteration_complex(k,iorb)) * &
+    !                     mo_coef_complex(l,j) * ao_overlap_complex(k,l)
+    !      enddo
+    !    enddo
+    !    accu(j) = -cdabs(accu_c(j))
+    !  enddo
+    !  call dsort(accu,iorder,mo_num)
+    !  index_core_orb(i) = iorder(1)
+    !enddo
 
-    complex*16 :: x_c
-    do j = 1, n_core_orb
-      i1 = list_core(j)
-      i2 = index_core_orb(j)
-      do i=1,ao_num
-         x_c = mo_coef_complex(i,i1)
-         mo_coef_complex(i,i1) = mo_coef_complex(i,i2)
-         mo_coef_complex(i,i2) = x_c
-      enddo
-    enddo
-    !call loc_cele_routine
+    !complex*16 :: x_c
+    !do j = 1, n_core_orb
+    !  i1 = list_core(j)
+    !  i2 = index_core_orb(j)
+    !  do i=1,ao_num
+    !     x_c = mo_coef_complex(i,i1)
+    !     mo_coef_complex(i,i1) = mo_coef_complex(i,i2)
+    !     mo_coef_complex(i,i2) = x_c
+    !  enddo
+    !enddo
+    !!call loc_cele_routine
    
+    !deallocate(accu,accu_c,index_core_orb, iorder)
+    allocate(accu(mo_num_per_kpt),accu_c(mo_num_per_kpt),index_core_orb(n_core_orb),iorder(mo_num_per_kpt))
+    integer :: kk
+    do kk=1,kpt_num
+      do i = 1, n_core_orb_kpts(kk)
+        iorb = list_core_kpts(i,kk)
+        do j = 1, mo_num_per_kpt
+          accu(j) = 0.d0
+          accu_c(j) = (0.d0,0.d0)
+          iorder(j) = j
+          do k = 1, ao_num_per_kpt
+            do l = 1, ao_num_per_kpt
+              accu_c(j) += dconjg(mo_coef_begin_iteration_kpts(k,iorb,kk)) * &
+                           mo_coef_kpts(l,j,kk) * ao_overlap_kpts(k,l,kk)
+            enddo
+          enddo
+          accu(j) = -cdabs(accu_c(j))
+        enddo
+        call dsort(accu,iorder,mo_num_per_kpt)
+        index_core_orb(i) = iorder(1)
+      enddo
+
+      complex*16 :: x_c
+      do j = 1, n_core_orb
+        i1 = list_core_kpts(j,kk)
+        i2 = index_core_orb(j)
+        do i=1,ao_num_per_kpt
+           x_c = mo_coef_kpts(i,i1,kk)
+           mo_coef_kpts(i,i1,kk) = mo_coef_kpts(i,i2,kk)
+           mo_coef_kpts(i,i2,kk) = x_c
+        enddo
+      enddo
+      !call loc_cele_routine
+    enddo
     deallocate(accu,accu_c,index_core_orb, iorder)
   else
     allocate(accu(mo_num),index_core_orb(n_core_orb),iorder(mo_num))

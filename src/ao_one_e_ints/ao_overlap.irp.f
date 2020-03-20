@@ -209,6 +209,18 @@ BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
     size(ao_overlap_complex,1),ao_num,ao_num,S_inv_complex,size(S_inv_complex,1))
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, S_inv_kpts,(ao_num_per_kpt,ao_num_per_kpt,kpt_num) ]
+ implicit none
+ BEGIN_DOC
+! Inverse of the overlap matrix
+ END_DOC
+ integer :: k
+ do k=1,kpt_num
+  call get_pseudo_inverse_complex(ao_overlap_kpts(1,1,k), &
+     size(ao_overlap_kpts,1),ao_num_per_kpt,ao_num_per_kpt,S_inv_kpts(1,1,k),size(S_inv_kpts,1))
+ enddo
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]
 
   BEGIN_DOC
@@ -326,6 +338,66 @@ BEGIN_PROVIDER [ complex*16, S_half_inv_complex, (AO_num,AO_num) ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ complex*16, S_half_inv_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num) ]
+
+  BEGIN_DOC
+!   :math:`X = S^{-1/2}` obtained by SVD
+  END_DOC
+
+  implicit none
+
+  integer                         :: num_linear_dependencies
+  integer                         :: LDA, LDC
+  double precision, allocatable   :: D(:)
+  complex*16, allocatable   :: U(:,:),Vt(:,:)
+  integer                         :: info, i, j, k,kk
+  double precision, parameter     :: threshold_overlap_AO_eigenvalues = 1.d-6
+
+  LDA = size(ao_overlap_kpts,1)
+  LDC = size(s_half_inv_kpts,1)
+
+  allocate(         &
+    U(LDC,ao_num_per_kpt),  &
+    Vt(LDA,ao_num_per_kpt), &
+    D(ao_num_per_kpt))
+  
+  do kk=1,kpt_num
+    call svd_complex(    &
+         ao_overlap_kpts(1,1,kk),LDA, &
+         U,LDC,          &
+         D,              &
+         Vt,LDA,         &
+         ao_num_per_kpt,ao_num_per_kpt)
+  
+    num_linear_dependencies = 0
+    do i=1,ao_num_per_kpt
+      print*,D(i)
+      if(abs(D(i)) <= threshold_overlap_AO_eigenvalues) then
+        D(i) = 0.d0
+        num_linear_dependencies += 1
+      else
+        ASSERT (D(i) > 0.d0)
+        D(i) = 1.d0/sqrt(D(i))
+      endif
+      do j=1,ao_num_per_kpt
+        S_half_inv_kpts(j,i,kk) = 0.d0
+      enddo
+    enddo
+    write(*,*) 'linear dependencies, k: ',num_linear_dependencies,', ',kk 
+  
+    do k=1,ao_num_per_kpt
+      if(D(k) /= 0.d0) then
+        do j=1,ao_num_per_kpt
+          do i=1,ao_num_per_kpt
+            S_half_inv_kpts(i,j,kk) = S_half_inv_kpts(i,j,kk) + U(i,k)*D(k)*Vt(k,j)
+          enddo
+        enddo
+      endif
+    enddo
+  enddo
+
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, S_half, (ao_num,ao_num)  ]
  implicit none
@@ -389,6 +461,42 @@ BEGIN_PROVIDER [ complex*16, S_half_complex, (ao_num,ao_num)  ]
           S_half_complex(i,j) = S_half_complex(i,j) + U(i,k)*D(k)*Vt(k,j)
         enddo
       enddo
+  enddo
+
+  deallocate(U,Vt,D)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, S_half_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num)  ]
+ implicit none
+ BEGIN_DOC
+ ! :math:`S^{1/2}`
+ END_DOC
+
+  integer :: i,j,k,kk
+  complex*16, allocatable  :: U(:,:)
+  complex*16, allocatable  :: Vt(:,:)
+  double precision, allocatable  :: D(:)
+
+  allocate(U(ao_num_per_kpt,ao_num_per_kpt),Vt(ao_num_per_kpt,ao_num_per_kpt),D(ao_num_per_kpt))
+
+  do kk=1,kpt_num
+    call svd_complex(ao_overlap_kpts(1,1,k),size(ao_overlap_kpts,1),U,size(U,1),D,Vt,size(Vt,1),ao_num_per_kpt,ao_num_per_kpt)
+  
+    do i=1,ao_num_per_kpt
+      D(i) = dsqrt(D(i))
+      do j=1,ao_num_per_kpt
+        S_half_kpts(j,i,kk) = (0.d0,0.d0)
+      enddo
+    enddo
+  
+    do k=1,ao_num_per_kpt
+        do j=1,ao_num_per_kpt
+          do i=1,ao_num_per_kpt
+            S_half_kpts(i,j,kk) = S_half_kpts(i,j,kk) + U(i,k)*D(k)*Vt(k,j)
+          enddo
+        enddo
+    enddo
   enddo
 
   deallocate(U,Vt,D)

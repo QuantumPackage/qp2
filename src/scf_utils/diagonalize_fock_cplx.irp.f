@@ -72,8 +72,8 @@ BEGIN_PROVIDER [ complex*16, eigenvectors_Fock_matrix_mo_kpts, (ao_num_per_kpt,m
   allocate (diag(mo_num_per_kpt) )
 
   do k=1,kpt_num 
-    do j=1,mo_num
-      do i=1,mo_num
+    do j=1,mo_num_per_kpt
+      do i=1,mo_num_per_kpt
         !F(i,j) = fock_matrix_mo_complex(i,j)
         F(i,j) = fock_matrix_mo_kpts(i,j,k)
       enddo

@@ -157,15 +157,17 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  END_DOC
  SCF_energy = nuclear_repulsion
 
- integer                        :: i,j
+ integer                        :: i,j,k
  if (is_complex) then
    complex*16 :: scf_e_tmp
    scf_e_tmp = dcmplx(SCF_energy,0.d0)
-   do j=1,ao_num
-     do i=1,ao_num
-       scf_e_tmp += 0.5d0 * (                                          &
-           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_alpha_complex(i,j) ) *  SCF_density_matrix_ao_alpha_complex(j,i) +&
-           (ao_one_e_integrals_complex(i,j) + Fock_matrix_ao_beta_complex (i,j) ) *  SCF_density_matrix_ao_beta_complex (j,i) )
+   do k=1,kpt_num
+     do j=1,ao_num_per_kpt
+       do i=1,ao_num_per_kpt
+         scf_e_tmp += 0.5d0 * (                                          &
+             (ao_one_e_integrals_kpts(i,j,k) + Fock_matrix_ao_alpha_kpts(i,j,k) ) *  SCF_density_matrix_ao_alpha_kpts(j,i,k) +&
+             (ao_one_e_integrals_kpts(i,j,k) + Fock_matrix_ao_beta_kpts (i,j,k) ) *  SCF_density_matrix_ao_beta_kpts (j,i,k) )
+       enddo
      enddo
    enddo
    !TODO: add check for imaginary part? (should be zero)

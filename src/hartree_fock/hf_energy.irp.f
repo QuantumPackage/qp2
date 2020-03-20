@@ -18,7 +18,7 @@ END_PROVIDER
  BEGIN_DOC
  ! Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
  END_DOC
- integer :: i,j
+ integer :: i,j,k
  hf_energy = nuclear_repulsion
  hf_two_electron_energy = 0.d0
  hf_one_electron_energy = 0.d0
@@ -26,12 +26,14 @@ END_PROVIDER
     complex*16 :: hf_1e_tmp, hf_2e_tmp
     hf_1e_tmp = (0.d0,0.d0)
     hf_2e_tmp = (0.d0,0.d0)
-    do j=1,ao_num
-      do i=1,ao_num
-        hf_2e_tmp += 0.5d0 * ( ao_two_e_integral_alpha_complex(i,j) * scf_density_matrix_ao_alpha_complex(j,i) &
-                              +ao_two_e_integral_beta_complex(i,j)  * scf_density_matrix_ao_beta_complex(j,i) )
-        hf_1e_tmp += ao_one_e_integrals_complex(i,j) * (scf_density_matrix_ao_alpha_complex(j,i) &
-                                                      + scf_density_matrix_ao_beta_complex (j,i) )
+    do k=1,kpt_num
+      do j=1,ao_num_per_kpt
+        do i=1,ao_num_per_kpt
+          hf_2e_tmp += 0.5d0 * ( ao_two_e_integral_alpha_kpts(i,j,k) * scf_density_matrix_ao_alpha_kpts(j,i,k) &
+                                +ao_two_e_integral_beta_kpts(i,j,k)  * scf_density_matrix_ao_beta_kpts(j,i,k) )
+          hf_1e_tmp += ao_one_e_integrals_kpts(i,j,k) * (scf_density_matrix_ao_alpha_kpts(j,i,k) &
+                                                        + scf_density_matrix_ao_beta_kpts (j,i,k) )
+        enddo
       enddo
     enddo
     if (dabs(dimag(hf_2e_tmp)).gt.1.d-10) then
