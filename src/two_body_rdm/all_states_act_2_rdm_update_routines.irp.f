@@ -73,7 +73,6 @@
  else if(ispin == 4)then
   spin_trace  = .True.
  endif
-! call debug_det(det_1_act,N_int)
  call bitstring_to_list_ab(det_1_act, occ, n_occ_ab, N_int)
  logical :: is_integer_in_string
  integer :: i1,i2

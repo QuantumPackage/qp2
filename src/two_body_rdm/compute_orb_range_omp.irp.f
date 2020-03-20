@@ -57,6 +57,8 @@
     i2 = occ(j,2)
     h1 = list_orb_reverse(i1)
     h2 = list_orb_reverse(i2)
+     ! If alpha/beta, electron 1 is alpha, electron 2 is beta
+     ! Therefore you don't necessayr have symmetry between electron 1 and 2 
     nkeys += 1
     values(nkeys) = c_1 
     keys(1,nkeys) = h1
@@ -255,7 +257,7 @@
  endif
  end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -281,6 +283,7 @@
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
  integer, intent(in) :: list_orb_reverse(mo_num)
+ integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
  double precision, intent(in)   :: c_1
  double precision, intent(out)  :: values(sze_buff)
  integer         , intent(out)  :: keys(4,sze_buff)
@@ -314,14 +317,14 @@
    if (exc(0,1,1) == 1) then
     ! Mono alpha
     h1 = exc(1,1,1)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 = exc(1,2,1)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
      do i = 1, n_occ_ab(2)
       h2 = occ(i,2)
-      if(list_orb_reverse(h2).lt.0)return
+      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
       h2 = list_orb_reverse(h2)
       nkeys += 1
       values(nkeys) = c_1 * phase
@@ -333,14 +336,14 @@
    else 
     ! Mono beta
     h1 = exc(1,1,2)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 = exc(1,2,2)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
      do i = 1, n_occ_ab(1)
       h2 = occ(i,1)
-      if(list_orb_reverse(h2).lt.0)return
+      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
       h2 = list_orb_reverse(h2)
       nkeys += 1
       values(nkeys) = c_1 * phase
@@ -354,14 +357,14 @@
    if (exc(0,1,1) == 1) then
     ! Mono alpha
     h1 = exc(1,1,1)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 = exc(1,2,1)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
      do i = 1, n_occ_ab(2)
       h2 = occ(i,2)
-      if(list_orb_reverse(h2).lt.0)return
+      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
       h2 = list_orb_reverse(h2)
       nkeys += 1
       values(nkeys) = 0.5d0 * c_1 * phase
@@ -379,19 +382,15 @@
    else 
     ! Mono beta
     h1 = exc(1,1,2)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 = exc(1,2,2)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
-   !print*,'****************'
-   !print*,'****************'
-   !print*,'h1,p1',h1,p1
      do i = 1, n_occ_ab(1)
       h2 = occ(i,1)
-      if(list_orb_reverse(h2).lt.0)return
+      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
       h2 = list_orb_reverse(h2)
-   !  print*,'h2 = ',h2
       nkeys += 1
       values(nkeys) = 0.5d0 * c_1 * phase
       keys(1,nkeys) = h1
@@ -409,7 +408,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
  !
@@ -435,6 +434,7 @@
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
  integer, intent(in) :: list_orb_reverse(mo_num)
+ integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
  double precision, intent(in)   :: c_1
  double precision, intent(out)  :: values(sze_buff)
  integer         , intent(out)  :: keys(4,sze_buff)
@@ -468,14 +468,14 @@
    if (exc(0,1,1) == 1) then
     ! Mono alpha
     h1 = exc(1,1,1)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 = exc(1,2,1)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
      do i = 1, n_occ_ab(1)
       h2 = occ(i,1)
-      if(list_orb_reverse(h2).lt.0)return
+      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
       h2 = list_orb_reverse(h2)
 
       nkeys += 1
@@ -512,7 +512,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -538,6 +538,7 @@
  integer, intent(in) :: ispin,sze_buff
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
  integer, intent(in) :: list_orb_reverse(mo_num)
+ integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
  double precision, intent(in)   :: c_1
  double precision, intent(out)  :: values(sze_buff)
  integer         , intent(out)  :: keys(4,sze_buff)
@@ -573,14 +574,14 @@
    else
     ! Mono beta
     h1 =  exc(1,1,2)
-    if(list_orb_reverse(h1).lt.0)return
+    if(.not.is_integer_in_string(h1,orb_bitmask,N_int))return
     h1 = list_orb_reverse(h1)
     p1 =  exc(1,2,2)
-    if(list_orb_reverse(p1).lt.0)return
+    if(.not.is_integer_in_string(p1,orb_bitmask,N_int))return
     p1 = list_orb_reverse(p1)
     do i = 1, n_occ_ab(2)
      h2 = occ(i,2)
-     if(list_orb_reverse(h2).lt.0)return
+     if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
      h2 = list_orb_reverse(h2)
      nkeys += 1
      values(nkeys) = 0.5d0 * c_1 * phase

@@ -271,6 +271,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           endif
          endif
          call orb_range_off_diag_double_to_two_rdm_ab_dm_buffer(tmp_det,tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+!         print*,'todo orb_range_off_diag_double_to_two_rdm_ab_dm_buffer'
      
        enddo
       endif
@@ -352,13 +353,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
          call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
          nkeys = 0
        endif
-       call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+       call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        ! increment the alpha/alpha part for single excitations
        if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
          call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
          nkeys = 0
        endif
-       call orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(tmp_det,tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+       call orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(tmp_det,tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
        
      enddo
@@ -456,13 +457,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
         ! increment the beta /beta  part for single excitations
         if (nkeys+4 * elec_alpha_num .ge. sze_buff) then
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
      enddo
      
@@ -489,6 +490,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           nkeys = 0
         endif
         call orb_range_off_diag_double_to_two_rdm_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+!         print*,'to do orb_range_off_diag_double_to_two_rdm_bb_dm_buffer'
         ASSERT (l_a <= N_det)
         
       enddo
