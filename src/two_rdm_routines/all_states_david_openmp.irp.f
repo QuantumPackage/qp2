@@ -459,8 +459,7 @@ subroutine orb_range_two_rdm_all_states_openmp_openmp_work_$N_int(big_array,dim1
           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
           nkeys = 0
         endif
-!        call orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!        print*,'to do orb_range_off_diag_single_to_two_rdm_bb_dm_buffer'
+        call orb_range_off_diag_single_to_all_states_bb_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
      enddo
      call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
@@ -485,7 +484,7 @@ subroutine orb_range_two_rdm_all_states_openmp_openmp_work_$N_int(big_array,dim1
           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
           nkeys = 0
         endif
-!        call orb_range_off_diag_double_to_two_rdm_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_double_to_all_states_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
 !        print*,'to do orb_range_off_diag_double_to_two_rdm_bb_dm_buffer'
         ASSERT (l_a <= N_det)
         

@@ -562,7 +562,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_all_states_bb_dm_buffer(det_1,det_2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -585,18 +585,18 @@
  ! here, only ispin == 2 or 4 will do something
   END_DOC
   implicit none
- integer, intent(in) :: ispin,sze_buff
+ integer, intent(in) :: ispin,sze_buff,N_st
  integer(bit_kind), intent(in)  :: det_1(N_int,2),det_2(N_int,2)
  integer, intent(in) :: list_orb_reverse(mo_num)
  integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
- double precision, intent(in)   :: c_1
- double precision, intent(out)  :: values(sze_buff)
+ double precision, intent(in)   :: c_1(N_st)
+ double precision, intent(out)  :: values(N_st,sze_buff)
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  
   integer                        :: occ(N_int*bit_kind_size,2)
   integer                        :: n_occ_ab(2)
-  integer :: i,j,h1,h2,p1
+  integer :: i,j,h1,h2,p1,istate
   integer                        :: exc(0:2,2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -634,28 +634,36 @@
      if(.not.is_integer_in_string(h2,orb_bitmask,N_int))cycle
      h2 = list_orb_reverse(h2)
      nkeys += 1
-     values(nkeys) = 0.5d0 * c_1 * phase
+     do istate = 1, N_st
+      values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+     enddo
      keys(1,nkeys) = h1
      keys(2,nkeys) = h2
      keys(3,nkeys) = p1
      keys(4,nkeys) = h2
 
      nkeys += 1
-     values(nkeys) = - 0.5d0 * c_1 * phase
+     do istate = 1, N_st
+      values(istate,nkeys) = - 0.5d0 * c_1(istate) * phase
+     enddo
      keys(1,nkeys) = h1
      keys(2,nkeys) = h2
      keys(3,nkeys) = h2
      keys(4,nkeys) = p1
   
      nkeys += 1
-     values(nkeys) = 0.5d0 * c_1 * phase
+     do istate = 1, N_st
+      values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+     enddo
      keys(1,nkeys) = h2
      keys(2,nkeys) = h1
      keys(3,nkeys) = h2
      keys(4,nkeys) = p1
 
      nkeys += 1
-     values(nkeys) = - 0.5d0 * c_1 * phase
+     do istate = 1, N_st
+      values(istate,nkeys) = - 0.5d0 * c_1(istate) * phase
+     enddo
      keys(1,nkeys) = h2
      keys(2,nkeys) = h1
      keys(3,nkeys) = p1
@@ -770,7 +778,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_double_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_double_to_all_states_bb_dm_buffer(det_1,det_2,c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -794,15 +802,15 @@
   END_DOC
   implicit none
  
- integer, intent(in) :: ispin,sze_buff
+ integer, intent(in) :: ispin,sze_buff,N_st
  integer(bit_kind), intent(in)  :: det_1(N_int),det_2(N_int)
  integer, intent(in) :: list_orb_reverse(mo_num)
- double precision, intent(in)   :: c_1
- double precision, intent(out)  :: values(sze_buff)
+ double precision, intent(in)   :: c_1(N_st)
+ double precision, intent(out)  :: values(N_st,sze_buff)
  integer         , intent(out)  :: keys(4,sze_buff)
  integer         , intent(inout):: nkeys
  
-  integer :: i,j,h1,h2,p1,p2
+  integer :: i,j,h1,h2,p1,p2,istate
   integer                        :: exc(0:2,2)
   double precision               :: phase
   logical                        :: alpha_alpha,beta_beta,alpha_beta,spin_trace
@@ -836,28 +844,36 @@
   p2 = list_orb_reverse(p2)
   if(beta_beta.or.spin_trace)then
     nkeys += 1
-    values(nkeys) = 0.5d0 * c_1 * phase
+    do istate = 1, N_st
+     values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h1
     keys(2,nkeys) = h2
     keys(3,nkeys) = p1
     keys(4,nkeys) = p2
 
     nkeys += 1
-    values(nkeys) = - 0.5d0 * c_1 * phase
+    do istate = 1, N_st
+     values(istate,nkeys) = - 0.5d0 * c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h1
     keys(2,nkeys) = h2
     keys(3,nkeys) = p2
     keys(4,nkeys) = p1
                                           
     nkeys += 1
-    values(nkeys) = 0.5d0 * c_1 * phase
+    do istate = 1, N_st
+     values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h2
     keys(2,nkeys) = h1
     keys(3,nkeys) = p2
     keys(4,nkeys) = p1
 
     nkeys += 1
-    values(nkeys) = - 0.5d0 * c_1 * phase
+    do istate = 1, N_st
+     values(istate,nkeys) = - 0.5d0 * c_1(istate) * phase
+    enddo
     keys(1,nkeys) = h2
     keys(2,nkeys) = h1
     keys(3,nkeys) = p1
