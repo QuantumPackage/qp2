@@ -42,10 +42,10 @@ subroutine routine_active_only
 
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-       rdmab_omp  = state_av_act_two_rdm_openmp_alpha_beta_mo(l,k,j,i)
-       rdmbb_omp  = state_av_act_two_rdm_openmp_beta_beta_mo(l,k,j,i)
-       rdmaa_omp  = state_av_act_two_rdm_openmp_alpha_alpha_mo(l,k,j,i)
-       rdmtot_omp = state_av_act_two_rdm_openmp_spin_trace_mo(l,k,j,i)
+       rdmab_omp  = state_av_act_two_rdm_alpha_beta_mo(l,k,j,i)
+       rdmbb_omp  = state_av_act_two_rdm_beta_beta_mo(l,k,j,i)
+       rdmaa_omp  = state_av_act_two_rdm_alpha_alpha_mo(l,k,j,i)
+       rdmtot_omp = state_av_act_two_rdm_spin_trace_mo(l,k,j,i)
 
        rdmaa      =  all_states_act_two_rdm_alpha_alpha_mo(l,k,j,i,istate)
        rdmbb      =  all_states_act_two_rdm_beta_beta_mo(l,k,j,i,istate)
