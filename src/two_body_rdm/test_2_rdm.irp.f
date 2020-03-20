@@ -19,9 +19,11 @@ subroutine routine_active_only
  double precision :: accu_ab_omp,rdmab_omp
  double precision :: accu_bb_omp,rdmbb_omp
  double precision :: accu_aa_omp,rdmaa_omp
+ double precision :: accu_tot_omp,rdmtot_omp
  accu_ab_omp = 0.d0
  accu_bb_omp = 0.d0
  accu_aa_omp = 0.d0
+ accu_tot_omp = 0.d0
  accu_aa = 0.d0
  accu_ab = 0.d0
  accu_bb = 0.d0
@@ -40,21 +42,25 @@ subroutine routine_active_only
 
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-       rdmab_omp = state_av_act_two_rdm_openmp_alpha_beta_mo(l,k,j,i)
-       rdmbb_omp = state_av_act_two_rdm_openmp_beta_beta_mo(l,k,j,i)
-       rdmaa_omp = state_av_act_two_rdm_openmp_alpha_alpha_mo(l,k,j,i)
-       rdmaa  =  all_states_act_two_rdm_alpha_alpha_mo(l,k,j,i,istate)
-       rdmbb  =  all_states_act_two_rdm_beta_beta_mo(l,k,j,i,istate)
-       rdmab  =  all_states_act_two_rdm_alpha_beta_mo(l,k,j,i,istate)
-       rdmtot =  all_states_act_two_rdm_spin_trace_mo(l,k,j,i,istate)
+       rdmab_omp  = state_av_act_two_rdm_openmp_alpha_beta_mo(l,k,j,i)
+       rdmbb_omp  = state_av_act_two_rdm_openmp_beta_beta_mo(l,k,j,i)
+       rdmaa_omp  = state_av_act_two_rdm_openmp_alpha_alpha_mo(l,k,j,i)
+       rdmtot_omp = state_av_act_two_rdm_openmp_spin_trace_mo(l,k,j,i)
 
-       accu_ab_omp     += vijkl * rdmab_omp
-       accu_bb_omp     += vijkl * rdmbb_omp
-       accu_aa_omp     += vijkl * rdmaa_omp
-       accu_ab(istate) += vijkl * rdmab
-       accu_aa(istate) += vijkl * rdmaa
-       accu_bb(istate) += vijkl * rdmbb
-       accu_tot(istate)+= vijkl * rdmtot
+       rdmaa      =  all_states_act_two_rdm_alpha_alpha_mo(l,k,j,i,istate)
+       rdmbb      =  all_states_act_two_rdm_beta_beta_mo(l,k,j,i,istate)
+       rdmab      =  all_states_act_two_rdm_alpha_beta_mo(l,k,j,i,istate)
+       rdmtot     =  all_states_act_two_rdm_spin_trace_mo(l,k,j,i,istate)
+
+       accu_ab_omp      += vijkl * rdmab_omp
+       accu_bb_omp      += vijkl * rdmbb_omp
+       accu_aa_omp      += vijkl * rdmaa_omp
+       accu_tot_omp     += vijkl * rdmtot_omp
+
+       accu_ab(istate)  += vijkl * rdmab
+       accu_aa(istate)  += vijkl * rdmaa
+       accu_bb(istate)  += vijkl * rdmbb
+       accu_tot(istate) += vijkl * rdmtot
       enddo
      enddo
     enddo
@@ -70,6 +76,7 @@ subroutine routine_active_only
    print*,''
    print*,'sum    (istate)             = ',accu_aa(istate) + accu_bb(istate) + accu_ab(istate)
    print*,'accu_tot(istate)            = ',accu_tot(istate)
+   print*,'accu_tot_omp                = ',accu_tot_omp
    print*,'psi_energy_two_e(istate)    = ',psi_energy_two_e(istate)
   enddo
 

@@ -12,7 +12,11 @@
  ! condition for alpha/beta spin
  ispin = 1 
  state_av_act_two_rdm_openmp_alpha_alpha_mo = 0.D0
+ call wall_time(wall_1)
+ double precision :: wall_1, wall_2
  call orb_range_two_rdm_state_av_openmp(state_av_act_two_rdm_openmp_alpha_alpha_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call wall_time(wall_2)
+ print*,'Wall time to provide state_av_act_two_rdm_openmp_alpha_alpha_mo',wall_2 - wall_1
 
  END_PROVIDER 
 
@@ -29,7 +33,11 @@
  ! condition for alpha/beta spin
  ispin = 2
  state_av_act_two_rdm_openmp_beta_beta_mo = 0.d0
+ call wall_time(wall_1)
+ double precision :: wall_1, wall_2
  call orb_range_two_rdm_state_av_openmp(state_av_act_two_rdm_openmp_beta_beta_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call wall_time(wall_2)
+ print*,'Wall time to provide state_av_act_two_rdm_openmp_beta_beta_mo',wall_2 - wall_1
 
  END_PROVIDER 
 
@@ -51,7 +59,11 @@
  ispin = 3 
  print*,'ispin = ',ispin
  state_av_act_two_rdm_openmp_alpha_beta_mo = 0.d0
+ call wall_time(wall_1)
+ double precision :: wall_1, wall_2
  call orb_range_two_rdm_state_av_openmp(state_av_act_two_rdm_openmp_alpha_beta_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call wall_time(wall_2)
+ print*,'Wall time to provide state_av_act_two_rdm_openmp_alpha_beta_mo',wall_2 - wall_1
 
  END_PROVIDER 
 
@@ -74,12 +86,12 @@
  ispin = 4 
  state_av_act_two_rdm_openmp_spin_trace_mo = 0.d0
  integer :: i
- double precision :: wall_0,wall_1
- call wall_time(wall_0)
- print*,'providing the  state average TWO-RDM ...'
+ call wall_time(wall_1)
+ double precision :: wall_1, wall_2
+ print*,'providing state_av_act_two_rdm_openmp_spin_trace_mo '
  call orb_range_two_rdm_state_av_openmp(state_av_act_two_rdm_openmp_spin_trace_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
 
- call wall_time(wall_1)
- print*,'Time to provide the state average TWO-RDM',wall_1 - wall_0
+ call wall_time(wall_2)
+ print*,'Time to provide state_av_act_two_rdm_openmp_spin_trace_mo',wall_2 - wall_1
  END_PROVIDER 
 

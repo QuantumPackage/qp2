@@ -52,6 +52,7 @@
 !                      Therefore you don't necessayr have symmetry between electron 1 and 2 
  END_DOC 
  integer :: ispin
+ double precision :: wall_1, wall_2
  ! condition for alpha/beta spin
  print*,''
  print*,''
@@ -60,8 +61,11 @@
  ispin = 3 
  print*,'ispin = ',ispin
  all_states_act_two_rdm_alpha_beta_mo = 0.d0
+ call wall_time(wall_1)
  call orb_range_all_states_two_rdm(all_states_act_two_rdm_alpha_beta_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
 
+ call wall_time(wall_2)
+ print*,'Wall time to provide all_states_act_two_rdm_alpha_beta_mo',wall_2 - wall_1
  END_PROVIDER 
 
 
