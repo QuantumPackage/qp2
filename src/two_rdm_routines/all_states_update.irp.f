@@ -1,31 +1,3 @@
-
- subroutine orb_range_diagonal_contrib_to_two_rdm_ab_dm_all_states(det_1,c_1,N_st,big_array,dim1,orb_bitmask)
- use bitmasks
- BEGIN_DOC
-! routine that update the DIAGONAL PART of the alpha/beta two body rdm in a specific range of orbitals 
- END_DOC
- implicit none
- integer, intent(in) :: dim1,N_st
- double precision, intent(inout) :: big_array(dim1,dim1,dim1,dim1,N_st)
- integer(bit_kind), intent(in)  :: det_1(N_int,2)
- integer(bit_kind), intent(in)  :: orb_bitmask(N_int)
- double precision, intent(in)   :: c_1(N_st)
- integer                        :: occ(N_int*bit_kind_size,2)
- integer                        :: n_occ_ab(2)
- integer :: i,j,h1,h2,istate
- call bitstring_to_list_ab(det_1, occ, n_occ_ab, N_int)
- do istate = 1, N_st
-  do i = 1, n_occ_ab(1)
-   h1 = occ(i,1)
-   do j = 1, n_occ_ab(2)
-    h2 = occ(j,2)
-    big_array(h1,h2,h1,h2,istate) += c_1(istate)
-   enddo 
-  enddo
- enddo
- end
-
-
  subroutine orb_range_diagonal_contrib_to_all_two_rdm_dm_all_states(det_1,c_1,N_st,big_array,dim1,orb_bitmask,list_orb_reverse,ispin)
  use bitmasks
  BEGIN_DOC

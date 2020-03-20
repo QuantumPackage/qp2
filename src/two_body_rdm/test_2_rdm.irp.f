@@ -42,25 +42,28 @@ subroutine routine_active_only
 
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-       rdmab_omp  = state_av_act_two_rdm_alpha_beta_mo(l,k,j,i)
-       rdmbb_omp  = state_av_act_two_rdm_beta_beta_mo(l,k,j,i)
-       rdmaa_omp  = state_av_act_two_rdm_alpha_alpha_mo(l,k,j,i)
-       rdmtot_omp = state_av_act_two_rdm_spin_trace_mo(l,k,j,i)
+!       rdmab_omp  = state_av_act_two_rdm_alpha_beta_mo(l,k,j,i)
+!       rdmbb_omp  = state_av_act_two_rdm_beta_beta_mo(l,k,j,i)
+!       rdmaa_omp  = state_av_act_two_rdm_alpha_alpha_mo(l,k,j,i)
+!       rdmtot_omp = state_av_act_two_rdm_spin_trace_mo(l,k,j,i)
+
+
+       rdmab_omp  =  all_states_openmp_act_two_rdm_alpha_beta_mo(l,k,j,i,istate)
+       rdmaa_omp  =  all_states_openmp_act_two_rdm_alpha_alpha_mo(l,k,j,i,istate)
 
        rdmaa      =  all_states_act_two_rdm_alpha_alpha_mo(l,k,j,i,istate)
-       rdmbb      =  all_states_act_two_rdm_beta_beta_mo(l,k,j,i,istate)
+!       rdmbb      =  all_states_act_two_rdm_beta_beta_mo(l,k,j,i,istate)
        rdmab      =  all_states_act_two_rdm_alpha_beta_mo(l,k,j,i,istate)
-       rdmtot     =  all_states_act_two_rdm_spin_trace_mo(l,k,j,i,istate)
+!       rdmtot     =  all_states_act_two_rdm_spin_trace_mo(l,k,j,i,istate)
 
        accu_ab_omp      += vijkl * rdmab_omp
-       accu_bb_omp      += vijkl * rdmbb_omp
        accu_aa_omp      += vijkl * rdmaa_omp
-       accu_tot_omp     += vijkl * rdmtot_omp
+!       accu_tot_omp     += vijkl * rdmtot_omp
 
        accu_ab(istate)  += vijkl * rdmab
        accu_aa(istate)  += vijkl * rdmaa
-       accu_bb(istate)  += vijkl * rdmbb
-       accu_tot(istate) += vijkl * rdmtot
+!       accu_bb(istate)  += vijkl * rdmbb
+!       accu_tot(istate) += vijkl * rdmtot
       enddo
      enddo
     enddo
@@ -69,14 +72,14 @@ subroutine routine_active_only
    print*,'Active space only energy '
    print*,'accu_aa(istate)             = ',accu_aa(istate)
    print*,'accu_aa_omp                 = ',accu_aa_omp
-   print*,'accu_bb(istate)             = ',accu_bb(istate)
-   print*,'accu_bb_omp                 = ',accu_bb_omp
+!   print*,'accu_bb(istate)             = ',accu_bb(istate)
+!   print*,'accu_bb_omp                 = ',accu_bb_omp
    print*,'accu_ab(istate)             = ',accu_ab(istate)
    print*,'accu_ab_omp                 = ',accu_ab_omp
    print*,''
-   print*,'sum    (istate)             = ',accu_aa(istate) + accu_bb(istate) + accu_ab(istate)
-   print*,'accu_tot(istate)            = ',accu_tot(istate)
-   print*,'accu_tot_omp                = ',accu_tot_omp
+!   print*,'sum    (istate)             = ',accu_aa(istate) + accu_bb(istate) + accu_ab(istate)
+!   print*,'accu_tot(istate)            = ',accu_tot(istate)
+!   print*,'accu_tot_omp                = ',accu_tot_omp
    print*,'psi_energy_two_e(istate)    = ',psi_energy_two_e(istate)
   enddo
 
