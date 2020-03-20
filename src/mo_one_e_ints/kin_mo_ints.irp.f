@@ -30,9 +30,13 @@ BEGIN_PROVIDER [ double precision, mo_kinetic_integrals_diag,(mo_num)]
   END_DOC
   
   if (is_complex) then
-    PROVIDE mo_kinetic_integrals_complex
-    do i=1,mo_num
-      mo_kinetic_integrals_diag(i) = dble(mo_kinetic_integrals_complex(i,i))
+    integer :: k,i_shft
+    PROVIDE mo_kinetic_integrals_kpts
+    do k=1,kpt_num
+      i_shft = (k-1)*mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_kinetic_integrals_diag(i+i_shft) = dble(mo_kinetic_integrals_kpts(i,i,k))
+      enddo
     enddo
   else
     PROVIDE mo_kinetic_integrals

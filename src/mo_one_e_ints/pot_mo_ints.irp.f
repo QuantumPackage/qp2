@@ -52,9 +52,13 @@ BEGIN_PROVIDER [ double precision, mo_integrals_n_e_diag,(mo_num)]
   END_DOC
   
   if (is_complex) then
-    PROVIDE mo_integrals_n_e_complex
-    do i=1,mo_num
-      mo_integrals_n_e_diag(i) = dble(mo_integrals_n_e_complex(i,i))
+    integer :: k,i_shft
+    PROVIDE mo_integrals_n_e_kpts
+    do k=1,kpt_num
+      i_shft = (k-1)*mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_integrals_n_e_diag(i+i_shft) = dble(mo_integrals_n_e_kpts(i,i,k))
+      enddo
     enddo
   else
     PROVIDE mo_integrals_n_e
