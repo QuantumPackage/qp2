@@ -14,8 +14,12 @@
  ! condition for alpha/beta spin
  ispin = 1 
  all_states_act_two_rdm_alpha_alpha_mo = 0.D0
+ double precision :: wall_1,wall_2
+ call wall_time(wall_1)
+ print*,'providing all_states_act_two_rdm_alpha_alpha_mo ...'
  call orb_range_all_states_two_rdm(all_states_act_two_rdm_alpha_alpha_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
-
+ call wall_time(wall_2)
+ print*,'time to provide all_states_act_two_rdm_alpha_alpha_mo',wall_2 - wall_1
 
  END_PROVIDER 
 
@@ -32,7 +36,12 @@
  ! condition for alpha/beta spin
  ispin = 2
  all_states_act_two_rdm_beta_beta_mo = 0.d0
+ double precision :: wall_1,wall_2
+ call wall_time(wall_1)
+ print*,'providing all_states_act_two_rdm_beta_beta_mo ...'
  call orb_range_all_states_two_rdm(all_states_act_two_rdm_beta_beta_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call wall_time(wall_2)
+ print*,'time to provide all_states_act_two_rdm_beta_beta_mo',wall_2 - wall_1
 
  END_PROVIDER 
 
@@ -54,10 +63,8 @@
  integer :: ispin
  double precision :: wall_1, wall_2
  ! condition for alpha/beta spin
- print*,''
- print*,''
- print*,''
- print*,'providint all_states_act_two_rdm_alpha_beta_mo '
+ call wall_time(wall_1)
+ print*,'providing all_states_act_two_rdm_alpha_beta_mo ...'
  ispin = 3 
  print*,'ispin = ',ispin
  all_states_act_two_rdm_alpha_beta_mo = 0.d0
@@ -65,7 +72,7 @@
  call orb_range_all_states_two_rdm(all_states_act_two_rdm_alpha_beta_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
 
  call wall_time(wall_2)
- print*,'Wall time to provide all_states_act_two_rdm_alpha_beta_mo',wall_2 - wall_1
+ print*,'time to provide all_states_act_two_rdm_alpha_beta_mo',wall_2 - wall_1
  END_PROVIDER 
 
 
@@ -89,6 +96,11 @@
  ispin = 4 
  all_states_act_two_rdm_spin_trace_mo = 0.d0
 
+ double precision :: wall_1,wall_2
+ call wall_time(wall_1)
+ print*,'providing all_states_act_two_rdm_spin_trace_mo ...'
  call orb_range_all_states_two_rdm(all_states_act_two_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,list_act_reverse,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ call wall_time(wall_2)
+ print*,'time to provide all_states_act_two_rdm_spin_trace_mo',wall_2 - wall_1
  END_PROVIDER 
 
