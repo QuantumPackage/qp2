@@ -8,17 +8,19 @@
 !
 ! <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE RANGE OF OCCUPIED MOS (CORE+INACT+ACT) BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * N_{\beta}
+!
+! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 ! !!!!! WARNING !!!!! For efficiency reasons, electron 1 is ALPHA, electron 2 is BETA 
 !
-!  act_2_rdm_ab_mo(i,j,k,l,istate) = i:alpha, j:beta, j:alpha, l:beta
+!  full_occ_2_rdm_ab_mo(i,j,k,l,istate) = i:alpha, j:beta, j:alpha, l:beta
 !                      
 !                      Therefore you don't necessary have symmetry between electron 1 and 2 
 !
-!  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
+!  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO ARE SET TO ZERO 
  END_DOC 
  full_occ_2_rdm_ab_mo = 0.d0
  do istate = 1, N_states
@@ -135,9 +137,11 @@
 !
 ! <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \alpha} a_{l \alpha} a_{k \alpha} |Psi>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * (N_{\alpha} - 1)/2
+!
+! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
  END_DOC 
@@ -231,9 +235,11 @@
 !
 ! <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \beta} a_{l \beta} a_{k \beta} |Psi>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta} * (N_{\beta} - 1)/2
+!
+! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
  END_DOC 
@@ -327,11 +333,18 @@
 !
 ! <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \beta} a_{l \beta} a_{k \beta} |Psi>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)/2
+!
+!  !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
+! The two-electron energy of each state can be computed as:
+!
+!   \sum_{i,j,k,l = 1, n_core_inact_act_orb} full_occ_2_rdm_spin_trace_mo(i,j,k,l,istate) * < ii jj | kk ll > 
+!
+!   with ii = list_core_inact_act(i), jj = list_core_inact_act(j), kk = list_core_inact_act(k), ll = list_core_inact_act(l)
  END_DOC 
 
  do istate = 1, N_states

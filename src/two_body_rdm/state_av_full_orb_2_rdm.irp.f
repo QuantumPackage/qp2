@@ -6,13 +6,15 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_ab_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/beta electrons 
 !
-! <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE RANGE OF OCCUPIED MOS (CORE+INACT+ACT) BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * N_{\beta}
 !
-! !!!!! WARNING !!!!! For efficiency reasons, electron 1 is ALPHA, electron 2 is BETA 
+!  !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! 
+!  !!!!! WARNING !!!!! For efficiency reasons, electron 1 is ALPHA, electron 2 is BETA 
 !
 !  state_av_full_occ_2_rdm_ab_mo(i,j,k,l) = i:alpha, j:beta, j:alpha, l:beta
 !                      
@@ -129,11 +131,13 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_aa_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of alpha/alpha electrons 
 !
-! <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \alpha} a_{l \alpha} a_{k \alpha} |Psi>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} |Psi_{istate}>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * (N_{\alpha} - 1)/2
+!
+!  !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
  END_DOC 
@@ -223,11 +227,13 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons 
 !
-! <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \beta} a_{l \beta} a_{k \beta} |Psi>
+!                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} |Psi_{istate}>
+!
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+!
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta} * (N_{\beta} - 1)/2
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
-!
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
  END_DOC 
@@ -317,11 +323,14 @@
  BEGIN_DOC
 ! state_av_full_occ_2_rdm_bb_mo(i,j,k,l) =  STATE AVERAGE physicist notation for 2RDM of beta/beta electrons 
 !
-! <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \beta} a_{l \beta} a_{k \beta} |Psi>
+!                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} |Psi_{istate}>
 !
-! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-!                     BUT THE STRUCTURE OF THE TWO-RDM ON THE FULL RANGE OF MOs IS IMPLEMENTED BECAUSE IT CAN BE CONVENIENT FOR SOME APPLICATIONS 
+! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+!
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)/2
+!
+!  !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
  END_DOC 

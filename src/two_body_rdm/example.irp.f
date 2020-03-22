@@ -152,6 +152,13 @@ subroutine routine_full_mos
  double precision :: wee_ab_st_av, rdm_ab_st_av
  double precision :: wee_tot_st_av, rdm_tot_st_av
  double precision :: wee_aa_st_av_2,wee_ab_st_av_2,wee_bb_st_av_2,wee_tot_st_av_2,wee_tot_st_av_3
+ double precision :: aa_norm(N_states),bb_norm(N_states),ab_norm(N_states),tot_norm(N_states)
+
+ aa_norm  = 0.d0
+ bb_norm  = 0.d0
+ ab_norm  = 0.d0
+ tot_norm = 0.d0
+
  wee_aa = 0.d0
  wee_ab = 0.d0
  wee_bb = 0.d0
@@ -194,6 +201,10 @@ subroutine routine_full_mos
        wee_tot(istate)+= vijkl * rdmtot
       enddo
      enddo
+     aa_norm(istate) += full_occ_2_rdm_aa_mo(j,i,j,i,istate)
+     bb_norm(istate) += full_occ_2_rdm_bb_mo(j,i,j,i,istate)
+     ab_norm(istate) += full_occ_2_rdm_ab_mo(j,i,j,i,istate)
+     tot_norm(istate)+= full_occ_2_rdm_spin_trace_mo(j,i,j,i,istate)
     enddo
    enddo
    wee_aa_st_av_2  += wee_aa(istate)  * state_average_weight(istate)
@@ -211,6 +222,20 @@ subroutine routine_full_mos
    print*,'sum    (istate)         = ',wee_aa(istate) + wee_bb(istate) + wee_ab(istate)
    print*,'wee_tot(istate)         = ',wee_tot(istate)
    print*,'psi_energy_two_e(istate)= ',psi_energy_two_e(istate)
+   print*,''
+   print*,'Normalization of two-rdms '
+   print*,''
+   print*,'aa_norm(istate)         = ',aa_norm(istate)
+   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(1) * (elec_num_tab(1) - 1)/2
+   print*,''
+   print*,'bb_norm(istate)         = ',bb_norm(istate)
+   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(2) * (elec_num_tab(2) - 1)/2
+   print*,''
+   print*,'ab_norm(istate)         = ',ab_norm(istate)
+   print*,'N_alpha * N_beta        = ',elec_num_tab(1) * elec_num_tab(2)
+   print*,''
+   print*,'tot_norm(istate)        = ',tot_norm(istate)
+   print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)/2
   enddo
 
  wee_aa_st_av  = 0.d0
