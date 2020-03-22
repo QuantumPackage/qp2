@@ -1,4 +1,4 @@
-subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_weights,ispin,u_0,N_st,sze)
+subroutine orb_range_2_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_weights,ispin,u_0,N_st,sze)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -30,7 +30,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_
        size(u_t, 1),                                                 &
        N_det, N_st)
    
-   call orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
+   call orb_range_2_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,1,N_det,0,1)
    deallocate(u_t)
    
    do k=1,N_st
@@ -39,7 +39,7 @@ subroutine orb_range_two_rdm_state_av_openmp(big_array,dim1,norb,list_orb,state_
    
 end
 
-subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_2_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    implicit none
    BEGIN_DOC
@@ -58,15 +58,15 @@ subroutine orb_range_two_rdm_state_av_openmp_work(big_array,dim1,norb,list_orb,s
    
    select case (N_int)
      case (1)
-       call orb_range_two_rdm_state_av_openmp_work_1(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_2_rdm_state_av_openmp_work_1(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (2)
-       call orb_range_two_rdm_state_av_openmp_work_2(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_2_rdm_state_av_openmp_work_2(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (3)
-       call orb_range_two_rdm_state_av_openmp_work_3(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_2_rdm_state_av_openmp_work_3(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
      case (4)
-       call orb_range_two_rdm_state_av_openmp_work_4(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_2_rdm_state_av_openmp_work_4(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
        case default
-       call orb_range_two_rdm_state_av_openmp_work_N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+       call orb_range_2_rdm_state_av_openmp_work_N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    end select
 end
  
@@ -74,7 +74,7 @@ end
  
 
  BEGIN_TEMPLATE
-subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_orb,state_weights,ispin,u_t,N_st,sze,istart,iend,ishift,istep)
    use bitmasks
    use omp_lib
    implicit none
@@ -130,7 +130,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
    else if(ispin == 4)then
     spin_trace  = .True.
    else
-    print*,'Wrong parameter for ispin in general_two_rdm_state_av_openmp_work'
+    print*,'Wrong parameter for ispin in general_2_rdm_state_av_openmp_work'
     print*,'ispin = ',ispin
     stop
    endif
@@ -270,8 +270,8 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
             nkeys = 0
           endif
          endif
-         call orb_range_off_diag_double_to_two_rdm_ab_dm_buffer(tmp_det,tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!         print*,'todo orb_range_off_diag_double_to_two_rdm_ab_dm_buffer'
+         call orb_range_off_diag_double_to_2_rdm_ab_dm_buffer(tmp_det,tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+!         print*,'todo orb_range_off_diag_double_to_2_rdm_ab_dm_buffer'
      
        enddo
       endif
@@ -353,13 +353,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
          call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
          nkeys = 0
        endif
-       call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+       call orb_range_off_diag_single_to_2_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        ! increment the alpha/alpha part for single excitations
        if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
          call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
          nkeys = 0
        endif
-       call orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(tmp_det,tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+       call orb_range_off_diag_single_to_2_rdm_aa_dm_buffer(tmp_det,tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
        
      enddo
@@ -386,7 +386,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_double_to_two_rdm_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_double_to_2_rdm_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
       enddo
      endif
      
@@ -457,13 +457,13 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_single_to_2_rdm_ab_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
         ! increment the beta /beta  part for single excitations
         if (nkeys+4 * elec_alpha_num .ge. sze_buff) then
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+        call orb_range_off_diag_single_to_2_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
      enddo
      
@@ -489,8 +489,8 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
           call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
           nkeys = 0
         endif
-        call orb_range_off_diag_double_to_two_rdm_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!         print*,'to do orb_range_off_diag_double_to_two_rdm_bb_dm_buffer'
+        call orb_range_off_diag_double_to_2_rdm_bb_dm_buffer(tmp_det(1,2),psi_det_beta_unique(1, lcol),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+!         print*,'to do orb_range_off_diag_double_to_2_rdm_bb_dm_buffer'
         ASSERT (l_a <= N_det)
         
       enddo
@@ -524,7 +524,7 @@ subroutine orb_range_two_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,lis
      
      call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
      nkeys = 0
-     call orb_range_diag_to_all_two_rdm_dm_buffer(tmp_det,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+     call orb_range_diag_to_all_2_rdm_dm_buffer(tmp_det,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
      call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
      nkeys = 0
      

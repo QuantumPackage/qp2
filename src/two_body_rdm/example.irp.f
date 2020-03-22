@@ -35,9 +35,9 @@ subroutine routine_active_only
  korb = 1
  lorb = 1
  vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
- provide act_two_rdm_ab_mo  act_two_rdm_aa_mo  act_two_rdm_bb_mo  act_two_rdm_spin_trace_mo 
- provide state_av_act_two_rdm_ab_mo  state_av_act_two_rdm_aa_mo  
- provide state_av_act_two_rdm_bb_mo  state_av_act_two_rdm_spin_trace_mo 
+ provide act_2_rdm_ab_mo  act_2_rdm_aa_mo  act_2_rdm_bb_mo  act_2_rdm_spin_trace_mo 
+ provide state_av_act_2_rdm_ab_mo  state_av_act_2_rdm_aa_mo  
+ provide state_av_act_2_rdm_bb_mo  state_av_act_2_rdm_spin_trace_mo 
  print*,'**************************'
  print*,'**************************'
  do istate = 1, N_states
@@ -55,10 +55,10 @@ subroutine routine_active_only
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
 
-       rdmab   =  act_two_rdm_ab_mo(l,k,j,i,istate)
-       rdmaa   =  act_two_rdm_aa_mo(l,k,j,i,istate)
-       rdmbb   =  act_two_rdm_bb_mo(l,k,j,i,istate)
-       rdmtot  =  act_two_rdm_spin_trace_mo(l,k,j,i,istate)
+       rdmab   =  act_2_rdm_ab_mo(l,k,j,i,istate)
+       rdmaa   =  act_2_rdm_aa_mo(l,k,j,i,istate)
+       rdmbb   =  act_2_rdm_bb_mo(l,k,j,i,istate)
+       rdmtot  =  act_2_rdm_spin_trace_mo(l,k,j,i,istate)
 
 
        wee_ab(istate)    += vijkl * rdmab
@@ -103,10 +103,10 @@ subroutine routine_active_only
 
      vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-     rdm_aa_st_av  = state_av_act_two_rdm_aa_mo(l,k,j,i)
-     rdm_bb_st_av  = state_av_act_two_rdm_bb_mo(l,k,j,i)
-     rdm_ab_st_av  = state_av_act_two_rdm_ab_mo(l,k,j,i)
-     rdm_tot_st_av = state_av_act_two_rdm_spin_trace_mo(l,k,j,i)
+     rdm_aa_st_av  = state_av_act_2_rdm_aa_mo(l,k,j,i)
+     rdm_bb_st_av  = state_av_act_2_rdm_bb_mo(l,k,j,i)
+     rdm_ab_st_av  = state_av_act_2_rdm_ab_mo(l,k,j,i)
+     rdm_tot_st_av = state_av_act_2_rdm_spin_trace_mo(l,k,j,i)
 
      wee_aa_st_av += vijkl * rdm_aa_st_av
      wee_bb_st_av += vijkl * rdm_bb_st_av
@@ -169,7 +169,7 @@ subroutine routine_full_mos
  korb = 1
  lorb = 1
  vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
- provide full_occ_two_rdm_ab_mo  full_occ_two_rdm_aa_mo  full_occ_two_rdm_bb_mo  full_occ_two_rdm_spin_trace_mo 
+ provide full_occ_2_rdm_ab_mo  full_occ_2_rdm_aa_mo  full_occ_2_rdm_bb_mo  full_occ_2_rdm_spin_trace_mo 
  print*,'**************************'
  print*,'**************************'
  do istate = 1, N_states
@@ -183,10 +183,10 @@ subroutine routine_full_mos
        lorb = list_core_inact_act(l)
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-       rdmaa  =  full_occ_two_rdm_aa_mo(l,k,j,i,istate)
-       rdmab  =  full_occ_two_rdm_ab_mo(l,k,j,i,istate)
-       rdmbb  =  full_occ_two_rdm_bb_mo(l,k,j,i,istate)
-       rdmtot =  full_occ_two_rdm_spin_trace_mo(l,k,j,i,istate)
+       rdmaa  =  full_occ_2_rdm_aa_mo(l,k,j,i,istate)
+       rdmab  =  full_occ_2_rdm_ab_mo(l,k,j,i,istate)
+       rdmbb  =  full_occ_2_rdm_bb_mo(l,k,j,i,istate)
+       rdmtot =  full_occ_2_rdm_spin_trace_mo(l,k,j,i,istate)
 
        wee_ab(istate) += vijkl * rdmab
        wee_aa(istate) += vijkl * rdmaa
@@ -227,10 +227,10 @@ subroutine routine_full_mos
      lorb = list_core_inact_act(l)
      vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
-     rdm_aa_st_av  = state_av_full_occ_two_rdm_aa_mo(l,k,j,i)
-     rdm_bb_st_av  = state_av_full_occ_two_rdm_bb_mo(l,k,j,i)
-     rdm_ab_st_av  = state_av_full_occ_two_rdm_ab_mo(l,k,j,i)
-     rdm_tot_st_av = state_av_full_occ_two_rdm_spin_trace_mo(l,k,j,i)
+     rdm_aa_st_av  = state_av_full_occ_2_rdm_aa_mo(l,k,j,i)
+     rdm_bb_st_av  = state_av_full_occ_2_rdm_bb_mo(l,k,j,i)
+     rdm_ab_st_av  = state_av_full_occ_2_rdm_ab_mo(l,k,j,i)
+     rdm_tot_st_av = state_av_full_occ_2_rdm_spin_trace_mo(l,k,j,i)
 
      wee_aa_st_av  += vijkl * rdm_aa_st_av
      wee_bb_st_av  += vijkl * rdm_bb_st_av

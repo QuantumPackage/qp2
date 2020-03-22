@@ -1,4 +1,4 @@
-  subroutine orb_range_diag_to_all_two_rdm_dm_buffer(det_1,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_diag_to_all_2_rdm_dm_buffer(det_1,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  !  routine that update the DIAGONAL PART of the two body rdms in a specific range of orbitals for a given determinant det_1
@@ -175,7 +175,7 @@
  end
 
 
- subroutine orb_range_off_diag_double_to_two_rdm_ab_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+ subroutine orb_range_off_diag_double_to_2_rdm_ab_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
  use bitmasks
  BEGIN_DOC
 ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -257,7 +257,7 @@
  endif
  end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_ab_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_2_rdm_ab_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -408,7 +408,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_aa_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_2_rdm_aa_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
  !
@@ -512,7 +512,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_single_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_single_to_2_rdm_bb_dm_buffer(det_1,det_2,c_1,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -616,7 +616,7 @@
   end
 
 
-  subroutine orb_range_off_diag_double_to_two_rdm_aa_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_double_to_2_rdm_aa_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 
@@ -711,7 +711,7 @@
   endif
   end
 
-  subroutine orb_range_off_diag_double_to_two_rdm_bb_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_off_diag_double_to_2_rdm_bb_dm_buffer(det_1,det_2,c_1,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  ! routine that update the OFF DIAGONAL PART of the two body rdms in a specific range of orbitals for 

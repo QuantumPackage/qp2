@@ -1,4 +1,4 @@
-  subroutine orb_range_diag_to_all_states_two_rdm_dm_buffer(det_1,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+  subroutine orb_range_diag_to_all_states_2_rdm_dm_buffer(det_1,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
   use bitmasks
   BEGIN_DOC
  !  routine that update the DIAGONAL PART of the two body rdms in a specific range of orbitals for a given determinant det_1
