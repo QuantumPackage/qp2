@@ -20,8 +20,8 @@
    r(2) = final_grid_points(2,i)
    r(3) = final_grid_points(3,i)
    weight = final_weight_at_r_vector(i)
-   rhoa(istate) = one_e_dm_alpha_at_r(i,istate)
-   rhob(istate) = one_e_dm_beta_at_r(i,istate)
+   rhoa(istate) = one_e_dm_and_grad_alpha_in_r(4,i,istate)
+   rhob(istate) = one_e_dm_and_grad_beta_in_r(4,i,istate)
    call ec_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_c,vc_a,vc_b)
    call ex_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_x,vx_a,vx_b)
    energy_sr_x_lda(istate) += weight * e_x

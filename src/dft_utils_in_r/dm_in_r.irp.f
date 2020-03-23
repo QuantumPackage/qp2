@@ -40,17 +40,15 @@ END_PROVIDER
  END_DOC
  integer :: i,istate
  double precision :: r(3),weight
- allocate(dm_a(N_states),dm_b(N_states))
  do istate = 1, N_states
   do i = 1, n_points_final_grid
    r(1) = final_grid_points(1,i)
    r(2) = final_grid_points(2,i)
    r(3) = final_grid_points(3,i)
-   call dm_dft_alpha_beta_at_r(r,dm_a,dm_b)
    weight = final_weight_at_r_vector(i)
  
-   elec_beta_num_grid_becke(istate)  += * weight
-   elec_alpha_num_grid_becke(istate) += * weight
+   elec_alpha_num_grid_becke(istate) += one_e_dm_and_grad_alpha_in_r(4,i,istate) * weight
+   elec_beta_num_grid_becke(istate)  += one_e_dm_and_grad_beta_in_r(4,i,istate) * weight
   enddo
  enddo
 
@@ -61,8 +59,8 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, one_e_dm_and_grad_beta_in_r,  (4,n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_grad_2_dm_alpha_at_r, (n_points_final_grid,N_states) ]
 &BEGIN_PROVIDER [double precision, one_e_grad_2_dm_beta_at_r, (n_points_final_grid,N_states) ]
-&BEGIN_PROVIDER [double precision, one_e_grad_dm_squared_at_r, (3,n_points_final_grid,N_states) ]
-&BEGIN_PROVIDER [double precision, scal_prod_grad_one_e_dm_ab, (3,n_points_final_grid,N_states) ]
+&BEGIN_PROVIDER [double precision, scal_prod_grad_one_e_dm_ab, (n_points_final_grid,N_states) ]
+&BEGIN_PROVIDER [double precision, one_e_stuff_for_pbe, (3,n_points_final_grid,N_states) ]
  BEGIN_DOC
 ! one_e_dm_and_grad_alpha_in_r(1,i,i_state) = d\dx n_alpha(r_i,istate)
 !
@@ -91,22 +89,42 @@ END_PROVIDER
   r(1) = final_grid_points(1,i)
   r(2) = final_grid_points(2,i)
   r(3) = final_grid_points(3,i)
+
    call density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b,  dm_a_grad, dm_b_grad, aos_array, grad_aos_array)
+
+   ! alpha/beta density 
+   one_e_dm_and_grad_alpha_in_r(4,i,istate)  =  dm_a(istate)
+   one_e_dm_and_grad_beta_in_r(4,i,istate)   =  dm_b(istate)
+
+   ! alpha/beta density gradients 
    one_e_dm_and_grad_alpha_in_r(1,i,istate)  =  dm_a_grad(1,istate)
    one_e_dm_and_grad_alpha_in_r(2,i,istate)  =  dm_a_grad(2,istate)
    one_e_dm_and_grad_alpha_in_r(3,i,istate)  =  dm_a_grad(3,istate)
-   one_e_dm_and_grad_alpha_in_r(4,i,istate)  =  dm_a(istate)
-   one_e_grad_2_dm_alpha_at_r(i,istate) = dm_a_grad(1,istate) * dm_a_grad(1,istate) + dm_a_grad(2,istate) * dm_a_grad(2,istate) + dm_a_grad(3,istate) * dm_a_grad(3,istate)
 
    one_e_dm_and_grad_beta_in_r(1,i,istate)  =  dm_b_grad(1,istate)
    one_e_dm_and_grad_beta_in_r(2,i,istate)  =  dm_b_grad(2,istate)
    one_e_dm_and_grad_beta_in_r(3,i,istate)  =  dm_b_grad(3,istate)
-   one_e_dm_and_grad_beta_in_r(4,i,istate)  =  dm_b(istate)
-   one_e_grad_2_dm_beta_at_r(i,istate) = dm_b_grad(1,istate) * dm_b_grad(1,istate) + dm_b_grad(2,istate) * dm_b_grad(2,istate) + dm_b_grad(3,istate) * dm_b_grad(3,istate)
-   one_e_grad_dm_squared_at_r(1,i,istate) = 2.D0 * (dm_a_grad(1,istate) + dm_b_grad(1,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
-   one_e_grad_dm_squared_at_r(2,i,istate) = 2.D0 * (dm_a_grad(2,istate) + dm_b_grad(2,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
-   one_e_grad_dm_squared_at_r(3,i,istate) = 2.D0 * (dm_a_grad(3,istate) + dm_b_grad(3,istate) ) * (one_e_dm_and_grad_alpha_in_r(4,i,istate) + one_e_dm_and_grad_beta_in_r(4,i,istate))
-   scal_prod_grad_one_e_dm_ab(i,istate) = dm_a_grad(1,istate) * dm_b_grad(1,istate) + dm_a_grad(2,istate) * dm_b_grad(2,istate) + dm_a_grad(3,istate) * dm_b_grad(3,istate)
+
+   ! alpha/beta squared of the gradients 
+   one_e_grad_2_dm_alpha_at_r(i,istate) = dm_a_grad(1,istate) * dm_a_grad(1,istate)  & 
+                                        + dm_a_grad(2,istate) * dm_a_grad(2,istate)  & 
+                                        + dm_a_grad(3,istate) * dm_a_grad(3,istate)
+   one_e_grad_2_dm_beta_at_r(i,istate)  = dm_b_grad(1,istate) * dm_b_grad(1,istate)  & 
+                                        + dm_b_grad(2,istate) * dm_b_grad(2,istate)  & 
+                                        + dm_b_grad(3,istate) * dm_b_grad(3,istate)
+
+   ! scalar product between alpha and beta density gradient 
+   scal_prod_grad_one_e_dm_ab(i,istate) = dm_a_grad(1,istate) * dm_b_grad(1,istate)  & 
+                                        + dm_a_grad(2,istate) * dm_b_grad(2,istate)  & 
+                                        + dm_a_grad(3,istate) * dm_b_grad(3,istate)
+
+   ! some stuffs needed for GGA type potentials 
+   one_e_stuff_for_pbe(1,i,istate) = 2.D0 * (dm_a_grad(1,istate) + dm_b_grad(1,istate) ) & 
+                                                 * (dm_a(istate) + dm_b(istate))
+   one_e_stuff_for_pbe(2,i,istate) = 2.D0 * (dm_a_grad(2,istate) + dm_b_grad(2,istate) ) & 
+                                                 * (dm_a(istate) + dm_b(istate))
+   one_e_stuff_for_pbe(3,i,istate) = 2.D0 * (dm_a_grad(3,istate) + dm_b_grad(3,istate) ) & 
+                                                 * (dm_a(istate) + dm_b(istate))
   enddo
  enddo
 
