@@ -24,6 +24,7 @@ BEGIN_PROVIDER [double precision, ao_ortho_cano_n_e_ints, (mo_num,mo_num)]
 END_PROVIDER
 
 BEGIN_PROVIDER [complex*16, ao_ortho_cano_n_e_ints_cplx, (mo_num,mo_num)]
+!todo: kpts
  implicit none
  integer :: i1,j1,i,j
  complex*16 :: c_i1,c_j1

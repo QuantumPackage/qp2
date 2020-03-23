@@ -112,6 +112,10 @@ BEGIN_PROVIDER [complex*16, ao_integrals_n_e_complex, (ao_num,ao_num)]
   !
   !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
   END_DOC
+  print*,'error: ',irp_here
+  write(*,*) "test"
+  ao_integrals_n_e_complex(999,999) = 0.d0
+  call abort()
   if (read_ao_integrals_n_e) then
     call ezfio_get_ao_one_e_ints_ao_integrals_n_e_complex(ao_integrals_n_e_complex)
     print *,  'AO N-e integrals read from disk'
