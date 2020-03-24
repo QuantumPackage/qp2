@@ -119,6 +119,25 @@ complex*16 function get_two_e_integral_complex(i,j,k,l,map,map2)
   get_two_e_integral_complex = tmp
 end
 
+complex*16 function get_two_e_integral_kpts(i,j,k,l,ki,kj,kk,kl,map,map2)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Returns one integral <ij|kl> in the MO basis
+  ! TODO: finish this
+  END_DOC
+  integer, intent(in)            :: i,j,k,l
+  integer, intent(in)            :: ki,kj,kk,kl
+  type(map_type), intent(inout)  :: map,map2
+  complex*16                     :: get_two_e_integral_complex
+  complex*16 :: tmp
+  tmp = get_two_e_integral_complex( i + mo_num_per_kpt*(ki-1), &
+                                    j + mo_num_per_kpt*(kj-1), &
+                                    k + mo_num_per_kpt*(kk-1), &
+                                    l + mo_num_per_kpt*(kl-1), map,map2)
+  get_two_e_integral_kpts = tmp
+end
+
 complex*16 function mo_two_e_integral_complex(i,j,k,l)
   implicit none
   BEGIN_DOC
@@ -130,6 +149,25 @@ complex*16 function mo_two_e_integral_complex(i,j,k,l)
   PROVIDE mo_two_e_integrals_in_map
   !DIR$ FORCEINLINE
   mo_two_e_integral_complex = get_two_e_integral_complex(i,j,k,l,mo_integrals_map,mo_integrals_map_2)
+  return
+end
+
+complex*16 function mo_two_e_integral_kpts(i,j,k,l,ki,kj,kk,kl)
+  implicit none
+  BEGIN_DOC
+  ! Returns one integral <ij|kl> in the MO basis
+  END_DOC
+  integer, intent(in)            :: i,j,k,l
+  integer, intent(in)            :: ki,kj,kk,kl
+  complex*16                     :: get_two_e_integral_complex
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_complex
+  PROVIDE mo_two_e_integrals_in_map
+  !DIR$ FORCEINLINE
+  mo_two_e_integral_kpts = get_two_e_integral_complex( &
+                                    i + mo_num_per_kpt*(ki-1), &
+                                    j + mo_num_per_kpt*(kj-1), &
+                                    k + mo_num_per_kpt*(kk-1), &
+                                    l + mo_num_per_kpt*(kl-1),mo_integrals_map,mo_integrals_map_2)
   return
 end
 
