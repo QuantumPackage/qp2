@@ -177,7 +177,8 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
       if (is_complex) then
         !todo: psi_selectors isn't linked to psi_selectors_coef anymore; should we provide both?
-        PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals_complex pt2_w
+        !PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals_complex pt2_w
+        PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals_kpts pt2_w
         PROVIDE psi_selectors pt2_u pt2_J pt2_R
       else
         PROVIDE nproc pt2_F mo_two_e_integrals_in_map mo_one_e_integrals pt2_w

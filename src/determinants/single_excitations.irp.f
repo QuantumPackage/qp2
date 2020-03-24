@@ -336,6 +336,7 @@ END_PROVIDER
 BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo_num_per_kpt,kpt_num) ]
  implicit none
  integer :: i0,j0,i,j,k0,k,kblock,kvirt
+ integer :: i_i, i_j, i_k, kocc
  integer :: n_occ_ab(2,kpt_num)
  integer :: occ(N_int*bit_kind_size,2,kpt_num)
  integer :: n_occ_ab_virt(2)
@@ -343,7 +344,7 @@ BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo
  integer(bit_kind) :: key_test(N_int)
  integer(bit_kind) :: key_virt(N_int,2)
  complex*16 :: accu
- complex*16, allocatable :: array_coulomb(:,:),array_exchange(:,:)
+ complex*16, allocatable :: array_coulomb(:),array_exchange(:)
 
  do kblock = 1,kpt_num
    call bitstring_to_list_ab(ref_closed_shell_bitmask_kpts(1,1,kblock), &
@@ -378,9 +379,9 @@ BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo
        accu += 2.d0 * array_coulomb(i_k) - array_exchange(i_k)
       enddo
      enddo
-     fock_op_cshell_ref_bitmask_cplx(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
+     fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
      !fock_op_cshell_ref_bitmask_cplx(j,i) = dconjg(accu) + mo_one_e_integrals_complex(j,i)
-     fock_op_cshell_ref_bitmask_cplx(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
+     fock_op_cshell_ref_bitmask_kpts(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
     enddo
    enddo
   
@@ -401,8 +402,8 @@ BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo
        accu += 2.d0 * array_coulomb(i_k) - array_exchange(i_k)
       enddo
      enddo
-     fock_op_cshell_ref_bitmask_cplx(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
-     fock_op_cshell_ref_bitmask_cplx(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
+     fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
+     fock_op_cshell_ref_bitmask_kpts(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
     enddo
    enddo
   
@@ -423,8 +424,8 @@ BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo
        accu += 2.d0 * array_coulomb(i_k) - array_exchange(i_k)
       enddo
      enddo
-     fock_op_cshell_ref_bitmask_cplx(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
-     fock_op_cshell_ref_bitmask_cplx(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
+     fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock) = accu + mo_one_e_integrals_kpts(i_i,i_j,kblock)
+     fock_op_cshell_ref_bitmask_kpts(i_j,i_i,kblock) = dconjg(fock_op_cshell_ref_bitmask_kpts(i_i,i_j,kblock))
     enddo
    enddo
   enddo
@@ -432,69 +433,83 @@ BEGIN_PROVIDER [complex*16, fock_op_cshell_ref_bitmask_kpts, (mo_num_per_kpt, mo
 
 END_PROVIDER
 
-subroutine get_single_excitation_from_fock_kpts(det_1,det_2,h,p,spin,phase,hij)
- use bitmasks
- implicit none
- integer,intent(in) :: h,p,spin
- double precision, intent(in)  :: phase
- integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)
- complex*16, intent(out) :: hij
- integer(bit_kind) :: differences(N_int,2)
- integer(bit_kind) :: hole(N_int,2)
- integer(bit_kind) :: partcl(N_int,2)
- integer :: occ_hole(N_int*bit_kind_size,2)
- integer :: occ_partcl(N_int*bit_kind_size,2)
- integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
- integer :: i0,i
- complex*16 :: buffer_c(mo_num),buffer_x(mo_num)
-! do 
- do i=1, mo_num
-   buffer_c(i) = big_array_coulomb_integrals_kpts(i,ki,h,p,kp)
-   buffer_x(i) = big_array_exchange_integrals_kpts(i,ki,h,p,kp)
- enddo
- do i = 1, N_int
-  differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask(i,1))
-  differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask(i,2))
-  hole(i,1) = iand(differences(i,1),ref_closed_shell_bitmask(i,1))
-  hole(i,2) = iand(differences(i,2),ref_closed_shell_bitmask(i,2))
-  partcl(i,1) = iand(differences(i,1),det_1(i,1))
-  partcl(i,2) = iand(differences(i,2),det_1(i,2))
- enddo
- call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
- call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
- hij = fock_op_cshell_ref_bitmask_cplx(h,p)
- ! holes :: direct terms
- do i0 = 1, n_occ_ab_hole(1)
-  i = occ_hole(i0,1)
-  hij -= buffer_c(i)
- enddo
- do i0 = 1, n_occ_ab_hole(2)
-  i = occ_hole(i0,2)
-  hij -= buffer_c(i)
- enddo
-
- ! holes :: exchange terms
- do i0 = 1, n_occ_ab_hole(spin)
-  i = occ_hole(i0,spin)
-  hij += buffer_x(i)
- enddo
-
- ! particles :: direct terms
- do i0 = 1, n_occ_ab_partcl(1)
-  i = occ_partcl(i0,1)
-  hij += buffer_c(i)
- enddo
- do i0 = 1, n_occ_ab_partcl(2)
-  i = occ_partcl(i0,2)
-  hij += buffer_c(i)
- enddo
-
- ! particles :: exchange terms
- do i0 = 1, n_occ_ab_partcl(spin)
-  i = occ_partcl(i0,spin)
-  hij -= buffer_x(i)
- enddo
- hij = hij * phase
+subroutine get_single_excitation_from_fock_kpts(det_1,det_2,ih,ip,spin,phase,hij)
+  use bitmasks
+  !called by i_h_j{,_s2,_single_spin}_complex
+  ! ih, ip are indices in total mo list (not per kpt)
+  implicit none
+  integer,intent(in) :: ih,ip,spin
+  double precision, intent(in)  :: phase
+  integer(bit_kind), intent(in) :: det_1(N_int,2), det_2(N_int,2)
+  complex*16, intent(out) :: hij
+  integer(bit_kind) :: differences(N_int,2)
+  integer(bit_kind) :: hole(N_int,2)
+  integer(bit_kind) :: partcl(N_int,2)
+  integer :: occ_hole(N_int*bit_kind_size,2)
+  integer :: occ_partcl(N_int*bit_kind_size,2)
+  integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
+  integer :: i0,i,h,p
+  integer :: ki,khp
+  complex*16 :: buffer_c(mo_num_per_kpt),buffer_x(mo_num_per_kpt)
+  khp = (ip-1)/mo_num_per_kpt+1
+  p = mod(ip-1,mo_num_per_kpt)+1
+  h = mod(ih-1,mo_num_per_kpt)+1
+  !todo: omp kpts
+  do ki=1,kpt_num
+    do i=1, mo_num_per_kpt
+      !<hi|pi>
+      buffer_c(i) = big_array_coulomb_integrals_kpts(i,ki,h,p,khp)
+      !<hi|ip>
+      buffer_x(i) = big_array_exchange_integrals_kpts(i,ki,h,p,khp)
+    enddo
+    do i = 1, N_int
+      !holes in ref, not in det1
+      !part in det1, not in ref
+      differences(i,1) = iand(xor(det_1(i,1),ref_closed_shell_bitmask(i,1)),kpts_bitmask(i,ki))
+      differences(i,2) = iand(xor(det_1(i,2),ref_closed_shell_bitmask(i,2)),kpts_bitmask(i,ki))
+      !differences(i,1) = xor(det_1(i,1),ref_closed_shell_bitmask_kpts(i,1,ki))
+      !differences(i,2) = xor(det_1(i,2),ref_closed_shell_bitmask_kpts(i,2,ki))
+      hole(i,1) = iand(differences(i,1),ref_closed_shell_bitmask_kpts(i,1,ki))
+      hole(i,2) = iand(differences(i,2),ref_closed_shell_bitmask_kpts(i,2,ki))
+      partcl(i,1) = iand(differences(i,1),det_1(i,1))
+      partcl(i,2) = iand(differences(i,2),det_1(i,2))
+    enddo
+    call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
+    call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
+    hij = fock_op_cshell_ref_bitmask_kpts(h,p,khp)
+    ! holes :: direct terms
+    do i0 = 1, n_occ_ab_hole(1)
+      i = occ_hole(i0,1) - (ki-1)*mo_num_per_kpt
+      hij -= buffer_c(i)
+    enddo
+    do i0 = 1, n_occ_ab_hole(2)
+      i = occ_hole(i0,2) - (ki-1)*mo_num_per_kpt
+      hij -= buffer_c(i)
+    enddo
+   
+    ! holes :: exchange terms
+    do i0 = 1, n_occ_ab_hole(spin)
+      i = occ_hole(i0,spin) - (ki-1)*mo_num_per_kpt
+      hij += buffer_x(i)
+    enddo
+   
+    ! particles :: direct terms
+    do i0 = 1, n_occ_ab_partcl(1)
+      i = occ_partcl(i0,1) - (ki-1)*mo_num_per_kpt
+      hij += buffer_c(i)
+    enddo
+    do i0 = 1, n_occ_ab_partcl(2)
+      i = occ_partcl(i0,2) - (ki-1)*mo_num_per_kpt
+      hij += buffer_c(i)
+    enddo
+   
+    ! particles :: exchange terms
+    do i0 = 1, n_occ_ab_partcl(spin)
+      i = occ_partcl(i0,spin) - (ki-1)*mo_num_per_kpt
+      hij -= buffer_x(i)
+    enddo
+  enddo
+  hij = hij * phase
 
 end
 
