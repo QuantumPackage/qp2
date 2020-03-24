@@ -221,13 +221,11 @@ qp_name potential_sr_xc_beta_ao_lda  --rename=potential_xc_beta_ao_sr_lda
 qp_name potential_sr_xc_beta_ao_lda --rename=potential_xc_beta_ao_sr_lda
 qp_name potential_sr_xc_beta_ao_pbe  --rename=potential_xc_beta_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
-<<<<<<< HEAD
 qp_name disk_access_nuclear_repulsion --rename=io_nuclear_repulsion
 qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
 qp_name ref_bitmask_e_n_energy -r ref_bitmask_n_e_energy
 qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
 qp_name write_ao_integrals_e_n -r write_ao_integrals_n_e
-=======
 qp_name psi_energy_bielec -r psi_energy_two_e
 qp_name read_ao_integrals --rename="read_ao_two_e_integrals"
 qp_name read_ao_integrals --rename=read_ao_two_e_integrals
