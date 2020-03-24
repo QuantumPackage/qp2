@@ -413,3 +413,32 @@ END_PROVIDER
    print *,  list_inact_act(1:n_inact_act_orb)
 END_PROVIDER
  
+
+BEGIN_PROVIDER [integer, n_all_but_del_orb]
+ implicit none
+ integer :: i
+ n_all_but_del_orb = 0
+ do i = 1, mo_num
+  if(  trim(mo_class(i))=="Core" & 
+  .or. trim(mo_class(i))=="Inactive" & 
+  .or. trim(mo_class(i))=="Active"   &
+  .or. trim(mo_class(i))=="Virtual" )then
+   n_all_but_del_orb +=1 
+  endif
+ enddo
+END_PROVIDER 
+
+BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
+ implicit none
+ integer :: i,j
+ do i = 1, mo_num
+  if(  trim(mo_class(i))=="Core" & 
+  .or. trim(mo_class(i))=="Inactive" & 
+  .or. trim(mo_class(i))=="Active"   &
+  .or. trim(mo_class(i))=="Virtual" )then
+   list_all_but_del_orb(i) = i
+  endif
+ enddo
+
+END_PROVIDER 
+
