@@ -49,13 +49,10 @@ BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
   P0tuvx= 0.d0
   do istate=1,N_states
    do x = 1, n_act_orb
-    xx = list_act(x)
     do v = 1, n_act_orb
-     vv = list_act(v)
      do u = 1, n_act_orb
-      uu = list_act(u)
       do t = 1, n_act_orb
-       tt = list_act(t)
+       !      1 1 2 2                                     1 2 1 2
        P0tuvx(t,u,v,x) = state_av_act_2_rdm_spin_trace_mo(t,v,u,x)
       enddo
      enddo 
