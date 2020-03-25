@@ -431,12 +431,14 @@ END_PROVIDER
 BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
  implicit none
  integer :: i,j
+ j = 0 
  do i = 1, mo_num
   if(  trim(mo_class(i))=="Core" & 
   .or. trim(mo_class(i))=="Inactive" & 
   .or. trim(mo_class(i))=="Active"   &
   .or. trim(mo_class(i))=="Virtual" )then
-   list_all_but_del_orb(i) = i
+   j += 1
+   list_all_but_del_orb(j) = i
   endif
  enddo
 

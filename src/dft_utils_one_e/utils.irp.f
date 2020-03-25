@@ -14,15 +14,20 @@ subroutine GGA_sr_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_
  do istate = 1, N_states
   call ex_pbe_sr(mu_erf_dft,rho_a(istate),rho_b(istate),grad_rho_a_2(istate),grad_rho_b_2(istate),grad_rho_a_b(istate),ex(istate),vx_rho_a(istate),vx_rho_b(istate),vx_grad_rho_a_2(istate),vx_grad_rho_b_2(istate),vx_grad_rho_a_b(istate))
 
-  double precision :: rhoc,rhoo,sigmacc,sigmaco,sigmaoo,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo
-  ! convertion from (alpha,beta) formalism to (closed, open) formalism
-   call rho_ab_to_rho_oc(rho_a(istate),rho_b(istate),rhoo,rhoc)
-   call grad_rho_ab_to_grad_rho_oc(grad_rho_a_2(istate),grad_rho_b_2(istate),grad_rho_a_b(istate),sigmaoo,sigmacc,sigmaco)
-
-   call ec_pbe_sr(mu_erf_dft,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec(istate),vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo)
-
-   call v_rho_oc_to_v_rho_ab(vrhoo,vrhoc,vc_rho_a(istate),vc_rho_b(istate))
-   call v_grad_rho_oc_to_v_grad_rho_ab(vsigmaoo,vsigmacc,vsigmaco,vc_grad_rho_a_2(istate),vc_grad_rho_b_2(istate),vc_grad_rho_a_b(istate))
+  vx_rho_a(istate) = d/e_xmd(n_a,n_b,grad_na,grad_nb,grad_n_a . grad_n_b)/d_n_a
+  vx_rho_b 
+  vx_grad_rho_a_2   d/e_xmd(n_a,n_b,grad_na,grad_nb,grad_n_a . grad_n_b)/d_grad_rho_a_2
+  vx_grad_rho_b_2 
+  vx_grad_rho_a_b
+!  double precision :: rhoc,rhoo,sigmacc,sigmaco,sigmaoo,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo
+! !!!  ! convertion from (alpha,beta) formalism to (closed, open) formalism
+!   call rho_ab_to_rho_oc(rho_a(istate),rho_b(istate),rhoo,rhoc)
+!   call grad_rho_ab_to_grad_rho_oc(grad_rho_a_2(istate),grad_rho_b_2(istate),grad_rho_a_b(istate),sigmaoo,sigmacc,sigmaco)
+!
+!   call ec_pbe_sr(mu_erf_dft,rhoc,rhoo,sigmacc,sigmaco,sigmaoo,ec(istate),vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo)
+!
+!   call v_rho_oc_to_v_rho_ab(vrhoo,vrhoc,vc_rho_a(istate),vc_rho_b(istate))
+!   call v_grad_rho_oc_to_v_grad_rho_ab(vsigmaoo,vsigmacc,vsigmaco,vc_grad_rho_a_2(istate),vc_grad_rho_b_2(istate),vc_grad_rho_a_b(istate))
  enddo
 end
 
