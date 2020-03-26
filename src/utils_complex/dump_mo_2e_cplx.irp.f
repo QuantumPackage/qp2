@@ -15,7 +15,9 @@ subroutine run
       do k=1,mo_num 
         do l=1,mo_num 
           tmp_cmplx = get_two_e_integral_complex(i,j,k,l,mo_integrals_map,mo_integrals_map_2)
-          print'(4(I4),2(E23.15))',i,j,k,l,tmp_cmplx
+          if (cdabs(tmp_cmplx).gt. 1d-12) then
+            print'(4(I4),2(E23.15))',i,j,k,l,tmp_cmplx
+          endif
         enddo
       enddo
     enddo

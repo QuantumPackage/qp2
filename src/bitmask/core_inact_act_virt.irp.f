@@ -426,12 +426,16 @@ BEGIN_PROVIDER [ integer(bit_kind), kpts_bitmask , (N_int,kpt_num) ]
   integer :: k,i,di
   integer :: tmp_mo_list(mo_num_per_kpt)
   kpts_bitmask  = 0_bit_kind
+  print*,'kpts bitmask'
   do k=1,kpt_num
     di=(k-1)*mo_num_per_kpt
     do i=1,mo_num_per_kpt
       tmp_mo_list(i) = i+di
     enddo
     call list_to_bitstring( kpts_bitmask(1,k), tmp_mo_list, mo_num_per_kpt, N_int)
+    !debugging
+    print*,'k'
+    call debug_single_spindet(kpts_bitmask(1,k),N_int)
   enddo
 END_PROVIDER
 

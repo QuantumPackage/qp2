@@ -1,4 +1,16 @@
 
+subroutine double_allowed_mo_kpts(h1,h2,p1,p2,is_allowed)
+  implicit none
+  integer, intent(in) :: h1,h2,p1,p2
+  logical, intent(out) :: is_allowed
+  integer :: kh1,kh2,kp1,kp2
+
+  kh1 = (h1-1)/mo_num_per_kpt+1
+  kh2 = (h2-1)/mo_num_per_kpt+1
+  kp1 = (p1-1)/mo_num_per_kpt+1
+  kp2 = (p2-1)/mo_num_per_kpt+1
+  call double_allowed_kpts(kh1,kh2,kp1,kp2,is_allowed)
+end subroutine
 
 subroutine add_integrals_to_map_complex(mask_ijkl)
   use map_module

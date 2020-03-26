@@ -29,3 +29,12 @@ BEGIN_PROVIDER [integer, kconserv, (kpt_num,kpt_num,kpt_num)]
     print *,  'kconserv written to disk'
   endif
 END_PROVIDER
+
+subroutine double_allowed_kpts(kh1,kh2,kp1,kp2,is_allowed)
+  implicit none
+  integer, intent(in) :: kh1,kh2,kp1,kp2
+  logical, intent(out) :: is_allowed
+
+  is_allowed = (kconserv(kh1,kh2,kp1) == kp2)
+end subroutine
+

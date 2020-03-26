@@ -1,4 +1,13 @@
 
+kpts:
+  changed matrices to block diagonal (1-e ints, fock, 1rdm)
+  double_allowed_mo_kpts(h1,h2,p1,p2,is_allowed)
+    {h,p}{1,2} indices in total mo_num (not per kpt)
+  double_allowed_kpts(kh1,kh2,kp1,kp2,is_allowed)
+    k{h,p}{1,2} k-point indices
+
+  only allow momentum-conserving excitations
+
 
 todo:
   change everything to be blocked by kpt

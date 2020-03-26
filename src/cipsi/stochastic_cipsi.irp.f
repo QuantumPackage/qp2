@@ -110,6 +110,7 @@ subroutine run_stochastic_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+    !call print_debug_fci()
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 

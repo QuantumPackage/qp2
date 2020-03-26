@@ -2418,9 +2418,11 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
   complex*16               :: get_two_e_integral_complex
   integer                        :: m,n,p,q
   integer                        :: i,j,k
+  integer :: ih1,ih2,ip1,ip2,kh1,kh2,kp1,kp2
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
+  logical :: is_allowed
   PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals_complex
 
   ASSERT (Nint > 0)
@@ -2439,11 +2441,38 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
     case (2)
       call get_double_excitation(key_i,key_j,exc,phase,Nint)
       if (exc(0,1,1) == 1) then
+        call double_allowed_mo_kpts(exc(1,1,1),exc(1,1,2),exc(1,2,1),exc(1,2,2),is_allowed)
+        if (.not.is_allowed) then
+          hij = (0.d0,0.d0)
+          return
+        endif
         ! Single alpha, single beta
         if(exc(1,1,1) == exc(1,2,2) )then
-          hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+          ih1 = mod(exc(1,1,1)-1,mo_num_per_kpt)+1
+          ih2 = mod(exc(1,1,2)-1,mo_num_per_kpt)+1
+          kh1 = (exc(1,1,1)-1)/mo_num_per_kpt+1
+          kh2 = (exc(1,1,2)-1)/mo_num_per_kpt+1
+          ip1 = mod(exc(1,2,1)-1,mo_num_per_kpt)+1
+          kp1 = (exc(1,2,1)-1)/mo_num_per_kpt+1
+          if(kp1.ne.kh2) then
+            print*,'problem with hij kpts: ',irp_here
+            stop -4
+          endif
+          hij = phase * big_array_exchange_integrals_kpts(ih1,kh1,ih2,ip1,kp1)
+          !hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+          ih1 = mod(exc(1,1,1)-1,mo_num_per_kpt)+1
+          kh1 = (exc(1,1,1)-1)/mo_num_per_kpt+1
+          ip1 = mod(exc(1,2,1)-1,mo_num_per_kpt)+1
+          kp1 = (exc(1,2,1)-1)/mo_num_per_kpt+1
+          ip2 = mod(exc(1,2,2)-1,mo_num_per_kpt)+1
+          kp2 = (exc(1,2,2)-1)/mo_num_per_kpt+1
+          if(kp2.ne.kh1) then
+            print*,'problem with hij kpts: ',irp_here
+            stop -4
+          endif
+          hij = phase * big_array_exchange_integrals_kpts(ip1,kp1,ih1,ip2,kp2)
+          !hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
         else
           hij = phase*get_two_e_integral_complex(                     &
               exc(1,1,1),                                             &
@@ -2452,6 +2481,11 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
               exc(1,2,2) ,mo_integrals_map,mo_integrals_map_2)
         endif
       else if (exc(0,1,1) == 2) then
+        call double_allowed_mo_kpts(exc(1,1,1),exc(2,1,1),exc(1,2,1),exc(2,2,1),is_allowed)
+        if (.not.is_allowed) then
+          hij = (0.d0,0.d0)
+          return
+        endif
         ! Double alpha
         hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,1),                                              &
@@ -2464,6 +2498,11 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
             exc(2,2,1),                                              &
             exc(1,2,1) ,mo_integrals_map,mo_integrals_map_2) )
       else if (exc(0,1,2) == 2) then
+        call double_allowed_mo_kpts(exc(1,1,2),exc(2,1,2),exc(1,2,2),exc(2,2,2),is_allowed)
+        if (.not.is_allowed) then
+          hij = (0.d0,0.d0)
+          return
+        endif
         ! Double beta
         hij = phase*(get_two_e_integral_complex(                     &
             exc(1,1,2),                                              &
@@ -2490,6 +2529,11 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
         m = exc(1,1,2)
         p = exc(1,2,2)
         spin = 2
+      endif
+      !if m,p not from same kpt, single not allowed
+      if (int((m-1)/mo_num_per_kpt + 1).ne.int((p-1)/mo_num_per_kpt + 1)) then
+        hij = (0.d0,0.d0)
+        return
       endif
       !call get_single_excitation_from_fock_complex(key_i,key_j,m,p,spin,phase,hij)
       call get_single_excitation_from_fock_kpts(key_i,key_j,m,p,spin,phase,hij)
@@ -2775,10 +2819,12 @@ subroutine i_H_j_single_spin_complex(key_i,key_j,Nint,spin,hij)
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
+  !PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
+  PROVIDE big_array_exchange_integrals_kpts mo_two_e_integrals_in_map
 
   call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
-  call get_single_excitation_from_fock_complex(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
+  !call get_single_excitation_from_fock_complex(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
+  call get_single_excitation_from_fock_kpts(key_i,key_j,exc(1,1),exc(1,2),spin,phase,hij)
 end
 
 subroutine i_H_j_double_spin_complex(key_i,key_j,Nint,hij)

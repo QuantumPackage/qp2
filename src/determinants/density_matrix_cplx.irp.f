@@ -508,9 +508,11 @@ END_PROVIDER
           print *,'kh1 = ',kh1
           print *,'kp1 = ',kp1
           !call debug_det(tmp_det,N_int)
-          !call debug_spindet(tmp_det2,N_int)
+          call debug_single_spindet(tmp_det(1,1),N_int)
+          call debug_single_spindet(tmp_det2,N_int)
+          call debug_single_spindet(tmp_det(1,2),N_int)
           !call print_spindet(tmp_det2,N_int)
-          !stop -2
+          stop -2
         endif
         do m=1,N_states
           ckl = dconjg(psi_bilinear_matrix_values_complex(k_a,m))*psi_bilinear_matrix_values_complex(l,m) * phase
@@ -587,7 +589,10 @@ END_PROVIDER
           print *,'ip1 = ',ip1
           print *,'kh1 = ',kh1
           print *,'kp1 = ',kp1
-          !stop -3
+          call debug_single_spindet(tmp_det(1,2),N_int)
+          call debug_single_spindet(tmp_det2,N_int)
+          call debug_single_spindet(tmp_det(1,1),N_int)
+          stop -3
         endif
         do m=1,N_states
           ckl = dconjg(psi_bilinear_matrix_transp_values_complex(k_b,m))*psi_bilinear_matrix_transp_values_complex(l,m) * phase
