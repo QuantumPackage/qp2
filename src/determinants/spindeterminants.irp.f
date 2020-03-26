@@ -416,6 +416,7 @@ END_PROVIDER
 BEGIN_PROVIDER  [ double precision, psi_bilinear_matrix_values, (N_det,N_states) ]
   use bitmasks
   PROVIDE psi_bilinear_matrix_rows
+  integer :: k,l
   do k=1,N_det
     do l=1,N_states
       psi_bilinear_matrix_values(k,l) = psi_coef(k,l)
@@ -429,6 +430,7 @@ END_PROVIDER
 BEGIN_PROVIDER  [ complex*16, psi_bilinear_matrix_values_complex, (N_det,N_states) ]
   use bitmasks
   PROVIDE psi_bilinear_matrix_rows
+  integer :: k,l
   do k=1,N_det
     do l=1,N_states
       psi_bilinear_matrix_values_complex(k,l) = psi_coef_complex(k,l)
