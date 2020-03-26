@@ -434,7 +434,7 @@ BEGIN_PROVIDER [ integer(bit_kind), kpts_bitmask , (N_int,kpt_num) ]
     enddo
     call list_to_bitstring( kpts_bitmask(1,k), tmp_mo_list, mo_num_per_kpt, N_int)
     !debugging
-    print*,'k'
+    print*,'k = ',k
     call debug_single_spindet(kpts_bitmask(1,k),N_int)
   enddo
 END_PROVIDER
