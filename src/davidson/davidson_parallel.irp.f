@@ -105,6 +105,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
 !  integer, external :: zmq_get_dvector
   integer, external :: zmq_get_dmatrix
   integer, external :: zmq_get_cdmatrix
+  IRP_IF MPI
+    include 'mpif.h'
+  IRP_ENDIF
  
   if (is_complex) then
     complex*16, allocatable  :: v_tc(:,:), s_tc(:,:), u_tc(:,:)
@@ -140,7 +143,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
     enddo
 
     IRP_IF MPI
-      include 'mpif.h'
+!      include 'mpif.h'
       call broadcast_chunks_complex_double(u_tc,size(u_tc,kind=8))
     IRP_ENDIF
 
@@ -202,7 +205,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   enddo
 
   IRP_IF MPI
-    include 'mpif.h'
+    !include 'mpif.h'
     call broadcast_chunks_double(u_t,size(u_t,kind=8))
   IRP_ENDIF
 
