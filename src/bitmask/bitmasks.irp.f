@@ -85,7 +85,7 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
     kpt=1
     korb=1
     do i=1,elec_alpha_num
-      occ(i) = korb + (kpt-1) * ao_num_per_kpt
+      occ(i) = korb + (kpt-1) * mo_num_per_kpt
       kpt += 1
       if (kpt > kpt_num) then
         kpt = 1
