@@ -354,10 +354,10 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
   PROVIDE read_ao_two_e_integrals io_ao_two_e_integrals
   if (read_ao_two_e_integrals) then
     print*,'Reading the AO integrals'
-      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-      print*, 'AO integrals provided'
-      ao_two_e_integrals_in_map = .True.
-      return
+    call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
+    print*, 'AO integrals provided'
+    ao_two_e_integrals_in_map = .True.
+    return
   endif
 
   print*, 'Providing the AO integrals'

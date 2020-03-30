@@ -12,8 +12,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
   integer                        :: i,j,k,l,n_pt_in,m
   double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
-  if (read_ao_integrals_e_n) then
-    call ezfio_get_ao_one_e_ints_ao_integrals_e_n(ao_integrals_n_e)
+  if (read_ao_integrals_n_e) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
     print *,  'AO N-e integrals read from disk'
   else
 
@@ -76,12 +76,35 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     !$OMP END DO
     !$OMP END PARALLEL
   endif
-  if (write_ao_integrals_e_n) then
-    call ezfio_set_ao_one_e_ints_ao_integrals_e_n(ao_integrals_n_e)
+  if (write_ao_integrals_n_e) then
+    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
     print *,  'AO N-e integrals written to disk'
   endif
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
+  BEGIN_DOC
+  !  Nucleus-electron interaction, in the |AO| basis set.
+  !
+  !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+  END_DOC
+  implicit none
+  double precision               :: alpha, beta, gama, delta
+  integer                        :: num_A,num_B
+  double precision               :: A_center(3),B_center(3),C_center(3)
+  integer                        :: power_A(3),power_B(3)
+  integer                        :: i,j,k,l,n_pt_in,m
+  double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
+
+  if (read_ao_integrals_n_e) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_n_e_imag(ao_integrals_n_e_imag)
+    print *,  'AO N-e integrals read from disk'
+  else
+   print *,  irp_here, ': Not yet implemented'
+  endif
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nucl_num)]
   BEGIN_DOC
@@ -166,7 +189,7 @@ double precision function NAI_pol_mult(A_center,B_center,power_A,power_B,alpha,b
   double precision               :: P_center(3)
   double precision               :: d(0:n_pt_in),pouet,coeff,rho,dist,const,pouet_2,p,p_inv,factor
   double precision               :: I_n_special_exact,integrate_bourrin,I_n_bibi
-  double precision               :: V_e_n,const_factor,dist_integral,tmp
+  double precision               :: V_n_e,const_factor,dist_integral,tmp
   double precision               :: accu,epsilo,rint
   integer                        :: n_pt_out,lmax
   include 'utils/constants.include.F'
@@ -178,7 +201,7 @@ double precision function NAI_pol_mult(A_center,B_center,power_A,power_B,alpha,b
         (A_center(3)/=C_center(3))) then
     continue
   else
-    NAI_pol_mult = V_e_n(power_A(1),power_A(2),power_A(3),           &
+    NAI_pol_mult = V_n_e(power_A(1),power_A(2),power_A(3),           &
         power_B(1),power_B(2),power_B(3),alpha,beta)
     return
   endif
@@ -476,7 +499,7 @@ recursive subroutine I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,d,nd,dim)
   endif
 end
 
-double precision function V_e_n(a_x,a_y,a_z,b_x,b_y,b_z,alpha,beta)
+double precision function V_n_e(a_x,a_y,a_z,b_x,b_y,b_z,alpha,beta)
   implicit none
   BEGIN_DOC
 ! Primitve nuclear attraction between the two primitves centered on the same atom.
@@ -489,9 +512,9 @@ double precision function V_e_n(a_x,a_y,a_z,b_x,b_y,b_z,alpha,beta)
   double precision               :: alpha,beta
   double precision               :: V_r, V_phi, V_theta
   if(iand((a_x+b_x),1)==1.or.iand(a_y+b_y,1)==1.or.iand((a_z+b_z),1)==1)then
-    V_e_n = 0.d0
+    V_n_e = 0.d0
   else
-    V_e_n =   V_r(a_x+b_x+a_y+b_y+a_z+b_z+1,alpha+beta)              &
+    V_n_e =   V_r(a_x+b_x+a_y+b_y+a_z+b_z+1,alpha+beta)              &
         * V_phi(a_x+b_x,a_y+b_y)                                     &
         * V_theta(a_z+b_z,a_x+b_x+a_y+b_y+1)
   endif

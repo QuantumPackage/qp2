@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_begin_iteration, (ao_num,mo_num) ]
    BEGIN_DOC
    ! Void provider to store the coefficients of the |MO| basis at the beginning of the SCF iteration
    !
-   ! Usefull to track some orbitals
+   ! Useful to track some orbitals
    END_DOC
 END_PROVIDER
 

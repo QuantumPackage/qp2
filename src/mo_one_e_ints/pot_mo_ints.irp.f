@@ -4,8 +4,8 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
 ! Nucleus-electron interaction on the |MO| basis
  END_DOC
 
-  if (read_mo_integrals_e_n) then
-     call ezfio_get_mo_one_e_ints_mo_integrals_e_n(mo_integrals_n_e)
+  if (read_mo_integrals_n_e) then
+     call ezfio_get_mo_one_e_ints_mo_integrals_n_e(mo_integrals_n_e)
     print *,  'MO N-e integrals read from disk'
   else
     call ao_to_mo(                                                   &
@@ -15,8 +15,8 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e, (mo_num,mo_num)]
         size(mo_integrals_n_e,1)                                &
         )
   endif
-  if (write_mo_integrals_e_n) then
-     call ezfio_set_mo_one_e_ints_mo_integrals_e_n(mo_integrals_n_e)
+  if (write_mo_integrals_n_e) then
+     call ezfio_set_mo_one_e_ints_mo_integrals_n_e(mo_integrals_n_e)
     print *,  'MO N-e integrals written to disk'
   endif
 
