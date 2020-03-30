@@ -6,7 +6,6 @@
 ! exchange/correlation energy with the short range pbe functional
  END_DOC
  integer :: istate,i,j,m
- double precision :: r(3)
  double precision :: mu,weight
  double precision, allocatable :: ex(:), ec(:)
  double precision, allocatable :: rho_a(:),rho_b(:),grad_rho_a(:,:),grad_rho_b(:,:),grad_rho_a_2(:),grad_rho_b_2(:),grad_rho_a_b(:)
@@ -22,9 +21,6 @@
  energy_x_pbe = 0.d0
  do istate = 1, N_states
   do i = 1, n_points_final_grid
-   r(1) = final_grid_points(1,i)
-   r(2) = final_grid_points(2,i)
-   r(3) = final_grid_points(3,i)
    weight = final_weight_at_r_vector(i)
    rho_a(istate) =  one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rho_b(istate) =  one_e_dm_and_grad_beta_in_r(4,i,istate)
@@ -40,7 +36,7 @@
    enddo
 
                              ! inputs
-   call GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(0.d0,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    energy_x_pbe += ex * weight
@@ -56,7 +52,6 @@ BEGIN_PROVIDER[double precision, energy_c_pbe, (N_states) ]
 ! exchange/correlation energy with the short range pbe functional
  END_DOC
  integer :: istate,i,j,m
- double precision :: r(3)
  double precision :: mu,weight
  double precision, allocatable :: ex(:), ec(:)
  double precision, allocatable :: rho_a(:),rho_b(:),grad_rho_a(:,:),grad_rho_b(:,:),grad_rho_a_2(:),grad_rho_b_2(:),grad_rho_a_b(:)
@@ -72,9 +67,6 @@ BEGIN_PROVIDER[double precision, energy_c_pbe, (N_states) ]
  energy_c_pbe = 0.d0
  do istate = 1, N_states
   do i = 1, n_points_final_grid
-   r(1) = final_grid_points(1,i)
-   r(2) = final_grid_points(2,i)
-   r(3) = final_grid_points(3,i)
    weight = final_weight_at_r_vector(i)
    rho_a(istate) =  one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rho_b(istate) =  one_e_dm_and_grad_beta_in_r(4,i,istate)
@@ -90,7 +82,7 @@ BEGIN_PROVIDER[double precision, energy_c_pbe, (N_states) ]
    enddo
 
                              ! inputs
-   call GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(0.d0,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    energy_c_pbe += ec * weight
@@ -159,7 +151,6 @@ END_PROVIDER
 ! aos_vxc_alpha_pbe_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
  integer :: istate,i,j,m
- double precision :: r(3)
  double precision :: mu,weight
  double precision, allocatable :: ex(:), ec(:)
  double precision, allocatable :: rho_a(:),rho_b(:),grad_rho_a(:,:),grad_rho_b(:,:),grad_rho_a_2(:),grad_rho_b_2(:),grad_rho_a_b(:)
@@ -179,9 +170,6 @@ END_PROVIDER
 
  do istate = 1, N_states
   do i = 1, n_points_final_grid
-   r(1) = final_grid_points(1,i)
-   r(2) = final_grid_points(2,i)
-   r(3) = final_grid_points(3,i)
    weight = final_weight_at_r_vector(i)
    rho_a(istate) =  one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rho_b(istate) =  one_e_dm_and_grad_beta_in_r(4,i,istate)
@@ -197,7 +185,7 @@ END_PROVIDER
    enddo
 
                              ! inputs
-   call GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(0.d0,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    vx_rho_a(istate) *= weight
@@ -325,63 +313,54 @@ END_PROVIDER
 ! aos_vxc_alpha_pbe_w(j,i) = ao_i(r_j) * (v^x_alpha(r_j) + v^c_alpha(r_j)) * W(r_j)
  END_DOC
  integer :: istate,i,j,m
- double precision :: r(3)
  double precision :: mu,weight
- double precision, allocatable :: ex(:), ec(:)
- double precision, allocatable :: rho_a(:),rho_b(:),grad_rho_a(:,:),grad_rho_b(:,:),grad_rho_a_2(:),grad_rho_b_2(:),grad_rho_a_b(:)
- double precision, allocatable :: contrib_grad_xa(:,:),contrib_grad_xb(:,:),contrib_grad_ca(:,:),contrib_grad_cb(:,:)
- double precision, allocatable :: vc_rho_a(:), vc_rho_b(:), vx_rho_a(:), vx_rho_b(:)
- double precision, allocatable :: vx_grad_rho_a_2(:), vx_grad_rho_b_2(:), vx_grad_rho_a_b(:), vc_grad_rho_a_2(:), vc_grad_rho_b_2(:), vc_grad_rho_a_b(:)
- allocate(vc_rho_a(N_states), vc_rho_b(N_states), vx_rho_a(N_states), vx_rho_b(N_states))
- allocate(vx_grad_rho_a_2(N_states), vx_grad_rho_b_2(N_states), vx_grad_rho_a_b(N_states), vc_grad_rho_a_2(N_states), vc_grad_rho_b_2(N_states), vc_grad_rho_a_b(N_states))
- allocate(rho_a(N_states), rho_b(N_states),grad_rho_a(3,N_states),grad_rho_b(3,N_states))
- allocate(grad_rho_a_2(N_states),grad_rho_b_2(N_states),grad_rho_a_b(N_states), ex(N_states), ec(N_states))
- allocate(contrib_grad_xa(3,N_states),contrib_grad_xb(3,N_states),contrib_grad_ca(3,N_states),contrib_grad_cb(3,N_states))
+ double precision :: ex, ec
+ double precision :: rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
+ double precision :: contrib_grad_xa(3),contrib_grad_xb(3),contrib_grad_ca(3),contrib_grad_cb(3)
+ double precision :: vc_rho_a, vc_rho_b, vx_rho_a, vx_rho_b
+ double precision :: vx_grad_rho_a_2, vx_grad_rho_b_2, vx_grad_rho_a_b, vc_grad_rho_a_2, vc_grad_rho_b_2, vc_grad_rho_a_b
 
   aos_dvxc_alpha_pbe_w = 0.d0
   aos_dvxc_beta_pbe_w  = 0.d0
 
  do istate = 1, N_states
   do i = 1, n_points_final_grid
-   r(1) = final_grid_points(1,i)
-   r(2) = final_grid_points(2,i)
-   r(3) = final_grid_points(3,i)
    weight = final_weight_at_r_vector(i)
-   rho_a(istate) =  one_e_dm_and_grad_alpha_in_r(4,i,istate)
-   rho_b(istate) =  one_e_dm_and_grad_beta_in_r(4,i,istate)
-   grad_rho_a(1:3,istate) =  one_e_dm_and_grad_alpha_in_r(1:3,i,istate)
-   grad_rho_b(1:3,istate) =  one_e_dm_and_grad_beta_in_r(1:3,i,istate)
+   rho_a =  one_e_dm_and_grad_alpha_in_r(4,i,istate)
+   rho_b =  one_e_dm_and_grad_beta_in_r(4,i,istate)
+   grad_rho_a(1:3) =  one_e_dm_and_grad_alpha_in_r(1:3,i,istate)
+   grad_rho_b(1:3) =  one_e_dm_and_grad_beta_in_r(1:3,i,istate)
    grad_rho_a_2 = 0.d0
    grad_rho_b_2 = 0.d0
    grad_rho_a_b = 0.d0
    do m = 1, 3
-    grad_rho_a_2(istate) += grad_rho_a(m,istate) * grad_rho_a(m,istate)
-    grad_rho_b_2(istate) += grad_rho_b(m,istate) * grad_rho_b(m,istate)
-    grad_rho_a_b(istate) += grad_rho_a(m,istate) * grad_rho_b(m,istate)
+    grad_rho_a_2 += grad_rho_a(m) * grad_rho_a(m)
+    grad_rho_b_2 += grad_rho_b(m) * grad_rho_b(m)
+    grad_rho_a_b += grad_rho_a(m) * grad_rho_b(m)
    enddo
 
-                             ! inputs
-   call GGA_type_functionals(r,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
-                             ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
-                             ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
-   vx_rho_a(istate) *= weight
-   vc_rho_a(istate) *= weight
-   vx_rho_b(istate) *= weight
-   vc_rho_b(istate) *= weight
+   ! call exc_sr_pbe 
+   call GGA_sr_type_functionals(0.d0,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,         &  ! inputs
+                             ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs exchange
+                             ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )  ! outputs correlation
+   vx_rho_a *= weight
+   vc_rho_a *= weight
+   vx_rho_b *= weight
+   vc_rho_b *= weight
    do m= 1,3
-    contrib_grad_ca(m,istate) = weight * (2.d0 * vc_grad_rho_a_2(istate) *  grad_rho_a(m,istate) + vc_grad_rho_a_b(istate)  * grad_rho_b(m,istate))
-    contrib_grad_xa(m,istate) = weight * (2.d0 * vx_grad_rho_a_2(istate) *  grad_rho_a(m,istate) + vx_grad_rho_a_b(istate)  * grad_rho_b(m,istate))
-    contrib_grad_cb(m,istate) = weight * (2.d0 * vc_grad_rho_b_2(istate) *  grad_rho_b(m,istate) + vc_grad_rho_a_b(istate)  * grad_rho_a(m,istate))
-    contrib_grad_xb(m,istate) = weight * (2.d0 * vx_grad_rho_b_2(istate) *  grad_rho_b(m,istate) + vx_grad_rho_a_b(istate)  * grad_rho_a(m,istate))
+    contrib_grad_ca(m) = weight * (2.d0 * vc_grad_rho_a_2 *  grad_rho_a(m) + vc_grad_rho_a_b  * grad_rho_b(m))
+    contrib_grad_xa(m) = weight * (2.d0 * vx_grad_rho_a_2 *  grad_rho_a(m) + vx_grad_rho_a_b  * grad_rho_b(m))
+    contrib_grad_cb(m) = weight * (2.d0 * vc_grad_rho_b_2 *  grad_rho_b(m) + vc_grad_rho_a_b  * grad_rho_a(m))
+    contrib_grad_xb(m) = weight * (2.d0 * vx_grad_rho_b_2 *  grad_rho_b(m) + vx_grad_rho_a_b  * grad_rho_a(m))
    enddo
    do j = 1, ao_num
-    aos_vxc_alpha_pbe_w(j,i,istate) = ( vc_rho_a(istate) + vx_rho_a(istate) ) * aos_in_r_array(j,i)
-    aos_vxc_beta_pbe_w (j,i,istate) = ( vc_rho_b(istate) + vx_rho_b(istate) ) * aos_in_r_array(j,i)
+    aos_vxc_alpha_pbe_w(j,i,istate) = ( vc_rho_a + vx_rho_a ) * aos_in_r_array(j,i)
+    aos_vxc_beta_pbe_w (j,i,istate) = ( vc_rho_b + vx_rho_b ) * aos_in_r_array(j,i)
    enddo
    do j = 1, ao_num
     do m = 1,3
-     aos_dvxc_alpha_pbe_w(j,i,istate) += ( contrib_grad_ca(m,istate) + contrib_grad_xa(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_dvxc_beta_pbe_w (j,i,istate) += ( contrib_grad_cb(m,istate) + contrib_grad_xb(m,istate) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_dvxc_alpha_pbe_w(j,i,istate) += ( contrib_grad_ca(m) + contrib_grad_xa(m) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_dvxc_beta_pbe_w (j,i,istate) += ( contrib_grad_cb(m) + contrib_grad_xb(m) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
     enddo
    enddo
   enddo
