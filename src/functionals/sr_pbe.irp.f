@@ -12,7 +12,7 @@
  END_DOC
  integer :: istate,i,j,m
  double precision :: mu,weight
- double precision, allocatable :: ex, ec
+ double precision :: ex, ec
  double precision :: rho_a,rho_b,grad_rho_a(3),grad_rho_b(3),grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
  double precision :: vc_rho_a, vc_rho_b, vx_rho_a, vx_rho_b
  double precision :: vx_grad_rho_a_2, vx_grad_rho_b_2, vx_grad_rho_a_b, vc_grad_rho_a_2, vc_grad_rho_b_2, vc_grad_rho_a_b

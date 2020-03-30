@@ -9,10 +9,8 @@ subroutine GGA_sr_type_functionals(mu,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad
  double precision, intent(in)  :: mu,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b
  double precision, intent(out) :: ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b
  double precision, intent(out) :: ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b
- integer          :: istate
- double precision :: r2(3),dr2(3), local_potential,r12,dx2
+ double precision :: rhoc,rhoo,sigmacc,sigmaco,sigmaoo,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo
 
-  double precision :: rhoc,rhoo,sigmacc,sigmaco,sigmaoo,vrhoc,vrhoo,vsigmacc,vsigmaco,vsigmaoo
 
    ! exhange energy and potentials 
    call ex_pbe_sr(mu,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b)
