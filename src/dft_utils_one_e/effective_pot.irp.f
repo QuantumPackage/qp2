@@ -10,10 +10,9 @@
 ! 
 ! Taking the expectation value does not provide any energy, but
 !
-! effective_one_e_potential(i,j) is the potential coupling DFT and WFT part to
+! effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts 
 !
-! be used in any WFT calculation.
-!
+! and it is used in any RS-DFT based calculations  
  END_DOC
  do istate = 1, N_states
   do j = 1, mo_num
