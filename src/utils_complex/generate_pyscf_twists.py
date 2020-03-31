@@ -115,7 +115,7 @@ for i in range(len(allkpts)):
     #end if
    
     with open('e_scf','w') as ener:
-        ener.write('%s\n' % (e_scf))
+        ener.write('%s\\n' % (e_scf))
     print('e_scf',e_scf)
    
     #title="S8-twist%s"%i
