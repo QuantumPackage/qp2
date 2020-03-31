@@ -135,7 +135,7 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, mat_tmp_dm_super_ci, (n_act_orb,n_act_orb)]
  implicit none
  BEGIN_DOC
- ! computation of the term in [ ] in the equation B3.d of Roos et. al. Chemical Physics 48 (1980) 157-173
+ ! computation of the term in [ ] in the equation B3.d of Roos et. al. Chemical Physics 48 (1980) 157-173
  !
  ! !!!!! WARNING !!!!!! there is a TYPO: a MINUS SIGN SHOULD APPEAR in that term 
  END_DOC

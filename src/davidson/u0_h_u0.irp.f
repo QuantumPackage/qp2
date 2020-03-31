@@ -2,9 +2,9 @@
 &BEGIN_PROVIDER [ double precision, psi_s2, (N_states) ]
   implicit none
   BEGIN_DOC
-! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
+! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
 ! 
-! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
+! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
   END_DOC
   call u_0_H_u_0(psi_energy,psi_s2,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
   integer :: i

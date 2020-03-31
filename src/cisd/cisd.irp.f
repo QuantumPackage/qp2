@@ -14,7 +14,7 @@ program cisd
   ! * **Ground state calculation**: if even after a :c:func:`cis` calculation, natural
   !   orbitals (see :c:func:`save_natorb`) and then :c:func:`scf` optimization, you are not sure to have the lowest scf
   !   solution,
-  !   do the same strategy with the :c:func:`cisd` executable instead of the :c:func:`cis` exectuable to generate the natural
+  !   do the same strategy with the :c:func:`cisd` executable instead of the :c:func:`cis` exectuable to generate the natural
   !   orbitals as a guess for the :c:func:`scf`.
   !
   !
