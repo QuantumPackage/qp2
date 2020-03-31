@@ -29,9 +29,12 @@ if [[ -z ${QP_ROOT} ]] ; then
 fi
 
 
-FILES=$(grep -P "\xA0" ${QP_ROOT}/src/*/*.f | cut -d ':' -f 1 | sort | uniq)
+FILES=$(grep -e "[\x{00FF}-\x{FFFF}]" ${QP_ROOT}/src/*/*.f | cut -d ':' -f 1 | sort | uniq)
 for F in $FILES ; do
   echo "Cleaning $F"
-  vim -c "% s/\%xA0/ /g" -c ":wq" $F
+#  vim -c "% s/\%xA0/ /g" -c ":wq" $F
+  perl -pi -e 's/[^[:ascii:]]/ /g' $F
 done
+
+
 
