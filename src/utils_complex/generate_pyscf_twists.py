@@ -81,7 +81,7 @@ $system
 $twistinfo
 
 pwd_top = os.path.dirname(os.path.realpath(__file__))
-for i in range(2,3):
+for i in range(len(allkpts)):
     jobdir=pwd_top + '/twist-{:02d}/'.format(i)
     if not restart:
         os.mkdir(jobdir)
