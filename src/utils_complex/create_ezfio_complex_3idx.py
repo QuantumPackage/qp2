@@ -139,7 +139,7 @@ def convert_kpts(filename,qph5path):
     with h5py.File(qph5path,'r') as qph5:
         if 'mo_one_e_ints' in qph5.keys():
             kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic_kpts'][()].tolist()
-            ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap'][()].tolist()
+            ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap_kpts'][()].tolist()
             ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e_kpts'][()].tolist()
     
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
