@@ -189,16 +189,27 @@ end
 subroutine ex_pbe_sr(mu,rho_a,rho_b,grd_rho_a_2,grd_rho_b_2,grd_rho_a_b,ex,vx_rho_a,vx_rho_b,vx_grd_rho_a_2,vx_grd_rho_b_2,vx_grd_rho_a_b)
 BEGIN_DOC
 !mu    = range separation parameter
+!
 !rho_a = density alpha
+!
 !rho_b = density beta
+!
 !grd_rho_a_2 = (gradient rho_a)^2
+!
 !grd_rho_b_2 = (gradient rho_b)^2
+!
 !grd_rho_a_b = (gradient rho_a).(gradient rho_b)
+!
 !ex = exchange energy density at the density and corresponding gradients of the density
+!
 !vx_rho_a = d ex / d rho_a
+!
 !vx_rho_b = d ex / d rho_b
+!
 !vx_grd_rho_a_2 = d ex / d grd_rho_a_2
+!
 !vx_grd_rho_b_2 = d ex / d grd_rho_b_2
+!
 !vx_grd_rho_a_b = d ex / d grd_rho_a_b
 END_DOC
 
@@ -313,10 +324,15 @@ END_DOC
 subroutine ex_pbe_sr_only(mu,rho_a,rho_b,grd_rho_a_2,grd_rho_b_2,grd_rho_a_b,ex)
 BEGIN_DOC
 !rho_a = density alpha
+!
 !rho_b = density beta
+!
 !grd_rho_a_2 = (gradient rho_a)^2
+!
 !grd_rho_b_2 = (gradient rho_b)^2
+!
 !grd_rho_a_b = (gradient rho_a).(gradient rho_b)
+!
 !ex = exchange energy density at point r
 END_DOC
 

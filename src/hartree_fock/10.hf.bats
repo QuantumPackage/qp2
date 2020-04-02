@@ -11,7 +11,7 @@ function run() {
   qp edit --check
   qp reset --mos
   qp run scf 
-  qp set_frozen_core 
+#  qp set_frozen_core 
   energy="$(ezfio get hartree_fock energy)"
   eq $energy $2 $thresh
 }

@@ -7,10 +7,12 @@
 ! Effective_one_e_potential(i,j) = $\rangle i_{MO}| v_{H}^{sr} |j_{MO}\rangle  + \rangle i_{MO}| h_{core} |j_{MO}\rangle  + \rangle i_{MO}|v_{xc} |j_{MO}\rangle$
 !
 ! on the |MO| basis
+! 
 ! Taking the expectation value does not provide any energy, but
-! effective_one_e_potential(i,j) is the potential coupling DFT and WFT part to
-! be used in any WFT calculation.
 !
+! effective_one_e_potential(i,j) is the potential coupling DFT and WFT parts 
+!
+! and it is used in any RS-DFT based calculations  
  END_DOC
  do istate = 1, N_states
   do j = 1, mo_num
