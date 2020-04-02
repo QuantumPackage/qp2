@@ -544,7 +544,7 @@ def df_ao_to_mo_new(j3ao,mo_coef):
     Nk = mo_coef.shape[0]
     return np.array([
         np.einsum('mji,ik,jl->mlk',j3ao[idx2_tri((ki,kj))],mo_coef[ki].conj(),mo_coef[kj])
-        for ki,kj in product(range(Nk),repeat=2) if (ki>=kj)])
+        for ki,kj in product(range(Nk),repeat=2) if (ki>=kj)],dtype=np.complex128)
 
 def df_ao_to_mo_test(j3ao,mo_coef):
     from itertools import product
@@ -693,13 +693,15 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     
     with h5py.File(qph5path,'a') as qph5:
         # k,mo,ao(,2)
-        mo_coef_f = np.array(mo_k.transpose((0,2,1)),order='c')
+        mo_coef_f = np.array(mo_k.transpose((0,2,1)),order='c',dtype=np.complex128)
         mo_coef_blocked=block_diag(*mo_k)
         mo_coef_blocked_f = block_diag(*mo_coef_f)
         #qph5.create_dataset('mo_basis/mo_coef_real',data=mo_coef_blocked.real)
         #qph5.create_dataset('mo_basis/mo_coef_imag',data=mo_coef_blocked.imag)
         #qph5.create_dataset('mo_basis/mo_coef_kpts_real',data=mo_k.real)
         #qph5.create_dataset('mo_basis/mo_coef_kpts_imag',data=mo_k.imag)
+        print(mo_coef_f.dtype)
+        print(mo_coef_blocked_f.dtype)
         qph5.create_dataset('mo_basis/mo_coef_complex',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
         qph5.create_dataset('mo_basis/mo_coef_kpts',data=mo_coef_f.view(dtype=np.float64).reshape((Nk,nmo,nao,2)))
    
@@ -723,9 +725,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
             ovlp_ao_blocked=block_diag(*ovlp_ao)
             ne_ao_blocked=block_diag(*ne_ao)
 
-            kin_ao_f =  np.array(kin_ao.transpose((0,2,1)),order='c')
-            ovlp_ao_f = np.array(ovlp_ao.transpose((0,2,1)),order='c')
-            ne_ao_f =   np.array(ne_ao.transpose((0,2,1)),order='c')
+            kin_ao_f =  np.array(kin_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
+            ovlp_ao_f = np.array(ovlp_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
+            ne_ao_f =   np.array(ne_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
 
             kin_ao_blocked_f = block_diag(*kin_ao_f)
             ovlp_ao_blocked_f = block_diag(*ovlp_ao_f)
@@ -760,9 +762,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         ne_mo_blocked=block_diag(*ne_mo)
 
         with h5py.File(qph5path,'a') as qph5:
-            kin_mo_f =  np.array(kin_mo.transpose((0,2,1)),order='c')
-            ovlp_mo_f = np.array(ovlp_mo.transpose((0,2,1)),order='c')
-            ne_mo_f =   np.array(ne_mo.transpose((0,2,1)),order='c')
+            kin_mo_f =  np.array(kin_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
+            ovlp_mo_f = np.array(ovlp_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
+            ne_mo_f =   np.array(ne_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
 
             kin_mo_blocked_f = block_diag(*kin_mo_f)
             ovlp_mo_blocked_f = block_diag(*ovlp_mo_f)

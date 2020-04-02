@@ -36,8 +36,8 @@ cell_info = obj(
 #        tiling = [[ 1, -1,  1],
 #                  [ 1,  1, -1],
 #                  [-1,  1,  1]],
-        tiling = (2,2,2),
-        kgrid  = (6,6,6),
+        tiling = (1,1,1),
+        kgrid  = (12,12,12),
         ),
     )
 
@@ -196,14 +196,17 @@ for cell_type in cell_types:
         #jobparams['twistinfo']+='])\n'
 
         jobparams['twistinfo']+='# mapping from supercell to primitive cell k-points\n'
-        jobparams['twistinfo']+='mymap=array([\n'
+
         if kmap is None:
-            for i in range(len(s.kpoints)):
-                jobparams['twistinfo']+=('['+str(i)+'],\n')
+            nkpts = str(len(s.kpoints))
+            jobparams['twistinfo']+='mymap=np.arange('+nkpts+').reshape(('+nkpts+',1))\n'
+            #for i in range(len(s.kpoints)):
+            #    jobparams['twistinfo']+=('['+str(i)+'],\n')
         else:
+            jobparams['twistinfo']+='mymap=array([\n'
             for kmapkey in kmap.sorted_keys():
                 jobparams['twistinfo']+=(str(list(kmap[kmapkey]))+',\n')
-        jobparams['twistinfo']+='])\n'
+            jobparams['twistinfo']+='])\n'
         print ('mapping from supercell to primitive cell k-points')
         if kmap is not None:
             print (kmap)
