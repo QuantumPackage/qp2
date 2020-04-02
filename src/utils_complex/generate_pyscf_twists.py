@@ -185,23 +185,28 @@ for cell_type in cell_types:
         #end for
         jobparams['twistinfo']+='])\n'
 
-        print ('primitive cell kpoints')
+        #print ('primitive cell kpoints')
         # this should already be written by nexus as part of $system
         #jobparams['twistinfo']+='# primitive cell kpoints\n')
         #jobparams['twistinfo']+='orig=array([\n'
-        for i,k in enumerate(s.folded_structure.kpoints):
-            print ('  ',i,k)
+        #for i,k in enumerate(s.folded_structure.kpoints):
+            #print ('  ',i,k)
             #jobparams['twistinfo']+=(str(list(k))+',\n')
         #end for
         #jobparams['twistinfo']+='])\n'
 
         jobparams['twistinfo']+='# mapping from supercell to primitive cell k-points\n'
         jobparams['twistinfo']+='mymap=array([\n'
-        for kmapkey in kmap.sorted_keys():
-            jobparams['twistinfo']+=(str(list(kmap[kmapkey]))+',\n')
+        if kmap is None:
+            for i in range(len(s.kpoints)):
+                jobparams['twistinfo']+=('['+str(i)+'],\n')
+        else:
+            for kmapkey in kmap.sorted_keys():
+                jobparams['twistinfo']+=(str(list(kmap[kmapkey]))+',\n')
         jobparams['twistinfo']+='])\n'
         print ('mapping from supercell to primitive cell k-points')
-        print (kmap)
+        if kmap is not None:
+            print (kmap)
 
         #jobparams['twistinfo']+=('allkpts=array(list(map(lambda xs: list(map(lambda x: orig[x], xs)), mymap)))\n')
         jobparams['twistinfo']+=('allkpts=array(list(map(lambda xs: list(map(lambda x: kpts[x], xs)), mymap)))\n')
