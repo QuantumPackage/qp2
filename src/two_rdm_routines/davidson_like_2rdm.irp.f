@@ -137,7 +137,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
    PROVIDE N_int
 
    call list_to_bitstring( orb_bitmask, list_orb, norb, N_int)
-   sze_buff = 6 * norb
+   sze_buff = 6 * norb + elec_alpha_num * elec_alpha_num * 60 
    list_orb_reverse = -1000 
    do i = 1, norb
     list_orb_reverse(list_orb(i)) = i 
@@ -267,7 +267,7 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
           endif
          endif
          call orb_range_off_diag_double_to_all_states_ab_dm_buffer(tmp_det,tmp_det2,c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!         print*,'coucou'
+
        enddo
       endif
        
@@ -347,15 +347,13 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
          nkeys = 0
        endif
-        call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
+       call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        ! increment the alpha/alpha part for single excitations
        if (nkeys+4 * elec_alpha_num .ge. sze_buff ) then
          call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
          nkeys = 0
        endif
-!       call orb_range_off_diag_single_to_2_rdm_aa_dm_buffer(tmp_det,tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-        call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!       print*,'to do orb_range_off_diag_single_to_2_rdm_aa_dm_buffer'
+       call orb_range_off_diag_single_to_all_states_aa_dm_buffer(tmp_det,tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
        
      enddo
@@ -382,7 +380,6 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
           nkeys = 0
         endif
         call orb_range_off_diag_double_to_all_states_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_1,N_st,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!        print*,'to do orb_range_off_diag_double_to_2_rdm_aa_dm_buffer'
       enddo
      endif
      call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)
@@ -453,7 +450,6 @@ subroutine orb_range_2_rdm_openmp_work_$N_int(big_array,dim1,norb,list_orb,ispin
           nkeys = 0
         endif
          call orb_range_off_diag_single_to_all_states_ab_dm_buffer(tmp_det, tmp_det2,c_1,N_st,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!        print*,'to do orb_range_off_diag_single_to_2_rdm_ab_dm_buffer'
         ! increment the beta /beta  part for single excitations
         if (nkeys+4 * elec_alpha_num .ge. sze_buff) then
           call update_keys_values_n_states(keys,values,nkeys,dim1,n_st,big_array,lock_2rdm)

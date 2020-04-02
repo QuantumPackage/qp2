@@ -257,11 +257,9 @@
  if(list_orb_reverse(p2).lt.0)return
  p2 = list_orb_reverse(p2)
  if(alpha_beta)then
-!   print*,'coucou'
    nkeys += 1
    do istate = 1, N_st
     values(istate,nkeys) = c_1(istate) * phase
-!    print*,'values',values(istate,nkeys),nkeys
    enddo
    keys(1,nkeys) = h1
    keys(2,nkeys) = h2

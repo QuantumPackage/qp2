@@ -49,9 +49,10 @@ BEGIN_PROVIDER [ integer, n_act_orb]
       n_act_orb += 1
     endif
   enddo
-  
   call write_int(6,n_act_orb, 'Number of active   MOs')
-   
+  if (mpi_master) then
+    call ezfio_set_bitmask_n_act_orb(n_act_orb)
+  endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, n_virt_orb ]

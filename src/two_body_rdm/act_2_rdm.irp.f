@@ -26,8 +26,17 @@
  ispin = 3 
  act_2_rdm_ab_mo = 0.d0
  call wall_time(wall_1)
- call orb_range_2_rdm_openmp(act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
-
+ if(read_two_body_rdm_ab)then
+  print*,'Reading act_2_rdm_ab_mo from disk ...'
+  call ezfio_get_two_body_rdm_two_rdm_ab_disk(act_2_rdm_ab_mo)
+ else 
+  call orb_range_2_rdm_openmp(act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ endif
+ if(write_two_body_rdm_ab)then
+  print*,'Writing act_2_rdm_ab_mo on disk ...'
+  call ezfio_set_two_body_rdm_two_rdm_ab_disk(act_2_rdm_ab_mo)
+  call ezfio_set_two_body_rdm_io_two_body_rdm_ab("Read")
+ endif
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_ab_mo',wall_2 - wall_1
  END_PROVIDER 
@@ -54,7 +63,17 @@
  ispin = 1 
  act_2_rdm_aa_mo = 0.d0
  call wall_time(wall_1)
- call orb_range_2_rdm_openmp(act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ if(read_two_body_rdm_aa)then
+  print*,'Reading act_2_rdm_aa_mo from disk ...'
+  call ezfio_get_two_body_rdm_two_rdm_aa_disk(act_2_rdm_aa_mo)
+ else 
+  call orb_range_2_rdm_openmp(act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ endif
+ if(write_two_body_rdm_aa)then
+  print*,'Writing act_2_rdm_aa_mo on disk ...'
+  call ezfio_set_two_body_rdm_two_rdm_aa_disk(act_2_rdm_aa_mo)
+  call ezfio_set_two_body_rdm_io_two_body_rdm_aa("Read")
+ endif
 
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_aa_mo',wall_2 - wall_1
@@ -82,7 +101,17 @@
  ispin = 2 
  act_2_rdm_bb_mo = 0.d0
  call wall_time(wall_1)
- call orb_range_2_rdm_openmp(act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ if(read_two_body_rdm_bb)then
+  print*,'Reading act_2_rdm_bb_mo from disk ...'
+  call ezfio_get_two_body_rdm_two_rdm_bb_disk(act_2_rdm_bb_mo)
+ else 
+  call orb_range_2_rdm_openmp(act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ endif
+ if(write_two_body_rdm_bb)then
+  print*,'Writing act_2_rdm_bb_mo on disk ...'
+  call ezfio_set_two_body_rdm_two_rdm_bb_disk(act_2_rdm_bb_mo)
+  call ezfio_set_two_body_rdm_io_two_body_rdm_bb("Read")
+ endif
 
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_bb_mo',wall_2 - wall_1
@@ -109,7 +138,17 @@
  ispin = 4 
  act_2_rdm_spin_trace_mo = 0.d0
  call wall_time(wall_1)
- call orb_range_2_rdm_openmp(act_2_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ if(read_two_body_rdm_spin_trace)then
+  print*,'Reading act_2_rdm_spin_trace_mo from disk ...'
+  call ezfio_get_two_body_rdm_two_rdm_spin_trace_disk(act_2_rdm_spin_trace_mo)
+ else 
+  call orb_range_2_rdm_openmp(act_2_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
+ endif
+ if(write_two_body_rdm_spin_trace)then
+  print*,'Writing act_2_rdm_spin_trace_mo on disk ...'
+  call ezfio_set_two_body_rdm_two_rdm_spin_trace_disk(act_2_rdm_spin_trace_mo)
+  call ezfio_set_two_body_rdm_io_two_body_rdm_spin_trace("Read")
+ endif
 
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_spin_trace_mo',wall_2 - wall_1

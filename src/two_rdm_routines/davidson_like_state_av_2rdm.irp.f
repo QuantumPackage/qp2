@@ -139,7 +139,7 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
    PROVIDE N_int
 
    call list_to_bitstring( orb_bitmask, list_orb, norb, N_int)
-   sze_buff = norb ** 3 + 6 * norb
+   sze_buff = 6 * norb + elec_alpha_num * elec_alpha_num * 60 
    list_orb_reverse = -1000 
    do i = 1, norb
     list_orb_reverse(list_orb(i)) = i 
@@ -271,11 +271,12 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
           endif
          endif
          call orb_range_off_diag_double_to_2_rdm_ab_dm_buffer(tmp_det,tmp_det2,c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-!         print*,'todo orb_range_off_diag_double_to_2_rdm_ab_dm_buffer'
-     
+
        enddo
       endif
        
+      call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+      nkeys = 0
      enddo
      
    enddo
@@ -364,6 +365,8 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
        
      enddo
      
+     call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     nkeys = 0
      
      ! Compute Hij for all alpha doubles
      ! ----------------------------------
@@ -389,6 +392,8 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
         call orb_range_off_diag_double_to_2_rdm_aa_dm_buffer(tmp_det(1,1),psi_det_alpha_unique(1, lrow),c_average,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
       enddo
      endif
+     call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     nkeys = 0
      
      
      ! Single and double beta excitations
@@ -466,6 +471,8 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
         call orb_range_off_diag_single_to_2_rdm_bb_dm_buffer(tmp_det, tmp_det2,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
        endif
      enddo
+     call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     nkeys = 0
      
      ! Compute Hij for all beta doubles
      ! ----------------------------------
