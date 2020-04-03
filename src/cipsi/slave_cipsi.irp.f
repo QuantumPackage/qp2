@@ -16,7 +16,7 @@ end
 subroutine provide_everything
   if (is_complex) then
     PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators_complex psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
-    PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
+    PROVIDE pt2_e0_denominator mo_num_per_kpt N_int ci_energy mpi_master zmq_state zmq_context
     PROVIDE psi_det psi_coef_complex threshold_generators state_average_weight
     PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
   else

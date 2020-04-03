@@ -139,7 +139,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
     do while (zmq_get_cdmatrix(zmq_to_qp_run_socket, worker_id, 'u_tc', u_tc, ni, nj, size(u_tc,kind=8)) == -1)
       print *,  'mpi_rank, N_states_diag, N_det'
       print *,  mpi_rank, N_states_diag, N_det
-      stop 'u_t'
+      stop 'u_tc'
     enddo
 
     IRP_IF MPI
@@ -737,21 +737,26 @@ subroutine davidson_push_results_complex(zmq_socket_push, v_t, s_t, imin, imax, 
   sz = (imax-imin+1)*N_states_diag
 
   rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push task_id'
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push task_id'
 
   rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push imin'
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push imin'
 
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push imax'
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push imax'
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
-  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
+  if(rc8 /= 8_8*sz*2) then
+    print*,irp_here,' rc8 = ',rc8
+    print*,irp_here,'  sz = ',sz
+    print*,'rc8 /= sz*8'
+    stop 'davidson_push_results_complex failed to push vt'
+  endif
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
-  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
+  if(rc8 /= 8_8*sz*2) stop 'davidson_push_results_complex failed to push st'
 
 ! Activate is zmq_socket_push is a REQ
 IRP_IF ZMQ_PUSH
@@ -790,21 +795,26 @@ subroutine davidson_push_results_async_send_complex(zmq_socket_push, v_t, s_t, i
   sz = (imax-imin+1)*N_states_diag
 
   rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push task_id'
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push task_id'
 
   rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push imin'
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push imin'
 
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
-  if(rc /= 4) stop 'davidson_push_results failed to push imax'
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push imax'
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
-  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push vt'
+  if(rc8 /= 8_8*sz*2) then
+    print*,irp_here,' rc8 = ',rc8
+    print*,irp_here,'  sz = ',sz
+    print*,'rc8 /= sz*8'
+    stop 'davidson_push_results_async_send_complex failed to push vt'
+  endif
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
-  if(rc8 /= 8_8*sz) stop 'davidson_push_results failed to push st'
+  if(rc8 /= 8_8*sz*2) stop 'davidson_push_results_async_send_complex failed to push st'
 
 end subroutine
 
@@ -837,11 +847,11 @@ subroutine davidson_pull_results_complex(zmq_socket_pull, v_t, s_t, imin, imax, 
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_recv8( zmq_socket_pull, v_t(1,imin), 8_8*sz*2, 0)
-  if(rc8 /= 8*sz) stop 'davidson_pull_results failed to pull v_t'
+  if(rc8 /= 8*sz*2) stop 'davidson_pull_results_complex failed to pull v_t'
 
   !todo: double sz for complex? (done)
   rc8 = f77_zmq_recv8( zmq_socket_pull, s_t(1,imin), 8_8*sz*2, 0)
-  if(rc8 /= 8*sz) stop 'davidson_pull_results failed to pull s_t'
+  if(rc8 /= 8*sz*2) stop 'davidson_pull_results_complex failed to pull s_t'
 
 ! Activate if zmq_socket_pull is a REP
 IRP_IF ZMQ_PUSH
@@ -906,8 +916,8 @@ end subroutine
 
 subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
   !todo: maybe make separate zmq_put_psi_complex?
-  print*,irp_here,' not implemented for complex'
-  stop -1
+  !print*,irp_here,' not implemented for complex'
+  !stop -1
   use omp_lib
   use bitmasks
   use f77_zmq
@@ -926,8 +936,8 @@ subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
   complex*16, intent(inout)      :: u_0(sze,N_st)
   integer                        :: i,j,k
   integer                        :: ithread
-  complex*16, allocatable        :: u_t(:,:)
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
+  complex*16, allocatable        :: u_tc(:,:)
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_tc
   integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
   PROVIDE psi_det_beta_unique psi_bilinear_matrix_order_transp_reverse psi_det_alpha_unique
   PROVIDE psi_bilinear_matrix_transp_values_complex psi_bilinear_matrix_values_complex psi_bilinear_matrix_columns_loc
@@ -986,7 +996,7 @@ subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
     ipos=1
   endif
 
-  allocate(u_t(N_st,N_det))
+  allocate(u_tc(N_st,N_det))
   do k=1,N_st
     call cdset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
@@ -994,8 +1004,8 @@ subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
   call cdtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
-      u_t,                                                           &
-      size(u_t, 1),                                                  &
+      u_tc,                                                           &
+      size(u_tc, 1),                                                  &
       N_det, N_st)
 
 
@@ -1008,20 +1018,20 @@ subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
 
   integer, external :: zmq_put_dvector, zmq_put_psi, zmq_put_N_states_diag
   integer, external :: zmq_put_cdmatrix
-  if (size(u_t) < 8388608) then
-    ni = size(u_t)
+  if (size(u_tc,kind=8) < 8388608_8) then
+    ni = size(u_tc)
     nj = 1
   else
     ni = 8388608
-    nj = size(u_t)/8388608 + 1
+    nj = int(size(u_tc,kind=8)/8388608_8,4) + 1
   endif
   ! Warning : dimensions are modified for efficiency, It is OK since we get the
   ! full matrix
-  if (zmq_put_cdmatrix(zmq_to_qp_run_socket, 1, 'u_t', u_t, ni, nj, size(u_t,kind=8)) == -1) then
-    stop 'Unable to put u_t on ZMQ server'
+  if (zmq_put_cdmatrix(zmq_to_qp_run_socket, 1, 'u_tc', u_tc, ni, nj, size(u_tc,kind=8)) == -1) then
+    stop 'Unable to put u_tc on ZMQ server'
   endif
 
-  deallocate(u_t)
+  deallocate(u_tc)
 
   integer, external :: zmq_set_running
   if (zmq_set_running(zmq_to_qp_run_socket) == -1) then

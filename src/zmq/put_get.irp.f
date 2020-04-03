@@ -540,6 +540,9 @@ integer function zmq_get_cdmatrix(zmq_to_qp_run_socket, worker_id, name, x, size
       endif
 
       rc = f77_zmq_recv8(zmq_to_qp_run_socket,x(1,j),ni*8_8*2,0)
+      !print *,irp_here, 'rc = ',rc
+      !print *,irp_here, 'ni = ',ni
+      !print *,irp_here, ' j = ',j
       if (rc /= ni*8_8*2) then
         print *,  irp_here, 'rc /= size_x1*8*2 : ', trim(name)
         print *,  irp_here, '  received: ', rc
