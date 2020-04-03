@@ -2456,6 +2456,9 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
           kp1 = (exc(1,2,1)-1)/mo_num_per_kpt+1
           if(kp1.ne.kh2) then
             print*,'problem with hij kpts: ',irp_here
+            print*,is_allowed
+            print*,exc(1,1,1),exc(1,1,2),exc(1,2,1),exc(1,2,2)
+            print*,ih1,kh1,ih2,kh2,ip1,kp1
             stop -4
           endif
           hij = phase * big_array_exchange_integrals_kpts(ih1,kh1,ih2,ip1,kp1)
@@ -2469,7 +2472,10 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
           kp2 = (exc(1,2,2)-1)/mo_num_per_kpt+1
           if(kp2.ne.kh1) then
             print*,'problem with hij kpts: ',irp_here
-            stop -4
+            print*,is_allowed
+            print*,exc(1,1,1),exc(1,1,2),exc(1,2,1),exc(1,2,2)
+            print*,ip1,kp1,ip2,kp2,ih1,kh1
+            stop -5
           endif
           hij = phase * big_array_exchange_integrals_kpts(ip1,kp1,ih1,ip2,kp2)
           !hij = phase * big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
