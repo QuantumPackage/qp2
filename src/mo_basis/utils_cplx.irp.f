@@ -384,63 +384,74 @@ subroutine mo_as_svd_vectors_of_mo_matrix_kpts(matrix,lda,m,n,label)
 end
 
 
-subroutine mo_as_svd_vectors_of_mo_matrix_eig_kpts(matrix,lda,m,n,eig,label)
+subroutine mo_as_svd_vectors_of_mo_matrix_eig_kpts(matrix,lda,m,n,nk,eig,label)
   !TODO: implement
-  print *, irp_here, ' not implemented for kpts'
-  stop 1
+  !print *, irp_here, ' not implemented for kpts'
+  !stop 1
   implicit none
-  integer,intent(in)             :: lda,m,n
+  integer,intent(in)             :: lda,m,n,nk
   character*(64), intent(in)     :: label
-  complex*16, intent(in)   :: matrix(lda,n)
-  double precision, intent(out)  :: eig(m)
+  complex*16, intent(in)   :: matrix(lda,n,nk)
+  double precision, intent(out)  :: eig(m,nk)
 
-  integer :: i,j
+  integer :: i,j,k
   double precision :: accu
   double precision, allocatable  :: D(:)
   complex*16, allocatable  :: mo_coef_new(:,:), U(:,:), A(:,:), Vt(:,:), work(:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, U, Vt, A
 
   call write_time(6)
-  if (m /= mo_num) then
-    print *, irp_here, ': Error : m/= mo_num'
+  if (m /= mo_num_per_kpt) then
+    print *, irp_here, ': Error : m/= mo_num_per_kpt'
     stop 1
   endif
 
-  allocate(A(lda,n),U(lda,n),mo_coef_new(ao_num,m),D(m),Vt(lda,n))
+  
+  allocate(A(lda,n),U(lda,n),mo_coef_new(ao_num_per_kpt,m),D(m),Vt(lda,n))
 
-  do j=1,n
+  do k=1,nk
+    do j=1,n
+      do i=1,m
+        A(i,j) = matrix(i,j,k)
+      enddo
+    enddo
+    mo_coef_new = mo_coef_kpts(1,1,k)
+
+    call svd_complex(A,lda,U,lda,D,Vt,lda,m,n)
+
+
+
+    call zgemm('N','N',ao_num_per_kpt,m,m,  &
+               (1.d0,0.d0),mo_coef_new,size(mo_coef_new,1),U,size(U,1),&
+               (0.d0,0.d0),mo_coef_kpts(1,1,k),size(mo_coef_kpts,1))
+
     do i=1,m
-      A(i,j) = matrix(i,j)
+      eig(i,k) = D(i)
     enddo
   enddo
-  mo_coef_new = mo_coef_complex
 
-  call svd_complex(A,lda,U,lda,D,Vt,lda,m,n)
+  deallocate(A,mo_coef_new,U,Vt,D)
 
   write (6,'(A)') 'MOs are now **'//trim(label)//'**'
   write (6,'(A)')  ''
-  write (6,'(A)') 'Eigenvalues'
+  write (6,'(A)') 'Eigenvalues '
   write (6,'(A)')  '-----------'
   write (6,'(A)') ''
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  '   MO       Eigenvalue       Cumulative   '
   write (6,'(A)')  '======== ================ ================'
-
-  accu = 0.d0
-  do i=1,m
-    accu = accu + D(i)
-    write (6,'(I8,1X,F16.10,1X,F16.10)')  i,D(i), accu
+ 
+  do k=1,nk
+    accu = 0.d0
+    do i=1,m
+      accu = accu + eig(i,k)
+      write (6,'(I8,1X,F16.10,1X,F16.10)')  i,eig(i,k), accu
+    enddo
+  write (6,'(A)')  '-------- ---------------- ----------------'
   enddo
   write (6,'(A)')  '======== ================ ================'
   write (6,'(A)')  ''
 
-  call zgemm('N','N',ao_num,m,m,(1.d0,0.d0),mo_coef_new,size(mo_coef_new,1),U,size(U,1),(0.d0,0.d0),mo_coef_complex,size(mo_coef_complex,1))
-
-  do i=1,m
-    eig(i) = D(i)
-  enddo
-
-  deallocate(A,mo_coef_new,U,Vt,D)
   call write_time(6)
 
   mo_label = label

@@ -344,7 +344,7 @@ END_DOC
   logical, external              :: qp_stop
   complex*16, allocatable :: mo_coef_save(:,:,:)
 
-  PROVIDE ao_md5 mo_occ level_shift
+  PROVIDE ao_md5 mo_occ_kpts level_shift
 
   allocate(mo_coef_save(ao_num_per_kpt,mo_num_per_kpt,kpt_num),                          &
       Fock_matrix_DIIS (ao_num_per_kpt,ao_num_per_kpt,max_dim_DIIS,kpt_num),                 &

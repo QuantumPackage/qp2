@@ -12,7 +12,7 @@ subroutine save_mos
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
   if (is_complex) then
-    allocate ( buffer_c(ao_num,mo_num))
+    !allocate ( buffer_c(ao_num,mo_num))
     allocate ( buffer_k(ao_num_per_kpt,mo_num_per_kpt,kpt_num))
     buffer_k = (0.d0,0.d0)
     do k=1,kpt_num
@@ -53,6 +53,8 @@ subroutine save_mos_no_occ
  !call ezfio_set_mo_basis_mo_label(mo_label)
  !call ezfio_set_mo_basis_ao_md5(ao_md5)
   if (is_complex) then
+    print*,irp_here, ' not implemented for kpts'
+    stop -1
     allocate ( buffer_c(ao_num,mo_num))
     buffer_c = (0.d0,0.d0)
     do j = 1, mo_num
@@ -88,6 +90,8 @@ subroutine save_mos_truncated(n)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
   if (is_complex) then
+    print*,irp_here, ' not implemented for kpts'
+    stop -1
     allocate ( buffer_c(ao_num,mo_num))
     buffer_c = (0.d0,0.d0)
     do j = 1, n
