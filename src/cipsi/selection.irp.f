@@ -52,7 +52,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     rpt2(k) = pt2(k)/(1.d0 + norm(k))
   enddo
 
-  avg = sum(rpt2(1:N_st)) / dble(N_st)
+  avg = sum(rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(rpt2(k)/avg -1.d0))
     element = min(1.5d0 , element)
@@ -61,7 +61,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     pt2_match_weight(k) = product(memo_pt2(k,:))
   enddo
 
-  avg = sum(variance(1:N_st)) / dble(N_st)
+  avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
     element = min(1.5d0 , element)
@@ -325,7 +325,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-12) then
+        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
           indices(k) = idx
           k=k+1
         endif
@@ -349,7 +349,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-12) then
+        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
           indices(k) = idx
           k=k+1
         endif
