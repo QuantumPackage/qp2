@@ -99,6 +99,17 @@ subroutine run_selection_slave(thread,iproc,energy)
     ctask = ctask + 1
   end do
 
+  if(ctask > 0) then
+    call sort_selection_buffer(buf)
+!    call merge_selection_buffers(buf,buf2)
+    call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
+!    buf%mini = buf2%mini
+    pt2(:) = 0d0
+    variance(:) = 0d0
+    norm(:) = 0d0
+    buf%cur = 0
+  end if
+  ctask = 0
 
   integer, external :: disconnect_from_taskserver
   if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) == -1) then
