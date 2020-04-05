@@ -11,7 +11,7 @@ END_PROVIDER
   implicit none
   logical, external :: testTeethBuilding
   integer :: i,j
-  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
+  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
@@ -96,7 +96,7 @@ logical function testTeethBuilding(minF, N)
   do
     u0 = tilde_cW(n0)
     r = tilde_cW(n0 + minF)
-    Wt = (1d0 - u0) * f 
+    Wt = (1d0 - u0) * f
     if (dabs(Wt) <= 1.d-3) then
       exit
     endif
@@ -123,6 +123,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
+!  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
   double precision, intent(out)  :: pt2(N_states),error(N_states)
   double precision, intent(out)  :: variance(N_states),norm(N_states)
@@ -152,7 +153,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     PROVIDE psi_occ_pattern_hii det_to_occ_pattern
   endif
 
-  if (N_det <= max(4,N_states)) then
+  if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
     pt2=0.d0
     variance=0.d0
     norm=0.d0
@@ -324,7 +325,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm          Seconds      '
       print '(A)', '========== ================= =========== =============== =============== ================='
 
-      PROVIDE global_selection_buffer 
+      PROVIDE global_selection_buffer
       !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(nproc_target+1)            &
           !$OMP  PRIVATE(i)
       i = omp_get_thread_num()
@@ -374,7 +375,7 @@ subroutine pt2_slave_inproc(i)
   implicit none
   integer, intent(in)            :: i
 
-  PROVIDE global_selection_buffer 
+  PROVIDE global_selection_buffer
   call run_pt2_slave(1,i,pt2_e0_denominator)
 end
 
@@ -556,8 +557,8 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
        print*,'PB !!!'
        print*,'If you see this, send an email to Anthony scemama with the following content'
        print*,irp_here
-       print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max  
-       stop -1 
+       print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max
+       stop -1
       endif
       if (zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending) == -1) then
           stop 'PT2: Unable to delete tasks (send)'
@@ -568,7 +569,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
          print*,'If you see this, send an email to Anthony scemama with the following content'
          print*,irp_here
          print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
-         stop -1 
+         stop -1
         endif
         eI(1:N_states, index(i)) += eI_task(1:N_states,i)
         vI(1:N_states, index(i)) += vI_task(1:N_states,i)
@@ -759,25 +760,25 @@ END_PROVIDER
    double precision, allocatable  :: tilde_w(:), tilde_cW(:)
    double precision               :: r, tooth_width
    integer, external              :: pt2_find_sample
-   
+
    double precision               :: rss
    double precision, external     :: memory_of_double, memory_of_int
    rss = memory_of_double(2*N_det_generators+1)
    call check_mem(rss,irp_here)
-   
+
    if (N_det_generators == 1) then
-     
+
      pt2_w(1)   = 1.d0
      pt2_cw(1)  = 1.d0
      pt2_u_0    = 1.d0
      pt2_W_T    = 0.d0
      pt2_n_0(1) = 0
      pt2_n_0(2) = 1
-     
+
    else
-     
+
      allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
-     
+
      tilde_cW(0) = 0d0
     
      if (is_complex) then
@@ -795,9 +796,9 @@ END_PROVIDER
      do i=N_det_generators,1,-1
        norm += tilde_w(i)
      enddo
-     
+
      tilde_w(:) = tilde_w(:) / norm
-     
+
      tilde_cW(0) = -1.d0
      do i=1,N_det_generators
        tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
@@ -818,13 +819,13 @@ END_PROVIDER
        stop -1
      end if
    end do
-   
+
    do t=2, pt2_N_teeth
      r = pt2_u_0 + pt2_W_T * dble(t-1)
      pt2_n_0(t) = pt2_find_sample(r, tilde_cW)
    end do
    pt2_n_0(pt2_N_teeth+1) = N_det_generators
-   
+
    pt2_w(:pt2_n_0(1)) = tilde_w(:pt2_n_0(1))
    do t=1, pt2_N_teeth
      tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
@@ -836,7 +837,7 @@ END_PROVIDER
        pt2_w(i) = tilde_w(i) * pt2_w_t / tooth_width
      end do
    end do
-   
+
    pt2_cW(0) = 0d0
    do i=1,N_det_generators
      pt2_cW(i) = pt2_cW(i-1) + pt2_w(i)

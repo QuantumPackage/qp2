@@ -81,12 +81,19 @@ BEGIN_PROVIDER [ complex*16, mo_coef_complex_kpts, (ao_num_per_kpt, mo_num_per_k
   integer :: i,j,k, mo_shft, ao_shft
   mo_coef_complex_kpts = (0.d0,0.d0)
 
+ ! do k=1,kpt_num
+ !   mo_shft = (k-1)*mo_num_per_kpt
+ !   ao_shft = (k-1)*ao_num_per_kpt
+ !   do i=1,mo_num_per_kpt
+ !     do j=1,ao_num_per_kpt
+ !       mo_coef_complex_kpts(j,i,k) = mo_coef_complex(j+ao_shft,i+mo_shft)
+ !     enddo
+ !   enddo
+ ! enddo
   do k=1,kpt_num
-    mo_shft = (k-1)*mo_num_per_kpt
-    ao_shft = (k-1)*ao_num_per_kpt
     do i=1,mo_num_per_kpt
       do j=1,ao_num_per_kpt
-        mo_coef_complex_kpts(j,i,k) = mo_coef_complex(j+ao_shft,i+mo_shft)
+        mo_coef_complex_kpts(j,i,k) = mo_coef_kpts(j,i,k)
       enddo
     enddo
   enddo
