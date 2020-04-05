@@ -885,7 +885,9 @@ let run ~port =
 
     Zmq.Socket.send pair_socket @@ string_of_pub_state Stopped;
     Thread.join pub_thread;
-    Zmq.Socket.close rep_socket
+    Zmq.Socket.close pair_socket;
+    Zmq.Socket.close rep_socket;
+    Zmq.Context.terminate zmq_context
 
 
 
