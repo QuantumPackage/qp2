@@ -25,3 +25,9 @@ function run {
   run cu_nh3_4_2plus.gms.out  cu_nh3_4_2plus.ezfio
   qp set scf_utils thresh_scf 1.e-10
 }
+
+@test "O2 CAS GAMESS" { # 1.38541s
+  run o2_cas.gms.out  o2_cas.gms.ezfio
+  qp set scf_utils thresh_scf 1.e-10
+  qp set_mo_class -c "[1-2]" -a "[3-10]" -v "[11-46]"
+}
