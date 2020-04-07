@@ -47,7 +47,7 @@ subroutine run_stochastic_cipsi
   if (has) then
     call ezfio_get_hartree_fock_energy(hf_energy_ref)
   else
-    hf_energy_ref = ref_bitmask_energy
+    hf_energy_ref = ref_bitmask_energy_with_nucl_rep
   endif
 
   if (N_det > N_det_max) then

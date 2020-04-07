@@ -6,6 +6,7 @@
 &BEGIN_PROVIDER [ double precision, ref_bitmask_energy_ab ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_energy_bb ]
 &BEGIN_PROVIDER [ double precision, ref_bitmask_energy_aa ]
+&BEGIN_PROVIDER [ double precision, ref_bitmask_energy_with_nucl_rep ]
 
   use bitmasks
   implicit none
@@ -80,7 +81,7 @@
  enddo
  ref_bitmask_energy_bb = ref_bitmask_energy_bb * 0.5d0
 
-
+ ref_bitmask_energy_with_nucl_rep = ref_bitmask_energy + nuclear_repulsion 
 
 END_PROVIDER
 
