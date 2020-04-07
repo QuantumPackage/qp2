@@ -415,7 +415,7 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig_kpts(matrix,lda,m,n,nk,eig,label)
         A(i,j) = matrix(i,j,k)
       enddo
     enddo
-    mo_coef_new = mo_coef_kpts(1,1,k)
+    mo_coef_new(1:ao_num_per_kpt,1:m) = mo_coef_kpts(1:ao_num_per_kpt,1:m,k)
 
     call svd_complex(A,lda,U,lda,D,Vt,lda,m,n)
 
@@ -428,6 +428,11 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig_kpts(matrix,lda,m,n,nk,eig,label)
     do i=1,m
       eig(i,k) = D(i)
     enddo
+    !do j=1,mo_num_per_kpt
+    !  do i=1,mo_num_per_kpt
+    !    print'(3(I5),2(E25.15))',i,j,k,mo_coef_kpts(i,j,k)
+    !  enddo
+    !enddo
   enddo
 
   deallocate(A,mo_coef_new,U,Vt,D)

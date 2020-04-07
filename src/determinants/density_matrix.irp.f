@@ -259,6 +259,7 @@ subroutine set_natural_mos
   label = "Natural"
   integer :: i,j,iorb,jorb,k
   if (is_complex) then
+
     !todo: implement for kpts
     do k=1,kpt_num
       do i = 1, n_virt_orb_kpts(k)
@@ -273,6 +274,14 @@ subroutine set_natural_mos
         enddo
       enddo
     enddo
+    !print*,'1RDM'
+    !do k=1,kpt_num
+    !  do j=1,mo_num_per_kpt
+    !    do i=1,mo_num_per_kpt
+    !      print'(3(I5),2(E25.15))',i,j,k,one_e_dm_mo_kpts(i,j,k)
+    !    enddo
+    !  enddo
+    !enddo
 !    call mo_as_svd_vectors_of_mo_matrix_eig_complex(one_e_dm_mo_complex,size(one_e_dm_mo_complex,1),mo_num,mo_num,mo_occ,label)
     call mo_as_svd_vectors_of_mo_matrix_eig_kpts(one_e_dm_mo_kpts,size(one_e_dm_mo_kpts,1),mo_num_per_kpt,mo_num_per_kpt,kpt_num,mo_occ_kpts,label)
     soft_touch mo_occ_kpts

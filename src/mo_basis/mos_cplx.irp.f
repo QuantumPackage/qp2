@@ -228,7 +228,7 @@ BEGIN_PROVIDER [ complex*16, mo_coef_kpts, (ao_num_per_kpt, mo_num_per_kpt, kpt_
 
   if (mpi_master) then
     ! Coefs
-    call ezfio_has_mo_basis_mo_coef_complex(exists)
+    call ezfio_has_mo_basis_mo_coef_kpts(exists)
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
