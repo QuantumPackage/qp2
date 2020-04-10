@@ -217,6 +217,56 @@ subroutine get_mo_two_e_integrals_complex(j,k,l,sze,out_val,map,map2)
   enddo
 end
 
+subroutine get_mo_two_e_integrals_kpts(j,ij,kj,k,ik,kk,l,il,kl,sze,out_val,map,map2)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Returns multiple integrals <ij|kl> in the MO basis, all
+  ! i for j,k,l fixed.
+  END_DOC
+  integer, intent(in)            :: j,k,l, ij,ik,il, kj,kk,kl, sze
+  complex*16, intent(out)        :: out_val(sze)
+  type(map_type), intent(inout)  :: map,map2
+  integer                        :: i
+  complex*16, external           :: get_two_e_integral_complex_simple
+  complex*16, external           :: mo_two_e_integral_kpts
+
+  integer :: ki,imin0
+  integer                        :: ii, ii0
+  integer*8                      :: ii_8, ii0_8
+  complex(integral_kind)         :: tmp
+  integer(key_kind)              :: i1, idx
+  integer(key_kind)              :: p,q,r,s,i2
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache_complex
+
+!DEBUG
+!  do i=1,sze
+!    out_val(i) = get_two_e_integral_complex(i,j,k,l,map,map2)
+!  enddo
+!  return
+!DEBUG
+
+  ki = kconserv(kk,kl,kj)
+  imin0 = (ki-1)*mo_num_per_kpt
+  ii0 = l-mo_integrals_cache_min
+  ii0 = ior(ii0, k-mo_integrals_cache_min)
+  ii0 = ior(ii0, j-mo_integrals_cache_min)
+
+  ii0_8 = int(l,8)-mo_integrals_cache_min_8
+  ii0_8 = ior( shiftl(ii0_8,7), int(k,8)-mo_integrals_cache_min_8)
+  ii0_8 = ior( shiftl(ii0_8,7), int(j,8)-mo_integrals_cache_min_8)
+
+  do i=1,sze
+    ii = ior(ii0, i+imin0-mo_integrals_cache_min)
+    if (iand(ii, -128) == 0) then
+      ii_8 = ior( shiftl(ii0_8,7), int(i+imin0,8)-mo_integrals_cache_min_8)
+      out_val(i) = mo_integrals_cache_complex(ii_8)
+    else
+      out_val(i) = get_two_e_integral_complex_simple(i+imin0,j,k,l,map,map2)
+    endif
+  enddo
+end
+
 !subroutine get_mo_two_e_integrals_ij_complex(k,l,sze,out_array,map)
 !  use map_module
 !  implicit none
