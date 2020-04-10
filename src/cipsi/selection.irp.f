@@ -2793,7 +2793,7 @@ subroutine get_d0_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
     h2 = p(1,2)
     do p1=1, mo_num
       if(bannedOrb(p1, 1)) cycle
-      call get_mo_two_e_integrals_complex(p1,h2,h1,mo_num,hij_cache1,mo_integrals_map)
+      call get_mo_two_e_integrals_complex(p1,h2,h1,mo_num,hij_cache1,mo_integrals_map,mo_integrals_map_2)
       do p2=1, mo_num
         if(bannedOrb(p2,2)) cycle
         if(banned(p1, p2, bant)) cycle ! rentable?
