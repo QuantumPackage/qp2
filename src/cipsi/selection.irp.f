@@ -269,6 +269,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   type(selection_buffer), intent(inout) :: buf
 
   integer                         :: h1,h2,s1,s2,s3,i1,i2,ib,sp,k,i,j,nt,ii,sze
+  integer   :: kh1,kh2,kpt12,kk1,kk2,ik01,ik02,ik1,ik2
   integer(bit_kind)               :: hole(N_int,2), particle(N_int,2), mask(N_int, 2), pmask(N_int, 2)
   logical                         :: fullMatch, ok
 
@@ -511,12 +512,13 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       maskInd = maskInd_save
       
       h1 = hole_list(i1,s1)
-!todo      kpt1 = (h1-1)/mo_num_per_kpt + 1
+!todo: kpts
+      kh1 = (h1-1)/mo_num_per_kpt + 1
       ! pmask is i_generator det with bit at h1 set to zero
       call apply_hole(psi_det_generators(1,1,i_generator), s1,h1, pmask, ok, N_int)
       
       negMask = not(pmask)
-      
+!      
       ! see set definitions above 
       interesting(0) = 0
       fullinteresting(0) = 0
@@ -674,31 +676,31 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
           if (is_complex) then
 !=============================================================
 !!todo use this once kpts are implemented
-!            kpt2 = (h2-1)/mo_num_per_kpt + 1
-!            kpt12 = kconserv(kpt1,kpt2,1)
-!            ! mask is gen_i with (h1,s1),(h2,s2) removed
-!            call apply_hole(pmask, s2,h2, mask, ok, N_int)
-!            banned = .true.
-!            ! only allow excitations that conserve momentum
-!            do kk1=1,kpt_num
-!              ! equivalent to kk2 = kconserv(kpt1,kpt2,kk1)
-!              kk2 = kconserv(kpt12,1,kk1)
-!              ik01 = (kk1-1) * mo_num_per_kpt + 1 !first mo in kk1
-!              ik02 = (kk2-1) * mo_num_per_kpt + 1 !first mo in kk2
-!              do ik1 = ik01, ik01 + mo_num_per_kpt - 1 !loop over mos in kk1
-!                do ik2 = ik02, ik02 + mo_num_per_kpt - 1 !loop over mos in kk2
-!                  ! depending on sp, might not need both of these?
-!                  ! sp=1 (a,a) or sp=2 (b,b): only use banned(:,:,1)
-!                  ! sp=3 (a,b): banned(alpha,beta,1) is transpose of banned(beta,alpha,2)
-!                  banned(ik1,ik2,1) = .false.
-!                  banned(ik1,ik2,2) = .false.
-!                enddo
-!              enddo
-!            enddo
-!=============================================================
+            kh2 = (h2-1)/mo_num_per_kpt + 1
+            kpt12 = kconserv(kh1,kh2,1)
             ! mask is gen_i with (h1,s1),(h2,s2) removed
             call apply_hole(pmask, s2,h2, mask, ok, N_int)
-            banned = .false.
+            banned = .true.
+            ! only allow excitations that conserve momentum
+            do kk1=1,kpt_num
+              ! equivalent to kk2 = kconserv(kh1,kh2,kk1)
+              kk2 = kconserv(kpt12,1,kk1)
+              ik01 = (kk1-1) * mo_num_per_kpt + 1 !first mo in kk1
+              ik02 = (kk2-1) * mo_num_per_kpt + 1 !first mo in kk2
+              do ik1 = ik01, ik01 + mo_num_per_kpt - 1 !loop over mos in kk1
+                do ik2 = ik02, ik02 + mo_num_per_kpt - 1 !loop over mos in kk2
+                  ! depending on sp, might not need both of these?
+                  ! sp=1 (a,a) or sp=2 (b,b): only use banned(:,:,1)
+                  ! sp=3 (a,b): banned(alpha,beta,1) is transpose of banned(beta,alpha,2)
+                  banned(ik1,ik2,1) = .false.
+                  banned(ik1,ik2,2) = .false.
+                enddo
+              enddo
+            enddo
+!=============================================================
+!            ! mask is gen_i with (h1,s1),(h2,s2) removed
+!            call apply_hole(pmask, s2,h2, mask, ok, N_int)
+!            banned = .false.
 !=============================================================
           else
             call apply_hole(pmask, s2,h2, mask, ok, N_int)
