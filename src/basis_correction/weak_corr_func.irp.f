@@ -8,8 +8,8 @@
  implicit none
  integer :: ipoint,istate
  double precision :: rho_a, rho_b, ec
- logical :: dospin
  double precision :: wall0,wall1,weight,mu
+ logical :: dospin
  dospin = .true. ! JT dospin have to be set to true for open shell
  print*,'Providing ecmd_lda_mu_of_r ...'
 

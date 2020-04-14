@@ -91,4 +91,31 @@ double precision function h_func(zeta)
 end
 
 
+!-------------------------------------------------------------------------------------------------------------------------------------------
+  subroutine g0_dg0(rho, rho_a, rho_b, g0, dg0drho)
+
+  implicit none
+  BEGIN_DOC
+  ! Give the on-top pair distribution function g0 and its derivative according to rho dg0drho
+  END_DOC
+
+  double precision, intent (in) :: rho, rho_a, rho_b
+  double precision, intent (out) :: g0, dg0drho
+  double precision :: pi
+  double precision :: g0_UEG_mu_inf, dg0drs
+  double precision :: C1, F1, D1, E1, B1, rs
+
+  pi = dacos(-1.d0)
+  C1 = 0.0819306d0
+  F1 = 0.752411d0
+  D1 = -0.0127713d0
+  E1 = 0.00185898d0
+  B1 = 0.7317d0 - F1
+  rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0) 
+   
+  g0 = g0_UEG_mu_inf(rho_a, rho_b)
+  dg0drs = 0.5d0*((-B1 + 2.d0*C1*rs + 3.d0*D1*rs**2 + 4.d0*E1*rs**3)-F1*(1.d0 - B1*rs + C1*rs**2 + D1*rs**3 + E1*rs**4))*exp(-F1*rs)
+  dg0drho = -((6.d0*dsqrt(pi)*rho**2)**(-2.d0/3.d0))*dg0drs
+ 
+  end subroutine g0_dg0 
 
