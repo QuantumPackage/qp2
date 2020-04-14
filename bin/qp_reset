@@ -95,6 +95,7 @@ qp set_file $ezfio
 if [[ $dets -eq 1 ]] ; then
   rm --force -- ${ezfio}/determinants/n_det
   rm --force -- ${ezfio}/determinants/psi_{det,coef}.gz
+  rm --force -- ${ezfio}/determinants/n_det_qp_edit
   rm --force -- ${ezfio}/determinants/psi_{det,coef}_qp_edit.gz
 fi
 
