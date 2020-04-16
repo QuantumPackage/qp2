@@ -383,7 +383,7 @@ END_PROVIDER
        deallocate(s2_eigvalues)
      else
        call lapack_diag_complex(eigenvalues,eigenvectors,                      &
-           H_matrix_all_dets_complex,size(H_matrix_all_dets,1),N_det)
+           H_matrix_all_dets_complex,size(H_matrix_all_dets_complex,1),N_det)
        ci_electronic_energy_complex(:) = 0.d0
        call u_0_S2_u_0_complex(ci_s2_complex,eigenvectors,N_det,psi_det,N_int,&
           min(N_det,N_states_diag),size(eigenvectors,1))
