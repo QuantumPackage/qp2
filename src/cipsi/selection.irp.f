@@ -32,7 +32,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
-  integer, parameter :: i_itermax = 3
+  integer, parameter :: i_itermax = 1
   double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
 
   if (i_iter == 0) then
@@ -46,7 +46,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     i_iter = 1
   endif
 
-  dt = 4.d0
+  dt = 0.5d0
 
   do k=1,N_st
     rpt2(k) = pt2(k)/(1.d0 + norm(k))
@@ -58,7 +58,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     element = min(1.5d0 , element)
     element = max(0.5d0 , element)
     memo_pt2(k,i_iter) = element
-    pt2_match_weight(k) = product(memo_pt2(k,:))
+    pt2_match_weight(k) *= product(memo_pt2(k,:))
   enddo
 
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
@@ -67,7 +67,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     element = min(1.5d0 , element)
     element = max(0.5d0 , element)
     memo_variance(k,i_iter) = element
-    variance_match_weight(k) = product(memo_variance(k,:))
+    variance_match_weight(k) *= product(memo_variance(k,:))
   enddo
 
   threshold_davidson_pt2 = min(1.d-6, &
