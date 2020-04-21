@@ -198,7 +198,6 @@ subroutine make_selection_buffer_s2(b)
 
   deallocate(b%det)
 
-  print*,'n_d = ',n_d
   call i8sort(bit_tmp,iorder,n_d)
 
   do i=1,n_d

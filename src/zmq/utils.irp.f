@@ -241,10 +241,10 @@ IRP_ENDIF
     stop 'Unable to set ZMQ_LINGER on pull socket'
   endif
 
-  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,10,4)
-  if (rc /= 0) then
-    stop 'Unable to set ZMQ_RCVHWM on pull socket'
-  endif
+!  rc = f77_zmq_setsockopt(new_zmq_pull_socket,ZMQ_RCVHWM,10,4)
+!  if (rc /= 0) then
+!    stop 'Unable to set ZMQ_RCVHWM on pull socket'
+!  endif
 
   integer :: icount
 
@@ -316,10 +316,10 @@ IRP_ENDIF
     stop 'Unable to set ZMQ_LINGER on push socket'
   endif
 
-  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,1,4)
-  if (rc /= 0) then
-    stop 'Unable to set ZMQ_SNDHWM on push socket'
-  endif
+!  rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_SNDHWM,1,4)
+!  if (rc /= 0) then
+!    stop 'Unable to set ZMQ_SNDHWM on push socket'
+!  endif
 
   rc = f77_zmq_setsockopt(new_zmq_push_socket,ZMQ_IMMEDIATE,1,4)
   if (rc /= 0) then
@@ -585,7 +585,7 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
     stop 'Wrong end of job'
   endif
 
-  do i=3600,1,-1
+  do i=1200,1,-1
     rc = f77_zmq_send(zmq_to_qp_run_socket, 'end_job '//trim(zmq_state),8+len(trim(zmq_state)),0)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 512, 0)
     if (trim(message(1:13)) == 'error waiting') then
