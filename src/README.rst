@@ -22,8 +22,8 @@ The core modules of the QP
     Ex : if "exchange_functional" == "sr_pbe", then energy_x will contain the exchange correlation functional defined in "functiona/sr_pbe.irp.f", which corresponds to the short-range PBE functional (at the value mu_erf for the range separation parameter) 
 
 
-*** How are handled the DFT functionals in QP2 ?
-================================================
+*** How to add a new functional in QP2 
+======================================
 
     Creating a new functional and propagating it through the whole QP2 programs is easy as all dependencies are handled by a script. 
 

@@ -29,11 +29,18 @@
  double precision, allocatable :: dm_a(:),dm_b(:), dm_a_grad(:,:), dm_b_grad(:,:)
  allocate(dm_a(N_states),dm_b(N_states), dm_a_grad(3,N_states), dm_b_grad(3,N_states))
  allocate(aos_array(ao_num),grad_aos_array(3,ao_num))
+ !$OMP PARALLEL DO                                                                    &
+ !$OMP DEFAULT (NONE)                                                                 &
+ !$OMP SHARED(n_points_final_grid,final_grid_points,N_states,                         &
+ !$OMP        one_e_dm_and_grad_alpha_in_r,one_e_dm_and_grad_beta_in_r,               &
+ !$OMP        one_e_grad_2_dm_alpha_at_r,one_e_grad_2_dm_beta_at_r,                   &
+ !$OMP        scal_prod_grad_one_e_dm_ab,one_e_stuff_for_pbe)                         &
+ !$OMP PRIVATE (istate,i,r,dm_a,dm_b,dm_a_grad,dm_b_grad,aos_array, grad_aos_array)     
  do istate = 1, N_states
   do i = 1, n_points_final_grid
-  r(1) = final_grid_points(1,i)
-  r(2) = final_grid_points(2,i)
-  r(3) = final_grid_points(3,i)
+   r(1) = final_grid_points(1,i)
+   r(2) = final_grid_points(2,i)
+   r(3) = final_grid_points(3,i)
 
    call density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b,  dm_a_grad, dm_b_grad, aos_array, grad_aos_array)
 
@@ -72,6 +79,7 @@
                                                  * (dm_a(istate) + dm_b(istate))
   enddo
  enddo
+ !$OMP END PARALLEL DO
 
 END_PROVIDER
 

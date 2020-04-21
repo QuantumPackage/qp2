@@ -21,6 +21,19 @@ function run() {
   run b2_stretched.ezfio -48.9950585434279
 }
 
+@test "LiF" { # 3 s
+  run lif.ezfio -106.9801081911955
+}
+
+@test "Be" { # 3 s
+  run be.ezfio -14.57287346825270
+}
+
+@test "F" { # 3 s
+  run f.ezfio -99.40093527229389
+}
+
+
 @test "SiH2_3B1" { # 0.539000  1.51094s
   run sih2_3b1.ezfio -289.9654718453571
 }
