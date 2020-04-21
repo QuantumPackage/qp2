@@ -159,10 +159,10 @@ END_PROVIDER
    enddo
    do j = 1, ao_num
     do m = 1,3
-     aos_d_vc_alpha_pbe_w(j,i,istate) += contrib_grad_ca(m) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_d_vc_beta_pbe_w (j,i,istate) += contrib_grad_cb(m) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_d_vx_alpha_pbe_w(j,i,istate) += contrib_grad_xa(m) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_d_vx_beta_pbe_w (j,i,istate) += contrib_grad_xb(m) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_d_vc_alpha_pbe_w(j,i,istate) += contrib_grad_ca(m) * aos_grad_in_r_array_transp(m,j,i)
+     aos_d_vc_beta_pbe_w (j,i,istate) += contrib_grad_cb(m) * aos_grad_in_r_array_transp(m,j,i)
+     aos_d_vx_alpha_pbe_w(j,i,istate) += contrib_grad_xa(m) * aos_grad_in_r_array_transp(m,j,i)
+     aos_d_vx_beta_pbe_w (j,i,istate) += contrib_grad_xb(m) * aos_grad_in_r_array_transp(m,j,i)
     enddo
    enddo
   enddo
@@ -315,8 +315,8 @@ END_PROVIDER
    enddo
    do j = 1, ao_num
     do m = 1,3
-     aos_d_vxc_alpha_pbe_w(j,i,istate) += ( contrib_grad_ca(m) + contrib_grad_xa(m) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
-     aos_d_vxc_beta_pbe_w (j,i,istate) += ( contrib_grad_cb(m) + contrib_grad_xb(m) ) * aos_grad_in_r_array_transp_xyz(m,j,i)
+     aos_d_vxc_alpha_pbe_w(j,i,istate) += ( contrib_grad_ca(m) + contrib_grad_xa(m) ) * aos_grad_in_r_array_transp(m,j,i)
+     aos_d_vxc_beta_pbe_w (j,i,istate) += ( contrib_grad_cb(m) + contrib_grad_xb(m) ) * aos_grad_in_r_array_transp(m,j,i)
     enddo
    enddo
   enddo

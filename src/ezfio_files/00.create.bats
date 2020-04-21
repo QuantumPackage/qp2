@@ -49,6 +49,18 @@ function run {
   run hcn.xyz 1 0 aug-cc-pvdz
 }
 
+@test "LiF" {
+  run lif.xyz 1 0 cc-pvtz
+}
+
+@test "F" {
+  run f.xyz 2 0 cc-pvtz
+}
+
+@test "Be" {
+  run be.xyz 1 0 cc-pvtz
+}
+
 @test "N2" {
   run n2.xyz 1 0 cc-pvtz
 }
