@@ -25,6 +25,7 @@
  print*,'Providing act_2_rdm_ab_mo '
  ispin = 3 
  act_2_rdm_ab_mo = 0.d0
+ provide mo_two_e_integrals_in_map
  call wall_time(wall_1)
  if(read_two_body_rdm_ab)then
   print*,'Reading act_2_rdm_ab_mo from disk ...'
