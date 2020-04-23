@@ -311,3 +311,34 @@ BEGIN_PROVIDER [double precision, two_e_int_ii_f, (n_basis_orb,n_basis_orb,n_ina
  enddo
 END_PROVIDER 
 
+
+subroutine give_mu_of_r_cas(r,istate,mu_of_r,f_psi,n2_psi)
+ implicit none
+ BEGIN_DOC
+! returns mu(r), f_psi, n2_psi for a general cas wave function
+ END_DOC
+ integer, intent(in) :: istate
+ double precision, intent(in)  :: r(3)
+ double precision, intent(out) :: mu_of_r,f_psi,n2_psi
+ double precision :: f_ii_val_ab,two_bod_dens_ii
+ double precision :: f_ia_val_ab,two_bod_dens_ia
+ double precision :: f_aa_val_ab,two_bod_dens_aa
+ double precision :: sqpi,w_psi
+ sqpi = dsqrt(dacos(-1.d0))
+ ! inactive-inactive part of f_psi(r1,r2)
+ call give_f_ii_val_ab(r,r,f_ii_val_ab,two_bod_dens_ii)
+ ! inactive-active part of f_psi(r1,r2)
+ call give_f_ia_val_ab(r,r,f_ia_val_ab,two_bod_dens_ia,istate)
+ ! active-active part of f_psi(r1,r2)
+ call give_f_aa_val_ab(r,r,f_aa_val_ab,two_bod_dens_aa,istate)
+
+ f_psi  = f_ii_val_ab     + f_ia_val_ab     + f_aa_val_ab 
+ n2_psi = two_bod_dens_ii + two_bod_dens_ia + two_bod_dens_aa
+ if(n2_psi.le.1.d-12.or.f_psi.le.0.d0.or.f_psi * n2_psi.lt.0.d0)then
+   w_psi   = 1.d+10
+ else 
+   w_psi  = f_psi /  n2_psi
+ endif
+ mu_of_r  = w_psi * sqpi * 0.5d0
+ 
+end
