@@ -1,8 +1,10 @@
 double precision function primitive_value_explicit(power_prim,center_prim,alpha,r)
  implicit none
  BEGIN_DOC
-! Returns the value of the j-th primitive of the i-th |AO| at point $\textbf{r}
-! **without the coefficient**
+! Evaluates at "r" a primitive of type : 
+! (x - center_prim(1))**power_prim(1)  (y - center_prim(2))**power_prim(2) * (z - center_prim(3))**power_prim(3)
+!
+! exp(-alpha * [(x - center_prim(1))**2 + (y - center_prim(2))**2 + (z - center_prim(3))**2] )
  END_DOC
  integer, intent(in)          :: power_prim(3)
  double precision, intent(in) :: center_prim(3),alpha
