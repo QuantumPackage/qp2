@@ -11,9 +11,9 @@
   ELSE
         ao_one_e_integrals = ao_integrals_n_e + ao_kinetic_integrals
 
-        IF (DO_PSEUDO) THEN
-              ao_one_e_integrals += ao_pseudo_integrals
-        ENDIF
+!        IF (DO_PSEUDO) THEN
+!              ao_one_e_integrals += ao_pseudo_integrals
+!        ENDIF
   ENDIF
 
   DO j = 1, ao_num
