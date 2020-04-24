@@ -26,6 +26,14 @@ subroutine ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top,
   pi = 4.d0 * datan(1.d0)
 
   eps_c_md_on_top_PBE = 0.d0
+  ! convertion from (alpha,beta) formalism to (closed, open) formalism for the density 
+  call rho_ab_to_rho_oc(rho_a,rho_b,rhoo,rhoc)
+  if(rhoc.lt.1.d-10)then
+   return
+  else if(on_top/(rhoc**2) .lt. 1.d-6)then
+   return
+  endif
+
   grad_rho_a_2 = 0.d0
   grad_rho_b_2 = 0.d0
   grad_rho_a_b = 0.d0
@@ -34,8 +42,7 @@ subroutine ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top,
    grad_rho_b_2 += grad_rho_b(m)*grad_rho_b(m)
    grad_rho_a_b += grad_rho_a(m)*grad_rho_b(m)
   enddo
-  ! convertion from (alpha,beta) formalism to (closed, open) formalism
-  call rho_ab_to_rho_oc(rho_a,rho_b,rhoo,rhoc)
+  ! same same for gradients : convertion from (alpha,beta) formalism to (closed, open) formalism
   call grad_rho_ab_to_grad_rho_oc(grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,sigmaoo,sigmacc,sigmaco)
 
   ! usual PBE correlation energy using the density, spin polarization and density gradients for alpha/beta electrons
