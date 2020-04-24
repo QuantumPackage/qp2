@@ -2533,6 +2533,7 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
   complex*16               :: hij, tmp_row(N_states, mo_num), tmp_row2(N_states, mo_num)
   complex*16               :: tmp_row_kpts(N_states, mo_num), tmp_row2_kpts(N_states, mo_num)
   complex*16               :: tmp_row_kpts2(N_states, mo_num_per_kpt), tmp_row2_kpts2(N_states,mo_num_per_kpt)
+  complex*16 :: tmp_mat1(N_states,mo_num,mo_num), tmp_mat2(N_states,mo_num,mo_num)
   PROVIDE mo_integrals_map N_int
 
   allocate (lbanned(mo_num, 2))
@@ -2821,9 +2822,23 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
         puti = p(i, ma)
         p1 = p(turn3(1,i), ma)
         p2 = p(turn3(2,i), ma)
+        kputi = (puti-1)/mo_num_per_kpt + 1
+        khfix = (hfix-1)/mo_num_per_kpt + 1
+        kp1   =   (p1-1)/mo_num_per_kpt + 1
+        kp2   =   (p2-1)/mo_num_per_kpt + 1
+        iputi = mod(puti-1,mo_num_per_kpt) + 1
+        ihfix = mod(hfix-1,mo_num_per_kpt) + 1
+        ip1   = mod(p1-1,  mo_num_per_kpt) + 1
+        ip2   = mod(p2-1,  mo_num_per_kpt) + 1
         call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
         call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
+        call get_mo_two_e_integrals_kpts(hfix,ihfix,khfix,p1,ip1,kp1,p2,ip2,kp2,mo_num_per_kpt,hij_cache2(1,1),mo_integrals_map,mo_integrals_map_2)
+        call get_mo_two_e_integrals_kpts(hfix,ihfix,khfix,p2,ip2,kp2,p1,ip1,kp1,mo_num_per_kpt,hij_cache2(1,2),mo_integrals_map,mo_integrals_map_2)
         tmp_row = (0.d0,0.d0)
+        !tmp_row_kpts = (0.d0,0.d0)
+        tmp_row_kpts2 = (0.d0,0.d0)
+        !===================
+        !begin ref
         do putj=1,hfix-1
           if(banned(putj,puti,1)) cycle
           if(lbanned(putj,ma)) cycle
@@ -2842,7 +2857,89 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
             tmp_row(:,putj) = tmp_row(:,putj) + hij * coefs(:)
           endif
         end do
+        !end ref
+        !=================
+        !begin kpts
+        kputj = kconserv(kp1,kp2,khfix)
+        putj0 = (kputj-1)*mo_num_per_kpt
+        do putj = putj0+1,hfix-1
+          iputj = putj - putj0
+          if(banned(putj,puti,1)) cycle
+          if(lbanned(putj,ma)) cycle
+          hij = hij_cache2(iputj,1) - hij_cache2(iputj,2)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, ma, ma, putj, p1, hfix, p2, N_int)
+            !tmp_row_kpts(:,putj) = tmp_row_kpts(:,putj) + hij * coefs(:)
+            tmp_row_kpts2(:,iputj) = tmp_row_kpts2(:,iputj) + hij * coefs(:)
+          endif
+        end do
+        do putj=hfix+1,putj0+mo_num_per_kpt
+          iputj = putj - putj0
+          if(banned(putj,puti,1)) cycle
+          if(lbanned(putj,ma)) cycle
+          hij = hij_cache2(iputj,2) - hij_cache2(iputj,1)
+          if (hij /= (0.d0,0.d0)) then
+            hij = hij * get_phase_bi(phasemask, ma, ma, hfix, p1, putj, p2, N_int)
+            !tmp_row_kpts(:,putj) = tmp_row_kpts(:,putj) + hij * coefs(:)
+            tmp_row_kpts2(:,iputj) = tmp_row_kpts2(:,iputj) + hij * coefs(:)
+          endif
+        end do
 
+        !end kpts
+    !do ii0=1,mo_num
+    !  if (cdabs(tmp_row_kpts(1,ii0)-tmp_row(1,ii0)).gt.1.d-12) then
+    !    print'((A),4(I5),2(2(E25.15),2X))','WarNInG 1a, ',ii0,hfix,pfix,p2,tmp_row_kpts(1,ii0),tmp_row(1,ii0)
+    !!  else if ((cdabs(tmp_row_kpts(1,ii0))+cdabs(tmp_row(1,ii0))).gt.1.d-12) then
+    !!    print'((A),4(I5),2(2(E25.15),2X))','WarNInG 1b, ',ii0,hfix,pfix,p2,tmp_row_kpts(1,ii0),tmp_row(1,ii0)
+    !  endif
+    !enddo
+        !=================
+        tmp_mat1 = (0.d0,0.d0)
+        tmp_mat2 = (0.d0,0.d0)
+        tmp_mat1(:, :puti-1, puti) = tmp_mat1(:, :puti-1, puti) + tmp_row(:,:puti-1)
+        do l=puti,mo_num
+          !DIR$ LOOP COUNT AVG(4)
+          do k=1,N_states
+            tmp_mat1(k, puti, l) = tmp_mat1(k, puti,l) + tmp_row(k,l)
+          enddo
+        enddo
+        !=================
+        if (kputj.lt.kputi) then
+          tmp_mat2(1:N_states,putj0+1:putj0+mo_num_per_kpt,puti) =  &
+                  tmp_mat2(1:N_states,putj0+1:putj0+mo_num_per_kpt,puti) + &
+                  tmp_row_kpts2(1:N_states,1:mo_num_per_kpt)
+        else if (kputj.gt.kputi) then
+          do l=1,mo_num_per_kpt
+            !DIR$ LOOP COUNT AVG(4)
+            do k=1,N_states
+              tmp_mat2(k, puti, l+putj0) = tmp_mat2(k, puti,l+putj0) + tmp_row_kpts2(k,l)
+            enddo
+          enddo
+        else !kputj == kputi
+          tmp_mat2(1:N_states,putj0+1:puti-1,puti) =  &
+                  tmp_mat2(1:N_states,putj0+1:puti-1,puti) + &
+                  tmp_row_kpts2(1:N_states,1:iputi-1)
+          do l=iputi,mo_num_per_kpt
+            !DIR$ LOOP COUNT AVG(4)
+            do k=1,N_states
+              tmp_mat2(k, puti, l+putj0) = tmp_mat2(k, puti,l+putj0) + tmp_row_kpts2(k,l)
+            enddo
+          enddo
+        endif
+        !=================
+        do k=1,N_states
+          do l=1,mo_num
+            do ii0=1,mo_num
+              if (cdabs(tmp_mat2(k,l,ii0)-tmp_mat1(k,l,ii0)).gt.1.d-12) then
+                print'((A),6(I5),2(2(E25.15),2X))','WarNInG 3a, ',k,l,ii0,hfix,p1,p2,tmp_mat2(k,l,ii0),tmp_mat1(k,l,ii0)
+            !  else if ((cdabs(tmp_row_kpts(1,ii0))+cdabs(tmp_row(1,ii0))).gt.1.d-12) then
+            !    print'((A),4(I5),2(2(E25.15),2X))','WarNInG 1b, ',ii0,hfix,pfix,p2,tmp_row_kpts(1,ii0),tmp_row(1,ii0)
+              endif
+            enddo
+          enddo
+        enddo
+
+        !=================
         mat(:, :puti-1, puti) = mat(:, :puti-1, puti) + tmp_row(:,:puti-1)
         do l=puti,mo_num
           !DIR$ LOOP COUNT AVG(4)
@@ -2850,16 +2947,54 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
             mat(k, puti, l) = mat(k, puti,l) + tmp_row(k,l)
           enddo
         enddo
+        !!=================
+        !!todo: check for iputi=1,2
+        !if (kputj.lt.kputi) then
+        !  mat(1:N_states,putj0+1:putj0+mo_num_per_kpt,puti) =  &
+        !          mat(1:N_states,putj0+1:putj0+mo_num_per_kpt,puti) + &
+        !          tmp_row_kpts2(1:N_states,1:mo_num_per_kpt)
+        !else if (kputj.gt.kputi) then
+        !  do l=1,mo_num_per_kpt
+        !    !DIR$ LOOP COUNT AVG(4)
+        !    do k=1,N_states
+        !      mat(k, puti, l+putj0) = mat(k, puti,l+putj0) + tmp_row_kpts2(k,l)
+        !    enddo
+        !  enddo
+        !else !kputj == kputi
+        !  mat(1:N_states,putj0+1:puti-1,puti) =  &
+        !          mat(1:N_states,putj0+1:puti-1,puti) + &
+        !          tmp_row_kpts2(1:N_states,1:iputi-1)
+        !  do l=iputi,mo_num_per_kpt
+        !    !DIR$ LOOP COUNT AVG(4)
+        !    do k=1,N_states
+        !      mat(k, puti, l+putj0) = mat(k, puti,l+putj0) + tmp_row_kpts2(k,l)
+        !    enddo
+        !  enddo
+        !endif
       end do
     else
       hfix = h(1,mi)
       pfix = p(1,mi)
       p1 = p(1,ma)
       p2 = p(2,ma)
+      kpfix = (pfix-1)/mo_num_per_kpt + 1
+      khfix = (hfix-1)/mo_num_per_kpt + 1
+      kp1   =   (p1-1)/mo_num_per_kpt + 1
+      kp2   =   (p2-1)/mo_num_per_kpt + 1
+      ipfix = mod(pfix-1,mo_num_per_kpt) + 1
+      ihfix = mod(hfix-1,mo_num_per_kpt) + 1
+      ip1   = mod(p1-1,  mo_num_per_kpt) + 1
+      ip2   = mod(p2-1,  mo_num_per_kpt) + 1
       tmp_row = (0.d0,0.d0)
       tmp_row2 = (0.d0,0.d0)
+      !tmp_row_kpts = (0.d0,0.d0)
+      !tmp_row2_kpts = (0.d0,0.d0)
       call get_mo_two_e_integrals_complex(hfix,p1,pfix,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
       call get_mo_two_e_integrals_complex(hfix,p2,pfix,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
+      !call get_mo_two_e_integrals_kpts(hfix,ihfix,khfix,p1,ip1,kp1,pfix,ipfix,kpfix,mo_num_per_kpt,hij_cache2(1,1),mo_integrals_map,mo_integrals_map_2)
+      !call get_mo_two_e_integrals_kpts(hfix,ihfix,khfix,p2,ip2,kp2,pfix,ipfix,kpfix,mo_num_per_kpt,hij_cache2(1,2),mo_integrals_map,mo_integrals_map_2)
+      !===============
+      !begin ref
       putj = p2
       do puti=1,mo_num
         if(lbanned(puti,ma)) cycle
@@ -2886,6 +3021,61 @@ subroutine get_d1_complex(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp
           endif
         end if
       end do
+      !end ref
+      !===============
+      !begin kpts
+      !todo: combine if kp1==kp2
+ !     putj = p2
+ !     kputi1 = kconserv(kp1,kpfix,khfix)
+ !     puti01 = (kputi1-1)*mo_num_per_kpt
+ !     do iputi=1,mo_num_per_kpt
+ !       puti = puti01 + iputi
+ !       if(lbanned(puti,ma)) cycle
+ !       if(.not. banned(puti,putj,1)) then
+ !         hij = hij_cache2(iputi,1)
+ !         if (hij /= (0.d0,0.d0)) then
+ !           hij = hij * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p1, N_int)
+ !           !DIR$ LOOP COUNT AVG(4)
+ !           do k=1,N_states
+ !             tmp_row_kpts(k,puti) = tmp_row_kpts(k,puti) + hij * coefs(k)
+ !           enddo
+ !         endif
+ !       end if
+ !     enddo
+ !     putj = p1
+ !     kputi2 = kconserv(kp2,kpfix,khfix)
+ !     puti02 = (kputi2-1)*mo_num_per_kpt
+ !     do iputi=1,mo_num_per_kpt
+ !       puti = puti02 + iputi
+ !       if(lbanned(puti,ma)) cycle
+ !       if(.not. banned(puti,putj,1)) then
+ !         hij = hij_cache2(iputi,2)
+ !         if (hij /= (0.d0,0.d0)) then
+ !           hij = hij * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p2, N_int)
+ !           do k=1,N_states
+ !             tmp_row2_kpts(k,puti) = tmp_row2_kpts(k,puti) + hij * coefs(k)
+ !           enddo
+ !         endif
+ !       end if
+ !     end do
+ !     !end kpts
+ !     !===============
+ !   !test printing
+ !   !print'((A),5(I5))','kpt info1: ',kconserv(kpfix,kp2,khfix),khfix,kpfix,kp2,kputi2
+ !   !print'((A),5(I5))','kpt info2: ',kconserv(kpfix,kp1,khfix),khfix,kpfix,kp1,kputi1
+ !   do ii0=1,mo_num
+ !     if (cdabs(tmp_row_kpts(1,ii0)-tmp_row(1,ii0)).gt.1.d-12) then
+ !       print'((A),4(I5),2(2(E25.15),2X))','WarNInG 1a, ',ii0,hfix,p1,pfix,tmp_row_kpts(1,ii0),tmp_row(1,ii0)
+ !   !  else if ((cdabs(tmp_row_kpts(1,ii0))+cdabs(tmp_row(1,ii0))).gt.1.d-12) then
+ !   !    print'((A),4(I5),2(2(E25.15),2X))','WarNInG 1b, ',ii0,hfix,pfix,p2,tmp_row_kpts(1,ii0),tmp_row(1,ii0)
+ !     endif
+ !     if (cdabs(tmp_row2_kpts(1,ii0)-tmp_row2(1,ii0)).gt.1.d-12) then
+ !       print'((A),4(I5),2(2(E25.15),2X))','WarNInG 2a, ',ii0,hfix,p2,pfix,tmp_row2_kpts(1,ii0),tmp_row2(1,ii0)
+ !   !  else if ((cdabs(tmp_row2_kpts(1,ii0))+cdabs(tmp_row2(1,ii0))).gt.1.d-12) then
+ !   !    print'((A),4(I5),2(2(E25.15),2X))','WarNInG 2b, ',ii0,hfix,pfix,p1,tmp_row2_kpts(1,ii0),tmp_row2(1,ii0)
+ !     endif
+ !   enddo
+    !===================
       mat(:,:p2-1,p2) = mat(:,:p2-1,p2) + tmp_row(:,:p2-1)
       do l=p2,mo_num
         !DIR$ LOOP COUNT AVG(4)
