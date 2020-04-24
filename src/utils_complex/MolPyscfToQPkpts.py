@@ -650,7 +650,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5['mo_basis'].attrs['mo_num']=Nk*nmo
         qph5['ao_basis'].attrs['ao_num']=Nk*nao
 
-        qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
+        #qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
+        qph5['ao_basis'].attrs['ao_basis']="dummy basis"
 
         qph5.create_dataset('ao_basis/ao_nucl',data=Nk*ao_nucl)
 
@@ -847,4 +848,176 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
     if (print_mo_ints_bi):
         print_mo_bi(mf,kconserv,'W.mo.qp',cas_idx,bielec_int_threshold)
+    return
+
+def xyzcount(s):
+    return list(map(s.count,['x','y','z']))
+
+def pyscf2QP2_mol(mf, cas_idx=None, int_threshold = 1E-8, 
+        qph5path = 'qpdat.h5',
+        norm='sp',
+        print_debug=False):
+    '''
+    cas_idx = List of active MOs. If not specified all MOs are actives
+    int_threshold = The integral will be not printed in they are bellow that
+    norm should be one of 'sp', 'all', or None
+    '''
+  
+    import h5py
+
+    mol = mf.mol
+    nao_c = mol.nao_cart()
+
+    mo_coef_threshold = int_threshold
+    ovlp_threshold = int_threshold
+    kin_threshold = int_threshold
+    ne_threshold = int_threshold
+    bielec_int_threshold = int_threshold
+    thresh_mono = int_threshold
+    
+    
+#    qph5path = 'qpdat.h5'
+    # create hdf5 file, delete old data if exists
+    with h5py.File(qph5path,'w') as qph5:
+        qph5.create_group('nuclei')
+        qph5.create_group('electrons')
+        qph5.create_group('ao_basis')
+        qph5.create_group('mo_basis')
+
+    if mf.mol.cart:
+        mo_coeff = mf.mo_coeff
+    else:
+        c2s = mol.cart2sph_coeff(normalized=norm)
+        #c2s = mol.cart2sph_coeff(normalized='sp')
+        #c2s = mol.cart2sph_coeff(normalized='all')
+        #c2s = mol.cart2sph_coeff(normalized=None)
+        mo_coeff = np.dot(c2s,mf.mo_coeff)
+    # Mo_coeff actif
+    mo_c = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
+    e_c =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
+  
+    nao, nmo = mo_c.shape
+
+    print("n active MOs", nmo)
+    print("n AOs", nao)
+    assert nao==nao_c, "wrong number of AOs"
+
+    ##########################################
+    #                                        #
+    #                Nuclei                  #
+    #                                        #
+    ##########################################
+
+    natom = mol.natm
+    print('n_atom',   natom)
+
+    atom_xyz = mol.atom_coords(unit='Bohr')
+    #if not(mol.unit.startswith(('B','b','au','AU'))):
+    #    from pyscf.data.nist import BOHR
+    #    atom_xyz /= BOHR # always convert to au
+
+    with h5py.File(qph5path,'a') as qph5:
+        qph5['nuclei'].attrs['nucl_num']=natom
+        qph5.create_dataset('nuclei/nucl_coord',data=atom_xyz)
+        qph5.create_dataset('nuclei/nucl_charge',data=mol.atom_charges())
+
+        strtype=h5py.special_dtype(vlen=str)
+        atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
+        for i in range(natom):
+            atom_dset[i] = mol.atom_pure_symbol(i)
+
+    ##########################################
+    #                                        #
+    #                Basis                   #
+    #                                        #
+    ##########################################
+
+    # nucleus on which each AO is centered
+    ao_nucl=[i[0] for i in mf.mol.ao_labels(fmt=False,base=1)]
+
+
+    nprim_max = 0
+    for iatom, (sh0,sh1,ao0,ao1) in enumerate(mol.aoslice_by_atom()):
+        for ib in range(sh0,sh1): # sets of contracted exponents
+            nprim = mol.bas_nprim(ib)
+            if (nprim > nprim_max):
+                nprim_max = nprim
+    
+    qp_prim_num = np.zeros((nao),dtype=int)
+    qp_coef = np.zeros((nao,nprim_max))
+    qp_expo = np.zeros((nao,nprim_max))
+    qp_nucl = np.zeros((nao),dtype=int)
+    qp_pwr = np.zeros((nao,3),dtype=int)
+    
+    clabels = mol.cart_labels(fmt=False)
+    
+    tmp_idx=0
+    for iatom, (sh0,sh1,ao0,ao1) in enumerate(mol.aoslice_by_atom()):
+        # shell start,end; AO start,end (sph or cart) for each atom
+        for ib in range(sh0,sh1): # sets of contracted exponents
+            l = mol.bas_angular(ib)    # angular momentum
+            nprim = mol.bas_nprim(ib)  # numer of primitives
+            es = mol.bas_exp(ib)       # exponents
+            cs = mol.bas_ctr_coeff(ib) # coeffs
+            nctr = mol.bas_nctr(ib)    # number of contractions
+            print(iatom,ib,l,nprim,nctr,tmp_idx)
+            for ic in range(nctr): # sets of contraction coeffs
+                for nfunc in range(((l+1)*(l+2))//2): # always use cart for qp ao basis?
+                    qp_expo[tmp_idx,:nprim] = es[:]
+                    qp_coef[tmp_idx,:nprim] = cs[:,ic]
+                    qp_nucl[tmp_idx] = iatom + 1
+                    qp_pwr[tmp_idx,:] = xyzcount(clabels[tmp_idx][3])
+                    qp_prim_num[tmp_idx] = nprim
+                    tmp_idx += 1
+
+    with h5py.File(qph5path,'a') as qph5:
+        qph5['mo_basis'].attrs['mo_num']=nmo
+        qph5['ao_basis'].attrs['ao_num']=nao
+
+        #qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
+        qph5['ao_basis'].attrs['ao_basis']="dummy basis"
+
+        qph5.create_dataset('ao_basis/ao_nucl',data=qp_nucl)
+        qph5.create_dataset('ao_basis/ao_prim_num',data=qp_prim_num)
+        qph5.create_dataset('ao_basis/ao_expo',data=qp_expo.T)
+        qph5.create_dataset('ao_basis/ao_coef',data=qp_coef.T)
+        qph5.create_dataset('ao_basis/ao_power',data=qp_pwr.T)
+
+    ##########################################
+    #                                        #
+    #              Electrons                 #
+    #                                        #
+    ##########################################
+
+    nelec = mol.nelectron
+    neleca,nelecb = mol.nelec
+
+    print('num_elec', nelec)
+
+    with h5py.File(qph5path,'a') as qph5:
+        qph5['electrons'].attrs['elec_alpha_num']=neleca 
+        qph5['electrons'].attrs['elec_beta_num']=nelecb
+
+    ##########################################
+    #                                        #
+    #           Nuclear Repulsion            #
+    #                                        #
+    ##########################################
+
+    e_nuc = mol.energy_nuc()
+  
+    print('nucl_repul', e_nuc)
+
+    with h5py.File(qph5path,'a') as qph5:
+        qph5['nuclei'].attrs['nuclear_repulsion']=e_nuc
+  
+    ##########################################
+    #                                        #
+    #               MO Coef                  #
+    #                                        #
+    ##########################################
+    
+    with h5py.File(qph5path,'a') as qph5:
+        qph5.create_dataset('mo_basis/mo_coef',data=mo_c.T)
+   
     return
