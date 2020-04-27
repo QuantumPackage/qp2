@@ -695,15 +695,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     with h5py.File(qph5path,'a') as qph5:
         # k,mo,ao(,2)
         mo_coef_f = np.array(mo_k.transpose((0,2,1)),order='c',dtype=np.complex128)
-        mo_coef_blocked=block_diag(*mo_k)
-        mo_coef_blocked_f = block_diag(*mo_coef_f)
-        #qph5.create_dataset('mo_basis/mo_coef_real',data=mo_coef_blocked.real)
-        #qph5.create_dataset('mo_basis/mo_coef_imag',data=mo_coef_blocked.imag)
-        #qph5.create_dataset('mo_basis/mo_coef_kpts_real',data=mo_k.real)
-        #qph5.create_dataset('mo_basis/mo_coef_kpts_imag',data=mo_k.imag)
-        print(mo_coef_f.dtype)
-        print(mo_coef_blocked_f.dtype)
-        qph5.create_dataset('mo_basis/mo_coef_complex',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
+        #mo_coef_blocked=block_diag(*mo_k)
+        #mo_coef_blocked_f = block_diag(*mo_coef_f)
+        #qph5.create_dataset('mo_basis/mo_coef_complex',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
         qph5.create_dataset('mo_basis/mo_coef_kpts',data=mo_coef_f.view(dtype=np.float64).reshape((Nk,nmo,nao,2)))
    
     if print_debug:
@@ -722,28 +716,10 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     if print_ao_ints_mono:
 
         with h5py.File(qph5path,'a') as qph5:
-            kin_ao_blocked=block_diag(*kin_ao)
-            ovlp_ao_blocked=block_diag(*ovlp_ao)
-            ne_ao_blocked=block_diag(*ne_ao)
-
             kin_ao_f =  np.array(kin_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
             ovlp_ao_f = np.array(ovlp_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
             ne_ao_f =   np.array(ne_ao.transpose((0,2,1)),order='c',dtype=np.complex128)
 
-            kin_ao_blocked_f = block_diag(*kin_ao_f)
-            ovlp_ao_blocked_f = block_diag(*ovlp_ao_f)
-            ne_ao_blocked_f = block_diag(*ne_ao_f)
-
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_real',data=kin_ao_blocked.real)
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_imag',data=kin_ao_blocked.imag)
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_real',data=ovlp_ao_blocked.real)
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_imag',data=ovlp_ao_blocked.imag)
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_real',    data=ne_ao_blocked.real)
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_imag',    data=ne_ao_blocked.imag)
-
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic',data=kin_ao_blocked_f.view(dtype=np.float64).reshape((Nk*nao,Nk*nao,2)))
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap',data=ovlp_ao_blocked_f.view(dtype=np.float64).reshape((Nk*nao,Nk*nao,2)))
-            #qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e',    data=ne_ao_blocked_f.view(dtype=np.float64).reshape((Nk*nao,Nk*nao,2)))
             qph5.create_dataset('ao_one_e_ints/ao_integrals_kinetic_kpts',data=kin_ao_f.view(dtype=np.float64).reshape((Nk,nao,nao,2)))
             qph5.create_dataset('ao_one_e_ints/ao_integrals_overlap_kpts',data=ovlp_ao_f.view(dtype=np.float64).reshape((Nk,nao,nao,2)))
             qph5.create_dataset('ao_one_e_ints/ao_integrals_n_e_kpts',    data=ne_ao_f.view(dtype=np.float64).reshape((Nk,nao,nao,2)))
@@ -758,28 +734,10 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         ovlp_mo = ao_to_mo_1e(ovlp_ao,mo_k)
         ne_mo = ao_to_mo_1e(ne_ao,mo_k)
 
-        kin_mo_blocked=block_diag(*kin_mo)
-        ovlp_mo_blocked=block_diag(*ovlp_mo)
-        ne_mo_blocked=block_diag(*ne_mo)
-
         with h5py.File(qph5path,'a') as qph5:
             kin_mo_f =  np.array(kin_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
             ovlp_mo_f = np.array(ovlp_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
             ne_mo_f =   np.array(ne_mo.transpose((0,2,1)),order='c',dtype=np.complex128)
-
-            kin_mo_blocked_f = block_diag(*kin_mo_f)
-            ovlp_mo_blocked_f = block_diag(*ovlp_mo_f)
-            ne_mo_blocked_f = block_diag(*ne_mo_f)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_real',data=kin_mo_blocked.real)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_imag',data=kin_mo_blocked.imag)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_real',data=ovlp_mo_blocked.real)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_imag',data=ovlp_mo_blocked.imag)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_real',    data=ne_mo_blocked.real)
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e_imag',    data=ne_mo_blocked.imag)
-
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic',data=kin_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap',data=ovlp_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
-            #qph5.create_dataset('mo_one_e_ints/mo_integrals_n_e',    data=ne_mo_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nmo,2)))
 
             qph5.create_dataset('mo_one_e_ints/mo_integrals_kinetic_kpts',data=kin_mo_f.view(dtype=np.float64).reshape((Nk,nmo,nmo,2)))
             qph5.create_dataset('mo_one_e_ints/mo_integrals_overlap_kpts',data=ovlp_mo_f.view(dtype=np.float64).reshape((Nk,nmo,nmo,2)))
@@ -811,37 +769,31 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #                                        #
     ##########################################
 
-    j3arr = get_j3ao(mf.with_df._cderi,nao,Nk)
+    j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
 
     # test? nkpt_pairs should be (Nk*(Nk+1))//2
-    nkpt_pairs, naux, _, _ = j3arr.shape
+    nkpt_pairs, naux, _, _ = j3ao_new.shape
 
     print("n df fitting functions", naux)
     with h5py.File(qph5path,'a') as qph5:
         qph5.create_group('ao_two_e_ints')
         qph5['ao_two_e_ints'].attrs['df_num']=naux
 
-    j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
     if print_ao_ints_df:
         if print_debug:
-            print_df(j3arr,'D.qp',bielec_int_threshold)
+            print_df(j3ao_new,'D.qp',bielec_int_threshold)
 
         with h5py.File(qph5path,'a') as qph5:
-            #qph5.create_dataset('ao_two_e_ints/df_ao_integrals_real',data=j3arr.transpose((2,3,1,0)).real)
-            #qph5.create_dataset('ao_two_e_ints/df_ao_integrals_imag',data=j3arr.transpose((2,3,1,0)).imag)
             qph5.create_dataset('ao_two_e_ints/df_ao_integrals',data=j3ao_new.view(dtype=np.float64).reshape((nkpt_pairs,naux,nao,nao,2)))
 
     if print_mo_ints_df:
 
-        j3mo = df_ao_to_mo(j3arr,mo_k)
         j3mo_new = df_ao_to_mo_new(j3ao_new,mo_k)
 
         if print_debug:
-            print_df(j3mo,'D.mo.qp',bielec_int_threshold)
+            print_df(j3mo_new,'D.mo.qp',bielec_int_threshold)
 
         with h5py.File(qph5path,'a') as qph5:
-            #qph5.create_dataset('mo_two_e_ints/df_mo_integrals_real',data=j3mo.transpose((2,3,1,0)).real)
-            #qph5.create_dataset('mo_two_e_ints/df_mo_integrals_imag',data=j3mo.transpose((2,3,1,0)).imag)
             qph5.create_dataset('mo_two_e_ints/df_mo_integrals',data=j3mo_new.view(dtype=np.float64).reshape((nkpt_pairs,naux,nmo,nmo,2)))
 
     if (print_ao_ints_bi):
