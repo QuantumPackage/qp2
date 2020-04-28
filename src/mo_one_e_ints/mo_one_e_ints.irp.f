@@ -12,10 +12,6 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
   ELSE
       mo_one_e_integrals  = mo_integrals_n_e + mo_kinetic_integrals
 
-      IF (DO_PSEUDO) THEN
-            mo_one_e_integrals  += mo_pseudo_integrals
-      ENDIF
-
   ENDIF
 
   IF (write_mo_one_e_integrals) THEN

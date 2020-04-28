@@ -19,6 +19,7 @@ subroutine orb_range_2_rdm_openmp(big_array,dim1,norb,list_orb,ispin,u_0,N_st,sz
    integer                        :: k
    double precision, allocatable  :: u_t(:,:)
    !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
+   PROVIDE mo_two_e_integrals_in_map
    allocate(u_t(N_st,N_det))
    do k=1,N_st
      call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)

@@ -76,6 +76,12 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     !$OMP END DO
     !$OMP END PARALLEL
   endif
+
+  IF (DO_PSEUDO) THEN                                                                                               
+        ao_integrals_n_e += ao_pseudo_integrals
+  ENDIF
+
+
   if (write_ao_integrals_n_e) then
     call ezfio_set_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
     print *,  'AO N-e integrals written to disk'
