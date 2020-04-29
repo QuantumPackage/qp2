@@ -92,16 +92,12 @@ subroutine give_n2_ia_val_ab(r1,r2,two_bod_dens,istate)
  enddo
 
  ! Contracted density : intermediate quantity
- ! rho_tilde(i,a) = \sum_b rho(b,a) * phi_i(1) * phi_j(2)
- allocate(rho_tilde(n_inact_orb,n_act_orb))
  two_bod_dens = 0.d0
  do a = 1, n_act_orb 
   do i = 1, n_inact_orb
-   rho_tilde(i,a) = 0.d0
    do b = 1, n_act_orb 
     rho = one_e_act_dm_beta_mo_for_dft(b,a,istate) + one_e_act_dm_alpha_mo_for_dft(b,a,istate) 
     two_bod_dens += mos_array_inact_r1(i) * mos_array_inact_r1(i) * mos_array_act_r2(a) * mos_array_act_r2(b) * rho
-    rho_tilde(i,a) += rho * mos_array_inact_r1(i) * mos_array_act_r2(b)
    enddo
   enddo
  enddo
@@ -147,16 +143,12 @@ subroutine give_n2_aa_val_ab(r1,r2,two_bod_dens,istate)
  enddo
 
  ! Contracted density : intermediate quantity
- ! rho_tilde(i,a) = \sum_b rho(b,a) * phi_i(1) * phi_j(2)
- allocate(rho_tilde(n_act_orb,n_act_orb))
  two_bod_dens = 0.d0
- rho_tilde = 0.d0
  do a = 1, n_act_orb  ! 1
   do b = 1, n_act_orb  ! 2
    do c = 1, n_act_orb  ! 1
     do d = 1, n_act_orb  ! 2
      rho = mos_array_act_r1(c) * mos_array_act_r2(d) * act_2_rdm_ab_mo(d,c,b,a,istate)
-     rho_tilde(b,a) += rho 
      two_bod_dens += rho * mos_array_act_r1(a) * mos_array_act_r2(b) 
     enddo
    enddo
@@ -177,13 +169,12 @@ subroutine give_n2_cas(r1,r2,istate,n2_psi)
  double precision :: two_bod_dens_ia
  double precision :: two_bod_dens_aa
  ! inactive-inactive part of n2_psi(r1,r2)
- call give_n2_ii_val_ab(r,r,two_bod_dens_ii)
+ call give_n2_ii_val_ab(r1,r2,two_bod_dens_ii)
  ! inactive-active part of n2_psi(r1,r2)
- call give_n2_ia_val_ab(r,r,two_bod_dens_ia,istate)
+ call give_n2_ia_val_ab(r1,r2,two_bod_dens_ia,istate)
  ! active-active part of n2_psi(r1,r2)
- call give_n2_aa_val_ab(r,r,two_bod_dens_aa,istate)
+ call give_n2_aa_val_ab(r1,r2,two_bod_dens_aa,istate)
 
- n2_psi  = n2_ii_val_ab     + n2_ia_val_ab     + n2_aa_val_ab 
  n2_psi = two_bod_dens_ii + two_bod_dens_ia + two_bod_dens_aa
  
 end
