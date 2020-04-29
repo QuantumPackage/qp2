@@ -9,7 +9,6 @@ subroutine give_n2_ii_val_ab(r1,r2,two_bod_dens)
  integer :: i,j,m,n,i_m,i_n
  integer :: i_i,i_j
  double precision, allocatable :: mos_array_inact_r1(:),mos_array_inact_r2(:)
- double precision, allocatable :: mos_array_basis_r1(:),mos_array_basis_r2(:)
  double precision, allocatable :: mos_array_r1(:) , mos_array_r2(:) 
  ! You get all orbitals in r_1 and r_2
  allocate(mos_array_r1(mo_num) , mos_array_r2(mo_num) )
@@ -22,13 +21,6 @@ subroutine give_n2_ii_val_ab(r1,r2,two_bod_dens)
  enddo
  do i_m = 1, n_inact_orb
   mos_array_inact_r2(i_m) = mos_array_r2(list_inact(i_m))
- enddo
-
- ! You extract the orbitals belonging to the space \mathcal{B}
- allocate(mos_array_basis_r1(n_basis_orb) , mos_array_basis_r2(n_basis_orb) )
- do i_m = 1, n_basis_orb 
-  mos_array_basis_r1(i_m) = mos_array_r1(list_basis(i_m))
-  mos_array_basis_r2(i_m) = mos_array_r2(list_basis(i_m))
  enddo
 
  two_bod_dens = 0.d0
@@ -55,7 +47,6 @@ subroutine give_n2_ia_val_ab(r1,r2,two_bod_dens,istate)
  double precision :: rho
  double precision, allocatable :: mos_array_r1(:) , mos_array_r2(:) 
  double precision, allocatable :: mos_array_inact_r1(:),mos_array_inact_r2(:)
- double precision, allocatable :: mos_array_basis_r1(:),mos_array_basis_r2(:)
  double precision, allocatable :: mos_array_act_r1(:),mos_array_act_r2(:)
 
  two_bod_dens = 0.d0
@@ -74,21 +65,12 @@ subroutine give_n2_ia_val_ab(r1,r2,two_bod_dens,istate)
  enddo
 
  ! You extract the active orbitals 
- allocate( mos_array_act_r1(n_basis_orb) , mos_array_act_r2(n_basis_orb) )
+ allocate( mos_array_act_r1(n_act_orb) , mos_array_act_r2(n_act_orb) )
  do i= 1, n_act_orb
   mos_array_act_r1(i) = mos_array_r1(list_act(i))
  enddo
  do i= 1, n_act_orb
   mos_array_act_r2(i) = mos_array_r2(list_act(i))
- enddo
-
- ! You extract the orbitals belonging to the space \mathcal{B}
- allocate( mos_array_basis_r1(n_basis_orb) , mos_array_basis_r2(n_basis_orb) )
- do i= 1, n_basis_orb
-  mos_array_basis_r1(i) = mos_array_r1(list_basis(i))
- enddo
- do i= 1, n_basis_orb
-  mos_array_basis_r2(i) = mos_array_r2(list_basis(i))
  enddo
 
  ! Contracted density : intermediate quantity
@@ -115,7 +97,6 @@ subroutine give_n2_aa_val_ab(r1,r2,two_bod_dens,istate)
  integer :: i,orb_i,a,orb_a,n,m,b,c,d
  double precision :: rho
  double precision, allocatable :: mos_array_r1(:) , mos_array_r2(:) 
- double precision, allocatable :: mos_array_basis_r1(:),mos_array_basis_r2(:)
  double precision, allocatable :: mos_array_act_r1(:),mos_array_act_r2(:)
 
  two_bod_dens = 0.d0
@@ -125,21 +106,12 @@ subroutine give_n2_aa_val_ab(r1,r2,two_bod_dens,istate)
  call give_all_mos_at_r(r2,mos_array_r2) 
 
  ! You extract the active orbitals 
- allocate( mos_array_act_r1(n_basis_orb) , mos_array_act_r2(n_basis_orb) )
+ allocate( mos_array_act_r1(n_act_orb) , mos_array_act_r2(n_act_orb) )
  do i= 1, n_act_orb
   mos_array_act_r1(i) = mos_array_r1(list_act(i))
  enddo
  do i= 1, n_act_orb
   mos_array_act_r2(i) = mos_array_r2(list_act(i))
- enddo
-
- ! You extract the orbitals belonging to the space \mathcal{B}
- allocate( mos_array_basis_r1(n_basis_orb) , mos_array_basis_r2(n_basis_orb) )
- do i= 1, n_basis_orb
-  mos_array_basis_r1(i) = mos_array_r1(list_basis(i))
- enddo
- do i= 1, n_basis_orb
-  mos_array_basis_r2(i) = mos_array_r2(list_basis(i))
  enddo
 
  ! Contracted density : intermediate quantity
