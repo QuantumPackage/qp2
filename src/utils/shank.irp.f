@@ -34,6 +34,12 @@ double precision function shank_function(array,i,n)
  double precision :: b_n, b_n1
  b_n = array(i) - array(i-1)
  b_n1 = array(i+1) - array(i)
- shank_function = array(i+1) - b_n1*b_n1/(b_n1-b_n)
+ if(dabs(b_n1-b_n).lt.1.d-12)then
+  shank_function = array(i+1)
+ else
+  shank_function = array(i+1) - b_n1*b_n1/(b_n1-b_n)
+ endif
+
 end
+
 
