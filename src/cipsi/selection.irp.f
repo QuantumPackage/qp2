@@ -46,7 +46,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     i_iter = 1
   endif
 
-  dt = 0.5d0
+  dt = 1.0d0
 
   do k=1,N_st
     rpt2(k) = pt2(k)/(1.d0 + norm(k))
@@ -55,7 +55,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(rpt2(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_pt2(k,i_iter) = element
     pt2_match_weight(k) *= product(memo_pt2(k,:))
@@ -64,7 +64,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_variance(k,i_iter) = element
     variance_match_weight(k) *= product(memo_variance(k,:))
