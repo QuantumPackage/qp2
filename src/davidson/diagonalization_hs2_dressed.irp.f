@@ -1176,7 +1176,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
          do i=1,shift2
            s_(i,j) = (0.d0,0.d0)
            do k=1,sze
-             s_(i,j) = s_(i,j) + dconjg(U(k,i)) * cmplx(S(k,j))
+             s_(i,j) = s_(i,j) + dconjg(U(k,i)) * dcmplx(S(k,j))
            enddo
           enddo
         enddo
@@ -1188,7 +1188,7 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       !todo: why not size(h,1)?
       call zgemm('C','N', shift2, shift2, sze,                       &
           (1.d0,0.d0), U, size(U,1), W, size(W,1),                   &
-          (0.d0,0.d0), h, size(h_p,1))
+          (0.d0,0.d0), h, size(h,1))
 
       ! Penalty method
       ! --------------
