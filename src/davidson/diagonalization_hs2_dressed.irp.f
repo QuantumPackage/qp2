@@ -879,10 +879,11 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
   itertot = 0
 
   if (state_following) then
-    allocate(overlap(N_st_diag*itermax, N_st_diag*itermax), &
-             y_tmp(N_st_diag*itermax, N_st_diag*itermax))
+    allocate(overlap(N_st_diag*itermax, N_st_diag*itermax))
+    allocate(y_tmp(N_st_diag*itermax, N_st_diag*itermax))
   else
-    allocate(overlap(1,1),y_tmp(1,1))  ! avoid 'if' for deallocate
+    allocate(overlap(1,1))
+    allocate(y_tmp(1,1))  ! avoid 'if' for deallocate
   endif
   overlap = 0.d0
   y_tmp = (0.d0,0.d0)
@@ -1002,24 +1003,37 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
     call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
     call c_f_pointer(ptr_s, s, (/sze,N_st_diag*itermax/))
   else
-    allocate(W(sze,N_st_diag*itermax), S(sze,N_st_diag*itermax))
+    !allocate(W(sze,N_st_diag*itermax), S(sze,N_st_diag*itermax))
+    allocate(W(sze,N_st_diag*itermax))
+    allocate(S(sze,N_st_diag*itermax))
   endif
 
-  allocate(                                                          &
-      ! Large
-      U(sze,N_st_diag*itermax),                                      &
-      S_d(sze,N_st_diag),                                            &
+  !allocate(                                                          &
+  !    ! Large
+  !    U(sze,N_st_diag*itermax),                                      &
+  !    S_d(sze,N_st_diag),                                            &
 
-      ! Small
-      h(N_st_diag*itermax,N_st_diag*itermax),                        &
-      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
-      y(N_st_diag*itermax,N_st_diag*itermax),                        &
-      s_(N_st_diag*itermax,N_st_diag*itermax),                       &
-      s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
-      residual_norm(N_st_diag),                                      &
-      s2(N_st_diag*itermax),                                         &
-      y_s(N_st_diag*itermax,N_st_diag*itermax),                      &
-      lambda(N_st_diag*itermax))
+  !    ! Small
+  !    h(N_st_diag*itermax,N_st_diag*itermax),                        &
+  !    h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
+  !    y(N_st_diag*itermax,N_st_diag*itermax),                        &
+  !    s_(N_st_diag*itermax,N_st_diag*itermax),                       &
+  !    s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
+  !    residual_norm(N_st_diag),                                      &
+  !    s2(N_st_diag*itermax),                                         &
+  !    y_s(N_st_diag*itermax,N_st_diag*itermax),                      &
+  !    lambda(N_st_diag*itermax))
+      allocate(U(sze,N_st_diag*itermax))
+      allocate(S_d(sze,N_st_diag))
+      allocate(h(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(h_p(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(y(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(s_(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(s_tmp(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(residual_norm(N_st_diag))
+      allocate(s2(N_st_diag*itermax))
+      allocate(y_s(N_st_diag*itermax,N_st_diag*itermax))
+      allocate(lambda(N_st_diag*itermax))
 
   h = (0.d0,0.d0)
   U = (0.d0,0.d0)
