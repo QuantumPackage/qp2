@@ -797,7 +797,9 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
   integer, intent(in)            :: N_st,sze
-  complex*16, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
+  complex*16, intent(out)    :: v_0(sze,N_st), s_0(sze,N_st)
+  complex*16, intent(inout)  :: u_0(sze,N_st)
+  !complex*16, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
   integer :: k
   complex*16, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
