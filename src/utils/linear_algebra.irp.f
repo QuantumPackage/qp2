@@ -224,18 +224,34 @@ subroutine ortho_qr_complex(A,LDA,m,n)
   call  zgeqrf( m, n, A, LDA, tau, work, lwork, info )
   lwork=int(work(1))
   deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 1
+  endif
   allocate(work(lwork))
   call  zgeqrf(m, n, A, LDA, tau, work, lwork, info )
   deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 2
+  endif
 
   lwork=-1
   allocate(work(1))
   call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
   lwork=int(work(1))
   deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 3
+  endif
   allocate(work(lwork))
   call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
   deallocate(work,tau)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 4
+  endif
 end
 
 subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
@@ -260,7 +276,15 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
 
   allocate(tau(n),work(n))
   call zgeqr2(m,n,A,LDA,tau,work,info)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqr2 had an illegal value'
+    stop 1
+  endif
   call zung2r(m,n,n,A,LDA,tau,work,info)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zung2r had an illegal value'
+    stop 2
+  endif
   deallocate(work,tau)
 end
   
