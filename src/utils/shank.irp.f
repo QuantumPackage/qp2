@@ -1,17 +1,26 @@
-double precision function shank3_f(array,n,nmax)
+double precision function shank_general(array,n,nmax)
  implicit none                                                                                                                                                         
  integer, intent(in) :: n,nmax
  double precision, intent(in) :: array(0:nmax) ! array of the partial sums
- integer :: ntmp
- double precision :: shank1(0:nmax),shank2(0:nmax),shank3(0:nmax)
+ integer :: ntmp,i
+ double precision :: sum(0:nmax),shank1(0:nmax)
+ if(n.lt.3)then
+  print*,'You asked to Shank a sum but the order is smaller than 3 ...'
+  print*,'n = ',n
+  print*,'stopping ....'
+  stop
+ endif
  ntmp = n
- call shank(array,ntmp,nmax,shank1)
- ntmp = ntmp - 2
- call shank(shank1,ntmp,nmax,shank2)
- ntmp = ntmp - 2
- call shank(shank2,ntmp,nmax,shank3)
- ntmp = ntmp - 2
- shank3_f = shank3(ntmp)
+ sum = array
+ i = 0
+ do while(ntmp.ge.2)
+  i += 1
+!  print*,'i = ',i
+  call shank(sum,ntmp,nmax,shank1)
+  ntmp = ntmp - 2
+  sum = shank1
+  shank_general = shank1(ntmp)
+ enddo
 end
 
 
