@@ -1,3 +1,8 @@
+! Obtained from
+! https://pseudopotentiallibrary.org
+
+$DATA
+
 HYDROGEN
 S  8
   1      23.843185  0.00411490
@@ -4307,3 +4312,4 @@ H  1
 H  1
   1       0.386056  1.00000000
 
+$END

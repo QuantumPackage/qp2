@@ -1,3 +1,8 @@
+! Obtained from
+! https://pseudopotentiallibrary.org
+
+$DATA
+
 HYDROGEN
 S  8
   1      23.843185  0.00411490
@@ -34,7 +39,6 @@ F  1
   1       0.444647  1.00000000
 F  1
   1       1.421460  1.00000000
-
 
 HELIUM
 S  8
@@ -3507,3 +3511,4 @@ G  1
 G  1
   1       0.307906  1.00000000
 
+$END

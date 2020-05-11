@@ -1,3 +1,8 @@
+! Obtained from
+! https://pseudopotentiallibrary.org
+
+$DATA
+
 POTASSIUM
 S  13
   1      33.190598  0.00093460
@@ -1586,3 +1591,4 @@ D  1
 F  1
   1       8.867564  1.00000000
 
+$END
