@@ -174,6 +174,7 @@ for cell_type in cell_types:
         print (cell_type)
         print ('===============================')
         s = diamond.structure.copy()
+        s.change_units('B') #required for supertwists to be in 1/au instead of 1/Å
         kmap = s.kmap()
 
         print ('supercell kpoints/twists')
