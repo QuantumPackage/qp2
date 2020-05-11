@@ -696,8 +696,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         # k,mo,ao(,2)
         mo_coef_f = np.array(mo_k.transpose((0,2,1)),order='c',dtype=np.complex128)
         #mo_coef_blocked=block_diag(*mo_k)
-        #mo_coef_blocked_f = block_diag(*mo_coef_f)
-        #qph5.create_dataset('mo_basis/mo_coef_complex',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
+        mo_coef_blocked_f = block_diag(*mo_coef_f)
+        qph5.create_dataset('mo_basis/mo_coef_complex',data=mo_coef_blocked_f.view(dtype=np.float64).reshape((Nk*nmo,Nk*nao,2)))
         qph5.create_dataset('mo_basis/mo_coef_kpts',data=mo_coef_f.view(dtype=np.float64).reshape((Nk,nmo,nao,2)))
    
     if print_debug:
