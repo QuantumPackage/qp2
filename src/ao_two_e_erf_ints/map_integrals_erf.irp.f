@@ -85,9 +85,10 @@ double precision function get_ao_two_e_integral_erf(i,j,k,l,map) result(result)
   type(map_type), intent(inout)  :: map
   integer                        :: ii
   real(integral_kind)            :: tmp
+  logical, external              :: ao_two_e_integral_zero
   PROVIDE ao_two_e_integrals_erf_in_map ao_integrals_erf_cache ao_integrals_erf_cache_min
   !DIR$ FORCEINLINE
-  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
+  if (ao_two_e_integral_zero(i,j,k,l) < ao_integrals_threshold ) then
     tmp = 0.d0
   else if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < ao_integrals_threshold) then
     tmp = 0.d0
@@ -127,10 +128,11 @@ subroutine get_ao_two_e_integrals_erf(j,k,l,sze,out_val)
   integer                        :: i
   integer(key_kind)              :: hash
   double precision               :: thresh
+  logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_erf_in_map ao_integrals_erf_map
   thresh = ao_integrals_threshold
 
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -156,11 +158,12 @@ subroutine get_ao_two_e_integrals_erf_non_zero(j,k,l,sze,out_val,out_val_index,n
   integer                        :: i
   integer(key_kind)              :: hash
   double precision               :: thresh,tmp
+  logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_erf_in_map
   thresh = ao_integrals_threshold
 
   non_zero_int = 0
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif

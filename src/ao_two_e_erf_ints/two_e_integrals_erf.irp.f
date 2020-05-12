@@ -291,8 +291,10 @@ subroutine compute_ao_two_e_integrals_erf(j,k,l,sze,buffer_value)
   double precision               :: ao_two_e_integral_erf
 
   integer                        :: i
+  logical, external              :: ao_one_e_integral_zero
+  logical, external              :: ao_two_e_integral_zero
 
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     buffer_value = 0._integral_kind
     return
   endif
@@ -302,7 +304,7 @@ subroutine compute_ao_two_e_integrals_erf(j,k,l,sze,buffer_value)
   endif
 
   do i = 1, ao_num
-    if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < thresh) then
+    if (ao_two_e_integral_zero(i,j,k,l)) then
       buffer_value(i) = 0._integral_kind
       cycle
     endif
@@ -618,6 +620,7 @@ subroutine compute_ao_integrals_erf_jl(j,l,n_integrals,buffer_i,buffer_value)
   double precision               :: integral, wall_0
   double precision               :: thr
   integer                        :: kk, m, j1, i1
+  logical, external              :: ao_two_e_integral_zero
 
   thr = ao_integrals_threshold
 
@@ -634,7 +637,7 @@ subroutine compute_ao_integrals_erf_jl(j,l,n_integrals,buffer_i,buffer_value)
       if (i1 > j1) then
         exit
       endif
-      if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < thr) then
+      if (ao_two_e_integral_zero(i,j,k,l)) then
         cycle
       endif
       if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < thr ) then
