@@ -88,7 +88,7 @@ double precision function get_ao_two_e_integral_erf(i,j,k,l,map) result(result)
   logical, external              :: ao_two_e_integral_zero
   PROVIDE ao_two_e_integrals_erf_in_map ao_integrals_erf_cache ao_integrals_erf_cache_min
   !DIR$ FORCEINLINE
-  if (ao_two_e_integral_zero(i,j,k,l) < ao_integrals_threshold ) then
+  if (ao_two_e_integral_zero(i,j,k,l)) then
     tmp = 0.d0
   else if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < ao_integrals_threshold) then
     tmp = 0.d0
