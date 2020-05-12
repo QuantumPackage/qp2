@@ -3,6 +3,7 @@ BEGIN_PROVIDER [ integer, ao_prim_num_max ]
  BEGIN_DOC
  ! Max number of primitives.
  END_DOC
+print *, 'XXXX', irp_here
  ao_prim_num_max = maxval(ao_prim_num)
 END_PROVIDER
 
@@ -19,6 +20,7 @@ END_PROVIDER
   C_A(1) = 0.d0
   C_A(2) = 0.d0
   C_A(3) = 0.d0
+print *, 'XXXX', irp_here
   ao_coef_normalized = 0.d0
 
   do i=1,ao_num
@@ -65,6 +67,7 @@ BEGIN_PROVIDER [ double precision, ao_coef_normalization_libint_factor, (ao_num)
   integer                        :: l, powA(3), nz
   integer                        :: i,j,k
   nz=100
+print *, 'XXXX', irp_here
   C_A(1) = 0.d0
   C_A(2) = 0.d0
   C_A(3) = 0.d0
@@ -99,6 +102,7 @@ END_PROVIDER
   integer                        :: iorder(ao_prim_num_max)
   double precision               :: d(ao_prim_num_max,2)
   integer                        :: i,j
+print *, 'XXXX', irp_here
   do i=1,ao_num
     do j=1,ao_prim_num(i)
       iorder(j) = j
@@ -121,6 +125,7 @@ BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered_transp, (ao_prim_n
   ! Transposed :c:data:`ao_coef_normalized_ordered`
   END_DOC
   integer                        :: i,j
+print *, 'XXXX', irp_here
   do j=1, ao_num
     do i=1, ao_prim_num_max
       ao_coef_normalized_ordered_transp(i,j) = ao_coef_normalized_ordered(j,i)
@@ -135,6 +140,7 @@ BEGIN_PROVIDER [ double precision, ao_expo_ordered_transp, (ao_prim_num_max,ao_n
   ! Transposed :c:data:`ao_expo_ordered`
   END_DOC
   integer                        :: i,j
+print *, 'XXXX', irp_here
   do j=1, ao_num
     do i=1, ao_prim_num_max
       ao_expo_ordered_transp(i,j) = ao_expo_ordered(j,i)
@@ -151,6 +157,7 @@ END_PROVIDER
 ! :math:`l` value of the |AO|: :math`a+b+c` in :math:`x^a y^b z^c`
  END_DOC
  integer :: i
+print *, 'XXXX', irp_here
  do i=1,ao_num
    ao_l(i) = ao_power(i,1) + ao_power(i,2) + ao_power(i,3)
    ao_l_char(i) = l_to_character(ao_l(i))
@@ -167,6 +174,7 @@ integer function ao_power_index(nx,ny,nz)
   ! :math:`\frac{1}{2} (l-n_x) (l-n_x+1) + n_z + 1`
   END_DOC
   integer                        :: l
+print *, 'XXXX', irp_here
   l = nx + ny + nz
   ao_power_index = ((l-nx)*(l-nx+1))/2 + nz + 1
 end
@@ -177,6 +185,7 @@ BEGIN_PROVIDER [ character*(128), l_to_character, (0:7)]
  ! Character corresponding to the "l" value of an |AO|
  END_DOC
  implicit none
+print *, 'XXXX', irp_here
  l_to_character(0)='s'
  l_to_character(1)='p'
  l_to_character(2)='d'
@@ -195,6 +204,7 @@ END_PROVIDER
  ! Number of |AOs| per atom
  END_DOC
  integer :: i
+print *, 'XXXX', irp_here
  Nucl_N_Aos = 0
  do i = 1, ao_num
   Nucl_N_Aos(ao_nucl(i)) +=1
@@ -209,6 +219,7 @@ END_PROVIDER
  END_DOC
  integer :: i
  integer, allocatable :: nucl_tmp(:)
+print *, 'XXXX', irp_here
  allocate(nucl_tmp(nucl_num))
  nucl_tmp = 0
  Nucl_Aos = 0
@@ -229,6 +240,7 @@ END_PROVIDER
  ! By convention, for p,d,f and g |AOs|, we take the index
  ! of the |AO| with the the corresponding power in the x axis
  END_DOC
+print *, 'XXXX', irp_here
  do i = 1, nucl_num
   Nucl_num_shell_Aos(i) = 0
 
@@ -276,6 +288,7 @@ BEGIN_PROVIDER [ character*(4), ao_l_char_space, (ao_num) ]
  END_DOC
  integer :: i
  character*(4) :: give_ao_character_space
+print *, 'XXXX', irp_here
  do i=1,ao_num
 
   if(ao_l(i)==0)then

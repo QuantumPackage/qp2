@@ -109,6 +109,7 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]
   double precision :: A_center(3), B_center(3)
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx
+print *, "XXX---", irp_here
   if (is_periodic) then
     do j=1,ao_num
       do i= 1,ao_num

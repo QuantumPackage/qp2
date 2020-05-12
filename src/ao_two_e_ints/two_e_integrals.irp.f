@@ -343,8 +343,6 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
-  integral = ao_two_e_integral(1,1,1,1)
-
   double precision               :: map_mb
   PROVIDE read_ao_two_e_integrals io_ao_two_e_integrals
   if (read_ao_two_e_integrals) then
@@ -359,6 +357,11 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
   call wall_time(wall_0)
   call wall_time(wall_1)
   call cpu_time(cpu_1)
+
+  if (.True.) then
+    ! Avoid openMP
+    integral = ao_two_e_integral(1,1,1,1)
+  endif
 
   integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
   call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'ao_integrals')
