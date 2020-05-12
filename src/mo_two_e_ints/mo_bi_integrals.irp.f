@@ -189,7 +189,6 @@ subroutine add_integrals_to_map(mask_ijkl)
       two_e_tmp_2 = 0.d0
       do j1 = 1,ao_num
         call get_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
-        ! call compute_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
       enddo
       do j1 = 1,ao_num
         kmax = 0
@@ -747,7 +746,6 @@ subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
       two_e_tmp_2 = 0.d0
       do j1 = 1,ao_num
         call get_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
-        ! call compute_ao_two_e_integrals(j1,k1,l1,ao_num,two_e_tmp_0(1,j1))
       enddo
       do j1 = 1,ao_num
         kmax = 0
