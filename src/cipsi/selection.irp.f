@@ -22,14 +22,14 @@ END_PROVIDER
 subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   implicit none
   BEGIN_DOC
-! Updates the rPT2- and Variance- matching weights.
+! Updates the PT2- and Variance- matching weights.
   END_DOC
   integer, intent(in)          :: N_st
   double precision, intent(in) :: pt2(N_st)
   double precision, intent(in) :: variance(N_st)
   double precision, intent(in) :: norm(N_st)
 
-  double precision :: avg, rpt2(N_st), element, dt, x
+  double precision :: avg, pt2_rpt2(N_st), element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
   integer, parameter :: i_itermax = 1
@@ -46,16 +46,17 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     i_iter = 1
   endif
 
-  dt = 0.5d0
+  dt = 1.0d0
 
   do k=1,N_st
-    rpt2(k) = pt2(k)/(1.d0 + norm(k))
+    ! PT2 + rPT2
+    pt2_rpt2(k) = pt2(k)* (1.d0 + 1.d0/(1.d0 + norm(k)))
   enddo
 
-  avg = sum(rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
+  avg = sum(pt2_rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st
-    element = exp(dt*(rpt2(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = exp(dt*(pt2_rpt2(k)/avg -1.d0))
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_pt2(k,i_iter) = element
     pt2_match_weight(k) *= product(memo_pt2(k,:))
@@ -64,14 +65,14 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_variance(k,i_iter) = element
     variance_match_weight(k) *= product(memo_variance(k,:))
   enddo
 
   threshold_davidson_pt2 = min(1.d-6, &
-     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(rpt2(1:N_states)))) )
+     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
 
   SOFT_TOUCH pt2_match_weight variance_match_weight threshold_davidson_pt2
 end
