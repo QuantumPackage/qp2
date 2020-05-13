@@ -1112,61 +1112,61 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
          continue
       endif
 
-      if (dressing_state > 0) then
-        !todo: implement for complex
-        print*,irp_here,' not implemented for complex (dressed)'
-        stop -1
-!
-!        if (N_st == 1) then
-!
-!          l = dressed_column_idx(1)
-!          complex*16 :: f
-!          !todo: check for complex
-!          f = (1.0d0,0.d0)/psi_coef(l,1)
-!          do istate=1,N_st_diag
-!            do i=1,sze
-!              !todo: conjugate?
-!              W(i,shift+istate) += dressing_column_h_complex(i,1) *f * U(l,shift+istate)
-!              W(l,shift+istate) += dressing_column_h_complex(i,1) *f * U(i,shift+istate)
-!              S(i,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(l,shift+istate))
-!              S(l,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(i,shift+istate))
-!            enddo
-!
-!          enddo
-!
-!        else
-!
-!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
-!            psi_coef, size(psi_coef,1), &
-!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
-!
-!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-!            dressing_column_h, size(dressing_column_h,1), s_tmp, size(s_tmp,1), &
-!            1.d0, W(1,shift+1), size(W,1))
-!
-!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-!            dressing_column_s, size(dressing_column_s,1), s_tmp, size(s_tmp,1), &
-!            1.d0, S_d, size(S_d,1))
-!
-!
-!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
-!            dressing_column_h, size(dressing_column_h,1), &
-!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
-!
-!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-!            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-!            1.d0, W(1,shift+1), size(W,1))
-!
-!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
-!            dressing_column_s, size(dressing_column_s,1), &
-!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
-!
-!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-!            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-!            1.d0, S_d, size(S_d,1))
-!
-!        endif
-      endif
+!      if (dressing_state > 0) then
+!        !todo: implement for complex
+!        print*,irp_here,' not implemented for complex (dressed)'
+!        stop -1
+!!
+!!        if (N_st == 1) then
+!!
+!!          l = dressed_column_idx(1)
+!!          complex*16 :: f
+!!          !todo: check for complex
+!!          f = (1.0d0,0.d0)/psi_coef(l,1)
+!!          do istate=1,N_st_diag
+!!            do i=1,sze
+!!              !todo: conjugate?
+!!              W(i,shift+istate) += dressing_column_h_complex(i,1) *f * U(l,shift+istate)
+!!              W(l,shift+istate) += dressing_column_h_complex(i,1) *f * U(i,shift+istate)
+!!              S(i,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(l,shift+istate))
+!!              S(l,shift+istate) += cmplx(dressing_column_s_complex(i,1) *f * U(i,shift+istate))
+!!            enddo
+!!
+!!          enddo
+!!
+!!        else
+!!
+!!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+!!            psi_coef, size(psi_coef,1), &
+!!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!!
+!!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!!            dressing_column_h, size(dressing_column_h,1), s_tmp, size(s_tmp,1), &
+!!            1.d0, W(1,shift+1), size(W,1))
+!!
+!!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!!            dressing_column_s, size(dressing_column_s,1), s_tmp, size(s_tmp,1), &
+!!            1.d0, S_d, size(S_d,1))
+!!
+!!
+!!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+!!            dressing_column_h, size(dressing_column_h,1), &
+!!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!!
+!!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!!            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
+!!            1.d0, W(1,shift+1), size(W,1))
+!!
+!!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+!!            dressing_column_s, size(dressing_column_s,1), &
+!!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!!
+!!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!!            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
+!!            1.d0, S_d, size(S_d,1))
+!!
+!!        endif
+!      endif
 
       ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
       ! -------------------------------------------
