@@ -1061,8 +1061,8 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
       r1 = dsqrt(-2.d0*dlog(r1))
       r2 = dtwo_pi*r2
       !todo: real or complex? rescale for complex? sqrt(2)?
-      u_in(i,k) = dcmplx(r1*dcos(r2),0.d0)
-      !u_in(i,k) = dcmplx(r1*dcos(r2),r1*dsin(r2))
+      !u_in(i,k) = dcmplx(r1*dcos(r2),0.d0)
+      u_in(i,k) = dcmplx(r1*dcos(r2),r1*dsin(r2))
     enddo
   enddo
   do k=1,N_st_diag
