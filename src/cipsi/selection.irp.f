@@ -46,11 +46,11 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     i_iter = 1
   endif
 
-  dt = 1.0d0
+  dt = 2.0d0
 
   do k=1,N_st
     ! rPT2
-    rpt2(k) = pt2(k)* (1.d0 + 1.d0/(1.d0 + norm(k)))
+    rpt2(k) = pt2(k)/(1.d0 + norm(k))
   enddo
 
   avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
@@ -70,6 +70,12 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     memo_variance(k,i_iter) = element
     variance_match_weight(k) *= product(memo_variance(k,:))
   enddo
+
+  if (N_det < 100) then
+    ! For tiny wave functions, weights are 1.d0
+    pt2_match_weight(:) = 1.d0
+    variance_match_weight(:) = 1.d0
+  endif
 
   threshold_davidson_pt2 = min(1.d-6, &
      max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
