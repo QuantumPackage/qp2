@@ -326,7 +326,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
+        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
           indices(k) = idx
           k=k+1
         endif
@@ -350,7 +350,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
+        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
           indices(k) = idx
           k=k+1
         endif
