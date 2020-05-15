@@ -75,7 +75,6 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   P_new(0,1) = 0.d0
   P_new(0,2) = 0.d0
   P_new(0,3) = 0.d0
-
   !DIR$ FORCEINLINE
   call gaussian_product(alpha,A_center,beta,B_center,fact_k,p,P_center)
   if (fact_k < thresh) then
