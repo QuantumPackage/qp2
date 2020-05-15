@@ -8,8 +8,8 @@ logical function ao_two_e_integral_zero(i,j,k,l)
         ao_two_e_integral_zero = .True.
         return
     endif
-  endif
-  if (ao_two_e_integral_schwartz(j,l)*ao_two_e_integral_schwartz(i,k)  < ao_integrals_threshold) then
-      ao_two_e_integral_zero = .True.
+    if (ao_two_e_integral_schwartz(j,l)*ao_two_e_integral_schwartz(i,k)  < ao_integrals_threshold) then
+        ao_two_e_integral_zero = .True.
+    endif
   endif
 end

@@ -211,7 +211,7 @@ END_PROVIDER
    END_DOC
    integer                        :: iunit, i
    integer, external              :: getUnitAndOpen
-   character*(128)                :: filename
+   character*(1024)               :: filename
    if (mpi_master) then
      call getenv('QP_ROOT',filename)
      filename = trim(filename)//'/data/list_element.txt'

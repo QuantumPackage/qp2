@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ character*(128), qp_stop_filename ]
-&BEGIN_PROVIDER [ character*(128), qp_kill_filename ]
+ BEGIN_PROVIDER [ character*(256), qp_stop_filename ]
+&BEGIN_PROVIDER [ character*(256), qp_kill_filename ]
 &BEGIN_PROVIDER [ integer, qp_stop_variable ]
  implicit none
  BEGIN_DOC
