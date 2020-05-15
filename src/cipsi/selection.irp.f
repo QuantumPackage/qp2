@@ -29,7 +29,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   double precision, intent(in) :: variance(N_st)
   double precision, intent(in) :: norm(N_st)
 
-  double precision :: avg, pt2_rpt2(N_st), element, dt, x
+  double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
   integer, parameter :: i_itermax = 1
@@ -49,13 +49,13 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   dt = 1.0d0
 
   do k=1,N_st
-    ! PT2 + rPT2
-    pt2_rpt2(k) = pt2(k)* (1.d0 + 1.d0/(1.d0 + norm(k)))
+    ! rPT2
+    rpt2(k) = pt2(k)* (1.d0 + 1.d0/(1.d0 + norm(k)))
   enddo
 
-  avg = sum(pt2_rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
+  avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st
-    element = exp(dt*(pt2_rpt2(k)/avg -1.d0))
+    element = exp(dt*(pt2(k)/avg -1.d0))
     element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_pt2(k,i_iter) = element
