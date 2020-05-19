@@ -7,6 +7,7 @@ program basis_correction
   touch read_wf
   no_core_density = .True.
   touch no_core_density
+  provide ao_two_e_integrals_in_map
   provide mo_two_e_integrals_in_map
   call print_basis_correction
 !  call print_e_b
