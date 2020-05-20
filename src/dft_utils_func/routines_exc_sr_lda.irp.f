@@ -138,6 +138,8 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 !Density and kF
  rho_a_2=rho_a*2.D0
  akf = ckf*(rho_a_2**f13)
+ ! Avoid division by zero
+ if (akf == 0.d0) akf = 1.d-20
  a = mu/(z2*akf)
  a2 = a*a
  a3 = a2*a
@@ -169,6 +171,7 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 !Density and kF
  rho_b_2= rho_b * 2.d0
  akf = ckf*(rho_b_2**f13)
+ if (akf == 0.d0) akf = 1.d-20
  a = mu/(z2*akf)
  a2 = a*a
  a3 = a2*a

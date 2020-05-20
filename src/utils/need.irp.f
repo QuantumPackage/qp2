@@ -92,42 +92,47 @@
       end
 
       double precision function erf0(x)
-      implicit double precision (a-h,o-z)
-      if(x.lt.0.d0)then
-        erf0=-gammp(0.5d0,x**2)
+      implicit none
+      double precision, intent(in) :: x
+      double precision, external :: gammp
+      if(x < 0.d0)then
+         erf0=-gammp(0.5d0,x*x)
       else
-        erf0=gammp(0.5d0,x**2)
+         erf0=gammp(0.5d0,x*x)
       endif
       end
 
 
       double precision function gammp(a,x)
-      implicit double precision (a-h,o-z)
-      if(x.lt.0..or.a.le.0.)stop 'error in gammp'
-      if(x.lt.a+1.)then
+      implicit none
+      double precision, intent(in) :: a, x
+      double precision             :: gln, gammcf
+      if(x<0.d0.or.a<=0.d0) then
+         stop 'error in gammp'
+      endif
+      if(x < a+1.d0)then
         call gser(gammp,a,x,gln)
       else
         call gcf(gammcf,a,x,gln)
-        gammp=1.-gammcf
+        gammp=1.d0-gammcf
       endif
-      return
       end
 
 
       subroutine gser(gamser,a,x,gln)
       implicit double precision (a-h,o-z)
-      parameter (itmax=100,eps=3.e-7)
+      parameter (itmax=100,eps=3.d-7)
       gln=gammln(a)
-      if(x.le.0.)then
-        if(x.lt.0.) stop 'error in gser'
-        gamser=0.
+      if(x.le.0.d0)then
+        if(x.lt.0.d0) stop 'error in gser'
+        gamser=0.d0
         return
       endif
       ap=a
-      sum=1./a
+      sum=1.d0/a
       del=sum
       do 11 n=1,itmax
-        ap=ap+1.
+        ap=ap+1.d0
         del=del*x/ap
         sum=sum+del
         if(abs(del).lt.abs(sum)*eps)go to 1
@@ -139,14 +144,14 @@
 
       subroutine gcf(gammcf,a,x,gln)
       implicit double precision (a-h,o-z)
-      parameter (itmax=100,eps=3.e-7)
+      parameter (itmax=100,eps=3.d-7)
       gln=gammln(a)
-      gold=0.
-      a0=1.
+      gold=0.d0
+      a0=1.d0
       a1=x
-      b0=0.
-      b1=1.
-      fac=1.
+      b0=0.d0
+      b1=1.d0
+      fac=1.d0
       do 11 n=1,itmax
         an=float(n)
         ana=an-a
@@ -155,8 +160,8 @@
         anf=an*fac
         a1=x*a0+anf*a1
         b1=x*b0+anf*b1
-        if(a1.ne.0.)then
-          fac=1./a1
+        if(a1.ne.0.d0)then
+          fac=1.d0/a1
           g=b1*fac
           if(abs((g-gold)/g).lt.eps)go to 1
           gold=g
