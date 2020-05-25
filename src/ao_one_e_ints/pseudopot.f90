@@ -1907,13 +1907,17 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
       sum=s_q_0
 
       if (q>300) then
-        stop 'pseudopot.f90 : q > 300'
+        stop 'pseudopot.f90 : q > 200'
       endif
 
       qk = dble(q)
       two_qkmp1 = 2.d0*(qk+mk)+1.d0
       do k=0,q-1
         s_q_k = two_qkmp1*qk*inverses(k)*s_q_k
+        if (s_q_k < 1.d-32) then
+          s_q_k = 0.d0
+          exit
+        endif
         sum=sum+s_q_k
         two_qkmp1 = two_qkmp1-2.d0
         qk = qk-1.d0

@@ -53,18 +53,20 @@ BEGIN_PROVIDER [ double precision, nucl_coord,  (nucl_num,3) ]
          '================','============','============','============','============'
      write(6,'(A)') ''
 
-     double precision               :: dist_min, x, y, z
-     dist_min = huge(1.d0)
-     do i=1,nucl_num
-       do j=i+1,nucl_num
-         x = nucl_coord(i,1)-nucl_coord(j,1)
-         y = nucl_coord(i,2)-nucl_coord(j,2)
-         z = nucl_coord(i,3)-nucl_coord(j,3)
-         dist_min = min(x*x + y*y + z*z, dist_min)
+     if (nucl_num > 1) then
+       double precision               :: dist_min, x, y, z
+       dist_min = huge(1.d0)
+       do i=1,nucl_num
+         do j=i+1,nucl_num
+           x = nucl_coord(i,1)-nucl_coord(j,1)
+           y = nucl_coord(i,2)-nucl_coord(j,2)
+           z = nucl_coord(i,3)-nucl_coord(j,3)
+           dist_min = min(x*x + y*y + z*z, dist_min)
+         enddo
        enddo
-     enddo
-     write(6,'(A,F12.4,A)') 'Minimal interatomic distance found: ', &
-         dsqrt(dist_min)*a0,' Angstrom'
+       write(6,'(A,F12.4,A)') 'Minimal interatomic distance found: ', &
+          dsqrt(dist_min)*a0,' Angstrom'
+     endif
 
    endif
 
