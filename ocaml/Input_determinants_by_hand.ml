@@ -377,7 +377,7 @@ end = struct
           (coefs_string i)
           (Determinant.to_string ~mo_num:mo_num b.psi_det.(i)
            |> String_ext.split ~on:'\n'
-           |> List.map (fun x -> "  "^x)
+           |> list_map (fun x -> "  "^x)
            |> String.concat "\n"
           )
       )
@@ -427,7 +427,7 @@ psi_det                = %s
      (b.n_det         |> Det_number.to_string)
      (b.n_states      |> States_number.to_string)
      (b.expected_s2   |> Positive_float.to_string)
-     (b.state_average_weight |> Array.to_list |> List.map Positive_float.to_string |> String.concat ",")
+     (b.state_average_weight |> Array.to_list |> list_map Positive_float.to_string |> String.concat ",")
      (b.psi_coef  |> Array.map Det_coef.to_string |> Array.to_list
       |> String.concat ", ")
      (b.psi_det   |> Array.map (Determinant.to_string ~mo_num) |> Array.to_list
@@ -457,7 +457,7 @@ psi_det                = %s
         else
           ( (String.contains line '=') && (line.[0] = ' ') )
        )
-    |> List.map (fun line ->
+    |> list_map (fun line ->
         "("^(
         String_ext.tr line ~target:'=' ~replacement:' '
         |> String.trim
@@ -468,7 +468,7 @@ psi_det                = %s
     (* Handle determinant coefs *)
     let dets = match ( dets
       |> String_ext.split ~on:'\n'
-      |> List.map String.trim
+      |> list_map String.trim
     ) with
     | _::lines -> lines
     | _ -> failwith "Error in determinants"
@@ -481,7 +481,7 @@ psi_det                = %s
       | ""::c::tail ->
           let c =
             String_ext.split ~on:'\t' c
-            |> List.map (fun x -> Det_coef.of_float (Float.of_string x))
+            |> list_map (fun x -> Det_coef.of_float (Float.of_string x))
             |> Array.of_list
           in
           read_coefs (c::accu) tail
@@ -499,7 +499,7 @@ psi_det                = %s
           let i =
             i-1
           in
-          List.map (fun x -> Det_coef.to_string x.(i)) buffer
+          list_map (fun x -> Det_coef.to_string x.(i)) buffer
           |> String.concat " "
         in
         let rec build_result = function

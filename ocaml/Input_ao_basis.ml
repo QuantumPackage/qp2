@@ -202,14 +202,14 @@ end = struct
      in
      let ao_prim_num =
       Array.to_list ao_prim_num
-      |> List.map AO_prim_number.to_int
+      |> list_map AO_prim_number.to_int
      in
      Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
        ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
 
      let ao_nucl = 
        Array.to_list ao_nucl
-       |> List.map Nucl_number.to_int
+       |> list_map Nucl_number.to_int
      in
      Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
        ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
@@ -217,9 +217,9 @@ end = struct
      let ao_power =
        let l = Array.to_list ao_power in 
        List.concat [
-         (List.map (fun a -> Positive_int.to_int a.Symmetry.Xyz.x) l) ;
-         (List.map (fun a -> Positive_int.to_int a.Symmetry.Xyz.y) l) ;
-         (List.map (fun a -> Positive_int.to_int a.Symmetry.Xyz.z) l) ]
+         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.x) l) ;
+         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.y) l) ;
+         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.z) l) ]
      in
      Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
      ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
@@ -230,14 +230,14 @@ end = struct
      
      let ao_coef =
       Array.to_list ao_coef
-      |> List.map AO_coef.to_float
+      |> list_map AO_coef.to_float
      in
      Ezfio.set_ao_basis_ao_coef(Ezfio.ezfio_array_of_list
      ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_coef) ;
 
      let ao_expo =
       Array.to_list ao_expo
-      |> List.map AO_expo.to_float
+      |> list_map AO_expo.to_float
      in
      Ezfio.set_ao_basis_ao_expo(Ezfio.ezfio_array_of_list
      ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_expo) ;
@@ -299,8 +299,8 @@ end = struct
                 | Some (s', g', n')  ->
                    if s <> s' || n <> n' then find2 (s,g,n) a (i+1)
                    else
-                   let lc  = List.map (fun (prim, _) -> prim) g.Gto.lc 
-                   and lc' = List.map (fun (prim, _) -> prim) g'.Gto.lc
+                   let lc  = list_map (fun (prim, _) -> prim) g.Gto.lc 
+                   and lc' = list_map (fun (prim, _) -> prim) g'.Gto.lc
                    in
                    if lc <> lc' then find2 (s,g,n) a (i+1) else (a.(i) <- None ; i)
       in
@@ -314,14 +314,14 @@ end = struct
   let of_long_basis long_basis name ao_cartesian =
       let ao_num = List.length long_basis |> AO_number.of_int in
       let ao_prim_num =
-        List.map (fun (_,g,_) -> List.length g.Gto.lc
+        list_map (fun (_,g,_) -> List.length g.Gto.lc
           |> AO_prim_number.of_int ) long_basis 
         |> Array.of_list
       and ao_nucl =
-        List.map (fun (_,_,n) -> n) long_basis 
+        list_map (fun (_,_,n) -> n) long_basis 
         |> Array.of_list
       and ao_power =
-        List.map (fun (x,_,_) -> x) long_basis 
+        list_map (fun (x,_,_) -> x) long_basis 
         |> Array.of_list
       in
       let ao_prim_num_max = Array.fold_left (fun s x ->
@@ -331,15 +331,15 @@ end = struct
       in
 
       let gtos =
-        List.map (fun (_,x,_) -> x) long_basis 
+        list_map (fun (_,x,_) -> x) long_basis 
       in
       let create_expo_coef ec =
           let coefs =
             begin match ec with
-            | `Coefs -> List.map (fun x->
-              List.map (fun (_,coef) -> AO_coef.to_float coef) x.Gto.lc ) gtos 
-            | `Expos -> List.map (fun x->
-              List.map (fun (prim,_) -> AO_expo.to_float
+            | `Coefs -> list_map (fun x->
+              list_map (fun (_,coef) -> AO_coef.to_float coef) x.Gto.lc ) gtos 
+            | `Expos -> list_map (fun x->
+              list_map (fun (prim,_) -> AO_expo.to_float
               prim.GaussianPrimitive.expo) x.Gto.lc ) gtos 
             end
           in
@@ -450,7 +450,7 @@ Basis set (read-only) ::
     (string_of_bool b.ao_normalized)
     (Basis.to_string short_basis
        |> String_ext.split ~on:'\n'
-       |> List.map (fun x-> "  "^x)
+       |> list_map (fun x-> "  "^x)
        |> String.concat "\n"
     ) print_sym
 
@@ -490,16 +490,16 @@ md5                     = %s
 "
     (AO_basis_name.to_string b.ao_basis)
     (AO_number.to_string b.ao_num)
-    (b.ao_prim_num |> Array.to_list |> List.map
+    (b.ao_prim_num |> Array.to_list |> list_map
       (AO_prim_number.to_string) |> String.concat ", " )
     (AO_prim_number.to_string b.ao_prim_num_max)
-    (b.ao_nucl |> Array.to_list |> List.map Nucl_number.to_string |>
+    (b.ao_nucl |> Array.to_list |> list_map Nucl_number.to_string |>
       String.concat ", ")
-    (b.ao_power |> Array.to_list |> List.map (fun x->
+    (b.ao_power |> Array.to_list |> list_map (fun x->
       "("^(Symmetry.Xyz.to_string x)^")" )|> String.concat ", ")
-    (b.ao_coef  |> Array.to_list |> List.map AO_coef.to_string
+    (b.ao_coef  |> Array.to_list |> list_map AO_coef.to_string
       |> String.concat ", ")
-    (b.ao_expo  |> Array.to_list |> List.map AO_expo.to_string
+    (b.ao_expo  |> Array.to_list |> list_map AO_expo.to_string
       |> String.concat ", ")
     (b.ao_cartesian |> string_of_bool)
     (b.ao_normalized |> string_of_bool)

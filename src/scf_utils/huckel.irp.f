@@ -23,8 +23,6 @@ subroutine huckel_guess
   Fock_matrix_ao_alpha(1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
   Fock_matrix_ao_beta (1:ao_num,1:ao_num) = A(1:ao_num,1:ao_num)
 
-!  TOUCH mo_coef
-
   TOUCH Fock_matrix_ao_alpha Fock_matrix_ao_beta
   mo_coef = eigenvectors_fock_matrix_mo
   SOFT_TOUCH mo_coef
