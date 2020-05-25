@@ -277,7 +277,7 @@ END_DOC
     return
   endif
 
- if (rcond == 0.d-10) then
+ if (rcond < 1.d-14) then
    dim_DIIS = 0
    return
  endif
