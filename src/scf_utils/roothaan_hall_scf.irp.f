@@ -284,19 +284,22 @@ END_DOC
 
 ! Solve the linear system C = B.X
 
-  call dsysvx('N','U',dim_DIIS+1,1,      &
-   B_matrix_DIIS,size(B_matrix_DIIS,1), &
-   AF, size(AF,1),                      &
-   ipiv,                                &
-   C_vector_DIIS,size(C_vector_DIIS,1), &
-   X_vector_DIIS,size(X_vector_DIIS,1), &
-   rcond,                               &
-   ferr,                                &
-   berr,                                &
-   scratch,size(scratch),               &
-   iwork,                               &
-   info                                 &
- )
+  X_vector_DIIS = C_vector_DIIS
+  call dgesv ( dim_DIIS+1 , 1, B_matrix_DIIS, size(B_matrix_DIIS,1), &
+      ipiv , X_vector_DIIS , size(X_vector_DIIS,1), info)
+!  call dsysvx('N','U',dim_DIIS+1,1,      &
+!   B_matrix_DIIS,size(B_matrix_DIIS,1), &
+!   AF, size(AF,1),                      &
+!   ipiv,                                &
+!   C_vector_DIIS,size(C_vector_DIIS,1), &
+!   X_vector_DIIS,size(X_vector_DIIS,1), &
+!   rcond,                               &
+!   ferr,                                &
+!   berr,                                &
+!   scratch,size(scratch),               &
+!   iwork,                               &
+!   info                                 &
+! )
 
  deallocate(scratch,AF,iwork)
 
