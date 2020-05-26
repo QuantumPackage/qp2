@@ -40,7 +40,7 @@ function run() {
 }
 
 @test "SO" { # 0.539000  5.70403s
-  run so.ezfio -25.7175270084056
+  run so.ezfio -25.7175135615971
 }
 
 @test "HCO" { # 0.636700  1.55279s
