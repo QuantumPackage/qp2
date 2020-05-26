@@ -200,7 +200,7 @@ END_DOC
   integer, allocatable :: iwork(:)
   integer :: lwork
 
-  if (dim_DIIS < 4) then
+  if (dim_DIIS < 1) then
     return
   endif
 

@@ -5,7 +5,7 @@ source $QP_ROOT/quantum_package.rc
 
 
 function run() {
-  thresh=1.e-6
+  thresh=1.e-5
   test_exe scf || skip
   qp set_file $1
   qp edit --check
