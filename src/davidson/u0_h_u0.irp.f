@@ -797,9 +797,9 @@ subroutine H_S2_u_0_nstates_openmp_complex(v_0,s_0,u_0,N_st,sze)
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
   integer, intent(in)            :: N_st,sze
-  complex*16, intent(out)    :: v_0(sze,N_st), s_0(sze,N_st)
-  complex*16, intent(inout)  :: u_0(sze,N_st)
-  !complex*16, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
+  !complex*16, intent(out)    :: v_0(sze,N_st), s_0(sze,N_st)
+  !complex*16, intent(inout)  :: u_0(sze,N_st)
+  complex*16, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
   integer :: k
   complex*16, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
@@ -884,7 +884,8 @@ subroutine H_S2_u_0_nstates_openmp_work_complex_$N_int(v_t,s_t,u_t,N_st,sze,ista
   complex*16, intent(in)         :: u_t(N_st,N_det)
   complex*16, intent(out)        :: v_t(N_st,sze), s_t(N_st,sze)
 
-  complex*16                     :: hij, sij
+  complex*16                     :: hij
+  double precision               :: sij
   integer                        :: i,j,k,l,kk
   integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
   integer                        :: istate
@@ -1389,7 +1390,7 @@ compute_singles=.True.
     double precision, external :: diag_H_mat_elem, diag_S_mat_elem
 
     hij = dcmplx(diag_H_mat_elem(tmp_det,$N_int),0.d0)
-    sij = dcmplx(diag_S_mat_elem(tmp_det,$N_int),0.d0)
+    sij = diag_s_mat_elem(tmp_det,$N_int)
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
