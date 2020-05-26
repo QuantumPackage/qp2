@@ -50,7 +50,7 @@ end = struct
     in
     let labels =
        Array.to_list labels
-       |> List.map Element.to_string
+       |> list_map Element.to_string
     in
     Ezfio.ezfio_array_of_list ~rank:1
        ~dim:[| nucl_num |] ~data:labels
@@ -70,7 +70,7 @@ end = struct
     in
     let charges =
        Array.to_list charges
-       |> List.map Charge.to_float
+       |> list_map Charge.to_float
     in
     Ezfio.ezfio_array_of_list ~rank:1
        ~dim:[| nucl_num |] ~data:charges
@@ -101,9 +101,9 @@ end = struct
     in
     let coord = Array.to_list coord in
     let coord =
-       (List.map (fun x-> x.Point3d.x) coord) @
-       (List.map (fun x-> x.Point3d.y) coord) @
-       (List.map (fun x-> x.Point3d.z) coord)
+       (list_map (fun x-> x.Point3d.x) coord) @
+       (list_map (fun x-> x.Point3d.y) coord) @
+       (list_map (fun x-> x.Point3d.z) coord)
     in
     Ezfio.ezfio_array_of_list ~rank:2
        ~dim:[| nucl_num ; 3 |] ~data:coord
@@ -159,11 +159,11 @@ nucl_charge      = %s
 nucl_coord       = %s
 "
     (Nucl_number.to_string b.nucl_num)
-    (b.nucl_label |> Array.to_list |> List.map
+    (b.nucl_label |> Array.to_list |> list_map
       (Element.to_string) |> String.concat ", " )
-    (b.nucl_charge |> Array.to_list |> List.map
+    (b.nucl_charge |> Array.to_list |> list_map
       (Charge.to_string) |> String.concat ", " )
-    (b.nucl_coord  |> Array.to_list |> List.map
+    (b.nucl_coord  |> Array.to_list |> list_map
       (Point3d.to_string ~units:Units.Bohr) |> String.concat "\n" )
   ;;
 
@@ -226,11 +226,11 @@ Nuclear coordinates in xyz format (Angstroms) ::
     let result =
       { nucl_num = List.length atom_list
           |> Nucl_number.of_int ~max:nmax;
-        nucl_label = List.map (fun x ->
+        nucl_label = list_map (fun x ->
           x.Atom.element) atom_list |> Array.of_list ;
-        nucl_charge = List.map (fun x ->
+        nucl_charge = list_map (fun x ->
           x.Atom.charge ) atom_list |> Array.of_list ;
-        nucl_coord = List.map (fun x ->
+        nucl_coord = list_map (fun x ->
           x.Atom.coord ) atom_list |> Array.of_list ;
       }
     in Some result

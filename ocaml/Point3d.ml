@@ -1,4 +1,5 @@
 open Qptypes
+open Qputils
 open Sexplib.Std
 
 type t = {
@@ -23,7 +24,7 @@ let of_string ~units s =
   let l = s
           |> String_ext.split ~on:' '
           |> List.filter (fun x -> x <> "")
-          |> List.map float_of_string
+          |> list_map float_of_string
           |> Array.of_list
   in
   { x = l.(0) *. f ;

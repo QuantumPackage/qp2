@@ -13,7 +13,7 @@ BEGIN_PROVIDER [double precision, ao_ortho_lowdin_coef, (ao_num,ao_num)]
   do j=1, ao_num
     tmp_matrix(j,j) = 1.d0
   enddo
-  call ortho_lowdin(ao_overlap,ao_num,ao_num,tmp_matrix,ao_num,ao_num)
+  call ortho_lowdin(ao_overlap,ao_num,ao_num,tmp_matrix,ao_num,ao_num,lin_dep_cutoff)
   do i=1, ao_num
     do j=1, ao_num
       ao_ortho_lowdin_coef(j,i) = tmp_matrix(i,j)

@@ -47,14 +47,14 @@ subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
-  !   
+  !
   ! LDx : leftmost dimension of x
   !
   ! Dimension of A is m x n
   ! A,U,Vt are complex*16
   ! D is double precision
   END_DOC
-  
+
   integer, intent(in)             :: LDA, LDU, LDVt, m, n
   complex*16, intent(in)          :: A(LDA,n)
   complex*16, intent(out)         :: U(LDU,m)
@@ -63,12 +63,12 @@ subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   complex*16,allocatable          :: work(:)
   double precision,allocatable    :: rwork(:)
   integer                         :: info, lwork, i, j, k, lrwork
-  
+
   complex*16,allocatable          :: A_tmp(:,:)
-  allocate (A_tmp(LDA,n)) 
+  allocate (A_tmp(LDA,n))
   A_tmp = A
   lrwork = 5*min(m,n)
-  
+
   ! Find optimal size for temp arrays
   allocate(work(1),rwork(lrwork))
   lwork = -1
@@ -76,25 +76,25 @@ subroutine svd_complex(A,LDA,U,LDU,D,Vt,LDVt,m,n)
       D, U, LDU, Vt, LDVt, work, lwork, rwork, info)
   lwork = int(work(1))
   deallocate(work)
-  
+
   allocate(work(lwork))
   call zgesvd('A','A', m, n, A_tmp, LDA,                             &
       D, U, LDU, Vt, LDVt, work, lwork, rwork, info)
   deallocate(work,rwork,A_tmp)
-  
+
   if (info /= 0) then
     print *,  info, ': SVD failed'
     stop
   endif
-      
+
 end
-  
-subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m)
+
+subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.U.s^-1/2 canonical orthogonalization.
   !
-  ! overlap : overlap matrix 
+  ! overlap : overlap matrix
   !
   ! LDA : leftmost dimension of overlap array
   !
@@ -108,10 +108,11 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m)
   ! m : Coefficients matrix is MxN, ( array is (LDC,N) )
   !
   END_DOC
-  
+
   integer, intent(in)            :: lda, ldc, n
   integer, intent(out)           :: m
   complex*16, intent(in)   :: overlap(lda,n)
+  double precision, intent(in)   :: cutoff
   complex*16, intent(inout) :: C(ldc,n)
   complex*16, allocatable  :: U(:,:)
   complex*16, allocatable  :: Vt(:,:)
@@ -119,19 +120,19 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m)
   complex*16, allocatable  :: S(:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: U, Vt, D
   integer                        :: info, i, j
-  
+
   if (n < 2) then
     return
   endif
-  
+
   allocate (U(ldc,n), Vt(lda,n), D(n), S(lda,n))
-  
+
   call svd_complex(overlap,lda,U,ldc,D,Vt,lda,n,n)
-  
+
   D(:) = dsqrt(D(:))
   m=n
   do i=1,n
-    if ( D(i) >= 1.d-6 ) then
+    if ( D(i) >= cutoff ) then
       D(i) = 1.d0/D(i)
     else
       m = i-1
@@ -139,39 +140,39 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m)
       exit
     endif
   enddo
-  do i=m+1,n 
+  do i=m+1,n
     D(i) = 0.d0
-  enddo                                                                                       
-      
+  enddo
+
   do i=1,m
     if ( D(i) >= 1.d5 ) then
       print *,  'Warning: Basis set may have linear dependence problems'
     endif
   enddo
-  
+
   do j=1,n
     do i=1,n
       S(i,j) = U(i,j)*D(j)
     enddo
   enddo
-  
+
   do j=1,n
     do i=1,n
       U(i,j) = C(i,j)
     enddo
   enddo
-  
+
   call zgemm('N','N',n,n,n,(1.d0,0.d0),U,size(U,1),S,size(S,1),(0.d0,0.d0),C,size(C,1))
-  deallocate (U, Vt, D, S)                                                                    
-    
-end   
-    
-  
+  deallocate (U, Vt, D, S)
+
+end
+
+
 subroutine ortho_qr_complex(A,LDA,m,n)
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
-  !   
+  !
   ! A : matrix to orthogonalize
   !
   ! LDA : leftmost dimension of A
@@ -183,7 +184,7 @@ subroutine ortho_qr_complex(A,LDA,m,n)
   END_DOC
   integer, intent(in)            :: m,n, LDA
   complex*16, intent(inout) :: A(LDA,n)
-  
+
   integer                        :: lwork, info
   integer, allocatable           :: jpvt(:)
   complex*16, allocatable  :: tau(:), work(:)
@@ -215,7 +216,7 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   END_DOC
   integer, intent(in)            :: m,n, LDA
   double precision, intent(inout) :: A(LDA,n)
-  
+
   integer                        :: info
   integer, allocatable           :: jpvt(:)
   double precision, allocatable  :: tau(:), work(:)
@@ -228,13 +229,13 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
 !  call dorg2r(m, n, n, A, LDA, tau, WORK, INFO)
 !  deallocate(WORK,jpvt,tau)
 end
-  
-subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
+
+subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.S^-1/2 orthogonalization.
   !
-  ! overlap : overlap matrix 
+  ! overlap : overlap matrix
   !
   ! LDA : leftmost dimension of overlap array
   !
@@ -248,7 +249,7 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
   ! M : Coefficients matrix is MxN, ( array is (LDC,N) )
   !
   END_DOC
-  
+
   integer, intent(in)            :: LDA, ldc, n, m
   complex*16, intent(in)   :: overlap(lda,n)
   complex*16, intent(inout) :: C(ldc,n)
@@ -256,8 +257,9 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
   complex*16, allocatable  :: Vt(:,:)
   double precision, allocatable  :: D(:)
   complex*16, allocatable  :: S(:,:)
+  double precision, intent(in) :: cutoff
   integer                        :: info, i, j, k
-  
+
   if (n < 2) then
     return
   endif
@@ -267,12 +269,13 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
   call svd_complex(overlap,lda,U,ldc,D,Vt,lda,n,n)
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED(S,U,D,Vt,n,C,m) &
+  !$OMP SHARED(S,U,D,Vt,n,C,m,cutoff) &
   !$OMP PRIVATE(i,j,k)
 
   !$OMP DO
   do i=1,n
-    if ( D(i) < 1.d-6 ) then
+    if ( D(i) < cutoff) then
+      print *,  'Removed Linear dependencies :', 1.d0/D(i)
       D(i) = 0.d0
     else
       D(i) = 1.d0/dsqrt(D(i))
@@ -294,7 +297,7 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
       !$OMP END DO NOWAIT
     endif
   enddo
-  
+
   !$OMP BARRIER
   !$OMP DO
   do j=1,n
@@ -303,11 +306,11 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m)
     enddo
   enddo
   !$OMP END DO
-  
+
   !$OMP END PARALLEL
 
   call zgemm('N','N',m,n,n,(1.d0,0.d0),U,size(U,1),S,size(S,1),(0.d0,0.d0),C,size(C,1))
-  
+
   deallocate(U,Vt,S,D)
 end
 
@@ -340,15 +343,16 @@ subroutine get_inverse_complex(A,LDA,m,C,LDC)
 end
 
 
-subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC)
+subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   implicit none
   BEGIN_DOC
   ! Find C = A^-1
   END_DOC
   integer, intent(in)            :: m,n, LDA, LDC
   complex*16, intent(in)   :: A(LDA,n)
+  double precision, intent(in)   :: cutoff
   complex*16, intent(out)  :: C(LDC,m)
-  
+
   double precision, allocatable  :: D(:), rwork(:)
   complex*16, allocatable  :: U(:,:), Vt(:,:), work(:), A_tmp(:,:)
   integer                        :: info, lwork
@@ -373,15 +377,15 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC)
     print *,  info, ':: SVD failed'
     stop 1
   endif
-  
+
   do i=1,n
-    if (D(i)/D(1) > 1.d-10) then
+    if (D(i)/D(1) > cutoff) then
       D(i) = 1.d0/D(i)
     else
       D(i) = 0.d0
     endif
   enddo
-  
+
   C = (0.d0,0.d0)
   do i=1,m
     do j=1,n
@@ -390,9 +394,9 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC)
       enddo
     enddo
   enddo
-  
+
   deallocate(U,D,Vt,work,A_tmp,rwork)
-                                                                                              
+
 end
 
 subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
@@ -475,7 +479,7 @@ subroutine lapack_diagd_diag_in_place_complex(eigvalues,eigvectors,nmax,n)
 end
 
 subroutine lapack_diagd_diag_complex(eigvalues,eigvectors,H,nmax,n)
-  implicit none                                                                               
+  implicit none
   BEGIN_DOC
   ! Diagonalize matrix H(complex)
   !
@@ -617,7 +621,7 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
   allocate (work(lwork),iwork(liwork),rwork(lrwork))
   call ZHEEVD( 'V', 'U', n, A, nmax, eigenvalues, work, lwork, &
     rwork, lrwork, iwork, liwork, info )
-  deallocate(work,iwork,rwork)                                                                
+  deallocate(work,iwork,rwork)
 
 
   if (info < 0) then
@@ -640,7 +644,7 @@ subroutine lapack_diagd_complex(eigvalues,eigvectors,H,nmax,n)
 end
 
 subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
-  implicit none                                                                               
+  implicit none
   BEGIN_DOC
   ! Diagonalize matrix H (complex)
   !
@@ -695,10 +699,10 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
       do j=1,n
         print *,  H(i,j)
       enddo
-     enddo 
+     enddo
      stop 1
   end if
-  
+
   eigvectors = (0.d0,0.d0)
   eigvalues = 0.d0
   do j = 1, n
@@ -708,12 +712,12 @@ subroutine lapack_diag_complex(eigvalues,eigvectors,H,nmax,n)
     enddo
   enddo
   deallocate(A,eigenvalues)
-end 
-    
+end
+
 subroutine matrix_vector_product_complex(u0,u1,matrix,sze,lda)
  implicit none
  BEGIN_DOC
-! performs u1 += u0 * matrix 
+! performs u1 += u0 * matrix
  END_DOC
  integer, intent(in)             :: sze,lda
  complex*16, intent(in)    :: u0(sze)
@@ -727,7 +731,7 @@ subroutine matrix_vector_product_complex(u0,u1,matrix,sze,lda)
  call zhemv('U', sze, (1.d0,0.d0), matrix, lda, u0, incx, (1.d0,0.d0), u1, incy)
 end
 
-subroutine ortho_canonical(overlap,LDA,N,C,LDC,m)
+subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.U.s^-1/2 canonical orthogonalization.
@@ -750,6 +754,7 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m)
   integer, intent(in)            :: lda, ldc, n
   integer, intent(out)           :: m
   double precision, intent(in)   :: overlap(lda,n)
+  double precision, intent(in)   :: cutoff
   double precision, intent(inout) :: C(ldc,n)
   double precision, allocatable  :: U(:,:)
   double precision, allocatable  :: Vt(:,:)
@@ -769,7 +774,7 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m)
   D(:) = dsqrt(D(:))
   m=n
   do i=1,n
-    if ( D(i) >= 1.d-6 ) then
+    if ( D(i) >= cutoff ) then
       D(i) = 1.d0/D(i)
     else
       m = i-1
@@ -840,7 +845,7 @@ subroutine ortho_qr(A,LDA,m,n)
   call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
   LWORK=max(n,int(WORK(1)))
-  
+
   deallocate(WORK)
   allocate(WORK(LWORK))
   call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
@@ -874,7 +879,7 @@ subroutine ortho_qr_unblocked(A,LDA,m,n)
   deallocate(WORK,TAU)
 end
 
-subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m)
+subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
   implicit none
   BEGIN_DOC
   ! Compute C_new=C_old.S^-1/2 orthogonalization.
@@ -896,6 +901,7 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m)
 
   integer, intent(in)            :: LDA, ldc, n, m
   double precision, intent(in)   :: overlap(lda,n)
+  double precision, intent(in)   :: cutoff
   double precision, intent(inout) :: C(ldc,n)
   double precision, allocatable  :: U(:,:)
   double precision, allocatable  :: Vt(:,:)
@@ -912,12 +918,13 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m)
   call svd(overlap,lda,U,ldc,D,Vt,lda,n,n)
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED(S,U,D,Vt,n,C,m) &
+  !$OMP SHARED(S,U,D,Vt,n,C,m,cutoff) &
   !$OMP PRIVATE(i,j,k)
 
   !$OMP DO
   do i=1,n
-    if ( D(i) < 1.d-6 ) then
+    if ( D(i) < cutoff ) then
+      print *,  'Removed Linear dependencies :', 1.d0/D(i)
       D(i) = 0.d0
     else
       D(i) = 1.d0/dsqrt(D(i))
@@ -986,13 +993,14 @@ subroutine get_inverse(A,LDA,m,C,LDC)
   deallocate(ipiv,work)
 end
 
-subroutine get_pseudo_inverse(A,LDA,m,n,C,LDC)
+subroutine get_pseudo_inverse(A,LDA,m,n,C,LDC,cutoff)
   implicit none
   BEGIN_DOC
   ! Find C = A^-1
   END_DOC
   integer, intent(in)            :: m,n, LDA, LDC
   double precision, intent(in)   :: A(LDA,n)
+  double precision, intent(in)   :: cutoff
   double precision, intent(out)  :: C(LDC,m)
 
   double precision, allocatable  :: U(:,:), D(:), Vt(:,:), work(:), A_tmp(:,:)
@@ -1020,7 +1028,7 @@ subroutine get_pseudo_inverse(A,LDA,m,n,C,LDC)
   endif
 
   do i=1,n
-    if (D(i)/D(1) > 1.d-10) then
+    if (D(i)/D(1) > cutoff) then
       D(i) = 1.d0/D(i)
     else
       D(i) = 0.d0
@@ -1053,7 +1061,7 @@ subroutine find_rotation(A,LDA,B,m,C,n)
 
   double precision, allocatable  :: A_inv(:,:)
   allocate(A_inv(LDA,n))
-  call get_pseudo_inverse(A,LDA,m,n,A_inv,LDA)
+  call get_pseudo_inverse(A,LDA,m,n,A_inv,LDA,1.d-10)
 
   integer                        :: i,j,k
   call dgemm('N','N',n,n,m,1.d0,A_inv,n,B,LDA,0.d0,C,n)

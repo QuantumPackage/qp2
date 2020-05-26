@@ -30,7 +30,7 @@ let bit_kind_size = lazy (
       in
       begin match (String_ext.rsplit2 ~on:':' line) with
       | Some (_ ,buffer) ->
-        begin match (String_ext.split ~on:'=' buffer |> List.map String.trim) with
+        begin match (String_ext.split ~on:'=' buffer |> list_map String.trim) with
         | ["bit_kind_size"; x] -> 
           int_of_string x |> Bit_kind_size.of_int
         | _  -> get_data tail
@@ -58,7 +58,7 @@ let executables = lazy (
     result
   in
   lines
-  |> List.map (fun x ->
+  |> list_map (fun x ->
          let e = String_ext.split ~on:' ' x
            |> List.filter (fun x -> x <> "")
          in

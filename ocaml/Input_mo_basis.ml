@@ -257,9 +257,9 @@ mo_coef         = %s
 "
       (MO_label.to_string b.mo_label)
       (MO_number.to_string b.mo_num)
-      (b.mo_class |> Array.to_list |> List.map
+      (b.mo_class |> Array.to_list |> list_map
          (MO_class.to_string) |> String.concat ", " )
-      (b.mo_occ |> Array.to_list |> List.map
+      (b.mo_occ |> Array.to_list |> list_map
          (MO_occ.to_string) |> String.concat ", " )
       (b.mo_coef |> Array.map
          (fun x-> Array.map MO_coef.to_string x |> 

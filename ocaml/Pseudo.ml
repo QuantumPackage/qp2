@@ -1,4 +1,5 @@
 open Sexplib.Std
+open Qputils
 open Qptypes
 
 
@@ -81,7 +82,7 @@ let to_string_local = function
 | t  ->
   "Local component:" ::
   ( Printf.sprintf "%20s %8s %20s" "Coeff." "r^n" "Exp." ) ::
-  ( List.map (fun (l,c) -> Printf.sprintf "%20f %8d %20f"
+  ( list_map (fun (l,c) -> Printf.sprintf "%20f %8d %20f"
       (AO_coef.to_float c)
       (R_power.to_int   l.GaussianPrimitive_local.r_power)
       (AO_expo.to_float l.GaussianPrimitive_local.expo)
@@ -95,7 +96,7 @@ let to_string_non_local = function
 | t  ->
   "Non-local component:" ::
   ( Printf.sprintf "%20s %8s %20s %8s" "Coeff." "r^n" "Exp." "Proj") ::
-  ( List.map (fun (l,c) ->
+  ( list_map (fun (l,c) ->
       let p =
         Positive_int.to_int l.GaussianPrimitive_non_local.proj
       in

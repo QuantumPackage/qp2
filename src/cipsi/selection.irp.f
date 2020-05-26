@@ -22,7 +22,7 @@ END_PROVIDER
 subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   implicit none
   BEGIN_DOC
-! Updates the rPT2- and Variance- matching weights.
+! Updates the PT2- and Variance- matching weights.
   END_DOC
   integer, intent(in)          :: N_st
   double precision, intent(in) :: pt2(N_st)
@@ -32,7 +32,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
-  integer, parameter :: i_itermax = 3
+  integer, parameter :: i_itermax = 1
   double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
 
   if (i_iter == 0) then
@@ -46,32 +46,39 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
     i_iter = 1
   endif
 
-  dt = 4.d0
+  dt = 2.0d0
 
   do k=1,N_st
+    ! rPT2
     rpt2(k) = pt2(k)/(1.d0 + norm(k))
   enddo
 
-  avg = sum(rpt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
+  avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st
-    element = exp(dt*(rpt2(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = exp(dt*(pt2(k)/avg -1.d0))
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_pt2(k,i_iter) = element
-    pt2_match_weight(k) = product(memo_pt2(k,:))
+    pt2_match_weight(k) *= product(memo_pt2(k,:))
   enddo
 
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
-    element = min(1.5d0 , element)
+    element = min(2.0d0 , element)
     element = max(0.5d0 , element)
     memo_variance(k,i_iter) = element
-    variance_match_weight(k) = product(memo_variance(k,:))
+    variance_match_weight(k) *= product(memo_variance(k,:))
   enddo
 
+  if (N_det < 100) then
+    ! For tiny wave functions, weights are 1.d0
+    pt2_match_weight(:) = 1.d0
+    variance_match_weight(:) = 1.d0
+  endif
+
   threshold_davidson_pt2 = min(1.d-6, &
-     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(rpt2(1:N_states)))) )
+     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
 
   SOFT_TOUCH pt2_match_weight variance_match_weight threshold_davidson_pt2
 end
@@ -325,7 +332,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
+        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
           indices(k) = idx
           k=k+1
         endif
@@ -349,7 +356,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > 0.d0) then
+        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
           indices(k) = idx
           k=k+1
         endif
