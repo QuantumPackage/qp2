@@ -1040,6 +1040,15 @@ subroutine davidson_diag_hjj_sjj_complex(dets_in,u_in,H_jj,s2_out,energies,dim_i
   y = (0.d0,0.d0)
   s_ = (0.d0,0.d0)
   s_tmp = (0.d0,0.d0)
+  W = (0.d0,0.d0)
+  S = (0.e0,0.e0)
+  S_d = (0.d0,0.d0)
+  h_p = (0.d0,0.d0)
+  residual_norm = 0.d0
+  s2 = 0.d0
+  y_s = (0.e0,0.e0)
+  lambda = 0.d0
+
 
 
   ASSERT (N_st > 0)

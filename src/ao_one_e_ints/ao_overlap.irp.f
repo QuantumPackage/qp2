@@ -481,7 +481,7 @@ BEGIN_PROVIDER [ complex*16, S_half_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num
   allocate(U(ao_num_per_kpt,ao_num_per_kpt),Vt(ao_num_per_kpt,ao_num_per_kpt),D(ao_num_per_kpt))
 
   do kk=1,kpt_num
-    call svd_complex(ao_overlap_kpts(1,1,k),size(ao_overlap_kpts,1),U,size(U,1),D,Vt,size(Vt,1),ao_num_per_kpt,ao_num_per_kpt)
+    call svd_complex(ao_overlap_kpts(1,1,kk),size(ao_overlap_kpts,1),U,size(U,1),D,Vt,size(Vt,1),ao_num_per_kpt,ao_num_per_kpt)
   
     do i=1,ao_num_per_kpt
       D(i) = dsqrt(D(i))
