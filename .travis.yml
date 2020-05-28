@@ -1,13 +1,5 @@
-#sudo: true
-#before_script:
-#  - sudo apt-get update -q
-#  - sudo apt-get remove curl
-#  - sudo apt-get remove zlib1g-dev
-#  - sudo apt-get install autoconf
-#  - sudo rm /usr/local/bin/bats
-
 os: linux
-dist: trusty
+dist: bionic
 sudo: false
 compiler: gfortran
 
