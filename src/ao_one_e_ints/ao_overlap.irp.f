@@ -162,7 +162,8 @@ BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
  BEGIN_DOC
 ! Inverse of the overlap matrix
  END_DOC
- call get_pseudo_inverse(ao_overlap,size(ao_overlap,1),ao_num,ao_num,S_inv,size(S_inv,1))
+ call get_pseudo_inverse(ao_overlap,size(ao_overlap,1),ao_num,ao_num,S_inv, &
+    size(S_inv,1),lin_dep_cutoff)
 END_PROVIDER
 
 BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
@@ -170,8 +171,8 @@ BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
  BEGIN_DOC
 ! Inverse of the overlap matrix
  END_DOC
- call get_pseudo_inverse_complex(ao_overlap_complex, &
-    size(ao_overlap_complex,1),ao_num,ao_num,S_inv_complex,size(S_inv_complex,1))
+ call get_pseudo_inverse_complex(ao_overlap_complex, size(ao_overlap_complex,1),&
+    ao_num,ao_num,S_inv_complex,size(S_inv_complex,1),lin_dep_cutoff)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]

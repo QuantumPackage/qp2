@@ -333,11 +333,10 @@ double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
   type(map_type), intent(inout)  :: map
   integer                        :: ii
   real(integral_kind)            :: tmp
+  logical, external              :: ao_two_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_cache ao_integrals_cache_min
   !DIR$ FORCEINLINE
-  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
-    tmp = 0.d0
-  else if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < ao_integrals_threshold) then
+  if (ao_two_e_integral_zero(i,j,k,l)) then
     tmp = 0.d0
   else
     ii = l-ao_integrals_cache_min
@@ -427,9 +426,8 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
   complex(integral_kind)         :: tmp
   PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
   !DIR$ FORCEINLINE
-  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
-    tmp = (0.d0,0.d0)
-  else if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < ao_integrals_threshold) then
+  logical, external              :: ao_two_e_integral_zero
+  if (ao_two_e_integral_zero(i,j,k,l)) then
     tmp = (0.d0,0.d0)
   else
     ii = l-ao_integrals_cache_min
@@ -481,11 +479,10 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
 
   integer                        :: i
   integer(key_kind)              :: hash
-  double precision               :: thresh
+  logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
-  thresh = ao_integrals_threshold
 
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -511,11 +508,10 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
 
   integer                        :: i
   integer(key_kind)              :: hash
-  double precision               :: thresh
+  logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
-  thresh = ao_integrals_threshold
 
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -540,12 +536,13 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
 
   integer                        :: i
   integer(key_kind)              :: hash
-  double precision               :: thresh,tmp
+  double precision               :: tmp
+  logical, external              :: ao_one_e_integral_zero
+  logical, external              :: ao_two_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map
-  thresh = ao_integrals_threshold
 
   non_zero_int = 0
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -555,12 +552,12 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
     integer, external :: ao_l4
     double precision, external :: ao_two_e_integral
     !DIR$ FORCEINLINE
-    if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+    if (ao_two_e_integral_zero(i,j,k,l)) then
       cycle
     endif
     call two_e_integrals_index(i,j,k,l,hash)
     call map_get(ao_integrals_map, hash,tmp)
-    if (dabs(tmp) < thresh ) cycle
+    if (dabs(tmp) < ao_integrals_threshold) cycle
     non_zero_int = non_zero_int+1
     out_val_index(non_zero_int) = i
     out_val(non_zero_int) = tmp
@@ -584,10 +581,12 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
   integer                        :: i,k
   integer(key_kind)              :: hash
   double precision               :: tmp
+  logical, external              :: ao_one_e_integral_zero
+  logical, external              :: ao_two_e_integral_zero
 
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -598,7 +597,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
      integer, external :: ao_l4
      double precision, external :: ao_two_e_integral
      !DIR$ FORCEINLINE
-     if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+     if (ao_two_e_integral_zero(i,j,k,l)) then
        cycle
      endif
      call two_e_integrals_index(i,j,k,l,hash)
@@ -630,10 +629,12 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   integer                        :: i,k
   integer(key_kind)              :: hash
   double precision               :: tmp
+  logical, external              :: ao_one_e_integral_zero
+  logical, external              :: ao_two_e_integral_zero
 
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
-  if (ao_overlap_abs(j,l) < thresh) then
+  if (ao_one_e_integral_zero(j,l)) then
     out_val = 0.d0
     return
   endif
@@ -646,7 +647,7 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
    integer, external :: ao_l4
    double precision, external :: ao_two_e_integral
    !DIR$ FORCEINLINE
-   if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh) then
+   if (ao_two_e_integral_zero(i,j,k,l)) then
      cycle
    endif
    call two_e_integrals_index(i,j,k,l,hash)

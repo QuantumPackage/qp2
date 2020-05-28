@@ -196,6 +196,13 @@ END_DOC
 
   double precision,allocatable  :: scratch(:,:)
   integer                       :: i,j,k,i_DIIS,j_DIIS
+  double precision :: rcond, ferr, berr
+  integer, allocatable :: iwork(:)
+  integer :: lwork
+
+  if (dim_DIIS < 1) then
+    return
+  endif
 
   allocate(                               &
     B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1), &
@@ -239,77 +246,70 @@ END_DOC
   B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1) = 0.d0
   C_vector_DIIS(dim_DIIS+1) = -1.d0
 
-! Solve the linear system C = B.X
+  deallocate(scratch)
 
+! Estimate condition number of B
+  double precision :: anorm
   integer              :: info
   integer,allocatable  :: ipiv(:)
-
-  allocate(          &
-    ipiv(dim_DIIS+1) &
-  )
-
   double precision, allocatable :: AF(:,:)
-  allocate (AF(dim_DIIS+1,dim_DIIS+1))
-  double precision :: rcond, ferr, berr
-  integer :: iwork(dim_DIIS+1), lwork
+  double precision, external :: dlange
 
-  call dsysvx('N','U',dim_DIIS+1,1,      &
-    B_matrix_DIIS,size(B_matrix_DIIS,1), &
-    AF, size(AF,1),                      &
-    ipiv,                                &
-    C_vector_DIIS,size(C_vector_DIIS,1), &
-    X_vector_DIIS,size(X_vector_DIIS,1), &
-    rcond,                               &
-    ferr,                                &
-    berr,                                &
-    scratch,-1,                          &
-    iwork,                               &
-    info                                 &
-  )
-  lwork = int(scratch(1,1))
-  deallocate(scratch)
+  lwork = max((dim_DIIS+1)**2, (dim_DIIS+1)*5)
+  allocate(AF(dim_DIIS+1,dim_DIIS+1))
+  allocate(ipiv(2*(dim_DIIS+1)), iwork(2*(dim_DIIS+1)) )
   allocate(scratch(lwork,1))
 
-  call dsysvx('N','U',dim_DIIS+1,1,      &
-    B_matrix_DIIS,size(B_matrix_DIIS,1), &
-    AF, size(AF,1),                      &
-    ipiv,                                &
-    C_vector_DIIS,size(C_vector_DIIS,1), &
-    X_vector_DIIS,size(X_vector_DIIS,1), &
-    rcond,                               &
-    ferr,                                &
-    berr,                                &
-    scratch,size(scratch),               &
-    iwork,                               &
-    info                                 &
-  )
+  anorm = dlange('1', dim_DIIS+1, dim_DIIS+1, B_matrix_DIIS, &
+              size(B_matrix_DIIS,1), scratch)
 
- if(info < 0) then
-   stop 'bug in DIIS'
+  AF(:,:) = B_matrix_DIIS(:,:)
+  call dgetrf(dim_DIIS+1,dim_DIIS+1,AF,size(AF,1),ipiv,info)
+  if (info /= 0) then
+    dim_DIIS = 0
+    return
+  endif
+
+  call dgecon( '1', dim_DIIS+1, AF, &
+    size(AF,1), anorm, rcond, scratch, iwork, info )
+  if (info /= 0) then
+    dim_DIIS = 0
+    return
+  endif
+
+ if (rcond < 1.d-14) then
+   dim_DIIS = 0
+   return
  endif
 
- if (rcond > 1.d-12) then
+! Solve the linear system C = B.X
+
+  X_vector_DIIS = C_vector_DIIS
+  call dgesv ( dim_DIIS+1 , 1, B_matrix_DIIS, size(B_matrix_DIIS,1), &
+      ipiv , X_vector_DIIS , size(X_vector_DIIS,1), info)
+
+  deallocate(scratch,AF,iwork)
+
+  if(info < 0) then
+    stop 'bug in DIIS'
+  endif
 
   ! Compute extrapolated Fock matrix
 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
-      do j=1,ao_num
-        do i=1,ao_num
-          Fock_matrix_AO_(i,j) = 0.d0
-        enddo
-        do k=1,dim_DIIS
-          if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
-          do i=1,ao_num
-            Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
-                X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
-          enddo
-        enddo
+  !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
+  do j=1,ao_num
+    do i=1,ao_num
+      Fock_matrix_AO_(i,j) = 0.d0
+    enddo
+    do k=1,dim_DIIS
+      if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
+      do i=1,ao_num
+        Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
+            X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
       enddo
-      !$OMP END PARALLEL DO
-
-  else
-    dim_DIIS = 0
-  endif
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 
 end

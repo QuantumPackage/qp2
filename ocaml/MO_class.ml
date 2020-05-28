@@ -1,4 +1,5 @@
 open Qptypes
+open Qputils
 open Sexplib.Std
 
 
@@ -13,7 +14,7 @@ type t =
 
 let to_string  x =
   let print_list l =
-    let s = List.map (fun x-> MO_number.to_int x |> string_of_int ) l
+    let s = list_map (fun x-> MO_number.to_int x |> string_of_int ) l
             |> (String.concat ", ")
     in
     "("^s^")"
@@ -43,7 +44,7 @@ let of_string s =
 
 
 let _mo_number_list_of_range range =
-  Range.of_string range |> List.map MO_number.of_int
+  Range.of_string range |> list_map MO_number.of_int
 
 
 let create_core     range = Core     (_mo_number_list_of_range range)

@@ -1,4 +1,5 @@
 open Qptypes
+open Qputils
 open Sexplib.Std
 
 exception MultiplicityError of string
@@ -96,7 +97,7 @@ let to_string_general ~f m =
   let title =
      name m
   in
-  [ string_of_int n ; title ] @  (List.map f nuclei)
+  [ string_of_int n ; title ] @  (list_map f nuclei)
   |> String.concat "\n"
 
 let to_string =
@@ -112,7 +113,7 @@ let of_xyz_string
     s =
   let l = String_ext.split s ~on:'\n'
        |> List.filter (fun x -> x <> "")
-       |> List.map (fun x -> Atom.of_string units x)
+       |> list_map (fun x -> Atom.of_string units x)
   in
   let ne = ( get_charge {
         nuclei=l ;
@@ -190,7 +191,7 @@ let of_file
 let distance_matrix molecule =
   let coord =
     molecule.nuclei
-    |> List.map (fun x -> x.Atom.coord)
+    |> list_map (fun x -> x.Atom.coord)
     |> Array.of_list
   in
   let n =

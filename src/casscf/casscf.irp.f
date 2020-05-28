@@ -5,6 +5,7 @@ program casscf
   END_DOC
   call reorder_orbitals_for_casscf
   no_vvvv_integrals = .True.
+  touch no_vvvv_integrals
   pt2_max = 0.02
   SOFT_TOUCH no_vvvv_integrals pt2_max
   call run_stochastic_cipsi

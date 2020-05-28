@@ -238,9 +238,6 @@ ntotB=n_b(1)+n_b(2)+n_b(3)
 ntot=ntotA+ntotB
 
 nkl_max=4
-!=!=!=!=!=!=!=!=!=!
-! A l l o c a t e !
-!=!=!=!=!=!=!=!=!=!
 
 allocate (array_coefs_A(0:ntot,3))
 allocate (array_coefs_B(0:ntot,3))
@@ -254,15 +251,7 @@ allocate (array_I_B(-(lmax+ntot):lmax+ntot,0:lmax+ntot,0:ntot,0:ntot,0:ntot))
 if(ac.eq.0.d0.and.bc.eq.0.d0)then
 
 
- !=!=!=!=!=!
- ! I n i t !
- !=!=!=!=!=!
-
  accu=0.d0
-
- !=!=!=!=!=!=!=!
- ! c a l c u l !
- !=!=!=!=!=!=!=!
 
  do k=1,kmax
   do l=0,lmax
@@ -278,17 +267,9 @@ if(ac.eq.0.d0.and.bc.eq.0.d0)then
   enddo
  enddo
 
- !=!=!=!=!
- ! E n d !
- !=!=!=!=!
-
  Vpseudo=accu*fourpi
 
 else if(ac.ne.0.d0.and.bc.ne.0.d0)then
-
- !=!=!=!=!=!
- ! I n i t !
- !=!=!=!=!=!
 
  f=fourpi*fourpi
 
@@ -329,10 +310,6 @@ else if(ac.ne.0.d0.and.bc.ne.0.d0)then
  do k3p=0,n_b(3)
    array_coefs_B(k3p,3) = binom_func(n_b(3),k3p)*(c(3)-b(3))**(n_b(3)-k3p)
  enddo
-
- !=!=!=!=!=!=!=!
- ! c a l c u l !
- !=!=!=!=!=!=!=!
 
  accu=0.d0
  do l=0,lmax
@@ -408,17 +385,9 @@ else if(ac.ne.0.d0.and.bc.ne.0.d0)then
    enddo
  enddo
 
- !=!=!=!=!
- ! E n d !
- !=!=!=!=!
-
  Vpseudo=f*accu
 
 else if(ac.eq.0.d0.and.bc.ne.0.d0)then
-
- !=!=!=!=!=!
- ! I n i t !
- !=!=!=!=!=!
 
  f=fourpi**1.5d0
  theta_BC0=dacos( (b(3)-c(3))/bc )
@@ -447,10 +416,6 @@ else if(ac.eq.0.d0.and.bc.ne.0.d0)then
  do k3p=0,n_b(3)
    array_coefs_B(k3p,3) = binom_func(n_b(3),k3p)*(c(3)-b(3))**(n_b(3)-k3p)
  enddo
-
- !=!=!=!=!=!=!=!
- ! c a l c u l !
- !=!=!=!=!=!=!=!
 
  accu=0.d0
  do l=0,lmax
@@ -498,17 +463,9 @@ else if(ac.eq.0.d0.and.bc.ne.0.d0)then
    enddo
  enddo
 
- !=!=!=!=!
- ! E n d !
- !=!=!=!=!
-
  Vpseudo=f*accu
 
 else if(ac.ne.0.d0.and.bc.eq.0.d0)then
-
- !=!=!=!=!=!
- ! I n i t !
- !=!=!=!=!=!
 
  f=fourpi**1.5d0
  theta_AC0=dacos( (a(3)-c(3))/ac )
@@ -537,10 +494,6 @@ else if(ac.ne.0.d0.and.bc.eq.0.d0)then
  do k3=0,n_a(3)
    array_coefs_A(k3,3) = binom_func(n_a(3),k3)*(c(3)-a(3))**(n_a(3)-k3)
  enddo
-
- !=!=!=!=!=!=!=!
- ! c a l c u l !
- !=!=!=!=!=!=!=!
 
  accu=0.d0
  do l=0,lmax
@@ -586,10 +539,6 @@ else if(ac.ne.0.d0.and.bc.eq.0.d0)then
 
   enddo
  enddo
-
- !=!=!=!=!
- ! E n d !
- !=!=!=!=!
 
  Vpseudo=f*accu
 endif
@@ -1885,7 +1834,7 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
     pi=dacos(-1.d0)
     a_over_b_square = (a/b)**2
 
-    ! Calcul first term of the sequence
+    ! First term of the sequence
 
     term_a =dble_fact(nlm-1) / (dble_fact(n_1)*dble_fact(m_1))
     expo=0.5d0*dfloat(nlm+1)
@@ -1894,7 +1843,7 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
     s_0_0=term_rap*a**(n)*b**(m)
     if(mod(nlm,2).eq.0)s_0_0=s_0_0*dsqrt(pi*.5d0)
 
-    ! Initialise the first recurence terme for the q loop
+    ! Initialize the first recurrence term for the q loop
     s_q_0 = s_0_0
 
 
@@ -1914,6 +1863,10 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
       two_qkmp1 = 2.d0*(qk+mk)+1.d0
       do k=0,q-1
         s_q_k = two_qkmp1*qk*inverses(k)*s_q_k
+!        if (s_q_k < 1.d-32) then
+!          s_q_k = 0.d0
+!          exit
+!        endif
         sum=sum+s_q_k
         two_qkmp1 = two_qkmp1-2.d0
         qk = qk-1.d0
