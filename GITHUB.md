@@ -13,11 +13,8 @@ dev:
 bugfix:
   A fork of the *master* on which the bug fixes are made.
 
-dev-lcpq:
-  Toulouse development branch  
-
-dev-lct:
-  Paris development branch  
+dev:
+  Development branch  
 
 gh-pages:
   This is an independent branch, containing only the web site of QP2.
