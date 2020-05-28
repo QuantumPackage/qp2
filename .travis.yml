@@ -45,3 +45,26 @@ jobs:
       - ./configure --install all --config ./config/travis.cfg 
       - source ./quantum_package.rc ; ninja -j 1 -v 
       - source ./quantum_package.rc ; qp_test -a 
+  - name: intel
+    env: 
+      - CXX='icpc'
+      - FC='ifort'
+      - CXX='icc'
+    install:
+    - source /opt/intel/inteloneapi/compiler/latest/env/vars.sh
+    addons:
+      apt:
+        sources:
+        - sourceline: 'deb https://apt.repos.intel.com/oneapi all main'
+          key_url: https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+        packages:
+        - intel-oneapi-icc
+        - intel-oneapi-ifort
+        - liblapack-dev
+        - libblas-dev
+        - wget
+    compiler: ifort
+    script: 
+      - ./configure --install all --config ./config/ifort_debug.cfg 
+      - source ./quantum_package.rc ; ninja -j 1 -v 
+      - source ./quantum_package.rc ; qp_test -a 
