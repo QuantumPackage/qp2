@@ -32,7 +32,7 @@ jobs:
   - name: default gcc 9 
     addons:
       apt:
-        - sourceline: "ppa:ubuntu-toolchain-r/test"
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
           key_url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x60c317803a41ba51845e371a1e9377a2ba9ef27f    
         packages:
           - gfortran-9
