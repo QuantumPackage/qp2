@@ -1462,10 +1462,8 @@ subroutine clear_mo_map
   ! Frees the memory of the MO map
   END_DOC
   call map_deinit(mo_integrals_map)
-  !if (is_complex) then
-    call map_deinit(mo_integrals_map_2)
-  !endif
-  FREE mo_integrals_map mo_two_e_integrals_jj mo_two_e_integrals_jj_anti
+  call map_deinit(mo_integrals_map_2)
+  FREE mo_integrals_map mo_integrals_map_2 mo_two_e_integrals_jj mo_two_e_integrals_jj_anti
   FREE mo_two_e_integrals_jj_exchange mo_two_e_integrals_in_map
 end
 
