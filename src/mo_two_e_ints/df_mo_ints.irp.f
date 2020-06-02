@@ -26,7 +26,7 @@ subroutine mo_map_fill_from_df_single
   ! fill mo bielec integral map using 3-index df integrals
   END_DOC
 
-  integer :: i,k,j,l
+  integer :: i,k,j,l,mu
   integer :: ki,kk,kj,kl
   integer :: ii,ik,ij,il
   integer :: kikk2,kjkl2,jl2,ik2
@@ -34,7 +34,7 @@ subroutine mo_map_fill_from_df_single
 
   complex*16,allocatable :: ints_ik(:,:,:), ints_jl(:,:,:)
 
-  complex*16 :: integral
+  complex*16 :: integral,mjl,mik
   integer                        :: n_integrals_1, n_integrals_2
   integer                        :: size_buffer
   integer(key_kind),allocatable  :: buffer_i_1(:), buffer_i_2(:)
@@ -97,6 +97,7 @@ subroutine mo_map_fill_from_df_single
         endif
 
         !$OMP PARALLEL PRIVATE(i,k,j,l,ii,ik,ij,il,jl2,ik2, &
+            !$OMP  mu, mik, mjl, &
             !$OMP  n_integrals_1, buffer_i_1, buffer_values_1, &
             !$OMP  n_integrals_2, buffer_i_2, buffer_values_2, &
             !$OMP  idx_tmp, tmp_re, tmp_im, integral,sign,use_map1) &
