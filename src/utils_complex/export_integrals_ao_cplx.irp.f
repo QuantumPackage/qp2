@@ -159,7 +159,7 @@ provide ao_two_e_integrals_in_map
    if (cdabs(tmp_cmplx-int2e_tmp1).gt.thr0) then
      print'(4(I4),4(E15.7))',i,j,k,l,tmp_cmplx,int2e_tmp1
    endif
-    integer*8 :: ii
+    integer :: ii
           ii = l-ao_integrals_cache_min
           ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
