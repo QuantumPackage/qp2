@@ -44,7 +44,8 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     else if (read_df_mo_integrals.or.read_df_ao_integrals) then
       PROVIDE df_mo_integrals_complex
       !call mo_map_fill_from_df
-      call mo_map_fill_from_df_single
+      !call mo_map_fill_from_df_single
+      call mo_map_fill_from_df_dot
       return
     else
       PROVIDE ao_two_e_integrals_in_map
