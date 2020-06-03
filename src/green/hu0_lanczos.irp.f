@@ -194,7 +194,7 @@ subroutine H_u_0_openmp_work_$N_int(v_t,u_t,sze,istart,iend,ishift,istep)
         ASSERT (lrow <= N_det_alpha_unique)
 
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-        call i_h_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
+        call i_h_j_double_alpha_beta_complex(tmp_det,tmp_det2,$N_int,hij)
         v_t(k_a) = v_t(k_a) + hij * u_t(l_a)
       enddo
     enddo
@@ -264,7 +264,7 @@ subroutine H_u_0_openmp_work_$N_int(v_t,u_t,sze,istart,iend,ishift,istep)
       ASSERT (lrow <= N_det_alpha_unique)
 
       tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-      call i_H_j_mono_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+      call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 1, hij)
 
       v_t(k_a) = v_t(k_a) + hij * u_t(l_a)
     enddo
@@ -280,7 +280,7 @@ subroutine H_u_0_openmp_work_$N_int(v_t,u_t,sze,istart,iend,ishift,istep)
       lrow = psi_bilinear_matrix_rows(l_a)
       ASSERT (lrow <= N_det_alpha_unique)
 
-      call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
+      call i_h_j_double_spin_complex( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
       v_t(k_a) = v_t(k_a) + hij * u_t(l_a)
     enddo
     
@@ -341,7 +341,7 @@ subroutine H_u_0_openmp_work_$N_int(v_t,u_t,sze,istart,iend,ishift,istep)
       ASSERT (lcol <= N_det_beta_unique)
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-      call i_H_j_mono_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+      call i_h_j_single_spin_complex( tmp_det, tmp_det2, $N_int, 2, hij)
       l_a = psi_bilinear_matrix_transp_order(l_b)
       ASSERT (l_a <= N_det)
       v_t(k_a) = v_t(k_a) + hij * u_t(l_a)
@@ -357,7 +357,7 @@ subroutine H_u_0_openmp_work_$N_int(v_t,u_t,sze,istart,iend,ishift,istep)
       lcol = psi_bilinear_matrix_transp_columns(l_b)
       ASSERT (lcol <= N_det_beta_unique)
 
-      call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
+      call i_h_j_double_spin_complex( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
       l_a = psi_bilinear_matrix_transp_order(l_b)
       ASSERT (l_a <= N_det)
 

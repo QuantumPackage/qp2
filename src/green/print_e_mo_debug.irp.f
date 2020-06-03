@@ -11,5 +11,5 @@ subroutine routine
  implicit none
  integer :: i
  read*,i
- call print_mo_energies(psi_det(:,:,i),N_int,mo_tot_num)
+ call print_mo_energies(psi_det(:,:,i),N_int,mo_num)
 end

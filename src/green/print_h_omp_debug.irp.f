@@ -30,7 +30,7 @@ subroutine routine_omp
     u_tmp(i,i)=(1.d0,0.d0)
   enddo
 
-  call h_s2_u_0_nstates_openmp(v_tmp,s_tmp,u_tmp,n_st,h_size)
+  call h_s2_u_0_nstates_openmp_complex(v_tmp,s_tmp,u_tmp,n_st,h_size)
   do i = 1, n_st
     v_tmp(i,i) += nuclear_repulsion
   enddo

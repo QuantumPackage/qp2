@@ -595,22 +595,22 @@ subroutine i_h_j_double_spin_hp(key_i,key_j,Nint,ispin,hij_hp,N_hp,spin_hp,sign_
   double precision :: phase_hp(N_hp)
   integer                        :: exc(0:2,2)
   double precision               :: phase
-  complex*16, external     :: get_mo_bielec_integral
+  complex*16, external     :: mo_two_e_integral_complex
   integer :: i1,i2,i3,i4,j2,j3,ii
 
-  PROVIDE big_array_exchange_integrals mo_bielec_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
 
   call get_double_excitation_spin(key_i,key_j,exc,phase,Nint)
-  hij0 = phase*(get_mo_bielec_integral(                               &
+  hij0 = phase*(mo_two_e_integral_complex(                       &
       exc(1,1),                                                      &
       exc(2,1),                                                      &
       exc(1,2),                                                      &
-      exc(2,2), mo_integrals_map) -                                  &
-      get_mo_bielec_integral(                                        &
+      exc(2,2)) -                                  &
+      mo_two_e_integral_complex(                                    &
       exc(1,1),                                                      &
       exc(2,1),                                                      &
       exc(2,2),                                                      &
-      exc(1,2), mo_integrals_map) )
+      exc(1,2)) )
 
   ASSERT (exc(1,1) < exc(2,1))
   ASSERT (exc(1,2) < exc(2,2))
@@ -661,14 +661,14 @@ subroutine i_h_j_mono_spin_hp(key_i,key_j,Nint,spin,hij_hp,N_hp,spin_hp,sign_hp,
   integer                        :: exc(0:2,2)
   double precision               :: phase
 
-  PROVIDE big_array_exchange_integrals mo_bielec_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
  
-  call get_mono_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
+  call get_single_excitation_spin(key_i(1,spin),key_j(1,spin),exc,phase,Nint)
 
-  call get_mono_excitation_from_fock_hp(key_i,key_j,exc(1,1),exc(1,2),spin,phase,N_hp,hij_hp,spin_hp,sign_hp,idx_hp,allowed_hp)
+  call get_single_excitation_from_fock_hp(key_i,key_j,exc(1,1),exc(1,2),spin,phase,N_hp,hij_hp,spin_hp,sign_hp,idx_hp,allowed_hp)
 end
 
-subroutine get_mono_excitation_from_fock_hp(det_1,det_2,h,p,spin,phase,N_hp,hij_hp,spin_hp,sign_hp,idx_hp,allowed_hp)
+subroutine get_single_excitation_from_fock_hp(det_1,det_2,h,p,spin,phase,N_hp,hij_hp,spin_hp,sign_hp,idx_hp,allowed_hp)
   use bitmasks
   implicit none
   integer,intent(in) :: h,p,spin,N_hp
@@ -699,37 +699,37 @@ subroutine get_mono_excitation_from_fock_hp(det_1,det_2,h,p,spin,phase,N_hp,hij_
   enddo
   call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
   call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
-  hij0 = fock_operator_closed_shell_ref_bitmask(h,p)
+  hij0 = fock_op_cshell_ref_bitmask_cplx(h,p)
   ! holes :: direct terms
   do i0 = 1, n_occ_ab_hole(1)
     i = occ_hole(i0,1)
-    hij0 -= big_array_coulomb_integrals(i,h,p) ! get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
+    hij0 -= big_array_coulomb_integrals_complex(i,h,p) ! get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
   enddo
   do i0 = 1, n_occ_ab_hole(2)
     i = occ_hole(i0,2)
-    hij0 -= big_array_coulomb_integrals(i,h,p) !get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
+    hij0 -= big_array_coulomb_integrals_complex(i,h,p) !get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
   enddo
  
   ! holes :: exchange terms
   do i0 = 1, n_occ_ab_hole(spin)
     i = occ_hole(i0,spin)
-    hij0 += big_array_exchange_integrals(i,h,p) ! get_mo_bielec_integral_schwartz(h,i,i,p,mo_integrals_map)
+    hij0 += big_array_exchange_integrals_complex(i,h,p) ! get_mo_bielec_integral_schwartz(h,i,i,p,mo_integrals_map)
   enddo
  
   ! particles :: direct terms
   do i0 = 1, n_occ_ab_partcl(1)
     i = occ_partcl(i0,1)
-    hij0 += big_array_coulomb_integrals(i,h,p)!get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
+    hij0 += big_array_coulomb_integrals_complex(i,h,p)!get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
   enddo
   do i0 = 1, n_occ_ab_partcl(2)
     i = occ_partcl(i0,2)
-    hij0 += big_array_coulomb_integrals(i,h,p) !get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
+    hij0 += big_array_coulomb_integrals_complex(i,h,p) !get_mo_bielec_integral_schwartz(h,i,p,i,mo_integrals_map)
   enddo
  
   ! particles :: exchange terms
   do i0 = 1, n_occ_ab_partcl(spin)
     i = occ_partcl(i0,spin)
-    hij0 -= big_array_exchange_integrals(i,h,p)!get_mo_bielec_integral_schwartz(h,i,i,p,mo_integrals_map)
+    hij0 -= big_array_exchange_integrals_complex(i,h,p)!get_mo_bielec_integral_schwartz(h,i,i,p,mo_integrals_map)
   enddo
 
   low=min(h,p)
@@ -771,7 +771,7 @@ subroutine get_mono_excitation_from_fock_hp(det_1,det_2,h,p,spin,phase,N_hp,hij_
       hij_hp(ii) = 0.d0
       cycle
     else if (spin.eq.spin_hp(ii)) then
-      hij_hp(ii) = hij0 + sign_hp(ii) *(big_array_coulomb_integrals(idx_hp(ii),h,p) - big_array_exchange_integrals(idx_hp(ii),h,p))
+      hij_hp(ii) = hij0 + sign_hp(ii) *(big_array_coulomb_integrals_complex(idx_hp(ii),h,p) - big_array_exchange_integrals_complex(idx_hp(ii),h,p))
       if ((low.lt.idx_hp(ii)).and.(high.gt.idx_hp(ii))) then
         phase_hp(ii) = -1.d0
       else
@@ -779,7 +779,7 @@ subroutine get_mono_excitation_from_fock_hp(det_1,det_2,h,p,spin,phase,N_hp,hij_
       endif
     else
       phase_hp(ii) = 1.d0
-      hij_hp(ii) = hij0 + sign_hp(ii) * big_array_coulomb_integrals(idx_hp(ii),h,p)
+      hij_hp(ii) = hij0 + sign_hp(ii) * big_array_coulomb_integrals_complex(idx_hp(ii),h,p)
     endif
     hij_hp(ii) = hij_hp(ii) * phase * phase_hp(ii)
   enddo
@@ -806,24 +806,24 @@ subroutine i_H_j_double_alpha_beta_hp(key_i,key_j,Nint,hij_hp,N_hp,spin_hp,sign_
   integer :: lowhigh(2,2)
   integer                        :: exc(0:2,2,2)
   double precision               :: phase, phase2
-  complex*16, external     :: get_mo_bielec_integral
+  complex*16, external     :: mo_two_e_integral_complex
 
-  PROVIDE big_array_exchange_integrals mo_bielec_integrals_in_map
+  PROVIDE big_array_exchange_integrals_complex mo_two_e_integrals_in_map
 
-  call get_mono_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
-  call get_mono_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
+  call get_single_excitation_spin(key_i(1,1),key_j(1,1),exc(0,1,1),phase,Nint)
+  call get_single_excitation_spin(key_i(1,2),key_j(1,2),exc(0,1,2),phase2,Nint)
   phase = phase*phase2
 
   if (exc(1,1,1) == exc(1,2,2)) then
-    hij0 =  big_array_exchange_integrals(exc(1,1,1),exc(1,1,2),exc(1,2,1))
+    hij0 =  big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
   else if (exc(1,2,1) == exc(1,1,2)) then
-    hij0 =  big_array_exchange_integrals(exc(1,2,1),exc(1,1,1),exc(1,2,2))
+    hij0 =  big_array_exchange_integrals_complex(exc(1,2,1),exc(1,1,1),exc(1,2,2))
   else
-    hij0 = get_mo_bielec_integral(                              &
+    hij0 = mo_two_e_integral_complex(                              &
         exc(1,1,1),                                                  &
         exc(1,1,2),                                                  &
         exc(1,2,1),                                                  &
-        exc(1,2,2) ,mo_integrals_map)
+        exc(1,2,2))
   endif
   
   !todo: clean this up

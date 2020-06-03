@@ -28,7 +28,7 @@ END_PROVIDER
   integer :: idx_homo_lumo(2), spin_homo_lumo(2)
   logical :: has_idx,has_spin,has_sign,has_lanc
   integer :: nlanc
-  ! needs psi_det, mo_tot_num, N_int, mo_bielec_integral_jj, mo_mono_elec_integral_diag
+  ! needs psi_det, mo_num, N_int, mo_bielec_integral_jj, mo_mono_elec_integral_diag
   call ezfio_has_green_green_idx(has_idx)
   call ezfio_has_green_green_spin(has_spin)
   call ezfio_has_green_green_sign(has_sign)
@@ -43,7 +43,7 @@ END_PROVIDER
     stop 'problem with lanczos restart; need idx, spin, sign'
   else
     print*,'new lanczos calculation, finding homo/lumo'
-    call get_homo_lumo(psi_det(1:N_int,1:2,1),N_int,mo_tot_num,idx_homo_lumo,spin_homo_lumo)
+    call get_homo_lumo(psi_det(1:N_int,1:2,1),N_int,mo_num,idx_homo_lumo,spin_homo_lumo)
 
     ! homo
     green_idx(1)=idx_homo_lumo(1)
@@ -75,7 +75,7 @@ END_PROVIDER
 !    endif
 !  else
 !    print*,'new lanczos calculation, finding homo/lumo'
-!    call get_homo_lumo(psi_det(1:N_int,1:2,1),N_int,mo_tot_num,idx_homo_lumo,spin_homo_lumo)
+!    call get_homo_lumo(psi_det(1:N_int,1:2,1),N_int,mo_num,idx_homo_lumo,spin_homo_lumo)
 !
 !    ! homo
 !    green_idx(1)=idx_homo_lumo(1)
@@ -279,9 +279,9 @@ BEGIN_PROVIDER [ double precision, spectral_lanczos, (n_omega,n_green_vec) ]
   logical :: has_ci_energy
   double precision :: ref_energy_0
   PROVIDE delta_omega alpha_lanczos beta_lanczos omega_list
-  call ezfio_has_full_ci_zmq_energy(has_ci_energy)
+  call ezfio_has_fci_energy(has_ci_energy)
   if (has_ci_energy) then
-    call ezfio_get_full_ci_zmq_energy(ref_energy_0)
+    call ezfio_get_fci_energy(ref_energy_0)
   else
     print*,'no reference energy from full_ci_zmq, exiting'
     stop
@@ -469,7 +469,8 @@ subroutine lanczos_h_step_hp(uu,vv,work,sze,alpha_i,beta_i,ng,spin_hp,sign_hp,id
   complex*16, intent(inout) :: uu(sze,ng),vv(sze,ng)
   complex*16, intent(out) :: work(sze,ng)
   double precision, intent(out) :: alpha_i(ng), beta_i(ng)
-  integer, intent(in) :: spin_hp(ng), sign_hp(ng), idx_hp(ng)
+  integer, intent(in) :: spin_hp(ng), idx_hp(ng)
+  double precision, intent(in) :: sign_hp(ng)
 
   double precision, external :: dznrm2
   complex*16, external :: u_dot_v_complex

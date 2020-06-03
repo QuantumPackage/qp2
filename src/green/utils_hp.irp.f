@@ -26,8 +26,8 @@ subroutine print_mo_energies(key_ref,nint,nmo)
   enddo
   call bitstring_to_list_ab(key_virt,virt,n_virt,nint)
 
-  e_mo(1:nmo,1)=mo_mono_elec_integral_diag(1:nmo)
-  e_mo(1:nmo,2)=mo_mono_elec_integral_diag(1:nmo)
+  e_mo(1:nmo,1)=mo_one_e_integrals_diag(1:nmo)
+  e_mo(1:nmo,2)=mo_one_e_integrals_diag(1:nmo)
 
   do ispin=1,2
     jspin=int_spin2(ispin)
@@ -36,23 +36,23 @@ subroutine print_mo_energies(key_ref,nint,nmo)
       is_occ(i,ispin)=1
       do j0=i0+1,n_occ(ispin)
         j=occ(j0,ispin)
-        e_mo(i,ispin) = e_mo(i,ispin) + mo_bielec_integral_jj_anti(i,j)
-        e_mo(j,ispin) = e_mo(j,ispin) + mo_bielec_integral_jj_anti(i,j)
+        e_mo(i,ispin) = e_mo(i,ispin) + mo_two_e_integrals_jj_anti(i,j)
+        e_mo(j,ispin) = e_mo(j,ispin) + mo_two_e_integrals_jj_anti(i,j)
       enddo
       do k=2,ispin
         do j0=1,n_occ(jspin)
           j=occ(j0,jspin)
-          e_mo(i,ispin) = e_mo(i,ispin) + mo_bielec_integral_jj(i,j)
-          e_mo(j,jspin) = e_mo(j,jspin) + mo_bielec_integral_jj(i,j) !can delete this and remove k level of loop
+          e_mo(i,ispin) = e_mo(i,ispin) + mo_two_e_integrals_jj(i,j)
+          e_mo(j,jspin) = e_mo(j,jspin) + mo_two_e_integrals_jj(i,j) !can delete this and remove k level of loop
         enddo
       enddo
       do j0=1,n_virt(ispin)
         j=virt(j0,ispin)
-        e_mo(j,ispin) = e_mo(j,ispin) + mo_bielec_integral_jj_anti(i,j)
+        e_mo(j,ispin) = e_mo(j,ispin) + mo_two_e_integrals_jj_anti(i,j)
       enddo
       do j0=1,n_virt(jspin)
         j=virt(j0,jspin)
-        e_mo(j,jspin) = e_mo(j,jspin) + mo_bielec_integral_jj(i,j)
+        e_mo(j,jspin) = e_mo(j,jspin) + mo_two_e_integrals_jj(i,j)
       enddo
     enddo
   enddo
@@ -89,8 +89,8 @@ subroutine get_mo_energies(key_ref,nint,nmo,e_mo)
   enddo
   call bitstring_to_list_ab(key_virt,virt,n_virt,nint)
 
-  e_mo(1:nmo,1)=mo_mono_elec_integral_diag(1:nmo)
-  e_mo(1:nmo,2)=mo_mono_elec_integral_diag(1:nmo)
+  e_mo(1:nmo,1)=mo_one_e_integrals_diag(1:nmo)
+  e_mo(1:nmo,2)=mo_one_e_integrals_diag(1:nmo)
 
   do ispin=1,2
     jspin=int_spin2(ispin)
@@ -98,23 +98,23 @@ subroutine get_mo_energies(key_ref,nint,nmo,e_mo)
       i=occ(i0,ispin)
       do j0=i0+1,n_occ(ispin)
         j=occ(j0,ispin)
-        e_mo(i,ispin) = e_mo(i,ispin) + mo_bielec_integral_jj_anti(i,j)
-        e_mo(j,ispin) = e_mo(j,ispin) + mo_bielec_integral_jj_anti(i,j)
+        e_mo(i,ispin) = e_mo(i,ispin) + mo_two_e_integrals_jj_anti(i,j)
+        e_mo(j,ispin) = e_mo(j,ispin) + mo_two_e_integrals_jj_anti(i,j)
       enddo
       do k=2,ispin
         do j0=1,n_occ(jspin)
           j=occ(j0,jspin)
-          e_mo(i,ispin) = e_mo(i,ispin) + mo_bielec_integral_jj(i,j)
-          e_mo(j,jspin) = e_mo(j,jspin) + mo_bielec_integral_jj(i,j) !can delete this and remove k level of loop
+          e_mo(i,ispin) = e_mo(i,ispin) + mo_two_e_integrals_jj(i,j)
+          e_mo(j,jspin) = e_mo(j,jspin) + mo_two_e_integrals_jj(i,j) !can delete this and remove k level of loop
         enddo
       enddo
       do j0=1,n_virt(ispin)
         j=virt(j0,ispin)
-        e_mo(j,ispin) = e_mo(j,ispin) + mo_bielec_integral_jj_anti(i,j)
+        e_mo(j,ispin) = e_mo(j,ispin) + mo_two_e_integrals_jj_anti(i,j)
       enddo
       do j0=1,n_virt(jspin)
         j=virt(j0,jspin)
-        e_mo(j,jspin) = e_mo(j,jspin) + mo_bielec_integral_jj(i,j)
+        e_mo(j,jspin) = e_mo(j,jspin) + mo_two_e_integrals_jj(i,j)
       enddo
     enddo
   enddo
@@ -524,17 +524,17 @@ subroutine ac_operator_phase(key_new,key_ref,iorb,ispin,Nint,phase)
   if (ispin==1) then
     parity_filled=0_bit_kind
   else
-    parity_filled=iand(elec_alpha_num,1_bit_kind)
+    parity_filled=iand(int(elec_alpha_num,bit_kind),1_bit_kind)
   endif
 
   ! get parity due to orbs in other ints (with lower indices)
   do i=1,k-1
-    parity_filled = iand(popcnt(key_ref(i,ispin)),parity_filled)
+    parity_filled = iand(int(popcnt(key_ref(i,ispin)),bit_kind),parity_filled)
   enddo
   
   ! get parity due to orbs in same int as iorb
   ! ishft(1_bit_kind,l)-1 has its l rightmost bits set to 1, other bits set to 0
-  parity_filled = iand(popcnt(iand(ishft(1_bit_kind,l)-1,key_ref(k,ispin))),parity_filled)
+  parity_filled = iand(int(popcnt(iand(ishft(1_bit_kind,l)-1,key_ref(k,ispin))),bit_kind),parity_filled)
   phase = p(iand(1_bit_kind,parity_filled))
 
 end
@@ -585,30 +585,30 @@ subroutine a_operator_phase(key_new,key_ref,iorb,ispin,Nint,phase)
   if (ispin==1) then
     parity_filled=0_bit_kind
   else
-    parity_filled=iand(elec_alpha_num,1_bit_kind)
+    parity_filled=iand(int(elec_alpha_num,bit_kind),1_bit_kind)
   endif
 
   ! get parity due to orbs in other ints (with lower indices)
   do i=1,k-1
-    parity_filled = iand(popcnt(key_ref(i,ispin)),parity_filled)
+    parity_filled = iand(int(popcnt(key_ref(i,ispin)),bit_kind),parity_filled)
   enddo
   
   ! get parity due to orbs in same int as iorb
   ! ishft(1_bit_kind,l)-1 has its l rightmost bits set to 1, other bits set to 0
-  parity_filled = iand(popcnt(iand(ishft(1_bit_kind,l)-1,key_ref(k,ispin))),parity_filled)
+  parity_filled = iand(int(popcnt(iand(ishft(1_bit_kind,l)-1,key_ref(k,ispin))),bit_kind),parity_filled)
   phase = p(iand(1_bit_kind,parity_filled))
 
 end
-BEGIN_PROVIDER [ double precision, mo_mono_elec_integral_diag,(mo_tot_num)]
-  implicit none
-  integer                        :: i
-  BEGIN_DOC
-  ! diagonal elements of mo_mono_elec_integral array
-  END_DOC
-  print*,'Providing the mono electronic integrals (diagonal)'
-
-  do i = 1, mo_tot_num
-    mo_mono_elec_integral_diag(i) = real(mo_mono_elec_integral(i,i))
-  enddo
-
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, mo_mono_elec_integral_diag,(mo_num)]
+!  implicit none
+!  integer                        :: i
+!  BEGIN_DOC
+!  ! diagonal elements of mo_mono_elec_integral array
+!  END_DOC
+!  print*,'Providing the mono electronic integrals (diagonal)'
+!
+!  do i = 1, mo_num
+!    mo_mono_elec_integral_diag(i) = real(mo_mono_elec_integral(i,i))
+!  enddo
+!
+!END_PROVIDER

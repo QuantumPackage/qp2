@@ -53,7 +53,7 @@ subroutine routine
  print*,'H matrix '
  double precision :: s2
  complex*16 :: ref_h_matrix
- ref_h_matrix = h_matrix_all_dets(1,1)
+ ref_h_matrix = h_matrix_all_dets_complex(1,1)
  print*,'HF like determinant energy = ',ref_bitmask_energy+nuclear_repulsion
  print*,'Ref element of H_matrix    = ',ref_h_matrix+nuclear_repulsion
  print*,'Printing the H matrix ...'
@@ -64,7 +64,7 @@ subroutine routine
 !enddo
 
  do i = 1, N_det
-  H_matrix_all_dets(i,i) += nuclear_repulsion
+  H_matrix_all_dets_complex(i,i) += nuclear_repulsion
  enddo
 
 !do i = 5,N_det
@@ -79,7 +79,7 @@ subroutine routine
 
 ! TODO: change for complex
  do i = 1, N_det
-  write(*,'(I3,X,A3,2000(E24.15))')i,' | ',H_matrix_all_dets(i,:)
+  write(*,'(I3,X,A3,2000(E24.15))')i,' | ',H_matrix_all_dets_complex(i,:)
  enddo
 
 ! print*,''

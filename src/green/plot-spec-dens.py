@@ -23,7 +23,7 @@ def printspec(ezdir,wmin,wmax,nw,eps):
     gdir=ezdir+'/green/'
     with open(gdir+'n_green_vec') as infile:
         ngvec=int(infile.readline().strip())
-    with open(ezdir+'/full_ci_zmq/energy') as infile:
+    with open(ezdir+'/fci/energy') as infile:
         e0=float(infile.readline().strip())
     with open(gdir+'n_lanczos_complete') as infile:
         nlanc=int(infile.readline().strip())

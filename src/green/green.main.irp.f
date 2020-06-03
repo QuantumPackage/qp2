@@ -15,7 +15,7 @@ end
 subroutine psicoefprinttest
   implicit none
   integer :: i
-  TOUCH psi_coef
+  TOUCH psi_coef_complex
   print *, 'printing ndet', N_det
 end
 subroutine print_lanczos_eigvals
