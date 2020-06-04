@@ -120,6 +120,7 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
   complex*16, allocatable  :: S(:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: U, Vt, D
   integer                        :: info, i, j
+  double precision :: local_cutoff
 
   if (n < 2) then
     return
@@ -130,24 +131,19 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
   call svd_complex(overlap,lda,U,ldc,D,Vt,lda,n,n)
 
   D(:) = dsqrt(D(:))
+  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
   m=n
   do i=1,n
-    if ( D(i) >= cutoff ) then
+    if ( D(i) >= local_cutoff ) then
       D(i) = 1.d0/D(i)
     else
       m = i-1
-      print *,  'Removed Linear dependencies below:', 1.d0/D(m)
+      print *,  'Removed Linear dependencies below:', local_cutoff
       exit
     endif
   enddo
   do i=m+1,n
     D(i) = 0.d0
-  enddo
-
-  do i=1,m
-    if ( D(i) >= 1.d5 ) then
-      print *,  'Warning: Basis set may have linear dependence problems'
-    endif
   enddo
 
   do j=1,n
@@ -258,7 +254,8 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: D(:)
   complex*16, allocatable  :: S(:,:)
   double precision, intent(in) :: cutoff
-  integer                        :: info, i, j, k
+  double precision :: local_cutoff
+  integer                        :: info, i, j, k, mm
 
   if (n < 2) then
     return
@@ -267,28 +264,32 @@ subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
   allocate(U(ldc,n),Vt(lda,n),S(lda,n),D(n))
 
   call svd_complex(overlap,lda,U,ldc,D,Vt,lda,n,n)
-
-  !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED(S,U,D,Vt,n,C,m,cutoff) &
-  !$OMP PRIVATE(i,j,k)
-
-  !$OMP DO
+  D(:) = dsqrt(D(:))
+  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
+  mm=n
   do i=1,n
-    if ( D(i) < cutoff) then
-      print *,  'Removed Linear dependencies :', 1.d0/D(i)
-      D(i) = 0.d0
+    if ( D(i) >= local_cutoff) then
+      D(i) = 1.d0/D(i)
     else
-      D(i) = 1.d0/dsqrt(D(i))
+      mm = mm-1
+      D(i) = 0.d0
     endif
     do j=1,n
       S(j,i) = (0.d0,0.d0)
     enddo
   enddo
-  !$OMP END DO
+
+  if (mm < n) then
+    print *,  'Removed Linear dependencies below ', local_cutoff
+  endif
+
+  !$OMP PARALLEL DEFAULT(NONE) &
+  !$OMP SHARED(S,U,D,Vt,n,C,m,local_cutoff) &
+  !$OMP PRIVATE(i,j,k)
 
   do k=1,n
     if (D(k) /= 0.d0) then
-      !$OMP DO
+      !$OMP DO SCHEDULE(STATIC)
       do j=1,n
         do i=1,n
           S(i,j) = S(i,j) + U(i,k)*D(k)*Vt(k,j)
@@ -379,7 +380,7 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   endif
 
   do i=1,n
-    if (D(i)/D(1) > cutoff) then
+    if (D(i) > cutoff*D(1)) then
       D(i) = 1.d0/D(i)
     else
       D(i) = 0.d0
@@ -762,6 +763,7 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: S(:,:)
   !DIR$ ATTRIBUTES ALIGN : 64    :: U, Vt, D
   integer                        :: info, i, j
+  double precision :: local_cutoff
 
   if (n < 2) then
     return
@@ -772,24 +774,19 @@ subroutine ortho_canonical(overlap,LDA,N,C,LDC,m,cutoff)
   call svd(overlap,lda,U,ldc,D,Vt,lda,n,n)
 
   D(:) = dsqrt(D(:))
+  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
   m=n
   do i=1,n
-    if ( D(i) >= cutoff ) then
+    if ( D(i) >= local_cutoff ) then
       D(i) = 1.d0/D(i)
     else
       m = i-1
-      print *,  'Removed Linear dependencies below:', 1.d0/D(m)
+      print *,  'Removed Linear dependencies below:', local_cutoff
       exit
     endif
   enddo
   do i=m+1,n
     D(i) = 0.d0
-  enddo
-
-  do i=1,m
-    if ( D(i) >= 1.d5 ) then
-      print *,  'Warning: Basis set may have linear dependence problems'
-    endif
   enddo
 
   do j=1,n
@@ -907,7 +904,8 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
   double precision, allocatable  :: Vt(:,:)
   double precision, allocatable  :: D(:)
   double precision, allocatable  :: S(:,:)
-  integer                        :: info, i, j, k
+  integer                        :: info, i, j, k, mm
+  double precision :: local_cutoff
 
   if (n < 2) then
     return
@@ -916,24 +914,28 @@ subroutine ortho_lowdin(overlap,LDA,N,C,LDC,m,cutoff)
   allocate(U(ldc,n),Vt(lda,n),S(lda,n),D(n))
 
   call svd(overlap,lda,U,ldc,D,Vt,lda,n,n)
-
-  !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED(S,U,D,Vt,n,C,m,cutoff) &
-  !$OMP PRIVATE(i,j,k)
-
-  !$OMP DO
+  D(:) = dsqrt(D(:))
+  local_cutoff = dsqrt(cutoff)*D(1) ! such that D(i)/D(1) > dsqrt(cutoff) is kept
+  mm=n
   do i=1,n
-    if ( D(i) < cutoff ) then
-      print *,  'Removed Linear dependencies :', 1.d0/D(i)
-      D(i) = 0.d0
+    if ( D(i) >= local_cutoff) then
+      D(i) = 1.d0/D(i)
     else
-      D(i) = 1.d0/dsqrt(D(i))
+      mm = mm-1
+      D(i) = 0.d0
     endif
     do j=1,n
       S(j,i) = 0.d0
     enddo
   enddo
-  !$OMP END DO
+
+  if (mm < n) then
+    print *,  'Removed Linear dependencies below ', local_cutoff
+  endif
+
+  !$OMP PARALLEL DEFAULT(NONE) &
+  !$OMP SHARED(S,U,D,Vt,n,C,m,cutoff) &
+  !$OMP PRIVATE(i,j,k)
 
   do k=1,n
     if (D(k) /= 0.d0) then
