@@ -32,10 +32,10 @@ double precision function g0_UEG_mu_inf(rho_a,rho_b)
  C = 0.08193d0
  D = -0.01277d0
  E = 0.001859d0                     
- if (dabs(rho) > 1.d-12) then
+ x = -d2*rs
+ if (dabs(rho) > 1.d-12.and.dabs(x).lt.20.d0) then
   rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) ! JT: serious bug fixed 20/03/19
-  x = -d2*rs
-  g0_UEG_mu_inf= 0.5d0 * (1d0- B*rs + C*rs**2 + D*rs**3 + E*rs**4)*exp(x)
+  g0_UEG_mu_inf= 0.5d0 * (1d0- B*rs + C*rs**2 + D*rs**3 + E*rs**4)*dexp(x)
  else
   g0_UEG_mu_inf= 0.d0
  endif
@@ -67,7 +67,11 @@ double precision function g0_UEG_mu(mu,rho_a,rho_b)
  kf = (alpha*rs)**(-1d0)
  zeta = mu / kf
  x = -d2*rs*h_func(zeta)/ahd 
- g0_UEG_mu = (exp(x)/2d0) * (1d0- B*(h_func(zeta)/ahd)*rs + C*((h_func(zeta)**2d0)/(ahd**2d0))*(rs**2d0) + D*((h_func(zeta)**3d0)/(ahd**3d0))*(rs**3d0) + E*((h_func(zeta)**4d0)/(ahd**4d0))*(rs**4d0) )
+ if(dabs(x).lt.40.d0)then
+  g0_UEG_mu = (dexp(x)/2d0) * (1d0- B*(h_func(zeta)/ahd)*rs + C*((h_func(zeta)**2d0)/(ahd**2d0))*(rs**2d0) + D*((h_func(zeta)**3d0)/(ahd**3d0))*(rs**3d0) + E*((h_func(zeta)**4d0)/(ahd**4d0))*(rs**4d0) )
+ else
+  g0_UEG_mu = 0.d0
+ endif
  
 end
 
@@ -111,11 +115,23 @@ end
   D1 = -0.0127713d0
   E1 = 0.00185898d0
   B1 = 0.7317d0 - F1
-  rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0) 
+  if(dabs(rho).gt.1.d-12)then
+   rs = (3.d0 / (4.d0*pi*rho))**(1.d0/3.d0) 
+  else
+   rs = (3.d0 / (4.d0*pi*1.d-12))**(1.d0/3.d0) 
+  endif
    
   g0 = g0_UEG_mu_inf(rho_a, rho_b)
-  dg0drs = 0.5d0*((-B1 + 2.d0*C1*rs + 3.d0*D1*rs**2 + 4.d0*E1*rs**3)-F1*(1.d0 - B1*rs + C1*rs**2 + D1*rs**3 + E1*rs**4))*exp(-F1*rs)
-  dg0drho = -((6.d0*dsqrt(pi)*rho**2)**(-2.d0/3.d0))*dg0drs
+  if(dabs(F1*rs).lt.40.d0)then
+   dg0drs = 0.5d0*((-B1 + 2.d0*C1*rs + 3.d0*D1*rs**2 + 4.d0*E1*rs**3)-F1*(1.d0 - B1*rs + C1*rs**2 + D1*rs**3 + E1*rs**4))*dexp(-F1*rs)
+  else 
+   dg0drs = 0.d0
+  endif
+  if(rho**2.gt.1.d-12)then
+   dg0drho = -((6.d0*dsqrt(pi)*rho**2)**(-2.d0/3.d0))*dg0drs
+  else
+   dg0drho = -((6.d0*dsqrt(pi)*1.d-12)**(-2.d0/3.d0))*dg0drs
+  endif
  
   end subroutine g0_dg0 
 

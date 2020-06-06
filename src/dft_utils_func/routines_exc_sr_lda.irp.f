@@ -153,8 +153,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 
 !Intermediate values of a
  elseif (a.le.100d0) then
-   ex_a = - (rho_a_2*(z24*rho_a_2/pi)**f13) * (z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
-   vx_a =  -(z3*rho_a_2/pi)**f13 + z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi * derf(f12/a)
+   if(dabs(f14/a2).lt.40.d0)then
+    ex_a = - (rho_a_2*(z24*rho_a_2/pi)**f13) * (z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
+    vx_a =  -(z3*rho_a_2/pi)**f13 + z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi * derf(f12/a)
+   else
+    ex_a = 0.d0
+    vx_a = 0.d0
+   endif
 
 
 !Expansion for large a
@@ -185,8 +190,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 
 !Intermediate values of a
  elseif (a.le.100d0) then
-   ex_b = - (rho_b_2*(z24*rho_b_2/pi)**f13)*(z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
-   vx_b = -(z3*rho_b_2/pi)**f13+ z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi* derf(f12/a)
+   if(dabs(f14/a2).lt.40.d0)then
+    ex_b = - (rho_b_2*(z24*rho_b_2/pi)**f13)*(z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
+    vx_b = -(z3*rho_b_2/pi)**f13+ z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi* derf(f12/a)
+   else
+    ex_b = 0.d0
+    vx_b = 0.d0
+   endif
 
 !Expansion for large a
  elseif (a.lt.1.d+9) then
@@ -254,7 +264,11 @@ end
       double precision derf
 
       eta=19.0d0
-      fak=2.540118935556d0*dexp(-eta*a*a)
+      if(dabs(eta*a*a).lt.40.d0)then
+       fak=2.540118935556d0*dexp(-eta*a*a)
+      else
+       fak = 0.d0
+      endif
 
       if(a .lt. 0.075d0) then
 !      expansion for small mu to avoid numerical problems
@@ -301,7 +315,11 @@ end
       double precision t1,t2,tdexp,t3,t4,t5
 
       eta=19.0d0
-      fak=2.540118935556d0*dexp(-eta*a*a)
+      if(dabs(eta*a*a).lt.40.d0)then
+       fak=2.540118935556d0*dexp(-eta*a*a)
+      else
+       fak=0.d0
+      endif
       dfakda=-2.0d0*eta*a*fak
 
       if(a .lt. 0.075d0) then
@@ -372,9 +390,16 @@ subroutine ecorrlr(rs,z,mu,eclr)
   t3a    = 0.31d0
 
   b0=adib*rs
-
-  d2anti=(q1a*rs+q2a*rs**2)*exp(-abs(q3a)*rs)/rs**2
-  d3anti=(t1a*rs+t2a*rs**2)*exp(-abs(t3a)*rs)/rs**3
+  if(dabs(q3a*rs).lt.40.d0)then
+   d2anti=(q1a*rs+q2a*rs**2)*dexp(-dabs(q3a)*rs)/rs**2
+  else
+   d2anti=0.d0
+  endif
+  if(dabs(t3a*rs).lt.40.d0)then
+   d3anti=(t1a*rs+t2a*rs**2)*dexp(-dabs(t3a)*rs)/rs**3
+  else
+   d3anti=0.d0
+  endif
 
   coe2=-3.d0/8.d0/rs**3*(1.d0-z**2)*(g0f(rs)-0.5d0)
 
@@ -468,20 +493,44 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
 
       b0=adib*rs
 
-      d2anti=(q1a+q2a*rs)*exp(-q3a*rs)/rs
-      d3anti=(t1a+t2a*rs)*exp(-t3a*rs)/rs**2
+      if(dabs(q3a*rs).lt.40.d0)then
+       d2anti=(q1a+q2a*rs)*dexp(-q3a*rs)/rs
+      else
+       d2anti=0.d0
+      endif
+      if(dabs(t3a*rs).lt.40.d0)then
+       d3anti=(t1a+t2a*rs)*dexp(-t3a*rs)/rs**2
+      else
+       d3anti=0.d0
+      endif
 
-      d2antid=-((q1a + q1a*q3a*rs + q2a*q3a*rs**2)/rs**2)*exp(-q3a*rs)
-      d3antid=-((rs*t2a*(1d0 + rs*t3a) + t1a*(2d0 + rs*t3a))/rs**3)*exp(-rs*t3a)
+      if(dabs(q3a*rs).lt.40.d0)then
+       d2antid=-((q1a + q1a*q3a*rs + q2a*q3a*rs**2)/rs**2)*dexp(-q3a*rs)
+      else
+       d2antid=0.d0
+      endif
+      if(dabs(t3a*rs).lt.40.d0)then
+       d3antid=-((rs*t2a*(1d0 + rs*t3a) + t1a*(2d0 + rs*t3a))/rs**3)*dexp(-rs*t3a)
+      else
+       d3antid=0.d0
+      endif
 
 !SCD
-      d2antidd = exp(-q3a*rs)/rs**3*(                      &
-                 q3a**2*q1a*rs**2+q2a*q3a**2*rs**3         &
-                +2.d0*q3a*q1a*rs+2.d0*q1a)
-      d3antidd = exp(-t3a*rs)/rs**4*                       &
+      if(dabs(q3a*rs).lt.40.d0)then
+       d2antidd = dexp(-q3a*rs)/rs**3*(                      &
+                  q3a**2*q1a*rs**2+q2a*q3a**2*rs**3         &
+                 +2.d0*q3a*q1a*rs+2.d0*q1a)
+      else
+       d2antidd = 0.d0
+      endif
+      if(dabs(t3a*rs).lt.40.d0)then
+       d3antidd = dexp(-t3a*rs)/rs**4*                       &
                 (2.d0*t3a*t2a*rs**2 + 2.d0*t2a*rs          &
                  + t1a*t3a**2*rs**2 + t2a*t3a**2*rs**3     &
                  + 4.d0*t1a*t3a*rs + 6.d0*t1a)
+      else
+       d3antidd=0.d0
+      endif
 !SCF
       coe2=-3.d0/8.d0/rs**3*(1.d0-z**2)*(g0f(rs)-0.5d0)
       coe2rs=-3.d0/8.d0/rs**3*(1.d0-z**2)*g0d(rs)+         &
@@ -759,8 +808,12 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       D0f             = 0.752411d0
       E0f             = -0.0127713d0
       F0f             = 0.00185898d0
-      g0f=(1.d0-(0.7317d0-D0f)*x+C0f*x**2+E0f*x**3+  &
-           F0f*x**4)*exp(-abs(D0f)*x)/2.d0
+      if(dabs(D0f*x).lt.40.d0)then
+       g0f=(1.d0-(0.7317d0-D0f)*x+C0f*x**2+E0f*x**3+  &
+            F0f*x**4)*dexp(-dabs(D0f)*x)/2.d0
+      else
+       g0f = 0.d0
+      endif
       return
       end
 
@@ -774,11 +827,15 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       Dg0             = -0.0127713d0
       Eg0             = 0.00185898d0
       Bg0             =0.7317d0-Fg0
-      expsum=exp(-Fg0*rs)
-      g0d=(-Bg0+2d0*Cg0*rs+3d0*Dg0*rs**2+4d0*Eg0*rs**3)/2.d0 &
-         *expsum                                             &
-         - (Fg0*(1d0 - Bg0*rs + Cg0*rs**2 + Dg0*rs**3 + Eg0*rs**4))/ &
-         2.d0*expsum
+      if(dabs(Fg0*rs).lt.40.d0)then
+       expsum=dexp(-Fg0*rs)
+       g0d=(-Bg0+2d0*Cg0*rs+3d0*Dg0*rs**2+4d0*Eg0*rs**3)/2.d0 &
+          *expsum                                             &
+          - (Fg0*(1d0 - Bg0*rs + Cg0*rs**2 + Dg0*rs**3 + Eg0*rs**4))/ &
+          2.d0*expsum
+      else
+       g0d = 0.d0
+      endif
       return
       end
 !SCD
@@ -791,13 +848,17 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       Dg0             = -0.0127713d0
       Eg0             = 0.00185898d0
       Bg0             = 0.7317d0-Fg0
-      expsum=exp(-Fg0*rs)
-      g0dd = (2.d0*Cg0+6.d0*Dg0*rs+12.d0*Eg0*rs**2)/2.d0*  &
-             expsum                                        &
-           - (-Bg0+2.d0*Cg0*rs+3.d0*Dg0*rs**2+4.d0*Eg0*rs**3)*Fg0* &
-             expsum                                                &
-           + (1.d0-Bg0*rs+Cg0*rs**2+Dg0*rs**3+Eg0*rs**4)*Fg0**2*   &
-             expsum/(2.d0)
+      if(dabs(Fg0*rs).lt.40.d0)then
+       expsum=dexp(-Fg0*rs)
+       g0dd = (2.d0*Cg0+6.d0*Dg0*rs+12.d0*Eg0*rs**2)/2.d0*  &
+              expsum                                        &
+            - (-Bg0+2.d0*Cg0*rs+3.d0*Dg0*rs**2+4.d0*Eg0*rs**3)*Fg0* &
+              expsum                                                &
+            + (1.d0-Bg0*rs+Cg0*rs**2+Dg0*rs**3+Eg0*rs**4)*Fg0**2*   &
+              expsum/(2.d0)
+      else
+       g0dd = 0.d0
+      endif
       return
       end
 !SCF
