@@ -150,14 +150,18 @@ let of_xyz_file
   let lines =
     match Io_ext.input_lines filename with
     | natoms :: title :: rest ->
-        begin
-          try
-            if (int_of_string @@ String_ext.strip natoms) <= 0 then
-              raise XYZError
-          with
-          | _ -> raise XYZError
-        end;
-        String.concat "\n" rest
+          let natoms = 
+            try
+              int_of_string @@ String_ext.strip natoms
+            with
+            | _ -> raise XYZError
+          in
+          if natoms <= 0 then
+            raise XYZError;
+          let a = Array.of_list rest in
+          Array.sub a 0 natoms
+          |> Array.to_list
+          |> String.concat "\n" 
     | _ -> raise XYZError
   in
   of_xyz_string ~charge:charge ~multiplicity:multiplicity
