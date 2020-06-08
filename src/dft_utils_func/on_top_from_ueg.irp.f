@@ -32,7 +32,8 @@ double precision function g0_UEG_mu_inf(rho_a,rho_b)
  C = 0.08193d0
  D = -0.01277d0
  E = 0.001859d0                     
- if (dabs(rho) > 1.d-12) then
+ x = -d2*rs
+ if (dabs(rho) > 1.d-12.and.dabs(x).lt.20.d0) then
   rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) ! JT: serious bug fixed 20/03/19
   x = -d2*rs
   if(dabs(x).lt.50.d0)then
