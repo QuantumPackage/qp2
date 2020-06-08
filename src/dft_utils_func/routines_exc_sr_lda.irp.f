@@ -254,7 +254,11 @@ end
       double precision derf
 
       eta=19.0d0
-      fak=2.540118935556d0*dexp(-eta*a*a)
+      if(dabs(eta*a*a).lt.50.d0)then
+       fak=2.540118935556d0*dexp(-eta*a*a)
+      else
+       fak=0.d0
+      endif
 
       if(a .lt. 0.075d0) then
 !      expansion for small mu to avoid numerical problems
