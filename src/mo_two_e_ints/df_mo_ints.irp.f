@@ -48,7 +48,8 @@ subroutine mo_map_fill_from_df_dot
   logical :: use_map1
   integer(key_kind) :: idx_tmp
   double precision :: sign
-  complex*16, external :: zdotc
+  !complex*16, external :: zdotc
+  complex*16, external :: zdotu
 
   mo_num_kpt_2 = mo_num_per_kpt * mo_num_per_kpt
 
@@ -145,7 +146,8 @@ subroutine mo_map_fill_from_df_dot
                 if ((j==l) .and. (i>k)) exit
                 call idx2_tri_int(i,k,ik2)
                 if (ik2 > jl2) exit
-                integral = zdotc(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                !integral = zdotc(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                integral = zdotu(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
 !                print*,i,k,j,l,real(integral),imag(integral)
                 if (cdabs(integral) < mo_integrals_threshold) then
                   cycle
