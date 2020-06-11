@@ -448,7 +448,7 @@ BEGIN_PROVIDER [ integer, n_core_orb_kpts, (kpt_num)]
 
   do k=1,kpt_num
     n_core_orb_kpts(k) = 0
-    kshift = (1-k)*mo_num_per_kpt
+    kshift = (k-1)*mo_num_per_kpt
     do i = 1, mo_num_per_kpt
       if(mo_class(i+kshift) == 'Core')then
         n_core_orb_kpts(k) += 1
@@ -469,7 +469,7 @@ BEGIN_PROVIDER [ integer, n_inact_orb_kpts, (kpt_num)]
 
   do k=1,kpt_num
     n_inact_orb_kpts(k) = 0
-    kshift = (1-k)*mo_num_per_kpt
+    kshift = (k-1)*mo_num_per_kpt
     do i = 1, mo_num_per_kpt
       if(mo_class(i+kshift) == 'Inactive')then
         n_inact_orb_kpts(k) += 1
@@ -490,7 +490,7 @@ BEGIN_PROVIDER [ integer, n_act_orb_kpts, (kpt_num)]
 
   do k=1,kpt_num
     n_act_orb_kpts(k) = 0
-    kshift = (1-k)*mo_num_per_kpt
+    kshift = (k-1)*mo_num_per_kpt
     do i = 1, mo_num_per_kpt
       if(mo_class(i+kshift) == 'Active')then
         n_act_orb_kpts(k) += 1
@@ -511,7 +511,7 @@ BEGIN_PROVIDER [ integer, n_virt_orb_kpts, (kpt_num)]
 
   do k=1,kpt_num
     n_virt_orb_kpts(k) = 0
-    kshift = (1-k)*mo_num_per_kpt
+    kshift = (k-1)*mo_num_per_kpt
     do i = 1, mo_num_per_kpt
       if(mo_class(i+kshift) == 'Virtual')then
         n_virt_orb_kpts(k) += 1
@@ -532,7 +532,7 @@ BEGIN_PROVIDER [ integer, n_del_orb_kpts, (kpt_num)]
 
   do k=1,kpt_num
     n_del_orb_kpts(k) = 0
-    kshift = (1-k)*mo_num_per_kpt
+    kshift = (k-1)*mo_num_per_kpt
     do i = 1, mo_num_per_kpt
       if(mo_class(i+kshift) == 'Deleted')then
         n_del_orb_kpts(k) += 1
