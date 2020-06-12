@@ -129,8 +129,6 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
       call make_selection_buffer_s2(b)
     endif
     call fill_H_apply_buffer_no_selection(b%cur,b%det,N_int,0)
-    call copy_H_apply_buffer_to_wf()
-    call save_wavefunction
   endif
   call delete_selection_buffer(b)
   do k=1,N_states

@@ -63,7 +63,12 @@ subroutine run_selection_slave(thread,iproc,energy)
         call create_selection_buffer(bsize, bsize*2, buf)
         buffer_ready = .True.
       else
-        ASSERT (N == buf%N)
+        if (N /= buf%N) then
+          print *, 'N=', N
+          print *, 'buf%N=', buf%N
+          print *, 'bug in ', irp_here
+          stop '-1'
+        end if
       end if
       call select_connected(i_generator,energy,pt2,variance,norm,buf,subset,pt2_F(i_generator))
     endif
