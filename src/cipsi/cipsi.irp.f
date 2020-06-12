@@ -88,7 +88,7 @@ subroutine run_cipsi
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
-    call ZMQ_selection(to_select, pt2, variance, norm)
+      call ZMQ_selection(to_select, pt2, variance, norm)
     endif
 
     do k=1,N_states

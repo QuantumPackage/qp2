@@ -16,6 +16,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
 !  PROVIDE psi_det psi_coef N_det qp_max_mem N_states pt2_F s2_eig N_det_generators
 
   N = max(N_in,1)
+  N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
   if (.True.) then
     PROVIDE pt2_e0_denominator nproc
     PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
@@ -78,6 +79,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
       stop 'Unable to add task to task server'
     endif
   endif
+  N = max(N_in,1)
 
 
   ASSERT (associated(b%det))

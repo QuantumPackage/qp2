@@ -59,8 +59,7 @@ subroutine run_selection_slave(thread,iproc,energy)
       read(task,*) subset, i_generator, N
       if(buf%N == 0) then
         ! Only first time
-        bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
-        call create_selection_buffer(bsize, bsize*2, buf)
+        call create_selection_buffer(N, N*2, buf)
         buffer_ready = .True.
       else
         if (N /= buf%N) then
