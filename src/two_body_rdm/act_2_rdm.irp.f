@@ -2,6 +2,8 @@
  BEGIN_PROVIDER [double precision, act_2_rdm_ab_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
  implicit none
  BEGIN_DOC
+!                             12 12
+!                 1 2 1 2 == <ij|kl>
 ! act_2_rdm_ab_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of alpha/beta electrons 
 ! 
 ! <Psi_{istate}| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi_{istate}>

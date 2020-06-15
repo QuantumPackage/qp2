@@ -8,7 +8,8 @@
  !
  ! These numbers are automatically set by setting the grid_type_sgn parameter
  END_DOC
-select case (grid_type_sgn)
+if(.not.my_grid_becke)then
+ select case (grid_type_sgn)
     case(0)
      n_points_radial_grid = 23
      n_points_integration_angular = 170
@@ -25,6 +26,10 @@ select case (grid_type_sgn)
       write(*,*) '!!! Quadrature grid not available !!!'
       stop
   end select
+else
+ n_points_radial_grid = my_n_pt_r_grid
+ n_points_integration_angular = my_n_pt_a_grid
+endif
 END_PROVIDER
 
 BEGIN_PROVIDER [integer, n_points_grid_per_atom]

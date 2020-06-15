@@ -24,8 +24,9 @@ double precision function primitive_value_explicit(power_prim,center_prim,alpha,
 end
 
 double precision function give_pol_in_r(r,pol,center, alpha,iorder, max_dim)
- double precision    :: r(3), center(3), alpha,pol(0:max_dim,3)
+ implicit none
  integer, intent(in) :: iorder(3), max_dim
+ double precision    :: r(3), center(3), alpha,pol(0:max_dim,3)
  integer :: i,m
  double precision :: gauss(3), x
  gauss  = 0.d0
@@ -33,7 +34,7 @@ double precision function give_pol_in_r(r,pol,center, alpha,iorder, max_dim)
  do m = 1, 3
   x = r(m) - center(m)
   do i = 0, iorder(m)
-   gauss(m) += pol(i,m) * dexp(-alpha *x**2 ) * x**i 
+   gauss(m) += pol(i,m) * dexp(-alpha *x*x ) * x**i 
   enddo
  enddo
  give_pol_in_r = gauss(1) * gauss(2) * gauss(3)

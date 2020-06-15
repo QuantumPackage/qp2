@@ -127,7 +127,6 @@ double precision function mo_two_e_integral(i,j,k,l)
   integer, intent(in)            :: i,j,k,l
   double precision               :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
-  PROVIDE mo_two_e_integrals_in_map
   !DIR$ FORCEINLINE
   mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
   return
@@ -202,47 +201,12 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
-  integer(key_kind),allocatable  :: hash(:)
-  integer  ,allocatable          :: pairs(:,:), iorder(:)
+  integer                        :: j
   real(integral_kind), allocatable :: tmp_val(:)
 
-  PROVIDE mo_two_e_integrals_in_map
-  allocate (hash(sze*sze), pairs(2,sze*sze),iorder(sze*sze), &
-  tmp_val(sze*sze))
-
-  kk=0
-  out_array = 0.d0
   do j=1,sze
-   do i=1,sze
-    kk += 1
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(i,j,k,l,hash(kk))
-    pairs(1,kk) = i
-    pairs(2,kk) = j
-    iorder(kk) = kk
-   enddo
+    call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
   enddo
-
-  logical :: integral_is_in_map
-  if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
-  endif
-
-  call map_get_many(mo_integrals_map, hash, tmp_val, kk)
-
-  do ll=1,kk
-    m = iorder(ll)
-    i=pairs(1,m)
-    j=pairs(2,m)
-    out_array(i,j) = tmp_val(ll)
-  enddo
-
-  deallocate(pairs,hash,iorder,tmp_val)
 end
 
 subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
@@ -256,47 +220,13 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
-  integer(key_kind),allocatable  :: hash(:)
-  integer  ,allocatable          :: pairs(:,:), iorder(:)
-  real(integral_kind), allocatable :: tmp_val(:)
-
+  integer                        :: j
   PROVIDE mo_two_e_integrals_in_map
-  allocate (hash(sze*sze), pairs(2,sze*sze),iorder(sze*sze), &
-  tmp_val(sze*sze))
 
-  kk=0
-  out_array = 0.d0
   do j=1,sze
-   do i=1,sze
-    kk += 1
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(i,k,j,l,hash(kk))
-    pairs(1,kk) = i
-    pairs(2,kk) = j
-    iorder(kk) = kk
-   enddo
+    call get_mo_two_e_integrals(k,j,l,sze,out_array(1,j),map)
   enddo
 
-  logical :: integral_is_in_map
-  if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
-  endif
-
-  call map_get_many(mo_integrals_map, hash, tmp_val, kk)
-
-  do ll=1,kk
-    m = iorder(ll)
-    i=pairs(1,m)
-    j=pairs(2,m)
-    out_array(i,j) = tmp_val(ll)
-  enddo
-
-  deallocate(pairs,hash,iorder,tmp_val)
 end
 
 
@@ -312,25 +242,13 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i
-  integer(key_kind)              :: hash(sze)
-  real(integral_kind)            :: tmp_val(sze)
+  double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  integer :: kk
   do i=1,sze
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(k,i,l,i,hash(i))
+    out_val(i) = get_two_e_integral(k,i,l,i,map)
   enddo
 
-  if (integral_kind == 8) then
-    call map_get_many(map, hash, out_val, sze)
-  else
-    call map_get_many(map, hash, tmp_val, sze)
-    ! Conversion to double precision
-    do i=1,sze
-      out_val(i) = dble(tmp_val(i))
-    enddo
-  endif
 end
 
 subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
@@ -345,25 +263,13 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i
-  integer(key_kind)              :: hash(sze)
-  real(integral_kind)            :: tmp_val(sze)
+  double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  integer :: kk
   do i=1,sze
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(k,i,i,l,hash(i))
+    out_val(i) = get_two_e_integral(k,i,i,l,map)
   enddo
 
-  if (integral_kind == 8) then
-    call map_get_many(map, hash, out_val, sze)
-  else
-    call map_get_many(map, hash, tmp_val, sze)
-    ! Conversion to double precision
-    do i=1,sze
-      out_val(i) = dble(tmp_val(i))
-    enddo
-  endif
 end
 
 

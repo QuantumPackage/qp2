@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ character*(128), ezfio_filename ]
+BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
   implicit none
   BEGIN_DOC
   ! Name of EZFIO file. It is obtained from the QPACKAGE_INPUT environment
@@ -34,7 +34,7 @@ BEGIN_PROVIDER [ character*(128), ezfio_filename ]
   ! Adjust out-of-memory killer flag such that the current process will be
   ! killed first by the OOM killer, allowing compute nodes to survive
   integer :: getpid
-  character*(64) :: command, pidc
+  character*(1024) :: command, pidc
   write(pidc,*) getpid()
   write(command,*) 'echo 15 > /proc//'//trim(adjustl(pidc))//'/oom_adj'
   call system(command)
@@ -43,7 +43,7 @@ BEGIN_PROVIDER [ character*(128), ezfio_filename ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ character*(128), ezfio_work_dir ]
+BEGIN_PROVIDER [ character*(1024), ezfio_work_dir ]
  implicit none
  BEGIN_DOC
  ! EZFIO/work/

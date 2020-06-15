@@ -1,11 +1,11 @@
-BEGIN_PROVIDER [ logical, no_vvvv_integrals  ]
-  implicit none
-  BEGIN_DOC
+!BEGIN_PROVIDER [ logical, no_vvvv_integrals  ]
+!  implicit none
+!  BEGIN_DOC
 ! If `True`, computes all integrals except for the integrals having 3 or 4 virtual indices
-  END_DOC
-
-  no_vvvv_integrals = .False.
-END_PROVIDER
+!  END_DOC
+!
+!  no_vvvv_integrals = .False.
+!END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, mo_coef_novirt, (ao_num,n_core_inact_act_orb) ]
  implicit none
@@ -56,6 +56,8 @@ subroutine four_idx_novvvv
   BEGIN_DOC
   ! Retransform MO integrals for next CAS-SCF step
   END_DOC
+  print*,'Using partial transformation'
+  print*,'It will not transform all integrals with at least 3 indices within the virtuals'
   integer                        :: i,j,k,l,n_integrals
   double precision, allocatable  :: f(:,:,:), f2(:,:,:), d(:,:), T(:,:,:,:), T2(:,:,:,:)
   double precision, external     :: get_ao_two_e_integral
