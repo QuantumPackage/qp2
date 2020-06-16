@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Usage:
@@ -43,9 +43,9 @@ try:
     from module_handler import get_l_module_descendant
     from qp_path import QP_SRC, QP_PLUGINS, QP_DATA, QP_ROOT
 except ImportError:
-    print "Please check if you have sourced the ${QP_ROOT}/quantum_package.rc"
-    print "(`source ${QP_ROOT}/quantum_package.rc`)"
-    print sys.exit(1)
+    print("Please check if you have sourced the ${QP_ROOT}/quantum_package.rc")
+    print("(`source ${QP_ROOT}/quantum_package.rc`)")
+    print(sys.exit(1))
 
 
 def save_new_module(path, l_child):
@@ -58,7 +58,7 @@ def save_new_module(path, l_child):
     try:
         os.makedirs(path)
     except OSError:
-        print "The module ({0}) already exists...".format(path)
+        print("The module ({0}) already exists...".format(path))
         sys.exit(1)
 
     with open(os.path.join(path, "NEED"), "w") as f:
@@ -105,7 +105,7 @@ def main(arguments):
     if arguments["list"]:
         if arguments["--repositories"]:
             for repo in get_repositories():
-                print repo
+                print(repo)
 
         else:
             # Search in QP_PLUGINS all directories with a NEED file
@@ -121,7 +121,7 @@ def main(arguments):
             for (x, y) in l_tmp:
                 d_tmp[x] = y
                 repo_of_plugin[y] = x.replace(QP_PLUGINS+'/','')
-            l_repository = d_tmp.keys()
+            l_repository = list(d_tmp.keys())
             if l_repository == []:
                l_result = []
             else:
@@ -142,7 +142,7 @@ def main(arguments):
                 l_result = [f for f in l_plugins if f not in l_installed]
 
             for module in sorted(l_result):
-                print "%-30s %-30s"%(module, repo_of_plugin[module])
+                print("%-30s %-30s"%(module, repo_of_plugin[module]))
 
 
     if arguments["create"]:
@@ -159,29 +159,29 @@ def main(arguments):
 
         path = os.path.join(QP_PLUGINS, repository, name)
 
-        print "Created plugin:"
-        print path, '\n'
+        print("Created plugin:")
+        print(path, '\n')
 
         for children in l_children:
             if children not in m_instance.dict_descendant:
-                print "Error: {0} is not a valid module.".format(children)
+                print("Error: {0} is not a valid module.".format(children))
                 sys.exit(1)
 
-        print "Needed modules:"
-        print l_children, '\n'
+        print("Needed modules:")
+        print(l_children, '\n')
 
-        print "This corresponds to using the following modules:"
-        print l_children + m_instance.l_descendant_unique(l_children), '\n'
+        print("This corresponds to using the following modules:")
+        print(l_children + m_instance.l_descendant_unique(l_children), '\n')
 
-        print "Which is reduced to:"
+        print("Which is reduced to:")
         l_child_reduce = m_instance.l_reduce_tree(l_children)
-        print l_child_reduce, '\n'
+        print(l_child_reduce, '\n')
 
-        print "Installation",
+        print("Installation", end=' ')
         save_new_module(path, l_child_reduce)
 
-        print "    [ OK ]"
-        print ""
+        print("    [ OK ]")
+        print("")
         arguments["create"] = False
         arguments["install"] = True
         main(arguments)
@@ -228,7 +228,7 @@ def main(arguments):
         for (x, y) in [os.path.split(f) for f in l_tmp]:
             d_repo_of_plugin[y] = x
             d_repo[x] = None
-        l_repository = d_repo.keys()
+        l_repository = list(d_repo.keys())
 
         d_plugin = get_dict_child(l_repository)
 
@@ -236,7 +236,7 @@ def main(arguments):
         d_child.update(d_plugin)
 
         normalize_case = {}
-        for name in d_local.keys() + d_plugin.keys():
+        for name in list(d_local.keys()) + list(d_plugin.keys()):
             normalize_case[name.lower()] = name
 
         l_name = [normalize_case[name.lower()] for name in arguments["<name>"]]
@@ -244,7 +244,7 @@ def main(arguments):
         for name in l_name:
 
             if name in d_local:
-                print "{0} Is already installed".format(name)
+                print("{0} Is already installed".format(name))
 
         l_module_descendant = get_l_module_descendant(d_child, l_name)
 
@@ -252,10 +252,10 @@ def main(arguments):
 
         if l_module_to_cp:
 
-            print "Required dependencies:"
-            print l_module_to_cp
+            print("Required dependencies:")
+            print(l_module_to_cp)
 
-            print "Installation...",
+            print("Installation...", end=' ')
 
             for module_to_cp in l_module_to_cp:
                 src = os.path.join(d_repo_of_plugin[module_to_cp], module_to_cp)
@@ -269,10 +269,10 @@ def main(arguments):
                         subprocess.check_call([install])
                         os.chdir(wd)
                 except OSError:
-                    print "The src directory is broken. Please remove %s" % des
+                    print("The src directory is broken. Please remove %s" % des)
                     raise
             subprocess.check_call(["qp_create_ninja", "update"])
-            print "[ OK ]"
+            print("[ OK ]")
 
     elif arguments["uninstall"]:
 
@@ -285,17 +285,17 @@ def main(arguments):
         l_failed = [name for name in l_name if name not in d_local]
 
         if l_failed:
-            print "Plugins not installed:"
+            print("Plugins not installed:")
             for name in sorted(l_failed):
-                print "%s" % name
+                print("%s" % name)
             sys.exit(1)
 
         l_name_to_remove = l_name + \
             [module for module in m_instance.l_module \
               for name in l_name if name in d_descendant[module]]
 
-        print "Removing plugins:"
-        print l_name_to_remove
+        print("Removing plugins:")
+        print(l_name_to_remove)
 
         for module in set(l_name_to_remove):
 
@@ -310,7 +310,7 @@ def main(arguments):
             try:
                 os.unlink(os.path.join(QP_SRC, module))
             except OSError:
-                print "%s is a core module which can't be removed" % module
+                print("%s is a core module which can't be removed" % module)
 
 
     elif arguments["update"]:
@@ -321,7 +321,7 @@ def main(arguments):
             l_repositories = get_repositories()
 
         for repo in l_repositories:
-            print "Updating ", repo
+            print("Updating ", repo)
             os.chdir(os.path.join(QP_PLUGINS,repo))
             git_cmd=["git", "pull"]
             subprocess.check_call(git_cmd)

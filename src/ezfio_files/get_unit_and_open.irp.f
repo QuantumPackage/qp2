@@ -17,7 +17,7 @@ integer function getUnitAndOpen(f,mode)
   END_DOC
 
   character*(*)      :: f
-  character*(128)    :: new_f
+  character*(256)    :: new_f
   integer            :: iunit
   logical            :: is_open, exists
   character          :: mode

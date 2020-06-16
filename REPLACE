@@ -220,6 +220,11 @@ qp_name potential_sr_xc_beta_ao_lda  --rename=potential_xc_beta_ao_sr_lda
 qp_name potential_sr_xc_beta_ao_lda --rename=potential_xc_beta_ao_sr_lda
 qp_name potential_sr_xc_beta_ao_pbe  --rename=potential_xc_beta_ao_sr_pbe
 qp_name potential_sr_xc_beta_ao_pbe --rename=potential_xc_beta_ao_sr_pbe
+qp_name disk_access_nuclear_repulsion --rename=io_nuclear_repulsion
+qp_name nucl_elec_ref_bitmask_energy -r ref_bitmask_n_e_energy
+qp_name ref_bitmask_e_n_energy -r ref_bitmask_n_e_energy
+qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
+qp_name write_ao_integrals_e_n -r write_ao_integrals_n_e
 qp_name psi_energy_bielec -r psi_energy_two_e
 qp_name read_ao_integrals_e_n -r read_ao_integrals_n_e
 qp_name read_ao_integrals --rename="read_ao_two_e_integrals"
@@ -239,6 +244,15 @@ qp_name write_ao_integrals --rename=write_ao_two_e_integrals
 qp_name write_mo_integrals_erf -r write_mo_two_e_integrals_erf
 qp_name write_mo_integrals --rename="write_mo_two_e_integrals"
 qp_name write_mo_integrals --rename=write_mo_two_e_integrals
+qp_name io_mo_integrals_e_n -r io_mo_integrals_n_e
+qp_name write_mo_integrals_e_n -r write_mo_integrals_n_e
+qp_name read_mo_integrals_e_n -r read_mo_integrals_n_e
+qp_name mo_integrals_e_n -r mo_integrals_n_e
+qp_name ezfio_get_mo_one_e_ints_mo_integrals_e_n -r ezfio_get_mo_one_e_ints_mo_integrals_n_e
+qp_name ezfio_set_mo_one_e_ints_mo_integrals_e_n -r ezfio_set_mo_one_e_ints_mo_integrals_n_e
+qp_name ezfio_has_mo_one_e_ints_mo_integrals_e_n -r ezfio_has_mo_one_e_ints_mo_integrals_n_e
+qp_name ezfio_has_mo_one_e_ints_io_mo_integrals_e_n -r ezfio_has_mo_one_e_ints_io_mo_integrals_n_e
+qp_name ezfio_get_mo_one_e_ints_io_mo_integrals_e_n -r ezfio_get_mo_one_e_ints_io_mo_integrals_n_e
 qp_name ao_ortho_canonical_coef_inv_complex -r ao_ortho_cano_coef_inv_cplx
 qp_name fock_operator_closed_shell_ref_bitmask -r fock_op_cshell_ref_bitmask
 qp_name fock_operator_closed_shell_ref_bitmask_complex -r fock_op_cshell_ref_bitmask_cplx

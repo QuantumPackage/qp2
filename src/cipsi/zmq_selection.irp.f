@@ -16,6 +16,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
 !  PROVIDE psi_det psi_coef N_det qp_max_mem N_states pt2_F s2_eig N_det_generators
 
   N = max(N_in,1)
+  N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
   if (.True.) then
     !todo: some providers have become unlinked for real/complex (det/coef); do these need to be provided?
     PROVIDE pt2_e0_denominator nproc
@@ -79,6 +80,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
       stop 'Unable to add task to task server'
     endif
   endif
+  N = max(N_in,1)
 
 
   ASSERT (associated(b%det))
@@ -137,8 +139,6 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm)
       call make_selection_buffer_s2(b)
     endif
     call fill_H_apply_buffer_no_selection(b%cur,b%det,N_int,0)
-    call copy_H_apply_buffer_to_wf()
-    call save_wavefunction
   endif
   call delete_selection_buffer(b)
   do k=1,N_states

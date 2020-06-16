@@ -17,18 +17,18 @@ export CC=gcc
 
 # /!\ When updating version, update also etc files
 
-EZFIO_TGZ="EZFIO.1.6.2.tar.gz"
+EZFIO_TGZ="EZFIO.2.0.2.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
 BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
 GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
-IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v1.7.6/irpf90-v1.7.6.tar.gz"
+IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v2.0.0/irpf90-v2.0.0.tar.gz"
 LIBCAP_URL="https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz"
 NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
 OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
-RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v1.0/resultsFile-v1.0.tar.gz"
+RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v2.0/resultsFile-v2.0.tar.gz"
 ZEROMQ_URL="https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.gz"
 ZLIB_URL="https://www.zlib.net/zlib-1.2.11.tar.gz"
 
@@ -154,7 +154,7 @@ function find_exe() {
 }
 
 function find_python_lib() {
-        python2 -c "import $1" &> /dev/null && echo "$1" || not_found
+        python3 -c "import $1" &> /dev/null && echo "$1" || not_found
 }
 
 function find_lib() {
@@ -278,6 +278,8 @@ EOF
 
             download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
             execute << EOF
+              export CC=gcc
+              export CXX=g++
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file zeromq.tar.gz
               rm zeromq.tar.gz
@@ -326,8 +328,8 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 #
-#                opam switch create ocaml-base-compiler.4.07.1
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+#                opam switch create ocaml-base-compiler.4.10.0
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
 
                 eval $(opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -346,14 +348,15 @@ EOF
 EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#                opam switch create ocaml-base-compiler.4.07.1     || exit 1
+#                opam switch create ocaml-base-compiler.4.10.0     || exit 1
 
-                opam init --verbose --yes --compiler=4.07.1 --disable-sandboxing
+                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
                 eval $(opam env)
                 execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1
 EOF
             fi
+
 
     elif [[ ${PACKAGE} = bse ]] ; then
 

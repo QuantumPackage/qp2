@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import sys
 from bs4 import BeautifulSoup
 
@@ -35,11 +35,11 @@ def clean_up(text):
         return False
       else:
         return y[0] in irred
-    data = filter(f,data)[:len(irred)]
+    data = list(filter(f,data))[:len(irred)]
     for line in data:
        s = line.replace('*','').split()
        l = irred[s[0]]
-       data[l] = map(float,s[1:len(irred)+1])
+       data[l] = list(map(float,s[1:len(irred)+1]))
 
     d = {}
     e = {}
@@ -48,23 +48,23 @@ def clean_up(text):
     for k in sop:
       e[sop[k]] = k
     n = len(irred)
-    print "Group\t", group, "\nn\t", n
-    print "\n     \tIrred     \tOperation"
+    print("Group\t", group, "\nn\t", n)
+    print("\n     \tIrred     \tOperation")
     for i in range(n):
-      print "%4d \t %s \t %s"%(i+1, d[i].ljust(10), e[i].ljust(10))
+      print("%4d \t %s \t %s"%(i+1, d[i].ljust(10), e[i].ljust(10)))
 
-    print "\nTable\n     ",
+    print("\nTable\n     ", end=' ')
     for j in range(n):
-        print "%8s "%(str(j+1).center(8)),
+        print("%8s "%(str(j+1).center(8)), end=' ')
     for i in range(n):
-      print "\n%4d "%(i+1), 
+      print("\n%4d "%(i+1), end=' ') 
       for j in range(n):
-        print "%8.5f "%(data[i][j]), 
-    print "\n"
+        print("%8.5f "%(data[i][j]), end=' ') 
+    print("\n")
 
 def main():
     for group in sys.argv[1:]:
-      f = urllib.urlopen(address%(group))
+      f = urllib.request.urlopen(address%(group))
       html = f.read().split('\n',1)[1]
       text = clean_up(html)
 

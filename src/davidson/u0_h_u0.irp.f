@@ -2,7 +2,7 @@
 &BEGIN_PROVIDER [ double precision, psi_s2, (N_states) ]
   implicit none
   BEGIN_DOC
-! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
+! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
 ! 
 ! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
 ! real and complex

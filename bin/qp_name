@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 Displays the names of all the files in which the provider/subroutine/function
@@ -30,7 +30,7 @@ try:
     from docopt import docopt
     from qp_path import QP_SRC, QP_ROOT
 except ImportError:
-    print "source .quantum_package.rc"
+    print("source .quantum_package.rc")
     raise
 
 
@@ -38,7 +38,7 @@ def main(arguments):
     """Main function"""
 
     # Check that name exist in */IRPF90_man
-    print "Checking that name exists..."
+    print("Checking that name exists...")
     all_modules = os.listdir(QP_SRC)
 
     f = arguments["<name>"]+".l"
@@ -52,21 +52,21 @@ def main(arguments):
         if found: break
 
     if not found:
-        print "Error:"
-        print "The variable/subroutine/function \""+arguments["<name>"] \
-        + "\" was not found in the sources."
-        print "Did you compile the code at the root?"
-        print "Continue? [y/N]  ",
+        print("Error:")
+        print("The variable/subroutine/function \""+arguments["<name>"] \
+        + "\" was not found in the sources.")
+        print("Did you compile the code at the root?")
+        print("Continue? [y/N]  ", end=' ')
         cont = sys.stdin.read(1).strip() in ["y", "Y"]
         if not cont:
-            print "Aborted"
+            print("Aborted")
             sys.exit(1)
 
     # Now search in all the files
     if arguments["--rename"]:
-        print "Replacing..."
+        print("Replacing...")
     else:
-        print "Searching..."
+        print("Searching...")
 
     name = re.compile(r"\b"+arguments["<name>"]+r"\b", re.IGNORECASE)
 
@@ -84,15 +84,15 @@ def main(arguments):
             with open(filename, "r") as f:
                 f_in = f.read()
             if name.search(f_in):
-                print filename
+                print(filename)
                 if arguments["--rename"]:
                     f_new = name.sub(arguments["--rename"], f_in)
                     with open(filename, "w") as f:
                         f.write(f_new)
 
-    print "Done"
+    print("Done")
     with open(os.path.join(QP_ROOT, "REPLACE"), 'a') as f:
-        print >>f, "qp_name "+" ".join(sys.argv[1:])
+        print("qp_name "+" ".join(sys.argv[1:]), file=f)
 
 
 

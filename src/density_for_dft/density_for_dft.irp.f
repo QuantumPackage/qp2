@@ -22,7 +22,7 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
   one_e_dm_mo_alpha_for_dft(:,:,1) = one_e_dm_mo_alpha_average(:,:)
  endif
  
- if(no_core_density .EQ. "no_core_dm")then
+ if(no_core_density)then
   integer :: ii,i,j
   do ii = 1, n_core_orb
    i = list_core(ii)
@@ -73,7 +73,7 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
   one_e_dm_mo_beta_for_dft(:,:,1) = one_e_dm_mo_beta_average(:,:)
  endif
 
- if(no_core_density .EQ. "no_core_dm")then
+ if(no_core_density)then
   integer :: ii,i,j
   do ii = 1, n_core_orb
    i = list_core(ii)

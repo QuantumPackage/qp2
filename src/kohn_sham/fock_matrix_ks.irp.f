@@ -28,7 +28,7 @@
        !$OMP local_threshold)&
        !$OMP SHARED(ao_num,SCF_density_matrix_ao_alpha,SCF_density_matrix_ao_beta,&
        !$OMP ao_integrals_map,ao_integrals_threshold, ao_two_e_integral_schwartz, &
-       !$OMP ao_overlap_abs, ao_two_e_integral_alpha, ao_two_e_integral_beta)
+       !$OMP ao_two_e_integral_alpha, ao_two_e_integral_beta)
 
    allocate(keys(1), values(1))
    allocate(ao_two_e_integral_alpha_tmp(ao_num,ao_num), &
@@ -51,8 +51,8 @@
            l = ll(1)
            j = jj(1)
 
-           if (ao_overlap_abs(k,l)*ao_overlap_abs(i,j)  &
-              < ao_integrals_threshold) then
+           logical, external :: ao_two_e_integral_zero
+           if (ao_two_e_integral_zero(i,k,j,l)) then
              cycle
            endif
            local_threshold = ao_two_e_integral_schwartz(k,l)*ao_two_e_integral_schwartz(i,j)

@@ -21,10 +21,6 @@ let () =
         doc="Downloads the EZFIO directory." ;
         arg=Without_arg; } ;
 
-      { short='v' ; long="verbose" ; opt=Optional ;
-        doc="Prints the transfer speed." ;
-        arg=Without_arg; } ;
-
       anonymous
         "(EZFIO_DIR|ADDRESS)"
          Mandatory
@@ -150,45 +146,6 @@ let () =
         Zmq.Socket.subscribe  socket_in  "";
 
 
-    (*
-    let action = 
-      if verbose then
-        begin
-          match req_or_sub with
-          | REQ -> (fun () ->
-                    let msg = 
-                      Zmq.Socket.recv_all  socket_in
-                    in
-                    let t0 = Unix.gettimeofday () in
-                    Zmq.Socket.send_all socket_out  msg;
-                    let in_size =
-                      float_of_int ( List.fold_left (fun accu x -> accu + String.length x) 0 msg )
-                      /. 8192. /. 1024.
-                    in
-                    let msg = 
-                      Zmq.Socket.recv_all  socket_out
-                    in
-                    let t1 = Unix.gettimeofday () in
-                    Zmq.Socket.send_all  socket_in msg;
-                    let in_time = t1 -. t0 in
-                    in_time_sum := !in_time_sum +. in_time;
-                    in_size_sum := !in_size_sum +. in_size;
-                    Printf.printf " %16.2f MiB/s  --  %16.2f MiB/s\n%!" (in_size /. in_time) (!in_size_sum /. !in_time_sum);
-                    )
-          | SUB -> (fun () ->
-                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
-        end
-      else
-        begin
-          match req_or_sub with
-          | REQ -> (fun () ->
-                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out;
-                    Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
-          | SUB -> (fun () ->
-                    Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
-        end
-    in
-    *)
 
    let action_in = 
       match req_or_sub with

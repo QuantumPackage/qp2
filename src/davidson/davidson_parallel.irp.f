@@ -507,6 +507,11 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   ipos=1
   do imin=1,N_det,tasksize
     imax = min(N_det,imin-1+tasksize)
+    if (imin==1) then
+      istep = 2
+    else
+      istep = 1
+    endif
     do ishift=0,istep-1
       write(task(ipos:ipos+50),'(4(I11,1X),1X,1A)') imin, imax, ishift, istep, '|'
       ipos = ipos+50

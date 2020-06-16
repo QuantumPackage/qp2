@@ -1,6 +1,7 @@
 open Sexplib
 open Sexplib.Std
 open Qptypes
+open Qputils
 
 
 let fail_msg str (ex,range) =
@@ -25,7 +26,7 @@ let fail_msg str (ex,range) =
     in
     let str = String_ext.tr str ~target:'(' ~replacement:' '
       |> String_ext.split ~on:')'
-      |> List.map String_ext.strip
+      |> list_map String_ext.strip
       |> List.filter (fun x ->
           match String_ext.substr_index ~pos:0 ~pattern:"##" x with
           | None -> false
@@ -48,7 +49,7 @@ let of_rst t_of_sexp s =
   Rst_string.to_string s
   |> String_ext.split ~on:'\n'
   |> List.filter (fun line -> String.contains line '=')
-  |> List.map (fun line ->
+  |> list_map (fun line ->
       "("^(
       String_ext.tr ~target:'=' ~replacement:' ' line
       )^")" )

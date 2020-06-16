@@ -3,6 +3,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
   !  Nucleus-electron interaction, in the |AO| basis set.
   !
   !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+  !
+  !  These integrals also contain the pseudopotential integrals.
   END_DOC
   implicit none
   double precision               :: alpha, beta, gama, delta
@@ -75,7 +77,13 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
     !$OMP END DO
     !$OMP END PARALLEL
+    IF (DO_PSEUDO) THEN
+       ao_integrals_n_e += ao_pseudo_integrals
+    ENDIF
+
   endif
+
+
   if (write_ao_integrals_n_e) then
     call ezfio_set_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
     print *,  'AO N-e integrals written to disk'

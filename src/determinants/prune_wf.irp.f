@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ logical, pruned, (N_det) ]
 
  pruned(:) = .False.
 
- if (pruning == 0.d0) then
+ if (pruning <= 0.d0) then
    return
  endif
 
