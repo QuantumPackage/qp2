@@ -17,7 +17,7 @@ program molden
 
   write(i_unit_output,'(A)') '[Molden Format]'
 
-  write(i_unit_output,'(A)') '[Atoms] AU'
+  write(i_unit_output,'(A)') '[Atoms] Angs'
   do i = 1, nucl_num
     write(i_unit_output,'(A2,2X,I4,2X,I4,3(2X,F15.10))')                   &
         trim(element_name(int(nucl_charge(i)))),                     &
