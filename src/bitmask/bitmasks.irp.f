@@ -80,9 +80,23 @@ BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask, (N_int,2)]
   integer                        :: occ(elec_alpha_num)
   
   HF_bitmask = 0_bit_kind
-  do i=1,elec_alpha_num
-    occ(i) = i
-  enddo
+  if (is_complex) then
+    integer :: kpt,korb
+    kpt=1
+    korb=1
+    do i=1,elec_alpha_num
+      occ(i) = korb + (kpt-1) * mo_num_per_kpt
+      kpt += 1
+      if (kpt > kpt_num) then
+        kpt = 1
+        korb += 1
+      endif
+    enddo
+  else
+    do i=1,elec_alpha_num
+      occ(i) = i
+    enddo
+  endif
   call list_to_bitstring( HF_bitmask(1,1), occ, elec_alpha_num, N_int)
   ! elec_alpha_num <= elec_beta_num, so occ is already OK.
   call list_to_bitstring( HF_bitmask(1,2), occ, elec_beta_num, N_int)
@@ -240,3 +254,252 @@ BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask, (N_int,2)]
     closed_shell_ref_bitmask(i,2) = ior(ref_bitmask(i,2),act_bitmask(i,2))
   enddo
 END_PROVIDER
+ 
+!============================================!
+!                                            !
+!                    kpts                    !
+!                                            !
+!============================================!
+
+!BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask, (N_int) ]
+!  implicit none
+!  BEGIN_DOC
+!  ! Bitmask to include all possible MOs
+!  END_DOC
+!  
+!  integer                        :: i,j,k
+!  k=0
+!  do j=1,N_int
+!    full_ijkl_bitmask(j) = 0_bit_kind
+!    do i=0,bit_kind_size-1
+!      k=k+1
+!      if (mo_class(k) /= 'Deleted') then
+!        full_ijkl_bitmask(j) = ibset(full_ijkl_bitmask(j),i)
+!      endif
+!      if (k == mo_num) exit
+!    enddo
+!  enddo
+!END_PROVIDER
+!
+!BEGIN_PROVIDER [ integer(bit_kind), full_ijkl_bitmask_4, (N_int,4) ]
+!  implicit none
+!  integer                        :: i
+!  do i=1,N_int
+!    full_ijkl_bitmask_4(i,1) = full_ijkl_bitmask(i)
+!    full_ijkl_bitmask_4(i,2) = full_ijkl_bitmask(i)
+!    full_ijkl_bitmask_4(i,3) = full_ijkl_bitmask(i)
+!    full_ijkl_bitmask_4(i,4) = full_ijkl_bitmask(i)
+!  enddo
+!END_PROVIDER
+!
+!BEGIN_PROVIDER [ integer(bit_kind), core_inact_act_bitmask_4, (N_int,4) ]
+!  implicit none
+!  integer                        :: i
+!  do i=1,N_int
+!    core_inact_act_bitmask_4(i,1) = reunion_of_core_inact_act_bitmask(i,1)
+!    core_inact_act_bitmask_4(i,2) = reunion_of_core_inact_act_bitmask(i,1)
+!    core_inact_act_bitmask_4(i,3) = reunion_of_core_inact_act_bitmask(i,1)
+!    core_inact_act_bitmask_4(i,4) = reunion_of_core_inact_act_bitmask(i,1)
+!  enddo
+!END_PROVIDER
+!
+!BEGIN_PROVIDER [ integer(bit_kind), virt_bitmask_4, (N_int,4) ]
+!  implicit none
+!  integer                        :: i
+!  do i=1,N_int
+!    virt_bitmask_4(i,1) = virt_bitmask(i,1)
+!    virt_bitmask_4(i,2) = virt_bitmask(i,1)
+!    virt_bitmask_4(i,3) = virt_bitmask(i,1)
+!    virt_bitmask_4(i,4) = virt_bitmask(i,1)
+!  enddo
+!END_PROVIDER
+!
+!
+!
+!
+BEGIN_PROVIDER [ integer(bit_kind), HF_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Hartree Fock bit mask
+  END_DOC
+  integer                        :: i,k
+  
+  hf_bitmask_kpts = 0_bit_kind
+  do k=1,kpt_num
+    do i=1,N_int
+      hf_bitmask_kpts(i,1,k) = iand(hf_bitmask(i,1),kpts_bitmask(i,k))
+      hf_bitmask_kpts(i,2,k) = iand(hf_bitmask(i,2),kpts_bitmask(i,k))
+    enddo
+  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer(bit_kind), ref_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reference bit mask, used in Slater rules, chosen as Hartree-Fock bitmask
+  END_DOC
+  ref_bitmask_kpts = HF_bitmask_kpts
+END_PROVIDER
+
+
+
+!BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
+!  implicit none
+!  BEGIN_DOC
+!  ! Bitmasks for generator determinants.
+!  ! (N_int, alpha/beta, hole/particle, generator).
+!  !
+!  ! 3rd index is :
+!  !
+!  ! * 1 : hole     for single exc
+!  !
+!  ! * 2 : particle for single exc
+!  !
+!  ! * 3 : hole     for 1st exc of double
+!  !
+!  ! * 4 : particle for 1st exc of double
+!  !
+!  ! * 5 : hole     for 2nd exc of double
+!  !
+!  ! * 6 : particle for 2nd exc of double
+!  !
+!  END_DOC
+!  logical                        :: exists
+!  PROVIDE ezfio_filename full_ijkl_bitmask 
+!  
+!  integer                        :: ispin, i
+!  do ispin=1,2
+!      do i=1,N_int
+!        generators_bitmask(i,ispin,s_hole ) = reunion_of_inact_act_bitmask(i,ispin)
+!        generators_bitmask(i,ispin,s_part ) = reunion_of_act_virt_bitmask(i,ispin)
+!        generators_bitmask(i,ispin,d_hole1) = reunion_of_inact_act_bitmask(i,ispin)
+!        generators_bitmask(i,ispin,d_part1) = reunion_of_act_virt_bitmask(i,ispin)
+!        generators_bitmask(i,ispin,d_hole2) = reunion_of_inact_act_bitmask(i,ispin)
+!        generators_bitmask(i,ispin,d_part2) = reunion_of_act_virt_bitmask(i,ispin)
+!      enddo
+!  enddo
+!  
+!END_PROVIDER
+
+BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the core and inactive and virtual bitmasks
+  END_DOC
+  integer                        :: i,k
+  do k=1,kpt_num
+    do i = 1, N_int
+      reunion_of_core_inact_bitmask_kpts(i,1,k) = ior(core_bitmask_kpts(i,1,k),inact_bitmask_kpts(i,1,k))
+      reunion_of_core_inact_bitmask_kpts(i,2,k) = ior(core_bitmask_kpts(i,2,k),inact_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_inact_act_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the  inactive and active bitmasks
+  END_DOC
+  integer                        :: i,k
+  
+  do k=1,kpt_num
+    do i = 1, N_int
+      reunion_of_inact_act_bitmask_kpts(i,1,k) = ior(inact_bitmask_kpts(i,1,k),act_bitmask_kpts(i,1,k))
+      reunion_of_inact_act_bitmask_kpts(i,2,k) = ior(inact_bitmask_kpts(i,2,k),act_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_act_virt_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the  inactive and active bitmasks
+  END_DOC
+  integer                        :: i,k
+  
+  do k=1,kpt_num
+    do i = 1, N_int
+      reunion_of_act_virt_bitmask_kpts(i,1,k) = ior(virt_bitmask_kpts(i,1,k),act_bitmask_kpts(i,1,k))
+      reunion_of_act_virt_bitmask_kpts(i,2,k) = ior(virt_bitmask_kpts(i,2,k),act_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [integer(bit_kind), reunion_of_core_inact_act_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the core, inactive and active bitmasks
+  END_DOC
+  integer                        :: i,k
+
+  do k=1,kpt_num
+    do i = 1, N_int
+      reunion_of_core_inact_act_bitmask_kpts(i,1,k) = ior(reunion_of_core_inact_bitmask_kpts(i,1,k),act_bitmask_kpts(i,1,k))
+      reunion_of_core_inact_act_bitmask_kpts(i,2,k) = ior(reunion_of_core_inact_bitmask_kpts(i,2,k),act_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ integer(bit_kind), reunion_of_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the inactive, active and virtual bitmasks
+  END_DOC
+  integer                        :: i,k
+  do k=1,kpt_num
+    do i = 1, N_int
+      reunion_of_bitmask_kpts(i,1,k) = ior(ior(act_bitmask_kpts(i,1,k),inact_bitmask_kpts(i,1,k)),virt_bitmask_kpts(i,1,k))
+      reunion_of_bitmask_kpts(i,2,k) = ior(ior(act_bitmask_kpts(i,2,k),inact_bitmask_kpts(i,2,k)),virt_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+
+ BEGIN_PROVIDER [ integer(bit_kind), inact_virt_bitmask_kpts, (N_int,2,kpt_num)]
+&BEGIN_PROVIDER [ integer(bit_kind), core_inact_virt_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Reunion of the inactive and virtual bitmasks
+  END_DOC
+  integer                        :: i,k
+  do k=1,kpt_num
+    do i = 1, N_int
+      inact_virt_bitmask_kpts(i,1,k) = ior(inact_bitmask_kpts(i,1,k),virt_bitmask_kpts(i,1,k))
+      inact_virt_bitmask_kpts(i,2,k) = ior(inact_bitmask_kpts(i,2,k),virt_bitmask_kpts(i,2,k))
+      core_inact_virt_bitmask_kpts(i,1,k) = ior(core_bitmask_kpts(i,1,k),inact_virt_bitmask_kpts(i,1,k))
+      core_inact_virt_bitmask_kpts(i,2,k) = ior(core_bitmask_kpts(i,2,k),inact_virt_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ integer(bit_kind), unpaired_alpha_electrons_kpts, (N_int,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Bitmask reprenting the unpaired alpha electrons in the HF_bitmask
+  END_DOC
+  integer                        :: i,k
+  unpaired_alpha_electrons_kpts = 0_bit_kind
+  do k = 1, kpt_num
+    do i = 1, N_int
+      unpaired_alpha_electrons_kpts(i,k) = xor(HF_bitmask_kpts(i,1,k),HF_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [integer(bit_kind), closed_shell_ref_bitmask_kpts, (N_int,2,kpt_num)]
+  implicit none
+  integer                        :: i,k
+
+  closed_shell_ref_bitmask_kpts = 0_bit_kind
+  do k=1,kpt_num
+    do i = 1, N_int
+      closed_shell_ref_bitmask_kpts(i,1,k) = ior(ref_bitmask_kpts(i,1,k),act_bitmask_kpts(i,1,k))
+      closed_shell_ref_bitmask_kpts(i,2,k) = ior(ref_bitmask_kpts(i,2,k),act_bitmask_kpts(i,2,k))
+    enddo
+  enddo
+END_PROVIDER
+ 

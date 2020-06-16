@@ -98,7 +98,11 @@ BEGIN_PROVIDER [ double precision, s2_values, (N_states) ]
 ! array of the averaged values of the S^2 operator on the various states
  END_DOC
  integer :: i
+ if (is_complex) then
+    call u_0_S2_u_0_complex(s2_values,psi_coef_complex,n_det,psi_det,N_int,N_states,psi_det_size)
+ else
  call u_0_S2_u_0(s2_values,psi_coef,n_det,psi_det,N_int,N_states,psi_det_size)
+ endif
 
 END_PROVIDER
 

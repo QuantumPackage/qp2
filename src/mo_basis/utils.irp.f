@@ -1,23 +1,64 @@
 subroutine save_mos
   implicit none
   double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j
-
+  complex*16, allocatable        :: buffer_c(:,:),buffer_k(:,:,:)
+  integer                        :: i,j,k,ishft,jshft
+  !TODO: change this for periodic?
+  !      save real/imag parts of mo_coef_complex
+  !      otherwise need to make sure mo_coef and mo_coef_imag
+  !      are updated whenever mo_coef_complex changes
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
-  allocate ( buffer(ao_num,mo_num) )
-  buffer = 0.d0
-  do j = 1, mo_num
-    do i = 1, ao_num
-      buffer(i,j) = mo_coef(i,j)
+  if (is_complex) then
+    allocate ( buffer_c(ao_num,mo_num))
+    allocate ( buffer_k(ao_num_per_kpt,mo_num_per_kpt,kpt_num))
+    buffer_k = (0.d0,0.d0)
+    do k=1,kpt_num
+      do j = 1, mo_num_per_kpt
+        do i = 1, ao_num_per_kpt
+          buffer_k(i,j,k) = mo_coef_kpts(i,j,k)
+          !print*,i,j,k,buffer_k(i,j,k)
+        enddo
+      enddo
     enddo
-  enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
-  call ezfio_set_mo_basis_mo_occ(mo_occ)
+    buffer_c = (0.d0,0.d0)
+    do k=1,kpt_num
+      ishft = (k-1)*ao_num_per_kpt
+      jshft = (k-1)*mo_num_per_kpt
+      do j=1,mo_num_per_kpt
+        do i=1,ao_num_per_kpt
+          buffer_c(i+ishft,j+jshft) = buffer_k(i,j,k)
+        enddo
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef_kpts(buffer_k)
+    call ezfio_set_mo_basis_mo_coef_complex(buffer_c)
+
+    deallocate (buffer_k,buffer_c)
+    mo_occ = 0.d0
+    do k=1,kpt_num
+      ishft=(k-1)*mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_occ(i+ishft)=mo_occ_kpts(i,k)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_occ_kpts(mo_occ_kpts)
+    call ezfio_set_mo_basis_mo_occ(mo_occ)
+  else
+    allocate ( buffer(ao_num,mo_num) )
+    buffer = 0.d0
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef(buffer)
+    deallocate (buffer)
+    call ezfio_set_mo_basis_mo_occ(mo_occ)
+  endif
   call ezfio_set_mo_basis_mo_class(mo_class)
-  deallocate (buffer)
 
 end
 
@@ -25,27 +66,43 @@ end
 subroutine save_mos_no_occ
   implicit none
   double precision, allocatable  :: buffer(:,:)
+  complex*16, allocatable        :: buffer_c(:,:)
   integer                        :: i,j
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
  !call ezfio_set_mo_basis_mo_num(mo_num)
  !call ezfio_set_mo_basis_mo_label(mo_label)
  !call ezfio_set_mo_basis_ao_md5(ao_md5)
-  allocate ( buffer(ao_num,mo_num) )
-  buffer = 0.d0
-  do j = 1, mo_num
-    do i = 1, ao_num
-      buffer(i,j) = mo_coef(i,j)
+  if (is_complex) then
+    print*,irp_here, ' not implemented for kpts'
+    stop -1
+    allocate ( buffer_c(ao_num,mo_num))
+    buffer_c = (0.d0,0.d0)
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer_c(i,j) = mo_coef_complex(i,j)
+      enddo
     enddo
-  enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
-  deallocate (buffer)
+    call ezfio_set_mo_basis_mo_coef_complex(buffer_c)
+    deallocate (buffer_c)
+  else
+    allocate ( buffer(ao_num,mo_num) )
+    buffer = 0.d0
+    do j = 1, mo_num
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef(buffer)
+    deallocate (buffer)
+  endif
 
 end
 
 subroutine save_mos_truncated(n)
   implicit none
   double precision, allocatable  :: buffer(:,:)
+  complex*16, allocatable        :: buffer_c(:,:)
   integer                        :: i,j,n
 
   call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
@@ -53,17 +110,31 @@ subroutine save_mos_truncated(n)
   call ezfio_set_mo_basis_mo_num(n)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
-  allocate ( buffer(ao_num,n) )
-  buffer = 0.d0
-  do j = 1, n
-    do i = 1, ao_num
-      buffer(i,j) = mo_coef(i,j)
+  if (is_complex) then
+    print*,irp_here, ' not implemented for kpts'
+    stop -1
+    allocate ( buffer_c(ao_num,mo_num))
+    buffer_c = (0.d0,0.d0)
+    do j = 1, n
+      do i = 1, ao_num
+        buffer_c(i,j) = mo_coef_complex(i,j)
+      enddo
     enddo
-  enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
+    call ezfio_set_mo_basis_mo_coef_complex(buffer_c)
+    deallocate (buffer_c)
+  else
+    allocate ( buffer(ao_num,n) )
+    buffer = 0.d0
+    do j = 1, n
+      do i = 1, ao_num
+        buffer(i,j) = mo_coef(i,j)
+      enddo
+    enddo
+    call ezfio_set_mo_basis_mo_coef(buffer)
+    deallocate (buffer)
+  endif
   call ezfio_set_mo_basis_mo_occ(mo_occ)
   call ezfio_set_mo_basis_mo_class(mo_class)
-  deallocate (buffer)
 
 end
 

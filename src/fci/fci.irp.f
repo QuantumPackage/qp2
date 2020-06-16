@@ -37,7 +37,11 @@ program fci
   END_DOC
 
   if (.not.is_zmq_slave) then
-    PROVIDE psi_det psi_coef mo_two_e_integrals_in_map
+    if (is_complex) then
+      PROVIDE psi_det psi_coef_complex mo_two_e_integrals_in_map
+    else
+      PROVIDE psi_det psi_coef mo_two_e_integrals_in_map
+    endif
 
     if (do_pt2) then
       call run_stochastic_cipsi

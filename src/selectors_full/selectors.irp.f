@@ -30,8 +30,7 @@ BEGIN_PROVIDER [ integer, N_det_selectors]
   call write_int(6,N_det_selectors,'Number of selectors')
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int,2,psi_selectors_size) ]
-&BEGIN_PROVIDER [ double precision, psi_selectors_coef, (psi_selectors_size,N_states) ]
+BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int,2,psi_selectors_size) ]
   implicit none
   BEGIN_DOC
   ! Determinants on which we apply <i|H|psi> for perturbation.
@@ -44,9 +43,34 @@ END_PROVIDER
       psi_selectors(k,2,i) = psi_det_sorted(k,2,i)
     enddo
   enddo
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, psi_selectors_coef, (psi_selectors_size,N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Determinants on which we apply <i|H|psi> for perturbation.
+  END_DOC
+  integer                        :: i,k
+
   do k=1,N_states
     do i=1,N_det_selectors
       psi_selectors_coef(i,k) = psi_coef_sorted(i,k)
+    enddo
+  enddo
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, psi_selectors_coef_complex, (psi_selectors_size,N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Determinants on which we apply <i|H|psi> for perturbation.
+  END_DOC
+  integer                        :: i,k
+
+  do k=1,N_states
+    do i=1,N_det_selectors
+      psi_selectors_coef_complex(i,k) = psi_coef_sorted_complex(i,k)
     enddo
   enddo
 

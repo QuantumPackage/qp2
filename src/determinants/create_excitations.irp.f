@@ -80,6 +80,33 @@ subroutine build_singly_excited_wavefunction(i_hole,i_particle,ispin,det_out,coe
   enddo
 end
 
+subroutine build_singly_excited_wavefunction_complex(i_hole,i_particle,ispin,det_out,coef_out)
+  implicit none
+  BEGIN_DOC
+  ! Applies the single excitation operator : a^{dager}_(i_particle) a_(i_hole) of
+  ! spin = ispin to the current wave function (psi_det, psi_coef)
+  END_DOC
+  integer, intent(in)            :: i_hole,i_particle,ispin
+  integer(bit_kind), intent(out) :: det_out(N_int,2,N_det)
+  complex*16, intent(out)  :: coef_out(N_det,N_states)
+
+  integer :: k
+  integer :: i_ok
+  double precision :: phase
+  do k=1,N_det
+    coef_out(k,:) = psi_coef(k,:)
+    det_out(:,:,k) = psi_det(:,:,k)
+    call do_single_excitation(det_out(1,1,k),i_hole,i_particle,ispin,i_ok)
+    if (i_ok == 1) then
+      call get_phase(psi_det(1,1,k), det_out(1,1,k),phase,N_int)
+      coef_out(k,:) = phase * coef_out(k,:)
+    else
+      coef_out(k,:) = (0.d0,0.d0)
+      det_out(:,:,k) = psi_det(:,:,k)
+    endif
+  enddo
+end
+
 logical function is_spin_flip_possible(key_in,i_flip,ispin)
   implicit none
   BEGIN_DOC

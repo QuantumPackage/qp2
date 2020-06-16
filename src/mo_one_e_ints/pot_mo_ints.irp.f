@@ -44,3 +44,26 @@ BEGIN_PROVIDER [double precision, mo_integrals_n_e_per_atom, (mo_num,mo_num,nucl
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, mo_integrals_n_e_diag,(mo_num)]
+  implicit none
+  integer                        :: i
+  BEGIN_DOC
+  ! diagonal elements of mo_integrals_n_e or mo_integrals_n_e_complex
+  END_DOC
+  
+  if (is_complex) then
+    integer :: k,i_shft
+    PROVIDE mo_integrals_n_e_kpts
+    do k=1,kpt_num
+      i_shft = (k-1)*mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_integrals_n_e_diag(i+i_shft) = dble(mo_integrals_n_e_kpts(i,i,k))
+      enddo
+    enddo
+  else
+    PROVIDE mo_integrals_n_e
+    do i=1,mo_num
+      mo_integrals_n_e_diag(i) = mo_integrals_n_e(i,i)
+    enddo
+  endif
+END_PROVIDER

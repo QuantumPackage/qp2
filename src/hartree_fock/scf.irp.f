@@ -45,19 +45,43 @@ subroutine create_guess
   END_DOC
   logical                        :: exists
   PROVIDE ezfio_filename
-  call ezfio_has_mo_basis_mo_coef(exists)
+  if (is_complex) then
+!    call ezfio_has_mo_basis_mo_coef_complex(exists)
+    call ezfio_has_mo_basis_mo_coef_kpts(exists)
+  else
+    call ezfio_has_mo_basis_mo_coef(exists)
+  endif
   if (.not.exists) then
     if (mo_guess_type == "HCore") then
-      mo_coef = ao_ortho_lowdin_coef
-      TOUCH mo_coef
-      mo_label = 'Guess'
-      call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
-          size(mo_one_e_integrals,1),                            &
-          size(mo_one_e_integrals,2),                            &
-          mo_label,1,.false.)
-      SOFT_TOUCH mo_coef mo_label
+      if (is_complex) then
+        !mo_coef_complex = ao_ortho_lowdin_coef_complex
+        mo_coef_kpts = ao_ortho_lowdin_coef_kpts
+        TOUCH mo_coef_kpts
+        mo_label = 'Guess'
+        !call mo_as_eigvectors_of_mo_matrix_complex(mo_one_e_integrals_kpts,     &
+        call mo_as_eigvectors_of_mo_matrix_kpts(mo_one_e_integrals_kpts,     &
+            size(mo_one_e_integrals_kpts,1),                            &
+            size(mo_one_e_integrals_kpts,2),                            &
+            size(mo_one_e_integrals_kpts,3),                            &
+            mo_label,1,.false.)
+        SOFT_TOUCH mo_coef_kpts mo_label
+      else
+        mo_coef = ao_ortho_lowdin_coef
+        TOUCH mo_coef
+        mo_label = 'Guess'
+        call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
+            size(mo_one_e_integrals,1),                            &
+            size(mo_one_e_integrals,2),                            &
+            mo_label,1,.false.)
+        SOFT_TOUCH mo_coef mo_label
+      endif
     else if (mo_guess_type == "Huckel") then
-      call huckel_guess
+      if (is_complex) then
+        !call huckel_guess_complex
+        call huckel_guess_kpts
+      else
+        call huckel_guess
+      endif
     else
       print *,  'Unrecognized MO guess type : '//mo_guess_type
       stop 1
@@ -77,9 +101,17 @@ subroutine run
   integer                        :: i_it, i, j, k
 
   mo_label = "Orthonormalized"
-
-  call Roothaan_Hall_SCF
+  if (is_complex) then
+    !call roothaan_hall_scf_complex
+    call roothaan_hall_scf_kpts
+  else
+    call roothaan_hall_scf
+  endif
   call ezfio_set_hartree_fock_energy(SCF_energy)
+  print*,'hf 1e,2e,total energy'
+  print*,hf_one_electron_energy
+  print*,hf_two_electron_energy
+  print*,hf_energy
 
 end
 

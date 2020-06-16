@@ -93,59 +93,6 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
-  implicit none
-  BEGIN_DOC
-  ! Molecular orbital coefficients on |AO| basis set
-  !
-  ! mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
-  !
-  ! mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
-  END_DOC
-  integer                        :: i, j
-  double precision, allocatable  :: buffer(:,:)
-  logical                        :: exists
-  PROVIDE ezfio_filename
-
-
-  if (mpi_master) then
-    ! Coefs
-    call ezfio_has_mo_basis_mo_coef_imag(exists)
-  endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-    call MPI_BCAST(exists, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_coef_imag with MPI'
-    endif
-  IRP_ENDIF
-
-  if (exists) then
-    if (mpi_master) then
-      call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
-      write(*,*) 'Read  mo_coef_imag'
-    endif
-    IRP_IF MPI
-      call MPI_BCAST( mo_coef_imag, mo_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-      if (ierr /= MPI_SUCCESS) then
-        stop 'Unable to read mo_coef_imag with MPI'
-      endif
-    IRP_ENDIF
-  else
-    ! Orthonormalized AO basis
-    do i=1,mo_num
-      do j=1,ao_num
-        mo_coef_imag(j,i) = 0.d0
-      enddo
-    enddo
-  endif
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  implicit none
  BEGIN_DOC
@@ -154,7 +101,7 @@ BEGIN_PROVIDER [ double precision, mo_coef_in_ao_ortho_basis, (ao_num, mo_num) ]
  ! $C^{-1}.C_{mo}$
  END_DOC
  call dgemm('N','N',ao_num,mo_num,ao_num,1.d0,                   &
-     ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+     ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
      mo_coef, size(mo_coef,1), 0.d0,                                 &
      mo_coef_in_ao_ortho_basis, size(mo_coef_in_ao_ortho_basis,1))
 
@@ -295,27 +242,42 @@ subroutine mix_mo_jk(j,k)
   ! by convention, the '+' |MO| is in the lowest  index (min(j,k))
   ! by convention, the '-' |MO| is in the highest index (max(j,k))
   END_DOC
-  double precision               :: array_tmp(ao_num,2),dsqrt_2
   if(j==k)then
     print*,'You want to mix two orbitals that are the same !'
     print*,'It does not make sense ... '
     print*,'Stopping ...'
     stop
   endif
-  array_tmp = 0.d0
+  double precision               :: dsqrt_2
   dsqrt_2 = 1.d0/dsqrt(2.d0)
-  do i = 1, ao_num
-    array_tmp(i,1) = dsqrt_2 * (mo_coef(i,j) + mo_coef(i,k))
-    array_tmp(i,2) = dsqrt_2 * (mo_coef(i,j) - mo_coef(i,k))
-  enddo
   i_plus = min(j,k)
   i_minus = max(j,k)
-  do i = 1, ao_num
-    mo_coef(i,i_plus) = array_tmp(i,1)
-    mo_coef(i,i_minus) = array_tmp(i,2)
-  enddo
+  if (is_complex) then
+    complex*16               :: array_tmp_c(ao_num,2)
+    array_tmp_c = (0.d0,0.d0)
+    do i = 1, ao_num
+      array_tmp_c(i,1) = dsqrt_2 * (mo_coef_complex(i,j) + mo_coef_complex(i,k))
+      array_tmp_c(i,2) = dsqrt_2 * (mo_coef_complex(i,j) - mo_coef_complex(i,k))
+    enddo
+    do i = 1, ao_num
+      mo_coef_complex(i,i_plus) = array_tmp_c(i,1)
+      mo_coef_complex(i,i_minus) = array_tmp_c(i,2)
+    enddo
+  else
+    double precision               :: array_tmp(ao_num,2)
+    array_tmp = 0.d0
+    do i = 1, ao_num
+      array_tmp(i,1) = dsqrt_2 * (mo_coef(i,j) + mo_coef(i,k))
+      array_tmp(i,2) = dsqrt_2 * (mo_coef(i,j) - mo_coef(i,k))
+    enddo
+    do i = 1, ao_num
+      mo_coef(i,i_plus) = array_tmp(i,1)
+      mo_coef(i,i_minus) = array_tmp(i,2)
+    enddo
+  endif
 
 end
+
 
 subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
   implicit none
@@ -333,13 +295,13 @@ subroutine ao_ortho_cano_to_ao(A_ao,LDA_ao,A,LDA)
 
   call dgemm('T','N', ao_num, ao_num, ao_num,                        &
       1.d0,                                                          &
-      ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1),&
       A_ao,size(A_ao,1),                                             &
       0.d0, T, size(T,1))
 
   call dgemm('N','N', ao_num, ao_num, ao_num, 1.d0,                  &
       T, size(T,1),                                                  &
-      ao_ortho_canonical_coef_inv,size(ao_ortho_canonical_coef_inv,1),&
+      ao_ortho_cano_coef_inv,size(ao_ortho_cano_coef_inv,1),&
       0.d0, A, size(A,1))
 
   deallocate(T)
