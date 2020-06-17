@@ -145,12 +145,12 @@ def convert_kpts(filename,qph5path):
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            ezfio.set_mo_one_e_ints_mo_integrals_e_n_kpts(ne_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
             
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-            ezfio.set_mo_one_e_ints_io_mo_integrals_e_n('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
       
     ##########################################
     #                                        #
@@ -331,12 +331,12 @@ def convert_cplx(filename,qph5path):
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_complex(kin_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_overlap_complex(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            ezfio.set_mo_one_e_ints_mo_integrals_e_n_complex(ne_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-            ezfio.set_mo_one_e_ints_io_mo_integrals_e_n('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
       
     ##########################################
     #                                        #

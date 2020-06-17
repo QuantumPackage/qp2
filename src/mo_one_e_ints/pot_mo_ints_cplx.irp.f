@@ -6,8 +6,8 @@ BEGIN_PROVIDER [complex*16, mo_integrals_n_e_complex, (mo_num,mo_num)]
   integer :: i,j
   
   print *, 'Providing MO N-e integrals'
-  if (read_mo_integrals_e_n) then
-    call ezfio_get_mo_one_e_ints_mo_integrals_e_n_complex(mo_integrals_n_e_complex)
+  if (read_mo_integrals_n_e) then
+    call ezfio_get_mo_one_e_ints_mo_integrals_n_e_complex(mo_integrals_n_e_complex)
     print *,  'MO N-e integrals read from disk'
   else
   print *, 'Providing MO N-e integrals from AO N-e integrals'
@@ -18,8 +18,8 @@ BEGIN_PROVIDER [complex*16, mo_integrals_n_e_complex, (mo_num,mo_num)]
         size(mo_integrals_n_e_complex,1)                          &
         )
   endif
-  if (write_mo_integrals_e_n) then
-    call ezfio_set_mo_one_e_ints_mo_integrals_e_n_complex(mo_integrals_n_e_complex)
+  if (write_mo_integrals_n_e) then
+    call ezfio_set_mo_one_e_ints_mo_integrals_n_e_complex(mo_integrals_n_e_complex)
     print *,  'MO N-e integrals written to disk'
   endif
 
@@ -39,8 +39,8 @@ BEGIN_PROVIDER [complex*16, mo_integrals_n_e_kpts, (mo_num_per_kpt,mo_num_per_kp
   integer :: i,j
   
   print *, 'Providing MO N-e integrals'
-  if (read_mo_integrals_e_n) then
-    call ezfio_get_mo_one_e_ints_mo_integrals_e_n_kpts(mo_integrals_n_e_kpts)
+  if (read_mo_integrals_n_e) then
+    call ezfio_get_mo_one_e_ints_mo_integrals_n_e_kpts(mo_integrals_n_e_kpts)
     print *,  'MO N-e integrals read from disk'
   else
   print *, 'Providing MO N-e integrals from AO N-e integrals'
@@ -51,8 +51,8 @@ BEGIN_PROVIDER [complex*16, mo_integrals_n_e_kpts, (mo_num_per_kpt,mo_num_per_kp
         size(mo_integrals_n_e_kpts,1)                          &
         )
   endif
-  if (write_mo_integrals_e_n) then
-    call ezfio_set_mo_one_e_ints_mo_integrals_e_n_kpts(mo_integrals_n_e_kpts)
+  if (write_mo_integrals_n_e) then
+    call ezfio_set_mo_one_e_ints_mo_integrals_n_e_kpts(mo_integrals_n_e_kpts)
     print *,  'MO N-e integrals written to disk'
   endif
 

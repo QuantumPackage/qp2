@@ -19,7 +19,7 @@ subroutine huckel_guess_complex
     enddo
     A(j,j) = ao_one_e_integrals_diag_complex(j) + dble(ao_two_e_integral_alpha_complex(j,j))
     if (dabs(dimag(ao_two_e_integral_alpha_complex(j,j))) .gt. 1.0d-10) then
-      stop 'diagonal elements of ao_bi_elec_integral_alpha should be real'
+      stop 'diagonal elements of ao_two_e_integral_alpha should be real'
     endif
   enddo
 
@@ -67,7 +67,7 @@ subroutine huckel_guess_kpts
       enddo
       A(j,j) = ao_one_e_integrals_diag_kpts(j,k) + dble(ao_two_e_integral_alpha_kpts(j,j,k))
       if (dabs(dimag(ao_two_e_integral_alpha_kpts(j,j,k))) .gt. 1.0d-10) then
-        stop 'diagonal elements of ao_bi_elec_integral_alpha should be real'
+        stop 'diagonal elements of ao_two_e_integral_alpha should be real'
       endif
     enddo
 
