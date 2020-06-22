@@ -39,6 +39,47 @@ BEGIN_PROVIDER [ integer, mo_num ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, mo_num_per_kpt ]
+  implicit none
+  BEGIN_DOC
+  ! Number of MOs per kpt
+  END_DOC
+
+  logical                        :: has
+  PROVIDE ezfio_filename
+  if (mpi_master) then
+    call ezfio_has_mo_basis_mo_num_per_kpt(has)
+  endif
+  IRP_IF MPI_DEBUG
+    print *,  irp_here, mpi_rank
+    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  IRP_ENDIF
+  IRP_IF MPI
+    include 'mpif.h'
+    integer                        :: ierr
+    call MPI_BCAST( has, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+    if (ierr /= MPI_SUCCESS) then
+      stop 'Unable to read mo_num_per_kpt with MPI'
+    endif
+  IRP_ENDIF
+  if (.not.has) then
+    mo_num_per_kpt = ao_ortho_canonical_num_per_kpt_max
+  else
+    if (mpi_master) then
+      call ezfio_get_mo_basis_mo_num_per_kpt(mo_num_per_kpt)
+    endif
+    IRP_IF MPI
+      call MPI_BCAST( mo_num_per_kpt, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+      if (ierr /= MPI_SUCCESS) then
+        stop 'Unable to read mo_num_per_kpt with MPI'
+      endif
+    IRP_ENDIF
+  endif
+  call write_int(6,mo_num_per_kpt,'mo_num_per_kpt')
+  ASSERT (mo_num_per_kpt > 0)
+
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   implicit none

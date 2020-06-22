@@ -34,6 +34,8 @@ def convert_kpts(filename,qph5path):
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
+    ezfio.set_ao_basis_ao_num_per_kpt(ao_num//kpt_num)
+    ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
     

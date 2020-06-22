@@ -441,8 +441,8 @@ END_PROVIDER
       !$OMP PRIVATE(j,k,k_a,k_b,l,m,occ,ck, cl, ckl,phase,h1,h2,p1,p2,s1,s2, degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2,ih1,ip1,kh1,kp1,kk,&
       !$OMP  tmp_det_kpts,k_shft,ii)&
-      !$OMP SHARED(psi_det,psi_coef_complex,N_int,N_states,elec_alpha_num_kpts,  &
-      !$OMP  elec_beta_num_kpts,one_e_dm_mo_alpha_kpts,one_e_dm_mo_beta_kpts,N_det,&
+      !$OMP SHARED(psi_det,psi_coef_complex,N_int,N_states,  &
+      !$OMP  one_e_dm_mo_alpha_kpts,one_e_dm_mo_beta_kpts,N_det,&
       !$OMP  mo_num_per_kpt,psi_bilinear_matrix_rows,psi_bilinear_matrix_columns,&
       !$OMP  psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns,&
       !$OMP  psi_bilinear_matrix_order_reverse, psi_det_alpha_unique, psi_det_beta_unique,&
