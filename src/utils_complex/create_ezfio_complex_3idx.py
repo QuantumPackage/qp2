@@ -72,6 +72,8 @@ def convert_kpts(filename,qph5path):
     
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
+    if isinstance(nucl_label[0],bytes):
+        nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
     
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
@@ -260,6 +262,8 @@ def convert_cplx(filename,qph5path):
     
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
+    if isinstance(nucl_label[0],bytes):
+        nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
     
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
