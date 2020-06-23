@@ -12,7 +12,7 @@ BEGIN_PROVIDER [complex*16, ao_ortho_lowdin_coef_complex, (ao_num,ao_num)]
   do j=1, ao_num
     tmp_matrix(j,j) = (1.d0,0.d0)
   enddo
-  call ortho_lowdin_complex(ao_overlap_complex,ao_num,ao_num,tmp_matrix,ao_num,ao_num)
+  call ortho_lowdin_complex(ao_overlap_complex,ao_num,ao_num,tmp_matrix,ao_num,ao_num,lin_dep_cutoff)
   do i=1, ao_num
     do j=1, ao_num
       ao_ortho_lowdin_coef_complex(j,i) = tmp_matrix(i,j)
@@ -68,7 +68,7 @@ BEGIN_PROVIDER [complex*16, ao_ortho_lowdin_coef_kpts, (ao_num_per_kpt,ao_num_pe
     do j=1, ao_num
       tmp_matrix(j,j) = (1.d0,0.d0)
     enddo
-    call ortho_lowdin_complex(ao_overlap_kpts(:,:,k),ao_num_per_kpt,ao_num_per_kpt,tmp_matrix,ao_num_per_kpt,ao_num_per_kpt)
+    call ortho_lowdin_complex(ao_overlap_kpts(:,:,k),ao_num_per_kpt,ao_num_per_kpt,tmp_matrix,ao_num_per_kpt,ao_num_per_kpt,lin_dep_cutoff)
     do i=1, ao_num_per_kpt
       do j=1, ao_num_per_kpt
         ao_ortho_lowdin_coef_kpts(j,i,k) = tmp_matrix(i,j)

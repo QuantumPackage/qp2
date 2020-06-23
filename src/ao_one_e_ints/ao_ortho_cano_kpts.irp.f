@@ -135,7 +135,7 @@ END_PROVIDER
     do k=1,kpt_num
       call ortho_canonical_complex(ao_overlap_kpts(:,:,k),size(ao_overlap_kpts,1), &
         ao_num_per_kpt,ao_ortho_canonical_coef_kpts(:,:,k),size(ao_ortho_canonical_coef_kpts,1), &
-        ao_ortho_canonical_num_per_kpt(k))
+        ao_ortho_canonical_num_per_kpt(k),lin_dep_cutoff)
     enddo
 
 
@@ -152,7 +152,7 @@ END_PROVIDER
 
       ao_ortho_canonical_num_per_kpt(k) = ao_cart_to_sphe_num_per_kpt
       call ortho_canonical_complex(ao_cart_to_sphe_overlap_kpts, size(ao_cart_to_sphe_overlap_kpts,1), &
-        ao_cart_to_sphe_num_per_kpt, S, size(S,1), ao_ortho_canonical_num_per_kpt(k))
+        ao_cart_to_sphe_num_per_kpt, S, size(S,1), ao_ortho_canonical_num_per_kpt(k),lin_dep_cutoff)
 
       call zgemm('N','N', ao_num_per_kpt, ao_ortho_canonical_num_per_kpt(k), ao_cart_to_sphe_num_per_kpt, (1.d0,0.d0), &
         ao_cart_to_sphe_coef_kpts, size(ao_cart_to_sphe_coef_kpts,1), &

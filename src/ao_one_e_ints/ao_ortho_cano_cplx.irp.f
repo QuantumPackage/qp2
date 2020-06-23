@@ -68,7 +68,7 @@ END_PROVIDER
     ao_ortho_canonical_num_complex = ao_num
     call ortho_canonical_complex(ao_overlap,size(ao_overlap,1), &
       ao_num,ao_ortho_canonical_coef_complex,size(ao_ortho_canonical_coef_complex,1), &
-      ao_ortho_canonical_num_complex)
+      ao_ortho_canonical_num_complex,lin_dep_cutoff)
 
 
   else
@@ -83,7 +83,7 @@ END_PROVIDER
 
     ao_ortho_canonical_num_complex = ao_cart_to_sphe_num
     call ortho_canonical_complex(ao_cart_to_sphe_overlap_complex, size(ao_cart_to_sphe_overlap_complex,1), &
-      ao_cart_to_sphe_num, S, size(S,1), ao_ortho_canonical_num_complex)
+      ao_cart_to_sphe_num, S, size(S,1), ao_ortho_canonical_num_complex,lin_dep_cutoff)
 
     call zgemm('N','N', ao_num, ao_ortho_canonical_num_complex, ao_cart_to_sphe_num, (1.d0,0.d0), &
       ao_cart_to_sphe_coef_complex, size(ao_cart_to_sphe_coef_complex,1), &

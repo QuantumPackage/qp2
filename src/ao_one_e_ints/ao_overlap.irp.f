@@ -218,7 +218,7 @@ BEGIN_PROVIDER [ complex*16, S_inv_kpts,(ao_num_per_kpt,ao_num_per_kpt,kpt_num) 
  integer :: k
  do k=1,kpt_num
   call get_pseudo_inverse_complex(ao_overlap_kpts(1,1,k), &
-     size(ao_overlap_kpts,1),ao_num_per_kpt,ao_num_per_kpt,S_inv_kpts(1,1,k),size(S_inv_kpts,1))
+     size(ao_overlap_kpts,1),ao_num_per_kpt,ao_num_per_kpt,S_inv_kpts(1,1,k),size(S_inv_kpts,1),lin_dep_cutoff)
  enddo
 END_PROVIDER
 
