@@ -520,7 +520,9 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
       h1 = hole_list(i1,s1)
 !todo: kpts
-      kh1 = (h1-1)/mo_num_per_kpt + 1
+      if (is_complex) then
+        kh1 = (h1-1)/mo_num_per_kpt + 1
+      endif
       ! pmask is i_generator det with bit at h1 set to zero
       call apply_hole(psi_det_generators(1,1,i_generator), s1,h1, pmask, ok, N_int)
 
