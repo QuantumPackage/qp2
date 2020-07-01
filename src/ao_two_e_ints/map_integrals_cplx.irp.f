@@ -406,6 +406,10 @@ subroutine get_ao_two_e_integrals_non_zero_complex(j,k,l,sze,out_val,out_val_ind
   integer, intent(out)           :: out_val_index(sze),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i
 !  integer(key_kind)              :: hash
@@ -455,6 +459,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl_complex(j,l,thresh,sze_max,sze,out
   integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i,k
 !  integer(key_kind)              :: hash
@@ -507,6 +515,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list_complex(j,l,thresh,list,
   integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i,k
 !  integer(key_kind)              :: hash
