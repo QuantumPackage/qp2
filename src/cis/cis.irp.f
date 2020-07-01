@@ -77,8 +77,13 @@ subroutine run
   endif
 
   call ezfio_set_cis_energy(CI_energy)
-  psi_coef = ci_eigenvectors
-  SOFT_TOUCH psi_coef
+  if (is_complex) then
+    psi_coef_complex = ci_eigenvectors_complex
+    SOFT_TOUCH psi_coef_complex
+  else
+    psi_coef = ci_eigenvectors
+    SOFT_TOUCH psi_coef
+  endif
   call save_wavefunction
 
 end
