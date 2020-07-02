@@ -167,7 +167,7 @@ subroutine H_apply_cis_kpts()
   integer                        :: i_generator
   double precision               :: wall_0, wall_1
   integer(bit_kind), allocatable :: mask(:,:,:)
-  integer(bit_kind), allocatable :: mask_kpts(:,:,:)
+  integer(bit_kind), allocatable :: mask_kpts(:,:,:,:)
   integer                        :: kk
   integer                        :: ispin, k
   integer                        :: iproc
@@ -459,7 +459,7 @@ subroutine H_apply_cis_sym_kpts()
   integer                        :: i_generator
   double precision               :: wall_0, wall_1
   integer(bit_kind), allocatable :: mask(:,:,:)
-  integer(bit_kind), allocatable :: mask_kpts(:,:,:)
+  integer(bit_kind), allocatable :: mask_kpts(:,:,:,:)
   integer                        :: kk
   integer                        :: ispin, k
   integer                        :: iproc
@@ -487,11 +487,11 @@ subroutine H_apply_cis_sym_kpts()
     do kk=1,kpt_num
     do ispin=1,2
       do k=1,N_int
-        mask(k,ispin,d_hole2) =                                      &
-            iand(generators_bitmask(k,ispin,d_hole2),  &
+        mask_kpts(k,ispin,d_hole2,kk) =                                      &
+            iand(generators_bitmask_kpts(k,ispin,d_hole2,kk),  &
             psi_det_generators(k,ispin,i_generator) )
-        mask(k,ispin,d_part2) =                                      &
-            iand(generators_bitmask(k,ispin,d_part2),  &
+        mask_kpts(k,ispin,d_part2,kk) =                                      &
+            iand(generators_bitmask_kpts(k,ispin,d_part2,kk),  &
             not(psi_det_generators(k,ispin,i_generator)) )
        ! mask_kpts(k,ispin,d_hole1,kk) =                                      &
        !     iand(generators_bitmask_kpts(k,ispin,d_hole1,kk),  &
