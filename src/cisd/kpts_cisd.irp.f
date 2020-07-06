@@ -587,17 +587,17 @@ subroutine H_apply_cisd_kpts()
     enddo
     if(.True.)then
       do kh1=1,kpt_num
-        do kh2=1,kh1
+        do kh2=1,kpt_num
           do kp1=1,kpt_num
             kp2=kconserv(kh1,kh2,kp1)
-            print*,'kh1h2p1p1',kh1,kh2,kp1,kp2
-            print*,'size_before: ',h_apply_buffer(iproc)%n_det
+            !print*,'kh1h2p1p1',kh1,kh2,kp1,kp2
+            !print*,'size_before: ',h_apply_buffer(iproc)%n_det
      call H_apply_cisd_kpts_diexc(psi_det_generators(1,1,i_generator),      &
          psi_det_generators(1,1,1),                                   &
          mask_kpts(1,1,d_hole1,kh1), mask_kpts(1,1,d_part1,kp1),                        &
          mask_kpts(1,1,d_hole2,kh2), mask_kpts(1,1,d_part2,kp2),                        &
          fock_diag_tmp, i_generator, iproc )
-            print*,'size_after: ',h_apply_buffer(iproc)%n_det
+            !print*,'size_after: ',h_apply_buffer(iproc)%n_det
           enddo
         enddo
       enddo
