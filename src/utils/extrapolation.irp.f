@@ -23,7 +23,7 @@ subroutine extrapolate_data(N_data, data, pt2, output)
     x(i,2) = pt2_rev(i)
   enddo
   do ifit=2,N_data
-    call get_pseudo_inverse(x,size(x,1),ifit,2,x_inv,size(x_inv,1))
+    call get_pseudo_inverse(x,size(x,1),ifit,2,x_inv,size(x_inv,1),1.d-10)
     ab = matmul(x_inv(1:2,1:ifit),y(1:ifit))
     output(ifit) = ab(1)
   enddo

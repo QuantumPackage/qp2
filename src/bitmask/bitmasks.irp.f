@@ -343,43 +343,45 @@ END_PROVIDER
 
 
 
-!BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask, (N_int,2,6) ]
-!  implicit none
-!  BEGIN_DOC
-!  ! Bitmasks for generator determinants.
-!  ! (N_int, alpha/beta, hole/particle, generator).
-!  !
-!  ! 3rd index is :
-!  !
-!  ! * 1 : hole     for single exc
-!  !
-!  ! * 2 : particle for single exc
-!  !
-!  ! * 3 : hole     for 1st exc of double
-!  !
-!  ! * 4 : particle for 1st exc of double
-!  !
-!  ! * 5 : hole     for 2nd exc of double
-!  !
-!  ! * 6 : particle for 2nd exc of double
-!  !
-!  END_DOC
-!  logical                        :: exists
-!  PROVIDE ezfio_filename full_ijkl_bitmask 
-!  
-!  integer                        :: ispin, i
-!  do ispin=1,2
-!      do i=1,N_int
-!        generators_bitmask(i,ispin,s_hole ) = reunion_of_inact_act_bitmask(i,ispin)
-!        generators_bitmask(i,ispin,s_part ) = reunion_of_act_virt_bitmask(i,ispin)
-!        generators_bitmask(i,ispin,d_hole1) = reunion_of_inact_act_bitmask(i,ispin)
-!        generators_bitmask(i,ispin,d_part1) = reunion_of_act_virt_bitmask(i,ispin)
-!        generators_bitmask(i,ispin,d_hole2) = reunion_of_inact_act_bitmask(i,ispin)
-!        generators_bitmask(i,ispin,d_part2) = reunion_of_act_virt_bitmask(i,ispin)
-!      enddo
-!  enddo
-!  
-!END_PROVIDER
+BEGIN_PROVIDER [ integer(bit_kind), generators_bitmask_kpts, (N_int,2,6,kpt_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Bitmasks for generator determinants.
+  ! (N_int, alpha/beta, hole/particle, generator).
+  !
+  ! 3rd index is :
+  !
+  ! * 1 : hole     for single exc
+  !
+  ! * 2 : particle for single exc
+  !
+  ! * 3 : hole     for 1st exc of double
+  !
+  ! * 4 : particle for 1st exc of double
+  !
+  ! * 5 : hole     for 2nd exc of double
+  !
+  ! * 6 : particle for 2nd exc of double
+  !
+  END_DOC
+  logical                        :: exists
+  PROVIDE ezfio_filename full_ijkl_bitmask 
+  
+  integer                        :: ispin, i, k
+  do k=1,kpt_num
+      do ispin=1,2
+          do i=1,N_int
+            generators_bitmask_kpts(i,ispin,s_hole ,k) = reunion_of_inact_act_bitmask_kpts(i,ispin,k)
+            generators_bitmask_kpts(i,ispin,s_part ,k) = reunion_of_act_virt_bitmask_kpts(i,ispin,k)
+            generators_bitmask_kpts(i,ispin,d_hole1,k) = reunion_of_inact_act_bitmask_kpts(i,ispin,k)
+            generators_bitmask_kpts(i,ispin,d_part1,k) = reunion_of_act_virt_bitmask_kpts(i,ispin,k)
+            generators_bitmask_kpts(i,ispin,d_hole2,k) = reunion_of_inact_act_bitmask_kpts(i,ispin,k)
+            generators_bitmask_kpts(i,ispin,d_part2,k) = reunion_of_act_virt_bitmask_kpts(i,ispin,k)
+          enddo
+      enddo
+  enddo
+  
+END_PROVIDER
 
 BEGIN_PROVIDER [ integer(bit_kind), reunion_of_core_inact_bitmask_kpts, (N_int,2,kpt_num)]
   implicit none

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 Save the .o from a .f90
 and is the .o is asked a second time, retur it
@@ -13,9 +13,9 @@ import re
 import shutil
 import subprocess
 
-r = re.compile(ur'-c\s+(\S+\.[fF]90)\s+-o\s+(\S+\.o)')
-p = re.compile(ur'-I IRPF90_temp/\S*\s+')
-mod = re.compile(ur'module\s+(?P<mod>\S+).+end\s?module\s+(?P=mod)?',
+r = re.compile(r'-c\s+(\S+\.[fF]90)\s+-o\s+(\S+\.o)')
+p = re.compile(r'-I IRPF90_temp/\S*\s+')
+mod = re.compile(r'module\s+(?P<mod>\S+).+end\s?module\s+(?P=mod)?',
                  re.MULTILINE | re.IGNORECASE)
 
 tmpdir_root = os.environ.get("TMPDIR", failobj="/dev/shm")

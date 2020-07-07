@@ -18,89 +18,89 @@ double precision function ao_two_e_integral(i,j,k,l)
 
    if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
      ao_two_e_integral = ao_two_e_integral_schwartz_accel(i,j,k,l)
-     return
-   endif
+   else
 
-  dim1 = n_pt_max_integrals
+    dim1 = n_pt_max_integrals
 
-  num_i = ao_nucl(i)
-  num_j = ao_nucl(j)
-  num_k = ao_nucl(k)
-  num_l = ao_nucl(l)
-  ao_two_e_integral = 0.d0
+    num_i = ao_nucl(i)
+    num_j = ao_nucl(j)
+    num_k = ao_nucl(k)
+    num_l = ao_nucl(l)
+    ao_two_e_integral = 0.d0
 
-  if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
-    do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
-      I_center(p) = nucl_coord(num_i,p)
-      J_center(p) = nucl_coord(num_j,p)
-      K_center(p) = nucl_coord(num_k,p)
-      L_center(p) = nucl_coord(num_l,p)
-    enddo
+    if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
+      do p = 1, 3
+        I_power(p) = ao_power(i,p)
+        J_power(p) = ao_power(j,p)
+        K_power(p) = ao_power(k,p)
+        L_power(p) = ao_power(l,p)
+        I_center(p) = nucl_coord(num_i,p)
+        J_center(p) = nucl_coord(num_j,p)
+        K_center(p) = nucl_coord(num_k,p)
+        L_center(p) = nucl_coord(num_l,p)
+      enddo
 
-    double precision               :: coef1, coef2, coef3, coef4
-    double precision               :: p_inv,q_inv
-    double precision               :: general_primitive_integral
+      double precision               :: coef1, coef2, coef3, coef4
+      double precision               :: p_inv,q_inv
+      double precision               :: general_primitive_integral
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
-        call give_explicit_poly_and_gaussian(P_new,P_center,pp,fact_p,iorder_p,&
-            ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),                 &
-            I_power,J_power,I_center,J_center,dim1)
-        p_inv = 1.d0/pp
-        do r = 1, ao_prim_num(k)
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
-            call give_explicit_poly_and_gaussian(Q_new,Q_center,qq,fact_q,iorder_q,&
-                ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),             &
-                K_power,L_power,K_center,L_center,dim1)
-            q_inv = 1.d0/qq
-            integral = general_primitive_integral(dim1,              &
-                P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
-                Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
-            ao_two_e_integral = ao_two_e_integral +  coef4 * integral
-          enddo ! s
-        enddo  ! r
-      enddo   ! q
-    enddo    ! p
+      do p = 1, ao_prim_num(i)
+        coef1 = ao_coef_normalized_ordered_transp(p,i)
+        do q = 1, ao_prim_num(j)
+          coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+          call give_explicit_poly_and_gaussian(P_new,P_center,pp,fact_p,iorder_p,&
+              ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),                 &
+              I_power,J_power,I_center,J_center,dim1)
+          p_inv = 1.d0/pp
+          do r = 1, ao_prim_num(k)
+            coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
+            do s = 1, ao_prim_num(l)
+              coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+              call give_explicit_poly_and_gaussian(Q_new,Q_center,qq,fact_q,iorder_q,&
+                  ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),             &
+                  K_power,L_power,K_center,L_center,dim1)
+              q_inv = 1.d0/qq
+              integral = general_primitive_integral(dim1,              &
+                  P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
+                  Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
+              ao_two_e_integral = ao_two_e_integral +  coef4 * integral
+            enddo ! s
+          enddo  ! r
+        enddo   ! q
+      enddo    ! p
 
-  else
+    else
 
-    do p = 1, 3
-      I_power(p) = ao_power(i,p)
-      J_power(p) = ao_power(j,p)
-      K_power(p) = ao_power(k,p)
-      L_power(p) = ao_power(l,p)
-    enddo
-    double  precision              :: ERI
+      do p = 1, 3
+        I_power(p) = ao_power(i,p)
+        J_power(p) = ao_power(j,p)
+        K_power(p) = ao_power(k,p)
+        L_power(p) = ao_power(l,p)
+      enddo
+      double  precision              :: ERI
 
-    do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_normalized_ordered_transp(p,i)
-      do q = 1, ao_prim_num(j)
-        coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
-        do r = 1, ao_prim_num(k)
-          coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
-          do s = 1, ao_prim_num(l)
-            coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
-            integral = ERI(                                          &
-                ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
-                I_power(1),J_power(1),K_power(1),L_power(1),         &
-                I_power(2),J_power(2),K_power(2),L_power(2),         &
-                I_power(3),J_power(3),K_power(3),L_power(3))
-            ao_two_e_integral = ao_two_e_integral + coef4 * integral
-          enddo ! s
-        enddo  ! r
-      enddo   ! q
-    enddo    ! p
+      do p = 1, ao_prim_num(i)
+        coef1 = ao_coef_normalized_ordered_transp(p,i)
+        do q = 1, ao_prim_num(j)
+          coef2 = coef1*ao_coef_normalized_ordered_transp(q,j)
+          do r = 1, ao_prim_num(k)
+            coef3 = coef2*ao_coef_normalized_ordered_transp(r,k)
+            do s = 1, ao_prim_num(l)
+              coef4 = coef3*ao_coef_normalized_ordered_transp(s,l)
+              integral = ERI(                                          &
+                  ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l),&
+                  I_power(1),J_power(1),K_power(1),L_power(1),         &
+                  I_power(2),J_power(2),K_power(2),L_power(2),         &
+                  I_power(3),J_power(3),K_power(3),L_power(3))
+              ao_two_e_integral = ao_two_e_integral + coef4 * integral
+            enddo ! s
+          enddo  ! r
+        enddo   ! q
+      enddo    ! p
+
+    endif
 
   endif
-
 end
 
 double precision function ao_two_e_integral_schwartz_accel(i,j,k,l)
@@ -300,22 +300,17 @@ subroutine compute_ao_two_e_integrals(j,k,l,sze,buffer_value)
   double precision               :: ao_two_e_integral
 
   integer                        :: i
+  logical, external              :: ao_one_e_integral_zero
+  logical, external              :: ao_two_e_integral_zero
 
-  if (ao_overlap_abs(j,l) < thresh) then
-    buffer_value = 0._integral_kind
-    return
-  endif
-  if (ao_two_e_integral_schwartz(j,l) < thresh ) then
+
+  if (ao_one_e_integral_zero(j,l)) then
     buffer_value = 0._integral_kind
     return
   endif
 
   do i = 1, ao_num
-    if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < thresh) then
-      buffer_value(i) = 0._integral_kind
-      cycle
-    endif
-    if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thresh ) then
+    if (ao_two_e_integral_zero(i,j,k,l)) then
       buffer_value(i) = 0._integral_kind
       cycle
     endif
@@ -348,7 +343,6 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
-
   double precision               :: map_mb
   PROVIDE read_ao_two_e_integrals io_ao_two_e_integrals
   if (is_complex) then
@@ -370,20 +364,22 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
     endif
 
   else
-    if (read_ao_two_e_integrals) then
-      print*,'Reading the AO integrals'
-      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-      print*, 'AO integrals provided'
-      ao_two_e_integrals_in_map = .True.
-      return
-    endif
-  
-    integral = ao_two_e_integral(1,1,1,1)
+  if (read_ao_two_e_integrals) then
+    print*,'Reading the AO integrals'
+    call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
+    print*, 'AO integrals provided'
+    ao_two_e_integrals_in_map = .True.
+  else
+
     print*, 'Providing the AO integrals'
     call wall_time(wall_0)
     call wall_time(wall_1)
     call cpu_time(cpu_1)
-  
+
+    if (.True.) then
+      ! Avoid openMP
+      integral = ao_two_e_integral(1,1,1,1)
+    endif
     integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'ao_integrals')
   
@@ -398,12 +394,12 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
       endif
     enddo
     deallocate(task)
-  
+
     integer, external :: zmq_set_running
     if (zmq_set_running(zmq_to_qp_run_socket) == -1) then
       print *,  irp_here, ': Failed in zmq_set_running'
     endif
-  
+
     PROVIDE nproc
     !$OMP PARALLEL DEFAULT(shared) private(i) num_threads(nproc+1)
         i = omp_get_thread_num()
@@ -413,30 +409,32 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
           call ao_two_e_integrals_in_map_slave_inproc(i)
         endif
     !$OMP END PARALLEL
-  
+
     call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'ao_integrals')
-  
-  
+
+
     print*, 'Sorting the map'
     call map_sort(ao_integrals_map)
     call cpu_time(cpu_2)
     call wall_time(wall_2)
     integer(map_size_kind)         :: get_ao_map_size, ao_map_size
     ao_map_size = get_ao_map_size()
-  
+
     print*, 'AO integrals provided:'
     print*, ' Size of AO map :         ', map_mb(ao_integrals_map) ,'MB'
     print*, ' Number of AO integrals :', ao_map_size
     print*, ' cpu  time :',cpu_2 - cpu_1, 's'
     print*, ' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1+tiny(1.d0)), ' )'
-  
+
     ao_two_e_integrals_in_map = .True.
-  
+
     if (write_ao_two_e_integrals.and.mpi_master) then
       call ezfio_set_work_empty(.False.)
       call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
       call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
     endif
+
+  endif
   endif
 END_PROVIDER
 
@@ -1192,6 +1190,7 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
   double precision               :: integral, wall_0
   double precision               :: thr
   integer                        :: kk, m, j1, i1
+  logical, external :: ao_two_e_integral_zero
 
   thr = ao_integrals_threshold
 
@@ -1208,10 +1207,7 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
       if (i1 > j1) then
         exit
       endif
-      if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < thr) then
-        cycle
-      endif
-      if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < thr ) then
+      if (ao_two_e_integral_zero(i,j,k,l)) then
         cycle
       endif
       !DIR$ FORCEINLINE

@@ -38,7 +38,7 @@ let dummy_centers ~threshold ~molecule ~nuclei =
   | _ -> assert false
   in
   aux [] (n-1,n-1)
-  |> List.map (fun (i,x,j,y,r) ->
+  |> list_map (fun (i,x,j,y,r) ->
     let f =
       x /. (x +. y)
     in
@@ -270,7 +270,7 @@ let run ?o b au c d m p cart xyz_file =
 
       (* Write Pseudo *)
       let pseudo =
-        List.map (fun x ->
+        list_map (fun x ->
             match pseudo_channel x.Atom.element with
             | Some channel -> Pseudo.read_element channel x.Atom.element
             | None -> Pseudo.empty x.Atom.element
@@ -292,7 +292,7 @@ let run ?o b au c d m p cart xyz_file =
             |> Elec_beta_number.of_int;
           Molecule.nuclei =
             let charges =
-              List.map (fun x -> Positive_int.to_int x.Pseudo.n_elec
+              list_map (fun x -> Positive_int.to_int x.Pseudo.n_elec
                 |> Float.of_int) pseudo 
               |> Array.of_list
             in
@@ -315,13 +315,13 @@ let run ?o b au c d m p cart xyz_file =
 
       (* Write Nuclei *)
       let labels =
-        List.map (fun x->Element.to_string x.Atom.element) nuclei
+        list_map (fun x->Element.to_string x.Atom.element) nuclei
       and charges =
-        List.map (fun x-> Atom.(Charge.to_float x.charge)) nuclei
+        list_map (fun x-> Atom.(Charge.to_float x.charge)) nuclei
       and coords  =
-        (List.map (fun x-> x.Atom.coord.Point3d.x) nuclei) @
-        (List.map (fun x-> x.Atom.coord.Point3d.y) nuclei) @
-        (List.map (fun x-> x.Atom.coord.Point3d.z) nuclei) in
+        (list_map (fun x-> x.Atom.coord.Point3d.x) nuclei) @
+        (list_map (fun x-> x.Atom.coord.Point3d.y) nuclei) @
+        (list_map (fun x-> x.Atom.coord.Point3d.z) nuclei) in
       let nucl_num = (List.length labels) in
       Ezfio.set_nuclei_nucl_num nucl_num ;
       Ezfio.set_nuclei_nucl_label (Ezfio.ezfio_array_of_list
@@ -365,7 +365,7 @@ let run ?o b au c d m p cart xyz_file =
 
      let kmax =
         Array.init (lmax+1) (fun i->
-            List.map (fun x ->
+            list_map (fun x ->
                 List.filter (fun (y,_) ->
                     (Positive_int.to_int y.Pseudo.GaussianPrimitive_non_local.proj) = i)
                   x.Pseudo.non_local 
@@ -478,7 +478,7 @@ let run ?o b au c d m p cart xyz_file =
         in
         let result = do_work [] 1  nuclei
         |> List.rev
-        |> List.map (fun (x,i) ->
+        |> list_map (fun (x,i) ->
           try
             let e =
               match x.Atom.element with
@@ -512,30 +512,30 @@ let run ?o b au c d m p cart xyz_file =
       let ao_num = List.length long_basis in
       Ezfio.set_ao_basis_ao_num ao_num;
       Ezfio.set_ao_basis_ao_basis b;
-      let ao_prim_num = List.map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
-      and ao_nucl = List.map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
+      let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
+      and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
       and ao_power=
-        let l = List.map (fun (x,_,_) -> x) long_basis in
-        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) l)@
-        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) l)@
-        (List.map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) l)
+        let l = list_map (fun (x,_,_) -> x) long_basis in
+        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) l)@
+        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) l)@
+        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) l)
       in
       let ao_prim_num_max = List.fold_left (fun s x ->
         if x > s then x
         else s) 0 ao_prim_num
       in
       let gtos =
-        List.map (fun (_,x,_) -> x) long_basis 
+        list_map (fun (_,x,_) -> x) long_basis 
       in
 
       let create_expo_coef ec =
           let coefs =
             begin match ec with
-            | `Coefs -> List.map (fun x->
-              List.map (fun (_,coef) ->
+            | `Coefs -> list_map (fun x->
+              list_map (fun (_,coef) ->
                 AO_coef.to_float coef) x.Gto.lc) gtos 
-            | `Expos -> List.map (fun x->
-              List.map (fun (prim,_) -> AO_expo.to_float
+            | `Expos -> list_map (fun x->
+              list_map (fun (prim,_) -> AO_expo.to_float
               prim.GaussianPrimitive.expo) x.Gto.lc) gtos 
             end
           in

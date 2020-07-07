@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import os
 
@@ -105,7 +105,6 @@ class H_apply(object):
     s["do_mono_excitations"] = d[do_mono_exc]
     s["do_double_excitations"] = d[do_double_exc]
     s["keys_work"]  += "call fill_H_apply_buffer_no_selection(key_idx,keys_out,N_int,iproc)"
-
     s["filter_integrals"] = "array_pairs = .True."
     if SingleRef:
       s["filter_integrals"] = """
@@ -131,9 +130,15 @@ class H_apply(object):
   !$OMP END PARALLEL
 
   call dsort(H_jj,iorder,N_det)
-  do k=1,N_states
-    psi_coef(iorder(k),k) = 1.d0
-  enddo
+  if (is_complex) then
+    do k=1,N_states
+      psi_coef_complex(iorder(k),k) = (1.d0,0.d0)
+    enddo
+  else
+    do k=1,N_states
+      psi_coef(iorder(k),k) = 1.d0
+    enddo
+  endif
   deallocate(H_jj,iorder)
     """
 
@@ -142,7 +147,11 @@ class H_apply(object):
   if (s2_eig) then
     call make_s2_eigenfunction
   endif
-  SOFT_TOUCH psi_det psi_coef N_det
+  if (is_complex) then
+    SOFT_TOUCH psi_det psi_coef_complex N_det
+  else
+    SOFT_TOUCH psi_det psi_coef N_det
+  endif
 """
     s["printout_now"]   = """write(6,*)  &
        100.*float(i_generator)/float(N_det_generators), '% in ', wall_1-wall_0, 's'"""
@@ -156,7 +165,7 @@ class H_apply(object):
 
   def __repr__(self):
     buffer = self.template
-    for key,value in self.data.items():
+    for key,value in list(self.data.items()):
       buffer = buffer.replace('$'+key, value)
     return buffer
 

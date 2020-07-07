@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import os
 from qp_path import QP_SRC
@@ -7,7 +7,7 @@ Pert_dir = os.path.join(QP_SRC,"perturbation")
 
 perturbations = []
 
-for filename in filter(lambda x: x.endswith(".irp.f"), os.listdir(Pert_dir)):
+for filename in [x for x in os.listdir(Pert_dir) if x.endswith(".irp.f")]:
 
   filename = os.path.join(Pert_dir,filename)
   file = open(filename,'r')
@@ -22,6 +22,6 @@ for filename in filter(lambda x: x.endswith(".irp.f"), os.listdir(Pert_dir)):
 
 
 if __name__ == '__main__':
-  print 'Perturbations:'
+  print('Perturbations:')
   for k in perturbations:
-    print '* ', k
+    print('* ', k)

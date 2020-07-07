@@ -34,6 +34,8 @@ def convert_kpts(filename,qph5path):
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
+    ezfio.set_ao_basis_ao_num_per_kpt(ao_num//kpt_num)
+    ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
     
@@ -70,6 +72,8 @@ def convert_kpts(filename,qph5path):
     
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
+    if isinstance(nucl_label[0],bytes):
+        nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
     
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
@@ -145,12 +149,12 @@ def convert_kpts(filename,qph5path):
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            ezfio.set_mo_one_e_ints_mo_integrals_e_n_kpts(ne_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
             
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-            ezfio.set_mo_one_e_ints_io_mo_integrals_e_n('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
       
     ##########################################
     #                                        #
@@ -258,6 +262,8 @@ def convert_cplx(filename,qph5path):
     
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
+    if isinstance(nucl_label[0],bytes):
+        nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
     
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
@@ -331,12 +337,12 @@ def convert_cplx(filename,qph5path):
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_complex(kin_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_overlap_complex(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            ezfio.set_mo_one_e_ints_mo_integrals_e_n_complex(ne_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-            ezfio.set_mo_one_e_ints_io_mo_integrals_e_n('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
       
     ##########################################
     #                                        #

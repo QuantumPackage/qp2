@@ -6,21 +6,28 @@ subroutine run_cipsi
   END_DOC
   integer                        :: i,j,k
   double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:), zeros(:)
-  integer                        :: n_det_before, to_select
+  integer                        :: to_select
+  logical, external :: qp_stop
 
+  double precision :: threshold_generators_save
   double precision :: rss
   double precision, external :: memory_of_double
+  PROVIDE H_apply_buffer_allocated 
+
+  N_iter = 1
+  threshold_generators = 1.d0
+  SOFT_TOUCH threshold_generators
+
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
-  N_iter = 1
   allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm(N_states), variance(N_states))
 
   double precision               :: hf_energy_ref
   logical                        :: has
   double precision               :: relative_error
 
-  PROVIDE h_apply_buffer_allocated
+  !PROVIDE h_apply_buffer_allocated
 
   relative_error=PT2_relative_error
 
@@ -69,29 +76,27 @@ subroutine run_cipsi
     call save_wavefunction
   endif
 
-  n_det_before = 0
-
   double precision :: correlation_energy_ratio
-  double precision :: threshold_generators_save
-  threshold_generators_save = threshold_generators
   double precision :: error(N_states)
-  logical, external :: qp_stop
 
   correlation_energy_ratio = 0.d0
 
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(rpt2(1:N_states))) > pt2_max) .and.               &
-        (maxval(variance(1:N_states)) > variance_max) .and.               &
-        (correlation_energy_ratio <= correlation_energy_ratio_max)    &
+        (maxval(abs(variance(1:N_states))) > variance_max) .and.     &
+        (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 
+    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
+    to_select = max(N_states_diag, to_select)
     if (do_pt2) then
       pt2 = 0.d0
       variance = 0.d0
       norm = 0.d0
+      threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
 !      if (is_complex) then
@@ -103,6 +108,8 @@ subroutine run_cipsi
 !      endif
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
+    else
+      call ZMQ_selection(to_select, pt2, variance, norm)
     endif
 
     do k=1,N_states
@@ -114,7 +121,7 @@ subroutine run_cipsi
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
-    call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+    call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
@@ -122,12 +129,16 @@ subroutine run_cipsi
     call print_extrapolated_energy()
     N_iter += 1
 
-    if (qp_stop()) exit 
+    if (qp_stop()) exit
 
-    n_det_before = N_det
-    to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
-    to_select = max(N_states_diag, to_select)
-    call zmq_selection(to_select, pt2, variance, norm)
+    ! Add selected determinants
+    call copy_H_apply_buffer_to_wf()
+!    call save_wavefunction
+
+    !n_det_before = N_det
+    !to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
+    !to_select = max(N_states_diag, to_select)
+    !call zmq_selection(to_select, pt2, variance, norm)
     if (is_complex) then
 !      call zmq_selection_complex(to_select, pt2, variance, norm)
       PROVIDE  psi_coef_complex
@@ -146,10 +157,6 @@ subroutine run_cipsi
     call save_wavefunction
     call save_energy(psi_energy_with_nucl_rep, zeros)
     if (qp_stop()) exit 
-print *,  (N_det < N_det_max)
-print *,  (maxval(abs(rpt2(1:N_states))) > pt2_max)
-print *,  (maxval(variance(1:N_states)) > variance_max)
-print *,  (correlation_energy_ratio <= correlation_energy_ratio_max)
   enddo
 
   if (.not.qp_stop()) then
@@ -188,8 +195,8 @@ print *,  (correlation_energy_ratio <= correlation_energy_ratio_max)
       rpt2(k) = pt2(k)/(1.d0 + norm(k))
     enddo
 
-    call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
     call save_energy(psi_energy_with_nucl_rep, rpt2)
+    call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif

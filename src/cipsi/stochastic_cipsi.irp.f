@@ -118,7 +118,7 @@ subroutine run_stochastic_cipsi
     call print_extrapolated_energy()
     N_iter += 1
 
-    if (qp_stop()) exit 
+    if (qp_stop()) exit
 
     ! Add selected determinants
     call copy_h_apply_buffer_to_wf()

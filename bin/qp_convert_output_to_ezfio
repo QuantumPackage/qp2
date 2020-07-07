@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 convert output of GAMESS/GAU$$IAN to ezfio
 
@@ -22,7 +22,7 @@ try:
     QP_ROOT = os.environ["QP_ROOT"]
     QP_EZFIO = os.environ["QP_EZFIO"]
 except KeyError:
-    print "Error: QP_ROOT environment variable not found."
+    print("Error: QP_ROOT environment variable not found.")
     sys.exit(1)
 else:
     sys.path = [QP_EZFIO + "/Python",
@@ -30,10 +30,11 @@ else:
                 QP_ROOT + "/install",
                 QP_ROOT + "/scripts"] + sys.path
 
+from resultsFile import *
 try:
     from resultsFile import *
 except:
-    print "Error: resultsFile Python library not installed"
+    print("Error: resultsFile Python library not installed")
     sys.exit(1)
 
 
@@ -48,17 +49,17 @@ def write_ezfio(res, filename):
     # |_ |  _   _ _|_ ._ _  ._   _
     # |_ | (/_ (_  |_ | (_) | | _>
     #
-    print "Electrons\t...\t",
+    print("Electrons\t...\t", end=' ')
     ezfio.set_electrons_elec_alpha_num(res.num_alpha)
     ezfio.set_electrons_elec_beta_num(res.num_beta)
-    print "OK"
+    print("OK")
 
     #
     # |\ |      _ |  _  o
     # | \| |_| (_ | (/_ |
     #
 
-    print "Nuclei\t\t...\t",
+    print("Nuclei\t\t...\t", end=' ')
     # ~#~#~#~ #
     # I n i t #
     # ~#~#~#~ #
@@ -88,29 +89,29 @@ def write_ezfio(res, filename):
     # W r i t e #
     # ~#~#~#~#~ #
 
+    ezfio.set_nuclei_is_complex(False)
     ezfio.set_nuclei_nucl_num(len(res.geometry))
     ezfio.set_nuclei_nucl_charge(charge)
 
     # Transformt H1 into H
     import re
-    p = re.compile(ur'(\d*)$')
+    p = re.compile(r'(\d*)$')
     label = [p.sub("", x.name).capitalize() for x in res.geometry]
     ezfio.set_nuclei_nucl_label(label)
 
     ezfio.set_nuclei_nucl_coord(coord_x + coord_y + coord_z)
-    print "OK"
+    print("OK")
 
     #                 _
     #   /\   _   _   |_)  _.  _ o  _
     #  /--\ (_) _>   |_) (_| _> | _>
     #
 
-    print "AOS\t\t...\t",
+    print("AOS\t\t...\t", end=' ')
     # ~#~#~#~ #
     # I n i t #
     # ~#~#~#~ #
 
-    import string
     at = []
     num_prim = []
     power_x = []
@@ -131,9 +132,9 @@ def write_ezfio(res, filename):
                 at.append(i + 1)
         num_prim.append(len(b.prim))
         s = b.sym
-        power_x.append(string.count(s, "x"))
-        power_y.append(string.count(s, "y"))
-        power_z.append(string.count(s, "z"))
+        power_x.append(str.count(s, "x"))
+        power_y.append(str.count(s, "y"))
+        power_z.append(str.count(s, "z"))
         coefficient.append(b.coef)
         exponent.append([p.expo for p in b.prim])
 
@@ -175,14 +176,14 @@ def write_ezfio(res, filename):
     ezfio.set_ao_basis_ao_expo(expo)
     ezfio.set_ao_basis_ao_basis("Read by resultsFile")
 
-    print "OK"
+    print("OK")
 
     #                _
     # |\/|  _   _   |_)  _.  _ o  _
     # |  | (_) _>   |_) (_| _> | _>
     #
 
-    print "MOS\t\t...\t",
+    print("MOS\t\t...\t", end=' ')
     # ~#~#~#~ #
     # I n i t #
     # ~#~#~#~ #
@@ -205,9 +206,9 @@ def write_ezfio(res, filename):
         virtual = []
         active = [(allMOs[i].eigenvalue, i) for i in range(len(allMOs))]
 
-    closed = map(lambda x: x[1], closed)
-    active = map(lambda x: x[1], active)
-    virtual = map(lambda x: x[1], virtual)
+    closed = [x[1] for x in closed]
+    active = [x[1] for x in active]
+    virtual = [x[1] for x in virtual]
     MOindices = closed + active + virtual
 
     MOs = []
@@ -223,7 +224,7 @@ def write_ezfio(res, filename):
         MOmap[i] = MOindices.index(i)
 
     energies = []
-    for i in xrange(mo_num):
+    for i in range(mo_num):
         energies.append(MOs[i].eigenvalue)
 
     if res.occ_num is not None:
@@ -237,11 +238,11 @@ def write_ezfio(res, filename):
     MoMatrix = []
     sym0 = [i.sym for i in res.mo_sets[MO_type]]
     sym = [i.sym for i in res.mo_sets[MO_type]]
-    for i in xrange(len(sym)):
+    for i in range(len(sym)):
         sym[MOmap[i]] = sym0[i]
 
     MoMatrix = []
-    for i in xrange(len(MOs)):
+    for i in range(len(MOs)):
         m = MOs[i]
         for coef in m.vector:
             MoMatrix.append(coef)
@@ -256,10 +257,10 @@ def write_ezfio(res, filename):
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.set_mo_basis_mo_occ(OccNum)
     ezfio.set_mo_basis_mo_coef(MoMatrix)
-    print "OK"
+    print("OK")
 
 
-    print "Pseudos\t\t...\t",
+    print("Pseudos\t\t...\t", end=' ')
     try:
         lmax = 0
         nucl_charge_remove = []
@@ -327,7 +328,7 @@ def write_ezfio(res, filename):
     else:
         ezfio.set_pseudo_do_pseudo(True)
 
-    print "OK"
+    print("OK")
 
 
 
@@ -335,7 +336,7 @@ def write_ezfio(res, filename):
 def get_full_path(file_path):
     file_path = os.path.expanduser(file_path)
     file_path = os.path.expandvars(file_path)
-    file_path = os.path.abspath(file_path)
+#    file_path = os.path.abspath(file_path)
     return file_path
 
 
@@ -354,15 +355,15 @@ if __name__ == '__main__':
     except:
         raise
     else:
-        print FILE, 'recognized as', str(RES_FILE).split('.')[-1].split()[0]
+        print(FILE, 'recognized as', str(RES_FILE).split('.')[-1].split()[0])
 
     write_ezfio(RES_FILE, EZFIO_FILE)
     sys.stdout.flush()
     if os.system("qp_run save_ortho_mos "+EZFIO_FILE) != 0:
-        print """Warning: You need to run
+        print("""Warning: You need to run
 
          qp run save_ortho_mos
 
 to be sure your MOs will be orthogonal, which is not the case when
-the MOs are read from output files (not enough precision in output)."""
+the MOs are read from output files (not enough precision in output).""")
 

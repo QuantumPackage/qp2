@@ -256,7 +256,7 @@ subroutine copy_H_apply_buffer_to_wf
 
     call remove_duplicates_in_psi_det(found_duplicates)
     do k=1,N_states
-      call normalize(psi_coef_complex(1,k),N_det)
+      call normalize_complex(psi_coef_complex(1,k),N_det)
     enddo
     SOFT_TOUCH N_det psi_det psi_coef_complex
   else

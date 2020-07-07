@@ -343,11 +343,10 @@ complex*16 function get_ao_two_e_integral_complex(i,j,k,l,map,map2) result(resul
   ! a.le.c, b.le.d, tri(a,c).le.tri(b,d)
   PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_complex ao_integrals_cache_min
   !DIR$ FORCEINLINE
-!  if (ao_overlap_abs(i,k)*ao_overlap_abs(j,l) < ao_integrals_threshold ) then
-!    tmp = (0.d0,0.d0)
-!  else if (ao_two_e_integral_schwartz(i,k)*ao_two_e_integral_schwartz(j,l) < ao_integrals_threshold) then
-!    tmp = (0.d0,0.d0)
-!  else
+  !logical, external              :: ao_two_e_integral_zero
+  !if (ao_two_e_integral_zero(i,j,k,l)) then
+  !  tmp = (0.d0,0.d0)
+  !else
   if (.True.) then
     ii = l-ao_integrals_cache_min
     ii = ior(ii, k-ao_integrals_cache_min)
@@ -362,8 +361,8 @@ complex*16 function get_ao_two_e_integral_complex(i,j,k,l,map,map2) result(resul
       ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
       tmp = ao_integrals_cache_complex(ii)
     endif
-    result = tmp
   endif
+  result = tmp
 end
 
 
@@ -380,14 +379,13 @@ subroutine get_ao_two_e_integrals_complex(j,k,l,sze,out_val)
 
   integer                        :: i
   integer(key_kind)              :: hash
-  double precision               :: thresh
+  !logical, external              :: ao_one_e_integral_zero
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
-  thresh = ao_integrals_threshold
 
-  if (ao_overlap_abs(j,l) < thresh) then
-    out_val = (0.d0,0.d0)
-    return
-  endif
+  !if (ao_one_e_integral_zero(j,l)) then
+  !  out_val = (0.d0,0.d0)
+  !  return
+  !endif
 
   complex*16 :: get_ao_two_e_integral_complex
   do i=1,sze
@@ -397,17 +395,21 @@ subroutine get_ao_two_e_integrals_complex(j,k,l,sze,out_val)
 end
 
 subroutine get_ao_two_e_integrals_non_zero_complex(j,k,l,sze,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO bi-electronic integral from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  integer, intent(in)            :: j,k,l, sze
+  complex(integral_kind), intent(out) :: out_val(sze)
+  integer, intent(out)           :: out_val_index(sze),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
-!  use map_module
-!  implicit none
-!  BEGIN_DOC
-!  ! Gets multiple AO bi-electronic integral from the AO map .
-!  ! All non-zero i are retrieved for j,k,l fixed.
-!  END_DOC
-!  integer, intent(in)            :: j,k,l, sze
-!  real(integral_kind), intent(out) :: out_val(sze)
-!  integer, intent(out)           :: out_val_index(sze),non_zero_int
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i
 !  integer(key_kind)              :: hash
@@ -445,18 +447,22 @@ end
 
 
 subroutine get_ao_two_e_integrals_non_zero_jl_complex(j,l,thresh,sze_max,sze,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO bi-electronic integral from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: j,l, sze,sze_max
+  complex(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
-!  use map_module
-!  implicit none
-!  BEGIN_DOC
-!  ! Gets multiple AO bi-electronic integral from the AO map .
-!  ! All non-zero i are retrieved for j,k,l fixed.
-!  END_DOC
-!  double precision, intent(in)   :: thresh
-!  integer, intent(in)            :: j,l, sze,sze_max
-!  real(integral_kind), intent(out) :: out_val(sze_max)
-!  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i,k
 !  integer(key_kind)              :: hash
@@ -496,19 +502,23 @@ end
 
 
 subroutine get_ao_two_e_integrals_non_zero_jl_from_list_complex(j,l,thresh,list,n_list,sze_max,out_val,out_val_index,non_zero_int)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Gets multiple AO two-electron integrals from the AO map .
+  ! All non-zero i are retrieved for j,k,l fixed.
+  END_DOC
+  double precision, intent(in)   :: thresh
+  integer, intent(in)            :: sze_max
+  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
+  complex(integral_kind), intent(out) :: out_val(sze_max)
+  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
   print*,'not implemented for periodic',irp_here
   stop -1
-!  use map_module
-!  implicit none
-!  BEGIN_DOC
-!  ! Gets multiple AO two-electron integrals from the AO map .
-!  ! All non-zero i are retrieved for j,k,l fixed.
-!  END_DOC
-!  double precision, intent(in)   :: thresh
-!  integer, intent(in)            :: sze_max
-!  integer, intent(in)            :: j,l, n_list,list(2,sze_max)
-!  real(integral_kind), intent(out) :: out_val(sze_max)
-!  integer, intent(out)           :: out_val_index(2,sze_max),non_zero_int
+  !placeholder to keep compiler from complaining about out values not assigned
+  out_val=0.d0
+  out_val_index=0
+  non_zero_int=0
 !
 !  integer                        :: i,k
 !  integer(key_kind)              :: hash

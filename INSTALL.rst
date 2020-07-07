@@ -25,8 +25,8 @@ sets all the environment variables required for the normal operation of the
 Running this script will also tell you which external dependencies are missing
 and need to be installed.
 
-When all dependencies have been installed, ( the :command:`configure` will tell you) 
-source the :file:`quantum_package.rc` in order to load all environment variables and compile the |QP|. 
+When all dependencies have been installed, ( the :command:`configure` will tell you)
+source the :file:`quantum_package.rc` in order to load all environment variables and compile the |QP|.
 
 
 Requirements
@@ -36,7 +36,7 @@ Requirements
 - Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran
 - `GNU make`_
 - `Autoconf`_
-- `Python`_ > 2.6
+- `Python`_ > 3.0
 - |IRPF90| : Fortran code generator
 - |EZFIO| : Easy Fortran Input/Output library generator
 - |BLAS| and |LAPACK|
@@ -44,7 +44,7 @@ Requirements
 - `GNU Patch`_
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
-- |OCaml| compiler with |OPAM| package manager 
+- |OCaml| compiler with |OPAM| package manager
 - `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
 - `libcap <https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git>`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
@@ -74,29 +74,29 @@ Help for installing external dependencies
 Using the :command:`configure` executable
 -----------------------------------------
 
-The :command:`configure` executable can help you in installing the minimal dependencies you will need to compile the |QP|. 
-The command is to be used as follows: 
+The :command:`configure` executable can help you in installing the minimal dependencies you will need to compile the |QP|.
+The command is to be used as follows:
 
 .. code:: bash
 
    ./configure --install <package>
 
-The following packages are supported by the :command:`configure` installer: 
+The following packages are supported by the :command:`configure` installer:
 
-* ninja 
-* irpf90 
-* zeromq 
+* ninja
+* irpf90
+* zeromq
 * f77zmq
 * gmp
 * libcap
 * bwrap
 * ocaml  ( :math:`\approx` 10 minutes)
-* ezfio 
-* docopt 
-* resultsFile 
+* ezfio
+* docopt
+* resultsFile
 * bats
 
-Example: 
+Example:
 
 .. code:: bash
 
@@ -115,7 +115,7 @@ Example:
 If the :command:`configure` executable fails to install a specific dependency
 -----------------------------------------------------------------------------
 
-If the :command:`configure` executable does not succeed to install a specific dependency, 
+If the :command:`configure` executable does not succeed to install a specific dependency,
 there are some proposition of how to download and install the minimal dependencies to compile and use the |QP|.
 
 
@@ -140,7 +140,7 @@ IRPF90
 ------
 
 *IRPF90* is a Fortran code generator for programming using the Implicit Reference
-to Parameters (IRP) method. 
+to Parameters (IRP) method.
 
 * Download the latest version of IRPF90
   here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
@@ -312,26 +312,26 @@ OCaml
   `<https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh>`_
   and move it in the :file:`${QP_ROOT}/external` directory
 
-* If you use OCaml only with the |qp|, you can install the OPAM directory 
+* If you use OCaml only with the |qp|, you can install the OPAM directory
   containing the compiler and all the installed libraries in the
   :file:`${QP_ROOT}/external` directory as
 
   .. code:: bash
-       
+
      export OPAMROOT=${QP_ROOT}/external/opam
 
 
 * Run the installer
 
   .. code:: bash
-       
+
      echo ${QP_ROOT}/bin
      ${QP_ROOT}/external/opam_installer.sh --no-backup --fresh
 
   The :command:`opam` command can be installed in the :file:`${QP_ROOT}/bin`
   directory. To do this, take the output of ``echo ${QP_ROOT}/bin`` and
   use it as an answer to where :command:`opam` should be installed.
-  
+
 
 * Install the OCaml compiler
 
@@ -370,11 +370,11 @@ Docopt
 
 *Docopt* is a Python package defining a command-line interface description language.
 
-If you have *pip* for Python2, you can do 
+If you have *pip* for Python3, you can do
 
 .. code:: bash
 
-   pip2 install --user docopt
+   python3 -m pip install --user docopt
 
 Otherwise,
 

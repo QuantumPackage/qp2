@@ -1,5 +1,6 @@
 open Sexplib.Std
 open Qptypes
+open Qputils
 
 (** New job : Request to create a new multi-tasked job *)
 
@@ -193,12 +194,12 @@ end = struct
   }
   let create ~state ~task_ids =
     { state = State.of_string state ;
-      task_ids = List.map Id.Task.of_int task_ids
+      task_ids = list_map Id.Task.of_int task_ids
     }
   let to_string x =
     Printf.sprintf "del_task %s %s"
       (State.to_string x.state)
-      (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
+      (String.concat "|" @@ list_map Id.Task.to_string x.task_ids)
 end
 
 
@@ -219,7 +220,7 @@ end = struct
       else "done"
     in
     Printf.sprintf "del_task_reply %s %s"
-     more (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
+     more (String.concat "|" @@ list_map Id.Task.to_string x.task_ids)
 end
 
 
@@ -303,7 +304,7 @@ end = struct
      "get_tasks_reply ok"
   let to_string_list x =
      "get_tasks_reply ok" :: (
-     List.map (fun (task_id, task) ->
+     list_map (fun (task_id, task) ->
        match task_id with
        | Some task_id -> Printf.sprintf "%d %s" (Id.Task.to_int task_id) task
        | None -> Printf.sprintf "0 terminate"
@@ -408,14 +409,14 @@ end = struct
   let create ~state ~client_id ~task_ids =
     { client_id = Id.Client.of_int client_id ;
       state = State.of_string state ;
-      task_ids  = List.map Id.Task.of_int task_ids;
+      task_ids  = list_map Id.Task.of_int task_ids;
     }
 
   let to_string x =
     Printf.sprintf "task_done %s %d %s"
       (State.to_string x.state)
       (Id.Client.to_int x.client_id)
-      (String.concat "|" @@ List.map Id.Task.to_string x.task_ids)
+      (String.concat "|" @@ list_map Id.Task.to_string x.task_ids)
 end
 
 (** Terminate *)
