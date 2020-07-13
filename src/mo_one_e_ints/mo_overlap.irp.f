@@ -128,3 +128,18 @@ BEGIN_PROVIDER [ complex*16, mo_overlap_kpts,(mo_num_per_kpt,mo_num_per_kpt,kpt_
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, mo_overlap_kpts_real, (mo_num_per_kpt, mo_num_per_kpt, kpt_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex MOs
+  END_DOC
+  integer :: i,j,k
+  do k=1,kpt_num
+    do j=1,mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_overlap_kpts_real(i,j,k) = dble(mo_overlap_kpts(i,j,k))
+      enddo
+    enddo
+  enddo
+END_PROVIDER
+

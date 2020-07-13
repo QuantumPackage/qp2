@@ -1277,3 +1277,77 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
   deallocate(A,eigenvalues)
 end
 
+subroutine lapack_diagd_diag_in_place(eigvalues,eigvectors,nmax,n)
+  implicit none
+  BEGIN_DOC
+  ! Diagonalize matrix H(complex)
+  !
+  ! H is untouched between input and ouptut
+  !
+  ! eigevalues(i) = ith lowest eigenvalue of the H matrix
+  !
+  ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
+  !
+  END_DOC
+  integer, intent(in)            :: n,nmax
+  double precision, intent(out)  :: eigvectors(nmax,n)
+!  complex*16, intent(inout)        :: eigvectors(nmax,n)
+  double precision, intent(out)  :: eigvalues(n)
+!  double precision, intent(in)   :: H(nmax,n)
+  double precision,allocatable         :: work(:)
+  integer         ,allocatable   :: iwork(:)
+!  complex*16,allocatable         :: A(:,:)
+  integer                        :: lwork, info, i,j,l,k, liwork
+
+! print*,'Diagonalization by jacobi'
+! print*,'n = ',n
+
+  lwork = 2*n*n + 6*n + 1
+  liwork = 5*n + 3
+  allocate (work(lwork),iwork(liwork))
+
+  lwork = -1
+  liwork = -1
+  ! get optimal work size
+  call DSYEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
+    iwork, liwork, info )
+  if (info < 0) then
+    print *, irp_here, ': DSYEVD: the ',-info,'-th argument had an illegal value'
+    stop 2
+  endif
+  lwork  = int( real(work(1)))
+  liwork = iwork(1)
+  deallocate (work,iwork)
+
+  allocate (work(lwork),iwork(liwork))
+  call DSYEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
+    iwork, liwork, info )
+  deallocate(work,iwork)
+
+
+  if (info < 0) then
+    print *, irp_here, ': DSYEVD: the ',-info,'-th argument had an illegal value'
+    stop 2
+  else if( info > 0  ) then
+     write(*,*)'DSYEVD Failed; calling DSYEV'
+     lwork = 3*n - 1
+     allocate(work(lwork))
+     lwork = -1
+     call DSYEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,info)
+     if (info < 0) then
+       print *, irp_here, ': DSYEV: the ',-info,'-th argument had an illegal value'
+       stop 2
+     endif
+     lwork = int(work(1))
+     deallocate(work)
+     allocate(work(lwork))
+     call DSYEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,info)
+     if (info /= 0 ) then
+       write(*,*)'DSYEV Failed'
+       stop 1
+     endif
+    deallocate(work)
+  end if
+
+end
+

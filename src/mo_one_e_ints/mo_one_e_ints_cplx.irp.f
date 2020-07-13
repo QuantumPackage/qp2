@@ -59,3 +59,20 @@ BEGIN_PROVIDER [ complex*16, mo_one_e_integrals_kpts,(mo_num_per_kpt,mo_num_per_
   print*,'Provided the one-electron integrals'
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, mo_one_e_integrals_kpts_real,(mo_num_per_kpt,mo_num_per_kpt,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! array of the one-electron Hamiltonian on the |MO| basis :
+  ! sum of the kinetic and nuclear electronic potentials (and pseudo potential if needed)
+  END_DOC
+
+  integer :: i,j,k
+  do k=1,kpt_num
+    do j=1,mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_one_e_integrals_kpts_real(i,j,k) = dble(mo_one_e_integrals_kpts(i,j,k))
+      enddo
+    enddo
+  enddo
+END_PROVIDER

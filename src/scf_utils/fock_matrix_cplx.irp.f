@@ -362,6 +362,24 @@ END_PROVIDER
 
 !============================================!
 !                                            !
+!                    kpts_real               !
+!                                            !
+!============================================!
+
+BEGIN_PROVIDER [ double precision, Fock_matrix_mo_kpts_real, (mo_num_per_kpt,mo_num_per_kpt,kpt_num) ]
+  implicit none
+  integer :: i,j,k
+  do k=1,kpt_num
+    do j=1,mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        fock_matrix_mo_kpts_real(i,j,k) = dble(fock_matrix_mo_kpts(i,j,k))
+      enddo
+    enddo
+  enddo
+END_PROVIDER
+
+!============================================!
+!                                            !
 !                    kpts                    !
 !                                            !
 !============================================!
