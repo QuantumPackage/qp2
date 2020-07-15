@@ -80,6 +80,22 @@ BEGIN_PROVIDER [ integer, mo_num_per_kpt ]
 
 END_PROVIDER
 
+subroutine get_kpt_idx_mo(idx_full,k,i)
+  implicit none
+  BEGIN_DOC
+  ! idx_full is mo index in full range (up to mo_num)
+  ! k is index of the k-point for this mo
+  ! i is index of this mo within k-point k
+  ! this assumes that all kpts have the same number of mos
+  END_DOC
+
+  integer, intent(in) :: idx_full
+  integer, intent(out) :: i,k
+  i = mod(idx_full-1,mo_num_per_kpt)+1
+  k = (idx_full-1)/mo_num_per_kpt+1
+  ASSERT (k <= kpt_num)
+end
+
 
 BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   implicit none

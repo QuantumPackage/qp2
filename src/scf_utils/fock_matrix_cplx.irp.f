@@ -362,6 +362,24 @@ END_PROVIDER
 
 !============================================!
 !                                            !
+!                    kpts_real               !
+!                                            !
+!============================================!
+
+BEGIN_PROVIDER [ double precision, Fock_matrix_mo_kpts_real, (mo_num_per_kpt,mo_num_per_kpt,kpt_num) ]
+  implicit none
+  integer :: i,j,k
+  do k=1,kpt_num
+    do j=1,mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        fock_matrix_mo_kpts_real(i,j,k) = dble(fock_matrix_mo_kpts(i,j,k))
+      enddo
+    enddo
+  enddo
+END_PROVIDER
+
+!============================================!
+!                                            !
 !                    kpts                    !
 !                                            !
 !============================================!
@@ -593,14 +611,10 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/ao_num_per_kpt +1
-          kpt_j = (j-1)/ao_num_per_kpt +1
-          kpt_k = (k-1)/ao_num_per_kpt +1
-          kpt_l = (l-1)/ao_num_per_kpt +1
-          idx_i = mod(i-1,ao_num_per_kpt)+1
-          idx_j = mod(j-1,ao_num_per_kpt)+1
-          idx_k = mod(k-1,ao_num_per_kpt)+1
-          idx_l = mod(l-1,ao_num_per_kpt)+1
+          call get_kpt_idx_ao(i,kpt_i,idx_i)
+          call get_kpt_idx_ao(j,kpt_j,idx_j)
+          call get_kpt_idx_ao(k,kpt_k,idx_k)
+          call get_kpt_idx_ao(l,kpt_l,idx_l)
           integral = i_sign(k2)*values(k1) !for klij and lkji, take complex conjugate
 
           !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
@@ -636,14 +650,10 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/ao_num_per_kpt +1
-          kpt_j = (j-1)/ao_num_per_kpt +1
-          kpt_k = (k-1)/ao_num_per_kpt +1
-          kpt_l = (l-1)/ao_num_per_kpt +1
-          idx_i = mod(i-1,ao_num_per_kpt)+1
-          idx_j = mod(j-1,ao_num_per_kpt)+1
-          idx_k = mod(k-1,ao_num_per_kpt)+1
-          idx_l = mod(l-1,ao_num_per_kpt)+1
+          call get_kpt_idx_ao(i,kpt_i,idx_i)
+          call get_kpt_idx_ao(j,kpt_j,idx_j)
+          call get_kpt_idx_ao(k,kpt_k,idx_k)
+          call get_kpt_idx_ao(l,kpt_l,idx_l)
           integral = values(k1)
 
           if (kpt_l.eq.kpt_j) then
@@ -714,14 +724,10 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/ao_num_per_kpt +1
-          kpt_j = (j-1)/ao_num_per_kpt +1
-          kpt_k = (k-1)/ao_num_per_kpt +1
-          kpt_l = (l-1)/ao_num_per_kpt +1
-          idx_i = mod(i-1,ao_num_per_kpt)+1
-          idx_j = mod(j-1,ao_num_per_kpt)+1
-          idx_k = mod(k-1,ao_num_per_kpt)+1
-          idx_l = mod(l-1,ao_num_per_kpt)+1
+          call get_kpt_idx_ao(i,kpt_i,idx_i)
+          call get_kpt_idx_ao(j,kpt_j,idx_j)
+          call get_kpt_idx_ao(k,kpt_k,idx_k)
+          call get_kpt_idx_ao(l,kpt_l,idx_l)
           integral = i_sign(k2)*values(k1) ! for klij and lkji, take conjugate
 
           !G_a(i,k) += D_{ab}(l,j)*(<ij|kl>)
@@ -757,14 +763,10 @@ END_PROVIDER
           j = jj(k2)
           k = kk(k2)
           l = ll(k2)
-          kpt_i = (i-1)/ao_num_per_kpt +1
-          kpt_j = (j-1)/ao_num_per_kpt +1
-          kpt_k = (k-1)/ao_num_per_kpt +1
-          kpt_l = (l-1)/ao_num_per_kpt +1
-          idx_i = mod(i-1,ao_num_per_kpt)+1
-          idx_j = mod(j-1,ao_num_per_kpt)+1
-          idx_k = mod(k-1,ao_num_per_kpt)+1
-          idx_l = mod(l-1,ao_num_per_kpt)+1
+          call get_kpt_idx_ao(i,kpt_i,idx_i)
+          call get_kpt_idx_ao(j,kpt_j,idx_j)
+          call get_kpt_idx_ao(k,kpt_k,idx_k)
+          call get_kpt_idx_ao(l,kpt_l,idx_l)
           integral = values(k1)
 
           if (kpt_l.eq.kpt_j) then

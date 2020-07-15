@@ -495,10 +495,8 @@ END_PROVIDER
         call decode_exc_spin(exc,h1,p1,h2,p2)
         ! h1 occ in k
         ! p1 occ in l
-        ih1 = mod(h1-1,mo_num_per_kpt)+1
-        ip1 = mod(p1-1,mo_num_per_kpt)+1
-        kh1 = (h1-1)/mo_num_per_kpt + 1
-        kp1 = (p1-1)/mo_num_per_kpt + 1
+        call get_kpt_idx_mo(h1,kh1,ih1)
+        call get_kpt_idx_mo(p1,kp1,ip1)
         if (kh1.ne.kp1) then
           print *,'problem in: ',irp_here,'a'
           print *,' h1 = ',h1
@@ -577,10 +575,8 @@ END_PROVIDER
         exc = 0
         call get_single_excitation_spin(tmp_det(1,2),tmp_det2,exc,phase,N_int)
         call decode_exc_spin(exc,h1,p1,h2,p2)
-        ih1 = mod(h1-1,mo_num_per_kpt)+1
-        ip1 = mod(p1-1,mo_num_per_kpt)+1
-        kh1 = (h1-1)/mo_num_per_kpt + 1
-        kp1 = (p1-1)/mo_num_per_kpt + 1
+        call get_kpt_idx_mo(h1,kh1,ih1)
+        call get_kpt_idx_mo(p1,kp1,ip1)
         if (kh1.ne.kp1) then
           print *,'problem in: ',irp_here,'b'
           print *,' h1 = ',h1

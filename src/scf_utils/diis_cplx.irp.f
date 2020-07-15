@@ -164,7 +164,7 @@ BEGIN_PROVIDER [complex*16, FPS_SPF_Matrix_AO_kpts, (AO_num_per_kpt, AO_num_per_
     call zgemm('N','N',AO_num_per_kpt,AO_num_per_kpt,AO_num_per_kpt,                           &
         (1.d0,0.d0),                                                          &
         Fock_Matrix_AO_kpts(1,1,k),Size(Fock_Matrix_AO_kpts,1),                &
-        SCF_Density_Matrix_AO_kpts(1,1,k),Size(SCF_Density_Matrix_AO_kpts,1),  &
+        scf_density_matrix_ao_kpts(1,1,k),Size(SCF_Density_Matrix_AO_kpts,1),  &
         (0.d0,0.d0),                                                          &
         scratch,Size(scratch,1))
 

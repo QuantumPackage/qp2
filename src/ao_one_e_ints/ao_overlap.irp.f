@@ -122,6 +122,22 @@ BEGIN_PROVIDER [ complex*16, ao_overlap_kpts, (ao_num_per_kpt, ao_num_per_kpt, k
 END_PROVIDER
 
 
+BEGIN_PROVIDER [ double precision, ao_overlap_kpts_real, (ao_num_per_kpt, ao_num_per_kpt, kpt_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex AOs
+  END_DOC
+  integer :: i,j,k
+  do k=1,kpt_num
+    do j=1,ao_num_per_kpt
+      do i=1,ao_num_per_kpt
+        ao_overlap_kpts_real(i,j,k) = dble(ao_overlap_kpts(i,j,k))
+      enddo
+    enddo
+  enddo
+END_PROVIDER
+
+
 
 
 BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]

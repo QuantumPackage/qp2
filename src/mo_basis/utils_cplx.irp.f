@@ -327,6 +327,85 @@ subroutine mo_as_eigvectors_of_mo_matrix_kpts(matrix,n,m,nk,label,sign,output)
     endif
 end
 
+subroutine mo_as_eigvectors_of_mo_matrix_kpts_real(matrix,n,m,nk,label,sign,output)
+  !TODO: test this
+  implicit none
+  integer,intent(in)             :: n,m,nk, sign
+  character*(64), intent(in)     :: label
+  double precision, intent(in)   :: matrix(n,m,nk)
+  logical, intent(in)            :: output
+
+  integer :: i,j,k
+  double precision, allocatable  :: eigvalues(:)
+  !complex*16, allocatable  :: mo_coef_new(:,:)
+  double precision, allocatable  :: mo_coef_new(:,:),mo_coef_tmp(:,:),R(:,:), A(:,:)
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: mo_coef_new, R
+
+  call write_time(6)
+  if (m /= mo_num_per_kpt) then
+    print *, irp_here, ': Error : m/= mo_num_per_kpt'
+    stop 1
+  endif
+  if (nk /= kpt_num) then
+    print *, irp_here, ': Error : nk/= kpt_num'
+    stop 1
+  endif
+  allocate(A(n,m),R(n,m),mo_coef_tmp(ao_num_per_kpt,m),mo_coef_new(ao_num_per_kpt,m),eigvalues(m))
+  do k=1,nk
+    if (sign == -1) then
+      do j=1,m
+        do i=1,n
+          A(i,j) = -matrix(i,j,k)
+        enddo
+      enddo
+    else
+      do j=1,m
+        do i=1,n
+          A(i,j) = matrix(i,j,k)
+        enddo
+      enddo
+    endif
+    mo_coef_new = dble(mo_coef_kpts(:,:,k))
+
+    call lapack_diag(eigvalues,R,A,n,m)
+    if (sign == -1) then
+      do i=1,m
+        eigvalues(i) = -eigvalues(i)
+      enddo
+    endif
+    if (output) then
+      do i=1,m
+        write (6,'(2(I8),1X,F16.10)') k,i,eigvalues(i)
+      enddo
+      write (6,'(A)') '======== ================'
+      write (6,'(A)')  ''
+      !write (6,'(A)')  'Fock Matrix'
+      !write (6,'(A)') '-----------'
+      !do i=1,n
+      !  write(*,'(200(E24.15))') A(i,:)
+      !enddo
+    endif
+
+    call dgemm('N','N',ao_num_per_kpt,m,m,1.d0, &
+        mo_coef_new,size(mo_coef_new,1),R,size(R,1),0.d0, &
+        mo_coef_tmp,size(mo_coef_tmp,1))
+    call zlacp2('N',ao_num_per_kpt,m,mo_coef_tmp,size(mo_coef_tmp,1), &
+                mo_coef_kpts(:,:,k),size(mo_coef_kpts,1))
+  enddo
+  deallocate(A,mo_coef_new,mo_coef_tmp,R,eigvalues)
+  call write_time(6)
+
+  mo_label = label
+    if (output) then
+      write (6,'(A)')  'MOs are now **'//trim(label)//'**'
+      write (6,'(A)') ''
+      write (6,'(A)')  'Eigenvalues'
+      write (6,'(A)') '-----------'
+      write (6,'(A)')  ''
+      write (6,'(A)') '======== ================'
+    endif
+end
+
 subroutine mo_as_svd_vectors_of_mo_matrix_kpts(matrix,lda,m,n,label)
   !TODO: implement
   print *, irp_here, ' not implemented for kpts'

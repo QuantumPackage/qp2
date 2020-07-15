@@ -411,6 +411,15 @@ END_PROVIDER
 
 END_PROVIDER
 
+subroutine diagonalize_ci
+  implicit none
+  if (is_complex) then
+    call diagonalize_ci_complex
+  else
+    call diagonalize_ci_real
+  endif
+end
+
 subroutine diagonalize_CI_complex
   implicit none
   BEGIN_DOC
@@ -429,7 +438,7 @@ subroutine diagonalize_CI_complex
   SOFT_TOUCH psi_coef_complex CI_electronic_energy_complex ci_energy CI_eigenvectors_complex CI_s2_complex psi_energy psi_s2
 end
 
-subroutine diagonalize_CI
+subroutine diagonalize_CI_real
   implicit none
   BEGIN_DOC
 !  Replace the coefficients of the |CI| states by the coefficients of the

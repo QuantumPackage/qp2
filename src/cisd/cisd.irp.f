@@ -56,10 +56,14 @@ subroutine run
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
 
-  if(pseudo_sym)then
-   call H_apply_cisd_sym
+  if (is_complex) then
+    call H_apply_cisd_kpts
   else
-   call H_apply_cisd
+    if(pseudo_sym)then
+     call H_apply_cisd_sym
+    else
+     call H_apply_cisd
+    endif
   endif
   if (is_complex) then
     psi_coef_complex = ci_eigenvectors_complex

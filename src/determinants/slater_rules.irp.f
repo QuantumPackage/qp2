@@ -2443,18 +2443,19 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
       if (exc(0,1,1) == 1) then
         call double_allowed_mo_kpts(exc(1,1,1),exc(1,1,2),exc(1,2,1),exc(1,2,2),is_allowed)
         if (.not.is_allowed) then
+          ! excitation doesn't conserve momentum
           hij = (0.d0,0.d0)
           return
         endif
         ! Single alpha, single beta
         if(exc(1,1,1) == exc(1,2,2) )then
-          ih1 = mod(exc(1,1,1)-1,mo_num_per_kpt)+1
-          ih2 = mod(exc(1,1,2)-1,mo_num_per_kpt)+1
-          kh1 = (exc(1,1,1)-1)/mo_num_per_kpt+1
-          kh2 = (exc(1,1,2)-1)/mo_num_per_kpt+1
-          ip1 = mod(exc(1,2,1)-1,mo_num_per_kpt)+1
-          kp1 = (exc(1,2,1)-1)/mo_num_per_kpt+1
+          !h1(a) = p2(b)
+          call get_kpt_idx_mo(exc(1,1,1),kh1,ih1)
+          call get_kpt_idx_mo(exc(1,1,2),kh2,ih2)
+          call get_kpt_idx_mo(exc(1,2,1),kp1,ip1)
+
           if(kp1.ne.kh2) then
+            !if h1==p2 then kp1==kh2
             print*,'problem with hij kpts: ',irp_here
             print*,is_allowed
             print*,exc(1,1,1),exc(1,1,2),exc(1,2,1),exc(1,2,2)
@@ -2464,12 +2465,10 @@ subroutine i_H_j_complex(key_i,key_j,Nint,hij)
           hij = phase * big_array_exchange_integrals_kpts(ih1,kh1,ih2,ip1,kp1)
           !hij = phase * big_array_exchange_integrals_complex(exc(1,1,1),exc(1,1,2),exc(1,2,1))
         else if (exc(1,2,1) ==exc(1,1,2))then
-          ih1 = mod(exc(1,1,1)-1,mo_num_per_kpt)+1
-          kh1 = (exc(1,1,1)-1)/mo_num_per_kpt+1
-          ip1 = mod(exc(1,2,1)-1,mo_num_per_kpt)+1
-          kp1 = (exc(1,2,1)-1)/mo_num_per_kpt+1
-          ip2 = mod(exc(1,2,2)-1,mo_num_per_kpt)+1
-          kp2 = (exc(1,2,2)-1)/mo_num_per_kpt+1
+          !p1(a)==h2(b)
+          call get_kpt_idx_mo(exc(1,1,1),kh1,ih1)
+          call get_kpt_idx_mo(exc(1,2,1),kp1,ip1)
+          call get_kpt_idx_mo(exc(1,2,2),kp2,ip2)
           if(kp2.ne.kh1) then
             print*,'problem with hij kpts: ',irp_here
             print*,is_allowed

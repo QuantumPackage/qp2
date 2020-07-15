@@ -2918,14 +2918,10 @@ subroutine get_d1_kpts(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, c
     hfix = h(1,ma)
     p1 = p(1,ma)
     p2 = p(2,ma)
-    kputi = (puti-1)/mo_num_per_kpt + 1
-    khfix = (hfix-1)/mo_num_per_kpt + 1
-    kp1   =   (p1-1)/mo_num_per_kpt + 1
-    kp2   =   (p2-1)/mo_num_per_kpt + 1
-    iputi = mod(puti-1,mo_num_per_kpt) + 1
-    ihfix = mod(hfix-1,mo_num_per_kpt) + 1
-    ip1   = mod(p1-1,  mo_num_per_kpt) + 1
-    ip2   = mod(p2-1,  mo_num_per_kpt) + 1
+    call get_kpt_idx_mo(puti,kputi,iputi)
+    call get_kpt_idx_mo(hfix,khfix,ihfix)
+    call get_kpt_idx_mo(p1,kp1,ip1)
+    call get_kpt_idx_mo(p2,kp2,ip2)
 
     if(.not. bannedOrb(puti, mi)) then
       !==================
@@ -3059,8 +3055,7 @@ subroutine get_d1_kpts(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, c
 
     !MOVE MI
     pfix = p(1,mi)
-    kpfix = (pfix-1)/mo_num_per_kpt + 1
-    ipfix = mod(pfix-1,mo_num_per_kpt) + 1
+    call get_kpt_idx_mo(pfix,kpfix,ipfix)
     tmp_row = (0.d0,0.d0)
     tmp_row2 = (0.d0,0.d0)
     !tmp_row_kpts = (0.d0,0.d0)
@@ -3270,14 +3265,10 @@ subroutine get_d1_kpts(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, c
         puti = p(i, ma)
         p1 = p(turn3(1,i), ma)
         p2 = p(turn3(2,i), ma)
-        kputi = (puti-1)/mo_num_per_kpt + 1
-        khfix = (hfix-1)/mo_num_per_kpt + 1
-        kp1   =   (p1-1)/mo_num_per_kpt + 1
-        kp2   =   (p2-1)/mo_num_per_kpt + 1
-        iputi = mod(puti-1,mo_num_per_kpt) + 1
-        ihfix = mod(hfix-1,mo_num_per_kpt) + 1
-        ip1   = mod(p1-1,  mo_num_per_kpt) + 1
-        ip2   = mod(p2-1,  mo_num_per_kpt) + 1
+        call get_kpt_idx_mo(puti,kputi,iputi)
+        call get_kpt_idx_mo(hfix,khfix,ihfix)
+        call get_kpt_idx_mo(p1,kp1,ip1)
+        call get_kpt_idx_mo(p2,kp2,ip2)
         call get_mo_two_e_integrals_complex(hfix,p1,p2,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
         call get_mo_two_e_integrals_complex(hfix,p2,p1,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
         call get_mo_two_e_integrals_kpts(hfix,ihfix,khfix,p1,ip1,kp1,p2,ip2,kp2,mo_num_per_kpt,hij_cache2(1,1),mo_integrals_map,mo_integrals_map_2)
@@ -3425,14 +3416,10 @@ subroutine get_d1_kpts(gen, phasemask, bannedOrb, banned, mat, mask, h, p, sp, c
       pfix = p(1,mi)
       p1 = p(1,ma)
       p2 = p(2,ma)
-      kpfix = (pfix-1)/mo_num_per_kpt + 1
-      khfix = (hfix-1)/mo_num_per_kpt + 1
-      kp1   =   (p1-1)/mo_num_per_kpt + 1
-      kp2   =   (p2-1)/mo_num_per_kpt + 1
-      ipfix = mod(pfix-1,mo_num_per_kpt) + 1
-      ihfix = mod(hfix-1,mo_num_per_kpt) + 1
-      ip1   = mod(p1-1,  mo_num_per_kpt) + 1
-      ip2   = mod(p2-1,  mo_num_per_kpt) + 1
+      call get_kpt_idx_mo(pfix,kpfix,ipfix)
+      call get_kpt_idx_mo(hfix,khfix,ihfix)
+      call get_kpt_idx_mo(p1,kp1,ip1)
+      call get_kpt_idx_mo(p2,kp2,ip2)
       tmp_row = (0.d0,0.d0)
       tmp_row2 = (0.d0,0.d0)
       !tmp_row_kpts = (0.d0,0.d0)

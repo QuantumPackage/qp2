@@ -449,12 +449,14 @@ subroutine get_single_excitation_from_fock_kpts(det_1,det_2,ih,ip,spin,phase,hij
   integer :: occ_partcl(N_int*bit_kind_size,2)
   integer :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
   integer :: i0,i,h,p
-  integer :: ki,khp
+  integer :: ki,khp,kh
   complex*16 :: buffer_c(mo_num_per_kpt),buffer_x(mo_num_per_kpt)
-  khp = (ip-1)/mo_num_per_kpt+1
-  p = mod(ip-1,mo_num_per_kpt)+1
-  h = mod(ih-1,mo_num_per_kpt)+1
+
+  call get_kpt_idx_mo(ip,khp,p)
+  call get_kpt_idx_mo(ih,kh,h)
+  ASSERT (kh==khp)
   !todo: omp kpts
+  hij = fock_op_cshell_ref_bitmask_kpts(h,p,khp)
   do ki=1,kpt_num
     do i=1, mo_num_per_kpt
       !<hi|pi>
@@ -476,7 +478,6 @@ subroutine get_single_excitation_from_fock_kpts(det_1,det_2,ih,ip,spin,phase,hij
     enddo
     call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, N_int)
     call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, N_int)
-    hij = fock_op_cshell_ref_bitmask_kpts(h,p,khp)
     ! holes :: direct terms
     do i0 = 1, n_occ_ab_hole(1)
       i = occ_hole(i0,1) - (ki-1)*mo_num_per_kpt
