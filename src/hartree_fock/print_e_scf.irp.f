@@ -7,7 +7,9 @@ subroutine run
   use bitmasks
   implicit none
 
-  call print_debug_scf_complex
+  !if (is_complex) then
+  !  call print_debug_scf_complex
+  !endif
 
   print*,'hf 1e,2e,total energy'
   print*,hf_one_electron_energy
