@@ -835,6 +835,8 @@ def pyscf2QP2_mol(mf, cas_idx=None, int_threshold = 1E-8,
         qph5.create_group('electrons')
         qph5.create_group('ao_basis')
         qph5.create_group('mo_basis')
+        qph5.create_group('pseudo')
+        qph5['pseudo'].attrs['do_pseudo']=False
 
     if mf.mol.cart:
         mo_coeff = mf.mo_coeff.copy()
@@ -950,6 +952,83 @@ def pyscf2QP2_mol(mf, cas_idx=None, int_threshold = 1E-8,
         atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
         for i in range(natom):
             atom_dset[i] = mol.atom_pure_symbol(i)
+
+    ##########################################
+    #                                        #
+    #                 ECP                    #
+    #                                        #
+    ##########################################
+
+    if (mol.has_ecp()):
+        #atsymb = [mol.atom_pure_symbol(i) for i in range(natom)]
+        #pyecp = mol._ecp
+        ## nelec to remove for each atom
+        #nuc_z_remov = [pyecp[i][0] for i in atsymb]
+        #nl_per_atom = [len(pyecp[i][1]) for i in atsymb]
+        ## list of l-values for channels of each atom
+        #ecp_l = [[pyecp[i][1][j][0] for j in range(len(pyecp[i][1]))] for i in atsymb]
+        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
+        #ecp_ac = [[pyecp[i][1][j][1] for j in range(len(pyecp[i][1]))] for i in atsymb]
+        pyecp = [mol._ecp[mol.atom_pure_symbol(i)] for i in range(natom)]
+        nzrmv=[0]*natom
+        lmax=0
+        klocmax=0
+        knlmax=0
+        for i,(nz,dat) in enumerate(pyecp):
+            nzrmv[i]=nz
+            for lval,ac in dat:
+                if (lval==-1):
+                    klocmax=max(sum(len(j) for j in ac),klocmax)
+                else:
+                    lmax=max(lval,lmax)
+                    knlmax=max(sum(len(j) for j in ac),knlmax)
+        #psd_nk = np.zeros((natom,klocmax),dtype=int)
+        #psd_vk = np.zeros((natom,klocmax),dtype=float)
+        #psd_dzk = np.zeros((natom,klocmax),dtype=float)
+        #psd_nkl = np.zeros((natom,knlmax,lmax+1),dtype=int)
+        #psd_vkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
+        #psd_dzkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
+        klnlmax=max(klocmax,knlmax)
+        psd_n = np.zeros((lmax+2,klnlmax,natom),dtype=int)
+        psd_v = np.zeros((lmax+2,klnlmax,natom),dtype=float)
+        psd_dz = np.zeros((lmax+2,klnlmax,natom),dtype=float)
+        for i,(_,dat) in enumerate(pyecp):
+            for lval,ac in dat:
+                count=0
+                for ri,aici in enumerate(ac):
+                    for ai,ci in aici:
+                        psd_n[lval+1,count,i] = ri-2
+                        psd_v[lval+1,count,i] = ci
+                        psd_dz[lval+1,count,i] = ai
+                        count += 1
+        psd_nk = psd_n[0,:klocmax]
+        psd_vk = psd_v[0,:klocmax]
+        psd_dzk = psd_dz[0,:klocmax]
+        psd_nkl = psd_n[1:,:knlmax]
+        psd_vkl = psd_v[1:,:knlmax]
+        psd_dzkl = psd_dz[1:,:knlmax]
+        with h5py.File(qph5path,'a') as qph5:
+            qph5['pseudo'].attrs['do_pseudo']=True
+            qph5['pseudo'].attrs['pseudo_lmax']=lmax
+            qph5['pseudo'].attrs['pseudo_klocmax']=klocmax
+            qph5['pseudo'].attrs['pseudo_kmax']=knlmax
+            qph5.create_dataset('pseudo/nucl_charge_remove',data=nzrmv)
+            qph5.create_dataset('pseudo/pseudo_n_k',data=psd_nk)
+            qph5.create_dataset('pseudo/pseudo_n_kl',data=psd_nkl)
+            qph5.create_dataset('pseudo/pseudo_v_k',data=psd_vk)
+            qph5.create_dataset('pseudo/pseudo_v_kl',data=psd_vkl)
+            qph5.create_dataset('pseudo/pseudo_dz_k',data=psd_dzk)
+            qph5.create_dataset('pseudo/pseudo_dz_kl',data=psd_dzkl)
+
+        ## nelec to remove for each atom
+        #nuc_z_remov = [i[0] for i in pyecp]
+        #nl_per_atom = [len(i[1]) for i in pyecp]
+        ## list of l-values for channels of each atom
+        #ecp_l = [[ j[0] for j in i[1] ] for i in pyecp]
+        #lmax = max(map(max,ecp_l))
+        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
+        #ecp_ac = [[ j[1] for j in i[1] ] for i in pyecp]
+
 
     ##########################################
     #                                        #
