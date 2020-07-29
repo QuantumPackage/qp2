@@ -313,7 +313,7 @@ END_PROVIDER
          H_prime(j,j) = H_prime(j,j) + alpha*(s_z2_sz - expected_s2)
        enddo
        call lapack_diag_complex(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
-       ci_electronic_energy_complex(:) = (0.d0,0.d0)
+       ci_electronic_energy_complex(:) = 0.d0
        i_state = 0
        allocate (s2_eigvalues(N_det))
        allocate(index_good_state_array(N_det),good_state_array(N_det))
