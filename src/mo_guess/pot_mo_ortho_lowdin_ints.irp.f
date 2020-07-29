@@ -28,7 +28,7 @@ BEGIN_PROVIDER [complex*16, ao_ortho_lowdin_n_e_ints_cplx, (mo_num,mo_num)]
  integer :: i1,j1,i,j
  complex*16 :: c_i1,c_j1
 
- ao_ortho_lowdin_nucl_elec_integrals = (0.d0,0.d0)
+ ao_ortho_lowdin_n_e_ints_cplx = (0.d0,0.d0)
  !$OMP PARALLEL DO DEFAULT(none) &
  !$OMP PRIVATE(i,j,i1,j1,c_j1,c_i1) &
  !$OMP SHARED(mo_num,ao_num,ao_ortho_lowdin_coef_complex, &
