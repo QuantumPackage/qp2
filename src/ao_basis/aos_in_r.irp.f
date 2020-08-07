@@ -97,6 +97,7 @@ subroutine give_all_aos_at_r(r,aos_array)
    dz2 = dz**power_ao(3)
    do l = 1,ao_prim_num(k)
     beta = ao_expo_ordered_transp_per_nucl(l,j,i)
+    if(dabs(beta*r2).gt.40.d0)cycle
     aos_array(k)+= ao_coef_normalized_ordered_transp_per_nucl(l,j,i) * dexp(-beta*r2)
    enddo
    aos_array(k) = aos_array(k) * dx2 * dy2 * dz2
@@ -162,6 +163,8 @@ subroutine give_all_aos_and_grad_at_r(r,aos_array,aos_grad_array)
    accu_2 = 0.d0
    do l = 1,ao_prim_num(k)
     beta = ao_expo_ordered_transp_per_nucl(l,j,i)
+    contrib = 0.d0
+    if(beta*r2.gt.50.d0)cycle
     contrib = ao_coef_normalized_ordered_transp_per_nucl(l,j,i) * dexp(-beta*r2)
     accu_1 += contrib
     accu_2 += contrib * beta

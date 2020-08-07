@@ -114,6 +114,7 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
  double precision :: f12,f13,f14,f32,f23,f43,f16
  double precision :: ckf
  double precision :: a, akf,a2, a3
+ double precision :: exp_f14a2
 
  z0  = 0.D0
  z1  = 1.D0
@@ -153,8 +154,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 
 !Intermediate values of a
  elseif (a.le.100d0) then
-   ex_a = - (rho_a_2*(z24*rho_a_2/pi)**f13) * (z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
-   vx_a =  -(z3*rho_a_2/pi)**f13 + z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi * derf(f12/a)
+   if(dabs(f14/a2).lt.50.d0)then
+    exp_f14a2 = dexp(-f14/a2)
+   else
+    exp_f14a2 = 0.d0
+   endif
+   ex_a = - (rho_a_2*(z24*rho_a_2/pi)**f13) * (z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)* exp_f14a2 -z3*a+z4*a3))
+   vx_a =  -(z3*rho_a_2/pi)**f13 + z2*a*mu/pi*(exp_f14a2 - z1)+mu/sqpi * derf(f12/a)
 
 
 !Expansion for large a
@@ -185,8 +191,13 @@ subroutine ex_lda_sr(mu,rho_a,rho_b,ex,vx_a,vx_b)
 
 !Intermediate values of a
  elseif (a.le.100d0) then
-   ex_b = - (rho_b_2*(z24*rho_b_2/pi)**f13)*(z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*dexp(-f14/a2)-z3*a+z4*a3))
-   vx_b = -(z3*rho_b_2/pi)**f13+ z2*a*mu/pi*(dexp(-f14/a2)-z1)+mu/sqpi* derf(f12/a)
+   if(dabs(f14/a2).lt.50.d0)then
+    exp_f14a2 = dexp(-f14/a2)
+   else
+    exp_f14a2 = 0.d0
+   endif
+   ex_b = - (rho_b_2*(z24*rho_b_2/pi)**f13)*(z3/z8-a*(sqpi*derf(f12/a)+(z2*a-z4*a3)*exp_f14a2-z3*a+z4*a3))
+   vx_b = -(z3*rho_b_2/pi)**f13+ z2*a*mu/pi*(exp_f14a2-z1)+mu/sqpi* derf(f12/a)
 
 !Expansion for large a
  elseif (a.lt.1.d+9) then
@@ -254,7 +265,11 @@ end
       double precision derf
 
       eta=19.0d0
-      fak=2.540118935556d0*dexp(-eta*a*a)
+      if(dabs(eta*a*a).lt.50.d0)then
+       fak=2.540118935556d0*dexp(-eta*a*a)
+      else
+       fak=0.d0
+      endif
 
       if(a .lt. 0.075d0) then
 !      expansion for small mu to avoid numerical problems
@@ -301,7 +316,11 @@ end
       double precision t1,t2,tdexp,t3,t4,t5
 
       eta=19.0d0
-      fak=2.540118935556d0*dexp(-eta*a*a)
+      if(dabs(eta*a*a).lt.50.d0)then
+       fak=2.540118935556d0*dexp(-eta*a*a)
+      else
+       fak=0.d0
+      endif
       dfakda=-2.0d0*eta*a*fak
 
       if(a .lt. 0.075d0) then
@@ -373,17 +392,29 @@ subroutine ecorrlr(rs,z,mu,eclr)
 
   b0=adib*rs
 
-  d2anti=(q1a*rs+q2a*rs**2)*exp(-abs(q3a)*rs)/rs**2
-  d3anti=(t1a*rs+t2a*rs**2)*exp(-abs(t3a)*rs)/rs**3
+  double precision :: exp_q3a_rs
+  if(dabs(q3a*rs).lt.50.d0)then
+   exp_q3a_rs = dexp(-dabs(q3a)*rs)
+  else
+   exp_q3a_rs = 0.d0
+  endif
+  d2anti=(q1a*rs+q2a*rs**2)*exp_q3a_rs/rs**2
+  double precision :: exp_t3a_rs
+  if(dabs(t3a*rs).lt.50.d0)then
+   exp_t3a_rs = dexp(-dabs(t3a)*rs)
+  else
+   exp_t3a_rs = 0.d0
+  endif
+  d3anti=(t1a*rs+t2a*rs**2)*exp_t3a_rs/rs**3
 
   coe2=-3.d0/8.d0/rs**3*(1.d0-z**2)*(g0f(rs)-0.5d0)
 
-  coe3=-(1.d0-z**2)*g0f(rs)/(sqrt(2.d0*pi)*rs**3)
+  coe3=-(1.d0-z**2)*g0f(rs)/(dsqrt(2.d0*pi)*rs**3)
 
-  if(abs(z).eq.1.d0) then
+  if(dabs(z).eq.1.d0) then
 
     coe4=-9.d0/64.d0/rs**3*(dpol(rs) -cf**2*2d0**(5.d0/3.d0)/5.d0/rs**2)
-    coe5=-9.d0/40.d0/(sqrt(2.d0*pi)*rs**3)*dpol(rs)
+    coe5=-9.d0/40.d0/(dsqrt(2.d0*pi)*rs**3)*dpol(rs)
 
   else
 
@@ -393,7 +424,7 @@ subroutine ecorrlr(rs,z,mu,eclr)
         (1.-z**2)*d2anti-cf**2/10.d0*((1.d0+z)**(8.d0/3.d0)          &
         +(1.-z)**(8.d0/3.d0))/rs**2)
 
-    coe5=-9.d0/40.d0/(sqrt(2.d0*pi)*rs**3)*(((1.d0+z)/2.d0)**2       &
+    coe5=-9.d0/40.d0/(dsqrt(2.d0*pi)*rs**3)*(((1.d0+z)/2.d0)**2       &
         *dpol(rs*(2.d0/(1.d0+z))**(1.d0/3.d0))+((1.d0-z)/2.d0)**2    &
         *dpol(rs*(2.d0/(1.d0-z))**(1.d0/3.d0))+(1.d0-z**2)*          &
         d3anti)
@@ -409,13 +440,13 @@ subroutine ecorrlr(rs,z,mu,eclr)
   a3=b0**8*coe3
   a4=b0**6*(b0**2*coe2+4.d0*ec)
 
-  if(mu*sqrt(rs)/phi.lt.0.d0)then
+  if(mu*dsqrt(rs)/phi.lt.0.d0)then
     print*,'phi',phi
     print*,'mu ',mu
     print*,'rs ',rs
     stop -1
   endif
-  eclr=(phi**3*Qrpa(mu*sqrt(rs)/phi)+a1*mu**3+a2*mu**4+a3*mu**5+     &
+  eclr=(phi**3*Qrpa(mu*dsqrt(rs)/phi)+a1*mu**3+a2*mu**4+a3*mu**5+     &
       a4*mu**6+b0**8*mu**8*ec)/((1.d0+b0**2*mu**2)**4)
 
   return
@@ -467,18 +498,29 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
 !SCF
 
       b0=adib*rs
+      double precision :: exp_q3a_rs,exp_t3a_rs
+      if(dabs(q3a*rs).lt.50.d0)then
+       exp_q3a_rs = dexp(-q3a*rs)
+      else
+       exp_q3a_rs = 0.d0
+      endif
+      if(dabs(t3a*rs).lt.50.d0)then
+       exp_t3a_rs = dexp(-t3a*rs)
+      else
+       exp_t3a_rs = 0.d0
+      endif
 
-      d2anti=(q1a+q2a*rs)*exp(-q3a*rs)/rs
-      d3anti=(t1a+t2a*rs)*exp(-t3a*rs)/rs**2
+      d2anti=(q1a+q2a*rs)*exp_q3a_rs/rs
+      d3anti=(t1a+t2a*rs)*exp_t3a_rs/rs**2
 
-      d2antid=-((q1a + q1a*q3a*rs + q2a*q3a*rs**2)/rs**2)*exp(-q3a*rs)
-      d3antid=-((rs*t2a*(1d0 + rs*t3a) + t1a*(2d0 + rs*t3a))/rs**3)*exp(-rs*t3a)
+      d2antid=-((q1a + q1a*q3a*rs + q2a*q3a*rs**2)/rs**2)*exp_q3a_rs
+      d3antid=-((rs*t2a*(1d0 + rs*t3a) + t1a*(2d0 + rs*t3a))/rs**3)*exp_t3a_rs
 
 !SCD
-      d2antidd = exp(-q3a*rs)/rs**3*(                      &
+      d2antidd = exp_q3a_rs/rs**3*(                      &
                  q3a**2*q1a*rs**2+q2a*q3a**2*rs**3         &
                 +2.d0*q3a*q1a*rs+2.d0*q1a)
-      d3antidd = exp(-t3a*rs)/rs**4*                       &
+      d3antidd = exp_t3a_rs/rs**4*                       &
                 (2.d0*t3a*t2a*rs**2 + 2.d0*t2a*rs          &
                  + t1a*t3a**2*rs**2 + t2a*t3a**2*rs**3     &
                  + 4.d0*t1a*t3a*rs + 6.d0*t1a)
@@ -526,7 +568,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
                    +dpoldd(rs)*rs**4)
         coe4zd = 0.d0
 
-        coe5rsd = -9.d0/40.d0/sqrt(2.d0/pi)/rs**5*        &
+        coe5rsd = -9.d0/40.d0/dsqrt(2.d0/pi)/rs**5*        &
                   (12.d0*dpol(rs)-6.d0*rs*dpold(rs)       &
                   +rs**2*dpoldd(rs))
         coe5zd = 0.d0
@@ -670,7 +712,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       a5zd= 0.d0
 !SCF
 
-      x=mu*sqrt(rs)/phi
+      x=mu*dsqrt(rs)/phi
 
       eclr=(phi**3*Qrpa(x)+a1*mu**3+a2*mu**4+a3*mu**5+ &
            a4*mu**6+a5*mu**8)/((1.d0+b0**2*mu**2)**4)
@@ -759,8 +801,14 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       D0f             = 0.752411d0
       E0f             = -0.0127713d0
       F0f             = 0.00185898d0
+      double precision :: exp_d0fx
+      if(dabs(D0f*x).lt.50.d0)then
+       exp_d0fx = dexp(-dabs(D0f)*x)
+      else
+       exp_d0fx = 0.d0
+      endif
       g0f=(1.d0-(0.7317d0-D0f)*x+C0f*x**2+E0f*x**3+  &
-           F0f*x**4)*exp(-abs(D0f)*x)/2.d0
+           F0f*x**4)*exp_d0fx/2.d0
       return
       end
 
@@ -774,7 +822,11 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       Dg0             = -0.0127713d0
       Eg0             = 0.00185898d0
       Bg0             =0.7317d0-Fg0
-      expsum=exp(-Fg0*rs)
+      if(dabs(Fg0*rs).lt.50.d0)then
+       expsum=dexp(-Fg0*rs)
+      else
+       expsum = 0.d0
+      endif
       g0d=(-Bg0+2d0*Cg0*rs+3d0*Dg0*rs**2+4d0*Eg0*rs**3)/2.d0 &
          *expsum                                             &
          - (Fg0*(1d0 - Bg0*rs + Cg0*rs**2 + Dg0*rs**3 + Eg0*rs**4))/ &
@@ -791,7 +843,11 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       Dg0             = -0.0127713d0
       Eg0             = 0.00185898d0
       Bg0             = 0.7317d0-Fg0
-      expsum=exp(-Fg0*rs)
+      if(dabs(Fg0*rs).lt.50.d0)then
+       expsum=dexp(-Fg0*rs)
+      else
+       expsum=0.d0
+      endif
       g0dd = (2.d0*Cg0+6.d0*Dg0*rs+12.d0*Eg0*rs**2)/2.d0*  &
              expsum                                        &
            - (-Bg0+2.d0*Cg0*rs+3.d0*Dg0*rs**2+4.d0*Eg0*rs**3)*Fg0* &
@@ -856,19 +912,12 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       implicit none
       double precision pi,a2,b2,c2,d2,x,Acoul
       pi=dacos(-1.d0)
-      Acoul=2.d0*(log(2.d0)-1.d0)/pi**2
+      Acoul=2.d0*(dlog(2.d0)-1.d0)/pi**2
       a2              = 5.84605d0
       c2              = 3.91744d0
       d2              = 3.44851d0
       b2=d2-3.d0/(2.d0*pi*Acoul)*(4.d0/(9.d0*pi))**(1.d0/3.d0)
-     !if(((1.d0+a2*x+b2*x**2+c2*x**3)/(1.d0+a2*x+d2*x**2)).le.0.d0)then
-     ! print*,(1.d0+a2*x+b2*x**2+c2*x**3)/(1.d0+a2*x+d2*x**2)
-     ! print*,(1.d0+a2*x+b2*x**2+c2*x**3),(1.d0+a2*x+d2*x**2)
-     ! print*,x
-     ! pause
-     !endif
-     !Qrpa=Acoul*log(dabs((1.d0+a2*x+b2*x**2+c2*x**3)/(1.d0+a2*x+d2*x**2)))
-      Qrpa=Acoul*log((1.d0+a2*x+b2*x**2+c2*x**3)/(1.d0+a2*x+d2*x**2))
+      Qrpa=Acoul*dlog((1.d0+a2*x+b2*x**2+c2*x**3)/(1.d0+a2*x+d2*x**2))
       return
       end
 
@@ -876,7 +925,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       implicit none
       double precision pi,a2,b2,c2,d2,x,Acoul
       pi=dacos(-1.d0)
-      Acoul=2.d0*(log(2.d0)-1.d0)/pi**2
+      Acoul=2.d0*(dlog(2.d0)-1.d0)/pi**2
       a2              = 5.84605d0
       c2              = 3.91744d0
       d2              = 3.44851d0
@@ -894,7 +943,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       double precision pi,a2,b2,c2,d2,x,Acoul
       double precision uQ,duQ,dduQ,vQ,dvQ,ddvQ
       pi=dacos(-1.d0)
-      Acoul=2.d0*(log(2.d0)-1.d0)/pi**2
+      Acoul=2.d0*(dlog(2.d0)-1.d0)/pi**2
       a2              = 5.84605d0
       c2              = 3.91744d0
       d2              = 3.44851d0
@@ -934,7 +983,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       ff=((1.d0+y)**(4.d0/3.d0)+(1.d0-y)**(4.d0/3.d0)- &
            2.d0)/(2.d0**(4.d0/3.d0)-2.d0)
 
-      aaa=(1.d0-log(2.d0))/pi**2
+      aaa=(1.d0-dlog(2.d0))/pi**2
       call  GPW(x,aaa,0.21370d0,7.5957d0,3.5876d0, &
            1.6382d0,0.49294d0,G,Gd,Gdd)
       ec0=G
@@ -969,8 +1018,6 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       return
       end
 
-!     subroutine GPW(x,Ac,alfa1,beta1,beta2,beta3,beta4,G,Gd)
-!SCD
       subroutine GPW(x,Ac,alfa1,beta1,beta2,beta3,beta4,G,Gd,Gdd)
 !SCF
 !cc Gd is d/drs G
@@ -982,7 +1029,7 @@ subroutine vcorrlr(rs,z,mu,vclrup,vclrdown,vclrupd,vclrdownd)
       double precision A,dA,ddA,B
 !SCF
       double precision sqrtx
-      sqrtx=sqrt(x)
+      sqrtx=dsqrt(x)
       G=-2.d0*Ac*(1.d0+alfa1*x)*dlog(1.d0+1.d0/(2.d0* &
            Ac*(beta1*x**0.5d0+                        &
            beta2*x+beta3*x**1.5d0+beta4*x**2)))
