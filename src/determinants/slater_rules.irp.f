@@ -1776,12 +1776,12 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   integer                        :: k,l,i
 
   if (iorb < 1) then
-    print *,  irp_here, 'iorb < 1'
+    print *,  irp_here, ': iorb < 1'
     print *,  iorb, mo_num
     stop -1
   endif
   if (iorb > mo_num) then
-    print *,  irp_here, 'iorb > mo_num'
+    print *,  irp_here, ': iorb > mo_num'
     print *,  iorb, mo_num
     stop -1
   endif

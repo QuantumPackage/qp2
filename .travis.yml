@@ -36,5 +36,5 @@ python:
 
 script: 
   - ./configure --install all --config ./config/travis.cfg 
-  - source ./quantum_package.rc ; ninja -j 1 -v 
-  - source ./quantum_package.rc ; qp_test -a 
+#  - source ./quantum_package.rc ; ninja -j 1 -v 
+#  - source ./quantum_package.rc ; qp_test -a 
