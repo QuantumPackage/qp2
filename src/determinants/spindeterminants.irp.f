@@ -364,6 +364,31 @@ subroutine write_spindeterminants
 
 end
 
+subroutine read_spindeterminants
+  use bitmasks
+  implicit none
+  integer                        :: k
+
+  call ezfio_get_spindeterminants_n_det(N_det)
+  call ezfio_get_spindeterminants_n_states(N_states)
+  TOUCH N_det N_states
+
+  call ezfio_get_spindeterminants_n_det_alpha(N_det_alpha_unique)
+  call ezfio_get_spindeterminants_n_det_beta(N_det_beta_unique)
+  call ezfio_get_spindeterminants_psi_coef_matrix_values(psi_bilinear_matrix_values)
+  call ezfio_get_spindeterminants_psi_coef_matrix_rows(psi_bilinear_matrix_rows)
+  call ezfio_get_spindeterminants_psi_coef_matrix_columns(psi_bilinear_matrix_columns)
+  call ezfio_get_spindeterminants_psi_det_alpha(psi_det_alpha_unique)
+  call ezfio_get_spindeterminants_psi_det_beta(psi_det_beta_unique)
+  do k=1,N_det
+    psi_bilinear_matrix_order(k) = k
+  enddo
+  TOUCH psi_bilinear_matrix_values psi_bilinear_matrix_rows psi_bilinear_matrix_columns N_det_alpha_unique N_det_beta_unique psi_det_alpha_unique psi_det_beta_unique psi_bilinear_matrix_order
+
+  call wf_of_psi_bilinear_matrix(.True.)
+
+end
+
  BEGIN_PROVIDER [ double precision, det_alpha_norm, (N_det_alpha_unique) ]
 &BEGIN_PROVIDER [ double precision, det_beta_norm, (N_det_beta_unique) ]
   implicit none
