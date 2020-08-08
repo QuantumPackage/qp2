@@ -7,6 +7,7 @@ double precision function diag_S_mat_elem(key_i,Nint)
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
   BEGIN_DOC
 ! Returns <i|S^2|i>
+! returns <i|S_+ S_-|i> = <i|S^2|i> - S_z*(S_z-1)
   END_DOC
   integer                        :: nup, i
   integer(bit_kind)              :: xorvec(N_int_max)
@@ -33,7 +34,7 @@ subroutine get_s2(key_i,key_j,Nint,s2)
   implicit none
   use bitmasks
   BEGIN_DOC
-  ! Returns $\langle S^2 \rangle - S_z^2 S_z$
+  ! Returns $\langle S^2 \rangle - (S_z^2-S_z)$
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key_i(Nint,2)
