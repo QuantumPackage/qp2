@@ -42,7 +42,7 @@ end
 
 subroutine run_complex
   implicit none
-  integer :: i
+  integer :: i,j
   complex*16 :: i_h_psi_array(n_states)
   double precision :: e(n_states)
   double precision :: norm(n_states)
