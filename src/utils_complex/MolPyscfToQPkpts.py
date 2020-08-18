@@ -564,7 +564,7 @@ def pyscf2QP2_mo(cell,mf,kpts,kmesh=None,cas_idx=None, int_threshold = 1E-8,qph5
 
 
 def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8, 
-        qph5path = 'qpdat.h5',
+        qph5path = 'qpdat.h5', sp_twist=None,
         print_ao_ints_bi=False, 
         print_mo_ints_bi=False, 
         print_ao_ints_df=True, 
@@ -600,6 +600,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5.create_group('electrons')
         qph5.create_group('ao_basis')
         qph5.create_group('mo_basis')
+        qph5.create_group('PBC_DATA')
 
     mo_coeff = mf.mo_coeff
     # Mo_coeff actif
@@ -646,14 +647,69 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     # nucleus on which each AO is centered
     ao_nucl=[i[0] for i in mf.cell.ao_labels(fmt=False,base=1)]
 
+
+    nprim_max = 0
+    for iatom, (sh0,sh1,ao0,ao1) in enumerate(cell.aoslice_by_atom()):
+        for ib in range(sh0,sh1): # sets of contracted exponents
+            nprim = cell.bas_nprim(ib)
+            if (nprim > nprim_max):
+                nprim_max = nprim
+
+    qp_prim_num = np.zeros((nao),dtype=int)
+    qp_coef = np.zeros((nao,nprim_max))
+    qp_expo = np.zeros((nao,nprim_max))
+    qp_nucl = np.zeros((nao),dtype=int)
+    qp_pwr = np.zeros((nao,3),dtype=int)
+
+    clabels = cell.cart_labels(fmt=False)
+
+    tmp_idx=0
+    for iatom, (sh0,sh1,ao0,ao1) in enumerate(cell.aoslice_by_atom()):
+        # shell start,end; AO start,end (sph or cart) for each atom
+        for ib in range(sh0,sh1): # sets of contracted exponents
+            l = cell.bas_angular(ib)    # angular momentum
+            if ( cell.cart==True):
+                 representation=((l+1)*(l+2))//2
+            else:
+                 representation=2*l-1
+            nprim = cell.bas_nprim(ib)  # numer of primitives
+            es = cell.bas_exp(ib)       # exponents
+            cs = cell.bas_ctr_coeff(ib) # coeffs
+            nctr = cell.bas_nctr(ib)    # number of contractions
+            print(iatom,ib,l,nprim,nctr,tmp_idx)
+            for ic in range(nctr): # sets of contraction coeffs
+#                for nfunc in range(((l+1)*(l+2))//2): # always use cart for qp ao basis?
+#                for nfunc in range(2*l-1):
+                for nfunc in range(representation):
+                    qp_expo[tmp_idx,:nprim] = es[:]
+                    qp_coef[tmp_idx,:nprim] = cs[:,ic]
+                    qp_nucl[tmp_idx] = iatom + 1
+                    qp_pwr[tmp_idx,:] = xyzcount(clabels[tmp_idx][3])
+                    qp_prim_num[tmp_idx] = nprim
+                    tmp_idx += 1
+
     with h5py.File(qph5path,'a') as qph5:
-        qph5['mo_basis'].attrs['mo_num']=Nk*nmo
-        qph5['ao_basis'].attrs['ao_num']=Nk*nao
+        qph5['mo_basis'].attrs['mo_num']=nmo
+        qph5['ao_basis'].attrs['ao_num']=nao
 
         #qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
         qph5['ao_basis'].attrs['ao_basis']="dummy basis"
 
-        qph5.create_dataset('ao_basis/ao_nucl',data=Nk*ao_nucl)
+        qph5.create_dataset('ao_basis/ao_nucl',data=qp_nucl)
+        qph5.create_dataset('ao_basis/ao_prim_num',data=qp_prim_num)
+        qph5.create_dataset('ao_basis/ao_expo',data=qp_expo.T)
+        qph5.create_dataset('ao_basis/ao_coef',data=qp_coef.T)
+        qph5.create_dataset('ao_basis/ao_power',data=qp_pwr.T)
+
+
+#    with h5py.File(qph5path,'a') as qph5:
+#        qph5['mo_basis'].attrs['mo_num']=Nk*nmo
+#        qph5['ao_basis'].attrs['ao_num']=Nk*nao
+#
+#        #qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
+#        qph5['ao_basis'].attrs['ao_basis']="dummy basis"
+#
+#        qph5.create_dataset('ao_basis/ao_nucl',data=Nk*ao_nucl)
 
     ##########################################
     #                                        #
@@ -800,7 +856,33 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         print_ao_bi(mf,kconserv,'W.qp',bielec_int_threshold)
     if (print_mo_ints_bi):
         print_mo_bi(mf,kconserv,'W.mo.qp',cas_idx,bielec_int_threshold)
+
+
+    ##########################################
+    #                                        #
+    #       PBC DATA To transfer to qmc      #
+    #                                        #
+    ##########################################
+
+    if len(kpts)== 0:
+        sp_twist=[0.0,0.0,0.0]
+
+
+    with h5py.File(qph5path,'a') as qph5:
+        qph5.create_dataset('PBC_DATA/PBE',(1,),dtype="b1",data=True)
+        qph5.create_dataset('PBC_DATA/Super_Twist',(1,3),dtype="f8",data=sp_twist)
+        qph5.create_dataset('PBC_DATA/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
+        qph5.create_dataset('PBC_DATA/eigenval',(1,nmo),dtype="f8",data=mf.mo_energy)
+
+
+
     return
+
+def xyzcount(s):
+    return list(map(s.count,['x','y','z']))
+
+
+
 
 def xyzcount(s):
     return list(map(s.count,['x','y','z']))
