@@ -8,24 +8,35 @@ double precision function diag_S_mat_elem(key_i,Nint)
   BEGIN_DOC
 ! Returns <i|S^2|i>
   END_DOC
-  integer                        :: nup, i
-  integer(bit_kind)              :: xorvec(N_int_max)
+  integer                        :: nup, ntot, i
+  integer(bit_kind)              :: xorvec(N_int_max), upvec(N_int_max)
 
   do i=1,Nint
     xorvec(i) = xor(key_i(i,1),key_i(i,2))
   enddo
 
   do i=1,Nint
-    xorvec(i) = iand(xorvec(i),key_i(i,1))
+    upvec(i) = iand(xorvec(i),key_i(i,1))
   enddo
 
+  ! nup is number of alpha unpaired
+  ! ntot is total number of unpaired
   nup = 0
+  ntot = 0
   do i=1,Nint
     if (xorvec(i) /= 0_bit_kind) then
-      nup += popcnt(xorvec(i))
+      ntot += popcnt(xorvec(i))
+      if (upvec(i) /= 0_bit_kind) then
+        nup += popcnt(upvec(i))
+      endif
     endif
   enddo
-  diag_S_mat_elem = dble(nup)
+  
+  double precision :: sz
+  sz = nup - 0.5d0*ntot
+  
+  !<S^2> = <S+ S-> + Sz(Sz-1)
+  diag_S_mat_elem = nup + sz*(sz-1)
 
 end
 
