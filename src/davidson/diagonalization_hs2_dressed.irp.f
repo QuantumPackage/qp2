@@ -450,7 +450,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       if (s2_eig) then
         h_p = s_
         do k=1,shift2
-          h_p(k,k) = h_p(k,k) + S_z2_Sz - expected_s2
+          h_p(k,k) = h_p(k,k) - expected_s2
         enddo
         if (only_expected_s2) then
           alpha = 0.1d0
@@ -496,7 +496,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           0.d0, s_, size(s_,1))
 
       do k=1,shift2
-        s2(k) = s_(k,k) + S_z2_Sz
+        s2(k) = s_(k,k)
       enddo
 
       if (only_expected_s2) then

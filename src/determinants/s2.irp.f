@@ -136,7 +136,7 @@ subroutine u_0_S2_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
 
   call S2_u_0_nstates(v_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
   do i=1,N_st
-    e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)/u_dot_u(u_0(1,i),n) + S_z2_Sz
+    e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)/u_dot_u(u_0(1,i),n)
   enddo
 end
 
