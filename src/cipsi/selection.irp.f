@@ -19,7 +19,7 @@ BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
  variance_match_weight(:) = 1.d0
 END_PROVIDER
 
-subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
+subroutine update_pt2_and_variance_weights(pt2, variance, norm2, N_st)
   implicit none
   BEGIN_DOC
 ! Updates the PT2- and Variance- matching weights.
@@ -27,7 +27,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
   integer, intent(in)          :: N_st
   double precision, intent(in) :: pt2(N_st)
   double precision, intent(in) :: variance(N_st)
-  double precision, intent(in) :: norm(N_st)
+  double precision, intent(in) :: norm2(N_st)
 
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
@@ -50,7 +50,7 @@ subroutine update_pt2_and_variance_weights(pt2, variance, norm, N_st)
 
   do k=1,N_st
     ! rPT2
-    rpt2(k) = pt2(k)/(1.d0 + norm(k))
+    rpt2(k) = pt2(k)/(1.d0 + norm2(k))
   enddo
 
   avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
@@ -179,7 +179,7 @@ subroutine get_mask_phase(det1, pm, Nint)
 end subroutine
 
 
-subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
+subroutine select_connected(i_generator,E0,pt2,variance,norm2,b,subset,csubset)
   use bitmasks
   use selection_types
   implicit none
@@ -187,7 +187,7 @@ subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
   type(selection_buffer), intent(inout) :: b
   double precision, intent(inout)  :: pt2(N_states)
   double precision, intent(inout)  :: variance(N_states)
-  double precision, intent(inout)  :: norm(N_states)
+  double precision, intent(inout)  :: norm2(N_states)
   integer :: k,l
   double precision, intent(in)   :: E0(N_states)
 
@@ -205,7 +205,7 @@ subroutine select_connected(i_generator,E0,pt2,variance,norm,b,subset,csubset)
       particle_mask(k,1) = iand(generators_bitmask(k,1,s_part), not(psi_det_generators(k,1,i_generator)) )
       particle_mask(k,2) = iand(generators_bitmask(k,2,s_part), not(psi_det_generators(k,2,i_generator)) )
   enddo
-  call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm,b,subset,csubset)
+  call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm2,b,subset,csubset)
   deallocate(fock_diag_tmp)
 end subroutine
 
@@ -254,7 +254,7 @@ double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
 end
 
 
-subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm,buf,subset,csubset)
+subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2,variance,norm2,buf,subset,csubset)
   use bitmasks
   use selection_types
   implicit none
@@ -268,7 +268,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   double precision, intent(in)   :: E0(N_states)
   double precision, intent(inout) :: pt2(N_states)
   double precision, intent(inout)  :: variance(N_states)
-  double precision, intent(inout)  :: norm(N_states)
+  double precision, intent(inout)  :: norm2(N_states)
   type(selection_buffer), intent(inout) :: buf
 
   integer                         :: h1,h2,s1,s2,s3,i1,i2,ib,sp,k,i,j,nt,ii,sze
@@ -644,9 +644,9 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
 
             if(.not.pert_2rdm)then
-             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat, buf)
             else
-             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
+             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
             endif
           end if
         enddo
@@ -664,7 +664,7 @@ end subroutine
 
 
 
-subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf)
+subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat, buf)
   use bitmasks
   use selection_types
   implicit none
@@ -676,7 +676,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, intent(in)    :: E0(N_states)
   double precision, intent(inout) :: pt2(N_states)
   double precision, intent(inout) :: variance(N_states)
-  double precision, intent(inout) :: norm(N_states)
+  double precision, intent(inout) :: norm2(N_states)
   type(selection_buffer), intent(inout) :: buf
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate
@@ -787,7 +787,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
         pt2(istate) = pt2(istate) + e_pert
         variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
-        norm(istate) = norm(istate) + coef * coef
+        norm2(istate) = norm2(istate) + coef * coef
 
 !!!DEBUG
 !        pt2(istate) = pt2(istate) - e_pert + alpha_h_psi**2/delta_E
