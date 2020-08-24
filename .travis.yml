@@ -8,7 +8,7 @@
 
 os: linux
 
-dist: trusty
+dist: bionic
 
 sudo: false
 
