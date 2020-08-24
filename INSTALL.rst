@@ -36,7 +36,7 @@ Requirements
 - Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran
 - `GNU make`_
 - `Autoconf`_
-- `Python`_ > 3.0
+- `Python`_ > 3.7
 - |IRPF90| : Fortran code generator
 - |EZFIO| : Easy Fortran Input/Output library generator
 - |BLAS| and |LAPACK|
@@ -141,6 +141,14 @@ IRPF90
 
 *IRPF90* is a Fortran code generator for programming using the Implicit Reference
 to Parameters (IRP) method.
+
+If you have *pip* for Python2, you can do 
+
+.. code:: bash
+
+   python2 -m pip install --user irpf90
+
+Otherwise,
 
 * Download the latest version of IRPF90
   here : `<https://gitlab.com/scemama/irpf90/-/archive/v1.7.2/irpf90-v1.7.2.tar.gz>`_ and move
@@ -383,5 +391,19 @@ Otherwise,
 * Extract the archive
 
 * Copy :file:`docopt-0.6.2/docopt.py` in the :file:`${QP_ROOT}/scripts` directory
+
+
+resultsFile
+-----------
+
+*resultsFile* is a Python package to extract data from output files of quantum chemistry
+codes.
+
+If you have *pip* for Python3, you can do 
+
+.. code:: bash
+
+   python3 -m pip install --user resultsFile
+
 
 
