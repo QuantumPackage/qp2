@@ -2,13 +2,16 @@
 # Stage 3
 
 # Extract cache from compile stage
-cd $HOME
-tar -zxf ./cache/compil.tgz
-rm ./cache/compil.tgz
+cd ../
+tar -zxf $HOME/cache/compil.tgz
+rm $HOME/cache/compil.tgz
 
 # Configure QP2
-cd $HOME/QuantumPackage/qp2
+cd qp2
 source ./quantum_package.rc
 qp_test -a
+
+
+
 
 
