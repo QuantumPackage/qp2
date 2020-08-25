@@ -4,13 +4,13 @@ subroutine run_stochastic_cipsi
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
   END_DOC
   integer                        :: i,j,k
-  double precision, allocatable  :: pt2(:), variance(:), norm(:), rpt2(:), zeros(:)
+  double precision, allocatable  :: pt2(:), variance(:), norm2(:), rpt2(:), zeros(:)
   integer                        :: to_select
   logical, external :: qp_stop
 
   double precision :: rss
   double precision, external :: memory_of_double
-  PROVIDE H_apply_buffer_allocated 
+  PROVIDE H_apply_buffer_allocated
 
   N_iter = 1
   threshold_generators = 1.d0
@@ -19,7 +19,7 @@ subroutine run_stochastic_cipsi
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
-  allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm(N_states), variance(N_states))
+  allocate (pt2(N_states), zeros(N_states), rpt2(N_states), norm2(N_states), variance(N_states))
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -30,7 +30,7 @@ subroutine run_stochastic_cipsi
   zeros = 0.d0
   pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
-  norm = 0.d0
+  norm2 = 0.d0
   variance = huge(1.e0)
 
   if (s2_eig) then
@@ -77,12 +77,12 @@ subroutine run_stochastic_cipsi
 
     pt2 = 0.d0
     variance = 0.d0
-    norm = 0.d0
+    norm2 = 0.d0
     call ZMQ_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-      norm, to_select) ! Stochastic PT2 and selection
+      norm2, to_select) ! Stochastic PT2 and selection
 
     do k=1,N_states
-      rpt2(k) = pt2(k)/(1.d0 + norm(k))
+      rpt2(k) = pt2(k)/(1.d0 + norm2(k))
     enddo
 
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
@@ -90,7 +90,7 @@ subroutine run_stochastic_cipsi
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
-    call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+    call print_summary(psi_energy_with_nucl_rep,pt2,error,variance,norm2,N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
@@ -111,7 +111,7 @@ subroutine run_stochastic_cipsi
     call diagonalize_CI
     call save_wavefunction
     call save_energy(psi_energy_with_nucl_rep, zeros)
-    if (qp_stop()) exit 
+    if (qp_stop()) exit
   enddo
 
   if (.not.qp_stop()) then
@@ -123,16 +123,16 @@ subroutine run_stochastic_cipsi
 
     pt2(:) = 0.d0
     variance(:) = 0.d0
-    norm(:) = 0.d0
+    norm2(:) = 0.d0
     call ZMQ_pt2(psi_energy_with_nucl_rep, pt2,relative_error,error,variance, &
-      norm,0) ! Stochastic PT2
+      norm2,0) ! Stochastic PT2
 
     do k=1,N_states
-      rpt2(k) = pt2(k)/(1.d0 + norm(k))
+      rpt2(k) = pt2(k)/(1.d0 + norm2(k))
     enddo
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
-    call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+    call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm2,N_det,N_occ_pattern,N_states,psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif

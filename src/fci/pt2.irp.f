@@ -36,7 +36,7 @@ subroutine run
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
 
-  double precision               :: E_CI_before(N_states), relative_error, error(N_states), variance(N_states), norm(N_states), rpt2(N_states)
+  double precision               :: E_CI_before(N_states), relative_error, error(N_states), variance(N_states), norm2(N_states), rpt2(N_states)
 
   pt2(:) = 0.d0
 
@@ -45,16 +45,16 @@ subroutine run
 
   if (do_pt2) then
     call ZMQ_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-      norm,0) ! Stochastic PT2
+      norm2,0) ! Stochastic PT2
   else
-    call ZMQ_selection(0, pt2, variance, norm)
+    call ZMQ_selection(0, pt2, variance, norm2)
   endif
 
   do k=1,N_states
-    rpt2(k) = pt2(k)/(1.d0 + norm(k))
+    rpt2(k) = pt2(k)/(1.d0 + norm2(k))
   enddo
 
-  call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm,N_det,N_occ_pattern,N_states,psi_s2)
+  call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm2,N_det,N_occ_pattern,N_states,psi_s2)
 
   call save_energy(E_CI_before,pt2)
 end
