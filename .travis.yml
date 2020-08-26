@@ -19,9 +19,11 @@ addons:
     packages:
     - gfortran
     - gcc
+    - libatlas-base-dev
     - liblapack-dev
     - libblas-dev
     - wget
+    - eatmydata
 
 env:
   - OPAMROOT=$HOME/.opam
@@ -43,9 +45,9 @@ stages:
 jobs:
   include:
     - stage: configuration
-      script: travis/configuration.sh
+      script: eatmydata travis/configuration.sh
     - stage: compilation
-      script: travis/compilation.sh
+      script: eatmydata travis/compilation.sh
     - stage: testing
-      script: travis/testing.sh
+      script: eatmydata travis/testing.sh
 
