@@ -20,8 +20,8 @@ addons:
     - gfortran
     - gcc
     - libatlas-base-dev
-    - liblapack-dev
-    - libblas-dev
+#    - liblapack-dev
+#    - libblas-dev
     - wget
     - eatmydata
 
