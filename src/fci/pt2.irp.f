@@ -28,35 +28,41 @@ end
 
 subroutine run
   implicit none
+  use selection_types
   integer                        :: i,j,k
   logical, external              :: detEq
 
-  double precision               :: pt2(N_states)
+  type(pt2_type)                 :: pt2_data
   integer                        :: degree
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
 
   double precision               :: E_CI_before(N_states), relative_error, error(N_states), variance(N_states), norm2(N_states), rpt2(N_states)
 
-  pt2(:) = 0.d0
+  allocate( pt2_data % pt2(N_states) )
+  allocate( pt2_data % variance(N_states) )
+  allocate( pt2_data % norm2(N_states) )
 
   E_CI_before(:) = psi_energy(:) + nuclear_repulsion
   relative_error=PT2_relative_error
 
   if (do_pt2) then
-    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2,relative_error,error, variance, &
-      norm2,0) ! Stochastic PT2
+    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error,error,0) ! Stochastic PT2
   else
-    call ZMQ_selection(0, pt2, variance, norm2)
+    call ZMQ_selection(0, pt2_data)
   endif
 
   do k=1,N_states
-    rpt2(k) = pt2(k)/(1.d0 + norm2(k))
+    rpt2(k) = pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
   enddo
 
-  call print_summary(psi_energy_with_nucl_rep(1:N_states),pt2,error,variance,norm2,N_det,N_occ_pattern,N_states,psi_s2)
+  call print_summary(psi_energy_with_nucl_rep(1:N_states), &
+    pt2_data % pt2, error, &
+    pt2_data % variance,   &
+    pt2_data % norm2,      &
+    N_det,N_occ_pattern,N_states,psi_s2)
 
-  call save_energy(E_CI_before,pt2)
+  call save_energy(E_CI_before,pt2_data % pt2)
 end
 
 

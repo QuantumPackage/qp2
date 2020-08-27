@@ -19,21 +19,27 @@ BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
  variance_match_weight(:) = 1.d0
 END_PROVIDER
 
-subroutine update_pt2_and_variance_weights(pt2, variance, norm2, N_st)
+subroutine update_pt2_and_variance_weights(pt2_data, N_st)
   implicit none
+  use selection_types
   BEGIN_DOC
 ! Updates the PT2- and Variance- matching weights.
   END_DOC
   integer, intent(in)          :: N_st
-  double precision, intent(in) :: pt2(N_st)
-  double precision, intent(in) :: variance(N_st)
-  double precision, intent(in) :: norm2(N_st)
+  type(pt2_type), intent(in)   :: pt2_data
+  double precision             :: pt2(N_st)
+  double precision             :: variance(N_st)
+  double precision             :: norm2(N_st)
 
   double precision :: avg, rpt2(N_st), element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
   integer, parameter :: i_itermax = 1
   double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
+
+  pt2(:)      = pt2_data % pt2(:)
+  variance(:) = pt2_data % variance(:)
+  norm2(:)    = pt2_data % norm2(:)
 
   if (i_iter == 0) then
     allocate(memo_variance(N_st,i_itermax), memo_pt2(N_st,i_itermax))

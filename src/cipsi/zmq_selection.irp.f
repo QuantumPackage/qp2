@@ -1,4 +1,4 @@
-subroutine ZMQ_selection(N_in, pt2, variance, norm2)
+subroutine ZMQ_selection(N_in, pt2_data)
   use f77_zmq
   use selection_types
 
@@ -9,9 +9,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm2)
   type(selection_buffer)         :: b
   integer                        :: i, N
   integer, external              :: omp_get_thread_num
-  double precision, intent(out)  :: pt2(N_states)
-  double precision, intent(out)  :: variance(N_states)
-  double precision, intent(out)  :: norm2(N_states)
+  type(pt2_type), intent(inout)  :: pt2_data
 
 !  PROVIDE psi_det psi_coef N_det qp_max_mem N_states pt2_F s2_eig N_det_generators
 
@@ -112,19 +110,20 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm2)
     enddo
   endif
 
-  !$OMP PARALLEL DEFAULT(shared)  SHARED(b, pt2, variance, norm2)  PRIVATE(i) NUM_THREADS(nproc_target+1)
+  !$OMP PARALLEL DEFAULT(shared)  SHARED(b, pt2_data)  PRIVATE(i) NUM_THREADS(nproc_target+1)
   i = omp_get_thread_num()
   if (i==0) then
-    call selection_collector(zmq_socket_pull, b, N, pt2, variance, norm2)
+    call selection_collector(zmq_socket_pull, b, N, &
+       pt2_data % pt2, pt2_data % variance, pt2_data % norm2)
   else
     call selection_slave_inproc(i)
   endif
   !$OMP END PARALLEL
   call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'selection')
   do i=N_det+1,N_states
-    pt2(i) = 0.d0
-    variance(i) = 0.d0
-    norm2(i) = 0.d0
+    pt2_data % pt2(i) = 0.d0
+    pt2_data % variance(i) = 0.d0
+    pt2_data % norm2(i) = 0.d0
   enddo
   if (N_in > 0) then
     if (s2_eig) then
@@ -134,12 +133,12 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm2)
   endif
   call delete_selection_buffer(b)
   do k=1,N_states
-    pt2(k) = pt2(k) * f(k)
-    variance(k) = variance(k) * f(k)
-    norm2(k) = norm2(k) * f(k)
+    pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
+    pt2_data % variance(k) = pt2_data % variance(k) * f(k)
+    pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
   enddo
 
-  call update_pt2_and_variance_weights(pt2, variance, norm2, N_states)
+  call update_pt2_and_variance_weights(pt2_data, N_states)
 
 end subroutine
 

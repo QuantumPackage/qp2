@@ -5,5 +5,11 @@ module selection_types
     double precision, pointer :: val(:)
     double precision          :: mini
   endtype
+
+  type pt2_type
+    double precision, allocatable :: pt2(:)
+    double precision, allocatable :: variance(:)
+    double precision, allocatable :: norm2(:)
+  endtype
 end module
 
