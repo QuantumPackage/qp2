@@ -128,13 +128,14 @@ subroutine ZMQ_selection(N_in, pt2_data)
   endif
   call delete_selection_buffer(b)
 
-  if (.not.do_pt2) then
-    do k=1,N_states
+  do k=1,N_states
       pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
       pt2_data % variance(k) = pt2_data % variance(k) * f(k)
       pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
-    enddo
-  endif
+
+      pt2_data % rpt2(k) =  &
+         pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
+  enddo
 
   call update_pt2_and_variance_weights(pt2_data, N_states)
 

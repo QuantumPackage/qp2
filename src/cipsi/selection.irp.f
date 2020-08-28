@@ -31,7 +31,7 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
   double precision             :: variance(N_st)
   double precision             :: norm2(N_st)
 
-  double precision :: avg, rpt2(N_st), element, dt, x
+  double precision :: avg, element, dt, x
   integer          :: k
   integer, save    :: i_iter=0
   integer, parameter :: i_itermax = 1
@@ -53,11 +53,6 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
   endif
 
   dt = 2.0d0
-
-  do k=1,N_st
-    ! rPT2
-    rpt2(k) = pt2(k)/(1.d0 + norm2(k))
-  enddo
 
   avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
   do k=1,N_st

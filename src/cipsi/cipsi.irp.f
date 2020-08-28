@@ -7,7 +7,7 @@ subroutine run_cipsi
   END_DOC
   integer                        :: i,j,k
   type(pt2_type)                 :: pt2_data
-  double precision, allocatable  :: rpt2(:), zeros(:)
+  double precision, allocatable  :: zeros(:)
   integer                        :: to_select
   logical, external :: qp_stop
 
@@ -23,8 +23,8 @@ subroutine run_cipsi
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss,irp_here)
 
-  allocate (zeros(N_states), rpt2(N_states))
-  allocate (pt2_data % pt2(N_states), pt2_data % norm2(N_states), pt2_data % variance(N_states))
+  allocate (zeros(N_states))
+  call pt2_alloc(pt2_data, N_states)
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -33,8 +33,8 @@ subroutine run_cipsi
   relative_error=PT2_relative_error
 
   zeros = 0.d0
-  rpt2 = -huge(1.e0)
-  pt2_data % pt2 = -huge(1.e0)
+  pt2_data % pt2  = -huge(1.e0)
+  pt2_data % rpt2 = -huge(1.e0)
   pt2_data % norm2 = 0.d0
   pt2_data % variance = huge(1.e0)
 
@@ -92,21 +92,17 @@ subroutine run_cipsi
       call ZMQ_selection(to_select, pt2_data)
     endif
 
-    do k=1,N_states
-      rpt2(k) = pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
-    enddo
-
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
-                    (psi_energy_with_nucl_rep(1) + rpt2(1) - hf_energy_ref)
+                    (psi_energy_with_nucl_rep(1) + pt2_data % rpt2(1) - hf_energy_ref)
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
        pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
 
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
+    call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
+    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
     N_iter += 1
 
@@ -147,15 +143,10 @@ subroutine run_cipsi
     print *,  'N_states          = ', N_states
     print*,   'correlation_ratio = ', correlation_energy_ratio
 
-
-    do k=1,N_states
-      rpt2(k) = pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
-    enddo
-
-    call save_energy(psi_energy_with_nucl_rep, rpt2)
+    call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states), &
       pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
+    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
   endif
 

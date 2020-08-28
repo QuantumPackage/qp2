@@ -292,16 +292,19 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
       print '(A)', '========== ================= =========== =============== =============== ================='
 
       PROVIDE global_selection_buffer
+
       !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(nproc_target+1)            &
           !$OMP  PRIVATE(i)
       i = omp_get_thread_num()
       if (i==0) then
 
-        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, w(1,1), w(1,2), w(1,3), w(1,4), b, N)
-        pt2_data % pt2(pt2_stoch_istate) = w(pt2_stoch_istate,1)
-        pt2_data % pt2_err(pt2_stoch_istate) = w(pt2_stoch_istate,2)
-        pt2_data % variance(pt2_stoch_istate) = w(pt2_stoch_istate,3)
-        pt2_data % norm2(pt2_stoch_istate) = w(pt2_stoch_istate,4)
+        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, pt2_data, b, N)
+        pt2_data % rpt2(pt2_stoch_istate) =  &
+          pt2_data % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
+
+        !TODO : We should use here the correct formula for the error of X/Y
+        pt2_data % rpt2_err(pt2_stoch_istate) =  &
+          pt2_data % pt2_err(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
 
       else
         call pt2_slave_inproc(i)
@@ -343,7 +346,7 @@ subroutine pt2_slave_inproc(i)
 end
 
 
-subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm2, b, N_)
+subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   use f77_zmq
   use selection_types
   use bitmasks
@@ -352,8 +355,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   double precision, intent(in)   :: relative_error, E
-  double precision, intent(out)  :: pt2(N_states), error(N_states)
-  double precision, intent(out)  :: variance(N_states), norm2(N_states)
+  type(pt2_type), intent(inout)  :: pt2_data
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N_
 
@@ -409,10 +411,10 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   call create_selection_buffer(N_, N_*2, b2)
 
 
-  pt2(:) = -huge(1.)
-  error(:) = huge(1.)
-  variance(:) = huge(1.)
-  norm2(:) = 0.d0
+  pt2_data % pt2(pt2_stoch_istate) = -huge(1.)
+  pt2_data % pt2_err(pt2_stoch_istate) = huge(1.)
+  pt2_data % variance(pt2_stoch_istate) = huge(1.)
+  pt2_data % norm2(pt2_stoch_istate) = 0.d0
   S(:) = 0d0
   S2(:) = 0d0
   T2(:) = 0d0
@@ -486,21 +488,21 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
         if (qp_stop()) then
           stop_now = .True.
         endif
-        pt2(pt2_stoch_istate) = avg
-        variance(pt2_stoch_istate) = avg2
-        norm2(pt2_stoch_istate) = avg3
+        pt2_data % pt2(pt2_stoch_istate) = avg
+        pt2_data % variance(pt2_stoch_istate) = avg2
+        pt2_data % norm2(pt2_stoch_istate) = avg3
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((S2(t) / c) - (S(t)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          error(pt2_stoch_istate) = eqt
+          pt2_data % pt2_err(pt2_stoch_istate) = eqt
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
             print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, F14.10, 2X, F14.10, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3, time-time0, ''
             if (stop_now .or. (                                      &
-                  (do_exit .and. (dabs(error(pt2_stoch_istate)) /    &
-                  (1.d-20 + dabs(pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
+                  (do_exit .and. (dabs(pt2_data % pt2_err(pt2_stoch_istate)) /    &
+                  (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
               if (zmq_abort(zmq_to_qp_run_socket) == -1) then
                 call sleep(10)
                 if (zmq_abort(zmq_to_qp_run_socket) == -1) then
