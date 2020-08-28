@@ -104,7 +104,7 @@ subroutine ZMQ_selection(N_in, pt2_data)
 
   f(:) = 1.d0
   if (.not.do_pt2) then
-  double precision :: f(N_states), u_dot_u
+    double precision :: f(N_states), u_dot_u
     do k=1,min(N_det,N_states)
      f(k) = 1.d0 / u_dot_u(psi_selectors_coef(1,k), N_det_selectors)
     enddo
@@ -113,18 +113,13 @@ subroutine ZMQ_selection(N_in, pt2_data)
   !$OMP PARALLEL DEFAULT(shared)  SHARED(b, pt2_data)  PRIVATE(i) NUM_THREADS(nproc_target+1)
   i = omp_get_thread_num()
   if (i==0) then
-    call selection_collector(zmq_socket_pull, b, N, &
-       pt2_data % pt2, pt2_data % variance, pt2_data % norm2)
+    call selection_collector(zmq_socket_pull, b, N, pt2_data)
   else
     call selection_slave_inproc(i)
   endif
   !$OMP END PARALLEL
+
   call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'selection')
-  do i=N_det+1,N_states
-    pt2_data % pt2(i) = 0.d0
-    pt2_data % variance(i) = 0.d0
-    pt2_data % norm2(i) = 0.d0
-  enddo
   if (N_in > 0) then
     if (s2_eig) then
       call make_selection_buffer_s2(b)
@@ -132,11 +127,14 @@ subroutine ZMQ_selection(N_in, pt2_data)
     call fill_H_apply_buffer_no_selection(b%cur,b%det,N_int,0)
   endif
   call delete_selection_buffer(b)
-  do k=1,N_states
-    pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
-    pt2_data % variance(k) = pt2_data % variance(k) * f(k)
-    pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
-  enddo
+
+  if (.not.do_pt2) then
+    do k=1,N_states
+      pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
+      pt2_data % variance(k) = pt2_data % variance(k) * f(k)
+      pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
+    enddo
+  endif
 
   call update_pt2_and_variance_weights(pt2_data, N_states)
 
@@ -150,7 +148,7 @@ subroutine selection_slave_inproc(i)
   call run_selection_slave(1,i,pt2_e0_denominator)
 end
 
-subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm2)
+subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   use f77_zmq
   use selection_types
   use bitmasks
@@ -160,12 +158,11 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm2)
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N
-  double precision, intent(out)      :: pt2(N_states)
-  double precision, intent(out)      :: variance(N_states)
-  double precision, intent(out)      :: norm2(N_states)
-  double precision                   :: pt2_mwen(N_states)
-  double precision                   :: variance_mwen(N_states)
-  double precision                   :: norm2_mwen(N_states)
+  type(pt2_type), intent(inout)  :: pt2_data
+
+  double precision               :: pt2_mwen(N_states)
+  double precision               :: variance_mwen(N_states)
+  double precision               :: norm2_mwen(N_states)
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
 
@@ -189,18 +186,18 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm2)
   call check_mem(rss,irp_here)
   allocate(task_id(N_det_generators))
   more = 1
-  pt2(:)           = 0d0
-  variance(:)      = 0.d0
-  norm2(:)          = 0.d0
+  pt2_data % pt2(:)      = 0d0
+  pt2_data % variance(:) = 0.d0
+  pt2_data % norm2(:)    = 0.d0
   pt2_mwen(:)      = 0.d0
   variance_mwen(:) = 0.d0
   norm2_mwen(:)     = 0.d0
   do while (more == 1)
     call pull_selection_results(zmq_socket_pull, pt2_mwen, variance_mwen, norm2_mwen, b2%val(1), b2%det(1,1,1), b2%cur, task_id, ntask)
 
-    pt2(:) += pt2_mwen(:)
-    variance(:) += variance_mwen(:)
-    norm2(:) += norm2_mwen(:)
+    pt2_data % pt2(:)      += pt2_mwen(:)
+    pt2_data % variance(:) += variance_mwen(:)
+    pt2_data % norm2(:)    += norm2_mwen(:)
     do i=1, b2%cur
       call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
       if (b2%val(i) > b%mini) exit

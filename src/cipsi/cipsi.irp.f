@@ -64,7 +64,6 @@ subroutine run_cipsi
   endif
 
   double precision :: correlation_energy_ratio
-  double precision :: error(N_states)
 
   correlation_energy_ratio = 0.d0
 
@@ -86,7 +85,7 @@ subroutine run_cipsi
       threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error,error, 0) ! Stochastic PT2
+      call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error, 0) ! Stochastic PT2
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
@@ -103,10 +102,7 @@ subroutine run_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data % pt2, error, &
-       pt2_data % variance,   &
-       pt2_data % norm2,      &
-       N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
@@ -143,7 +139,7 @@ subroutine run_cipsi
       pt2_data % norm2(:) = 0.d0
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, error, 0) ! Stochastic PT2
+      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, 0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
     endif
     print *,  'N_det             = ', N_det
@@ -158,10 +154,7 @@ subroutine run_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states), &
-      pt2_data % pt2, error, &
-      pt2_data % variance,   &
-      pt2_data % norm2,      &
-      N_det,N_occ_pattern,N_states,psi_s2)
+      pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif

@@ -107,7 +107,7 @@ end function
 
 
 
-subroutine ZMQ_pt2(E, pt2_data, relative_error, error, N_in)
+subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
   use f77_zmq
   use selection_types
 
@@ -117,7 +117,6 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, error, N_in)
   integer, intent(in)            :: N_in
 !  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
-  double precision, intent(out)  :: error(N_states)
   type(pt2_type), intent(inout)  :: pt2_data
 !
   integer                        :: i, N
@@ -137,11 +136,7 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, error, N_in)
   endif
 
   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
-    pt2_data % pt2=0.d0
-    pt2_data % variance=0.d0
-    pt2_data % norm2=0.d0
-    call ZMQ_selection(N_in, pt2_data % pt2, pt2_data % variance, pt2_data % norm2)
-    error(:) = 0.d0
+    call ZMQ_selection(N_in, pt2_data)
   else
 
     N = max(N_in,1) * N_states
@@ -304,10 +299,9 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, error, N_in)
 
         call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, w(1,1), w(1,2), w(1,3), w(1,4), b, N)
         pt2_data % pt2(pt2_stoch_istate) = w(pt2_stoch_istate,1)
-        error(pt2_stoch_istate) = w(pt2_stoch_istate,2)
+        pt2_data % pt2_err(pt2_stoch_istate) = w(pt2_stoch_istate,2)
         pt2_data % variance(pt2_stoch_istate) = w(pt2_stoch_istate,3)
         pt2_data % norm2(pt2_stoch_istate) = w(pt2_stoch_istate,4)
-        !TODO SEGV
 
       else
         call pt2_slave_inproc(i)
@@ -334,9 +328,6 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, error, N_in)
     state_average_weight(:) = state_average_weight_save(:)
     TOUCH state_average_weight
   endif
-  do k=N_det+1,N_states
-    pt2_data % pt2(k) = 0.d0
-  enddo
 
   call update_pt2_and_variance_weights(pt2_data, N_states)
 

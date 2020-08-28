@@ -23,10 +23,7 @@ subroutine run_stochastic_cipsi
   call check_mem(rss,irp_here)
 
   allocate (zeros(N_states), rpt2(N_states))
-  allocate( pt2_data % pt2(N_states) )
-  allocate( pt2_data % variance(N_states) )
-  allocate( pt2_data % norm2(N_states) )
-
+  call pt2_alloc(pt2_data, N_states)
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -35,8 +32,8 @@ subroutine run_stochastic_cipsi
   relative_error=PT2_relative_error
 
   zeros = 0.d0
-  pt2_data % pt2 = -huge(1.e0)
   rpt2 = -huge(1.e0)
+  pt2_data % pt2 = -huge(1.e0)
   pt2_data % norm2 = 0.d0
   pt2_data % variance = huge(1.e0)
 
@@ -66,7 +63,6 @@ subroutine run_stochastic_cipsi
   endif
 
   double precision :: correlation_energy_ratio
-  double precision :: error(N_states)
 
   correlation_energy_ratio = 0.d0
 
@@ -86,8 +82,7 @@ subroutine run_stochastic_cipsi
     pt2_data % pt2 = 0.d0
     pt2_data % variance = 0.d0
     pt2_data % norm2 = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error,error, &
-      to_select) ! Stochastic PT2 and selection
+    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error,to_select) ! Stochastic PT2 and selection
 
     do k=1,N_states
       rpt2(k) = pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
@@ -99,10 +94,7 @@ subroutine run_stochastic_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data % pt2, error, &
-       pt2_data % variance,   &
-       pt2_data % norm2,      &
-       N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
 
@@ -136,7 +128,7 @@ subroutine run_stochastic_cipsi
     pt2_data % pt2(:) = 0.d0
     pt2_data % variance(:) = 0.d0
     pt2_data % norm2(:) = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, error, 0) ! Stochastic PT2
+    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, 0) ! Stochastic PT2
 
     do k=1,N_states
       rpt2(k) = pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
@@ -144,12 +136,10 @@ subroutine run_stochastic_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, rpt2)
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data % pt2, error, &
-       pt2_data % variance,   &
-       pt2_data % norm2,      &
-       N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data , N_det, N_occ_pattern, N_states, psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),rpt2,N_det)
     call print_extrapolated_energy()
   endif
+  call pt2_dealloc(pt2_data)
 
 end
