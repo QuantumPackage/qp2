@@ -11,6 +11,7 @@ function run() {
   qp edit --check
   qp reset --mos
   qp set scf_utils n_it_scf_max 50
+  qp set ao_one_e_ints lin_dep_cutoff 1.e-50
   qp run scf
 #  qp set_frozen_core 
   energy="$(ezfio get hartree_fock energy)"
