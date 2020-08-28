@@ -214,22 +214,59 @@ def convert_kpts(filename,qph5path):
     #                                        #
     ##########################################
     
+    #with h5py.File(qph5path,'r') as qph5:
+    #    ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
+    #    ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
+    #
+   # 
+    #Just need one (can clean this up later)
+   # ao_prim_num_max  = 5
+   # 
+   # d = [ [0] *ao_prim_num_max]*ao_num
+   # ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
+   # ezfio.set_ao_basis_ao_power(d)
+   # ezfio.set_ao_basis_ao_coef(d)
+   # ezfio.set_ao_basis_ao_expo(d)
+    
+    
+    ##########################################
+    #                                        #
+    #                Basis                   #
+    #                                        #
+    ##########################################
+
     with h5py.File(qph5path,'r') as qph5:
+        do_pseudo = qph5['pseudo'].attrs['do_pseudo']
+        ezfio.set_pseudo_do_pseudo(do_pseudo)
+        if (do_pseudo):
+            ezfio.set_pseudo_pseudo_lmax(qph5['pseudo'].attrs['pseudo_lmax'])
+            ezfio.set_pseudo_pseudo_klocmax(qph5['pseudo'].attrs['pseudo_klocmax'])
+            ezfio.set_pseudo_pseudo_kmax(qph5['pseudo'].attrs['pseudo_kmax'])
+            ezfio.set_pseudo_nucl_charge_remove(qph5['pseudo/nucl_charge_remove'][()].tolist())
+            ezfio.set_pseudo_pseudo_n_k(qph5['pseudo/pseudo_n_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_n_kl(qph5['pseudo/pseudo_n_kl'][()].tolist())
+            ezfio.set_pseudo_pseudo_v_k(qph5['pseudo/pseudo_v_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_v_kl(qph5['pseudo/pseudo_v_kl'][()].tolist())
+            ezfio.set_pseudo_pseudo_dz_k(qph5['pseudo/pseudo_dz_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_dz_kl(qph5['pseudo/pseudo_dz_kl'][()].tolist())
+
+   ##########################################
+   #                                        #
+   #                Basis                   #
+   #                                        #
+   ##########################################
+
+    with h5py.File(qph5path,'r') as qph5:
+        coeftmp = qph5['ao_basis/ao_coef'][()]
+        expotmp = qph5['ao_basis/ao_expo'][()]
         ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
         ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-    
-    
-    #Just need one (can clean this up later)
-    ao_prim_num_max  = 5
-    
-    d = [ [0] *ao_prim_num_max]*ao_num
-    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
-    ezfio.set_ao_basis_ao_power(d)
-    ezfio.set_ao_basis_ao_coef(d)
-    ezfio.set_ao_basis_ao_expo(d)
-    
-    
-    
+        ezfio.set_ao_basis_ao_prim_num(qph5['ao_basis/ao_prim_num'][()].tolist())
+        ezfio.set_ao_basis_ao_power(qph5['ao_basis/ao_power'][()].tolist())
+        ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
+        ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
+
+ 
       
     ##########################################
     #                                        #
@@ -404,20 +441,57 @@ def convert_cplx(filename,qph5path):
     #                                        #
     ##########################################
     
+#    with h5py.File(qph5path,'r') as qph5:
+#        ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
+#        ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
+#    
+#    
+#    #Just need one (can clean this up later)
+#    ao_prim_num_max  = 5
+#    
+#    d = [ [0] *ao_prim_num_max]*ao_num
+#    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
+#    ezfio.set_ao_basis_ao_power(d)
+#    ezfio.set_ao_basis_ao_coef(d)
+#    ezfio.set_ao_basis_ao_expo(d)
+    
+    ##########################################
+    #                                        #
+    #                Basis                   #
+    #                                        #
+    ##########################################
+
     with h5py.File(qph5path,'r') as qph5:
+        do_pseudo = qph5['pseudo'].attrs['do_pseudo']
+        ezfio.set_pseudo_do_pseudo(do_pseudo)
+        if (do_pseudo):
+            ezfio.set_pseudo_pseudo_lmax(qph5['pseudo'].attrs['pseudo_lmax'])
+            ezfio.set_pseudo_pseudo_klocmax(qph5['pseudo'].attrs['pseudo_klocmax'])
+            ezfio.set_pseudo_pseudo_kmax(qph5['pseudo'].attrs['pseudo_kmax'])
+            ezfio.set_pseudo_nucl_charge_remove(qph5['pseudo/nucl_charge_remove'][()].tolist())
+            ezfio.set_pseudo_pseudo_n_k(qph5['pseudo/pseudo_n_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_n_kl(qph5['pseudo/pseudo_n_kl'][()].tolist())
+            ezfio.set_pseudo_pseudo_v_k(qph5['pseudo/pseudo_v_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_v_kl(qph5['pseudo/pseudo_v_kl'][()].tolist())
+            ezfio.set_pseudo_pseudo_dz_k(qph5['pseudo/pseudo_dz_k'][()].tolist())
+            ezfio.set_pseudo_pseudo_dz_kl(qph5['pseudo/pseudo_dz_kl'][()].tolist())
+
+   ##########################################
+   #                                        #
+   #                Basis                   #
+   #                                        #
+   ##########################################
+
+    with h5py.File(qph5path,'r') as qph5:
+        coeftmp = qph5['ao_basis/ao_coef'][()]
+        expotmp = qph5['ao_basis/ao_expo'][()]
         ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
         ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-    
-    
-    #Just need one (can clean this up later)
-    ao_prim_num_max  = 5
-    
-    d = [ [0] *ao_prim_num_max]*ao_num
-    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
-    ezfio.set_ao_basis_ao_power(d)
-    ezfio.set_ao_basis_ao_coef(d)
-    ezfio.set_ao_basis_ao_expo(d)
-    
+        ezfio.set_ao_basis_ao_prim_num(qph5['ao_basis/ao_prim_num'][()].tolist())
+        ezfio.set_ao_basis_ao_power(qph5['ao_basis/ao_power'][()].tolist())
+        ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
+        ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
+
     
     
       
