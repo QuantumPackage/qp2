@@ -70,12 +70,12 @@ subroutine print_summary(e_,pt2_data,n_det_,n_occ_pattern_,n_st,s2_)
     print*,'* State ',k
     print *,  '< S^2 >         = ', s2_(k)
     print *,  'E               = ', e_(k)
-    print *,  'Variance        = ', pt2_data % variance(k)
-    print *,  'PT norm         = ', dsqrt(pt2_data % norm2(k))
-    print *,  'PT2             = ', pt2_data % pt2(k)
-    print *,  'rPT2            = ', pt2_data % pt2(k)*f(k)
-    print *,  'E+PT2 '//pt2_string//'  = ', e_(k)+pt2_data % pt2(k), ' +/- ', pt2_data % pt2_err(k)
-    print *,  'E+rPT2'//pt2_string//'  = ', e_(k)+pt2_data % pt2(k)*f(k), ' +/- ', pt2_data % pt2_err(k)*f(k)
+    print *,  'Variance        = ', pt2_data % variance(k), ' +/- ', pt2_data % variance_err(k)
+    print *,  'PT norm         = ', dsqrt(pt2_data % norm2(k)), ' +/- ', 0.5d0*dsqrt(pt2_data % norm2(k)) * pt2_data % norm2_err(k) / pt2_data % norm2(k)
+    print *,  'PT2             = ', pt2_data % pt2(k), ' +/- ', pt2_data % pt2_err(k)
+    print *,  'rPT2            = ', pt2_data % pt2(k)*f(k), ' +/- ', pt2_data % rpt2_err(k)
+    print *,  'E+PT2 '//pt2_string//' = ', e_(k)+pt2_data % pt2(k), ' +/- ', pt2_data % pt2_err(k)
+    print *,  'E+rPT2'//pt2_string//' = ', e_(k)+pt2_data % pt2(k)*f(k), ' +/- ', pt2_data % pt2_err(k)*f(k)
     print *,  ''
   enddo
 

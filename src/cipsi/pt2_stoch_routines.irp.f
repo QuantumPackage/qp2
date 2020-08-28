@@ -360,9 +360,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   integer, intent(in)            :: N_
 
 
-  double precision, allocatable      :: eI(:,:), eI_task(:,:), S(:), S2(:)
-  double precision, allocatable      :: vI(:,:), vI_task(:,:), T2(:)
-  double precision, allocatable      :: nI(:,:), nI_task(:,:), T3(:)
+  double precision, allocatable      :: eI(:,:), eI_task(:,:), Se(:), Se2(:)
+  double precision, allocatable      :: vI(:,:), vI_task(:,:), Sv(:), Sv2(:)
+  double precision, allocatable      :: nI(:,:), nI_task(:,:), Sn(:), Sn2(:)
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
   integer, external :: zmq_delete_tasks_async_send
@@ -402,8 +402,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   allocate(eI(N_states, N_det_generators), eI_task(N_states, pt2_n_tasks_max))
   allocate(vI(N_states, N_det_generators), vI_task(N_states, pt2_n_tasks_max))
   allocate(nI(N_states, N_det_generators), nI_task(N_states, pt2_n_tasks_max))
-  allocate(S(pt2_N_teeth+1), S2(pt2_N_teeth+1))
-  allocate(T2(pt2_N_teeth+1), T3(pt2_N_teeth+1))
+  allocate(Se(pt2_N_teeth+1), Se2(pt2_N_teeth+1))
+  allocate(Sv(pt2_N_teeth+1), Sv2(pt2_N_teeth+1))
+  allocate(Sn(pt2_N_teeth+1), Sn2(pt2_N_teeth+1))
 
 
 
@@ -415,10 +416,12 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   pt2_data % pt2_err(pt2_stoch_istate) = huge(1.)
   pt2_data % variance(pt2_stoch_istate) = huge(1.)
   pt2_data % norm2(pt2_stoch_istate) = 0.d0
-  S(:) = 0d0
-  S2(:) = 0d0
-  T2(:) = 0d0
-  T3(:) = 0d0
+  Se(:) = 0d0
+  Sv(:) = 0d0
+  Sn(:) = 0d0
+  Se2(:) = 0d0
+  Sv2(:) = 0d0
+  Sn2(:) = 0d0
   n = 1
   t = 0
   U = 0
@@ -474,14 +477,16 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
           x  += eI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
           x2 += vI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
           x3 += nI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          S(p) += x
-          S2(p) += x*x
-          T2(p) += x2
-          T3(p) += x3
+          Se(p) += x
+          Sv(p) += x2
+          Sn(p) += x3
+          Se2(p) += x*x
+          Sv2(p) += x2*x2
+          Sn2(p) += x3*3
         end do
-        avg  = E0 + S(t) / dble(c)
-        avg2 = v0 + T2(t) / dble(c)
-        avg3 = n0 + T3(t) / dble(c)
+        avg  = E0 + Se(t) / dble(c)
+        avg2 = v0 + Sv(t) / dble(c)
+        avg3 = n0 + Sn(t) / dble(c)
         if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
@@ -494,9 +499,18 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
-          eqt = dabs((S2(t) / c) - (S(t)/c)**2) ! dabs for numerical stability
+          eqt = dabs((Se2(t) / c) - (Se(t)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data % pt2_err(pt2_stoch_istate) = eqt
+
+          eqt = dabs((Sv2(t) / c) - (Sv(t)/c)**2) ! dabs for numerical stability
+          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          pt2_data % variance_err(pt2_stoch_istate) = eqt
+
+          eqt = dabs((Sn2(t) / c) - (Sn(t)/c)**2) ! dabs for numerical stability
+          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          pt2_data % norm2_err(pt2_stoch_istate) = eqt
+
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
             print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, F14.10, 2X, F14.10, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3, time-time0, ''
@@ -520,7 +534,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
       call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
       if(n_tasks > pt2_n_tasks_max)then
        print*,'PB !!!'
-       print*,'If you see this, send an email to Anthony scemama with the following content'
+       print*,'If you see this, send a bug report with the following content'
        print*,irp_here
        print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max
        stop -1
@@ -531,7 +545,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
       do i=1,n_tasks
         if(index(i).gt.size(eI,2).or.index(i).lt.1)then
          print*,'PB !!!'
-         print*,'If you see this, send an email to Anthony scemama with the following content'
+       print*,'If you see this, send a bug report with the following content'
          print*,irp_here
          print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
          stop -1
