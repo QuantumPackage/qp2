@@ -31,7 +31,7 @@ BEGIN_PROVIDER [double precision, pert_2rdm_provider, (n_orb_pert_rdm,n_orb_pert
 
 END_PROVIDER
 
-subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
+subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, psi_det_connection, psi_coef_connection_reverse, n_det_connection)
   use bitmasks
   use selection_types
   implicit none
@@ -44,9 +44,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
   logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
   double precision, intent(in)           :: fock_diag_tmp(mo_num)
   double precision, intent(in)    :: E0(N_states)
-  double precision, intent(inout) :: pt2(N_states)
-  double precision, intent(inout) :: variance(N_states)
-  double precision, intent(inout) :: norm(N_states)
+  type(pt2_type), intent(inout)   :: pt2_data
   type(selection_buffer), intent(inout) :: buf
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate
@@ -152,9 +150,9 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         e_pert = 0.5d0 * (tmp - delta_E)
         coef(istate) = e_pert / alpha_h_psi
         print*,e_pert,coef,alpha_h_psi
-        pt2(istate) = pt2(istate) + e_pert
-        variance(istate) = variance(istate) + alpha_h_psi * alpha_h_psi
-        norm(istate) = norm(istate) + coef(istate) * coef(istate)
+        pt2_data % pt2(istate) += e_pert
+        pt2_data % variance(istate) += alpha_h_psi * alpha_h_psi
+        pt2_data % norm2(istate) = coef(istate) * coef(istate)
 
         if (weight_selection /= 5) then
           ! Energy selection

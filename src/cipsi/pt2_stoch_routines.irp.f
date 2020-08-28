@@ -243,7 +243,7 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
             ( 1.d0*pt2_n_tasks_max            & ! task_id, index
             + 0.635d0*N_det_generators        & ! f,d
             + 3.d0*N_det_generators*N_states  & ! eI, vI, nI
-            + 3.d0*pt2_n_tasks_max*N_states   & ! eI_task, vI_task, nI_task
+            + pt2_n_tasks_max*pt2_type_size(N_states)/8 & ! pt2_data_task
             + 4.d0*(pt2_N_teeth+1)            & ! S, S2, T2, T3
             + 1.d0*(N_int*2.d0*N + N)         & ! selection buffer
             + 1.d0*(N_int*2.d0*N + N)         & ! sort selection buffer
@@ -359,10 +359,10 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N_
 
-
-  double precision, allocatable      :: eI(:,:), eI_task(:,:), Se(:), Se2(:)
-  double precision, allocatable      :: vI(:,:), vI_task(:,:), Sv(:), Sv2(:)
-  double precision, allocatable      :: nI(:,:), nI_task(:,:), Sn(:), Sn2(:)
+  type(pt2_type), allocatable    :: pt2_data_task(:)
+  double precision, allocatable      :: eI(:,:), Se(:), Se2(:)
+  double precision, allocatable      :: vI(:,:), Sv(:), Sv2(:)
+  double precision, allocatable      :: nI(:,:), Sn(:), Sn2(:)
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
   integer, external :: zmq_delete_tasks_async_send
@@ -399,9 +399,10 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   ! updated in ZMQ_pt2
   allocate(task_id(pt2_n_tasks_max), index(pt2_n_tasks_max), f(N_det_generators))
   allocate(d(N_det_generators+1))
-  allocate(eI(N_states, N_det_generators), eI_task(N_states, pt2_n_tasks_max))
-  allocate(vI(N_states, N_det_generators), vI_task(N_states, pt2_n_tasks_max))
-  allocate(nI(N_states, N_det_generators), nI_task(N_states, pt2_n_tasks_max))
+  allocate(pt2_data_task(pt2_n_tasks_max))
+  allocate(eI(N_states, N_det_generators))
+  allocate(vI(N_states, N_det_generators))
+  allocate(nI(N_states, N_det_generators))
   allocate(Se(pt2_N_teeth+1), Se2(pt2_N_teeth+1))
   allocate(Sv(pt2_N_teeth+1), Sv2(pt2_N_teeth+1))
   allocate(Sn(pt2_N_teeth+1), Sn2(pt2_N_teeth+1))
@@ -531,7 +532,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
     else if(more == 0) then
       exit
     else
-      call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
+      call pull_pt2_results(zmq_socket_pull, index, pt2_data_task, task_id, n_tasks, b2)
       if(n_tasks > pt2_n_tasks_max)then
        print*,'PB !!!'
        print*,'If you see this, send a bug report with the following content'
@@ -550,9 +551,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
          print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
          stop -1
         endif
-        eI(1:N_states, index(i)) += eI_task(1:N_states,i)
-        vI(1:N_states, index(i)) += vI_task(1:N_states,i)
-        nI(1:N_states, index(i)) += nI_task(1:N_states,i)
+        eI(1:N_states, index(i)) += pt2_data_task(i) % pt2(1:N_states)
+        vI(1:N_states, index(i)) += pt2_data_task(i) % variance(1:N_states)
+        nI(1:N_states, index(i)) += pt2_data_task(i) % norm2(1:N_states)
         f(index(i)) -= 1
       end do
       do i=1, b2%cur

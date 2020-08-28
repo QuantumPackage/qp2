@@ -19,6 +19,13 @@ module selection_types
     double precision, allocatable :: overlap_err(:,:)
   endtype
 
+  contains
+
+  integer function pt2_type_size(N)
+    implicit none
+    integer, intent(in) :: N
+    pt2_type_size = 8*(8*n + 2*n*n)
+  end function
 
 end module
 

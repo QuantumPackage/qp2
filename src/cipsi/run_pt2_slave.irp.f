@@ -1,8 +1,8 @@
- use omp_lib 
+ use omp_lib
  use selection_types
  use f77_zmq
 BEGIN_PROVIDER [ integer(omp_lock_kind), global_selection_buffer_lock ]
- use omp_lib 
+ use omp_lib
  implicit none
  BEGIN_DOC
  ! Global buffer for the OpenMP selection
@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ integer(omp_lock_kind), global_selection_buffer_lock ]
 END_PROVIDER
 
 BEGIN_PROVIDER [ type(selection_buffer), global_selection_buffer ]
- use omp_lib 
+ use omp_lib
  implicit none
  BEGIN_DOC
  ! Global buffer for the OpenMP selection
@@ -61,7 +61,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
-  double precision,allocatable :: pt2(:,:), variance(:,:), norm(:,:)
+  type(pt2_type), allocatable :: pt2_data(:)
   integer :: n_tasks, k, N
   integer, allocatable :: i_generator(:), subset(:)
 
@@ -70,10 +70,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
 !  logical :: sending
 
   allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
-  allocate(pt2(N_states,pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
-  allocate(variance(N_states,pt2_n_tasks_max))
-  allocate(norm(N_states,pt2_n_tasks_max))
-
+  allocate(pt2_data(pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
   integer, external :: connect_to_taskserver
@@ -120,13 +117,11 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     double precision :: time0, time1
     call wall_time(time0)
     do k=1,n_tasks
-        pt2(:,k) = 0.d0
-        variance(:,k) = 0.d0
-        norm(:,k) = 0.d0
+        call pt2_alloc(pt2_data(k),N_states)
         b%cur = 0
 !double precision :: time2
 !call wall_time(time2)
-        call select_connected(i_generator(k),energy,pt2(1,k),variance(1,k),norm(1,k),b,subset(k),pt2_F(i_generator(k)))
+        call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
 !call wall_time(time1)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
@@ -138,7 +133,10 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
       done = .true.
     endif
     call sort_selection_buffer(b)
-    call push_pt2_results(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks)
+    call push_pt2_results(zmq_socket_push, i_generator, pt2_data, b, task_id, n_tasks)
+    do k=1,n_tasks
+      call pt2_dealloc(pt2_data(k))
+    enddo
     b%cur=0
 
 !    ! Try to adjust n_tasks around nproc/2 seconds per job
@@ -183,7 +181,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
-  double precision,allocatable :: pt2(:,:), variance(:,:), norm(:,:)
+  type(pt2_type), allocatable :: pt2_data(:)
   integer :: n_tasks, k, N
   integer, allocatable :: i_generator(:), subset(:)
 
@@ -193,9 +191,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
 
   allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
-  allocate(pt2(N_states,pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
-  allocate(variance(N_states,pt2_n_tasks_max))
-  allocate(norm(N_states,pt2_n_tasks_max))
+  allocate(pt2_data(pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
@@ -243,13 +239,11 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     double precision :: time0, time1
     call wall_time(time0)
     do k=1,n_tasks
-        pt2(:,k) = 0.d0
-        variance(:,k) = 0.d0
-        norm(:,k) = 0.d0
+        call pt2_alloc(pt2_data(k),N_states)
         b%cur = 0
 !double precision :: time2
 !call wall_time(time2)
-        call select_connected(i_generator(k),energy,pt2(1,k),variance(1,k),norm(1,k),b,subset(k),pt2_F(i_generator(k)))
+        call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
 !call wall_time(time1)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
@@ -269,13 +263,16 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     call omp_unset_lock(global_selection_buffer_lock)
     if ( iproc == 1 ) then
       call omp_set_lock(global_selection_buffer_lock)
-      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2, variance, norm, global_selection_buffer, task_id, n_tasks,sending)
+      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, global_selection_buffer, task_id, n_tasks,sending)
       global_selection_buffer%cur = 0
       call omp_unset_lock(global_selection_buffer_lock)
     else
-      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2, variance, norm, b, task_id, n_tasks,sending)
+      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, b, task_id, n_tasks,sending)
     endif
 
+    do k=1,n_tasks
+      call pt2_dealloc(pt2_data(k))
+    enddo
 !    ! Try to adjust n_tasks around nproc/2 seconds per job
 !    n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/2) / (time1 - time0 + 1.d0)))
     n_tasks = 1
@@ -298,34 +295,30 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 end subroutine
 
 
-subroutine push_pt2_results(zmq_socket_push, index, pt2, variance, norm, b, task_id, n_tasks)
+subroutine push_pt2_results(zmq_socket_push, index, pt2_data, b, task_id, n_tasks)
  use selection_types
  use f77_zmq
   implicit none
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
-  double precision, intent(in)   :: pt2(N_states,n_tasks)
-  double precision, intent(in)   :: variance(N_states,n_tasks)
-  double precision, intent(in)   :: norm(N_states,n_tasks)
+  type(pt2_type), intent(in)     :: pt2_data(n_tasks)
   integer, intent(in) :: n_tasks, index(n_tasks), task_id(n_tasks)
   type(selection_buffer), intent(inout) :: b
 
   logical :: sending
   sending = .False.
-  call push_pt2_results_async_send(zmq_socket_push, index, pt2, variance, norm, b, task_id, n_tasks, sending)
+  call push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task_id, n_tasks, sending)
   call push_pt2_results_async_recv(zmq_socket_push, b%mini, sending)
 end subroutine
 
 
-subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2, variance, norm, b, task_id, n_tasks, sending)
+subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task_id, n_tasks, sending)
  use selection_types
  use f77_zmq
   implicit none
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
-  double precision, intent(in)   :: pt2(N_states,n_tasks)
-  double precision, intent(in)   :: variance(N_states,n_tasks)
-  double precision, intent(in)   :: norm(N_states,n_tasks)
+  type(pt2_type), intent(in)     :: pt2_data(n_tasks)
   integer, intent(in) :: n_tasks, index(n_tasks), task_id(n_tasks)
   type(selection_buffer), intent(inout) :: b
   logical, intent(inout) :: sending
@@ -358,32 +351,12 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2, variance, no
   endif
 
 
-  rc = f77_zmq_send( zmq_socket_push, pt2, 8*N_states*n_tasks, ZMQ_SNDMORE)
+  rc = f77_zmq_send( zmq_socket_push, pt2_data, pt2_type_size(N_states)*n_tasks, ZMQ_SNDMORE)
   if (rc == -1) then
     print *,  irp_here, ': error sending result'
     stop 3
     return
-  else if(rc /= 8*N_states*n_tasks) then
-    stop 'push'
-  endif
-
-
-  rc = f77_zmq_send( zmq_socket_push, variance, 8*N_states*n_tasks, ZMQ_SNDMORE)
-  if (rc == -1) then
-    print *,  irp_here, ': error sending result'
-    stop 4
-    return
-  else if(rc /= 8*N_states*n_tasks) then
-    stop 'push'
-  endif
-
-
-  rc = f77_zmq_send( zmq_socket_push, norm, 8*N_states*n_tasks, ZMQ_SNDMORE)
-  if (rc == -1) then
-    print *,  irp_here, ': error sending result'
-    stop 5
-    return
-  else if(rc /= 8*N_states*n_tasks) then
+  else if(rc /= pt2_type_size(N_states)*n_tasks) then
     stop 'push'
   endif
 
@@ -475,7 +448,7 @@ IRP_ELSE
     stop 11
     return
   else if (rc /= 8) then
-    print *,  irp_here//': error in receiving mini' 
+    print *,  irp_here//': error in receiving mini'
     stop 12
   endif
 IRP_ENDIF
@@ -484,14 +457,12 @@ end subroutine
 
 
 
-subroutine pull_pt2_results(zmq_socket_pull, index, pt2, variance, norm, task_id, n_tasks, b)
+subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, b)
  use selection_types
  use f77_zmq
   implicit none
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
-  double precision, intent(inout) :: pt2(N_states,*)
-  double precision, intent(inout) :: variance(N_states,*)
-  double precision, intent(inout) :: norm(N_states,*)
+  type(pt2_type), intent(inout)  :: pt2_data(n_tasks)
   type(selection_buffer), intent(inout) :: b
   integer, intent(out) :: index(*)
   integer, intent(out) :: n_tasks, task_id(*)
@@ -514,27 +485,11 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2, variance, norm, task_id
     stop 'pull'
   endif
 
-  rc = f77_zmq_recv( zmq_socket_pull, pt2, N_states*8*n_tasks, 0)
+  rc = f77_zmq_recv( zmq_socket_pull, pt2_data, pt2_type_size(N_states)*n_tasks, 0)
   if (rc == -1) then
     n_tasks = 1
     task_id(1) = 0
-  else if(rc /= 8*N_states*n_tasks) then
-    stop 'pull'
-  endif
-
-  rc = f77_zmq_recv( zmq_socket_pull, variance, N_states*8*n_tasks, 0)
-  if (rc == -1) then
-    n_tasks = 1
-    task_id(1) = 0
-  else if(rc /= 8*N_states*n_tasks) then
-    stop 'pull'
-  endif
-
-  rc = f77_zmq_recv( zmq_socket_pull, norm, N_states*8*n_tasks, 0)
-  if (rc == -1) then
-    n_tasks = 1
-    task_id(1) = 0
-  else if(rc /= 8*N_states*n_tasks) then
+  else if(rc /= pt2_type_size(N_states)*n_tasks) then
     stop 'pull'
   endif
 
