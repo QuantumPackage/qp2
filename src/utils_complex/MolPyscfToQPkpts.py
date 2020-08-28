@@ -27,6 +27,9 @@ def pad(arr_in,outshape):
     arr_out[dataslice] = arr_in
     return arr_out
 
+def xyzcount(s):
+    return list(map(s.count,['x','y','z']))
+
 def idx40(i,j,k,l):
     return idx2_tri((idx2_tri((i,k)),idx2_tri((j,l))))
 
@@ -877,15 +880,6 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
 
     return
-
-def xyzcount(s):
-    return list(map(s.count,['x','y','z']))
-
-
-
-
-def xyzcount(s):
-    return list(map(s.count,['x','y','z']))
 
 def pyscf2QP2_mol(mf, cas_idx=None, int_threshold = 1E-8, 
         qph5path = 'qpdat.h5',
