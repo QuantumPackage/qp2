@@ -50,25 +50,51 @@ subroutine pt2_dealloc(pt2_data)
             )
 end subroutine
 
-subroutine pt2_add(p1, p2)
+subroutine pt2_add(p1, w, p2)
   implicit none
   use selection_types
   BEGIN_DOC
-! p1 += p2
+! p1 += w * p2
   END_DOC
   type(pt2_type), intent(inout) :: p1
+  double precision, intent(in)  :: w
   type(pt2_type), intent(in)    :: p2
 
-  p1 % pt2(:)            += p2 % pt2(:)
-  p1 % pt2_err(:)        += p2 % pt2_err(:)
-  p1 % rpt2(:)           += p2 % rpt2(:)
-  p1 % rpt2_err(:)       += p2 % rpt2_err(:)
-  p1 % variance(:)       += p2 % variance(:)
-  p1 % variance_err(:)   += p2 % variance_err(:)
-  p1 % norm2(:)          += p2 % norm2(:)
-  p1 % norm2_err(:)      += p2 % norm2_err(:)
-  p1 % overlap(:,:)      += p2 % overlap(:,:)
-  p1 % overlap_err(:,:)  += p2 % overlap_err(:,:)
+  p1 % pt2(:)            = p1 % pt2(:)           + w * p2 % pt2(:)
+  p1 % pt2_err(:)        = p1 % pt2_err(:)       + w * p2 % pt2_err(:)
+  p1 % rpt2(:)           = p1 % rpt2(:)          + w * p2 % rpt2(:)
+  p1 % rpt2_err(:)       = p1 % rpt2_err(:)      + w * p2 % rpt2_err(:)
+  p1 % variance(:)       = p1 % variance(:)      + w * p2 % variance(:)
+  p1 % variance_err(:)   = p1 % variance_err(:)  + w * p2 % variance_err(:)
+  p1 % norm2(:)          = p1 % norm2(:)         + w * p2 % norm2(:)
+  p1 % norm2_err(:)      = p1 % norm2_err(:)     + w * p2 % norm2_err(:)
+  p1 % overlap(:,:)      = p1 % overlap(:,:)     + w * p2 % overlap(:,:)
+  p1 % overlap_err(:,:)  = p1 % overlap_err(:,:) + w * p2 % overlap_err(:,:)
+
+end subroutine
+
+
+subroutine pt2_add2(p1, w, p2)
+  implicit none
+  use selection_types
+  BEGIN_DOC
+! p1 += w * p2**2
+  END_DOC
+  type(pt2_type), intent(inout) :: p1
+  double precision, intent(in)  :: w
+  type(pt2_type), intent(in)    :: p2
+
+  p1 % pt2(:)           = p1 % pt2(:)           + w * p2 % pt2(:)           * p2 % pt2(:)
+  p1 % pt2_err(:)       = p1 % pt2_err(:)       + w * p2 % pt2_err(:)       * p2 % pt2_err(:)
+  p1 % rpt2(:)          = p1 % rpt2(:)          + w * p2 % rpt2(:)          * p2 % rpt2(:)
+  p1 % rpt2_err(:)      = p1 % rpt2_err(:)      + w * p2 % rpt2_err(:)      * p2 % rpt2_err(:)
+  p1 % variance(:)      = p1 % variance(:)      + w * p2 % variance(:)      * p2 % variance(:)
+  p1 % variance_err(:)  = p1 % variance_err(:)  + w * p2 % variance_err(:)  * p2 % variance_err(:)
+  p1 % norm2(:)         = p1 % norm2(:)         + w * p2 % norm2(:)         * p2 % norm2(:)
+  p1 % norm2_err(:)     = p1 % norm2_err(:)     + w * p2 % norm2_err(:)     * p2 % norm2_err(:)
+  p1 % overlap(:,:)     = p1 % overlap(:,:)     + w * p2 % overlap(:,:)     * p2 % overlap(:,:)
+  p1 % overlap_err(:,:) = p1 % overlap_err(:,:) + w * p2 % overlap_err(:,:) * p2 % overlap_err(:,:)
+
 end subroutine
 
 

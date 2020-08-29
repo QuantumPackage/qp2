@@ -462,7 +462,7 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, 
  use f77_zmq
   implicit none
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
-  type(pt2_type), intent(inout)  :: pt2_data(n_tasks)
+  type(pt2_type), intent(inout)  :: pt2_data(*)
   type(selection_buffer), intent(inout) :: b
   integer, intent(out) :: index(*)
   integer, intent(out) :: n_tasks, task_id(*)

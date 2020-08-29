@@ -242,8 +242,8 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
       mem_collector = 8.d0 *                  & ! bytes
             ( 1.d0*pt2_n_tasks_max            & ! task_id, index
             + 0.635d0*N_det_generators        & ! f,d
-            + 3.d0*N_det_generators*N_states  & ! eI, vI, nI
             + pt2_n_tasks_max*pt2_type_size(N_states)/8 & ! pt2_data_task
+            + N_det_generators*pt2_type_size(N_states)/8  & ! pt2_data_I
             + 4.d0*(pt2_N_teeth+1)            & ! S, S2, T2, T3
             + 1.d0*(N_int*2.d0*N + N)         & ! selection buffer
             + 1.d0*(N_int*2.d0*N + N)         & ! sort selection buffer
@@ -360,15 +360,18 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   integer, intent(in)            :: N_
 
   type(pt2_type), allocatable    :: pt2_data_task(:)
-  double precision, allocatable      :: eI(:,:), Se(:), Se2(:)
-  double precision, allocatable      :: vI(:,:), Sv(:), Sv2(:)
-  double precision, allocatable      :: nI(:,:), Sn(:), Sn2(:)
+  type(pt2_type), allocatable    :: pt2_data_I(:)
+  type(pt2_type), allocatable    :: pt2_data_S(:)
+  type(pt2_type), allocatable    :: pt2_data_S2(:)
+  type(pt2_type)                 :: pt2_data_teeth
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
   integer, external :: zmq_delete_tasks_async_send
   integer, external :: zmq_delete_tasks_async_recv
   integer, external :: zmq_abort
   integer, external :: pt2_find_sample_lr
+
+  PROVIDE pt2_stoch_istate
 
   integer :: more, n, i, p, c, t, n_tasks, U
   integer, allocatable :: task_id(:)
@@ -400,12 +403,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   allocate(task_id(pt2_n_tasks_max), index(pt2_n_tasks_max), f(N_det_generators))
   allocate(d(N_det_generators+1))
   allocate(pt2_data_task(pt2_n_tasks_max))
-  allocate(eI(N_states, N_det_generators))
-  allocate(vI(N_states, N_det_generators))
-  allocate(nI(N_states, N_det_generators))
-  allocate(Se(pt2_N_teeth+1), Se2(pt2_N_teeth+1))
-  allocate(Sv(pt2_N_teeth+1), Sv2(pt2_N_teeth+1))
-  allocate(Sn(pt2_N_teeth+1), Sn2(pt2_N_teeth+1))
+  allocate(pt2_data_I(N_det_generators))
+  allocate(pt2_data_S(pt2_N_teeth+1))
+  allocate(pt2_data_S2(pt2_N_teeth+1))
 
 
 
@@ -417,18 +417,19 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
   pt2_data % pt2_err(pt2_stoch_istate) = huge(1.)
   pt2_data % variance(pt2_stoch_istate) = huge(1.)
   pt2_data % norm2(pt2_stoch_istate) = 0.d0
-  Se(:) = 0d0
-  Sv(:) = 0d0
-  Sn(:) = 0d0
-  Se2(:) = 0d0
-  Sv2(:) = 0d0
-  Sn2(:) = 0d0
   n = 1
   t = 0
   U = 0
-  eI(:,:) = 0d0
-  vI(:,:) = 0d0
-  nI(:,:) = 0d0
+  do i=1,pt2_n_tasks_max
+    call pt2_alloc(pt2_data_task(i),N_states)
+  enddo
+  do i=1,pt2_N_teeth+1
+    call pt2_alloc(pt2_data_S(i),N_states)
+    call pt2_alloc(pt2_data_S2(i),N_states)
+  enddo
+  do i=1,N_det_generators
+    call pt2_alloc(pt2_data_I(i),N_states)
+  enddo
   f(:) = pt2_F(:)
   d(:) = .false.
   n_tasks = 0
@@ -456,9 +457,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
           v0 = 0.d0
           n0 = 0.d0
           do i=pt2_n_0(t),1,-1
-            E0 += eI(pt2_stoch_istate, i)
-            v0 += vI(pt2_stoch_istate, i)
-            n0 += nI(pt2_stoch_istate, i)
+            E0 += pt2_data_I(i) % pt2(pt2_stoch_istate)
+            v0 += pt2_data_I(i) % variance(pt2_stoch_istate)
+            n0 += pt2_data_I(i) % norm2(pt2_stoch_istate)
           end do
         else
           exit
@@ -468,26 +469,19 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
       ! Add Stochastic part
       c = pt2_R(n)
       if(c > 0) then
-!print *,  'c>0'
-        x  = 0d0
-        x2 = 0d0
-        x3 = 0d0
+
+        call pt2_alloc(pt2_data_teeth,N_states)
         do p=pt2_N_teeth, 1, -1
           v = pt2_u_0 + pt2_W_T * (pt2_u(c) + dble(p-1))
           i = pt2_find_sample_lr(v, pt2_cW,pt2_n_0(p),pt2_n_0(p+1))
-          x  += eI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          x2 += vI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          x3 += nI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          Se(p) += x
-          Sv(p) += x2
-          Sn(p) += x3
-          Se2(p) += x*x
-          Sv2(p) += x2*x2
-          Sn2(p) += x3*3
+          call pt2_add ( pt2_data_teeth,  pt2_W_T / pt2_w(i),  pt2_data_I(i) )
+          call pt2_add ( pt2_data_S(p),  1.d0,  pt2_data_teeth )
+          call pt2_add2( pt2_data_S2(p), 1.d0,  pt2_data_teeth )
         end do
-        avg  = E0 + Se(t) / dble(c)
-        avg2 = v0 + Sv(t) / dble(c)
-        avg3 = n0 + Sn(t) / dble(c)
+        call pt2_dealloc(pt2_data_teeth)
+        avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
+        avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
+        avg3 = n0 + pt2_data_S(t) % norm2(pt2_stoch_istate) / dble(c)
         if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
@@ -500,17 +494,18 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
-          eqt = dabs((Se2(t) / c) - (Se(t)/c)**2) ! dabs for numerical stability
+          eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data % pt2_err(pt2_stoch_istate) = eqt
 
-          eqt = dabs((Sv2(t) / c) - (Sv(t)/c)**2) ! dabs for numerical stability
+          eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data % variance_err(pt2_stoch_istate) = eqt
 
-          eqt = dabs((Sn2(t) / c) - (Sn(t)/c)**2) ! dabs for numerical stability
+          eqt = dabs((pt2_data_S2(t) % norm2(pt2_stoch_istate) / c) - (pt2_data_S(t) % norm2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data % norm2_err(pt2_stoch_istate) = eqt
+
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
@@ -544,16 +539,22 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
           stop 'PT2: Unable to delete tasks (send)'
       endif
       do i=1,n_tasks
-        if(index(i).gt.size(eI,2).or.index(i).lt.1)then
+        if(index(i).gt.size(pt2_data_I,1).or.index(i).lt.1)then
          print*,'PB !!!'
-       print*,'If you see this, send a bug report with the following content'
+         print*,'If you see this, send a bug report with the following content'
          print*,irp_here
-         print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
+         print*,'i,index(i),size(pt2_data_I,1) = ',i,index(i),size(pt2_data_I,1)
          stop -1
         endif
-        eI(1:N_states, index(i)) += pt2_data_task(i) % pt2(1:N_states)
-        vI(1:N_states, index(i)) += pt2_data_task(i) % variance(1:N_states)
-        nI(1:N_states, index(i)) += pt2_data_task(i) % norm2(1:N_states)
+!        print *, pt2_data_I(index(i))%pt2
+!        print *, pt2_data_I(index(i))%variance
+!        print *, pt2_data_I(index(i))%norm2
+!        print *, ''
+!        print *, pt2_data_task(i)%pt2
+!        print *, pt2_data_task(i)%variance
+!        print *, pt2_data_task(i)%norm2
+!        print *, ''
+        call pt2_add(pt2_data_I(index(i)),1.d0,pt2_data_task(i))
         f(index(i)) -= 1
       end do
       do i=1, b2%cur
@@ -566,6 +567,16 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
       endif
     end if
   end do
+  do i=1,N_det_generators
+    call pt2_dealloc(pt2_data_I(i))
+  enddo
+  do i=1,pt2_N_teeth+1
+    call pt2_dealloc(pt2_data_S(i))
+    call pt2_dealloc(pt2_data_S2(i))
+  enddo
+  do i=1,pt2_n_tasks_max
+    call pt2_dealloc(pt2_data_task(i))
+  enddo
 !print *,  'deleting b2'
   call delete_selection_buffer(b2)
 !print *,  'sorting b'
