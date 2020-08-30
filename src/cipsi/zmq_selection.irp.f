@@ -129,12 +129,12 @@ subroutine ZMQ_selection(N_in, pt2_data)
   call delete_selection_buffer(b)
 
   do k=1,N_states
-      pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
-      pt2_data % variance(k) = pt2_data % variance(k) * f(k)
-      pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
+    pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
+    pt2_data % variance(k) = pt2_data % variance(k) * f(k)
+    pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
 
-      pt2_data % rpt2(k) =  &
-         pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
+    pt2_data % rpt2(k) =  &
+       pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
   enddo
 
   call update_pt2_and_variance_weights(pt2_data, N_states)
@@ -160,6 +160,7 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N
   type(pt2_type), intent(inout)  :: pt2_data
+  type(pt2_type)                 :: pt2_data_tmp
 
   double precision               :: pt2_mwen(N_states)
   double precision               :: variance_mwen(N_states)
@@ -190,15 +191,11 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   pt2_data % pt2(:)      = 0d0
   pt2_data % variance(:) = 0.d0
   pt2_data % norm2(:)    = 0.d0
-  pt2_mwen(:)      = 0.d0
-  variance_mwen(:) = 0.d0
-  norm2_mwen(:)     = 0.d0
+  call pt2_alloc(pt2_data_tmp,N_states)
   do while (more == 1)
-    call pull_selection_results(zmq_socket_pull, pt2_mwen, variance_mwen, norm2_mwen, b2%val(1), b2%det(1,1,1), b2%cur, task_id, ntask)
+    call pull_selection_results(zmq_socket_pull, pt2_data_tmp, b2%val(1), b2%det(1,1,1), b2%cur, task_id, ntask)
 
-    pt2_data % pt2(:)      += pt2_mwen(:)
-    pt2_data % variance(:) += variance_mwen(:)
-    pt2_data % norm2(:)    += norm2_mwen(:)
+    call pt2_add(pt2_data, 1.d0, pt2_data_tmp)
     do i=1, b2%cur
       call add_to_selection_buffer(b, b2%det(1,1,i), b2%val(i))
       if (b2%val(i) > b%mini) exit
@@ -214,6 +211,7 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
       endif
     end do
   end do
+  call pt2_dealloc(pt2_data_tmp)
 
 
   call delete_selection_buffer(b2)

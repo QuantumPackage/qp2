@@ -141,6 +141,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
 
 !    ! Try to adjust n_tasks around nproc/2 seconds per job
     n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/2) / (time1 - time0 + 1.d0)))
+    n_tasks = min(n_tasks, pt2_n_tasks_max)
 !    n_tasks = 1
   end do
 
@@ -169,8 +170,8 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   integer                         :: rc, i
 
   integer                        :: worker_id, ctask, ltask
-  character*(512), allocatable   :: task(:)
-  integer, allocatable           :: task_id(:)
+  character*(512)                :: task
+  integer                        :: task_id
 
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
@@ -181,17 +182,14 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
-  type(pt2_type), allocatable :: pt2_data(:)
+  type(pt2_type) :: pt2_data
   integer :: n_tasks, k, N
-  integer, allocatable :: i_generator(:), subset(:)
+  integer :: i_generator, subset
 
   integer :: bsize ! Size of selection buffers
   logical :: sending
   PROVIDE global_selection_buffer global_selection_buffer_lock
 
-
-  allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
-  allocate(pt2_data(pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
@@ -211,22 +209,17 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   done = .False.
   do while (.not.done)
 
-    n_tasks = max(1,n_tasks)
-    n_tasks = min(pt2_n_tasks_max,n_tasks)
-
     integer, external :: get_tasks_from_taskserver
     if (get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id, task_id, task, n_tasks) == -1) then
       exit
     endif
-    done = task_id(n_tasks) == 0
+    done = task_id == 0
     if (done) then
       n_tasks = n_tasks-1
     endif
     if (n_tasks == 0) exit
 
-    do k=1,n_tasks
-      read (task(k),*) subset(k), i_generator(k), N
-    enddo
+    read (task,*) subset, i_generator, N
     if (b%N == 0) then
       ! Only first time
       bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
@@ -238,15 +231,13 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
     double precision :: time0, time1
     call wall_time(time0)
-    do k=1,n_tasks
-        call pt2_alloc(pt2_data(k),N_states)
-        b%cur = 0
+    call pt2_alloc(pt2_data,N_states)
+    b%cur = 0
 !double precision :: time2
 !call wall_time(time2)
-        call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
+    call select_connected(i_generator,energy,pt2_data,b,subset,pt2_F(i_generator))
 !call wall_time(time1)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
-    enddo
     call wall_time(time1)
 !print *,  '-->', i_generator(1), time1-time0, n_tasks
 
@@ -270,12 +261,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
       call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, b, task_id, n_tasks,sending)
     endif
 
-    do k=1,n_tasks
-      call pt2_dealloc(pt2_data(k))
-    enddo
-!    ! Try to adjust n_tasks around nproc/2 seconds per job
-!    n_tasks = min(2*n_tasks,int( dble(n_tasks * nproc/2) / (time1 - time0 + 1.d0)))
-    n_tasks = 1
+    call pt2_dealloc(pt2_data)
   end do
   call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 
@@ -322,8 +308,9 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
   integer, intent(in) :: n_tasks, index(n_tasks), task_id(n_tasks)
   type(selection_buffer), intent(inout) :: b
   logical, intent(inout) :: sending
-  integer :: rc
+  integer :: rc, i
   integer*8 :: rc8
+  double precision, allocatable :: pt2_serialized(:,:)
 
   if (sending) then
     print *,  irp_here, ': sending is true'
@@ -351,12 +338,18 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
   endif
 
 
-  rc = f77_zmq_send( zmq_socket_push, pt2_data, pt2_type_size(N_states)*n_tasks, ZMQ_SNDMORE)
+  allocate(pt2_serialized (pt2_type_size(N_states),n_tasks) )
+  do i=1,n_tasks
+    call pt2_serialize(pt2_data(i),N_states,pt2_serialized(1,i))
+  enddo
+
+  rc = f77_zmq_send( zmq_socket_push, pt2_serialized, size(pt2_serialized)*8, ZMQ_SNDMORE)
+  deallocate(pt2_serialized)
   if (rc == -1) then
     print *,  irp_here, ': error sending result'
     stop 3
     return
-  else if(rc /= pt2_type_size(N_states)*n_tasks) then
+  else if(rc /= size(pt2_serialized)*8) then
     stop 'push'
   endif
 
@@ -468,6 +461,7 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, 
   integer, intent(out) :: n_tasks, task_id(*)
   integer :: rc, rn, i
   integer*8 :: rc8
+  double precision, allocatable :: pt2_serialized(:,:)
 
   rc = f77_zmq_recv( zmq_socket_pull, n_tasks, 4, 0)
   if (rc == -1) then
@@ -485,13 +479,19 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, 
     stop 'pull'
   endif
 
-  rc = f77_zmq_recv( zmq_socket_pull, pt2_data, pt2_type_size(N_states)*n_tasks, 0)
+  allocate(pt2_serialized (pt2_type_size(N_states),n_tasks) )
+  rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized)*n_tasks, 0)
   if (rc == -1) then
     n_tasks = 1
     task_id(1) = 0
-  else if(rc /= pt2_type_size(N_states)*n_tasks) then
+  else if(rc /= 8*size(pt2_serialized)) then
     stop 'pull'
   endif
+
+  do i=1,n_tasks
+    call pt2_deserialize(pt2_data(i),N_states,pt2_serialized(1,i))
+  enddo
+  deallocate(pt2_serialized)
 
   rc = f77_zmq_recv( zmq_socket_pull, task_id, n_tasks*4, 0)
   if (rc == -1) then

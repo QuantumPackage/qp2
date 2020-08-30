@@ -474,10 +474,12 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
         do p=pt2_N_teeth, 1, -1
           v = pt2_u_0 + pt2_W_T * (pt2_u(c) + dble(p-1))
           i = pt2_find_sample_lr(v, pt2_cW,pt2_n_0(p),pt2_n_0(p+1))
-          call pt2_add ( pt2_data_teeth,  pt2_W_T / pt2_w(i),  pt2_data_I(i) )
+          v = pt2_W_T / pt2_w(i)
+          call pt2_add ( pt2_data_teeth,  v,  pt2_data_I(i) )
           call pt2_add ( pt2_data_S(p),  1.d0,  pt2_data_teeth )
           call pt2_add2( pt2_data_S2(p), 1.d0,  pt2_data_teeth )
-        end do
+        enddo
+
         call pt2_dealloc(pt2_data_teeth)
         avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
         avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
@@ -546,14 +548,6 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
          print*,'i,index(i),size(pt2_data_I,1) = ',i,index(i),size(pt2_data_I,1)
          stop -1
         endif
-!        print *, pt2_data_I(index(i))%pt2
-!        print *, pt2_data_I(index(i))%variance
-!        print *, pt2_data_I(index(i))%norm2
-!        print *, ''
-!        print *, pt2_data_task(i)%pt2
-!        print *, pt2_data_task(i)%variance
-!        print *, pt2_data_task(i)%norm2
-!        print *, ''
         call pt2_add(pt2_data_I(index(i)),1.d0,pt2_data_task(i))
         f(index(i)) -= 1
       end do

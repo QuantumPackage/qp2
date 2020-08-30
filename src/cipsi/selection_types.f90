@@ -24,7 +24,7 @@ module selection_types
   integer function pt2_type_size(N)
     implicit none
     integer, intent(in) :: N
-    pt2_type_size = 8*(8*n + 2*n*n)
+    pt2_type_size = (8*n + 2*n*n)
   end function
 
 end module
