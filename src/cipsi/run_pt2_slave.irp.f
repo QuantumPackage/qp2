@@ -117,11 +117,11 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     double precision :: time0, time1
     call wall_time(time0)
     do k=1,n_tasks
-        call pt2_alloc(pt2_data(k),N_states)
-        b%cur = 0
+      call pt2_alloc(pt2_data(k),N_states)
+      b%cur = 0
 !double precision :: time2
 !call wall_time(time2)
-        call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
+      call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
 !call wall_time(time1)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
@@ -157,6 +157,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
   if (buffer_ready) then
     call delete_selection_buffer(b)
   endif
+  deallocate(pt2_data)
 end subroutine
 
 
@@ -171,7 +172,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
   integer                        :: worker_id, ctask, ltask
   character*(512)                :: task
-  integer                        :: task_id
+  integer                        :: task_id(1)
 
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
@@ -182,9 +183,9 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
-  type(pt2_type) :: pt2_data
+  type(pt2_type) :: pt2_data(1)
   integer :: n_tasks, k, N
-  integer :: i_generator, subset
+  integer :: i_generator(1), subset
 
   integer :: bsize ! Size of selection buffers
   logical :: sending
@@ -213,13 +214,13 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     if (get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id, task_id, task, n_tasks) == -1) then
       exit
     endif
-    done = task_id == 0
+    done = task_id(1) == 0
     if (done) then
       n_tasks = n_tasks-1
     endif
     if (n_tasks == 0) exit
 
-    read (task,*) subset, i_generator, N
+    read (task,*) subset, i_generator(1), N
     if (b%N == 0) then
       ! Only first time
       bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
@@ -231,11 +232,11 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
     double precision :: time0, time1
     call wall_time(time0)
-    call pt2_alloc(pt2_data,N_states)
+    call pt2_alloc(pt2_data(1),N_states)
     b%cur = 0
 !double precision :: time2
 !call wall_time(time2)
-    call select_connected(i_generator,energy,pt2_data,b,subset,pt2_F(i_generator))
+    call select_connected(i_generator(1),energy,pt2_data(1),b,subset,pt2_F(i_generator(1)))
 !call wall_time(time1)
 !print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     call wall_time(time1)
@@ -261,7 +262,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
       call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, b, task_id, n_tasks,sending)
     endif
 
-    call pt2_dealloc(pt2_data)
+    call pt2_dealloc(pt2_data(1))
   end do
   call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 

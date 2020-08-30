@@ -6,7 +6,7 @@ subroutine run_cipsi
 ! stochastic PT2.
   END_DOC
   integer                        :: i,j,k
-  type(pt2_type)                 :: pt2_data
+  type(pt2_type)                 :: pt2_data, pt2_data_err
   double precision, allocatable  :: zeros(:)
   integer                        :: to_select
   logical, external :: qp_stop
@@ -25,6 +25,7 @@ subroutine run_cipsi
 
   allocate (zeros(N_states))
   call pt2_alloc(pt2_data, N_states)
+  call pt2_alloc(pt2_data_err, N_states)
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -79,16 +80,19 @@ subroutine run_cipsi
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
     if (do_pt2) then
-      pt2_data % pt2 = 0.d0
-      pt2_data % variance = 0.d0
-      pt2_data % norm2 = 0.d0
+      call pt2_dealloc(pt2_data)
+      call pt2_dealloc(pt2_data_err)
+      call pt2_alloc(pt2_data, N_states)
+      call pt2_alloc(pt2_data_err, N_states)
       threshold_generators_save = threshold_generators
       threshold_generators = 1.d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error, 0) ! Stochastic PT2
+      call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error, 0) ! Stochastic PT2
       threshold_generators = threshold_generators_save
       SOFT_TOUCH threshold_generators
     else
+      call pt2_dealloc(pt2_data)
+      call pt2_alloc(pt2_data, N_states)
       call ZMQ_selection(to_select, pt2_data)
     endif
 
@@ -98,7 +102,7 @@ subroutine run_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data, pt2_data_err, N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
@@ -130,12 +134,13 @@ subroutine run_cipsi
     endif
 
     if (do_pt2) then
-      pt2_data % pt2(:) = 0.d0
-      pt2_data % variance(:) = 0.d0
-      pt2_data % norm2(:) = 0.d0
+      call pt2_dealloc(pt2_data)
+      call pt2_dealloc(pt2_data_err)
+      call pt2_alloc(pt2_data, N_states)
+      call pt2_alloc(pt2_data_err, N_states)
       threshold_generators = 1d0
       SOFT_TOUCH threshold_generators
-      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, 0) ! Stochastic PT2
+      call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
       SOFT_TOUCH threshold_generators
     endif
     print *,  'N_det             = ', N_det
@@ -145,9 +150,11 @@ subroutine run_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep(1:N_states), &
-      pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
+      pt2_data, pt2_data_err, N_det,N_occ_pattern,N_states,psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
   endif
+  call pt2_dealloc(pt2_data)
+  call pt2_dealloc(pt2_data_err)
 
 end

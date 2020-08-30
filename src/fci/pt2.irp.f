@@ -32,29 +32,34 @@ subroutine run
   integer                        :: i,j,k
   logical, external              :: detEq
 
-  type(pt2_type)                 :: pt2_data
+  type(pt2_type)                 :: pt2_data, pt2_data_err
   integer                        :: degree
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
 
-  double precision               :: E_CI_before(N_states), relative_error
+  double precision               :: relative_error
+  double precision, allocatable  :: E_CI_before(:)
 
+  allocate ( E_CI_before(N_states))
   call pt2_alloc(pt2_data, N_states)
+  call pt2_alloc(pt2_data_err, N_states)
 
   E_CI_before(:) = psi_energy(:) + nuclear_repulsion
   relative_error=PT2_relative_error
 
   if (do_pt2) then
-    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, 0) ! Stochastic PT2
+    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
     call ZMQ_selection(0, pt2_data)
   endif
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &
-    pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
+    pt2_data, pt2_data_err, N_det,N_occ_pattern,N_states,psi_s2)
 
-  call save_energy(E_CI_before,pt2_data % pt2)
+  call save_energy(E_CI_before, pt2_data % pt2)
   call pt2_dealloc(pt2_data)
+  call pt2_dealloc(pt2_data_err)
+  deallocate(E_CI_before)
 end
 
 

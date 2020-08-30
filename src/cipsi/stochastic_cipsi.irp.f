@@ -7,7 +7,7 @@ subroutine run_stochastic_cipsi
   integer                        :: i,j,k
   double precision, allocatable  :: zeros(:)
   integer                        :: to_select
-  type(pt2_type)                 :: pt2_data
+  type(pt2_type)                 :: pt2_data, pt2_data_err
   logical, external              :: qp_stop
 
 
@@ -24,6 +24,7 @@ subroutine run_stochastic_cipsi
 
   allocate (zeros(N_states))
   call pt2_alloc(pt2_data, N_states)
+  call pt2_alloc(pt2_data_err, N_states)
 
   double precision               :: hf_energy_ref
   logical                        :: has
@@ -79,10 +80,11 @@ subroutine run_stochastic_cipsi
     to_select = max(N_states_diag, to_select)
 
 
-    pt2_data % pt2 = 0.d0
-    pt2_data % variance = 0.d0
-    pt2_data % norm2 = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,relative_error,to_select) ! Stochastic PT2 and selection
+    call pt2_dealloc(pt2_data)
+    call pt2_dealloc(pt2_data_err)
+    call pt2_alloc(pt2_data, N_states)
+    call pt2_alloc(pt2_data_err, N_states)
+    call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error,to_select) ! Stochastic PT2 and selection
 
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
                     (psi_energy_with_nucl_rep(1) + pt2_data % rpt2(1) - hf_energy_ref)
@@ -90,7 +92,7 @@ subroutine run_stochastic_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data, N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data, pt2_data_err, N_det,N_occ_pattern,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
@@ -121,17 +123,19 @@ subroutine run_stochastic_cipsi
         call save_energy(psi_energy_with_nucl_rep, zeros)
     endif
 
-    pt2_data % pt2(:) = 0.d0
-    pt2_data % variance(:) = 0.d0
-    pt2_data % norm2(:) = 0.d0
-    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, relative_error, 0) ! Stochastic PT2
+    call pt2_dealloc(pt2_data)
+    call pt2_dealloc(pt2_data_err)
+    call pt2_alloc(pt2_data, N_states)
+    call pt2_alloc(pt2_data_err, N_states)
+    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data , N_det, N_occ_pattern, N_states, psi_s2)
+       pt2_data , pt2_data_err, N_det, N_occ_pattern, N_states, psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
   endif
   call pt2_dealloc(pt2_data)
+  call pt2_dealloc(pt2_data_err)
 
 end

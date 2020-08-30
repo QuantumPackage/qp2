@@ -107,7 +107,7 @@ end function
 
 
 
-subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
+subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   use f77_zmq
   use selection_types
 
@@ -117,7 +117,7 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
   integer, intent(in)            :: N_in
 !  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
-  type(pt2_type), intent(inout)  :: pt2_data
+  type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
 !
   integer                        :: i, N
 
@@ -298,13 +298,13 @@ subroutine ZMQ_pt2(E, pt2_data, relative_error, N_in)
       i = omp_get_thread_num()
       if (i==0) then
 
-        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, pt2_data, b, N)
+        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, pt2_data, pt2_data_err, b, N)
         pt2_data % rpt2(pt2_stoch_istate) =  &
           pt2_data % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
 
         !TODO : We should use here the correct formula for the error of X/Y
-        pt2_data % rpt2_err(pt2_stoch_istate) =  &
-          pt2_data % pt2_err(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
+        pt2_data_err % rpt2(pt2_stoch_istate) =  &
+          pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
 
       else
         call pt2_slave_inproc(i)
@@ -346,7 +346,7 @@ subroutine pt2_slave_inproc(i)
 end
 
 
-subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
+subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_err, b, N_)
   use f77_zmq
   use selection_types
   use bitmasks
@@ -355,7 +355,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   double precision, intent(in)   :: relative_error, E
-  type(pt2_type), intent(inout)  :: pt2_data
+  type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N_
 
@@ -414,9 +414,11 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
 
 
   pt2_data % pt2(pt2_stoch_istate) = -huge(1.)
-  pt2_data % pt2_err(pt2_stoch_istate) = huge(1.)
+  pt2_data_err % pt2(pt2_stoch_istate) = huge(1.)
   pt2_data % variance(pt2_stoch_istate) = huge(1.)
+  pt2_data_err % variance(pt2_stoch_istate) = huge(1.)
   pt2_data % norm2(pt2_stoch_istate) = 0.d0
+  pt2_data_err % norm2(pt2_stoch_istate) = huge(1.)
   n = 1
   t = 0
   U = 0
@@ -479,8 +481,8 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
           call pt2_add ( pt2_data_S(p),  1.d0,  pt2_data_teeth )
           call pt2_add2( pt2_data_S2(p), 1.d0,  pt2_data_teeth )
         enddo
-
         call pt2_dealloc(pt2_data_teeth)
+
         avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
         avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
         avg3 = n0 + pt2_data_S(t) % norm2(pt2_stoch_istate) / dble(c)
@@ -498,22 +500,22 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, b, N_)
         if(c > 2) then
           eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          pt2_data % pt2_err(pt2_stoch_istate) = eqt
+          pt2_data_err % pt2(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          pt2_data % variance_err(pt2_stoch_istate) = eqt
+          pt2_data_err % variance(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % norm2(pt2_stoch_istate) / c) - (pt2_data_S(t) % norm2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          pt2_data % norm2_err(pt2_stoch_istate) = eqt
+          pt2_data_err % norm2(pt2_stoch_istate) = eqt
 
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
             print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, F14.10, 2X, F14.10, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3, time-time0, ''
             if (stop_now .or. (                                      &
-                  (do_exit .and. (dabs(pt2_data % pt2_err(pt2_stoch_istate)) /    &
+                  (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
                   (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
               if (zmq_abort(zmq_to_qp_run_socket) == -1) then
                 call sleep(10)
