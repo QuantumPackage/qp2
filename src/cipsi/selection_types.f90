@@ -10,7 +10,6 @@ module selection_types
     double precision, allocatable :: pt2(:)
     double precision, allocatable :: rpt2(:)
     double precision, allocatable :: variance(:)
-    double precision, allocatable :: norm2(:)
     double precision, allocatable :: overlap(:,:)
   endtype
 
@@ -19,7 +18,7 @@ module selection_types
   integer function pt2_type_size(N)
     implicit none
     integer, intent(in) :: N
-    pt2_type_size = (4*n + n*n)
+    pt2_type_size = (3*n + n*n)
   end function
 
 end module

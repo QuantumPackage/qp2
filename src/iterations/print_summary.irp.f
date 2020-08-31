@@ -12,7 +12,6 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
   integer                        :: N_states_p
   character*(9)                  :: pt2_string
   character*(512)                :: fmt
-  double precision               :: f(n_st)
 
   if (do_pt2) then
     pt2_string = '        '
@@ -21,10 +20,6 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
   endif
 
   N_states_p = min(N_det_,n_st)
-
-  do i=1,N_states_p
-    f(i) = 1.d0/(1.d0+pt2_data % norm2(i))
-  enddo
 
   print *, ''
   print '(A,I12)',  'Summary at N_det = ', N_det_
@@ -45,10 +40,10 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
   endif
   write(fmt,*) '(A13,', 2*N_states_p, '(1X,F14.8))'
   write(*,fmt) '# PT2 '//pt2_string, (pt2_data % pt2(k), pt2_data_err % pt2(k), k=1,N_states_p)
-  write(*,fmt) '# rPT2'//pt2_string, (pt2_data % pt2(k)*f(k), pt2_data_err % pt2(k)*f(k), k=1,N_states_p)
+  write(*,fmt) '# rPT2'//pt2_string, (pt2_data % rpt2(k), pt2_data_err % rpt2(k), k=1,N_states_p)
   write(*,'(A)') '#'
   write(*,fmt) '# E+PT2      ', (e_(k)+pt2_data % pt2(k),pt2_data_err % pt2(k), k=1,N_states_p)
-  write(*,fmt) '# E+rPT2     ', (e_(k)+pt2_data % pt2(k)*f(k),pt2_data_err % pt2(k)*f(k), k=1,N_states_p)
+  write(*,fmt) '# E+rPT2     ', (e_(k)+pt2_data % rpt2(k),pt2_data_err % rpt2(k), k=1,N_states_p)
   if (N_states_p > 1) then
     write(*,fmt) '# Excit. (au)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1)), &
       dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1)), k=1,N_states_p)
@@ -71,11 +66,11 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
     print *,  '< S^2 >         = ', s2_(k)
     print *,  'E               = ', e_(k)
     print *,  'Variance        = ', pt2_data % variance(k), ' +/- ', pt2_data_err % variance(k)
-    print *,  'PT norm         = ', dsqrt(pt2_data % norm2(k)), ' +/- ', 0.5d0*dsqrt(pt2_data % norm2(k)) * pt2_data_err % norm2(k) / pt2_data % norm2(k)
+    print *,  'PT norm         = ', dsqrt(pt2_data % overlap(k,k)), ' +/- ', 0.5d0*dsqrt(pt2_data % overlap(k,k)) * pt2_data_err % overlap(k,k) / (pt2_data % overlap(k,k))
     print *,  'PT2             = ', pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)
-    print *,  'rPT2            = ', pt2_data % pt2(k)*f(k), ' +/- ', pt2_data_err % rpt2(k)
+    print *,  'rPT2            = ', pt2_data % rpt2(k), ' +/- ', pt2_data_err % rpt2(k)
     print *,  'E+PT2 '//pt2_string//' = ', e_(k)+pt2_data % pt2(k), ' +/- ', pt2_data_err % pt2(k)
-    print *,  'E+rPT2'//pt2_string//' = ', e_(k)+pt2_data % pt2(k)*f(k), ' +/- ', pt2_data_err % pt2(k)*f(k)
+    print *,  'E+rPT2'//pt2_string//' = ', e_(k)+pt2_data % rpt2(k), ' +/- ', pt2_data_err % rpt2(k)
     print *,  ''
   enddo
 
@@ -95,8 +90,8 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
     print *,  '-----'
     print*, 'Variational + renormalized perturbative Energy difference (au | eV)'
     do i=2, N_states_p
-      print*,'Delta E = ', (e_(i)+ pt2_data % pt2(i)*f(i) - (e_(1) + pt2_data % pt2(1)*f(1))), &
-        (e_(i)+ pt2_data % pt2(i)*f(i) - (e_(1) + pt2_data % pt2(1)*f(1))) * 27.211396641308d0
+      print*,'Delta E = ', (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))), &
+        (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))) * 27.211396641308d0
     enddo
   endif
 

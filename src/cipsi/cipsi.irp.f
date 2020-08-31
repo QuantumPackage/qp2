@@ -36,7 +36,7 @@ subroutine run_cipsi
   zeros = 0.d0
   pt2_data % pt2  = -huge(1.e0)
   pt2_data % rpt2 = -huge(1.e0)
-  pt2_data % norm2 = 0.d0
+  pt2_data % overlap(:,:) = 0.d0
   pt2_data % variance = huge(1.e0)
 
   if (s2_eig) then

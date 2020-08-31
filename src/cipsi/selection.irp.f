@@ -29,7 +29,6 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
   type(pt2_type), intent(in)   :: pt2_data
   double precision             :: pt2(N_st)
   double precision             :: variance(N_st)
-  double precision             :: norm2(N_st)
 
   double precision :: avg, element, dt, x
   integer          :: k
@@ -39,7 +38,6 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
 
   pt2(:)      = pt2_data % pt2(:)
   variance(:) = pt2_data % variance(:)
-  norm2(:)    = pt2_data % norm2(:)
 
   if (i_iter == 0) then
     allocate(memo_variance(N_st,i_itermax), memo_pt2(N_st,i_itermax))
@@ -800,7 +798,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         e_pert = coef(istate) * alpha_h_psi
 
         pt2_data % variance(istate) += alpha_h_psi * alpha_h_psi
-        pt2_data % norm2(istate)    += coef(istate) * coef(istate)
         pt2_data % pt2(istate)      += e_pert
 
 !!!DEBUG

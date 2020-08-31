@@ -242,8 +242,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       mem_collector = 8.d0 *                  & ! bytes
             ( 1.d0*pt2_n_tasks_max            & ! task_id, index
             + 0.635d0*N_det_generators        & ! f,d
-            + pt2_n_tasks_max*pt2_type_size(N_states)/8 & ! pt2_data_task
-            + N_det_generators*pt2_type_size(N_states)/8  & ! pt2_data_I
+            + pt2_n_tasks_max*pt2_type_size(N_states) & ! pt2_data_task
+            + N_det_generators*pt2_type_size(N_states)  & ! pt2_data_I
             + 4.d0*(pt2_N_teeth+1)            & ! S, S2, T2, T3
             + 1.d0*(N_int*2.d0*N + N)         & ! selection buffer
             + 1.d0*(N_int*2.d0*N + N)         & ! sort selection buffer
@@ -258,7 +258,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
               nproc_target * 8.d0 *             & ! bytes
               ( 0.5d0*pt2_n_tasks_max           & ! task_id
               + 64.d0*pt2_n_tasks_max           & ! task
-              + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm2
+              + pt2_type_size(N_states)*pt2_n_tasks_max*N_states   & ! pt2, variance, overlap
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
@@ -300,11 +300,11 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
         call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, pt2_data, pt2_data_err, b, N)
         pt2_data % rpt2(pt2_stoch_istate) =  &
-          pt2_data % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
+          pt2_data % pt2(pt2_stoch_istate)/(1.d0+pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
 
         !TODO : We should use here the correct formula for the error of X/Y
         pt2_data_err % rpt2(pt2_stoch_istate) =  &
-          pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % norm2(pt2_stoch_istate))
+          pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
 
       else
         call pt2_slave_inproc(i)
@@ -377,7 +377,8 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   integer, allocatable :: task_id(:)
   integer, allocatable :: index(:)
 
-  double precision :: v, x, x2, x3, avg, avg2, avg3, eqt, E0, v0, n0
+  double precision :: v, x, x2, x3, avg, avg2, avg3(N_states), eqt, E0, v0, n0(N_states)
+  double precision :: eqta(N_states)
   double precision :: time, time1, time0
 
   integer, allocatable :: f(:)
@@ -417,8 +418,8 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   pt2_data_err % pt2(pt2_stoch_istate) = huge(1.)
   pt2_data % variance(pt2_stoch_istate) = huge(1.)
   pt2_data_err % variance(pt2_stoch_istate) = huge(1.)
-  pt2_data % norm2(pt2_stoch_istate) = 0.d0
-  pt2_data_err % norm2(pt2_stoch_istate) = huge(1.)
+  pt2_data % overlap(:,pt2_stoch_istate) = 0.d0
+  pt2_data_err % overlap(:,pt2_stoch_istate) = huge(1.)
   n = 1
   t = 0
   U = 0
@@ -437,7 +438,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   n_tasks = 0
   E0 = E
   v0 = 0.d0
-  n0 = 0.d0
+  n0(:) = 0.d0
   more = 1
   call wall_time(time0)
   time1 = time0
@@ -457,11 +458,11 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
           t=t+1
           E0 = 0.d0
           v0 = 0.d0
-          n0 = 0.d0
+          n0(:) = 0.d0
           do i=pt2_n_0(t),1,-1
             E0 += pt2_data_I(i) % pt2(pt2_stoch_istate)
             v0 += pt2_data_I(i) % variance(pt2_stoch_istate)
-            n0 += pt2_data_I(i) % norm2(pt2_stoch_istate)
+            n0(:) += pt2_data_I(i) % overlap(:,pt2_stoch_istate)
           end do
         else
           exit
@@ -485,7 +486,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
 
         avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
         avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
-        avg3 = n0 + pt2_data_S(t) % norm2(pt2_stoch_istate) / dble(c)
+        avg3(:) = n0(:) + pt2_data_S(t) % overlap(:,pt2_stoch_istate) / dble(c)
         if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
@@ -494,7 +495,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         endif
         pt2_data % pt2(pt2_stoch_istate) = avg
         pt2_data % variance(pt2_stoch_istate) = avg2
-        pt2_data % norm2(pt2_stoch_istate) = avg3
+        pt2_data % overlap(:,pt2_stoch_istate) = avg3(:)
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
@@ -506,14 +507,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
-          eqt = dabs((pt2_data_S2(t) % norm2(pt2_stoch_istate) / c) - (pt2_data_S(t) % norm2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          pt2_data_err % norm2(pt2_stoch_istate) = eqt
+          eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
+          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, F14.10, 2X, F14.10, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3, time-time0, ''
+            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, G14.6, 2X, G14.6, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3(pt2_stoch_istate), time-time0, ''
             if (stop_now .or. (                                      &
                   (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
                   (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then

@@ -7,20 +7,15 @@ subroutine pt2_alloc(pt2_data,N)
 
   allocate(pt2_data % pt2(N)           &
           ,pt2_data % variance(N)      &
-          ,pt2_data % norm2(N)         &
           ,pt2_data % rpt2(N)          &
           ,pt2_data % overlap(N,N)     &
           )
 
   pt2_data % pt2(:)           = 0.d0
   pt2_data % variance(:)      = 0.d0
-  pt2_data % norm2(:)         = 0.d0
   pt2_data % rpt2(:)          = 0.d0
   pt2_data % overlap(:,:)     = 0.d0
 
-  do k=1,N
-    pt2_data % overlap(k,k) = 1.d0
-  enddo
 end subroutine
 
 subroutine pt2_dealloc(pt2_data)
@@ -29,7 +24,6 @@ subroutine pt2_dealloc(pt2_data)
   type(pt2_type), intent(inout) :: pt2_data
   deallocate(pt2_data % pt2         &
             ,pt2_data % variance    &
-            ,pt2_data % norm2       &
             ,pt2_data % rpt2        &
             ,pt2_data % overlap     &
             )
@@ -50,7 +44,6 @@ subroutine pt2_add(p1, w, p2)
     p1 % pt2(:)            = p1 % pt2(:)           + p2 % pt2(:)
     p1 % rpt2(:)           = p1 % rpt2(:)          + p2 % rpt2(:)
     p1 % variance(:)       = p1 % variance(:)      + p2 % variance(:)
-    p1 % norm2(:)          = p1 % norm2(:)         + p2 % norm2(:)
     p1 % overlap(:,:)      = p1 % overlap(:,:)     + p2 % overlap(:,:)
 
   else
@@ -58,7 +51,6 @@ subroutine pt2_add(p1, w, p2)
     p1 % pt2(:)            = p1 % pt2(:)           + w * p2 % pt2(:)
     p1 % rpt2(:)           = p1 % rpt2(:)          + w * p2 % rpt2(:)
     p1 % variance(:)       = p1 % variance(:)      + w * p2 % variance(:)
-    p1 % norm2(:)          = p1 % norm2(:)         + w * p2 % norm2(:)
     p1 % overlap(:,:)      = p1 % overlap(:,:)     + w * p2 % overlap(:,:)
 
   endif
@@ -81,7 +73,6 @@ subroutine pt2_add2(p1, w, p2)
     p1 % pt2(:)           = p1 % pt2(:)           + p2 % pt2(:)           * p2 % pt2(:)
     p1 % rpt2(:)          = p1 % rpt2(:)          + p2 % rpt2(:)          * p2 % rpt2(:)
     p1 % variance(:)      = p1 % variance(:)      + p2 % variance(:)      * p2 % variance(:)
-    p1 % norm2(:)         = p1 % norm2(:)         + p2 % norm2(:)         * p2 % norm2(:)
     p1 % overlap(:,:)     = p1 % overlap(:,:)     + p2 % overlap(:,:)     * p2 % overlap(:,:)
 
   else
@@ -89,7 +80,6 @@ subroutine pt2_add2(p1, w, p2)
     p1 % pt2(:)           = p1 % pt2(:)           + w * p2 % pt2(:)           * p2 % pt2(:)
     p1 % rpt2(:)          = p1 % rpt2(:)          + w * p2 % rpt2(:)          * p2 % rpt2(:)
     p1 % variance(:)      = p1 % variance(:)      + w * p2 % variance(:)      * p2 % variance(:)
-    p1 % norm2(:)         = p1 % norm2(:)         + w * p2 % norm2(:)         * p2 % norm2(:)
     p1 % overlap(:,:)     = p1 % overlap(:,:)     + w * p2 % overlap(:,:)     * p2 % overlap(:,:)
 
   endif
@@ -113,8 +103,6 @@ subroutine pt2_serialize(pt2_data, n, x)
   k=k+n
   x(k+1:k+n)     =  pt2_data % variance(1:n)
   k=k+n
-  x(k+1:k+n)     =  pt2_data % norm2(1:n)
-  k=k+n
   x(k+1:k+n2)  =  reshape(pt2_data % overlap(1:n,1:n), (/ n2 /))
 
 end
@@ -134,8 +122,6 @@ subroutine pt2_deserialize(pt2_data, n, x)
   pt2_data % rpt2(1:n)          =   x(k+1:k+n)
   k=k+n
   pt2_data % variance(1:n)      =   x(k+1:k+n)
-  k=k+n
-  pt2_data % norm2(1:n)         =   x(k+1:k+n)
   k=k+n
   pt2_data % overlap(1:n,1:n) = reshape(x(k+1:k+n2), (/ n, n /))
 

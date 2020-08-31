@@ -7,7 +7,7 @@ subroutine ZMQ_selection(N_in, pt2_data)
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket , zmq_socket_pull
   integer, intent(in)            :: N_in
   type(selection_buffer)         :: b
-  integer                        :: i, N
+  integer                        :: i, l, N
   integer, external              :: omp_get_thread_num
   type(pt2_type), intent(inout)  :: pt2_data
 
@@ -131,10 +131,13 @@ subroutine ZMQ_selection(N_in, pt2_data)
   do k=1,N_states
     pt2_data % pt2(k) = pt2_data % pt2(k) * f(k)
     pt2_data % variance(k) = pt2_data % variance(k) * f(k)
-    pt2_data % norm2(k) = pt2_data % norm2(k) * f(k)
+    do l=1,N_states
+      pt2_data % overlap(k,l) = pt2_data % overlap(k,l) * dsqrt(f(k)*f(l))
+      pt2_data % overlap(l,k) = pt2_data % overlap(l,k) * dsqrt(f(k)*f(l))
+    enddo
 
     pt2_data % rpt2(k) =  &
-       pt2_data % pt2(k)/(1.d0 + pt2_data % norm2(k))
+       pt2_data % pt2(k)/(1.d0 + pt2_data % overlap(k,k))
   enddo
 
   call update_pt2_and_variance_weights(pt2_data, N_states)
@@ -182,6 +185,7 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
   call create_selection_buffer(N, N*2, b2)
+  integer :: k
   double precision :: rss
   double precision, external :: memory_of_int
   rss = memory_of_int(N_det_generators)
@@ -190,7 +194,7 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   more = 1
   pt2_data % pt2(:)      = 0d0
   pt2_data % variance(:) = 0.d0
-  pt2_data % norm2(:)    = 0.d0
+  pt2_data % overlap(:,:) = 0.d0
   call pt2_alloc(pt2_data_tmp,N_states)
   do while (more == 1)
     call pull_selection_results(zmq_socket_pull, pt2_data_tmp, b2%val(1), b2%det(1,1,1), b2%cur, task_id, ntask)

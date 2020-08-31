@@ -47,7 +47,7 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
   type(pt2_type), intent(inout)   :: pt2_data
   type(selection_buffer), intent(inout) :: buf
   logical :: ok
-  integer :: s1, s2, p1, p2, ib, j, istate
+  integer :: s1, s2, p1, p2, ib, j, istate, jstate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
   double precision :: e_pert, delta_E, val, Hii, sum_e_pert, tmp, alpha_h_psi, coef(N_states)
   double precision, external :: diag_H_mat_elem_fock
@@ -152,7 +152,14 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
         print*,e_pert,coef,alpha_h_psi
         pt2_data % pt2(istate) += e_pert
         pt2_data % variance(istate) += alpha_h_psi * alpha_h_psi
-        pt2_data % norm2(istate) = coef(istate) * coef(istate)
+      enddo
+
+      do istate=1,N_states
+        alpha_h_psi = mat(istate, p1, p2)
+        e_pert = coef(istate) * alpha_h_psi
+        do jstate=1,N_states
+          pt2_data % overlap(jstate,jstate) = coef(istate) * coef(jstate)
+        enddo
 
         if (weight_selection /= 5) then
           ! Energy selection
