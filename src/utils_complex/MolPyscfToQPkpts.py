@@ -377,16 +377,14 @@ def print_kpts_unblocked_upper(ints_k,outfilename,thresh):
 
 
 def get_kin_ao(mf):
-    nao = mf.cell.nao_nr(cart=True)
+    nao = mf.cell.nao_nr()
     Nk = len(mf.kpts)
-    return np.reshape(mf.cell.pbc_intor('int1e_kin_cart',1,1,kpts=mf.kpts),(Nk,nao,nao))
+    return np.reshape(mf.cell.pbc_intor('int1e_kin',1,1,kpts=mf.kpts),(Nk,nao,nao))
 
 def get_ovlp_ao(mf):
-    nao = mf.cell.nao_nr(cart=True)
+    nao = mf.cell.nao_nr()
     Nk = len(mf.kpts)
-    if mf.cell.cart:
-    return np.reshape(mf.cell.pbc_intor('int1e_ovlp_cart',1,1,kpts=mf.kpts),(Nk,nao,nao))
-    #return np.reshape(mf.get_ovlp(cell=mf.cell,kpts=mf.kpts),(Nk,nao,nao))
+    return np.reshape(mf.get_ovlp(cell=mf.cell,kpts=mf.kpts),(Nk,nao,nao))
 
 def get_pot_ao(mf):
     nao = mf.cell.nao_nr()
@@ -605,18 +603,18 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5.create_group('electrons')
         qph5.create_group('ao_basis')
         qph5.create_group('mo_basis')
-        qph5.create_group('pseudo')
-        qph5['pseudo'].attrs['do_pseudo']=False
-        qph5.create_group('PBC_DATA')
+        qph5.create_group('qmcpack')
+        #qph5.create_group('pseudo')
+        #qph5['pseudo'].attrs['do_pseudo']=False
 
-    if mf.cell.cart:
-        mo_coeff = mf.mo_coeff.copy()
-    else:
-        # normalized can be one of ['all','sp',None]
-        # we can either normalize here or after qp
-        c2s = mf.cell.cart2sph_coeff(normalized='sp')
-        mo_coeff = list(map(lambda x: np.dot(c2s,x),mf.mo_coeff))
-    #mo_coeff = mf.mo_coeff
+    #if mf.cell.cart:
+    #    mo_coeff = mf.mo_coeff.copy()
+    #else:
+    #    # normalized can be one of ['all','sp',None]
+    #    # we can either normalize here or after qp
+    #    c2s = mf.cell.cart2sph_coeff(normalized='sp')
+    #    mo_coeff = list(map(lambda x: np.dot(c2s,x),mf.mo_coeff))
+    mo_coeff = mf.mo_coeff
     # Mo_coeff actif
     mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
     e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
@@ -663,17 +661,19 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
 
     nprim_max = 0
+    nfunc_tot = 0
     for iatom, (sh0,sh1,ao0,ao1) in enumerate(cell.aoslice_by_atom()):
         for ib in range(sh0,sh1): # sets of contracted exponents
             nprim = cell.bas_nprim(ib)
+            nfunc_tot += cell.bas_nctr(ib)
             if (nprim > nprim_max):
                 nprim_max = nprim
 
-    qp_prim_num = np.zeros((nao),dtype=int)
-    qp_coef = np.zeros((nao,nprim_max))
-    qp_expo = np.zeros((nao,nprim_max))
-    qp_nucl = np.zeros((nao),dtype=int)
-    qp_pwr = np.zeros((nao,3),dtype=int)
+    qp_prim_num = np.zeros((nfunc_tot),dtype=int)
+    qp_coef = np.zeros((nfunc_tot,nprim_max))
+    qp_expo = np.zeros((nfunc_tot,nprim_max))
+    qp_nucl = np.zeros((nfunc_tot),dtype=int)
+    qp_lbas = np.zeros((nfunc_tot),dtype=int)
 
     clabels = cell.cart_labels(fmt=False)
 
@@ -692,27 +692,37 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
             #else:
             #    nfuncmax = 2*l+1
             for ic in range(nctr): # sets of contraction coeffs
+                qp_expo[tmp_idx,:nprim] = es[:]
+                qp_coef[tmp_idx,:nprim] = cs[:,ic]
+                qp_nucl[tmp_idx] = iatom 
+                qp_lbas[tmp_idx] = l
+                qp_prim_num[tmp_idx] = nprim
+                tmp_idx += 1
                 #for nfunc in range(nfuncmax):
-                for nfunc in range(((l+1)*(l+2))//2): # always use cart for qp ao basis?
-                    qp_expo[tmp_idx,:nprim] = es[:]
-                    qp_coef[tmp_idx,:nprim] = cs[:,ic]
-                    qp_nucl[tmp_idx] = iatom + 1
-                    qp_pwr[tmp_idx,:] = xyzcount(clabels[tmp_idx][3])
-                    qp_prim_num[tmp_idx] = nprim
-                    tmp_idx += 1
+                #for nfunc in range(((l+1)*(l+2))//2): # always use cart for qp ao basis?
+                #    qp_expo[tmp_idx,:nprim] = es[:]
+                #    qp_coef[tmp_idx,:nprim] = cs[:,ic]
+                #    qp_nucl[tmp_idx] = iatom + 1
+                #    qp_pwr[tmp_idx,:] = xyzcount(clabels[tmp_idx][3])
+                #    qp_prim_num[tmp_idx] = nprim
+                #    tmp_idx += 1
 
     with h5py.File(qph5path,'a') as qph5:
-        qph5['mo_basis'].attrs['mo_num']=nmo
-        qph5['ao_basis'].attrs['ao_num']=nao
+        qph5['mo_basis'].attrs['mo_num']=Nk*nmo
+        qph5['ao_basis'].attrs['ao_num']=Nk*nao
 
         #qph5['ao_basis'].attrs['ao_basis']=mf.cell.basis
         qph5['ao_basis'].attrs['ao_basis']="dummy basis"
 
-        qph5.create_dataset('ao_basis/ao_nucl',data=qp_nucl)
-        qph5.create_dataset('ao_basis/ao_prim_num',data=qp_prim_num)
-        qph5.create_dataset('ao_basis/ao_expo',data=qp_expo.T)
-        qph5.create_dataset('ao_basis/ao_coef',data=qp_coef.T)
-        qph5.create_dataset('ao_basis/ao_power',data=qp_pwr.T)
+        qph5.create_dataset('ao_basis/ao_nucl',data=Nk*ao_nucl)
+
+        qph5['qmcpack'].attrs['qmc_nshell']=nfunc_tot
+        qph5['qmcpack'].attrs['qmc_prim_num_max']=nprim_max
+        qph5.create_dataset('qmcpack/qmc_nucl',data=qp_nucl)
+        qph5.create_dataset('qmcpack/qmc_prim_num',data=qp_prim_num)
+        qph5.create_dataset('qmcpack/qmc_expo',data=qp_expo.T)
+        qph5.create_dataset('qmcpack/qmc_coef',data=qp_coef.T)
+        qph5.create_dataset('qmcpack/qmc_lbas',data=qp_lbas)
 
 
 #    with h5py.File(qph5path,'a') as qph5:
@@ -882,87 +892,87 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
 
     with h5py.File(qph5path,'a') as qph5:
-        qph5.create_dataset('PBC_DATA/PBE',(1,),dtype="b1",data=True)
-        qph5.create_dataset('PBC_DATA/Super_Twist',(1,3),dtype="f8",data=sp_twist)
-        qph5.create_dataset('PBC_DATA/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
-        qph5.create_dataset('PBC_DATA/eigenval',(1,nmo),dtype="f8",data=mf.mo_energy)
+        qph5.create_dataset('qmcpack/PBE',(1,),dtype="b1",data=True)
+        qph5.create_dataset('qmcpack/Super_Twist',(1,3),dtype="f8",data=sp_twist)
+        qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
+        qph5.create_dataset('qmcpack/eigenval',(1,Nk*nmo),dtype="f8",data=mf.mo_energy)
                                                                                                                       
 
-    ##########################################
-    #                                        #
-    #                 ECP                    #
-    #                                        #
-    ##########################################
-
-    if (cell.has_ecp()):
-        #atsymb = [mol.atom_pure_symbol(i) for i in range(natom)]
-        #pyecp = mol._ecp
-        ## nelec to remove for each atom
-        #nuc_z_remov = [pyecp[i][0] for i in atsymb]
-        #nl_per_atom = [len(pyecp[i][1]) for i in atsymb]
-        ## list of l-values for channels of each atom
-        #ecp_l = [[pyecp[i][1][j][0] for j in range(len(pyecp[i][1]))] for i in atsymb]
-        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
-        #ecp_ac = [[pyecp[i][1][j][1] for j in range(len(pyecp[i][1]))] for i in atsymb]
-        pyecp = [cell._ecp[cell.atom_pure_symbol(i)] for i in range(natom)]
-        nzrmv=[0]*natom
-        lmax=0
-        klocmax=0
-        knlmax=0
-        for i,(nz,dat) in enumerate(pyecp):
-            nzrmv[i]=nz
-            for lval,ac in dat:
-                if (lval==-1):
-                    klocmax=max(sum(len(j) for j in ac),klocmax)
-                else:
-                    lmax=max(lval,lmax)
-                    knlmax=max(sum(len(j) for j in ac),knlmax)
-        #psd_nk = np.zeros((natom,klocmax),dtype=int)
-        #psd_vk = np.zeros((natom,klocmax),dtype=float)
-        #psd_dzk = np.zeros((natom,klocmax),dtype=float)
-        #psd_nkl = np.zeros((natom,knlmax,lmax+1),dtype=int)
-        #psd_vkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
-        #psd_dzkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
-        klnlmax=max(klocmax,knlmax)
-        psd_n = np.zeros((lmax+2,klnlmax,natom),dtype=int)
-        psd_v = np.zeros((lmax+2,klnlmax,natom),dtype=float)
-        psd_dz = np.zeros((lmax+2,klnlmax,natom),dtype=float)
-        for i,(_,dat) in enumerate(pyecp):
-            for lval,ac in dat:
-                count=0
-                for ri,aici in enumerate(ac):
-                    for ai,ci in aici:
-                        psd_n[lval+1,count,i] = ri-2
-                        psd_v[lval+1,count,i] = ci
-                        psd_dz[lval+1,count,i] = ai
-                        count += 1
-        psd_nk = psd_n[0,:klocmax]
-        psd_vk = psd_v[0,:klocmax]
-        psd_dzk = psd_dz[0,:klocmax]
-        psd_nkl = psd_n[1:,:knlmax]
-        psd_vkl = psd_v[1:,:knlmax]
-        psd_dzkl = psd_dz[1:,:knlmax]
-        with h5py.File(qph5path,'a') as qph5:
-            qph5['pseudo'].attrs['do_pseudo']=True
-            qph5['pseudo'].attrs['pseudo_lmax']=lmax
-            qph5['pseudo'].attrs['pseudo_klocmax']=klocmax
-            qph5['pseudo'].attrs['pseudo_kmax']=knlmax
-            qph5.create_dataset('pseudo/nucl_charge_remove',data=nzrmv)
-            qph5.create_dataset('pseudo/pseudo_n_k',data=psd_nk)
-            qph5.create_dataset('pseudo/pseudo_n_kl',data=psd_nkl)
-            qph5.create_dataset('pseudo/pseudo_v_k',data=psd_vk)
-            qph5.create_dataset('pseudo/pseudo_v_kl',data=psd_vkl)
-            qph5.create_dataset('pseudo/pseudo_dz_k',data=psd_dzk)
-            qph5.create_dataset('pseudo/pseudo_dz_kl',data=psd_dzkl)
-
-        ## nelec to remove for each atom
-        #nuc_z_remov = [i[0] for i in pyecp]
-        #nl_per_atom = [len(i[1]) for i in pyecp]
-        ## list of l-values for channels of each atom
-        #ecp_l = [[ j[0] for j in i[1] ] for i in pyecp]
-        #lmax = max(map(max,ecp_l))
-        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
-        #ecp_ac = [[ j[1] for j in i[1] ] for i in pyecp]
+#    ##########################################
+#    #                                        #
+#    #                 ECP                    #
+#    #                                        #
+#    ##########################################
+#
+#    if (cell.has_ecp()):
+#        #atsymb = [mol.atom_pure_symbol(i) for i in range(natom)]
+#        #pyecp = mol._ecp
+#        ## nelec to remove for each atom
+#        #nuc_z_remov = [pyecp[i][0] for i in atsymb]
+#        #nl_per_atom = [len(pyecp[i][1]) for i in atsymb]
+#        ## list of l-values for channels of each atom
+#        #ecp_l = [[pyecp[i][1][j][0] for j in range(len(pyecp[i][1]))] for i in atsymb]
+#        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
+#        #ecp_ac = [[pyecp[i][1][j][1] for j in range(len(pyecp[i][1]))] for i in atsymb]
+#        pyecp = [cell._ecp[cell.atom_pure_symbol(i)] for i in range(natom)]
+#        nzrmv=[0]*natom
+#        lmax=0
+#        klocmax=0
+#        knlmax=0
+#        for i,(nz,dat) in enumerate(pyecp):
+#            nzrmv[i]=nz
+#            for lval,ac in dat:
+#                if (lval==-1):
+#                    klocmax=max(sum(len(j) for j in ac),klocmax)
+#                else:
+#                    lmax=max(lval,lmax)
+#                    knlmax=max(sum(len(j) for j in ac),knlmax)
+#        #psd_nk = np.zeros((natom,klocmax),dtype=int)
+#        #psd_vk = np.zeros((natom,klocmax),dtype=float)
+#        #psd_dzk = np.zeros((natom,klocmax),dtype=float)
+#        #psd_nkl = np.zeros((natom,knlmax,lmax+1),dtype=int)
+#        #psd_vkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
+#        #psd_dzkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
+#        klnlmax=max(klocmax,knlmax)
+#        psd_n = np.zeros((lmax+2,klnlmax,natom),dtype=int)
+#        psd_v = np.zeros((lmax+2,klnlmax,natom),dtype=float)
+#        psd_dz = np.zeros((lmax+2,klnlmax,natom),dtype=float)
+#        for i,(_,dat) in enumerate(pyecp):
+#            for lval,ac in dat:
+#                count=0
+#                for ri,aici in enumerate(ac):
+#                    for ai,ci in aici:
+#                        psd_n[lval+1,count,i] = ri-2
+#                        psd_v[lval+1,count,i] = ci
+#                        psd_dz[lval+1,count,i] = ai
+#                        count += 1
+#        psd_nk = psd_n[0,:klocmax]
+#        psd_vk = psd_v[0,:klocmax]
+#        psd_dzk = psd_dz[0,:klocmax]
+#        psd_nkl = psd_n[1:,:knlmax]
+#        psd_vkl = psd_v[1:,:knlmax]
+#        psd_dzkl = psd_dz[1:,:knlmax]
+#        with h5py.File(qph5path,'a') as qph5:
+#            qph5['pseudo'].attrs['do_pseudo']=True
+#            qph5['pseudo'].attrs['pseudo_lmax']=lmax
+#            qph5['pseudo'].attrs['pseudo_klocmax']=klocmax
+#            qph5['pseudo'].attrs['pseudo_kmax']=knlmax
+#            qph5.create_dataset('pseudo/nucl_charge_remove',data=nzrmv)
+#            qph5.create_dataset('pseudo/pseudo_n_k',data=psd_nk)
+#            qph5.create_dataset('pseudo/pseudo_n_kl',data=psd_nkl)
+#            qph5.create_dataset('pseudo/pseudo_v_k',data=psd_vk)
+#            qph5.create_dataset('pseudo/pseudo_v_kl',data=psd_vkl)
+#            qph5.create_dataset('pseudo/pseudo_dz_k',data=psd_dzk)
+#            qph5.create_dataset('pseudo/pseudo_dz_kl',data=psd_dzkl)
+#
+#        ## nelec to remove for each atom
+#        #nuc_z_remov = [i[0] for i in pyecp]
+#        #nl_per_atom = [len(i[1]) for i in pyecp]
+#        ## list of l-values for channels of each atom
+#        #ecp_l = [[ j[0] for j in i[1] ] for i in pyecp]
+#        #lmax = max(map(max,ecp_l))
+#        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
+#        #ecp_ac = [[ j[1] for j in i[1] ] for i in pyecp]
 
     return
 
