@@ -208,7 +208,7 @@ subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_i
   endif
 
   allocate(pt2_serialized (pt2_type_size(N_states)) )
-  rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized)*ntasks, 0)
+  rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized), 0)
   if (rc == -1) then
     ntasks = 1
     task_id(1) = 0
