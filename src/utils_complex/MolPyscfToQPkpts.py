@@ -377,14 +377,16 @@ def print_kpts_unblocked_upper(ints_k,outfilename,thresh):
 
 
 def get_kin_ao(mf):
-    nao = mf.cell.nao_nr()
+    nao = mf.cell.nao_nr(cart=True)
     Nk = len(mf.kpts)
-    return np.reshape(mf.cell.pbc_intor('int1e_kin',1,1,kpts=mf.kpts),(Nk,nao,nao))
+    return np.reshape(mf.cell.pbc_intor('int1e_kin_cart',1,1,kpts=mf.kpts),(Nk,nao,nao))
 
 def get_ovlp_ao(mf):
-    nao = mf.cell.nao_nr()
+    nao = mf.cell.nao_nr(cart=True)
     Nk = len(mf.kpts)
-    return np.reshape(mf.get_ovlp(cell=mf.cell,kpts=mf.kpts),(Nk,nao,nao))
+    if mf.cell.cart:
+    return np.reshape(mf.cell.pbc_intor('int1e_ovlp_cart',1,1,kpts=mf.kpts),(Nk,nao,nao))
+    #return np.reshape(mf.get_ovlp(cell=mf.cell,kpts=mf.kpts),(Nk,nao,nao))
 
 def get_pot_ao(mf):
     nao = mf.cell.nao_nr()
@@ -607,7 +609,14 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5['pseudo'].attrs['do_pseudo']=False
         qph5.create_group('PBC_DATA')
 
-    mo_coeff = mf.mo_coeff
+    if mf.cell.cart:
+        mo_coeff = mf.mo_coeff.copy()
+    else:
+        # normalized can be one of ['all','sp',None]
+        # we can either normalize here or after qp
+        c2s = mf.cell.cart2sph_coeff(normalized='sp')
+        mo_coeff = list(map(lambda x: np.dot(c2s,x),mf.mo_coeff))
+    #mo_coeff = mf.mo_coeff
     # Mo_coeff actif
     mo_k = np.array([c[:,cas_idx] for c in mo_coeff] if cas_idx is not None else mo_coeff)
     e_k =  np.array([e[cas_idx] for e in mf.mo_energy] if cas_idx is not None else mf.mo_energy)
@@ -678,7 +687,12 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
             cs = cell.bas_ctr_coeff(ib) # coeffs
             nctr = cell.bas_nctr(ib)    # number of contractions
             print(iatom,ib,l,nprim,nctr,tmp_idx)
+            #if cell.cart:
+            #    nfuncmax = ((l+1)*(l+2))//2
+            #else:
+            #    nfuncmax = 2*l+1
             for ic in range(nctr): # sets of contraction coeffs
+                #for nfunc in range(nfuncmax):
                 for nfunc in range(((l+1)*(l+2))//2): # always use cart for qp ao basis?
                     qp_expo[tmp_idx,:nprim] = es[:]
                     qp_coef[tmp_idx,:nprim] = cs[:,ic]
