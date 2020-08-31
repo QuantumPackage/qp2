@@ -787,11 +787,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       enddo
 
       ! Gram-Schmidt using input overlap matrix
-!      do istate=1,N_states
-!        do jstate=1,istate-1
-!          coef(istate) = coef(istate) - pt2_overlap(jstate,istate)/(pt2_overlap(jstate,jstate)) * coef(jstate)
-!        enddo
-!      enddo
+      do istate=1,N_states
+        do jstate=1,istate-1
+          coef(istate) = coef(istate) - pt2_overlap(istate,jstate)/(1.d0+pt2_overlap(jstate,jstate)) * coef(jstate)
+        enddo
+      enddo
 
       do istate=1,N_states
         alpha_h_psi = mat(istate, p1, p2)

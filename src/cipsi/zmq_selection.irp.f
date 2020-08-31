@@ -140,6 +140,8 @@ subroutine ZMQ_selection(N_in, pt2_data)
        pt2_data % pt2(k)/(1.d0 + pt2_data % overlap(k,k))
   enddo
 
+  pt2_overlap(:,:) = pt2_data % overlap(:,:)
+  SOFT_TOUCH pt2_overlap
   call update_pt2_and_variance_weights(pt2_data, N_states)
 
 end subroutine

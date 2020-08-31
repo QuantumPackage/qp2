@@ -314,6 +314,12 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
       print '(A)', '========== ================= =========== =============== =============== ================='
 
+    pt2_overlap(:,pt2_stoch_istate) = pt2_data % overlap(:,pt2_stoch_istate)
+print *, 'Overlap'
+print *, pt2_overlap(:,pt2_stoch_istate)
+print *, '-------'
+    SOFT_TOUCH pt2_overlap
+
     enddo
     FREE pt2_stoch_istate
 

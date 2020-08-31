@@ -186,10 +186,10 @@ END_DOC
 
   implicit none
 
+  integer,intent(inout)         :: dim_DIIS
   double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,dim_DIIS),error_matrix_DIIS(ao_num,ao_num,dim_DIIS)
   integer,intent(in)            :: iteration_SCF, size_Fock_matrix_AO
   double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
-  integer,intent(inout)         :: dim_DIIS
 
   double precision,allocatable  :: B_matrix_DIIS(:,:),X_vector_DIIS(:)
   double precision,allocatable  :: C_vector_DIIS(:)
