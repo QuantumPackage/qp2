@@ -892,9 +892,9 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
 
     with h5py.File(qph5path,'a') as qph5:
-        qph5.create_dataset('qmcpack/PBE',(1,),dtype="b1",data=True)
+        qph5['qmcpack'].attrs['PBC']=True 
         qph5.create_dataset('qmcpack/Super_Twist',(1,3),dtype="f8",data=sp_twist)
-        qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
+        qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors().T)
         qph5.create_dataset('qmcpack/eigenval',(1,Nk*nmo),dtype="f8",data=mf.mo_energy)
                                                                                                                       
 
