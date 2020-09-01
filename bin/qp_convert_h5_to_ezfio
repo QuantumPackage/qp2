@@ -3,12 +3,12 @@
 convert hdf5 output (e.g. from PySCF) to ezfio
 
 Usage:
-    qp_convert_h5_to_ezfio [--qmc] [-o EZFIO_DIR] FILE
+    qp_convert_h5_to_ezfio [--noqmc] [-o EZFIO_DIR] FILE
 
 Options:
     -o --output=EZFIO_DIR    Produced directory
                              by default is FILE.ezfio
-    --qmc                    include basis, cell, etc. for QMCPACK
+    --noqmc                  don't include basis, cell, etc. for QMCPACK
 
 """
 from ezfio import ezfio
@@ -138,7 +138,7 @@ def convert_mol(filename,qph5path):
     
     return
 
-def convert_kpts(filename,qph5path,qmcpack=False):
+def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
     
@@ -275,19 +275,29 @@ def convert_kpts(filename,qph5path,qmcpack=False):
     ##########################################
 
     if qmcpack:
-        with h5py.File(qph5path,'r') as qph5:
-            ezfio.set_qmcpack_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
-            ezfio.set_qmcpack_qmc_prim_num_max(qph5['qmcpack'].attrs['qmc_prim_num_max'])
-            ezfio.set_qmcpack_qmc_nucl(qph5['qmcpack/qmc_nucl'][()].tolist())
-            ezfio.set_qmcpack_qmc_prim_num(qph5['qmcpack/qmc_prim_num'][()].tolist())
-            ezfio.set_qmcpack_qmc_lbas(qph5['qmcpack/qmc_lbas'][()].tolist())
-            ezfio.set_qmcpack_qmc_coef(qph5['qmcpack/qmc_coef'][()].tolist())
-            ezfio.set_qmcpack_qmc_expo(qph5['qmcpack/qmc_expo'][()].tolist())
-
-            ezfio.set_qmcpack_qmc_pbc(qph5['qmcpack'].attrs['PBC'])
-            ezfio.set_qmcpack_supertwist(qph5['qmcpack/Super_Twist'][()].tolist())
-            ezfio.set_qmcpack_latticevectors(qph5['qmcpack/LatticeVectors'][()].tolist())
-            ezfio.set_qmcpack_qmc_mo_energy(qph5['qmcpack/eigenval'][()].tolist())
+        try:
+            with h5py.File(qph5path,'r') as qph5:
+                ezfio.set_qmcpack2_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
+                ezfio.set_qmcpack_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
+                ezfio.set_qmcpack_qmc_prim_num_max(qph5['qmcpack'].attrs['qmc_prim_num_max'])
+                ezfio.set_qmcpack_qmc_nucl(qph5['qmcpack/qmc_nucl'][()].tolist())
+                ezfio.set_qmcpack_qmc_prim_num(qph5['qmcpack/qmc_prim_num'][()].tolist())
+                ezfio.set_qmcpack_qmc_lbas(qph5['qmcpack/qmc_lbas'][()].tolist())
+                ezfio.set_qmcpack_qmc_coef(qph5['qmcpack/qmc_coef'][()].tolist())
+                ezfio.set_qmcpack_qmc_expo(qph5['qmcpack/qmc_expo'][()].tolist())
+    
+                ezfio.set_qmcpack_qmc_pbc(qph5['qmcpack'].attrs['PBC'])
+                ezfio.set_qmcpack_supertwist(qph5['qmcpack/Super_Twist'][()].tolist())
+                ezfio.set_qmcpack_latticevectors(qph5['qmcpack/LatticeVectors'][()].tolist())
+                ezfio.set_qmcpack_qmc_mo_energy(qph5['qmcpack/eigenval'][()].tolist())
+        except AttributeError as err:
+            print("################################################")
+            print("# ERROR: problem copying QMCPACK data to ezfio #")
+            print("#        make sure qmcpack plugin is built     #")
+            print("################################################")
+            #print(f"AttributeError: {err}")
+            print("to create ezfio without qmcpack data, use 'qp_convert_h5_to_ezfio --noqmc'")
+            raise
 
  
       
@@ -619,14 +629,14 @@ if __name__ == '__main__':
     ARGUMENTS = docopt(__doc__)
 
     FILE = get_full_path(ARGUMENTS['FILE'])
-    qmcpack = False
+    qmcpack = True
     if ARGUMENTS["--output"]:
         EZFIO_FILE = get_full_path(ARGUMENTS["--output"])
     else:
         EZFIO_FILE = "{0}.ezfio".format(FILE)
 
-    if ARGUMENTS["--qmc"]:
-        qmcpack = True
+    if ARGUMENTS["--noqmc"]:
+        qmcpack = False
     with h5py.File(FILE,'r') as qph5:
         do_kpts = ('kconserv' in qph5['nuclei'].keys())
     if (do_kpts):
