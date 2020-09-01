@@ -113,7 +113,12 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
   logical                        :: exists
   character*(64)                 :: label
 
-  PROVIDE read_wf N_det mo_label ezfio_filename HF_bitmask mo_coef
+  PROVIDE read_wf N_det mo_label ezfio_filename HF_bitmask
+  if (is_complex) then
+    PROVIDE mo_coef_complex
+  else
+    PROVIDE mo_coef
+  endif
   psi_det = 0_bit_kind
   if (mpi_master) then
     if (read_wf) then
@@ -244,12 +249,21 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   double precision               :: f
 
   psi_average_norm_contrib(:) = 0.d0
+  if (is_complex) then
+    do k=1,N_states
+      do i=1,N_det
+        psi_average_norm_contrib(i) = psi_average_norm_contrib(i) +    &
+            cdabs(psi_coef_complex(i,k)*psi_coef_complex(i,k))*state_average_weight(k)
+      enddo
+    enddo
+  else
   do k=1,N_states
     do i=1,N_det
       psi_average_norm_contrib(i) = psi_average_norm_contrib(i) +    &
           psi_coef(i,k)*psi_coef(i,k)*state_average_weight(k)
     enddo
   enddo
+  endif
   f = 1.d0/sum(psi_average_norm_contrib(1:N_det))
   do i=1,N_det
     psi_average_norm_contrib(i) = psi_average_norm_contrib(i)*f
@@ -266,7 +280,6 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted, (psi_det_size,N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted, (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_order, (psi_det_size) ]
    implicit none
@@ -288,9 +301,6 @@ END_PROVIDER
        psi_det_sorted(j,1,i) = psi_det(j,1,iorder(i))
        psi_det_sorted(j,2,i) = psi_det(j,2,iorder(i))
      enddo
-     do k=1,N_states
-       psi_coef_sorted(i,k) = psi_coef(iorder(i),k)
-     enddo
      psi_average_norm_contrib_sorted(i) = -psi_average_norm_contrib_sorted(i)
    enddo
    do i=1,N_det
@@ -298,28 +308,73 @@ END_PROVIDER
    enddo
 
    psi_det_sorted(:,:,N_det+1:psi_det_size) = 0_bit_kind
-   psi_coef_sorted(N_det+1:psi_det_size,:) = 0.d0
    psi_average_norm_contrib_sorted(N_det+1:psi_det_size) = 0.d0
    psi_det_sorted_order(N_det+1:psi_det_size) = 0
 
    deallocate(iorder)
 
 END_PROVIDER
+BEGIN_PROVIDER [ double precision, psi_coef_sorted, (psi_det_size,N_states) ]
+  implicit none
+  integer                        :: i,j,k
+  do i=1,N_det
+    j=psi_det_sorted_order(i)
+    do k=1,N_states
+      psi_coef_sorted(j,k) = psi_coef(i,k)
+    enddo
+  enddo
+  psi_coef_sorted(N_det+1:psi_det_size,:) = 0.d0
+END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
-   implicit none
-   BEGIN_DOC
-   ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
-   ! They are sorted by determinants interpreted as integers. Useful
-   ! to accelerate the search of a random determinant in the wave
-   ! function.
-   END_DOC
+&BEGIN_PROVIDER [ integer, psi_det_sorted_bit_order, (psi_det_size) ]
+  implicit none
+  integer :: i,j
+  integer*8, allocatable         :: bit_tmp(:)
+  integer*8, external            :: det_search_key
 
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, size(psi_coef,1),       &
-       psi_det_sorted_bit, psi_coef_sorted_bit, N_states)
+  allocate(bit_tmp(N_det))
 
+  do i=1,N_det
+    psi_det_sorted_bit_order(i) = i
+    !$DIR FORCEINLINE
+    bit_tmp(i) = det_search_key(psi_det(1,1,i),N_int)
+  enddo
+  call i8sort(bit_tmp,psi_det_sorted_bit_order,N_det)
+  do i=1,N_det
+    do j=1,N_int
+      psi_det_sorted_bit(j,1,i) = psi_det(j,1,psi_det_sorted_bit_order(i))
+      psi_det_sorted_bit(j,2,i) = psi_det(j,2,psi_det_sorted_bit_order(i))
+    enddo
+  enddo
+  deallocate(bit_tmp)
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
+  implicit none
+  integer :: i,k
+  do i=1,N_det
+    do k=1,N_states
+      psi_coef_sorted_bit(i,k) = psi_coef(psi_det_sorted_bit_order(i),k)
+    enddo
+  enddo
+END_PROVIDER
+
+
+! BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
+!&BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
+!   implicit none
+!   BEGIN_DOC
+!   ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
+!   ! They are sorted by determinants interpreted as integers. Useful
+!   ! to accelerate the search of a random determinant in the wave
+!   ! function.
+!   END_DOC
+!
+!   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, size(psi_coef,1),       &
+!       psi_det_sorted_bit, psi_coef_sorted_bit, N_states)
+!
+!END_PROVIDER
 
 subroutine sort_dets_by_det_search_key(Ndet, det_in, coef_in, sze, det_out, coef_out, N_st)
    use bitmasks
@@ -369,24 +424,46 @@ end
 
  BEGIN_PROVIDER [ double precision, psi_coef_max, (N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_min, (N_states) ]
-&BEGIN_PROVIDER [ double precision, abs_psi_coef_max, (N_states) ]
-&BEGIN_PROVIDER [ double precision, abs_psi_coef_min, (N_states) ]
-   implicit none
-   BEGIN_DOC
-   ! Max and min values of the coefficients
-   END_DOC
-   integer                        :: i
-   do i=1,N_states
-     psi_coef_min(i) = minval(psi_coef(:,i))
-     psi_coef_max(i) = maxval(psi_coef(:,i))
-     abs_psi_coef_min(i) = minval( dabs(psi_coef(:,i)) )
-     abs_psi_coef_max(i) = maxval( dabs(psi_coef(:,i)) )
-     call write_double(6,psi_coef_max(i), 'Max coef')
-     call write_double(6,psi_coef_min(i), 'Min coef')
-     call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
-     call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
-   enddo
+  implicit none
+  BEGIN_DOC
+  ! Max and min values of the coefficients
+  END_DOC
+  integer                        :: i
+  if (is_complex) then
+    print*,irp_here,' not implemented for complex'
+    stop -1
+  endif
+  do i=1,N_states
+    psi_coef_min(i) = minval(psi_coef(:,i))
+    psi_coef_max(i) = maxval(psi_coef(:,i))
+    call write_double(6,psi_coef_max(i), 'Max coef')
+    call write_double(6,psi_coef_min(i), 'Min coef')
+  enddo
+END_PROVIDER
 
+
+ BEGIN_PROVIDER [ double precision, abs_psi_coef_max, (N_states) ]
+&BEGIN_PROVIDER [ double precision, abs_psi_coef_min, (N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Max and min magnitudes of the coefficients
+  END_DOC
+  integer                        :: i
+  if (is_complex) then
+    do i=1,N_states
+      abs_psi_coef_min(i) = minval( cdabs(psi_coef_complex(:,i)) )
+      abs_psi_coef_max(i) = maxval( cdabs(psi_coef_complex(:,i)) )
+      call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
+      call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
+    enddo
+  else
+    do i=1,N_states
+      abs_psi_coef_min(i) = minval( dabs(psi_coef(:,i)) )
+      abs_psi_coef_max(i) = maxval( dabs(psi_coef(:,i)) )
+      call write_double(6,abs_psi_coef_max(i), 'Max abs coef')
+      call write_double(6,abs_psi_coef_min(i), 'Min abs coef')
+    enddo
+  endif
 END_PROVIDER
 
 
@@ -442,10 +519,17 @@ end
 subroutine save_ref_determinant
   implicit none
   use bitmasks
+  if (is_complex) then
+    complex*16 :: buffer_c(1,N_states)
+    buffer_c = (0.d0,0.d0)
+    buffer_c(1,1) = (1.d0,0.d0)
+    call save_wavefunction_general_complex(1,N_states,ref_bitmask,1,buffer_c)
+  else
   double precision               :: buffer(1,N_states)
   buffer = 0.d0
   buffer(1,1) = 1.d0
   call save_wavefunction_general(1,N_states,ref_bitmask,1,buffer)
+  endif
 end
 
 
@@ -467,7 +551,12 @@ subroutine save_wavefunction_truncated(thr)
     endif
   enddo
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det_save,min(N_states,N_det_save),&
+                psi_det_sorted,size(psi_coef_sorted_complex,1),psi_coef_sorted_complex)
+    else
     call save_wavefunction_general(N_det_save,min(N_states,N_det_save),psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    endif
   endif
 end
 
@@ -485,7 +574,12 @@ subroutine save_wavefunction
     return
   endif
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det,N_states,&
+                  psi_det_sorted,size(psi_coef_sorted_complex,1),psi_coef_sorted_complex)
+    else
     call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+    endif
   endif
 end
 
@@ -497,7 +591,12 @@ subroutine save_wavefunction_unsorted
   !  Save the wave function into the |EZFIO| file
   END_DOC
   if (mpi_master) then
+    if (is_complex) then
+      call save_wavefunction_general_complex(N_det,min(N_states,N_det),&
+                   psi_det,size(psi_coef_complex,1),psi_coef_complex)
+    else
     call save_wavefunction_general(N_det,min(N_states,N_det),psi_det,size(psi_coef,1),psi_coef)
+    endif
   endif
 end
 

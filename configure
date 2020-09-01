@@ -365,7 +365,6 @@ EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file bse.tar.gz
               pip install -e basis_set_exchange-*
-EOF
     elif [[ ${PACKAGE} = zlib ]] ; then
 
             download ${ZLIB_URL} "${QP_ROOT}"/external/zlib.tar.gz

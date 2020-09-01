@@ -18,6 +18,7 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm2)
   N = max(N_in,1)
   N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
   if (.True.) then
+    !todo: some providers have become unlinked for real/complex (det/coef); do these need to be provided?
     PROVIDE pt2_e0_denominator nproc
     PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
     PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
@@ -107,9 +108,16 @@ subroutine ZMQ_selection(N_in, pt2, variance, norm2)
   f(:) = 1.d0
   if (.not.do_pt2) then
   double precision :: f(N_states), u_dot_u
-    do k=1,min(N_det,N_states)
-     f(k) = 1.d0 / u_dot_u(psi_selectors_coef(1,k), N_det_selectors)
-    enddo
+    if (is_complex) then
+      double precision :: u_dot_u_complex
+      do k=1,min(N_det,N_states)
+       f(k) = 1.d0 / u_dot_u_complex(psi_selectors_coef_complex(1,k), N_det_selectors)
+      enddo
+    else
+      do k=1,min(N_det,N_states)
+       f(k) = 1.d0 / u_dot_u(psi_selectors_coef(1,k), N_det_selectors)
+      enddo
+    endif
   endif
 
   !$OMP PARALLEL DEFAULT(shared)  SHARED(b, pt2, variance, norm2)  PRIVATE(i) NUM_THREADS(nproc_target+1)
@@ -223,4 +231,5 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2, variance, norm2)
   call sort_selection_buffer(b)
   call end_zmq_to_qp_run_socket(zmq_to_qp_run_socket)
 end subroutine
+
 

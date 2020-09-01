@@ -17,7 +17,11 @@ end
 
 subroutine routine
  implicit none
- call diagonalize_CI
+ call diagonalize_ci
  print*,'N_det = ',N_det
- call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+ if (is_complex) then
+  call save_wavefunction_general_complex(N_det,N_states,psi_det_sorted,size(psi_coef_sorted_complex,1),psi_coef_sorted_complex)
+ else
+  call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+ endif
 end

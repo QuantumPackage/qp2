@@ -63,4 +63,3 @@ BEGIN_PROVIDER [ double precision, S_mo_coef, (ao_num, mo_num) ]
 
 END_PROVIDER
 
-

@@ -89,6 +89,7 @@ def write_ezfio(res, filename):
     # W r i t e #
     # ~#~#~#~#~ #
 
+    ezfio.set_nuclei_is_complex(False)
     ezfio.set_nuclei_nucl_num(len(res.geometry))
     ezfio.set_nuclei_nucl_charge(charge)
 

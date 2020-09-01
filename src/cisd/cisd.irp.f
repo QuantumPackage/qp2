@@ -56,21 +56,38 @@ subroutine run
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
 
-  if(pseudo_sym)then
-   call H_apply_cisd_sym
+  if (is_complex) then
+    call H_apply_cisd_kpts
   else
-   call H_apply_cisd
+    if(pseudo_sym)then
+     call H_apply_cisd_sym
+    else
+     call H_apply_cisd
+    endif
   endif
-  psi_coef = ci_eigenvectors
-  SOFT_TOUCH psi_coef
+  if (is_complex) then
+    psi_coef_complex = ci_eigenvectors_complex
+    SOFT_TOUCH psi_coef_complex
+  else
+    psi_coef = ci_eigenvectors
+    SOFT_TOUCH psi_coef
+  endif
   call save_wavefunction
   call ezfio_set_cisd_energy(CI_energy)
 
-  do i = 1,N_states
-    k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
-    delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
-    cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
-  enddo
+  if (is_complex) then
+    do i = 1,N_states
+      k = maxloc(cdabs(psi_coef_sorted_complex(1:N_det,i)),dim=1)
+      delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
+      cisdq(i) = CI_energy(i) + delta_E * (1.d0 - cdabs(psi_coef_sorted_complex(k,i))**2)
+    enddo
+  else
+    do i = 1,N_states
+      k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
+      delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
+      cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
+    enddo
+  endif
   print *,  'N_det = ', N_det
   print*,''
   print*,'******************************'

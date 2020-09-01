@@ -82,3 +82,39 @@ BEGIN_PROVIDER [ double precision, select_max, (size_select_max) ]
   select_max = huge(1.d0)
 END_PROVIDER
 
+
+ BEGIN_PROVIDER [ complex*16, psi_coef_generators_complex, (psi_det_size,N_states) ]
+&BEGIN_PROVIDER [ complex*16, psi_coef_sorted_gen_complex, (psi_det_size,N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! For Single reference wave functions, the generator is the
+  ! Hartree-Fock determinant
+  END_DOC
+  integer                        :: i, k, l, m
+  logical                        :: good
+  integer, external :: number_of_holes,number_of_particles
+  integer, allocatable :: nongen(:)
+  integer :: inongen
+
+  allocate(nongen(N_det))
+
+  inongen = 0
+  m=0
+  do i=1,N_det
+    good = ( number_of_holes(psi_det_sorted(1,1,i)) ==0).and.(number_of_particles(psi_det_sorted(1,1,i))==0 )
+    if (good) then
+      m = m+1
+      psi_coef_generators_complex(m,:) = psi_coef_sorted_complex(i,:)
+    else
+      inongen += 1
+      nongen(inongen) = i
+    endif
+  enddo
+  ASSERT (m == N_det_generators)
+
+  psi_coef_sorted_gen_complex(:N_det_generators, :) = psi_coef_generators_complex(:N_det_generators, :)
+  do i=1,inongen
+    psi_coef_sorted_gen_complex(N_det_generators+i, :) = psi_coef_sorted_complex(nongen(i),:)
+  end do
+END_PROVIDER
+

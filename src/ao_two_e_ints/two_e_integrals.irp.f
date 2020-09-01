@@ -345,6 +345,25 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
 
   double precision               :: map_mb
   PROVIDE read_ao_two_e_integrals io_ao_two_e_integrals
+  if (is_complex) then
+    if (read_ao_two_e_integrals) then
+      print*,'Reading the AO integrals (periodic)'
+      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_complex_1',ao_integrals_map)
+      call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints_complex_2',ao_integrals_map_2)
+      print*, 'AO integrals provided (periodic)'
+      ao_two_e_integrals_in_map = .True.
+      return
+    else if (read_df_ao_integrals) then
+      call ao_map_fill_from_df
+      print*, 'AO integrals provided from 3-index ao ints (periodic)'
+      ao_two_e_integrals_in_map = .True.
+      return
+    else
+      print*,'calculation of periodic AOs not implemented'
+      stop -1
+    endif
+
+  else
   if (read_ao_two_e_integrals) then
     print*,'Reading the AO integrals'
     call map_load_from_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
@@ -361,10 +380,9 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
       ! Avoid openMP
       integral = ao_two_e_integral(1,1,1,1)
     endif
-
     integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'ao_integrals')
-
+  
     character(len=:), allocatable :: task
     allocate(character(len=ao_num*12) :: task)
     write(fmt,*) '(', ao_num, '(I5,X,I5,''|''))'
@@ -417,7 +435,7 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
     endif
 
   endif
-
+  endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]

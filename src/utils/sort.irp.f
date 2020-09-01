@@ -346,6 +346,7 @@ SUBST [ X, type ]
  i ; integer ;;
  i8; integer*8 ;;
  i2; integer*2 ;;
+ cd; complex*16 ;;
 END_TEMPLATE
 
 
@@ -381,6 +382,16 @@ BEGIN_TEMPLATE
 
  end subroutine insertion_$Xsort_big
 
+SUBST [ X, type ]
+   ; real ;;
+ d ; double precision ;;
+ i ; integer ;;
+ i8; integer*8 ;;
+ i2; integer*2 ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
  subroutine $Xset_order_big(x,iorder,isize)
   implicit none
   BEGIN_DOC
@@ -408,6 +419,7 @@ BEGIN_TEMPLATE
 SUBST [ X, type ]
    ; real ;;
  d ; double precision ;;
+ cd; complex*16 ;;
  i ; integer ;;
  i8; integer*8 ;;
  i2; integer*2 ;;

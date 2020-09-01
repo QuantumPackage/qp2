@@ -84,13 +84,13 @@ END_PROVIDER
 
 
 
-BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef_inv, (ao_num,ao_num)]
+BEGIN_PROVIDER [ double precision, ao_ortho_cano_coef_inv, (ao_num,ao_num)]
  implicit none
  BEGIN_DOC
 ! ao_ortho_canonical_coef^(-1)
  END_DOC
  call get_inverse(ao_ortho_canonical_coef,size(ao_ortho_canonical_coef,1),&
-     ao_num, ao_ortho_canonical_coef_inv, size(ao_ortho_canonical_coef_inv,1))
+     ao_num, ao_ortho_cano_coef_inv, size(ao_ortho_cano_coef_inv,1))
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision, ao_ortho_canonical_coef, (ao_num,ao_num)]

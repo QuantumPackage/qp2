@@ -14,10 +14,17 @@ subroutine run_slave_cipsi
 end
 
 subroutine provide_everything
-  PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
-  PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
-  PROVIDE psi_det psi_coef threshold_generators state_average_weight
-  PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
+  if (is_complex) then
+    PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators_complex psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
+    PROVIDE pt2_e0_denominator mo_num_per_kpt N_int ci_energy mpi_master zmq_state zmq_context
+    PROVIDE psi_det psi_coef_complex threshold_generators state_average_weight
+    PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
+  else
+    PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
+    PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
+    PROVIDE psi_det psi_coef threshold_generators state_average_weight
+    PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
+  endif
 end
 
 subroutine run_slave_main
@@ -51,9 +58,15 @@ subroutine run_slave_main
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
-  PROVIDE psi_det psi_coef threshold_generators state_average_weight mpi_master
-  PROVIDE zmq_state N_det_selectors pt2_stoch_istate N_det pt2_e0_denominator
-  PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator mpi_rank
+  if (is_complex) then
+    PROVIDE psi_det psi_coef_complex threshold_generators state_average_weight mpi_master
+    PROVIDE zmq_state N_det_selectors pt2_stoch_istate N_det pt2_e0_denominator
+    PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator mpi_rank
+  else
+    PROVIDE psi_det psi_coef threshold_generators state_average_weight mpi_master
+    PROVIDE zmq_state N_det_selectors pt2_stoch_istate N_det pt2_e0_denominator
+    PROVIDE N_det_generators N_states N_states_diag pt2_e0_denominator mpi_rank
+  endif
 
   IRP_IF MPI
     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
@@ -268,6 +281,10 @@ subroutine run_slave_main
                 + 2.0d0*(N_int*2*ii)              & ! minilist, fullminilist
                 + 1.0d0*(N_states*mo_num*mo_num)  & ! mat
                 ) / 1024.d0**3
+          if (is_complex) then
+            ! mat is complex
+            mem = mem + (nproc_target * 8.d0 * (n_states*mo_num*mo_num)) / 1024.d0**3
+          endif
 
           if (nproc_target == 0) then
             call check_mem(mem,irp_here)
