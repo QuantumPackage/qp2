@@ -61,23 +61,23 @@ logical function testTeethBuilding(minF, N)
 
   allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
 
-  norm = 0.d0
-  double precision :: norm
+  double precision :: norm2
+  norm2 = 0.d0
   if (is_complex) then
     do i=N_det_generators,1,-1
       tilde_w(i)  = cdabs(psi_coef_sorted_gen_complex(i,pt2_stoch_istate) * &
                     psi_coef_sorted_gen_complex(i,pt2_stoch_istate))
-      norm = norm + tilde_w(i)
+      norm2 = norm2 + tilde_w(i)
     enddo
   else
     do i=N_det_generators,1,-1
       tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate) * &
                     psi_coef_sorted_gen(i,pt2_stoch_istate)
-      norm = norm + tilde_w(i)
+      norm2 = norm2 + tilde_w(i)
     enddo
   endif
 
-  f = 1.d0/norm
+  f = 1.d0/norm2
   tilde_w(:) = tilde_w(:) * f
 
   tilde_cW(0) = -1.d0
@@ -115,7 +115,7 @@ end function
 
 
 
-subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
+subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm2, N_in)
   use f77_zmq
   use selection_types
 
@@ -126,7 +126,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 !  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
   double precision, intent(out)  :: pt2(N_states),error(N_states)
-  double precision, intent(out)  :: variance(N_states),norm(N_states)
+  double precision, intent(out)  :: variance(N_states),norm2(N_states)
 
 
   integer                        :: i, N
@@ -156,8 +156,8 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
     pt2=0.d0
     variance=0.d0
-    norm=0.d0
-    call zmq_selection(N_in, pt2, variance, norm)
+    norm2=0.d0
+    call ZMQ_selection(N_in, pt2, variance, norm2)
     error(:) = 0.d0
   else
 
@@ -288,7 +288,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
               nproc_target * 8.d0 *             & ! bytes
               ( 0.5d0*pt2_n_tasks_max           & ! task_id
               + 64.d0*pt2_n_tasks_max           & ! task
-              + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
+              + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm2
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
@@ -322,7 +322,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
 
       print '(A)', '========== ================= =========== =============== =============== ================='
-      print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm          Seconds      '
+      print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm^2        Seconds      '
       print '(A)', '========== ================= =========== =============== =============== ================='
 
       PROVIDE global_selection_buffer
@@ -335,7 +335,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
         pt2(pt2_stoch_istate) = w(pt2_stoch_istate,1)
         error(pt2_stoch_istate) = w(pt2_stoch_istate,2)
         variance(pt2_stoch_istate) = w(pt2_stoch_istate,3)
-        norm(pt2_stoch_istate) = w(pt2_stoch_istate,4)
+        norm2(pt2_stoch_istate) = w(pt2_stoch_istate,4)
 
       else
         call pt2_slave_inproc(i)
@@ -366,7 +366,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
     pt2(k) = 0.d0
   enddo
 
-  call update_pt2_and_variance_weights(pt2, variance, norm, N_states)
+  call update_pt2_and_variance_weights(pt2, variance, norm2, N_states)
 
 end subroutine
 
@@ -380,7 +380,7 @@ subroutine pt2_slave_inproc(i)
 end
 
 
-subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm, b, N_)
+subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm2, b, N_)
   use f77_zmq
   use selection_types
   use bitmasks
@@ -390,7 +390,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   double precision, intent(in)   :: relative_error, E
   double precision, intent(out)  :: pt2(N_states), error(N_states)
-  double precision, intent(out)  :: variance(N_states), norm(N_states)
+  double precision, intent(out)  :: variance(N_states), norm2(N_states)
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N_
 
@@ -449,7 +449,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   pt2(:) = -huge(1.)
   error(:) = huge(1.)
   variance(:) = huge(1.)
-  norm(:) = 0.d0
+  norm2(:) = 0.d0
   S(:) = 0d0
   S2(:) = 0d0
   T2(:) = 0d0
@@ -525,7 +525,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
         endif
         pt2(pt2_stoch_istate) = avg
         variance(pt2_stoch_istate) = avg2
-        norm(pt2_stoch_istate) = avg3
+        norm2(pt2_stoch_istate) = avg3
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
@@ -791,13 +791,13 @@ END_PROVIDER
        enddo
      endif
      
-     double precision               :: norm
-     norm = 0.d0
+     double precision               :: norm2
+     norm2 = 0.d0
      do i=N_det_generators,1,-1
-       norm += tilde_w(i)
+       norm2 += tilde_w(i)
      enddo
 
-     tilde_w(:) = tilde_w(:) / norm
+     tilde_w(:) = tilde_w(:) / norm2
 
      tilde_cW(0) = -1.d0
      do i=1,N_det_generators

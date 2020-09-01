@@ -9,24 +9,35 @@ double precision function diag_S_mat_elem(key_i,Nint)
 ! Returns <i|S^2|i>
 ! returns <i|S_+ S_-|i> = <i|S^2|i> - S_z*(S_z-1)
   END_DOC
-  integer                        :: nup, i
-  integer(bit_kind)              :: xorvec(N_int_max)
+  integer                        :: nup, ntot, i
+  integer(bit_kind)              :: xorvec(N_int_max), upvec(N_int_max)
 
   do i=1,Nint
     xorvec(i) = xor(key_i(i,1),key_i(i,2))
   enddo
 
   do i=1,Nint
-    xorvec(i) = iand(xorvec(i),key_i(i,1))
+    upvec(i) = iand(xorvec(i),key_i(i,1))
   enddo
 
+  ! nup is number of alpha unpaired
+  ! ntot is total number of unpaired
   nup = 0
+  ntot = 0
   do i=1,Nint
     if (xorvec(i) /= 0_bit_kind) then
-      nup += popcnt(xorvec(i))
+      ntot += popcnt(xorvec(i))
+      if (upvec(i) /= 0_bit_kind) then
+        nup += popcnt(upvec(i))
+      endif
     endif
   enddo
-  diag_S_mat_elem = dble(nup)
+  
+  double precision :: sz
+  sz = nup - 0.5d0*ntot
+  
+  !<S^2> = <S+ S-> + Sz(Sz-1)
+  diag_S_mat_elem = nup + sz*(sz-1)
 
 end
 
@@ -130,7 +141,7 @@ subroutine u_0_S2_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
 
   call S2_u_0_nstates(v_0,u_0,n,keys_tmp,Nint,N_st,sze_8)
   do i=1,N_st
-    e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)/u_dot_u(u_0(1,i),n) + S_z2_Sz
+    e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)/u_dot_u(u_0(1,i),n)
   enddo
 end
 
