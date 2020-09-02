@@ -208,8 +208,8 @@ END_DOC
   do j=1,dim_DIIS
     do i=1,dim_DIIS
 
-      j_DIIS = mod(iteration_SCF-j,max_dim_DIIS)+1
-      i_DIIS = mod(iteration_SCF-i,max_dim_DIIS)+1
+      j_DIIS = min(mod(iteration_SCF-j,max_dim_DIIS)+1,dim_DIIS)
+      i_DIIS = min(mod(iteration_SCF-i,max_dim_DIIS)+1,dim_DIIS)
 
 ! Compute product of two errors vectors
 
