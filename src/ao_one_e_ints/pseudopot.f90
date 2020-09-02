@@ -1862,6 +1862,7 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
       qk = dble(q)
       two_qkmp1 = 2.d0*(qk+mk)+1.d0
       do k=0,q-1
+        ! possible FPE here. To be checked
         s_q_k = two_qkmp1*qk*inverses(k)*s_q_k
 !        if (s_q_k < 1.d-32) then
 !          s_q_k = 0.d0
