@@ -314,9 +314,18 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
       print '(A)', '========== ================= =========== =============== =============== ================='
 
-    pt2_overlap(:,pt2_stoch_istate) = pt2_data % overlap(:,pt2_stoch_istate)
-print *, 'Overlap'
+    do k=1,N_states
+      pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
+    enddo
+!    ! The overlap is not exactly zero because of the guiding function.
+!    ! Remove the bias
+!    do k=1,pt2_stoch_istate-1
+!      pt2_overlap(k,pt2_stoch_istate) -= pt2_data % overlap(k,pt2_stoch_istate)
+!    enddo
+print *, 'Overlap before orthogonalization'
 print *, pt2_overlap(:,pt2_stoch_istate)
+print *, 'Overlap after orthogonalization'
+print *, pt2_overlap(pt2_stoch_istate,:)
 print *, '-------'
     SOFT_TOUCH pt2_overlap
 
@@ -520,7 +529,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, G14.6, 2X, G14.6, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3(pt2_stoch_istate), time-time0, ''
+            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, G14.6, 2X, G14.6, 2X, F10.4)', c, avg+E, eqt, avg2, avg3(pt2_stoch_istate), time-time0
             if (stop_now .or. (                                      &
                   (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
                   (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then

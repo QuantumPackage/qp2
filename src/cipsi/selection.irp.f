@@ -780,17 +780,17 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
       enddo
 
-      do istate=1,N_states
-        do jstate=1,N_states
-          pt2_data % overlap(jstate,istate) += coef(jstate) * coef(istate)
-        enddo
-      enddo
-
       ! Gram-Schmidt using input overlap matrix
       do istate=1,N_states
         do jstate=1,istate-1
-          if ( (pt2_overlap(istate,jstate) == 0.d0).or.(pt2_overlap(jstate,jstate) == 0.d0) ) cycle
-          coef(istate) = coef(istate) - pt2_overlap(istate,jstate)/pt2_overlap(jstate,jstate) * coef(jstate)
+          if ( (pt2_overlap(jstate,istate) == 0.d0).or.(pt2_overlap(jstate,jstate) == 0.d0) ) cycle
+          coef(istate) = coef(istate) - pt2_overlap(jstate,istate)/pt2_overlap(jstate,jstate) * coef(jstate)
+        enddo
+      enddo
+
+      do istate=1, N_states
+        do jstate=1,N_states
+          pt2_data % overlap(jstate,istate) += coef(jstate) * coef(istate)
         enddo
       enddo
 
