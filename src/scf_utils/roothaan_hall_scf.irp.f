@@ -214,9 +214,9 @@ END_DOC
 ! Compute the matrices B and X
   B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
+    j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
     do i=1,dim_DIIS
 
-      j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
       i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
 
 ! Compute product of two errors vectors
