@@ -674,7 +674,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate, jstate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
-  double precision :: e_pert, delta_E, val, Hii, w, tmp, alpha_h_psi, coef(N_states)
+  double precision :: e_pert(N_states), coef(N_states), X(N_states)
+  double precision :: delta_E, val, Hii, w, tmp, alpha_h_psi
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
 
@@ -772,21 +773,26 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (delta_E < 0.d0) then
             tmp = -tmp
         endif
-        e_pert = 0.5d0 * (tmp - delta_E)
+        e_pert(istate) = 0.5d0 * (tmp - delta_E)
         if (dabs(alpha_h_psi) > 1.d-4) then
-          coef(istate) = e_pert / alpha_h_psi
+          coef(istate) = e_pert(istate) / alpha_h_psi
         else
           coef(istate) = alpha_h_psi / delta_E
         endif
+        if (e_pert(istate) < 0.d0) then
+           X(istate) = -dsqrt(-e_pert(istate))
+        else
+           X(istate) = dsqrt(e_pert(istate))
+        endif
       enddo
 
-      ! Gram-Schmidt using input overlap matrix
-      do istate=1,N_states
-        do jstate=1,istate-1
-          if ( (pt2_overlap(jstate,istate) == 0.d0).or.(pt2_overlap(jstate,jstate) == 0.d0) ) cycle
-          coef(istate) = coef(istate) - pt2_overlap(jstate,istate)/pt2_overlap(jstate,jstate) * coef(jstate)
-        enddo
-      enddo
+!      ! Gram-Schmidt using input overlap matrix
+!      do istate=1,N_states
+!        do jstate=1,istate-1
+!          if ( (pt2_overlap(jstate,istate) == 0.d0).or.(pt2_overlap(jstate,jstate) == 0.d0) ) cycle
+!          coef(istate) = coef(istate) - pt2_overlap(jstate,istate)/pt2_overlap(jstate,jstate) * coef(jstate)
+!        enddo
+!      enddo
 
       do istate=1, N_states
         do jstate=1,N_states
@@ -796,10 +802,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       do istate=1,N_states
         alpha_h_psi = mat(istate, p1, p2)
-        e_pert = coef(istate) * alpha_h_psi
 
         pt2_data % variance(istate) += alpha_h_psi * alpha_h_psi
-        pt2_data % pt2(istate)      += e_pert
+        pt2_data % pt2(istate)      += e_pert(istate)
 
 !!!DEBUG
 !        delta_E = E0(istate) - Hii + E_shift
@@ -831,7 +836,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case default
             ! Energy selection
-            w = w + e_pert * selection_weight(istate)
+            w = w + e_pert(istate) * selection_weight(istate)
+            do jstate=1,N_states
+              if (istate == jstate) cycle
+              w = w - dabs(X(istate))*X(jstate) * sqrt(selection_weight(istate)*selection_weight(jstate))
+            enddo
 
         end select
       end do
