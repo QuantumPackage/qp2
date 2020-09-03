@@ -317,13 +317,24 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
     do k=1,N_states
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
     enddo
-print *, 'Overlap of perturbed states:'
-print *, pt2_overlap(pt2_stoch_istate,:)
-print *, '-------'
     SOFT_TOUCH pt2_overlap
 
     enddo
     FREE pt2_stoch_istate
+
+    ! Symmetrize overlap
+    do j=2,N_states
+     do i=1,j-1
+       pt2_overlap(i,j) = 0.5d0 * (pt2_overlap(i,j) + pt2_overlap(j,i))
+       pt2_overlap(j,i) = pt2_overlap(i,j)
+     enddo
+    enddo
+
+    print *, 'Overlap of perturbed states:'
+    do k=1,N_states
+      print *, pt2_overlap(k,:)
+    enddo
+    print *, '-------'
 
     if (N_in > 0) then
       b%cur = min(N_in,b%cur)
@@ -522,7 +533,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(I10, X, F11.7, X, G10.4, X, G10.3, X, G10.3, X, G10.3, X, G10.3, X, F10.4)', c, &
+            print '(I10, X, F11.7, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.4)', c, &
               pt2_data     % pt2(pt2_stoch_istate) +E, &
               pt2_data_err % pt2(pt2_stoch_istate), &
               pt2_data     % variance(pt2_stoch_istate), &
