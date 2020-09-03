@@ -317,13 +317,24 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
     do k=1,N_states
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
     enddo
-print *, 'Overlap of perturbed states:'
-print *, pt2_overlap(pt2_stoch_istate,:)
-print *, '-------'
     SOFT_TOUCH pt2_overlap
 
     enddo
     FREE pt2_stoch_istate
+
+    ! Symmetrize overlap
+    do j=2,N_states
+     do i=1,j-1
+       pt2_overlap(i,j) = 0.5d0 * (pt2_overlap(i,j) + pt2_overlap(j,i))
+       pt2_overlap(j,i) = pt2_overlap(i,j)
+     enddo
+    enddo
+
+    print *, 'Overlap of perturbed states:'
+    do k=1,N_states
+      print *, pt2_overlap(k,:)
+    enddo
+    print *, '-------'
 
     if (N_in > 0) then
       b%cur = min(N_in,b%cur)
