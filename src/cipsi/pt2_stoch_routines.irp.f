@@ -287,9 +287,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call omp_set_nested(.false.)
 
 
-      print '(A)', '========== ================= =========== =============== =============== ================='
-      print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm^2        Seconds      '
-      print '(A)', '========== ================= =========== =============== =============== ================='
+      print '(A)', '========== ======================= ========= ========== ========== ========== ========== '
+      print '(A)', ' Samples          Energy                Variance               Norm^2          Seconds'
+      print '(A)', '========== ======================= ==================== ===================== =========='
 
       PROVIDE global_selection_buffer
 
@@ -529,7 +529,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, G14.6, 2X, G14.6, 2X, F10.4)', c, avg+E, eqt, avg2, avg3(pt2_stoch_istate), time-time0
+            print '(I10, X, F11.7, X, G10.3, X, G10.3, X, G10.3, X, G10.3, X, G10.3, X, F10.4)', c, &
+              pt2_data     % pt2(pt2_stoch_istate) +E, &
+              pt2_data_err % pt2(pt2_stoch_istate), &
+              pt2_data     % variance(pt2_stoch_istate), &
+              pt2_data_err % variance(pt2_stoch_istate), &
+              pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+              pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+              time-time0
             if (stop_now .or. (                                      &
                   (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
                   (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then

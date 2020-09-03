@@ -683,7 +683,12 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, allocatable :: values(:)
   integer, allocatable          :: keys(:,:)
   integer                       :: nkeys
-
+  double precision :: s_weight(N_states,N_states)
+  do jstate=1,N_states
+    do istate=1,N_states
+      s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
+    enddo
+  enddo
 
   if(sp == 3) then
     s1 = 1
@@ -829,17 +834,25 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case(5)
             ! Variance selection
-            w = w - alpha_h_psi * alpha_h_psi * selection_weight(istate)
+            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
+            do jstate=1,N_states
+              if (istate == jstate) cycle
+              w = w + alpha_h_psi*mat(jstate,p1,p2) * s_weight(istate,jstate)
+            enddo
 
           case(6)
-            w = w - coef(istate) * coef(istate) * selection_weight(istate)
+            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
+            do jstate=1,N_states
+              if (istate == jstate) cycle
+              w = w + coef(istate)*coef(jstate) * s_weight(istate,jstate)
+            enddo
 
           case default
             ! Energy selection
-            w = w + e_pert(istate) * selection_weight(istate)
+            w = w + e_pert(istate) * s_weight(istate,istate)
             do jstate=1,N_states
               if (istate == jstate) cycle
-              w = w - dabs(X(istate))*X(jstate) * sqrt(selection_weight(istate)*selection_weight(jstate))
+              w = w - dabs(X(istate))*X(jstate) * s_weight(istate,jstate)
             enddo
 
         end select
