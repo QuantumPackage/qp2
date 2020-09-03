@@ -287,9 +287,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call omp_set_nested(.false.)
 
 
-      print '(A)', '========== ======================= ========= ========== ========== ========== ========== '
+      print '(A)', '========== ====================== ===================== ===================== ==========='
       print '(A)', ' Samples          Energy                Variance               Norm^2          Seconds'
-      print '(A)', '========== ======================= ==================== ===================== =========='
+      print '(A)', '========== ====================== ===================== ===================== ==========='
 
       PROVIDE global_selection_buffer
 
@@ -312,7 +312,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       !$OMP END PARALLEL
       call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
 
-      print '(A)', '========== ================= =========== =============== =============== ================='
+      print '(A)', '========== ====================== ===================== ===================== ==========='
 
     do k=1,N_states
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
