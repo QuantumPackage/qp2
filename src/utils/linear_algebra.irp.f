@@ -164,7 +164,7 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
 end
 
 
-subroutine ortho_qr_complex(A,LDA,m,n)
+subroutine ortho_qr_complex_old(A,LDA,m,n)
   implicit none
   BEGIN_DOC
   ! Orthogonalization using Q.R factorization
@@ -196,6 +196,61 @@ subroutine ortho_qr_complex(A,LDA,m,n)
   deallocate(WORK,jpvt,tau)
 end
 
+subroutine ortho_qr_complex(A,LDA,m,n)
+  implicit none
+  BEGIN_DOC
+  ! Orthogonalization using Q.R factorization
+  !   
+  ! A : matrix to orthogonalize
+  !
+  ! LDA : leftmost dimension of A
+  !
+  ! n : Number of columns? of A
+  !
+  ! m : Number of rows? of A
+  !
+  END_DOC
+  integer, intent(in)            :: m,n, LDA
+  complex*16, intent(inout) :: A(LDA,n)
+  
+  integer                        :: lwork, info
+  complex*16, allocatable  :: tau(:), work(:)
+
+  allocate(tau(n), work(1))
+  lwork=-1
+  call  zgeqrf( m, n, A, LDA, tau, work, lwork, info )
+  lwork=int(work(1))
+  deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 1
+  endif
+  allocate(work(lwork))
+  call  zgeqrf(m, n, A, LDA, tau, work, lwork, info )
+  deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 2
+  endif
+
+  lwork=-1
+  allocate(work(1))
+  call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
+  lwork=int(work(1))
+  deallocate(work)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 3
+  endif
+  allocate(work(lwork))
+  call  zungqr(m, n, n, A, LDA, tau, work, lwork, info)
+  deallocate(work,tau)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqrf had an illegal value'
+    stop 4
+  endif
+end
+
 subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   implicit none
   BEGIN_DOC
@@ -205,25 +260,29 @@ subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   !
   ! LDA : leftmost dimension of A
   !
-  ! n : Number of rows of A
+  ! n : Number of columns of A
   !
-  ! m : Number of columns of A
+  ! m : Number of rows of A
   !
   END_DOC
   integer, intent(in)            :: m,n, LDA
-  double precision, intent(inout) :: A(LDA,n)
+  complex*16, intent(inout)      :: A(LDA,n)
 
   integer                        :: info
-  integer, allocatable           :: jpvt(:)
-  double precision, allocatable  :: tau(:), work(:)
+  complex*16, allocatable        :: tau(:), work(:)
 
-  print *, irp_here, ': TO DO'
-  stop -1
-
-!  allocate (jpvt(n), tau(n), work(n))
-!  call  dgeqr2( m, n, A, LDA, TAU, WORK, INFO )
-!  call dorg2r(m, n, n, A, LDA, tau, WORK, INFO)
-!  deallocate(WORK,jpvt,tau)
+  allocate(tau(n),work(n))
+  call zgeqr2(m,n,A,LDA,tau,work,info)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zgeqr2 had an illegal value'
+    stop 1
+  endif
+  call zung2r(m,n,n,A,LDA,tau,work,info)
+  if (info.ne.0) then
+    print*,irp_here,' The ',-info,' argument to zung2r had an illegal value'
+    stop 2
+  endif
+  deallocate(work,tau)
 end
 
 subroutine ortho_lowdin_complex(overlap,LDA,N,C,LDC,m,cutoff)
@@ -1216,5 +1275,79 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
     enddo
   enddo
   deallocate(A,eigenvalues)
+end
+
+subroutine lapack_diagd_diag_in_place(eigvalues,eigvectors,nmax,n)
+  implicit none
+  BEGIN_DOC
+  ! Diagonalize matrix H(complex)
+  !
+  ! H is untouched between input and ouptut
+  !
+  ! eigevalues(i) = ith lowest eigenvalue of the H matrix
+  !
+  ! eigvectors(i,j) = <i|psi_j> where i is the basis function and psi_j is the j th eigenvector
+  !
+  END_DOC
+  integer, intent(in)            :: n,nmax
+  double precision, intent(out)  :: eigvectors(nmax,n)
+!  complex*16, intent(inout)        :: eigvectors(nmax,n)
+  double precision, intent(out)  :: eigvalues(n)
+!  double precision, intent(in)   :: H(nmax,n)
+  double precision,allocatable         :: work(:)
+  integer         ,allocatable   :: iwork(:)
+!  complex*16,allocatable         :: A(:,:)
+  integer                        :: lwork, info, i,j,l,k, liwork
+
+! print*,'Diagonalization by jacobi'
+! print*,'n = ',n
+
+  lwork = 2*n*n + 6*n + 1
+  liwork = 5*n + 3
+  allocate (work(lwork),iwork(liwork))
+
+  lwork = -1
+  liwork = -1
+  ! get optimal work size
+  call DSYEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
+    iwork, liwork, info )
+  if (info < 0) then
+    print *, irp_here, ': DSYEVD: the ',-info,'-th argument had an illegal value'
+    stop 2
+  endif
+  lwork  = int( real(work(1)))
+  liwork = iwork(1)
+  deallocate (work,iwork)
+
+  allocate (work(lwork),iwork(liwork))
+  call DSYEVD( 'V', 'U', n, eigvectors, nmax, eigvalues, work, lwork, &
+    iwork, liwork, info )
+  deallocate(work,iwork)
+
+
+  if (info < 0) then
+    print *, irp_here, ': DSYEVD: the ',-info,'-th argument had an illegal value'
+    stop 2
+  else if( info > 0  ) then
+     write(*,*)'DSYEVD Failed; calling DSYEV'
+     lwork = 3*n - 1
+     allocate(work(lwork))
+     lwork = -1
+     call DSYEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,info)
+     if (info < 0) then
+       print *, irp_here, ': DSYEV: the ',-info,'-th argument had an illegal value'
+       stop 2
+     endif
+     lwork = int(work(1))
+     deallocate(work)
+     allocate(work(lwork))
+     call DSYEV('V','L',n,eigvectors,nmax,eigvalues,work,lwork,info)
+     if (info /= 0 ) then
+       write(*,*)'DSYEV Failed'
+       stop 1
+     endif
+    deallocate(work)
+  end if
+
 end
 

@@ -10,6 +10,7 @@ spindeterminants
   psi_coef_matrix_rows    integer (spindeterminants_n_det)
   psi_coef_matrix_columns integer (spindeterminants_n_det)
   psi_coef_matrix_values  double precision (spindeterminants_n_det,spindeterminants_n_states)
+  psi_coef_matrix_values_complex  double precision (2,spindeterminants_n_det,spindeterminants_n_states)
   n_svd_coefs     integer
   psi_svd_alpha   double precision (spindeterminants_n_det_alpha,spindeterminants_n_svd_coefs,spindeterminants_n_states)
   psi_svd_beta    double precision (spindeterminants_n_det_beta,spindeterminants_n_svd_coefs,spindeterminants_n_states)

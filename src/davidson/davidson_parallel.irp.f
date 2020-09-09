@@ -89,21 +89,97 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   character*(512)                :: msg
   integer                        :: imin, imax, ishift, istep
 
-  integer, allocatable           :: psi_det_read(:,:,:)
-  double precision, allocatable  :: v_t(:,:), s_t(:,:), u_t(:,:)
-
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t, v_t, s_t
-
-  ! Get wave function (u_t)
-  ! -----------------------
-
   integer                        :: rc, ni, nj
   integer*8                      :: rc8
   integer                        :: N_states_read, N_det_read, psi_det_size_read
   integer                        :: N_det_selectors_read, N_det_generators_read
 
-  integer, external :: zmq_get_dvector
+  integer, allocatable           :: psi_det_read(:,:,:)
+  logical :: sending
+  integer, external :: get_task_from_taskserver
+  integer, external :: task_done_to_taskserver
+  integer :: k
+  integer :: ierr
+ 
+
+!  integer, external :: zmq_get_dvector
   integer, external :: zmq_get_dmatrix
+  integer, external :: zmq_get_cdmatrix
+  IRP_IF MPI
+    include 'mpif.h'
+  IRP_ENDIF
+ 
+  if (is_complex) then
+    complex*16, allocatable  :: v_tc(:,:), s_tc(:,:), u_tc(:,:)
+
+    !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_tc, v_tc, s_tc
+
+
+    ! Get wave function (u_tc)
+    ! -----------------------
+
+    PROVIDE psi_det_beta_unique psi_bilinear_matrix_order_transp_reverse psi_det_alpha_unique
+    PROVIDE psi_bilinear_matrix_transp_values_complex psi_bilinear_matrix_values_complex psi_bilinear_matrix_columns_loc
+    PROVIDE ref_bitmask_energy nproc
+    PROVIDE mpi_initialized
+
+    allocate(u_tc(N_st,N_det))
+    
+    !todo: resize for complex? (should be okay)
+    ! Warning : dimensions are modified for efficiency, It is OK since we get the
+    ! full matrix
+    if (size(u_tc,kind=8) < 8388608_8) then
+      ni = size(u_tc)
+      nj = 1
+    else
+      ni = 8388608
+      nj = int(size(u_tc,kind=8)/8388608_8,4) + 1
+    endif
+
+    do while (zmq_get_cdmatrix(zmq_to_qp_run_socket, worker_id, 'u_tc', u_tc, ni, nj, size(u_tc,kind=8)) == -1)
+      print *,  'mpi_rank, N_states_diag, N_det'
+      print *,  mpi_rank, N_states_diag, N_det
+      stop 'u_tc'
+    enddo
+
+    IRP_IF MPI
+!      include 'mpif.h'
+      call broadcast_chunks_complex_double(u_tc,size(u_tc,kind=8))
+    IRP_ENDIF
+
+    ! Run tasks
+    ! ---------
+
+    sending=.False.
+
+    allocate(v_tc(N_st,N_det), s_tc(N_st,N_det))
+    do
+      if (get_task_from_taskserver(zmq_to_qp_run_socket,worker_id, task_id, msg) == -1) then
+        exit
+      endif
+      if(task_id == 0) exit
+      read (msg,*) imin, imax, ishift, istep
+      do k=imin,imax
+        v_tc(:,k) = (0.d0,0.d0)
+        s_tc(:,k) = (0.d0,0.d0)
+      enddo
+      call h_s2_u_0_nstates_openmp_work_complex(v_tc,s_tc,u_tc,N_st,N_det,imin,imax,ishift,istep)
+      if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id) == -1) then
+          print *,  irp_here, 'Unable to send task_done'
+      endif
+      call davidson_push_results_async_recv(zmq_socket_push, sending)
+      call davidson_push_results_async_send_complex(zmq_socket_push, v_tc, s_tc, imin, imax, task_id, sending)
+    end do
+    deallocate(u_tc,v_tc, s_tc)
+    call davidson_push_results_async_recv(zmq_socket_push, sending)
+  else
+  double precision, allocatable  :: v_t(:,:), s_t(:,:), u_t(:,:)
+
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t, v_t, s_t
+
+
+  ! Get wave function (u_t)
+  ! -----------------------
 
   PROVIDE psi_det_beta_unique psi_bilinear_matrix_order_transp_reverse psi_det_alpha_unique
   PROVIDE psi_bilinear_matrix_transp_values psi_bilinear_matrix_values psi_bilinear_matrix_columns_loc
@@ -129,29 +205,22 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   enddo
 
   IRP_IF MPI
-    include 'mpif.h'
-    integer :: ierr
-
+    !include 'mpif.h'
     call broadcast_chunks_double(u_t,size(u_t,kind=8))
-
   IRP_ENDIF
 
   ! Run tasks
   ! ---------
 
-  logical :: sending
   sending=.False.
 
   allocate(v_t(N_st,N_det), s_t(N_st,N_det))
   do
-    integer, external :: get_task_from_taskserver
-    integer, external :: task_done_to_taskserver
     if (get_task_from_taskserver(zmq_to_qp_run_socket,worker_id, task_id, msg) == -1) then
       exit
     endif
     if(task_id == 0) exit
     read (msg,*) imin, imax, ishift, istep
-    integer :: k
     do k=imin,imax
       v_t(:,k) = 0.d0
       s_t(:,k) = 0.d0
@@ -165,7 +234,7 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
   end do
   deallocate(u_t,v_t, s_t)
   call davidson_push_results_async_recv(zmq_socket_push, sending)
-
+  endif
 end subroutine
 
 
@@ -538,6 +607,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 end
 
 
+
 BEGIN_PROVIDER [ integer, nthreads_davidson ]
  implicit none
  BEGIN_DOC
@@ -646,5 +716,362 @@ integer function zmq_get_N_states_diag(zmq_to_qp_run_socket, worker_id)
       stop -1
     endif
   IRP_ENDIF
+end
+
+
+!==============================================================================!
+!                                                                              !
+!                                    Complex                                   !
+!                                                                              !
+!==============================================================================!
+
+subroutine davidson_push_results_complex(zmq_socket_push, v_t, s_t, imin, imax, task_id)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  integer             ,intent(in)    :: task_id, imin, imax
+  complex*16          ,intent(in)    :: v_t(N_states_diag,N_det)
+  complex*16          ,intent(in)    :: s_t(N_states_diag,N_det)
+  integer                            :: rc, sz
+  integer*8                          :: rc8
+
+  sz = (imax-imin+1)*N_states_diag
+
+  rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push task_id'
+
+  rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push imin'
+
+  rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_complex failed to push imax'
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
+  if(rc8 /= 8_8*sz*2) then
+    print*,irp_here,' rc8 = ',rc8
+    print*,irp_here,'  sz = ',sz
+    print*,'rc8 /= sz*8'
+    stop 'davidson_push_results_complex failed to push vt'
+  endif
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
+  if(rc8 /= 8_8*sz*2) stop 'davidson_push_results_complex failed to push st'
+
+! Activate is zmq_socket_push is a REQ
+IRP_IF ZMQ_PUSH
+IRP_ELSE
+  character*(2) :: ok
+  rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
+  if ((rc /= 2).and.(ok(1:2)/='ok')) then
+    print *, irp_here, ': f77_zmq_recv( zmq_socket_push, ok, 2, 0)'
+    stop -1
+  endif
+IRP_ENDIF
+
+end subroutine
+
+subroutine davidson_push_results_async_send_complex(zmq_socket_push, v_t, s_t, imin, imax, task_id,sending)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Push the results of $H | U \rangle$ from a worker to the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)    :: zmq_socket_push
+  integer             ,intent(in)    :: task_id, imin, imax
+  complex*16          ,intent(in)    :: v_t(N_states_diag,N_det)
+  complex*16          ,intent(in)    :: s_t(N_states_diag,N_det)
+  logical             ,intent(inout) :: sending
+  integer                            :: rc, sz
+  integer*8                          :: rc8
+
+  if (sending) then
+    print *,  irp_here, ': sending=true'
+    stop -1
+  endif
+  sending = .True.
+
+  sz = (imax-imin+1)*N_states_diag
+
+  rc = f77_zmq_send( zmq_socket_push, task_id, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push task_id'
+
+  rc = f77_zmq_send( zmq_socket_push, imin, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push imin'
+
+  rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
+  if(rc /= 4) stop 'davidson_push_results_async_send_complex failed to push imax'
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz*2, ZMQ_SNDMORE)
+  if(rc8 /= 8_8*sz*2) then
+    print*,irp_here,' rc8 = ',rc8
+    print*,irp_here,'  sz = ',sz
+    print*,'rc8 /= sz*8'
+    stop 'davidson_push_results_async_send_complex failed to push vt'
+  endif
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_send8( zmq_socket_push, s_t(1,imin), 8_8*sz*2, 0)
+  if(rc8 /= 8_8*sz*2) stop 'davidson_push_results_async_send_complex failed to push st'
+
+end subroutine
+
+
+subroutine davidson_pull_results_complex(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Pull the results of $H | U \rangle$ on the master.
+  END_DOC
+
+  integer(ZMQ_PTR)    ,intent(in)     :: zmq_socket_pull
+  integer             ,intent(out)    :: task_id, imin, imax
+  complex*16          ,intent(out)    :: v_t(N_states_diag,N_det)
+  complex*16          ,intent(out)    :: s_t(N_states_diag,N_det)
+
+  integer                            :: rc, sz
+  integer*8                          :: rc8
+
+  rc = f77_zmq_recv( zmq_socket_pull, task_id, 4, 0)
+  if(rc /= 4) stop 'davidson_pull_results failed to pull task_id'
+
+  rc = f77_zmq_recv( zmq_socket_pull, imin, 4, 0)
+  if(rc /= 4) stop 'davidson_pull_results failed to pull imin'
+
+  rc = f77_zmq_recv( zmq_socket_pull, imax, 4, 0)
+  if(rc /= 4) stop 'davidson_pull_results failed to pull imax'
+
+  sz = (imax-imin+1)*N_states_diag
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_recv8( zmq_socket_pull, v_t(1,imin), 8_8*sz*2, 0)
+  if(rc8 /= 8*sz*2) stop 'davidson_pull_results_complex failed to pull v_t'
+
+  !todo: double sz for complex? (done)
+  rc8 = f77_zmq_recv8( zmq_socket_pull, s_t(1,imin), 8_8*sz*2, 0)
+  if(rc8 /= 8*sz*2) stop 'davidson_pull_results_complex failed to pull s_t'
+
+! Activate if zmq_socket_pull is a REP
+IRP_IF ZMQ_PUSH
+IRP_ELSE
+  rc = f77_zmq_send( zmq_socket_pull, 'ok', 2, 0)
+  if (rc /= 2) then
+    print *,  irp_here, ' : f77_zmq_send (zmq_socket_pull,...'
+    stop -1
+  endif
+IRP_ENDIF
+
+end subroutine
+
+
+subroutine davidson_collector_complex(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze, N_st)
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+! Routine collecting the results of the workers in Davidson's algorithm.
+  END_DOC
+
+  integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
+  integer, intent(in)            :: sze, N_st
+  integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
+
+  complex*16      ,intent(inout) :: v0(sze, N_st)
+  complex*16      ,intent(inout) :: s0(sze, N_st)
+
+  integer                          :: more, task_id, imin, imax
+
+  complex*16, allocatable        :: v_t(:,:), s_t(:,:)
+  logical :: sending
+  integer :: i,j
+  integer, external :: zmq_delete_task_async_send
+  integer, external :: zmq_delete_task_async_recv
+
+  allocate(v_t(N_st,N_det), s_t(N_st,N_det))
+  v0 = (0.d0,0.d0)
+  s0 = (0.d0,0.d0)
+  more = 1
+  sending = .False.
+  do while (more == 1)
+    call davidson_pull_results_complex(zmq_socket_pull, v_t, s_t, imin, imax, task_id)
+    if (zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending) == -1) then
+      stop 'davidson: Unable to delete task (send)'
+    endif
+    do j=1,N_st
+      do i=imin,imax
+        v0(i,j) = v0(i,j) + v_t(j,i)
+        s0(i,j) = s0(i,j) + s_t(j,i)
+      enddo
+    enddo
+    if (zmq_delete_task_async_recv(zmq_to_qp_run_socket,more,sending) == -1) then
+      stop 'davidson: Unable to delete task (recv)'
+    endif
+  end do
+  deallocate(v_t,s_t)
+
+end subroutine
+
+
+
+subroutine h_s2_u_0_nstates_zmq_complex(v_0,s_0,u_0,N_st,sze)
+  !todo: maybe make separate zmq_put_psi_complex?
+  !print*,irp_here,' not implemented for complex'
+  !stop -1
+  use omp_lib
+  use bitmasks
+  use f77_zmq
+  implicit none
+  BEGIN_DOC
+  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$
+  !
+  ! n : number of determinants
+  !
+  ! H_jj : array of $\langle j | H | j \rangle$
+  !
+  ! S2_jj : array of $\langle j | S^2 | j \rangle$
+  END_DOC
+  integer, intent(in)            :: N_st, sze
+  complex*16, intent(out)        :: v_0(sze,N_st), s_0(sze,N_st)
+  complex*16, intent(inout)      :: u_0(sze,N_st)
+  integer                        :: i,j,k
+  integer                        :: ithread
+  complex*16, allocatable        :: u_tc(:,:)
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_tc
+  integer(ZMQ_PTR) :: zmq_to_qp_run_socket, zmq_socket_pull
+  PROVIDE psi_det_beta_unique psi_bilinear_matrix_order_transp_reverse psi_det_alpha_unique
+  PROVIDE psi_bilinear_matrix_transp_values_complex psi_bilinear_matrix_values_complex psi_bilinear_matrix_columns_loc
+  PROVIDE ref_bitmask_energy nproc
+  PROVIDE mpi_initialized
+
+  call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'davidson')
+
+!  integer :: N_states_diag_save
+!  N_states_diag_save = N_states_diag
+!  N_states_diag = N_st
+  if (zmq_put_N_states_diag(zmq_to_qp_run_socket, 1) == -1) then
+    stop 'Unable to put N_states_diag on ZMQ server'
+  endif
+
+  if (zmq_put_psi(zmq_to_qp_run_socket,1) == -1) then
+    stop 'Unable to put psi on ZMQ server'
+  endif
+  energy = 0.d0
+  if (zmq_put_dvector(zmq_to_qp_run_socket,1,'energy',energy,size(energy)) == -1) then
+    stop 'Unable to put energy on ZMQ server'
+  endif
+
+
+  ! Create tasks
+  ! ============
+
+  integer :: istep, imin, imax, ishift, ipos
+  integer, external :: add_task_to_taskserver
+  integer, parameter :: tasksize=10000
+  character*(100000) :: task
+  istep=1
+  ishift=0
+  imin=1
+
+
+  ipos=1
+  do imin=1,N_det,tasksize
+    imax = min(N_det,imin-1+tasksize)
+    do ishift=0,istep-1
+      write(task(ipos:ipos+50),'(4(I11,1X),1X,1A)') imin, imax, ishift, istep, '|'
+      ipos = ipos+50
+      if (ipos > 100000-50) then
+        if (add_task_to_taskserver(zmq_to_qp_run_socket,trim(task(1:ipos))) == -1) then
+          stop 'Unable to add task'
+        endif
+        ipos=1
+      endif
+    enddo
+  enddo
+
+  if (ipos > 1) then
+    if (add_task_to_taskserver(zmq_to_qp_run_socket,trim(task(1:ipos))) == -1) then
+      stop 'Unable to add task'
+    endif
+    ipos=1
+  endif
+
+  allocate(u_tc(N_st,N_det))
+  do k=1,N_st
+    call cdset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
+  enddo
+
+  call cdtranspose(                                                   &
+      u_0,                                                           &
+      size(u_0, 1),                                                  &
+      u_tc,                                                           &
+      size(u_tc, 1),                                                  &
+      N_det, N_st)
+
+
+  ASSERT (N_st == N_states_diag)
+  ASSERT (sze >= N_det)
+
+  integer :: rc, ni, nj
+  integer*8 :: rc8
+  double precision :: energy(N_st)
+
+  integer, external :: zmq_put_dvector, zmq_put_psi, zmq_put_N_states_diag
+  integer, external :: zmq_put_cdmatrix
+  if (size(u_tc,kind=8) < 8388608_8) then
+    ni = size(u_tc)
+    nj = 1
+  else
+    ni = 8388608
+    nj = int(size(u_tc,kind=8)/8388608_8,4) + 1
+  endif
+  ! Warning : dimensions are modified for efficiency, It is OK since we get the
+  ! full matrix
+  if (zmq_put_cdmatrix(zmq_to_qp_run_socket, 1, 'u_tc', u_tc, ni, nj, size(u_tc,kind=8)) == -1) then
+    stop 'Unable to put u_tc on ZMQ server'
+  endif
+
+  deallocate(u_tc)
+
+  integer, external :: zmq_set_running
+  if (zmq_set_running(zmq_to_qp_run_socket) == -1) then
+    print *,  irp_here, ': Failed in zmq_set_running'
+  endif
+
+  call omp_set_nested(.True.)
+  !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
+  ithread = omp_get_thread_num()
+  if (ithread == 0 ) then
+    call davidson_collector_complex(zmq_to_qp_run_socket, zmq_socket_pull, v_0, s_0, N_det, N_st)
+  else
+    call davidson_slave_inproc(1)
+  endif
+  !$OMP END PARALLEL
+  call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'davidson')
+
+  !$OMP PARALLEL
+  !$OMP SINGLE
+  do k=1,N_st
+    !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(k,N_det)
+    call cdset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    !$OMP END TASK
+    !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(k,N_det)
+    call cdset_order(s_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    !$OMP END TASK
+    !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(k,N_det)
+    call cdset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    !$OMP END TASK
+  enddo
+  !$OMP END SINGLE
+  !$OMP TASKWAIT
+  !$OMP END PARALLEL
+
+!  N_states_diag = N_states_diag_save
+!  SOFT_TOUCH N_states_diag
 end
 

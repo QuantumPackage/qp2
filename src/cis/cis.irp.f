@@ -57,10 +57,18 @@ subroutine run
   implicit none
   integer                        :: i
 
-  if(pseudo_sym)then
-   call H_apply_cis_sym
+  if (is_complex) then
+    if(pseudo_sym)then
+     call H_apply_cis_sym_kpts
+    else
+     call H_apply_cis_kpts
+    endif
   else
-   call H_apply_cis
+    if(pseudo_sym)then
+     call H_apply_cis_sym
+    else
+     call H_apply_cis
+    endif
   endif
   print *,  'N_det = ', N_det
   print*,'******************************'
@@ -77,8 +85,13 @@ subroutine run
   endif
 
   call ezfio_set_cis_energy(CI_energy)
-  psi_coef = ci_eigenvectors
-  SOFT_TOUCH psi_coef
+  if (is_complex) then
+    psi_coef_complex = ci_eigenvectors_complex
+    SOFT_TOUCH psi_coef_complex
+  else
+    psi_coef = ci_eigenvectors
+    SOFT_TOUCH psi_coef
+  endif
   call save_wavefunction
 
 end

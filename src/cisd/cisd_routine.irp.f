@@ -20,8 +20,13 @@ subroutine run_cisd
       print*, i ,CI_energy(i) - CI_energy(1)
     enddo
   endif
-  psi_coef = ci_eigenvectors
-  SOFT_TOUCH psi_coef
+  if (is_complex) then
+    psi_coef_complex = ci_eigenvectors_complex
+    SOFT_TOUCH psi_coef_complex
+  else
+    psi_coef = ci_eigenvectors
+    SOFT_TOUCH psi_coef
+  endif
   call save_wavefunction
   call ezfio_set_cisd_energy(CI_energy)
 

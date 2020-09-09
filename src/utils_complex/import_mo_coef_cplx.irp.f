@@ -1,4 +1,4 @@
-program import_mo_coef_periodic
+program import_mo_coef_complex
 
   PROVIDE ezfio_filename
   call run
@@ -17,7 +17,8 @@ subroutine run
   
   iunit = getunitandopen('C.qp','r')
   do 
-    read (iunit,*,end=10) i,j, mo_coef(i,j), mo_coef_imag(i,j)
+    read (iunit,*,end=10) i,j, int_re, int_im
+    mo_coef_complex(i,j) = dcmplx(int_re,int_im)
   enddo
   10 continue
   close(iunit)

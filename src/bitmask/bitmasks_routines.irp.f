@@ -214,6 +214,37 @@ subroutine print_spindet(string,Nint)
 
 end
 
+subroutine debug_single_spindet(string,Nint)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Subroutine to print the content of a determinant in '+-' notation and
+  ! hexadecimal representation.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: string(Nint)
+  character*(2048)                :: output(1)
+  call bitstring_to_hexa( output(1), string(1), Nint )
+  print *,  trim(output(1))
+  call print_single_spindet(string,Nint)
+
+end
+
+subroutine print_single_spindet(string,Nint)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Subroutine to print the content of a determinant using the '+-' notation
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: string(Nint)
+  character*(2048)                :: output(1)
+
+  call bitstring_to_str( output(1), string(1), Nint )
+  print *,  trim(output(1))
+
+end
+
 logical function is_integer_in_string(bite,string,Nint)
   use bitmasks
  implicit none

@@ -99,3 +99,15 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
 
 end subroutine
 
+subroutine print_debug_fci
+  implicit none
+  integer :: i 
+  do i=1,n_det
+    print'(2((F25.15),2X))',psi_coef_complex(i,1)
+    call debug_det(psi_det(1,1,i),n_int)
+  enddo
+  print*,'hamiltonian'
+  do i=1,n_det
+    print '(1000(F25.15))',h_matrix_all_dets_complex(i,:)
+  enddo
+end subroutine
