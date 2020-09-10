@@ -186,10 +186,10 @@ END_DOC
 
   implicit none
 
-  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,*),error_matrix_DIIS(ao_num,ao_num,*)
+  integer,intent(inout)         :: dim_DIIS
+  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,dim_DIIS),error_matrix_DIIS(ao_num,ao_num,dim_DIIS)
   integer,intent(in)            :: iteration_SCF, size_Fock_matrix_AO
   double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
-  integer,intent(inout)         :: dim_DIIS
 
   double precision,allocatable  :: B_matrix_DIIS(:,:),X_vector_DIIS(:)
   double precision,allocatable  :: C_vector_DIIS(:)
@@ -212,11 +212,12 @@ END_DOC
   )
 
 ! Compute the matrices B and X
+  B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
+    j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
     do i=1,dim_DIIS
 
-      j_DIIS = mod(iteration_SCF-j,max_dim_DIIS)+1
-      i_DIIS = mod(iteration_SCF-i,max_dim_DIIS)+1
+      i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
 
 ! Compute product of two errors vectors
 
@@ -229,7 +230,6 @@ END_DOC
 
 ! Compute Trace
 
-      B_matrix_DIIS(i,j) = 0.d0
       do k=1,ao_num
         B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + scratch(k,k)
       enddo
@@ -238,12 +238,11 @@ END_DOC
 
 ! Pad B matrix and build the X matrix
 
+  C_vector_DIIS(:) = 0.d0
   do i=1,dim_DIIS
     B_matrix_DIIS(i,dim_DIIS+1) = -1.d0
     B_matrix_DIIS(dim_DIIS+1,i) = -1.d0
-    C_vector_DIIS(i) = 0.d0
   enddo
-  B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1) = 0.d0
   C_vector_DIIS(dim_DIIS+1) = -1.d0
 
   deallocate(scratch)
@@ -259,9 +258,10 @@ END_DOC
   allocate(AF(dim_DIIS+1,dim_DIIS+1))
   allocate(ipiv(2*(dim_DIIS+1)), iwork(2*(dim_DIIS+1)) )
   allocate(scratch(lwork,1))
+  scratch(:,1) = 0.d0
 
   anorm = dlange('1', dim_DIIS+1, dim_DIIS+1, B_matrix_DIIS, &
-              size(B_matrix_DIIS,1), scratch)
+              size(B_matrix_DIIS,1), scratch(1,1))
 
   AF(:,:) = B_matrix_DIIS(:,:)
   call dgetrf(dim_DIIS+1,dim_DIIS+1,AF,size(AF,1),ipiv,info)
