@@ -741,7 +741,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
               call splash_pq_complex(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat_complex, interesting)
               
               if(.not.pert_2rdm)then
-               call fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat_complex, buf)
+               !call fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat_complex, buf)
+               call fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat_complex, buf)
               else
                 print*,irp_here,' not implemented for complex (fill_buffer_double_rdm_complex)'
                 stop -1
@@ -2084,7 +2085,7 @@ end
 !                                                                              !
 !==============================================================================!
 
-subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2, variance, norm2, mat, buf)
+subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
   !todo: should be okay for complex
   use bitmasks
   use selection_types
@@ -2093,17 +2094,16 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
   integer, intent(in) :: i_generator, sp, h1, h2
   complex*16, intent(in) :: mat(N_states, mo_num, mo_num)
   logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
-  double precision, intent(in)           :: fock_diag_tmp(mo_num)
+  double precision, intent(in)    :: fock_diag_tmp(mo_num)
   double precision, intent(in)    :: E0(N_states)
-  double precision, intent(inout) :: pt2(N_states)
-  double precision, intent(inout) :: variance(N_states)
-  double precision, intent(inout) :: norm2(N_states)
+  type(pt2_type), intent(inout)   :: pt2_date
   type(selection_buffer), intent(inout) :: buf
   logical :: ok
-  integer :: s1, s2, p1, p2, ib, j, istate
+  integer :: s1, s2, p1, p2, ib, j, istate, jstate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
-  double precision :: e_pert, delta_E, val, Hii, w, tmp
-  complex*16 ::  alpha_h_psi, coef, val_c
+  double precision :: e_pert(n_states), x(n_states)
+  double precision :: delta_E, val, Hii, w, tmp
+  complex*16 ::  alpha_h_psi, coef(n_states), val_c
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
 
@@ -2111,7 +2111,12 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
 !  double precision, allocatable :: values(:)
 !  integer, allocatable          :: keys(:,:)
 !  integer                       :: nkeys
-  
+  double precision :: s_weight(n_states,n_states)
+  do jstate=1,n_states
+    do istate=1,n_states
+      s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
+    enddo
+  enddo
 
   if(sp == 3) then
     s1 = 1
@@ -2201,15 +2206,32 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
         if (delta_E < 0.d0) then
             tmp = -tmp
         endif
-        e_pert = 0.5d0 * (tmp - delta_E)
+        e_pert(istate) = 0.5d0 * (tmp - delta_E)
+        !TODO: check conjugate for coef
         if (cdabs(alpha_h_psi) > 1.d-4) then
-          coef = e_pert / alpha_h_psi
+          coef(istate) = e_pert / alpha_h_psi
         else
-          coef = alpha_h_psi / delta_E
+          coef(istate) = alpha_h_psi / delta_E
         endif
-        pt2(istate) = pt2(istate) + e_pert
-        variance(istate) = variance(istate) + cdabs(alpha_h_psi * alpha_h_psi)
-        norm2(istate) = norm2(istate) + cdabs(coef * coef)
+        if (e_pert(istate) < 0.d0) then
+          x(istate) = -dsqrt(-e_pert(istate))
+        else
+          x(istate) = dsqrt(e_pert(istate))
+        endif
+      enddo
+
+      do istate=1,n_states
+        do jstate=1,n_states
+          val_c = coef(jstate) * dconjg(coef(istate)) 
+          pt2_data % overlap(jstate,istate) += dble(val_c) 
+          pt2_data % overlap_imag(jstate,istate) += dimag(val_c) 
+        enddo
+      enddo
+
+      do istate=1,n_states
+        alpha_h_psi = mat(istate, p1, p2)
+        pt2_data % variance(istate) += cdabs(alpha_h_psi * alpha_h_psi)
+        pt2_data % pt2(istate) += e_pert(istate)
 
 !!!DEBUG
 !        integer :: k
@@ -2229,16 +2251,30 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
 
         select case (weight_selection)
 
+          !TODO: check off-diagonals
           case(5)
             ! Variance selection
-            w = w - cdabs(alpha_h_psi * alpha_h_psi) * selection_weight(istate)
+            w = w - cdabs(alpha_h_psi * alpha_h_psi) * s_weight(istate,istate)
+            do jstate=1,n_states
+              if (istate == jstate) cycle
+              w = w + cdabs(alpha_h_psi * mat(jstate,p1,p2)) * s_weight(istate,jstate)
+            enddo
 
           case(6)
-            w = w - cdabs(coef * coef) * selection_weight(istate)
+            w = w - cdabs(coef(istate) * coef(istate)) * s_weight(istate,istate)
+            do jstate=1,n_states
+              if (istate == jstate) cycle
+              w = w + cdabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
+            enddo
 
           case default
             ! Energy selection
-            w = w + e_pert * selection_weight(istate)
+            w = w + e_pert(istate) * s_weight(istate,istate)
+            do jstate=1,n_states
+              if (istate == jstate) cycle
+              !TODO: why dabs?
+              w = w - dabs(x(istate))*x(jstate) * s_weight(istate,jstate)
+            enddo
 
         end select
       end do

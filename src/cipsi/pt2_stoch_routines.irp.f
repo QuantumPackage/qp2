@@ -346,6 +346,13 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
     enddo
     SOFT_TOUCH pt2_overlap
+    if (is_complex) then
+      !TODO: transpose/conjugate?
+      do k=1,N_states
+        pt2_overlap_imag(pt2_stoch_istate,k) = pt2_data % overlap_imag(k,pt2_stoch_istate)
+      enddo
+      SOFT_TOUCH pt2_overlap_imag
+    endif
 
     enddo
     FREE pt2_stoch_istate
@@ -357,12 +364,23 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
        pt2_overlap(j,i) = pt2_overlap(i,j)
      enddo
     enddo
+    
+    if (is_complex) then
+      !TODO: check sign
+      do j=2,N_states
+        do i=1,j-1
+          pt2_overlap_imag(i,j) = 0.5d0 * (pt2_overlap_imag(i,j) - pt2_overlap_imag(j,i))
+          pt2_overlap_imag(j,i) = -pt2_overlap_imag(i,j)
+        enddo
+      enddo
+    endif
 
     print *, 'Overlap of perturbed states:'
     do k=1,N_states
       print *, pt2_overlap(k,:)
     enddo
     print *, '-------'
+    !TODO: print imag part?
 
     if (N_in > 0) then
       b%cur = min(N_in,b%cur)
@@ -425,6 +443,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   integer, allocatable :: index(:)
 
   double precision :: v, x, x2, x3, avg, avg2, avg3(N_states), eqt, E0, v0, n0(N_states)
+  double precision :: avg3im(N_states), n0im(N_states)
   double precision :: eqta(N_states)
   double precision :: time, time1, time0
 
@@ -467,6 +486,11 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   pt2_data_err % variance(pt2_stoch_istate) = huge(1.)
   pt2_data % overlap(:,pt2_stoch_istate) = 0.d0
   pt2_data_err % overlap(:,pt2_stoch_istate) = huge(1.)
+  !TODO: init overlap_imag?
+  if (is_complex) then
+    pt2_data % overlap_imag(:,pt2_stoch_istate) = 0.d0
+    pt2_data_err % overlap_imag(:,pt2_stoch_istate) = 0.d0
+  endif
   n = 1
   t = 0
   U = 0
@@ -486,6 +510,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
   E0 = E
   v0 = 0.d0
   n0(:) = 0.d0
+  n0im(:) = 0.d0
   more = 1
   call wall_time(time0)
   time1 = time0
@@ -506,10 +531,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
           E0 = 0.d0
           v0 = 0.d0
           n0(:) = 0.d0
+          n0im(:) = 0.d0
           do i=pt2_n_0(t),1,-1
             E0 += pt2_data_I(i) % pt2(pt2_stoch_istate)
             v0 += pt2_data_I(i) % variance(pt2_stoch_istate)
             n0(:) += pt2_data_I(i) % overlap(:,pt2_stoch_istate)
+            if (is_complex) then
+              n0im(:) += pt2_data_I(i) % overlap_imag(:,pt2_stoch_istate)
+            endif
           end do
         else
           exit
@@ -534,6 +563,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
         avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
         avg3(:) = n0(:) + pt2_data_S(t) % overlap(:,pt2_stoch_istate) / dble(c)
+        if (is_complex) then
+          avg3im(:) = n0im(:) + pt2_data_S(t) % overlap_imag(:,pt2_stoch_istate) / dble(c)
+        endif
         if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
@@ -543,6 +575,9 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         pt2_data % pt2(pt2_stoch_istate) = avg
         pt2_data % variance(pt2_stoch_istate) = avg2
         pt2_data % overlap(:,pt2_stoch_istate) = avg3(:)
+        if (is_complex) then
+          pt2_data % overlap_imag(:,pt2_stoch_istate) = avg3im(:)
+        endif
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
@@ -554,7 +589,13 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
-          eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
+          if (is_complex) then
+            eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - &
+            (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2 - &
+            (pt2_data_S(t) % overlap_imag(:,pt2_stoch_istate)/c)**2 ) ! dabs for numerical stability
+          else
+            eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
+          endif
           eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
           pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 

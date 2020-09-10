@@ -38,6 +38,10 @@ subroutine run_cipsi
   pt2_data % rpt2 = -huge(1.e0)
   pt2_data % overlap(:,:) = 0.d0
   pt2_data % variance = huge(1.e0)
+  if (is_complex) then
+    pt2_data % overlap_imag(:,:) = 0.d0
+  endif
+
 
   if (s2_eig) then
     call make_s2_eigenfunction

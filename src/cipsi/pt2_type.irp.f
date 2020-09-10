@@ -15,6 +15,10 @@ subroutine pt2_alloc(pt2_data,N)
   pt2_data % variance(:)      = 0.d0
   pt2_data % rpt2(:)          = 0.d0
   pt2_data % overlap(:,:)     = 0.d0
+  if (is_complex) then
+    allocate(pt2_data % overlap_imag(N,N))
+    pt2_data % overlap_imag(:,:) = 0.d0
+  endif
 
 end subroutine
 
@@ -27,6 +31,9 @@ subroutine pt2_dealloc(pt2_data)
             ,pt2_data % rpt2        &
             ,pt2_data % overlap     &
             )
+  if (is_complex) then
+    deallocate(pt2_data % overlap_imag)
+  endif
 end subroutine
 
 subroutine pt2_add(p1, w, p2)
@@ -45,6 +52,9 @@ subroutine pt2_add(p1, w, p2)
     p1 % rpt2(:)           = p1 % rpt2(:)          + p2 % rpt2(:)
     p1 % variance(:)       = p1 % variance(:)      + p2 % variance(:)
     p1 % overlap(:,:)      = p1 % overlap(:,:)     + p2 % overlap(:,:)
+    if (is_complex) then
+      p1 % overlap_imag(:,:) = p1 % overlap_imag(:,:) + p2 % overlap_imag(:,:)
+    endif
 
   else
 
@@ -52,6 +62,9 @@ subroutine pt2_add(p1, w, p2)
     p1 % rpt2(:)           = p1 % rpt2(:)          + w * p2 % rpt2(:)
     p1 % variance(:)       = p1 % variance(:)      + w * p2 % variance(:)
     p1 % overlap(:,:)      = p1 % overlap(:,:)     + w * p2 % overlap(:,:)
+    if (is_complex) then
+      p1 % overlap_imag(:,:) = p1 % overlap_imag(:,:) + w * p2 % overlap_imag(:,:)
+    endif
 
   endif
 
@@ -74,6 +87,9 @@ subroutine pt2_add2(p1, w, p2)
     p1 % rpt2(:)          = p1 % rpt2(:)          + p2 % rpt2(:)          * p2 % rpt2(:)
     p1 % variance(:)      = p1 % variance(:)      + p2 % variance(:)      * p2 % variance(:)
     p1 % overlap(:,:)     = p1 % overlap(:,:)     + p2 % overlap(:,:)     * p2 % overlap(:,:)
+    if (is_complex) then
+      p1 % overlap(:,:)   = p1 % overlap(:,:)     + p2 % overlap_imag(:,:) * p2 % overlap_imag(:,:)
+    endif
 
   else
 
@@ -81,6 +97,9 @@ subroutine pt2_add2(p1, w, p2)
     p1 % rpt2(:)          = p1 % rpt2(:)          + w * p2 % rpt2(:)          * p2 % rpt2(:)
     p1 % variance(:)      = p1 % variance(:)      + w * p2 % variance(:)      * p2 % variance(:)
     p1 % overlap(:,:)     = p1 % overlap(:,:)     + w * p2 % overlap(:,:)     * p2 % overlap(:,:)
+    if (is_complex) then
+      p1 % overlap(:,:) = p1 % overlap(:,:)  + w * p2 % overlap_imag(:,:) * p2 % overlap_imag(:,:)
+    endif
 
   endif
 
@@ -104,6 +123,10 @@ subroutine pt2_serialize(pt2_data, n, x)
   x(k+1:k+n)     =  pt2_data % variance(1:n)
   k=k+n
   x(k+1:k+n2)  =  reshape(pt2_data % overlap(1:n,1:n), (/ n2 /))
+  if (is_complex) then
+    k=k+n2
+    x(k+1:k+n2) = reshape(pt2_data % overlap_imag(1:n,1:n), (/ n2 /))
+  endif
 
 end
 
@@ -124,5 +147,9 @@ subroutine pt2_deserialize(pt2_data, n, x)
   pt2_data % variance(1:n)      =   x(k+1:k+n)
   k=k+n
   pt2_data % overlap(1:n,1:n) = reshape(x(k+1:k+n2), (/ n, n /))
+  if (is_complex) then
+    k=k+n2
+    pt2_data % overlap_imag(1:n,1:n) = reshape(x(k+1:k+n2), (/ n, n /))
+  endif
 
 end

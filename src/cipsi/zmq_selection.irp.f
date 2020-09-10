@@ -142,6 +142,10 @@ subroutine ZMQ_selection(N_in, pt2_data)
     do l=1,N_states
       pt2_data % overlap(k,l) = pt2_data % overlap(k,l) * dsqrt(f(k)*f(l))
       pt2_data % overlap(l,k) = pt2_data % overlap(l,k) * dsqrt(f(k)*f(l))
+      if (is_complex) then
+        pt2_data % overlap_imag(k,l) = pt2_data % overlap_imag(k,l) * dsqrt(f(k)*f(l))
+        pt2_data % overlap_imag(l,k) = pt2_data % overlap_imag(l,k) * dsqrt(f(k)*f(l))
+      endif
     enddo
 
     pt2_data % rpt2(k) =  &
@@ -149,13 +153,21 @@ subroutine ZMQ_selection(N_in, pt2_data)
   enddo
 
   pt2_overlap(:,:) = pt2_data % overlap(:,:)
+  if (is_complex) then
+    pt2_overlap_imag(:,:) = pt2_data % overlap_imag(:,:)
+  endif
 
+
+  !TODO: print imag part for complex?
   print *, 'Overlap of perturbed states:'
   do l=1,N_states
     print *, pt2_overlap(l,:)
   enddo
   print *, '-------'
   SOFT_TOUCH pt2_overlap
+  if (is_complex) then
+    SOFT_TOUCH pt2_overlap_imag
+  endif
   call update_pt2_and_variance_weights(pt2_data, N_states)
 
 end subroutine
@@ -211,6 +223,9 @@ subroutine selection_collector(zmq_socket_pull, b, N, pt2_data)
   pt2_data % pt2(:)      = 0d0
   pt2_data % variance(:) = 0.d0
   pt2_data % overlap(:,:) = 0.d0
+  if (is_complex) then
+    pt2_data % overlap_imag(:,:) = 0.d0
+  endif
   call pt2_alloc(pt2_data_tmp,N_states)
   do while (more == 1)
     call pull_selection_results(zmq_socket_pull, pt2_data_tmp, b2%val(1), b2%det(1,1,1), b2%cur, task_id, ntask)
