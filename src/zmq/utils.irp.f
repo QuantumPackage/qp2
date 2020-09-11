@@ -585,6 +585,7 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
     stop 'Wrong end of job'
   endif
 
+  message = repeat(' ',512)
   do i=360,1,-1
     rc = f77_zmq_send(zmq_to_qp_run_socket, 'end_job '//trim(zmq_state),8+len(trim(zmq_state)),0)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 512, 0)
@@ -645,6 +646,7 @@ integer function connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread)
     endif
   endif
 
+  message = repeat(' ',512)
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 510, 0)
   message = trim(message(1:rc))
   if(message(1:5) == "error") then

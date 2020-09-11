@@ -8,7 +8,7 @@
 
 os: linux
 
-dist: trusty
+dist: bionic
 
 sudo: false
 
@@ -19,9 +19,11 @@ addons:
     packages:
     - gfortran
     - gcc
-    - liblapack-dev
-    - libblas-dev
+    - libatlas-base-dev
+#    - liblapack-dev
+#    - libblas-dev
     - wget
+    - eatmydata
 
 env:
   - OPAMROOT=$HOME/.opam
@@ -29,12 +31,23 @@ env:
 cache:
   directories:
   - $HOME/.opam/
+  - $HOME/cache
 
 language: python
 python:
-    - "2.7"
+    - "3.7"
 
-script: 
-  - ./configure --install all --config ./config/travis.cfg 
-  - source ./quantum_package.rc ; ninja -j 1 -v 
-  - source ./quantum_package.rc ; qp_test -a 
+stages:
+  - configuration
+  - compilation
+  - testing
+
+jobs:
+  include:
+    - stage: configuration
+      script: eatmydata travis/configuration.sh
+    - stage: compilation
+      script: eatmydata travis/compilation.sh
+    - stage: testing
+      script: eatmydata travis/testing.sh
+
