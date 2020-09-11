@@ -339,7 +339,7 @@ subroutine push_pt2_results_async_send(zmq_socket_push, index, pt2_data, b, task
   endif
 
 
-  allocate(pt2_serialized (pt2_type_size(N_states),n_tasks) )
+  allocate(pt2_serialized (pt2_type_size(N_states,is_complex),n_tasks) )
   do i=1,n_tasks
     call pt2_serialize(pt2_data(i),N_states,pt2_serialized(1,i))
   enddo
@@ -480,7 +480,7 @@ subroutine pull_pt2_results(zmq_socket_pull, index, pt2_data, task_id, n_tasks, 
     stop 'pull'
   endif
 
-  allocate(pt2_serialized (pt2_type_size(N_states),n_tasks) )
+  allocate(pt2_serialized (pt2_type_size(N_states,is_complex),n_tasks) )
   rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized)*n_tasks, 0)
   if (rc == -1) then
     n_tasks = 1

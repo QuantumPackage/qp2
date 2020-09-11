@@ -2096,7 +2096,7 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
   logical, intent(in) :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
   double precision, intent(in)    :: fock_diag_tmp(mo_num)
   double precision, intent(in)    :: E0(N_states)
-  type(pt2_type), intent(inout)   :: pt2_date
+  type(pt2_type), intent(inout)   :: pt2_data
   type(selection_buffer), intent(inout) :: buf
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate, jstate
@@ -2209,7 +2209,7 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
         e_pert(istate) = 0.5d0 * (tmp - delta_E)
         !TODO: check conjugate for coef
         if (cdabs(alpha_h_psi) > 1.d-4) then
-          coef(istate) = e_pert / alpha_h_psi
+          coef(istate) = e_pert(istate) / alpha_h_psi
         else
           coef(istate) = alpha_h_psi / delta_E
         endif

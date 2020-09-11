@@ -145,7 +145,7 @@ subroutine push_selection_results(zmq_socket_push, pt2_data, b, task_id, ntasks)
   endif
 
 
-  allocate(pt2_serialized (pt2_type_size(N_states)) )
+  allocate(pt2_serialized (pt2_type_size(N_states,is_complex)) )
   call pt2_serialize(pt2_data,N_states,pt2_serialized)
 
   rc = f77_zmq_send( zmq_socket_push, pt2_serialized, size(pt2_serialized)*8, ZMQ_SNDMORE)
@@ -213,7 +213,7 @@ subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_i
     print *,  'f77_zmq_recv( zmq_socket_pull, N, 4, 0)'
   endif
 
-  allocate(pt2_serialized (pt2_type_size(N_states)) )
+  allocate(pt2_serialized (pt2_type_size(N_states,is_complex)) )
   rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized), 0)
   if (rc == -1) then
     ntasks = 1

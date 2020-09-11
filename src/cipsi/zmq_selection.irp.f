@@ -105,12 +105,6 @@ subroutine ZMQ_selection(N_in, pt2_data)
 
   f(:) = 1.d0
   if (.not.do_pt2) then
-<<<<<<< HEAD
-    double precision :: f(N_states), u_dot_u
-    do k=1,min(N_det,N_states)
-     f(k) = 1.d0 / u_dot_u(psi_selectors_coef(1,k), N_det_selectors)
-    enddo
-=======
   double precision :: f(N_states), u_dot_u
     if (is_complex) then
       double precision :: u_dot_u_complex
@@ -122,7 +116,6 @@ subroutine ZMQ_selection(N_in, pt2_data)
        f(k) = 1.d0 / u_dot_u(psi_selectors_coef(1,k), N_det_selectors)
       enddo
     endif
->>>>>>> origin/cleaning_kpts
   endif
 
   !$OMP PARALLEL DEFAULT(shared)  SHARED(b, pt2_data)  PRIVATE(i) NUM_THREADS(nproc_target+1)

@@ -266,8 +266,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       mem_collector = 8.d0 *                  & ! bytes
             ( 1.d0*pt2_n_tasks_max            & ! task_id, index
             + 0.635d0*N_det_generators        & ! f,d
-            + pt2_n_tasks_max*pt2_type_size(N_states) & ! pt2_data_task
-            + N_det_generators*pt2_type_size(N_states)  & ! pt2_data_I
+            + pt2_n_tasks_max*pt2_type_size(N_states,is_complex) & ! pt2_data_task
+            + N_det_generators*pt2_type_size(N_states,is_complex)  & ! pt2_data_I
             + 4.d0*(pt2_N_teeth+1)            & ! S, S2, T2, T3
             + 1.d0*(N_int*2.d0*N + N)         & ! selection buffer
             + 1.d0*(N_int*2.d0*N + N)         & ! sort selection buffer
@@ -282,7 +282,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
               nproc_target * 8.d0 *             & ! bytes
               ( 0.5d0*pt2_n_tasks_max           & ! task_id
               + 64.d0*pt2_n_tasks_max           & ! task
-              + pt2_type_size(N_states)*pt2_n_tasks_max*N_states   & ! pt2, variance, overlap
+              + pt2_type_size(N_states,is_complex)*pt2_n_tasks_max*N_states   & ! pt2, variance, overlap
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
