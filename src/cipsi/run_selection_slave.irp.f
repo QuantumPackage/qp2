@@ -18,9 +18,8 @@ subroutine run_selection_slave(thread,iproc,energy)
 
   type(selection_buffer) :: buf, buf2
   logical :: done, buffer_ready
-  double precision :: pt2(N_states)
-  double precision :: variance(N_states)
-  double precision :: norm(N_states)
+  type(pt2_type) :: pt2_data
+
   
   !todo: check for providers that are now unlinked for real/complex
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
@@ -33,6 +32,7 @@ subroutine run_selection_slave(thread,iproc,energy)
     PROVIDE psi_selectors_coef_transp psi_det_sorted weight_selection
   endif
 
+  call pt2_alloc(pt2_data,N_states)
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
@@ -47,9 +47,6 @@ subroutine run_selection_slave(thread,iproc,energy)
   buf%N = 0
   buffer_ready = .False.
   ctask = 1
-  pt2(:) = 0d0
-  variance(:) = 0d0
-  norm(:) = 0.d0
 
   do
     integer, external :: get_task_from_taskserver
@@ -74,7 +71,7 @@ subroutine run_selection_slave(thread,iproc,energy)
           stop '-1'
         end if
       end if
-      call select_connected(i_generator,energy,pt2,variance,norm,buf,subset,pt2_F(i_generator))
+      call select_connected(i_generator,energy,pt2_data,buf,subset,pt2_F(i_generator))
     endif
 
     integer, external :: task_done_to_taskserver
@@ -93,12 +90,10 @@ subroutine run_selection_slave(thread,iproc,energy)
       if(ctask > 0) then
         call sort_selection_buffer(buf)
 !        call merge_selection_buffers(buf,buf2)
-!print *, task_id(1), pt2(1), buf%cur, ctask
-        call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
+        call push_selection_results(zmq_socket_push, pt2_data, buf, task_id(1), ctask)
+        call pt2_dealloc(pt2_data)
+        call pt2_alloc(pt2_data,N_states)
 !        buf%mini = buf2%mini
-        pt2(:) = 0d0
-        variance(:) = 0d0
-        norm(:) = 0d0
         buf%cur = 0
       end if
       ctask = 0
@@ -111,14 +106,12 @@ subroutine run_selection_slave(thread,iproc,energy)
   if(ctask > 0) then
     call sort_selection_buffer(buf)
 !    call merge_selection_buffers(buf,buf2)
-    call push_selection_results(zmq_socket_push, pt2, variance, norm, buf, task_id(1), ctask)
+    call push_selection_results(zmq_socket_push, pt2_data, buf, task_id(1), ctask)
 !    buf%mini = buf2%mini
-    pt2(:) = 0d0
-    variance(:) = 0d0
-    norm(:) = 0d0
     buf%cur = 0
   end if
   ctask = 0
+  call pt2_dealloc(pt2_data)
 
   integer, external :: disconnect_from_taskserver
   if (disconnect_from_taskserver(zmq_to_qp_run_socket,worker_id) == -1) then
@@ -134,18 +127,17 @@ subroutine run_selection_slave(thread,iproc,energy)
 end subroutine
 
 
-subroutine push_selection_results(zmq_socket_push, pt2, variance, norm, b, task_id, ntask)
+subroutine push_selection_results(zmq_socket_push, pt2_data, b, task_id, ntasks)
   use f77_zmq
   use selection_types
   implicit none
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_push
-  double precision, intent(in)   :: pt2(N_states)
-  double precision, intent(in)   :: variance(N_states)
-  double precision, intent(in)   :: norm(N_states)
+  type(pt2_type), intent(in)     :: pt2_data
   type(selection_buffer), intent(inout) :: b
-  integer, intent(in) :: ntask, task_id(*)
+  integer, intent(in) :: ntasks, task_id(*)
   integer :: rc
+  double precision, allocatable :: pt2_serialized(:)
 
   rc = f77_zmq_send( zmq_socket_push, b%cur, 4, ZMQ_SNDMORE)
   if(rc /= 4) then
@@ -153,20 +145,18 @@ subroutine push_selection_results(zmq_socket_push, pt2, variance, norm, b, task_
   endif
 
 
-  rc = f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_send( zmq_socket_push, pt2, 8*N_states, ZMQ_SNDMORE)'
-  endif
+  allocate(pt2_serialized (pt2_type_size(N_states)) )
+  call pt2_serialize(pt2_data,N_states,pt2_serialized)
 
-  rc = f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_send( zmq_socket_push, variance, 8*N_states, ZMQ_SNDMORE)'
+  rc = f77_zmq_send( zmq_socket_push, pt2_serialized, size(pt2_serialized)*8, ZMQ_SNDMORE)
+  if (rc == -1) then
+    print *,  irp_here, ': error sending result'
+    stop 3
+    return
+  else if(rc /= size(pt2_serialized)*8) then
+    stop 'push'
   endif
-
-  rc = f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_send( zmq_socket_push, norm, 8*N_states, ZMQ_SNDMORE)'
-  endif
+  deallocate(pt2_serialized)
 
   if (b%cur > 0) then
 
@@ -182,14 +172,14 @@ subroutine push_selection_results(zmq_socket_push, pt2, variance, norm, b, task_
 
   endif
 
-  rc = f77_zmq_send( zmq_socket_push, ntask, 4, ZMQ_SNDMORE)
+  rc = f77_zmq_send( zmq_socket_push, ntasks, 4, ZMQ_SNDMORE)
   if(rc /= 4) then
-    print *,  'f77_zmq_send( zmq_socket_push, ntask, 4, ZMQ_SNDMORE)'
+    print *,  'f77_zmq_send( zmq_socket_push, ntasks, 4, ZMQ_SNDMORE)'
   endif
 
-  rc = f77_zmq_send( zmq_socket_push, task_id(1), ntask*4, 0)
-  if(rc /= 4*ntask) then
-    print *,  'f77_zmq_send( zmq_socket_push, task_id(1), ntask*4, 0)'
+  rc = f77_zmq_send( zmq_socket_push, task_id(1), ntasks*4, 0)
+  if(rc /= 4*ntasks) then
+    print *,  'f77_zmq_send( zmq_socket_push, task_id(1), ntasks*4, 0)'
   endif
 
 ! Activate is zmq_socket_push is a REQ
@@ -206,42 +196,34 @@ IRP_ENDIF
 end subroutine
 
 
-subroutine pull_selection_results(zmq_socket_pull, pt2, variance, norm, val, det, N, task_id, ntask)
+subroutine pull_selection_results(zmq_socket_pull, pt2_data, val, det, N, task_id, ntasks)
   use f77_zmq
   use selection_types
   implicit none
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
-  double precision, intent(inout) :: pt2(N_states)
-  double precision, intent(inout) :: variance(N_states)
-  double precision, intent(inout) :: norm(N_states)
+  type(pt2_type), intent(inout) :: pt2_data
   double precision, intent(out) :: val(*)
   integer(bit_kind), intent(out) :: det(N_int, 2, *)
-  integer, intent(out) :: N, ntask, task_id(*)
+  integer, intent(out) :: N, ntasks, task_id(*)
   integer :: rc, rn, i
+  double precision, allocatable :: pt2_serialized(:)
 
   rc = f77_zmq_recv( zmq_socket_pull, N, 4, 0)
   if(rc /= 4) then
     print *,  'f77_zmq_recv( zmq_socket_pull, N, 4, 0)'
   endif
 
-  pt2(:) = 0.d0
-  variance(:) = 0.d0
-  norm(:) = 0.d0
-
-  rc = f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_recv( zmq_socket_pull, pt2, N_states*8, 0)'
+  allocate(pt2_serialized (pt2_type_size(N_states)) )
+  rc = f77_zmq_recv( zmq_socket_pull, pt2_serialized, 8*size(pt2_serialized), 0)
+  if (rc == -1) then
+    ntasks = 1
+    task_id(1) = 0
+  else if(rc /= 8*size(pt2_serialized)) then
+    stop 'pull'
   endif
 
-  rc = f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_recv( zmq_socket_pull, variance, N_states*8, 0)'
-  endif
-
-  rc = f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)
-  if(rc /= 8*N_states) then
-    print *,  'f77_zmq_recv( zmq_socket_pull, norm, N_states*8, 0)'
-  endif
+  call pt2_deserialize(pt2_data,N_states,pt2_serialized)
+  deallocate(pt2_serialized)
 
   if (N>0) then
       rc = f77_zmq_recv( zmq_socket_pull, val(1), 8*N, 0)
@@ -255,14 +237,14 @@ subroutine pull_selection_results(zmq_socket_pull, pt2, variance, norm, val, det
       endif
   endif
 
-  rc = f77_zmq_recv( zmq_socket_pull, ntask, 4, 0)
+  rc = f77_zmq_recv( zmq_socket_pull, ntasks, 4, 0)
   if(rc /= 4) then
-    print *,  'f77_zmq_recv( zmq_socket_pull, ntask, 4, 0)'
+    print *,  'f77_zmq_recv( zmq_socket_pull, ntasks, 4, 0)'
   endif
 
-  rc = f77_zmq_recv( zmq_socket_pull, task_id(1), ntask*4, 0)
-  if(rc /= 4*ntask) then
-    print *,  'f77_zmq_recv( zmq_socket_pull, task_id(1), ntask*4, 0)'
+  rc = f77_zmq_recv( zmq_socket_pull, task_id(1), ntasks*4, 0)
+  if(rc /= 4*ntasks) then
+    print *,  'f77_zmq_recv( zmq_socket_pull, task_id(1), ntasks*4, 0)'
   endif
 
 ! Activate is zmq_socket_pull is a REP

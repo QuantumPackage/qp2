@@ -41,3 +41,19 @@ BEGIN_PROVIDER [ double precision, pt2_E0_denominator, (N_states) ]
 END_PROVIDER
 
 
+BEGIN_PROVIDER [ double precision, pt2_overlap, (N_states, N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Overlap between the perturbed wave functions
+ END_DOC
+ pt2_overlap(1:N_states,1:N_states) = 0.d0
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, pt2_overlap_imag, (N_states, N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Overlap between the perturbed wave functions
+ END_DOC
+ pt2_overlap_imag(1:N_states,1:N_states) = 0.d0
+END_PROVIDER
+
