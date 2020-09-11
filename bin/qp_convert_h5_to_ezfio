@@ -277,7 +277,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     if qmcpack:
         try:
             with h5py.File(qph5path,'r') as qph5:
-                ezfio.set_qmcpack2_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
+                ezfio.set_qmcpack_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
                 ezfio.set_qmcpack_qmc_nshell(qph5['qmcpack'].attrs['qmc_nshell'])
                 ezfio.set_qmcpack_qmc_prim_num_max(qph5['qmcpack'].attrs['qmc_prim_num_max'])
                 ezfio.set_qmcpack_qmc_nucl(qph5['qmcpack/qmc_nucl'][()].tolist())
