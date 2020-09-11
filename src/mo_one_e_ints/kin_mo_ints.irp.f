@@ -22,3 +22,26 @@ BEGIN_PROVIDER [double precision, mo_kinetic_integrals, (mo_num,mo_num)]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, mo_kinetic_integrals_diag,(mo_num)]
+  implicit none
+  integer                        :: i
+  BEGIN_DOC
+  ! diagonal elements of mo_kinetic_integrals or mo_kinetic_integrals_complex
+  END_DOC
+  
+  if (is_complex) then
+    integer :: k,i_shft
+    PROVIDE mo_kinetic_integrals_kpts
+    do k=1,kpt_num
+      i_shft = (k-1)*mo_num_per_kpt
+      do i=1,mo_num_per_kpt
+        mo_kinetic_integrals_diag(i+i_shft) = dble(mo_kinetic_integrals_kpts(i,i,k))
+      enddo
+    enddo
+  else
+    PROVIDE mo_kinetic_integrals
+    do i=1,mo_num
+      mo_kinetic_integrals_diag(i) = mo_kinetic_integrals(i,i)
+    enddo
+  endif
+END_PROVIDER

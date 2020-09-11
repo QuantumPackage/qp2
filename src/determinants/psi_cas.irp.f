@@ -150,7 +150,20 @@ END_PROVIDER
  double precision :: hij,norm,u_dot_v
   psi_cas_energy = 0.d0
 
-
+  if (is_complex) then
+    complex*16 :: hij_c
+    do k = 1, N_states
+      norm = 0.d0
+      do i = 1, N_det_cas_complex
+        norm += cdabs(psi_cas_coef_complex(i,k) * psi_cas_coef_complex(i,k))
+        do j = 1, N_det_cas_complex
+          !TODO: accum imag parts to ensure that sum is zero?
+          psi_cas_energy(k) += dble(dconjg(psi_cas_coef_complex(i,k)) * psi_cas_coef_complex(j,k) * H_matrix_cas_complex(i,j))
+        enddo
+      enddo
+      psi_cas_energy(k) = psi_cas_energy(k) /norm
+    enddo
+  else
   do k = 1, N_states
    norm = 0.d0
    do i = 1, N_det_cas
@@ -161,6 +174,7 @@ END_PROVIDER
    enddo
    psi_cas_energy(k) = psi_cas_energy(k) /norm
   enddo
+  endif
 
 END_PROVIDER
 

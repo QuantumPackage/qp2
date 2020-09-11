@@ -38,29 +38,47 @@ subroutine run_cipsi
   pt2_data % rpt2 = -huge(1.e0)
   pt2_data % overlap(:,:) = 0.d0
   pt2_data % variance = huge(1.e0)
+  if (is_complex) then
+    pt2_data % overlap_imag(:,:) = 0.d0
+  endif
+
 
   if (s2_eig) then
     call make_s2_eigenfunction
   endif
-  call diagonalize_CI
+  if (is_complex) then
+    call diagonalize_ci_complex
+  else
+    call diagonalize_CI
+  endif
   call save_wavefunction
 
   call ezfio_has_hartree_fock_energy(has)
   if (has) then
     call ezfio_get_hartree_fock_energy(hf_energy_ref)
   else
-    hf_energy_ref = ref_bitmask_energy
+    hf_energy_ref = ref_bitmask_energy_with_nucl_rep
   endif
 
   if (N_det > N_det_max) then
     psi_det = psi_det_sorted
-    psi_coef = psi_coef_sorted
-    N_det = N_det_max
-    soft_touch N_det psi_det psi_coef
+    if (is_complex) then
+      psi_coef_complex = psi_coef_sorted_complex
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef_complex
+    else
+      psi_coef = psi_coef_sorted
+      N_det = N_det_max
+      soft_touch N_det psi_det psi_coef
+    endif
     if (s2_eig) then
       call make_s2_eigenfunction
     endif
-    call diagonalize_CI
+    if (is_complex) then
+      call diagonalize_CI_complex
+    else
+      call diagonalize_CI
+    endif
     call save_wavefunction
   endif
 
@@ -116,11 +134,19 @@ subroutine run_cipsi
     call copy_H_apply_buffer_to_wf()
 !    call save_wavefunction
 
-    PROVIDE  psi_coef
+    if (is_complex) then
+      PROVIDE  psi_coef_complex
+    else
+      PROVIDE  psi_coef
+    endif
     PROVIDE  psi_det
     PROVIDE  psi_det_sorted
 
-    call diagonalize_CI
+    if (is_complex) then
+      call diagonalize_ci_complex
+    else
+      call diagonalize_CI
+    endif
     call save_wavefunction
     call save_energy(psi_energy_with_nucl_rep, zeros)
     if (qp_stop()) exit
@@ -128,7 +154,11 @@ subroutine run_cipsi
 
   if (.not.qp_stop()) then
     if (N_det < N_det_max) then
-        call diagonalize_CI
+        if (is_complex) then
+          call diagonalize_ci_complex
+        else
+          call diagonalize_CI
+        endif
         call save_wavefunction
         call save_energy(psi_energy_with_nucl_rep, zeros)
     endif

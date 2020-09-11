@@ -4,6 +4,7 @@ use map_module
 !! ======
 
 BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
+&BEGIN_PROVIDER [ type(map_type), ao_integrals_map_2 ]
   implicit none
   BEGIN_DOC
   ! AO integrals
@@ -11,9 +12,17 @@ BEGIN_PROVIDER [ type(map_type), ao_integrals_map ]
   integer(key_kind)              :: key_max
   integer(map_size_kind)         :: sze
   call two_e_integrals_index(ao_num,ao_num,ao_num,ao_num,key_max)
-  sze = key_max
-  call map_init(ao_integrals_map,sze)
-  print*,  'AO map initialized : ', sze
+  if (is_complex) then
+    sze = key_max*2
+    call map_init(ao_integrals_map,sze)
+    call map_init(ao_integrals_map_2,sze) 
+    print*,  'AO maps initialized (complex): ', 2*sze
+  else
+    sze = key_max
+    call map_init(ao_integrals_map,sze)
+    call map_init(ao_integrals_map_2,1_map_size_kind) 
+    print*,  'AO map initialized : ', sze
+  endif
 END_PROVIDER
 
 subroutine two_e_integrals_index(i,j,k,l,i1)
@@ -21,7 +30,7 @@ subroutine two_e_integrals_index(i,j,k,l,i1)
   implicit none
   BEGIN_DOC
 ! Gives a unique index for i,j,k,l using permtuation symmetry.
-! i <-> k, j <-> l, and (i,k) <-> (j,l) for non-periodic systems
+! i <-> k, j <-> l, and (i,k) <-> (j,l) 
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind), intent(out) :: i1
@@ -36,8 +45,6 @@ subroutine two_e_integrals_index(i,j,k,l,i1)
   i2 = max(p,q)
   i1 = i1+shiftr(i2*i2-i2,1)
 end
-
-
 
 subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
   use map_module
@@ -128,155 +135,6 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
 
 end
 
-
-
-subroutine ao_idx2_sq(i,j,ij)
-  implicit none
-  integer, intent(in)  :: i,j
-  integer, intent(out) :: ij
-  if (i<j) then
-    ij=(j-1)*(j-1)+2*i-mod(j+1,2)
-  else if (i>j) then
-    ij=(i-1)*(i-1)+2*j-mod(i,2)
-  else
-    ij=i*i
-  endif
-end
-  
-subroutine idx2_tri_int(i,j,ij)
-  implicit none
-  integer, intent(in)  :: i,j
-  integer, intent(out) :: ij
-  integer :: p,q
-  p = max(i,j)
-  q = min(i,j)
-  ij = q+ishft(p*p-p,-1)
-end
-  
-subroutine ao_idx2_tri_key(i,j,ij)
-  use map_module
-  implicit none
-  integer, intent(in)  :: i,j
-  integer(key_kind), intent(out) :: ij
-  integer(key_kind) :: p,q
-  p = max(i,j)
-  q = min(i,j)
-  ij = q+ishft(p*p-p,-1)
-end
-  
-subroutine two_e_integrals_index_2fold(i,j,k,l,i1)                                           
-  use map_module
-  implicit none
-  integer, intent(in)            :: i,j,k,l
-  integer(key_kind), intent(out) :: i1
-  integer                        :: ik,jl
-
-  call ao_idx2_sq(i,k,ik)
-  call ao_idx2_sq(j,l,jl)
-  call ao_idx2_tri_key(ik,jl,i1)
-end
-
-subroutine ao_idx2_sq_rev(i,k,ik)                                                                
-  BEGIN_DOC
-  ! reverse square compound index
-  END_DOC
-!  p = ceiling(dsqrt(dble(ik)))
-!  q = ceiling(0.5d0*(dble(ik)-dble((p-1)*(p-1))))
-!  if (mod(ik,2)==0) then
-!    k=p
-!    i=q
-!  else
-!    i=p
-!    k=q
-!  endif
-  integer, intent(in)           :: ik
-  integer, intent(out)          :: i,k
-  integer                       :: pq(0:1),i1,i2
-  pq(0) = ceiling(dsqrt(dble(ik)))
-  pq(1) = ceiling(0.5d0*(dble(ik)-dble((pq(0)-1)*(pq(0)-1))))
-  i1=mod(ik,2)
-  i2=mod(ik+1,2)
-
-  k=pq(i1)
-  i=pq(i2)
-end
-
-subroutine ao_idx2_tri_rev_key(i,k,ik)
-  use map_module
-  BEGIN_DOC
-  !return i<=k
-  END_DOC
-  integer(key_kind), intent(in) :: ik
-  integer, intent(out)          :: i,k
-  integer(key_kind) :: tmp_k
-  k = ceiling(0.5d0*(dsqrt(8.d0*dble(ik)+1.d0)-1.d0))
-  tmp_k = k
-  i = int(ik - ishft(tmp_k*tmp_k-tmp_k,-1))
-end
-
-subroutine idx2_tri_rev_int(i,k,ik)
-  BEGIN_DOC
-  !return i<=k
-  END_DOC
-  integer, intent(in)           :: ik
-  integer, intent(out)          :: i,k
-  k = ceiling(0.5d0*(dsqrt(8.d0*dble(ik)+1.d0)-1.d0))
-  i = int(ik - ishft(k*k-k,-1))
-end
-
-subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
-  use map_module
-  implicit none
-  integer, intent(out)           :: i(2),j(2),k(2),l(2)
-  integer(key_kind), intent(in)  :: i1
-  integer(key_kind)              :: i0
-  integer                        :: i2,i3
-  i = 0
-  call ao_idx2_tri_rev_key(i3,i2,i1)
-
-  call ao_idx2_sq_rev(j(1),l(1),i2)
-  call ao_idx2_sq_rev(i(1),k(1),i3)
-
-              !ijkl
-  i(2) = j(1) !jilk
-  j(2) = i(1)
-  k(2) = l(1)
-  l(2) = k(1)
-
-!  i(3) = k(1) !klij   complex conjugate
-!  j(3) = l(1)
-!  k(3) = i(1)
-!  l(3) = j(1)
-!
-!  i(4) = l(1) !lkji   complex conjugate
-!  j(4) = k(1)
-!  k(4) = j(1)
-!  l(4) = i(1)
-
-  integer :: ii
-  if ( (i(1)==i(2)).and. &
-       (j(1)==j(2)).and. &
-       (k(1)==k(2)).and. &
-       (l(1)==l(2)) ) then
-    i(2) = 0
-  endif
-! This has been tested with up to 1000 AOs, and all the reverse indices are
-! correct ! We can remove the test
-!  do ii=1,2
-!    if (i(ii) /= 0) then
-!      call two_e_integrals_index_2fold(i(ii),j(ii),k(ii),l(ii),i0)
-!      if (i1 /= i0) then
-!        print *,  i1, i0
-!        print *,  i(ii), j(ii), k(ii), l(ii)
-!        stop 'two_e_integrals_index_reverse_2fold failed'
-!      endif
-!    endif
-!  enddo
-end
-
-
-
-
  BEGIN_PROVIDER [ integer, ao_integrals_cache_min ]
 &BEGIN_PROVIDER [ integer, ao_integrals_cache_max ]
  implicit none
@@ -359,111 +217,111 @@ double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
   result = tmp
 end
 
-BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
- implicit none
- BEGIN_DOC
- ! Cache of AO integrals for fast access
- END_DOC
- PROVIDE ao_two_e_integrals_in_map
- integer                        :: i,j,k,l,ii
- integer(key_kind)              :: idx1, idx2
- real(integral_kind)            :: tmp_re, tmp_im
- integer(key_kind)              :: idx_re,idx_im
- complex(integral_kind)         :: integral
+!BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
+! implicit none
+! BEGIN_DOC
+! ! Cache of AO integrals for fast access
+! END_DOC
+! PROVIDE ao_two_e_integrals_in_map
+! integer                        :: i,j,k,l,ii
+! integer(key_kind)              :: idx1, idx2
+! real(integral_kind)            :: tmp_re, tmp_im
+! integer(key_kind)              :: idx_re,idx_im
+! complex(integral_kind)         :: integral
+!
+!
+! !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx1,idx2,tmp_re,tmp_im,idx_re,idx_im,ii,integral)
+! do l=ao_integrals_cache_min,ao_integrals_cache_max
+!   do k=ao_integrals_cache_min,ao_integrals_cache_max
+!     do j=ao_integrals_cache_min,ao_integrals_cache_max
+!       do i=ao_integrals_cache_min,ao_integrals_cache_max
+!         !DIR$ FORCEINLINE
+!         call two_e_integrals_index_2fold(i,j,k,l,idx1)
+!         !DIR$ FORCEINLINE
+!         call two_e_integrals_index_2fold(k,l,i,j,idx2)
+!         idx_re = min(idx1,idx2)
+!         idx_im = max(idx1,idx2)
+!         !DIR$ FORCEINLINE
+!         call map_get(ao_integrals_map,idx_re,tmp_re)
+!         if (idx_re /= idx_im) then
+!           call map_get(ao_integrals_map,idx_im,tmp_im)
+!           if (idx1 < idx2) then
+!             integral = dcmplx(tmp_re,tmp_im)
+!           else
+!             integral = dcmplx(tmp_re,-tmp_im)
+!           endif
+!         else
+!           tmp_im = 0.d0
+!           integral = dcmplx(tmp_re,tmp_im)
+!         endif
+!         
+!         ii = l-ao_integrals_cache_min
+!         ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
+!         ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
+!         ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+!         ao_integrals_cache_periodic(ii) = integral
+!       enddo
+!     enddo
+!   enddo
+! enddo
+! !$OMP END PARALLEL DO
+!
+!END_PROVIDER
 
 
- !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx1,idx2,tmp_re,tmp_im,idx_re,idx_im,ii,integral)
- do l=ao_integrals_cache_min,ao_integrals_cache_max
-   do k=ao_integrals_cache_min,ao_integrals_cache_max
-     do j=ao_integrals_cache_min,ao_integrals_cache_max
-       do i=ao_integrals_cache_min,ao_integrals_cache_max
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index_2fold(i,j,k,l,idx1)
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index_2fold(k,l,i,j,idx2)
-         idx_re = min(idx1,idx2)
-         idx_im = max(idx1,idx2)
-         !DIR$ FORCEINLINE
-         call map_get(ao_integrals_map,idx_re,tmp_re)
-         if (idx_re /= idx_im) then
-           call map_get(ao_integrals_map,idx_im,tmp_im)
-           if (idx1 < idx2) then
-             integral = dcmplx(tmp_re,tmp_im)
-           else
-             integral = dcmplx(tmp_re,-tmp_im)
-           endif
-         else
-           tmp_im = 0.d0
-           integral = dcmplx(tmp_re,tmp_im)
-         endif
-         
-         ii = l-ao_integrals_cache_min
-         ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-         ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-         ao_integrals_cache_periodic(ii) = integral
-       enddo
-     enddo
-   enddo
- enddo
- !$OMP END PARALLEL DO
-
-END_PROVIDER
-
-
-complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
-  use map_module
-  implicit none
-  BEGIN_DOC
-  ! Gets one AO bi-electronic integral from the AO map
-  END_DOC
-  integer, intent(in)            :: i,j,k,l
-  integer(key_kind)              :: idx1,idx2
-  real(integral_kind)            :: tmp_re, tmp_im
-  integer(key_kind)              :: idx_re,idx_im
-  type(map_type), intent(inout)  :: map
-  integer                        :: ii
-  complex(integral_kind)         :: tmp
-  PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
-  !DIR$ FORCEINLINE
-  logical, external              :: ao_two_e_integral_zero
-  if (ao_two_e_integral_zero(i,j,k,l)) then
-    tmp = (0.d0,0.d0)
-  else
-    ii = l-ao_integrals_cache_min
-    ii = ior(ii, k-ao_integrals_cache_min)
-    ii = ior(ii, j-ao_integrals_cache_min)
-    ii = ior(ii, i-ao_integrals_cache_min)
-    if (iand(ii, -64) /= 0) then
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index_2fold(i,j,k,l,idx1)
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index_2fold(k,l,i,j,idx2)
-         idx_re = min(idx1,idx2)
-         idx_im = max(idx1,idx2)
-         !DIR$ FORCEINLINE
-         call map_get(ao_integrals_map,idx_re,tmp_re)
-         if (idx_re /= idx_im) then
-           call map_get(ao_integrals_map,idx_im,tmp_im)
-           if (idx1 < idx2) then
-             tmp = dcmplx(tmp_re,tmp_im)
-           else
-             tmp = dcmplx(tmp_re,-tmp_im)
-           endif
-         else
-           tmp_im = 0.d0
-           tmp = dcmplx(tmp_re,tmp_im)
-         endif
-    else
-      ii = l-ao_integrals_cache_min
-      ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
-      ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
-      tmp = ao_integrals_cache_periodic(ii)
-    endif
-    result = tmp
-  endif
-end
+!complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
+!  use map_module
+!  implicit none
+!  BEGIN_DOC
+!  ! Gets one AO bi-electronic integral from the AO map
+!  END_DOC
+!  integer, intent(in)            :: i,j,k,l
+!  integer(key_kind)              :: idx1,idx2
+!  real(integral_kind)            :: tmp_re, tmp_im
+!  integer(key_kind)              :: idx_re,idx_im
+!  type(map_type), intent(inout)  :: map
+!  integer                        :: ii
+!  complex(integral_kind)         :: tmp
+!  PROVIDE ao_two_e_integrals_in_map ao_integrals_cache_periodic ao_integrals_cache_min
+!  !DIR$ FORCEINLINE
+!  logical, external              :: ao_two_e_integral_zero
+!  if (ao_two_e_integral_zero(i,j,k,l)) then
+!    tmp = (0.d0,0.d0)
+!  else
+!    ii = l-ao_integrals_cache_min
+!    ii = ior(ii, k-ao_integrals_cache_min)
+!    ii = ior(ii, j-ao_integrals_cache_min)
+!    ii = ior(ii, i-ao_integrals_cache_min)
+!    if (iand(ii, -64) /= 0) then
+!         !DIR$ FORCEINLINE
+!         call two_e_integrals_index_2fold(i,j,k,l,idx1)
+!         !DIR$ FORCEINLINE
+!         call two_e_integrals_index_2fold(k,l,i,j,idx2)
+!         idx_re = min(idx1,idx2)
+!         idx_im = max(idx1,idx2)
+!         !DIR$ FORCEINLINE
+!         call map_get(ao_integrals_map,idx_re,tmp_re)
+!         if (idx_re /= idx_im) then
+!           call map_get(ao_integrals_map,idx_im,tmp_im)
+!           if (idx1 < idx2) then
+!             tmp = dcmplx(tmp_re,tmp_im)
+!           else
+!             tmp = dcmplx(tmp_re,-tmp_im)
+!           endif
+!         else
+!           tmp_im = 0.d0
+!           tmp = dcmplx(tmp_re,tmp_im)
+!         endif
+!    else
+!      ii = l-ao_integrals_cache_min
+!      ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
+!      ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
+!      ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+!      tmp = ao_integrals_cache_periodic(ii)
+!    endif
+!    result = tmp
+!  endif
+!end
 
 
 subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
@@ -495,33 +353,33 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
 end
 
 
-subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
-  use map_module
-  BEGIN_DOC
-  ! Gets multiple AO bi-electronic integral from the AO map .
-  ! All i are retrieved for j,k,l fixed.
-  ! physicist convention : <ij|kl> 
-  END_DOC
-  implicit none
-  integer, intent(in)            :: j,k,l, sze
-  complex(integral_kind), intent(out) :: out_val(sze)
-
-  integer                        :: i
-  integer(key_kind)              :: hash
-  logical, external              :: ao_one_e_integral_zero
-  PROVIDE ao_two_e_integrals_in_map ao_integrals_map
-
-  if (ao_one_e_integral_zero(j,l)) then
-    out_val = 0.d0
-    return
-  endif
-
-  double precision :: get_ao_two_e_integral
-  do i=1,sze
-    out_val(i) = get_ao_two_e_integral(i,j,k,l,ao_integrals_map)
-  enddo
-
-end
+!subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
+!  use map_module
+!  BEGIN_DOC
+!  ! Gets multiple AO bi-electronic integral from the AO map .
+!  ! All i are retrieved for j,k,l fixed.
+!  ! physicist convention : <ij|kl> 
+!  END_DOC
+!  implicit none
+!  integer, intent(in)            :: j,k,l, sze
+!  complex(integral_kind), intent(out) :: out_val(sze)
+!
+!  integer                        :: i
+!  integer(key_kind)              :: hash
+!  logical, external              :: ao_one_e_integral_zero
+!  PROVIDE ao_two_e_integrals_in_map ao_integrals_map
+!
+!  if (ao_one_e_integral_zero(j,l)) then
+!    out_val = 0.d0
+!    return
+!  endif
+!
+!  double precision :: get_ao_two_e_integral
+!  do i=1,sze
+!    out_val(i) = get_ao_two_e_integral(i,j,k,l,ao_integrals_map)
+!  enddo
+!
+!end
 
 subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_zero_int)
   use map_module
@@ -539,6 +397,10 @@ subroutine get_ao_two_e_integrals_non_zero(j,k,l,sze,out_val,out_val_index,non_z
   double precision               :: tmp
   logical, external              :: ao_one_e_integral_zero
   logical, external              :: ao_two_e_integral_zero
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
 
   non_zero_int = 0
@@ -584,6 +446,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl(j,l,thresh,sze_max,sze,out_val,out
   logical, external              :: ao_one_e_integral_zero
   logical, external              :: ao_two_e_integral_zero
 
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
   if (ao_one_e_integral_zero(j,l)) then
@@ -632,6 +498,10 @@ subroutine get_ao_two_e_integrals_non_zero_jl_from_list(j,l,thresh,list,n_list,s
   logical, external              :: ao_one_e_integral_zero
   logical, external              :: ao_two_e_integral_zero
 
+  if(is_complex) then
+    print*,'not implemented for periodic:',irp_here
+    stop -1
+  endif
   PROVIDE ao_two_e_integrals_in_map
   non_zero_int = 0
   if (ao_one_e_integral_zero(j,l)) then
@@ -670,7 +540,7 @@ function get_ao_map_size()
   BEGIN_DOC
   ! Returns the number of elements in the AO map
   END_DOC
-  get_ao_map_size = ao_integrals_map % n_elements
+  get_ao_map_size = ao_integrals_map % n_elements + ao_integrals_map_2 % n_elements
 end
 
 subroutine clear_ao_map
@@ -680,6 +550,9 @@ subroutine clear_ao_map
   END_DOC
   call map_deinit(ao_integrals_map)
   FREE ao_integrals_map
+  call map_deinit(ao_integrals_map_2)
+  FREE ao_integrals_map_2
+  
 end
 
 
@@ -698,81 +571,3 @@ subroutine insert_into_ao_integrals_map(n_integrals,buffer_i, buffer_values)
 end
 
 
-!subroutine dump_ao_integrals(filename)
-!  use map_module
-!  implicit none
-!  BEGIN_DOC
-!  ! Save to disk the |AO| integrals
-!  END_DOC
-!  character*(*), intent(in)      :: filename
-!  integer(cache_key_kind), pointer :: key(:)
-!  real(integral_kind), pointer   :: val(:)
-!  integer*8                      :: i,j, n
-!  if (.not.mpi_master) then
-!    return
-!  endif
-!  call ezfio_set_work_empty(.False.)
-!  open(unit=66,file=filename,FORM='unformatted')
-!  write(66) integral_kind, key_kind
-!  write(66) ao_integrals_map%sorted, ao_integrals_map%map_size,    &
-!      ao_integrals_map%n_elements
-!  do i=0_8,ao_integrals_map%map_size
-!    write(66) ao_integrals_map%map(i)%sorted, ao_integrals_map%map(i)%map_size,&
-!        ao_integrals_map%map(i)%n_elements
-!  enddo
-!  do i=0_8,ao_integrals_map%map_size
-!    key => ao_integrals_map%map(i)%key
-!    val => ao_integrals_map%map(i)%value
-!    n = ao_integrals_map%map(i)%n_elements
-!    write(66) (key(j), j=1,n), (val(j), j=1,n)
-!  enddo
-!  close(66)
-!
-!end
-
-
-!integer function load_ao_integrals(filename)
-!  implicit none
-!  BEGIN_DOC
-!  ! Read from disk the |AO| integrals
-!  END_DOC
-!  character*(*), intent(in)      :: filename
-!  integer*8                      :: i
-!  integer(cache_key_kind), pointer :: key(:)
-!  real(integral_kind), pointer   :: val(:)
-!  integer                        :: iknd, kknd
-!  integer*8                      :: n, j
-!  load_ao_integrals = 1
-!  open(unit=66,file=filename,FORM='unformatted',STATUS='UNKNOWN')
-!  read(66,err=98,end=98) iknd, kknd
-!  if (iknd /= integral_kind) then
-!    print *,  'Wrong integrals kind in file :', iknd
-!    stop 1
-!  endif
-!  if (kknd /= key_kind) then
-!    print *,  'Wrong key kind in file :', kknd
-!    stop 1
-!  endif
-!  read(66,err=98,end=98) ao_integrals_map%sorted, ao_integrals_map%map_size,&
-!      ao_integrals_map%n_elements
-!  do i=0_8, ao_integrals_map%map_size
-!    read(66,err=99,end=99) ao_integrals_map%map(i)%sorted,          &
-!        ao_integrals_map%map(i)%map_size, ao_integrals_map%map(i)%n_elements
-!    call cache_map_reallocate(ao_integrals_map%map(i),ao_integrals_map%map(i)%map_size)
-!  enddo
-!  do i=0_8, ao_integrals_map%map_size
-!    key => ao_integrals_map%map(i)%key
-!    val => ao_integrals_map%map(i)%value
-!    n = ao_integrals_map%map(i)%n_elements
-!    read(66,err=99,end=99) (key(j), j=1,n), (val(j), j=1,n)
-!  enddo
-!  call map_sort(ao_integrals_map)
-!  load_ao_integrals = 0
-!  return
-!  99 continue
-!  call map_deinit(ao_integrals_map)
-!  98 continue
-!  stop 'Problem reading ao_integrals_map file in work/'
-!
-!end
-!

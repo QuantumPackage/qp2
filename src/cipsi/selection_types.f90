@@ -18,7 +18,12 @@ module selection_types
   integer function pt2_type_size(N)
     implicit none
     integer, intent(in) :: N
-    pt2_type_size = (3*n + n*n)
+    if (is_complex) then
+      pt2_type_size = (3*n + 2*n*n)
+    else
+      pt2_type_size = (3*n + n*n)
+    endif
+
   end function
 
 end module

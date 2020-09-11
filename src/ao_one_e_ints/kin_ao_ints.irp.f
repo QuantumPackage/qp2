@@ -149,7 +149,29 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals, (ao_num,ao_num)]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
+!BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
+!  implicit none
+!  BEGIN_DOC
+!  ! Kinetic energy integrals in the |AO| basis.
+!  !
+!  ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
+!  !
+!  END_DOC
+!  integer                        :: i,j,k,l
+!
+!  if (read_ao_integrals_kinetic) then
+!    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic_imag(ao_kinetic_integrals_imag)
+!    print *,  'AO kinetic integrals read from disk'
+!  else
+!    print *,  irp_here, ': Not yet implemented'
+!  endif
+!  if (write_ao_integrals_kinetic) then
+!    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_imag(ao_kinetic_integrals_imag)
+!    print *,  'AO kinetic integrals written to disk'
+!  endif
+!END_PROVIDER
+
+BEGIN_PROVIDER [complex*16, ao_kinetic_integrals_complex, (ao_num,ao_num)]
   implicit none
   BEGIN_DOC
   ! Kinetic energy integrals in the |AO| basis.
@@ -157,17 +179,36 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_imag, (ao_num,ao_num)]
   ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
   !
   END_DOC
-  integer                        :: i,j,k,l
-
   if (read_ao_integrals_kinetic) then
-    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals_imag)
+    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic_complex(ao_kinetic_integrals_complex)
     print *,  'AO kinetic integrals read from disk'
   else
     print *,  irp_here, ': Not yet implemented'
+    stop -1
   endif
   if (write_ao_integrals_kinetic) then
-    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic(ao_kinetic_integrals_imag)
+    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_complex(ao_kinetic_integrals_complex)
     print *,  'AO kinetic integrals written to disk'
   endif
 END_PROVIDER
 
+BEGIN_PROVIDER [complex*16, ao_kinetic_integrals_kpts, (ao_num_per_kpt,ao_num_per_kpt,kpt_num)]
+  implicit none
+  BEGIN_DOC
+  ! Kinetic energy integrals in the |AO| basis.
+  !
+  ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
+  !
+  END_DOC
+  if (read_ao_integrals_kinetic) then
+    call ezfio_get_ao_one_e_ints_ao_integrals_kinetic_kpts(ao_kinetic_integrals_kpts)
+    print *,  'AO kinetic integrals read from disk'
+  else
+    print *,  irp_here, ': Not yet implemented'
+    stop -1
+  endif
+  if (write_ao_integrals_kinetic) then
+    call ezfio_set_ao_one_e_ints_ao_integrals_kinetic_kpts(ao_kinetic_integrals_kpts)
+    print *,  'AO kinetic integrals written to disk'
+  endif
+END_PROVIDER

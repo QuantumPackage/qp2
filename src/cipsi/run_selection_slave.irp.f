@@ -20,11 +20,17 @@ subroutine run_selection_slave(thread,iproc,energy)
   logical :: done, buffer_ready
   type(pt2_type) :: pt2_data
 
+  
+  !todo: check for providers that are now unlinked for real/complex
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order N_int pt2_F pseudo_sym
-  PROVIDE psi_selectors_coef_transp psi_det_sorted weight_selection
+  if (is_complex) then
+    PROVIDE psi_selectors_coef_transp_complex psi_det_sorted weight_selection
+  else
+    PROVIDE psi_selectors_coef_transp psi_det_sorted weight_selection
+  endif
 
   call pt2_alloc(pt2_data,N_states)
 
