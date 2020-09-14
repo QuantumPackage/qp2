@@ -144,6 +144,18 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, selection_weight_mat, (N_states,N_states) ]
+  implicit none
+  BEGIN_DOC
+  ! Weights used in the selection criterion
+  END_DOC
+  integer :: istate,jstate
+  do jstate=1,N_states
+    do istate=1,N_states
+      selection_weight_mat(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
+    enddo
+  enddo
+END_PROVIDER
 
 subroutine get_mask_phase(det1, pm, Nint)
   use bitmasks
@@ -2111,12 +2123,12 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
 !  double precision, allocatable :: values(:)
 !  integer, allocatable          :: keys(:,:)
 !  integer                       :: nkeys
-  double precision :: s_weight(n_states,n_states)
-  do jstate=1,n_states
-    do istate=1,n_states
-      s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
-    enddo
-  enddo
+  !double precision :: s_weight(n_states,n_states)
+  !do jstate=1,n_states
+  !  do istate=1,n_states
+  !    s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
+  !  enddo
+  !enddo
 
   if(sp == 3) then
     s1 = 1
@@ -2254,26 +2266,26 @@ subroutine fill_buffer_double_complex(i_generator, sp, h1, h2, bannedOrb, banned
           !TODO: check off-diagonals
           case(5)
             ! Variance selection
-            w = w - cdabs(alpha_h_psi * alpha_h_psi) * s_weight(istate,istate)
+            w = w - cdabs(alpha_h_psi * alpha_h_psi) * selection_weight_mat(istate,istate)
             do jstate=1,n_states
               if (istate == jstate) cycle
-              w = w + cdabs(alpha_h_psi * mat(jstate,p1,p2)) * s_weight(istate,jstate)
+              w = w + cdabs(alpha_h_psi * mat(jstate,p1,p2)) * selection_weight_mat(istate,jstate)
             enddo
 
           case(6)
-            w = w - cdabs(coef(istate) * coef(istate)) * s_weight(istate,istate)
+            w = w - cdabs(coef(istate) * coef(istate)) * selection_weight_mat(istate,istate)
             do jstate=1,n_states
               if (istate == jstate) cycle
-              w = w + cdabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
+              w = w + cdabs(coef(istate)*coef(jstate)) * selection_weight_mat(istate,jstate)
             enddo
 
           case default
             ! Energy selection
-            w = w + e_pert(istate) * s_weight(istate,istate)
+            w = w + e_pert(istate) * selection_weight_mat(istate,istate)
             do jstate=1,n_states
               if (istate == jstate) cycle
               !TODO: why dabs?
-              w = w - dabs(x(istate))*x(jstate) * s_weight(istate,jstate)
+              w = w - dabs(x(istate))*x(jstate) * selection_weight_mat(istate,jstate)
             enddo
 
         end select
