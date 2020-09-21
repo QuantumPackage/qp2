@@ -28,6 +28,8 @@
     mu_of_r_prov(ipoint,istate) =  mu_of_r_hf(ipoint)
    else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated")then
     mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
+   else if(mu_of_r_potential.EQ."transcorr")then
+    mu_of_r_prov(ipoint,istate) = mu_of_r_transcorr(ipoint,istate)
    else 
     print*,'you requested the following mu_of_r_potential'
     print*,mu_of_r_potential
@@ -124,6 +126,47 @@
  print*,'Time to provide mu_of_r_psi_cas = ',wall1-wall0
  END_PROVIDER 
 
+ BEGIN_PROVIDER [double precision, mu_of_r_transcorr, (n_points_final_grid,N_states) ]
+ implicit none 
+ BEGIN_DOC
+ ! mu(r) computed with a wave function developped in an active space
+ !
+ ! corresponds to \sqrt(pi) * (W(0) + 1/4)/3
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals 
+ !
+ ! in the one- and two-body density matrix are excluded
+ !
+ ! 
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: wall0,wall1,f_psi,on_top,w_psi,sqpi
+ print*,'providing mu_of_r_transcorr ...'
+ call wall_time(wall0)
+ sqpi = dsqrt(dacos(-1.d0))
+
+ provide f_psi_cas_ab
+ !$OMP PARALLEL DO &
+ !$OMP DEFAULT (NONE)  &
+ !$OMP PRIVATE (ipoint,f_psi,on_top,w_psi,istate) & 
+ !$OMP SHARED (n_points_final_grid,mu_of_r_transcorr,f_psi_cas_ab,on_top_cas_mu_r,sqpi,N_states) 
+ do istate = 1, N_states
+  do ipoint = 1, n_points_final_grid
+   f_psi  = f_psi_cas_ab(ipoint,istate) 
+   on_top = on_top_cas_mu_r(ipoint,istate)
+   if(on_top.le.1.d-12.or.f_psi.le.0.d0.or.f_psi * on_top.lt.0.d0)then
+     w_psi   = 1.d+10
+   else 
+     w_psi  = f_psi /  on_top
+   endif
+   mu_of_r_transcorr(ipoint,istate) = (0.25d0 + w_psi) * sqpi / 3.d0
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+ call wall_time(wall1)
+ print*,'Time to provide mu_of_r_transcorr = ',wall1-wall0
+ END_PROVIDER 
+
 
  BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  implicit none
@@ -146,5 +189,29 @@
    mu_average_prov(istate) += mu_of_r_prov(ipoint,istate) * weight * density
   enddo
   mu_average_prov(istate) = mu_average_prov(istate) / elec_num_grid_becke(istate)
+ enddo
+ END_PROVIDER 
+
+ BEGIN_PROVIDER [double precision, mu_average_trans_corr, (N_states)]
+ implicit none
+ BEGIN_DOC
+ ! average value of mu(r) weighted with the total one-e density and divised by the number of electrons 
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals 
+ !
+ ! in the one- and two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint,istate
+ double precision :: weight,density
+ mu_average_trans_corr = 0.d0
+ do istate = 1, N_states
+  do ipoint = 1, n_points_final_grid
+   weight =final_weight_at_r_vector(ipoint)
+   density = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate) & 
+           + one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+   if(mu_of_r_transcorr(ipoint,istate).gt.1.d+09)cycle
+   mu_average_trans_corr(istate) += mu_of_r_transcorr(ipoint,istate) * weight * density
+  enddo
+  mu_average_trans_corr(istate) = mu_average_trans_corr(istate) / elec_num_grid_becke(istate)
  enddo
  END_PROVIDER 

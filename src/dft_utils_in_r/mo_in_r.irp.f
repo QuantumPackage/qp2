@@ -79,7 +79,7 @@
  END_DOC
  integer :: m
  integer  :: i,j
- mos_grad_in_r_array = 0.d0
+ mos_grad_in_r_array_tranp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
    do m = 1, 3
@@ -125,5 +125,4 @@
   call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_lapl_in_r_array(1,1,m),ao_num,0.d0,mos_lapl_in_r_array(1,1,m),mo_num)
  enddo
  END_PROVIDER
-
 
