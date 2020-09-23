@@ -810,7 +810,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
       enddo
 
-      do_diag = maxval(dabs(coef)) > 0.001d0
+      do_diag = sum(dabs(coef)) > 0.001d0
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
@@ -883,14 +883,16 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case(5)
             ! Variance selection
-            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
+!            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
+            w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
 !            do jstate=1,N_states
 !              if (istate == jstate) cycle
 !              w = w + dabs(alpha_h_psi*mat(jstate,p1,p2)) * s_weight(istate,jstate)
 !            enddo
 
           case(6)
-            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
+!            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
+            w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
 !            do jstate=1,N_states
 !              if (istate == jstate) cycle
 !              w = w + dabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
@@ -898,7 +900,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case default
             ! Energy selection
-            w = w + e_pert(istate) * s_weight(istate,istate)
+!            w = w + e_pert(istate) * s_weight(istate,istate)
+            w = min(w, e_pert(istate) * s_weight(istate,istate))
 !            do jstate=1,N_states
 !              if (istate == jstate) cycle
 !              w = w + dabs(X(istate)*X(jstate)) * s_weight(istate,jstate)
