@@ -1,4 +1,3 @@
-
 use bitmasks
 
 BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
@@ -142,6 +141,23 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
     end select
      print *, '# Total weight ', real(selection_weight(:),4)
 
+END_PROVIDER
+
+BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! If true, the excitation is banned in the selection. Useful with local MOs.
+ END_DOC
+ banned_excitation = .False.
+ integer :: i,j
+ double precision :: buffer(mo_num)
+ do j=1,mo_num
+   call get_mo_two_e_integrals_exch_ii(j,j,mo_num,buffer,mo_integrals_map)
+   buffer = dabs(buffer)
+   do i=1,mo_num
+    banned_excitation(i,j) = buffer(i) < 1.d-15
+  enddo
+ enddo
 END_PROVIDER
 
 
@@ -288,6 +304,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp
+  PROVIDE banned_excitation
 
   monoAdo = .true.
   monoBdo = .true.
@@ -607,7 +624,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
           h2 = hole_list(i2,s2)
           call apply_hole(pmask, s2,h2, mask, ok, N_int)
-          banned = .false.
+          banned(:,:,1) = banned_excitation(:,:)
+          banned(:,:,2) = banned_excitation(:,:)
           do j=1,mo_num
             bannedOrb(j, 1) = .true.
             bannedOrb(j, 2) = .true.
@@ -674,7 +692,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   logical :: ok
   integer :: s1, s2, p1, p2, ib, j, istate, jstate
   integer(bit_kind) :: mask(N_int, 2), det(N_int, 2)
-  double precision :: e_pert(N_states), coef(N_states), X(N_states)
+  double precision :: e_pert(N_states), coef(N_states)
   double precision :: delta_E, val, Hii, w, tmp, alpha_h_psi
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
@@ -769,10 +787,16 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 !      call occ_pattern_of_det(det,occ,N_int)
 !      call occ_pattern_to_dets_size(occ,n,elec_alpha_num,N_int)
 
+      e_pert = 0.d0
+      coef = 0.d0
+      logical :: do_diag
+      do_diag = .False.
 
       do istate=1,N_states
         delta_E = E0(istate) - Hii + E_shift
         alpha_h_psi = mat(istate, p1, p2)
+        if (alpha_h_psi == 0.d0) cycle
+
         val = alpha_h_psi + alpha_h_psi
         tmp = dsqrt(delta_E * delta_E + val * val)
         if (delta_E < 0.d0) then
@@ -784,12 +808,37 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         else
           coef(istate) = alpha_h_psi / delta_E
         endif
-        if (e_pert(istate) < 0.d0) then
-           X(istate) = -dsqrt(-e_pert(istate))
-        else
-           X(istate) = dsqrt(e_pert(istate))
-        endif
       enddo
+
+      do_diag = maxval(dabs(coef)) > 0.001d0
+
+      double precision :: eigvalues(N_states+1)
+      double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
+      integer :: iwork(3+5*(N_states+1)), info, k ,n
+
+      if (do_diag) then
+        double precision :: pt2_matrix(N_states+1,N_states+1)
+        pt2_matrix(N_states+1,N_states+1) = Hii+E_shift
+        do istate=1,N_states
+          pt2_matrix(:,istate) = 0.d0
+          pt2_matrix(istate,istate) = E0(istate)
+          pt2_matrix(istate,N_states+1) = mat(istate,p1,p2)
+          pt2_matrix(N_states+1,istate) = mat(istate,p1,p2)
+        enddo
+
+        call DSYEVD( 'V', 'U', N_states+1, pt2_matrix, N_states+1, eigvalues, &
+                     work, size(work), iwork, size(iwork), info )
+        if (info /= 0) then
+          print *, 'error in '//irp_here
+          stop -1
+        endif
+        pt2_matrix = dabs(pt2_matrix)
+        iwork = maxloc(pt2_matrix,1)
+        do k=1,N_states
+          e_pert(iwork(k)) = eigvalues(k) - E0(iwork(k))
+        enddo
+      endif
+
 
 !      ! Gram-Schmidt using input overlap matrix
 !      do istate=1,N_states
@@ -835,25 +884,25 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           case(5)
             ! Variance selection
             w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
-            do jstate=1,N_states
-              if (istate == jstate) cycle
-              w = w + alpha_h_psi*mat(jstate,p1,p2) * s_weight(istate,jstate)
-            enddo
+!            do jstate=1,N_states
+!              if (istate == jstate) cycle
+!              w = w + dabs(alpha_h_psi*mat(jstate,p1,p2)) * s_weight(istate,jstate)
+!            enddo
 
           case(6)
             w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
-            do jstate=1,N_states
-              if (istate == jstate) cycle
-              w = w + coef(istate)*coef(jstate) * s_weight(istate,jstate)
-            enddo
+!            do jstate=1,N_states
+!              if (istate == jstate) cycle
+!              w = w + dabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
+!            enddo
 
           case default
             ! Energy selection
             w = w + e_pert(istate) * s_weight(istate,istate)
-            do jstate=1,N_states
-              if (istate == jstate) cycle
-              w = w - dabs(X(istate))*X(jstate) * s_weight(istate,jstate)
-            enddo
+!            do jstate=1,N_states
+!              if (istate == jstate) cycle
+!              w = w + dabs(X(istate)*X(jstate)) * s_weight(istate,jstate)
+!            enddo
 
         end select
       end do
