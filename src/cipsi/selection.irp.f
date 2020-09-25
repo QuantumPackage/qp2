@@ -143,24 +143,6 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
- implicit none
- BEGIN_DOC
- ! If true, the excitation is banned in the selection. Useful with local MOs.
- END_DOC
- banned_excitation = .False.
- integer :: i,j
- double precision :: buffer(mo_num)
- do j=1,mo_num
-   call get_mo_two_e_integrals_exch_ii(j,j,mo_num,buffer,mo_integrals_map)
-   buffer = dabs(buffer)
-   do i=1,mo_num
-    banned_excitation(i,j) = buffer(i) < 1.d-15
-  enddo
- enddo
-END_PROVIDER
-
-
 subroutine get_mask_phase(det1, pm, Nint)
   use bitmasks
   implicit none
