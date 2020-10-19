@@ -287,9 +287,12 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     
                 ezfio.set_qmcpack_qmc_pbc(qph5['qmcpack'].attrs['PBC'])
                 ezfio.set_qmcpack_qmc_cart(qph5['qmcpack'].attrs['cart'])
+                ezfio.set_qmcpack_qmc_pseudo(qph5['qmcpack'].attrs['Pseudo'])
                 ezfio.set_qmcpack_supertwist(qph5['qmcpack/Super_Twist'][()].tolist())
                 ezfio.set_qmcpack_latticevectors(qph5['qmcpack/LatticeVectors'][()].tolist())
+                ezfio.set_qmcpack_qmc_phase(qph5['qmcpack/qmc_phase'][()].tolist())
                 ezfio.set_qmcpack_qmc_mo_energy(qph5['qmcpack/eigenval'][()].tolist())
+
         except AttributeError as err:
             print("################################################")
             print("# ERROR: problem copying QMCPACK data to ezfio #")
