@@ -124,8 +124,7 @@ def makesq2(vlist,n1,n2):
         out[i] = tmp2.copy()
     return out
 
-
-def get_phase(cell, kpts, kmesh=None):
+def get_supcellPhase(cell, kpts=[], kmesh=[]):
     '''
     The unitary transformation that transforms the supercell basis k-mesh
     adapted basis.
@@ -134,7 +133,7 @@ def get_phase(cell, kpts, kmesh=None):
     from pyscf import lib
 
     latt_vec = cell.lattice_vectors()
-    if kmesh is None:
+    if len(kmesh)== 0:
         # Guess kmesh
         scaled_k = cell.get_scaled_kpts(kpts).round(8)
         kmesh = (len(np.unique(scaled_k[:,0])),
@@ -153,58 +152,7 @@ def get_phase(cell, kpts, kmesh=None):
 
     # R_rel_mesh has to be construct exactly same to the Ts in super_cell function
     scell = tools.super_cell(cell, kmesh)
-    return scell, phase
-
-def mo_k2gamma(cell, mo_energy, mo_coeff, kpts, kmesh=None):
-    '''
-    Transform MOs in Kpoints to the equivalents supercell
-    '''
-    from pyscf import lib
-    import scipy.linalg as la
-    scell, phase = get_phase(cell, kpts, kmesh)
-
-    E_g = np.hstack(mo_energy)
-    C_k = np.asarray(mo_coeff)
-    Nk, Nao, Nmo = C_k.shape
-    NR = phase.shape[0]
-
-    # Transform AO indices
-    C_gamma = np.einsum('Rk, kum -> Rukm', phase, C_k)
-    C_gamma = C_gamma.reshape(Nao*NR, Nk*Nmo)
-
-    E_sort_idx = np.argsort(E_g)
-    E_g = E_g[E_sort_idx]
-    C_gamma = C_gamma[:,E_sort_idx]
-    s = scell.pbc_intor('int1e_ovlp')
-    assert(abs(reduce(np.dot, (C_gamma.conj().T, s, C_gamma))
-               - np.eye(Nmo*Nk)).max() < 1e-7)
-
-    # Transform MO indices
-    E_k_degen = abs(E_g[1:] - E_g[:-1]).max() < 1e-5
-    if np.any(E_k_degen):
-        degen_mask = np.append(False, E_k_degen) | np.append(E_k_degen, False)
-        shift = min(E_g[degen_mask]) - .1
-        f = np.dot(C_gamma[:,degen_mask] * (E_g[degen_mask] - shift),
-                   C_gamma[:,degen_mask].conj().T)
-        assert(abs(f.imag).max() < 1e-5)
-
-        e, na_orb = la.eigh(f.real, s, type=2)
-        C_gamma[:,degen_mask] = na_orb[:, e>0]
-
-    if abs(C_gamma.imag).max() < 1e-7:
-        print('!Warning  Some complexe pollutions in MOs are present')
-
-    C_gamma = C_gamma.real
-    if  abs(reduce(np.dot, (C_gamma.conj().T, s, C_gamma)) - np.eye(Nmo*Nk)).max() < 1e-7:
-        print('!Warning  Some complexe pollutions in MOs are present')
-
-    s_k = cell.pbc_intor('int1e_ovlp', kpts=kpts)
-    # overlap between k-point unitcell and gamma-point supercell
-    s_k_g = np.einsum('kuv,Rk->kuRv', s_k, phase.conj()).reshape(Nk,Nao,NR*Nao)
-    # The unitary transformation from k-adapted orbitals to gamma-point orbitals
-    mo_phase = lib.einsum('kum,kuv,vi->kmi', C_k.conj(), s_k_g, C_gamma)
-
-    return mo_phase
+    return scell,phase
 
 def qp2rename():
     import shutil
@@ -594,7 +542,8 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     ne_threshold = int_threshold
     bielec_int_threshold = int_threshold
     thresh_mono = int_threshold
-    
+    loc_cell,phase=get_supcellPhase(cell=cell,kmesh=kmesh,kpts=kpts)
+
     
 #    qph5path = 'qpdat.h5'
     # create hdf5 file, delete old data if exists
@@ -632,23 +581,39 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     ##########################################
 
     natom = cell.natm
-    print('n_atom per kpt',   natom)
 
+    print('n_atom per kpt',   natom)
+    
     atom_xyz = mf.cell.atom_coords()
+
+    unit_bohr=1.0
     if not(mf.cell.unit.startswith(('B','b','au','AU'))):
         from pyscf.data.nist import BOHR
         atom_xyz /= BOHR # always convert to au
+        unit_bohr=BOHR
 
     with h5py.File(qph5path,'a') as qph5:
         qph5['nuclei'].attrs['kpt_num']=Nk
-        qph5['nuclei'].attrs['nucl_num']=natom
-        qph5.create_dataset('nuclei/nucl_coord',data=atom_xyz)
-        qph5.create_dataset('nuclei/nucl_charge',data=mf.cell.atom_charges())
-
-        strtype=h5py.special_dtype(vlen=str)
-        atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
-        for i in range(natom):
-            atom_dset[i] = mf.cell.atom_pure_symbol(i)
+        
+        if len(kpts)!=0:
+           nbatom=loc_cell.natm
+           qph5['nuclei'].attrs['nucl_num']=nbatom
+           MyPos=qph5.create_dataset('nuclei/nucl_coord',(nbatom,3),dtype="f8")
+           for x in range(nbatom): 
+              MyPos[x:]=loc_cell.atom_coord(x)/unit_bohr
+           qph5.create_dataset('nuclei/nucl_charge',data=loc_cell.atom_charges())
+           strtype=h5py.special_dtype(vlen=str)
+           atom_dset=qph5.create_dataset('nuclei/nucl_label',(nbatom,),dtype=strtype)
+           for i in range(nbatom):
+               atom_dset[i] = loc_cell.atom_pure_symbol(i)
+        else:
+           qph5['nuclei'].attrs['nucl_num']=natom
+           qph5.create_dataset('nuclei/nucl_coord',data=atom_xyz)
+           qph5.create_dataset('nuclei/nucl_charge',data=mf.cell.atom_charges())
+           strtype=h5py.special_dtype(vlen=str)
+           atom_dset=qph5.create_dataset('nuclei/nucl_label',(natom,),dtype=strtype)
+           for i in range(natom):
+               atom_dset[i] = mf.cell.atom_pure_symbol(i)
 
     ##########################################
     #                                        #
@@ -723,6 +688,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
         qph5.create_dataset('qmcpack/qmc_expo',data=qp_expo.T)
         qph5.create_dataset('qmcpack/qmc_coef',data=qp_coef.T)
         qph5.create_dataset('qmcpack/qmc_lbas',data=qp_lbas)
+
 
 
 #    with h5py.File(qph5path,'a') as qph5:
@@ -890,91 +856,18 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     if len(kpts)== 0:
         sp_twist=[0.0,0.0,0.0]
 
-
     with h5py.File(qph5path,'a') as qph5:
         qph5['qmcpack'].attrs['PBC']=True 
         qph5['qmcpack'].attrs['cart']=cell.cart 
+        qph5['qmcpack'].attrs['Pseudo']=cell.has_ecp() 
         qph5.create_dataset('qmcpack/Super_Twist',(1,3),dtype="f8",data=sp_twist)
-        qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors().T)
+        if len(kpts)!= 0:
+           qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=loc_cell.lattice_vectors())
+        else:
+           qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
         qph5.create_dataset('qmcpack/eigenval',(1,Nk*nmo),dtype="f8",data=mf.mo_energy)
+        qph5.create_dataset('qmcpack/qmc_phase',data=phase.view(dtype=float))
                                                                                                                       
-
-#    ##########################################
-#    #                                        #
-#    #                 ECP                    #
-#    #                                        #
-#    ##########################################
-#
-#    if (cell.has_ecp()):
-#        #atsymb = [mol.atom_pure_symbol(i) for i in range(natom)]
-#        #pyecp = mol._ecp
-#        ## nelec to remove for each atom
-#        #nuc_z_remov = [pyecp[i][0] for i in atsymb]
-#        #nl_per_atom = [len(pyecp[i][1]) for i in atsymb]
-#        ## list of l-values for channels of each atom
-#        #ecp_l = [[pyecp[i][1][j][0] for j in range(len(pyecp[i][1]))] for i in atsymb]
-#        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
-#        #ecp_ac = [[pyecp[i][1][j][1] for j in range(len(pyecp[i][1]))] for i in atsymb]
-#        pyecp = [cell._ecp[cell.atom_pure_symbol(i)] for i in range(natom)]
-#        nzrmv=[0]*natom
-#        lmax=0
-#        klocmax=0
-#        knlmax=0
-#        for i,(nz,dat) in enumerate(pyecp):
-#            nzrmv[i]=nz
-#            for lval,ac in dat:
-#                if (lval==-1):
-#                    klocmax=max(sum(len(j) for j in ac),klocmax)
-#                else:
-#                    lmax=max(lval,lmax)
-#                    knlmax=max(sum(len(j) for j in ac),knlmax)
-#        #psd_nk = np.zeros((natom,klocmax),dtype=int)
-#        #psd_vk = np.zeros((natom,klocmax),dtype=float)
-#        #psd_dzk = np.zeros((natom,klocmax),dtype=float)
-#        #psd_nkl = np.zeros((natom,knlmax,lmax+1),dtype=int)
-#        #psd_vkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
-#        #psd_dzkl = np.zeros((natom,knlmax,lmax+1),dtype=float)
-#        klnlmax=max(klocmax,knlmax)
-#        psd_n = np.zeros((lmax+2,klnlmax,natom),dtype=int)
-#        psd_v = np.zeros((lmax+2,klnlmax,natom),dtype=float)
-#        psd_dz = np.zeros((lmax+2,klnlmax,natom),dtype=float)
-#        for i,(_,dat) in enumerate(pyecp):
-#            for lval,ac in dat:
-#                count=0
-#                for ri,aici in enumerate(ac):
-#                    for ai,ci in aici:
-#                        psd_n[lval+1,count,i] = ri-2
-#                        psd_v[lval+1,count,i] = ci
-#                        psd_dz[lval+1,count,i] = ai
-#                        count += 1
-#        psd_nk = psd_n[0,:klocmax]
-#        psd_vk = psd_v[0,:klocmax]
-#        psd_dzk = psd_dz[0,:klocmax]
-#        psd_nkl = psd_n[1:,:knlmax]
-#        psd_vkl = psd_v[1:,:knlmax]
-#        psd_dzkl = psd_dz[1:,:knlmax]
-#        with h5py.File(qph5path,'a') as qph5:
-#            qph5['pseudo'].attrs['do_pseudo']=True
-#            qph5['pseudo'].attrs['pseudo_lmax']=lmax
-#            qph5['pseudo'].attrs['pseudo_klocmax']=klocmax
-#            qph5['pseudo'].attrs['pseudo_kmax']=knlmax
-#            qph5.create_dataset('pseudo/nucl_charge_remove',data=nzrmv)
-#            qph5.create_dataset('pseudo/pseudo_n_k',data=psd_nk)
-#            qph5.create_dataset('pseudo/pseudo_n_kl',data=psd_nkl)
-#            qph5.create_dataset('pseudo/pseudo_v_k',data=psd_vk)
-#            qph5.create_dataset('pseudo/pseudo_v_kl',data=psd_vkl)
-#            qph5.create_dataset('pseudo/pseudo_dz_k',data=psd_dzk)
-#            qph5.create_dataset('pseudo/pseudo_dz_kl',data=psd_dzkl)
-#
-#        ## nelec to remove for each atom
-#        #nuc_z_remov = [i[0] for i in pyecp]
-#        #nl_per_atom = [len(i[1]) for i in pyecp]
-#        ## list of l-values for channels of each atom
-#        #ecp_l = [[ j[0] for j in i[1] ] for i in pyecp]
-#        #lmax = max(map(max,ecp_l))
-#        ## list of [exp,coef] for each channel (r**0,1,2,3,4,5,)
-#        #ecp_ac = [[ j[1] for j in i[1] ] for i in pyecp]
-
     return
 
 def pyscf2QP2_mol(mf, cas_idx=None, int_threshold = 1E-8, 
