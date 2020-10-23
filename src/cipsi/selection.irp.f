@@ -815,7 +815,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           stop -1
         endif
         pt2_matrix = dabs(pt2_matrix)
-        iwork = maxloc(pt2_matrix,1)
+        iwork(1:N_states) = maxloc(pt2_matrix,1)
         do k=1,N_states
           e_pert(iwork(k)) = eigvalues(k) - E0(iwork(k))
         enddo
