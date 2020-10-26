@@ -59,7 +59,7 @@ function run_stoch() {
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.390292448857 3.e-4  100000
+  run -113.389297812482 6.e-4  100000
 }
 
 @test "H2O2" { # 12.9214s
