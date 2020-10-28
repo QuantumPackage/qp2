@@ -120,4 +120,18 @@
  !$OMP END PARALLEL DO
  END_PROVIDER
 
+ BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp_bis, (n_points_final_grid,ao_num,3)]
+ implicit none
+ integer :: i,j,m
+ double precision :: aos_array(ao_num), r(3)
+ double precision :: aos_grad_array(3,ao_num)
+ do m = 1, 3
+  do j = 1, ao_num
+   do i = 1, n_points_final_grid
+    aos_grad_in_r_array_transp_bis(i,j,m) = aos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
 
