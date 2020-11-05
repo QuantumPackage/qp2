@@ -440,10 +440,10 @@ def get_j3ao_new(fname,nao,Nk):
         # in new(?) version of PySCF, there is an extra layer of groups before the datasets
         # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
         # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
-        #keysub = '/0' if bool(j3c.get('0/0',getclass=True)) else ''
+        keysub = '/0' if bool(j3c.get('0/0',getclass=True)) else ''
 
-        #naux = max(map(lambda k: j3c[k+keysub].shape[0],j3c.keys()))
-        naux = max(map(lambda k: j3c[k]['0'].shape[0],j3c.keys()))
+        naux = max(map(lambda k: j3c[k+keysub].shape[0],j3c.keys()))
+        #naux = max(map(lambda k: j3c[k]['0'].shape[0],j3c.keys()))
 
         naosq = nao*nao
         naotri = (nao*(nao+1))//2
@@ -452,12 +452,15 @@ def get_j3ao_new(fname,nao,Nk):
         j3arr = np.zeros((nkpairs,naux,nao,nao),dtype=np.complex128)
 
         for i,kpair in enumerate(j3ckeys):
-            tmpdat = np.concatenate([j3c[kpair][ii][()] for ii in j3c[kpair]],axis=1)
-            iaux,dim2 = tmpdat.shape
+            iaux,dim2 = j3c[kpair+keysub].shape
+            #tmpdat = np.concatenate([j3c[kpair][ii][()] for ii in j3c[kpair]],axis=1)
+            #iaux,dim2 = tmpdat.shape
             if (dim2==naosq):
-                j3arr[i,:iaux,:,:] = tmpdat.reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
+                j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
+                #j3arr[i,:iaux,:,:] = tmpdat.reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
             else:
-                j3arr[i,:iaux,:,:] = makesq3(tmpdat.conj(),nao) * nkinvsq
+                j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()].conj(),nao) * nkinvsq
+                #j3arr[i,:iaux,:,:] = makesq3(tmpdat.conj(),nao) * nkinvsq
 
         return j3arr
 
@@ -586,12 +589,14 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     print('n_atom per kpt',   natom)
     
+    #BY DEFAULT SEEMS TO BE IN BOHR
     atom_xyz = mf.cell.atom_coords()
 
     unit_bohr=1.0
     if not(mf.cell.unit.startswith(('B','b','au','AU'))):
         from pyscf.data.nist import BOHR
-        atom_xyz /= BOHR # always convert to au
+#        atom_xyz *= BOHR # always convert to au
+#        atom_xyz /= BOHR # always convert to au
         unit_bohr=BOHR
 
     with h5py.File(qph5path,'a') as qph5:
