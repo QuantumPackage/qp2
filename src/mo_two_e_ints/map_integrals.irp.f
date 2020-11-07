@@ -99,6 +99,10 @@ double precision function get_two_e_integral(i,j,k,l,map)
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  if (banned_excitation(i,k) .or. banned_excitation(j,l)) then
+    get_two_e_integral = 0.d0
+    return
+  endif
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
@@ -159,6 +163,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 !  return
 !DEBUG
 
+  out_val(1:sze) = 0.d0
+  if (banned_excitation(j,l)) then
+    return
+  endif
+
   ii0 = l-mo_integrals_cache_min
   ii0 = ior(ii0, k-mo_integrals_cache_min)
   ii0 = ior(ii0, j-mo_integrals_cache_min)
@@ -172,6 +181,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   q = q+shiftr(s*s-s,1)
 
   do i=1,sze
+    if (banned_excitation(i,k)) cycle
     ii = ior(ii0, i-mo_integrals_cache_min)
     if (iand(ii, -128) == 0) then
       ii_8 = ior( shiftl(ii0_8,7), int(i,8)-mo_integrals_cache_min_8)
@@ -271,6 +281,29 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   enddo
 
 end
+
+BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+ implicit none
+ use map_module
+ BEGIN_DOC
+ ! If true, the excitation is banned in the selection. Useful with local MOs.
+ END_DOC
+ banned_excitation = .False.
+ integer :: i,j
+ integer(key_kind)              :: idx
+ double precision :: tmp
+! double precision :: buffer(mo_num)
+ do j=1,mo_num
+   do i=1,j-1
+    call two_e_integrals_index(i,j,j,i,idx)
+    !DIR$ FORCEINLINE
+    call map_get(mo_integrals_map,idx,tmp)
+    banned_excitation(i,j) = dabs(tmp) < 1.d-15
+    banned_excitation(j,i) = banned_excitation(i,j)
+  enddo
+ enddo
+END_PROVIDER
+
 
 
 integer*8 function get_mo_map_size()
