@@ -59,7 +59,7 @@ function run_stoch() {
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.389298880564 3.e-4  100000
+  run -113.389297812482 6.e-4  100000
 }
 
 @test "H2O2" { # 12.9214s
@@ -175,7 +175,7 @@ function run_stoch() {
   [[ -n $TRAVIS ]] && skip
   qp set_file cu_nh3_4_2plus.ezfio
   qp set_mo_class --core="[1-24]" --act="[25-45]" --del="[46-87]"
-  run -1862.98614665139  3.e-04  100000
+  run -1862.97568806589  3.e-04  100000
 }
 
 @test "HCN" { # 20.3273s
