@@ -17,9 +17,12 @@ END_PROVIDER
 
   pt2_F(:) = int(sqrt(float(pt2_n_tasks_max)))
   do i=1,pt2_n_0(1+pt2_N_teeth/4)
-    pt2_F(i) = pt2_n_tasks_max
+    pt2_F(i) = pt2_n_tasks_max*pt2_min_parallel_tasks
   enddo
-  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), N_det_generators
+  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), pt2_n_0(pt2_N_teeth-pt2_N_teeth/10)
+    pt2_F(i) = pt2_min_parallel_tasks
+  enddo
+  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/10), N_det_generators
     pt2_F(i) = 1
   enddo
 
