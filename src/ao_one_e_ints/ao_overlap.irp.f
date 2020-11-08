@@ -54,6 +54,13 @@
         call overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,overlap_y,overlap_z,overlap,dim1)
         c = ao_coef_normalized_ordered_transp(n,j) * ao_coef_normalized_ordered_transp(l,i)
         ao_overlap(i,j) += c * overlap
+        if(isnan(ao_overlap(i,j)))then
+         print*,'i,j',i,j
+         print*,'l,n',l,n
+         print*,'c,overlap',c,overlap
+         print*,overlap_x,overlap_y,overlap_z
+         stop
+        endif
         ao_overlap_x(i,j) += c * overlap_x
         ao_overlap_y(i,j) += c * overlap_y
         ao_overlap_z(i,j) += c * overlap_z

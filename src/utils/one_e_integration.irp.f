@@ -15,10 +15,10 @@ double precision function overlap_gaussian_x(A_center,B_center,alpha,beta,power_
   call give_explicit_poly_and_gaussian_x(P_new,P_center,p,fact_p,iorder_p,alpha,&
       beta,power_A,power_B,A_center,B_center,dim)
 
-! if(fact_p.lt.0.000001d0)then
-!   overlap_gaussian_x = 0.d0
-!   return
-! endif
+  if(fact_p.lt.1.d-20)then
+    overlap_gaussian_x = 0.d0
+    return
+  endif
 
   overlap_gaussian_x = 0.d0
   integer                        :: i
