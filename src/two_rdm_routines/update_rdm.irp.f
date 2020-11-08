@@ -356,12 +356,20 @@
       h2 = list_orb_reverse(h2)
       nkeys += 1
       do istate = 1, N_st
-       values(istate,nkeys) = c_1(istate) * phase
+       values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
       enddo
       keys(1,nkeys) = h1
       keys(2,nkeys) = h2
       keys(3,nkeys) = p1
       keys(4,nkeys) = h2
+      nkeys += 1
+      do istate = 1, N_st
+       values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+      enddo
+      keys(1,nkeys) = h2
+      keys(2,nkeys) = h1
+      keys(3,nkeys) = h2
+      keys(4,nkeys) = p1
      enddo 
    else 
     ! Mono beta
@@ -377,12 +385,20 @@
       h2 = list_orb_reverse(h2)
       nkeys += 1
       do istate = 1, N_st
-       values(istate,nkeys) = c_1(istate) * phase
+       values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
       enddo
       keys(1,nkeys) = h1
       keys(2,nkeys) = h2
       keys(3,nkeys) = p1
       keys(4,nkeys) = h2
+      nkeys += 1
+      do istate = 1, N_st
+       values(istate,nkeys) = 0.5d0 * c_1(istate) * phase
+      enddo
+      keys(1,nkeys) = h2
+      keys(2,nkeys) = h1
+      keys(3,nkeys) = h2
+      keys(4,nkeys) = p1
      enddo 
    endif
   else if(spin_trace)then
