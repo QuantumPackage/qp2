@@ -75,7 +75,6 @@ subroutine print_basis_correction
   print*,'**************'
   do istate = 1, N_states
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  Average mu(r)      , state ',istate,' = ',mu_average_prov(istate)
-    write(*, '(A29,X,I3,X,A3,X,F16.10)') 'mu_average_trans_corr, state ',istate,' = ',mu_average_trans_corr(istate)
   enddo
 
 end
