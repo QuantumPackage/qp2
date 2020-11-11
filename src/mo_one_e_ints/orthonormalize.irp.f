@@ -8,7 +8,7 @@ subroutine orthonormalize_mos
     call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
   enddo
   if (restore_symm) then
-     call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-12)
+     call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
   endif
   SOFT_TOUCH mo_coef
 end
