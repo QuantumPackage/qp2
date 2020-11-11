@@ -298,7 +298,7 @@ BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
     call two_e_integrals_index(i,j,j,i,idx)
     !DIR$ FORCEINLINE
     call map_get(mo_integrals_map,idx,tmp)
-    banned_excitation(i,j) = dabs(tmp) < 1.d-15
+    banned_excitation(i,j) = dabs(tmp) < 1.d-14
     banned_excitation(j,i) = banned_excitation(i,j)
   enddo
  enddo
