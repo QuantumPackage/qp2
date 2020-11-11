@@ -320,11 +320,16 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   do k=N_st+1,N_st_diag
     u_in(k,k) = 10.d0
     do i=1,sze
-      call random_number(r1)
-      call random_number(r2)
-      r1 = dsqrt(-2.d0*dlog(r1))
-      r2 = dtwo_pi*r2
-      u_in(i,k) = r1*dcos(r2)
+      ! This Preserves symmetry when zero coefs are in the guess
+      if (dabs(u_in(i,k-N_st)) < 1.d-5) then
+        u_in(i,k) =0.d0
+      else
+        call random_number(r1)
+        call random_number(r2)
+        r1 = dsqrt(-2.d0*dlog(r1))
+        r2 = dtwo_pi*r2
+        u_in(i,k) = r1*dcos(r2)
+      endif
     enddo
   enddo
   do k=1,N_st_diag
@@ -655,11 +660,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+
     do k=1,N_st_diag
       do i=1,sze
         U(i,k) = u_in(i,k)
       enddo
     enddo
+
     if (disk_based) then
       call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
       call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
@@ -667,11 +674,15 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       call ortho_qr(U,size(U,1),sze,N_st_diag)
       call ortho_qr(U,size(U,1),sze,N_st_diag)
     endif
+
+    ! Adjust the phase
     do j=1,N_st_diag
+      ! Find first non-zero
       k=1
       do while ((k<sze).and.(U(k,j) == 0.d0))
         k = k+1
       enddo
+      ! Check sign
       if (U(k,j) * u_in(k,j) < 0.d0) then
         do i=1,sze
           W(i,j) = -W(i,j)
@@ -679,12 +690,21 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         enddo
       endif
     enddo
+
     do j=1,N_st_diag
       do i=1,sze
         S_d(i,j) = dble(S(i,j))
       enddo
     enddo
 
+  enddo
+
+
+  call nullify_small_elements(sze,N_st_diag,U,size(U,1),threshold_davidson_pt2)
+  do k=1,N_st_diag
+    do i=1,sze
+      u_in(i,k) = U(i,k)
+    enddo
   enddo
 
   do k=1,N_st_diag
