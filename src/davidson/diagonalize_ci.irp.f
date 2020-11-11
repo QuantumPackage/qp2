@@ -110,6 +110,7 @@ END_PROVIDER
          H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
        enddo
        call lapack_diag(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
+       call nullify_small_elements(N_det,N_det,eigenvectors,size(eigenvectors,1),1.d-12)
        CI_electronic_energy(:) = 0.d0
        i_state = 0
        allocate (s2_eigvalues(N_det))
