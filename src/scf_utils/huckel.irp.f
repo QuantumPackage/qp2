@@ -26,6 +26,7 @@ subroutine huckel_guess
   TOUCH Fock_matrix_ao_alpha Fock_matrix_ao_beta
   mo_coef = eigenvectors_fock_matrix_mo
   call nullify_small_elements(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-12 )
+  call orthonormalize_mos
   SOFT_TOUCH mo_coef
   call save_mos
   deallocate(A)
