@@ -280,6 +280,8 @@ subroutine save_natural_mos
    ! the |MO| basis
    END_DOC
    call set_natural_mos
+   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+   call orthonormalize_mos
    call save_mos
 end
 

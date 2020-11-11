@@ -165,6 +165,8 @@ END_DOC
 
   if(.not.frozen_orb_scf)then
    call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1),size(Fock_matrix_mo,2),mo_label,1,.true.)
+   call nullify_small_elements(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
+   call orthonormalize_mos
    call save_mos
   endif
 
@@ -303,7 +305,7 @@ END_DOC
       Fock_matrix_AO_(i,j) = 0.d0
     enddo
     do k=1,dim_DIIS
-      if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
+      if (dabs(X_vector_DIIS(k)) < 1.d-12) cycle
       do i=1,ao_num
         Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
             X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)

@@ -1367,3 +1367,92 @@ subroutine lapack_diag(eigvalues,eigvectors,H,nmax,n)
   deallocate(A,eigenvalues)
 end
 
+subroutine nullify_small_elements(m,n,A,LDA,thresh)
+  implicit none
+  integer, intent(in) :: m,n,LDA
+  double precision, intent(inout) :: A(LDA,n)
+  double precision, intent(in) :: thresh
+  integer :: i,j
+  double precision :: amax
+
+  ! Find max value
+  amax = 0.d0
+  do j=1,n
+    do i=1,m
+      amax = max(dabs(A(i,j)), amax)
+    enddo
+  enddo
+  amax = 1.d0/amax
+
+  ! Remove tiny elements
+  do j=1,n
+    do i=1,m
+      if ( dabs(A(i,j) * amax) < thresh ) then
+         A(i,j) = 0.d0
+      endif
+    enddo
+  enddo
+
+end
+
+subroutine restore_symmetry(m,n,A,LDA,thresh)
+  implicit none
+  integer, intent(in) :: m,n,LDA
+  double precision, intent(inout) :: A(LDA,n)
+  double precision, intent(in) :: thresh
+  integer :: i,j,k,l
+  logical, allocatable :: done(:,:)
+  double precision :: f, g, count, thresh2
+  thresh2 = dsqrt(thresh)
+  call nullify_small_elements(m,n,A,LDA,thresh)
+
+  allocate(done(m,n))
+
+  do j=1,n
+    do i=1,m
+      done(i,j) = A(i,j) == 0.d0
+    enddo
+  enddo
+
+  do j=1,n
+    do i=1,m
+      if ( done(i,j) ) cycle
+      done(i,j) = .True.
+      count = 1.d0
+      f = 1.d0/A(i,j)
+      do l=1,n
+        do k=1,m
+          if ( done(k,l) ) cycle
+          g = f * A(k,l)
+          if ( dabs(dabs(g) - 1.d0) < thresh2 ) then
+            count = count + 1.d0
+            if (g>0.d0) then
+              A(i,j) = A(i,j) + A(k,l)
+            else
+              A(i,j) = A(i,j) - A(k,l)
+            end if
+          endif
+        enddo
+      enddo
+      if (count > 1.d0) then
+        A(i,j) = A(i,j) / count
+        do l=1,n
+          do k=1,m
+            if ( done(k,l) ) cycle
+            g = f * A(k,l)
+            if ( dabs(dabs(g) - 1.d0) < thresh2 ) then
+              done(k,l) = .True.
+              if (g>0.d0) then
+                A(k,l) = A(i,j)
+              else
+                A(k,l) = -A(i,j)
+              end if
+            endif
+          enddo
+        enddo
+      endif
+
+    enddo
+  enddo
+
+end

@@ -1,34 +1,34 @@
 program scf
   BEGIN_DOC
-! 
+!
 ! The :ref:`scf` program performs *Restricted* Hartree-Fock
 ! calculations (the spatial part of the |MOs| is common for alpha and beta
 ! spinorbitals).
-! 
+!
 ! It performs the following actions:
-! 
+!
 ! #. Compute/Read all the one- and two-electron integrals, and store them
 !    in memory
 ! #. Check in the |EZFIO| database if there is a set of |MOs|.
 !    If there is, it will read them as initial guess. Otherwise, it will
 !    create a guess.
 ! #. Perform the |SCF| iterations
-! 
+!
 ! For the keywords related to the |SCF| procedure, see the ``scf_utils``
 ! directory where you will find all options.
-! 
+!
 ! At each iteration, the |MOs| are saved in the |EZFIO| database. Hence,
 ! if the calculation crashes for any unexpected reason, the calculation
 ! can be restarted by running again the |SCF| with the same |EZFIO|
 ! database.
-! 
+!
 ! To start again a fresh |SCF| calculation, the |MOs| can be reset by
 ! running the :ref:`qp_reset` command.
-! 
-! The `DIIS`_ algorithm is implemented, as well as the `level-shifting`_ 
+!
+! The `DIIS`_ algorithm is implemented, as well as the `level-shifting`_
 ! method. If the |SCF| does not converge, try again with a higher value of
 ! :option:`level_shift`.
-! 
+!
 ! .. _DIIS: https://en.wikipedia.org/w/index.php?title=DIIS
 ! .. _level-shifting: https://doi.org/10.1002/qua.560070407
 !
@@ -55,6 +55,7 @@ subroutine create_guess
           size(mo_one_e_integrals,1),                            &
           size(mo_one_e_integrals,2),                            &
           mo_label,1,.false.)
+      call nullify_small_elements(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
       SOFT_TOUCH mo_coef mo_label
     else if (mo_guess_type == "Huckel") then
       call huckel_guess
