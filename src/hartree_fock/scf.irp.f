@@ -79,7 +79,7 @@ subroutine run
 
   integer                        :: i_it, i, j, k
 
-  mo_label = 'Near-Canonical'
+  mo_label = 'Orthonormalized'
 
   call Roothaan_Hall_SCF
   call ezfio_set_hartree_fock_energy(SCF_energy)
