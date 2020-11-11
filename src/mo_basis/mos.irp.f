@@ -277,6 +277,7 @@ subroutine ao_to_mo(A_ao,LDA_ao,A_mo,LDA_mo)
       T, ao_num,                                                     &
       0.d0, A_mo, size(A_mo,1))
 
+  call restore_symmetry(mo_num,mo_num,A_mo,size(A_mo,1),1.d-12)
   deallocate(T)
 end
 

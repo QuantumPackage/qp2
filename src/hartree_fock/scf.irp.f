@@ -50,12 +50,13 @@ subroutine create_guess
     mo_label = 'Guess'
     if (mo_guess_type == "HCore") then
       mo_coef = ao_ortho_lowdin_coef
+      call restore_symmetry(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
       TOUCH mo_coef
       call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
           size(mo_one_e_integrals,1),                            &
           size(mo_one_e_integrals,2),                            &
           mo_label,1,.false.)
-      call nullify_small_elements(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
+      call restore_symmetry(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
       SOFT_TOUCH mo_coef
     else if (mo_guess_type == "Huckel") then
       call huckel_guess
