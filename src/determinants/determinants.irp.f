@@ -459,10 +459,12 @@ subroutine save_wavefunction_truncated(thr)
   !  Save the wave function into the |EZFIO| file
   END_DOC
   integer :: N_det_save,i
+  call nullify_small_elements(N_det,N_states,psi_coef,size(psi_coef,1),thr)
+  TOUCH psi_coef
   N_det_save = N_det
   do i=1,N_det
     if (psi_average_norm_contrib_sorted(i) < thr) then
-      N_det_save = i
+      N_det_save = i-1
       exit
     endif
   enddo
