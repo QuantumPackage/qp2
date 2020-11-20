@@ -398,7 +398,7 @@ def create_ezfio_stuff(dict_ezfio_cfg, config_or_default="config"):
                 try:
                     (begin, end) = list(map(str.strip, dim.split(":")))
                 except ValueError:
-                    a_size_raw.append(dim)
+                    a_size_raw.append(dim.strip())
                 else:
                     if begin[0] == '-':
                         a_size_raw.append("{0}+{1}+1".format(end, begin[1:]))
