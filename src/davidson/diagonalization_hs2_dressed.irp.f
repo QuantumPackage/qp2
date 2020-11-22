@@ -318,19 +318,14 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   converged = .False.
 
   do k=N_st+1,N_st_diag
-    u_in(k,k) = 10.d0
     do i=1,sze
-      ! This Preserves symmetry when zero coefs are in the guess
-      if (dabs(u_in(i,k-N_st)) < 1.d-5) then
-        u_in(i,k) =0.d0
-      else
         call random_number(r1)
         call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
-        u_in(i,k) = r1*dcos(r2)
-      endif
+        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
     enddo
+    u_in(k,k) = u_in(k,k) + 10.d0
   enddo
   do k=1,N_st_diag
     call normalize(u_in(1,k),sze)
