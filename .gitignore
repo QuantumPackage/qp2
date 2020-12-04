@@ -9,3 +9,4 @@ config/qp_create_ninja.pickle
 src/*/.gitignore
 ezfio_interface.irp.f
 share
+venv
