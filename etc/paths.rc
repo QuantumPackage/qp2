@@ -3,7 +3,7 @@
 QP_PYTHON=
 
 # Load dependencies
-for i in ezfio.rc irpf90.rc ninja.rc ocaml.rc 
+for i in ezfio.rc irpf90.rc ocaml.rc 
 do
   source $i
 done
