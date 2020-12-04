@@ -73,8 +73,6 @@ let hostname = lazy (
     | _ -> "localhost"
 )
 
-let () = 
-  Printf.printf "%s\n%!" (Lazy.force hostname)
 
 external get_ipv4_address_for_interface : string -> string =
   "get_ipv4_address_for_interface" ;;
