@@ -428,7 +428,7 @@ fi
 
 IRPF90=$(find_exe irpf90)
 if [[ ${IRPF90} = $(not_found) ]] ; then
-        error "IRPf90 (irpf90) is not installed."
+        error "IRPF90 (irpf90) is not installed."
         fail
 fi
 
