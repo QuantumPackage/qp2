@@ -49,7 +49,7 @@ import os.path
 try:
     import qp_path
 except ImportError:
-    print("source .quantum_package.rc")
+    print("source quantum_package.rc")
     raise
 
 from docopt import docopt

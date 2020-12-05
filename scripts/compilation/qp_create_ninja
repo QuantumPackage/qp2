@@ -38,7 +38,7 @@ def comp_path(path):
 
 from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
 
-LIB = " -lz" 
+LIB = " -lz"
 EZFIO_LIB = join("$QP_ROOT", "lib", "libezfio_irp.a")
 ZMQ_LIB = join("$QP_ROOT", "lib", "libf77zmq.a") + " "  + join("$QP_ROOT", "lib", "libzmq.a") + " -lstdc++ -lrt -ldl"
 ROOT_BUILD_NINJA = join("$QP_ROOT", "config", "build.ninja")
@@ -57,7 +57,7 @@ header = r"""#
 #               /_/     \__,_/ \___/ /_/|_| \__,_/ _\__, / \___/
 #                                                  /____/
 #
-# https://github.com/LCPQ/quantum_package,
+# https://github.com/QuantumPackage/qp2,
 #
 # Generated automatically by {0}
 #
@@ -416,7 +416,7 @@ def get_l_file_for_module(path_module):
 
 def get_file_dependency(d_info_module):
     """
-    For a module return all the irp.f90 needed files 
+    For a module return all the irp.f90 needed files
     """
     d_irp = defaultdict(dict)
 
@@ -711,7 +711,7 @@ def save_subninja_file(path_module):
                  ""]
 
     path_ninja_cur = join(path_module.abs, "build.ninja")
-    
+
     with open(path_ninja_cur, "w") as f:
         f.write(header)
         f.write("\n".join(l_string))
@@ -851,7 +851,7 @@ if __name__ == "__main__":
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
 
     for module_to_compile in l_module:
-    
+
         if module_to_compile.rel == "dummy":
                 continue
 

@@ -1,0 +1,36 @@
+det  : dans la fonction d'onde   vec
+csf  : dans la fonctions d'onde  vec
+conf_det : Nconf x Ndet'(conf)
+conf_csf : Nconf x Ncsf'(conf)
+
+csf'(conf)  : dans une conf (N_somo(conf) + N_domo(conf))
+det'(conf)  : dans une conf (N_somo(conf) + N_domo(conf))
+
+det''(conf) : probleme modele avec N_somo(conf)
+csf''(conf) : probleme modele avec N_somo(conf)
+
+* [0/2]
+  - [ ] Precalculer dans la base des configurations
+        W_pq = \sum_{K} <Psi | E_pq | K>
+        K> configuration \in SOMO-SOMO SOMO-DOMO DOMO-VMO SOMO-VMO
+        W : matrice mono x mono
+  - [ ] Fonction conf -> 
+  - [ ] Compute <i|H|j> in conf basis
+  - [ ] Function hij_conf(i,j) -> matrix Ndet_ixM
+
+
+
+  (1,Ndet)   (Ndet,Ndet)   (Ndet,1) -> E
+
+  for i=1,Nconf
+  for j=1,Nconf
+  (i,Ndet') [(Ndet',Ndet'')  (Ndet'',Ndet'') (Ndet'',Ndet')]  (Ndet',j) -> E
+  (i,Ncsf') (Ncsf',Ncsf'') [(Ncsf'',Ndet'')  (Ndet'',Ndet'') (Ndet'',Ncsf'')] (Ncsf'',Ncsf')  (Ncsf',j) -> E
+
+   <psi | [\sum_K E_pq | K>< K | E_rs] | Psi>
+  
+  C.D^t
+
+  K : toutes les mono 
+
+  <ij|kl> = \sum_m <ij|mj><ml|kl>

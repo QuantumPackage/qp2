@@ -410,6 +410,9 @@ EOF
               rm --recursive --force -- bats-core-1.1.0 \  "\${QP_ROOT}"/external/bats.tar.gz
 EOF
 
+    else
+        error "${PACKAGE} unknown."
+        fail
     fi
 
 
