@@ -16,7 +16,6 @@ export CC=gcc
 
 
 # /!\ When updating version, update also etc files
-
 EZFIO_TGZ="EZFIO-v2.0.3.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
