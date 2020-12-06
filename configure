@@ -14,15 +14,16 @@ unset CCXX
 # Force GCC instead of ICC for dependencies
 export CC=gcc
 
+# Download submodules
+git submodule init
+git submodule update
 
 # /!\ When updating version, update also etc files
-EZFIO_TGZ="EZFIO-v2.0.6.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
 BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
-IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v2.0.4/irpf90-v2.0.4.tar.gz"
 LIBCAP_URL="https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz"
 NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
 OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
@@ -176,15 +177,10 @@ function find_dir() {
 }
 
 
-# Extract EZFIO if needed
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ${EZFIO_TGZ}
-              rm -rf ezfio
-              mv EZFIO ezfio || mv EZFIO-v*/ ezfio
-EOF
+# Install IRPF90 if needed
+IRPF90=$(find_exe irpf90)
+if [[ ${IRPF90} = $(not_found) ]] ; then
+        make -C ${QP_ROOT}/external/irpf90
 fi
 
 
@@ -259,8 +255,6 @@ EOF
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
-            # When changing version of irpf90, don't forget to update etc/irpf90.rc
-            download ${IRPF90_URL} "${QP_ROOT}"/external/irpf90.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file irpf90.tar.gz
