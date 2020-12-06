@@ -117,7 +117,6 @@ Providers
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
        * :c:data:`s2_matrix_all_dets`
-       * :c:data:`s_z`
        * :c:data:`threshold_davidson`
 
     Needed by:
@@ -162,7 +161,6 @@ Providers
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
        * :c:data:`s2_matrix_all_dets`
-       * :c:data:`s_z`
        * :c:data:`threshold_davidson`
 
     Needed by:
@@ -234,7 +232,6 @@ Providers
        * :c:data:`psi_det`
        * :c:data:`s2_eig`
        * :c:data:`s2_matrix_all_dets`
-       * :c:data:`s_z`
        * :c:data:`threshold_davidson`
 
     Needed by:
@@ -243,20 +240,6 @@ Providers
        :columns: 3
 
        * :c:data:`ci_energy`
-
- 
-.. c:var:: davidson_criterion
-
-
-    File : :file:`davidson/parameters.irp.f`
-
-    .. code:: fortran
-
-        character(64)	:: davidson_criterion	
-
-
-    Can be : [  energy  | residual | both | wall_time | cpu_time | iterations ]
-
 
  
 .. c:var:: diag_algorithm
@@ -382,9 +365,9 @@ Providers
         double precision, allocatable	:: psi_s2	(N_states)
 
 
-    psi_energy(i) = :math:`\langle \Psi_i | H | \Psi_i \rangle` 
+    psi_energy(i) = :math:`\langle \Psi_i | H | \Psi_i \rangle` 
     
-    psi_s2(i) = :math:`\langle \Psi_i | S^2 | \Psi_i \rangle` 
+    psi_s2(i) = :math:`\langle \Psi_i | S^2 | \Psi_i \rangle` 
 
     Needs:
 
@@ -408,9 +391,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_energy_two_e`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
 
  
 .. c:var:: psi_energy_two_e
@@ -436,7 +417,6 @@ Providers
        * :c:data:`psi_coef`
        * :c:data:`psi_det`
        * :c:data:`psi_det_size`
-       * :c:data:`psi_energy`
 
 
  
@@ -474,9 +454,9 @@ Providers
         double precision, allocatable	:: psi_s2	(N_states)
 
 
-    psi_energy(i) = :math:`\langle \Psi_i | H | \Psi_i \rangle` 
+    psi_energy(i) = :math:`\langle \Psi_i | H | \Psi_i \rangle` 
     
-    psi_s2(i) = :math:`\langle \Psi_i | S^2 | \Psi_i \rangle` 
+    psi_s2(i) = :math:`\langle \Psi_i | S^2 | \Psi_i \rangle` 
 
     Needs:
 
@@ -500,9 +480,28 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_energy_two_e`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
+
+ 
+.. c:var:: threshold_davidson_pt2
+
+
+    File : :file:`davidson/diagonalization_hs2_dressed.irp.f`
+
+    .. code:: fortran
+
+        double precision	:: threshold_davidson_pt2	
+
+
+    Threshold of Davidson's algorithm, using PT2 as a guide
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`threshold_davidson`
+
 
  
  
@@ -543,42 +542,6 @@ Subroutines / functions
        * :c:func:`davidson_pull_results`
 
  
-.. c:function:: davidson_converged:
-
-
-    File : :file:`davidson/parameters.irp.f`
-
-    .. code:: fortran
-
-        subroutine davidson_converged(energy,residual,wall,iterations,cpu,N_st,converged)
-
-
-    True if the Davidson algorithm is converged
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`threshold_davidson`
-       * :c:data:`davidson_criterion`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`davidson_diag_hjj_sjj`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`cpu_time`
-       * :c:func:`wall_time`
-
- 
 .. c:function:: davidson_diag_hjj_sjj:
 
 
@@ -615,28 +578,30 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_bilinear_matrix_order_reverse`
-       * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_coef`
-       * :c:data:`dressed_column_idx`
-       * :c:data:`expected_s2`
-       * :c:data:`s_z`
-       * :c:data:`n_det`
-       * :c:data:`dressing_column_h`
-       * :c:data:`ezfio_work_dir`
        * :c:data:`davidson_sze_max`
-       * :c:data:`state_following`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`nuclear_repulsion`
-       * :c:data:`nproc`
-       * :c:data:`qp_max_mem`
        * :c:data:`disk_based_davidson`
-       * :c:data:`s2_eig`
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`only_expected_s2`
        * :c:data:`distributed_davidson`
+       * :c:data:`dressed_column_idx`
+       * :c:data:`dressing_column_h`
+       * :c:data:`expected_s2`
+       * :c:data:`ezfio_work_dir`
+       * :c:data:`n_det`
        * :c:data:`n_int`
+       * :c:data:`nproc`
+       * :c:data:`nthreads_davidson`
+       * :c:data:`nuclear_repulsion`
+       * :c:data:`only_expected_s2`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`qp_max_mem`
+       * :c:data:`s2_eig`
+       * :c:data:`state_following`
+       * :c:data:`threshold_davidson`
+       * :c:data:`threshold_davidson_from_pt2`
+       * :c:data:`threshold_davidson_pt2`
 
     Called by:
 
@@ -652,8 +617,6 @@ Subroutines / functions
 
        * :c:func:`c_f_pointer`
        * :c:func:`check_mem`
-       * :c:func:`cpu_time`
-       * :c:func:`davidson_converged`
        * :c:func:`dgemm`
        * :c:func:`dswap`
        * :c:func:`h_s2_u_0_nstates_openmp`
@@ -662,11 +625,12 @@ Subroutines / functions
        * :c:func:`mmap`
        * :c:func:`munmap`
        * :c:func:`normalize`
+       * :c:func:`nullify_small_elements`
        * :c:func:`ortho_qr`
+       * :c:func:`ortho_qr_unblocked`
        * :c:func:`random_number`
        * :c:func:`resident_memory`
        * :c:func:`sgemm`
-       * :c:func:`wall_time`
        * :c:func:`write_double`
        * :c:func:`write_int`
        * :c:func:`write_time`
@@ -711,6 +675,7 @@ Subroutines / functions
 
        * :c:data:`dressing_column_h`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -751,8 +716,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
 
     Called by:
 
@@ -779,8 +744,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
 
  
 .. c:function:: davidson_push_results_async_recv:
@@ -820,8 +785,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
 
     Called by:
 
@@ -848,8 +813,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states_diag`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
 
     Called by:
 
@@ -907,13 +872,6 @@ Subroutines / functions
 
 
 
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run_slave_main`
-
     Calls:
 
     .. hlist::
@@ -938,18 +896,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`mpi_rank`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
        * :c:data:`mpi_initialized`
+       * :c:data:`mpi_rank`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
+       * :c:data:`nproc`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`nproc`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`ref_bitmask_energy`
-       * :c:data:`n_states_diag`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
 
     Called by:
 
@@ -986,24 +944,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_coef`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`n_states`
-       * :c:data:`n_det`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`psi_energy`
        * :c:data:`ci_energy`
        * :c:data:`ci_electronic_energy`
+       * :c:data:`n_det`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
        * :c:data:`psi_energy`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`remove_small_contributions`
-       * :c:func:`run_cipsi`
-       * :c:func:`run_stochastic_cipsi`
+       * :c:data:`psi_energy`
 
     Touches:
 
@@ -1040,9 +989,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`n_det`
 
     Called by:
 
@@ -1081,9 +1030,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ref_bitmask_energy`
        * :c:data:`n_det`
        * :c:data:`n_int`
+       * :c:data:`ref_bitmask_energy`
 
     Called by:
 
@@ -1108,7 +1057,7 @@ Subroutines / functions
 .. c:function:: h_s2_u_0_nstates_openmp_work_1:
 
 
-    File : :file:`davidson/u0_h_u0.irp.f_template_645`
+    File : :file:`davidson/u0_h_u0.irp.f_template_708`
 
     .. code:: fortran
 
@@ -1124,18 +1073,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`singles_beta_csc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
 
     Called by:
 
@@ -1160,7 +1109,7 @@ Subroutines / functions
 .. c:function:: h_s2_u_0_nstates_openmp_work_2:
 
 
-    File : :file:`davidson/u0_h_u0.irp.f_template_645`
+    File : :file:`davidson/u0_h_u0.irp.f_template_708`
 
     .. code:: fortran
 
@@ -1176,18 +1125,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`singles_beta_csc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
 
     Called by:
 
@@ -1212,7 +1161,7 @@ Subroutines / functions
 .. c:function:: h_s2_u_0_nstates_openmp_work_3:
 
 
-    File : :file:`davidson/u0_h_u0.irp.f_template_645`
+    File : :file:`davidson/u0_h_u0.irp.f_template_708`
 
     .. code:: fortran
 
@@ -1228,18 +1177,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`singles_beta_csc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
 
     Called by:
 
@@ -1264,7 +1213,7 @@ Subroutines / functions
 .. c:function:: h_s2_u_0_nstates_openmp_work_4:
 
 
-    File : :file:`davidson/u0_h_u0.irp.f_template_645`
+    File : :file:`davidson/u0_h_u0.irp.f_template_708`
 
     .. code:: fortran
 
@@ -1280,18 +1229,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`singles_beta_csc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
 
     Called by:
 
@@ -1316,7 +1265,7 @@ Subroutines / functions
 .. c:function:: h_s2_u_0_nstates_openmp_work_n_int:
 
 
-    File : :file:`davidson/u0_h_u0.irp.f_template_645`
+    File : :file:`davidson/u0_h_u0.irp.f_template_708`
 
     .. code:: fortran
 
@@ -1332,18 +1281,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
-       * :c:data:`singles_beta_csc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
-       * :c:data:`singles_beta_csc_idx`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
+       * :c:data:`singles_beta_csc`
+       * :c:data:`singles_beta_csc_idx`
 
     Called by:
 
@@ -1388,17 +1337,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`mpi_initialized`
        * :c:data:`n_det`
+       * :c:data:`n_states_diag`
+       * :c:data:`nproc`
+       * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_reverse`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
        * :c:data:`psi_bilinear_matrix_transp_values`
        * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`nproc`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
        * :c:data:`ref_bitmask_energy`
-       * :c:data:`psi_bilinear_matrix_columns_loc`
 
     Called by:
 
@@ -1443,9 +1393,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`n_det`
        * :c:data:`psi_bilinear_matrix_order_reverse`
        * :c:data:`psi_bilinear_matrix_values`
-       * :c:data:`n_det`
 
     Called by:
 
@@ -1483,9 +1433,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ref_bitmask_energy`
        * :c:data:`n_det`
        * :c:data:`n_int`
+       * :c:data:`ref_bitmask_energy`
 
     Called by:
 
@@ -1525,16 +1475,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
     Called by:
 
@@ -1575,16 +1525,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
     Called by:
 
@@ -1625,16 +1575,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
     Called by:
 
@@ -1675,16 +1625,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
     Called by:
 
@@ -1725,16 +1675,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_det_beta_unique`
-       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
-       * :c:data:`psi_det_alpha_unique`
-       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
        * :c:data:`n_det`
-       * :c:data:`psi_bilinear_matrix_transp_values`
-       * :c:data:`nthreads_davidson`
-       * :c:data:`psi_bilinear_matrix_values`
        * :c:data:`n_int`
+       * :c:data:`nthreads_davidson`
        * :c:data:`psi_bilinear_matrix_columns_loc`
+       * :c:data:`psi_bilinear_matrix_order_transp_reverse`
+       * :c:data:`psi_bilinear_matrix_transp_rows_loc`
+       * :c:data:`psi_bilinear_matrix_transp_values`
+       * :c:data:`psi_bilinear_matrix_values`
+       * :c:data:`psi_det_alpha_unique`
+       * :c:data:`psi_det_beta_unique`
 
     Called by:
 
@@ -1774,20 +1724,13 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_integrals_n_e`
-       * :c:data:`n_states`
-       * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_num`
+       * :c:data:`mo_pseudo_integrals`
+       * :c:data:`n_states`
        * :c:data:`nuclear_repulsion`
-       * :c:data:`psi_energy`
        * :c:data:`one_e_dm_mo_alpha`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`print_summary`
+       * :c:data:`psi_energy`
 
  
 .. c:function:: u_0_h_u_0:
@@ -1812,11 +1755,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`h_matrix_all_dets`
-       * :c:data:`s2_matrix_all_dets`
-       * :c:data:`n_states_diag`
        * :c:data:`distributed_davidson`
+       * :c:data:`h_matrix_all_dets`
        * :c:data:`n_det_max_full`
+       * :c:data:`n_states_diag`
+       * :c:data:`s2_matrix_all_dets`
 
     Called by:
 
@@ -1881,9 +1824,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mpi_master`
        * :c:data:`n_states_diag`
        * :c:data:`zmq_state`
-       * :c:data:`mpi_master`
 
     Touches:
 

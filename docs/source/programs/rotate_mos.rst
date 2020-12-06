@@ -19,8 +19,8 @@ rotate_mos
     :columns: 3 
  
     * :c:data:`ao_num` 
-    * :c:data:`mo_num` 
     * :c:data:`mo_coef` 
+    * :c:data:`mo_num` 
  
  Calls: 
  

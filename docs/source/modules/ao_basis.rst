@@ -118,10 +118,12 @@ Providers
 
        * :c:data:`ao_coef`
        * :c:data:`ao_expo`
+       * :c:data:`ao_normalized`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_prim_num_max`
+       * :c:data:`primitives_normalized`
 
     Needed by:
 
@@ -177,10 +179,12 @@ Providers
 
        * :c:data:`ao_coef`
        * :c:data:`ao_expo`
+       * :c:data:`ao_normalized`
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`ao_prim_num_max`
+       * :c:data:`primitives_normalized`
 
     Needed by:
 
@@ -261,10 +265,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
 
  
@@ -363,10 +364,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
 
  
@@ -853,10 +851,7 @@ Providers
 
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_integrals_n_e_per_atom`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`gauleg_t2`
 
@@ -888,10 +883,7 @@ Providers
 
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_integrals_n_e_per_atom`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`gauleg_t2`
 
@@ -1088,10 +1080,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
        * :c:data:`nucl_coord`
 
  
@@ -1117,14 +1109,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_expo_ordered_transp_per_nucl`
-       * :c:data:`ao_power_ordered_transp_per_nucl`
-       * :c:data:`nucl_n_aos`
-       * :c:data:`ao_num`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
        * :c:data:`nucl_aos_transposed`
        * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
     Called by:
@@ -1158,14 +1150,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_expo_ordered_transp_per_nucl`
-       * :c:data:`ao_power_ordered_transp_per_nucl`
-       * :c:data:`nucl_n_aos`
-       * :c:data:`ao_num`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
        * :c:data:`nucl_aos_transposed`
        * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
     Called by:
@@ -1195,14 +1187,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_expo_ordered_transp_per_nucl`
-       * :c:data:`ao_power_ordered_transp_per_nucl`
-       * :c:data:`nucl_n_aos`
-       * :c:data:`ao_num`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_coef_normalized_ordered_transp_per_nucl`
+       * :c:data:`ao_expo_ordered_transp_per_nucl`
+       * :c:data:`ao_num`
+       * :c:data:`ao_power_ordered_transp_per_nucl`
+       * :c:data:`ao_prim_num`
        * :c:data:`nucl_aos_transposed`
        * :c:data:`nucl_coord`
+       * :c:data:`nucl_n_aos`
        * :c:data:`nucl_num`
 
     Called by:
@@ -1233,6 +1225,6 @@ Subroutines / functions
 
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
-       * :c:data:`nucl_coord`
        * :c:data:`ao_power`
+       * :c:data:`nucl_coord`
 

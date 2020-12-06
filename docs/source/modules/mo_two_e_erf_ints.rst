@@ -57,7 +57,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`list_inact`
+       * :c:data:`list_core`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_int_erf_jj`
        * :c:data:`n_core_orb`
@@ -82,12 +82,14 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`list_inact`
+       * :c:data:`list_act`
+       * :c:data:`list_core`
        * :c:data:`mo_integrals_erf_cache`
        * :c:data:`mo_integrals_erf_cache_min`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_erf_in_map`
+       * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
 
 
@@ -403,7 +405,6 @@ Providers
        * :c:data:`ao_integrals_erf_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`do_direct_integrals`
@@ -472,7 +473,6 @@ Providers
        * :c:data:`ao_integrals_erf_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`do_direct_integrals`
@@ -506,7 +506,6 @@ Providers
        * :c:data:`ao_integrals_erf_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`do_direct_integrals`
@@ -578,14 +577,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_coef_transp`
        * :c:data:`ao_num`
-       * :c:data:`n_int`
-       * :c:data:`mo_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
        * :c:data:`mo_integrals_erf_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -796,8 +795,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_integrals_erf_map`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
 
     Calls:
 
@@ -830,8 +829,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_integrals_erf_map`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
 
     Calls:
 
@@ -925,11 +924,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_erf_in_map`
-       * :c:data:`mo_two_e_int_erf_jj`
-       * :c:data:`mo_two_e_int_erf_jj`
        * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_two_e_int_erf_jj`
+       * :c:data:`mo_two_e_int_erf_jj`
+       * :c:data:`mo_two_e_int_erf_jj`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
 
  
 .. c:function:: save_erf_two_e_integrals_mo:
@@ -948,9 +947,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`ezfio_filename`
        * :c:data:`mo_integrals_erf_map`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
 
     Called by:
 
@@ -985,9 +984,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`ezfio_filename`
        * :c:data:`mo_integrals_erf_map`
+       * :c:data:`mo_two_e_integrals_erf_in_map`
 
     Calls:
 

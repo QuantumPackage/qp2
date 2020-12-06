@@ -118,10 +118,10 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`extrapolated_energy`
-       * :c:data:`n_states`
        * :c:data:`n_det`
-       * :c:data:`pt2_iterations`
        * :c:data:`n_iter`
+       * :c:data:`n_states`
+       * :c:data:`pt2_iterations`
 
     Called by:
 
@@ -139,7 +139,7 @@ Subroutines / functions
 
     .. code:: fortran
 
-        subroutine print_summary(e_,pt2_,error_,variance_,norm_,n_det_,n_occ_pattern_,n_st,s2_)
+        subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_)
 
 
     Print the extrapolated energy in the output
@@ -185,11 +185,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_iter`
        * :c:data:`energy_iterations`
+       * :c:data:`n_det_iterations`
+       * :c:data:`n_iter`
        * :c:data:`n_states`
        * :c:data:`pt2_iterations`
-       * :c:data:`n_det_iterations`
 
     Called by:
 

@@ -218,10 +218,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`selection_criterion`
+       * :c:data:`elec_alpha_num`
+       * :c:data:`elec_beta_num`
        * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
        * :c:data:`n_int`
+       * :c:data:`selection_criterion`
 
     Calls:
 
@@ -252,11 +254,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -287,11 +290,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -322,11 +326,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -357,11 +362,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -392,11 +398,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -427,11 +434,12 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_num`
-       * :c:data:`psi_selectors`
        * :c:data:`n_det`
-       * :c:data:`n_det_selectors`
        * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -461,11 +469,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -497,11 +506,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -533,11 +543,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -569,11 +580,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -605,11 +617,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -641,11 +654,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_det_selectors`
-       * :c:data:`n_det_generators`
-       * :c:data:`psi_selectors`
-       * :c:data:`psi_det_generators`
        * :c:data:`mo_num`
+       * :c:data:`n_det_generators`
+       * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_det_generators`
+       * :c:data:`psi_selectors`
 
     Calls:
 
@@ -676,11 +690,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
-       * :c:data:`selection_criterion`
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_size`
-       * :c:data:`mo_num`
+       * :c:data:`selection_criterion`
 
     Called by:
 
@@ -721,11 +735,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
-       * :c:data:`selection_criterion`
+       * :c:data:`n_int`
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_size`
-       * :c:data:`mo_num`
+       * :c:data:`selection_criterion`
 
     Called by:
 
@@ -766,10 +781,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_size`
-       * :c:data:`mo_num`
 
     Called by:
 
@@ -811,11 +827,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
+       * :c:data:`n_int`
+       * :c:data:`psi_energy`
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_size`
-       * :c:data:`psi_energy`
-       * :c:data:`mo_num`
 
     Called by:
 
@@ -856,12 +873,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ref_bitmask`
-       * :c:data:`psi_selectors_size`
-       * :c:data:`psi_selectors`
+       * :c:data:`fock_matrix_mo`
        * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
-       * :c:data:`fock_matrix_mo`
+       * :c:data:`n_int`
+       * :c:data:`psi_selectors`
+       * :c:data:`psi_selectors_size`
+       * :c:data:`ref_bitmask`
 
     Called by:
 
@@ -902,11 +920,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`mo_num`
        * :c:data:`n_det_selectors`
-       * :c:data:`selection_criterion`
+       * :c:data:`n_int`
        * :c:data:`psi_selectors`
        * :c:data:`psi_selectors_size`
-       * :c:data:`mo_num`
+       * :c:data:`selection_criterion`
 
     Called by:
 
@@ -944,16 +963,16 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_coef`
-       * :c:data:`selection_criterion`
-       * :c:data:`n_states`
        * :c:data:`n_det`
-       * :c:data:`psi_det_size`
        * :c:data:`n_det_generators`
        * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
        * :c:data:`psi_det_sorted`
        * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
        * :c:data:`psi_det_sorted`
+       * :c:data:`selection_criterion`
 
     Calls:
 

@@ -86,8 +86,10 @@ Providers
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
+       * :c:data:`is_periodic`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
+       * :c:data:`read_ao_two_e_integrals`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
 
@@ -130,8 +132,10 @@ Providers
        * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
+       * :c:data:`is_periodic`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
+       * :c:data:`read_ao_two_e_integrals`
        * :c:data:`scf_density_matrix_ao_alpha`
        * :c:data:`scf_density_matrix_ao_beta`
 
@@ -339,12 +343,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_num`
+       * :c:data:`ao_ortho_lowdin_coef`
        * :c:data:`ezfio_filename`
        * :c:data:`mo_coef`
        * :c:data:`mo_guess_type`
-       * :c:data:`mo_one_e_integrals`
-       * :c:data:`ao_ortho_lowdin_coef`
        * :c:data:`mo_label`
+       * :c:data:`mo_num`
+       * :c:data:`mo_one_e_integrals`
 
     Called by:
 
@@ -361,6 +367,7 @@ Subroutines / functions
        * :c:func:`ezfio_has_mo_basis_mo_coef`
        * :c:func:`huckel_guess`
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
+       * :c:func:`restore_symmetry`
 
     Touches:
 
@@ -371,52 +378,4 @@ Subroutines / functions
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`mo_coef`
        * :c:data:`mo_label`
-
- 
-.. c:function:: run:
-
-
-    File : :file:`hartree_fock/scf.irp.f`
-
-    .. code:: fortran
-
-        subroutine run
-
-
-    Run SCF calculation
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`scf_energy`
-       * :c:data:`mo_label`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`pt2`
-       * :c:func:`scf`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ezfio_set_hartree_fock_energy`
-       * :c:func:`roothaan_hall_scf`
-
-    Touches:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`mo_coef`
-       * :c:data:`level_shift`
-       * :c:data:`mo_coef`
 

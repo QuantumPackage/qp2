@@ -12,12 +12,11 @@ All the one-electron integrals in the |AO| basis are here.
 
 The most important providers for usual quantum-chemistry calculation are:
 
-* `ao_kinetic_integral` which are the kinetic operator integrals on the |AO| basis (see :file:`kin_ao_ints.irp.f`)
-* `ao_nucl_elec_integral` which are the nuclear-elctron operator integrals on the |AO| basis (see :file:`pot_ao_ints.irp.f`)
-* `ao_one_e_integrals` which are the the h_core operator integrals on the |AO| basis (see :file:`ao_mono_ints.irp.f`)
+* `ao_kinetic_integrals` which are the kinetic operator integrals on the |AO| basis 
+* `ao_integrals_n_e` which are the nuclear-elctron operator integrals on the |AO| basis
+* `ao_one_e_integrals` which are the the h_core operator integrals on the |AO| basis
 
 
-Note that you can find other interesting integrals related to the position operator in :file:`spread_dipole_ao.irp.f`.
  
  
  
@@ -144,6 +143,7 @@ Providers
 
        * :c:data:`ao_cart_to_sphe_coef`
        * :c:data:`ao_num`
+       * :c:data:`lin_dep_cutoff`
 
 
  
@@ -570,6 +570,8 @@ Providers
     Nucleus-electron interaction, in the |AO| basis set.
     
     :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+    
+    These integrals also contain the pseudopotential integrals.
 
     Needs:
 
@@ -582,11 +584,13 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
+       * :c:data:`ao_pseudo_integrals`
+       * :c:data:`do_pseudo`
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
-       * :c:data:`read_ao_integrals_e_n`
+       * :c:data:`read_ao_integrals_n_e`
 
     Needed by:
 
@@ -594,9 +598,31 @@ Providers
        :columns: 3
 
        * :c:data:`ao_one_e_integrals`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
-       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
        * :c:data:`mo_integrals_n_e`
+
+ 
+.. c:var:: ao_integrals_n_e_imag
+
+
+    File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_integrals_n_e_imag	(ao_num,ao_num)
+
+
+    Nucleus-electron interaction, in the |AO| basis set.
+    
+    :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`read_ao_integrals_n_e`
+
 
  
 .. c:var:: ao_integrals_n_e_per_atom
@@ -669,6 +695,31 @@ Providers
        * :c:data:`mo_kinetic_integrals`
 
  
+.. c:var:: ao_kinetic_integrals_imag
+
+
+    File : :file:`ao_one_e_ints/kin_ao_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_kinetic_integrals_imag	(ao_num,ao_num)
+
+
+    Kinetic energy integrals in the |AO| basis.
+    
+    :math:`\langle \chi_i |\hat{T}| \chi_j \rangle` 
+    
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`read_ao_integrals_kinetic`
+
+
+ 
 .. c:var:: ao_one_e_integrals
 
 
@@ -690,18 +741,8 @@ Providers
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_kinetic_integrals`
        * :c:data:`ao_num`
-       * :c:data:`ao_pseudo_integrals`
-       * :c:data:`do_pseudo`
        * :c:data:`read_ao_one_e_integrals`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`hf_energy`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: ao_one_e_integrals_diag
@@ -725,18 +766,30 @@ Providers
        * :c:data:`ao_integrals_n_e`
        * :c:data:`ao_kinetic_integrals`
        * :c:data:`ao_num`
-       * :c:data:`ao_pseudo_integrals`
-       * :c:data:`do_pseudo`
        * :c:data:`read_ao_one_e_integrals`
 
-    Needed by:
+
+ 
+.. c:var:: ao_one_e_integrals_imag
+
+
+    File : :file:`ao_one_e_ints/ao_one_e_ints.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_one_e_integrals_imag	(ao_num,ao_num)
+
+
+    One-electron Hamiltonian in the |AO| basis.
+
+    Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_matrix_ao_alpha`
-       * :c:data:`hf_energy`
-       * :c:data:`scf_energy`
+       * :c:data:`ao_num`
+       * :c:data:`read_ao_one_e_integrals`
+
 
  
 .. c:var:: ao_ortho_canonical_coef
@@ -764,6 +817,8 @@ Providers
        * :c:data:`ao_cartesian`
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
+       * :c:data:`lin_dep_cutoff`
+       * :c:data:`mpi_master`
 
     Needed by:
 
@@ -771,7 +826,6 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
@@ -830,6 +884,8 @@ Providers
        * :c:data:`ao_cartesian`
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
+       * :c:data:`lin_dep_cutoff`
+       * :c:data:`mpi_master`
 
     Needed by:
 
@@ -837,7 +893,6 @@ Providers
        :columns: 3
 
        * :c:data:`ao_ortho_canonical_coef_inv`
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
        * :c:data:`ao_ortho_canonical_overlap`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
@@ -906,9 +961,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
-       * :c:data:`fps_spf_matrix_ao`
+       * :c:data:`ao_overlap_complex`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -939,19 +992,69 @@ Providers
        * :c:data:`ao_expo_ordered_transp`
        * :c:data:`ao_nucl`
        * :c:data:`ao_num`
+       * :c:data:`ao_overlap_complex`
        * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
+       * :c:data:`is_periodic`
        * :c:data:`nucl_coord`
+
+
+ 
+.. c:var:: ao_overlap_complex
+
+
+    File : :file:`ao_one_e_ints/ao_overlap.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_overlap_complex	(ao_num,ao_num)
+
+
+    Overlap for complex AOs
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap`
+       * :c:data:`ao_overlap_imag`
 
     Needed by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
-       * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`s_inv_complex`
+
+ 
+.. c:var:: ao_overlap_imag
+
+
+    File : :file:`ao_one_e_ints/ao_overlap.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: ao_overlap_imag	(ao_num,ao_num)
+
+
+    Imaginary part of the overlap
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_overlap_complex`
 
  
 .. c:var:: ao_overlap_x
@@ -993,9 +1096,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
-       * :c:data:`fps_spf_matrix_ao`
+       * :c:data:`ao_overlap_complex`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1042,9 +1143,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
-       * :c:data:`fps_spf_matrix_ao`
+       * :c:data:`ao_overlap_complex`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1091,9 +1190,7 @@ Providers
        * :c:data:`ao_cart_to_sphe_overlap`
        * :c:data:`ao_ortho_canonical_coef`
        * :c:data:`ao_ortho_canonical_overlap`
-       * :c:data:`ao_ortho_lowdin_coef`
-       * :c:data:`ao_ortho_lowdin_overlap`
-       * :c:data:`fps_spf_matrix_ao`
+       * :c:data:`ao_overlap_complex`
        * :c:data:`mo_overlap`
        * :c:data:`s_half`
        * :c:data:`s_half_inv`
@@ -1131,7 +1228,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_one_e_integrals`
+       * :c:data:`ao_integrals_n_e`
        * :c:data:`mo_pseudo_integrals`
 
  
@@ -1688,12 +1785,6 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`eigenvalues_fock_matrix_ao`
 
  
 .. c:var:: s_inv
@@ -1715,12 +1806,58 @@ Providers
 
        * :c:data:`ao_num`
        * :c:data:`ao_overlap`
+       * :c:data:`lin_dep_cutoff`
+
+
+ 
+.. c:var:: s_inv_complex
+
+
+    File : :file:`ao_one_e_ints/ao_overlap.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: s_inv_complex	(ao_num,ao_num)
+
+
+    Inverse of the overlap matrix
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ao_overlap_complex`
+       * :c:data:`lin_dep_cutoff`
 
 
  
  
 Subroutines / functions 
 ----------------------- 
+ 
+.. c:function:: ao_one_e_integral_zero:
+
+
+    File : :file:`ao_one_e_ints/screening.irp.f`
+
+    .. code:: fortran
+
+        logical function ao_one_e_integral_zero(i,k)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`io_ao_integrals_overlap`
+       * :c:data:`is_periodic`
+
  
 .. c:function:: give_all_erf_kl_ao:
 
@@ -1854,12 +1991,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
  
@@ -1949,14 +2086,14 @@ Subroutines / functions
        * :c:func:`overlap_bourrin_deriv_x`
 
  
-.. c:function:: v_e_n:
+.. c:function:: v_n_e:
 
 
     File : :file:`ao_one_e_ints/pot_ao_ints.irp.f`
 
     .. code:: fortran
 
-        double precision function V_e_n(a_x,a_y,a_z,b_x,b_y,b_z,alpha,beta)
+        double precision function V_n_e(a_x,a_y,a_z,b_x,b_y,b_z,alpha,beta)
 
 
     Primitve nuclear attraction between the two primitves centered on the same atom.

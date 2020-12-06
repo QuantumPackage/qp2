@@ -43,27 +43,39 @@ EZFIO parameters
  
     Default: 1.e-15
  
-.. option:: no_vvvv_integrals
- 
-    If `True`, computes all integrals except for the integrals having 4 virtual indices
- 
-    Default: False
- 
-.. option:: no_ivvv_integrals
- 
-    Can be switched on only if `no_vvvv_integrals` is `True`, then does not compute the integrals with 3 virtual indices and 1 belonging to the core inactive active orbitals
- 
-    Default: False
- 
-.. option:: no_vvv_integrals
- 
-    Can be switched on only if `no_vvvv_integrals` is `True`, then does not compute the integrals with 3 virtual orbitals
- 
-    Default: False
- 
  
 Providers 
 --------- 
+ 
+.. c:var:: banned_excitation
+
+
+    File : :file:`mo_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        logical, allocatable	:: banned_excitation	(mo_num,mo_num)
+
+
+    If true, the excitation is banned in the selection. Useful with local MOs.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_num`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`big_array_coulomb_integrals`
+       * :c:data:`core_fock_operator`
+       * :c:data:`mo_two_e_integrals_jj`
+
  
 .. c:var:: big_array_coulomb_integrals
 
@@ -85,6 +97,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
@@ -96,7 +109,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
 
@@ -121,6 +133,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
@@ -132,7 +145,6 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`coef_hf_selector`
        * :c:data:`h_matrix_all_dets`
        * :c:data:`h_matrix_cas`
 
@@ -154,7 +166,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`list_inact`
+       * :c:data:`list_core`
        * :c:data:`mo_one_e_integrals`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`n_core_orb`
@@ -179,12 +191,15 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`list_inact`
+       * :c:data:`banned_excitation`
+       * :c:data:`list_act`
+       * :c:data:`list_core`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
 
 
@@ -224,6 +239,30 @@ Providers
        :columns: 3
 
        * :c:func:`map_update`
+
+ 
+.. c:var:: mo_coef_novirt
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        double precision, allocatable	:: mo_coef_novirt	(ao_num,n_core_inact_act_orb)
+
+
+    MO coefficients without virtual MOs
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`list_core_inact_act`
+       * :c:data:`mo_coef`
+       * :c:data:`n_core_inact_act_orb`
+
 
  
 .. c:var:: mo_integrals_cache
@@ -417,8 +456,8 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`big_array_coulomb_integrals`
-       * :c:data:`coef_hf_selector`
        * :c:data:`core_fock_operator`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
@@ -453,8 +492,6 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
        * :c:data:`mo_coef`
@@ -480,12 +517,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`ao_integrals_map`
        * :c:data:`ao_num`
        * :c:data:`ao_two_e_integrals_in_map`
-       * :c:data:`core_inact_act_bitmask_4`
        * :c:data:`ezfio_filename`
        * :c:data:`full_ijkl_bitmask_4`
-       * :c:data:`list_inact`
+       * :c:data:`list_core_inact_act`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
@@ -493,9 +530,8 @@ Providers
        * :c:data:`mo_integrals_threshold`
        * :c:data:`mo_num`
        * :c:data:`mpi_master`
+       * :c:data:`n_core_inact_act_orb`
        * :c:data:`n_int`
-       * :c:data:`no_ivvv_integrals`
-       * :c:data:`no_vvv_integrals`
        * :c:data:`no_vvvv_integrals`
        * :c:data:`read_mo_two_e_integrals`
 
@@ -504,9 +540,12 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`act_2_rdm_aa_mo`
+       * :c:data:`act_2_rdm_ab_mo`
+       * :c:data:`act_2_rdm_bb_mo`
+       * :c:data:`act_2_rdm_spin_trace_mo`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`ci_electronic_energy`
-       * :c:data:`coef_hf_selector`
        * :c:data:`core_fock_operator`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
@@ -537,6 +576,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
@@ -573,6 +613,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
@@ -612,8 +653,6 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
        * :c:data:`mo_coef`
@@ -643,6 +682,7 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
        * :c:data:`mo_integrals_map`
@@ -682,8 +722,6 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
        * :c:data:`mo_coef`
@@ -717,15 +755,13 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
-       * :c:data:`n_core_orb`
+       * :c:data:`n_virt_orb`
 
 
  
@@ -754,15 +790,13 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
-       * :c:data:`n_core_orb`
+       * :c:data:`n_virt_orb`
 
 
  
@@ -791,15 +825,13 @@ Providers
        * :c:data:`ao_integrals_map`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_num`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`do_direct_integrals`
-       * :c:data:`list_inact`
+       * :c:data:`list_virt`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_num`
-       * :c:data:`n_core_orb`
+       * :c:data:`n_virt_orb`
 
 
  
@@ -824,13 +856,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_coef_transp`
        * :c:data:`ao_num`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
        * :c:data:`n_int`
 
     Called by:
@@ -838,6 +870,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`four_idx_novvvv2`
        * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
@@ -846,7 +879,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`bitstring_to_list`
-       * :c:func:`bitstring_to_str`
        * :c:func:`cpu_time`
        * :c:func:`get_ao_two_e_integrals`
        * :c:func:`insert_into_mo_integrals_map`
@@ -872,21 +904,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_coef_transp`
        * :c:data:`ao_num`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
        * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
 
@@ -919,21 +944,14 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`mo_integrals_threshold`
-       * :c:data:`mo_coef_transp`
        * :c:data:`ao_num`
-       * :c:data:`mo_integrals_map`
-       * :c:data:`mo_num`
        * :c:data:`ao_two_e_integrals_in_map`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_coef_transp`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
        * :c:data:`n_int`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
 
@@ -941,13 +959,50 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`bitstring_to_list`
-       * :c:func:`bitstring_to_str`
        * :c:func:`cpu_time`
        * :c:func:`get_ao_two_e_integrals`
        * :c:func:`insert_into_mo_integrals_map`
        * :c:func:`map_merge`
        * :c:func:`mo_two_e_integrals_index`
        * :c:func:`wall_time`
+
+ 
+.. c:function:: ao_to_mo_novirt:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_to_mo_novirt(A_ao,LDA_ao,A_mo,LDA_mo)
+
+
+    Transform A from the |AO| basis to the |MO| basis excluding virtuals
+    
+    $C^\dagger.A_{ao}.C$
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`mo_coef_novirt`
+       * :c:data:`n_core_inact_act_orb`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`four_idx_novvvv`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`dgemm`
 
  
 .. c:function:: clear_mo_map:
@@ -1005,6 +1060,81 @@ Subroutines / functions
        * :c:func:`ezfio_set_work_empty`
 
  
+.. c:function:: four_idx_novvvv:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine four_idx_novvvv
+
+
+    Retransform MO integrals for next CAS-SCF step
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_num`
+       * :c:data:`list_core_inact_act`
+       * :c:data:`mo_integrals_map`
+       * :c:data:`mo_integrals_threshold`
+       * :c:data:`mo_num`
+       * :c:data:`n_core_inact_act_orb`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`mo_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_to_mo`
+       * :c:func:`ao_to_mo_novirt`
+       * :c:func:`map_append`
+       * :c:func:`map_shrink`
+       * :c:func:`map_sort`
+       * :c:func:`map_unique`
+       * :c:func:`two_e_integrals_index`
+
+ 
+.. c:function:: four_idx_novvvv2:
+
+
+    File : :file:`mo_two_e_ints/four_idx_novvvv.irp.f`
+
+    .. code:: fortran
+
+        subroutine four_idx_novvvv2
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`core_inact_act_bitmask_4`
+       * :c:data:`full_ijkl_bitmask_4`
+       * :c:data:`n_int`
+       * :c:data:`virt_bitmask`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`add_integrals_to_map`
+
+ 
 .. c:function:: get_mo_map_size:
 
 
@@ -1043,17 +1173,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_two_e_integrals_in_map`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`get_d0`
-       * :c:func:`get_d1`
+       * :c:func:`get_mo_two_e_integrals_i1j1`
+       * :c:func:`get_mo_two_e_integrals_ij`
 
     Calls:
 
@@ -1092,14 +1223,6 @@ Subroutines / functions
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
 
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`map_get_many`
-       * :c:func:`two_e_integrals_index`
-
  
 .. c:function:: get_mo_two_e_integrals_exch_ii:
 
@@ -1130,14 +1253,6 @@ Subroutines / functions
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
 
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`map_get_many`
-       * :c:func:`two_e_integrals_index`
-
  
 .. c:function:: get_mo_two_e_integrals_i1j1:
 
@@ -1159,18 +1274,13 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mo_integrals_map`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`i2radix_sort`
-       * :c:func:`i8radix_sort`
-       * :c:func:`iradix_sort`
-       * :c:func:`map_get_many`
-       * :c:func:`two_e_integrals_index`
+       * :c:func:`get_mo_two_e_integrals`
 
  
 .. c:function:: get_mo_two_e_integrals_ij:
@@ -1187,24 +1297,12 @@ Subroutines / functions
     i(1)j(2) 1/r12 k(1)l(2)
     i, j for k,l fixed.
 
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`mo_integrals_map`
-
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`i2radix_sort`
-       * :c:func:`i8radix_sort`
-       * :c:func:`iradix_sort`
-       * :c:func:`map_get_many`
-       * :c:func:`two_e_integrals_index`
+       * :c:func:`get_mo_two_e_integrals`
 
  
 .. c:function:: get_two_e_integral:
@@ -1224,9 +1322,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`banned_excitation`
        * :c:data:`mo_integrals_cache`
        * :c:data:`mo_integrals_cache_min`
+       * :c:data:`mo_two_e_integrals_in_map`
 
     Calls:
 
@@ -1306,7 +1405,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`add_integrals_to_map`
-       * :c:func:`add_integrals_to_map_erf`
        * :c:func:`add_integrals_to_map_no_exit_34`
        * :c:func:`add_integrals_to_map_three_indices`
 

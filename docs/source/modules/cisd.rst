@@ -80,20 +80,26 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_coef`
-       * :c:data:`n_states`
        * :c:data:`generators_bitmask`
+       * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
-       * :c:data:`s2_eig`
        * :c:data:`n_det_generators`
-       * :c:data:`i_bitmask_gen`
        * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_generators`
        * :c:data:`psi_det`
        * :c:data:`psi_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`s2_eig`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run_cisd`
 
     Calls:
 
@@ -140,9 +146,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`n_det`
        * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -178,9 +184,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_num`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -214,9 +220,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`n_det`
        * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -252,9 +258,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_num`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -290,20 +296,26 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`psi_coef`
-       * :c:data:`n_states`
        * :c:data:`generators_bitmask`
+       * :c:data:`h_apply_buffer_allocated`
        * :c:data:`mo_num`
        * :c:data:`mo_two_e_integrals_in_map`
-       * :c:data:`h_apply_buffer_allocated`
        * :c:data:`n_det`
-       * :c:data:`s2_eig`
        * :c:data:`n_det_generators`
-       * :c:data:`i_bitmask_gen`
        * :c:data:`n_int`
+       * :c:data:`n_states`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_generators`
        * :c:data:`psi_det`
        * :c:data:`psi_det_generators`
-       * :c:data:`psi_det_generators`
+       * :c:data:`s2_eig`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run_cisd`
 
     Calls:
 
@@ -350,9 +362,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`n_det`
        * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -388,9 +400,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_num`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -425,9 +437,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
-       * :c:data:`n_det`
        * :c:data:`mo_num`
+       * :c:data:`n_det`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -463,9 +475,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_int`
        * :c:data:`elec_alpha_num`
        * :c:data:`mo_num`
+       * :c:data:`n_int`
 
     Called by:
 
@@ -482,4 +494,53 @@ Subroutines / functions
        * :c:func:`bitstring_to_list_ab`
        * :c:func:`connected_to_hf`
        * :c:func:`fill_h_apply_buffer_no_selection`
+
+ 
+.. c:function:: run_cisd:
+
+
+    File : :file:`cisd_routine.irp.f`
+
+    .. code:: fortran
+
+        subroutine run_cisd
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ci_electronic_energy`
+       * :c:data:`ci_energy`
+       * :c:data:`n_det`
+       * :c:data:`n_states`
+       * :c:data:`pseudo_sym`
+       * :c:data:`psi_coef`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_cisd_energy`
+       * :c:func:`h_apply_cisd`
+       * :c:func:`h_apply_cisd_sym`
+       * :c:func:`save_wavefunction`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`psi_occ_pattern`
+       * :c:data:`c0_weight`
+       * :c:data:`psi_coef`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_det`
+       * :c:data:`psi_det_size`
+       * :c:data:`psi_det_sorted_bit`
+       * :c:data:`psi_occ_pattern`
 
