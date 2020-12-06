@@ -54,7 +54,7 @@ Requirements
 - `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
 - `libcap <https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git>`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
-- |pkg-config|
+- |pkg-config| : a tool which returns information about installed libraries
 
 
 When all the dependencies have been installed, go into the :file:`config`
