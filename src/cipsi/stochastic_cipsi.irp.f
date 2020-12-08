@@ -92,7 +92,7 @@ subroutine run_stochastic_cipsi
 
     call write_double(6,correlation_energy_ratio, 'Correlation ratio')
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data, pt2_data_err, N_det,N_occ_pattern,N_states,psi_s2)
+       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
@@ -131,7 +131,7 @@ subroutine run_stochastic_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data , pt2_data_err, N_det, N_occ_pattern, N_states, psi_s2)
+       pt2_data , pt2_data_err, N_det, N_configuration, N_states, psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
   endif

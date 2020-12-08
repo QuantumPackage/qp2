@@ -12,7 +12,7 @@ integer*8 function det_search_key(det,Nint)
 end
 
 
-integer*8 function occ_pattern_search_key(det,Nint)
+integer*8 function configuration_search_key(det,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -22,7 +22,7 @@ integer*8 function occ_pattern_search_key(det,Nint)
   integer(bit_kind), intent(in) :: det(Nint,2)
   integer :: i
   i = shiftr(elec_alpha_num, bit_kind_shift)+1
-  occ_pattern_search_key = int(shiftr(ior(det(i,1),det(i,2)),1)+sum(det),8)
+  configuration_search_key = int(shiftr(ior(det(i,1),det(i,2)),1)+sum(det),8)
 end
 
 

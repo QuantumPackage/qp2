@@ -134,8 +134,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii selection_weight pseudo_sym
 
-  if (h0_type == 'SOP') then
-    PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+  if (h0_type == 'CFG') then
+    PROVIDE psi_configuration_hii det_to_configuration
   endif
 
   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then

@@ -1,107 +1,116 @@
 #+TITLE: CFG CIPSI
 #+AUTHOR: Vijay Gopal Chilkuri (vijay.gopal.c@gmail.com)
-#+DATE: <2020-12-08 Tue 08:27>
+#+DATE: 2020-12-08 Tue 08:27
+#+startup: latexpreview
 
 #+LATEX_HEADER: \usepackage{braket}
 
+* Biblio 
 * Theoretical background
 
   Here we describe the main theoretical background and definitions of the
   Configuration (CFG) based CIPSI algorithm. The outline of the document is as follows.
   First, we give some definitions of the CFG many-particle basis follwed by the
   definitions of the overlap, one-particle, and two-particle matrix-elements. Finally,
-  an algorithm is presented for the sigma-vector (\[ \sigma \]-vector defined later) calculation using
+  an algorithm is presented for the sigma-vector (\( \sigma \)-vector defined later) calculation using
   the CFG basis.
   
 
-  * Definitino of CI basis
+** Definitinon of CI basis
 
-    In CFG based CIPSI, the wavefunction is represented in CFG basis as shown in Eq:\[~\ref{Eq:definebasis1}\].
+    In CFG based CIPSI, the wavefunction is represented in CFG basis
+    as shown in Eq: [[Eq:definebasis1]].
 
+    #+LATEX: \newcommand{\Ncfg}{N_{\text{CFG}}}
+    #+LATEX: \newcommand{\Ncsf}{N_{\text{CSF}}}
+    #+LATEX: \newcommand{\Nsomo}{N_{\text{SOMO}}}
+    #+NAME: Eq:definebasis1
     \begin{equation}
-    \label{Eq:definebasis1}
-    \ket{\psi} &= \sum_{ij} c_{ij} ^s\ket{\phi^j_i}
+    \ket{\Psi} = \sum_{i=1}^{\Ncfg} \sum_{j=1}^{\Ncsf(i)} c_{ij} {^S\ket{\Phi^j_i}}
     \end{equation}
 
 
-    where the \[\ket{\Phi^j_i}\] represent Configuration State Functions (CSFs)
+    where the \(\ket{\Phi^j_i}\) represent Configuration State Functions (CSFs)
     which are expanded in terms of Bonded functions (BFs) as shown in
-    Eq:\[~\ref{Eq:definebasis2}\].
-
+    [[Eq:definebasis2]].
+    #+NAME: Eq:definebasis2
     \begin{equation}
-    \label{Eq:definebasis2}
-    \ket{\Phi^j_i} &= \sum^j_{i,k} O^j_{i,k} \ket{^S\phi_k(i,j)}
+    \ket{\Phi^j_i} = \sum_k O^{\Nsomo(i)}_{kj} \ket{^S\phi_k(i,j)}
     \end{equation}
+    where the functions \(\ket{^S\phi_k(i,j)}\) represent the BFs for the CFG
+    \(\ket{^S\Phi_i}\).
+    The coefficients \(O^b_{a,k}\) depend only on the number of SOMOs
+    in \(\Phi_i\).
+    
+    Each CFG contains a list of CSFs related to it which describes the
+    spin part of the wavefunction (see Eq: [[Eq:definebasis3]]) which is
+    encoded in the BFs as shown below in Eq: [[Eq:definebasis5]].
 
 
-    Where the functions \[\ket{^S\phi_k(i,j)}\] represent the BFs for the CFG
-    \[i\]. Each CFG contains a list of CSFs related to it which describes the
-    spin part of the wavefunction (see Eq:~\ref{Eq:definebasis3}) which is
-    encoded in the BFs as shown below in Eq:~\ref{Eq:definebasis5}.
-
-
-    \begin{equation}\begin{equation}
-    \label{Eq:definebasis3}
-    \ket{^S\Phi_i} = \left\{ \ket{^S\Phi^1_i}, \ket{^S\Phi^2_i}, \dots, \ket{^s\phi^{n_{csf}}_i} \right}
+    #+NAME: Eq:definebasis3
+    \begin{equation}
+    \ket{^S\Phi_i} = \left\{ \ket{^S\Phi^1_i}, \ket{^S\Phi^2_i}, \dots, \ket{^s\Phi^{\Ncsf}_i} \right\}
     \end{equation}
 
     
 
-    \begin{equation}\begin{equation}
-    \label{eq:definebasis4}
-    \ket{^s\phi_i} = \left\{ c^1_i, c^1_i, \dots, c^{N_{CSF}}_i \right\}
-    \end{equation}
-
-
-    Each of the CSFs belonging to the CFG \[\ket{^S\Phi_i}\] have coefficients
-    associated to them as shown in Eq:~\ref{Eq:definebasis4}. Crucially, the bonded functions
-    defined in Eq:~\ref{Eq:definebasis5} are not northogonal to each other.
-
-
+    #+NAME: Eq:definebasis4
     \begin{equation}
-    \label{Eq:definebasis4}
-    \ket{^S\phi_k(i,j)} = (i\bar{i})\dots (j,k) l m
+    \mathbf{c}_i = \left\{ c^1_i, c^2_i, \dots, c^{\Ncsf}_i \right\}
     \end{equation}
+
+
+    Each of the CSFs belonging to the CFG \(\ket{^S\Phi_i}\) have coefficients
+    associated to them as shown in Eq: [[Eq:definebasis4]]. Crucially, the bonded functions
+    defined in Eq: [[Eq:definebasis5]] are not northogonal to each other.
+
+
+    #+NAME: Eq:definebasis5
+    \begin{equation}
+    \ket{^S\phi_k(i,j)} = (a\bar{a})\dots (b\ c) (d (e
+    \end{equation}
+    $i$ is the index of the CFG and $j$ determines the coupling.
 
 
     The bonded functions are made up of products of slater determinants. There are
-    three types of determinants, first, the closed shell pairs \[(i\bar{i})\]. Second,
-    the open-shell singlet pairs \[(i,j)\] which are expanded as \[(i,j) = \frac{\ket{i\bar{j}}-\ket{\bar{i}j}}{\sqrt{2}}\]. Third, the
+    three types of determinants, first, the closed shell pairs \((a\bar{a})\). Second,
+    the open-shell singlet pairs \((b\ c)\) which are expanded as
+    \((b\ c) = \frac{\ket{b\bar{c}}-\ket{\bar{b}c}}{\sqrt{2}}\). Third, the
     open-shell SOMOs which are coupled parallel and account for the total spin of the
-    wavefunction \[(l (m \dots\]. They are shown as open brackets.
+    wavefunction \((l (m \dots\). They are shown as open brackets.
 
-  * Overlap of the wavefunction
+** Overlap of the wavefunction
 
     Once the wavefunction has been expanded in terms of the CSFs, the most fundamental
     operation is to calculate the overlap between two states. The overlap in the
-    basis of CSFs is defined as shown in Eq:~\ref{Eq:defineovlp1}.
+    basis of CSFs is defined as shown in Eq: [[Eq:defineovlp1]].
 
 
+    #+NAME: Eq:defineovlp1
     \begin{equation}
-    \label{Eq:defineovlp1}
     \braket{^S\Phi_i|^S\Phi_j} = \sum_{kl} C_i C_j \braket{^S\Psi^k_i|^S\Psi^l_j}
     \end{equation}
 
 
-    Where the sum is over the CSFs \[k\] and \[l\] corresponding to the \[i\]
-    and \[j\] CFGs respectively. The overlap between the CSFs can be expanded in terms
-    of the BFs using the definition given in Eq:~\ref{Eq:definebasis2} and Eq:~\ref{Eq:definebasis3}
-    as given in Eq:~\ref{Eq:defineovlp2}.
+    Where the sum is over the CSFs \(k\) and \(l\) corresponding to the \(i\)
+    and \(j\) CFGs respectively. The overlap between the CSFs can be expanded in terms
+    of the BFs using the definition given in Eq: [[Eq:definebasis2]] and
+    Eq: [[Eq:definebasis3]] as given in Eq: [[Eq:defineovlp2]].
 
 
+    #+NAME: Eq:defineovlp2
     \begin{equation}
-    \label{Eq:defineovlp2}
     \braket{^S\Phi^k_i|^S\Phi^l_j} = \sum_m \sum_n \left( O^k_{i,m}\right)^{\dagger} \braket{^S\phi_m(i,k)|^S\phi_n(j,l)} O^l_{j,n}
     \end{equation}
 
 
     Therefore, the overlap between two CSFs can be expanded in terms of the overlap
-    between the constituent BFs. The overlap matrix \[S_{mn}\] is of dimension \[\left( N^k_{N_{BF}} , N^l_{N_{BF}} \rigth)\].
-    The equation shown above (Eq:~\ref{Eq:defineovlp2}) can be written in marix-form as
-    shown below in Eq:~\ref{Eq:defineovlp3}.
+    between the constituent BFs. The overlap matrix \(S_{mn}\) is of dimension \(\left( N^k_{N_{BF}} , N^l_{N_{BF}} \right)\).
+    The equation shown above (Eq: [[Eq:defineovlp2]]) can be written in marix-form as
+    shown below in Eq: [[Eq:defineovlp3]].
 
+    #+NAME: Eq:defineovlp3
     \begin{equation}
-    \label{Eq:defineovlp3}
     \braket{^S\Phi_i|^S\Phi_j} = \left( C_{i,1} \right)^{\dagger} \mathbf{O}_i\cdot\mathbf{S}_{ij}\cdot\mathbf{O}_j C_{j,1}
     \end{equation}
 
@@ -110,16 +119,13 @@
     labels. It only depends on the number of Singly Occupied Molecular Orbitals
     (SOMOs) therefore it can be pretabulated. Actually, it is possible to
     redefine the CSFs in terms of a linear combination of BFs such that
-    \[S_{ij}\] becomes the identity matrix. In this case, one needs to store the
-    orthogonalization matrix \[\mathbf{\tilde{O}}_i\] which is given by
-    \[\mathbf{O}_i\cdot S^{1/2}_i\] for a given CFG \[i\]. Note that the a CFG
-    \[i\] is by definition of an orthonormal set of MOs automatically orthogonal
-    to a CFG \[j\] with a different occupation.
+    \(S_{ij}\) becomes the identity matrix. In this case, one needs to store the
+    orthogonalization matrix \(\mathbf{\tilde{O}}_i\) which is given by
+    \(\mathbf{O}_i\cdot S^{1/2}_i\) for a given CFG \(i\). Note that the a CFG
+    \(i\) is by definition of an orthonormal set of MOs automatically orthogonal
+    to a CFG \(j\) with a different occupation.
 
-  * Definition of matrix-elements
+** Definition of matrix-elements
 
     The matrix-element (ME) evaluation follows a similar logic.
     
-# Local variables:
-# after-save-hook: org-preview-latex-fragment
-# end:

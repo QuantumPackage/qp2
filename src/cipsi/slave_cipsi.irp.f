@@ -296,8 +296,8 @@ subroutine run_slave_main
             print *,  'Number of threads', nproc_target
           endif
 
-          if (h0_type == 'SOP') then
-            PROVIDE det_to_occ_pattern
+          if (h0_type == 'CFG') then
+            PROVIDE det_to_configuration
           endif
 
           PROVIDE global_selection_buffer 

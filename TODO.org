@@ -1,36 +1,29 @@
-det  : dans la fonction d'onde   vec
-csf  : dans la fonctions d'onde  vec
-conf_det : Nconf x Ndet'(conf)
-conf_csf : Nconf x Ncsf'(conf)
+* popcnt pour avoir les determinants par NSOMO
+* Trier par Nsomo
+* Tableau (i) -> indice du 1er CFG qui a i SOMO
+* Boucler sur toutes les CFG mono-excitees par rapport a toutes les autres
 
-csf'(conf)  : dans une conf (N_somo(conf) + N_domo(conf))
-det'(conf)  : dans une conf (N_somo(conf) + N_domo(conf))
-
-det''(conf) : probleme modele avec N_somo(conf)
-csf''(conf) : probleme modele avec N_somo(conf)
-
-* [0/2]
-  - [ ] Precalculer dans la base des configurations
-        W_pq = \sum_{K} <Psi | E_pq | K>
-        K> configuration \in SOMO-SOMO SOMO-DOMO DOMO-VMO SOMO-VMO
-        W : matrice mono x mono
-  - [ ] Fonction conf -> 
-  - [ ] Compute <i|H|j> in conf basis
-  - [ ] Function hij_conf(i,j) -> matrix Ndet_ixM
+* p,q,cfg -> 0|1|2|3 (Type d'excitation)
 
 
+222200000000
+000010100101
+p->q
+222200200000
+000000000101
 
-  (1,Ndet)   (Ndet,Ndet)   (Ndet,1) -> E
+SOMO->SOMO
 
-  for i=1,Nconf
-  for j=1,Nconf
-  (i,Ndet') [(Ndet',Ndet'')  (Ndet'',Ndet'') (Ndet'',Ndet')]  (Ndet',j) -> E
-  (i,Ncsf') (Ncsf',Ncsf'') [(Ncsf'',Ndet'')  (Ndet'',Ndet'') (Ndet'',Ncsf'')] (Ncsf'',Ncsf')  (Ncsf',j) -> E
+DOMO -> SOMO
 
-   <psi | [\sum_K E_pq | K>< K | E_rs] | Psi>
-  
-  C.D^t
+do p in DO
+  do q in not(DO or SO)
+    p->q + 2 DOMO->VMO
 
-  K : toutes les mono 
 
-  <ij|kl> = \sum_m <ij|mj><ml|kl>
+do p in DO
+  do q in not(DO or SO)
+    p->q + 2 DOMO->VMO
+DOMO -> VMO
+test si bit=1 dans DO
+test si bit=1 dans VO

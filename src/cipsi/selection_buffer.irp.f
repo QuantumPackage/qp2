@@ -175,7 +175,7 @@ subroutine make_selection_buffer_s2(b)
   ! Sort
   integer, allocatable           :: iorder(:)
   integer*8, allocatable         :: bit_tmp(:)
-  integer*8, external            :: occ_pattern_search_key
+  integer*8, external            :: configuration_search_key
   integer(bit_kind), allocatable :: tmp_array(:,:,:)
   logical, allocatable           :: duplicate(:)
 
@@ -193,7 +193,7 @@ subroutine make_selection_buffer_s2(b)
       o(k,2,i) = iand(b%det(k,1,i), b%det(k,2,i))
     enddo
     iorder(i) = i
-    bit_tmp(i) = occ_pattern_search_key(o(1,1,i),N_int)
+    bit_tmp(i) = configuration_search_key(o(1,1,i),N_int)
   enddo
 
   deallocate(b%det)
@@ -279,7 +279,7 @@ subroutine make_selection_buffer_s2(b)
   ! Create determinants
   n_d = 0
   do i=1,n_p
-    call occ_pattern_to_dets_size(o(1,1,i),sze,elec_alpha_num,N_int)
+    call configuration_to_dets_size(o(1,1,i),sze,elec_alpha_num,N_int)
     n_d = n_d + sze
     if (n_d > b%cur) then
 !      if (n_d - b%cur > b%cur - n_d + sze) then
@@ -295,8 +295,8 @@ subroutine make_selection_buffer_s2(b)
   k=1
   do i=1,n_p
     n=n_d
-    call occ_pattern_to_dets_size(o(1,1,i),n,elec_alpha_num,N_int)
-    call occ_pattern_to_dets(o(1,1,i),b%det(1,1,k),n,elec_alpha_num,N_int)
+    call configuration_to_dets_size(o(1,1,i),n,elec_alpha_num,N_int)
+    call configuration_to_dets(o(1,1,i),b%det(1,1,k),n,elec_alpha_num,N_int)
     do j=k,k+n-1
       b%val(j) = val(i)
     enddo

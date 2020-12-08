@@ -10,16 +10,16 @@ BEGIN_PROVIDER [ logical, pruned, (N_det) ]
    return
  endif
 
- integer :: i,j,k,ndet_new,nsop_max
+ integer :: i,j,k,ndet_new,ncfg_max
  double precision :: thr
 
  if (s2_eig) then
 
-  nsop_max = max(1,int ( dble(N_occ_pattern) * (1.d0 - pruning) + 0.5d0 ))
+  ncfg_max = max(1,int ( dble(N_configuration) * (1.d0 - pruning) + 0.5d0 ))
 
   do i=1,N_det
-    k = det_to_occ_pattern(i)
-    pruned(i) = psi_occ_pattern_sorted_order_reverse(k) > nsop_max
+    k = det_to_configuration(i)
+    pruned(i) = psi_configuration_sorted_order_reverse(k) > ncfg_max
   enddo
 
  else
