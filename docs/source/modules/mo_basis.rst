@@ -68,6 +68,49 @@ EZFIO parameters
 Providers 
 --------- 
  
+.. c:var:: mo_class
+
+
+    File : :file:`mo_basis/mo_class.irp.f`
+
+    .. code:: fortran
+
+        character*(32), allocatable	:: mo_class	(mo_num)
+
+
+    [ Core | Inactive | Active | Virtual | Deleted ], as defined by :ref:`qp_set_mo_class`
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_num`
+       * :c:data:`mpi_master`
+       * :c:data:`output_wall_time_0`
+
+    Needed by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`full_ijkl_bitmask`
+       * :c:data:`list_act`
+       * :c:data:`list_all_but_del_orb`
+       * :c:data:`list_core`
+       * :c:data:`list_del`
+       * :c:data:`list_inact`
+       * :c:data:`list_virt`
+       * :c:data:`mo_two_e_integrals_in_map`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_all_but_del_orb`
+       * :c:data:`n_core_orb`
+       * :c:data:`n_del_orb`
+       * :c:data:`n_inact_orb`
+       * :c:data:`n_virt_orb`
+
+ 
 .. c:var:: mo_coef
 
 
@@ -100,11 +143,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
-       * :c:data:`fps_spf_matrix_mo`
        * :c:data:`mo_coef_in_ao_ortho_basis`
+       * :c:data:`mo_coef_novirt`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_n_e`
@@ -113,32 +153,34 @@ Providers
        * :c:data:`mo_overlap`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_spread_x`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`one_e_dm_alpha_ao_for_dft`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
        * :c:data:`one_e_dm_ao_alpha`
+       * :c:data:`one_e_dm_mo_alpha_for_dft`
+       * :c:data:`one_e_dm_mo_beta_for_dft`
        * :c:data:`one_e_spin_density_ao`
        * :c:data:`psi_det`
        * :c:data:`s_mo_coef`
-       * :c:data:`scf_density_matrix_ao_alpha`
-       * :c:data:`scf_density_matrix_ao_beta`
 
  
-.. c:var:: mo_coef_begin_iteration
+.. c:var:: mo_coef_imag
 
 
-    File : :file:`mo_basis/track_orb.irp.f`
+    File : :file:`mo_basis/mos.irp.f`
 
     .. code:: fortran
 
-        double precision, allocatable	:: mo_coef_begin_iteration	(ao_num,mo_num)
+        double precision, allocatable	:: mo_coef_imag	(ao_num,mo_num)
 
 
-    Void provider to store the coefficients of the |MO| basis at the beginning of the SCF iteration
+    Molecular orbital coefficients on |AO| basis set
     
-    Usefull to track some orbitals
+    mo_coef_imag(i,j) = coefficient of the i-th |AO| on the jth |MO|
+    
+    mo_label : Label characterizing the |MOs| (local, canonical, natural, etc)
 
     Needs:
 
@@ -146,7 +188,9 @@ Providers
        :columns: 3
 
        * :c:data:`ao_num`
+       * :c:data:`ezfio_filename`
        * :c:data:`mo_num`
+       * :c:data:`mpi_master`
 
 
  
@@ -202,9 +246,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
 
@@ -269,33 +311,31 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_ortho_canonical_nucl_elec_integrals`
-       * :c:data:`ao_ortho_lowdin_nucl_elec_integrals`
+       * :c:data:`banned_excitation`
        * :c:data:`big_array_coulomb_integrals`
        * :c:data:`core_fock_operator`
-       * :c:data:`core_fock_operator_erf`
        * :c:data:`data_one_e_dm_alpha_mo`
        * :c:data:`data_one_e_dm_beta_mo`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`fock_matrix_ao`
-       * :c:data:`fock_matrix_mo`
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`fock_wee_closed_shell`
-       * :c:data:`fps_spf_matrix_mo`
        * :c:data:`full_ijkl_bitmask`
-       * :c:data:`int_erf_3_index`
+       * :c:data:`list_act`
+       * :c:data:`list_all_but_del_orb`
+       * :c:data:`list_core`
+       * :c:data:`list_core_inact`
+       * :c:data:`list_core_inact_act`
+       * :c:data:`list_del`
        * :c:data:`list_inact`
+       * :c:data:`list_inact_act`
+       * :c:data:`list_virt`
        * :c:data:`mo_class`
        * :c:data:`mo_coef`
        * :c:data:`mo_coef_begin_iteration`
+       * :c:data:`mo_coef_imag`
        * :c:data:`mo_coef_in_ao_ortho_basis`
        * :c:data:`mo_coef_transp`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_cache_min`
-       * :c:data:`mo_integrals_erf_cache_min`
-       * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
@@ -305,21 +345,34 @@ Providers
        * :c:data:`mo_overlap`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_spread_x`
-       * :c:data:`mo_two_e_int_erf_jj`
-       * :c:data:`mo_two_e_int_erf_jj_from_ao`
        * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_jj`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
+       * :c:data:`n_act_orb`
+       * :c:data:`n_all_but_del_orb`
        * :c:data:`n_core_orb`
+       * :c:data:`n_del_orb`
+       * :c:data:`n_inact_orb`
        * :c:data:`n_int`
+       * :c:data:`n_virt_orb`
+       * :c:data:`one_body_dm_mo_alpha_one_det`
+       * :c:data:`one_e_dm_alpha_ao_for_dft`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
        * :c:data:`one_e_dm_ao_alpha`
+       * :c:data:`one_e_dm_average_alpha_mo_for_dft`
+       * :c:data:`one_e_dm_average_beta_mo_for_dft`
+       * :c:data:`one_e_dm_average_mo_for_dft`
        * :c:data:`one_e_dm_dagger_mo_spin_index`
        * :c:data:`one_e_dm_mo`
        * :c:data:`one_e_dm_mo_alpha`
        * :c:data:`one_e_dm_mo_alpha_average`
+       * :c:data:`one_e_dm_mo_alpha_for_dft`
+       * :c:data:`one_e_dm_mo_alpha_for_dft_no_core`
+       * :c:data:`one_e_dm_mo_beta_for_dft`
+       * :c:data:`one_e_dm_mo_beta_for_dft_no_core`
        * :c:data:`one_e_dm_mo_diff`
+       * :c:data:`one_e_dm_mo_for_dft`
        * :c:data:`one_e_dm_mo_spin_index`
        * :c:data:`one_e_spin_density_ao`
        * :c:data:`one_e_spin_density_mo`
@@ -408,23 +461,23 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`fock_matrix_mo_alpha`
-       * :c:data:`fock_matrix_mo_beta`
-       * :c:data:`fps_spf_matrix_mo`
+       * :c:func:`four_idx_novvvv`
        * :c:data:`mo_dipole_x`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_integrals_n_e_per_atom`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_pseudo_integrals`
        * :c:data:`mo_spread_x`
+       * :c:data:`one_e_dm_mo_alpha_for_dft`
+       * :c:data:`one_e_dm_mo_beta_for_dft`
 
     Calls:
 
@@ -432,6 +485,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`dgemm`
+       * :c:func:`restore_symmetry`
 
  
 .. c:function:: give_all_mos_and_grad_and_lapl_at_r:
@@ -451,8 +505,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
 
     Calls:
 
@@ -479,8 +533,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
 
     Calls:
 
@@ -507,8 +561,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef_transp`
+       * :c:data:`mo_num`
 
     Calls:
 
@@ -517,36 +571,6 @@ Subroutines / functions
 
        * :c:func:`dgemv`
        * :c:func:`give_all_aos_at_r`
-
- 
-.. c:function:: initialize_mo_coef_begin_iteration:
-
-
-    File : :file:`mo_basis/track_orb.irp.f`
-
-    .. code:: fortran
-
-        subroutine initialize_mo_coef_begin_iteration
-
-
-    
-    Initialize :c:data:`mo_coef_begin_iteration` to the current :c:data:`mo_coef`
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_coef_begin_iteration`
-       * :c:data:`mo_coef`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`damping_scf`
-       * :c:func:`roothaan_hall_scf`
 
  
 .. c:function:: mix_mo_jk:
@@ -593,20 +617,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_label`
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`create_guess`
-       * :c:func:`damping_scf`
-       * :c:func:`hcore_guess`
-       * :c:func:`roothaan_hall_scf`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
 
     Calls:
 
@@ -634,10 +648,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_label`
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
 
     Calls:
 
@@ -665,10 +679,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_label`
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
 
     Called by:
 
@@ -687,45 +701,36 @@ Subroutines / functions
        * :c:func:`write_time`
 
  
-.. c:function:: reorder_core_orb:
+.. c:function:: mo_coef_new_as_svd_vectors_of_mo_matrix_eig:
 
 
-    File : :file:`mo_basis/track_orb.irp.f`
+    File : :file:`mo_basis/utils.irp.f`
 
     .. code:: fortran
 
-        subroutine reorder_core_orb
+        subroutine mo_coef_new_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,mo_coef_before,eig,mo_coef_new)
 
 
-    routines that takes the current :c:data:`mo_coef` and reorder the core orbitals (see :c:data:`list_core` and :c:data:`n_core_orb`) according to the overlap with :c:data:`mo_coef_begin_iteration`
+    You enter with matrix in the MO basis defined with the mo_coef_before.
+    
+    You SVD the matrix and set the eigenvectors as mo_coef_new ordered by increasing singular values
 
     Needs:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_num`
-       * :c:data:`mo_coef_begin_iteration`
-       * :c:data:`mo_coef`
-       * :c:data:`ao_overlap`
-       * :c:data:`n_core_orb`
        * :c:data:`ao_num`
-       * :c:data:`list_inact`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`damping_scf`
-       * :c:func:`roothaan_hall_scf`
+       * :c:data:`mo_num`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`dsort`
+       * :c:func:`dgemm`
+       * :c:func:`svd`
+       * :c:func:`write_time`
 
  
 .. c:function:: save_mos:
@@ -744,28 +749,21 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_occ`
        * :c:data:`ao_md5`
-       * :c:data:`ezfio_filename`
-       * :c:data:`mo_num`
-       * :c:data:`mo_coef`
        * :c:data:`ao_num`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_class`
+       * :c:data:`mo_coef`
        * :c:data:`mo_label`
+       * :c:data:`mo_num`
+       * :c:data:`mo_occ`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`damping_scf`
-       * :c:func:`hcore_guess`
-       * :c:func:`huckel_guess`
-       * :c:func:`roothaan_hall_scf`
-       * :c:func:`rotate_mos`
        * :c:func:`save_natural_mos`
-       * :c:func:`save_ortho_mos`
-       * :c:func:`sort_by_fock_energies`
-       * :c:func:`swap_mos`
 
     Calls:
 
@@ -773,10 +771,41 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ezfio_set_mo_basis_ao_md5`
+       * :c:func:`ezfio_set_mo_basis_mo_class`
        * :c:func:`ezfio_set_mo_basis_mo_coef`
        * :c:func:`ezfio_set_mo_basis_mo_label`
        * :c:func:`ezfio_set_mo_basis_mo_num`
        * :c:func:`ezfio_set_mo_basis_mo_occ`
+       * :c:func:`system`
+
+ 
+.. c:function:: save_mos_no_occ:
+
+
+    File : :file:`mo_basis/utils.irp.f`
+
+    .. code:: fortran
+
+        subroutine save_mos_no_occ
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_num`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ezfio_set_mo_basis_mo_coef`
        * :c:func:`system`
 
  
@@ -796,12 +825,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_occ`
        * :c:data:`ao_md5`
-       * :c:data:`ezfio_filename`
-       * :c:data:`mo_coef`
        * :c:data:`ao_num`
+       * :c:data:`ezfio_filename`
+       * :c:data:`mo_class`
+       * :c:data:`mo_coef`
        * :c:data:`mo_label`
+       * :c:data:`mo_occ`
 
     Calls:
 
@@ -809,6 +839,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`ezfio_set_mo_basis_ao_md5`
+       * :c:func:`ezfio_set_mo_basis_mo_class`
        * :c:func:`ezfio_set_mo_basis_mo_coef`
        * :c:func:`ezfio_set_mo_basis_mo_label`
        * :c:func:`ezfio_set_mo_basis_mo_num`

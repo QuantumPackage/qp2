@@ -19,10 +19,10 @@ ks_scf
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`io_mo_one_e_integrals` 
-    * :c:data:`mu_erf_dft` 
     * :c:data:`density_for_dft` 
     * :c:data:`io_ao_one_e_integrals` 
+    * :c:data:`io_mo_one_e_integrals` 
+    * :c:data:`mu_erf_dft` 
  
  Calls: 
  

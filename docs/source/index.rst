@@ -50,7 +50,6 @@
    :hidden:
 
    appendix/benchmarks
-   appendix/research
    appendix/license
    appendix/contributors
 

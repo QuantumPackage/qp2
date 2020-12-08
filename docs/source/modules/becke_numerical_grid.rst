@@ -128,7 +128,7 @@ Providers
 .. c:var:: angular_quadrature_points
 
 
-    File : :file:`becke_numerical_grid/grid_becke.irp.f`
+    File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
 
     .. code:: fortran
 
@@ -224,31 +224,26 @@ Providers
        :columns: 3
 
        * :c:data:`aos_grad_in_r_array`
-       * :c:data:`aos_grad_in_r_array_transp`
-       * :c:data:`aos_grad_in_r_array_transp_xyz`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vc_alpha_pbe_w`
        * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_pbe_w`
        * :c:data:`aos_vc_alpha_lda_w`
        * :c:data:`aos_vc_alpha_pbe_w`
+       * :c:data:`aos_vc_alpha_sr_pbe_w`
        * :c:data:`aos_vxc_alpha_lda_w`
        * :c:data:`aos_vxc_alpha_pbe_w`
+       * :c:data:`aos_vxc_alpha_sr_pbe_w`
+       * :c:data:`elec_beta_num_grid_becke`
        * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_pbe`
        * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_sr_x_lda`
-       * :c:data:`energy_sr_x_pbe`
        * :c:data:`energy_x_lda`
        * :c:data:`energy_x_pbe`
        * :c:data:`energy_x_sr_lda`
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`mos_in_r_array`
-       * :c:data:`one_e_dm_alpha_at_r`
+       * :c:data:`mos_in_r_array_omp`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: final_grid_points_per_atom
@@ -361,31 +356,26 @@ Providers
        :columns: 3
 
        * :c:data:`aos_grad_in_r_array`
-       * :c:data:`aos_grad_in_r_array_transp`
-       * :c:data:`aos_grad_in_r_array_transp_xyz`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vc_alpha_pbe_w`
        * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_pbe_w`
        * :c:data:`aos_vc_alpha_lda_w`
        * :c:data:`aos_vc_alpha_pbe_w`
+       * :c:data:`aos_vc_alpha_sr_pbe_w`
        * :c:data:`aos_vxc_alpha_lda_w`
        * :c:data:`aos_vxc_alpha_pbe_w`
+       * :c:data:`aos_vxc_alpha_sr_pbe_w`
+       * :c:data:`elec_beta_num_grid_becke`
        * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_pbe`
        * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_sr_x_lda`
-       * :c:data:`energy_sr_x_pbe`
        * :c:data:`energy_x_lda`
        * :c:data:`energy_x_pbe`
        * :c:data:`energy_x_sr_lda`
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`mos_in_r_array`
-       * :c:data:`one_e_dm_alpha_at_r`
+       * :c:data:`mos_in_r_array_omp`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: final_weight_at_r_vector_per_atom
@@ -484,7 +474,6 @@ Providers
 
        * :c:data:`final_grid_points`
        * :c:data:`final_grid_points_per_atom`
-       * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
  
@@ -556,31 +545,26 @@ Providers
        :columns: 3
 
        * :c:data:`aos_grad_in_r_array`
-       * :c:data:`aos_grad_in_r_array_transp`
-       * :c:data:`aos_grad_in_r_array_transp_xyz`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vc_alpha_pbe_w`
        * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_pbe_w`
        * :c:data:`aos_vc_alpha_lda_w`
        * :c:data:`aos_vc_alpha_pbe_w`
+       * :c:data:`aos_vc_alpha_sr_pbe_w`
        * :c:data:`aos_vxc_alpha_lda_w`
        * :c:data:`aos_vxc_alpha_pbe_w`
+       * :c:data:`aos_vxc_alpha_sr_pbe_w`
+       * :c:data:`elec_beta_num_grid_becke`
        * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_pbe`
        * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_sr_x_lda`
-       * :c:data:`energy_sr_x_pbe`
        * :c:data:`energy_x_lda`
        * :c:data:`energy_x_pbe`
        * :c:data:`energy_x_sr_lda`
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`mos_in_r_array`
-       * :c:data:`one_e_dm_alpha_at_r`
+       * :c:data:`mos_in_r_array_omp`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: index_final_points_per_atom
@@ -690,31 +674,26 @@ Providers
        :columns: 3
 
        * :c:data:`aos_grad_in_r_array`
-       * :c:data:`aos_grad_in_r_array_transp`
-       * :c:data:`aos_grad_in_r_array_transp_xyz`
        * :c:data:`aos_in_r_array`
        * :c:data:`aos_lapl_in_r_array`
        * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vc_alpha_pbe_w`
        * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_pbe_w`
        * :c:data:`aos_vc_alpha_lda_w`
        * :c:data:`aos_vc_alpha_pbe_w`
+       * :c:data:`aos_vc_alpha_sr_pbe_w`
        * :c:data:`aos_vxc_alpha_lda_w`
        * :c:data:`aos_vxc_alpha_pbe_w`
+       * :c:data:`aos_vxc_alpha_sr_pbe_w`
+       * :c:data:`elec_beta_num_grid_becke`
        * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_pbe`
        * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_sr_x_lda`
-       * :c:data:`energy_sr_x_pbe`
        * :c:data:`energy_x_lda`
        * :c:data:`energy_x_pbe`
        * :c:data:`energy_x_sr_lda`
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`mos_in_r_array`
-       * :c:data:`one_e_dm_alpha_at_r`
+       * :c:data:`mos_in_r_array_omp`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
 
  
 .. c:var:: m_knowles
@@ -765,43 +744,45 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:data:`alpha_dens_kin_in_r`
        * :c:data:`aos_grad_in_r_array`
        * :c:data:`aos_grad_in_r_array_transp`
-       * :c:data:`aos_grad_in_r_array_transp_xyz`
        * :c:data:`aos_in_r_array`
+       * :c:data:`aos_in_r_array_transp`
        * :c:data:`aos_lapl_in_r_array`
+       * :c:data:`aos_lapl_in_r_array_transp`
        * :c:data:`aos_sr_vc_alpha_lda_w`
-       * :c:data:`aos_sr_vc_alpha_pbe_w`
        * :c:data:`aos_sr_vxc_alpha_lda_w`
-       * :c:data:`aos_sr_vxc_alpha_pbe_w`
        * :c:data:`aos_vc_alpha_lda_w`
        * :c:data:`aos_vc_alpha_pbe_w`
+       * :c:data:`aos_vc_alpha_sr_pbe_w`
        * :c:data:`aos_vxc_alpha_lda_w`
        * :c:data:`aos_vxc_alpha_pbe_w`
+       * :c:data:`aos_vxc_alpha_sr_pbe_w`
+       * :c:data:`elec_beta_num_grid_becke`
        * :c:data:`energy_c_lda`
-       * :c:data:`energy_c_pbe`
        * :c:data:`energy_c_sr_lda`
-       * :c:data:`energy_sr_x_lda`
-       * :c:data:`energy_sr_x_pbe`
        * :c:data:`energy_x_lda`
        * :c:data:`energy_x_pbe`
        * :c:data:`energy_x_sr_lda`
        * :c:data:`energy_x_sr_pbe`
        * :c:data:`final_grid_points`
+       * :c:data:`kinetic_density_generalized`
        * :c:data:`mos_grad_in_r_array`
+       * :c:data:`mos_grad_in_r_array_tranp`
        * :c:data:`mos_in_r_array`
+       * :c:data:`mos_in_r_array_omp`
+       * :c:data:`mos_in_r_array_transp`
        * :c:data:`mos_lapl_in_r_array`
-       * :c:data:`one_e_dm_alpha_at_r`
        * :c:data:`one_e_dm_and_grad_alpha_in_r`
-       * :c:data:`one_e_dm_no_core_and_grad_alpha_in_r`
        * :c:data:`pot_grad_x_alpha_ao_pbe`
+       * :c:data:`pot_grad_x_alpha_ao_sr_pbe`
        * :c:data:`pot_grad_xc_alpha_ao_pbe`
+       * :c:data:`pot_grad_xc_alpha_ao_sr_pbe`
        * :c:data:`pot_scal_x_alpha_ao_pbe`
+       * :c:data:`pot_scal_x_alpha_ao_sr_pbe`
        * :c:data:`pot_scal_xc_alpha_ao_pbe`
-       * :c:data:`pot_sr_grad_x_alpha_ao_pbe`
-       * :c:data:`pot_sr_grad_xc_alpha_ao_pbe`
-       * :c:data:`pot_sr_scal_x_alpha_ao_pbe`
-       * :c:data:`pot_sr_scal_xc_alpha_ao_pbe`
+       * :c:data:`pot_scal_xc_alpha_ao_sr_pbe`
        * :c:data:`potential_c_alpha_ao_lda`
        * :c:data:`potential_c_alpha_ao_sr_lda`
        * :c:data:`potential_x_alpha_ao_lda`
@@ -854,6 +835,9 @@ Providers
        :columns: 3
 
        * :c:data:`grid_type_sgn`
+       * :c:data:`my_grid_becke`
+       * :c:data:`my_n_pt_a_grid`
+       * :c:data:`my_n_pt_r_grid`
 
     Needed by:
 
@@ -869,7 +853,6 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_grid_per_atom`
        * :c:data:`n_pts_per_atom`
-       * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
  
@@ -896,6 +879,9 @@ Providers
        :columns: 3
 
        * :c:data:`grid_type_sgn`
+       * :c:data:`my_grid_becke`
+       * :c:data:`my_n_pt_a_grid`
+       * :c:data:`my_n_pt_r_grid`
 
     Needed by:
 
@@ -911,7 +897,6 @@ Providers
        * :c:data:`n_points_final_grid`
        * :c:data:`n_points_grid_per_atom`
        * :c:data:`n_pts_per_atom`
-       * :c:data:`one_e_dm_alpha_in_r`
        * :c:data:`weight_at_r`
 
  
@@ -1019,7 +1004,7 @@ Providers
 .. c:var:: weights_angular_points
 
 
-    File : :file:`becke_numerical_grid/grid_becke.irp.f`
+    File : :file:`becke_numerical_grid/angular_grid_pts.irp.f`
 
     .. code:: fortran
 
@@ -1069,10 +1054,10 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`nucl_dist_inv`
-       * :c:data:`slater_bragg_type_inter_distance_ua`
        * :c:data:`nucl_coord_transp`
+       * :c:data:`nucl_dist_inv`
        * :c:data:`nucl_num`
+       * :c:data:`slater_bragg_type_inter_distance_ua`
 
  
 .. c:function:: derivative_knowles_function:
@@ -1105,11 +1090,11 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_points_final_grid`
-       * :c:data:`final_weight_at_r`
-       * :c:data:`n_points_radial_grid`
-       * :c:data:`grid_points_per_atom`
        * :c:data:`final_grid_points`
+       * :c:data:`final_weight_at_r`
+       * :c:data:`grid_points_per_atom`
+       * :c:data:`n_points_final_grid`
+       * :c:data:`n_points_radial_grid`
        * :c:data:`nucl_coord`
        * :c:data:`nucl_num`
 

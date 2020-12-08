@@ -17,8 +17,8 @@ write_integrals_erf
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`io_mo_two_e_integrals` 
     * :c:data:`io_ao_two_e_integrals` 
+    * :c:data:`io_mo_two_e_integrals` 
  
  Calls: 
  

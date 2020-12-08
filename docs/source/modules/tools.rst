@@ -33,6 +33,76 @@ Programs
 Subroutines / functions 
 ----------------------- 
  
+.. c:function:: print_energy:
+
+
+    File : :file:`print_energy.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_energy
+
+
+    Prints the energy of the wave function stored in the |EZFIO| directory.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_states`
+       * :c:data:`read_wf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`read_wf`
+
+ 
+.. c:function:: print_hamiltonian:
+
+
+    File : :file:`print_hamiltonian.irp.f`
+
+    .. code:: fortran
+
+        subroutine print_hamiltonian
+
+
+    Prints the Hamiltonian matrix defined in the space of determinants
+    present in the |EZFIO| directory.
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`read_wf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`run`
+
+    Touches:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`read_wf`
+
+ 
 .. c:function:: routine:
 
 
@@ -80,8 +150,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_states`
        * :c:data:`ezfio_filename`
+       * :c:data:`n_states`
 
     Called by:
 
@@ -137,4 +207,42 @@ Subroutines / functions
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_alpha_mo`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_ao`
        * :c:func:`ezfio_set_aux_quantities_data_one_e_dm_beta_mo`
+
+ 
+.. c:function:: run:
+
+
+    File : :file:`print_hamiltonian.irp.f`
+
+    .. code:: fortran
+
+        subroutine run
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`n_det`
+       * :c:data:`n_int`
+       * :c:data:`psi_det`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`print_energy`
+       * :c:func:`print_hamiltonian`
+       * :c:func:`pt2`
+       * :c:func:`scf`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`i_h_j`
 

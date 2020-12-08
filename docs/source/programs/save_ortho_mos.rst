@@ -17,6 +17,13 @@ save_ortho_mos
   
  Thanks to the Lowdin orthonormalization, the new MOs are the most similar to the guess MOs. 
  
+ Needs: 
+ 
+ .. hlist:: 
+    :columns: 3 
+ 
+    * :c:data:`mo_label` 
+ 
  Calls: 
  
  .. hlist:: 

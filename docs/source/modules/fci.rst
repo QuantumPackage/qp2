@@ -97,6 +97,7 @@ Providers
     .. code:: fortran
 
         logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
         logical	:: do_ddci	
 
 
@@ -112,6 +113,23 @@ Providers
     .. code:: fortran
 
         logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
+        logical	:: do_ddci	
+
+
+    In the FCI case, all those are always false
+
+
+ 
+.. c:var:: do_only_cas
+
+
+    File : :file:`fci/class.irp.f`
+
+    .. code:: fortran
+
+        logical	:: do_only_1h1p	
+        logical	:: do_only_cas	
         logical	:: do_ddci	
 
 

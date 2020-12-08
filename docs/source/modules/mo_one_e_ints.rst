@@ -176,7 +176,7 @@ Providers
        * :c:data:`ao_num`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
-       * :c:data:`read_mo_integrals_e_n`
+       * :c:data:`read_mo_integrals_n_e`
 
     Needed by:
 
@@ -264,11 +264,9 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`do_pseudo`
        * :c:data:`mo_integrals_n_e`
        * :c:data:`mo_kinetic_integrals`
        * :c:data:`mo_num`
-       * :c:data:`mo_pseudo_integrals`
        * :c:data:`read_mo_one_e_integrals`
 
     Needed by:
@@ -277,7 +275,6 @@ Providers
        :columns: 3
 
        * :c:data:`core_energy`
-       * :c:data:`core_energy_erf`
        * :c:data:`fock_operator_closed_shell_ref_bitmask`
        * :c:data:`psi_energy_h_core`
        * :c:data:`ref_bitmask_energy`
@@ -331,12 +328,6 @@ Providers
        * :c:data:`mo_num`
        * :c:data:`read_mo_integrals_pseudo`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`mo_one_e_integrals`
 
  
 .. c:var:: mo_spread_x
@@ -445,12 +436,6 @@ Providers
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_matrix_ao`
 
  
  
@@ -477,15 +462,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`s_mo_coef`
        * :c:data:`mo_num`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`fock_matrix_ao`
+       * :c:data:`s_mo_coef`
 
     Calls:
 
@@ -513,8 +491,16 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_num`
-       * :c:data:`mo_num`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`one_e_dm_alpha_ao_for_dft`
+       * :c:data:`one_e_dm_alpha_ao_for_dft_no_core`
 
     Calls:
 
@@ -540,26 +526,27 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_label`
        * :c:data:`ao_num`
-       * :c:data:`mo_overlap`
-       * :c:data:`mo_num`
+       * :c:data:`lin_dep_cutoff`
        * :c:data:`mo_coef`
+       * :c:data:`mo_num`
+       * :c:data:`mo_overlap`
 
     Called by:
 
     .. hlist::
        :columns: 3
 
-       * :c:func:`save_ortho_mos`
-       * :c:func:`scf`
+       * :c:func:`save_natural_mos`
 
     Calls:
 
     .. hlist::
        :columns: 3
 
+       * :c:func:`nullify_small_elements`
        * :c:func:`ortho_lowdin`
+       * :c:func:`restore_symmetry`
 
     Touches:
 
@@ -567,5 +554,4 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`mo_coef`
-       * :c:data:`mo_label`
 

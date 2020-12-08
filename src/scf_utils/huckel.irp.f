@@ -15,7 +15,8 @@ subroutine huckel_guess
   A = 0.d0
   do j=1,ao_num
     do i=1,ao_num
-      A(i,j) = c * ao_overlap(i,j) * (ao_one_e_integrals_diag(i) + ao_one_e_integrals_diag(j))
+      A(i,j) = c * ao_overlap(i,j)/(ao_overlap(i,i)*ao_overlap(j,j)) * &
+         (ao_one_e_integrals_diag(i) + ao_one_e_integrals_diag(j))
     enddo
     A(j,j) = ao_one_e_integrals_diag(j) + ao_two_e_integral_alpha(j,j)
   enddo
