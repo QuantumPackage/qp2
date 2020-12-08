@@ -1550,6 +1550,7 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
       amax = max(dabs(A(i,j)), amax)
     enddo
   enddo
+  if (amax == 0.d0) return
   amax = 1.d0/amax
 
   ! Remove tiny elements
