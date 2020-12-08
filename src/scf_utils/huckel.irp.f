@@ -14,7 +14,9 @@ subroutine huckel_guess
   allocate (A(ao_num, ao_num))
   A = 0.d0
   do j=1,ao_num
+    if (ao_overlap(j,j) == 0.d0) cycle
     do i=1,ao_num
+      if (ao_overlap(i,i) == 0.d0) cycle
       A(i,j) = c * ao_overlap(i,j)/(ao_overlap(i,i)*ao_overlap(j,j)) * &
          (ao_one_e_integrals_diag(i) + ao_one_e_integrals_diag(j))
     enddo
