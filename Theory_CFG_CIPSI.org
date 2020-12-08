@@ -18,53 +18,51 @@
 
     In CFG based CIPSI, the wavefunction is represented in CFG basis as shown in Eq:\[~\ref{Eq:definebasis1}\].
 
-    #+BEGIN_LaTeX
     \begin{equation}
     \label{Eq:definebasis1}
     \ket{\psi} &= \sum_{ij} c_{ij} ^s\ket{\phi^j_i}
     \end{equation}
-    #+END_LaTeX
+
 
     where the \[\ket{\Phi^j_i}\] represent Configuration State Functions (CSFs)
     which are expanded in terms of Bonded functions (BFs) as shown in
     Eq:\[~\ref{Eq:definebasis2}\].
 
-    #+BEGIN_LaTeX
     \begin{equation}
     \label{Eq:definebasis2}
     \ket{\Phi^j_i} &= \sum^j_{i,k} O^j_{i,k} \ket{^S\phi_k(i,j)}
     \end{equation}
-    #+END_LaTeX
+
 
     Where the functions \[\ket{^S\phi_k(i,j)}\] represent the BFs for the CFG
     \[i\]. Each CFG contains a list of CSFs related to it which describes the
     spin part of the wavefunction (see Eq:~\ref{Eq:definebasis3}) which is
     encoded in the BFs as shown below in Eq:~\ref{Eq:definebasis5}.
 
-    #+BEGIN_LaTeX
+
     \begin{equation}\begin{equation}
     \label{Eq:definebasis3}
     \ket{^S\Phi_i} = \left\{ \ket{^S\Phi^1_i}, \ket{^S\Phi^2_i}, \dots, \ket{^s\phi^{n_{csf}}_i} \right}
     \end{equation}
-    #+END_LaTeX
+
     
-    #+BEGIN_LaTeX
+
     \begin{equation}\begin{equation}
     \label{eq:definebasis4}
     \ket{^s\phi_i} = \left\{ c^1_i, c^1_i, \dots, c^{N_{CSF}}_i \right\}
     \end{equation}
-    #+END_LaTeX
+
 
     Each of the CSFs belonging to the CFG \[\ket{^S\Phi_i}\] have coefficients
     associated to them as shown in Eq:~\ref{Eq:definebasis4}. Crucially, the bonded functions
     defined in Eq:~\ref{Eq:definebasis5} are not northogonal to each other.
 
-    #+BEGIN_LaTeX
+
     \begin{equation}
     \label{Eq:definebasis4}
     \ket{^S\phi_k(i,j)} = (i\bar{i})\dots (j,k) l m
     \end{equation}
-    #+END_LaTeX
+
 
     The bonded functions are made up of products of slater determinants. There are
     three types of determinants, first, the closed shell pairs \[(i\bar{i})\]. Second,
@@ -78,36 +76,35 @@
     operation is to calculate the overlap between two states. The overlap in the
     basis of CSFs is defined as shown in Eq:~\ref{Eq:defineovlp1}.
 
-    #+BEGIN_LaTeX
+
     \begin{equation}
     \label{Eq:defineovlp1}
     \braket{^S\Phi_i|^S\Phi_j} = \sum_{kl} C_i C_j \braket{^S\Psi^k_i|^S\Psi^l_j}
     \end{equation}
-    #+END_LaTeX
+
 
     Where the sum is over the CSFs \[k\] and \[l\] corresponding to the \[i\]
     and \[j\] CFGs respectively. The overlap between the CSFs can be expanded in terms
     of the BFs using the definition given in Eq:~\ref{Eq:definebasis2} and Eq:~\ref{Eq:definebasis3}
     as given in Eq:~\ref{Eq:defineovlp2}.
 
-    #+BEGIN_LaTeX
+
     \begin{equation}
     \label{Eq:defineovlp2}
     \braket{^S\Phi^k_i|^S\Phi^l_j} = \sum_m \sum_n \left( O^k_{i,m}\right)^{\dagger} \braket{^S\phi_m(i,k)|^S\phi_n(j,l)} O^l_{j,n}
     \end{equation}
-    #+END_LaTeX
+
 
     Therefore, the overlap between two CSFs can be expanded in terms of the overlap
     between the constituent BFs. The overlap matrix \[S_{mn}\] is of dimension \[\left( N^k_{N_{BF}} , N^l_{N_{BF}} \rigth)\].
     The equation shown above (Eq:~\ref{Eq:defineovlp2}) can be written in marix-form as
     shown below in Eq:~\ref{Eq:defineovlp3}.
 
-    #+BEGIN_LaTeX
     \begin{equation}
     \label{Eq:defineovlp3}
     \braket{^S\Phi_i|^S\Phi_j} = \left( C_{i,1} \right)^{\dagger} \mathbf{O}_i\cdot\mathbf{S}_{ij}\cdot\mathbf{O}_j C_{j,1}
     \end{equation}
-    #+END_LaTeX
+
 
     Note that the overlap between two CFGs does not depend on the orbital
     labels. It only depends on the number of Singly Occupied Molecular Orbitals
