@@ -695,9 +695,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   call apply_holes(psi_det_generators(1,1,i_generator), s1, h1, s2, h2, mask, ok, N_int)
   E_shift = 0.d0
 
-  if (h0_type == 'SOP') then
-    j = det_to_occ_pattern(i_generator)
-    E_shift = psi_det_Hii(i_generator) - psi_occ_pattern_Hii(j)
+  if (h0_type == 'CFG') then
+    j = det_to_configuration(i_generator)
+    E_shift = psi_det_Hii(i_generator) - psi_configuration_Hii(j)
   endif
 
   do p1=1,mo_num
@@ -810,8 +810,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       w = 0d0
 
 !      integer(bit_kind) :: occ(N_int,2), n
-!      call occ_pattern_of_det(det,occ,N_int)
-!      call occ_pattern_to_dets_size(occ,n,elec_alpha_num,N_int)
+!      call configuration_of_det(det,occ,N_int)
+!      call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
 
       e_pert = 0.d0
       coef = 0.d0

@@ -1,9 +1,9 @@
 use bitmasks
-subroutine occ_pattern_of_det(d,o,Nint)
+subroutine configuration_of_det(d,o,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Transforms a determinant to an occupation pattern
+  ! Transforms a determinant to a configuration
   !
   ! occ(:,1) : Single occupations
   !
@@ -23,11 +23,11 @@ subroutine occ_pattern_of_det(d,o,Nint)
 end
 
 
-subroutine occ_pattern_to_dets_size(o,sze,n_alpha,Nint)
+subroutine configuration_to_dets_size(o,sze,n_alpha,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-!  Number of possible determinants for a given occ_pattern
+!  Number of possible determinants for a given configuration
   END_DOC
   integer          ,intent(in)   :: Nint, n_alpha
   integer(bit_kind),intent(in)   :: o(Nint,2)
@@ -49,15 +49,15 @@ subroutine occ_pattern_to_dets_size(o,sze,n_alpha,Nint)
 end
 
 
-subroutine occ_pattern_to_dets(o,d,sze,n_alpha,Nint)
+subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Generate all possible determinants for a given occ_pattern
+  ! Generate all possible determinants for a given configuration
   ! 
   ! Input :
-  !    o   : occupation pattern : (doubly occupied, singly occupied)
-  !    sze : Number of produced determinants, computed by `occ_pattern_to_dets_size`
+  !    o   : configuration : (doubly occupied, singly occupied)
+  !    sze : Number of produced determinants, computed by `configuration_to_dets_size`
   !    n_alpha : Number of $\alpha$ electrons
   !    Nint    : N_int
   !
@@ -184,32 +184,32 @@ subroutine occ_pattern_to_dets(o,d,sze,n_alpha,Nint)
 end
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_occ_pattern, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ integer, N_occ_pattern ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ integer, N_configuration ]
  implicit none
  BEGIN_DOC
-  ! Array of the occ_patterns present in the wave function.
+  ! Array of the configurations present in the wave function.
   !
-  ! psi_occ_pattern(:,1,j) = j-th occ_pattern of the wave function : represents all the single occupations
+  ! psi_configuration(:,1,j) = j-th configuration of the wave function : represents all the single occupations
   !
-  ! psi_occ_pattern(:,2,j) = j-th occ_pattern of the wave function : represents all the double occupations
+  ! psi_configuration(:,2,j) = j-th configuration of the wave function : represents all the double occupations
   !
-  ! The occ patterns are sorted by :c:func:`occ_pattern_search_key`
+  ! The occ patterns are sorted by :c:func:`configuration_search_key`
  END_DOC
  integer :: i,j,k
 
  ! create
  do i = 1, N_det
   do k = 1, N_int
-   psi_occ_pattern(k,1,i) = ieor(psi_det(k,1,i),psi_det(k,2,i))
-   psi_occ_pattern(k,2,i) = iand(psi_det(k,1,i),psi_det(k,2,i))
+   psi_configuration(k,1,i) = ieor(psi_det(k,1,i),psi_det(k,2,i))
+   psi_configuration(k,2,i) = iand(psi_det(k,1,i),psi_det(k,2,i))
   enddo
  enddo
 
  ! Sort
  integer, allocatable           :: iorder(:)
  integer*8, allocatable         :: bit_tmp(:)
- integer*8, external            :: occ_pattern_search_key
+ integer*8, external            :: configuration_search_key
  integer(bit_kind), allocatable :: tmp_array(:,:,:)
  logical,allocatable            :: duplicate(:)
  logical :: dup
@@ -219,7 +219,7 @@ end
 
  do i=1,N_det
    iorder(i) = i
-   bit_tmp(i) = occ_pattern_search_key(psi_occ_pattern(1,1,i),N_int)
+   bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
  enddo
 
  call i8sort(bit_tmp,iorder,N_det)
@@ -230,8 +230,8 @@ end
  !$OMP DO
  do i=1,N_det
   do k=1,N_int
-    tmp_array(k,1,i) = psi_occ_pattern(k,1,iorder(i))
-    tmp_array(k,2,i) = psi_occ_pattern(k,2,iorder(i))
+    tmp_array(k,1,i) = psi_configuration(k,1,iorder(i))
+    tmp_array(k,2,i) = psi_configuration(k,2,iorder(i))
   enddo
   duplicate(i) = .False.
  enddo
@@ -273,36 +273,36 @@ end
  !$OMP END PARALLEL
 
  ! Copy filtered result
- N_occ_pattern=0
+ N_configuration=0
  do i=1,N_det
   if (duplicate(i)) then
     cycle
   endif
-  N_occ_pattern += 1
+  N_configuration += 1
   do k=1,N_int
-    psi_occ_pattern(k,1,N_occ_pattern) = tmp_array(k,1,i)
-    psi_occ_pattern(k,2,N_occ_pattern) = tmp_array(k,2,i)
+    psi_configuration(k,1,N_configuration) = tmp_array(k,1,i)
+    psi_configuration(k,2,N_configuration) = tmp_array(k,2,i)
   enddo
  enddo
 
 !- Check
 !  print *,  'Checking for duplicates in occ pattern'
-!  do i=1,N_occ_pattern
-!   do j=i+1,N_occ_pattern
+!  do i=1,N_configuration
+!   do j=i+1,N_configuration
 !     duplicate(1) = .True.
 !     do k=1,N_int
-!       if (psi_occ_pattern(k,1,i) /= psi_occ_pattern(k,1,j)) then
+!       if (psi_configuration(k,1,i) /= psi_configuration(k,1,j)) then
 !         duplicate(1) = .False.
 !         exit
 !       endif
-!       if (psi_occ_pattern(k,2,i) /= psi_occ_pattern(k,2,j)) then
+!       if (psi_configuration(k,2,i) /= psi_configuration(k,2,j)) then
 !         duplicate(1) = .False.
 !         exit
 !       endif
 !     enddo
 !     if (duplicate(1)) then
-!       call debug_det(psi_occ_pattern(1,1,i),N_int)
-!       call debug_det(psi_occ_pattern(1,1,j),N_int)
+!       call debug_det(psi_configuration(1,1,i),N_int)
+!       call debug_det(psi_configuration(1,1,j),N_int)
 !       stop 'DUPLICATE'
 !     endif
 !   enddo
@@ -313,21 +313,21 @@ end
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, det_to_occ_pattern, (N_det) ]
+BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
  implicit none
  BEGIN_DOC
- ! Returns the index of the occupation pattern for each determinant
+ ! Returns the index of the configuration for each determinant
  END_DOC
  integer :: i,j,k,r,l
  integer*8 :: key
  integer(bit_kind) :: occ(N_int,2)
  logical :: found
  integer*8, allocatable :: bit_tmp(:)
- integer*8, external            :: occ_pattern_search_key
+ integer*8, external            :: configuration_search_key
 
- allocate(bit_tmp(N_occ_pattern))
- do i=1,N_occ_pattern
-   bit_tmp(i) = occ_pattern_search_key(psi_occ_pattern(1,1,i),N_int)
+ allocate(bit_tmp(N_configuration))
+ do i=1,N_configuration
+   bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
  enddo
 
  !$OMP PARALLEL DO DEFAULT(SHARED) &
@@ -338,11 +338,11 @@ BEGIN_PROVIDER [ integer, det_to_occ_pattern, (N_det) ]
       occ(k,2) = iand(psi_det(k,1,i),psi_det(k,2,i))
     enddo
 
-    key = occ_pattern_search_key(occ,N_int)
+    key = configuration_search_key(occ,N_int)
 
     ! TODO: Binary search
     l = 1
-    r = N_occ_pattern
+    r = N_configuration
 !    do while(r-l > 32)
 !      j = shiftr(r+l,1)
 !      if (bit_tmp(j) < key) then
@@ -354,14 +354,14 @@ BEGIN_PROVIDER [ integer, det_to_occ_pattern, (N_det) ]
     do j=l,r
       found = .True.
       do k=1,N_int
-        if ( (occ(k,1) /= psi_occ_pattern(k,1,j)) &
-        .or. (occ(k,2) /= psi_occ_pattern(k,2,j)) ) then
+        if ( (occ(k,1) /= psi_configuration(k,1,j)) &
+        .or. (occ(k,2) /= psi_configuration(k,2,j)) ) then
           found = .False.
           exit
         endif
       enddo
       if (found) then
-        det_to_occ_pattern(i) = j
+        det_to_configuration(i) = j
         exit
       endif
     enddo
@@ -376,78 +376,78 @@ BEGIN_PROVIDER [ integer, det_to_occ_pattern, (N_det) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_occ_pattern_Hii, (N_occ_pattern) ]
+BEGIN_PROVIDER [ double precision, psi_configuration_Hii, (N_configuration) ]
  implicit none
  BEGIN_DOC
- ! $\langle I|H|I \rangle$ where $|I\rangle$ is an occupation pattern.
+ ! $\langle I|H|I \rangle$ where $|I\rangle$ is a configuration.
  ! This is the minimum $H_{ii}$, where the $|i\rangle$ are the
  ! determinants of $|I\rangle$.
  END_DOC
  integer :: j, i
 
- psi_occ_pattern_Hii(:) = huge(1.d0)
+ psi_configuration_Hii(:) = huge(1.d0)
  do i=1,N_det
-  j = det_to_occ_pattern(i)
-  psi_occ_pattern_Hii(j) = min(psi_occ_pattern_Hii(j), psi_det_Hii(i))
+  j = det_to_configuration(i)
+  psi_configuration_Hii(j) = min(psi_configuration_Hii(j), psi_det_Hii(i))
  enddo
 
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, weight_occ_pattern, (N_occ_pattern,N_states) ]
+BEGIN_PROVIDER [ double precision, weight_configuration, (N_configuration,N_states) ]
  implicit none
  BEGIN_DOC
- ! Weight of the occupation patterns in the wave function
+ ! Weight of the configurations in the wave function
  END_DOC
  integer :: i,j,k
- weight_occ_pattern = 0.d0
+ weight_configuration = 0.d0
  do i=1,N_det
-  j = det_to_occ_pattern(i)
+  j = det_to_configuration(i)
   do k=1,N_states
-    weight_occ_pattern(j,k) += psi_coef(i,k) * psi_coef(i,k)
+    weight_configuration(j,k) += psi_coef(i,k) * psi_coef(i,k)
   enddo
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, weight_occ_pattern_average, (N_occ_pattern) ]
+BEGIN_PROVIDER [ double precision, weight_configuration_average, (N_configuration) ]
  implicit none
  BEGIN_DOC
- ! State-average weight of the occupation patterns in the wave function
+ ! State-average weight of the configurations in the wave function
  END_DOC
  integer :: i,j,k
- weight_occ_pattern_average(:) = 0.d0
+ weight_configuration_average(:) = 0.d0
  do i=1,N_det
-  j = det_to_occ_pattern(i)
+  j = det_to_configuration(i)
   do k=1,N_states
-    weight_occ_pattern_average(j) += psi_coef(i,k) * psi_coef(i,k) * state_average_weight(k)
+    weight_configuration_average(j) += psi_coef(i,k) * psi_coef(i,k) * state_average_weight(k)
   enddo
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_occ_pattern_sorted, (N_int,2,N_occ_pattern) ]
-&BEGIN_PROVIDER [ double precision, weight_occ_pattern_average_sorted, (N_occ_pattern) ]
-&BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order, (N_occ_pattern) ]
-&BEGIN_PROVIDER [ integer, psi_occ_pattern_sorted_order_reverse, (N_occ_pattern) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_configuration_sorted, (N_int,2,N_configuration) ]
+&BEGIN_PROVIDER [ double precision, weight_configuration_average_sorted, (N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_sorted_order, (N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_sorted_order_reverse, (N_configuration) ]
  implicit none
  BEGIN_DOC
- ! Occupation patterns sorted by weight 
+ ! Configurations sorted by weight 
  END_DOC
  integer                        :: i,j,k
  integer, allocatable           :: iorder(:)
- allocate ( iorder(N_occ_pattern) )
- do i=1,N_occ_pattern
-   weight_occ_pattern_average_sorted(i) = -weight_occ_pattern_average(i)
+ allocate ( iorder(N_configuration) )
+ do i=1,N_configuration
+   weight_configuration_average_sorted(i) = -weight_configuration_average(i)
    iorder(i) = i
  enddo
- call dsort(weight_occ_pattern_average_sorted,iorder,N_occ_pattern)
- do i=1,N_occ_pattern
+ call dsort(weight_configuration_average_sorted,iorder,N_configuration)
+ do i=1,N_configuration
    do j=1,N_int
-     psi_occ_pattern_sorted(j,1,i) = psi_occ_pattern(j,1,iorder(i)) 
-     psi_occ_pattern_sorted(j,2,i) = psi_occ_pattern(j,2,iorder(i)) 
+     psi_configuration_sorted(j,1,i) = psi_configuration(j,1,iorder(i)) 
+     psi_configuration_sorted(j,2,i) = psi_configuration(j,2,iorder(i)) 
    enddo
-   psi_occ_pattern_sorted_order(iorder(i)) = i
-   psi_occ_pattern_sorted_order_reverse(i) = iorder(i)
-   weight_occ_pattern_average_sorted(i) = -weight_occ_pattern_average_sorted(i)
+   psi_configuration_sorted_order(iorder(i)) = i
+   psi_configuration_sorted_order_reverse(i) = iorder(i)
+   weight_configuration_average_sorted(i) = -weight_configuration_average_sorted(i)
  enddo
 
  deallocate(iorder)
@@ -466,27 +466,27 @@ subroutine make_s2_eigenfunction
   logical                        :: update
 
   update=.False.
-  call write_int(6,N_occ_pattern,'Number of occupation patterns')
+  call write_int(6,N_configuration,'Number of configurations')
 
   !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP  SHARED(N_occ_pattern, psi_occ_pattern, elec_alpha_num,N_int,update) &
+  !$OMP  SHARED(N_configuration, psi_configuration, elec_alpha_num,N_int,update) &
   !$OMP  PRIVATE(s,ithread, d, det_buffer, smax, N_det_new,i,j,k)
   N_det_new = 0
-  call occ_pattern_to_dets_size(psi_occ_pattern(1,1,1),s,elec_alpha_num,N_int)
+  call configuration_to_dets_size(psi_configuration(1,1,1),s,elec_alpha_num,N_int)
   allocate (d(N_int,2,s+64), det_buffer(N_int,2,bufsze) )
   smax = s
   ithread=0
   !$ ithread = omp_get_thread_num()
   !$OMP DO SCHEDULE (dynamic,1000)
-  do i=1,N_occ_pattern
-    call occ_pattern_to_dets_size(psi_occ_pattern(1,1,i),s,elec_alpha_num,N_int)
+  do i=1,N_configuration
+    call configuration_to_dets_size(psi_configuration(1,1,i),s,elec_alpha_num,N_int)
     s += 1
     if (s > smax) then
       deallocate(d)
       allocate ( d(N_int,2,s+64) )
       smax = s
     endif
-    call occ_pattern_to_dets(psi_occ_pattern(1,1,i),d,s,elec_alpha_num,N_int)
+    call configuration_to_dets(psi_configuration(1,1,i),d,s,elec_alpha_num,N_int)
     do j=1,s
       if ( is_in_wavefunction(d(1,1,j), N_int) ) then
         cycle
@@ -511,7 +511,7 @@ subroutine make_s2_eigenfunction
 
   if (update) then
     call copy_H_apply_buffer_to_wf
-    TOUCH N_det psi_coef psi_det psi_occ_pattern N_occ_pattern
+    TOUCH N_det psi_coef psi_det psi_configuration N_configuration
   endif
   call write_time(6)
 
