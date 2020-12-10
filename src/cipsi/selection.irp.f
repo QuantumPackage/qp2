@@ -821,6 +821,19 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         enddo
       endif
 
+      if (seniority >= 0) then
+        !TODO : Check if 1st determinant should be used for all states
+        integer :: s
+        s = 0
+        do k=1,N_int
+          s = s + popcnt(ieor(det(k,1),det(k,2)))
+        enddo
+
+        if (s > seniority) then
+          e_pert(:) = 0.d0
+        endif
+      endif
+
 
 !      ! Gram-Schmidt using input overlap matrix
 !      do istate=1,N_states
@@ -899,6 +912,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       endif
 
 !      w = dble(n) * w
+
 
       if(w <= buf%mini) then
         call add_to_selection_buffer(buf, det, w)
