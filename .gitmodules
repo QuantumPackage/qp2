@@ -1,6 +1,6 @@
 [submodule "external/ezfio"]
 	path = external/ezfio
-	url = https://gitlab.com/scemama/ezfio
+	url = https://gitlab.com/scemama/ezfio.git
 [submodule "external/irpf90"]
 	path = external/irpf90
-	url = https://gitlab.com/scemama/irpf90
+	url = https://gitlab.com/scemama/irpf90.git
