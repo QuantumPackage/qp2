@@ -678,11 +678,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision :: delta_E, val, Hii, w, tmp, alpha_h_psi
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
-
-  logical, external :: detEq
-  double precision, allocatable :: values(:)
-  integer, allocatable          :: keys(:,:)
-  integer                       :: nkeys
   double precision :: s_weight(N_states,N_states)
   do jstate=1,N_states
     do istate=1,N_states
@@ -761,6 +756,36 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (.not.is_a_1h1p(det)) cycle
       endif
 
+      if (seniority_max >= 0) then
+        integer :: s
+        s = 0
+        do k=1,N_int
+          s = s + popcnt(ieor(det(k,1),det(k,2)))
+        enddo
+
+        if (s > seniority_max) cycle
+      endif
+
+
+      if (excitation_max >= 0) then
+        integer :: degree
+        call get_excitation_degree(ref_bitmask(1,1),det(1,1),degree,N_int)
+        if (degree > excitation_max) cycle
+      endif
+
+
+      if (excitation_alpha_max >= 0) then
+        call get_excitation_degree_spin(ref_bitmask(1,1),det(1,1),degree,N_int)
+        if (degree > excitation_alpha_max) cycle
+      endif
+
+
+      if (excitation_beta_max >= 0) then
+        call get_excitation_degree_spin(ref_bitmask(1,2),det(1,2),degree,N_int)
+        if (degree > excitation_beta_max) cycle
+      endif
+
+
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       w = 0d0
@@ -821,18 +846,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         enddo
       endif
 
-      if (seniority >= 0) then
-        !TODO : Check if 1st determinant should be used for all states
-        integer :: s
-        s = 0
-        do k=1,N_int
-          s = s + popcnt(ieor(det(k,1),det(k,2)))
-        enddo
-
-        if (s > seniority) then
-          e_pert(:) = 0.d0
-        endif
-      endif
 
 
 !      ! Gram-Schmidt using input overlap matrix
