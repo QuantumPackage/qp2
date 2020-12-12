@@ -312,12 +312,14 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
 
+  ! Pre-compute excitation degrees wrt alpha determinants
   k=1
   do i=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,i),       &
         psi_det_generators(1,1,i_generator), exc_degree(i), N_int)
   enddo
 
+  ! Iterate on 0SD beta, and find alphas 0SDTQ such that exc_degree <= 4
   do j=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,j),        &
         psi_det_generators(1,2,i_generator), nt, N_int)
@@ -334,11 +336,14 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
     enddo
   enddo
 
+  ! Pre-compute excitation degrees wrt beta determinants
   do i=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,i),        &
         psi_det_generators(1,2,i_generator), exc_degree(i), N_int)
   enddo
 
+  ! Iterate on 0S alpha, and find betas TQ such that exc_degree <= 4
+  ! Remove also contributions < 1.d-20)
   do j=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,j),       &
         psi_det_generators(1,1,i_generator), nt, N_int)
