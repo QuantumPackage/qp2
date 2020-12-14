@@ -127,5 +127,55 @@
 
 ** Definition of matrix-elements
 
-    The matrix-element (ME) evaluation follows a similar logic.
+    The matrix-element (ME) evaluation follows a similar logic as the evalulation of
+    the overlap. However, here the metric is the one-, or two-particle operator \(\hat{E}_{pq}\)
+    or \(\hat{E}_{pq}\hat{E}_{rs}\) as shown in Eq: [[Eq:defineme1]] and Eq: [[Eq:defineme2]].
+    
+    #+NAME: Eq:defineme1
+    \begin{equation}
+    \braket{^S\Phi^k_i|\hat{O}_{pq}|^S\Phi^l_j} = \left( C_{i,1} \right)^{\dagger} \mathbf{O}_i\cdot\mathbf{A}^{pq}_{ij}\cdot\mathbf{O}_j C_{j,1}
+    \end{equation}
+    
+    #+NAME: Eq:defineme2
+    \begin{equation}
+    \braket{^S\Phi^k_i|\hat{O}_{pq,rs}|^S\Phi^l_j} = \sum_K \left( C_{i,1} \right)^{\dagger} \mathbf{O}_i\cdot\mathbf{A}^{pq}_{ik}\cdot\mathbf{O}_k \mathbf{O}_k\cdot\mathbf{A}^{rs}_{kj}\cdot\mathbf{O}_j  C_{j,1}
+    \end{equation}
+
+    
+    Where, \(\hat{O}_{pq}\) and \(hat{O}_{pq,rs}\) represent an arbitrary one-, and 
+    two-particle operators respectively. Importantly, the one-, and two-particle 
+    matrix-element evaluation can be recast into an effecient matrix multiplication 
+    form which is crucial for a fast evaluation of the action of the operators 
+    \(\hat{O}_{pq}\) and \(hat{O}_{pq,rs}\). The matrix \(\mathbf{A}^{pq}_{ij}\) contains
+    the result of the operation \(\braket{^S\Phi^k_i|\hat{O}_{pq}|^S\Phi^l_j}\) in terms 
+    of BFs and is therefore of size \(NCSF(i) \textit{x} NBF(i)\). In this formulation, the determinant basis is entirely avoided.
+    Note that the size and contents of the matrix \(\mathbf{A}^{pq}_{ij}\) depends
+    only on the total number of SOMOs and the total spin \(S\), therefore, an optimal
+    prototyping scheme can be deviced for a rapid calculaiton of these matrix contractions.
+    The resolution of identity (RI) is used to evaluate the two-particle operator since 
+    this alleviates the necessacity to explicity construct two-particle matrix-elements 
+    \(\braket{^S\Phi^k_i|\hat{O}_{pq,rs}|^S\Phi^l_j}\) directly.
+    
+** Sigma-vector evaluation
+
+    Once the \(\mathbf{A}^{pq}_{ij}\) matrices have been constructed for the given
+    selected list of CFGs, the prototype lists for the \(\mathbf{A}^{pq}_{ij}\) matrices
+    can be constructed. Following this, one can proceede to the evaluation of the sigma-vector 
+    as defined in the Eq [[Eq:definesigma1]]. 
+    
+    
+    #+NAME: Eq:definesigma1
+    \begin{equation}
+    \sigma = \sum_{pq} \tilde{h}_{pq}\hat{E}_{pq}|\ket{^S\Phi^l_j} + \frac{1}{2}\sum_{pq,rs} g_{pq,rs} \hat{E}_{pq}\hat{E}_{rs}|\ket{^S\Phi^l_j} 
+    \end{equation}
+    
+    The one-electron part of the sigma-vector can be calculated as shown in Eq: [[Eq:defineme1]]
+    and the two-electron part can be calculated using the RI as shown in Eq: [[Eq:defineme2]]. 
+    The most expensive part involves the two-particle operator as shown on the RHS of Eq: [[Eq:definesigma1]].
+    In this CFG formulation, the cost intensive part of the sigma-vector evaluation has been recast
+    into an efficient BLAS matrix multiplication operation. Therefore, this formulation is the most efficient
+    albeit at the cost of storing the prototype matrices \(\mathbf{A}^{pq}_{ij}\). However, where the total spin
+    is small and the largest number of SOMOs does not exceed 14, the \(\mathbf{A}^{pq}_{ij}\) matrices 
+    can be stored in memory.
+
     
