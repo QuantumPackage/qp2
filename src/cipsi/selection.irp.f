@@ -730,6 +730,12 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       if(bannedOrb(p2, s2)) cycle
       if(banned(p1,p2)) cycle
 
+      if(pseudo_sym)then
+        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
+          w = 0.d0
+        endif
+      endif
+
       val = maxval(abs(mat(1:N_states, p1, p2)))
       if( val == 0d0) cycle
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
@@ -917,12 +923,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         end select
       end do
 
-
-      if(pseudo_sym)then
-        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
-          w = 0.d0
-        endif
-      endif
 
 !      w = dble(n) * w
 
