@@ -1,0 +1,81 @@
+#+TITLE: Quantum Package Release notes
+
+* Version 2.2
+
+** New features
+
+** Changes
+
+  - Python3 replaces Python2
+  - Travis CI uses 3 jobs
+  - Moved Travis scripts into ~travis~ directory
+  - IRPF90 and EZFIO are now git submodules
+  - Now basis sets should be downloaded from basis-set-exchange website
+  - Added ~bse~ in the installable tools
+  - Documentation in ~src/README.rst~
+  - Added two-body reduced density matrix
+  - Added basis set correction
+  - Added CAS-based on-top density functional
+  - Improve PT2 computation for excited-states: Mostly 2x2
+    diagonalization, and some (n+1)x(n+1) diagonalizations
+  - Error bars for stochastic variance and norm of the perturbed wave function
+  - Improve PT2-matching for excited-states
+  - Compute the overlap of PT2 excited states
+  - Renamed SOP into CFG
+  - Improved parallelism in PT2 by splitting tasks
+  - Use max in multi-state PT2 instead of sum for the selection weight
+  - Added seniority
+  - Added excitation_max
+  - More tasks for distribueted Davidson
+  - Random guess vectors in Davidson have zeros to preserve symmetry
+  - Disk-based Davidson when too much memory is required
+  - Fixed bug in DIIS
+  - Fixed bug in molden (Au -> Angs)
+    
+*** User interface
+
+    - Added ~qp_basis~ script to install a basis set from the ~bse~
+      command-line tool
+    - Introduced ~n_det_qp_edit~, ~psi_det_qp_edit~, and
+      ~psi_coef_qp_edit~ to accelerate the opening of qp_edit with
+      large wave functions
+    - Removed ~etc/ninja.rc~
+    - Added flag to specify if the AOs are normalized 
+    - Added flag to specify if the primitive Gaussians are normalized
+    - Added ~lin_dep_cutoff~, the cutoff for linear dependencies
+    - Davidson convergence threshold can be adapted from PT2
+    - In ~density_for_dft~, ~no_core_density~ is now a logical
+    - Default for ~weight_selection~ has changed from 2 to 1
+    - Nullify_small_elements in matrices to keep symmetry
+    - Default of density functional changed from LDA to PBE
+    - Added ~no_vvvv_integrals~ flag
+    - Added ~pt2_min_parallel_tasks~ to control parallelism in PT2
+    - Added ~print_energy~
+    - Added ~print_hamiltonian~
+    - Added input for two body RDM
+
+*** Code
+
+    - Many bug fixes
+    - Changed electron-nucleus from ~e_n~ to ~n_e~ in names of variables
+    - Changed ~occ_pattern~ to ~configuration~
+    - Replaced ~List.map~ by a tail-recursive version ~Qputils.list_map~
+    - Added possible imaginary part in OCaml MO coefficients
+    - Added ~qp_clean_source_files.sh~ to remove non-ascii characters
+    - Added flag ~is_periodic~ for periodic systems
+    - Possibilities to handle complex integrals and complex MOs
+    - Moved pseuodpotential integrals out of ~ao_one_e_integrals~
+    - Removed Schwarz test and added logical functions
+      ~ao_two_e_integral_zero~ and ~ao_one_e_integral_zero~
+    - Introduced type for ~pt2_data~
+    - Banned excitations are used with far apart localized MOs
+    - S_z2_Sz is now included in S2
+    - S^2 in single precision
+    - Added Shank function
+    - Added utilities for periodic calculations
+
+    ao_one_e_integral_zero
+    banned_excitations
+      
+
+
