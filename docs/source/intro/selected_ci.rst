@@ -77,7 +77,7 @@ The determinants in |SetDI| will be characterized as **internal**.
       e_\alpha = \frac{ \langle \Psi^{(n)}| {\hat H} | \alpha \rangle^2 }{E^{(n)} - \langle \alpha | {\hat H} | \alpha \rangle }.
 
    `E^{(n)}` is the variational energy of the wave function at the current
-   iteration. Note that another perturbation theory could be used to estimate
+   iteration. Note that other perturbation theory baesd methods could be used to estimate
    |ealpha|.
 
 #. An estimate of the total missing correlation energy can be computed
@@ -96,22 +96,22 @@ The determinants in |SetDI| will be characterized as **internal**.
       \{ |D_I \rangle \}^{(n+1)} = \{|D_I\rangle\}^{(n)} \cup \{ |\alpha\rangle \}_\star^{(n)}
 
 
-#. Go to iteration n+1, or exit on some criterion (number of determinants in
+#. Go to iteration n+1, or exit based upon some criteria (number of determinants in
    the wave function, low |EPT|, ...).
 
 
-Of course, such a procedure can be applied on any state and therefore can allow to treat both ground and excited states. 
+Of course, such a procedure can be applied on any state and therefore can allow the treatment of both ground and excited states. 
 
 
 Stochastic approximations for the selection and the computation of |EPT|
 ------------------------------------------------------------------------
 
-The simple algorithm would be too slow to make calculations possible. Instead,
-the |QP| uses a stochastic algorithm :cite:`Garniron_2017.2` in order to compute 
-efficiently the |EPT| and to select on-the-fly the best Slater determinants. 
+The simple algorithm described above would be too slow to make calculations practical. Instead,
+|QP| uses a stochastic algorithm :cite:`Garniron_2017.2` in order to compute 
+|EPT| efficiently and to select the best Slater determinants on-the-fly. 
 
 In such a way, the selection step introduces no extra cost with respect to the |EPT| calculation and the |EPT| 
-itself is unbiased but associated with a statistical error bar rapidly converging. 
+itself is unbiased but associated with a rapidly converging statistical error bar. 
 
 
 Deterministic approximations for the selection
@@ -134,7 +134,7 @@ The default is to use :option:`determinants threshold_generators` = 0.99 for
 the generators, and :option:`determinants threshold_selectors` = 0.999 for the
 selectors.
 
-This is nothing but the 3-class |CIPSI| approximation to accelerate the selection, 
+This is nothing but the three-class |CIPSI| approximation to accelerate the selection, 
 :cite:`Evangelisti_1983` where instead of generating all possible |kalpha|,
 we only generate a subset which are likely to be selected.
 
@@ -156,13 +156,13 @@ one will produce a selected |CISD|. If one also changes the rules for the genera
 to generate only the double excitations, one will have a selected |CID|.
 
 The generators can also be chosen as determinants belonging to a |CAS|. If the
-rules allow only for excitations inside the |CAS|, we obtain a selected
-|CAS| |CI|. If the rules allow for excitations in the |FCI| space, we obtain
-a selected |CAS-SD|. And if one add the rule to prevent for doing double
-excitations with two holes and two particles outside of the active space, one
+rules allow for excitations only inside the |CAS|, we obtain a selected
+|CAS|-|CI|. If the rules allow for single and double-excitations in the |FCI| space, we obtain
+a selected |CAS-SD|. And if one adds the rule to exclude those double
+excitations which contain two holes and two particles outside of the active space, one
 obtains a selected |DDCI| method.
 
-All such things can be done very easily when programming the |qp|.
+All such things can be done very easily when programming within the |qp|.
 
 -----------------------------------
 
