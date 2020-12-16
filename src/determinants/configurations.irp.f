@@ -286,7 +286,7 @@ end
  enddo
 
 !- Check
-!  print *,  'Checking for duplicates in occ pattern'
+!  print *,  'Checking for duplicates in configuration'
 !  do i=1,N_configuration
 !   do j=i+1,N_configuration
 !     duplicate(1) = .True.
@@ -312,6 +312,29 @@ end
  deallocate(iorder,duplicate,bit_tmp,tmp_array)
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Returns the index in psi_configuration of the first cfg with
+ ! the requested seniority
+ END_DOC
+ integer :: i, k, s, sold
+ cfg_seniority_index(:) = -1
+ sold = -1
+ do i=1,N_configuration
+   s = 0
+   do k=1,N_int
+     if (psi_configuration(k,1,i) == 0_bit_kind) cycle
+     s = s + popcnt(psi_configuration(k,1,i))
+   enddo
+   if (s /= sold) then
+     sold = s
+     cfg_seniority_index(s) = i
+   endif
+ enddo
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
  implicit none

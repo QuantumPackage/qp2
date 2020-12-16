@@ -907,6 +907,10 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
 
   message = repeat(' ',512)
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
+  if (rc <= 0) then
+     print *, rc
+     stop "rc"
+  end if
   rc = min(1024,rc)
   read(message(1:rc),*, end=10, err=10) reply
   if (trim(reply) == 'get_task_reply') then
