@@ -872,7 +872,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
            qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=loc_cell.lattice_vectors())
         else:
            qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=cell.lattice_vectors())
-        qph5.create_dataset('qmcpack/eigenval',(1,Nk*nmo),dtype="f8",data=mf.mo_energy)
+        qph5.create_dataset('qmcpack/eigenval',(1,Nk*nmo),dtype="f8",data=e_k)
         qph5.create_dataset('qmcpack/qmc_phase',data=phase.view(dtype=float))
                                                                                                                       
     return
