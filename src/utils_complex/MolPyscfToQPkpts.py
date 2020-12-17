@@ -421,6 +421,50 @@ def get_j3ao(fname,nao,Nk):
 
         return j3arr
 
+def get_j3ao_big(fname,nao,Nk):
+    '''
+    returns padded df AO array
+    fills in zeros when functions are dropped due to linear dependency
+    last AO index corresponds to largest kpt index?
+    (k, mu, j, i) where i.kpt >= j.kpt
+    '''
+    import h5py
+    with h5py.File(fname,'r') as intfile:
+        j3c = intfile.get('j3c')
+        j3ckeys = list(j3c.keys())
+        nkpairs = len(j3ckeys)
+
+        # get num order instead of lex order
+        j3ckeys.sort(key=lambda strkey:int(strkey))
+
+        # in new(?) version of PySCF, there is an extra layer of groups before the datasets
+        # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
+        # datasets now are    [/j3c/0/0, /j3c/1/0, /j3c/2/0, ...]
+        #keysub = '/0' if bool(j3c.get('0/0',getclass=True)) else ''
+
+        #naux = max(map(lambda k: j3c[k+keysub].shape[0],j3c.keys()))
+        naux = max(map(lambda k: j3c[k]['0'].shape[0],j3c.keys()))
+
+        naosq = nao*nao
+        naotri = (nao*(nao+1))//2
+        nkinvsq = 1./np.sqrt(Nk)
+
+        j3arr = np.zeros((nkpairs,naux,nao,nao),dtype=np.complex128)
+
+        for i,kpair in enumerate(j3ckeys):
+            #iaux,dim2 = j3c[kpair+keysub].shape
+            tmpdat = np.concatenate([j3c[kpair][ii][()] for ii in j3c[kpair]],axis=1)
+            iaux,dim2 = tmpdat.shape
+            if (dim2==naosq):
+                #j3arr[i,:iaux,:,:] = j3c[kpair+keysub][()].reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
+                j3arr[i,:iaux,:,:] = tmpdat.reshape([iaux,nao,nao]).transpose((0,2,1)) * nkinvsq
+            else:
+                #j3arr[i,:iaux,:,:] = makesq3(j3c[kpair+keysub][()].conj(),nao) * nkinvsq
+                j3arr[i,:iaux,:,:] = makesq3(tmpdat.conj(),nao) * nkinvsq
+
+        return j3arr
+
+
 def get_j3ao_new(fname,nao,Nk):
     '''
     returns padded df AO array
@@ -821,7 +865,14 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #                                        #
     ##########################################
 
-    j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
+    try:
+        j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
+        print('using old get_j3ao_new')
+    except ValueError:
+        j3ao_new = get_j3ao_big(mf.with_df._cderi,nao,Nk)
+        print('using new get_j3ao_big')
+    except:
+        print('unhandled error in get_j3ao?')
 
     # test? nkpt_pairs should be (Nk*(Nk+1))//2
     nkpt_pairs, naux, _, _ = j3ao_new.shape
