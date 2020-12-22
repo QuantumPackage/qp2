@@ -679,6 +679,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
+  PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
       s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
@@ -777,9 +778,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       logical :: do_cycle
       if (excitation_max >= 0) then
         do_cycle = .True.
-        do k=1,N_states
-          call get_excitation_degree(psi_det(1,1,dominant_det(k)),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_max) 
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
         enddo
         if (do_cycle) cycle
       endif
@@ -787,8 +788,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       if (excitation_alpha_max >= 0) then
         do_cycle = .True.
-        do k=1,N_states
-          call get_excitation_degree_spin(psi_det(1,1,dominant_det(k)),det(1,1),degree,N_int)
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
           do_cycle = do_cycle .and. (degree > excitation_alpha_max) 
         enddo
         if (do_cycle) cycle
@@ -797,8 +798,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       if (excitation_beta_max >= 0) then
         do_cycle = .True.
-        do k=1,N_states
-          call get_excitation_degree_spin(psi_det(1,2,dominant_det(k)),det(1,2),degree,N_int)
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
           do_cycle = do_cycle .and. (degree > excitation_beta_max) 
         enddo
         if (do_cycle) cycle
