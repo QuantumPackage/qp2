@@ -44,7 +44,7 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
     stop
   endif
 
-  do j=1,m
+  do j=1,min(m,n)
     do i=1,m
       if (dabs(U(i,j)) < 1.d-14)  U(i,j) = 0.d0
     enddo
@@ -1123,7 +1123,12 @@ subroutine ortho_svd(A,LDA,m,n)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:)
   allocate(U(m,n), D(n), Vt(n,n))
   call SVD(A,LDA,U,size(U,1),D,Vt,size(Vt,1),m,n)
-  A(1:m,1:n) = U(1:m,1:n)
+  integer :: i,j
+  do j=1,n
+    do i=1,m
+      A(i,j) = U(i,j)
+    enddo
+  enddo
   deallocate(U,D, Vt)
 
 end
