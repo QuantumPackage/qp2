@@ -68,7 +68,7 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
   integer          ,intent(in)   :: Nint
   integer          ,intent(in)   :: n_alpha        ! Number of alpha electrons
   integer         ,intent(inout) :: sze            ! Dimension of the output dets
-  integer(bit_kind),intent(in)   :: o(Nint,2)      ! Occ patters
+  integer(bit_kind),intent(in)   :: o(Nint,2)      ! Configurations
   integer(bit_kind),intent(out)  :: d(Nint,2,sze)  ! Output determinants
 
   integer                        :: i, k, n, ispin, ispin2
