@@ -541,6 +541,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
+  PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
       s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
@@ -592,6 +593,12 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       if(bannedOrb(p2, s2)) cycle
       if(banned(p1,p2)) cycle
 
+      if(pseudo_sym)then
+        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
+          w = 0.d0
+        endif
+      endif
+
       val = maxval(abs(mat(1:N_states, p1, p2)))
       if( val == 0d0) cycle
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
@@ -629,22 +636,35 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       endif
 
 
+      integer :: degree
+      logical :: do_cycle
       if (excitation_max >= 0) then
-        integer :: degree
-        call get_excitation_degree(ref_bitmask(1,1),det(1,1),degree,N_int)
-        if (degree > excitation_max) cycle
+        do_cycle = .True.
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        enddo
+        if (do_cycle) cycle
       endif
 
 
       if (excitation_alpha_max >= 0) then
-        call get_excitation_degree_spin(ref_bitmask(1,1),det(1,1),degree,N_int)
-        if (degree > excitation_alpha_max) cycle
+        do_cycle = .True.
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_alpha_max) 
+        enddo
+        if (do_cycle) cycle
       endif
 
 
       if (excitation_beta_max >= 0) then
-        call get_excitation_degree_spin(ref_bitmask(1,2),det(1,2),degree,N_int)
-        if (degree > excitation_beta_max) cycle
+        do_cycle = .True.
+        do k=1,N_dominant_dets_of_cfgs
+          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_beta_max) 
+        enddo
+        if (do_cycle) cycle
       endif
 
 
@@ -779,12 +799,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         end select
       end do
 
-
-      if(pseudo_sym)then
-        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
-          w = 0.d0
-        endif
-      endif
 
 !      w = dble(n) * w
 

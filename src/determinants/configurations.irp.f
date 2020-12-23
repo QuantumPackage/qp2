@@ -337,8 +337,6 @@ END_PROVIDER
 
 
 BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
- implicit none
- BEGIN_DOC
  ! Returns the index of the configuration for each determinant
  END_DOC
  integer :: i,j,k,r,l
@@ -542,3 +540,47 @@ end
 
 
 
+BEGIN_PROVIDER [ integer, dominant_cfg, (N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Configuration of the determinants with the largest weight, for each state
+ END_DOC
+ integer :: k
+ do k=1,N_states
+   dominant_cfg(k) = det_to_configuration(dominant_det(k))
+ enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ integer, N_dominant_dets_of_cfgs ]
+ implicit none
+ BEGIN_DOC
+ ! Number of determinants in all dominant determinants
+ END_DOC
+ integer                        :: k, sze
+
+ N_dominant_dets_of_cfgs = 0
+ do k=1,N_states
+   call configuration_to_dets_size(  &
+          psi_configuration(1,1,dominant_cfg(k)), &
+          sze, elec_alpha_num, N_int)
+   N_dominant_dets_of_cfgs += sze
+ enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_dets_of_cfgs) ]
+ implicit none
+ BEGIN_DOC
+ ! Configuration of the determinants with the largest weight, for each state
+ END_DOC
+ integer :: i,k,sze
+ i=1
+ do k=1,N_states
+   sze = N_dominant_dets_of_cfgs
+   call configuration_to_dets( &
+          psi_configuration(1,1,dominant_cfg(k)), &
+          dominant_dets_of_cfgs(1,1,i), &
+          sze,elec_alpha_num,N_int)
+   i += sze
+ enddo
+END_PROVIDER

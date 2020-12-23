@@ -256,6 +256,26 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, dominant_det, (N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Determinant with the largest weight, for each state
+ END_DOC
+ integer :: i, k
+ double precision :: wmax, c
+ do k=1,N_states
+   wmax = 0.d0
+   do i=1,N_det
+     c = psi_coef(i,k)*psi_coef(i,k)
+     if (c > wmax) then
+       dominant_det(k) = i
+       wmax = c
+     endif
+   enddo
+ enddo
+
+END_PROVIDER
+
 
 
 !==============================================================================!
