@@ -14,9 +14,7 @@ subroutine alpha_callback(delta_ij_loc, i_generator, subset, csubset, iproc)
   integer(bit_kind)              :: hole_mask(N_int,2), particle_mask(N_int,2)
 
 
-  do l=1,N_generators_bitmask
-    call generate_singles_and_doubles(delta_ij_loc,i_generator,l,subset,csubset,iproc)
-  enddo
+  call generate_singles_and_doubles(delta_ij_loc,i_generator,subset,csubset,iproc)
 end subroutine
 
 
@@ -34,7 +32,7 @@ BEGIN_PROVIDER [ integer, psi_from_sorted_gen, (N_det) ]
 END_PROVIDER
 
 
-subroutine generate_singles_and_doubles(delta_ij_loc, i_generator, bitmask_index, subset, csubset, iproc)
+subroutine generate_singles_and_doubles(delta_ij_loc, i_generator, subset, csubset, iproc)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -42,7 +40,7 @@ subroutine generate_singles_and_doubles(delta_ij_loc, i_generator, bitmask_index
   END_DOC
 
   double precision,intent(inout) :: delta_ij_loc(N_states,N_det,2)
-  integer, intent(in)            :: i_generator, subset, csubset, bitmask_index
+  integer, intent(in)            :: i_generator, subset, csubset
   integer, intent(in)            :: iproc
 
 
@@ -78,10 +76,10 @@ subroutine generate_singles_and_doubles(delta_ij_loc, i_generator, bitmask_index
 
   ! Masks adapted for MRCC
   do k=1,N_int
-    hole    (k,1) = iand(psi_det_generators(k,1,i_generator), ior(generators_bitmask(k,1,s_hole,bitmask_index),generators_bitmask(k,1,s_part,bitmask_index)  ) )
-    hole    (k,2) = iand(psi_det_generators(k,2,i_generator), ior(generators_bitmask(k,2,s_hole,bitmask_index),generators_bitmask(k,2,s_part,bitmask_index)  ) )
-    particle(k,1) = iand(not(psi_det_generators(k,1,i_generator)), ior(generators_bitmask(k,1,s_part,bitmask_index),generators_bitmask(k,1,s_hole,bitmask_index)) )
-    particle(k,2) = iand(not(psi_det_generators(k,2,i_generator)), ior(generators_bitmask(k,2,s_part,bitmask_index),generators_bitmask(k,2,s_hole,bitmask_index)) )
+    hole    (k,1) = iand(psi_det_generators(k,1,i_generator), ior(generators_bitmask(k,1,s_hole),generators_bitmask(k,1,s_part)  ) )
+    hole    (k,2) = iand(psi_det_generators(k,2,i_generator), ior(generators_bitmask(k,2,s_hole),generators_bitmask(k,2,s_part)  ) )
+    particle(k,1) = iand(not(psi_det_generators(k,1,i_generator)), ior(generators_bitmask(k,1,s_part),generators_bitmask(k,1,s_hole)) )
+    particle(k,2) = iand(not(psi_det_generators(k,2,i_generator)), ior(generators_bitmask(k,2,s_part),generators_bitmask(k,2,s_hole)) )
   enddo
 
   integer                        :: N_holes(2), N_particles(2)
