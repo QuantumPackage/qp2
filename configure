@@ -225,7 +225,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --bzip2 --extract --file gmp-6.1.2.tar.bz2
-              cd gmp*
+              cd gmp-6.1.2
               ./configure --prefix=$QP_ROOT && make -j 8
               make install
 EOF
