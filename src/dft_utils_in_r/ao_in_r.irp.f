@@ -122,6 +122,10 @@
 
  BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp_bis, (n_points_final_grid,ao_num,3)]
  implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
  integer :: i,j,m
  double precision :: aos_array(ao_num), r(3)
  double precision :: aos_grad_array(3,ao_num)

@@ -9,7 +9,5 @@ subroutine hcore_guess
                                      size(mo_one_e_integrals,1),  &
                                      size(mo_one_e_integrals,2),label,1,.false.)
   call save_mos
-!  SOFT_TOUCH mo_coef mo_label
   TOUCH mo_coef mo_label
-  print*,'mo_one_e_integrals(1,1) = ',mo_one_e_integrals(1,1)
 end
