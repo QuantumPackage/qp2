@@ -1,3 +1,4 @@
+! -*- mode: f90 -*-
 program pt2
   implicit none
   BEGIN_DOC
@@ -15,51 +16,51 @@ program pt2
   !
   END_DOC
   if (.not. is_zmq_slave) then
-    read_wf = .True.
-    threshold_generators = 1.d0
-    SOFT_TOUCH read_wf threshold_generators
-    PROVIDE mo_two_e_integrals_in_map
-    PROVIDE psi_energy
-    call run
+     read_wf = .True.
+     threshold_generators = 1.d0
+     SOFT_TOUCH read_wf threshold_generators
+     PROVIDE mo_two_e_integrals_in_map
+     PROVIDE psi_energy
+     call run
   else
-    call run_slave_cipsi
+     call run_slave_cipsi
   endif
-end
+end program pt2
 
 subroutine run
   implicit none
   use selection_types
   integer                        :: i,j,k
   logical, external              :: detEq
-
+  
   type(pt2_type)                 :: pt2_data, pt2_data_err
   integer                        :: degree
   integer                        :: n_det_before, to_select
   double precision               :: threshold_davidson_in
-
+  
   double precision               :: relative_error
   double precision, allocatable  :: E_CI_before(:)
-
+  
   allocate ( E_CI_before(N_states))
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
-
+  
   E_CI_before(:) = psi_energy(:) + nuclear_repulsion
   relative_error=PT2_relative_error
-
+  
   if (do_pt2) then
-    call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
+     call ZMQ_pt2(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
   else
-    call ZMQ_selection(0, pt2_data)
+     call ZMQ_selection(0, pt2_data)
   endif
 
   call print_summary(psi_energy_with_nucl_rep(1:N_states), &
-    pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
-
+       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
+  
   call save_energy(E_CI_before, pt2_data % pt2)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
   deallocate(E_CI_before)
-end
+end subroutine run
 
 

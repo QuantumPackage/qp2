@@ -2,8 +2,6 @@
 
 * Version 2.2
 
-** New features
-
 ** Changes
 
   - Python3 replaces Python2
@@ -73,6 +71,10 @@
     - S^2 in single precision
     - Added Shank function
     - Added utilities for periodic calculations
+    - Added ~V_ne_psi_energy~
+    - Added ~h_core_huess~ routine
+    - Fixed Laplacians in real space (indices)
+    - 
 
     ao_one_e_integral_zero
     banned_excitations

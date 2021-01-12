@@ -28,14 +28,14 @@ subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
   ! Find optimal size for temp arrays
   allocate(work(1))
   lwork = -1
-  call dgesvd('A','A', m, n, A_tmp, LDA,                             &
+  call dgesvd('S','S', m, n, A_tmp, LDA,                             &
       D, U, LDU, Vt, LDVt, work, lwork, info)
   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  lwork = max(int(work(1)), 5*MIN(M,N))
+  lwork = max(int(work(1)), 10*MIN(M,N))
   deallocate(work)
 
   allocate(work(lwork))
-  call dgesvd('A','A', m, n, A_tmp, LDA,                             &
+  call dgesvd('S','S', m, n, A_tmp, LDA,                             &
       D, U, LDU, Vt, LDVt, work, lwork, info)
   deallocate(A_tmp,work)
 
