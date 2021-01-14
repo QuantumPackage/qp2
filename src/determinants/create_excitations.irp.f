@@ -108,23 +108,25 @@ logical function is_spin_flip_possible(key_in,i_flip,ispin)
   endif
 end
 
-subroutine do_single_excitation_cfg(key_in,i_hole,i_particle,i_ok)
+subroutine do_single_excitation_cfg(key_in,key_out,i_hole,i_particle,ok)
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Applies the signle excitation operator to a configuration
-  ! If the excitation is possible, i_ok is True
+  ! If the excitation is possible, ok is True
   END_DOC
   integer, intent(in)            :: i_hole,i_particle
   integer(bit_kind), intent(inout) :: key_in(N_int,2)
-  integer, intent(out)           :: i_ok
+  logical , intent(out)           :: ok
   integer                        :: k,j,i
   integer(bit_kind)              :: mask
+  integer(bit_kind)              :: key_out(N_int,2)
 
   ASSERT (i_hole > 0)
   ASSERT (i_particle <= mo_num)
 
-  i_ok = 1
+  ok = .True.
+  key_out(:,:) = key_in(:,:)
 
   ! hole
   k = shiftr(i_hole-1,bit_kind_shift)+1
@@ -134,21 +136,21 @@ subroutine do_single_excitation_cfg(key_in,i_hole,i_particle,i_ok)
   ! Check if the position j is singly occupied
   ! 1  ->  0  (SOMO)
   ! 0      0  (DOMO)
-  if (iand(key_in(k,1),mask) /= 0_bit_kind) then
-     key_in(k,1) = ibclr(key_in(k,1),j)
+  if (iand(key_out(k,1),mask) /= 0_bit_kind) then
+     key_out(k,1) = ibclr(key_out(k,1),j)
 
   ! Check if the position j is doubly occupied
   ! 0  ->  1  (SOMO)
   ! 1      0  (DOMO)
-  else if (iand(key_in(k,2),mask) /= 0_bit_kind) then
-     key_in(k,1) = ibset(key_in(k,1),j)
-     key_in(k,2) = ibclr(key_in(k,2),j)
+  else if (iand(key_out(k,2),mask) /= 0_bit_kind) then
+     key_out(k,1) = ibset(key_out(k,1),j)
+     key_out(k,2) = ibclr(key_out(k,2),j)
 
   ! The position j is unoccupied: Not OK
   ! 0  ->  0  (SOMO)
   ! 0      0  (DOMO)
   else
-     i_ok = -1
+     ok =.False.
      return
   endif
 
@@ -161,22 +163,59 @@ subroutine do_single_excitation_cfg(key_in,i_hole,i_particle,i_ok)
   ! Check if the position j is singly occupied
   ! 1  ->  0  (SOMO)
   ! 0      1  (DOMO)
-  if (iand(key_in(k,1),mask) /= 0_bit_kind) then
-     key_in(k,1) = ibclr(key_in(k,1),j)
-     key_in(k,2) = ibset(key_in(k,2),j)
+  if (iand(key_out(k,1),mask) /= 0_bit_kind) then
+     key_out(k,1) = ibclr(key_out(k,1),j)
+     key_out(k,2) = ibset(key_out(k,2),j)
 
   ! Check if the position j is doubly occupied : Not OK
   ! 0  ->  1  (SOMO)
   ! 1      0  (DOMO)
-  else if (iand(key_in(k,2),mask) /= 0_bit_kind) then
-     i_ok = -1
+  else if (iand(key_out(k,2),mask) /= 0_bit_kind) then
+     ok = .False.
      return
 
   ! Position at j is unoccupied
   ! 0  ->  0  (SOMO)
   ! 0      0  (DOMO)
   else
-     key_in(k,1) = ibset(key_in(k,1),j)
+     key_out(k,1) = ibset(key_out(k,1),j)
   endif
 
+end
+
+subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
+  implicit none
+  use bitmasks
+  BEGIN_DOC
+  ! Generate all single excitation wrt a configuration
+  !
+  ! n_singles : on input, max number of singles :
+  !   elec_alpha_num * (mo_num - elec_beta_num)
+  !   on output, number of generated singles
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer, intent(inout)         :: n_singles
+  integer(bit_kind), intent(in)  :: cfg(Nint,2)
+  integer(bit_kind), intent(out) :: singles(Nint,2,*)
+
+  integer           :: i,k, n_singles_ma, i_hole, i_particle
+  integer(bit_kind) :: single(Nint,2)
+  logical           :: i_ok
+
+  n_singles = 0
+  !TODO
+  !Make list of Somo  and Domo for holes
+  !Make list of Unocc and Somo for particles
+  do i_hole = 1, mo_num
+    do i_particle = 1, mo_num
+      call do_single_excitation_cfg(cfg,single,i_hole,i_particle,i_ok)
+      if (i_ok) then
+        n_singles = n_singles + 1
+        do k=1,Nint
+          singles(k,1,n_singles) = single(k,1)
+          singles(k,2,n_singles) = single(k,2)
+        enddo
+      endif
+    enddo
+  enddo
 end
