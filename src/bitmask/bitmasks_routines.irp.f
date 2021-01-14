@@ -125,6 +125,41 @@ subroutine bitstring_to_str( output, string, Nint )
   output(ibuf:ibuf) = '|'
 end
 
+subroutine configuration_to_str( output, string, Nint )
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+! Transform the bit string of a configuration to a string for printing
+  END_DOC
+  character*(*), intent(out)     :: output
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: string(Nint,2)
+
+  integer                        :: i, j, ibuf
+  integer(bit_kind)              :: itemp
+
+  ibuf = 1
+  output = ''
+  output(ibuf:ibuf) = '|'
+  ibuf = ibuf+1
+  do i=1,Nint
+    itemp = 1_bit_kind
+    do j=1,bit_kind_size
+      if (iand(itemp,string(i,2)) == itemp) then
+        output(ibuf:ibuf) = '2'
+      else if (iand(itemp,string(i,1)) == itemp) then
+        output(ibuf:ibuf) = '1'
+      else
+        output(ibuf:ibuf) = '0'
+      endif
+      ibuf = ibuf+1
+      itemp = shiftl(itemp,1)
+    enddo
+  enddo
+  output(ibuf:ibuf) = '|'
+end
+
+
 
 subroutine bitstring_to_hexa( output, string, Nint )
   use bitmasks
@@ -163,6 +198,25 @@ subroutine debug_det(string,Nint)
   print *,  trim(output(1)) , '|', trim(output(2))
 
   call print_det(string,Nint)
+
+end
+
+subroutine debug_cfg(string,Nint)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Subroutine to print the content of a determinant in '+-' notation and
+  ! hexadecimal representation.
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer(bit_kind), intent(in)  :: string(Nint,2)
+  character*(2048)                :: output(2)
+  call bitstring_to_hexa( output(1), string(1,1), Nint )
+  call bitstring_to_hexa( output(2), string(1,2), Nint )
+  print *,  trim(output(1)) , '|', trim(output(2))
+
+  call configuration_to_str( output(1), string, Nint )
+  print *,  trim(output(1))
 
 end
 
