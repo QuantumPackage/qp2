@@ -24,7 +24,7 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
 ! check whether position j is occupied
   if (iand(key_in(k,ispin),mask) /= 0_bit_kind) then
    key_in(k,ispin) = ibclr(key_in(k,ispin),j)
-  else 
+  else
    i_ok= -1
    return
   end if
@@ -35,7 +35,7 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   mask = ibset(0_bit_kind,j)
   if (iand(key_in(k,ispin),mask) == 0_bit_kind) then
    key_in(k,ispin) = ibset(key_in(k,ispin),j)
-  else 
+  else
    i_ok= -1
    return
   end if
@@ -108,3 +108,75 @@ logical function is_spin_flip_possible(key_in,i_flip,ispin)
   endif
 end
 
+subroutine do_single_excitation_cfg(key_in,i_hole,i_particle,i_ok)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Applies the signle excitation operator to a configuration
+  ! If the excitation is possible, i_ok is True
+  END_DOC
+  integer, intent(in)            :: i_hole,i_particle
+  integer(bit_kind), intent(inout) :: key_in(N_int,2)
+  integer, intent(out)           :: i_ok
+  integer                        :: k,j,i
+  integer(bit_kind)              :: mask
+
+  ASSERT (i_hole > 0)
+  ASSERT (i_particle <= mo_num)
+
+  i_ok = 1
+
+  ! hole
+  k = shiftr(i_hole-1,bit_kind_shift)+1
+  j = i_hole-shiftl(k-1,bit_kind_shift)-1
+  mask = ibset(0_bit_kind,j)
+
+  ! Check if the position j is singly occupied
+  ! 1  ->  0  (SOMO)
+  ! 0      0  (DOMO)
+  if (iand(key_in(k,1),mask) /= 0_bit_kind) then
+     key_in(k,1) = ibclr(key_in(k,1),j)
+
+  ! Check if the position j is doubly occupied
+  ! 0  ->  1  (SOMO)
+  ! 1      0  (DOMO)
+  else if (iand(key_in(k,2),mask) /= 0_bit_kind) then
+     key_in(k,1) = ibset(key_in(k,1),j)
+     key_in(k,2) = ibclr(key_in(k,2),j)
+
+  ! The position j is unoccupied: Not OK
+  ! 0  ->  0  (SOMO)
+  ! 0      0  (DOMO)
+  else
+     i_ok = -1
+     return
+  endif
+
+
+  ! particle
+  k = shiftr(i_particle-1,bit_kind_shift)+1
+  j = i_particle-shiftl(k-1,bit_kind_shift)-1
+  mask = ibset(0_bit_kind,j)
+
+  ! Check if the position j is singly occupied
+  ! 1  ->  0  (SOMO)
+  ! 0      1  (DOMO)
+  if (iand(key_in(k,1),mask) /= 0_bit_kind) then
+     key_in(k,1) = ibclr(key_in(k,1),j)
+     key_in(k,2) = ibset(key_in(k,2),j)
+
+  ! Check if the position j is doubly occupied : Not OK
+  ! 0  ->  1  (SOMO)
+  ! 1      0  (DOMO)
+  else if (iand(key_in(k,2),mask) /= 0_bit_kind) then
+     i_ok = -1
+     return
+
+  ! Position at j is unoccupied
+  ! 0  ->  0  (SOMO)
+  ! 0      0  (DOMO)
+  else
+     key_in(k,1) = ibset(key_in(k,1),j)
+  endif
+
+end

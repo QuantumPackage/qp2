@@ -584,3 +584,4 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
    i += sze
  enddo
 END_PROVIDER
+
