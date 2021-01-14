@@ -3,7 +3,7 @@
   implicit none
   BEGIN_DOC
 ! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
-! 
+!
 ! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
   END_DOC
   call u_0_H_u_0(psi_energy,psi_s2,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
@@ -250,7 +250,7 @@ compute_singles=.True.
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk,                  &
-      !$OMP          buffer, doubles, n_doubles,                     &
+      !$OMP          buffer, doubles, n_doubles, umax,               &
       !$OMP          tmp_det2, hij, sij, idx, l, kcol_prev,          &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
@@ -399,8 +399,11 @@ compute_singles=.True.
       ! Loop over alpha singles
       ! -----------------------
 
+      double precision :: umax
+
       !DIR$ LOOP COUNT avg(1000)
       do k = 1,n_singles_a,block_size
+        umax = 0.d0
         ! Prefetch u_t(:,l_a)
         do kk=0,block_size-1
           if (k+kk > n_singles_a) exit
@@ -409,8 +412,10 @@ compute_singles=.True.
 
           do l=1,N_st
             utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
           enddo
         enddo
+        if (umax < 1.d-20) cycle
 
         do kk=0,block_size-1
           if (k+kk > n_singles_a) exit
@@ -490,6 +495,7 @@ compute_singles=.True.
     tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
     !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_a,block_size
+      umax = 0.d0
       ! Prefetch u_t(:,l_a)
       do kk=0,block_size-1
         if (i+kk > n_singles_a) exit
@@ -498,8 +504,10 @@ compute_singles=.True.
 
         do l=1,N_st
           utl(l,kk+1) = u_t(l,l_a)
+          umax = max(umax, dabs(utl(l,kk+1)))
         enddo
       enddo
+      if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
         if (i+kk > n_singles_a) exit
@@ -524,6 +532,7 @@ compute_singles=.True.
 
     !DIR$ LOOP COUNT avg(50000)
     do i=1,n_doubles,block_size
+      umax = 0.d0
       ! Prefetch u_t(:,l_a)
       do kk=0,block_size-1
         if (i+kk > n_doubles) exit
@@ -532,8 +541,10 @@ compute_singles=.True.
 
         do l=1,N_st
           utl(l,kk+1) = u_t(l,l_a)
+          umax = max(umax, dabs(utl(l,kk+1)))
         enddo
       enddo
+      if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
         if (i+kk > n_doubles) exit
@@ -599,6 +610,7 @@ compute_singles=.True.
     tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
     !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_b,block_size
+      umax = 0.d0
       do kk=0,block_size-1
         if (i+kk > n_singles_b) exit
         l_b = singles_b(i+kk)
@@ -609,8 +621,10 @@ compute_singles=.True.
 
         do l=1,N_st
           utl(l,kk+1) = u_t(l,l_a)
+          umax = max(umax, dabs(utl(l,kk+1)))
         enddo
       enddo
+      if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
         if (i+kk > n_singles_b) exit
@@ -634,6 +648,7 @@ compute_singles=.True.
 
     !DIR$ LOOP COUNT avg(50000)
     do i=1,n_doubles,block_size
+      umax = 0.d0
       do kk=0,block_size-1
         if (i+kk > n_doubles) exit
         l_b = doubles(i+kk)
@@ -643,8 +658,10 @@ compute_singles=.True.
 
         do l=1,N_st
           utl(l,kk+1) = u_t(l,l_a)
+          umax = max(umax, dabs(utl(l,kk+1)))
         enddo
       enddo
+      if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
         if (i+kk > n_doubles) exit
@@ -670,6 +687,12 @@ compute_singles=.True.
 
     ! Initial determinant is at k_a in alpha-major representation
     ! -----------------------------------------------------------------------
+
+    umax = 0.d0
+    do l=1,N_st
+      umax = max(umax, dabs(u_t(l,k_a)))
+    enddo
+    if (umax < 1.d-20) cycle
 
     krow = psi_bilinear_matrix_rows(k_a)
     ASSERT (krow <= N_det_alpha_unique)
