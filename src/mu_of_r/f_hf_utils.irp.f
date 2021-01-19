@@ -9,6 +9,7 @@ BEGIN_PROVIDER [double precision, two_e_int_hf_f, (n_basis_orb,n_basis_orb,n_max
  END_DOC
  integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: get_two_e_integral
+ PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
  do orb_m = 1, n_max_occ_val_orb_for_hf! electron 1 
   m = list_valence_orb_for_hf(orb_m,1)
   do orb_n = 1, n_max_occ_val_orb_for_hf! electron 2 
