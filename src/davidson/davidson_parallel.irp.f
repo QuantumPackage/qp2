@@ -428,7 +428,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
   integer :: istep, imin, imax, ishift, ipos
   integer, external :: add_task_to_taskserver
-  integer, parameter :: tasksize=10000
+  integer, parameter :: tasksize=100000
   character*(100000) :: task
   istep=1
   ishift=0
