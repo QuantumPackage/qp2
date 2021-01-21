@@ -319,7 +319,7 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
  ! Returns the index of the configuration for each determinant
  END_DOC
  integer :: i,j,k,r,l
- integer*8 :: key
+ integer*8 :: key, key2
  integer(bit_kind) :: occ(N_int,2)
  logical :: found
  integer*8, allocatable :: bit_tmp(:)
@@ -340,36 +340,23 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
 
     key = configuration_search_key(occ,N_int)
 
-    ! TODO: Binary search
-    l = 1
-    r = N_configuration
-!    do while(r-l > 32)
-!      j = shiftr(r+l,1)
-!      if (bit_tmp(j) < key) then
-!        l = j
-!      else
-!        r = j
-!      endif
-!    enddo
-    do j=l,r
-      found = .True.
-      do k=1,N_int
-        if ( (occ(k,1) /= psi_configuration(k,1,j)) &
-        .or. (occ(k,2) /= psi_configuration(k,2,j)) ) then
-          found = .False.
-          exit
-        endif
-      enddo
-      if (found) then
+    l = 0
+    r = N_configuration+1
+    j = shiftr(r-l,1)
+    do while (j>=1)
+      j = j+l
+      key2 = configuration_search_key(psi_configuration(1,1,j),N_int)
+      if (key2 == key) then
         det_to_configuration(i) = j
         exit
+      else if (key2 > key) then
+        r = j
+      else
+        l = j
       endif
+      j = shiftr(r-l,1)
     enddo
 
-    if (.not.found) then
-      print *,  '3 bug in ',  irp_here
-      stop -1
-    endif
  enddo
  !$OMP END PARALLEL DO
  deallocate(bit_tmp)
