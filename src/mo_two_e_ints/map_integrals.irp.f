@@ -99,9 +99,15 @@ double precision function get_two_e_integral(i,j,k,l,map)
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
-  if (banned_excitation(i,k) .or. banned_excitation(j,l)) then
-    get_two_e_integral = 0.d0
-    return
+  if (use_banned_excitation) then
+    if (banned_excitation(i,k)) then
+      get_two_e_integral = 0.d0
+      return
+    endif
+    if (banned_excitation(j,l)) then
+      get_two_e_integral = 0.d0
+      return
+    endif
   endif
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
@@ -282,17 +288,19 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
 
 end
 
-BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+ BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+&BEGIN_PROVIDER [ logical, use_banned_excitation  ]
  implicit none
  use map_module
  BEGIN_DOC
  ! If true, the excitation is banned in the selection. Useful with local MOs.
  END_DOC
  banned_excitation = .False.
- integer :: i,j
+ integer :: i,j, icount
  integer(key_kind)              :: idx
  double precision :: tmp
-! double precision :: buffer(mo_num)
+
+ icount = 1 ! Avoid division by zero
  do j=1,mo_num
    do i=1,j-1
     call two_e_integrals_index(i,j,j,i,idx)
@@ -300,8 +308,14 @@ BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
     call map_get(mo_integrals_map,idx,tmp)
     banned_excitation(i,j) = dabs(tmp) < 1.d-14
     banned_excitation(j,i) = banned_excitation(i,j)
+    if (banned_excitation(i,j)) icount = icount+1
   enddo
  enddo
+ use_banned_excitation =  (mo_num*mo_num) / icount <= 10
+ if (use_banned_excitation) then
+   print *, 'Using sparsity of exchange integrals'
+ endif
+
 END_PROVIDER
 
 

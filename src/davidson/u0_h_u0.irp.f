@@ -269,7 +269,7 @@ compute_singles=.True.
   kcol_prev=-1
 
   ! Check if u has multiple zeros
-  kk=0
+  kk=1 ! Avoid division by zero
   do k=1,N_det
     umax = 0.d0
     do l=1,N_st
@@ -436,6 +436,7 @@ compute_singles=.True.
             if (k+kk > n_singles_a) exit
             l_a = singles_a(k+kk)
             ASSERT (l_a <= N_det)
+            utl(:,kk+1) = u_t(:,l_a)
           enddo
           umax = 1.d0
         endif
@@ -537,6 +538,7 @@ compute_singles=.True.
           if (i+kk > n_singles_a) exit
           l_a = singles_a(i+kk)
           ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
         enddo
         umax = 1.d0
       endif
@@ -583,6 +585,7 @@ compute_singles=.True.
           if (i+kk > n_doubles) exit
           l_a = doubles(i+kk)
           ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
         enddo
         umax = 1.d0
       endif
@@ -673,6 +676,7 @@ compute_singles=.True.
           l_a = psi_bilinear_matrix_transp_order(l_b)
           ASSERT (l_b <= N_det)
           ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
         enddo
         umax = 1.d0
       endif
@@ -720,6 +724,7 @@ compute_singles=.True.
           l_a = psi_bilinear_matrix_transp_order(l_b)
           ASSERT (l_b <= N_det)
           ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
         enddo
         umax = 1.d0
       endif
