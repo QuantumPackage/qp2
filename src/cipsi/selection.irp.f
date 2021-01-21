@@ -166,6 +166,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
   integer                        :: l_a, nmax, idx
   integer, allocatable           :: indices(:), exc_degree(:), iorder(:)
+  double precision, parameter :: norm_thr = 1.d-16
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
 
@@ -183,7 +184,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
         endif
@@ -207,7 +208,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
         endif
