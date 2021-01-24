@@ -428,7 +428,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
   integer :: istep, imin, imax, ishift, ipos
   integer, external :: add_task_to_taskserver
-  integer, parameter :: tasksize=100000
+  integer, parameter :: tasksize=10000
   character*(100000) :: task
   istep=1
   ishift=0
@@ -441,7 +441,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
     if (imin==1) then
       istep = 2
     else
-      istep = 2
+      istep = 1
     endif
     do ishift=0,istep-1
       write(task(ipos:ipos+50),'(4(I11,1X),1X,1A)') imin, imax, ishift, istep, '|'

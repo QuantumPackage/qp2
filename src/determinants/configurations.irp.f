@@ -42,6 +42,7 @@ subroutine configuration_to_dets_size(o,sze,n_alpha,Nint)
     amax -= popcnt( o(k,2) )
   enddo
   if (binom_int(bmax, amax) > huge(1)) then
+    print *, bmax, amax
     print *,  irp_here, ': Too many determinants to generate'
     stop 1
   endif
