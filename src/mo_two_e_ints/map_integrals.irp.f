@@ -308,10 +308,10 @@ end
     call map_get(mo_integrals_map,idx,tmp)
     banned_excitation(i,j) = dabs(tmp) < 1.d-14
     banned_excitation(j,i) = banned_excitation(i,j)
-    if (banned_excitation(i,j)) icount = icount+1
+    if (banned_excitation(i,j)) icount = icount+2
   enddo
  enddo
- use_banned_excitation =  (mo_num*mo_num) / icount <= 10
+ use_banned_excitation =  (mo_num*mo_num) / icount <= 100  !1%
  if (use_banned_excitation) then
    print *, 'Using sparsity of exchange integrals'
  endif

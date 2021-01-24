@@ -270,16 +270,19 @@ compute_singles=.True.
 
   ! Check if u has multiple zeros
   kk=1 ! Avoid division by zero
+  !$OMP DO
   do k=1,N_det
     umax = 0.d0
     do l=1,N_st
       umax = max(umax, dabs(u_t(l,k)))
     enddo
     if (umax < 1.d-20) then
+      !$OMP ATOMIC
       kk = kk+1
     endif
   enddo
-  u_is_sparse = N_det / kk < 10
+  !$OMP END DO
+  u_is_sparse = N_det / kk < 20  ! 5%
 
   ASSERT (iend <= N_det)
   ASSERT (istart > 0)
