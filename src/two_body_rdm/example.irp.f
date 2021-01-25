@@ -285,6 +285,3 @@ subroutine routine_full_mos
 
 end
 
-program test
-  call routine_active_only
-end
