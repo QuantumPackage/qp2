@@ -585,3 +585,21 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
  enddo
 END_PROVIDER
 
+ BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]
+
+ implicit none
+ BEGIN_DOC
+ ! psi_configuration_to_psi_det_data(k) -> i : i is the index of the determinant in psi_det.
+ !
+ ! psi_configuration_to_psi_det(1:2,k) gives the first and last index of the
+ ! determinants of configuration k in array psi_configuration_to_psi_det_data.
+ END_DOC
+
+ integer :: i
+
+ do i=1,N_configuration
+   
+ enddo
+END_PROVIDER
+
