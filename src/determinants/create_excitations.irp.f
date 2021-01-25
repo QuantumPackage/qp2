@@ -112,12 +112,12 @@ subroutine do_single_excitation_cfg(key_in,key_out,i_hole,i_particle,ok)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Applies the signle excitation operator to a configuration
+  ! Applies the single excitation operator to a configuration
   ! If the excitation is possible, ok is True
   END_DOC
   integer, intent(in)            :: i_hole,i_particle
-  integer(bit_kind), intent(inout) :: key_in(N_int,2)
-  logical , intent(out)           :: ok
+  integer(bit_kind), intent(in)  :: key_in(N_int,2)
+  logical , intent(out)          :: ok
   integer                        :: k,j,i
   integer(bit_kind)              :: mask
   integer(bit_kind)              :: key_out(N_int,2)
@@ -219,3 +219,4 @@ subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
     enddo
   enddo
 end
+
