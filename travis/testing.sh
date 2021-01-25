@@ -8,7 +8,7 @@ tar -zxf $HOME/cache/compil.tgz
 # Configure QP2
 cd qp2
 source ./quantum_package.rc
-qp_test -a && rm $HOME/cache/compil.tgz
+exec qp_test -a && rm $HOME/cache/compil.tgz
 
 
 
