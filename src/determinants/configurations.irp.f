@@ -592,7 +592,7 @@ END_PROVIDER
  implicit none
  BEGIN_DOC
  ! psi_configuration_to_psi_det_data(k) -> i : i is the index of the
- ! determinant in psi_det_sorted_bit
+ ! determinant in psi_det
  !
  ! psi_configuration_to_psi_det(1:2,k) gives the first and last index of the
  ! determinants of configuration k in array psi_configuration_to_psi_det_data.
