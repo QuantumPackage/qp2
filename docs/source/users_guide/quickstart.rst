@@ -128,6 +128,12 @@ and the atomic basis set:
   ao_two_e_erf_ints  density_for_dft       electrons     mo_two_e_ints      scf_utils
   ao_two_e_ints      determinants          ezfio         nuclei             work
 
+If you need to run using an already existing EZFIO database, use
+
+.. code::  bash
+
+  qp set_file hcn
+
 
 Run a Hartree-Fock calculation
 ------------------------------

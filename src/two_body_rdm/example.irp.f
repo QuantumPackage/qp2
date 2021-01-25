@@ -284,3 +284,4 @@ subroutine routine_full_mos
    print*,'wee_tot_st_av_3         = ',wee_tot_st_av_3
 
 end
+

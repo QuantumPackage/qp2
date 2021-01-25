@@ -211,6 +211,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   double precision               :: rss, mem, ratio
   double precision, allocatable  :: utl(:,:)
   integer, parameter             :: block_size=128
+  logical                        :: u_is_sparse
 
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
@@ -221,6 +222,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 !    provide singles_beta_csc
 !  endif
 compute_singles=.True.
+
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
   allocate(idx0(maxab))
@@ -249,7 +251,7 @@ compute_singles=.True.
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
-      !$OMP          lcol, lrow, l_a, l_b, utl, kk,                  &
+      !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
       !$OMP          tmp_det2, hij, sij, idx, l, kcol_prev,          &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
@@ -265,6 +267,22 @@ compute_singles=.True.
       idx(maxab), utl(N_st,block_size))
 
   kcol_prev=-1
+
+  ! Check if u has multiple zeros
+  kk=1 ! Avoid division by zero
+  !$OMP DO
+  do k=1,N_det
+    umax = 0.d0
+    do l=1,N_st
+      umax = max(umax, dabs(u_t(l,k)))
+    enddo
+    if (umax < 1.d-20) then
+      !$OMP ATOMIC
+      kk = kk+1
+    endif
+  enddo
+  !$OMP END DO
+  u_is_sparse = N_det / kk < 20  ! 5%
 
   ASSERT (iend <= N_det)
   ASSERT (istart > 0)
@@ -405,16 +423,26 @@ compute_singles=.True.
       do k = 1,n_singles_a,block_size
         umax = 0.d0
         ! Prefetch u_t(:,l_a)
-        do kk=0,block_size-1
-          if (k+kk > n_singles_a) exit
-          l_a = singles_a(k+kk)
-          ASSERT (l_a <= N_det)
+        if (u_is_sparse) then
+          do kk=0,block_size-1
+            if (k+kk > n_singles_a) exit
+            l_a = singles_a(k+kk)
+            ASSERT (l_a <= N_det)
 
-          do l=1,N_st
-            utl(l,kk+1) = u_t(l,l_a)
-            umax = max(umax, dabs(utl(l,kk+1)))
+            do l=1,N_st
+              utl(l,kk+1) = u_t(l,l_a)
+              umax = max(umax, dabs(utl(l,kk+1)))
+            enddo
           enddo
-        enddo
+        else
+          do kk=0,block_size-1
+            if (k+kk > n_singles_a) exit
+            l_a = singles_a(k+kk)
+            ASSERT (l_a <= N_det)
+            utl(:,kk+1) = u_t(:,l_a)
+          enddo
+          umax = 1.d0
+        endif
         if (umax < 1.d-20) cycle
 
         do kk=0,block_size-1
@@ -497,16 +525,26 @@ compute_singles=.True.
     do i=1,n_singles_a,block_size
       umax = 0.d0
       ! Prefetch u_t(:,l_a)
-      do kk=0,block_size-1
-        if (i+kk > n_singles_a) exit
-        l_a = singles_a(i+kk)
-        ASSERT (l_a <= N_det)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
 
-        do l=1,N_st
-          utl(l,kk+1) = u_t(l,l_a)
-          umax = max(umax, dabs(utl(l,kk+1)))
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
         enddo
-      enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
       if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
@@ -534,16 +572,26 @@ compute_singles=.True.
     do i=1,n_doubles,block_size
       umax = 0.d0
       ! Prefetch u_t(:,l_a)
-      do kk=0,block_size-1
-        if (i+kk > n_doubles) exit
-        l_a = doubles(i+kk)
-        ASSERT (l_a <= N_det)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_a = doubles(i+kk)
+          ASSERT (l_a <= N_det)
 
-        do l=1,N_st
-          utl(l,kk+1) = u_t(l,l_a)
-          umax = max(umax, dabs(utl(l,kk+1)))
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
         enddo
-      enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_a = doubles(i+kk)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
       if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
@@ -611,19 +659,30 @@ compute_singles=.True.
     !DIR$ LOOP COUNT avg(1000)
     do i=1,n_singles_b,block_size
       umax = 0.d0
-      do kk=0,block_size-1
-        if (i+kk > n_singles_b) exit
-        l_b = singles_b(i+kk)
-        ASSERT (l_b <= N_det)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
 
-        l_a = psi_bilinear_matrix_transp_order(l_b)
-        ASSERT (l_a <= N_det)
-
-        do l=1,N_st
-          utl(l,kk+1) = u_t(l,l_a)
-          umax = max(umax, dabs(utl(l,kk+1)))
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
         enddo
-      enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
       if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
@@ -649,18 +708,29 @@ compute_singles=.True.
     !DIR$ LOOP COUNT avg(50000)
     do i=1,n_doubles,block_size
       umax = 0.d0
-      do kk=0,block_size-1
-        if (i+kk > n_doubles) exit
-        l_b = doubles(i+kk)
-        ASSERT (l_b <= N_det)
-        l_a = psi_bilinear_matrix_transp_order(l_b)
-        ASSERT (l_a <= N_det)
-
-        do l=1,N_st
-          utl(l,kk+1) = u_t(l,l_a)
-          umax = max(umax, dabs(utl(l,kk+1)))
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_b = doubles(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
         enddo
-      enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_b = doubles(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
       if (umax < 1.d-20) cycle
 
       do kk=0,block_size-1
@@ -688,10 +758,14 @@ compute_singles=.True.
     ! Initial determinant is at k_a in alpha-major representation
     ! -----------------------------------------------------------------------
 
-    umax = 0.d0
-    do l=1,N_st
-      umax = max(umax, dabs(u_t(l,k_a)))
-    enddo
+    if (u_is_sparse) then
+      umax = 0.d0
+      do l=1,N_st
+        umax = max(umax, dabs(u_t(l,k_a)))
+      enddo
+    else
+      umax = 1.d0
+    endif
     if (umax < 1.d-20) cycle
 
     krow = psi_bilinear_matrix_rows(k_a)

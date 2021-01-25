@@ -8,7 +8,7 @@ tar -zxf $HOME/cache/config.tgz
 # Configure QP2
 cd qp2
 source ./quantum_package.rc
-ninja -j 1 -v
+ninja -j 1 -v || exit -1
 
 # Create cache
 cd ..
