@@ -55,7 +55,7 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
   implicit none
   BEGIN_DOC
   ! Generate all possible determinants for a given configuration
-  ! 
+  !
   ! Input :
   !    o   : configuration : (doubly occupied, singly occupied)
   !    sze : Number of produced determinants, computed by `configuration_to_dets_size`
@@ -63,7 +63,7 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
   !    Nint    : N_int
   !
   ! Output:
-  !    d : determinants 
+  !    d : determinants
   !
   END_DOC
   integer          ,intent(in)   :: Nint
@@ -255,16 +255,13 @@ end
     endif
     dup = .True.
     do k=1,N_int
-      if ( (tmp_array(k,1,i) /= tmp_array(k,1,j)) &
-      .or. (tmp_array(k,2,i) /= tmp_array(k,2,j)) ) then
-         dup = .False.
-         exit
-      endif
+      dup = dup .and. (tmp_array(k,1,i) == tmp_array(k,1,j)) &
+                .and. (tmp_array(k,2,i) == tmp_array(k,2,j))
     enddo
     if (dup) then
       duplicate(j) = .True.
     endif
-    j+=1
+    j = j+1
     if (j>N_det) then
       exit
     endif
@@ -287,7 +284,7 @@ end
  enddo
 
 !- Check
-!  print *,  'Checking for duplicates in occ pattern'
+!  print *,  'Checking for duplicates in configuration'
 !  do i=1,N_configuration
 !   do j=i+1,N_configuration
 !     duplicate(1) = .True.
@@ -314,6 +311,28 @@ end
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+  implicit none
+  BEGIN_DOC
+ ! Returns the index in psi_configuration of the first cfg with
+ ! the requested seniority
+ END_DOC
+ integer :: i, k, s, sold
+ cfg_seniority_index(:) = -1
+ sold = -1
+ do i=1,N_configuration
+   s = 0
+   do k=1,N_int
+     if (psi_configuration(k,1,i) == 0_bit_kind) cycle
+     s = s + popcnt(psi_configuration(k,1,i))
+   enddo
+   if (s /= sold) then
+     sold = s
+     cfg_seniority_index(s) = i
+   endif
+ enddo
+END_PROVIDER
+
 BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
  implicit none
  BEGIN_DOC
@@ -326,7 +345,8 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
  integer*8, allocatable :: bit_tmp(:)
  integer*8, external            :: configuration_search_key
 
- allocate(bit_tmp(N_configuration))
+ allocate(bit_tmp(0:N_configuration))
+ bit_tmp(0) = 0
  do i=1,N_configuration
    bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
  enddo
@@ -341,16 +361,30 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
 
     key = configuration_search_key(occ,N_int)
 
+    ! Binary search
     l = 0
     r = N_configuration+1
     j = shiftr(r-l,1)
     do while (j>=1)
       j = j+l
-      key2 = configuration_search_key(psi_configuration(1,1,j),N_int)
-      if (key2 == key) then
-        det_to_configuration(i) = j
-        exit
-      else if (key2 > key) then
+      if (bit_tmp(j) == key) then
+        do while (bit_tmp(j) == bit_tmp(j-1))
+          j = j-1
+        enddo
+        do while (bit_tmp(j) == key)
+          found = .True.
+          do k=1,N_int
+            found = found .and. (psi_configuration(k,1,j) == occ(k,1)) &
+                          .and. (psi_configuration(k,2,j) == occ(k,2))
+          enddo
+          if (found) then
+            det_to_configuration(i) = j
+            exit
+          endif
+          j = j+1
+        enddo
+        if (found) exit
+      else if (bit_tmp(j) > key) then
         r = j
       else
         l = j
@@ -418,7 +452,7 @@ END_PROVIDER
 &BEGIN_PROVIDER [ integer, psi_configuration_sorted_order_reverse, (N_configuration) ]
  implicit none
  BEGIN_DOC
- ! Configurations sorted by weight 
+ ! Configurations sorted by weight
  END_DOC
  integer                        :: i,j,k
  integer, allocatable           :: iorder(:)
@@ -430,8 +464,8 @@ END_PROVIDER
  call dsort(weight_configuration_average_sorted,iorder,N_configuration)
  do i=1,N_configuration
    do j=1,N_int
-     psi_configuration_sorted(j,1,i) = psi_configuration(j,1,iorder(i)) 
-     psi_configuration_sorted(j,2,i) = psi_configuration(j,2,iorder(i)) 
+     psi_configuration_sorted(j,1,i) = psi_configuration(j,1,iorder(i))
+     psi_configuration_sorted(j,2,i) = psi_configuration(j,2,iorder(i))
    enddo
    psi_configuration_sorted_order(iorder(i)) = i
    psi_configuration_sorted_order_reverse(i) = iorder(i)
@@ -551,3 +585,39 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
    i += sze
  enddo
 END_PROVIDER
+
+ BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]
+
+ implicit none
+ BEGIN_DOC
+ ! psi_configuration_to_psi_det_data(k) -> i : i is the index of the
+ ! determinant in psi_det_sorted_bit.  !
+ !
+ ! psi_configuration_to_psi_det(1:2,k) gives the first and last index of the
+ ! determinants of configuration k in array psi_configuration_to_psi_det_data.
+ END_DOC
+
+ integer :: i, k, iorder
+ integer, allocatable :: confs(:)
+ allocate (confs(N_det))
+
+ do i=1,N_det
+   psi_configuration_to_psi_det_data(i) = i
+   confs(i) = det_to_configuration(i)
+ enddo
+
+ call isort(confs, psi_configuration_to_psi_det_data, N_det)
+ k=1
+ psi_configuration_to_psi_det(1,1) = 1
+ do i=2,N_det
+   if (confs(i) /= confs(i-1)) then
+     psi_configuration_to_psi_det(2,k) = i-1
+     k = k+1
+     psi_configuration_to_psi_det(1,k) = i
+   endif
+ enddo
+ psi_configuration_to_psi_det(2,k) = N_det
+
+END_PROVIDER
+
