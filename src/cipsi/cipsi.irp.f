@@ -114,7 +114,10 @@ subroutine run_cipsi
 
     ! Add selected determinants
     call copy_H_apply_buffer_to_wf()
-!    call save_wavefunction
+
+    if (save_wf_after_selection) then
+      call save_wavefunction
+    endif
 
     PROVIDE  psi_coef
     PROVIDE  psi_det

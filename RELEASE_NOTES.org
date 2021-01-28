@@ -51,6 +51,7 @@
     - Added ~print_energy~
     - Added ~print_hamiltonian~
     - Added input for two body RDM
+    - Added keyword ~save_wf_after_selection~ 
 
 *** Code
 
@@ -81,3 +82,4 @@
       
 
 
+    
