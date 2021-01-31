@@ -191,8 +191,8 @@ subroutine do_single_excitation_cfg_with_type(key_in,key_out,i_hole,i_particle,e
   ! Returns the type of excitation in ex_type
   ! where the following convention is used
   ! 1 = (SOMO -> SOMO) 1 change in Nsomo
-  ! 2 = (DOMO -> VMO)  1 change in Nsomo
-  ! 3 = (SOMO -> VMO)  0 change in Nsomo
+  ! 2 = (DOMO ->  VMO) 1 change in Nsomo
+  ! 3 = (SOMO ->  VMO) 0 change in Nsomo
   ! 4 = (DOMO -> SOMO) 0 change in Nsomo
   ! If the excitation is possible, ok is True
   END_DOC
