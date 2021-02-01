@@ -207,6 +207,10 @@ subroutine do_single_excitation_cfg_with_type(key_in,key_out,i_hole,i_particle,e
   logical                        :: isparticleSOMO
   logical                        :: isholeDOMO
   logical                        :: isparticleVMO
+  isholeSOMO = .False.
+  isholeDOMO = .False.
+  isparticleSOMO = .False.
+  isparticleVMO = .False.
 
   ASSERT (i_hole > 0)
   ASSERT (i_particle <= mo_num)
@@ -326,6 +330,47 @@ subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
         do k=1,Nint
           singles(k,1,n_singles) = single(k,1)
           singles(k,2,n_singles) = single(k,2)
+        enddo
+      endif
+    enddo
+  enddo
+end
+
+subroutine generate_all_singles_cfg_with_type(cfg,singles,ex_type_singles,n_singles,Nint)
+  implicit none
+  use bitmasks
+  BEGIN_DOC
+  ! Generate all single excitation wrt a configuration
+  !
+  ! n_singles : on input, max number of singles :
+  !   elec_alpha_num * (mo_num - elec_beta_num)
+  !   on output, number of generated singles
+  ! ex_type_singles : on output contains type of excitations  :
+  !
+  END_DOC
+  integer, intent(in)            :: Nint
+  integer, intent(inout)         :: n_singles
+  integer, intent(out)           :: ex_type_singles(*)
+  integer(bit_kind), intent(in)  :: cfg(Nint,2)
+  integer(bit_kind), intent(out) :: singles(Nint,2,*)
+
+  integer           :: i,k, n_singles_ma, i_hole, i_particle, ex_type
+  integer(bit_kind) :: single(Nint,2)
+  logical           :: i_ok
+
+  n_singles = 0
+  !TODO
+  !Make list of Somo  and Domo for holes
+  !Make list of Unocc and Somo for particles
+  do i_hole = 1, mo_num
+    do i_particle = 1, mo_num
+      call do_single_excitation_cfg_with_type(cfg,single,i_hole,i_particle,ex_type,i_ok)
+      if (i_ok) then
+        n_singles = n_singles + 1
+        do k=1,Nint
+          singles(k,1,n_singles) = single(k,1)
+          singles(k,2,n_singles) = single(k,2)
+          ex_type_singles(n_singles) = ex_type
         enddo
       endif
     enddo
