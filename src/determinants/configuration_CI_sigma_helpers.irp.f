@@ -48,7 +48,7 @@
   nholes = 0
   ! holes in SOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Isomo,IBSET(0,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 1
@@ -56,7 +56,7 @@
   end do
   ! holes in DOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Idomo,IBSET(0,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 2
@@ -69,11 +69,11 @@
   nvmos = 0
   do i = n_core_orb+1,n_core_orb + n_act_orb
      !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0,i-1)))), POPCNT(IAND(Idomo,(IBSET(0,i-1))))
-     if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0) then
+     if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 1
-     else if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0 ) then
+     else if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0 ) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 2
