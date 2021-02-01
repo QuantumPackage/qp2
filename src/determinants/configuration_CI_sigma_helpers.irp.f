@@ -215,3 +215,93 @@
   end do
 
   end subroutine
+
+subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
+  implicit none
+  use bitmasks
+  BEGIN_DOC
+  ! Documentation for obtain_connected_I_foralpha
+  ! This function returns all those selected configurations
+  ! which are connected to the input configuration
+  ! Ialpha by a single excitation.
+  !
+  ! The type of excitations are ordered as follows:
+  ! Type 1 - SOMO -> SOMO
+  ! Type 2 - DOMO -> VMO
+  ! Type 3 - SOMO -> VMO
+  ! Type 4 - DOMO -> SOMO
+  !
+  ! Order of operators
+  ! \alpha> = a^\dag_p a_q |I> = E_pq |I>
+  END_DOC
+  integer(bit_kind),intent(in)             :: Ialpha(N_int,2)
+  integer(bit_kind),intent(out)            :: connectedI(N_int,2,*)
+  integer,intent(out)                      :: nconnectedI
+  integer,intent(out)                      :: excitationIds(2,*)
+  integer,intent(out)                      :: excitationTypes(*)
+  integer*8                                :: Idomo
+  integer*8                                :: Isomo
+  integer*8                                :: Jdomo
+  integer*8                                :: Jsomo
+  integer*8                                :: diffSOMO
+  integer*8                                :: diffDOMO
+  integer                                  :: ndiffSOMO
+  integer                                  :: ndiffDOMO
+  integer :: i,j,k,l,p,q,nsomoI,nsomoalpha
+
+  nconnectedI = 0
+
+  Isomo = Ialpha(1,1)
+  Idomo = Ialpha(1,2)
+  do i=1,N_configuration
+     diffSOMO = XOR(Isomo,psi_configuration(1,1,i))
+     diffDOMO = XOR(Idomo,psi_configuration(1,2,i))
+     ndiffSOMO = POPCNT(diffSOMO)
+     ndiffDOMO = POPCNT(diffDOMO)
+     if(POPCNT(XOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+        nconnectedI += 1
+        connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+        select case(ndiffDOMO)
+        case (0)
+           ! SOMO -> VMO
+           excitationTypes(nconnectedI) = 3
+           Jsomo = XOR(Isomo, psi_configuration(1,1,i))
+           p = TRAILZ(iand(Jsomo,Isomo))
+           q = TRAILZ(iand(Jsomo,psi_configuration(1,1,i)))
+        case (1)
+           ! DOMO -> VMO
+           ! or
+           ! SOMO -> SOMO
+           nsomoI = POPCNT(psi_configuration(1,1,i))
+           nsomoalpha = POPCNT(Isomo)
+           if(nsomoI .GT. nsomoalpha) then
+              ! DOMO -> VMO
+              excitationTypes(nconnectedI) = 2
+              Jdomo = XOR(Idomo, psi_configuration(1,2,i))
+              Jsomo = XOR(Jdomo,XOR(Isomo, psi_configuration(1,1,i)))
+              p = TRAILZ(Jdomo)
+              q = TRAILZ(Jsomo)
+           else
+              ! SOMO -> SOMO
+              excitationTypes(nconnectedI) = 1
+              Jdomo = XOR(Idomo, psi_configuration(1,2,i))
+              Jsomo = XOR(Jdomo,XOR(Isomo, psi_configuration(1,1,i)))
+              q = TRAILZ(Jdomo)
+              p = TRAILZ(Jsomo)
+           end if
+        case (2)
+           ! DOMO -> SOMO
+           excitationTypes(nconnectedI) = 4
+           Jdomo = XOR(Idomo, psi_configuration(1,2,i))
+           p = TRAILZ(iand(Jdomo,Idomo))
+           q = TRAILZ(iand(Jdomo,psi_configuration(1,2,i)))
+        case default
+           print *,"something went wront in get connectedI"
+        end select
+        excitationIds(1,nconnectedI)=p
+        excitationIds(2,nconnectedI)=q
+     endif
+  end do
+
+
+end subroutine obtain_connected_I_foralpha
