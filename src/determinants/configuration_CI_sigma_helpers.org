@@ -111,6 +111,8 @@ the input determinant \(|D_I\rangle\).
   !print *,"Isomo"
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
+
+  ! TODO cfg_seniority_index
   do i = 1,nholes
      p = listholes(i)
      do j = 1,nvmos

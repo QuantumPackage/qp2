@@ -48,7 +48,7 @@
   nholes = 0
   ! holes in SOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Isomo,IBSET(0,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 1
@@ -56,7 +56,7 @@
   end do
   ! holes in DOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Idomo,IBSET(0,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 2
@@ -69,11 +69,11 @@
   nvmos = 0
   do i = n_core_orb+1,n_core_orb + n_act_orb
      !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0,i-1)))), POPCNT(IAND(Idomo,(IBSET(0,i-1))))
-     if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0) then
+     if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 1
-     else if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0 ) then
+     else if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0 ) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 2
@@ -127,11 +127,11 @@
         pqAlreadyGenQ = .FALSE.
         ! First check if it can be generated before
         do k = 1, idxI-1
-           diffSOMO = XOR(Jsomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
-           diffDOMO = XOR(Jdomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+           diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
+           diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
            ndiffSOMO = POPCNT(diffSOMO)
            ndiffDOMO = POPCNT(diffDOMO)
-           if(POPCNT(XOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+           if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
               pqAlreadyGenQ = .TRUE.
               !print *,i,k,ndiffSOMO,ndiffDOMO
               !call debug_spindet(Jsomo,1)
@@ -147,8 +147,8 @@
         pqExistsQ = .FALSE.
         ! now check if this exists in the selected list
         do k = idxI, N_configuration
-           diffSOMO = XOR(OR(reunion_of_act_virt_bitmask(1,1),Jsomo),psi_configuration(1,1,k))
-           diffDOMO = XOR(OR(reunion_of_act_virt_bitmask(1,1),Jdomo),psi_configuration(1,2,k))
+           diffSOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jsomo),psi_configuration(1,1,k))
+           diffDOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jdomo),psi_configuration(1,2,k))
            ndiffSOMO = POPCNT(diffSOMO)
            ndiffDOMO = POPCNT(diffDOMO)
            if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
@@ -254,18 +254,18 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   do i=1,N_configuration
-     diffSOMO = XOR(Isomo,psi_configuration(1,1,i))
-     diffDOMO = XOR(Idomo,psi_configuration(1,2,i))
+     diffSOMO = IEOR(Isomo,psi_configuration(1,1,i))
+     diffDOMO = IEOR(Idomo,psi_configuration(1,2,i))
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
-     if(POPCNT(XOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+     if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
         nconnectedI += 1
         connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
         select case(ndiffDOMO)
         case (0)
            ! SOMO -> VMO
            excitationTypes(nconnectedI) = 3
-           Jsomo = XOR(Isomo, psi_configuration(1,1,i))
+           Jsomo = IEOR(Isomo, psi_configuration(1,1,i))
            p = TRAILZ(iand(Jsomo,Isomo))
            q = TRAILZ(iand(Jsomo,psi_configuration(1,1,i)))
         case (1)
@@ -277,22 +277,22 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
            if(nsomoI .GT. nsomoalpha) then
               ! DOMO -> VMO
               excitationTypes(nconnectedI) = 2
-              Jdomo = XOR(Idomo, psi_configuration(1,2,i))
-              Jsomo = XOR(Jdomo,XOR(Isomo, psi_configuration(1,1,i)))
+              Jdomo = IEOR(Idomo, psi_configuration(1,2,i))
+              Jsomo = IEOR(Jdomo,IEOR(Isomo, psi_configuration(1,1,i)))
               p = TRAILZ(Jdomo)
               q = TRAILZ(Jsomo)
            else
               ! SOMO -> SOMO
               excitationTypes(nconnectedI) = 1
-              Jdomo = XOR(Idomo, psi_configuration(1,2,i))
-              Jsomo = XOR(Jdomo,XOR(Isomo, psi_configuration(1,1,i)))
+              Jdomo = IEOR(Idomo, psi_configuration(1,2,i))
+              Jsomo = IEOR(Jdomo,IEOR(Isomo, psi_configuration(1,1,i)))
               q = TRAILZ(Jdomo)
               p = TRAILZ(Jsomo)
            end if
         case (2)
            ! DOMO -> SOMO
            excitationTypes(nconnectedI) = 4
-           Jdomo = XOR(Idomo, psi_configuration(1,2,i))
+           Jdomo = IEOR(Idomo, psi_configuration(1,2,i))
            p = TRAILZ(iand(Jdomo,Idomo))
            q = TRAILZ(iand(Jdomo,psi_configuration(1,2,i)))
         case default
