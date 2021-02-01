@@ -251,6 +251,8 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
 
   nconnectedI = 0
 
+  p = 0
+  q = 0
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   do i=1,N_configuration
@@ -305,3 +307,14 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
 
 
 end subroutine obtain_connected_I_foralpha
+
+  function getNSOMO(Icfg) result(NSOMO)
+    implicit none
+    integer(bit_kind),intent(in)   :: Icfg(N_int,2)
+    integer                        :: NSOMO
+    integer                        :: i
+    NSOMO = 0
+    do i = 1,N_int
+       NSOMO += POPCNT(Icfg(i,1))
+    enddo
+  end function getNSOMO
