@@ -48,7 +48,7 @@
   nholes = 0
   ! holes in SOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Isomo,IBSET(0,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 1
@@ -56,7 +56,7 @@
   end do
   ! holes in DOMO
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Idomo,IBSET(0,i-1))) .EQ. 1) then
+     if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
         holetype(nholes) = 2
@@ -68,12 +68,12 @@
   vmotype = -1
   nvmos = 0
   do i = n_core_orb+1,n_core_orb + n_act_orb
-     !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0,i-1)))), POPCNT(IAND(Idomo,(IBSET(0,i-1))))
-     if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0) then
+     !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
+     if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 1
-     else if(POPCNT(IAND(Isomo,(IBSET(0,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0,i-1)))) .EQ. 0 ) then
+     else if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0 ) then
         nvmos += 1
         listvmos(nvmos) = i
         vmotype(nvmos) = 2
@@ -219,7 +219,7 @@
 
   end subroutine
 
-subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
+subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -237,6 +237,7 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
   ! Order of operators
   ! \alpha> = a^\dag_p a_q |I> = E_pq |I>
   END_DOC
+  integer          ,intent(in)             :: idxI
   integer(bit_kind),intent(in)             :: Ialpha(N_int,2)
   integer(bit_kind),intent(out)            :: connectedI(N_int,2,*)
   integer,intent(out)                      :: nconnectedI
@@ -256,7 +257,7 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
 
   p = 0
   q = 0
-  do i=1,N_configuration
+  do i=idxI,N_configuration
      Isomo = Ialpha(1,1)
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
@@ -364,6 +365,7 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   integer*8                            :: mask
   integer                              :: pos0,pos0prev
 
+  ! TODO Flag (print) when model space indices is > 64
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   Jsomo = Jcfg(1,1)

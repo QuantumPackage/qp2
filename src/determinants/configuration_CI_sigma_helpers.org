@@ -244,7 +244,7 @@ Next step is to obtain the connected CFGs \(|I\rangle\) that belong to the selec
 given a RI configuration \(|\alpha\rangle\).
 
 #+begin_src f90 :main no :tangle configuration_CI_sigma_helpers.irp.f
-subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
+subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -262,6 +262,7 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
   ! Order of operators
   ! \alpha> = a^\dag_p a_q |I> = E_pq |I>
   END_DOC
+  integer          ,intent(in)             :: idxI
   integer(bit_kind),intent(in)             :: Ialpha(N_int,2)
   integer(bit_kind),intent(out)            :: connectedI(N_int,2,*)
   integer,intent(out)                      :: nconnectedI
@@ -281,7 +282,7 @@ subroutine obtain_connected_I_foralpha(Ialpha, connectedI, nconnectedI, excitati
 
   p = 0
   q = 0
-  do i=1,N_configuration
+  do i=idxI,N_configuration
      Isomo = Ialpha(1,1)
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
@@ -412,6 +413,7 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   integer*8                            :: mask
   integer                              :: pos0,pos0prev
 
+  ! TODO Flag (print) when model space indices is > 64
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   Jsomo = Jcfg(1,1)
