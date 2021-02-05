@@ -272,6 +272,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
   integer*8                                :: Isomo
   integer*8                                :: Jdomo
   integer*8                                :: Jsomo
+  integer*8                                :: IJsomo
   integer*8                                :: diffSOMO
   integer*8                                :: diffDOMO
   integer                                  :: ndiffSOMO
@@ -306,10 +307,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
            ! SOMO -> VMO
            !print *,"obt SOMO -> VMO"
            excitationTypes(nconnectedI) = 3
-           Jsomo = IEOR(Isomo, Jsomo)
-           p = TRAILZ(Jsomo) + 1
-           Jsomo = IBCLR(Jsomo,p-1)
-           q = TRAILZ(Jsomo) + 1
+           IJsomo = IEOR(Isomo, Jsomo)
+           p = TRAILZ(AND(Isomo,IJsomo)) + 1
+           IJsomo = IBCLR(IJsomo,p-1)
+           q = TRAILZ(IJsomo) + 1
         case (1)
            ! DOMO -> VMO
            ! or
@@ -320,33 +321,33 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
               ! DOMO -> VMO
               !print *,"obt DOMO -> VMO"
               excitationTypes(nconnectedI) = 2
-              Isomo = IOR(IEOR(Isomo, Jsomo),IEOR(Idomo,Jdomo))
-              p = TRAILZ(Isomo) + 1
+              p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              Isomo = IEOR(Isomo, Jsomo)
               Isomo = IBCLR(Isomo,p-1)
               q = TRAILZ(Isomo) + 1
            else
               ! SOMO -> SOMO
               !print *,"obt SOMO -> SOMO"
               excitationTypes(nconnectedI) = 1
-              Isomo = IOR(IEOR(Isomo, Jsomo),IEOR(Idomo,Jdomo))
+              q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              Isomo = IEOR(Isomo, Jsomo)
+              Isomo = IBCLR(Isomo,q-1)
               p = TRAILZ(Isomo) + 1
-              Isomo = IBCLR(Isomo,p-1)
-              q = TRAILZ(Isomo) + 1
            end if
         case (2)
            ! DOMO -> SOMO
            !print *,"obt DOMO -> SOMO"
            excitationTypes(nconnectedI) = 4
-           Isomo = IEOR(Isomo, Jsomo)
-           p = TRAILZ(Isomo) + 1
-           Isomo = IBCLR(Isomo,p-1)
-           q = TRAILZ(Isomo) + 1
+           IJsomo = IEOR(Isomo, Jsomo)
+           p = TRAILZ(AND(Jsomo,IJsomo)) + 1
+           IJsomo = IBCLR(IJsomo,p-1)
+           q = TRAILZ(IJsomo) + 1
         case default
            print *,"something went wront in get connectedI"
         end select
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q
-        !print *,"------ > output p,q in obt=",p,q
+        print *,"------ > output p,q in obt=",p,q
      endif
   end do
 
@@ -355,14 +356,14 @@ end subroutine obtain_connected_I_foralpha
 #+end_src
 
 #+begin_src fortran
-      print *,TRAILZ(9)
+      print *,TRAILZ(8)
       print *,IBCLR(8,TRAILZ(9))
       print *,TRAILZ(IBCLR(8,TRAILZ(9)))
 
 #+end_src
 
 #+RESULTS:
-| 0 |
+| 3 |
 | 8 |
 | 3 |
 
@@ -411,6 +412,8 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   integer*8                            :: Jsomo
   integer*8                            :: Jdomo
   integer*8                            :: mask
+  integer*8                            :: Isomotmp
+  integer*8                            :: Jsomotmp
   integer                              :: pos0,pos0prev
 
   ! TODO Flag (print) when model space indices is > 64
@@ -421,72 +424,83 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   pos0prev = 0
   pmodel = p
   qmodel = q
-  !print *,"input pq=",p,q
+  print *,"input pq=",p,q,"extype=",extype
+  !call debug_spindet(Isomo,1)
+  !call debug_spindet(Idomo,1)
+  !call debug_spindet(Jsomo,1)
+  !call debug_spindet(Jdomo,1)
   select case(extype)
      case (1)
         ! SOMO -> SOMO
         ! remove all domos
         !print *,"type -> SOMO -> SOMO"
-        mask = IBSET(0_8,p) - 1
-        pmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
-        mask = IBSET(0_8,q) - 1
-        qmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
+        mask = ISHFT(1_8,p) - 1
+        Isomotmp = AND(Isomo,mask)
+        pmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+        mask = ISHFT(1_8,q) - 1
+        Isomotmp = AND(Isomo,mask)
+        qmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
      case (2)
         ! DOMO -> VMO
         ! remove all domos except one at p
         !print *,"type -> DOMO -> VMO"
-        mask = IBSET(0_8,p) - 1
-        pmodel = POPCNT(mask) - POPCNT(AND(Jsomo,mask)) - n_core_orb + 1
-        mask = IBSET(0_8,q) - 1
-        qmodel = POPCNT(mask) - POPCNT(AND(Jsomo,mask)) - n_core_orb + 1
+        mask = ISHFT(1_8,p) - 1
+        Jsomotmp = AND(Jsomo,mask)
+        pmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+        mask = ISHFT(1_8,q) - 1
+        Jsomotmp = AND(Jsomo,mask)
+        qmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
      case (3)
         ! SOMO -> VMO
         !print *,"type -> SOMO -> VMO"
-        Isomo = IEOR(Isomo,Jsomo)
-        mask = IBSET(0_8,p) - 1
-        pmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
-        mask = IBSET(0_8,q) - 1
-        qmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
+        !Isomo = IEOR(Isomo,Jsomo)
+        mask = ISHFT(1_8,p) - 1
+        Isomo = AND(Isomo,mask)
+        pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+        mask = ISHFT(1_8,q) - 1
+        Jsomo = AND(Jsomo,mask)
+        qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
      case (4)
         ! DOMO -> SOMO
         ! remove all domos except one at p
         !print *,"type -> DOMO -> SOMO"
-        Isomo = IEOR(Isomo,Jsomo)
-        mask = IBSET(0_8,p) - 1
-        pmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
-        mask = IBSET(0_8,q) - 1
-        qmodel = POPCNT(mask) - POPCNT(AND(Isomo,mask)) - n_core_orb + 1
+        !Isomo = IEOR(Isomo,Jsomo)
+        mask = ISHFT(1_8,p) - 1
+        Jsomo = AND(Jsomo,mask)
+        pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+        mask = ISHFT(1_8,q) - 1
+        Isomo = AND(Isomo,mask)
+        qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
      case default
         print *,"something is wrong in convertOrbIdsToModelSpaceIds"
      end select
-     !print *,p,q,"model ids=",pmodel,qmodel
+     print *,p,q,"model ids=",pmodel,qmodel
 end subroutine convertOrbIdsToModelSpaceIds
 #+end_src
 
 #+begin_src fortran
       integer :: i
       integer :: count
+      integer :: mask
+      integer :: isomo
       count = 0
-      i = 8-1
-      do while(i.GT.0 .AND. count .LT.10)
-         print *,i,TRAILZ(i),IBCLR(i,TRAILZ(i))
-         i = IBCLR(i,TRAILZ(i)-1)
-         count = count + 1
-      end do
+      mask = ISHFT(1_8,5)-1
+      print *,mask
+      print *,POPCNT(mask)
+      isomo = 144
+      isomo = AND(isomo,mask)
+      print *,isomo
+      print *,XOR(isomo,mask)
+      print *,POPCNT(mask) - POPCNT(XOR(isomo,mask))
 
 #+end_src
 
 #+RESULTS:
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
-| 7 | 0 | 6 |
+| 31 |
+|  5 |
+| 16 |
+| 15 |
+|  1 |
 
 #+begin_src fortran
       print *,IBSET(0_8,4)-1
