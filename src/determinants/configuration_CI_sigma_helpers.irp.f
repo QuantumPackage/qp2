@@ -272,7 +272,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
      diffDOMO = IEOR(Idomo,Jdomo)
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
-     if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
+     !if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
      !print *,"-I--i=",i,Isomo,Jsomo,ndiffSOMO,ndiffDOMO
      if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
         nconnectedI += 1
@@ -322,7 +322,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
         end select
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q
-        print *,"------ > output p,q in obt=",p,q
+        !print *,"------ > output p,q in obt=",p,q
      endif
   end do
 
@@ -376,7 +376,7 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   pos0prev = 0
   pmodel = p
   qmodel = q
-  print *,"input pq=",p,q,"extype=",extype
+  !print *,"input pq=",p,q,"extype=",extype
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
   !call debug_spindet(Jsomo,1)
@@ -426,5 +426,5 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
      case default
         print *,"something is wrong in convertOrbIdsToModelSpaceIds"
      end select
-     print *,p,q,"model ids=",pmodel,qmodel
+     !print *,p,q,"model ids=",pmodel,qmodel
 end subroutine convertOrbIdsToModelSpaceIds
