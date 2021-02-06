@@ -184,6 +184,144 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
 
 end
 
+subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Generate all possible determinants for a given configuration
+  !
+  ! This function preserves the tree addressing i.e.
+  ! the time-reversal determinants are at the opposite ends
+  ! and not one after the other as in the parent function.
+  !
+  ! Input :
+  !    o   : configuration : (doubly occupied, singly occupied)
+  !    sze : Number of produced determinants, computed by `configuration_to_dets_size`
+  !    n_alpha : Number of $\alpha$ electrons
+  !    Nint    : N_int
+  !
+  ! Output:
+  !    d : determinants
+  !
+  END_DOC
+  integer          ,intent(in)   :: Nint
+  integer          ,intent(in)   :: n_alpha        ! Number of alpha electrons
+  integer         ,intent(inout) :: sze            ! Dimension of the output dets
+  integer(bit_kind),intent(in)   :: o(Nint,2)      ! Configurations
+  integer(bit_kind),intent(out)  :: d(Nint,2,sze)  ! Output determinants
+
+  integer                        :: i, k, n, ispin, ispin2
+
+  ! Extract list of singly occupied MOs as (int,pos) pairs
+  ! ------------------------------------------------------
+
+  integer           :: iint(2*n_alpha), ipos(2*n_alpha)
+  integer(bit_kind) :: v, t, tt, diff, v_prev
+  integer           :: n_alpha_in_single
+
+  n=0
+  n_alpha_in_single = n_alpha
+  do i=1,Nint
+    v = o(i,1)
+    do while(v /= 0_bit_kind)
+      n = n+1
+      iint(n) = i
+      ipos(n) = trailz(v)
+      v = iand(v,v-1)
+    enddo
+    n_alpha_in_single = n_alpha_in_single - popcnt( o(i,2) )
+  enddo
+
+  v = shiftl(1,n_alpha_in_single) - 1
+
+  ! Initialize first determinant
+  d(:,1,1) = o(:,2)
+  d(:,2,1) = o(:,2)
+
+  do k=1,n_alpha_in_single
+    d(iint(k),1,1) = ibset( d(iint(k),1,1), ipos(k) )
+  enddo
+
+  do k=n_alpha_in_single+1,n
+    d(iint(k),2,1) = ibset( d(iint(k),2,1), ipos(k) )
+  enddo
+
+  sze = int(binom_int(n,n_alpha_in_single),4)
+
+  if ( (shiftl(n_alpha_in_single,1) == n).and.n>0 ) then
+
+    ! Time reversal symmetry
+    d(:,1,sze) = d(:,2,1)
+    d(:,2,sze) = d(:,1,1)
+
+    do i=2,sze/2,1
+      ! Generate next permutation with Anderson's algorithm
+      v_prev = v
+      t = ior(v,v-1)
+      tt = t+1
+      v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+
+      ! Find what has changed between v_prev and v
+      diff = ieor(v,v_prev)
+
+      ! Initialize with previous determinant
+      d(:,1,i) = d(:,1,i-1)
+      d(:,2,i) = d(:,2,i-1)
+
+      ! Swap bits only where they have changed from v_prev to v
+      do while (diff /= 0_bit_kind)
+        k = trailz(diff)+1
+        if (btest(v,k-1)) then
+          d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
+          d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
+        else
+          d(iint(k),1,i) = ibclr( d(iint(k),1,i), ipos(k) )
+          d(iint(k),2,i) = ibset( d(iint(k),2,i), ipos(k) )
+        endif
+        diff = iand(diff,diff-1_bit_kind)
+      enddo
+
+      ! Time reversal symmetry
+      d(:,1,sze-i+1) = d(:,2,i)
+      d(:,2,sze-i+1) = d(:,1,i)
+
+    enddo
+
+  else
+
+    do i=2,sze
+      ! Generate next permutation with Anderson's algorithm
+      v_prev = v
+      t = ior(v,v-1)
+      tt = t+1
+      v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+
+      ! Find what has changed between v_prev and v
+      diff = ieor(v,v_prev)
+
+      ! Initialize with previous determinant
+      d(:,1,i) = d(:,1,i-1)
+      d(:,2,i) = d(:,2,i-1)
+
+      ! Swap bits only where they have changed from v_prev to v
+      do while (diff /= 0_bit_kind)
+        k = trailz(diff)+1
+        if (btest(v,k-1)) then
+          d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
+          d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
+        else
+          d(iint(k),1,i) = ibclr( d(iint(k),1,i), ipos(k) )
+          d(iint(k),2,i) = ibset( d(iint(k),2,i), ipos(k) )
+        endif
+        diff = iand(diff,diff-1_bit_kind)
+      enddo
+
+    enddo
+
+  endif
+
+end
+
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_configuration ]
@@ -647,7 +785,7 @@ END_PROVIDER
    endif
 
    sze = nmax
-   call configuration_to_dets(                                       &
+   call configuration_to_dets_tree_addressing(                       &
        psi_configuration(1,1,k),                                     &
        dets, sze, elec_alpha_num, N_int)
 
