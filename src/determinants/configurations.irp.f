@@ -311,15 +311,19 @@ end
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+ BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+&BEGIN_PROVIDER [ integer, cfg_nsomo_max ]
   implicit none
   BEGIN_DOC
  ! Returns the index in psi_configuration of the first cfg with
  ! the requested seniority
+ !
+ ! cfg_nsomo_max : Max number of SOMO in the current wave function
  END_DOC
  integer :: i, k, s, sold
  cfg_seniority_index(:) = -1
  sold = -1
+ cfg_nsomo_max = 0
  do i=1,N_configuration
    s = 0
    do k=1,N_int
@@ -329,6 +333,7 @@ BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
    if (s /= sold) then
      sold = s
      cfg_seniority_index(s) = i
+     cfg_nsomo_max = s
    endif
  enddo
 END_PROVIDER
@@ -618,6 +623,63 @@ END_PROVIDER
    endif
  enddo
  psi_configuration_to_psi_det(2,k) = N_det
+
+
+ ! Reorder determinants according to generation 
+ ! --------------------------------------------
+
+ integer(bit_kind), allocatable :: dets(:,:,:)
+ integer                        :: nmax, sze, degree, istart, iend, j
+ integer, allocatable           :: old_order(:)
+
+
+ nmax = 1000
+ allocate(dets(N_int,2,nmax), old_order(nmax))
+
+ do k=1,N_configuration
+   istart = psi_configuration_to_psi_det(1,k)
+   iend   = psi_configuration_to_psi_det(2,k)
+
+   if (iend-istart+1 > nmax) then
+      nmax = iend-istart+1
+      deallocate(dets)
+      allocate(dets(N_int,2,nmax))
+   endif
+
+   sze = nmax
+   call configuration_to_dets(                                       &
+       psi_configuration(1,1,k),                                     &
+       dets, sze, elec_alpha_num, N_int)
+
+   if (sze /= iend-istart+1) then
+      print *, 'bug in ', irp_here
+      stop -1
+   endif
+
+   do i=1,sze
+     old_order(i) = psi_configuration_to_psi_det_data(i-1+istart)
+   enddo
+
+   do i=1,sze
+     do j=1,sze
+
+       if (old_order(j) == 0) cycle
+
+       call get_excitation_degree(dets(1,1,i),                       &
+           psi_det(1, 1, old_order(j)), degree, N_int)
+
+       if (degree == 0) then
+         psi_configuration_to_psi_det_data(i-1+istart) = old_order(j)
+         old_order(j) = 0
+         exit
+       endif
+
+     enddo
+   enddo
+
+ enddo
+
+ deallocate(dets, old_order)
 
 END_PROVIDER
 
