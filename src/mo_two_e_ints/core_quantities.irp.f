@@ -36,3 +36,26 @@ BEGIN_PROVIDER [double precision, core_fock_operator, (mo_num,mo_num)]
   enddo
  enddo
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Core Hamiltonian with 3-index exchange integrals:
+ !
+ ! $\tilde{h}{pq} = h_{pq} - \frac{1}{2}\sum_{k} g(pk,kq)$
+ END_DOC
+
+ integer :: i,j, k
+
+ do j=1,mo_num
+   do i=1,mo_num
+     h_core_ri(i,j) = mo_one_e_integrals(i,j)
+   enddo
+   do k=1,mo_num
+     do i=1,mo_num
+       h_core_ri(i,j) = h_core_ri(i,j) - big_array_exchange_integrals(i,k,j)
+     enddo
+   enddo
+ enddo
+END_PROVIDER
+
