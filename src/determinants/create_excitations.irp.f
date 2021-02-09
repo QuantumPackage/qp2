@@ -336,7 +336,7 @@ subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
   enddo
 end
 
-subroutine generate_all_singles_cfg_with_type(cfg,singles,ex_type_singles,n_singles,Nint)
+subroutine generate_all_singles_cfg_with_type(cfg,singles,idxs_singles,pq_singles,ex_type_singles,n_singles,Nint)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -350,7 +350,9 @@ subroutine generate_all_singles_cfg_with_type(cfg,singles,ex_type_singles,n_sing
   END_DOC
   integer, intent(in)            :: Nint
   integer, intent(inout)         :: n_singles
+  integer, intent(out)           :: idxs_singles(*)
   integer, intent(out)           :: ex_type_singles(*)
+  real*8 , intent(out)           :: pq_singles(2,*)
   integer(bit_kind), intent(in)  :: cfg(Nint,2)
   integer(bit_kind), intent(out) :: singles(Nint,2,*)
 
@@ -371,6 +373,8 @@ subroutine generate_all_singles_cfg_with_type(cfg,singles,ex_type_singles,n_sing
           singles(k,1,n_singles) = single(k,1)
           singles(k,2,n_singles) = single(k,2)
           ex_type_singles(n_singles) = ex_type
+          pq_singles(1,n_singles) = i_hole     ! p
+          pq_singles(1,n_singles) = i_particle ! q
         enddo
       endif
     enddo
