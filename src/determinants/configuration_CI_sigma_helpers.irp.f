@@ -274,9 +274,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      Jdomo = psi_configuration(1,2,i)
      !call debug_spindet(Isomo,1)
      !call debug_spindet(Idomo,1)
-     print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
-     call debug_spindet(Jsomo,1)
-     call debug_spindet(Jdomo,1)
+     !print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
+     !call debug_spindet(Jsomo,1)
+     !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
      diffDOMO = IEOR(Idomo,Jdomo)
      ndiffSOMO = POPCNT(diffSOMO)
@@ -330,15 +330,13 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         end select
         starti = psi_config_data(i,1)
         endi   = psi_config_data(i,2)
-!       do k=starti,endi
-           nconnectedI += 1
-           connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
-           idxs_connectedI(nconnectedI)=starti
-           excitationIds(1,nconnectedI)=p
-           excitationIds(2,nconnectedI)=q
-           excitationTypes(nconnectedI) = extyp
-!       enddo
-        print *,"------ > output p,q in obt=",p,q
+        nconnectedI += 1
+        connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+        idxs_connectedI(nconnectedI)=starti
+        excitationIds(1,nconnectedI)=p
+        excitationIds(2,nconnectedI)=q
+        excitationTypes(nconnectedI) = extyp
+        !print *,"------ > output p,q in obt=",p,q
      endif
   end do
 
