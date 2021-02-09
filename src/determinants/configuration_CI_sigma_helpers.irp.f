@@ -94,6 +94,14 @@
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
 
+  !print *,"Nholes=",nholes," Nvmos=",nvmos, " idxi=",idxI
+  !do i = 1,nholes
+  !   print *,i,"->",listholes(i)
+  !enddo
+  !do i = 1,nvmos
+  !   print *,i,"->",listvmos(i)
+  !enddo
+
   ! TODO cfg_seniority_index
   do i = 1,nholes
      p = listholes(i)
@@ -209,17 +217,17 @@
 
            NalphaIcfg += 1
            !print *,p,q,"|",holetype(i),vmotype(j),NalphaIcfg
-           !call debug_spindet(Jsomo,1)
+           !call debug_spindet(Idomo,1)
            !call debug_spindet(Jdomo,1)
            alphasIcfg(1,1,NalphaIcfg) = Jsomo
-           alphasIcfg(1,2,NalphaIcfg) = Jdomo
+           alphasIcfg(1,2,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
         endif
      end do
   end do
 
   end subroutine
 
-subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, excitationIds, excitationTypes)
+subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI, nconnectedI, excitationIds, excitationTypes)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -240,6 +248,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
   integer          ,intent(in)             :: idxI
   integer(bit_kind),intent(in)             :: Ialpha(N_int,2)
   integer(bit_kind),intent(out)            :: connectedI(N_int,2,*)
+  integer          ,intent(out)            :: idxs_connectedI(*)
   integer,intent(out)                      :: nconnectedI
   integer,intent(out)                      :: excitationIds(2,*)
   integer,intent(out)                      :: excitationTypes(*)
@@ -252,7 +261,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
   integer*8                                :: diffDOMO
   integer                                  :: ndiffSOMO
   integer                                  :: ndiffDOMO
-  integer :: i,j,k,l,p,q,nsomoJ,nsomoalpha
+  integer :: i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp
 
   nconnectedI = 0
 
@@ -265,7 +274,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
      Jdomo = psi_configuration(1,2,i)
      !call debug_spindet(Isomo,1)
      !call debug_spindet(Idomo,1)
-     !print *,"-J--i=",i,Jsomo,Isomo
+     !print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
      !call debug_spindet(Jsomo,1)
      !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
@@ -273,15 +282,14 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
      !if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
-     !print *,"-I--i=",i,Isomo,Jsomo,ndiffSOMO,ndiffDOMO
+     !print *,"-I--i=",i,diffSOMO,diffDOMO!Isomo,Jsomo,ndiffSOMO,ndiffDOMO
+     !print *,POPCNT(IEOR(diffSOMO,diffDOMO)), ndiffDOMO
      if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
-        nconnectedI += 1
-        connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
         select case(ndiffDOMO)
         case (0)
            ! SOMO -> VMO
            !print *,"obt SOMO -> VMO"
-           excitationTypes(nconnectedI) = 3
+           extyp = 3
            IJsomo = IEOR(Isomo, Jsomo)
            p = TRAILZ(AND(Isomo,IJsomo)) + 1
            IJsomo = IBCLR(IJsomo,p-1)
@@ -295,7 +303,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
            if(nsomoJ .GT. nsomoalpha) then
               ! DOMO -> VMO
               !print *,"obt DOMO -> VMO"
-              excitationTypes(nconnectedI) = 2
+              extyp = 2
               p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
               Isomo = IEOR(Isomo, Jsomo)
               Isomo = IBCLR(Isomo,p-1)
@@ -303,7 +311,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
            else
               ! SOMO -> SOMO
               !print *,"obt SOMO -> SOMO"
-              excitationTypes(nconnectedI) = 1
+              extyp = 1
               q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
               Isomo = IEOR(Isomo, Jsomo)
               Isomo = IBCLR(Isomo,q-1)
@@ -312,7 +320,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
         case (2)
            ! DOMO -> SOMO
            !print *,"obt DOMO -> SOMO"
-           excitationTypes(nconnectedI) = 4
+           extyp = 4
            IJsomo = IEOR(Isomo, Jsomo)
            p = TRAILZ(AND(Jsomo,IJsomo)) + 1
            IJsomo = IBCLR(IJsomo,p-1)
@@ -320,8 +328,14 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, nconnectedI, ex
         case default
            print *,"something went wront in get connectedI"
         end select
+        starti = psi_config_data(i,1)
+        endi   = psi_config_data(i,2)
+        nconnectedI += 1
+        connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+        idxs_connectedI(nconnectedI)=starti
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q
+        excitationTypes(nconnectedI) = extyp
         !print *,"------ > output p,q in obt=",p,q
      endif
   end do
