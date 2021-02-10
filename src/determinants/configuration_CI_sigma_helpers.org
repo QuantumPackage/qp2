@@ -16,7 +16,7 @@ Here we create a list of \(|\alpha\rangle\)'s associated with
 the input determinant \(|D_I\rangle\).
 
 #+begin_src f90 :main no :tangle configuration_CI_sigma_helpers.irp.f
-  subroutine obtain_associated_alphaI(idxI, Icfg, alphasIcfg, NalphaIcfg)
+  subroutine obtain_associated_alphaI(idxI, Icfg, alphasIcfg, NalphaIcfg, factor_alphaI)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -28,6 +28,7 @@ the input determinant \(|D_I\rangle\).
   integer,intent(in)                 :: idxI ! The id of the Ith CFG
   integer(bit_kind),intent(in)       :: Icfg(N_int,2)
   integer,intent(out)                :: NalphaIcfg
+  real*8 ,intent(out)                :: factor_alphaI(*)
   integer(bit_kind),intent(out)      :: alphasIcfg(N_int,2,*)
   logical,dimension(:,:),allocatable :: tableUniqueAlphas
   integer                            :: listholes(mo_num)
@@ -286,7 +287,30 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer*8                                :: diffDOMO
   integer                                  :: ndiffSOMO
   integer                                  :: ndiffDOMO
-  integer :: i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp
+  integer :: i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
+  integer :: listholes(mo_num)
+  integer :: holetype(mo_num)
+
+  ! find out all pq holes possible
+  nholes = 0
+  ! holes in SOMO
+  Isomo = psi_configuration(1,1,idxI)
+  Idomo = psi_configuration(1,2,idxI)
+  do i = n_core_orb+1,n_core_orb + n_act_orb
+     if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
+        nholes += 1
+        listholes(nholes) = i
+        holetype(nholes) = 1
+     endif
+  end do
+  ! holes in DOMO
+  do i = n_core_orb+1,n_core_orb + n_act_orb
+     if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
+        nholes += 1
+        listholes(nholes) = i
+        holetype(nholes) = 2
+     endif
+  end do
 
   nconnectedI = 0
 
@@ -306,17 +330,22 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      diffDOMO = IEOR(Idomo,Jdomo)
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
-     !if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
+     if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
      !print *,"-I--i=",i,diffSOMO,diffDOMO!Isomo,Jsomo,ndiffSOMO,ndiffDOMO
      !print *,POPCNT(IEOR(diffSOMO,diffDOMO)), ndiffDOMO
      if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+     call debug_spindet(Isomo,1)
+     call debug_spindet(Idomo,1)
+     print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
+     call debug_spindet(Jsomo,1)
+     call debug_spindet(Jdomo,1)
         select case(ndiffDOMO)
         case (0)
            ! SOMO -> VMO
            !print *,"obt SOMO -> VMO"
            extyp = 3
            IJsomo = IEOR(Isomo, Jsomo)
-           p = TRAILZ(AND(Isomo,IJsomo)) + 1
+           p = TRAILZ(IAND(Isomo,IJsomo)) + 1
            IJsomo = IBCLR(IJsomo,p-1)
            q = TRAILZ(IJsomo) + 1
         case (1)
@@ -347,7 +376,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            !print *,"obt DOMO -> SOMO"
            extyp = 4
            IJsomo = IEOR(Isomo, Jsomo)
-           p = TRAILZ(AND(Jsomo,IJsomo)) + 1
+           p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
            IJsomo = IBCLR(IJsomo,p-1)
            q = TRAILZ(IJsomo) + 1
         case default
@@ -361,10 +390,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q
         excitationTypes(nconnectedI) = extyp
-        !print *,"------ > output p,q in obt=",p,q
+        print *,"------ > output p,q in obt=",p,q
      endif
   end do
-
 
 end subroutine obtain_connected_I_foralpha
 #+end_src
@@ -438,56 +466,62 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   pos0prev = 0
   pmodel = p
   qmodel = q
-  !print *,"input pq=",p,q,"extype=",extype
-  !call debug_spindet(Isomo,1)
-  !call debug_spindet(Idomo,1)
-  !call debug_spindet(Jsomo,1)
-  !call debug_spindet(Jdomo,1)
-  select case(extype)
-     case (1)
-        ! SOMO -> SOMO
-        ! remove all domos
-        !print *,"type -> SOMO -> SOMO"
-        mask = ISHFT(1_8,p) - 1
-        Isomotmp = AND(Isomo,mask)
-        pmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
-        mask = ISHFT(1_8,q) - 1
-        Isomotmp = AND(Isomo,mask)
-        qmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
-     case (2)
-        ! DOMO -> VMO
-        ! remove all domos except one at p
-        !print *,"type -> DOMO -> VMO"
-        mask = ISHFT(1_8,p) - 1
-        Jsomotmp = AND(Jsomo,mask)
-        pmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
-        mask = ISHFT(1_8,q) - 1
-        Jsomotmp = AND(Jsomo,mask)
-        qmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
-     case (3)
-        ! SOMO -> VMO
-        !print *,"type -> SOMO -> VMO"
-        !Isomo = IEOR(Isomo,Jsomo)
-        mask = ISHFT(1_8,p) - 1
-        Isomo = AND(Isomo,mask)
-        pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
-        mask = ISHFT(1_8,q) - 1
-        Jsomo = AND(Jsomo,mask)
-        qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
-     case (4)
-        ! DOMO -> SOMO
-        ! remove all domos except one at p
-        !print *,"type -> DOMO -> SOMO"
-        !Isomo = IEOR(Isomo,Jsomo)
-        mask = ISHFT(1_8,p) - 1
-        Jsomo = AND(Jsomo,mask)
-        pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
-        mask = ISHFT(1_8,q) - 1
-        Isomo = AND(Isomo,mask)
-        qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
-     case default
-        print *,"something is wrong in convertOrbIdsToModelSpaceIds"
+
+  if(p .EQ. q) then
+     pmodel = 1
+     qmodel = 1
+  else
+     !print *,"input pq=",p,q,"extype=",extype
+     !call debug_spindet(Isomo,1)
+     !call debug_spindet(Idomo,1)
+     !call debug_spindet(Jsomo,1)
+     !call debug_spindet(Jdomo,1)
+     select case(extype)
+       case (1)
+          ! SOMO -> SOMO
+          ! remove all domos
+          !print *,"type -> SOMO -> SOMO"
+          mask = ISHFT(1_8,p) - 1
+          Isomotmp = IAND(Isomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          mask = ISHFT(1_8,q) - 1
+          Isomotmp = IAND(Isomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+       case (2)
+          ! DOMO -> VMO
+          ! remove all domos except one at p
+          !print *,"type -> DOMO -> VMO"
+          mask = ISHFT(1_8,p) - 1
+          Jsomotmp = IAND(Jsomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          mask = ISHFT(1_8,q) - 1
+          Jsomotmp = IAND(Jsomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+       case (3)
+          ! SOMO -> VMO
+          !print *,"type -> SOMO -> VMO"
+          !Isomo = IEOR(Isomo,Jsomo)
+          mask = ISHFT(1_8,p) - 1
+          Isomo = IAND(Isomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+          mask = ISHFT(1_8,q) - 1
+          Jsomo = IAND(Jsomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+       case (4)
+          ! DOMO -> SOMO
+          ! remove all domos except one at p
+          !print *,"type -> DOMO -> SOMO"
+          !Isomo = IEOR(Isomo,Jsomo)
+          mask = ISHFT(1_8,p) - 1
+          Jsomo = IAND(Jsomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+          mask = ISHFT(1_8,q) - 1
+          Isomo = IAND(Isomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+       case default
+          print *,"something is wrong in convertOrbIdsToModelSpaceIds"
      end select
+  endif
      !print *,p,q,"model ids=",pmodel,qmodel
 end subroutine convertOrbIdsToModelSpaceIds
 #+end_src
@@ -502,7 +536,7 @@ end subroutine convertOrbIdsToModelSpaceIds
       print *,mask
       print *,POPCNT(mask)
       isomo = 144
-      isomo = AND(isomo,mask)
+      isomo = IAND(isomo,mask)
       print *,isomo
       print *,XOR(isomo,mask)
       print *,POPCNT(mask) - POPCNT(XOR(isomo,mask))
@@ -518,8 +552,8 @@ end subroutine convertOrbIdsToModelSpaceIds
 
 #+begin_src fortran
       print *,IBSET(0_8,4)-1
-      print *,POPCNT(IBSET(0_8,4)-1) - POPCNT(AND(716,IBSET(0_8,4)-1))
-      print *,POPCNT(IBSET(0_8,8)-1) - POPCNT(AND(716,IBSET(0_8,8)-1))
+      print *,POPCNT(IBSET(0_8,4)-1) - POPCNT(IAND(716,IBSET(0_8,4)-1))
+      print *,POPCNT(IBSET(0_8,8)-1) - POPCNT(IAND(716,IBSET(0_8,8)-1))
 #+end_src
 
 #+RESULTS:

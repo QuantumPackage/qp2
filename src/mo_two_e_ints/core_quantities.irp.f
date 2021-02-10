@@ -53,7 +53,7 @@ BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
    enddo
    do k=1,mo_num
      do i=1,mo_num
-       h_core_ri(i,j) = h_core_ri(i,j) - big_array_exchange_integrals(i,k,j)
+       h_core_ri(i,j) = h_core_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
      enddo
    enddo
  enddo

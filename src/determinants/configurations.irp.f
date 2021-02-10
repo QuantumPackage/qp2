@@ -729,6 +729,41 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
  enddo
 END_PROVIDER
 
+subroutine binary_search_cfg(cfgInp,addcfg)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Documentation for binary_search
+  ! 
+  ! Does a binary search to find 
+  ! the address of a configuration in a list of
+  ! configurations.
+  END_DOC
+  integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
+  integer          , intent(out) :: addcfg
+  integer :: i,j,k,r,l
+  integer*8 :: key, key2
+  logical :: found
+  !integer*8, allocatable :: bit_tmp(:)
+  !integer*8, external            :: configuration_search_key
+
+  !allocate(bit_tmp(0:N_configuration))
+  !bit_tmp(0) = 0
+  do i=1,N_configuration
+    !bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
+    found = .True.
+    do k=1,N_int
+      found = found .and. (psi_configuration(k,1,i) == cfgInp(k,1)) &
+                    .and. (psi_configuration(k,2,i) == cfgInp(k,2))
+    enddo
+    if (found) then
+      addcfg = i
+      exit
+    endif
+  enddo
+
+end subroutine
+
  BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]
 

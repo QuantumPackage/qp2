@@ -336,7 +336,7 @@ subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
   enddo
 end
 
-subroutine generate_all_singles_cfg_with_type(cfg,singles,idxs_singles,pq_singles,ex_type_singles,n_singles,Nint)
+subroutine generate_all_singles_cfg_with_type(cfgInp,singles,idxs_singles,pq_singles,ex_type_singles,n_singles,Nint)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -352,11 +352,12 @@ subroutine generate_all_singles_cfg_with_type(cfg,singles,idxs_singles,pq_single
   integer, intent(inout)         :: n_singles
   integer, intent(out)           :: idxs_singles(*)
   integer, intent(out)           :: ex_type_singles(*)
-  real*8 , intent(out)           :: pq_singles(2,*)
-  integer(bit_kind), intent(in)  :: cfg(Nint,2)
+  integer, intent(out)           :: pq_singles(2,*)
+  integer(bit_kind), intent(in)  :: cfgInp(Nint,2)
   integer(bit_kind), intent(out) :: singles(Nint,2,*)
+  integer(bit_kind)              :: Jdet(Nint,2)
 
-  integer           :: i,k, n_singles_ma, i_hole, i_particle, ex_type
+  integer           :: i,k, n_singles_ma, i_hole, i_particle, ex_type, addcfg
   integer(bit_kind) :: single(Nint,2)
   logical           :: i_ok
 
@@ -364,17 +365,22 @@ subroutine generate_all_singles_cfg_with_type(cfg,singles,idxs_singles,pq_single
   !TODO
   !Make list of Somo  and Domo for holes
   !Make list of Unocc and Somo for particles
-  do i_hole = 1, mo_num
-    do i_particle = 1, mo_num
-      call do_single_excitation_cfg_with_type(cfg,single,i_hole,i_particle,ex_type,i_ok)
+  do i_hole = 1+n_core_orb, n_core_orb + n_act_orb
+    do i_particle = 1+n_core_orb, n_core_orb + n_act_orb
+      if(i_hole .EQ. i_particle) cycle
+      addcfg = -1
+      call do_single_excitation_cfg_with_type(cfgInp,single,i_hole,i_particle,ex_type,i_ok)
       if (i_ok) then
+        call binary_search_cfg(single,addcfg)
+        if(addcfg .EQ. -1) cycle
         n_singles = n_singles + 1
         do k=1,Nint
           singles(k,1,n_singles) = single(k,1)
           singles(k,2,n_singles) = single(k,2)
           ex_type_singles(n_singles) = ex_type
           pq_singles(1,n_singles) = i_hole     ! p
-          pq_singles(1,n_singles) = i_particle ! q
+          pq_singles(2,n_singles) = i_particle ! q
+          idxs_singles(n_singles) = addcfg
         enddo
       endif
     enddo
