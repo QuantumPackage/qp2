@@ -1226,8 +1226,8 @@ integer function zmq_delete_tasks_async_recv(zmq_to_qp_run_socket,more,sending)
   integer                        :: rc
   character*(64)                 :: reply
 
-  if (.not.sending) return
   zmq_delete_tasks_async_recv = 0
+  if (.not.sending) return
 
   reply = ''
   rc = f77_zmq_recv(zmq_to_qp_run_socket,reply,64,0)
