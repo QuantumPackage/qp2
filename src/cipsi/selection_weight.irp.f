@@ -33,53 +33,21 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
 
   double precision :: avg, element, dt, x
   integer          :: k
-!  integer, save    :: i_iter=0
-!  integer, parameter :: i_itermax = 1
-!  double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
-
   pt2(:)      = pt2_data % pt2(:)
   variance(:) = pt2_data % variance(:)
 
-!  if (i_iter == 0) then
-!    allocate(memo_variance(N_st,i_itermax), memo_pt2(N_st,i_itermax))
-!    memo_pt2(:,:) = 1.d0
-!    memo_variance(:,:) = 1.d0
-!  endif
-!
-!  i_iter = i_iter+1
-!  if (i_iter > i_itermax) then
-!    i_iter = 1
-!  endif
-!
-!  dt = 2.0d0
-
   avg = sum(pt2(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
-!  do k=1,N_st
-!    element = exp(dt*(pt2(k)/avg -1.d0))
-!    element = min(2.0d0 , element)
-!    element = max(0.5d0 , element)
-!    memo_pt2(k,i_iter) = element
-!    pt2_match_weight(k) *= product(memo_pt2(k,:))
-  !enddo
 
-  dt = 1.0d0 * selection_factor
+  dt = 2.d0 !* selection_factor
   do k=1,N_st
     element = exp(dt*(pt2(k)/avg - 1.d0))
     element = min(2.0d0 , element)
     element = max(0.5d0 , element)
-  print *, k, element
     pt2_match_weight(k) *= element
   enddo
 
 
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
-!  do k=1,N_st
-!    element = exp(dt*(variance(k)/avg -1.d0))
-!    element = min(2.0d0 , element)
-!    element = max(0.5d0 , element)
-!    memo_variance(k,i_iter) = element
-!    variance_match_weight(k) *= product(memo_variance(k,:))
-!  enddo
 
   do k=1,N_st
     element = exp(dt*(variance(k)/avg -1.d0))
@@ -93,8 +61,6 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
     pt2_match_weight(:) = 1.d0
     variance_match_weight(:) = 1.d0
   endif
-
-print *, 'XXX', n_det, pt2_match_weight(1), pt2_match_weight(2)
 
   threshold_davidson_pt2 = min(1.d-6, &
      max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
