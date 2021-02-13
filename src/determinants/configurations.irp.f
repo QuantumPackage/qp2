@@ -547,9 +547,14 @@ BEGIN_PROVIDER [ integer, dominant_cfg, (N_states) ]
  ! Configuration of the determinants with the largest weight, for each state
  END_DOC
  integer :: k
- do k=1,N_states
-   dominant_cfg(k) = det_to_configuration(dominant_det(k))
- enddo
+ dominant_cfg(1) = det_to_configuration(dominant_det(1))
+ if (N_det < N_states) then
+   dominant_cfg(:) = dominant_cfg(1)
+ else
+   do k=1,N_states
+     dominant_cfg(k) = det_to_configuration(dominant_det(k))
+   enddo
+ endif
 END_PROVIDER
 
 
