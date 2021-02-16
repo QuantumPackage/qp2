@@ -700,7 +700,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
       enddo
 
-      do_diag = sum(dabs(coef)) > 0.001d0
+      do_diag = sum(dabs(coef)) > 0.001d0 .and. N_states > 1
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
