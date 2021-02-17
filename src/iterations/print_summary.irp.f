@@ -58,6 +58,9 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   print *,  'N_states          = ', n_st
   if (s2_eig) then
     print *,  'N_cfg             = ', N_configuration_
+    if (only_expected_s2) then
+      print *,  'N_csf             = ', N_csf
+    endif
   endif
   print *,  ''
 
