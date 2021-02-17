@@ -653,7 +653,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         do_cycle = .True.
         do k=1,N_dominant_dets_of_cfgs
           call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_alpha_max) 
+          do_cycle = do_cycle .and. (degree > excitation_alpha_max)
         enddo
         if (do_cycle) cycle
       endif
@@ -663,7 +663,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         do_cycle = .True.
         do k=1,N_dominant_dets_of_cfgs
           call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_beta_max) 
+          do_cycle = do_cycle .and. (degree > excitation_beta_max)
         enddo
         if (do_cycle) cycle
       endif

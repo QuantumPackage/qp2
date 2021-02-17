@@ -352,9 +352,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
     state_average_weight(:) = state_average_weight_save(:)
     TOUCH state_average_weight
+    call update_pt2_and_variance_weights(pt2_data, N_states)
   endif
 
-  call update_pt2_and_variance_weights(pt2_data, N_states)
 
 end subroutine
 
