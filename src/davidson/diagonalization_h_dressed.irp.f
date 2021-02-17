@@ -119,7 +119,7 @@ subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
   include 'constants.include.F'
 
   N_st_diag = N_st_diag_in
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, S, y, S_d, h, lambda
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
   if (N_st_diag*3 > sze) then
     print *,  'error in Davidson :'
     print *,  'Increase n_det_max_full to ', N_st_diag*3
