@@ -401,8 +401,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       if (state_following) then
 
         overlap = -1.d0
-        do k=1,shift2
-          do i=1,shift2
+        do i=1,shift2
+          do k=1,shift2
             overlap(k,i) = dabs(y(k,i))
           enddo
         enddo
@@ -437,14 +437,14 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
       call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
           1.d0, U_csf, size(U_csf,1), y, size(y,1), 0.d0, U_csf(1,shift2+1), size(U_csf,1))
+      call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift2+1),U)
+
       call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
           1.d0, W_csf, size(W_csf,1), y, size(y,1), 0.d0, W_csf(1,shift2+1), size(W_csf,1))
+      call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift2+1),W)
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
-
-      call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift2+1),U)
-      call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift2+1),W)
 
       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k=1,N_st_diag
@@ -510,7 +510,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
-
     do k=1,N_st_diag
       do i=1,sze_csf
         U_csf(i,k) = u_in(i,k)
@@ -518,6 +517,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     enddo
 
     call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     ! Adjust the phase
     do j=1,N_st_diag
