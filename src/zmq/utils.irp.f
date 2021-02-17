@@ -681,7 +681,7 @@ integer function disconnect_from_taskserver(zmq_to_qp_run_socket, worker_id)
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
   integer, intent(in)            :: worker_id
   integer, external :: disconnect_from_taskserver_state
-  disconnect_from_taskserver = disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_id, zmq_state(1:128))
+  disconnect_from_taskserver = disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_id, zmq_state)
 end
 
 integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_id, state)
@@ -692,10 +692,11 @@ integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_i
   END_DOC
   integer(ZMQ_PTR), intent(in)   :: zmq_to_qp_run_socket
   integer, intent(in)            :: worker_id
+  character*(128), intent(in)    :: state
 
   integer                        :: rc, sze
   character*(512)                :: message, reply
-  character*(128)                :: state
+  character*(128)                :: state_tmp
 
   disconnect_from_taskserver_state = 0
 
@@ -712,8 +713,8 @@ integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_i
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 510, 0)
   message = trim(message(1:rc))
 
-  read(message,*, end=10, err=10) reply, state
-  if ((trim(reply) == 'disconnect_reply').and.(trim(state) == trim(zmq_state))) then
+  read(message,*, end=10, err=10) reply, state_tmp
+  if ((trim(reply) == 'disconnect_reply').and.(trim(state_tmp) == trim(state))) then
     return
   endif
   if (trim(message) == 'error Wrong state') then
@@ -905,7 +906,7 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
     return
   endif
 
-  message = repeat(' ',512)
+  message = repeat(' ',1024)
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
   if (rc <= 0) then
      print *, rc
@@ -916,10 +917,10 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
   if (trim(reply) == 'get_task_reply') then
     read(message(1:rc),*, end=10, err=10) reply, task_id
     rc = 15
-    do while (message(rc:rc) == ' ')
+    do while (rc < 1024 .and. message(rc:rc) == ' ')
       rc += 1
     enddo
-    do while (message(rc:rc) /= ' ')
+    do while (rc < 1024 .and. message(rc:rc) /= ' ')
       rc += 1
     enddo
     rc += 1
