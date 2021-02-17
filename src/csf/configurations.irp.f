@@ -1,4 +1,13 @@
 use bitmasks
+
+BEGIN_PROVIDER [ integer, spin_multiplicity ]
+ implicit none
+ BEGIN_DOC
+ ! n_alpha - n_beta + 1
+ END_DOC
+ spin_multiplicity = elec_alpha_num - elec_beta_num + 1
+END_PROVIDER
+
 subroutine configuration_of_det(d,o,Nint)
   use bitmasks
   implicit none
