@@ -298,14 +298,6 @@ subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-        if (disk_based) then
-          call ortho_qr_unblocked(U,size(U,1),sze,shift2)
-          call ortho_qr_unblocked(U,size(U,1),sze,shift2)
-        else
-          call ortho_qr(U,size(U,1),sze,shift2)
-          call ortho_qr(U,size(U,1),sze,shift2)
-        endif
-
         if ((sze > 100000).and.distributed_davidson) then
             call H_u_0_nstates_zmq   (W(1,shift+1),U(1,shift+1),N_st_diag,sze)
         else
@@ -359,11 +351,30 @@ subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
+      call dgemm('T','N', shift2, shift2, sze,                       &
+          1.d0, U, size(U,1), U, size(U,1),                          &
+          0.d0, s_tmp, size(s_tmp,1))
 
       ! Diagonalize h
       ! ---------------
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+       integer :: lwork, info
+       double precision, allocatable :: work(:)
+
+       y = h
+       lwork = -1
+       allocate(work(1))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       lwork = int(work(1))
+       deallocate(work)
+       allocate(work(lwork))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       deallocate(work)
+       if (info /= 0) then
+         stop 'DSYGV Diagonalization failed'
+       endif
 
       ! Compute Energy for each eigenvector
       ! -----------------------------------
@@ -459,7 +470,7 @@ subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
       endif
 
       do k=1,N_st
-        if (residual_norm(k) > 1.e8) then
+        if (residual_norm(k) > 1.d8) then
           print *, 'Davidson failed'
           stop -1
         endif
@@ -497,13 +508,6 @@ subroutine davidson_diag_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
       enddo
     enddo
 
-    if (disk_based) then
-      call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
-      call ortho_qr_unblocked(U,size(U,1),sze,N_st_diag)
-    else
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-    endif
 
     ! Adjust the phase
     do j=1,N_st_diag

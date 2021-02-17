@@ -15,7 +15,6 @@ subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_s
   !
   ! N_st : Number of eigenstates
   !
-  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
   integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
@@ -80,7 +79,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   !
   ! N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
   !
-  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
   integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag_in, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
@@ -302,14 +300,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-        if (disk_based) then
-          call ortho_qr_unblocked(U_csf,size(U_csf,1),sze_csf,shift2)
-          call ortho_qr_unblocked(U_csf,size(U_csf,1),sze_csf,shift2)
-        else
-          call ortho_qr(U_csf,size(U_csf,1),sze_csf,shift2)
-          call ortho_qr(U_csf,size(U_csf,1),sze_csf,shift2)
-        endif
-
         call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
         if ((sze > 100000).and.distributed_davidson) then
             call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
@@ -366,11 +356,30 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       call dgemm('T','N', shift2, shift2, sze_csf,                       &
           1.d0, U_csf, size(U_csf,1), W_csf, size(W_csf,1),                          &
           0.d0, h, size(h,1))
+      call dgemm('T','N', shift2, shift2, sze_csf,                       &
+          1.d0, U_csf, size(U_csf,1), U_csf, size(U_csf,1),                          &
+          0.d0, s_tmp, size(s_tmp,1))
 
       ! Diagonalize h
       ! ---------------
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+       integer :: lwork, info
+       double precision, allocatable :: work(:)
+
+       y = h
+       lwork = -1
+       allocate(work(1))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       lwork = int(work(1))
+       deallocate(work)
+       allocate(work(lwork))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       deallocate(work)
+       if (info /= 0) then
+         stop 'DSYGV Diagonalization failed'
+       endif
 
       ! Compute Energy for each eigenvector
       ! -----------------------------------
@@ -438,9 +447,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k=1,N_st_diag
         do i=1,sze
-!           U_csf(i,shift2+k) =  &
-!            (lambda(k) * U_csf(i,shift2+k) - W_csf(i,shift2+k) )      &
-!              /max(H_jj_csf(i) - lambda (k),1.d-2)
            U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
               /max(H_jj(i) - lambda (k),1.d-2)
         enddo
@@ -508,14 +514,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         U_csf(i,k) = u_in(i,k)
       enddo
     enddo
-
-    if (disk_based) then
-      call ortho_qr_unblocked(U_csf,size(U_csf,1),sze_csf,N_st_diag)
-      call ortho_qr_unblocked(U_csf,size(U_csf,1),sze_csf,N_st_diag)
-    else
-      call ortho_qr(U_csf,size(U_csf,1),sze_csf,N_st_diag)
-      call ortho_qr(U_csf,size(U_csf,1),sze_csf,N_st_diag)
-    endif
 
     call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
 
