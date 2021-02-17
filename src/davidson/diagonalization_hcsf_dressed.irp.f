@@ -155,8 +155,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   call resident_memory(rss)
   do
     r1 = 8.d0 *                                   &! bytes
-         ( dble(sze)*(N_st_diag*itermax)          &! U
-         + 1.0d0*dble(sze*m)*(N_st_diag*itermax)  &! W
+         ( dble(sze)*(N_st_diag)                  &! U
+         + dble(sze_csf)*(N_st_diag*itermax)      &! U_csf
+         + dble(sze)*(N_st_diag)                  &! W
+         + dble(sze_csf)*(N_st_diag*itermax)      &! W_csf
          + 3.0d0*(N_st_diag*itermax)**2           &! h,y,s_tmp
          + 1.d0*(N_st_diag*itermax)               &! lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
