@@ -38,7 +38,7 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
 
   avg = sum(pt2(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
 
-  dt = 2.d0 !* selection_factor
+  dt = 8.d0 !* selection_factor
   do k=1,N_st
     element = exp(dt*(pt2(k)/avg - 1.d0))
     element = min(2.0d0 , element)
