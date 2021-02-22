@@ -674,6 +674,19 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   ! of $\alpha$ and $\beta$ determinants
   END_DOC
   logical, intent(in)            :: truncate
+
+  call generate_all_alpha_beta_det_products
+  call update_wf_of_psi_bilinear_matrix(truncate)
+
+end
+
+subroutine update_wf_of_psi_bilinear_matrix(truncate)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Updates a wave function when psi_bilinear_matrix was modified
+  END_DOC
+  logical, intent(in)            :: truncate
   integer                        :: i,j,k
   integer(bit_kind)              :: tmp_det(N_int,2)
   integer                        :: idx
@@ -681,7 +694,6 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   double precision               :: norm(N_states)
   PROVIDE psi_bilinear_matrix
 
-  call generate_all_alpha_beta_det_products
   norm = 0.d0
   !$OMP PARALLEL DO DEFAULT(NONE)                                    &
       !$OMP PRIVATE(i,j,k,idx,tmp_det)                               &
@@ -717,7 +729,7 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   enddo
   psi_det  = psi_det_sorted_bit
   psi_coef = psi_coef_sorted_bit
-  TOUCH psi_det psi_coef
+  TOUCH psi_det psi_coef N_det_beta_unique N_det_alpha_unique psi_det_beta_unique psi_det_alpha_unique
   psi_det  = psi_det_sorted
   psi_coef = psi_coef_sorted
   norm(1) = 0.d0
@@ -733,7 +745,7 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
     endif
   enddo
   N_det = min(i,N_det)
-  SOFT_TOUCH psi_det psi_coef N_det
+  SOFT_TOUCH psi_det psi_coef N_det N_det_beta_unique N_det_alpha_unique psi_det_beta_unique psi_det_alpha_unique
 
 end
 
@@ -773,7 +785,7 @@ subroutine generate_all_alpha_beta_det_products
   deallocate(tmp_det)
   !$OMP END PARALLEL
   call copy_H_apply_buffer_to_wf
-  SOFT_TOUCH psi_det psi_coef N_det
+  SOFT_TOUCH psi_det psi_coef N_det N_det_beta_unique N_det_alpha_unique psi_det_alpha_unique psi_det_beta_unique
 end
 
 
