@@ -702,7 +702,7 @@ integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_i
 
   write(message,*) 'disconnect '//trim(state), worker_id
 
-  sze = len(trim(message))
+  sze = min(510,len(trim(message)))
   rc = f77_zmq_send(zmq_to_qp_run_socket, trim(message), sze, 0)
 
   if (rc /= sze) then
@@ -711,6 +711,11 @@ integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_i
   endif
 
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 510, 0)
+  if (rc <= 0) then
+    disconnect_from_taskserver_state = -3
+    return
+  endif
+  rc = min(510,rc)
   message = trim(message(1:rc))
 
   read(message,*, end=10, err=10) reply, state_tmp
@@ -906,13 +911,14 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
     return
   endif
 
+  task_id = 0
   message = repeat(' ',1024)
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
   if (rc <= 0) then
      print *, rc
      stop "rc"
   end if
-  rc = min(1024,rc)
+  rc = min(64,rc)
   read(message(1:rc),*, end=10, err=10) reply
   if (trim(reply) == 'get_task_reply') then
     read(message(1:rc),*, end=10, err=10) reply, task_id
@@ -926,13 +932,10 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
     rc += 1
     task = message(rc:)
   else if (trim(reply) == 'terminate') then
-    task_id = 0
     task = 'terminate'
   else if (trim(message) == 'error No job is running') then
-    task_id = 0
     task = 'terminate'
   else if (trim(message) == 'error Wrong state') then
-    task_id = 0
     task = 'terminate'
   else
     get_task_from_taskserver = -1
