@@ -66,7 +66,7 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer                        :: nbetas
   integer                        :: k
 
-  ! Initliaze deta and detb
+  ! Initialize deta and detb
   deta = Ialpha
   detb = Ibeta
 
