@@ -668,10 +668,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       w = 0d0
 
-!      integer(bit_kind) :: occ(N_int,2), n
-!      call configuration_of_det(det,occ,N_int)
-!      call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
-
       e_pert = 0.d0
       coef = 0.d0
       logical :: do_diag
@@ -699,7 +695,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
-      integer :: iwork(3+5*(N_states+1)), info, k ,n
+      integer :: iwork(3+5*(N_states+1)), info, k 
 
       if (do_diag) then
         double precision :: pt2_matrix(N_states+1,N_states+1)
@@ -765,36 +761,43 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case(5)
             ! Variance selection
-!            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
-            w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(alpha_h_psi*mat(jstate,p1,p2)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)) & 
+                / c0_weight(istate)
+            else
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
+            endif
 
           case(6)
-!            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
-            w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate)) &
+                / c0_weight(istate)
+            else
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
+            endif
 
           case default
             ! Energy selection
-!            w = w + e_pert(istate) * s_weight(istate,istate)
-            w = min(w, e_pert(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(X(istate)*X(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, e_pert(istate) * s_weight(istate,istate)) / c0_weight(istate)
+            else
+              w = min(w, e_pert(istate) * s_weight(istate,istate))
+            endif
 
         end select
       end do
 
 
-!      w = dble(n) * w
-
+      integer(bit_kind) :: occ(N_int,2), n
+      if (h0_type == 'CFG') then
+        do k=1,N_int
+          occ(k,1) = ieor(det(k,1),det(k,2))
+          occ(k,2) = iand(det(k,1),det(k,2))
+        enddo
+        call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
+        n = max(n,1)
+        w *= dsqrt(dble(n))
+      endif
 
       if(w <= buf%mini) then
         call add_to_selection_buffer(buf, det, w)
