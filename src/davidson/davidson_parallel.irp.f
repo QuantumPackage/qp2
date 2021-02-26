@@ -270,10 +270,12 @@ subroutine davidson_push_results_async_recv(zmq_socket_push,sending)
 ! Activate is zmq_socket_push is a REQ
 IRP_IF ZMQ_PUSH
 IRP_ELSE
-  character*(2) :: ok
+  character*(256) :: ok
   rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
   if ((rc /= 2).and.(ok(1:2)/='ok')) then
     print *, irp_here, ': f77_zmq_recv( zmq_socket_push, ok, 2, 0)'
+    print *,  rc
+    print *,  ok
     stop -1
   endif
 IRP_ENDIF

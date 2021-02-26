@@ -193,7 +193,7 @@ subroutine davidson_csf_push_results(zmq_socket_push, v_t, imin, imax, task_id)
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
   if(rc /= 4) stop 'davidson_csf_push_results failed to push imax'
 
-  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, 0)
   if(rc8 /= 8_8*sz) stop 'davidson_csf_push_results failed to push vt'
 
 ! Activate is zmq_socket_push is a REQ
@@ -240,7 +240,7 @@ subroutine davidson_csf_push_results_async_send(zmq_socket_push, v_t, imin, imax
   rc = f77_zmq_send( zmq_socket_push, imax, 4, ZMQ_SNDMORE)
   if(rc /= 4) stop 'davidson_csf_push_results failed to push imax'
 
-  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, ZMQ_SNDMORE)
+  rc8 = f77_zmq_send8( zmq_socket_push, v_t(1,imin), 8_8*sz, 0)
   if(rc8 /= 8_8*sz) stop 'davidson_csf_push_results failed to push vt'
 
 
