@@ -1,9 +1,9 @@
-  BEGIN_PROVIDER [ integer, NSOMOMax]
- &BEGIN_PROVIDER [ integer, NCSFMax]
- &BEGIN_PROVIDER [ integer*8, NMO]
- &BEGIN_PROVIDER [ integer, NBFMax]
- &BEGIN_PROVIDER [ integer, n_CSF]
- &BEGIN_PROVIDER [ integer, maxDetDimPerBF]
+ BEGIN_PROVIDER [ integer, NSOMOMax]
+&BEGIN_PROVIDER [ integer, NCSFMax]
+&BEGIN_PROVIDER [ integer*8, NMO]
+&BEGIN_PROVIDER [ integer, NBFMax]
+&BEGIN_PROVIDER [ integer, n_CSF]
+&BEGIN_PROVIDER [ integer, maxDetDimPerBF]
   implicit none
   BEGIN_DOC
   ! Documentation for NSOMOMax
@@ -22,7 +22,7 @@
   integer NSOMO
   integer dimcsfpercfg
   integer detDimperBF
-  real*8 :: coeff
+  real*8                         :: coeff
   integer MS
   integer ncfgpersomo
   detDimperBF = 0
@@ -31,21 +31,20 @@
   n_CSF = cfg_seniority_index(0)-1
   ncfgprev = cfg_seniority_index(0)
   do i = 0-iand(MS,1)+2, NSOMOMax,2
-     if(cfg_seniority_index(i) .EQ. -1)then
-        ncfgpersomo = N_configuration + 1
-     else
-        ncfgpersomo = cfg_seniority_index(i)
-     endif
-  ncfg = ncfgpersomo - ncfgprev
-  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-  n_CSF += ncfg * dimcsfpercfg
-  !if(cfg_seniority_index(i+2) == -1) EXIT
-  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
-  ncfgprev = cfg_seniority_index(i)
+    if(cfg_seniority_index(i) .EQ. -1)then
+      ncfgpersomo = N_configuration + 1
+    else
+      ncfgpersomo = cfg_seniority_index(i)
+    endif
+    ncfg = ncfgpersomo - ncfgprev
+    !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
+    dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+    n_CSF += ncfg * dimcsfpercfg
+    !if(cfg_seniority_index(i+2) == -1) EXIT
+    !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
+    ncfgprev = cfg_seniority_index(i)
   enddo
-  END_PROVIDER
-
+END_PROVIDER
 
 subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   use bitmasks
@@ -62,41 +61,44 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer(bit_kind),intent(in)   :: Ialpha(N_int)
   integer(bit_kind),intent(in)   :: Ibeta(N_int)
   real*8,intent(out)             :: phaseout
-  integer(bit_kind)              :: mask(N_int), deta(N_int), detb(N_int)
+  integer(bit_kind)              :: mask, mask2(N_int), deta(N_int), detb(N_int)
   integer                        :: nbetas
   integer                        :: count, k
-if (N_int >1 ) then
-   stop 'TODO: get_phase_qp_to_cfg '
-endif
 
-  nbetas = 0
-  mask = 0_bit_kind
-  count = 0
-  deta = Ialpha
-  detb = Ibeta
-  ! remove the domos
-  mask = IAND(deta,detb)
-  deta = IEOR(deta,mask)
-  detb = IEOR(detb,mask)
-  mask = 0
-  phaseout = 1.0
-  k = 1
-  do while((deta(k)).GT.0_8)
-     mask(k) = ISHFT(1_8,count)
-     if(POPCNT(IAND(deta(k),mask(k))).EQ.1)then
-        if(IAND(nbetas,1).EQ.0) then
-           phaseout *= 1.0d0
-        else
-           phaseout *= -1.0d0
-        endif
-        deta(k) = IEOR(deta(k),mask(k))
-     else
-        if(POPCNT(IAND(detb(k),mask(k))).EQ.1) then
-           nbetas += 1
-           detb(k) = IEOR(detb(k),mask(k))
-        endif
-     endif
-     count += 1
+  ! Remove the DOMOs
+  mask2 = IAND(Ialpha,Ibeta)
+  deta = IEOR(Ialpha,mask2)
+  detb = IEOR(Ibeta ,mask2)
+
+  ! Find how many alpha electrons there are in all the N_ints
+  integer :: Na(N_int)
+  do k=1,N_int
+    Na(k) = popcnt(deta(k))
+  enddo
+
+  integer :: shift, ipos, nperm
+  phaseout = 1.d0
+  do k=1,N_int
+
+    do while(detb(k) /= 0_bit_kind)
+      ! Find the lowest beta electron and clear it
+      ipos = trailz(detb(k))
+      detb(k) = ibclr(detb(k),ipos)
+
+      ! Create a mask will all MOs higher than the beta electron
+      mask = not(shiftl(1_bit_kind,ipos+1) - 1_bit_kind)
+
+      ! Apply the mask to the alpha string to count how many electrons to cross
+      nperm = popcnt( iand(mask, deta(k)) )
+
+      ! Count how many alpha electrons are above the beta electron in the other integers
+      nperm = nperm + sum(Na(k+1:N_int))
+      if (iand(nperm,1) == 1) then
+        phaseout  = -phaseout
+      endif
+
+    enddo
+
   enddo
 end subroutine get_phase_qp_to_cfg
 
