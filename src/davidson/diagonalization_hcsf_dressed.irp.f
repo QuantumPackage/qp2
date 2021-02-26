@@ -507,6 +507,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         W_csf(i,k) = u_in(i,k)
       enddo
     enddo
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
@@ -515,24 +516,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         U_csf(i,k) = u_in(i,k)
       enddo
     enddo
-
     call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
-    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
-
-    ! Adjust the phase
-    do j=1,N_st_diag
-      ! Find first non-zero
-      k=1
-      do while ((k<sze).and.(U(k,j) == 0.d0))
-        k = k+1
-      enddo
-      ! Check sign
-      if (U(k,j) * u_in(k,j) < 0.d0) then
-        do i=1,sze
-          W(i,j) = -W(i,j)
-        enddo
-      endif
-    enddo
 
   enddo
 

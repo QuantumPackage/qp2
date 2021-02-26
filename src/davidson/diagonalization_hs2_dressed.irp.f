@@ -673,29 +673,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       enddo
     enddo
 
-
-    ! Adjust the phase
-    do j=1,N_st_diag
-      ! Find first non-zero
-      k=1
-      do while ((k<sze).and.(U(k,j) == 0.d0))
-        k = k+1
-      enddo
-      ! Check sign
-      if (U(k,j) * u_in(k,j) < 0.d0) then
-        do i=1,sze
-          W(i,j) = -W(i,j)
-          S(i,j) = -S(i,j)
-        enddo
-      endif
-    enddo
-
-    do j=1,N_st_diag
-      do i=1,sze
-        S_d(i,j) = dble(S(i,j))
-      enddo
-    enddo
-
   enddo
 
 
