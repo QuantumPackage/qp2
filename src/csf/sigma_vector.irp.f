@@ -65,11 +65,6 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer                        :: nbetas
   integer                        :: count, k
 
-  ! Remove the DOMOs
-  mask2 = IAND(Ialpha,Ibeta)
-  deta = IEOR(Ialpha,mask2)
-  detb = IEOR(Ibeta ,mask2)
-
   ! Find how many alpha electrons there are in all the N_ints
   integer :: Na(N_int)
   do k=1,N_int
