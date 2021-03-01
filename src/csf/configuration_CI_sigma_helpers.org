@@ -43,8 +43,10 @@ the input determinant \(|D_I\rangle\).
   integer*8                          :: Jsomo
   integer*8                          :: diffSOMO
   integer*8                          :: diffDOMO
+  integer*8                          :: xordiffSOMODOMO
   integer                            :: ndiffSOMO
   integer                            :: ndiffDOMO
+  integer                            :: nxordiffSOMODOMO
   integer                            :: ndiffAll
   integer                            :: i
   integer                            :: j
@@ -55,6 +57,7 @@ the input determinant \(|D_I\rangle\).
   integer                            :: countalphas
   logical                            :: pqAlreadyGenQ
   logical                            :: pqExistsQ
+  logical                            :: ppExistsQ
   Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
   Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
   !print*,"Input cfg"
@@ -66,7 +69,7 @@ the input determinant \(|D_I\rangle\).
   ! find out all pq holes possible
   nholes = 0
   ! holes in SOMO
-  do i = n_core_orb+1,n_core_orb + n_act_orb
+  do i = 1,mo_num
      if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -74,7 +77,7 @@ the input determinant \(|D_I\rangle\).
      endif
   end do
   ! holes in DOMO
-  do i = n_core_orb+1,n_core_orb + n_act_orb
+  do i = 1,mo_num
      if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -86,7 +89,7 @@ the input determinant \(|D_I\rangle\).
   listvmos = -1
   vmotype = -1
   nvmos = 0
-  do i = n_core_orb+1,n_core_orb + n_act_orb
+  do i = 1,mo_num
      !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
      if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0) then
         nvmos += 1
@@ -126,7 +129,7 @@ the input determinant \(|D_I\rangle\).
      p = listholes(i)
      do j = 1,nvmos
         q = listvmos(j)
-        if(p == q) cycle
+        if(p .EQ. q) cycle
         if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 1) then
            ! SOMO -> VMO
            Jsomo = IBCLR(Isomo,p-1)
@@ -158,10 +161,19 @@ the input determinant \(|D_I\rangle\).
         do k = 1, idxI-1
            diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
            diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+           xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
            ndiffSOMO = POPCNT(diffSOMO)
            ndiffDOMO = POPCNT(diffDOMO)
-           if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+           nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+           !if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+           if((ndiffSOMO+ndiffDOMO) .EQ. 0) then
               pqAlreadyGenQ = .TRUE.
+              ppExistsQ = .TRUE.
+              EXIT
+           endif
+           if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
+              pqAlreadyGenQ = .TRUE.
+              !ppExistsQ = .TRUE.
               !print *,i,k,ndiffSOMO,ndiffDOMO
               !call debug_spindet(Jsomo,1)
               !call debug_spindet(Jdomo,1)
@@ -171,20 +183,22 @@ the input determinant \(|D_I\rangle\).
            endif
         end do
 
+        !print *,"(,",p,",",q,")",pqAlreadyGenQ
+
         if(pqAlreadyGenQ) cycle
 
         pqExistsQ = .FALSE.
         ! now check if this exists in the selected list
-        do k = idxI, N_configuration
-           diffSOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jsomo),psi_configuration(1,1,k))
-           diffDOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jdomo),psi_configuration(1,2,k))
-           ndiffSOMO = POPCNT(diffSOMO)
-           ndiffDOMO = POPCNT(diffDOMO)
-           if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
-              pqExistsQ = .TRUE.
-              EXIT
-           endif
-        end do
+        !do k = idxI+1, N_configuration
+        !   diffSOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jsomo),psi_configuration(1,1,k))
+        !   diffDOMO = IEOR(OR(reunion_of_act_virt_bitmask(1,1),Jdomo),psi_configuration(1,2,k))
+        !   ndiffSOMO = POPCNT(diffSOMO)
+        !   ndiffDOMO = POPCNT(diffDOMO)
+        !   if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
+        !      pqExistsQ = .TRUE.
+        !      EXIT
+        !   endif
+        !end do
 
         if(.NOT. pqExistsQ) then
            tableUniqueAlphas(p,q) = .TRUE.
@@ -234,15 +248,41 @@ the input determinant \(|D_I\rangle\).
               print*,"Something went wrong in obtain_associated_alphaI"
            endif
 
+           ! SOMO
            NalphaIcfg += 1
            !print *,p,q,"|",holetype(i),vmotype(j),NalphaIcfg
-           !call debug_spindet(Idomo,1)
-           !call debug_spindet(Jdomo,1)
            alphasIcfg(1,1,NalphaIcfg) = Jsomo
            alphasIcfg(1,2,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
         endif
      end do
   end do
+
+  ! Check if this Icfg has been previously generated as a mono
+  ppExistsQ = .False.
+  Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
+  Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+  do k = 1, idxI-1
+     diffSOMO = IEOR(Isomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
+     diffDOMO = IEOR(Idomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+     xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
+     ndiffSOMO = POPCNT(diffSOMO)
+     ndiffDOMO = POPCNT(diffDOMO)
+     nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+     if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
+        ppExistsQ = .TRUE.
+        EXIT
+     endif
+  end do
+  ! Diagonal part (pp,qq)
+  if(nholes > 0 .AND. (.NOT. ppExistsQ))then
+     ! SOMO
+     NalphaIcfg += 1
+     !print *,p,q,"|",holetype(i),vmotype(j),NalphaIcfg
+     !call debug_spindet(Idomo,1)
+     !call debug_spindet(Jdomo,1)
+     alphasIcfg(1,1,NalphaIcfg) = Icfg(1,1)
+     alphasIcfg(1,2,NalphaIcfg) = Icfg(1,2)
+  endif
 
   end subroutine
 #+end_src
@@ -253,7 +293,7 @@ Next step is to obtain the connected CFGs \(|I\rangle\) that belong to the selec
 given a RI configuration \(|\alpha\rangle\).
 
 #+begin_src f90 :main no :tangle ../cfgCI/obtain_I_foralpha.irp.f
-subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI, nconnectedI, excitationIds, excitationTypes)
+subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI, nconnectedI, excitationIds, excitationTypes, diagfactors)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -278,6 +318,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer,intent(out)                      :: nconnectedI
   integer,intent(out)                      :: excitationIds(2,*)
   integer,intent(out)                      :: excitationTypes(*)
+  real*8 ,intent(out)                      :: diagfactors(*)
   integer*8                                :: Idomo
   integer*8                                :: Isomo
   integer*8                                :: Jdomo
@@ -285,38 +326,19 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer*8                                :: IJsomo
   integer*8                                :: diffSOMO
   integer*8                                :: diffDOMO
+  integer*8                                :: xordiffSOMODOMO
   integer                                  :: ndiffSOMO
   integer                                  :: ndiffDOMO
-  integer :: i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
+  integer                                  :: nxordiffSOMODOMO
+  integer :: ii,i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
   integer :: listholes(mo_num)
   integer :: holetype(mo_num)
-
-  ! find out all pq holes possible
-  nholes = 0
-  ! holes in SOMO
-  Isomo = psi_configuration(1,1,idxI)
-  Idomo = psi_configuration(1,2,idxI)
-  do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
-        nholes += 1
-        listholes(nholes) = i
-        holetype(nholes) = 1
-     endif
-  end do
-  ! holes in DOMO
-  do i = n_core_orb+1,n_core_orb + n_act_orb
-     if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
-        nholes += 1
-        listholes(nholes) = i
-        holetype(nholes) = 2
-     endif
-  end do
 
   nconnectedI = 0
 
   p = 0
   q = 0
-  do i=idxI+1,N_configuration
+  do i=idxI,N_configuration
      Isomo = Ialpha(1,1)
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
@@ -328,12 +350,15 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
      diffDOMO = IEOR(Idomo,Jdomo)
+     xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
-     if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
-     !print *,"-I--i=",i,diffSOMO,diffDOMO!Isomo,Jsomo,ndiffSOMO,ndiffDOMO
+     nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+     !print *,"-I--i=",i,ndiffSOMO,ndiffDOMO,nxordiffSOMODOMO!Isomo,Jsomo,ndiffSOMO,ndiffDOMO
+     !if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
      !print *,POPCNT(IEOR(diffSOMO,diffDOMO)), ndiffDOMO
-     if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+     !if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
+     if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
      !call debug_spindet(Isomo,1)
      !call debug_spindet(Idomo,1)
      !print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
@@ -390,7 +415,58 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q
         excitationTypes(nconnectedI) = extyp
-        print *,"------ > output p,q in obt=",p,q
+        diagfactors(nconnectedI) = 1.0d0
+        !print *,"------ > output p,q in obt=",p,q
+     else if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
+        ! find out all pq holes possible
+        nholes = 0
+        ! holes in SOMO
+        Isomo = psi_configuration(1,1,i)
+        Idomo = psi_configuration(1,2,i)
+        do ii = 1,mo_num
+           if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
+              nholes += 1
+              listholes(nholes) = ii
+              holetype(nholes) = 1
+           endif
+        end do
+        ! holes in DOMO
+        do ii = 1,mo_num
+           if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
+              nholes += 1
+              listholes(nholes) = ii
+              holetype(nholes) = 2
+           endif
+        end do
+
+        do k=1,nholes
+           p = listholes(k)
+           q = p
+           extyp = 1
+           if(holetype(k) .EQ. 1) then
+              starti = psi_config_data(i,1)
+              endi   = psi_config_data(i,2)
+              nconnectedI += 1
+              connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+              idxs_connectedI(nconnectedI)=starti
+              excitationIds(1,nconnectedI)=p
+              excitationIds(2,nconnectedI)=q
+              excitationTypes(nconnectedI) = extyp
+              diagfactors(nconnectedI) = 1.0d0
+              !print *,"------ > output p,q in obt=",p,q
+           else
+              starti = psi_config_data(i,1)
+              endi   = psi_config_data(i,2)
+              nconnectedI += 1
+              connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+              idxs_connectedI(nconnectedI)=starti
+              excitationIds(1,nconnectedI)=p
+              excitationIds(2,nconnectedI)=q
+              excitationTypes(nconnectedI) = extyp
+              diagfactors(nconnectedI) = 2.0d0
+              !print *,"------ > output p,q in obt=",p,q
+           endif
+        enddo
      endif
   end do
 
@@ -468,6 +544,7 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   qmodel = q
 
   if(p .EQ. q) then
+     !print *,"input pq=",p,q,"extype=",extype
      pmodel = 1
      qmodel = 1
   else
@@ -501,28 +578,46 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
           ! SOMO -> VMO
           !print *,"type -> SOMO -> VMO"
           !Isomo = IEOR(Isomo,Jsomo)
-          mask = ISHFT(1_8,p) - 1
-          Isomo = IAND(Isomo,mask)
-          pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
-          mask = ISHFT(1_8,q) - 1
-          Jsomo = IAND(Jsomo,mask)
-          qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+          if(p.LT.q) then
+             mask = ISHFT(1_8,p) - 1
+             Isomo = IAND(Isomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+             mask = ISHFT(1_8,q) - 1
+             Jsomo = IAND(Jsomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask)) + 1
+          else
+             mask = ISHFT(1_8,p) - 1
+             Isomo = IAND(Isomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask)) + 1
+             mask = ISHFT(1_8,q) - 1
+             Jsomo = IAND(Jsomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+          endif
        case (4)
           ! DOMO -> SOMO
           ! remove all domos except one at p
           !print *,"type -> DOMO -> SOMO"
           !Isomo = IEOR(Isomo,Jsomo)
-          mask = ISHFT(1_8,p) - 1
-          Jsomo = IAND(Jsomo,mask)
-          pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
-          mask = ISHFT(1_8,q) - 1
-          Isomo = IAND(Isomo,mask)
-          qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+          if(p.LT.q) then
+             mask = ISHFT(1_8,p) - 1
+             Jsomo = IAND(Jsomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+             mask = ISHFT(1_8,q) - 1
+             Isomo = IAND(Isomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask)) + 1
+          else
+             mask = ISHFT(1_8,p) - 1
+             Jsomo = IAND(Jsomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask)) + 1
+             mask = ISHFT(1_8,q) - 1
+             Isomo = IAND(Isomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+          endif
        case default
           print *,"something is wrong in convertOrbIdsToModelSpaceIds"
      end select
   endif
-     !print *,p,q,"model ids=",pmodel,qmodel
+  !print *,p,q,"model ids=",pmodel,qmodel
 end subroutine convertOrbIdsToModelSpaceIds
 #+end_src
 
