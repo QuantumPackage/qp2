@@ -23,6 +23,10 @@ END_DOC
       error_matrix_DIIS(ao_num,ao_num,max_dim_DIIS)                  &
       )
 
+  Fock_matrix_DIIS = 0.d0
+  error_matrix_DIIS = 0.d0
+  mo_coef_save = 0.d0
+
   call write_time(6)
 
   print*,'Energy of the guess = ',SCF_energy
@@ -308,6 +312,7 @@ END_DOC
     do k=1,dim_DIIS
       if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
       do i=1,ao_num
+        ! FPE here
         Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
             X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
       enddo
