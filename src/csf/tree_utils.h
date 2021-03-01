@@ -22,7 +22,8 @@ struct bin_tree {
     int NBF;
 };
 
-#include "/export/apps/pgi/linux86-64/18.10/include/cblas.h"
+//#include "/export/apps/pgi/linux86-64/18.10/include/cblas.h"
+#include "cblas.h"
 
 #define MAX_SOMO 32
 
