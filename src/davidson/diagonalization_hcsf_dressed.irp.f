@@ -88,7 +88,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: i,j,k,l,m,kk
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -285,7 +285,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   ! Make random verctors eigenstates of S2
   call convertWFfromDETtoCSF(N_st_diag,U,U_csf)
-  call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
+  !call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
 
   do while (.not.converged)
     itertot = itertot+1
@@ -302,11 +302,28 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-        call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+        !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
         if ((sze > 100000).and.distributed_davidson) then
-            call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
+
+            !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+            !call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift+1),W)
+            !call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
+            !call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift+1))
+            !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
+            !call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
+            do kk=1,N_st_diag
+                call calculate_sigma_vector_cfg_nst(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+            enddo
         else
-            call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
+            !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+            !call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift+1),W)
+            !call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
+            !call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift+1))
+            !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
+            !call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
+            do kk=1,N_st_diag
+                call calculate_sigma_vector_cfg_nst(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+            enddo
         endif
       else
          ! Already computed in update below
@@ -350,7 +367,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         endif
       endif
 
-      call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
+      !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------

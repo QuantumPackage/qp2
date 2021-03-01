@@ -1,4 +1,4 @@
-  subroutine obtain_associated_alphaI(idxI, Icfg, alphasIcfg, NalphaIcfg, factor_alphaI)
+  subroutine obtain_associated_alphaI(idxI, Icfg, alphasIcfg, NalphaIcfg)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -10,7 +10,6 @@
   integer,intent(in)                 :: idxI ! The id of the Ith CFG
   integer(bit_kind),intent(in)       :: Icfg(N_int,2)
   integer,intent(out)                :: NalphaIcfg
-  real*8 ,intent(out)                :: factor_alphaI(*)
   integer(bit_kind),intent(out)      :: alphasIcfg(N_int,2,*)
   logical,dimension(:,:),allocatable :: tableUniqueAlphas
   integer                            :: listholes(mo_num)
@@ -293,19 +292,26 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   ! Type 3 - SOMO -> VMO
   ! Type 4 - DOMO -> SOMO
   END_DOC
-  integer(bit_kind),intent(in)         :: Ialpha(N_int,2)
-  integer(bit_kind),intent(in)         :: Jcfg(N_int,2)
-  integer,intent(in)                   :: p,q
-  integer,intent(in)                   :: extype
-  integer,intent(out)                  :: pmodel,qmodel
-  integer*8                            :: Isomo
-  integer*8                            :: Idomo
-  integer*8                            :: Jsomo
-  integer*8                            :: Jdomo
-  integer*8                            :: mask
-  integer*8                            :: Isomotmp
-  integer*8                            :: Jsomotmp
-  integer                              :: pos0,pos0prev
+  integer(bit_kind),intent(in)   :: Ialpha(N_int,2)
+  integer(bit_kind),intent(in)   :: Jcfg(N_int,2)
+  integer,intent(in)             :: p,q
+  integer,intent(in)             :: extype
+  integer,intent(out)            :: pmodel,qmodel
+  !integer(bit_kind)              :: Isomo(N_int)
+  !integer(bit_kind)              :: Idomo(N_int)
+  !integer(bit_kind)              :: Jsomo(N_int)
+  !integer(bit_kind)              :: Jdomo(N_int)
+  integer*8                       :: Isomo       
+  integer*8                       :: Idomo       
+  integer*8                       :: Jsomo       
+  integer*8                       :: Jdomo       
+  integer*8                      :: mask
+  integer                        :: iint, ipos
+  !integer(bit_kind)              :: Isomotmp(N_int)
+  !integer(bit_kind)              :: Jsomotmp(N_int)
+  integer*8             :: Isomotmp
+  integer*8             :: Jsomotmp
+  integer                        :: pos0,pos0prev
 
   ! TODO Flag (print) when model space indices is > 64
   Isomo = Ialpha(1,1)
@@ -317,15 +323,9 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
   qmodel = q
 
   if(p .EQ. q) then
-     !print *,"input pq=",p,q,"extype=",extype
      pmodel = 1
      qmodel = 1
   else
-     !print *,"input pq=",p,q,"extype=",extype
-     !call debug_spindet(Isomo,1)
-     !call debug_spindet(Idomo,1)
-     !call debug_spindet(Jsomo,1)
-     !call debug_spindet(Jdomo,1)
      select case(extype)
        case (1)
           ! SOMO -> SOMO
