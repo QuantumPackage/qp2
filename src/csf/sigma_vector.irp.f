@@ -74,6 +74,10 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer                        :: nbetas
   integer                        :: count, k
 
+  ! Initliaze deta and detb
+  deta = Ialpha
+  detb = Ibeta
+
   ! Find how many alpha electrons there are in all the N_ints
   integer :: Na(N_int)
   do k=1,N_int
@@ -86,12 +90,12 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
 
     do while(detb(k) /= 0_bit_kind)
       ! Find the lowest beta electron and clear it
-      ipos = trailz(detb(k))
-      detb(k) = ibclr(detb(k),ipos)
+      ipos = trailz(detb(k)) 
+      detb(k) = ibclr(detb(k),ipos) 
 
       ! Create a mask will all MOs higher than the beta electron
-      mask = not(shiftl(1_bit_kind,ipos+1) - 1_bit_kind)
-
+      mask = not(shiftl(1_bit_kind,ipos + 1) - 1_bit_kind)
+      
       ! Apply the mask to the alpha string to count how many electrons to cross
       nperm = popcnt( iand(mask, deta(k)) )
 
