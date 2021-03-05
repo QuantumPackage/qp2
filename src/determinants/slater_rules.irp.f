@@ -977,12 +977,12 @@ subroutine i_H_psi(key,keys,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
   call filter_connected_i_H_psi0(keys,key,Nint,Ndet,idx)
   if (Nstate == 1) then
 
-    do ii=1,idx(0)
-      i = idx(ii)
-      !DIR$ FORCEINLINE
-      call i_H_j(keys(1,1,i),key,Nint,hij)
-      i_H_psi_array(1) = i_H_psi_array(1) + coef(i,1)*hij
-    enddo
+   do ii=1,idx(0)
+     i = idx(ii)
+     !DIR$ FORCEINLINE
+     call i_H_j(keys(1,1,i),key,Nint,hij)
+     i_H_psi_array(1) = i_H_psi_array(1) + coef(i,1)*hij
+   enddo
 
   else
 

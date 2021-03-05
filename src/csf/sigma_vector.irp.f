@@ -908,6 +908,10 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   real*8, external :: mo_two_e_integral
   real*8, external :: get_two_e_integral
   real*8          :: diag_energies(n_CSF)
+  !PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+
+
+  print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
 
   MS = 0
@@ -1043,6 +1047,7 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
      endi   = psi_config_data(i,2)
 
      ! Returns all unique (checking the past) singly excited cfgs connected to I
+     Nalphas_Icfg = 0
      call obtain_associated_alphaI(i, Icfg, alphas_Icfg, Nalphas_Icfg)
      ! TODO : remove doubly excited for return
      ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
