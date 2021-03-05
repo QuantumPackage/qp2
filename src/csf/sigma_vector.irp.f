@@ -871,19 +871,19 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   real*8,intent(out):: psi_out(sze,n_st)
   integer(bit_kind) :: Icfg(N_INT,2)
   integer :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
-  integer(bit_kind) :: alphas_Icfg(N_INT,2,sze)
-  integer(bit_kind) :: singlesI(N_INT,2,sze)
-  integer(bit_kind) :: connectedI_alpha(N_INT,2,sze)
-  integer           :: idxs_singlesI(sze)
-  integer           :: idxs_connectedI_alpha(sze)
-  integer(bit_kind) :: psi_configuration_out(N_INT,2,sze)
+  integer(bit_kind) :: alphas_Icfg(N_INT,2,max(sze,100))
+  integer(bit_kind) :: singlesI(N_INT,2,max(sze,100))
+  integer(bit_kind) :: connectedI_alpha(N_INT,2,max(sze,100))
+  integer           :: idxs_singlesI(max(sze,100))
+  integer           :: idxs_connectedI_alpha(max(sze,100))
+  integer(bit_kind) :: psi_configuration_out(N_INT,2,max(sze,100))
   real*8            :: psi_coef_out(n_CSF)
   logical           :: psi_coef_out_init(n_CSF)
-  integer           :: excitationIds_single(2,sze)
-  integer           :: excitationTypes_single(sze)
-  integer           :: excitationIds(2,sze)
-  integer           :: excitationTypes(sze)
-  real*8            :: diagfactors(sze)
+  integer           :: excitationIds_single(2,max(sze,100))
+  integer           :: excitationTypes_single(max(sze,100))
+  integer           :: excitationIds(2,max(sze,100))
+  integer           :: excitationTypes(max(sze,100))
+  real*8            :: diagfactors(max(sze,100))
   integer           :: nholes
   integer           :: nvmos
   integer           :: listvmos(mo_num)
@@ -911,7 +911,7 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   !PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
 
 
-  print *," sze = ",sze
+  !print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
 
   MS = 0
