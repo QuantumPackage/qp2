@@ -32,6 +32,9 @@
   integer                            :: i
   integer                            :: j
   integer                            :: k
+  integer                            :: kstart
+  integer                            :: kend
+  integer                            :: Nsomo_I
   integer                            :: hole
   integer                            :: p
   integer                            :: q
@@ -93,6 +96,13 @@
   ! Now find the allowed (p,q) excitations
   Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
   Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+  Nsomo_I = POPCNT(Isomo)
+  if(Nsomo_I .EQ. 0) then
+    kstart = 1
+  else
+    kstart = cfg_seniority_index(Nsomo_I-2)
+  endif
+  kend = idxI-1
   !print *,"Isomo"
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
@@ -116,44 +126,59 @@
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBSET(Jsomo,q-1)
            Jdomo = Idomo
+           kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+           kend = idxI-1
         else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
            ! SOMO -> SOMO
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBSET(Idomo,q-1)
+           kstart = max(0,cfg_seniority_index(Nsomo_I-4))
+           kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
            ! DOMO -> VMO
            Jsomo = IBSET(Isomo,p-1)
            Jsomo = IBSET(Jsomo,q-1)
            Jdomo = IBCLR(Idomo,p-1)
+           kstart = cfg_seniority_index(Nsomo_I)
+           kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 2) then
            ! DOMO -> SOMO
            Jsomo = IBSET(Isomo,p-1)
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBCLR(Idomo,p-1)
            Jdomo = IBSET(Jdomo,q-1)
+           kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+           kend = idxI-1
         else
            print*,"Something went wrong in obtain_associated_alphaI"
         endif
 
-
+        ! Again, we don't have to search from 1
+        ! we just use seniorty to find the 
+        ! first index with NSOMO - 2 to NSOMO + 2
+        ! this is what is done in kstart, kend
+        
         pqAlreadyGenQ = .FALSE.
         ! First check if it can be generated before
-        do k = 1, idxI-1
+        do k = kstart, kend
            diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
+           ndiffSOMO = POPCNT(diffSOMO)
+           if((ndiffSOMO .NE. 0) .AND. (ndiffSOMO .NE. 2)) cycle
            diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
            xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-           ndiffSOMO = POPCNT(diffSOMO)
            ndiffDOMO = POPCNT(diffDOMO)
            nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+           nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO
            !if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
            if((ndiffSOMO+ndiffDOMO) .EQ. 0) then
               pqAlreadyGenQ = .TRUE.
               ppExistsQ = .TRUE.
               EXIT
            endif
-           if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
+           if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
               pqAlreadyGenQ = .TRUE.
+              !EXIT
               !ppExistsQ = .TRUE.
               !print *,i,k,ndiffSOMO,ndiffDOMO
               !call debug_spindet(Jsomo,1)
