@@ -303,6 +303,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! -----------------------------------
 
         !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+        PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
         if ((sze > 100000).and.distributed_davidson) then
 
             !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
@@ -311,6 +312,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift+1))
             !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
             !call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
+            ! TODO : psi_det_size ? for psi_det
             do kk=1,N_st_diag
                 call calculate_sigma_vector_cfg_nst(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
             enddo

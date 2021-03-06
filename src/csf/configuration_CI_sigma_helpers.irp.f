@@ -231,7 +231,7 @@
 
            ! SOMO
            NalphaIcfg += 1
-           !print *,p,q,"|",holetype(i),vmotype(j),NalphaIcfg
+           !print *,i,j,"|",NalphaIcfg
            alphasIcfg(1,1,NalphaIcfg) = Jsomo
            alphasIcfg(1,2,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
         endif
