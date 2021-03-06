@@ -38,12 +38,23 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer :: ii,i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
   integer :: listholes(mo_num)
   integer :: holetype(mo_num)
+  integer :: end_index
+  integer :: Nsomo_alpha
 
   nconnectedI = 0
+  end_index = N_configuration
+
+  ! Since CFGs are sorted wrt to seniority
+  ! we don't have to search the full CFG list
+  Isomo = Ialpha(1,1)
+  Idomo = Ialpha(1,2)
+  Nsomo_alpha = POPCNT(Isomo)
+  end_index = cfg_seniority_index(Nsomo_alpha+2)-1
+
 
   p = 0
   q = 0
-  do i=idxI,N_configuration
+  do i=idxI,end_index
      Isomo = Ialpha(1,1)
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
@@ -54,16 +65,18 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      !call debug_spindet(Jsomo,1)
      !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
+     if(ndiffSOMO .NE. 2 .OR. ndiffSOMO .NE. 0) cycle
      diffDOMO = IEOR(Idomo,Jdomo)
      xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
      nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+     nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
      !print *,"-I--i=",i,ndiffSOMO,ndiffDOMO,nxordiffSOMODOMO!Isomo,Jsomo,ndiffSOMO,ndiffDOMO
      !if((ndiffSOMO + ndiffDOMO) .EQ. 0) cycle
      !print *,POPCNT(IEOR(diffSOMO,diffDOMO)), ndiffDOMO
      !if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
-     if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
+     if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
      !call debug_spindet(Isomo,1)
      !call debug_spindet(Idomo,1)
      !print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
