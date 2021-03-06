@@ -49,7 +49,8 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   Nsomo_alpha = POPCNT(Isomo)
-  end_index = cfg_seniority_index(Nsomo_alpha+2)-1
+  end_index = min(N_configuration,cfg_seniority_index(min(elec_num,Nsomo_alpha+4))-1)
+  end_index = N_configuration
 
 
   p = 0
@@ -65,10 +66,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      !call debug_spindet(Jsomo,1)
      !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
-     if(ndiffSOMO .NE. 2 .OR. ndiffSOMO .NE. 0) cycle
+     ndiffSOMO = POPCNT(diffSOMO)
+     if(ndiffSOMO .NE. 2 .AND. ndiffSOMO .NE. 0) cycle
      diffDOMO = IEOR(Idomo,Jdomo)
      xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-     ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)
      nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
      nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
