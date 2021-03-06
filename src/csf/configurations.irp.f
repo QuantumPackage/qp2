@@ -748,33 +748,65 @@ subroutine binary_search_cfg(cfgInp,addcfg)
   implicit none
   BEGIN_DOC
   ! Documentation for binary_search
-  ! 
-  ! Does a binary search to find 
+  !
+  ! Does a binary search to find
   ! the address of a configuration in a list of
   ! configurations.
   END_DOC
   integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
   integer          , intent(out) :: addcfg
-  integer :: i,j,k,r,l
-  integer*8 :: key, key2
-  logical :: found
-  !integer*8, allocatable :: bit_tmp(:)
-  !integer*8, external            :: configuration_search_key
 
-  !allocate(bit_tmp(0:N_configuration))
-  !bit_tmp(0) = 0
-  do i=1,N_configuration
-    !bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
-    found = .True.
-    do k=1,N_int
-      found = found .and. (psi_configuration(k,1,i) == cfgInp(k,1)) &
-                    .and. (psi_configuration(k,2,i) == cfgInp(k,2))
-    enddo
-    if (found) then
-      addcfg = i
-      exit
+  logical                        :: found
+  integer                        :: l, r, j, k
+  integer*8                      :: bit_tmp, key
+
+  integer*8, external            :: configuration_search_key
+
+  key = configuration_search_key(cfgInp,N_int)
+
+  ! Binary search
+  l = 0
+  r = N_configuration+1
+  j = shiftr(r-l,1)
+  do while (j>=1)
+    j = j+l
+    bit_tmp = configuration_search_key(psi_configuration(1,1,j),N_int)
+    if (bit_tmp == key) then
+      ! Find 1st element which matches the key
+      if (j > 1) then
+        bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
+        do while (j>1 .and. bit_tmp == key)
+          j = j-1
+          bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
+        enddo
+        bit_tmp = key
+      endif
+      ! Find correct element matching the key
+      do while (bit_tmp == key)
+        found = .True.
+        do k=1,N_int
+          found = found .and. (psi_configuration(k,1,j) == cfgInp(k,1))&
+                        .and. (psi_configuration(k,2,j) == cfgInp(k,2))
+        enddo
+        if (found) then
+          addcfg = j
+          return
+        endif
+        j = j+1
+        bit_tmp = configuration_search_key(psi_configuration(1,1,j),N_int)
+      enddo
+      addcfg = -1
+      return
+    else if (bit_tmp > key) then
+      r = j
+    else
+      l = j
     endif
+    j = shiftr(r-l,1)
   enddo
+
+  addcfg = -1
+  return
 
 end subroutine
 
@@ -812,7 +844,7 @@ end subroutine
  psi_configuration_to_psi_det(2,k) = N_det
 
 
- ! Reorder determinants according to generation 
+ ! Reorder determinants according to generation
  ! --------------------------------------------
 
  integer(bit_kind), allocatable :: dets(:,:,:)
