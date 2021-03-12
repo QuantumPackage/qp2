@@ -6,7 +6,7 @@ To program in the |qp|, it is required that you are familiar with the |IRPF90|
 code generator. A GitBook can be found `here <http://scemama.gitbooks.io/irpf90>`_,
 and programmers are encouraged to visit this manual.
 
-|IRPF90| make programming very simple. The only information a programmer needs
+|IRPF90| makes programming very simple. The only information a programmer needs
 in order to write a new program is the name of the required |IRPF90| entities
 which may already exist in other modules.  For example, writing a program which
 prints the Hartree-Fock energy is as simple as:
@@ -24,7 +24,7 @@ prints the Hartree-Fock energy is as simple as:
 
 
 The only required information was the existence of a provider for
-:command:`hf_energy`. A detailed list of all the providers, subroutines
+:command:`HF_energy`. A detailed list of all the providers, subroutines
 and functions of the |qp| can be found in the appendix of this manual.
 
 
@@ -32,10 +32,10 @@ and functions of the |qp| can be found in the appendix of this manual.
 Architecture
 ============
 
-As |IRPF90| is used, the programmer doesn't have a full control of the sequence
+As |IRPF90| is used, the programmer doesn't have full control of the sequence
 of instructions in the produced Fortran code. This explains why the input data
-is stored in a database rather than in sequential text files. Indeed, the
-programmer can't know by advance in which order the files will be read, so a
+is stored in a database rather than in sequential text files. Consequently, the
+programmer can't know in advance the order in which the files will be read, so a
 simple random access to persistent data is needed. The |EZFIO| library generator
 is a practical answer to this problem. 
 
@@ -45,10 +45,10 @@ This is done mostly using the command line or scripting.
 
 .. important::
 
-    Each command modifies the state of the |EZFIO| database, so running twice the
-    same program on the same database may have different behaviors because of the
+    Each command modifies the state of the |EZFIO| database, so running the
+    same program twice on the same database may have different behavior because of the
     state of the database. For reproducibility, users are encouraged to run scripts
-    where a fresg new |EZFIO| database is created at the beginning of the
+    where a fresh new |EZFIO| database is created at the beginning of the
     script. This way of running the |qp| makes calculations reproducible.
 
 
@@ -97,7 +97,7 @@ in the `FCIDUMP` format (see :ref:`fcidump`).
 
 All the results are stored in the |EZFIO| directory, so users willing to fetch
 data such as the |MOs| or the |CI| coefficients should use the |EZFIO| API.
-There multiple major ways to do this:
+There are multiple major ways to do this:
 
 * Write a script in Python or OCaml and use the Python |EZFIO| API. The script
   :file:`$QP_ROOT/bin/qp_convert_output_to_ezfio` is a good example to understand
