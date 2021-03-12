@@ -867,49 +867,57 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   !  2. CSF to DET back transcormation
   ! returns : psi_coef_out_det :
   END_DOC
-  integer,intent(in) :: sze, istart,iend, istep, ishift, n_st
-  real*8,intent(in):: psi_in(sze,n_st)
-  real*8,intent(out):: psi_out(sze,n_st)
-  integer(bit_kind) :: Icfg(N_INT,2)
-  integer :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
-  integer(bit_kind) :: alphas_Icfg(N_INT,2,max(sze,100))
-  integer(bit_kind) :: singlesI(N_INT,2,max(sze,100))
-  integer(bit_kind) :: connectedI_alpha(N_INT,2,max(sze,100))
-  integer           :: idxs_singlesI(max(sze,100))
-  integer           :: idxs_connectedI_alpha(max(sze,100))
-  integer(bit_kind) :: psi_configuration_out(N_INT,2,max(sze,100))
-  real*8            :: psi_coef_out(n_CSF)
-  logical           :: psi_coef_out_init(n_CSF)
-  integer           :: excitationIds_single(2,max(sze,100))
-  integer           :: excitationTypes_single(max(sze,100))
-  integer           :: excitationIds(2,max(sze,100))
-  integer           :: excitationTypes(max(sze,100))
-  real*8            :: diagfactors(max(sze,100))
-  integer           :: nholes
-  integer           :: nvmos
-  integer           :: listvmos(mo_num)
-  integer           :: vmotype(mo_num) ! 1 -> VMO 2 -> SOMO
-  integer           :: listholes(mo_num)
-  integer           :: holetype(mo_num) ! 1-> SOMO 2->DOMO
-  integer  :: Nalphas_Icfg, nconnectedI, rowsikpq, colsikpq, nsinglesI
-  integer  :: extype,NSOMOalpha,NSOMOI,NSOMOJ,pmodel,qmodel
-  integer :: getNSOMO
-  integer :: totcolsTKI
-  integer :: rowsTKI
-  integer :: noccpp
-  integer :: istart_cfg, iend_cfg
-  integer*8 :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
-  integer :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
-  real*8  :: norm_coef_cfg, fac2eints
-  real*8  :: norm_coef_det
-  real*8  :: meCC1, meCC2, diagfac
+  integer,intent(in)             :: sze, istart,iend, istep, ishift, n_st
+  real*8,intent(in)              :: psi_in(sze,n_st)
+  real*8,intent(out)             :: psi_out(sze,n_st)
+  integer(bit_kind)              :: Icfg(N_INT,2)
+  integer                        :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
+  integer(bit_kind),dimension(:,:,:),allocatable :: alphas_Icfg
+  integer(bit_kind),dimension(:,:,:),allocatable :: singlesI
+  integer(bit_kind),dimension(:,:,:),allocatable :: connectedI_alpha
+  integer,dimension(:),allocatable :: idxs_singlesI
+  integer,dimension(:),allocatable :: idxs_connectedI_alpha
+  integer,dimension(:,:),allocatable :: excitationIds_single
+  integer,dimension(:),allocatable :: excitationTypes_single
+  integer,dimension(:,:),allocatable :: excitationIds
+  integer,dimension(:),allocatable :: excitationTypes
+  real*8,dimension(:),allocatable :: diagfactors
+  integer                        :: nholes
+  integer                        :: nvmos
+  integer                        :: listvmos(mo_num)
+  integer                        :: vmotype(mo_num) ! 1 -> VMO 2 -> SOMO
+  integer                        :: listholes(mo_num)
+  integer                        :: holetype(mo_num) ! 1-> SOMO 2->DOMO
+  integer                        :: Nalphas_Icfg, nconnectedI, rowsikpq, colsikpq, nsinglesI
+  integer                        :: extype,NSOMOalpha,NSOMOI,NSOMOJ,pmodel,qmodel
+  integer                        :: getNSOMO
+  integer                        :: totcolsTKI
+  integer                        :: rowsTKI
+  integer                        :: noccpp
+  integer                        :: istart_cfg, iend_cfg
+  integer*8                      :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
+  integer                        :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
+  real*8                         :: norm_coef_cfg, fac2eints
+  real*8                         :: norm_coef_det
+  real*8                         :: meCC1, meCC2, diagfac
   real*8,dimension(:,:,:),allocatable :: TKI
-  real*8,dimension(:,:),allocatable  :: GIJpqrs
-  real*8,dimension(:,:,:),allocatable  :: TKIGIJ
-  real*8, external :: mo_two_e_integral
-  real*8, external :: get_two_e_integral
-  real*8          :: diag_energies(n_CSF)
-  !PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  real*8,dimension(:,:),allocatable :: GIJpqrs
+  real*8,dimension(:,:,:),allocatable :: TKIGIJ
+  real*8, external               :: mo_two_e_integral
+  real*8, external               :: get_two_e_integral
+  real*8                         :: diag_energies(n_CSF)
+
+  ! allocate
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(singlesI(N_INT,2,max(sze,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_singlesI(max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds_single(2,max(sze,100)))
+  allocate(excitationTypes_single(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
 
   !print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
@@ -918,7 +926,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   norm_coef_cfg=0.d0
 
   psi_out=0.d0
-  psi_coef_out_init = .False.
 
   istart_cfg = psi_csf_to_config_data(istart)
   iend_cfg   = psi_csf_to_config_data(iend)
@@ -1026,7 +1033,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
               cntj += 1
               meCC1 = AIJpqContainer(NSOMOI,NSOMOJ,extype,pmodel,qmodel,cnti,cntj)
               psi_out(jj,kk) += meCC1 * psi_in(ii,kk) * h_core_ri(p,q)
-              psi_coef_out_init(jj) = .True.
            enddo
         enddo
         enddo
@@ -1185,7 +1191,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            do m = 1,colsikpq
               do l = 1,rowsTKI
                  psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
-                 psi_coef_out_init(idxs_connectedI_alpha(j)+m-1) = .True.
               enddo
            enddo
            enddo
@@ -1229,49 +1234,58 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   !  2. CSF to DET back transcormation
   ! returns : psi_coef_out_det :
   END_DOC
-  integer,intent(in) :: sze, istart,iend, istep, ishift, n_st
-  real*8,intent(in):: psi_in(sze,n_st)
-  real*8,intent(out):: psi_out(sze,n_st)
-  integer(bit_kind) :: Icfg(N_INT,2)
-  integer :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
-  integer(bit_kind) :: alphas_Icfg(N_INT,2,max(sze,100))
-  integer(bit_kind) :: singlesI(N_INT,2,max(sze,100))
-  integer(bit_kind) :: connectedI_alpha(N_INT,2,max(sze,100))
-  integer           :: idxs_singlesI(max(sze,100))
-  integer           :: idxs_connectedI_alpha(max(sze,100))
-  integer(bit_kind) :: psi_configuration_out(N_INT,2,max(sze,100))
-  real*8            :: psi_coef_out(n_CSF)
-  logical           :: psi_coef_out_init(n_CSF)
-  integer           :: excitationIds_single(2,max(sze,100))
-  integer           :: excitationTypes_single(max(sze,100))
-  integer           :: excitationIds(2,max(sze,100))
-  integer           :: excitationTypes(max(sze,100))
-  real*8            :: diagfactors(max(sze,100))
-  integer           :: nholes
-  integer           :: nvmos
-  integer           :: listvmos(mo_num)
-  integer           :: vmotype(mo_num) ! 1 -> VMO 2 -> SOMO
-  integer           :: listholes(mo_num)
-  integer           :: holetype(mo_num) ! 1-> SOMO 2->DOMO
-  integer  :: Nalphas_Icfg, nconnectedI, rowsikpq, colsikpq, nsinglesI
-  integer  :: extype,NSOMOalpha,NSOMOI,NSOMOJ,pmodel,qmodel
-  integer :: getNSOMO
-  integer :: totcolsTKI
-  integer :: rowsTKI
-  integer :: noccpp
-  integer :: istart_cfg, iend_cfg
-  integer*8 :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
-  integer :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
-  real*8  :: norm_coef_cfg, fac2eints
-  real*8  :: norm_coef_det
-  real*8  :: meCC1, meCC2, diagfac
+  integer,intent(in)             :: sze, istart,iend, istep, ishift, n_st
+  real*8,intent(in)              :: psi_in(sze,n_st)
+  real*8,intent(out)             :: psi_out(sze,n_st)
+  integer(bit_kind)              :: Icfg(N_INT,2)
+  integer                        :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
+  integer(bit_kind),dimension(:,:,:),allocatable :: alphas_Icfg
+  integer(bit_kind),dimension(:,:,:),allocatable :: singlesI
+  integer(bit_kind),dimension(:,:,:),allocatable :: connectedI_alpha
+  integer,dimension(:),allocatable :: idxs_singlesI
+  integer,dimension(:),allocatable :: idxs_connectedI_alpha
+  integer,dimension(:,:),allocatable :: excitationIds_single
+  integer,dimension(:),allocatable :: excitationTypes_single
+  integer,dimension(:,:),allocatable :: excitationIds
+  integer,dimension(:),allocatable :: excitationTypes
+  real*8,dimension(:),allocatable :: diagfactors
+  integer                        :: nholes
+  integer                        :: nvmos
+  integer                        :: listvmos(mo_num)
+  integer                        :: vmotype(mo_num) ! 1 -> VMO 2 -> SOMO
+  integer                        :: listholes(mo_num)
+  integer                        :: holetype(mo_num) ! 1-> SOMO 2->DOMO
+  integer                        :: Nalphas_Icfg, nconnectedI, rowsikpq, colsikpq, nsinglesI
+  integer                        :: extype,NSOMOalpha,NSOMOI,NSOMOJ,pmodel,qmodel
+  integer                        :: getNSOMO
+  integer                        :: totcolsTKI
+  integer                        :: rowsTKI
+  integer                        :: noccpp
+  integer                        :: istart_cfg, iend_cfg
+  integer*8                      :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
+  integer                        :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
+  real*8                         :: norm_coef_cfg, fac2eints
+  real*8                         :: norm_coef_det
+  real*8                         :: meCC1, meCC2, diagfac
   real*8,dimension(:,:,:),allocatable :: TKI
-  real*8,dimension(:,:),allocatable  :: GIJpqrs
-  real*8,dimension(:,:,:),allocatable  :: TKIGIJ
-  real*8, external :: mo_two_e_integral
-  real*8, external :: get_two_e_integral
-  real*8          :: diag_energies(n_CSF)
-  !PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  real*8,dimension(:,:),allocatable :: GIJpqrs
+  real*8,dimension(:,:,:),allocatable :: TKIGIJ
+  real*8, external               :: mo_two_e_integral
+  real*8, external               :: get_two_e_integral
+  real*8                         :: diag_energies(n_CSF)
+
+  ! allocate
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(singlesI(N_INT,2,max(sze,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_singlesI(max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds_single(2,max(sze,100)))
+  allocate(excitationTypes_single(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
+
 
   !print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
@@ -1280,7 +1294,6 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   norm_coef_cfg=0.d0
 
   psi_out=0.d0
-  psi_coef_out_init = .False.
 
   istart_cfg = psi_csf_to_config_data(istart)
   iend_cfg   = psi_csf_to_config_data(iend)
@@ -1388,7 +1401,6 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
               cntj += 1
               meCC1 = AIJpqContainer(NSOMOI,NSOMOJ,extype,pmodel,qmodel,cnti,cntj)
               psi_out(jj,kk) += meCC1 * psi_in(ii,kk) * h_core_ri(p,q)
-              psi_coef_out_init(jj) = .True.
            enddo
         enddo
         enddo
@@ -1527,7 +1539,6 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
            do m = 1,colsikpq
               do l = 1,rowsTKI
                  psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
-                 psi_coef_out_init(idxs_connectedI_alpha(j)+m-1) = .True.
               enddo
            enddo
            enddo
