@@ -796,7 +796,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         enddo
         call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
         n = max(n,1)
-        w *= dsqrt(dble(n))
+        w *= dble(n)
       endif
 
       if(w <= buf%mini) then
