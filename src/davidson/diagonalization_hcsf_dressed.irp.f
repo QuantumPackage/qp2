@@ -88,7 +88,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m,kk
+  integer                        :: i,j,k,l,m,kk,ii
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -110,6 +110,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   integer                        :: order(N_st_diag_in)
   double precision               :: cmax
   double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
+  double precision, allocatable  :: tmpU(:,:), tmpW(:,:)
   double precision, pointer      :: W(:,:), W_csf(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
@@ -313,9 +314,24 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 !             call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
 !            ! TODO : psi_det_size ? for psi_det
+            allocate(tmpW(sze_csf,N_st_diag))
+            allocate(tmpU(sze_csf,N_st_diag))
             do kk=1,N_st_diag
-                call calculate_sigma_vector_cfg_nst_naive_store(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+              do ii=1,sze_csf
+                tmpU(ii,kk) = U_csf(ii,shift+kk)
+              enddo
             enddo
+            call calculate_sigma_vector_cfg_nst(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                W_csf(ii,shift+kk)=tmpW(ii,kk)
+              enddo
+            enddo
+            deallocate(tmpW)
+            deallocate(tmpU)
+            !do kk=1,N_st_diag
+            !    call calculate_sigma_vector_cfg_nst_naive_store(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+            !enddo
         else
             !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
             !call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift+1),W)
@@ -323,9 +339,24 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift+1))
             !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 !             call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
+            allocate(tmpW(sze_csf,N_st_diag))
+            allocate(tmpU(sze_csf,N_st_diag))
             do kk=1,N_st_diag
-                call calculate_sigma_vector_cfg_nst_naive_store(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+              do ii=1,sze_csf
+                tmpU(ii,kk) = U_csf(ii,shift+kk)
+              enddo
             enddo
+            call calculate_sigma_vector_cfg_nst(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                W_csf(ii,shift+kk)=tmpW(ii,kk)
+              enddo
+            enddo
+            deallocate(tmpW)
+            deallocate(tmpU)
+            !do kk=1,N_st_diag
+            !    call calculate_sigma_vector_cfg_nst_naive_store(W_csf(1,shift+kk),U_csf(1,shift+kk),1,sze_csf,1,sze_csf,0,1)
+            !enddo
         endif
       else
          ! Already computed in update below

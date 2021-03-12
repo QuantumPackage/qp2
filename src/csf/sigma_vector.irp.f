@@ -1101,7 +1101,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         ! Initialize the inegral container
         ! dims : (totcolsTKI, nconnectedI)
         allocate(GIJpqrs(totcolsTKI,nconnectedI))  ! gpqrs
-        allocate(TKIGIJ(rowsTKI,n_st,nconnectedI))  ! gpqrs
+        allocate(TKIGIJ(rowsTKI,n_st,nconnectedI))  ! TKI * gpqrs
 
         totcolsTKI = 0
         do j = 1,nconnectedI
@@ -1151,6 +1151,23 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
              TKI, size(TKI,1)*n_st, GIJpqrs, size(GIJpqrs,1), 0.d0, &
              TKIGIJ , size(TKIGIJ,1)*n_st )
 
+        !print *,"DIMs = ",rowsTKI,n_st,totcolsTKI,nconnectedI
+        !print *,"TKI mat"
+        !do kk=1,n_st
+        !  do j=1,totcolsTKI
+        !    print *,TKI(:,kk,j)
+        !  enddo
+        !  print *,"--"
+        !enddo
+
+        !print *,"TKIGIJ mat"
+        !do kk=1,n_st
+        !  do j=1,nconnectedI
+        !    print *,TKIGIJ(:,kk,j)
+        !  enddo
+        !  print *,"--"
+        !enddo
+
 
         ! Collect the result
         totcolsTKI = 0
@@ -1186,12 +1203,15 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
 
   ! Add the diagonal contribution
+  do kk=1,n_st
   do i = 1,n_CSF
-     psi_out(i,1) += 1.0d0*diag_energies(i)*psi_in(i,1)
+     psi_out(i,kk) += 1.0d0*diag_energies(i)*psi_in(i,kk)
+  enddo
   enddo
 
 
-end subroutine calculate_sigma_vector_cfg_nst
+end subroutine calculate_sigma_vector_cfg_nst_naive_store
+
 subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, iend, ishift, istep)
   implicit none
   use bitmasks
@@ -1525,8 +1545,10 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
 
 
   ! Add the diagonal contribution
+  do kk=1,n_st
   do i = 1,n_CSF
-     psi_out(i,1) += 1.0d0*diag_energies(i)*psi_in(i,1)
+     psi_out(i,kk) += 1.0d0*diag_energies(i)*psi_in(i,kk)
+  enddo
   enddo
 
 

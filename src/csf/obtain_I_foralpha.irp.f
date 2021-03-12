@@ -68,9 +68,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
      ndiffSOMO = POPCNT(diffSOMO)
-     if(ndiffSOMO .NE. 2 .AND. ndiffSOMO .NE. 0) then
-       cycle
-     endif
+     !if(ndiffSOMO .NE. 2 .AND. ndiffSOMO .NE. 0) then
+     !  cycle
+     !endif
      diffDOMO = IEOR(Idomo,Jdomo)
      xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
      ndiffDOMO = POPCNT(diffDOMO)
