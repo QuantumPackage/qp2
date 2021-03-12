@@ -114,14 +114,14 @@ use bitmasks
              Jsomo = IBCLR(Isomo,p-1)
              Jsomo = IBSET(Jsomo,q-1)
              Jdomo = Idomo
-             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
+             kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
              kend = idxI-1
           else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
              ! SOMO -> SOMO
              Jsomo = IBCLR(Isomo,p-1)
              Jsomo = IBCLR(Jsomo,q-1)
              Jdomo = IBSET(Idomo,q-1)
-             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-4)))
+             kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-4)))
              kend = idxI-1
           else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
              ! DOMO -> VMO
@@ -136,7 +136,7 @@ use bitmasks
              Jsomo = IBCLR(Jsomo,q-1)
              Jdomo = IBCLR(Idomo,p-1)
              Jdomo = IBSET(Jdomo,q-1)
-             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
+             kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
              kend = idxI-1
           else
              print*,"Something went wrong in obtain_associated_alphaI"
@@ -386,14 +386,14 @@ END_PROVIDER
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBSET(Jsomo,q-1)
            Jdomo = Idomo
-           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
+           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
            kend = idxI-1
         else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
            ! SOMO -> SOMO
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBSET(Idomo,q-1)
-           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-4)))
+           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-4)))
            kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
            ! DOMO -> VMO
@@ -408,7 +408,7 @@ END_PROVIDER
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBCLR(Idomo,p-1)
            Jdomo = IBSET(Jdomo,q-1)
-           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
+           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
            kend = idxI-1
         else
            print*,"Something went wrong in obtain_associated_alphaI"

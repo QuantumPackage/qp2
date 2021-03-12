@@ -1,4 +1,5 @@
   BEGIN_PROVIDER [ integer, NSOMOMax]
+ &BEGIN_PROVIDER [ integer, NSOMOMin]
  &BEGIN_PROVIDER [ integer, NCSFMax]
  &BEGIN_PROVIDER [ integer*8, NMO]
  &BEGIN_PROVIDER [ integer, NBFMax]
@@ -11,6 +12,7 @@
   ! required for the calculation of prototype arrays.
   END_DOC
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
+  NSOMOMin = cfg_nsomo_min
   ! Note that here we need NSOMOMax + 2 sizes
   NCSFMax = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2)-binom(NSOMOMax,((NSOMOMax+1)/2)+1)))) ! TODO: NCSFs for MS=0
   NBFMax = NCSFMax
@@ -27,11 +29,13 @@
   integer ncfgpersomo
   detDimperBF = 0
   MS = elec_alpha_num-elec_beta_num
-  !print *,"NSOMOMax=",NSOMOMax, cfg_seniority_index(0)
+  !print *,"NSOMOMax=",NSOMOMax, cfg_seniority_index(NSOMOMin)
+  !print *,"NSOMOMin=",NSOMOMin
   ! number of cfgs = number of dets for 0 somos
-  n_CSF = cfg_seniority_index(0)-1
-  ncfgprev = cfg_seniority_index(0)
-  do i = 0-iand(MS,1)+2, NSOMOMax,2
+  n_CSF = cfg_seniority_index(NSOMOMin)-1
+  ncfgprev = cfg_seniority_index(NSOMOMin)
+  !do i = 0-iand(MS,1)+2, NSOMOMax,2
+  do i = NSOMOMin, NSOMOMax,2
      if(cfg_seniority_index(i) .EQ. -1)then
         ncfgpersomo = N_configuration + 1
      else
@@ -163,6 +167,7 @@ end subroutine get_phase_qp_to_cfg
   countdet = 0
   integer istate
   istate = 1
+  psi_csf_to_config_data(1) = 1
   phasedet = 1.0d0
   do i = 1,N_configuration
       startdet = psi_configuration_to_psi_det(1,i)
@@ -208,15 +213,17 @@ end subroutine get_phase_qp_to_cfg
       deallocate(tempCoeff)
       deallocate(tempBuffer)
       psi_config_data(i,1) = countcsf + 1
+      do k=1,bfIcfg
+        psi_csf_to_config_data(countcsf+k) = i
+      enddo
       countcsf += bfIcfg
       psi_config_data(i,2) = countcsf
-      psi_csf_to_config_data(countcsf) = i
   enddo
   print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
 
   END_PROVIDER
 
-  BEGIN_PROVIDER [ integer, AIJpqMatrixDimsList, (0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,2)]
+  BEGIN_PROVIDER [ integer, AIJpqMatrixDimsList, (NSOMOMin:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,2)]
  &BEGIN_PROVIDER [ integer, rowsmax]
  &BEGIN_PROVIDER [ integer, colsmax]
   use cfunctions
@@ -235,7 +242,6 @@ end subroutine get_phase_qp_to_cfg
   cols = -1
   integer*8 MS
   MS = elec_alpha_num-elec_beta_num
-  integer nsomomin
   nsomomin = elec_alpha_num-elec_beta_num
   rowsmax = 0
   colsmax = 0
@@ -246,7 +252,7 @@ end subroutine get_phase_qp_to_cfg
   !print *,"Doing SOMO->SOMO"
   AIJpqMatrixDimsList(0,1,1,1,1) = 1
   AIJpqMatrixDimsList(0,1,1,1,2) = 1
-  do i = 2-iand(nsomomin,1), NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
         Jsomo = ISHFT(1_8,j)-1
@@ -292,7 +298,7 @@ end subroutine get_phase_qp_to_cfg
   !print *,"Doing DOMO->VMO"
   AIJpqMatrixDimsList(0,2,1,1,1) = 1
   AIJpqMatrixDimsList(0,2,1,1,2) = 1
-  do i = 0+iand(nsomomin,1), NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
      do j = i+2,i+2, 2
@@ -344,7 +350,7 @@ end subroutine get_phase_qp_to_cfg
   !print *,"Doing SOMO->VMO"
   AIJpqMatrixDimsList(0,3,1,1,1) = 1
   AIJpqMatrixDimsList(0,3,1,1,2) = 1
-  do i = 2-iand(nsomomin,1), NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
         Jsomo = ISHFT(1_8,j)-1
@@ -386,7 +392,7 @@ end subroutine get_phase_qp_to_cfg
   !print *,"Doing DOMO->SOMO"
   AIJpqMatrixDimsList(0,4,1,1,1) = 1
   AIJpqMatrixDimsList(0,4,1,1,2) = 1
-  do i = 2-iand(nsomomin,1), NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      do j = i,i, 2
         if(j .GT. NSOMOMax .OR. j .LE. 0) then
            cycle
@@ -425,7 +431,6 @@ end subroutine get_phase_qp_to_cfg
   END_PROVIDER
 
   BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
-  !BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,-1:1,4,NSOMOMax+1,-1:1,NBFMax,NBFMax)]
   use cfunctions
   implicit none
   BEGIN_DOC
@@ -467,7 +472,7 @@ end subroutine get_phase_qp_to_cfg
   ! 1. SOMO -> SOMO
   !print *,"Doing SOMO -> SOMO"
   AIJpqContainer(0,1,1,1,1,1) = 1.0d0
-  do i = 2, NSOMOMax, 2
+  do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
         if(j .GT. NSOMOMax .OR. j .LT. 0) cycle
@@ -530,7 +535,7 @@ end subroutine get_phase_qp_to_cfg
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO -> VMO"
   AIJpqContainer(0,2,1,1,1,1) = 1.0d0
-  do i = 0, NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
      do j = i+2,i+2, 2
@@ -596,7 +601,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 3. SOMO -> VMO
   !print *,"Doing SOMO -> VMO"
-  do i = 2, NSOMOMax, 2
+  do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
         Jsomo = ISHFT(1_8,j)-1
@@ -655,7 +660,7 @@ end subroutine get_phase_qp_to_cfg
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO -> SOMO"
   AIJpqContainer(0,4,1,1,1,1) = 1.0d0
-  do i = 2, NSOMOMax, 2
+  do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
         Jsomo = ISHFT(1_8,i)-1
@@ -902,6 +907,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8,dimension(:,:,:),allocatable :: TKI
   real*8,dimension(:,:),allocatable :: GIJpqrs
   real*8,dimension(:,:,:),allocatable :: TKIGIJ
+  real*8,dimension(:),allocatable :: psi_out_tmp
+  real*8,dimension(:,:),allocatable :: CCmattmp
   real*8, external               :: mo_two_e_integral
   real*8, external               :: get_two_e_integral
   real*8                         :: diag_energies(n_CSF)
@@ -1187,11 +1194,29 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
            do kk = 1,n_st
+           !do m = 1,colsikpq
+           !   do l = 1,rowsTKI
+           !      psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
+           !   enddo
+           !enddo
+           allocate(psi_out_tmp(colsikpq))
+           !allocate(CCmattmp(rowsTKI,colsikpq))
+           !do m=1,colsikpq
+           !  do l=1,rowsTKI
+           !    CCmattmp(l,m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m)
+           !  enddo
+           !enddo
+           !call dgemv('T',rowsTKI, colsikpq, 1.d0,  &
+           !  CCmattmp, size(CCmattmp,1), TKIGIJ(:,kk,j), 1, 0.d0, &
+           !  psi_out_tmp, 1)
+           call dgemv('T',rowsTKI, colsikpq, 1.d0,  &
+             AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,1:rowsTKI,1:colsikpq), rowsTKI, TKIGIJ(:,kk,j), 1, 0.d0, &
+             psi_out_tmp, 1)
            do m = 1,colsikpq
-              do l = 1,rowsTKI
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
-              enddo
+                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += psi_out_tmp(m)
            enddo
+           deallocate(psi_out_tmp)
+           !deallocate(CCmattmp)
            enddo
            totcolsTKI += colsikpq
         enddo
@@ -1274,16 +1299,16 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
   real*8                         :: diag_energies(n_CSF)
 
   ! allocate
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(singlesI(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
-  allocate(idxs_singlesI(max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
-  allocate(excitationIds_single(2,max(sze,100)))
-  allocate(excitationTypes_single(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
+  allocate(alphas_Icfg(N_INT,2,max(sze/2,100)))
+  allocate(singlesI(N_INT,2,max(sze/2,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze/2,100)))
+  allocate(idxs_singlesI(max(sze/2,100)))
+  allocate(idxs_connectedI_alpha(max(sze/2,100)))
+  allocate(excitationIds_single(2,max(sze/2,100)))
+  allocate(excitationTypes_single(max(sze/2,100)))
+  allocate(excitationIds(2,max(sze/2,100)))
+  allocate(excitationTypes(max(sze/2,100)))
+  allocate(diagfactors(max(sze/2,100)))
 
 
   !print *," sze = ",sze
@@ -1300,6 +1325,7 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
 
   !!! Single Excitations !!!
   do i=istart_cfg,iend_cfg
+    print *,"I=",i
 
     ! if Seniority_range > 8 then
     ! continue

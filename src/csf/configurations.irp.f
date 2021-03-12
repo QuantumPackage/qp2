@@ -460,16 +460,19 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
 &BEGIN_PROVIDER [ integer, cfg_nsomo_max ]
+&BEGIN_PROVIDER [ integer, cfg_nsomo_min ]
   implicit none
   BEGIN_DOC
  ! Returns the index in psi_configuration of the first cfg with
  ! the requested seniority
  !
  ! cfg_nsomo_max : Max number of SOMO in the current wave function
+ ! cfg_nsomo_min : Min number of SOMO in the current wave function
  END_DOC
- integer :: i, k, s, sold
+ integer :: i, k, s, sold, soldmin
  cfg_seniority_index(:) = -1
  sold = -1
+ soldmin = 2000
  cfg_nsomo_max = 0
  do i=1,N_configuration
    s = 0
@@ -481,6 +484,10 @@ END_PROVIDER
      sold = s
      cfg_seniority_index(s) = i
      cfg_nsomo_max = s
+   endif
+   if (soldmin .GT. s ) then
+     soldmin = s
+     cfg_nsomo_min = s
    endif
  enddo
 END_PROVIDER
