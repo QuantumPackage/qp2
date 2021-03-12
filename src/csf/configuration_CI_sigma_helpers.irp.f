@@ -1,6 +1,6 @@
 use bitmasks
 
- BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,N_configuration*mo_num*mo_num)]
+ BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,mo_num*mo_num)]
 &BEGIN_PROVIDER [ integer, NalphaIcfg_list, (N_configuration) ]
   implicit none
   !use bitmasks
@@ -13,7 +13,6 @@ use bitmasks
   integer                            :: idxI ! The id of the Ith CFG
   integer(bit_kind)                  :: Icfg(N_int,2)
   integer                            :: NalphaIcfg
-  integer(bit_kind)                  :: alphasIcfg(N_int,2,N_configuration*mo_num*mo_num)
   logical,dimension(:,:),allocatable :: tableUniqueAlphas
   integer                            :: listholes(mo_num)
   integer                            :: holetype(mo_num) ! 1-> SOMO 2->DOMO
@@ -101,11 +100,10 @@ use bitmasks
     if(Nsomo_I .EQ. 0) then
       kstart = 1
     else
-      kstart = cfg_seniority_index(Nsomo_I-2)
+      kstart = cfg_seniority_index(max(0,Nsomo_I-2))
     endif
     kend = idxI-1
 
-    ! TODO cfg_seniority_index
     do i = 1,nholes
        p = listholes(i)
        do j = 1,nvmos
@@ -116,14 +114,14 @@ use bitmasks
              Jsomo = IBCLR(Isomo,p-1)
              Jsomo = IBSET(Jsomo,q-1)
              Jdomo = Idomo
-             kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
              kend = idxI-1
           else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
              ! SOMO -> SOMO
              Jsomo = IBCLR(Isomo,p-1)
              Jsomo = IBCLR(Jsomo,q-1)
              Jdomo = IBSET(Idomo,q-1)
-             kstart = max(0,cfg_seniority_index(Nsomo_I-4))
+             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-4)))
              kend = idxI-1
           else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
              ! DOMO -> VMO
@@ -138,7 +136,7 @@ use bitmasks
              Jsomo = IBCLR(Jsomo,q-1)
              Jdomo = IBCLR(Idomo,p-1)
              Jdomo = IBSET(Jdomo,q-1)
-             kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+             kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
              kend = idxI-1
           else
              print*,"Something went wrong in obtain_associated_alphaI"
@@ -224,9 +222,8 @@ use bitmasks
            ! SOMO
            NalphaIcfg += 1
            !print *,i,j,"|",NalphaIcfg
-           alphasIcfg(1,1,NalphaIcfg) = Jsomo
-           alphasIcfg(1,2,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
-           alphasIcfg_list(1:N_int,1:2,idxI,NalphaIcfg) = alphasIcfg(1:N_int,1:2,NalphaIcfg)
+           alphasIcfg_list(1,1,idxI,NalphaIcfg) = Jsomo
+           alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
            NalphaIcfg_list(idxI) = NalphaIcfg
         endif
      end do
@@ -252,9 +249,8 @@ use bitmasks
   if(nholes > 0 .AND. (.NOT. ppExistsQ))then
      ! SOMO
      NalphaIcfg += 1
-     alphasIcfg(1,1,NalphaIcfg) = Icfg(1,1)
-     alphasIcfg(1,2,NalphaIcfg) = Icfg(1,2)
-     alphasIcfg_list(1:N_int,1:2,idxI,NalphaIcfg) = alphasIcfg(1:N_int,1:2,NalphaIcfg)
+     alphasIcfg_list(1,1,idxI,NalphaIcfg) = Icfg(1,1)
+     alphasIcfg_list(1,2,idxI,NalphaIcfg) = Icfg(1,2)
      NalphaIcfg_list(idxI) = NalphaIcfg
   endif
 
@@ -365,7 +361,7 @@ END_PROVIDER
   if(Nsomo_I .EQ. 0) then
     kstart = 1
   else
-    kstart = cfg_seniority_index(Nsomo_I-2)
+    kstart = cfg_seniority_index(max(0,Nsomo_I-2))
   endif
   kend = idxI-1
   !print *,"Isomo"
@@ -380,7 +376,6 @@ END_PROVIDER
   !   print *,i,"->",listvmos(i)
   !enddo
 
-  ! TODO cfg_seniority_index
   do i = 1,nholes
      p = listholes(i)
      do j = 1,nvmos
@@ -391,14 +386,14 @@ END_PROVIDER
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBSET(Jsomo,q-1)
            Jdomo = Idomo
-           kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
            kend = idxI-1
         else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
            ! SOMO -> SOMO
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBSET(Idomo,q-1)
-           kstart = max(0,cfg_seniority_index(Nsomo_I-4))
+           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-4)))
            kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
            ! DOMO -> VMO
@@ -413,7 +408,7 @@ END_PROVIDER
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBCLR(Idomo,p-1)
            Jdomo = IBSET(Jdomo,q-1)
-           kstart = max(0,cfg_seniority_index(Nsomo_I-2))
+           kstart = max(0,cfg_seniority_index(max(0,Nsomo_I-2)))
            kend = idxI-1
         else
            print*,"Something went wrong in obtain_associated_alphaI"

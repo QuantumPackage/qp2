@@ -216,7 +216,7 @@ end subroutine get_phase_qp_to_cfg
 
   END_PROVIDER
 
-  BEGIN_PROVIDER [ integer, AIJpqMatrixDimsList, (0:NSOMOMax,0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,2)]
+  BEGIN_PROVIDER [ integer, AIJpqMatrixDimsList, (0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,2)]
  &BEGIN_PROVIDER [ integer, rowsmax]
  &BEGIN_PROVIDER [ integer, colsmax]
   use cfunctions
@@ -244,8 +244,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 1. SOMO -> SOMO
   !print *,"Doing SOMO->SOMO"
-  AIJpqMatrixDimsList(0,0,1,1,1,1) = 1
-  AIJpqMatrixDimsList(0,0,1,1,1,2) = 1
+  AIJpqMatrixDimsList(0,1,1,1,1) = 1
+  AIJpqMatrixDimsList(0,1,1,1,2) = 1
   do i = 2-iand(nsomomin,1), NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
@@ -281,8 +281,8 @@ end subroutine get_phase_qp_to_cfg
                  colsmax = cols
               end if
               ! i -> j
-              AIJpqMatrixDimsList(nsomoi,nsomoj,1,k,l,1) = rows
-              AIJpqMatrixDimsList(nsomoi,nsomoj,1,k,l,2) = cols
+              AIJpqMatrixDimsList(nsomoi,1,k,l,1) = rows
+              AIJpqMatrixDimsList(nsomoi,1,k,l,2) = cols
            end do
         end do
      end do
@@ -290,8 +290,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO->VMO"
-  AIJpqMatrixDimsList(0,0,2,1,1,1) = 1
-  AIJpqMatrixDimsList(0,0,2,1,1,2) = 1
+  AIJpqMatrixDimsList(0,2,1,1,1) = 1
+  AIJpqMatrixDimsList(0,2,1,1,2) = 1
   do i = 0+iand(nsomomin,1), NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
@@ -333,8 +333,8 @@ end subroutine get_phase_qp_to_cfg
                  colsmax = cols
               end if
               ! i -> j
-              AIJpqMatrixDimsList(nsomoi,nsomoj,2,k,l,1) = rows
-              AIJpqMatrixDimsList(nsomoi,nsomoj,2,k,l,2) = cols
+              AIJpqMatrixDimsList(nsomoi,2,k,l,1) = rows
+              AIJpqMatrixDimsList(nsomoi,2,k,l,2) = cols
            end do
         end do
      end do
@@ -342,8 +342,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 3. SOMO -> VMO
   !print *,"Doing SOMO->VMO"
-  AIJpqMatrixDimsList(0,0,3,1,1,1) = 1
-  AIJpqMatrixDimsList(0,0,3,1,1,2) = 1
+  AIJpqMatrixDimsList(0,3,1,1,1) = 1
+  AIJpqMatrixDimsList(0,3,1,1,2) = 1
   do i = 2-iand(nsomomin,1), NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -375,8 +375,8 @@ end subroutine get_phase_qp_to_cfg
                  colsmax = cols
               end if
               ! i -> j
-              AIJpqMatrixDimsList(i,j,3,k,l,1) = rows
-              AIJpqMatrixDimsList(i,j,3,k,l,2) = cols
+              AIJpqMatrixDimsList(i,3,k,l,1) = rows
+              AIJpqMatrixDimsList(i,3,k,l,2) = cols
            end do
         end do
      end do
@@ -384,8 +384,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO->SOMO"
-  AIJpqMatrixDimsList(0,0,4,1,1,1) = 1
-  AIJpqMatrixDimsList(0,0,4,1,1,2) = 1
+  AIJpqMatrixDimsList(0,4,1,1,1) = 1
+  AIJpqMatrixDimsList(0,4,1,1,2) = 1
   do i = 2-iand(nsomomin,1), NSOMOMax, 2
      do j = i,i, 2
         if(j .GT. NSOMOMax .OR. j .LE. 0) then
@@ -415,8 +415,8 @@ end subroutine get_phase_qp_to_cfg
                  colsmax = cols
               end if
               ! i -> j
-              AIJpqMatrixDimsList(i,j,4,k,l,1) = rows
-              AIJpqMatrixDimsList(i,j,4,k,l,2) = cols
+              AIJpqMatrixDimsList(i,4,k,l,1) = rows
+              AIJpqMatrixDimsList(i,4,k,l,2) = cols
            end do
         end do
      end do
@@ -424,7 +424,7 @@ end subroutine get_phase_qp_to_cfg
   print *,"Rowsmax=",rowsmax," Colsmax=",colsmax
   END_PROVIDER
 
-  BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
+  BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
   !BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,-1:1,4,NSOMOMax+1,-1:1,NBFMax,NBFMax)]
   use cfunctions
   implicit none
@@ -463,11 +463,10 @@ end subroutine get_phase_qp_to_cfg
   ! allocate matrix
   !print *,"rowsmax =",rowsmax," colsmax=",colsmax
   !print *,"NSOMOMax = ",NSOMOMax
-  !allocate(AIJpqMatrixDimsList(NSOMOMax,NSOMOMax,4,NSOMOMax,NSOMOMax,2))
   ! Type
   ! 1. SOMO -> SOMO
   !print *,"Doing SOMO -> SOMO"
-  AIJpqContainer(0,0,1,1,1,1,1) = 1.0d0
+  AIJpqContainer(0,1,1,1,1,1) = 1.0d0
   do i = 2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
@@ -493,7 +492,7 @@ end subroutine get_phase_qp_to_cfg
               !call debug_spindet(Jsomo,1)
               !call debug_spindet(Isomo,1)
 
-              AIJpqContainer(nsomoi,nsomoj,1,k,l,:,:) = 0.0d0
+              AIJpqContainer(nsomoi,1,k,l,:,:) = 0.0d0
               call getApqIJMatrixDims(Isomo,           &
                    Jsomo, &
                    MS,                       &
@@ -519,7 +518,7 @@ end subroutine get_phase_qp_to_cfg
               ! i -> j
              do ri = 1,rows
                  do ci = 1,cols
-                    AIJpqContainer(nsomoi,nsomoj,1,k,l,ri,ci) = meMatrix(ri, ci)
+                    AIJpqContainer(nsomoi,1,k,l,ri,ci) = meMatrix(ri, ci)
                  end do
               end do
               deallocate(meMatrix)
@@ -530,7 +529,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO -> VMO"
-  AIJpqContainer(0,0,2,1,1,1,1) = 1.0d0
+  AIJpqContainer(0,2,1,1,1,1) = 1.0d0
   do i = 0, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
@@ -560,7 +559,7 @@ end subroutine get_phase_qp_to_cfg
               !call debug_spindet(Jsomo,1)
               !call debug_spindet(Isomo,1)
 
-              AIJpqContainer(nsomoi,nsomoj,2,k,l,:,:) = 0.0d0
+              AIJpqContainer(nsomoi,2,k,l,:,:) = 0.0d0
               call getApqIJMatrixDims(Isomo,           &
                    Jsomo, &
                    MS,                       &
@@ -586,7 +585,7 @@ end subroutine get_phase_qp_to_cfg
               ! i -> j
              do ri = 1,rows
                  do ci = 1,cols
-                    AIJpqContainer(nsomoi,nsomoj,2,k,l,ri,ci) = meMatrix(ri, ci)
+                    AIJpqContainer(nsomoi,2,k,l,ri,ci) = meMatrix(ri, ci)
                  end do
               end do
               deallocate(meMatrix)
@@ -618,7 +617,7 @@ end subroutine get_phase_qp_to_cfg
               !call debug_spindet(Jsomo,1)
               !call debug_spindet(Isomo,1)
 
-              AIJpqContainer(i,j,3,k,l,:,:) = 0.0d0
+              AIJpqContainer(i,3,k,l,:,:) = 0.0d0
               call getApqIJMatrixDims(Isomo,           &
                    Jsomo, &
                    MS,                       &
@@ -644,7 +643,7 @@ end subroutine get_phase_qp_to_cfg
               ! i -> j
              do ri = 1,rows
                  do ci = 1,cols
-                    AIJpqContainer(i,j,3,k,l,ri,ci) = meMatrix(ri, ci)
+                    AIJpqContainer(i,3,k,l,ri,ci) = meMatrix(ri, ci)
                  end do
               end do
               deallocate(meMatrix)
@@ -655,7 +654,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO -> SOMO"
-  AIJpqContainer(0,0,4,1,1,1,1) = 1.0d0
+  AIJpqContainer(0,4,1,1,1,1) = 1.0d0
   do i = 2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -673,7 +672,7 @@ end subroutine get_phase_qp_to_cfg
                  Jsomo = ISHFT(1_8,j)-1
               endif
 
-              AIJpqContainer(i,j,4,k,l,:,:) = 0.0d0
+              AIJpqContainer(i,4,k,l,:,:) = 0.0d0
               call getApqIJMatrixDims(Isomo,           &
                    Jsomo, &
                    MS,                       &
@@ -700,7 +699,7 @@ end subroutine get_phase_qp_to_cfg
               ! i -> j
              do ri = 1,rows
                  do ci = 1,cols
-                    AIJpqContainer(i,j,4,k,l,ri,ci) = meMatrix(ri, ci)
+                    AIJpqContainer(i,4,k,l,ri,ci) = meMatrix(ri, ci)
                  end do
               end do
               deallocate(meMatrix)
@@ -1031,7 +1030,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            cntj = 0
            do jj = startj, endj
               cntj += 1
-              meCC1 = AIJpqContainer(NSOMOI,NSOMOJ,extype,pmodel,qmodel,cnti,cntj)
+              meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
               psi_out(jj,kk) += meCC1 * psi_in(ii,kk) * h_core_ri(p,q)
            enddo
         enddo
@@ -1092,8 +1091,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            if(p.EQ.q) then
               NSOMOalpha = NSOMOI
            endif
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            totcolsTKI += colsikpq
            if(rowsTKI .LT. rowsikpq .AND. rowsTKI .NE. -1) then
               print *,">",j,"Something is wrong in sigma-vector", rowsTKI, rowsikpq, "(p,q)=",pmodel,qmodel,"ex=",extype,"na=",NSOMOalpha," nI=",NSOMOI
@@ -1117,12 +1116,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            q = excitationIds(2,j)
            extype = excitationTypes(j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            do kk = 1,n_st
            do l = 1,rowsTKI
               do m = 1,colsikpq
-                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
+                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
               enddo
            enddo
            enddo
@@ -1184,13 +1183,13 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            q = excitationIds(2,j)
            extype = excitationTypes(j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
            do kk = 1,n_st
            do m = 1,colsikpq
               do l = 1,rowsTKI
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
+                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
               enddo
            enddo
            enddo
@@ -1399,7 +1398,7 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
            cntj = 0
            do jj = startj, endj
               cntj += 1
-              meCC1 = AIJpqContainer(NSOMOI,NSOMOJ,extype,pmodel,qmodel,cnti,cntj)
+              meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
               psi_out(jj,kk) += meCC1 * psi_in(ii,kk) * h_core_ri(p,q)
            enddo
         enddo
@@ -1457,8 +1456,8 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
            if(p.EQ.q) then
               NSOMOalpha = NSOMOI
            endif
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            totcolsTKI += colsikpq
            if(rowsTKI .LT. rowsikpq .AND. rowsTKI .NE. -1) then
               print *,">",j,"Something is wrong in sigma-vector", rowsTKI, rowsikpq, "(p,q)=",pmodel,qmodel,"ex=",extype,"na=",NSOMOalpha," nI=",NSOMOI
@@ -1482,12 +1481,12 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
            q = excitationIds(2,j)
            extype = excitationTypes(j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            do kk = 1,n_st
            do l = 1,rowsTKI
               do m = 1,colsikpq
-                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
+                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
               enddo
            enddo
            enddo
@@ -1532,13 +1531,13 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
            q = excitationIds(2,j)
            extype = excitationTypes(j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,2)
+           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
            do kk = 1,n_st
            do m = 1,colsikpq
               do l = 1,rowsTKI
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,NSOMOI,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
+                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
               enddo
            enddo
            enddo

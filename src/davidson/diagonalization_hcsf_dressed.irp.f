@@ -321,7 +321,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 tmpU(ii,kk) = U_csf(ii,shift+kk)
               enddo
             enddo
-            call calculate_sigma_vector_cfg_nst(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             do kk=1,N_st_diag
               do ii=1,sze_csf
                 W_csf(ii,shift+kk)=tmpW(ii,kk)
@@ -346,7 +346,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 tmpU(ii,kk) = U_csf(ii,shift+kk)
               enddo
             enddo
-            call calculate_sigma_vector_cfg_nst(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             do kk=1,N_st_diag
               do ii=1,sze_csf
                 W_csf(ii,shift+kk)=tmpW(ii,kk)
