@@ -918,6 +918,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8, external               :: mo_two_e_integral
   real*8, external               :: get_two_e_integral
   real*8                         :: diag_energies(n_CSF)
+  real*8                         :: tmpvar, tmptot
 
   ! allocate
   allocate(alphas_Icfg(N_INT,2,max(sze,100)))
@@ -1131,13 +1132,21 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+           allocate(CCmattmp(colsikpq,n_st))
            do kk = 1,n_st
-           do l = 1,rowsTKI
-              do m = 1,colsikpq
-                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
+           do m = 1,colsikpq
+              CCmattmp(m,kk) = psi_in(idxs_connectedI_alpha(j)+m-1,kk)
+           enddo
+           enddo
+           do kk = 1,n_st
+           do m = 1,colsikpq
+              tmpvar = CCmattmp(m,kk)
+              do l = 1,rowsTKI
+                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * tmpvar
               enddo
            enddo
            enddo
+           deallocate(CCmattmp)
            do m = 1,colsikpq
               do l = 1,nconnectedI
                  ! <ij|kl> = (ik|jl)
@@ -1201,9 +1210,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
            do kk = 1,n_st
            do m = 1,colsikpq
+              tmpvar = psi_out(idxs_connectedI_alpha(j)+m-1,kk)
               do l = 1,rowsTKI
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
+                 tmpvar += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
               enddo
+                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) = tmpvar
            enddo
            enddo
            totcolsTKI += colsikpq
