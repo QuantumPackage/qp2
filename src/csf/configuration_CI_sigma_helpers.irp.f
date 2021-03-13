@@ -47,6 +47,7 @@ use bitmasks
 
 
   allocate(tableUniqueAlphas(mo_num,mo_num))
+  NalphaIcfg_list = 0
 
   do idxI = 1, N_configuration
 
@@ -254,7 +255,7 @@ use bitmasks
      NalphaIcfg_list(idxI) = NalphaIcfg
   endif
 
-
+  NalphaIcfg = 0
   enddo ! end loop idxI
 
 END_PROVIDER

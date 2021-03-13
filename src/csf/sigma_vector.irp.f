@@ -12,7 +12,7 @@
   ! required for the calculation of prototype arrays.
   END_DOC
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
-  NSOMOMin = cfg_nsomo_min
+  NSOMOMin = max(0,cfg_nsomo_min-2)
   ! Note that here we need NSOMOMax + 2 sizes
   NCSFMax = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2)-binom(NSOMOMax,((NSOMOMax+1)/2)+1)))) ! TODO: NCSFs for MS=0
   NBFMax = NCSFMax
@@ -29,13 +29,17 @@
   integer ncfgpersomo
   detDimperBF = 0
   MS = elec_alpha_num-elec_beta_num
-  !print *,"NSOMOMax=",NSOMOMax, cfg_seniority_index(NSOMOMin)
-  !print *,"NSOMOMin=",NSOMOMin
+  print *,"NSOMOMax=",NSOMOMax, cfg_seniority_index(NSOMOMin)
+  print *,"NSOMOMin=",NSOMOMin
+  do i=0,elec_num
+    print *,i," #cfgs=",cfg_seniority_index(i)
+  enddo
   ! number of cfgs = number of dets for 0 somos
   n_CSF = cfg_seniority_index(NSOMOMin)-1
+  print *,"start=",n_CSF
   ncfgprev = cfg_seniority_index(NSOMOMin)
   !do i = 0-iand(MS,1)+2, NSOMOMax,2
-  do i = NSOMOMin, NSOMOMax,2
+  do i = NSOMOMin+2, NSOMOMax,2
      if(cfg_seniority_index(i) .EQ. -1)then
         ncfgpersomo = N_configuration + 1
      else
@@ -45,18 +49,18 @@
   !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
   dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
   n_CSF += ncfg * dimcsfpercfg
-  !print *,i,">(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
+  print *,i,">(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
   !if(cfg_seniority_index(i+2) == -1) EXIT
   !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
   ncfgprev = cfg_seniority_index(i)
   enddo
-  if(NSOMOMax .EQ. elec_num)then
-        ncfgpersomo = N_configuration + 1
-        ncfg = ncfgpersomo - ncfgprev
-        dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-        n_CSF += ncfg * dimcsfpercfg
-        !print *,i,">(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
-  endif
+  !if(NSOMOMax .EQ. elec_num)then
+  !      ncfgpersomo = N_configuration + 1
+  !      ncfg = ncfgpersomo - ncfgprev
+  !      dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+  !      n_CSF += ncfg * dimcsfpercfg
+  !      print *,i,">>(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
+  !endif
   END_PROVIDER
 
 subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
@@ -246,12 +250,13 @@ end subroutine get_phase_qp_to_cfg
   rowsmax = 0
   colsmax = 0
   print *,"NSOMOMax = ",NSOMOMax
+  print *,"NSOMOMin = ",NSOMOMin
   !allocate(AIJpqMatrixDimsList(NSOMOMax,NSOMOMax,4,NSOMOMax,NSOMOMax,2))
   ! Type
   ! 1. SOMO -> SOMO
   !print *,"Doing SOMO->SOMO"
-  AIJpqMatrixDimsList(0,1,1,1,1) = 1
-  AIJpqMatrixDimsList(0,1,1,1,2) = 1
+  AIJpqMatrixDimsList(NSOMOMin,1,1,1,1) = 1
+  AIJpqMatrixDimsList(NSOMOMin,1,1,1,2) = 1
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
@@ -296,8 +301,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO->VMO"
-  AIJpqMatrixDimsList(0,2,1,1,1) = 1
-  AIJpqMatrixDimsList(0,2,1,1,2) = 1
+  AIJpqMatrixDimsList(NSOMOMin,2,1,1,1) = 1
+  AIJpqMatrixDimsList(NSOMOMin,2,1,1,2) = 1
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
@@ -348,8 +353,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 3. SOMO -> VMO
   !print *,"Doing SOMO->VMO"
-  AIJpqMatrixDimsList(0,3,1,1,1) = 1
-  AIJpqMatrixDimsList(0,3,1,1,2) = 1
+  AIJpqMatrixDimsList(NSOMOMin,3,1,1,1) = 1
+  AIJpqMatrixDimsList(NSOMOMin,3,1,1,2) = 1
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -390,8 +395,8 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO->SOMO"
-  AIJpqMatrixDimsList(0,4,1,1,1) = 1
-  AIJpqMatrixDimsList(0,4,1,1,2) = 1
+  AIJpqMatrixDimsList(NSOMOMin,4,1,1,1) = 1
+  AIJpqMatrixDimsList(NSOMOMin,4,1,1,2) = 1
   do i = NSOMOMin, NSOMOMax, 2
      do j = i,i, 2
         if(j .GT. NSOMOMax .OR. j .LE. 0) then
@@ -430,7 +435,7 @@ end subroutine get_phase_qp_to_cfg
   print *,"Rowsmax=",rowsmax," Colsmax=",colsmax
   END_PROVIDER
 
-  BEGIN_PROVIDER [ real*8, AIJpqContainer, (0:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
+  BEGIN_PROVIDER [ real*8, AIJpqContainer, (NSOMOMin:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
   use cfunctions
   implicit none
   BEGIN_DOC
@@ -471,7 +476,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 1. SOMO -> SOMO
   !print *,"Doing SOMO -> SOMO"
-  AIJpqContainer(0,1,1,1,1,1) = 1.0d0
+  AIJpqContainer(NSOMOMin,1,1,1,1,1) = 1.0d0
   do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i-2,i-2, 2
@@ -534,7 +539,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO -> VMO"
-  AIJpqContainer(0,2,1,1,1,1) = 1.0d0
+  AIJpqContainer(NSOMOMin,2,1,1,1,1) = 1.0d0
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      tmpsomo = ISHFT(1_8,i+2)-1
@@ -601,6 +606,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 3. SOMO -> VMO
   !print *,"Doing SOMO -> VMO"
+  AIJpqContainer(NSOMOMin,3,1,1,1,1) = 1.0d0
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -659,7 +665,7 @@ end subroutine get_phase_qp_to_cfg
   ! Type
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO -> SOMO"
-  AIJpqContainer(0,4,1,1,1,1) = 1.0d0
+  AIJpqContainer(NSOMOMin,4,1,1,1,1) = 1.0d0
   do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -1194,29 +1200,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
            do kk = 1,n_st
-           !do m = 1,colsikpq
-           !   do l = 1,rowsTKI
-           !      psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
-           !   enddo
-           !enddo
-           allocate(psi_out_tmp(colsikpq))
-           !allocate(CCmattmp(rowsTKI,colsikpq))
-           !do m=1,colsikpq
-           !  do l=1,rowsTKI
-           !    CCmattmp(l,m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m)
-           !  enddo
-           !enddo
-           !call dgemv('T',rowsTKI, colsikpq, 1.d0,  &
-           !  CCmattmp, size(CCmattmp,1), TKIGIJ(:,kk,j), 1, 0.d0, &
-           !  psi_out_tmp, 1)
-           call dgemv('T',rowsTKI, colsikpq, 1.d0,  &
-             AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,1:rowsTKI,1:colsikpq), rowsTKI, TKIGIJ(:,kk,j), 1, 0.d0, &
-             psi_out_tmp, 1)
            do m = 1,colsikpq
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += psi_out_tmp(m)
+              do l = 1,rowsTKI
+                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
+              enddo
            enddo
-           deallocate(psi_out_tmp)
-           !deallocate(CCmattmp)
            enddo
            totcolsTKI += colsikpq
         enddo

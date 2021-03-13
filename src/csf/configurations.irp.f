@@ -783,8 +783,8 @@ subroutine binary_search_cfg(cfgInp,addcfg)
       if (j > 1) then
         bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
         do while (j>1 .and. bit_tmp == key)
-          j = j-1
           bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
+          j = j-1
         enddo
         bit_tmp = key
       endif

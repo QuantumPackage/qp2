@@ -49,7 +49,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   Isomo = Ialpha(1,1)
   Idomo = Ialpha(1,2)
   Nsomo_alpha = POPCNT(Isomo)
-  end_index = min(N_configuration,cfg_seniority_index(Nsomo_alpha+4)-1)
+  end_index = min(N_configuration,cfg_seniority_index(min(Nsomo_alpha+4,elec_num))-1)
   if(end_index .LT. 0) end_index= N_configuration
   !end_index = N_configuration
 
