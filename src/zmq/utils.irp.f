@@ -913,7 +913,7 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
 
   task_id = 0
   message = repeat(' ',1024)
-  rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
+  rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1023, 0)
   if (rc <= 0) then
      print *, rc
      stop "rc"
@@ -930,7 +930,7 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
       rc += 1
     enddo
     rc += 1
-    task = message(rc:)
+    task = trim(message(rc:rc+511))
   else if (trim(reply) == 'terminate') then
     task = 'terminate'
   else if (trim(message) == 'error No job is running') then
