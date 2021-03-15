@@ -7,7 +7,7 @@ BEGIN_PROVIDER [double precision, core_energy_erf]
  core_energy_erf = 0.d0
  do i = 1, n_core_orb
   j = list_core(i)
-  core_energy_erf += 2.d0 * mo_one_e_integrals(j,j) + mo_two_e_int_erf_jj(j,j)
+  core_energy_erf +=  mo_two_e_int_erf_jj(j,j)
   do k = i+1, n_core_orb
    l = list_core(k)
    core_energy_erf += 2.d0 * (2.d0 * mo_two_e_int_erf_jj(j,l) - mo_two_e_int_erf_jj_exchange(j,l))
