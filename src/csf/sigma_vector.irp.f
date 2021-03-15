@@ -176,7 +176,7 @@ end subroutine get_phase_qp_to_cfg
   istate = 1
   psi_csf_to_config_data(1) = 1
   phasedet = 1.0d0
-  call omp_set_nested(.False.)
+  call omp_set_max_active_levels(1)
   !$OMP PARALLEL
   !$OMP MASTER
   do i = 1,N_configuration
@@ -945,13 +945,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8                         :: tmpvar, tmptot
 
   integer(omp_lock_kind), allocatable :: lock(:)
+  call omp_set_max_active_levels(1)
 
-  ! allocate
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(singlesI(N_INT,2,max(sze,100)))
-  allocate(idxs_singlesI(max(sze,100)))
-  allocate(excitationIds_single(2,max(sze,100)))
-  allocate(excitationTypes_single(max(sze,100)))
   allocate(lock(sze))
   do i=1,sze
     call omp_init_lock(lock(i))
@@ -969,7 +964,32 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   iend_cfg   = psi_csf_to_config_data(iend)
 
 
+  call omp_set_max_active_levels(1)
+  !$OMP PARALLEL                                                     &
+      !$OMP DEFAULT(NONE)                                            &
+      !$OMP private(i,icfg, isomo, idomo, NSOMOI, NSOMOJ, nholes, k, listholes,&
+      !$OMP    holetype, vmotype, nvmos, listvmos, starti, endi,     &
+      !$OMP    nsinglesI, singlesI,idxs_singlesI,excitationIds_single,&
+      !$OMP    excitationTypes_single, idxI, p, q, extype, pmodel, qmodel,&
+      !$OMP    Jsomo, Jdomo, startj, endj, kk, jj, ii, cnti, cntj, meCC1,&
+      !$OMP   Nalphas_Icfg,alphas_Icfg,connectedI_alpha,             &
+      !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors,&
+      !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,rowsikpq,                &
+      !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,l,m,TKI,CCmattmp, moi, moj, mok, mol,&
+      !$OMP   diagfac)                                               &
+      !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
+      !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, AIJpqContainer,&
+      !$OMP     sze, NalphaIcfg_list,alphasIcfg_list,                &
+      !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock)
+
+  allocate(singlesI(N_INT,2,max(sze,100)))
+  allocate(idxs_singlesI(max(sze,100)))
+  allocate(excitationIds_single(2,max(sze,100)))
+  allocate(excitationTypes_single(max(sze,100)))
+
   !!! Single Excitations !!!
+
+  !$OMP DO SCHEDULE(dynamic,128)
   do i=istart_cfg,iend_cfg
 
     ! if Seniority_range > 8 then
@@ -1037,12 +1057,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
      do j = 1,nsinglesI
         idxI = idxs_singlesI(j)
-        NSOMOJ = getNSOMO(singlesI(:,:,j))
+        NSOMOJ = getNSOMO(singlesI(1,1,j))
         p = excitationIds_single(1,j)
         q = excitationIds_single(2,j)
         extype = excitationTypes_single(j)
         ! Off diagonal terms
-        call convertOrbIdsToModelSpaceIds(Icfg, singlesI(:,:,j), p, q, extype, pmodel, qmodel)
+        call convertOrbIdsToModelSpaceIds(Icfg, singlesI(1,1,j), p, q, extype, pmodel, qmodel)
         Jsomo = singlesI(1,1,j)
         Jdomo = singlesI(1,2,j)
 
@@ -1085,26 +1105,17 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         endif
      enddo
   enddo
+  !$OMP END DO
 
-  !!! Double Excitations !!!
 
-  call omp_set_max_active_levels(1)
-  !$OMP parallel default(none) &
-  !$OMP private(i,Icfg,starti,endi,Nalphas_Icfg,alphas_Icfg,k,connectedI_alpha, &
-  !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors, &
-  !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,NSOMOI,p,q,extype,pmodel,qmodel,rowsikpq, &
-  !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,kk,l,m,TKI,CCmattmp, moi, moj, mok, mol, &
-  !$OMP   diagfac) &
-  !$OMP shared(psi_configuration,NalphaIcfg_list,alphasIcfg_list,N_int,N_st, &
-  !$OMP   AIJpqMatrixDimsList, AIJpqContainer, sze, istart_cfg, iend_cfg, &
-  !$OMP   psi_config_data, psi_in, psi_out, lock)
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
   allocate(connectedI_alpha(N_INT,2,max(sze,100)))
   allocate(idxs_connectedI_alpha(max(sze,100)))
   allocate(excitationIds(2,max(sze,100)))
   allocate(excitationTypes(max(sze,100)))
   allocate(diagfactors(max(sze,100)))
   ! Loop over all selected configurations
-  !$OMP DO
+  !$OMP DO SCHEDULE(dynamic,128)
   do i = istart_cfg,iend_cfg
 
      ! if Seniority_range > 8 then
@@ -1280,17 +1291,19 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds)
   deallocate(excitationTypes)
   deallocate(diagfactors)
-  !$OMP end parallel
-  call omp_set_max_active_levels(4)
 
 
   ! Add the diagonal contribution
-  do kk=1,n_st
+  !$OMP DO
   do i = 1,n_CSF
-     psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
+    do kk=1,n_st
+      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
+    enddo
   enddo
-  enddo
+  !$OMP END DO
 
+  !$OMP end parallel
+  call omp_set_max_active_levels(4)
 
 end subroutine calculate_sigma_vector_cfg_nst_naive_store
 
