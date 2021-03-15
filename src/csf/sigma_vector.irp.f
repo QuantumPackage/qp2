@@ -141,6 +141,9 @@ end subroutine get_phase_qp_to_cfg
   real*8,dimension(:,:),allocatable    :: tempBuffer
   real*8,dimension(:),allocatable    :: tempCoeff
   real*8  :: norm_det1, phasedet
+
+  integer :: nt
+
   norm_det1 = 0.d0
   MS = elec_alpha_num - elec_beta_num
   print *,"Maxbfdim=",NBFMax
@@ -173,6 +176,9 @@ end subroutine get_phase_qp_to_cfg
   istate = 1
   psi_csf_to_config_data(1) = 1
   phasedet = 1.0d0
+  call omp_set_nested(.False.)
+  !$OMP PARALLEL
+  !$OMP MASTER
   do i = 1,N_configuration
       startdet = psi_configuration_to_psi_det(1,i)
       enddet = psi_configuration_to_psi_det(2,i)
@@ -224,6 +230,10 @@ end subroutine get_phase_qp_to_cfg
       psi_config_data(i,2) = countcsf
   enddo
   print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
+  !$OMP END MASTER
+  !$OMP END PARALLEL
+
+  call omp_set_nested(.True.)
 
   END_PROVIDER
 
