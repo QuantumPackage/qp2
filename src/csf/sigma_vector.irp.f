@@ -98,12 +98,12 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
 
     do while(detb(k) /= 0_bit_kind)
       ! Find the lowest beta electron and clear it
-      ipos = trailz(detb(k)) 
-      detb(k) = ibclr(detb(k),ipos) 
+      ipos = trailz(detb(k))
+      detb(k) = ibclr(detb(k),ipos)
 
       ! Create a mask will all MOs higher than the beta electron
       mask = not(shiftl(1_bit_kind,ipos + 1) - 1_bit_kind)
-      
+
       ! Apply the mask to the alpha string to count how many electrons to cross
       nperm = popcnt( iand(mask, deta(k)) )
 
@@ -886,6 +886,7 @@ end subroutine calculate_preconditioner_cfg
 subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze, istart, iend, ishift, istep)
   implicit none
   use bitmasks
+  use omp_lib
   BEGIN_DOC
   ! Documentation for sigma-vector calculation
   !
@@ -943,17 +944,18 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8                         :: diag_energies(n_CSF)
   real*8                         :: tmpvar, tmptot
 
+  integer(omp_lock_kind), allocatable :: lock(:)
+
   ! allocate
   allocate(alphas_Icfg(N_INT,2,max(sze,100)))
   allocate(singlesI(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
   allocate(idxs_singlesI(max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
   allocate(excitationIds_single(2,max(sze,100)))
   allocate(excitationTypes_single(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
+  allocate(lock(sze))
+  do i=1,sze
+    call omp_init_lock(lock(i))
+  enddo
 
   !print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
@@ -1086,10 +1088,23 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   !!! Double Excitations !!!
 
-  call omp_set_max_active_levels(0)
-  !$OMP parallel 
-  !$OMP master
+  call omp_set_max_active_levels(1)
+  !$OMP parallel default(none) &
+  !$OMP private(i,Icfg,starti,endi,Nalphas_Icfg,alphas_Icfg,k,connectedI_alpha, &
+  !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors, &
+  !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,NSOMOI,p,q,extype,pmodel,qmodel,rowsikpq, &
+  !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,kk,l,m,TKI,CCmattmp, moi, moj, mok, mol, &
+  !$OMP   diagfac) &
+  !$OMP shared(psi_configuration,NalphaIcfg_list,alphasIcfg_list,N_int,N_st, &
+  !$OMP   AIJpqMatrixDimsList, AIJpqContainer, sze, istart_cfg, iend_cfg, &
+  !$OMP   psi_config_data, psi_in, psi_out, lock)
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
   ! Loop over all selected configurations
+  !$OMP DO
   do i = istart_cfg,iend_cfg
 
      ! if Seniority_range > 8 then
@@ -1240,11 +1255,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            do m = 1,colsikpq
               !tmpvar = psi_out(kk,idxs_connectedI_alpha(j)+m-1)
               do l = 1,rowsTKI
+              call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
               do kk = 1,n_st
                  !tmpvar += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(kk,l,j)
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
               enddo
-                 !psi_out(kk,idxs_connectedI_alpha(j)+m-1) = tmpvar
+              call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
            enddo
            enddo
            totcolsTKI += colsikpq
@@ -1258,7 +1274,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
      enddo ! loop over alphas
   enddo ! loop over I
-  !$OMP end master
+  !$OMP end do
+  deallocate(connectedI_alpha)
+  deallocate(idxs_connectedI_alpha)
+  deallocate(excitationIds)
+  deallocate(excitationTypes)
+  deallocate(diagfactors)
   !$OMP end parallel
   call omp_set_max_active_levels(4)
 

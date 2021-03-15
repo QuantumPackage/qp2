@@ -22,8 +22,10 @@ struct bin_tree {
     int NBF;
 };
 
-#include "/opt/intel/oneapi/mkl/2021.1.1/include/mkl_cblas.h"
+//#include "/opt/intel/oneapi/mkl/2021.1.1/include/mkl_cblas.h"
 //#include "cblas.h"
+#include "mkl_cblas.h"
+///opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/include/mkl_cblas.h
 
 #define MAX_SOMO 32
 
