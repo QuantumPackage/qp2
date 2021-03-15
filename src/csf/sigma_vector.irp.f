@@ -986,10 +986,17 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(idxs_singlesI(max(sze,100)))
   allocate(excitationIds_single(2,max(sze,100)))
   allocate(excitationTypes_single(max(sze,100)))
+!
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
 
   !!! Single Excitations !!!
 
-  !$OMP DO SCHEDULE(dynamic,128)
+  !$OMP DO SCHEDULE(dynamic,16)
   do i=istart_cfg,iend_cfg
 
     ! if Seniority_range > 8 then
@@ -1104,19 +1111,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            nholes -= 1
         endif
      enddo
-  enddo
-  !$OMP END DO
+!  enddo
+!  !$OMP END DO
 
-
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
-  ! Loop over all selected configurations
-  !$OMP DO SCHEDULE(dynamic,128)
-  do i = istart_cfg,iend_cfg
+! Loop over all selected configurations
+!  !$OMP DO SCHEDULE(dynamic,128)
+!  do i = istart_cfg,iend_cfg
 
      ! if Seniority_range > 8 then
      ! continue

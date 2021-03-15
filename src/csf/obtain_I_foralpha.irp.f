@@ -61,11 +61,6 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
      Jdomo = psi_configuration(1,2,i)
-     !call debug_spindet(Isomo,1)
-     !call debug_spindet(Idomo,1)
-     !print *,"-J--i=",i,Idomo,Jdomo,">",N_configuration
-     !call debug_spindet(Jsomo,1)
-     !call debug_spindet(Jdomo,1)
      diffSOMO = IEOR(Isomo,Jsomo)
      ndiffSOMO = POPCNT(diffSOMO)
      !if(ndiffSOMO .NE. 2 .AND. ndiffSOMO .NE. 0) then
