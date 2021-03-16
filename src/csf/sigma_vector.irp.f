@@ -1276,9 +1276,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   !$OMP end parallel
   call omp_set_max_active_levels(4)
-!  do i=1,sze
-!    call omp_deinit_lock(lock(i))
-!  enddo
 
 end subroutine calculate_sigma_vector_cfg_nst_naive_store
 
