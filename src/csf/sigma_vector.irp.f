@@ -232,8 +232,7 @@ end subroutine get_phase_qp_to_cfg
   print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
   !$OMP END MASTER
   !$OMP END PARALLEL
-
-  call omp_set_nested(.True.)
+  call omp_set_max_active_levels(4)
 
   END_PROVIDER
 
@@ -987,12 +986,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(excitationIds_single(2,max(sze,100)))
   allocate(excitationTypes_single(max(sze,100)))
 !
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
 
   !!! Single Excitations !!!
 
@@ -1111,12 +1104,22 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            nholes -= 1
         endif
      enddo
-!  enddo
-!  !$OMP END DO
+   enddo
+   !$OMP END DO
+  deallocate(singlesI)
+  deallocate(idxs_singlesI)
+  deallocate(excitationIds_single)
+  deallocate(excitationTypes_single)
 
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
 ! Loop over all selected configurations
-!  !$OMP DO SCHEDULE(dynamic,128)
-!  do i = istart_cfg,iend_cfg
+  !$OMP DO SCHEDULE(dynamic,16)
+  do i = istart_cfg,iend_cfg
 
      ! if Seniority_range > 8 then
      ! continue
