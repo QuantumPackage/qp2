@@ -144,6 +144,7 @@ end subroutine get_phase_qp_to_cfg
 
   integer :: nt
 
+
   norm_det1 = 0.d0
   MS = elec_alpha_num - elec_beta_num
   print *,"Maxbfdim=",NBFMax
@@ -444,7 +445,6 @@ end subroutine get_phase_qp_to_cfg
   print *,"Rowsmax=",rowsmax," Colsmax=",colsmax
   END_PROVIDER
 
-  !BEGIN_PROVIDER [ real*8, AIJpqContainer, (NSOMOMin:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,NBFMax,NBFMax)]
   BEGIN_PROVIDER [ real*8, AIJpqContainer, (NBFMax,NBFmax,NSOMOMax+1,NSOMOMax+1,4,NSOMOMin:NSOMOMax)]
   use cfunctions
   implicit none
@@ -476,79 +476,72 @@ end subroutine get_phase_qp_to_cfg
   cols = -1
   integer*8 MS
   MS = 0
-  touch AIJpqMatrixDimsList
   real*8,dimension(:,:),allocatable :: meMatrix
   integer maxdim
-  !maxdim = max(rowsmax,colsmax)
-  ! allocate matrix
-  !print *,"rowsmax =",rowsmax," colsmax=",colsmax
-  !print *,"NSOMOMax = ",NSOMOMax
+
   ! Type
   ! 1. SOMO -> SOMO
-  !print *,"Doing SOMO -> SOMO"
-  !AIJpqContainer(NSOMOMin,1,1,1,1,1) = 1.0d0
+  AIJpqContainer = 0.d0
   AIJpqContainer(1,1,1,1,1,NSOMOMin) = 1.0d0
+  integer :: rows_old, cols_old
+  rows_old = -1
+  cols_old = -1
+  allocate(meMatrix(1,1))
   do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
-     do j = i-2,i-2, 2
-        if(j .GT. NSOMOMax .OR. j .LT. 0) cycle
-        !print *,"i,j=",i,j
-        do k = 1,i
-           do l = 1,i
+     j=i-2
+     if(j .GT. NSOMOMax .OR. j .LT. 0) cycle
+     nsomoi = i
+     do k = 1,i
+        orbp = k
+        do l = 1,i
 
-              ! Define Jsomo
-              if(k .NE. l) then
-                 Jsomo = IBCLR(Isomo, k-1)
-                 Jsomo = IBCLR(Jsomo, l-1)
-                 nsomoi = i
-                 nsomoj = j
-              else
-                 Isomo = ISHFT(1_8,i)-1
-                 Jsomo = ISHFT(1_8,i)-1
-                 nsomoi = i
-                 nsomoj = i
-              endif
+           ! Define Jsomo
+           if(k .NE. l) then
+              Jsomo = IBCLR(Isomo, k-1)
+              Jsomo = IBCLR(Jsomo, l-1)
+              nsomoj = j
+           else
+              Isomo = ISHFT(1_8,i)-1
+              Jsomo = ISHFT(1_8,i)-1
+              nsomoj = i
+           endif
 
-              !print *,"k,l=",k,l
-              !call debug_spindet(Jsomo,1)
-              !call debug_spindet(Isomo,1)
+           call getApqIJMatrixDims(Isomo,           &
+                Jsomo, &
+                MS,                       &
+                rows,                     &
+                cols)
 
-              !AIJpqContainer(nsomoi,1,k,l,:,:) = 0.0d0
-              AIJpqContainer(:,:,k,l,1,nsomoi) = 0.0d0
-              call getApqIJMatrixDims(Isomo,           &
-                   Jsomo, &
-                   MS,                       &
-                   rows,                     &
-                   cols)
-
-              orbp = k
-              orbq = l
-              allocate(meMatrix(rows,cols))
-              meMatrix = 0.0d0
-              ! fill matrix
-              call getApqIJMatrixDriver(Isomo,           &
-                   Jsomo, &
-                   orbp,                     &
-                   orbq,                     &
-                   MS,                       &
-                   NMO,                      &
-                   meMatrix,                 &
-                   rows,                     &
-                   cols)
-             !print *, i,j,k,l,">",Isomo,Jsomo,">",rows, cols,">",rowsmax,colsmax
-             !call printMatrix(meMatrix,rows,cols)
-              ! i -> j
-             do ri = 1,rows
-                 do ci = 1,cols
-                    !AIJpqContainer(nsomoi,1,k,l,ri,ci) = meMatrix(ri, ci)
-                    AIJpqContainer(ri,ci,k,l,1,nsomoi) = meMatrix(ri, ci)
-                 end do
+           orbq = l
+           if ((rows /= rows_old).or.(cols /= cols_old)) then
+             deallocate(meMatrix)
+             allocate(meMatrix(rows,cols))
+             rows_old = rows
+             cols_old = cols
+           endif
+           meMatrix = 0.0d0
+           ! fill matrix
+           call getApqIJMatrixDriver(Isomo,           &
+                Jsomo, &
+                orbp,                     &
+                orbq,                     &
+                MS,                       &
+                NMO,                      &
+                meMatrix,                 &
+                rows,                     &
+                cols)
+           ! i -> j
+          do ri = 1,rows
+              do ci = 1,cols
+                 AIJpqContainer(ri,ci,k,l,1,nsomoi) = meMatrix(ri, ci)
               end do
-              deallocate(meMatrix)
            end do
         end do
      end do
   end do
+  deallocate(meMatrix)
+
   ! Type
   ! 2. DOMO -> VMO
   !print *,"Doing DOMO -> VMO"
