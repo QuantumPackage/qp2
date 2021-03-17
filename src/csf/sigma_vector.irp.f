@@ -974,11 +974,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP    nsinglesI, singlesI,idxs_singlesI,excitationIds_single,&
       !$OMP    excitationTypes_single, idxI, p, q, extype, pmodel, qmodel,&
       !$OMP    Jsomo, Jdomo, startj, endj, kk, jj, ii, cnti, cntj, meCC1,&
+      !$OMP   nconnectedJ,listconnectedJ,idslistconnectedJ,             &
       !$OMP   Nalphas_Icfg,alphas_Icfg,connectedI_alpha,             &
       !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors,&
       !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,rowsikpq,                &
       !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,l,m,TKI,CCmattmp, moi, moj, mok, mol,&
-      !$OMP   diagfac)                                               &
+      !$OMP   diagfac, tmpvar)                                            &
       !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
       !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, AIJpqContainer,&
       !$OMP     sze, NalphaIcfg_list,alphasIcfg_list,                &
@@ -1114,12 +1115,14 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
+  allocate(listconnectedJ(N_INT,2,max(sze,100)))
   allocate(alphas_Icfg(N_INT,2,max(sze,100)))
   allocate(connectedI_alpha(N_INT,2,max(sze,100)))
   allocate(idxs_connectedI_alpha(max(sze,100)))
   allocate(excitationIds(2,max(sze,100)))
   allocate(excitationTypes(max(sze,100)))
   allocate(diagfactors(max(sze,100)))
+  allocate(idslistconnectedJ(max(sze,100)))
 
   ! Loop over all selected configurations
   !$OMP DO SCHEDULE(dynamic,16)
@@ -1286,8 +1289,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
               !tmpvar = psi_out(kk,idxs_connectedI_alpha(j)+m-1)
               do l = 1,rowsTKI
               do kk = 1,n_st
+            call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
                  !tmpvar += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(kk,l,j)
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
+            call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
               enddo
                  !psi_out(kk,idxs_connectedI_alpha(j)+m-1) = tmpvar
            enddo
@@ -1303,17 +1308,25 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
      enddo ! loop over alphas
   enddo ! loop over I
-  !$OMP end master
-  !$OMP end parallel
+  !$OMP END DO
   call omp_set_max_active_levels(4)
+  deallocate(connectedI_alpha)
+  deallocate(idxs_connectedI_alpha)
+  deallocate(excitationIds)
+  deallocate(excitationTypes)
+  deallocate(diagfactors)
 
 
   ! Add the diagonal contribution
+  !$OMP DO
   do kk=1,n_st
   do i = 1,n_CSF
      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
   enddo
   enddo
+  !$OMP END DO
+
+  !$OMP end parallel
 
 
 end subroutine calculate_sigma_vector_cfg_nst_naive_store
@@ -1520,12 +1533,10 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
         colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
         do m = 1,colsikpq
           do l = 1,rowsTKI
-            call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
             do kk = 1,n_st
               psi_out(kk,idxs_connectedI_alpha(j)+m-1) = psi_out(kk,idxs_connectedI_alpha(j)+m-1) + &
                 AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
             enddo
-            call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
           enddo
         enddo
         totcolsTKI += colsikpq
@@ -1539,7 +1550,6 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
 
     enddo ! loop over alphas
   enddo ! loop over I
-  !$OMP end do
   deallocate(connectedI_alpha)
   deallocate(idxs_connectedI_alpha)
   deallocate(excitationIds)
@@ -1548,15 +1558,11 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
 
 
   ! Add the diagonal contribution
-  !$OMP DO
   do i = 1,n_CSF
     do kk=1,n_st
       psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
     enddo
   enddo
-  !$OMP END DO
-
-  !$OMP end parallel
   call omp_set_max_active_levels(4)
 
 end subroutine calculate_sigma_vector_cfg_nst_naive_store
