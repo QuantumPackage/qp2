@@ -1205,25 +1205,24 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
-           allocate(CCmattmp(colsikpq,n_st))
-           do kk = 1,n_st
+           !allocate(CCmattmp(colsikpq,n_st))
+           !do kk = 1,n_st
+           !do m = 1,colsikpq
+           !   CCmattmp(m,kk) = psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+           !enddo
+           !enddo
            do m = 1,colsikpq
-              CCmattmp(m,kk) = psi_in(kk,idxs_connectedI_alpha(j)+m-1)
-           enddo
-           enddo
-           do m = 1,colsikpq
-              do kk = 1,n_st
-                 tmpvar = CCmattmp(m,kk)
+              !   tmpvar = CCmattmp(m,kk)
               do l = 1,rowsTKI
+              do kk = 1,n_st
                  !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * tmpvar
                  !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * tmpvar
-                 !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
-                 TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha)
+                 TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+                 !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * tmpvar
               enddo
-                 TKI(kk,:,totcolsTKI+m) *= tmpvar
            enddo
            enddo
-           deallocate(CCmattmp)
+           !deallocate(CCmattmp)
            do m = 1,colsikpq
               do l = 1,nconnectedI
                  ! <ij|kl> = (ik|jl)
@@ -1248,29 +1247,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         enddo
 
 
-
         ! Do big BLAS
         ! TODO TKI, size(TKI,1)*size(TKI,2)
         call dgemm('N','N', rowsTKI*n_st, nconnectedI, totcolsTKI, 1.d0,  &
              TKI, size(TKI,1)*size(TKI,2), GIJpqrs, size(GIJpqrs,1), 0.d0, &
              TKIGIJ , size(TKIGIJ,1)*size(TKIGIJ,2) )
-
-        !print *,"DIMs = ",rowsTKI,n_st,totcolsTKI,nconnectedI
-        !print *,"TKI mat"
-        !do kk=1,n_st
-        !  do j=1,totcolsTKI
-        !    print *,TKI(:,kk,j)
-        !  enddo
-        !  print *,"--"
-        !enddo
-
-        !print *,"TKIGIJ mat"
-        !do kk=1,n_st
-        !  do j=1,nconnectedI
-        !    print *,TKIGIJ(:,kk,j)
-        !  enddo
-        !  print *,"--"
-        !enddo
 
 
         ! Collect the result
@@ -1284,25 +1265,36 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
-           !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
+           allocate(CCmattmp(n_st,colsikpq))
+           CCmattmp = 0.d0
+
+           call dgemm('N','N', n_st, colsikpq, rowsTKI, 1.d0,  &
+             TKIGIJ(1:n_st,1:rowsTKI,j), n_st,       &
+             AIJpqContainer(1:rowsTKI,1:colsikpq,pmodel,qmodel,extype,NSOMOalpha), rowsTKI, 0.d0, &
+             CCmattmp, size(CCmattmp,1) )
+           !do kk=1,n_st
+           !  do m=1,colsikpq
+           !    do l=1,rowsTKI
+           !      CCmattmp(kk,m) += TKIGIJ(kk,l,j) * AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha)
+           !    enddo
+           !  enddo
+           !enddo
+
            do m = 1,colsikpq
-              !tmpvar = psi_out(kk,idxs_connectedI_alpha(j)+m-1)
-              do l = 1,rowsTKI
+              !do l = 1,rowsTKI
               do kk = 1,n_st
-            call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
-                 !tmpvar += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(kk,l,j)
-                 psi_out(kk,idxs_connectedI_alpha(j)+m-1) += AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
-            call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
-              enddo
-                 !psi_out(kk,idxs_connectedI_alpha(j)+m-1) = tmpvar
+            !call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
+                 !psi_out(kk,idxs_connectedI_alpha(j)+m-1) += AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
+                 psi_out(kk,idxs_connectedI_alpha(j)+m-1) += CCmattmp(kk,m)
+            !call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              !enddo
            enddo
            enddo
+           deallocate(CCmattmp)
            totcolsTKI += colsikpq
         enddo
 
         deallocate(TKI) ! coefficients of CSF
-        ! Initialize the inegral container
-        ! dims : (totcolsTKI, nconnectedI)
         deallocate(GIJpqrs)  ! gpqrs
         deallocate(TKIGIJ)  ! gpqrs
 
