@@ -905,6 +905,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8,intent(out)             :: psi_out(n_st,sze)
   integer(bit_kind)              :: Icfg(N_INT,2)
   integer                        :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
+  integer(bit_kind),dimension(:,:,:),allocatable :: listconnectedJ
   integer(bit_kind),dimension(:,:,:),allocatable :: alphas_Icfg
   integer(bit_kind),dimension(:,:,:),allocatable :: singlesI
   integer(bit_kind),dimension(:,:,:),allocatable :: connectedI_alpha
@@ -914,6 +915,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   integer,dimension(:),allocatable :: excitationTypes_single
   integer,dimension(:,:),allocatable :: excitationIds
   integer,dimension(:),allocatable :: excitationTypes
+  integer,dimension(:),allocatable :: idslistconnectedJ
   real*8,dimension(:),allocatable :: diagfactors
   integer                        :: nholes
   integer                        :: nvmos
@@ -928,6 +930,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   integer                        :: rowsTKI
   integer                        :: noccpp
   integer                        :: istart_cfg, iend_cfg
+  integer                        :: nconnectedJ
   integer*8                      :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
   integer                        :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
   real*8                         :: norm_coef_cfg, fac2eints
@@ -945,6 +948,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   ! allocate
   allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(listconnectedJ(N_INT,2,max(sze,100)))
   allocate(singlesI(N_INT,2,max(sze,100)))
   allocate(connectedI_alpha(N_INT,2,max(sze,100)))
   allocate(idxs_singlesI(max(sze,100)))
@@ -953,6 +957,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(excitationTypes_single(max(sze,100)))
   allocate(excitationIds(2,max(sze,100)))
   allocate(excitationTypes(max(sze,100)))
+  allocate(idslistconnectedJ(max(sze,100)))
   allocate(diagfactors(max(sze,100)))
 
   !print *," sze = ",sze
@@ -1109,16 +1114,25 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      !call obtain_associated_alphaI(i, Icfg, alphas_Icfg, Nalphas_Icfg)
      Nalphas_Icfg = NalphaIcfg_list(i)
      alphas_Icfg(1:n_int,1:2,1:Nalphas_Icfg) = alphasIcfg_list(1:n_int,1:2,i,1:Nalphas_Icfg)
+     !print *,"I=",i," Nal=",Nalphas_Icfg
+     call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ)
+     !print *,"size listconnected=",size(listconnectedJ)
+     !do k=1,nconnectedJ
+     !  print *," idJ =",idslistconnectedJ(k)
+     !enddo
 
      ! TODO : remove doubly excited for return
      ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
-        call obtain_connected_I_foralpha(i,alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors)
+        !call obtain_connected_I_foralpha(i,alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors)
+        call obtain_connected_I_foralpha_fromfilterdlist(i,nconnectedJ, idslistconnectedJ, listconnectedJ, alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors)
+        !print *,"\t---Ia=",k," NconI=",nconnectedI
 
         if(nconnectedI .EQ. 0) then
            cycle
         endif
+
         totcolsTKI = 0
         rowsTKI = -1
         do j = 1,nconnectedI
@@ -1148,6 +1162,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         ! dims : (totcolsTKI, nconnectedI)
         allocate(GIJpqrs(totcolsTKI,nconnectedI))  ! gpqrs
         allocate(TKIGIJ(n_st,rowsTKI,nconnectedI))  ! TKI * gpqrs
+        !print *,"\t---rowsTKI=",rowsTKI," totCols=",totcolsTKI
 
         totcolsTKI = 0
         do j = 1,nconnectedI
@@ -1160,19 +1175,21 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            allocate(CCmattmp(colsikpq,n_st))
-           !do kk = 1,n_st
-           !do m = 1,colsikpq
-           !   CCmattmp(m,kk) = psi_in(idxs_connectedI_alpha(j)+m-1,kk)
-           !enddo
-           !enddo
+           do kk = 1,n_st
            do m = 1,colsikpq
-              do l = 1,rowsTKI
+              CCmattmp(m,kk) = psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+           enddo
+           enddo
+           do m = 1,colsikpq
               do kk = 1,n_st
-                 !tmpvar = CCmattmp(m,kk)
+                 tmpvar = CCmattmp(m,kk)
+              do l = 1,rowsTKI
                  !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * tmpvar
                  !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * tmpvar
-                 TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+                 !TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+                 TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha)
               enddo
+                 TKI(kk,:,totcolsTKI+m) *= tmpvar
            enddo
            enddo
            deallocate(CCmattmp)

@@ -314,9 +314,9 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 !             call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
 !            ! TODO : psi_det_size ? for psi_det
-            !allocate(tmpW(sze_csf,N_st_diag))
+            !!allocate(tmpW(sze_csf,N_st_diag))
+            !!allocate(tmpU(sze_csf,N_st_diag))
             allocate(tmpW(N_st_diag,sze_csf))
-            !allocate(tmpU(sze_csf,N_st_diag))
             allocate(tmpU(N_st_diag,sze_csf))
             do kk=1,N_st_diag
               do ii=1,sze_csf
@@ -341,9 +341,9 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift+1))
             !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 !             call calculate_sigma_vector_cfg_nst(W_csf(1,shift+1),U_csf(1,shift+1),N_st_diag,sze_csf,1,sze_csf,0,1)
-            !allocate(tmpW(sze_csf,N_st_diag))
+            !!allocate(tmpW(sze_csf,N_st_diag))
+            !!allocate(tmpU(sze_csf,N_st_diag))
             allocate(tmpW(N_st_diag,sze_csf))
-            !allocate(tmpU(sze_csf,N_st_diag))
             allocate(tmpU(N_st_diag,sze_csf))
             do kk=1,N_st_diag
               do ii=1,sze_csf
