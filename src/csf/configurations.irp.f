@@ -750,7 +750,7 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
  enddo
 END_PROVIDER
 
-subroutine binary_search_cfg(cfgInp,addcfg)
+subroutine binary_search_cfg(cfgInp,addcfg,bit_tmp)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -762,10 +762,11 @@ subroutine binary_search_cfg(cfgInp,addcfg)
   END_DOC
   integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
   integer          , intent(out) :: addcfg
+  integer*8,          intent(in) :: bit_tmp(N_configuration)
 
   logical                        :: found
   integer                        :: l, r, j, k
-  integer*8                      :: bit_tmp, key
+  integer*8                      :: key
 
   integer*8, external            :: configuration_search_key
 
@@ -777,19 +778,15 @@ subroutine binary_search_cfg(cfgInp,addcfg)
   j = shiftr(r-l,1)
   do while (j>=1)
     j = j+l
-    bit_tmp = configuration_search_key(psi_configuration(1,1,j),N_int)
-    if (bit_tmp == key) then
+    if (bit_tmp(j) == key) then
       ! Find 1st element which matches the key
       if (j > 1) then
-        bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
-        do while (j>1 .and. bit_tmp == key)
-          bit_tmp = configuration_search_key(psi_configuration(1,1,j-1),N_int)
+        do while (j>1 .and. bit_tmp(j-1) == key)
           j = j-1
         enddo
-        bit_tmp = key
       endif
       ! Find correct element matching the key
-      do while (bit_tmp == key)
+      do while (bit_tmp(j) == key)
         found = .True.
         do k=1,N_int
           found = found .and. (psi_configuration(k,1,j) == cfgInp(k,1))&
@@ -800,11 +797,10 @@ subroutine binary_search_cfg(cfgInp,addcfg)
           return
         endif
         j = j+1
-        bit_tmp = configuration_search_key(psi_configuration(1,1,j),N_int)
       enddo
       addcfg = -1
       return
-    else if (bit_tmp > key) then
+    else if (bit_tmp(j) > key) then
       r = j
     else
       l = j
