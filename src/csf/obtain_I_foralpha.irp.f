@@ -380,6 +380,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
 
   p = 0
   q = 0
+  if (N_int > 1) stop 'obtain_connected_i_foralpha : N_int > 1'
   do i=idxI,end_index
      Isomo = Ialpha(1,1)
      Idomo = Ialpha(1,2)
@@ -393,7 +394,6 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
      nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
      if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
-        !print *," --- IdsJ=",i
         select case(ndiffDOMO)
         case (0)
            ! SOMO -> VMO
@@ -440,7 +440,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         starti = psi_config_data(i,1)
         endi   = psi_config_data(i,2)
         nconnectedI += 1
-        connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
+        do k=1,N_int
+          connectedI(k,1,nconnectedI) = psi_configuration(k,1,i)
+          connectedI(k,2,nconnectedI) = psi_configuration(k,2,i)
+        enddo
         idxs_connectedI(nconnectedI)=starti
         excitationIds(1,nconnectedI)=p
         excitationIds(2,nconnectedI)=q

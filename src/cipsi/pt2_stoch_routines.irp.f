@@ -287,7 +287,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call write_int(6,nproc_target,'Number of threads for PT2')
       call write_double(6,mem,'Memory (Gb)')
 
-      call omp_set_nested(.false.)
+      call omp_set_max_active_levels(1)
+
 
 
       print '(A)', '========== ======================= ===================== ===================== ==========='

@@ -98,12 +98,12 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
 
     do while(detb(k) /= 0_bit_kind)
       ! Find the lowest beta electron and clear it
-      ipos = trailz(detb(k)) 
-      detb(k) = ibclr(detb(k),ipos) 
+      ipos = trailz(detb(k))
+      detb(k) = ibclr(detb(k),ipos)
 
       ! Create a mask will all MOs higher than the beta electron
       mask = not(shiftl(1_bit_kind,ipos + 1) - 1_bit_kind)
-      
+
       ! Apply the mask to the alpha string to count how many electrons to cross
       nperm = popcnt( iand(mask, deta(k)) )
 
@@ -176,7 +176,7 @@ end subroutine get_phase_qp_to_cfg
   istate = 1
   psi_csf_to_config_data(1) = 1
   phasedet = 1.0d0
-  call omp_set_nested(.False.)
+  call omp_set_max_active_levels(1)
   !$OMP PARALLEL
   !$OMP MASTER
   do i = 1,N_configuration
@@ -232,8 +232,7 @@ end subroutine get_phase_qp_to_cfg
   print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
   !$OMP END MASTER
   !$OMP END PARALLEL
-
-  call omp_set_nested(.True.)
+  call omp_set_max_active_levels(4)
 
   END_PROVIDER
 
@@ -886,6 +885,7 @@ end subroutine calculate_preconditioner_cfg
 subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze, istart, iend, ishift, istep)
   implicit none
   use bitmasks
+  use omp_lib
   BEGIN_DOC
   ! Documentation for sigma-vector calculation
   !
@@ -946,19 +946,13 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8                         :: diag_energies(n_CSF)
   real*8                         :: tmpvar, tmptot
 
-  ! allocate
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(listconnectedJ(N_INT,2,max(sze,100)))
-  allocate(singlesI(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
-  allocate(idxs_singlesI(max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
-  allocate(excitationIds_single(2,max(sze,100)))
-  allocate(excitationTypes_single(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(idslistconnectedJ(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
+  integer(omp_lock_kind), allocatable :: lock(:)
+  call omp_set_max_active_levels(1)
+
+  allocate(lock(sze))
+  do i=1,sze
+    call omp_init_lock(lock(i))
+  enddo
 
   !print *," sze = ",sze
   call calculate_preconditioner_cfg(diag_energies)
@@ -972,7 +966,33 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   iend_cfg   = psi_csf_to_config_data(iend)
 
 
+  call omp_set_max_active_levels(1)
+  !$OMP PARALLEL                                                     &
+      !$OMP DEFAULT(NONE)                                            &
+      !$OMP private(i,icfg, isomo, idomo, NSOMOI, NSOMOJ, nholes, k, listholes,&
+      !$OMP    holetype, vmotype, nvmos, listvmos, starti, endi,     &
+      !$OMP    nsinglesI, singlesI,idxs_singlesI,excitationIds_single,&
+      !$OMP    excitationTypes_single, idxI, p, q, extype, pmodel, qmodel,&
+      !$OMP    Jsomo, Jdomo, startj, endj, kk, jj, ii, cnti, cntj, meCC1,&
+      !$OMP   Nalphas_Icfg,alphas_Icfg,connectedI_alpha,             &
+      !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors,&
+      !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,rowsikpq,                &
+      !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,l,m,TKI,CCmattmp, moi, moj, mok, mol,&
+      !$OMP   diagfac)                                               &
+      !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
+      !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, AIJpqContainer,&
+      !$OMP     sze, NalphaIcfg_list,alphasIcfg_list,                &
+      !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock)
+
+  allocate(singlesI(N_INT,2,max(sze,100)))
+  allocate(idxs_singlesI(max(sze,100)))
+  allocate(excitationIds_single(2,max(sze,100)))
+  allocate(excitationTypes_single(max(sze,100)))
+!
+
   !!! Single Excitations !!!
+
+  !$OMP DO SCHEDULE(dynamic,16)
   do i=istart_cfg,iend_cfg
 
     ! if Seniority_range > 8 then
@@ -995,20 +1015,20 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      ! bitmasks
      !do k = n_core_orb+1,n_core_orb + n_act_orb
      do k = 1,mo_num
-        if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 1
-        endif
+       if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
+         nholes += 1
+         listholes(nholes) = k
+         holetype(nholes) = 1
+       endif
      enddo
      ! holes in DOMO
      !do k = n_core_orb+1,n_core_orb + n_act_orb
      do k = 1,mo_num
-        if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 2
-        endif
+       if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
+         nholes += 1
+         listholes(nholes) = k
+         holetype(nholes) = 2
+       endif
      enddo
 
      ! find vmos
@@ -1017,84 +1037,92 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      nvmos = 0
      !do k = n_core_orb+1,n_core_orb + n_act_orb
      do k = 1,mo_num
-        !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
-        if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 0
-        else if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0 ) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 1
-        end if
+       !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
+       if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
+         nvmos += 1
+         listvmos(nvmos) = k
+         vmotype(nvmos) = 0
+       else if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0 ) then
+         nvmos += 1
+         listvmos(nvmos) = k
+         vmotype(nvmos) = 1
+       end if
      enddo
-
-
+ 
+ 
      ! Icsf ids
      starti = psi_config_data(i,1)
      endi   = psi_config_data(i,2)
      NSOMOI = getNSOMO(Icfg)
-
-     call generate_all_singles_cfg_with_type(Icfg,singlesI,idxs_singlesI,excitationIds_single, &
-          excitationTypes_single,nsinglesI,N_int)
-
+ 
+     call generate_all_singles_cfg_with_type(Icfg,singlesI,idxs_singlesI,excitationIds_single,&
+         excitationTypes_single,nsinglesI,N_int)
+ 
      do j = 1,nsinglesI
-        idxI = idxs_singlesI(j)
-        NSOMOJ = getNSOMO(singlesI(:,:,j))
-        p = excitationIds_single(1,j)
-        q = excitationIds_single(2,j)
-        extype = excitationTypes_single(j)
-        ! Off diagonal terms
-        call convertOrbIdsToModelSpaceIds(Icfg, singlesI(:,:,j), p, q, extype, pmodel, qmodel)
-        Jsomo = singlesI(1,1,j)
-        Jdomo = singlesI(1,2,j)
+       idxI = idxs_singlesI(j)
+       NSOMOJ = getNSOMO(singlesI(1,1,j))
+      p = excitationIds_single(1,j)
+      q = excitationIds_single(2,j)
+      extype = excitationTypes_single(j)
+      ! Off diagonal terms
+      call convertOrbIdsToModelSpaceIds(Icfg, singlesI(1,1,j), p, q, extype, pmodel, qmodel)
+      Jsomo = singlesI(1,1,j)
+      Jdomo = singlesI(1,2,j)
 
-        ! Add the hole on J
-        if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes += 1
-           listholes(nholes) = q
-           holetype(nholes) = 1
-        endif
-        if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes += 1
-           listholes(nholes) = q
-           holetype(nholes) = 2
-        endif
+      ! Add the hole on J
+      if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
+        nholes += 1
+        listholes(nholes) = q
+        holetype(nholes) = 1
+      endif
+      if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
+        nholes += 1
+        listholes(nholes) = q
+        holetype(nholes) = 2
+      endif
 
-        startj = psi_config_data(idxI,1)
-        endj   = psi_config_data(idxI,2)
+      startj = psi_config_data(idxI,1)
+      endj   = psi_config_data(idxI,2)
 
-        !!! One-electron contribution !!!
-        do kk = 1,n_st
-        cnti = 0
-        do ii = starti, endi
-           cnti += 1
-           cntj = 0
-           do jj = startj, endj
-              cntj += 1
-              !meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
-              meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)
-              psi_out(kk,jj) += meCC1 * psi_in(kk,ii) * h_core_ri(p,q)
-           enddo
+      !!! One-electron contribution !!!
+      do ii = starti, endi
+        cnti = ii-starti+1
+        do jj = startj, endj
+          cntj = jj-startj+1
+          !meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
+          meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)
+          call omp_set_lock(lock(jj))
+          do kk = 1,n_st
+            psi_out(kk,jj) += meCC1 * psi_in(kk,ii) * h_core_ri(p,q)
+          enddo
+          call omp_unset_lock(lock(jj))
         enddo
-        enddo
+      enddo
 
-        ! Undo setting in listholes
-        if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes -= 1
-        endif
-        if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes -= 1
-        endif
-     enddo
+      ! Undo setting in listholes
+      if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
+        nholes -= 1
+      endif
+      if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
+        nholes -= 1
+      endif
+    enddo
   enddo
+  !$OMP END DO
+  deallocate(singlesI)
+  deallocate(idxs_singlesI)
+  deallocate(excitationIds_single)
+  deallocate(excitationTypes_single)
 
-  !!! Double Excitations !!!
+  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
+  allocate(idxs_connectedI_alpha(max(sze,100)))
+  allocate(excitationIds(2,max(sze,100)))
+  allocate(excitationTypes(max(sze,100)))
+  allocate(diagfactors(max(sze,100)))
 
-  call omp_set_max_active_levels(0)
-  !$OMP parallel 
-  !$OMP master
   ! Loop over all selected configurations
+  !$OMP DO SCHEDULE(dynamic,16)
   do i = istart_cfg,iend_cfg
 
      ! if Seniority_range > 8 then
@@ -1381,260 +1409,155 @@ subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, ie
     ! else
     ! cycle
 
-     Icfg(1,1) = psi_configuration(1,1,i)
-     Icfg(1,2) = psi_configuration(1,2,i)
-     Isomo = Icfg(1,1)
-     Idomo = Icfg(1,2)
-     NSOMOI = getNSOMO(Icfg)
+    Icfg(1,1) = psi_configuration(1,1,i)
+    Icfg(1,2) = psi_configuration(1,2,i)
+    starti = psi_config_data(i,1)
+    endi   = psi_config_data(i,2)
 
-     ! find out all pq holes possible
-     nholes = 0
-     ! holes in SOMO
-     ! list_act
-     ! list_core
-     ! list_core_inact
-     ! bitmasks
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
-        if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 1
+    ! Returns all unique (checking the past) singly excited cfgs connected to I
+    Nalphas_Icfg = 0
+    ! TODO:
+    ! test if size(alphas_Icfg,1) < Nmo**2) then deallocate + allocate
+    !call obtain_associated_alphaI(i, Icfg, alphas_Icfg, Nalphas_Icfg)
+    Nalphas_Icfg = NalphaIcfg_list(i)
+    alphas_Icfg(1:N_int,1:2,1:Nalphas_Icfg) = alphasIcfg_list(1:n_int,1:2,i,1:Nalphas_Icfg)
+
+    ! TODO : remove doubly excited for return
+    ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
+    do k = 1,Nalphas_Icfg
+      ! Now generate all singly excited with respect to a given alpha CFG
+      call obtain_connected_I_foralpha(i,alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors)
+
+      totcolsTKI = 0
+      rowsTKI = -1
+      do j = 1,nconnectedI
+        NSOMOalpha = getNSOMO(alphas_Icfg(1,1,k))
+        NSOMOI = getNSOMO(connectedI_alpha(1,1,j))
+        p = excitationIds(1,j)
+        q = excitationIds(2,j)
+        extype = excitationTypes(j)
+        call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
+        ! for E_pp E_rs and E_ppE_rr case
+        if(p.EQ.q) then
+          NSOMOalpha = NSOMOI
         endif
-     enddo
-     ! holes in DOMO
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
-        if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 2
-        endif
-     enddo
+        rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+        colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+        totcolsTKI += colsikpq
+!        if(rowsTKI .LT. rowsikpq .AND. rowsTKI .NE. -1) then
+!          print *,">",j,"Something is wrong in sigma-vector", rowsTKI, rowsikpq, "(p,q)=",pmodel,qmodel,"ex=",extype,"na=",NSOMOalpha," nI=",NSOMOI
+!          !rowsTKI = rowsikpq
+!        else
+          rowsTKI = rowsikpq
+!        endif
+      enddo
 
-     ! find vmos
-     listvmos = -1
-     vmotype = -1
-     nvmos = 0
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
-        !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
-        if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 0
-        else if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0 ) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 1
-        end if
-     enddo
+      allocate(TKI(n_st,rowsTKI,totcolsTKI)) ! coefficients of CSF
+      ! Initialize the inegral container
+      ! dims : (totcolsTKI, nconnectedI)
+      allocate(GIJpqrs(totcolsTKI,nconnectedI))  ! gpqrs
+      allocate(TKIGIJ(n_st,rowsTKI,nconnectedI))  ! TKI * gpqrs
 
-
-     ! Icsf ids
-     starti = psi_config_data(i,1)
-     endi   = psi_config_data(i,2)
-     NSOMOI = getNSOMO(Icfg)
-
-     call generate_all_singles_cfg_with_type(Icfg,singlesI,idxs_singlesI,excitationIds_single, &
-          excitationTypes_single,nsinglesI,N_int)
-
-     do j = 1,nsinglesI
-        idxI = idxs_singlesI(j)
-        NSOMOJ = getNSOMO(singlesI(:,:,j))
-        p = excitationIds_single(1,j)
-        q = excitationIds_single(2,j)
-        extype = excitationTypes_single(j)
-        ! Off diagonal terms
-        call convertOrbIdsToModelSpaceIds(Icfg, singlesI(:,:,j), p, q, extype, pmodel, qmodel)
-        Jsomo = singlesI(1,1,j)
-        Jdomo = singlesI(1,2,j)
-
-        ! Add the hole on J
-        if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes += 1
-           listholes(nholes) = q
-           holetype(nholes) = 1
-        endif
-        if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes += 1
-           listholes(nholes) = q
-           holetype(nholes) = 2
-        endif
-
-        startj = psi_config_data(idxI,1)
-        endj   = psi_config_data(idxI,2)
-
-        !!! One-electron contribution !!!
-        do kk = 1,n_st
-        cnti = 0
-        do ii = starti, endi
-           cnti += 1
-           cntj = 0
-           do jj = startj, endj
-              cntj += 1
-              meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
-              psi_out(jj,kk) += meCC1 * psi_in(ii,kk) * h_core_ri(p,q)
-           enddo
+      totcolsTKI = 0
+      do j = 1,nconnectedI
+        NSOMOalpha = getNSOMO(alphas_Icfg(1,1,k))
+        NSOMOI = getNSOMO(connectedI_alpha(1,1,j))
+        p = excitationIds(1,j)
+        q = excitationIds(2,j)
+        extype = excitationTypes(j)
+        call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
+        rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+        colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+        do m = 1,colsikpq
+          do l = 1,rowsTKI
+            do kk = 1,n_st
+              TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
+            enddo
+          enddo
         enddo
+        do m = 1,colsikpq
+          do l = 1,nconnectedI
+            ! <ij|kl> = (ik|jl)
+            moi = excitationIds(1,j) ! p
+            mok = excitationIds(2,j) ! q
+            moj = excitationIds(2,l) ! s
+            mol = excitationIds(1,l) ! r
+            if(moi.EQ.mok .AND. moj.EQ.mol)then
+              diagfac = diagfactors(j)
+              diagfac *= diagfactors(l)
+              !print *,"integrals (",totcolsTKI+m,l,")",mok,moi,mol,moj, "|", diagfac
+              GIJpqrs(totcolsTKI+m,l) = diagfac*0.5d0*mo_two_e_integral(mok,mol,moi,moj) ! g(pq,sr) = <ps,qr>
+            else
+              diagfac = diagfactors(j)*diagfactors(l)
+              !print *,"integrals (",totcolsTKI+m,l,")",mok,moi,mol,moj, "|", diagfac
+              GIJpqrs(totcolsTKI+m,l) = diagfac*0.5d0*mo_two_e_integral(mok,mol,moi,moj) ! g(pq,sr) = <ps,qr>
+              !endif
+            endif
+          enddo
         enddo
+        totcolsTKI += colsikpq
+      enddo
 
-        ! Undo setting in listholes
-        if(POPCNT(IAND(Jsomo,IBSET(0_8,q-1))) .EQ. 1  .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes -= 1
-        endif
-        if((POPCNT(IAND(Jdomo,IBSET(0_8,q-1))) .EQ. 1 .AND. POPCNT(IAND(Idomo,IBSET(0_8,q-1))) .EQ. 0) .AND. POPCNT(IAND(Isomo,IBSET(0_8,q-1))) .EQ. 0) then
-           nholes -= 1
-        endif
-     enddo
-  enddo
 
-  !!! Double Excitations !!!
 
-  ! Loop over all selected configurations
-  do i = istart_cfg,iend_cfg
+      ! Do big BLAS
+      ! TODO TKI, size(TKI,1)*size(TKI,2)
+      call dgemm('N','N', rowsTKI*n_st, nconnectedI, totcolsTKI, 1.d0,&
+          TKI, size(TKI,1)*size(TKI,2), GIJpqrs, size(GIJpqrs,1), 0.d0,&
+          TKIGIJ , size(TKIGIJ,1)*size(TKIGIJ,2) )
 
-     ! if Seniority_range > 8 then
-     ! continue
-     ! else
-     ! cycle
 
-     Icfg(1,1) = psi_configuration(1,1,i)
-     Icfg(1,2) = psi_configuration(1,2,i)
-     starti = psi_config_data(i,1)
-     endi   = psi_config_data(i,2)
-
-     ! Returns all unique (checking the past) singly excited cfgs connected to I
-     Nalphas_Icfg = 0
-     ! TODO:
-     ! test if size(alphas_Icfg,1) < Nmo**2) then deallocate + allocate
-     call obtain_associated_alphaI(i, Icfg, alphas_Icfg, Nalphas_Icfg)
-     ! TODO : remove doubly excited for return
-     ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
-     do k = 1,Nalphas_Icfg
-        ! Now generate all singly excited with respect to a given alpha CFG
-        call obtain_connected_I_foralpha(i,alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors)
-
-        if(nconnectedI .EQ. 0) then
-           cycle
-        endif
-        totcolsTKI = 0
-        rowsTKI = -1
-        do j = 1,nconnectedI
-           NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
-           NSOMOI = getNSOMO(connectedI_alpha(:,:,j))
-           p = excitationIds(1,j)
-           q = excitationIds(2,j)
-           extype = excitationTypes(j)
-           call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
-           ! for E_pp E_rs and E_ppE_rr case
-           if(p.EQ.q) then
-              NSOMOalpha = NSOMOI
-           endif
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
-           totcolsTKI += colsikpq
-           if(rowsTKI .LT. rowsikpq .AND. rowsTKI .NE. -1) then
-              print *,">",j,"Something is wrong in sigma-vector", rowsTKI, rowsikpq, "(p,q)=",pmodel,qmodel,"ex=",extype,"na=",NSOMOalpha," nI=",NSOMOI
-              !rowsTKI = rowsikpq
-           else
-              rowsTKI = rowsikpq
-           endif
+      ! Collect the result
+      totcolsTKI = 0
+      do j = 1,nconnectedI
+        NSOMOalpha = getNSOMO(alphas_Icfg(1,1,k))
+        NSOMOI     = getNSOMO(connectedI_alpha(1,1,j))
+        p = excitationIds(1,j)
+        q = excitationIds(2,j)
+        extype = excitationTypes(j)
+        call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
+        rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
+        colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+        do m = 1,colsikpq
+          do l = 1,rowsTKI
+            call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
+            do kk = 1,n_st
+              psi_out(kk,idxs_connectedI_alpha(j)+m-1) = psi_out(kk,idxs_connectedI_alpha(j)+m-1) + &
+                AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) * TKIGIJ(kk,l,j)
+            enddo
+            call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
+          enddo
         enddo
+        totcolsTKI += colsikpq
+      enddo
 
-        allocate(TKI(rowsTKI,n_st,totcolsTKI)) ! coefficients of CSF
-        ! Initialize the inegral container
-        ! dims : (totcolsTKI, nconnectedI)
-        allocate(GIJpqrs(totcolsTKI,nconnectedI))  ! gpqrs
-        allocate(TKIGIJ(rowsTKI,n_st,nconnectedI))  ! gpqrs
+      deallocate(TKI) ! coefficients of CSF
+      ! Initialize the inegral container
+      ! dims : (totcolsTKI, nconnectedI)
+      deallocate(GIJpqrs)  ! gpqrs
+      deallocate(TKIGIJ)  ! gpqrs
 
-        totcolsTKI = 0
-        do j = 1,nconnectedI
-           NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
-           NSOMOI = getNSOMO(connectedI_alpha(:,:,j))
-           p = excitationIds(1,j)
-           q = excitationIds(2,j)
-           extype = excitationTypes(j)
-           call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
-           do kk = 1,n_st
-           do l = 1,rowsTKI
-              do m = 1,colsikpq
-                 TKI(l,kk,totcolsTKI+m) = AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * psi_in(idxs_connectedI_alpha(j)+m-1,kk)
-              enddo
-           enddo
-           enddo
-           do m = 1,colsikpq
-              do l = 1,nconnectedI
-                 ! <ij|kl> = (ik|jl)
-                 moi = excitationIds(1,j) ! p
-                 mok = excitationIds(2,j) ! q
-                 moj = excitationIds(2,l) ! s
-                 mol = excitationIds(1,l) ! r
-                 if(moi.EQ.mok .AND. moj.EQ.mol)then
-                    diagfac = diagfactors(j)
-                    diagfac *= diagfactors(l)
-                    !print *,"integrals (",totcolsTKI+m,l,")",mok,moi,mol,moj, "|", diagfac
-                    GIJpqrs(totcolsTKI+m,l) = diagfac*0.5d0*mo_two_e_integral(mok,mol,moi,moj) ! g(pq,sr) = <ps,qr>
-                 else
-                       diagfac = diagfactors(j)*diagfactors(l)
-                       !print *,"integrals (",totcolsTKI+m,l,")",mok,moi,mol,moj, "|", diagfac
-                       GIJpqrs(totcolsTKI+m,l) = diagfac*0.5d0*mo_two_e_integral(mok,mol,moi,moj) ! g(pq,sr) = <ps,qr>
-                    !endif
-                 endif
-              enddo
-           enddo
-           totcolsTKI += colsikpq
-        enddo
-
-
-
-        ! Do big BLAS
-        ! TODO TKI, size(TKI,1)*size(TKI,2)
-        call dgemm('N','N', rowsTKI*n_st, nconnectedI, totcolsTKI, 1.d0,  &
-             TKI, size(TKI,1)*n_st, GIJpqrs, size(GIJpqrs,1), 0.d0, &
-             TKIGIJ , size(TKIGIJ,1)*n_st )
-
-
-        ! Collect the result
-        totcolsTKI = 0
-        do j = 1,nconnectedI
-           NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
-           NSOMOI     = getNSOMO(connectedI_alpha(:,:,j))
-           p = excitationIds(1,j)
-           q = excitationIds(2,j)
-           extype = excitationTypes(j)
-           call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
-           rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
-           colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
-           !print *,">j=",j,rowsikpq,colsikpq, ">>",totcolsTKI,",",idxs_connectedI_alpha(j)
-           do kk = 1,n_st
-           do m = 1,colsikpq
-              do l = 1,rowsTKI
-                 psi_out(idxs_connectedI_alpha(j)+m-1,kk) += AIJpqContainer(NSOMOalpha,extype,pmodel,qmodel,l,m) * TKIGIJ(l,kk,j)
-              enddo
-           enddo
-           enddo
-           totcolsTKI += colsikpq
-        enddo
-
-        deallocate(TKI) ! coefficients of CSF
-        ! Initialize the inegral container
-        ! dims : (totcolsTKI, nconnectedI)
-        deallocate(GIJpqrs)  ! gpqrs
-        deallocate(TKIGIJ)  ! gpqrs
-
-     enddo ! loop over alphas
+    enddo ! loop over alphas
   enddo ! loop over I
+  !$OMP end do
+  deallocate(connectedI_alpha)
+  deallocate(idxs_connectedI_alpha)
+  deallocate(excitationIds)
+  deallocate(excitationTypes)
+  deallocate(diagfactors)
 
 
   ! Add the diagonal contribution
-  do kk=1,n_st
+  !$OMP DO
   do i = 1,n_CSF
-     psi_out(i,kk) += 1.0d0*diag_energies(i)*psi_in(i,kk)
+    do kk=1,n_st
+      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
+    enddo
   enddo
-  enddo
+  !$OMP END DO
 
+  !$OMP end parallel
+  call omp_set_max_active_levels(4)
 
-end subroutine calculate_sigma_vector_cfg_nst
+end subroutine calculate_sigma_vector_cfg_nst_naive_store
+
