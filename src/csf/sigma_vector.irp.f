@@ -98,7 +98,11 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
 
     do while(detb(k) /= 0_bit_kind)
       ! Find the lowest beta electron and clear it
+IRP_IF WITHOUT_TRAILZ
+      ipos = popcnt(ieor(detb(k),detb(k)-1))-1
+IRP_ELSE
       ipos = trailz(detb(k))
+IRP_ENDIF
       detb(k) = ibclr(detb(k),ipos)
 
       ! Create a mask will all MOs higher than the beta electron

@@ -206,7 +206,11 @@ subroutine get_double_excitation(det1,det2,exc,phase,Nint)
       particle = iand(tmp, det2(l,ispin))
       hole     = iand(tmp, det1(l,ispin))
       do while (particle /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        tz = popcnt(ieor(particle,particle-1))-1
+IRP_ELSE
         tz = trailz(particle)
+IRP_ENDIF
         idx_particle = idx_particle + 1
         exc(0,2,ispin) = exc(0,2,ispin) + 1
         exc(idx_particle,2,ispin) = tz+ishift
@@ -216,7 +220,11 @@ subroutine get_double_excitation(det1,det2,exc,phase,Nint)
         exit
       endif
       do while (hole /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        tz = popcnt(ieor(hole,hole-1))-1
+IRP_ELSE
         tz = trailz(hole)
+IRP_ENDIF
         idx_hole = idx_hole + 1
         exc(0,1,ispin) = exc(0,1,ispin) + 1
         exc(idx_hole,1,ispin) = tz+ishift
@@ -373,12 +381,20 @@ subroutine get_single_excitation(det1,det2,exc,phase,Nint)
       particle = iand(tmp, det2(l,ispin))
       hole     = iand(tmp, det1(l,ispin))
       if (particle /= 0_bit_kind) then
+IRP_IF WITHOUT_TRAILZ
+        tz = popcnt(ieor(particle,particle-1))-1
+IRP_ELSE
         tz = trailz(particle)
+IRP_ENDIF
         exc(0,2,ispin) = 1
         exc(1,2,ispin) = tz+ishift
       endif
       if (hole /= 0_bit_kind) then
+IRP_IF WITHOUT_TRAILZ
+        tz = popcnt(ieor(hole,hole-1))-1
+IRP_ELSE
         tz = trailz(hole)
+IRP_ENDIF
         exc(0,1,ispin) = 1
         exc(1,1,ispin) = tz+ishift
       endif
@@ -445,14 +461,22 @@ subroutine bitstring_to_list_ab( string, list, n_elements, Nint)
   do i=1,Nint
     l = string(i,1)
     do while (l /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+      j = popcnt(ieor(l,l-1))-1
+IRP_ELSE
       j = trailz(l)
+IRP_ENDIF
       n_elements(1) = n_elements(1)+1
       l = ibclr(l,j)
       list(n_elements(1),1) = ishift+j
     enddo
     l = string(i,2)
     do while (l /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+      j = popcnt(ieor(l,l-1))-1
+IRP_ELSE
       j = trailz(l)
+IRP_ENDIF
       n_elements(2) = n_elements(2)+1
       l = ibclr(l,j)
       list(n_elements(2),2) = ishift+j
@@ -2006,7 +2030,11 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
     particle = iand(tmp, det2(l))
     hole     = iand(tmp, det1(l))
     do while (particle /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+      tz = popcnt(ieor(particle,particle-1))-1
+IRP_ELSE
       tz = trailz(particle)
+IRP_ENDIF
       idx_particle = idx_particle + 1
       exc(0,2) = exc(0,2) + 1
       exc(idx_particle,2) = tz+ishift
@@ -2016,7 +2044,11 @@ subroutine get_double_excitation_spin(det1,det2,exc,phase,Nint)
       exit
     endif
     do while (hole /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+      tz = popcnt(ieor(hole,hole-1))-1
+IRP_ELSE
       tz = trailz(hole)
+IRP_ENDIF
       idx_hole = idx_hole + 1
       exc(0,1) = exc(0,1) + 1
       exc(idx_hole,1) = tz+ishift
@@ -2133,12 +2165,20 @@ subroutine get_single_excitation_spin(det1,det2,exc,phase,Nint)
     particle = iand(tmp, det2(l))
     hole     = iand(tmp, det1(l))
     if (particle /= 0_bit_kind) then
+IRP_IF WITHOUT_TRAILZ
+      tz = popcnt(ieor(particle,particle-1))-1
+IRP_ELSE
       tz = trailz(particle)
+IRP_ENDIF
       exc(0,2) = 1
       exc(1,2) = tz+ishift
     endif
     if (hole /= 0_bit_kind) then
+IRP_IF WITHOUT_TRAILZ
+      tz = popcnt(ieor(hole,hole-1))-1
+IRP_ELSE
       tz = trailz(hole)
+IRP_ENDIF
       exc(0,1) = 1
       exc(1,1) = tz+ishift
     endif

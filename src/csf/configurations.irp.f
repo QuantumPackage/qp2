@@ -97,7 +97,11 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
     do while(v /= 0_bit_kind)
       n = n+1
       iint(n) = i
+IRP_IF WITHOUT_TRAILZ
+      ipos(n) = popcnt(ieor(v,v-1))-1
+IRP_ELSE
       ipos(n) = trailz(v)
+IRP_ENDIF
       v = iand(v,v-1)
     enddo
     n_alpha_in_single = n_alpha_in_single - popcnt( o(i,2) )
@@ -130,7 +134,11 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
       v_prev = v
       t = ior(v,v-1)
       tt = t+1
+IRP_IF WITHOUT_TRAILZ
+      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+IRP_ENDIF
 
       ! Find what has changed between v_prev and v
       diff = ieor(v,v_prev)
@@ -141,7 +149,11 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
 
       ! Swap bits only where they have changed from v_prev to v
       do while (diff /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        k = popcnt(ieor(diff,diff-1))
+IRP_ELSE
         k = trailz(diff)+1
+IRP_ENDIF
         if (btest(v,k-1)) then
           d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
           d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
@@ -165,7 +177,11 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
       v_prev = v
       t = ior(v,v-1)
       tt = t+1
+IRP_IF WITHOUT_TRAILZ
+      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+IRP_ENDIF
 
       ! Find what has changed between v_prev and v
       diff = ieor(v,v_prev)
@@ -176,7 +192,11 @@ subroutine configuration_to_dets(o,d,sze,n_alpha,Nint)
 
       ! Swap bits only where they have changed from v_prev to v
       do while (diff /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        k = popcnt(ieor(diff,diff-1))
+IRP_ELSE
         k = trailz(diff)+1
+IRP_ENDIF
         if (btest(v,k-1)) then
           d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
           d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
@@ -235,7 +255,11 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
     do while(v /= 0_bit_kind)
       n = n+1
       iint(n) = i
+IRP_IF WITHOUT_TRAILZ
+      ipos(n) = popcnt(ieor(v,v-1))-1
+IRP_ELSE
       ipos(n) = trailz(v)
+IRP_ENDIF
       v = iand(v,v-1)
     enddo
     n_alpha_in_single = n_alpha_in_single - popcnt( o(i,2) )
@@ -268,7 +292,11 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
       v_prev = v
       t = ior(v,v-1)
       tt = t+1
+IRP_IF WITHOUT_TRAILZ
+      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+IRP_ENDIF
 
       ! Find what has changed between v_prev and v
       diff = ieor(v,v_prev)
@@ -279,7 +307,11 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
 
       ! Swap bits only where they have changed from v_prev to v
       do while (diff /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        k = popcnt(ieor(diff,diff-1))
+IRP_ELSE
         k = trailz(diff)+1
+IRP_ENDIF
         if (btest(v,k-1)) then
           d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
           d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
@@ -303,7 +335,11 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
       v_prev = v
       t = ior(v,v-1)
       tt = t+1
+IRP_IF WITHOUT_TRAILZ
+      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
+IRP_ENDIF
 
       ! Find what has changed between v_prev and v
       diff = ieor(v,v_prev)
@@ -314,7 +350,11 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
 
       ! Swap bits only where they have changed from v_prev to v
       do while (diff /= 0_bit_kind)
+IRP_IF WITHOUT_TRAILZ
+        k = popcnt(ieor(diff,diff-1))
+IRP_ELSE
         k = trailz(diff)+1
+IRP_ENDIF
         if (btest(v,k-1)) then
           d(iint(k),1,i) = ibset( d(iint(k),1,i), ipos(k) )
           d(iint(k),2,i) = ibclr( d(iint(k),2,i), ipos(k) )
