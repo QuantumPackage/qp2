@@ -655,7 +655,11 @@ subroutine integrale_new(I_f,a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z,p,q
   double precision               :: I_f, pq_inv, p10_1, p10_2, p01_1, p01_2,rho,pq_inv_2
   integer :: ix,iy,iz, jx,jy,jz, sx,sy,sz
 
+IRP_IF WITHOUT_SHIFTRL
+  j = ishft(n_pt,-1)
+IRP_ELSE
   j = shiftr(n_pt,1)
+IRP_ENDIF
   ASSERT (n_pt > 1)
   pq_inv = 0.5d0/(p+q)
   pq_inv_2 = pq_inv + pq_inv
@@ -1178,9 +1182,17 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
 
   n_integrals = 0
 
+IRP_IF WITHOUT_SHIFTRL
+  j1 = j+ishft(l*l-l,-1)
+IRP_ELSE
   j1 = j+shiftr(l*l-l,1)
+IRP_ENDIF
   do k = 1, ao_num           ! r1
+IRP_IF WITHOUT_SHIFTRL
+    i1 = ishft(k*k-k,-1)
+IRP_ELSE
     i1 = shiftr(k*k-k,1)
+IRP_ENDIF
     if (i1 > j1) then
       exit
     endif

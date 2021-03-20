@@ -77,6 +77,25 @@ double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
   integer :: p1_int, p2_int
   integer :: h1_bit, h2_bit
   integer :: p1_bit, p2_bit
+IRP_IF WITHOUT_SHIFTRL
+  h1_int = ishft(h1-1,-bit_kind_shift)+1
+  h1_bit = h1 - ishft (h1_int-1,bit_kind_shift)-1
+
+  h2_int = ishft(h2-1,-bit_kind_shift)+1
+  h2_bit = h2 - ishft(h2_int-1,bit_kind_shift)-1
+
+  p1_int = ishft(p1-1,-bit_kind_shift)+1
+  p1_bit = p1 - ishft(p1_int-1,bit_kind_shift)-1
+
+  p2_int = ishft(p2-1,-bit_kind_shift)+1
+  p2_bit = p2 - ishft(p2_int-1,bit_kind_shift)-1
+
+  ! Put the phasemask bits at position 0, and add them all
+  h1_bit = int(ishft(phasemask(h1_int,s1),-h1_bit))
+  p1_bit = int(ishft(phasemask(p1_int,s1),-p1_bit))
+  h2_bit = int(ishft(phasemask(h2_int,s2),-h2_bit))
+  p2_bit = int(ishft(phasemask(p2_int,s2),-p2_bit))
+IRP_ELSE
   h1_int = shiftr(h1-1,bit_kind_shift)+1
   h1_bit = h1 - shiftl(h1_int-1,bit_kind_shift)-1
 
@@ -95,6 +114,7 @@ double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
   p1_bit = int(shiftr(phasemask(p1_int,s1),p1_bit))
   h2_bit = int(shiftr(phasemask(h2_int,s2),h2_bit))
   p2_bit = int(shiftr(phasemask(p2_int,s2),p2_bit))
+IRP_ENDIF
 
   np = h1_bit + p1_bit + h2_bit + p2_bit
 

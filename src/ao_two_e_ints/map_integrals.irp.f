@@ -28,13 +28,25 @@ subroutine two_e_integrals_index(i,j,k,l,i1)
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
   r = max(i,k)
+IRP_IF WITHOUT_SHIFTRL
+  p = p+ishft(r*r-r,-1)
+IRP_ELSE
   p = p+shiftr(r*r-r,1)
+IRP_ENDIF
   q = min(j,l)
   s = max(j,l)
+IRP_IF WITHOUT_SHIFTRL
+  q = q+ishft(s*s-s,-1)
+IRP_ELSE
   q = q+shiftr(s*s-s,1)
+IRP_ENDIF
   i1 = min(p,q)
   i2 = max(p,q)
+IRP_IF WITHOUT_SHIFTRL
+  i1 = i1+ishft(i2*i2-i2,-1)
+IRP_ELSE
   i1 = i1+shiftr(i2*i2-i2,1)
+IRP_ENDIF
 end
 
 
@@ -59,10 +71,22 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
   i = 0
   i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
   l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
+IRP_IF WITHOUT_SHIFTRL
+  i3   = i1 - ishft(i2*i2-i2,-1)
+IRP_ELSE
   i3   = i1 - shiftr(i2*i2-i2,1)
+IRP_ENDIF
   k(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
+IRP_IF WITHOUT_SHIFTRL
+  j(1) = int(i2 - ishft(l(1)*l(1)-l(1),-1),4)
+IRP_ELSE
   j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
+IRP_ENDIF
+IRP_IF WITHOUT_SHIFTRL
+  i(1) = int(i3 - ishft(k(1)*k(1)-k(1),-1),4)
+IRP_ELSE
   i(1) = int(i3 - shiftr(k(1)*k(1)-k(1),1),4)
+IRP_ENDIF
 
               !ijkl
   i(2) = i(1) !ilkj

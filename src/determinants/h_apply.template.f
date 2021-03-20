@@ -22,12 +22,23 @@ subroutine $subroutine_diexc(key_in, key_prev, hole_1,particl_1, hole_2, particl
   do sp=1,2
     do ni=1,N_int
       do i=1,bit_kind_size
+IRP_IF WITHOUT_SHIFTRL
+        if(iand(1_bit_kind,ishft(key_in(ni, sp), (1-i))) == 0) then
+          cycle
+        end if
+IRP_ELSE
         if(iand(1_bit_kind,shiftr(key_in(ni, sp), (i-1))) == 0) then
           cycle
         end if
+IRP_ENDIF
         mi = (ni-1)*bit_kind_size+i
+IRP_IF WITHOUT_SHIFTRL
+        status(mi, sp) = int(iand(1_bit_kind,ishft(hole_1(ni,sp),(1-i))),4)
+        status(mi, sp) = status(mi, sp) + 2*int(iand(1_bit_kind,ishft(hole_2(ni,sp),(1-i))),4)
+IRP_ELSE
         status(mi, sp) = int(iand(1_bit_kind,shiftr(hole_1(ni,sp),(i-1))),4)
         status(mi, sp) = status(mi, sp) + 2*int(iand(1_bit_kind,shiftr(hole_2(ni,sp),(i-1))),4)
+IRP_ENDIF
         if(status(mi, sp) /= 0 .and. mi > highest) then
           highest = mi
         end if
@@ -88,16 +99,26 @@ subroutine $subroutine_diexcP(key_in, fs1, fh1, particl_1, fs2, fh2, particl_2, 
     p2_mask(k,1) = 0_bit_kind
     p2_mask(k,2) = 0_bit_kind
   enddo
+IRP_IF WITHOUT_SHIFTRL
+  p1_mask(ishft(fh1-1,-bit_kind_shift) + 1, fs1) = shiftl(one,iand(fh1-1,bit_kind_size-1))
+  p2_mask(ishft(fh2-1,-bit_kind_shift) + 1, fs2) = shiftl(one,iand(fh2-1,bit_kind_size-1))
+IRP_ELSE
   p1_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) = shiftl(one,iand(fh1-1,bit_kind_size-1))
   p2_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) = shiftl(one,iand(fh2-1,bit_kind_size-1))
+IRP_ENDIF
 
   do k=1,N_int
     key_mask(k,1) = key_in(k,1)
     key_mask(k,2) = key_in(k,2)
   enddo
 
+IRP_IF WITHOUT_SHIFTRL
+  key_mask(ishft(fh1-1,-bit_kind_shift) + 1, fs1) -= shiftl(one,iand(fh1-1,bit_kind_size-1))
+  key_mask(ishft(fh2-1,-bit_kind_shift) + 1, fs2) -= shiftl(one,iand(fh2-1,bit_kind_size-1))
+IRP_ELSE
   key_mask(shiftr(fh1-1,bit_kind_shift) + 1, fs1) -= shiftl(one,iand(fh1-1,bit_kind_size-1))
   key_mask(shiftr(fh2-1,bit_kind_shift) + 1, fs2) -= shiftl(one,iand(fh2-1,bit_kind_size-1))
+IRP_ENDIF
 
 
   call $subroutine_diexcOrg(key_in, key_mask, p1_mask, particl_1, p2_mask, particl_2, fock_diag_tmp, i_generator, iproc_in $parameters )
@@ -219,10 +240,18 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
       ASSERT (j_a > 0)
       ASSERT (j_a <= mo_num)
       hole = key_in
+IRP_IF WITHOUT_SHIFTRL
+      k = ishft(i_a-1,-bit_kind_shift)+1
+IRP_ELSE
       k = shiftr(i_a-1,bit_kind_shift)+1
+IRP_ENDIF
       j = i_a-shiftl(k-1,bit_kind_shift)-1
       hole(k,ispin) = ibclr(hole(k,ispin),j)
+IRP_IF WITHOUT_SHIFTRL
+      k_a = ishft(j_a-1,-bit_kind_shift)+1
+IRP_ELSE
       k_a = shiftr(j_a-1,bit_kind_shift)+1
+IRP_ENDIF
       l_a = j_a-shiftl(k_a-1,bit_kind_shift)-1
       hole(k_a,ispin) = ibset(hole(k_a,ispin),l_a)
 
@@ -269,11 +298,19 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
           hole = hole_save
           i_b = ib_jb_pairs(1,kk)
           j_b = ib_jb_pairs(2,kk)
+IRP_IF WITHOUT_SHIFTRL
+          k = ishft(i_b-1,-bit_kind_shift)+1
+IRP_ELSE
           k = shiftr(i_b-1,bit_kind_shift)+1
+IRP_ENDIF
           j = i_b-shiftl(k-1,bit_kind_shift)-1
           hole(k,other_spin) = ibclr(hole(k,other_spin),j)
           key = hole
+IRP_IF WITHOUT_SHIFTRL
+          k = ishft(j_b-1,-bit_kind_shift)+1
+IRP_ELSE
           k = shiftr(j_b-1,bit_kind_shift)+1
+IRP_ENDIF
           l = j_b-shiftl(k-1,bit_kind_shift)-1
           key(k,other_spin) = ibset(key(k,other_spin),l)
           $filter2h2p_double
@@ -325,11 +362,19 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
         hole = hole_save
         i_b = ib_jb_pairs(1,kk)
         j_b = ib_jb_pairs(2,kk)
+IRP_IF WITHOUT_SHIFTRL
+        k = ishft(i_b-1,-bit_kind_shift)+1
+IRP_ELSE
         k = shiftr(i_b-1,bit_kind_shift)+1
+IRP_ENDIF
         j = i_b-shiftl(k-1,bit_kind_shift)-1
         hole(k,ispin) = ibclr(hole(k,ispin),j)
         key = hole
+IRP_IF WITHOUT_SHIFTRL
+        k = ishft(j_b-1,-bit_kind_shift)+1
+IRP_ELSE
         k = shiftr(j_b-1,bit_kind_shift)+1
+IRP_ENDIF
         l = j_b-shiftl(k-1,bit_kind_shift)-1
         key(k,ispin) = ibset(key(k,ispin),l)
         $filter2h2p_double
@@ -477,11 +522,19 @@ subroutine $subroutine_monoexc(key_in, hole_1,particl_1,fock_diag_tmp,i_generato
       i_a = ia_ja_pairs(1,ii,ispin)
       j_a = ia_ja_pairs(2,ii,ispin)
       hole = key_in
+IRP_IF WITHOUT_SHIFTRL
+      k = ishft(i_a-1,-bit_kind_shift)+1
+IRP_ELSE
       k = shiftr(i_a-1,bit_kind_shift)+1
+IRP_ENDIF
       j = i_a-shiftl(k-1,bit_kind_shift)-1
   $filterhole
       hole(k,ispin) = ibclr(hole(k,ispin),j)
+IRP_IF WITHOUT_SHIFTRL
+      k_a = ishft(j_a-1,-bit_kind_shift)+1
+IRP_ELSE
       k_a = shiftr(j_a-1,bit_kind_shift)+1
+IRP_ENDIF
       l_a = j_a-shiftl(k_a-1,bit_kind_shift)-1
   $filterparticle
       hole(k_a,ispin) = ibset(hole(k_a,ispin),l_a)

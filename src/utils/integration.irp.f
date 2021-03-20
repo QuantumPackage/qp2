@@ -423,7 +423,11 @@ double precision function F_integral(n,p)
     F_integral = sqpi * sqrt_p
     return
   endif
+IRP_IF WITHOUT_SHIFTRL
+  F_integral = sqpi * 0.5d0**n * sqrt_p**(n+1) * fact(n)/fact(ishft(n,-1))
+IRP_ELSE
   F_integral = sqpi * 0.5d0**n * sqrt_p**(n+1) * fact(n)/fact(shiftr(n,1))
+IRP_ENDIF
 end
 
 
@@ -500,7 +504,11 @@ double precision function rint_sum(n_pt_out,rho,d1)
     endif
 
     do i=2,n_pt_out,2
+IRP_IF WITHOUT_SHIFTRL
+      n = ishft(i,-1)
+IRP_ELSE
       n = shiftr(i,1)
+IRP_ENDIF
       rint_sum = rint_sum + d1(i)*rint1(n,rho)
     enddo
 
@@ -525,7 +533,11 @@ double precision function rint_sum(n_pt_out,rho,d1)
       di = di+2.d0
     enddo
     do i=42,n_pt_out,2
+IRP_IF WITHOUT_SHIFTRL
+      n = ishft(i,-1)
+IRP_ELSE
       n = shiftr(i,1)
+IRP_ENDIF
       rint_sum = rint_sum + d1(i)*rint_large_n(n,rho)
     enddo
 

@@ -21,7 +21,11 @@ subroutine modify_bitmasks_for_hole(i_hole)
     enddo
  enddo
 
+IRP_IF WITHOUT_SHIFTRL
+ k = ishft(i_hole-1,-bit_kind_shift)+1
+IRP_ELSE
  k = shiftr(i_hole-1,bit_kind_shift)+1
+IRP_ENDIF
  j = i_hole-shiftl(k-1,bit_kind_shift)-1
  do l = 1, 3
    i = index_holes_bitmask(l)
@@ -42,7 +46,11 @@ subroutine modify_bitmasks_for_hole_in_out(i_hole)
 ! the electrons occupying i_hole
  END_DOC
 
+IRP_IF WITHOUT_SHIFTRL
+ k = ishft(i_hole-1,-bit_kind_shift)+1
+IRP_ELSE
  k = shiftr(i_hole-1,bit_kind_shift)+1
+IRP_ENDIF
  j = i_hole-shiftl(k-1,bit_kind_shift)-1
  do l = 1, 3
    i = index_holes_bitmask(l)
@@ -73,7 +81,11 @@ subroutine modify_bitmasks_for_particl(i_part)
    enddo
  enddo
 
+IRP_IF WITHOUT_SHIFTRL
+ k = ishft(i_part-1,-bit_kind_shift)+1
+IRP_ELSE
  k = shiftr(i_part-1,bit_kind_shift)+1
+IRP_ENDIF
  j = i_part-shiftl(k-1,bit_kind_shift)-1
  do l = 1, 3
    i = index_particl_bitmask(l)

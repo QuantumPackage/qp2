@@ -9,13 +9,25 @@ subroutine mo_two_e_integrals_index(i,j,k,l,i1)
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
   r = max(i,k)
+IRP_IF WITHOUT_SHIFTRL
+  p = p+ishft(r*r-r,-1)
+IRP_ELSE
   p = p+shiftr(r*r-r,1)
+IRP_ENDIF
   q = min(j,l)
   s = max(j,l)
+IRP_IF WITHOUT_SHIFTRL
+  q = q+ishft(s*s-s,-1)
+IRP_ELSE
   q = q+shiftr(s*s-s,1)
+IRP_ENDIF
   i1 = min(p,q)
   i2 = max(p,q)
+IRP_IF WITHOUT_SHIFTRL
+  i1 = i1+ishft(i2*i2-i2,-1)
+IRP_ELSE
   i1 = i1+shiftr(i2*i2-i2,1)
+IRP_ENDIF
 end
 
 
@@ -280,7 +292,11 @@ subroutine add_integrals_to_map(mask_ijkl)
       if (abs(c) < thr_coef) then
         cycle
       endif
+IRP_IF WITHOUT_SHIFTRL
+      j1 = ishft((l*l-l),-1)
+IRP_ELSE
       j1 = shiftr((l*l-l),1)
+IRP_ENDIF
       do j0 = 1, n_j
         j = list_ijkl(j0,2)
         if (j > l)  then
@@ -289,7 +305,11 @@ subroutine add_integrals_to_map(mask_ijkl)
         j1 += 1
         do k0 = 1, n_k
           k = list_ijkl(k0,3)
+IRP_IF WITHOUT_SHIFTRL
+          i1 = ishft((k*k-k),-1)
+IRP_ELSE
           i1 = shiftr((k*k-k),1)
+IRP_ENDIF
           if (i1<=j1) then
             continue
           else
@@ -556,7 +576,11 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
       endif
       do k0 = 1, n_k
         k = list_ijkl(k0,3)
+IRP_IF WITHOUT_SHIFTRL
+        i1 = ishft((k*k-k),-1)
+IRP_ELSE
         i1 = shiftr((k*k-k),1)
+IRP_ENDIF
         two_e_tmp_1 = 0.d0
         j0 = l0
         j = list_ijkl(j0,2)
@@ -600,7 +624,11 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
       endif
       do k0 = 1, n_k
         k = list_ijkl(k0,3)
+IRP_IF WITHOUT_SHIFTRL
+        i1 = ishft((k*k-k),-1)
+IRP_ELSE
         i1 = shiftr((k*k-k),1)
+IRP_ENDIF
         two_e_tmp_1 = 0.d0
         j0 = k0
         j = list_ijkl(k0,2)
@@ -837,7 +865,11 @@ subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
       if (abs(c) < thr_coef) then
         cycle
       endif
+IRP_IF WITHOUT_SHIFTRL
+      j1 = ishft((l*l-l),-1)
+IRP_ELSE
       j1 = shiftr((l*l-l),1)
+IRP_ENDIF
       do j0 = 1, n_j
         j = list_ijkl(j0,2)
         if (j > l)  then
@@ -846,7 +878,11 @@ subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
         j1 += 1
         do k0 = 1, n_k
           k = list_ijkl(k0,3)
+IRP_IF WITHOUT_SHIFTRL
+          i1 = ishft((k*k-k),-1)
+IRP_ELSE
           i1 = shiftr((k*k-k),1)
+IRP_ENDIF
           two_e_tmp_1 = 0.d0
           do i0 = 1, n_i
             i = list_ijkl(i0,1)

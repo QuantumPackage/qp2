@@ -19,7 +19,11 @@ subroutine do_single_excitation_cfg(key_in,key_out,i_hole,i_particle,ok)
   key_out(:,:) = key_in(:,:)
 
   ! hole
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(i_hole-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(i_hole-1,bit_kind_shift)+1
+IRP_ENDIF
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
   mask = ibset(0_bit_kind,j)
 
@@ -46,7 +50,11 @@ subroutine do_single_excitation_cfg(key_in,key_out,i_hole,i_particle,ok)
 
 
   ! particle
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(i_particle-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(i_particle-1,bit_kind_shift)+1
+IRP_ENDIF
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
   mask = ibset(0_bit_kind,j)
 
@@ -109,7 +117,11 @@ subroutine do_single_excitation_cfg_with_type(key_in,key_out,i_hole,i_particle,e
   key_out(:,:) = key_in(:,:)
 
   ! hole
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(i_hole-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(i_hole-1,bit_kind_shift)+1
+IRP_ENDIF
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
   mask = ibset(0_bit_kind,j)
 
@@ -138,7 +150,11 @@ subroutine do_single_excitation_cfg_with_type(key_in,key_out,i_hole,i_particle,e
 
 
   ! particle
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(i_particle-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(i_particle-1,bit_kind_shift)+1
+IRP_ENDIF
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
   mask = ibset(0_bit_kind,j)
 

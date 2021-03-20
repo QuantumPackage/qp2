@@ -51,7 +51,11 @@ subroutine get_excitation_degree(key1,key2,degree,Nint)
 
   end select
 
+IRP_IF WITHOUT_SHIFTRL
+  degree = ishft(degree,-1)
+IRP_ELSE
   degree = shiftr(degree,1)
+IRP_ENDIF
 
 end
 
@@ -247,8 +251,13 @@ IRP_ENDIF
         ASSERT (low >= 0)
         ASSERT (high > 0)
 
+IRP_IF WITHOUT_SHIFTRL
+        k = ishft(high,-bit_kind_shift)+1
+        j = ishft(low,-bit_kind_shift)+1
+IRP_ELSE
         k = shiftr(high,bit_kind_shift)+1
         j = shiftr(low,bit_kind_shift)+1
+IRP_ENDIF
         m = iand(high,bit_kind_size-1)
         n = iand(low,bit_kind_size-1)
 
@@ -279,8 +288,13 @@ IRP_ENDIF
           ASSERT (low > 0)
           ASSERT (high > 0)
 
+IRP_IF WITHOUT_SHIFTRL
+          k = ishft(high,-bit_kind_shift)+1
+          j = ishft(low,-bit_kind_shift)+1
+IRP_ELSE
           k = shiftr(high,bit_kind_shift)+1
           j = shiftr(low,bit_kind_shift)+1
+IRP_ENDIF
           m = iand(high,bit_kind_size-1)
           n = iand(low,bit_kind_size-1)
 
@@ -409,8 +423,13 @@ IRP_ENDIF
       ASSERT (low >= 0)
       ASSERT (high > 0)
 
+IRP_IF WITHOUT_SHIFTRL
+      k = ishft(high,-bit_kind_shift)+1
+      j = ishft(low,-bit_kind_shift)+1
+IRP_ELSE
       k = shiftr(high,bit_kind_shift)+1
       j = shiftr(low,bit_kind_shift)+1
+IRP_ENDIF
       m = iand(high,bit_kind_size-1)
       n = iand(low,bit_kind_size-1)
 
@@ -1112,7 +1131,11 @@ subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
       if (d > 2) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1129,7 +1152,11 @@ subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
       if (d > 2) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1148,7 +1175,11 @@ subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
       if (d > 2) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1167,7 +1198,11 @@ subroutine get_excitation_degree_vector_single(key1,key2,degree,Nint,sze,idx)
       if (d > 2) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1211,7 +1246,11 @@ subroutine get_excitation_degree_vector_single_or_exchange(key1,key2,degree,Nint
       if (d > 4)cycle
       if (d ==4)then
        if(popcnt(xor(key_tmp(1,1),key_tmp(1,2))) == 0)then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else
@@ -1219,7 +1258,11 @@ subroutine get_excitation_degree_vector_single_or_exchange(key1,key2,degree,Nint
        endif
 !      pause
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1269,7 +1312,11 @@ subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,
       degree_alpha = popcnt(key_tmp(1,1))
       degree_beta  = popcnt(key_tmp(1,2))
       if(degree_alpha .ge.3 .or. degree_beta .ge.3 )cycle !! no double excitations of same spin
+IRP_IF WITHOUT_SHIFTRL
+      degree(l) = ishft(d,-1)
+IRP_ELSE
       degree(l) = shiftr(d,1)
+IRP_ENDIF
       idx(l) = i
       l = l+1
     enddo
@@ -1289,7 +1336,11 @@ subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,
       degree_alpha = popcnt(key_tmp(1,1)) + popcnt(key_tmp(2,1))
       degree_beta  = popcnt(key_tmp(1,2)) + popcnt(key_tmp(2,2))
       if(degree_alpha .ge.3 .or. degree_beta .ge.3 )cycle !! no double excitations of same spin
+IRP_IF WITHOUT_SHIFTRL
+      degree(l) = ishft(d,-1)
+IRP_ELSE
       degree(l) = shiftr(d,1)
+IRP_ENDIF
       idx(l) = i
         l = l+1
     enddo
@@ -1314,7 +1365,11 @@ subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,
       degree_alpha = popcnt(key_tmp(1,1)) + popcnt(key_tmp(2,1)) + popcnt(key_tmp(3,1))
       degree_beta  = popcnt(key_tmp(1,2)) + popcnt(key_tmp(2,2)) + popcnt(key_tmp(3,2))
       if(degree_alpha .ge.3 .or. degree_beta .ge.3 )cycle !! no double excitations of same spin
+IRP_IF WITHOUT_SHIFTRL
+      degree(l) = ishft(d,-1)
+IRP_ELSE
       degree(l) = shiftr(d,1)
+IRP_ENDIF
       idx(l) = i
       l = l+1
     enddo
@@ -1336,7 +1391,11 @@ subroutine get_excitation_degree_vector_double_alpha_beta(key1,key2,degree,Nint,
         degree_beta  += popcnt(key_tmp(m,2))
       enddo
       if(degree_alpha .ge.3 .or. degree_beta .ge.3 )cycle !! no double excitations of same spin
+IRP_IF WITHOUT_SHIFTRL
+      degree(l) = ishft(d,-1)
+IRP_ELSE
       degree(l) = shiftr(d,1)
+IRP_ENDIF
       idx(l) = i
       l = l+1
     enddo
@@ -1391,19 +1450,30 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
       if (d > 4)cycle
       if (d ==4)then
        if(exchange_1 .eq. 0 ) then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else if (exchange_1 .eq. 2 .and. exchange_2.eq.2)then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else
         cycle
        endif
-!      pause
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1423,11 +1493,19 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
       if (d > 4)cycle
       if (d ==4)then
        if(exchange_1 .eq. 0 ) then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else if (exchange_1 .eq. 2 .and. exchange_2.eq.2)then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else
@@ -1435,7 +1513,11 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
        endif
 !      pause
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1460,11 +1542,19 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
       if (d > 4)cycle
       if (d ==4)then
        if(exchange_1 .eq. 0 ) then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else if (exchange_1 .eq. 2 .and. exchange_2.eq.2)then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else
@@ -1472,7 +1562,11 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
        endif
 !      pause
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1495,18 +1589,30 @@ subroutine get_excitation_degree_vector_single_or_exchange_verbose(key1,key2,deg
       if (d > 4)cycle
       if (d ==4)then
        if(exchange_1 .eq. 0 ) then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else if (exchange_1 .eq. 2 .and. exchange_2.eq.2)then
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
        else
         cycle
        endif
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1543,7 +1649,11 @@ subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
       if (d > 4) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l) = i
         l = l+1
       endif
@@ -1559,7 +1669,11 @@ subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
       if (d > 4) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1577,7 +1691,11 @@ subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
       if (d > 4) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1594,7 +1712,11 @@ subroutine get_excitation_degree_vector(key1,key2,degree,Nint,sze,idx)
       if (d > 4) then
         cycle
       else
+IRP_IF WITHOUT_SHIFTRL
+        degree(l) = ishft(d,-1)
+IRP_ELSE
         degree(l) = shiftr(d,1)
+IRP_ENDIF
         idx(l)    = i
         l         = l+1
       endif
@@ -1759,7 +1881,11 @@ subroutine a_operator(iorb,ispin,key,hjj,Nint,na,nb)
   ASSERT (ispin < 3)
   ASSERT (Nint > 0)
 
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(iorb-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(iorb-1,bit_kind_shift)+1
+IRP_ENDIF
   ASSERT (k>0)
   l = iorb - shiftl(k-1,bit_kind_shift)-1
   key(k,ispin) = ibclr(key(k,ispin),l)
@@ -1820,7 +1946,11 @@ subroutine ac_operator(iorb,ispin,key,hjj,Nint,na,nb)
   ASSERT (tmp(1) == elec_alpha_num)
   ASSERT (tmp(2) == elec_beta_num)
 
+IRP_IF WITHOUT_SHIFTRL
+  k = ishft(iorb-1,-bit_kind_shift)+1
+IRP_ELSE
   k = shiftr(iorb-1,bit_kind_shift)+1
+IRP_ENDIF
   ASSERT (k >0)
   l = iorb - shiftl(k-1,bit_kind_shift)-1
   ASSERT (l >= 0)
@@ -1911,7 +2041,11 @@ subroutine get_excitation_degree_spin(key1,key2,degree,Nint)
 
   end select
 
+IRP_IF WITHOUT_SHIFTRL
+  degree = ishft(degree,-1)
+IRP_ELSE
   degree = shiftr(degree,1)
+IRP_ENDIF
 
 end
 
@@ -2066,10 +2200,18 @@ IRP_ENDIF
       high = max(exc(1,1), exc(1,2))
 
       ASSERT (low > 0)
+IRP_IF WITHOUT_SHIFTRL
+      j = ishft(low-1,-bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ELSE
       j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ENDIF
       n = iand(low-1,bit_kind_size-1)+1        ! mod(low,bit_kind_size)
       ASSERT (high > 0)
+IRP_IF WITHOUT_SHIFTRL
+      k = ishft(high-1,-bit_kind_shift)+1
+IRP_ELSE
       k = shiftr(high-1,bit_kind_shift)+1
+IRP_ENDIF
       m = iand(high-1,bit_kind_size-1)+1
 
       if (j==k) then
@@ -2094,10 +2236,18 @@ IRP_ENDIF
         high = max(exc(i,1), exc(i,2))
 
         ASSERT (low > 0)
+IRP_IF WITHOUT_SHIFTRL
+        j = ishft(low-1,-bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ELSE
         j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ENDIF
         n = iand(low-1,bit_kind_size-1)+1        ! mod(low,bit_kind_size)
         ASSERT (high > 0)
+IRP_IF WITHOUT_SHIFTRL
+        k = ishft(high-1,-bit_kind_shift)+1
+IRP_ELSE
         k = shiftr(high-1,bit_kind_shift)+1
+IRP_ENDIF
         m = iand(high-1,bit_kind_size-1)+1
 
         if (j==k) then
@@ -2191,10 +2341,18 @@ IRP_ENDIF
     high = max(exc(1,1),exc(1,2))
 
     ASSERT (low > 0)
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(low-1,-bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ELSE
     j = shiftr(low-1,bit_kind_shift)+1   ! Find integer in array(Nint)
+IRP_ENDIF
     n = iand(low-1,bit_kind_size-1)+1      ! mod(low,bit_kind_size)
     ASSERT (high > 0)
+IRP_IF WITHOUT_SHIFTRL
+    k = ishft(high-1,-bit_kind_shift)+1
+IRP_ELSE
     k = shiftr(high-1,bit_kind_shift)+1
+IRP_ENDIF
     m = iand(high-1,bit_kind_size-1)+1
     if (j==k) then
       nperm = popcnt(iand(det1(j),                                   &

@@ -135,7 +135,7 @@ IRP_ENDIF
       t = ior(v,v-1)
       tt = t+1
 IRP_IF WITHOUT_TRAILZ
-      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+      v = ior(tt, ishft( and(not(t),tt) - 1, -popcnt(ieor(v,v-1))) )
 IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
 IRP_ENDIF
@@ -178,7 +178,7 @@ IRP_ENDIF
       t = ior(v,v-1)
       tt = t+1
 IRP_IF WITHOUT_TRAILZ
-      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+      v = ior(tt, ishft( and(not(t),tt) - 1, -popcnt(ieor(v,v-1))) )
 IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
 IRP_ENDIF
@@ -293,7 +293,7 @@ IRP_ENDIF
       t = ior(v,v-1)
       tt = t+1
 IRP_IF WITHOUT_TRAILZ
-      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+      v = ior(tt, ishft( and(not(t),tt) - 1, -popcnt(ieor(v,v-1))) )
 IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
 IRP_ENDIF
@@ -336,7 +336,7 @@ IRP_ENDIF
       t = ior(v,v-1)
       tt = t+1
 IRP_IF WITHOUT_TRAILZ
-      v = ior(tt, shiftr( and(not(t),tt) - 1, popcnt(ieor(v,v-1))) )
+      v = ior(tt, ishft( and(not(t),tt) - 1, -popcnt(ieor(v,v-1))) )
 IRP_ELSE
       v = ior(tt, shiftr( and(not(t),tt) - 1, trailz(v)+1) )
 IRP_ENDIF
@@ -563,7 +563,11 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
     ! Binary search
     l = 0
     r = N_configuration+1
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(r-l,-1)
+IRP_ELSE
     j = shiftr(r-l,1)
+IRP_ENDIF
     do while (j>=1)
       j = j+l
       if (bit_tmp(j) == key) then
@@ -588,7 +592,11 @@ BEGIN_PROVIDER [ integer, det_to_configuration, (N_det) ]
       else
         l = j
       endif
+IRP_IF WITHOUT_SHIFTRL
+      j = ishft(r-l,-1)
+IRP_ELSE
       j = shiftr(r-l,1)
+IRP_ENDIF
     enddo
 
  enddo
@@ -815,7 +823,11 @@ subroutine binary_search_cfg(cfgInp,addcfg,bit_tmp)
   ! Binary search
   l = 0
   r = N_configuration+1
+IRP_IF WITHOUT_SHIFTRL
+  j = ishft(r-l,-1)
+IRP_ELSE
   j = shiftr(r-l,1)
+IRP_ENDIF
   do while (j>=1)
     j = j+l
     if (bit_tmp(j) == key) then
@@ -845,7 +857,11 @@ subroutine binary_search_cfg(cfgInp,addcfg,bit_tmp)
     else
       l = j
     endif
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(r-l,-1)
+IRP_ELSE
     j = shiftr(r-l,1)
+IRP_ENDIF
   enddo
 
   addcfg = -1

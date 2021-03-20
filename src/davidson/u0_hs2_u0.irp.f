@@ -367,7 +367,11 @@ compute_singles=.True.
 !          right_max = -1_8
 !          right = singles_alpha_csc_idx(krow+1)
 !          do while (right-left>0_8)
+!IRP_IF WITHOUT_SHIFTRL
+!            k8 = ishft(right+left,-1)
+!IRP_ELSE
 !            k8 = shiftr(right+left,1)
+!IRP_ENDIF
 !            if (singles_alpha_csc(k8) > lrow) then
 !              right = k8
 !            else if (singles_alpha_csc(k8) < lrow) then
@@ -395,7 +399,11 @@ compute_singles=.True.
 !          left = last_found
 !          right = right_max
 !          do while (right-left>0_8)
+!IRP_IF WITHOUT_SHIFTRL
+!            k8 = ishft(right+left,-1)
+!IRP_ELSE
 !            k8 = shiftr(right+left,1)
+!IRP_ENDIF
 !            if (singles_alpha_csc(k8) > lrow) then
 !              right = k8
 !            else if (singles_alpha_csc(k8) < lrow) then

@@ -184,7 +184,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
   q = min(j,l)
   s = max(j,l)
+IRP_IF WITHOUT_SHIFTRL
+  q = q+ishft(s*s-s,-1)
+IRP_ELSE
   q = q+shiftr(s*s-s,1)
+IRP_ENDIF
 
   do i=1,sze
     if (banned_excitation(i,k)) cycle
@@ -195,10 +199,18 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
     else
       p = min(i,k)
       r = max(i,k)
+IRP_IF WITHOUT_SHIFTRL
+      p = p+ishft(r*r-r,-1)
+IRP_ELSE
       p = p+shiftr(r*r-r,1)
+IRP_ENDIF
       i1 = min(p,q)
       i2 = max(p,q)
+IRP_IF WITHOUT_SHIFTRL
+      idx = i1+ishft(i2*i2-i2,-1)
+IRP_ELSE
       idx = i1+shiftr(i2*i2-i2,1)
+IRP_ENDIF
       !DIR$ FORCEINLINE
       call map_get(map,idx,tmp)
       out_val(i) = dble(tmp)

@@ -633,7 +633,11 @@ integer function pt2_find_sample_lr(v, w, l_in, r_in)
   r=r_in
 
   do while(r-l > 1)
+IRP_IF WITHOUT_SHIFTRL
+    i = ishft(r+l,-1)
+IRP_ELSE
     i = shiftr(r+l,1)
+IRP_ENDIF
     if(w(i) < v) then
       l = i
     else

@@ -7,8 +7,13 @@ integer*8 function det_search_key(det,Nint)
   integer, intent(in) :: Nint
   integer(bit_kind), intent(in) :: det(Nint,2)
   integer :: i
+IRP_IF WITHOUT_SHIFTRL
+  i = ishft(elec_alpha_num,- bit_kind_shift)+1
+  det_search_key = int(ishft(ior(det(i,1),det(i,2)),-1)+sum(det),8)
+IRP_ELSE
   i = shiftr(elec_alpha_num, bit_kind_shift)+1
   det_search_key = int(shiftr(ior(det(i,1),det(i,2)),1)+sum(det),8)
+IRP_ENDIF
 end
 
 
@@ -53,7 +58,11 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
   !DIR$ FORCEINLINE
   det_search = det_search_key(psi_det_sorted_bit(1,1,1),Nint)
 
+IRP_IF WITHOUT_SHIFTRL
+  istep = ishft(iend-ibegin,-1)
+IRP_ELSE
   istep = shiftr(iend-ibegin,1)
+IRP_ENDIF
   i=ibegin+istep
   do while (istep > 0)
     !DIR$ FORCEINLINE
@@ -65,7 +74,11 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
     else
       ibegin = i
     endif
+IRP_IF WITHOUT_SHIFTRL
+    istep = ishft(iend-ibegin,-1)
+IRP_ELSE
     istep = shiftr(iend-ibegin,1)
+IRP_ENDIF
     i = ibegin + istep
   end do
 

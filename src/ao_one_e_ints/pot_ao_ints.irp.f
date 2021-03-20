@@ -568,9 +568,17 @@ double precision function V_r(n,alpha)
   integer                        :: n
   include 'utils/constants.include.F'
   if(iand(n,1).eq.1)then
+IRP_IF WITHOUT_SHIFTRL
+    V_r = 0.5d0 * fact(ishft(n,-1)) / (alpha ** (ishft(n,-1) + 1))
+IRP_ELSE
     V_r = 0.5d0 * fact(shiftr(n,1)) / (alpha ** (shiftr(n,1) + 1))
+IRP_ENDIF
   else
+IRP_IF WITHOUT_SHIFTRL
+    V_r = sqpi * fact(n) / fact(ishft(n,-1)) * (0.5d0/sqrt(alpha)) ** (n+1)
+IRP_ELSE
     V_r = sqpi * fact(n) / fact(shiftr(n,1)) * (0.5d0/sqrt(alpha)) ** (n+1)
+IRP_ENDIF
   endif
 end
 
@@ -585,7 +593,11 @@ double precision function V_phi(n,m)
   integer                        :: n,m, i
   double precision               :: prod, Wallis
   prod = 1.d0
+IRP_IF WITHOUT_SHIFTRL
+  do i = 0,ishft(n,-1)-1
+IRP_ELSE
   do i = 0,shiftr(n,1)-1
+IRP_ENDIF
     prod = prod/ (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
   enddo
   V_phi = 4.d0 * prod * Wallis(m)
@@ -604,7 +616,11 @@ double precision function V_theta(n,m)
   include 'utils/constants.include.F'
   V_theta = 0.d0
   prod = 1.d0
+IRP_IF WITHOUT_SHIFTRL
+  do i = 0,ishft(n,-1)-1
+IRP_ELSE
   do i = 0,shiftr(n,1)-1
+IRP_ENDIF
     prod = prod / (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
   enddo
   V_theta = (prod+prod) * Wallis(m)
@@ -622,10 +638,18 @@ double precision function Wallis(n)
   integer                        :: n,p
   include 'utils/constants.include.F'
   if(iand(n,1).eq.0)then
+IRP_IF WITHOUT_SHIFTRL
+    Wallis = fact(ishft(n,-1))
+IRP_ELSE
     Wallis = fact(shiftr(n,1))
+IRP_ENDIF
     Wallis = pi * fact(n) / (dble(ibset(0_8,n)) * (Wallis+Wallis)*Wallis)
   else
+IRP_IF WITHOUT_SHIFTRL
+    p = ishft(n,-1)
+IRP_ELSE
     p = shiftr(n,1)
+IRP_ENDIF
     Wallis = fact(p)
     Wallis = dble(ibset(0_8,p+p)) * Wallis*Wallis / fact(p+p+1)
   endif

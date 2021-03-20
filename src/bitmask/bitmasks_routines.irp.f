@@ -85,7 +85,11 @@ subroutine list_to_bitstring( string, list, n_elements, Nint)
   string = 0_bit_kind
 
   do i=1,n_elements
+IRP_IF WITHOUT_SHIFTRL
+    iint = ishft(list(i)-1,-bit_kind_shift) + 1
+IRP_ELSE
     iint = shiftr(list(i)-1,bit_kind_shift) + 1
+IRP_ENDIF
     ipos = list(i)-shiftl((iint-1),bit_kind_shift)-1
     string(iint) = ibset( string(iint), ipos )
   enddo

@@ -57,10 +57,14 @@ BEGIN_TEMPLATE
   $type                          :: c, tmp
   integer                        :: itmp
   integer                        :: i, j
- 
+
   if(isize<2)return
 
+IRP_IF WITHOUT_SHIFTRL
+  c = x( ishft(first+last,-1) )
+IRP_ELSE
   c = x( shiftr(first+last,1) )
+IRP_ENDIF
   i = first
   j = last
   do

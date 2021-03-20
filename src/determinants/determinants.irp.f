@@ -800,23 +800,39 @@ subroutine apply_excitation(det, exc, res, ok, Nint)
 
   res = det
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(h1-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(h1-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = h1-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s1), ibset(0_bit_kind, pos)) == 0_8) return
   res(ii, s1) = ibclr(res(ii, s1), pos)
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(p1-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(p1-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = p1-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s1),shiftl(1_bit_kind, pos)) /= 0_8) return
   res(ii, s1) = ibset(res(ii, s1), pos)
 
   if(degree == 2) then
+IRP_IF WITHOUT_SHIFTRL
+    ii = ishft(h2-1,-bit_kind_shift) + 1
+IRP_ELSE
     ii = shiftr(h2-1,bit_kind_shift) + 1
+IRP_ENDIF
     pos = h2-1-shiftl(ii-1,bit_kind_shift)
     if(iand(det(ii, s2), shiftl(1_bit_kind, pos)) == 0_8) return
     res(ii, s2) = ibclr(res(ii, s2), pos)
 
+IRP_IF WITHOUT_SHIFTRL
+    ii = ishft(p2-1,-bit_kind_shift) + 1
+IRP_ELSE
     ii = shiftr(p2-1,bit_kind_shift) + 1
+IRP_ENDIF
     pos = p2-1-shiftl(ii-1,bit_kind_shift)
     if(iand(det(ii, s2), shiftl(1_bit_kind, pos)) /= 0_8) return
     res(ii, s2) = ibset(res(ii, s2), pos)
@@ -839,13 +855,21 @@ subroutine apply_particles(det, s1, p1, s2, p2, res, ok, Nint)
   res = det
 
   if(p1 /= 0) then
+IRP_IF WITHOUT_SHIFTRL
+    ii =ishft(p1-1,-bit_kind_shift) + 1
+IRP_ELSE
     ii =shiftr(p1-1,bit_kind_shift) + 1
+IRP_ENDIF
     pos = p1-1-shiftl(ii-1,bit_kind_shift)
     if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) /= 0_8) return
     res(ii, s1) = ibset(res(ii, s1), pos)
   end if
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(p2-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(p2-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = p2-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s2), shiftl(1_bit_kind, pos)) /= 0_8) return
   res(ii, s2) = ibset(res(ii, s2), pos)
@@ -868,13 +892,21 @@ subroutine apply_holes(det, s1, h1, s2, h2, res, ok, Nint)
   res = det
 
   if(h1 /= 0) then
+IRP_IF WITHOUT_SHIFTRL
+    ii = ishft(h1-1,-bit_kind_shift) + 1
+IRP_ELSE
     ii = shiftr(h1-1,bit_kind_shift) + 1
+IRP_ENDIF
     pos = h1-1-shiftl(ii-1,bit_kind_shift)
     if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) == 0_8) return
     res(ii, s1) = ibclr(res(ii, s1), pos)
   end if
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(h2-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(h2-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = h2-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s2), shiftl(1_bit_kind, pos)) == 0_8) return
   res(ii, s2) = ibclr(res(ii, s2), pos)
@@ -895,7 +927,11 @@ subroutine apply_particle(det, s1, p1, res, ok, Nint)
   ok = .false.
   res = det
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(p1-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(p1-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = p1-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) /= 0_8) return
   res(ii, s1) = ibset(res(ii, s1), pos)
@@ -917,7 +953,11 @@ subroutine apply_hole(det, s1, h1, res, ok, Nint)
   ok = .false.
   res = det
 
+IRP_IF WITHOUT_SHIFTRL
+  ii = ishft(h1-1,-bit_kind_shift) + 1
+IRP_ELSE
   ii = shiftr(h1-1,bit_kind_shift) + 1
+IRP_ENDIF
   pos = h1-1-shiftl(ii-1,bit_kind_shift)
   if(iand(det(ii, s1), shiftl(1_bit_kind, pos)) == 0_8) return
   res(ii, s1) = ibclr(res(ii, s1), pos)
