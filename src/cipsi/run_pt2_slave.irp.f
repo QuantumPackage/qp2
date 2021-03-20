@@ -171,7 +171,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   integer                         :: rc, i
 
   integer                        :: worker_id, ctask, ltask
-  character*(512)                :: task
+  character(LEN=:), allocatable :: task
   integer                        :: task_id(1)
 
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
@@ -191,6 +191,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   logical :: sending
   PROVIDE global_selection_buffer global_selection_buffer_lock
 
+  allocate(character(LEN=512) :: task)
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
@@ -264,6 +265,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
     call pt2_dealloc(pt2_data(1))
   end do
+  deallocate(task)
   call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 
   integer, external :: disconnect_from_taskserver
