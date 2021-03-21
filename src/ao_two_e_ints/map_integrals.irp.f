@@ -69,22 +69,19 @@ subroutine two_e_integrals_index_reverse(i,j,k,l,i1)
   integer(key_kind), intent(in)  :: i1
   integer(key_kind)              :: i2,i3
   i = 0
-  i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
-  l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
 IRP_IF WITHOUT_SHIFTRL
+  i2   = ceiling(0.5d0*(dsqrt(dble(ishft(i1,3)+1))-1.d0))
+  l(1) = ceiling(0.5d0*(dsqrt(dble(ishft(i2,3)+1))-1.d0))
   i3   = i1 - ishft(i2*i2-i2,-1)
-IRP_ELSE
-  i3   = i1 - shiftr(i2*i2-i2,1)
-IRP_ENDIF
-  k(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
-IRP_IF WITHOUT_SHIFTRL
+  k(1) = ceiling(0.5d0*(dsqrt(dble(ishft(i3,3)+1))-1.d0))
   j(1) = int(i2 - ishft(l(1)*l(1)-l(1),-1),4)
-IRP_ELSE
-  j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
-IRP_ENDIF
-IRP_IF WITHOUT_SHIFTRL
   i(1) = int(i3 - ishft(k(1)*k(1)-k(1),-1),4)
 IRP_ELSE
+  i2   = ceiling(0.5d0*(dsqrt(dble(shiftl(i1,3)+1))-1.d0))
+  l(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i2,3)+1))-1.d0))
+  i3   = i1 - shiftr(i2*i2-i2,1)
+  k(1) = ceiling(0.5d0*(dsqrt(dble(shiftl(i3,3)+1))-1.d0))
+  j(1) = int(i2 - shiftr(l(1)*l(1)-l(1),1),4)
   i(1) = int(i3 - shiftr(k(1)*k(1)-k(1),1),4)
 IRP_ENDIF
 
@@ -166,7 +163,7 @@ subroutine ao_idx2_sq(i,j,ij)
     ij=i*i
   endif
 end
-  
+
 subroutine idx2_tri_int(i,j,ij)
   implicit none
   integer, intent(in)  :: i,j
@@ -176,7 +173,7 @@ subroutine idx2_tri_int(i,j,ij)
   q = min(i,j)
   ij = q+ishft(p*p-p,-1)
 end
-  
+
 subroutine ao_idx2_tri_key(i,j,ij)
   use map_module
   implicit none
@@ -187,8 +184,8 @@ subroutine ao_idx2_tri_key(i,j,ij)
   q = min(i,j)
   ij = q+ishft(p*p-p,-1)
 end
-  
-subroutine two_e_integrals_index_2fold(i,j,k,l,i1)                                           
+
+subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
   use map_module
   implicit none
   integer, intent(in)            :: i,j,k,l
@@ -200,7 +197,7 @@ subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
   call ao_idx2_tri_key(ik,jl,i1)
 end
 
-subroutine ao_idx2_sq_rev(i,k,ik)                                                                
+subroutine ao_idx2_sq_rev(i,k,ik)
   BEGIN_DOC
   ! reverse square compound index
   END_DOC
@@ -334,9 +331,15 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
           !DIR$ FORCEINLINE
           call map_get(ao_integrals_map,idx,integral)
           ii = l-ao_integrals_cache_min
+IRP_IF WITHOUT_SHIFTRL
+          ii = ior( ishft(ii,6), k-ao_integrals_cache_min)
+          ii = ior( ishft(ii,6), j-ao_integrals_cache_min)
+          ii = ior( ishft(ii,6), i-ao_integrals_cache_min)
+IRP_ELSE
           ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
           ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+IRP_ENDIF
           ao_integrals_cache(ii) = integral
         enddo
       enddo
@@ -374,9 +377,15 @@ double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
       call map_get(map,idx,tmp)
     else
       ii = l-ao_integrals_cache_min
+IRP_IF WITHOUT_SHIFTRL
+      ii = ior( ishft(ii,6), k-ao_integrals_cache_min)
+      ii = ior( ishft(ii,6), j-ao_integrals_cache_min)
+      ii = ior( ishft(ii,6), i-ao_integrals_cache_min)
+IRP_ELSE
       ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+IRP_ENDIF
       tmp = ao_integrals_cache(ii)
     endif
   endif
@@ -420,11 +429,17 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
            tmp_im = 0.d0
            integral = dcmplx(tmp_re,tmp_im)
          endif
-         
+
          ii = l-ao_integrals_cache_min
+IRP_IF WITHOUT_SHIFTRL
+         ii = ior( ishft(ii,6), k-ao_integrals_cache_min)
+         ii = ior( ishft(ii,6), j-ao_integrals_cache_min)
+         ii = ior( ishft(ii,6), i-ao_integrals_cache_min)
+IRP_ELSE
          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
          ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+IRP_ENDIF
          ao_integrals_cache_periodic(ii) = integral
        enddo
      enddo
@@ -480,9 +495,15 @@ complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
          endif
     else
       ii = l-ao_integrals_cache_min
+IRP_IF WITHOUT_SHIFTRL
+      ii = ior( ishft(ii,6), k-ao_integrals_cache_min)
+      ii = ior( ishft(ii,6), j-ao_integrals_cache_min)
+      ii = ior( ishft(ii,6), i-ao_integrals_cache_min)
+IRP_ELSE
       ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
       ii = ior( shiftl(ii,6), i-ao_integrals_cache_min)
+IRP_ENDIF
       tmp = ao_integrals_cache_periodic(ii)
     endif
     result = tmp
@@ -495,7 +516,7 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
-  ! physicist convention : <ij|kl> 
+  ! physicist convention : <ij|kl>
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze
@@ -524,7 +545,7 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
-  ! physicist convention : <ij|kl> 
+  ! physicist convention : <ij|kl>
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze

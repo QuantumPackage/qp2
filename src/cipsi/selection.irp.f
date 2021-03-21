@@ -12,6 +12,20 @@ subroutine get_mask_phase(det1, pm, Nint)
   tmp1 = 0_8
   tmp2 = 0_8
   do i=1,Nint
+IRP_IF WITHOUT_SHIFTRL
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 1))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 1))
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 2))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 2))
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 4))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 4))
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 8))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 8))
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 16))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 16))
+    pm(i,1) = ieor(pm(i,1), ishft(pm(i,1), 32))
+    pm(i,2) = ieor(pm(i,2), ishft(pm(i,2), 32))
+IRP_ELSE
     pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 1))
     pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 1))
     pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
@@ -24,6 +38,7 @@ subroutine get_mask_phase(det1, pm, Nint)
     pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
     pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
     pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+IRP_ENDIF
     pm(i,1) = ieor(pm(i,1), tmp1)
     pm(i,2) = ieor(pm(i,2), tmp2)
     if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)

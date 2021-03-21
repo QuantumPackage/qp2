@@ -28,7 +28,11 @@ IRP_ENDIF
     n_open_shells = n_open_shells + popcnt(cfg(i,1))
   enddo
   mask = n_open_shells
+IRP_IF WITHOUT_SHIFTRL
+  mask = ishft(mask,56)
+IRP_ELSE
   mask = shiftl(mask,56)
+IRP_ENDIF
   configuration_search_key = ior (mask,configuration_search_key)
 
 end

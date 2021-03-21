@@ -87,10 +87,11 @@ subroutine list_to_bitstring( string, list, n_elements, Nint)
   do i=1,n_elements
 IRP_IF WITHOUT_SHIFTRL
     iint = ishft(list(i)-1,-bit_kind_shift) + 1
+    ipos = list(i)-ishft((iint-1),bit_kind_shift)-1
 IRP_ELSE
     iint = shiftr(list(i)-1,bit_kind_shift) + 1
-IRP_ENDIF
     ipos = list(i)-shiftl((iint-1),bit_kind_shift)-1
+IRP_ENDIF
     string(iint) = ibset( string(iint), ipos )
   enddo
 
@@ -123,7 +124,11 @@ subroutine bitstring_to_str( output, string, Nint )
         output(ibuf:ibuf) = '-'
       endif
       ibuf = ibuf+1
+IRP_IF WITHOUT_SHIFTRL
+      itemp = ishft(itemp,1)
+IRP_ELSE
       itemp = shiftl(itemp,1)
+IRP_ENDIF
     enddo
   enddo
   output(ibuf:ibuf) = '|'
@@ -157,7 +162,11 @@ subroutine configuration_to_str( output, string, Nint )
         output(ibuf:ibuf) = '0'
       endif
       ibuf = ibuf+1
+IRP_IF WITHOUT_SHIFTRL
+      itemp = ishft(itemp,1)
+IRP_ELSE
       itemp = shiftl(itemp,1)
+IRP_ENDIF
     enddo
   enddo
   output(ibuf:ibuf) = '|'

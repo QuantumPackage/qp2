@@ -12,10 +12,11 @@ logical function is_the_hole_in_det(key_in,ispin,i_hole)
  enddo
 IRP_IF WITHOUT_SHIFTRL
  k = ishft(i_hole-1,-bit_kind_shift)+1
+ j = i_hole-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
  k = shiftr(i_hole-1,bit_kind_shift)+1
-IRP_ENDIF
  j = i_hole-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
  itest(k) = ibset(itest(k),j)
  j = 0
  do i = 1, N_int
@@ -44,10 +45,11 @@ logical function is_the_particl_in_det(key_in,ispin,i_particl)
  enddo
 IRP_IF WITHOUT_SHIFTRL
  k = ishft(i_particl-1,-bit_kind_shift)+1
+ j = i_particl-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
  k = shiftr(i_particl-1,bit_kind_shift)+1
-IRP_ENDIF
  j = i_particl-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
  itest(k) = ibset(itest(k),j)
  j = 0
  do i = 1, N_int

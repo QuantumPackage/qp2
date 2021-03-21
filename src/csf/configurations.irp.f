@@ -107,7 +107,11 @@ IRP_ENDIF
     n_alpha_in_single = n_alpha_in_single - popcnt( o(i,2) )
   enddo
 
+IRP_IF WITHOUT_SHIFTRL
+  v = ishft(1,n_alpha_in_single) - 1
+IRP_ELSE
   v = shiftl(1,n_alpha_in_single) - 1
+IRP_ENDIF
 
   ! Initialize first determinant
   d(:,1,1) = o(:,2)
@@ -123,7 +127,11 @@ IRP_ENDIF
 
   sze = int(binom_int(n,n_alpha_in_single),4)
 
+IRP_IF WITHOUT_SHIFTRL
+  if ( (ishft(n_alpha_in_single,1) == n).and.n>0 ) then
+IRP_ELSE
   if ( (shiftl(n_alpha_in_single,1) == n).and.n>0 ) then
+IRP_ENDIF
 
     ! Time reversal symmetry
     d(:,1,2) = d(:,2,1)
@@ -265,7 +273,11 @@ IRP_ENDIF
     n_alpha_in_single = n_alpha_in_single - popcnt( o(i,2) )
   enddo
 
+IRP_IF WITHOUT_SHIFTRL
+  v = ishft(1,n_alpha_in_single) - 1
+IRP_ELSE
   v = shiftl(1,n_alpha_in_single) - 1
+IRP_ENDIF
 
   ! Initialize first determinant
   d(:,1,1) = o(:,2)
@@ -281,7 +293,11 @@ IRP_ENDIF
 
   sze = int(binom_int(n,n_alpha_in_single),4)
 
+IRP_IF WITHOUT_SHIFTRL
+  if ( (ishft(n_alpha_in_single,1) == n).and.n>0 ) then
+IRP_ELSE
   if ( (shiftl(n_alpha_in_single,1) == n).and.n>0 ) then
+IRP_ENDIF
 
     ! Time reversal symmetry
     d(:,1,sze) = d(:,2,1)

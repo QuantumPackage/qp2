@@ -614,7 +614,7 @@ double precision function rint1(n,rho)
   rho_tmp = 1.d0
   do k=1,20
     rho_tmp = -rho_tmp*rho
-    diff=rho_tmp*fact_inv(k)*inv_int(shiftl(k+n,1)+1)
+    diff=rho_tmp*fact_inv(k)*inv_int(ishft(k+n,1)+1)
     rint1=rint1+diff
     if (dabs(diff) > eps) then
       cycle

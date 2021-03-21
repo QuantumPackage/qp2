@@ -624,7 +624,11 @@ double precision function ERI(alpha,beta,delta,gama,a_x,b_x,c_x,d_x,a_y,b_y,c_y,
   p = alpha + beta
   q = delta + gama
   ASSERT (p+q >= 0.d0)
+IRP_IF WITHOUT_SHIFTRL
+  n_pt =  ishft( nx+ny+nz,1 )
+IRP_ELSE
   n_pt =  shiftl( nx+ny+nz,1 )
+IRP_ENDIF
 
   coeff = pi_5_2 / (p * q * dsqrt(p+q))
   if (n_pt == 0) then
@@ -784,7 +788,11 @@ integer function n_pt_sup(a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z)
   ! $I_x(a_x,b_x,c_x,d_x) \, I_y(a_y,b_y,c_y,d_y) \, I_z(a_z,b_z,c_z,d_z)$
   END_DOC
   integer                        :: a_x,b_x,c_x,d_x,a_y,b_y,c_y,d_y,a_z,b_z,c_z,d_z
+IRP_IF WITHOUT_SHIFTRL
+  n_pt_sup =  ishft( a_x+b_x+c_x+d_x + a_y+b_y+c_y+d_y + a_z+b_z+c_z+d_z,1 )
+IRP_ELSE
   n_pt_sup =  shiftl( a_x+b_x+c_x+d_x + a_y+b_y+c_y+d_y + a_z+b_z+c_z+d_z,1 )
+IRP_ENDIF
 end
 
 

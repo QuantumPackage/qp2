@@ -140,7 +140,11 @@ IRP_ENDIF
       endif
     endif
     i=l
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(l,1)
+IRP_ELSE
     j = shiftl(l,1)
+IRP_ENDIF
     do while (j<k)
       if ( x(j) < x(j+1) ) then
         j=j+1
@@ -149,7 +153,11 @@ IRP_ENDIF
         x(i) = x(j)
         iorder(i) = iorder(j)
         i = j
+IRP_IF WITHOUT_SHIFTRL
+        j = ishft(j,1)
+IRP_ELSE
         j = shiftl(j,1)
+IRP_ENDIF
       else
         j = k+1
       endif
@@ -159,7 +167,11 @@ IRP_ENDIF
         x(i) = x(j)
         iorder(i) = iorder(j)
         i = j
+IRP_IF WITHOUT_SHIFTRL
+        j = ishft(j,1)
+IRP_ELSE
         j = shiftl(j,1)
+IRP_ENDIF
       else
         j = k+1
       endif
@@ -205,7 +217,11 @@ IRP_ENDIF
       endif
     endif
     i=l
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(l,1)
+IRP_ELSE
     j = shiftl(l,1)
+IRP_ENDIF
     do while (j<k)
       if ( x(j) < x(j+1) ) then
         j=j+1
@@ -214,7 +230,11 @@ IRP_ENDIF
         x(i) = x(j)
         iorder(i) = iorder(j)
         i = j
+IRP_IF WITHOUT_SHIFTRL
+        j = ishft(j,1)
+IRP_ELSE
         j = shiftl(j,1)
+IRP_ENDIF
       else
         j = k+1
       endif
@@ -224,7 +244,11 @@ IRP_ENDIF
         x(i) = x(j)
         iorder(i) = iorder(j)
         i = j
+IRP_IF WITHOUT_SHIFTRL
+        j = ishft(j,1)
+IRP_ELSE
         j = shiftl(j,1)
+IRP_ENDIF
       else
         j = k+1
       endif

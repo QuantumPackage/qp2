@@ -21,10 +21,11 @@ subroutine do_single_excitation_cfg(key_in,key_out,i_hole,i_particle,ok)
   ! hole
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_hole-1,-bit_kind_shift)+1
+  j = i_hole-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_hole-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
 
   ! Check if the position j is singly occupied
@@ -52,10 +53,11 @@ IRP_ENDIF
   ! particle
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_particle-1,-bit_kind_shift)+1
+  j = i_particle-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_particle-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
 
   ! Check if the position j is singly occupied
@@ -119,10 +121,11 @@ subroutine do_single_excitation_cfg_with_type(key_in,key_out,i_hole,i_particle,e
   ! hole
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_hole-1,-bit_kind_shift)+1
+  j = i_hole-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_hole-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
 
   ! Check if the position j is singly occupied
@@ -152,10 +155,11 @@ IRP_ENDIF
   ! particle
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_particle-1,-bit_kind_shift)+1
+  j = i_particle-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_particle-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
 
   ! Check if the position j is singly occupied

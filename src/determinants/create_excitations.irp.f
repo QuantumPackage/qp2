@@ -20,10 +20,11 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   ! hole
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_hole-1,-bit_kind_shift)+1
+  j = i_hole-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_hole-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_hole-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
 ! check whether position j is occupied
   if (iand(key_in(k,ispin),mask) /= 0_bit_kind) then
@@ -36,10 +37,11 @@ IRP_ENDIF
   ! particle
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_particle-1,-bit_kind_shift)+1
+  j = i_particle-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_particle-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_particle-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   mask = ibset(0_bit_kind,j)
   if (iand(key_in(k,ispin),mask) == 0_bit_kind) then
    key_in(k,ispin) = ibset(key_in(k,ispin),j)
@@ -102,10 +104,11 @@ logical function is_spin_flip_possible(key_in,i_flip,ispin)
   key_tmp = 0_bit_kind
 IRP_IF WITHOUT_SHIFTRL
   k = ishft(i_flip-1,-bit_kind_shift)+1
+  j = i_flip-ishft(k-1,bit_kind_shift)-1
 IRP_ELSE
   k = shiftr(i_flip-1,bit_kind_shift)+1
-IRP_ENDIF
   j = i_flip-shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   key_tmp(k,1) = ibset(key_tmp(k,1),j)
   integer                        :: other_spin(2)
   other_spin(1) = 2

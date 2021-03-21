@@ -106,7 +106,11 @@ IRP_ENDIF
       detb(k) = ibclr(detb(k),ipos)
 
       ! Create a mask will all MOs higher than the beta electron
+IRP_IF WITHOUT_SHIFTRL
+      mask = not(ishft(1_bit_kind,ipos + 1) - 1_bit_kind)
+IRP_ELSE
       mask = not(shiftl(1_bit_kind,ipos + 1) - 1_bit_kind)
+IRP_ENDIF
 
       ! Apply the mask to the alpha string to count how many electrons to cross
       nperm = popcnt( iand(mask, deta(k)) )

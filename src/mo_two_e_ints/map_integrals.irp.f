@@ -73,9 +73,15 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:128_8*128_8*128_8*12
          !DIR$ FORCEINLINE
          call map_get(mo_integrals_map,idx,integral)
          ii = l-mo_integrals_cache_min_8
+IRP_IF WITHOUT_SHIFTRL
+         ii = ior( ishft(ii,7), k-mo_integrals_cache_min_8)
+         ii = ior( ishft(ii,7), j-mo_integrals_cache_min_8)
+         ii = ior( ishft(ii,7), i-mo_integrals_cache_min_8)
+IRP_ELSE
          ii = ior( shiftl(ii,7), k-mo_integrals_cache_min_8)
          ii = ior( shiftl(ii,7), j-mo_integrals_cache_min_8)
          ii = ior( shiftl(ii,7), i-mo_integrals_cache_min_8)
+IRP_ENDIF
          mo_integrals_cache(ii) = integral
        enddo
      enddo
@@ -121,9 +127,15 @@ double precision function get_two_e_integral(i,j,k,l,map)
     get_two_e_integral = dble(tmp)
   else
     ii_8 = int(l,8)-mo_integrals_cache_min_8
+IRP_IF WITHOUT_SHIFTRL
+    ii_8 = ior( ishft(ii_8,7), int(k,8)-mo_integrals_cache_min_8)
+    ii_8 = ior( ishft(ii_8,7), int(j,8)-mo_integrals_cache_min_8)
+    ii_8 = ior( ishft(ii_8,7), int(i,8)-mo_integrals_cache_min_8)
+IRP_ELSE
     ii_8 = ior( shiftl(ii_8,7), int(k,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(j,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(i,8)-mo_integrals_cache_min_8)
+IRP_ENDIF
     get_two_e_integral = mo_integrals_cache(ii_8)
   endif
 end
@@ -179,8 +191,13 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   ii0 = ior(ii0, j-mo_integrals_cache_min)
 
   ii0_8 = int(l,8)-mo_integrals_cache_min_8
+IRP_IF WITHOUT_SHIFTRL
+  ii0_8 = ior( ishft(ii0_8,7), int(k,8)-mo_integrals_cache_min_8)
+  ii0_8 = ior( ishft(ii0_8,7), int(j,8)-mo_integrals_cache_min_8)
+IRP_ELSE
   ii0_8 = ior( shiftl(ii0_8,7), int(k,8)-mo_integrals_cache_min_8)
   ii0_8 = ior( shiftl(ii0_8,7), int(j,8)-mo_integrals_cache_min_8)
+IRP_ENDIF
 
   q = min(j,l)
   s = max(j,l)
@@ -194,7 +211,11 @@ IRP_ENDIF
     if (banned_excitation(i,k)) cycle
     ii = ior(ii0, i-mo_integrals_cache_min)
     if (iand(ii, -128) == 0) then
+IRP_IF WITHOUT_SHIFTRL
+      ii_8 = ior( ishft(ii0_8,7), int(i,8)-mo_integrals_cache_min_8)
+IRP_ELSE
       ii_8 = ior( shiftl(ii0_8,7), int(i,8)-mo_integrals_cache_min_8)
+IRP_ENDIF
       out_val(i) = mo_integrals_cache(ii_8)
     else
       p = min(i,k)

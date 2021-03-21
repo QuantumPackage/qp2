@@ -43,7 +43,11 @@ subroutine get_excitation_degree(key1,key2,degree,Nint)
 
     case default
       integer :: lmax
+IRP_IF WITHOUT_SHIFTRL
+      lmax = ishft(Nint,1)
+IRP_ELSE
       lmax = shiftl(Nint,1)
+IRP_ENDIF
       do l=1,lmax
         xorvec(l) = xor( key1(l), key2(l))
       enddo
@@ -262,16 +266,31 @@ IRP_ENDIF
         n = iand(low,bit_kind_size-1)
 
         if (j==k) then
+IRP_IF WITHOUT_SHIFTRL
+          nperm = nperm + popcnt(iand(det1(j,ispin),           &
+              iand( ishft(1_bit_kind,m)-1_bit_kind,            &
+                    not(ishft(1_bit_kind,n))+1_bit_kind)) )
+IRP_ELSE
           nperm = nperm + popcnt(iand(det1(j,ispin),           &
               iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
                     not(shiftl(1_bit_kind,n))+1_bit_kind)) )
+IRP_ENDIF
         else
+IRP_IF WITHOUT_SHIFTRL
+          nperm = nperm + popcnt(                                    &
+               iand(det1(j,ispin),                                   &
+                    iand(not(0_bit_kind),                            &
+                         (not(ishft(1_bit_kind,n)) + 1_bit_kind) ))) &
+               + popcnt(iand(det1(k,ispin),                          &
+                             (ishft(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ELSE
           nperm = nperm + popcnt(                                    &
                iand(det1(j,ispin),                                   &
                     iand(not(0_bit_kind),                            &
                          (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
                + popcnt(iand(det1(k,ispin),                          &
                              (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ENDIF
 
           do i=j+1,k-1
             nperm = nperm + popcnt(det1(i,ispin))
@@ -299,16 +318,31 @@ IRP_ENDIF
           n = iand(low,bit_kind_size-1)
 
           if (j==k) then
+IRP_IF WITHOUT_SHIFTRL
             nperm = nperm + popcnt(iand(det1(j,ispin),           &
-                iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
-                    not(shiftl(1_bit_kind,n))+1_bit_kind)) )
+               iand( ishft(1_bit_kind,m)-1_bit_kind,             &
+                     not(ishft(1_bit_kind,n))+1_bit_kind)) )
+IRP_ELSE
+            nperm = nperm + popcnt(iand(det1(j,ispin),           &
+               iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
+                     not(shiftl(1_bit_kind,n))+1_bit_kind)) )
+IRP_ENDIF
           else
+IRP_IF WITHOUT_SHIFTRL
             nperm = nperm + popcnt(                                    &
                  iand(det1(j,ispin),                                   &
                       iand(not(0_bit_kind),                            &
-                           (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
+                           (not(ishft(1_bit_kind,n)) + 1_bit_kind) ))) &
                  + popcnt(iand(det1(k,ispin),                          &
-                               (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
+                          (ishft(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ELSE
+            nperm = nperm + popcnt(                                    &
+                 iand(det1(j,ispin),                                   &
+                      iand(not(0_bit_kind),                            &
+                           (not(shiftl(1_bit_kind,n)) + 1_bit_kind) )))&
+                 + popcnt(iand(det1(k,ispin),                          &
+                          (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ENDIF
 
             do i=j+1,k-1
               nperm = nperm + popcnt(det1(i,ispin))
@@ -344,12 +378,21 @@ subroutine get_phasemask_bit(det1, pm, Nint)
   do ispin=1,2
   tmp = 0_8
   do i=1,Nint
+IRP_IF WITHOUT_SHIFTRL
+    pm(i,ispin) = xor(det1(i,ispin), ishft(det1(i,ispin), 1))
+    pm(i,ispin) = xor(pm(i,ispin), ishft(pm(i,ispin), 2))
+    pm(i,ispin) = xor(pm(i,ispin), ishft(pm(i,ispin), 4))
+    pm(i,ispin) = xor(pm(i,ispin), ishft(pm(i,ispin), 8))
+    pm(i,ispin) = xor(pm(i,ispin), ishft(pm(i,ispin), 16))
+    pm(i,ispin) = xor(pm(i,ispin), ishft(pm(i,ispin), 32))
+IRP_ELSE
     pm(i,ispin) = xor(det1(i,ispin), shiftl(det1(i,ispin), 1))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 2))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 4))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 8))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 16))
     pm(i,ispin) = xor(pm(i,ispin), shiftl(pm(i,ispin), 32))
+IRP_ENDIF
     pm(i,ispin) = xor(pm(i,ispin), tmp)
     if(iand(popcnt(det1(i,ispin)), 1) == 1) tmp = not(tmp)
   end do
@@ -434,16 +477,31 @@ IRP_ENDIF
       n = iand(low,bit_kind_size-1)
 
       if (j==k) then
+IRP_IF WITHOUT_SHIFTRL
         nperm = nperm + popcnt(iand(det1(j,ispin),           &
-            iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
+           iand( ishft(1_bit_kind,m)-1_bit_kind,            &
+                  not(ishft(1_bit_kind,n))+1_bit_kind)) )
+IRP_ELSE
+        nperm = nperm + popcnt(iand(det1(j,ispin),           &
+            iand( shiftl(1_bit_kind,m)-1_bit_kind,           &
                   not(shiftl(1_bit_kind,n))+1_bit_kind)) )
+IRP_ENDIF
       else
+IRP_IF WITHOUT_SHIFTRL
+        nperm = nperm + popcnt(                                    &
+             iand(det1(j,ispin),                                   &
+                  iand(not(0_bit_kind),                            &
+                       (not(ishft(1_bit_kind,n)) + 1_bit_kind) ))) &
+             + popcnt(iand(det1(k,ispin),                          &
+                           (ishft(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ELSE
         nperm = nperm + popcnt(                                    &
              iand(det1(j,ispin),                                   &
                   iand(not(0_bit_kind),                            &
                        (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
              + popcnt(iand(det1(k,ispin),                          &
                            (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
+IRP_ENDIF
 
         do i=j+1,k-1
           nperm = nperm + popcnt(det1(i,ispin))
@@ -1887,7 +1945,11 @@ IRP_ELSE
   k = shiftr(iorb-1,bit_kind_shift)+1
 IRP_ENDIF
   ASSERT (k>0)
+IRP_IF WITHOUT_SHIFTRL
+  l = iorb - ishft(k-1,bit_kind_shift)-1
+IRP_ELSE
   l = iorb - shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   key(k,ispin) = ibclr(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
 
@@ -1952,7 +2014,11 @@ IRP_ELSE
   k = shiftr(iorb-1,bit_kind_shift)+1
 IRP_ENDIF
   ASSERT (k >0)
+IRP_IF WITHOUT_SHIFTRL
+  l = iorb - ishft(k-1,bit_kind_shift)-1
+IRP_ELSE
   l = iorb - shiftl(k-1,bit_kind_shift)-1
+IRP_ENDIF
   ASSERT (l >= 0)
   key(k,ispin) = ibset(key(k,ispin),l)
   other_spin = iand(ispin,1)+1
