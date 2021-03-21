@@ -218,7 +218,7 @@ END_DOC
     scratch(ao_num,ao_num)                &
   )
 
-! Compute the matrices B and X
+  ! Compute the matrices B and X
   B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
     j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
@@ -226,7 +226,7 @@ END_DOC
 
       i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
 
-! Compute product of two errors vectors
+      ! Compute product of two errors vectors
 
       call dgemm('N','N',ao_num,ao_num,ao_num,                      &
            1.d0,                                                    &
@@ -235,13 +235,24 @@ END_DOC
            0.d0,                                                    &
            scratch,size(scratch,1))
 
-! Compute Trace
+      ! Compute Trace
 
       do k=1,ao_num
         B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + scratch(k,k)
       enddo
     enddo
   enddo
+
+! TODO : Could be simplified (to be checked)
+!
+!  call dgemm('T','N', &
+!    min(dim_DIIS,iteration_SCF), min(dim_DIIS,iteration_SCF), &
+!    ao_num*ao_num, &
+!    1.d0,                                                    &
+!    error_matrix_DIIS,size(error_matrix_DIIS,1)*size(error_matrix_DIIS,2), &
+!    error_matrix_DIIS,size(error_matrix_DIIS,1)*size(error_matrix_DIIS,2), &
+!    0.d0,                                                    &
+!    B_matrix_DIIS,size(B_matrix_DIIS,1))
 
 ! Pad B matrix and build the X matrix
 
