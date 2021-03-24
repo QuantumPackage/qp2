@@ -781,6 +781,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   real*8            :: meCC
   real*8            :: ecore
 
+  PROVIDE h_core_ri
   ! initialize energies
   diag_energies = 0.d0
 
@@ -928,6 +929,8 @@ subroutine obtain_connected_I_foralpha_fromfilterdlist(idxI, nconnectedJ, idslis
   integer :: end_index
   integer :: Nsomo_alpha
   logical :: isOKlistJ
+
+  PROVIDE DetToCSFTransformationMatrix
 
   isOKlistJ = .False.
 
@@ -1441,7 +1444,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         cnti = ii-starti+1
         do jj = startj, endj
           cntj = jj-startj+1
-          !meCC1 = AIJpqContainer(NSOMOI,extype,pmodel,qmodel,cnti,cntj)
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
@@ -1629,17 +1631,23 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   ! Add the diagonal contribution
   !$OMP DO
-  do kk=1,n_st
   do i = 1,n_CSF
+    do kk=1,n_st
      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
-  enddo
+    enddo
   enddo
   !$OMP END DO
 
-  !$OMP end parallel
+  !$OMP END PARALLEL
+  call omp_set_max_active_levels(4)
 
+  deallocate(diag_energies)
+  deallocate(bit_tmp)
 
 end subroutine calculate_sigma_vector_cfg_nst_naive_store
+
+
+
 
 subroutine calculate_sigma_vector_cfg_nst(psi_out, psi_in, n_st, sze, istart, iend, ishift, istep)
   implicit none
