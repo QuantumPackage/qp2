@@ -266,8 +266,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   do k=N_st+1,N_st_diag
     do i=1,sze
-        call random_number(r1)
-        call random_number(r2)
+        !call random_number(r1)
+        !call random_number(r2)
+        r1 = 0.5
+        r2 = 0.5
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
         u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)

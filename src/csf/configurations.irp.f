@@ -826,7 +826,7 @@ subroutine binary_search_cfg(cfgInp,addcfg,bit_tmp)
   END_DOC
   integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
   integer          , intent(out) :: addcfg
-  integer*8,          intent(in) :: bit_tmp(N_configuration)
+  integer*8,          intent(in) :: bit_tmp(0:N_configuration+1)
 
   logical                        :: found
   integer                        :: l, r, j, k

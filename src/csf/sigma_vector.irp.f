@@ -882,6 +882,336 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
 end subroutine calculate_preconditioner_cfg
 
+subroutine obtain_connected_I_foralpha_fromfilterdlist(idxI, nconnectedJ, idslistconnectedJ, listconnectedJ, Ialpha, connectedI, idxs_connectedI, nconnectedI, excitationIds, excitationTypes, diagfactors)
+  implicit none
+  use bitmasks
+  BEGIN_DOC
+  ! Documentation for obtain_connected_I_foralpha
+  ! This function returns all those selected configurations
+  ! which are connected to the input configuration
+  ! Ialpha by a single excitation.
+  !
+  ! The type of excitations are ordered as follows:
+  ! Type 1 - SOMO -> SOMO
+  ! Type 2 - DOMO -> VMO
+  ! Type 3 - SOMO -> VMO
+  ! Type 4 - DOMO -> SOMO
+  !
+  ! Order of operators
+  ! \alpha> = a^\dag_p a_q |I> = E_pq |I>
+  END_DOC
+  integer          ,intent(in)             :: idxI
+  integer          ,intent(in)             :: nconnectedJ
+  integer(bit_kind),intent(in)             :: listconnectedJ(N_int,2,*)
+  integer(bit_kind),intent(in)             :: Ialpha(N_int,2)
+  integer(bit_kind),intent(out)            :: connectedI(N_int,2,*)
+  integer          ,intent(in)             :: idslistconnectedJ(*)
+  integer          ,intent(out)            :: idxs_connectedI(*)
+  integer,intent(out)                      :: nconnectedI
+  integer,intent(out)                      :: excitationIds(2,*)
+  integer,intent(out)                      :: excitationTypes(*)
+  real*8 ,intent(out)                      :: diagfactors(*)
+  integer*8                                :: Idomo
+  integer*8                                :: Isomo
+  integer*8                                :: Jdomo
+  integer*8                                :: Jsomo
+  integer*8                                :: IJsomo
+  integer*8                                :: diffSOMO
+  integer*8                                :: diffDOMO
+  integer*8                                :: xordiffSOMODOMO
+  integer                                  :: ndiffSOMO
+  integer                                  :: ndiffDOMO
+  integer                                  :: nxordiffSOMODOMO
+  integer :: ii,i,j,k,kk,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes, idxJ
+  integer :: listholes(mo_num)
+  integer :: holetype(mo_num)
+  integer :: end_index
+  integer :: Nsomo_alpha
+  logical :: isOKlistJ
+
+  isOKlistJ = .False.
+
+  nconnectedI = 0
+  end_index = N_configuration
+
+  ! Since CFGs are sorted wrt to seniority
+  ! we don't have to search the full CFG list
+  Isomo = Ialpha(1,1)
+  Idomo = Ialpha(1,2)
+  Nsomo_alpha = POPCNT(Isomo)
+  end_index = min(N_configuration,cfg_seniority_index(min(Nsomo_alpha+4,elec_num))-1)
+  if(end_index .LT. 0) end_index= N_configuration
+  !end_index = N_configuration
+
+
+  p = 0
+  q = 0
+  do i=1,nconnectedJ
+     idxJ = idslistconnectedJ(i)
+     Isomo = Ialpha(1,1)
+     Idomo = Ialpha(1,2)
+     Jsomo = listconnectedJ(1,1,i)
+     Jdomo = listconnectedJ(1,2,i)
+     diffSOMO = IEOR(Isomo,Jsomo)
+     ndiffSOMO = POPCNT(diffSOMO)
+     diffDOMO = IEOR(Idomo,Jdomo)
+     xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
+     ndiffDOMO = POPCNT(diffDOMO)
+     nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
+     nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
+     if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
+        select case(ndiffDOMO)
+        case (0)
+           ! SOMO -> VMO
+           !print *,"obt SOMO -> VMO"
+           extyp = 3
+           IJsomo = IEOR(Isomo, Jsomo)
+IRP_IF WITHOUT_TRAILZ
+           p = (popcnt(ieor( IAND(Isomo,IJsomo), IAND(Isomo,IJsomo)-1)) -1) + 1
+IRP_ELSE
+           p = TRAILZ(IAND(Isomo,IJsomo)) + 1
+IRP_ENDIF
+           IJsomo = IBCLR(IJsomo,p-1)
+IRP_IF WITHOUT_TRAILZ
+           q = (popcnt(ieor(IJsomo,IJsomo-1))-1) + 1
+IRP_ELSE
+           q = TRAILZ(IJsomo) + 1
+IRP_ENDIF
+        case (1)
+           ! DOMO -> VMO
+           ! or
+           ! SOMO -> SOMO
+           nsomoJ = POPCNT(Jsomo)
+           nsomoalpha = POPCNT(Isomo)
+           if(nsomoJ .GT. nsomoalpha) then
+              ! DOMO -> VMO
+              !print *,"obt DOMO -> VMO"
+              extyp = 2
+IRP_IF WITHOUT_TRAILZ
+              p = (popcnt(ieor( IEOR(Idomo,Jdomo), IEOR(Idomo,Jdomo)-1))-1) + 1
+IRP_ELSE
+              p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+IRP_ENDIF
+              Isomo = IEOR(Isomo, Jsomo)
+              Isomo = IBCLR(Isomo,p-1)
+IRP_IF WITHOUT_TRAILZ
+              q = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
+IRP_ELSE
+              q = TRAILZ(Isomo) + 1
+IRP_ENDIF
+           else
+              ! SOMO -> SOMO
+              !print *,"obt SOMO -> SOMO"
+              extyp = 1
+IRP_IF WITHOUT_TRAILZ
+              q = (popcnt(ieor( IEOR(Idomo,Jdomo), IEOR(Idomo,Jdomo)-1))-1) + 1
+IRP_ELSE
+              q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+IRP_ENDIF
+              Isomo = IEOR(Isomo, Jsomo)
+              Isomo = IBCLR(Isomo,q-1)
+IRP_IF WITHOUT_TRAILZ
+              p = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
+IRP_ELSE
+              p = TRAILZ(Isomo) + 1
+IRP_ENDIF
+           end if
+        case (2)
+           ! DOMO -> SOMO
+           !print *,"obt DOMO -> SOMO"
+           extyp = 4
+           IJsomo = IEOR(Isomo, Jsomo)
+IRP_IF WITHOUT_TRAILZ
+           p = (popcnt(ieor(IAND(Jsomo,IJsomo) ,IAND(Jsomo,IJsomo) -1))-1) + 1
+IRP_ELSE
+           p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
+IRP_ENDIF
+           IJsomo = IBCLR(IJsomo,p-1)
+IRP_IF WITHOUT_TRAILZ
+           q = (popcnt(ieor(IJsomo,IJsomo-1))-1) + 1
+IRP_ELSE
+           q = TRAILZ(IJsomo) + 1
+IRP_ENDIF
+        case default
+           print *,"something went wront in get connectedI"
+        end select
+        starti = psi_config_data(idxJ,1)
+        endi   = psi_config_data(idxJ,2)
+        nconnectedI += 1
+        connectedI(:,:,nconnectedI) = listconnectedJ(:,:,i)
+        idxs_connectedI(nconnectedI)=starti
+        excitationIds(1,nconnectedI)=p
+        excitationIds(2,nconnectedI)=q
+        excitationTypes(nconnectedI) = extyp
+        diagfactors(nconnectedI) = 1.0d0
+     else if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
+        ! find out all pq holes possible
+        nholes = 0
+        ! holes in SOMO
+        Isomo = listconnectedJ(1,1,i)
+        Idomo = listconnectedJ(1,2,i)
+        do ii = 1,mo_num
+           if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
+              nholes += 1
+              listholes(nholes) = ii
+              holetype(nholes) = 1
+           endif
+        end do
+        ! holes in DOMO
+        do ii = 1,mo_num
+           if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
+              nholes += 1
+              listholes(nholes) = ii
+              holetype(nholes) = 2
+           endif
+        end do
+
+        do k=1,nholes
+           p = listholes(k)
+           q = p
+           extyp = 1
+           if(holetype(k) .EQ. 1) then
+              starti = psi_config_data(idxJ,1)
+              endi   = psi_config_data(idxJ,2)
+              nconnectedI += 1
+              connectedI(:,:,nconnectedI) = listconnectedJ(:,:,i)
+              idxs_connectedI(nconnectedI)=starti
+              excitationIds(1,nconnectedI)=p
+              excitationIds(2,nconnectedI)=q
+              excitationTypes(nconnectedI) = extyp
+              diagfactors(nconnectedI) = 1.0d0
+           else
+              starti = psi_config_data(idxJ,1)
+              endi   = psi_config_data(idxJ,2)
+              nconnectedI += 1
+              connectedI(:,:,nconnectedI) = listconnectedJ(:,:,i)
+              idxs_connectedI(nconnectedI)=starti
+              excitationIds(1,nconnectedI)=p
+              excitationIds(2,nconnectedI)=q
+              excitationTypes(nconnectedI) = extyp
+              diagfactors(nconnectedI) = 2.0d0
+           endif
+        enddo
+     endif
+  end do
+
+end subroutine obtain_connected_I_foralpha_fromfilterdlist
+
+
+subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmodel)
+  implicit none
+  BEGIN_DOC
+  ! This function converts the orbital ids
+  ! in real space to those used in model space
+  ! in order to identify the matrices required
+  ! for the calculation of MEs.
+  !
+  ! The type of excitations are ordered as follows:
+  ! Type 1 - SOMO -> SOMO
+  ! Type 2 - DOMO -> VMO
+  ! Type 3 - SOMO -> VMO
+  ! Type 4 - DOMO -> SOMO
+  END_DOC
+  integer(bit_kind),intent(in)   :: Ialpha(N_int,2)
+  integer(bit_kind),intent(in)   :: Jcfg(N_int,2)
+  integer,intent(in)             :: p,q
+  integer,intent(in)             :: extype
+  integer,intent(out)            :: pmodel,qmodel
+  !integer(bit_kind)              :: Isomo(N_int)
+  !integer(bit_kind)              :: Idomo(N_int)
+  !integer(bit_kind)              :: Jsomo(N_int)
+  !integer(bit_kind)              :: Jdomo(N_int)
+  integer*8                       :: Isomo
+  integer*8                       :: Idomo
+  integer*8                       :: Jsomo
+  integer*8                       :: Jdomo
+  integer*8                      :: mask
+  integer                        :: iint, ipos
+  !integer(bit_kind)              :: Isomotmp(N_int)
+  !integer(bit_kind)              :: Jsomotmp(N_int)
+  integer*8             :: Isomotmp
+  integer*8             :: Jsomotmp
+  integer                        :: pos0,pos0prev
+
+  ! TODO Flag (print) when model space indices is > 64
+  Isomo = Ialpha(1,1)
+  Idomo = Ialpha(1,2)
+  Jsomo = Jcfg(1,1)
+  Jdomo = Jcfg(1,2)
+  pos0prev = 0
+  pmodel = p
+  qmodel = q
+
+  if(p .EQ. q) then
+     pmodel = 1
+     qmodel = 1
+  else
+     select case(extype)
+       case (1)
+          ! SOMO -> SOMO
+          ! remove all domos
+          !print *,"type -> SOMO -> SOMO"
+          mask = ISHFT(1_8,p) - 1
+          Isomotmp = IAND(Isomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          mask = ISHFT(1_8,q) - 1
+          Isomotmp = IAND(Isomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+       case (2)
+          ! DOMO -> VMO
+          ! remove all domos except one at p
+          !print *,"type -> DOMO -> VMO"
+          mask = ISHFT(1_8,p) - 1
+          Jsomotmp = IAND(Jsomo,mask)
+          pmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          mask = ISHFT(1_8,q) - 1
+          Jsomotmp = IAND(Jsomo,mask)
+          qmodel = POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+       case (3)
+          ! SOMO -> VMO
+          !print *,"type -> SOMO -> VMO"
+          !Isomo = IEOR(Isomo,Jsomo)
+          if(p.LT.q) then
+             mask = ISHFT(1_8,p) - 1
+             Isomo = IAND(Isomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+             mask = ISHFT(1_8,q) - 1
+             Jsomo = IAND(Jsomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask)) + 1
+          else
+             mask = ISHFT(1_8,p) - 1
+             Isomo = IAND(Isomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask)) + 1
+             mask = ISHFT(1_8,q) - 1
+             Jsomo = IAND(Jsomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+          endif
+       case (4)
+          ! DOMO -> SOMO
+          ! remove all domos except one at p
+          !print *,"type -> DOMO -> SOMO"
+          !Isomo = IEOR(Isomo,Jsomo)
+          if(p.LT.q) then
+             mask = ISHFT(1_8,p) - 1
+             Jsomo = IAND(Jsomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask))
+             mask = ISHFT(1_8,q) - 1
+             Isomo = IAND(Isomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask)) + 1
+          else
+             mask = ISHFT(1_8,p) - 1
+             Jsomo = IAND(Jsomo,mask)
+             pmodel = POPCNT(mask) - POPCNT(XOR(Jsomo,mask)) + 1
+             mask = ISHFT(1_8,q) - 1
+             Isomo = IAND(Isomo,mask)
+             qmodel = POPCNT(mask) - POPCNT(XOR(Isomo,mask))
+          endif
+       case default
+          print *,"something is wrong in convertOrbIdsToModelSpaceIds"
+     end select
+  endif
+  !print *,p,q,"model ids=",pmodel,qmodel
+end subroutine convertOrbIdsToModelSpaceIds
 
 subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze, istart, iend, ishift, istep)
   implicit none
@@ -930,8 +1260,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   integer                        :: totcolsTKI
   integer                        :: rowsTKI
   integer                        :: noccpp
-  integer                        :: istart_cfg, iend_cfg
-  integer                        :: nconnectedJ
+  integer                        :: istart_cfg, iend_cfg, num_threads_max
+  integer                        :: nconnectedJ,nconnectedtotalmax,nconnectedmaxJ,maxnalphas,ntotJ
   integer*8                      :: MS, Isomo, Idomo, Jsomo, Jdomo, Ialpha, Ibeta
   integer                        :: moi, moj, mok, mol, starti, endi, startj, endj, cnti, cntj, cntk
   real*8                         :: norm_coef_cfg, fac2eints
@@ -944,7 +1274,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8,dimension(:,:),allocatable :: CCmattmp
   real*8, external               :: mo_two_e_integral
   real*8, external               :: get_two_e_integral
-  real*8                         :: diag_energies(n_CSF)
+  real*8,dimension(:),allocatable:: diag_energies
   real*8                         :: tmpvar, tmptot
 
   integer(omp_lock_kind), allocatable :: lock(:)
@@ -956,6 +1286,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   enddo
 
   !print *," sze = ",sze
+  allocate(diag_energies(n_CSF))
   call calculate_preconditioner_cfg(diag_energies)
 
   MS = 0
@@ -966,24 +1297,34 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   istart_cfg = psi_csf_to_config_data(istart)
   iend_cfg   = psi_csf_to_config_data(iend)
 
+  !nconnectedtotalmax = 1000
+  !nconnectedmaxJ = 1000
+  maxnalphas = elec_num*mo_num
+  Icfg(1,1) = psi_configuration(1,1,1)
+  Icfg(1,2) = psi_configuration(1,2,1)
+  allocate(listconnectedJ(N_INT,2,max(sze,100)))
+  allocate(idslistconnectedJ(max(sze,100)))
+  call obtain_connected_J_givenI(1, Icfg, listconnectedJ, idslistconnectedJ, nconnectedmaxJ, nconnectedtotalmax)
+  deallocate(listconnectedJ)
+  deallocate(idslistconnectedJ)
 
   integer*8, allocatable :: bit_tmp(:)
   integer*8, external :: configuration_search_key
   double precision :: diagfactors_0
-  allocate( bit_tmp(N_configuration))
+  allocate( bit_tmp(0:N_configuration+1))
   do j=1,N_configuration
     bit_tmp(j) = configuration_search_key(psi_configuration(1,1,j),N_int)
   enddo
 
   call omp_set_max_active_levels(1)
-  !$OMP PARALLEL                                                         &
-      !$OMP DEFAULT(NONE)                                            &
+  !$OMP PARALLEL                                              & 
+      !$OMP DEFAULT(NONE)                               &
       !$OMP private(i,icfg, isomo, idomo, NSOMOI, NSOMOJ, nholes, k, listholes,&
       !$OMP    holetype, vmotype, nvmos, listvmos, starti, endi,     &
       !$OMP    nsinglesI, singlesI,idxs_singlesI,excitationIds_single,&
       !$OMP    excitationTypes_single, idxI, p, q, extype, pmodel, qmodel,&
       !$OMP    Jsomo, Jdomo, startj, endj, kk, jj, ii, cnti, cntj, meCC1,&
-      !$OMP   nconnectedJ,listconnectedJ,idslistconnectedJ,             &
+      !$OMP   nconnectedJ,listconnectedJ,idslistconnectedJ,ntotJ,       &
       !$OMP   Nalphas_Icfg,alphas_Icfg,connectedI_alpha,             &
       !$OMP   idxs_connectedI_alpha,nconnectedI,excitationIds,excitationTypes,diagfactors,&
       !$OMP   totcolsTKI,rowsTKI,NSOMOalpha,rowsikpq,                &
@@ -992,7 +1333,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
       !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, AIJpqContainer,&
       !$OMP     sze, NalphaIcfg_list,alphasIcfg_list, bit_tmp,       &
-      !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax)
+      !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
+      !$OMP     num_threads_max)
 
   allocate(singlesI(N_INT,2,max(sze,100)))
   allocate(idxs_singlesI(max(sze,100)))
@@ -1137,6 +1479,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   ! Loop over all selected configurations
   !$OMP DO SCHEDULE(dynamic,16)
   do i = istart_cfg,iend_cfg
+!       TKI = 0.d0
+!       GIJpqrs = 0.d0
+!       TKIGIJ = 0.d0
 
      ! if Seniority_range > 8 then
      ! continue
@@ -1155,8 +1500,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
      Nalphas_Icfg = NalphaIcfg_list(i)
      alphas_Icfg(1:n_int,1:2,1:Nalphas_Icfg) = alphasIcfg_list(1:n_int,1:2,i,1:Nalphas_Icfg)
+     if(Nalphas_Icfg .GT. maxnalphas) then
+       print *,"Nalpha > maxnalpha"
+     endif
 
-     call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ)
+     call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
      ! TODO : remove doubly excited for return
      ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
@@ -1203,6 +1551,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(:,:,k), connectedI_alpha(:,:,j), p, q, extype, pmodel, qmodel)
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+           rowsTKI = rowsikpq
            do m = 1,colsikpq
               do l = 1,rowsTKI
               do kk = 1,n_st
@@ -1228,7 +1577,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
 
         ! Do big BLAS
-        ! TODO TKI, size(TKI,1)*size(TKI,2)
         call dgemm('N','N', rowsTKI*n_st, nconnectedI, totcolsTKI, 1.d0,  &
              TKI, size(TKI,1)*size(TKI,2), GIJpqrs, size(GIJpqrs,1), 0.d0, &
              TKIGIJ , size(TKIGIJ,1)*size(TKIGIJ,2) )
@@ -1244,6 +1592,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+           rowsTKI = rowsikpq
            CCmattmp = 0.d0
 
            call dgemm('N','N', n_st, colsikpq, rowsTKI, 1.d0,        &

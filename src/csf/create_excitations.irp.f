@@ -258,7 +258,7 @@ subroutine generate_all_singles_cfg_with_type(bit_tmp,cfgInp,singles,idxs_single
   ! ex_type_singles : on output contains type of excitations  :
   !
   END_DOC
-  integer*8, intent(in)          :: bit_tmp(N_configuration)
+  integer*8, intent(in)          :: bit_tmp(0:N_configuration+1)
   integer, intent(in)            :: Nint
   integer, intent(inout)         :: n_singles
   integer, intent(out)           :: idxs_singles(*)
