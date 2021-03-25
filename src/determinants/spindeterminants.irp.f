@@ -1193,16 +1193,10 @@ subroutine get_all_spin_singles_and_doubles_$N_int(buffer, idx, spindet, size_bu
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
     if ( degree == 4 ) then
@@ -1247,22 +1241,18 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 2).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
+    if ( degree /= 2 ) then
+      cycle
     endif
+
+    singles(n_singles) = idx(i)
+    n_singles = n_singles+1
 
   enddo
   n_singles = n_singles-1
@@ -1296,22 +1286,18 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
+    if ( degree /= 4 ) then
+      cycle
     endif
+
+    doubles(n_doubles) = idx(i)
+    n_doubles = n_doubles+1
 
   enddo
 
