@@ -8,27 +8,56 @@ subroutine get_mask_phase(det1, pm, Nint)
   integer(bit_kind), intent(out) :: pm(Nint,2)
   integer(bit_kind) :: tmp1, tmp2
   integer :: i
-  pm(1:Nint,1:2) = det1(1:Nint,1:2)
   tmp1 = 0_8
   tmp2 = 0_8
-  do i=1,Nint
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 1))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 1))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
-    pm(i,1) = ieor(pm(i,1), tmp1)
-    pm(i,2) = ieor(pm(i,2), tmp2)
-    if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
-    if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
-  end do
+  select case (Nint)
+
+BEGIN_TEMPLATE
+    case ($Nint)
+      do i=1,$Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+SUBST [ Nint ]
+1;;
+2;;
+3;;
+4;;
+END_TEMPLATE
+    case default
+      do i=1,Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+  end select
 
 end subroutine
 
@@ -445,11 +474,17 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       endif
 
       do i=1,fullinteresting(0)
-        fullminilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,fullinteresting(i))
+        do k=1,N_int
+          fullminilist(k,1,i) = psi_det_sorted(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_det_sorted(k,2,fullinteresting(i))
+        enddo
       enddo
 
       do i=1,interesting(0)
-        minilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,interesting(i))
+        do k=1,N_int
+          minilist(k,1,i) = psi_det_sorted(k,1,interesting(i))
+          minilist(k,2,i) = psi_det_sorted(k,2,interesting(i))
+        enddo
       enddo
 
       do s2=s1,2
