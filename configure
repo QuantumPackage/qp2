@@ -238,6 +238,7 @@ EOF
               tar --gunzip --extract --file libcap.tar.gz
               rm libcap.tar.gz
               cd libcap-*/libcap
+              prefix=$QP_ROOT make BUILD_GPERF=no
               prefix=$QP_ROOT make install
 EOF
 

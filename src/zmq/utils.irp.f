@@ -963,7 +963,7 @@ integer function get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id,task_i
 
   get_tasks_from_taskserver = 0
 
-  write(message,*) 'get_tasks '//trim(zmq_state), worker_id, n_tasks
+  write(message,'(A,A,X,I10,I10)') 'get_tasks ', trim(zmq_state), worker_id, n_tasks
 
   sze = len(trim(message))
   rc = f77_zmq_send(zmq_to_qp_run_socket, message, sze, 0)
@@ -974,8 +974,10 @@ integer function get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id,task_i
 
   message = repeat(' ',1024)
   rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
-  rc = min(1024,rc)
-  read(message(1:rc),*, end=10, err=10) reply
+  if (rc <= 0) then
+    get_tasks_from_taskserver = -1
+    return
+  endif
   if (trim(message) == 'get_tasks_reply ok') then
     continue
   else if (trim(message) == 'terminate') then
@@ -993,6 +995,10 @@ integer function get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id,task_i
   do i=1,n_tasks
     message = repeat(' ',512)
     rc = f77_zmq_recv(zmq_to_qp_run_socket, message, 1024, 0)
+    if (rc <= 0) then
+      get_tasks_from_taskserver = -1
+      return
+    endif
     rc = min(1024,rc)
     read(message(1:rc),*, end=10, err=10) task_id(i)
     if (task_id(i) == 0) then
@@ -1001,10 +1007,10 @@ integer function get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id,task_i
       exit
     endif
     rc = 1
-    do while (message(rc:rc) == ' ')
+    do while (rc < 1024 .and. message(rc:rc) == ' ')
       rc += 1
     enddo
-    do while (message(rc:rc) /= ' ')
+    do while (rc < 1024 .and. message(rc:rc) /= ' ')
       rc += 1
     enddo
     rc += 1

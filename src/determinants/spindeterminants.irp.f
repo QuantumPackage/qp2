@@ -1075,19 +1075,17 @@ subroutine get_all_spin_singles_and_doubles_1(buffer, idx, spindet, size_buffer,
   integer                        :: i
   include 'utils/constants.include.F'
   integer                        :: degree
-
+  integer                        :: add_double(0:64) = (/ 0, 0, 0, 0, 1, (0, i=1,60) /)
+  integer                        :: add_single(0:64) = (/ 0, 0, 1, 0, 0, (0, i=1,60) /)
 
   n_singles = 1
   n_doubles = 1
   do i=1,size_buffer
     degree =  popcnt(  xor( spindet, buffer(i) ) )
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
-    else if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
-    endif
+    doubles(n_doubles) = idx(i)
+    singles(n_singles) = idx(i)
+    n_doubles = n_doubles+add_double(degree)
+    n_singles = n_singles+add_single(degree)
   enddo
   n_singles = n_singles-1
   n_doubles = n_doubles-1
@@ -1113,15 +1111,14 @@ subroutine get_all_spin_singles_1(buffer, idx, spindet, size_buffer, singles, n_
   integer                        :: i
   integer(bit_kind)              :: v
   integer                        :: degree
+  integer                        :: add_single(0:64) = (/ 0, 0, 1, 0, 0, (0, i=1,60) /)
   include 'utils/constants.include.F'
 
   n_singles = 1
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    if (degree == 2) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
-    endif
+    singles(n_singles) = idx(i)
+    n_singles = n_singles+add_single(degree)
   enddo
   n_singles = n_singles-1
 
@@ -1145,14 +1142,13 @@ subroutine get_all_spin_doubles_1(buffer, idx, spindet, size_buffer, doubles, n_
   integer                        :: i
   include 'utils/constants.include.F'
   integer                        :: degree
+  integer                        :: add_double(0:64) = (/ 0, 0, 0, 0, 1, (0, i=1,60) /)
 
   n_doubles = 1
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
-    endif
+    doubles(n_doubles) = idx(i)
+    n_doubles = n_doubles+add_double(degree)
   enddo
   n_doubles = n_doubles-1
 
@@ -1193,16 +1189,10 @@ subroutine get_all_spin_singles_and_doubles_$N_int(buffer, idx, spindet, size_bu
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
     if ( degree == 4 ) then
@@ -1247,22 +1237,18 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 2).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
+    if ( degree /= 2 ) then
+      cycle
     endif
+
+    singles(n_singles) = idx(i)
+    n_singles = n_singles+1
 
   enddo
   n_singles = n_singles-1
@@ -1296,22 +1282,18 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
+    if ( degree /= 4 ) then
+      cycle
     endif
+
+    doubles(n_doubles) = idx(i)
+    n_doubles = n_doubles+1
 
   enddo
 
