@@ -438,7 +438,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   ipos=1
   do imin=1,N_det,tasksize
     imax = min(N_det,imin-1+tasksize)
-    if (imin==1) then
+    if (imin<=N_det/2) then
       istep = 2
     else
       istep = 1
@@ -505,7 +505,9 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
     print *,  irp_here, ': Failed in zmq_set_running'
   endif
 
-  call omp_set_max_active_levels(4)
+
+  call omp_set_max_active_levels(5)
+
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
   if (ithread == 0 ) then

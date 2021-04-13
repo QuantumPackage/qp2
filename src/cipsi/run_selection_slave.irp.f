@@ -52,7 +52,7 @@ subroutine run_selection_slave(thread,iproc,energy)
       ctask = ctask - 1
     else
       integer :: i_generator, N, subset, bsize
-      read(task,*) subset, i_generator, N
+      call sscanf_ddd(task, subset, i_generator, N)
       if(buf%N == 0) then
         ! Only first time
         call create_selection_buffer(N, N*2, buf)
