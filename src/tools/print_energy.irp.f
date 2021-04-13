@@ -14,6 +14,9 @@ end
 
 subroutine run
  implicit none
+ BEGIN_DOC
+! E = \sum_{ij} c_i c_j H_{ij}  / \sum{i} c_i^2
+ END_DOC
  integer :: i,j
  double precision :: i_H_psi_array(N_states)
  double precision :: E(N_states)
