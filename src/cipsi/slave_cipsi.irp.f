@@ -100,7 +100,7 @@ subroutine run_slave_main
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector threshold_generators')
       IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',(/threshold_generators/),1) == -1) cycle
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector energy')
       IRP_ENDIF
@@ -212,7 +212,7 @@ subroutine run_slave_main
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector threshold_generators')
       IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',(/threshold_generators/),1) == -1) cycle
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector energy')
       IRP_ENDIF
