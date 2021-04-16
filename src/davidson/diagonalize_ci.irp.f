@@ -57,7 +57,7 @@ END_PROVIDER
 
    if (diag_algorithm == "Davidson") then
 
-     if (s2_eig.and.only_expected_s2) then
+     if (s2_eig.and.only_expected_s2.and.expected_s2==0.d0) then
        call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
          size(CI_eigenvectors,1),CI_electronic_energy,               &
          N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
