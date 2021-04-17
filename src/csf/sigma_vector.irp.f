@@ -38,7 +38,11 @@
      endif
   ncfg = ncfgpersomo - ncfgprev
   !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+  if (i > 2) then
+    dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+  else
+    dimcsfpercfg = 1
+  endif
   n_CSF += ncfg * dimcsfpercfg
   !if(cfg_seniority_index(i+2) == -1) EXIT
   !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
