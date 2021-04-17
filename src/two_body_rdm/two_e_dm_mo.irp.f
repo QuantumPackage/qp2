@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num,1)]
+BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    implicit none
    BEGIN_DOC
    ! two_e_dm_bb_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of beta/beta electrons
@@ -29,12 +29,12 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num,1)]
       jorb = list_core_inact_act(j)
       do i=1,mo_num
         iorb = list_core_inact_act(i)
-        two_e_dm_mo(iorb,jorb,korb,lorb,1) = state_av_full_occ_2_rdm_spin_trace_mo(i,j,k,l)
+        two_e_dm_mo(iorb,jorb,korb,lorb) = state_av_full_occ_2_rdm_spin_trace_mo(i,j,k,l)
       enddo
      enddo
     enddo
    enddo
-   two_e_dm_mo(:,:,:,:,:) = two_e_dm_mo(:,:,:,:,:) * 2.d0
+   two_e_dm_mo(:,:,:,:) = two_e_dm_mo(:,:,:,:) * 2.d0
 
  END_PROVIDER
 

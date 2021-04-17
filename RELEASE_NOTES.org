@@ -73,7 +73,7 @@
     - Added Shank function
     - Added utilities for periodic calculations
     - Added ~V_ne_psi_energy~
-    - Added ~h_core_huess~ routine
+    - Added ~h_core_guess~ routine
     - Fixed Laplacians in real space (indices)
     - 
 
