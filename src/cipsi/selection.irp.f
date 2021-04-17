@@ -8,27 +8,56 @@ subroutine get_mask_phase(det1, pm, Nint)
   integer(bit_kind), intent(out) :: pm(Nint,2)
   integer(bit_kind) :: tmp1, tmp2
   integer :: i
-  pm(1:Nint,1:2) = det1(1:Nint,1:2)
   tmp1 = 0_8
   tmp2 = 0_8
-  do i=1,Nint
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 1))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 1))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
-    pm(i,1) = ieor(pm(i,1), tmp1)
-    pm(i,2) = ieor(pm(i,2), tmp2)
-    if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
-    if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
-  end do
+  select case (Nint)
+
+BEGIN_TEMPLATE
+    case ($Nint)
+      do i=1,$Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+SUBST [ Nint ]
+1;;
+2;;
+3;;
+4;;
+END_TEMPLATE
+    case default
+      do i=1,Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+  end select
 
 end subroutine
 
@@ -450,11 +479,17 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       endif
 
       do i=1,fullinteresting(0)
-        fullminilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,fullinteresting(i))
+        do k=1,N_int
+          fullminilist(k,1,i) = psi_det_sorted(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_det_sorted(k,2,fullinteresting(i))
+        enddo
       enddo
 
       do i=1,interesting(0)
-        minilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,interesting(i))
+        do k=1,N_int
+          minilist(k,1,i) = psi_det_sorted(k,1,interesting(i))
+          minilist(k,2,i) = psi_det_sorted(k,2,interesting(i))
+        enddo
       enddo
 
       do s2=s1,2
@@ -673,10 +708,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       w = 0d0
 
-!      integer(bit_kind) :: occ(N_int,2), n
-!      call configuration_of_det(det,occ,N_int)
-!      call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
-
       e_pert = 0.d0
       coef = 0.d0
       logical :: do_diag
@@ -704,7 +735,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
-      integer :: iwork(3+5*(N_states+1)), info, k ,n
+      integer :: iwork(3+5*(N_states+1)), info, k 
 
       if (do_diag) then
         double precision :: pt2_matrix(N_states+1,N_states+1)
@@ -770,36 +801,43 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case(5)
             ! Variance selection
-!            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
-            w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(alpha_h_psi*mat(jstate,p1,p2)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)) & 
+                / c0_weight(istate)
+            else
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
+            endif
 
           case(6)
-!            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
-            w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate)) &
+                / c0_weight(istate)
+            else
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
+            endif
 
           case default
             ! Energy selection
-!            w = w + e_pert(istate) * s_weight(istate,istate)
-            w = min(w, e_pert(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(X(istate)*X(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, e_pert(istate) * s_weight(istate,istate)) / c0_weight(istate)
+            else
+              w = min(w, e_pert(istate) * s_weight(istate,istate))
+            endif
 
         end select
       end do
 
 
-!      w = dble(n) * w
-
+      integer(bit_kind) :: occ(N_int,2), n
+      if (h0_type == 'CFG') then
+        do k=1,N_int
+          occ(k,1) = ieor(det(k,1),det(k,2))
+          occ(k,2) = iand(det(k,1),det(k,2))
+        enddo
+        call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
+        n = max(n,1)
+        w *= dble(n)
+      endif
 
       if(w <= buf%mini) then
         call add_to_selection_buffer(buf, det, w)

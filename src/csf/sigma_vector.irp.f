@@ -62,41 +62,43 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer(bit_kind),intent(in)   :: Ialpha(N_int)
   integer(bit_kind),intent(in)   :: Ibeta(N_int)
   real*8,intent(out)             :: phaseout
-  integer(bit_kind)              :: mask(N_int), deta(N_int), detb(N_int)
+  integer(bit_kind)              :: mask, deta(N_int), detb(N_int)
   integer                        :: nbetas
-  integer                        :: count, k
-if (N_int >1 ) then
-   stop 'TODO: get_phase_qp_to_cfg '
-endif
+  integer                        :: k
 
-  nbetas = 0
-  mask = 0_bit_kind
-  count = 0
+  ! Initliaze deta and detb
   deta = Ialpha
   detb = Ibeta
-  ! remove the domos
-  mask = IAND(deta,detb)
-  deta = IEOR(deta,mask)
-  detb = IEOR(detb,mask)
-  mask = 0
-  phaseout = 1.0
-  k = 1
-  do while((deta(k)).GT.0_8)
-     mask(k) = ISHFT(1_8,count)
-     if(POPCNT(IAND(deta(k),mask(k))).EQ.1)then
-        if(IAND(nbetas,1).EQ.0) then
-           phaseout *= 1.0d0
-        else
-           phaseout *= -1.0d0
-        endif
-        deta(k) = IEOR(deta(k),mask(k))
-     else
-        if(POPCNT(IAND(detb(k),mask(k))).EQ.1) then
-           nbetas += 1
-           detb(k) = IEOR(detb(k),mask(k))
-        endif
-     endif
-     count += 1
+
+  ! Find how many alpha electrons there are in all the N_ints
+  integer :: Na(N_int)
+  do k=1,N_int
+    Na(k) = popcnt(deta(k))
+  enddo
+
+  integer :: shift, ipos, nperm
+  phaseout = 1.d0
+  do k=1,N_int
+
+    do while(detb(k) /= 0_bit_kind)
+      ! Find the lowest beta electron and clear it
+      ipos = trailz(detb(k))
+      detb(k) = ibclr(detb(k),ipos)
+
+      ! Create a mask will all MOs higher than the beta electron
+      mask = not(shiftl(1_bit_kind,ipos + 1) - 1_bit_kind)
+
+      ! Apply the mask to the alpha string to count how many electrons to cross
+      nperm = popcnt( iand(mask, deta(k)) )
+
+      ! Count how many alpha electrons are above the beta electron in the other integers
+      nperm = nperm + sum(Na(k+1:N_int))
+      if (iand(nperm,1) == 1) then
+        phaseout  = -phaseout
+      endif
+
+    enddo
+
   enddo
 end subroutine get_phase_qp_to_cfg
 
