@@ -23,6 +23,10 @@ END_DOC
       error_matrix_DIIS(ao_num,ao_num,max_dim_DIIS)                  &
       )
 
+  Fock_matrix_DIIS = 0.d0
+  error_matrix_DIIS = 0.d0
+  mo_coef_save = 0.d0
+
   call write_time(6)
 
   print*,'Energy of the guess = ',SCF_energy
@@ -62,7 +66,7 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if (scf_algorithm == 'DIIS') then
+    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num
@@ -153,7 +157,7 @@ END_DOC
   enddo
 
  if (iteration_SCF < n_it_SCF_max) then
-   mo_label = "Canonical"
+   mo_label = 'Canonical'
  endif
 !
 ! End of Main SCF loop
@@ -164,7 +168,10 @@ END_DOC
   write(6,*)
 
   if(.not.frozen_orb_scf)then
-   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1),size(Fock_matrix_mo,2),mo_label,1,.true.)
+   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
+      size(Fock_matrix_mo,2),mo_label,1,.true.)
+   call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
+   call orthonormalize_mos
    call save_mos
   endif
 
@@ -186,16 +193,23 @@ END_DOC
 
   implicit none
 
-  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,*),error_matrix_DIIS(ao_num,ao_num,*)
+  integer,intent(inout)         :: dim_DIIS
+  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,dim_DIIS),error_matrix_DIIS(ao_num,ao_num,dim_DIIS)
   integer,intent(in)            :: iteration_SCF, size_Fock_matrix_AO
   double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
-  integer,intent(inout)         :: dim_DIIS
 
   double precision,allocatable  :: B_matrix_DIIS(:,:),X_vector_DIIS(:)
   double precision,allocatable  :: C_vector_DIIS(:)
 
   double precision,allocatable  :: scratch(:,:)
-  integer                       :: i,j,k,i_DIIS,j_DIIS
+  integer                       :: i,j,k,l,i_DIIS,j_DIIS
+  double precision :: rcond, ferr, berr
+  integer, allocatable :: iwork(:)
+  integer :: lwork
+
+  if (dim_DIIS < 1) then
+    return
+  endif
 
   allocate(                               &
     B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1), &
@@ -204,111 +218,100 @@ END_DOC
     scratch(ao_num,ao_num)                &
   )
 
-! Compute the matrices B and X
+  ! Compute the matrices B and X
+  B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
+    j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
+
     do i=1,dim_DIIS
+      i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
 
-      j_DIIS = min(mod(iteration_SCF-j,max_dim_DIIS)+1,dim_DIIS)
-      i_DIIS = min(mod(iteration_SCF-i,max_dim_DIIS)+1,dim_DIIS)
-
-! Compute product of two errors vectors
-
-      call dgemm('N','N',ao_num,ao_num,ao_num,                      &
-           1.d0,                                                    &
-           error_matrix_DIIS(1,1,i_DIIS),size(error_matrix_DIIS,1), &
-           error_matrix_DIIS(1,1,j_DIIS),size(error_matrix_DIIS,1), &
-           0.d0,                                                    &
-           scratch,size(scratch,1))
-
-! Compute Trace
-
-      B_matrix_DIIS(i,j) = 0.d0
-      do k=1,ao_num
-        B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + scratch(k,k)
+      ! Compute product of two errors vectors
+      do l=1,ao_num
+        do k=1,ao_num
+          B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + &
+            error_matrix_DIIS(k,l,i_DIIS) * error_matrix_DIIS(k,l,j_DIIS)
+        enddo
       enddo
+
     enddo
   enddo
 
 ! Pad B matrix and build the X matrix
 
+  C_vector_DIIS(:) = 0.d0
   do i=1,dim_DIIS
     B_matrix_DIIS(i,dim_DIIS+1) = -1.d0
     B_matrix_DIIS(dim_DIIS+1,i) = -1.d0
-    C_vector_DIIS(i) = 0.d0
   enddo
-  B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1) = 0.d0
   C_vector_DIIS(dim_DIIS+1) = -1.d0
+
+  deallocate(scratch)
+
+! Estimate condition number of B
+  double precision :: anorm
+  integer              :: info
+  integer,allocatable  :: ipiv(:)
+  double precision, allocatable :: AF(:,:)
+  double precision, external :: dlange
+
+  lwork = max((dim_DIIS+1)**2, (dim_DIIS+1)*5)
+  allocate(AF(dim_DIIS+1,dim_DIIS+1))
+  allocate(ipiv(2*(dim_DIIS+1)), iwork(2*(dim_DIIS+1)) )
+  allocate(scratch(lwork,1))
+  scratch(:,1) = 0.d0
+
+  anorm = dlange('1', dim_DIIS+1, dim_DIIS+1, B_matrix_DIIS, &
+              size(B_matrix_DIIS,1), scratch(1,1))
+
+  AF(:,:) = B_matrix_DIIS(:,:)
+  call dgetrf(dim_DIIS+1,dim_DIIS+1,AF,size(AF,1),ipiv,info)
+  if (info /= 0) then
+    dim_DIIS = 0
+    return
+  endif
+
+  call dgecon( '1', dim_DIIS+1, AF, &
+    size(AF,1), anorm, rcond, scratch, iwork, info )
+  if (info /= 0) then
+    dim_DIIS = 0
+    return
+  endif
+
+ if (rcond < 1.d-14) then
+   dim_DIIS = 0
+   return
+ endif
 
 ! Solve the linear system C = B.X
 
-  integer              :: info
-  integer,allocatable  :: ipiv(:)
+  X_vector_DIIS = C_vector_DIIS
+  call dgesv ( dim_DIIS+1 , 1, B_matrix_DIIS, size(B_matrix_DIIS,1), &
+      ipiv , X_vector_DIIS , size(X_vector_DIIS,1), info)
 
-  allocate(          &
-    ipiv(dim_DIIS+1) &
-  )
+  deallocate(scratch,AF,iwork)
 
-  double precision, allocatable :: AF(:,:)
-  allocate (AF(dim_DIIS+1,dim_DIIS+1))
-  double precision :: rcond, ferr, berr
-  integer :: iwork(dim_DIIS+1), lwork
-
-  call dsysvx('N','U',dim_DIIS+1,1,      &
-    B_matrix_DIIS,size(B_matrix_DIIS,1), &
-    AF, size(AF,1),                      &
-    ipiv,                                &
-    C_vector_DIIS,size(C_vector_DIIS,1), &
-    X_vector_DIIS,size(X_vector_DIIS,1), &
-    rcond,                               &
-    ferr,                                &
-    berr,                                &
-    scratch,-1,                          &
-    iwork,                               &
-    info                                 &
-  )
-  lwork = int(scratch(1,1))
-  deallocate(scratch)
-  allocate(scratch(lwork,1))
-
-  call dsysvx('N','U',dim_DIIS+1,1,      &
-    B_matrix_DIIS,size(B_matrix_DIIS,1), &
-    AF, size(AF,1),                      &
-    ipiv,                                &
-    C_vector_DIIS,size(C_vector_DIIS,1), &
-    X_vector_DIIS,size(X_vector_DIIS,1), &
-    rcond,                               &
-    ferr,                                &
-    berr,                                &
-    scratch,size(scratch),               &
-    iwork,                               &
-    info                                 &
-  )
-
- if(info < 0) then
-   stop 'bug in DIIS'
- endif
-
- if (rcond > 1.d-12) then
+  if(info < 0) then
+    stop 'bug in DIIS'
+  endif
 
   ! Compute extrapolated Fock matrix
 
 
-      !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
-      do j=1,ao_num
-        do i=1,ao_num
-          Fock_matrix_AO_(i,j) = 0.d0
-        enddo
-        do k=1,dim_DIIS
-          do i=1,ao_num
-            Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
-                X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
-          enddo
-        enddo
+  !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
+  do j=1,ao_num
+    do i=1,ao_num
+      Fock_matrix_AO_(i,j) = 0.d0
+    enddo
+    do k=1,dim_DIIS
+      if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
+      do i=1,ao_num
+        ! FPE here
+        Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
+            X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
       enddo
-      !$OMP END PARALLEL DO
-
-  else
-    dim_DIIS = 0
-  endif
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 
 end

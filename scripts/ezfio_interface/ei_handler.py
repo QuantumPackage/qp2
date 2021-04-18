@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Welcome to the ei_handler.
@@ -72,7 +72,7 @@ import sys
 import os
 import os.path
 
-import ConfigParser
+import configparser
 
 from collections import defaultdict
 from collections import namedtuple
@@ -220,8 +220,8 @@ def get_dict_config_file(module_obj):
     # L o a d _ C o n f i g #
     # ~#~#~#~#~#~#~#~#~#~#~ #
 
-    config_file = ConfigParser.ConfigParser()
-    config_file.readfp(open(module_obj.path))
+    config_file = configparser.ConfigParser()
+    config_file.read_file(open(module_obj.path))
 
     # ~#~#~#~#~#~#~#~#~ #
     # F i l l _ d i c t #
@@ -229,7 +229,7 @@ def get_dict_config_file(module_obj):
 
     def error(o, p, c):
         "o option ; p provider_name ;c module_obj.path"
-        print "You need a {0} for {1} in {2}".format(o, p, c)
+        print("You need a {0} for {1} in {2}".format(o, p, c))
 
     for section in config_file.sections():
         # pvd = provider
@@ -245,13 +245,13 @@ def get_dict_config_file(module_obj):
         # Check if type is avalaible
         try:
             type_ = config_file.get(section, "type").strip()
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             error("type", pvd, module_obj.path)
             sys.exit(1)
 
         if type_ not in type_dict:
-            print "{0} not avalaible. Choose in:".format(type_).strip()
-            print ", ".join(sorted([i for i in type_dict]))
+            print("{0} not avalaible. Choose in:".format(type_).strip())
+            print(", ".join(sorted([i for i in type_dict])))
             sys.exit(1)
         else:
             d[pvd]["type"] = type_dict[type_]
@@ -259,18 +259,18 @@ def get_dict_config_file(module_obj):
         # Fill the dict with REQUIRED information
         try:
             d[pvd]["doc"] = config_file.get(section, "doc")
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             error("doc", pvd, module_obj.path)
             sys.exit(1)
 
         try:
             interface = [i.lower().strip() for i in config_file.get(section, "interface").split(",")]
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             error("doc", pvd, module_obj.path)
             sys.exit(1)
         else:
             if not any(i in ["ezfio", "provider", "ocaml"] for i in interface):
-                print "Bad keyword for interface for {0}".format(pvd)
+                print("Bad keyword for interface for {0}".format(pvd))
                 sys.exit(1)
             else:
                 d[pvd]["interface"] = interface
@@ -279,7 +279,7 @@ def get_dict_config_file(module_obj):
         for option in l_info_optional:
             try:
                 d[pvd][option] = config_file.get(section, option).lower()
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 if option in d_default:
                     d[pvd][option] = d_default[option]
 
@@ -287,7 +287,7 @@ def get_dict_config_file(module_obj):
 
         try:
             default_raw = config_file.get(section, "default")
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             if "ocaml" in d[pvd]["interface"]:
                 error("default", pvd, module_obj.path)
                 sys.exit(1)
@@ -322,7 +322,7 @@ def create_ezfio_provider(dict_ezfio_cfg):
     dict_code_provider = dict()
 
     ez_p = EZFIO_Provider()
-    for provider_name, dict_info in dict_ezfio_cfg.iteritems():
+    for provider_name, dict_info in dict_ezfio_cfg.items():
         if "provider" in dict_info["interface"]:
             ez_p.set_type(dict_info['type'].fortran)
             ez_p.set_name(provider_name)
@@ -364,7 +364,7 @@ def save_ezfio_provider(path_head, dict_code_provider):
                 "! from file {0}/EZFIO.cfg".format(path_head),
                 "\n"]
 
-    l_output += [code for code in dict_code_provider.values()]
+    l_output += [code for code in list(dict_code_provider.values())]
 
     output = "\n".join(l_output)
 
@@ -381,22 +381,22 @@ def create_ezfio_stuff(dict_ezfio_cfg, config_or_default="config"):
     def size_format_to_ezfio(size_raw):
         """
         If size_raw == "=" is a formula -> do nothing; return
-        Else convert the born of a multidimential array
+        Else convert the range of a multidimential array
            (12,begin:end) into (12,begin+end+1) for example
-        If the value are between parenthses ->  do nothing; return
+        If the values are between parenthses ->  do nothing; return
         """
 
         size_raw = str(size_raw)
         if size_raw.startswith('='):
             size_convert = size_raw.replace('.', '_')
         else:
-            size_raw = provider_info["size"].translate(None, "()")
+            size_raw = provider_info["size"].translate(str.maketrans("","","()"))
             size_raw = size_raw.replace('.', '_')
 
             a_size_raw = []
             for dim in size_raw.split(","):
                 try:
-                    (begin, end) = map(str.strip, dim.split(":"))
+                    (begin, end) = list(map(str.strip, dim.split(":")))
                 except ValueError:
                     a_size_raw.append(dim.strip())
                 else:
@@ -423,7 +423,7 @@ def create_ezfio_stuff(dict_ezfio_cfg, config_or_default="config"):
 
     lenmax_name = max([len(i) for i in dict_ezfio_cfg])
     lenmax_type = max([len(i["type"].fortran)
-                       for i in dict_ezfio_cfg.values()])
+                       for i in list(dict_ezfio_cfg.values())])
 
     str_name_format = create_format_string(lenmax_name + 2)
     str_type_format = create_format_string(lenmax_type + 2)
@@ -433,15 +433,15 @@ def create_ezfio_stuff(dict_ezfio_cfg, config_or_default="config"):
     # ~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~# #
 
     # Checking is many ezfio_dir provided
-    l_ezfio_dir = [d['ezfio_dir'] for d in dict_ezfio_cfg.values()]
+    l_ezfio_dir = [d['ezfio_dir'] for d in list(dict_ezfio_cfg.values())]
 
     if not l_ezfio_dir.count(l_ezfio_dir[0]) == len(l_ezfio_dir):
-        print >> sys.stderr, "You have many ezfio_dir. Not supported yet"
+        print("You have many ezfio_dir. Not supported yet", file=sys.stderr)
         raise TypeError
     else:
         result = [l_ezfio_dir[0]]
 
-    for provider_name, provider_info in sorted(dict_ezfio_cfg.iteritems()):
+    for provider_name, provider_info in sorted(dict_ezfio_cfg.items()):
 
         # Get the value from dict
         name_raw = provider_info["ezfio_name"].lower()
@@ -532,7 +532,7 @@ def create_ocaml_input(dict_ezfio_cfg, module_lower):
     l_type = []
     l_doc = []
 
-    for k, v in dict_ezfio_cfg.iteritems():
+    for k, v in dict_ezfio_cfg.items():
         if "ocaml" in v['interface']:
             l_ezfio_name.append(v['ezfio_name'])
             l_type.append(v["type"])
@@ -580,7 +580,7 @@ def create_ocaml_input(dict_ezfio_cfg, module_lower):
                  '(* =~=~=~==~=~~=~=~=~=~=~=~=~ *)',
                  ""]
 
-    for provider_name, d_val in sorted(dict_ezfio_cfg.iteritems()):
+    for provider_name, d_val in sorted(dict_ezfio_cfg.items()):
 
         if 'default' not in d_val:
             continue
@@ -655,7 +655,7 @@ def get_l_module_with_auto_generate_ocaml_lower():
 
     l_module_lower = []
     import re
-    p = re.compile(ur'interface:.*ocaml')
+    p = re.compile(r'interface:.*ocaml')
 
     for f in l_folder:
         path = "{0}/{1}/EZFIO.cfg".format(QP_SRC, f)
@@ -782,7 +782,7 @@ if __name__ == "__main__":
     #
     if arguments["list_supported_types"]:
         for i in sorted(get_type_dict()):
-            print i
+            print(i)
         sys.exit(0)
 
     if arguments["ocaml_global"]:

@@ -11,15 +11,18 @@ END_PROVIDER
   implicit none
   logical, external :: testTeethBuilding
   integer :: i,j
-  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2 
+  pt2_n_tasks_max = elec_alpha_num*elec_alpha_num + elec_alpha_num*elec_beta_num  - n_core_orb*2
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
   pt2_F(:) = int(sqrt(float(pt2_n_tasks_max)))
   do i=1,pt2_n_0(1+pt2_N_teeth/4)
-    pt2_F(i) = pt2_n_tasks_max
+    pt2_F(i) = pt2_n_tasks_max*pt2_min_parallel_tasks
   enddo
-  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), N_det_generators
+  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/4), pt2_n_0(pt2_N_teeth-pt2_N_teeth/10)
+    pt2_F(i) = pt2_min_parallel_tasks
+  enddo
+  do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/10), N_det_generators
     pt2_F(i) = 1
   enddo
 
@@ -61,15 +64,15 @@ logical function testTeethBuilding(minF, N)
 
   allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
 
-  norm = 0.d0
-  double precision :: norm
+  double precision :: norm2
+  norm2 = 0.d0
   do i=N_det_generators,1,-1
     tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate) * &
                   psi_coef_sorted_gen(i,pt2_stoch_istate)
-    norm = norm + tilde_w(i)
+    norm2 = norm2 + tilde_w(i)
   enddo
 
-  f = 1.d0/norm
+  f = 1.d0/norm2
   tilde_w(:) = tilde_w(:) * f
 
   tilde_cW(0) = -1.d0
@@ -88,7 +91,7 @@ logical function testTeethBuilding(minF, N)
   do
     u0 = tilde_cW(n0)
     r = tilde_cW(n0 + minF)
-    Wt = (1d0 - u0) * f 
+    Wt = (1d0 - u0) * f
     if (dabs(Wt) <= 1.d-3) then
       exit
     endif
@@ -107,7 +110,7 @@ end function
 
 
 
-subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
+subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   use f77_zmq
   use selection_types
 
@@ -115,11 +118,10 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
+!  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
-  double precision, intent(out)  :: pt2(N_states),error(N_states)
-  double precision, intent(out)  :: variance(N_states),norm(N_states)
-
-
+  type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
+!
   integer                        :: i, N
 
   double precision               :: state_average_weight_save(N_states), w(N_states,4)
@@ -132,16 +134,12 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii selection_weight pseudo_sym
 
-  if (h0_type == 'SOP') then
-    PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+  if (h0_type == 'CFG') then
+    PROVIDE psi_configuration_hii det_to_configuration
   endif
 
-  if (N_det <= max(4,N_states)) then
-    pt2=0.d0
-    variance=0.d0
-    norm=0.d0
-    call ZMQ_selection(N_in, pt2, variance, norm)
-    error(:) = 0.d0
+  if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
+    call ZMQ_selection(N_in, pt2_data)
   else
 
     N = max(N_in,1) * N_states
@@ -247,8 +245,8 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       mem_collector = 8.d0 *                  & ! bytes
             ( 1.d0*pt2_n_tasks_max            & ! task_id, index
             + 0.635d0*N_det_generators        & ! f,d
-            + 3.d0*N_det_generators*N_states  & ! eI, vI, nI
-            + 3.d0*pt2_n_tasks_max*N_states   & ! eI_task, vI_task, nI_task
+            + pt2_n_tasks_max*pt2_type_size(N_states) & ! pt2_data_task
+            + N_det_generators*pt2_type_size(N_states)  & ! pt2_data_I
             + 4.d0*(pt2_N_teeth+1)            & ! S, S2, T2, T3
             + 1.d0*(N_int*2.d0*N + N)         & ! selection buffer
             + 1.d0*(N_int*2.d0*N + N)         & ! sort selection buffer
@@ -263,7 +261,7 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
               nproc_target * 8.d0 *             & ! bytes
               ( 0.5d0*pt2_n_tasks_max           & ! task_id
               + 64.d0*pt2_n_tasks_max           & ! task
-              + 3.d0*pt2_n_tasks_max*N_states   & ! pt2, variance, norm
+              + pt2_type_size(N_states)*pt2_n_tasks_max*N_states   & ! pt2, variance, overlap
               + 1.d0*pt2_n_tasks_max            & ! i_generator, subset
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! selection buffer
               + 1.d0*(N_int*2.d0*ii+ ii)        & ! sort selection buffer
@@ -292,21 +290,24 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       call omp_set_nested(.false.)
 
 
-      print '(A)', '========== ================= =========== =============== =============== ================='
-      print '(A)', ' Samples        Energy        Stat. Err     Variance          Norm          Seconds      '
-      print '(A)', '========== ================= =========== =============== =============== ================='
+      print '(A)', '========== ======================= ===================== ===================== ==========='
+      print '(A)', ' Samples          Energy                Variance               Norm^2          Seconds'
+      print '(A)', '========== ======================= ===================== ===================== ==========='
 
-      PROVIDE global_selection_buffer 
+      PROVIDE global_selection_buffer
+
       !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(nproc_target+1)            &
           !$OMP  PRIVATE(i)
       i = omp_get_thread_num()
       if (i==0) then
 
-        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, w(1,1), w(1,2), w(1,3), w(1,4), b, N)
-        pt2(pt2_stoch_istate) = w(pt2_stoch_istate,1)
-        error(pt2_stoch_istate) = w(pt2_stoch_istate,2)
-        variance(pt2_stoch_istate) = w(pt2_stoch_istate,3)
-        norm(pt2_stoch_istate) = w(pt2_stoch_istate,4)
+        call pt2_collector(zmq_socket_pull, E(pt2_stoch_istate),relative_error, pt2_data, pt2_data_err, b, N)
+        pt2_data % rpt2(pt2_stoch_istate) =  &
+          pt2_data % pt2(pt2_stoch_istate)/(1.d0+pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
+
+        !TODO : We should use here the correct formula for the error of X/Y
+        pt2_data_err % rpt2(pt2_stoch_istate) =  &
+          pt2_data_err % pt2(pt2_stoch_istate)/(1.d0 + pt2_data % overlap(pt2_stoch_istate,pt2_stoch_istate))
 
       else
         call pt2_slave_inproc(i)
@@ -314,10 +315,29 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
       !$OMP END PARALLEL
       call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
 
-      print '(A)', '========== ================= =========== =============== =============== ================='
+      print '(A)', '========== ======================= ===================== ===================== ==========='
+
+    do k=1,N_states
+      pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
+    enddo
+    SOFT_TOUCH pt2_overlap
 
     enddo
     FREE pt2_stoch_istate
+
+    ! Symmetrize overlap
+    do j=2,N_states
+     do i=1,j-1
+       pt2_overlap(i,j) = 0.5d0 * (pt2_overlap(i,j) + pt2_overlap(j,i))
+       pt2_overlap(j,i) = pt2_overlap(i,j)
+     enddo
+    enddo
+
+    print *, 'Overlap of perturbed states:'
+    do k=1,N_states
+      print *, pt2_overlap(k,:)
+    enddo
+    print *, '-------'
 
     if (N_in > 0) then
       b%cur = min(N_in,b%cur)
@@ -332,12 +352,9 @@ subroutine ZMQ_pt2(E, pt2,relative_error, error, variance, norm, N_in)
 
     state_average_weight(:) = state_average_weight_save(:)
     TOUCH state_average_weight
+    call update_pt2_and_variance_weights(pt2_data, N_states)
   endif
-  do k=N_det+1,N_states
-    pt2(k) = 0.d0
-  enddo
 
-  call update_pt2_and_variance_weights(pt2, variance, norm, N_states)
 
 end subroutine
 
@@ -346,12 +363,12 @@ subroutine pt2_slave_inproc(i)
   implicit none
   integer, intent(in)            :: i
 
-  PROVIDE global_selection_buffer 
+  PROVIDE global_selection_buffer
   call run_pt2_slave(1,i,pt2_e0_denominator)
 end
 
 
-subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, variance, norm, b, N_)
+subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_err, b, N_)
   use f77_zmq
   use selection_types
   use bitmasks
@@ -360,15 +377,15 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
 
   integer(ZMQ_PTR), intent(in)   :: zmq_socket_pull
   double precision, intent(in)   :: relative_error, E
-  double precision, intent(out)  :: pt2(N_states), error(N_states)
-  double precision, intent(out)  :: variance(N_states), norm(N_states)
+  type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
   type(selection_buffer), intent(inout) :: b
   integer, intent(in)            :: N_
 
-
-  double precision, allocatable      :: eI(:,:), eI_task(:,:), S(:), S2(:)
-  double precision, allocatable      :: vI(:,:), vI_task(:,:), T2(:)
-  double precision, allocatable      :: nI(:,:), nI_task(:,:), T3(:)
+  type(pt2_type), allocatable    :: pt2_data_task(:)
+  type(pt2_type), allocatable    :: pt2_data_I(:)
+  type(pt2_type), allocatable    :: pt2_data_S(:)
+  type(pt2_type), allocatable    :: pt2_data_S2(:)
+  type(pt2_type)                 :: pt2_data_teeth
   integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
   integer, external :: zmq_delete_tasks_async_send
@@ -376,11 +393,14 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   integer, external :: zmq_abort
   integer, external :: pt2_find_sample_lr
 
+  PROVIDE pt2_stoch_istate
+
   integer :: more, n, i, p, c, t, n_tasks, U
   integer, allocatable :: task_id(:)
   integer, allocatable :: index(:)
 
-  double precision :: v, x, x2, x3, avg, avg2, avg3, eqt, E0, v0, n0
+  double precision :: v, x, x2, x3, avg, avg2, avg3(N_states), eqt, E0, v0, n0(N_states)
+  double precision :: eqta(N_states)
   double precision :: time, time1, time0
 
   integer, allocatable :: f(:)
@@ -405,11 +425,10 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   ! updated in ZMQ_pt2
   allocate(task_id(pt2_n_tasks_max), index(pt2_n_tasks_max), f(N_det_generators))
   allocate(d(N_det_generators+1))
-  allocate(eI(N_states, N_det_generators), eI_task(N_states, pt2_n_tasks_max))
-  allocate(vI(N_states, N_det_generators), vI_task(N_states, pt2_n_tasks_max))
-  allocate(nI(N_states, N_det_generators), nI_task(N_states, pt2_n_tasks_max))
-  allocate(S(pt2_N_teeth+1), S2(pt2_N_teeth+1))
-  allocate(T2(pt2_N_teeth+1), T3(pt2_N_teeth+1))
+  allocate(pt2_data_task(pt2_n_tasks_max))
+  allocate(pt2_data_I(N_det_generators))
+  allocate(pt2_data_S(pt2_N_teeth+1))
+  allocate(pt2_data_S2(pt2_N_teeth+1))
 
 
 
@@ -417,26 +436,31 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
   call create_selection_buffer(N_, N_*2, b2)
 
 
-  pt2(:) = -huge(1.)
-  error(:) = huge(1.)
-  variance(:) = huge(1.)
-  norm(:) = 0.d0
-  S(:) = 0d0
-  S2(:) = 0d0
-  T2(:) = 0d0
-  T3(:) = 0d0
+  pt2_data % pt2(pt2_stoch_istate) = -huge(1.)
+  pt2_data_err % pt2(pt2_stoch_istate) = huge(1.)
+  pt2_data % variance(pt2_stoch_istate) = huge(1.)
+  pt2_data_err % variance(pt2_stoch_istate) = huge(1.)
+  pt2_data % overlap(:,pt2_stoch_istate) = 0.d0
+  pt2_data_err % overlap(:,pt2_stoch_istate) = huge(1.)
   n = 1
   t = 0
   U = 0
-  eI(:,:) = 0d0
-  vI(:,:) = 0d0
-  nI(:,:) = 0d0
+  do i=1,pt2_n_tasks_max
+    call pt2_alloc(pt2_data_task(i),N_states)
+  enddo
+  do i=1,pt2_N_teeth+1
+    call pt2_alloc(pt2_data_S(i),N_states)
+    call pt2_alloc(pt2_data_S2(i),N_states)
+  enddo
+  do i=1,N_det_generators
+    call pt2_alloc(pt2_data_I(i),N_states)
+  enddo
   f(:) = pt2_F(:)
   d(:) = .false.
   n_tasks = 0
   E0 = E
   v0 = 0.d0
-  n0 = 0.d0
+  n0(:) = 0.d0
   more = 1
   call wall_time(time0)
   time1 = time0
@@ -456,11 +480,11 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
           t=t+1
           E0 = 0.d0
           v0 = 0.d0
-          n0 = 0.d0
+          n0(:) = 0.d0
           do i=pt2_n_0(t),1,-1
-            E0 += eI(pt2_stoch_istate, i)
-            v0 += vI(pt2_stoch_istate, i)
-            n0 += nI(pt2_stoch_istate, i)
+            E0 += pt2_data_I(i) % pt2(pt2_stoch_istate)
+            v0 += pt2_data_I(i) % variance(pt2_stoch_istate)
+            n0(:) += pt2_data_I(i) % overlap(:,pt2_stoch_istate)
           end do
         else
           exit
@@ -470,45 +494,59 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       ! Add Stochastic part
       c = pt2_R(n)
       if(c > 0) then
-!print *,  'c>0'
-        x  = 0d0
-        x2 = 0d0
-        x3 = 0d0
+
+        call pt2_alloc(pt2_data_teeth,N_states)
         do p=pt2_N_teeth, 1, -1
           v = pt2_u_0 + pt2_W_T * (pt2_u(c) + dble(p-1))
           i = pt2_find_sample_lr(v, pt2_cW,pt2_n_0(p),pt2_n_0(p+1))
-          x  += eI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          x2 += vI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          x3 += nI(pt2_stoch_istate, i) * pt2_W_T / pt2_w(i)
-          S(p) += x
-          S2(p) += x*x
-          T2(p) += x2
-          T3(p) += x3
-        end do
-        avg  = E0 + S(t) / dble(c)
-        avg2 = v0 + T2(t) / dble(c)
-        avg3 = n0 + T3(t) / dble(c)
+          v = pt2_W_T / pt2_w(i)
+          call pt2_add ( pt2_data_teeth,  v,  pt2_data_I(i) )
+          call pt2_add ( pt2_data_S(p),  1.d0,  pt2_data_teeth )
+          call pt2_add2( pt2_data_S2(p), 1.d0,  pt2_data_teeth )
+        enddo
+        call pt2_dealloc(pt2_data_teeth)
+
+        avg  = E0 + pt2_data_S(t) % pt2(pt2_stoch_istate) / dble(c)
+        avg2 = v0 + pt2_data_S(t) % variance(pt2_stoch_istate) / dble(c)
+        avg3(:) = n0(:) + pt2_data_S(t) % overlap(:,pt2_stoch_istate) / dble(c)
         if ((avg /= 0.d0) .or. (n == N_det_generators) ) then
           do_exit = .true.
         endif
         if (qp_stop()) then
           stop_now = .True.
         endif
-        pt2(pt2_stoch_istate) = avg
-        variance(pt2_stoch_istate) = avg2
-        norm(pt2_stoch_istate) = avg3
+        pt2_data % pt2(pt2_stoch_istate) = avg
+        pt2_data % variance(pt2_stoch_istate) = avg2
+        pt2_data % overlap(:,pt2_stoch_istate) = avg3(:)
         call wall_time(time)
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
-          eqt = dabs((S2(t) / c) - (S(t)/c)**2) ! dabs for numerical stability
+          eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
           eqt = sqrt(eqt / (dble(c) - 1.5d0))
-          error(pt2_stoch_istate) = eqt
+          pt2_data_err % pt2(pt2_stoch_istate) = eqt
+
+          eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
+          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          pt2_data_err % variance(pt2_stoch_istate) = eqt
+
+          eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
+          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
+
+
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(G10.3, 2X, F16.10, 2X, G10.3, 2X, F14.10, 2X, F14.10, 2X, F10.4, A10)', c, avg+E, eqt, avg2, avg3, time-time0, ''
+            print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.4)', c, &
+              pt2_data     % pt2(pt2_stoch_istate) +E, &
+              pt2_data_err % pt2(pt2_stoch_istate), &
+              pt2_data     % variance(pt2_stoch_istate), &
+              pt2_data_err % variance(pt2_stoch_istate), &
+              pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+              pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+              time-time0
             if (stop_now .or. (                                      &
-                  (do_exit .and. (dabs(error(pt2_stoch_istate)) /    &
-                  (1.d-20 + dabs(pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
+                  (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
+                  (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
               if (zmq_abort(zmq_to_qp_run_socket) == -1) then
                 call sleep(10)
                 if (zmq_abort(zmq_to_qp_run_socket) == -1) then
@@ -523,28 +561,26 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
     else if(more == 0) then
       exit
     else
-      call pull_pt2_results(zmq_socket_pull, index, eI_task, vI_task, nI_task, task_id, n_tasks, b2)
+      call pull_pt2_results(zmq_socket_pull, index, pt2_data_task, task_id, n_tasks, b2)
       if(n_tasks > pt2_n_tasks_max)then
        print*,'PB !!!'
-       print*,'If you see this, send an email to Anthony scemama with the following content'
+       print*,'If you see this, send a bug report with the following content'
        print*,irp_here
-       print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max  
-       stop -1 
+       print*,'n_tasks,pt2_n_tasks_max = ',n_tasks,pt2_n_tasks_max
+       stop -1
       endif
       if (zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_tasks,sending) == -1) then
           stop 'PT2: Unable to delete tasks (send)'
       endif
       do i=1,n_tasks
-        if(index(i).gt.size(eI,2).or.index(i).lt.1)then
+        if(index(i).gt.size(pt2_data_I,1).or.index(i).lt.1)then
          print*,'PB !!!'
-         print*,'If you see this, send an email to Anthony scemama with the following content'
+         print*,'If you see this, send a bug report with the following content'
          print*,irp_here
-         print*,'i,index(i),size(ei,2) = ',i,index(i),size(ei,2)
-         stop -1 
+         print*,'i,index(i),size(pt2_data_I,1) = ',i,index(i),size(pt2_data_I,1)
+         stop -1
         endif
-        eI(1:N_states, index(i)) += eI_task(1:N_states,i)
-        vI(1:N_states, index(i)) += vI_task(1:N_states,i)
-        nI(1:N_states, index(i)) += nI_task(1:N_states,i)
+        call pt2_add(pt2_data_I(index(i)),1.d0,pt2_data_task(i))
         f(index(i)) -= 1
       end do
       do i=1, b2%cur
@@ -557,6 +593,16 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2, error, varianc
       endif
     end if
   end do
+  do i=1,N_det_generators
+    call pt2_dealloc(pt2_data_I(i))
+  enddo
+  do i=1,pt2_N_teeth+1
+    call pt2_dealloc(pt2_data_S(i))
+    call pt2_dealloc(pt2_data_S2(i))
+  enddo
+  do i=1,pt2_n_tasks_max
+    call pt2_dealloc(pt2_data_task(i))
+  enddo
 !print *,  'deleting b2'
   call delete_selection_buffer(b2)
 !print *,  'sorting b'
@@ -731,39 +777,39 @@ END_PROVIDER
    double precision, allocatable  :: tilde_w(:), tilde_cW(:)
    double precision               :: r, tooth_width
    integer, external              :: pt2_find_sample
-   
+
    double precision               :: rss
    double precision, external     :: memory_of_double, memory_of_int
    rss = memory_of_double(2*N_det_generators+1)
    call check_mem(rss,irp_here)
-   
+
    if (N_det_generators == 1) then
-     
+
      pt2_w(1)   = 1.d0
      pt2_cw(1)  = 1.d0
      pt2_u_0    = 1.d0
      pt2_W_T    = 0.d0
      pt2_n_0(1) = 0
      pt2_n_0(2) = 1
-     
+
    else
-     
+
      allocate(tilde_w(N_det_generators), tilde_cW(0:N_det_generators))
-     
+
      tilde_cW(0) = 0d0
-     
+
      do i=1,N_det_generators
        tilde_w(i)  = psi_coef_sorted_gen(i,pt2_stoch_istate)**2 !+ 1.d-20
      enddo
-     
-     double precision               :: norm
-     norm = 0.d0
+
+     double precision               :: norm2
+     norm2 = 0.d0
      do i=N_det_generators,1,-1
-       norm += tilde_w(i)
+       norm2 += tilde_w(i)
      enddo
-     
-     tilde_w(:) = tilde_w(:) / norm
-     
+
+     tilde_w(:) = tilde_w(:) / norm2
+
      tilde_cW(0) = -1.d0
      do i=1,N_det_generators
        tilde_cW(i) = tilde_cW(i-1) + tilde_w(i)
@@ -784,13 +830,13 @@ END_PROVIDER
        stop -1
      end if
    end do
-   
+
    do t=2, pt2_N_teeth
      r = pt2_u_0 + pt2_W_T * dble(t-1)
      pt2_n_0(t) = pt2_find_sample(r, tilde_cW)
    end do
    pt2_n_0(pt2_N_teeth+1) = N_det_generators
-   
+
    pt2_w(:pt2_n_0(1)) = tilde_w(:pt2_n_0(1))
    do t=1, pt2_N_teeth
      tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
@@ -802,7 +848,7 @@ END_PROVIDER
        pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
      end do
    end do
-   
+
    pt2_cW(0) = 0d0
    do i=1,N_det_generators
      pt2_cW(i) = pt2_cW(i-1) + pt2_w(i)

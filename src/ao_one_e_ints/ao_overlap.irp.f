@@ -70,6 +70,29 @@
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, ao_overlap_imag, (ao_num, ao_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Imaginary part of the overlap
+ END_DOC
+ ao_overlap_imag = 0.d0
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, ao_overlap_complex, (ao_num, ao_num) ]
+  implicit none
+  BEGIN_DOC
+  ! Overlap for complex AOs
+  END_DOC
+  integer                        :: i,j
+  do j=1,ao_num
+    do i=1,ao_num
+      ao_overlap_complex(i,j) = dcmplx( ao_overlap(i,j), ao_overlap_imag(i,j) )
+    enddo
+  enddo
+END_PROVIDER
+
+
+
 
 BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]
   implicit none
@@ -86,44 +109,52 @@ BEGIN_PROVIDER [ double precision, ao_overlap_abs,(ao_num,ao_num) ]
   double precision :: A_center(3), B_center(3)
   integer :: power_A(3), power_B(3)
   double precision :: lower_exp_val, dx
-  dim1=100
-  lower_exp_val = 40.d0
-  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-  !$OMP DEFAULT(NONE) &
-  !$OMP PRIVATE(A_center,B_center,power_A,power_B,&
-  !$OMP  overlap_x,overlap_y, overlap_z, overlap, &
-  !$OMP  alpha, beta,i,j,dx) &
-  !$OMP SHARED(nucl_coord,ao_power,ao_prim_num, &
-  !$OMP  ao_overlap_abs,ao_num,ao_coef_normalized_ordered_transp,ao_nucl, &
-  !$OMP  ao_expo_ordered_transp,dim1,lower_exp_val)
-  do j=1,ao_num
-   A_center(1) = nucl_coord( ao_nucl(j), 1 )
-   A_center(2) = nucl_coord( ao_nucl(j), 2 )
-   A_center(3) = nucl_coord( ao_nucl(j), 3 )
-   power_A(1)  = ao_power( j, 1 )
-   power_A(2)  = ao_power( j, 2 )
-   power_A(3)  = ao_power( j, 3 )
-   do i= 1,ao_num
-    ao_overlap_abs(i,j)= 0.d0
-    B_center(1) = nucl_coord( ao_nucl(i), 1 )
-    B_center(2) = nucl_coord( ao_nucl(i), 2 )
-    B_center(3) = nucl_coord( ao_nucl(i), 3 )
-    power_B(1)  = ao_power( i, 1 )
-    power_B(2)  = ao_power( i, 2 )
-    power_B(3)  = ao_power( i, 3 )
-    do n = 1,ao_prim_num(j)
-     alpha = ao_expo_ordered_transp(n,j)
-     do l = 1, ao_prim_num(i)
-      beta = ao_expo_ordered_transp(l,i)
-      call overlap_x_abs(A_center(1),B_center(1),alpha,beta,power_A(1),power_B(1),overlap_x,lower_exp_val,dx,dim1)
-      call overlap_x_abs(A_center(2),B_center(2),alpha,beta,power_A(2),power_B(2),overlap_y,lower_exp_val,dx,dim1)
-      call overlap_x_abs(A_center(3),B_center(3),alpha,beta,power_A(3),power_B(3),overlap_z,lower_exp_val,dx,dim1)
-      ao_overlap_abs(i,j) += abs(ao_coef_normalized_ordered_transp(n,j) * ao_coef_normalized_ordered_transp(l,i)) * overlap_x * overlap_y * overlap_z
-     enddo
+  if (is_periodic) then
+    do j=1,ao_num
+      do i= 1,ao_num
+        ao_overlap_abs(i,j)= cdabs(ao_overlap_complex(i,j))
+      enddo
     enddo
-   enddo
-  enddo
-  !$OMP END PARALLEL DO
+  else
+    dim1=100
+    lower_exp_val = 40.d0
+    !$OMP PARALLEL DO SCHEDULE(GUIDED)                               &
+        !$OMP DEFAULT(NONE)                                          &
+        !$OMP PRIVATE(A_center,B_center,power_A,power_B,             &
+        !$OMP  overlap_x,overlap_y, overlap_z, overlap,              &
+        !$OMP  alpha, beta,i,j,dx)                                   &
+        !$OMP SHARED(nucl_coord,ao_power,ao_prim_num,                &
+        !$OMP  ao_overlap_abs,ao_num,ao_coef_normalized_ordered_transp,ao_nucl,&
+        !$OMP  ao_expo_ordered_transp,dim1,lower_exp_val)
+    do j=1,ao_num
+      A_center(1) = nucl_coord( ao_nucl(j), 1 )
+      A_center(2) = nucl_coord( ao_nucl(j), 2 )
+      A_center(3) = nucl_coord( ao_nucl(j), 3 )
+      power_A(1)  = ao_power( j, 1 )
+      power_A(2)  = ao_power( j, 2 )
+      power_A(3)  = ao_power( j, 3 )
+      do i= 1,ao_num
+        ao_overlap_abs(i,j)= 0.d0
+        B_center(1) = nucl_coord( ao_nucl(i), 1 )
+        B_center(2) = nucl_coord( ao_nucl(i), 2 )
+        B_center(3) = nucl_coord( ao_nucl(i), 3 )
+        power_B(1)  = ao_power( i, 1 )
+        power_B(2)  = ao_power( i, 2 )
+        power_B(3)  = ao_power( i, 3 )
+        do n = 1,ao_prim_num(j)
+          alpha = ao_expo_ordered_transp(n,j)
+          do l = 1, ao_prim_num(i)
+            beta = ao_expo_ordered_transp(l,i)
+            call overlap_x_abs(A_center(1),B_center(1),alpha,beta,power_A(1),power_B(1),overlap_x,lower_exp_val,dx,dim1)
+            call overlap_x_abs(A_center(2),B_center(2),alpha,beta,power_A(2),power_B(2),overlap_y,lower_exp_val,dx,dim1)
+            call overlap_x_abs(A_center(3),B_center(3),alpha,beta,power_A(3),power_B(3),overlap_z,lower_exp_val,dx,dim1)
+            ao_overlap_abs(i,j) += abs(ao_coef_normalized_ordered_transp(n,j) * ao_coef_normalized_ordered_transp(l,i)) * overlap_x * overlap_y * overlap_z
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+  endif
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
@@ -131,7 +162,17 @@ BEGIN_PROVIDER [ double precision, S_inv,(ao_num,ao_num) ]
  BEGIN_DOC
 ! Inverse of the overlap matrix
  END_DOC
- call get_pseudo_inverse(ao_overlap,size(ao_overlap,1),ao_num,ao_num,S_inv,size(S_inv,1))
+ call get_pseudo_inverse(ao_overlap,size(ao_overlap,1),ao_num,ao_num,S_inv, &
+    size(S_inv,1),lin_dep_cutoff)
+END_PROVIDER
+
+BEGIN_PROVIDER [ complex*16, S_inv_complex,(ao_num,ao_num) ]
+ implicit none
+ BEGIN_DOC
+! Inverse of the overlap matrix
+ END_DOC
+ call get_pseudo_inverse_complex(ao_overlap_complex, size(ao_overlap_complex,1),&
+    ao_num,ao_num,S_inv_complex,size(S_inv_complex,1),lin_dep_cutoff)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, S_half_inv, (AO_num,AO_num) ]

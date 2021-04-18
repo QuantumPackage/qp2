@@ -99,6 +99,16 @@ double precision function get_two_e_integral(i,j,k,l,map)
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  if (use_banned_excitation) then
+    if (banned_excitation(i,k)) then
+      get_two_e_integral = 0.d0
+      return
+    endif
+    if (banned_excitation(j,l)) then
+      get_two_e_integral = 0.d0
+      return
+    endif
+  endif
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
@@ -127,7 +137,6 @@ double precision function mo_two_e_integral(i,j,k,l)
   integer, intent(in)            :: i,j,k,l
   double precision               :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
-  PROVIDE mo_two_e_integrals_in_map
   !DIR$ FORCEINLINE
   mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
   return
@@ -160,6 +169,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 !  return
 !DEBUG
 
+  out_val(1:sze) = 0.d0
+  if (banned_excitation(j,l)) then
+    return
+  endif
+
   ii0 = l-mo_integrals_cache_min
   ii0 = ior(ii0, k-mo_integrals_cache_min)
   ii0 = ior(ii0, j-mo_integrals_cache_min)
@@ -173,6 +187,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   q = q+shiftr(s*s-s,1)
 
   do i=1,sze
+    if (banned_excitation(i,k)) cycle
     ii = ior(ii0, i-mo_integrals_cache_min)
     if (iand(ii, -128) == 0) then
       ii_8 = ior( shiftl(ii0_8,7), int(i,8)-mo_integrals_cache_min_8)
@@ -202,47 +217,12 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
-  integer(key_kind),allocatable  :: hash(:)
-  integer  ,allocatable          :: pairs(:,:), iorder(:)
+  integer                        :: j
   real(integral_kind), allocatable :: tmp_val(:)
 
-  PROVIDE mo_two_e_integrals_in_map
-  allocate (hash(sze*sze), pairs(2,sze*sze),iorder(sze*sze), &
-  tmp_val(sze*sze))
-
-  kk=0
-  out_array = 0.d0
   do j=1,sze
-   do i=1,sze
-    kk += 1
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(i,j,k,l,hash(kk))
-    pairs(1,kk) = i
-    pairs(2,kk) = j
-    iorder(kk) = kk
-   enddo
+    call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
   enddo
-
-  logical :: integral_is_in_map
-  if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
-  endif
-
-  call map_get_many(mo_integrals_map, hash, tmp_val, kk)
-
-  do ll=1,kk
-    m = iorder(ll)
-    i=pairs(1,m)
-    j=pairs(2,m)
-    out_array(i,j) = tmp_val(ll)
-  enddo
-
-  deallocate(pairs,hash,iorder,tmp_val)
 end
 
 subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
@@ -256,47 +236,13 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
   integer, intent(in)            :: k,l, sze
   double precision, intent(out)  :: out_array(sze,sze)
   type(map_type), intent(inout)  :: map
-  integer                        :: i,j,kk,ll,m
-  integer(key_kind),allocatable  :: hash(:)
-  integer  ,allocatable          :: pairs(:,:), iorder(:)
-  real(integral_kind), allocatable :: tmp_val(:)
-
+  integer                        :: j
   PROVIDE mo_two_e_integrals_in_map
-  allocate (hash(sze*sze), pairs(2,sze*sze),iorder(sze*sze), &
-  tmp_val(sze*sze))
 
-  kk=0
-  out_array = 0.d0
   do j=1,sze
-   do i=1,sze
-    kk += 1
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(i,k,j,l,hash(kk))
-    pairs(1,kk) = i
-    pairs(2,kk) = j
-    iorder(kk) = kk
-   enddo
+    call get_mo_two_e_integrals(k,j,l,sze,out_array(1,j),map)
   enddo
 
-  logical :: integral_is_in_map
-  if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
-  else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
-  endif
-
-  call map_get_many(mo_integrals_map, hash, tmp_val, kk)
-
-  do ll=1,kk
-    m = iorder(ll)
-    i=pairs(1,m)
-    j=pairs(2,m)
-    out_array(i,j) = tmp_val(ll)
-  enddo
-
-  deallocate(pairs,hash,iorder,tmp_val)
 end
 
 
@@ -312,25 +258,13 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i
-  integer(key_kind)              :: hash(sze)
-  real(integral_kind)            :: tmp_val(sze)
+  double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  integer :: kk
   do i=1,sze
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(k,i,l,i,hash(i))
+    out_val(i) = get_two_e_integral(k,i,l,i,map)
   enddo
 
-  if (integral_kind == 8) then
-    call map_get_many(map, hash, out_val, sze)
-  else
-    call map_get_many(map, hash, tmp_val, sze)
-    ! Conversion to double precision
-    do i=1,sze
-      out_val(i) = dble(tmp_val(i))
-    enddo
-  endif
 end
 
 subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
@@ -345,26 +279,45 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i
-  integer(key_kind)              :: hash(sze)
-  real(integral_kind)            :: tmp_val(sze)
+  double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  integer :: kk
   do i=1,sze
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(k,i,i,l,hash(i))
+    out_val(i) = get_two_e_integral(k,i,i,l,map)
   enddo
 
-  if (integral_kind == 8) then
-    call map_get_many(map, hash, out_val, sze)
-  else
-    call map_get_many(map, hash, tmp_val, sze)
-    ! Conversion to double precision
-    do i=1,sze
-      out_val(i) = dble(tmp_val(i))
-    enddo
-  endif
 end
+
+ BEGIN_PROVIDER [ logical, banned_excitation, (mo_num,mo_num) ]
+&BEGIN_PROVIDER [ logical, use_banned_excitation  ]
+ implicit none
+ use map_module
+ BEGIN_DOC
+ ! If true, the excitation is banned in the selection. Useful with local MOs.
+ END_DOC
+ banned_excitation = .False.
+ integer :: i,j, icount
+ integer(key_kind)              :: idx
+ double precision :: tmp
+
+ icount = 1 ! Avoid division by zero
+ do j=1,mo_num
+   do i=1,j-1
+    call two_e_integrals_index(i,j,j,i,idx)
+    !DIR$ FORCEINLINE
+    call map_get(mo_integrals_map,idx,tmp)
+    banned_excitation(i,j) = dabs(tmp) < 1.d-14
+    banned_excitation(j,i) = banned_excitation(i,j)
+    if (banned_excitation(i,j)) icount = icount+2
+  enddo
+ enddo
+ use_banned_excitation =  (mo_num*mo_num) / icount <= 100  !1%
+ if (use_banned_excitation) then
+   print *, 'Using sparsity of exchange integrals'
+ endif
+
+END_PROVIDER
+
 
 
 integer*8 function get_mo_map_size()

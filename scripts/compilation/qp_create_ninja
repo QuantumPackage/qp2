@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Usage: qp_create_ninja create <config_file> (--development | --production)
@@ -24,7 +24,7 @@ except ImportError:
                                       "..",
                                       "quantum_package.rc"))
 
-    print "\n".join(["", "Error:", "source %s" % f, ""])
+    print("\n".join(["", "Error:", "source %s" % f, ""]))
     sys.exit(1)
 
 # Compress path
@@ -38,11 +38,12 @@ def comp_path(path):
 
 from qp_path import QP_ROOT, QP_SRC, QP_EZFIO
 
-LIB = " -lz" 
+LIB = " -lz"
 EZFIO_LIB = join("$QP_ROOT", "lib", "libezfio_irp.a")
 ZMQ_LIB = join("$QP_ROOT", "lib", "libf77zmq.a") + " "  + join("$QP_ROOT", "lib", "libzmq.a") + " -lstdc++ -lrt -ldl"
 ROOT_BUILD_NINJA = join("$QP_ROOT", "config", "build.ninja")
 ROOT_BUILD_NINJA_EXP =  join(QP_ROOT, "config", "build.ninja")
+ROOT_BUILD_NINJA_EXP_tmp =  join(QP_ROOT, "config", "build.ninja.tmp")
 header = r"""#
 #  _______                     _____
 #  __  __ \___  _______ _________  /____  ________ ___
@@ -57,7 +58,7 @@ header = r"""#
 #               /_/     \__,_/ \___/ /_/|_| \__,_/ _\__, / \___/
 #                                                  /____/
 #
-# https://github.com/LCPQ/quantum_package,
+# https://github.com/QuantumPackage/qp2,
 #
 # Generated automatically by {0}
 #
@@ -124,7 +125,7 @@ def dict_module_genelogy_path(d_module_genelogy):
     d_module_genelogy
     """
     d = dict()
-    for module_rel, l_children_rel in d_module_genelogy.iteritems():
+    for module_rel, l_children_rel in d_module_genelogy.items():
         module_abs = real_join(QP_SRC, module_rel)
 
         p = Path(module_abs, module_rel)
@@ -149,7 +150,7 @@ def get_l_module_with_ezfio_cfg():
     from os import listdir
     from os.path import isfile
 
-    return [real_join(QP_SRC, m) for m in listdir(QP_SRC)
+    return [real_join(QP_SRC, m) for m in sorted(listdir(QP_SRC))
             if isfile(real_join(QP_SRC, m, "EZFIO.cfg"))]
 
 
@@ -235,11 +236,11 @@ def ninja_ezfio_cfg_build(l_util):
     """
     l_string = []
 
-    for m in l_util.itervalues():
+    for m in l_util.values():
 
         str_ = "build {1} {2}: build_ezfio_interface {0}"
-        l_string += [str_.format(*map(comp_path,(m.ez_cfg.abs, m.ez_interface.abs,
-                                 m.ez_config.abs)))]
+        l_string += [str_.format(*list(map(comp_path,(m.ez_cfg.abs, m.ez_interface.abs,
+                                 m.ez_config.abs))))]
 
         l_string += ["   sub_module = {0}".format(comp_path(m.ez_module.abs))]
         l_string += [""]
@@ -257,8 +258,8 @@ def ninja_ezfio_config_build(l_ezfio_config):
         file_source = m.path_in_module
         file_create = m.path_in_ezfio
 
-        l_string += ["build {0}: build_ezfio_config {1}".format(*map(comp_path,(file_create,
-                                                                file_source)))]
+        l_string += ["build {0}: build_ezfio_config {1}".format(*list(map(comp_path,(file_create,
+                                                                file_source))))]
         l_string += [""]
 
     return l_string
@@ -291,7 +292,7 @@ def ninja_ezfio_build(l_ezfio_config, l_util):
     """
 
     l_ezfio_config = [i.path_in_ezfio for i in l_ezfio_config]
-    l_ezfio_from_cfg = [i.ez_config.abs for i in l_util.itervalues()]
+    l_ezfio_from_cfg = [i.ez_config.abs for i in l_util.values()]
 
     str_ = " ".join(map(comp_path,(l_ezfio_config + l_ezfio_from_cfg)))
     l_string = ["build {0}: build_ezfio {1}".format(EZFIO_LIB, str_), ""]
@@ -328,14 +329,14 @@ def ninja_symlink_build(path_module, l_symlink):
     if not l_symlink:
         return []
 
-    l_folder = [s.destination for s in l_symlink]
+    l_folder = [s.destination for s in sorted(l_symlink,key=lambda x:x.destination)]
 
     l_string = ["build l_symlink_{0} : phony {1}".format(path_module.rel,
                                                          " ".join(map(comp_path,l_folder))),
                 ""]
 
-    for symlink in l_symlink:
-        l_string += ["build {0}: build_symlink {1}".format(*map(comp_path,(symlink.destination, symlink.source))), ""]
+    for symlink in sorted(l_symlink, key=lambda x: x.source+x.destination):
+        l_string += ["build {0}: build_symlink {1}".format(*list(map(comp_path,(symlink.destination, symlink.source)))), ""]
 
     return l_string
 
@@ -360,7 +361,7 @@ def ninja_gitignore_build(path_module, d_binaries, l_symlink):
 
     path_gitignore = comp_path(join(path_module.abs, ".gitignore"))
 
-    l_b = map(comp_path,[i.abs for i in d_binaries[path_module]])
+    l_b = sorted(list(map(comp_path,[i.abs for i in d_binaries[path_module]])))
 
     root = "build {0}: build_gitignore {1}".format(path_gitignore,
                                                    " ".join(l_b))
@@ -389,7 +390,7 @@ def get_l_file_for_module(path_module):
 
     l_template = []
 
-    for f in os.listdir(path_module.abs):
+    for f in sorted(os.listdir(path_module.abs)):
         if f.lower().endswith(tuple([".template.f", ".include.f"])):
             l_template.append(join(path_module.abs, f))
         elif f.endswith(".irp.f"):
@@ -416,13 +417,13 @@ def get_l_file_for_module(path_module):
 
 def get_file_dependency(d_info_module):
     """
-    For a module return all the irp.f90 needed files 
+    For a module return all the irp.f90 needed files
     """
     d_irp = defaultdict(dict)
 
-    for module, l_children in d_info_module.iteritems():
+    for module, l_children in d_info_module.items():
 
-        for key, values in get_l_file_for_module(module).iteritems():
+        for key, values in get_l_file_for_module(module).items():
             if key in ["l_src"]:
                 values = [join(module.abs, o) for o in values]
             if key in ["l_obj"]:
@@ -431,7 +432,7 @@ def get_file_dependency(d_info_module):
             d_irp[module][key] = values
 
         for children in l_children:
-            for key, values in get_l_file_for_module(children).iteritems():
+            for key, values in get_l_file_for_module(children).items():
                 if key in ["l_src"]:
                     values = [join(module.abs, children.rel, o)
                               for o in values]
@@ -495,10 +496,10 @@ def ninja_irpf90_make_build(path_module, l_needed_molule, d_irp):
     # D e p e n d a n c y #
     # ~#~#~#~#~#~#~#~#~#~ #
 
-    l_depend = map(comp_path,d_irp[path_module]["l_depend"])
-    l_src = map(comp_path,d_irp[path_module]["l_src"])
-    l_obj = map(comp_path,d_irp[path_module]["l_obj"])
-    l_template = map(comp_path,d_irp[path_module]["l_template"])
+    l_depend = sorted(list(map(comp_path,d_irp[path_module]["l_depend"])))
+    l_src = sorted(list(map(comp_path,d_irp[path_module]["l_src"])))
+    l_obj = sorted(list(map(comp_path,d_irp[path_module]["l_obj"])))
+    l_template = sorted(list(map(comp_path,d_irp[path_module]["l_template"])))
 
     if l_needed_molule:
         l_symlink = ["l_symlink_{0}".format(path_module.rel)]
@@ -511,7 +512,7 @@ def ninja_irpf90_make_build(path_module, l_needed_molule, d_irp):
     # N i n j a _ b u i l d #
     # ~#~#~#~#~#~#~#~#~#~#~ #
 
-    l_include_dir = ["-I {0}".format(m.rel) for m in l_needed_molule]
+    l_include_dir  = ["-I {0}".format(m.rel) for m in sorted(l_needed_molule, key=lambda x:x.rel+x.abs) ]
 
     l_string = [
         "build {0}: build_irpf90.ninja {1}".format(str_creation, str_depend),
@@ -544,6 +545,7 @@ def get_binaries(path_module):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
+        stdout = stdout.decode()
     except OSError:
         return []
     else:
@@ -641,7 +643,7 @@ def ninja_binaries_build(path_module, l_children, d_binaries):
     # ~#~#~ #
 
     ninja_module_path = join(comp_path(path_module.abs), "IRPF90_temp/build.ninja")
-    l_abs_bin = map(comp_path,[binary.abs for binary in d_binaries[path_module]])
+    l_abs_bin = sorted(list(map(comp_path,[binary.abs for binary in d_binaries[path_module]])))
 
     # ~#~#~#~#~#~ #
     # s t r i n g #
@@ -658,8 +660,7 @@ def ninja_binaries_build(path_module, l_children, d_binaries):
 
 def ninja_module_build(path_module, d_binaries):
 
-    l_abs_bin = map(comp_path,[binary.abs for binary in d_binaries[path_module]])
-
+    l_abs_bin = sorted(list(map(comp_path,[binary.abs for binary in d_binaries[path_module]])))
     path_readme = os.path.join(comp_path(path_module.abs), "README.rst")
 
     l_string = ["build module_{0}: phony {1}".format(path_module.rel,
@@ -710,7 +711,7 @@ def save_subninja_file(path_module):
                  ""]
 
     path_ninja_cur = join(path_module.abs, "build.ninja")
-    
+
     with open(path_ninja_cur, "w") as f:
         f.write(header)
         f.write("\n".join(l_string))
@@ -829,14 +830,14 @@ if __name__ == "__main__":
     dict_root = module_instance.dict_root
     dict_root_path = dict_module_genelogy_path(dict_root)
 
-    l_all_module = d_genealogy_path.keys()
+    l_all_module = sorted(list(d_genealogy_path.keys()))
 
     # ~#~#~#~#~#~#~#~#~#~#~#~#~ #
     # M o d u l e _ t o _ i r p #
     # ~#~#~#~#~#~#~#~#~#~#~#~#~ #
 
     d_binaries = get_dict_binaries(l_all_module, mode="development")
-    l_module = d_binaries.keys()
+    l_module = sorted(list(d_binaries.keys()), key=lambda x: x.rel+x.abs)
 
 
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
@@ -850,7 +851,6 @@ if __name__ == "__main__":
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
 
     for module_to_compile in l_module:
-    
         if module_to_compile.rel == "dummy":
                 continue
 
@@ -883,6 +883,21 @@ if __name__ == "__main__":
     # S a v e s #
     # ~#~#~#~#~ #
 
-    with open(ROOT_BUILD_NINJA_EXP, "w+") as f:
+    with open(ROOT_BUILD_NINJA_EXP_tmp, "w+") as f:
         f.write(header)
         f.write("\n".join(l_string))
+
+    with open(ROOT_BUILD_NINJA_EXP_tmp, "r") as f:
+        a = f.read()
+
+    try:
+        with open(ROOT_BUILD_NINJA_EXP, "r") as f:
+           b = f.read()
+    except:
+           b = None
+
+    if a != b:
+       os.rename(ROOT_BUILD_NINJA_EXP_tmp, ROOT_BUILD_NINJA_EXP)
+    else:
+       os.remove(ROOT_BUILD_NINJA_EXP_tmp)
+

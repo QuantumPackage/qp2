@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ character*(128), qp_stop_filename ]
-&BEGIN_PROVIDER [ character*(128), qp_kill_filename ]
+ BEGIN_PROVIDER [ character*(256), qp_stop_filename ]
+&BEGIN_PROVIDER [ character*(256), qp_kill_filename ]
 &BEGIN_PROVIDER [ integer, qp_stop_variable ]
  implicit none
  BEGIN_DOC
@@ -23,6 +23,7 @@ logical function qp_stop()
     INQUIRE(FILE=trim(qp_kill_filename), EXIST=qp_stop)
     if (qp_stop) then
       qp_stop_variable = 1
+      ! qp_stop is true
       return
     endif
 

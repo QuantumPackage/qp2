@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -21,8 +21,8 @@ try:
     from docopt import docopt
     from qp_path import QP_SRC, QP_TESTS
 except ImportError:
-    print "Please check if you have sourced the ${QP_ROOT}/quantum_package.rc"
-    print "(`source ${QP_ROOT}/quantum_package.rc`)"
+    print("Please check if you have sourced the ${QP_ROOT}/quantum_package.rc")
+    print("(`source ${QP_ROOT}/quantum_package.rc`)")
     sys.exit(1)
 
 
@@ -54,11 +54,11 @@ def main(arguments):
     os.chdir(QP_TESTS)
 
     for bats_file in l_bats:
-        print ""
-        print "-~-~-~-~-~-~"
-        print ""
-        print "Running tests for %s"%(bats_file)
-        print ""
+        print("")
+        print("-~-~-~-~-~-~")
+        print("")
+        print("Running tests for %s"%(bats_file))
+        print("")
         if arguments["-v"]:
             p = None
             if arguments["TEST"]:
@@ -66,7 +66,7 @@ def main(arguments):
             else:
                 test = ""
             try:
-                os.system(test+" python2 bats_to_sh.py "+bats_file+
+                os.system(test+" python3 bats_to_sh.py "+bats_file+
                                     "| bash")
             except:
                 if p:

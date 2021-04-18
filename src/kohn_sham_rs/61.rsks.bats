@@ -5,7 +5,7 @@ source $QP_ROOT/quantum_package.rc
 
 
 function run() {
-  thresh=1.e-8
+  thresh=1.e-7
   functional=$2
   qp set_file $1
   qp edit --check
@@ -22,7 +22,7 @@ function run() {
 }
 
 @test "H3COH" {
-  run h3coh.ezfio sr_pbe -115.50238225208
+  run h3coh.ezfio sr_pbe -115.502382305049
 }
 
 @test "HCN" {
@@ -34,7 +34,7 @@ function run() {
 }
 
 @test "SiH2_3B1" {
-  run sih2_3b1.ezfio sr_lda -289.4398733527755
+  run sih2_3b1.ezfio sr_lda -289.439873304975
 }
 
 

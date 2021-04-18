@@ -107,10 +107,4 @@ Providers
        * :c:data:`correlation_functional`
        * :c:data:`exchange_functional`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_potential_alpha_xc`
 

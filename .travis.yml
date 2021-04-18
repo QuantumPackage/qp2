@@ -8,7 +8,7 @@
 
 os: linux
 
-dist: trusty
+dist: bionic
 
 sudo: false
 
@@ -19,8 +19,9 @@ addons:
     packages:
     - gfortran
     - gcc
-    - liblapack-dev
-    - libblas-dev
+    - libatlas-base-dev
+#    - liblapack-dev
+#    - libblas-dev
     - wget
 
 env:
@@ -29,12 +30,23 @@ env:
 cache:
   directories:
   - $HOME/.opam/
+  - $HOME/cache
 
 language: python
 python:
-    - "2.7"
+    - "3.7"
 
-script: 
-  - ./configure --install all --config ./config/travis.cfg 
-  - source ./quantum_package.rc ; ninja -j 1 -v 
-  - source ./quantum_package.rc ; qp_test -a 
+stages:
+  - configuration
+  - compilation
+  - testing
+
+jobs:
+  include:
+    - stage: configuration
+      script: travis/configuration.sh
+    - stage: compilation
+      script: travis/compilation.sh
+    - stage: testing
+      script: travis/testing.sh
+

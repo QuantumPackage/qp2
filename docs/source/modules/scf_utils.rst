@@ -178,9 +178,11 @@ Providers
        * :c:data:`fock_matrix_mo`
        * :c:data:`frozen_orb_scf`
        * :c:data:`level_shift`
-       * :c:data:`list_inact`
+       * :c:data:`list_act`
+       * :c:data:`list_core`
        * :c:data:`mo_coef`
        * :c:data:`mo_num`
+       * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
 
 
@@ -206,8 +208,8 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`max_dim_diis`
        * :c:data:`ao_num`
+       * :c:data:`max_dim_diis`
 
     Called by:
 
@@ -221,8 +223,10 @@ Providers
     .. hlist::
        :columns: 3
 
+       * :c:func:`dgecon`
        * :c:func:`dgemm`
-       * :c:func:`dsysvx`
+       * :c:func:`dgesv`
+       * :c:func:`dgetrf`
 
  
 .. c:var:: fock_matrix_ao
@@ -297,8 +301,10 @@ Providers
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
        * :c:data:`frozen_orb_scf`
-       * :c:data:`list_inact`
+       * :c:data:`list_act`
+       * :c:data:`list_core`
        * :c:data:`mo_num`
+       * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
 
     Needed by:
@@ -346,8 +352,10 @@ Providers
        * :c:data:`fock_matrix_mo_alpha`
        * :c:data:`fock_matrix_mo_beta`
        * :c:data:`frozen_orb_scf`
-       * :c:data:`list_inact`
+       * :c:data:`list_act`
+       * :c:data:`list_core`
        * :c:data:`mo_num`
+       * :c:data:`n_act_orb`
        * :c:data:`n_core_orb`
 
     Needed by:
@@ -637,18 +645,18 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`mo_coef`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`scf_energy`
-       * :c:data:`scf_density_matrix_ao_beta`
-       * :c:data:`fock_matrix_mo`
        * :c:data:`ao_num`
-       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_ao`
+       * :c:data:`fock_matrix_mo`
+       * :c:data:`frozen_orb_scf`
+       * :c:data:`mo_coef`
        * :c:data:`mo_label`
        * :c:data:`n_it_scf_max`
+       * :c:data:`scf_density_matrix_ao_alpha`
+       * :c:data:`scf_density_matrix_ao_beta`
+       * :c:data:`scf_energy`
        * :c:data:`thresh_scf`
-       * :c:data:`frozen_orb_scf`
 
     Calls:
 
@@ -690,14 +698,15 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_one_e_integrals`
-       * :c:data:`mo_coef`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`ao_overlap`
        * :c:data:`ao_num`
+       * :c:data:`ao_one_e_integrals`
+       * :c:data:`ao_overlap`
        * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_num`
 
     Called by:
 
@@ -711,6 +720,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:func:`orthonormalize_mos`
+       * :c:func:`restore_symmetry`
        * :c:func:`save_mos`
 
     Touches:
@@ -740,34 +751,27 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`max_dim_diis`
-       * :c:data:`mo_occ`
        * :c:data:`ao_md5`
-       * :c:data:`mo_coef`
-       * :c:data:`level_shift`
-       * :c:data:`fps_spf_matrix_mo`
-       * :c:data:`eigenvectors_fock_matrix_mo`
-       * :c:data:`scf_energy`
-       * :c:data:`mo_num`
-       * :c:data:`thresh_scf`
-       * :c:data:`scf_algorithm`
-       * :c:data:`fock_matrix_mo`
        * :c:data:`ao_num`
+       * :c:data:`eigenvectors_fock_matrix_mo`
        * :c:data:`fock_matrix_ao`
-       * :c:data:`mo_label`
-       * :c:data:`n_it_scf_max`
-       * :c:data:`threshold_diis_nonzero`
-       * :c:data:`frozen_orb_scf`
        * :c:data:`fock_matrix_ao_alpha`
        * :c:data:`fock_matrix_ao_alpha`
+       * :c:data:`fock_matrix_mo`
        * :c:data:`fps_spf_matrix_ao`
-
-    Called by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`run`
+       * :c:data:`fps_spf_matrix_mo`
+       * :c:data:`frozen_orb_scf`
+       * :c:data:`level_shift`
+       * :c:data:`max_dim_diis`
+       * :c:data:`mo_coef`
+       * :c:data:`mo_label`
+       * :c:data:`mo_num`
+       * :c:data:`mo_occ`
+       * :c:data:`n_it_scf_max`
+       * :c:data:`scf_algorithm`
+       * :c:data:`scf_energy`
+       * :c:data:`thresh_scf`
+       * :c:data:`threshold_diis_nonzero`
 
     Calls:
 
@@ -777,6 +781,8 @@ Subroutines / functions
        * :c:func:`extrapolate_fock_matrix`
        * :c:func:`initialize_mo_coef_begin_iteration`
        * :c:func:`mo_as_eigvectors_of_mo_matrix`
+       * :c:func:`nullify_small_elements`
+       * :c:func:`orthonormalize_mos`
        * :c:func:`reorder_core_orb`
        * :c:func:`save_mos`
        * :c:func:`write_double`

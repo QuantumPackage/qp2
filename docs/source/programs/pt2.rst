@@ -30,8 +30,8 @@ pt2
     * :c:data:`is_zmq_slave` 
     * :c:data:`mo_two_e_integrals_in_map` 
     * :c:data:`psi_energy` 
-    * :c:data:`threshold_generators` 
     * :c:data:`read_wf` 
+    * :c:data:`threshold_generators` 
  
  Calls: 
  
@@ -46,12 +46,7 @@ pt2
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`mo_coef` 
     * :c:data:`distributed_davidson` 
-    * :c:data:`level_shift` 
-    * :c:data:`mo_coef` 
     * :c:data:`pt2_e0_denominator` 
     * :c:data:`pt2_stoch_istate` 
     * :c:data:`read_wf` 

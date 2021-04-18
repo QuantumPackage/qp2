@@ -95,7 +95,7 @@ subroutine routine
     print*,'h2,p2 = ',h2,p2
    endif
 
-   print*,'<Ref| H |D_I> = ',hij
+   print*,'<Ref| H |D_I> = ',hij
    print*,'Delta E       = ',h00-hii
    print*,'coef pert (1) = ',coef_1
    print*,'coef 2x2      = ',coef_2_2

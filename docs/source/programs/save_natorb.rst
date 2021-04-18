@@ -32,8 +32,8 @@ save_natorb
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`ezfio_set_mo_one_e_ints_io_mo_integrals_e_n` 
     * :c:func:`ezfio_set_mo_one_e_ints_io_mo_integrals_kinetic` 
+    * :c:func:`ezfio_set_mo_one_e_ints_io_mo_integrals_n_e` 
     * :c:func:`ezfio_set_mo_one_e_ints_io_mo_integrals_pseudo` 
     * :c:func:`ezfio_set_mo_one_e_ints_io_mo_one_e_integrals` 
     * :c:func:`ezfio_set_mo_two_e_ints_io_mo_two_e_integrals` 
@@ -45,5 +45,6 @@ save_natorb
  .. hlist:: 
     :columns: 3 
  
+    * :c:data:`mo_coef` 
     * :c:data:`mo_occ` 
     * :c:data:`read_wf` 

@@ -31,15 +31,16 @@ fcidump
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`elec_beta_num` 
-    * :c:data:`ezfio_filename` 
-    * :c:data:`core_fock_operator` 
-    * :c:data:`elec_num` 
-    * :c:data:`mo_two_e_integrals_in_map` 
-    * :c:data:`elec_alpha_num` 
-    * :c:data:`mo_one_e_integrals` 
-    * :c:data:`n_core_orb` 
-    * :c:data:`mo_integrals_threshold` 
-    * :c:data:`list_inact` 
-    * :c:data:`mo_integrals_map` 
     * :c:data:`core_energy` 
+    * :c:data:`core_fock_operator` 
+    * :c:data:`elec_alpha_num` 
+    * :c:data:`elec_beta_num` 
+    * :c:data:`elec_num` 
+    * :c:data:`ezfio_filename` 
+    * :c:data:`list_act` 
+    * :c:data:`mo_integrals_map` 
+    * :c:data:`mo_integrals_threshold` 
+    * :c:data:`mo_one_e_integrals` 
+    * :c:data:`mo_two_e_integrals_in_map` 
+    * :c:data:`n_act_orb` 
+    * :c:data:`n_core_orb` 

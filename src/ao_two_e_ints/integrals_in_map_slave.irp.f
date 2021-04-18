@@ -116,7 +116,7 @@ subroutine ao_two_e_integrals_in_map_slave(thread,iproc)
       exit
     endif
     if (task_id == 0) exit
-    read(task,*) j, l
+    call sscanf_dd(task, j, l)
     integer, external :: task_done_to_taskserver
     call compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
     if (task_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id) == -1) then

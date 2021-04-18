@@ -287,13 +287,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
+       * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
        * :c:data:`ao_prim_num`
        * :c:data:`mu_erf`
-       * :c:data:`ao_nucl`
+       * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
     Calls:
@@ -322,13 +322,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
-       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_prim_num`
+       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
     Calls:
@@ -504,9 +504,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_num`
        * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_num`
        * :c:data:`ao_two_e_integral_erf_schwartz`
 
     Called by:
@@ -541,7 +540,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_num`
        * :c:data:`ao_two_e_integral_erf_schwartz`
 
@@ -650,10 +648,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_integrals_erf_cache_min`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_integrals_erf_cache`
+       * :c:data:`ao_integrals_erf_cache_min`
+       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
 
@@ -685,7 +682,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_erf_map`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_two_e_integrals_erf_in_map`
 
@@ -716,7 +712,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_erf_map`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integrals_erf_in_map`
@@ -792,9 +787,9 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
+       * :c:data:`gauleg_t2`
        * :c:data:`mu_erf`
        * :c:data:`n_pt_max_integrals`
-       * :c:data:`gauleg_t2`
 
     Called by:
 
@@ -857,8 +852,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_erf_map`
-       * :c:data:`ezfio_filename`
        * :c:data:`ao_two_e_integrals_erf_in_map`
+       * :c:data:`ezfio_filename`
 
     Called by:
 
@@ -894,8 +889,8 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_erf_map`
-       * :c:data:`ezfio_filename`
        * :c:data:`ao_two_e_integrals_erf_in_map`
+       * :c:data:`ezfio_filename`
 
     Calls:
 

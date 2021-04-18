@@ -12,15 +12,12 @@ BEGIN_PROVIDER [ double precision, mo_one_e_integrals,(mo_num,mo_num)]
   ELSE
       mo_one_e_integrals  = mo_integrals_n_e + mo_kinetic_integrals
 
-      IF (DO_PSEUDO) THEN
-            mo_one_e_integrals  += mo_pseudo_integrals
-      ENDIF
-
   ENDIF
 
   IF (write_mo_one_e_integrals) THEN
         call ezfio_set_mo_one_e_ints_mo_one_e_integrals(mo_one_e_integrals)
        print *,  'MO one-e integrals written to disk'
   ENDIF
+  call nullify_small_elements(mo_num,mo_num,mo_one_e_integrals,size(mo_one_e_integrals,1),1.d-10)
 
 END_PROVIDER

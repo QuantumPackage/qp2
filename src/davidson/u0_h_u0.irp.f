@@ -1,72 +1,43 @@
- BEGIN_PROVIDER [ double precision, psi_energy, (N_states) ]
-&BEGIN_PROVIDER [ double precision, psi_s2, (N_states) ]
-  implicit none
-  BEGIN_DOC
-! psi_energy(i) = $\langle \Psi_i | H | \Psi_i \rangle$
-! 
-! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
-  END_DOC
-  call u_0_H_u_0(psi_energy,psi_s2,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
-  integer :: i
-  do i=N_det+1,N_states
-    psi_energy(i) = 0.d0
-    psi_s2(i) = 0.d0
-  enddo
-END_PROVIDER
-
-BEGIN_PROVIDER [ double precision, psi_energy_with_nucl_rep, (N_states) ]
- implicit none
- BEGIN_DOC
- ! Energy of the wave function with the nuclear repulsion energy.
- END_DOC
- psi_energy_with_nucl_rep(1:N_states) = psi_energy(1:N_states) + nuclear_repulsion
-END_PROVIDER
-
-
-subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
+subroutine u_0_H_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Computes $E_0 = \frac{\langle u_0 | H | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
   !
-  ! and      $S_0 = \frac{\langle u_0 | S^2 | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
-  !
   ! n : number of determinants
   !
   END_DOC
   integer, intent(in)             :: n,Nint, N_st, sze
-  double precision, intent(out)   :: e_0(N_st),s_0(N_st)
+  double precision, intent(out)   :: e_0(N_st)
   double precision, intent(inout) :: u_0(sze,N_st)
   integer(bit_kind),intent(in)    :: keys_tmp(Nint,2,n)
 
-  double precision, allocatable   :: v_0(:,:), s_vec(:,:), u_1(:,:)
+  double precision, allocatable   :: v_0(:,:), u_1(:,:)
   double precision                :: u_dot_u,u_dot_v,diag_H_mat_elem
   integer                         :: i,j, istate
 
   if ((n > 100000).and.distributed_davidson) then
-    allocate (v_0(n,N_states_diag),s_vec(n,N_states_diag), u_1(n,N_states_diag))
+    allocate (v_0(n,N_states_diag), u_1(n,N_states_diag))
     u_1(:,:) = 0.d0
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-    call H_S2_u_0_nstates_zmq(v_0,s_vec,u_1,N_states_diag,n)
+    call H_u_0_nstates_zmq(v_0,u_1,N_states_diag,n)
   else if (n < n_det_max_full) then
-    allocate (v_0(n,N_st),s_vec(n,N_st), u_1(n,N_st))
+    allocate (v_0(n,N_st), u_1(n,N_st))
     v_0(:,:) = 0.d0
     u_1(:,:) = 0.d0
-    s_vec(:,:) = 0.d0
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
     do istate = 1,N_st
       do j=1,n
         do i=1,n
           v_0(i,istate) = v_0(i,istate) + h_matrix_all_dets(i,j) * u_0(j,istate)
-          s_vec(i,istate) = s_vec(i,istate) + S2_matrix_all_dets(i,j) * u_0(j,istate)
         enddo
       enddo
     enddo
   else
-    allocate (v_0(n,N_st),s_vec(n,N_st),u_1(n,N_st))
+    allocate (v_0(n,N_st),u_1(n,N_st))
     u_1(:,:) = 0.d0
     u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-    call H_S2_u_0_nstates_openmp(v_0,s_vec,u_1,N_st,n)
+    call H_u_0_nstates_openmp(v_0,u_1,N_st,n)
   endif
   u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
   deallocate(u_1)
@@ -76,42 +47,39 @@ subroutine u_0_H_u_0(e_0,s_0,u_0,n,keys_tmp,Nint,N_st,sze)
     norm = u_dot_u(u_0(1,i),n)
     if (norm /= 0.d0) then
       e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n)
-      s_0(i) = u_dot_v(s_vec(1,i),u_0(1,i),n)
     else
       e_0(i) = 0.d0
-      s_0(i) = 0.d0
     endif
   enddo
   !$OMP END PARALLEL DO
-  deallocate (s_vec, v_0)
+  deallocate (v_0)
 end
 
 
 
 
 
-subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
+subroutine H_u_0_nstates_openmp(v_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_0 = H | u_0\rangle$ and $s_0 = S^2  | u_0\rangle$.
+  ! Computes $v_0 = H | u_0\rangle$.
   !
   ! Assumes that the determinants are in psi_det
   !
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
   integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), s_0(sze,N_st), u_0(sze,N_st)
+  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
   integer :: k
-  double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
+  double precision, allocatable  :: u_t(:,:), v_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
-  allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
+  allocate(u_t(N_st,N_det),v_t(N_st,N_det))
 
   do k=1,N_st
     call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
   v_t = 0.d0
-  s_t = 0.d0
   call dtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
@@ -119,7 +87,7 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
       size(u_t, 1),                                                  &
       N_det, N_st)
 
-  call H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,1,N_det,0,1)
+  call H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,1,N_det,0,1)
   deallocate(u_t)
 
   call dtranspose(                                                   &
@@ -128,67 +96,60 @@ subroutine H_S2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze)
       v_0,                                                           &
       size(v_0, 1),                                                  &
       N_st, N_det)
-  call dtranspose(                                                   &
-      s_t,                                                           &
-      size(s_t, 1),                                                  &
-      s_0,                                                           &
-      size(s_0, 1),                                                  &
-      N_st, N_det)
-  deallocate(v_t,s_t)
+  deallocate(v_t)
 
   do k=1,N_st
     call dset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
-    call dset_order(s_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
     call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
   enddo
 
 end
 
 
-subroutine H_S2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine H_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t\rangle$ and $s_t = S^2  | u_t\rangle$
+  ! Computes $v_t = H | u_t\rangle$ 
   !
   ! Default should be 1,N_det,0,1
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
+  double precision, intent(out)  :: v_t(N_st,sze)
 
 
   PROVIDE ref_bitmask_energy N_int
 
   select case (N_int)
     case (1)
-      call H_S2_u_0_nstates_openmp_work_1(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+      call H_u_0_nstates_openmp_work_1(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
     case (2)
-      call H_S2_u_0_nstates_openmp_work_2(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+      call H_u_0_nstates_openmp_work_2(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
     case (3)
-      call H_S2_u_0_nstates_openmp_work_3(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+      call H_u_0_nstates_openmp_work_3(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
     case (4)
-      call H_S2_u_0_nstates_openmp_work_4(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+      call H_u_0_nstates_openmp_work_4(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
     case default
-      call H_S2_u_0_nstates_openmp_work_N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+      call H_u_0_nstates_openmp_work_N_int(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
   end select
 end
 BEGIN_TEMPLATE
 
-subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep)
+subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,istep)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
+  ! Computes $v_t = H | u_t \\rangle$ 
   !
   ! Default should be 1,N_det,0,1
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
+  double precision, intent(out)  :: v_t(N_st,sze)
 
-  double precision               :: hij, sij
-  integer                        :: i,j,k,l
+  double precision               :: hij
+  integer                        :: i,j,k,l,kk
   integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
   integer                        :: istate
   integer                        :: krow, kcol, krow_b, kcol_b
@@ -209,6 +170,9 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   logical                        :: compute_singles
   integer*8                      :: last_found, left, right, right_max
   double precision               :: rss, mem, ratio
+  double precision, allocatable  :: utl(:,:)
+  integer, parameter             :: block_size=128
+  logical                        :: u_is_sparse
 
 !  call resident_memory(rss)
 !  mem = dble(singles_beta_csc_size) / 1024.d0**3
@@ -219,6 +183,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 !    provide singles_beta_csc
 !  endif
 compute_singles=.True.
+
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
   allocate(idx0(maxab))
@@ -242,14 +207,14 @@ compute_singles=.True.
       !$OMP          psi_bilinear_matrix_order_transp_reverse,       &
       !$OMP          psi_bilinear_matrix_columns_loc,                &
       !$OMP          psi_bilinear_matrix_transp_rows_loc,            &
-      !$OMP          istart, iend, istep, irp_here, v_t, s_t,        &
+      !$OMP          istart, iend, istep, irp_here, v_t,             &
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
-      !$OMP          lcol, lrow, l_a, l_b,                           &
-      !$OMP          buffer, doubles, n_doubles,                     &
-      !$OMP          tmp_det2, hij, sij, idx, l, kcol_prev,          &
+      !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
+      !$OMP          buffer, doubles, n_doubles, umax,               &
+      !$OMP          tmp_det2, hij, idx, l, kcol_prev,          &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
 
@@ -260,9 +225,25 @@ compute_singles=.True.
       singles_a(maxab),                                              &
       singles_b(maxab),                                              &
       doubles(maxab),                                                &
-      idx(maxab))
+      idx(maxab), utl(N_st,block_size))
 
   kcol_prev=-1
+
+  ! Check if u has multiple zeros
+  kk=1 ! Avoid division by zero
+  !$OMP DO
+  do k=1,N_det
+    umax = 0.d0
+    do l=1,N_st
+      umax = max(umax, dabs(u_t(l,k)))
+    enddo
+    if (umax < 1.d-20) then
+      !$OMP ATOMIC
+      kk = kk+1
+    endif
+  enddo
+  !$OMP END DO
+  u_is_sparse = N_det / kk < 20  ! 5%
 
   ASSERT (iend <= N_det)
   ASSERT (istart > 0)
@@ -397,21 +378,46 @@ compute_singles=.True.
       ! Loop over alpha singles
       ! -----------------------
 
+      double precision :: umax
+
       !DIR$ LOOP COUNT avg(1000)
-      do k = 1,n_singles_a
-        l_a = singles_a(k)
-        ASSERT (l_a <= N_det)
+      do k = 1,n_singles_a,block_size
+        umax = 0.d0
+        ! Prefetch u_t(:,l_a)
+        if (u_is_sparse) then
+          do kk=0,block_size-1
+            if (k+kk > n_singles_a) exit
+            l_a = singles_a(k+kk)
+            ASSERT (l_a <= N_det)
 
-        lrow = psi_bilinear_matrix_rows(l_a)
-        ASSERT (lrow <= N_det_alpha_unique)
+            do l=1,N_st
+              utl(l,kk+1) = u_t(l,l_a)
+              umax = max(umax, dabs(utl(l,kk+1)))
+            enddo
+          enddo
+        else
+          do kk=0,block_size-1
+            if (k+kk > n_singles_a) exit
+            l_a = singles_a(k+kk)
+            ASSERT (l_a <= N_det)
+            utl(:,kk+1) = u_t(:,l_a)
+          enddo
+          umax = 1.d0
+        endif
+        if (umax < 1.d-20) cycle
 
-        tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-        call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
-        call get_s2(tmp_det,tmp_det2,$N_int,sij)
-        !DIR$ LOOP COUNT AVG(4)
-        do l=1,N_st
-          v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
-          s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,l_a)
+        do kk=0,block_size-1
+          if (k+kk > n_singles_a) exit
+          l_a = singles_a(k+kk)
+          lrow = psi_bilinear_matrix_rows(l_a)
+          ASSERT (lrow <= N_det_alpha_unique)
+
+          tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+          call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
+          !DIR$ LOOP COUNT AVG(4)
+          do l=1,N_st
+            v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+          enddo
         enddo
       enddo
 
@@ -475,20 +481,44 @@ compute_singles=.True.
 
     tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
     !DIR$ LOOP COUNT avg(1000)
-    do i=1,n_singles_a
-      l_a = singles_a(i)
-      ASSERT (l_a <= N_det)
+    do i=1,n_singles_a,block_size
+      umax = 0.d0
+      ! Prefetch u_t(:,l_a)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
 
-      lrow = psi_bilinear_matrix_rows(l_a)
-      ASSERT (lrow <= N_det_alpha_unique)
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_a) exit
+          l_a = singles_a(i+kk)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
 
-      tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
-      call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+      do kk=0,block_size-1
+        if (i+kk > n_singles_a) exit
+        l_a = singles_a(i+kk)
+        lrow = psi_bilinear_matrix_rows(l_a)
+        ASSERT (lrow <= N_det_alpha_unique)
 
-      !DIR$ LOOP COUNT AVG(4)
-      do l=1,N_st
-        v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
-        ! single => sij = 0
+        tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
+
+        !DIR$ LOOP COUNT AVG(4)
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+        enddo
       enddo
     enddo
 
@@ -497,18 +527,42 @@ compute_singles=.True.
     ! ----------------------------------
 
     !DIR$ LOOP COUNT avg(50000)
-    do i=1,n_doubles
-      l_a = doubles(i)
-      ASSERT (l_a <= N_det)
+    do i=1,n_doubles,block_size
+      umax = 0.d0
+      ! Prefetch u_t(:,l_a)
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_a = doubles(i+kk)
+          ASSERT (l_a <= N_det)
 
-      lrow = psi_bilinear_matrix_rows(l_a)
-      ASSERT (lrow <= N_det_alpha_unique)
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_a = doubles(i+kk)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
 
-      call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
-      !DIR$ LOOP COUNT AVG(4)
-      do l=1,N_st
-        v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
-        ! same spin => sij = 0
+      do kk=0,block_size-1
+        if (i+kk > n_doubles) exit
+        l_a = doubles(i+kk)
+        lrow = psi_bilinear_matrix_rows(l_a)
+        ASSERT (lrow <= N_det_alpha_unique)
+
+        call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
+        !DIR$ LOOP COUNT AVG(4)
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+        enddo
       enddo
     enddo
 
@@ -560,21 +614,47 @@ compute_singles=.True.
 
     tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
     !DIR$ LOOP COUNT avg(1000)
-    do i=1,n_singles_b
-      l_b = singles_b(i)
-      ASSERT (l_b <= N_det)
+    do i=1,n_singles_b,block_size
+      umax = 0.d0
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
 
-      lcol = psi_bilinear_matrix_transp_columns(l_b)
-      ASSERT (lcol <= N_det_beta_unique)
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_singles_b) exit
+          l_b = singles_b(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
 
-      tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-      call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
-      l_a = psi_bilinear_matrix_transp_order(l_b)
-      ASSERT (l_a <= N_det)
-      !DIR$ LOOP COUNT AVG(4)
-      do l=1,N_st
-        v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
-        ! single => sij = 0
+      do kk=0,block_size-1
+        if (i+kk > n_singles_b) exit
+        l_b = singles_b(i+kk)
+        l_a = psi_bilinear_matrix_transp_order(l_b)
+        lcol = psi_bilinear_matrix_transp_columns(l_b)
+        ASSERT (lcol <= N_det_beta_unique)
+
+        tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
+        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+        !DIR$ LOOP COUNT AVG(4)
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+        enddo
       enddo
     enddo
 
@@ -582,21 +662,46 @@ compute_singles=.True.
     ! ----------------------------------
 
     !DIR$ LOOP COUNT avg(50000)
-    do i=1,n_doubles
-      l_b = doubles(i)
-      ASSERT (l_b <= N_det)
+    do i=1,n_doubles,block_size
+      umax = 0.d0
+      if (u_is_sparse) then
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_b = doubles(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          do l=1,N_st
+            utl(l,kk+1) = u_t(l,l_a)
+            umax = max(umax, dabs(utl(l,kk+1)))
+          enddo
+        enddo
+      else
+        do kk=0,block_size-1
+          if (i+kk > n_doubles) exit
+          l_b = doubles(i+kk)
+          l_a = psi_bilinear_matrix_transp_order(l_b)
+          ASSERT (l_b <= N_det)
+          ASSERT (l_a <= N_det)
+          utl(:,kk+1) = u_t(:,l_a)
+        enddo
+        umax = 1.d0
+      endif
+      if (umax < 1.d-20) cycle
 
-      lcol = psi_bilinear_matrix_transp_columns(l_b)
-      ASSERT (lcol <= N_det_beta_unique)
+      do kk=0,block_size-1
+        if (i+kk > n_doubles) exit
+        l_b = doubles(i+kk)
+        l_a = psi_bilinear_matrix_transp_order(l_b)
+        lcol = psi_bilinear_matrix_transp_columns(l_b)
+        ASSERT (lcol <= N_det_beta_unique)
 
-      call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
-      l_a = psi_bilinear_matrix_transp_order(l_b)
-      ASSERT (l_a <= N_det)
+        call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
 
-      !DIR$ LOOP COUNT AVG(4)
-      do l=1,N_st
-        v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,l_a)
-        ! same spin => sij = 0
+        !DIR$ LOOP COUNT AVG(4)
+        do l=1,N_st
+          v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+        enddo
       enddo
     enddo
 
@@ -608,6 +713,16 @@ compute_singles=.True.
     ! Initial determinant is at k_a in alpha-major representation
     ! -----------------------------------------------------------------------
 
+    if (u_is_sparse) then
+      umax = 0.d0
+      do l=1,N_st
+        umax = max(umax, dabs(u_t(l,k_a)))
+      enddo
+    else
+      umax = 1.d0
+    endif
+    if (umax < 1.d-20) cycle
+
     krow = psi_bilinear_matrix_rows(k_a)
     ASSERT (krow <= N_det_alpha_unique)
 
@@ -617,19 +732,17 @@ compute_singles=.True.
     tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
     tmp_det(1:$N_int,2) = psi_det_beta_unique (1:$N_int, kcol)
 
-    double precision, external :: diag_H_mat_elem, diag_S_mat_elem
+    double precision, external :: diag_H_mat_elem
 
     hij = diag_H_mat_elem(tmp_det,$N_int)
-    sij = diag_S_mat_elem(tmp_det,$N_int)
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
-      s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)
     enddo
 
   end do
   !$OMP END DO
-  deallocate(buffer, singles_a, singles_b, doubles, idx)
+  deallocate(buffer, singles_a, singles_b, doubles, idx, utl)
   !$OMP END PARALLEL
 
 end

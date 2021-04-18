@@ -58,9 +58,5 @@ scf
  
     * :c:data:`fock_matrix_ao_alpha` 
     * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`fock_matrix_ao_alpha` 
-    * :c:data:`mo_coef` 
-    * :c:data:`level_shift` 
     * :c:data:`mo_coef` 
     * :c:data:`mo_label` 

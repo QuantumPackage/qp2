@@ -95,6 +95,8 @@ qp set_file $ezfio
 if [[ $dets -eq 1 ]] ; then
   rm --force -- ${ezfio}/determinants/n_det
   rm --force -- ${ezfio}/determinants/psi_{det,coef}.gz
+  rm --force -- ${ezfio}/determinants/n_det_qp_edit
+  rm --force -- ${ezfio}/determinants/psi_{det,coef}_qp_edit.gz
 fi
 
 if [[ $mos -eq 1 ]] ; then
@@ -110,7 +112,7 @@ qp_edit --check ${ezfio}
 
 if [[ $mos -eq 1 ]] ; then
   qp  set  mo_two_e_ints  io_mo_two_e_integrals    None
-  qp  set  mo_one_e_ints  io_mo_integrals_e_n      None
+  qp  set  mo_one_e_ints  io_mo_integrals_n_e      None
   qp  set  mo_one_e_ints  io_mo_integrals_kinetic  None
   qp  set  mo_one_e_ints  io_mo_integrals_pseudo   None
   qp  set  mo_one_e_ints  io_mo_one_e_integrals    None

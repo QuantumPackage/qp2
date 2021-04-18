@@ -146,7 +146,7 @@ subroutine routine_example_psi_det
   double precision, allocatable  :: i_H_psi(:)
   allocate(i_H_psi(N_states))
   i_H_psi = 0.d0
-  print*,'Computing <psi_det(1) | H | psi_det > = \sum_I c_I <psi_det(1)| H | psi_det(I)>'
+  print*,'Computing <psi_det(1) | H | psi_det > = \sum_I c_I <psi_det(1)| H | psi_det(I)>'
   do i = 1, idx(0) ! number of Slater determinants connected to the first one
     print*,'Determinant connected'
     call debug_det(psi_det(1,1,idx(i)),N_int)

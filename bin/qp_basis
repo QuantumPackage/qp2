@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Installs basis sets in the data directory from Basis Set Exchange.
+
+Usage:
+  qp_basis list 
+  qp_basis get BSE_BASIS 
+  qp_basis install BSE_BASIS QP_BASIS
+
+
+"""
+
+
+import sys
+import os
+import subprocess
+
+try:
+    from docopt import docopt
+    from qp_path import QP_ROOT
+except ImportError:
+    print("Please check if you have sourced the ${QP_ROOT}/quantum_package.rc")
+    print("(`source ${QP_ROOT}/quantum_package.rc`)")
+    sys.exit(1)
+
+
+def main(arguments):
+    """Main function"""
+
+    if arguments["list"]:
+        os.system("bse list-basis-sets")
+
+    elif arguments["install"]:
+        bse_basis = arguments["BSE_BASIS"]
+        qp_basis  = arguments["QP_BASIS"]
+        for character in """"[]{}()*&%$#!;:,<>?'|\\""":
+          if character in qp_basis:
+             print("Invalid character %s in QP_BASIS"%character)
+             sys.exit(1)
+        path = QP_ROOT+"/data/basis/"+qp_basis
+        os.system("bse get-basis --unc-spdf '%s' gamess_us > %s"%(bse_basis, path))
+
+    elif arguments["get"]:
+        bse_basis = arguments["BSE_BASIS"]
+        os.system("bse get-basis --unc-spdf '%s' gamess_us"%(bse_basis))
+
+
+if __name__ == '__main__':
+    ARGS = docopt(__doc__)
+    main(ARGS)
+
+

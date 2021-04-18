@@ -1,4 +1,5 @@
 open Qptypes
+open Qputils
 open Sexplib.Std
 
 type t = (Symmetry.Xyz.t * Gto.t * Nucl_number.t ) list [@@deriving sexp]
@@ -39,7 +40,7 @@ let to_basis b =
 
 
 let to_string b =
-  let middle = List.map (fun (x,y,z) ->
+  let middle = list_map (fun (x,y,z) ->
      "( "^((string_of_int (Nucl_number.to_int z)))^", "^
      (Symmetry.Xyz.to_string x)^", "^(Gto.to_string y)
      ^" )"

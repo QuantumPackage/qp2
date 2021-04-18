@@ -35,7 +35,7 @@ function run() {
 
 @test "HCO" { # 6.6077s 28.6801s
   qp set_file hco.ezfio
-  run -113.288687359997  -113.122945162967
+  run -113.39088802205114 -113.22204293108558
 }
 
 @test "H2O" { # 7.0651s 30.6642s
@@ -110,7 +110,8 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file cu_nh3_4_2plus.ezfio
   qp set_mo_class --core="[1-24]" --act="[25-45]" --del="[46-87]"
-  run -1862.98611018932    -1862.68751252590     
+  run -1862.98689579931  -1862.6883044626563
+
 }
 
 @test "ClF" { # 30.3225s

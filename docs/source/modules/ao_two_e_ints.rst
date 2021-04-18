@@ -98,6 +98,7 @@ Providers
        :columns: 3
 
        * :c:data:`ao_integrals_cache`
+       * :c:data:`ao_integrals_cache_periodic`
 
  
 .. c:var:: ao_integrals_cache_min
@@ -126,6 +127,30 @@ Providers
        :columns: 3
 
        * :c:data:`ao_integrals_cache`
+       * :c:data:`ao_integrals_cache_periodic`
+
+ 
+.. c:var:: ao_integrals_cache_periodic
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        complex*16, allocatable	:: ao_integrals_cache_periodic	(0:64*64*64*64)
+
+
+    Cache of AO integrals for fast access
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_cache_min`
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_two_e_integrals_in_map`
+
 
  
 .. c:var:: ao_integrals_map
@@ -153,9 +178,10 @@ Providers
        :columns: 3
 
        * :c:data:`ao_integrals_cache`
-       * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`ao_integrals_cache_periodic`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integral_jj_from_ao`
+       * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
 
  
@@ -185,14 +211,6 @@ Providers
        * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
-    Needed by:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_vv_from_ao`
 
  
 .. c:var:: ao_two_e_integrals_in_map
@@ -237,9 +255,8 @@ Providers
        :columns: 3
 
        * :c:data:`ao_integrals_cache`
-       * :c:data:`ao_two_e_integral_alpha`
+       * :c:data:`ao_integrals_cache_periodic`
        * :c:data:`mo_two_e_integral_jj_from_ao`
-       * :c:data:`mo_two_e_integrals_erf_in_map`
        * :c:data:`mo_two_e_integrals_in_map`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
 
@@ -341,7 +358,6 @@ Providers
        * :c:func:`i_x1_new`
        * :c:func:`i_x2_new`
        * :c:func:`integrale_new`
-       * :c:func:`integrale_new_erf`
 
     Calls:
 
@@ -512,6 +528,84 @@ Providers
 Subroutines / functions 
 ----------------------- 
  
+.. c:function:: ao_idx2_sq:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_idx2_sq(i,j,ij)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`two_e_integrals_index_2fold`
+
+ 
+.. c:function:: ao_idx2_sq_rev:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_idx2_sq_rev(i,k,ik)
+
+
+    reverse square compound index
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`two_e_integrals_index_reverse_2fold`
+
+ 
+.. c:function:: ao_idx2_tri_key:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_idx2_tri_key(i,j,ij)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`two_e_integrals_index_2fold`
+
+ 
+.. c:function:: ao_idx2_tri_rev_key:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine ao_idx2_tri_rev_key(i,k,ik)
+
+
+    return i<=k
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`two_e_integrals_index_reverse_2fold`
+
+ 
 .. c:function:: ao_l4:
 
 
@@ -550,12 +644,12 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_prim_num`
        * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
     Calls:
@@ -584,13 +678,13 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
-       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_coef_normalized_ordered_transp`
-       * :c:data:`ao_power`
        * :c:data:`ao_expo_ordered_transp`
-       * :c:data:`ao_prim_num`
+       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_nucl`
+       * :c:data:`ao_power`
+       * :c:data:`ao_prim_num`
+       * :c:data:`n_pt_max_integrals`
        * :c:data:`nucl_coord`
 
     Calls:
@@ -599,6 +693,29 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`give_explicit_poly_and_gaussian`
+
+ 
+.. c:function:: ao_two_e_integral_zero:
+
+
+    File : :file:`ao_two_e_ints/screening.irp.f`
+
+    .. code:: fortran
+
+        logical function ao_two_e_integral_zero(i,j,k,l)
+
+
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_threshold`
+       * :c:data:`ao_overlap_abs`
+       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`is_periodic`
+       * :c:data:`read_ao_two_e_integrals`
 
  
 .. c:function:: ao_two_e_integrals_in_map_collector:
@@ -766,10 +883,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_num`
        * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_two_e_integral_schwartz`
+       * :c:data:`ao_num`
 
     Called by:
 
@@ -803,9 +918,7 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_num`
-       * :c:data:`ao_two_e_integral_schwartz`
 
     Called by:
 
@@ -814,34 +927,6 @@ Subroutines / functions
 
        * :c:data:`mo_two_e_integral_jj_from_ao`
        * :c:data:`mo_two_e_integrals_vv_from_ao`
-
- 
-.. c:function:: dump_ao_integrals:
-
-
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        subroutine dump_ao_integrals(filename)
-
-
-    Save to disk the |AO| integrals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-       * :c:data:`mpi_master`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`ezfio_set_work_empty`
 
  
 .. c:function:: eri:
@@ -925,9 +1010,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_integrals_cache`
        * :c:data:`ao_integrals_cache_min`
        * :c:data:`ao_two_e_integrals_in_map`
@@ -939,6 +1021,37 @@ Subroutines / functions
 
        * :c:func:`map_get`
        * :c:func:`two_e_integrals_index`
+
+ 
+.. c:function:: get_ao_two_e_integral_periodic:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        complex*16 function get_ao_two_e_integral_periodic(i,j,k,l,map) result(result)
+
+
+    Gets one AO bi-electronic integral from the AO map
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_cache_min`
+       * :c:data:`ao_integrals_cache_periodic`
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_two_e_integrals_in_map`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`map_get`
+       * :c:func:`two_e_integrals_index_2fold`
 
  
 .. c:function:: get_ao_two_e_integrals:
@@ -961,8 +1074,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_map`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_integrals_threshold`
        * :c:data:`ao_two_e_integrals_in_map`
 
     Called by:
@@ -994,9 +1105,7 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_map`
-       * :c:data:`ao_overlap_abs`
        * :c:data:`ao_integrals_threshold`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
 
     Called by:
@@ -1035,8 +1144,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_map`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
 
     Calls:
@@ -1067,8 +1174,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_map`
-       * :c:data:`ao_overlap_abs`
-       * :c:data:`ao_two_e_integral_schwartz`
        * :c:data:`ao_two_e_integrals_in_map`
 
     Calls:
@@ -1078,6 +1183,29 @@ Subroutines / functions
 
        * :c:func:`map_get`
        * :c:func:`two_e_integrals_index`
+
+ 
+.. c:function:: get_ao_two_e_integrals_periodic:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
+
+
+    Gets multiple AO bi-electronic integral from the AO map .
+    All i are retrieved for j,k,l fixed.
+    physicist convention : <ij|kl>
+
+    Needs:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_map`
+       * :c:data:`ao_two_e_integrals_in_map`
 
  
 .. c:function:: give_polynom_mult_center_x:
@@ -1101,7 +1229,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`general_primitive_integral`
-       * :c:func:`general_primitive_integral_erf`
 
     Calls:
 
@@ -1139,6 +1266,31 @@ Subroutines / functions
        * :c:func:`i_x1_pol_mult_a2`
        * :c:func:`i_x1_pol_mult_recurs`
        * :c:func:`i_x2_pol_mult`
+
+ 
+.. c:function:: idx2_tri_int:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine idx2_tri_int(i,j,ij)
+
+
+
+ 
+.. c:function:: idx2_tri_rev_int:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine idx2_tri_rev_int(i,k,ik)
+
+
+    return i<=k
 
  
 .. c:function:: insert_into_ao_integrals_map:
@@ -1195,8 +1347,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`n_pt_max_integrals`
        * :c:data:`gauleg_t2`
+       * :c:data:`n_pt_max_integrals`
 
     Called by:
 
@@ -1211,35 +1363,6 @@ Subroutines / functions
        :columns: 3
 
        * :c:func:`i_x1_new`
-
- 
-.. c:function:: load_ao_integrals:
-
-
-    File : :file:`ao_two_e_ints/map_integrals.irp.f`
-
-    .. code:: fortran
-
-        integer function load_ao_integrals(filename)
-
-
-    Read from disk the |AO| integrals
-
-    Needs:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:data:`ao_integrals_map`
-
-    Calls:
-
-    .. hlist::
-       :columns: 3
-
-       * :c:func:`cache_map_reallocate`
-       * :c:func:`map_deinit`
-       * :c:func:`map_sort`
 
  
 .. c:function:: n_pt_sup:
@@ -1275,7 +1398,6 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:func:`ao_two_e_integrals_erf_in_map_slave`
        * :c:func:`ao_two_e_integrals_in_map_slave`
 
  
@@ -1290,7 +1412,7 @@ Subroutines / functions
 
 
     Gives a unique index for i,j,k,l using permtuation symmetry.
-    i <-> k, j <-> l, and (i,k) <-> (j,l)
+    i <-> k, j <-> l, and (i,k) <-> (j,l) for non-periodic systems
 
     Called by:
 
@@ -1298,33 +1420,45 @@ Subroutines / functions
        :columns: 3
 
        * :c:data:`ao_integrals_cache`
-       * :c:data:`ao_integrals_erf_cache`
-       * :c:data:`ao_integrals_erf_map`
        * :c:data:`ao_integrals_map`
-       * :c:func:`compute_ao_integrals_erf_jl`
+       * :c:data:`banned_excitation`
        * :c:func:`compute_ao_integrals_jl`
+       * :c:func:`four_idx_novvvv`
        * :c:func:`get_ao_two_e_integral`
-       * :c:func:`get_ao_two_e_integral_erf`
-       * :c:func:`get_ao_two_e_integrals_erf_non_zero`
        * :c:func:`get_ao_two_e_integrals_non_zero`
        * :c:func:`get_ao_two_e_integrals_non_zero_jl`
        * :c:func:`get_ao_two_e_integrals_non_zero_jl_from_list`
-       * :c:func:`get_mo_two_e_integral_erf`
-       * :c:func:`get_mo_two_e_integrals_coulomb_ii`
-       * :c:func:`get_mo_two_e_integrals_erf`
-       * :c:func:`get_mo_two_e_integrals_erf_coulomb_ii`
-       * :c:func:`get_mo_two_e_integrals_erf_exch_ii`
-       * :c:func:`get_mo_two_e_integrals_erf_i1j1`
-       * :c:func:`get_mo_two_e_integrals_erf_ij`
-       * :c:func:`get_mo_two_e_integrals_exch_ii`
-       * :c:func:`get_mo_two_e_integrals_i1j1`
-       * :c:func:`get_mo_two_e_integrals_ij`
        * :c:func:`get_two_e_integral`
        * :c:data:`mo_integrals_cache`
-       * :c:data:`mo_integrals_erf_cache`
-       * :c:data:`mo_integrals_erf_map`
        * :c:data:`mo_integrals_map`
-       * :c:func:`test`
+
+ 
+.. c:function:: two_e_integrals_index_2fold:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
+
+
+
+    Called by:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:data:`ao_integrals_cache_periodic`
+       * :c:func:`get_ao_two_e_integral_periodic`
+
+    Calls:
+
+    .. hlist::
+       :columns: 3
+
+       * :c:func:`ao_idx2_sq`
+       * :c:func:`ao_idx2_tri_key`
 
  
 .. c:function:: two_e_integrals_index_reverse:
@@ -1347,11 +1481,23 @@ Subroutines / functions
     This rule is applied 3 times. First for the symmetry of the
     pairs (i,k) and (j,l), and then for the symmetry within each pair.
 
-    Called by:
+ 
+.. c:function:: two_e_integrals_index_reverse_2fold:
+
+
+    File : :file:`ao_two_e_ints/map_integrals.irp.f`
+
+    .. code:: fortran
+
+        subroutine two_e_integrals_index_reverse_2fold(i,j,k,l,i1)
+
+
+
+    Calls:
 
     .. hlist::
        :columns: 3
 
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:func:`test`
+       * :c:func:`ao_idx2_sq_rev`
+       * :c:func:`ao_idx2_tri_rev_key`
 

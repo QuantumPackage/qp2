@@ -170,7 +170,7 @@ _qp_Complete()
             COMPREPLY=( $(compgen -W "" -- $cur ) )
             return 0;;
           -b)
-            COMPREPLY=( $(compgen -W "$( cut -d ' ' -f 1 ${QP_ROOT}/data/basis/00_README.rst | grep -v \'#\' )" -- $cur ) )
+            COMPREPLY=( $(compgen -W "$(ls ${QP_ROOT}/data/basis)" -- $cur ) )
             return 0
             ;;
           -p)

@@ -4,7 +4,7 @@ subroutine run_slave_cipsi
 ! Helper program for distributed parallelism
   END_DOC
 
-  call omp_set_nested(.false.)
+  call omp_set_max_active_levels(1)
   distributed_davidson = .False.
   read_wf = .False.
   SOFT_TOUCH read_wf distributed_davidson
@@ -171,9 +171,9 @@ subroutine run_slave_main
       call write_double(6,(t1-t0),'Broadcast time')
 
       !---
-      call omp_set_nested(.True.)
+      call omp_set_max_active_levels(8)
       call davidson_slave_tcp(0)
-      call omp_set_nested(.False.)
+      call omp_set_max_active_levels(1)
       print *,  mpi_rank, ': Davidson done'
       !---
 
@@ -292,11 +292,12 @@ subroutine run_slave_main
             print *,  'pt2_e0_denominator', pt2_e0_denominator
             print *,  'pt2_stoch_istate', pt2_stoch_istate
             print *,  'state_average_weight', state_average_weight
+            print *,  'selection_weight', selection_weight
             print *,  'Number of threads', nproc_target
           endif
 
-          if (h0_type == 'SOP') then
-            PROVIDE det_to_occ_pattern
+          if (h0_type == 'CFG') then
+            PROVIDE det_to_configuration
           endif
 
           PROVIDE global_selection_buffer 

@@ -12,7 +12,7 @@ function run() {
   qp set determinants n_states  1
   qp set davidson threshold_davidson 1.e-10
   qp set davidson n_states_diag 8
-  qp run fci 
+  qp run fci
   energy1="$(ezfio get fci energy | tr '[]' ' ' | cut -d ',' -f 1)"
   eq $energy1 $1 $thresh
 }
@@ -26,12 +26,12 @@ function run_stoch() {
   qp set determinants n_states  1
   qp set davidson threshold_davidson 1.e-10
   qp set davidson n_states_diag 1
-  qp run fci 
+  qp run fci
   energy1="$(ezfio get fci energy_pt2 | tr '[]' ' ' | cut -d ',' -f 1)"
   eq $energy1 $1 $thresh
 }
 
-@test "B-B" {  
+@test "B-B" {
   qp set_file b2_stretched.ezfio
   qp set determinants n_det_max 10000
   qp set_frozen_core
@@ -53,13 +53,13 @@ function run_stoch() {
 
 @test "DHNO" { # 11.4721s
   qp set_file dhno.ezfio
-  qp set_mo_class --core="[1-7]" --act="[8-64]" 
+  qp set_mo_class --core="[1-7]" --act="[8-64]"
   run -130.459020029816 3.e-4  100000
 }
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.297931671897 3.e-4  100000
+  run -113.389297812482 6.e-4  100000
 }
 
 @test "H2O2" { # 12.9214s
@@ -71,7 +71,7 @@ function run_stoch() {
 @test "HBO" { # 13.3144s
   [[ -n $TRAVIS ]] && skip
   qp set_file hbo.ezfio
-  run -100.212721540746 1.e-3  100000
+  run -100.212560384678 1.e-3  100000
 }
 
 @test "H2O" { # 11.3727s
@@ -89,7 +89,7 @@ function run_stoch() {
 @test "SO" { # 13.4952s
   [[ -n $TRAVIS ]] && skip
   qp set_file so.ezfio
-  run -26.0060656855457 1.e-3  100000
+  run -26.0096209515081 1.e-3  100000
 }
 
 @test "H2S" { # 13.6745s
@@ -98,7 +98,7 @@ function run_stoch() {
   run -398.859168655255 3.e-4  100000
 }
 
-@test "OH" { # 13.865s 
+@test "OH" { # 13.865s
   [[ -n $TRAVIS ]] && skip
   qp set_file oh.ezfio
   run -75.6121856748294 3.e-4   100000
@@ -107,7 +107,7 @@ function run_stoch() {
 @test "SiH2_3B1" { # 13.938ss
   [[ -n $TRAVIS ]] && skip
   qp set_file sih2_3b1.ezfio
-  run -290.017539006762 3.e-4  100000
+  run -290.0175411299477 3.e-4  100000
 }
 
 @test "H3COH" { # 14.7299s
@@ -132,13 +132,13 @@ function run_stoch() {
 @test "ClF" { # 16.8864s
   [[ -n $TRAVIS ]] && skip
   qp set_file clf.ezfio
-  run -559.1702772994 3.e-4  100000
+  run -559.169313755572 3.e-4  100000
 }
 
 @test "SO2" { # 17.5645s
   [[ -n $TRAVIS ]] && skip
   qp set_file so2.ezfio
-  qp set_mo_class --core="[1-8]" --act="[9-87]" 
+  qp set_mo_class --core="[1-8]" --act="[9-87]"
   run -41.5746738713298 3.e-4  100000
 }
 
@@ -146,14 +146,14 @@ function run_stoch() {
   [[ -n $TRAVIS ]] && skip
   qp set_file c2h2.ezfio
   qp set_mo_class --act="[1-30]" --del="[31-36]"
-  run -12.3671816782954 3.e-4  100000
+  run -12.3685464085969 3.e-4  100000
 }
 
 @test "N2" { # 18.0198s
   [[ -n $TRAVIS ]] && skip
   qp set_file n2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-60]"
-  run -109.291711886659 3.e-4  100000
+  run -109.28681540699360 3.e-4  100000
 }
 
 @test "N2H4" { # 18.5006s
@@ -167,7 +167,7 @@ function run_stoch() {
   [[ -n $TRAVIS ]] && skip
   qp set_file co2.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-30]" --del="[31-42]"
-  run -187.96924172901 3.e-4  100000
+  run -187.968547952413 3.e-4  100000
 }
 
 
@@ -175,13 +175,13 @@ function run_stoch() {
   [[ -n $TRAVIS ]] && skip
   qp set_file cu_nh3_4_2plus.ezfio
   qp set_mo_class --core="[1-24]" --act="[25-45]" --del="[46-87]"
-  run -1862.98614665139  3.e-04  100000
+  run -1862.9869374387192  3.e-04  100000
 }
 
 @test "HCN" { # 20.3273s
   [[ -n $TRAVIS ]] && skip
   qp set_file hcn.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-55]"
-  run -93.0803416322765 3.e-4  100000
+  run -93.0771143355433 3.e-4  100000
 }
 

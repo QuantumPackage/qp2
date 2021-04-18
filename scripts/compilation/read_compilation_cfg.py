@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os, sys
-import ConfigParser
+import configparser
 
 
 def get_l_option_section(config):
@@ -17,10 +17,10 @@ def get_compilation_option(pwd_cfg, flag_name):
     Return the flag compilation of a compile.cfg located in pwd_cfg
     """
     if not os.path.isfile(pwd_cfg):
-        print "Configuration file %s not found"%(pwd_cfg)
+        print("Configuration file %s not found"%(pwd_cfg))
         sys.exit(1)
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser(inline_comment_prefixes=(';','#'))
     config.read(pwd_cfg)
 
     if flag_name == "FC" and config.getboolean("OPTION","CACHE"):
@@ -33,7 +33,7 @@ def get_compilation_option(pwd_cfg, flag_name):
     for section in ["COMMON"] + l_option_section:
         try:
             l.extend(config.get(section, flag_name).split())
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             pass
 
     return " ".join(l)
@@ -43,5 +43,5 @@ if __name__ == '__main__':
     qpackage_root = os.environ['QP_ROOT']
     pwd_cfg = os.path.join(qpackage_root, "config/ifort_gpi2.cfg")
 
-    print get_compilation_option(pwd_cfg, "FC")
-    print get_compilation_option(pwd_cfg, "FCFLAGS")
+    print(get_compilation_option(pwd_cfg, "FC"))
+    print(get_compilation_option(pwd_cfg, "FCFLAGS"))

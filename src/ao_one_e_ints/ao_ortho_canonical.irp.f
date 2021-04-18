@@ -79,7 +79,7 @@ BEGIN_PROVIDER [ double precision, ao_cart_to_sphe_inv, (ao_cart_to_sphe_num,ao_
 
  call get_pseudo_inverse(ao_cart_to_sphe_coef,size(ao_cart_to_sphe_coef,1),&
    ao_num,ao_cart_to_sphe_num, &
-   ao_cart_to_sphe_inv, size(ao_cart_to_sphe_inv,1))
+   ao_cart_to_sphe_inv, size(ao_cart_to_sphe_inv,1), lin_dep_cutoff)
 END_PROVIDER
 
 
@@ -107,16 +107,13 @@ END_PROVIDER
     ao_ortho_canonical_coef(i,i) = 1.d0
   enddo
 
-!call ortho_lowdin(ao_overlap,size(ao_overlap,1),ao_num,ao_ortho_canonical_coef,size(ao_ortho_canonical_coef,1),ao_num)
-!ao_ortho_canonical_num=ao_num
-!return
-
+  call write_double(6, lin_dep_cutoff, "Linear dependencies cut-off") 
   if (ao_cartesian) then
 
     ao_ortho_canonical_num = ao_num
     call ortho_canonical(ao_overlap,size(ao_overlap,1), &
       ao_num,ao_ortho_canonical_coef,size(ao_ortho_canonical_coef,1), &
-      ao_ortho_canonical_num)
+      ao_ortho_canonical_num, lin_dep_cutoff)
 
 
   else
@@ -131,7 +128,7 @@ END_PROVIDER
 
     ao_ortho_canonical_num = ao_cart_to_sphe_num
     call ortho_canonical(ao_cart_to_sphe_overlap, size(ao_cart_to_sphe_overlap,1), &
-      ao_cart_to_sphe_num, S, size(S,1), ao_ortho_canonical_num)
+      ao_cart_to_sphe_num, S, size(S,1), ao_ortho_canonical_num, lin_dep_cutoff)
 
     call dgemm('N','N', ao_num, ao_ortho_canonical_num, ao_cart_to_sphe_num, 1.d0, &
       ao_cart_to_sphe_coef, size(ao_cart_to_sphe_coef,1), &
@@ -140,6 +137,7 @@ END_PROVIDER
 
     deallocate(S)
   endif
+
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, ao_ortho_canonical_overlap, (ao_ortho_canonical_num,ao_ortho_canonical_num)]
