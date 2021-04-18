@@ -1,4 +1,4 @@
-# Quantum Package 2.1
+# Quantum Package 2.2
 
 <img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250">
 
