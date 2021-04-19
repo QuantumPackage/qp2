@@ -14,7 +14,7 @@ integer*8 function configuration_search_key(cfg,Nint)
   i = shiftr(elec_alpha_num, bit_kind_shift)+1
   configuration_search_key = int(shiftr(ior(cfg(i,1),cfg(i,2)),1)+sum(cfg),8)
 
-  mask = X'00FFFFFFFFFFFFFF'
+  mask = int(Z'00FFFFFFFFFFFFFF',8)
   configuration_search_key = iand(mask,configuration_search_key)
 
   n_open_shells = 1
