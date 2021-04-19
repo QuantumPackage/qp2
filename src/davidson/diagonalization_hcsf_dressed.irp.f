@@ -284,8 +284,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   enddo
 
   ! Make random verctors eigenstates of S2
-  call convertWFfromDETtoCSF(N_st_diag,U,U_csf)
-  call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
+  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
+  call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
     itertot = itertot+1
