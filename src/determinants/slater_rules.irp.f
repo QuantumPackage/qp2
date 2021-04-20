@@ -77,6 +77,16 @@ subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
   ! exc(1,1,1) = first hole     alpha
   ! exc(1,2,2) = first particle beta
   ! exc(1,1,2) = first hole     beta
+  ! E_pq : T^alpha_pq + T^beta_pq
+  ! T^alpha_pq  : exc(0,1,1) = 1
+  !               exc(0,2,1) = 1
+  !               exc(1,1,1) = q
+  !               exc(1,2,1) = p
+
+  ! T^alpha_pq  : exc(0,1,2) = 1
+  !               exc(0,2,2) = 1
+  !               exc(1,1,2) = q
+  !               exc(1,2,2) = p
 
   ASSERT (Nint > 0)
 

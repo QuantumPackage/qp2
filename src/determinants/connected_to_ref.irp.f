@@ -32,6 +32,7 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
   use bitmasks
   BEGIN_DOC
 ! Returns the index of the determinant in the ``psi_det_sorted_bit`` array
+! using a binary search
   END_DOC
   implicit none
 
@@ -98,13 +99,11 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
       enddo
       if (in_wavefunction) then
         get_index_in_psi_det_sorted_bit = i
-!        exit
         return
       endif
     endif
     i += 1
     if (i > N_det) then
-!      exit
       return
     endif
 
