@@ -93,7 +93,7 @@ function qp()
 
     "prompt")
       shift
-      python2 $QP_ROOT/scripts/hello.py
+      python3 $QP_ROOT/scripts/hello.py
       function _check_ezfio() {
         if [[ -d ${EZFIO_FILE} ]] ; then
           printf "\e[0;32m|${EZFIO_FILE}>\e[m"
