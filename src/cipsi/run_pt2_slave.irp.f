@@ -221,9 +221,6 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     if (n_tasks == 0) exit
 
     call sscanf_ddd(task, subset, i_generator, N)
-!$OMP CRITICAL
-print *, ':task:', subset, i_generator, N, pt2_F(i_generator)
-!$OMP END CRITICAL
     if( pt2_F(i_generator) <= 0 .or. pt2_F(i_generator) > N_det ) then
       print *,  irp_here
       stop 'bug in selection'
