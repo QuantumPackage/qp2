@@ -46,7 +46,7 @@ program fci
     endif
 
   else
-    PROVIDE mo_two_e_integrals_in_map
+    PROVIDE mo_two_e_integrals_in_map pt2_min_parallel_tasks
 
     call run_slave_cipsi
 
