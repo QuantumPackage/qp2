@@ -103,7 +103,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     if (n_tasks == 0) exit
 
     do k=1,n_tasks
-      read (task(k),*) subset(k), i_generator(k), N
+      call sscanf_ddd(task(k), subset(k), i_generator(k), N)
     enddo
     if (b%N == 0) then
       ! Only first time
@@ -220,7 +220,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     endif
     if (n_tasks == 0) exit
 
-    read (task,*) subset, i_generator(1), N
+    call sscanf_ddd(task, subset, i_generator(1), N)
     if (b%N == 0) then
       ! Only first time
       bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
