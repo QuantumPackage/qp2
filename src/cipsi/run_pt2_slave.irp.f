@@ -103,7 +103,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     if (n_tasks == 0) exit
 
     do k=1,n_tasks
-      read (task(k),*) subset(k), i_generator(k), N
+      call sscanf_ddd(task(k), subset(k), i_generator(k), N)
     enddo
     if (b%N == 0) then
       ! Only first time
@@ -183,9 +183,9 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(selection_buffer) :: b
   logical :: done, buffer_ready
 
-  type(pt2_type) :: pt2_data(1)
+  type(pt2_type) :: pt2_data
   integer :: n_tasks, k, N
-  integer :: i_generator(1), subset
+  integer :: i_generator, subset
 
   integer :: bsize ! Size of selection buffers
   logical :: sending
@@ -220,7 +220,11 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     endif
     if (n_tasks == 0) exit
 
-    read (task,*) subset, i_generator(1), N
+    call sscanf_ddd(task, subset, i_generator, N)
+    if( pt2_F(i_generator) <= 0 .or. pt2_F(i_generator) > N_det ) then
+      print *,  irp_here
+      stop 'bug in selection'
+    endif
     if (b%N == 0) then
       ! Only first time
       bsize = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
@@ -232,15 +236,10 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
     double precision :: time0, time1
     call wall_time(time0)
-    call pt2_alloc(pt2_data(1),N_states)
+    call pt2_alloc(pt2_data,N_states)
     b%cur = 0
-!double precision :: time2
-!call wall_time(time2)
-    call select_connected(i_generator(1),energy,pt2_data(1),b,subset,pt2_F(i_generator(1)))
-!call wall_time(time1)
-!print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
+    call select_connected(i_generator,energy,pt2_data,b,subset,pt2_F(i_generator))
     call wall_time(time1)
-!print *,  '-->', i_generator(1), time1-time0, n_tasks
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then
@@ -255,14 +254,14 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     call omp_unset_lock(global_selection_buffer_lock)
     if ( iproc == 1 ) then
       call omp_set_lock(global_selection_buffer_lock)
-      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, global_selection_buffer, task_id, n_tasks,sending)
+      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, global_selection_buffer, task_id, 1,sending)
       global_selection_buffer%cur = 0
       call omp_unset_lock(global_selection_buffer_lock)
     else
-      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, b, task_id, n_tasks,sending)
+      call push_pt2_results_async_send(zmq_socket_push, i_generator, pt2_data, b, task_id, 1,sending)
     endif
 
-    call pt2_dealloc(pt2_data(1))
+    call pt2_dealloc(pt2_data)
   end do
   call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
 

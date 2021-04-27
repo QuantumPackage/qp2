@@ -22,7 +22,15 @@ struct bin_tree {
     int NBF;
 };
 
-#include <cblas.h>
+typedef enum {CblasRowMajor=101, CblasColMajor=102} CBLAS_LAYOUT;
+typedef enum {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113} CBLAS_TRANSPOSE;
+typedef CBLAS_LAYOUT CBLAS_ORDER;
+void cblas_dgemm(CBLAS_LAYOUT layout, CBLAS_TRANSPOSE TransA,
+                 CBLAS_TRANSPOSE TransB, const int M, const int N,
+                 const int K, const double alpha, const double *A,
+                 const int lda, const double *B, const int ldb,
+                 const double beta, double *C, const int ldc);
+
 
 #define MAX_SOMO 32
 
