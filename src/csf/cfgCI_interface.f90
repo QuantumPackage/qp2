@@ -46,4 +46,18 @@ module cfunctions
            real   (kind=C_DOUBLE ),intent(out) :: csftodetmatrix(rowsmax,colsmax)
          end subroutine getCSFtoDETTransformationMatrix
       end interface
-    end module cfunctions
+end module cfunctions
+
+subroutine f_dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC) &
+          bind(C, name='f_dgemm')
+  use iso_c_binding
+  implicit none
+  character, intent(in), value :: TRANSA, TRANSB
+  integer, intent(in), value   :: M,N,K,LDA,LDB,LDC
+  double precision, intent(in), value :: ALPHA, BETA
+  double precision, intent(in) :: A(LDA,*), B(LDB,*)
+  double precision, intent(out) :: C(LDC,*)
+  call dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC)
+end subroutine
+
+

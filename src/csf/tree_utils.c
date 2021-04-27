@@ -267,6 +267,7 @@ void callBlasMatxMat(double *A, int rowA, int colA, double *B, int rowB, int col
     double alpha = 1.0;
     double beta  = 0.0;
     int val = 0;
+
     if (transA) val |= 0x1;
     if (transB) val |= 0x2;
 
@@ -275,15 +276,13 @@ void callBlasMatxMat(double *A, int rowA, int colA, double *B, int rowB, int col
             m = rowA;
             n = colB;
             k = colA;
-            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                        m, n, k, alpha, A, k, B, n, beta, C, n);
+            f_dgemm('N', 'N', n, m, k, alpha, B, n, A, k, beta, C, n);
             break;
         case 1: // transA, notransB
             m = colA;
             n = colB;
             k = rowA;
-            cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
-                        m, n, k, alpha, A, colA, B, n, beta, C, n);
+            f_dgemm('N', 'T', n, m, k, alpha, B, n, A, colA, beta, C, n);
             break;
         case 2: // notransA, transB
             //m = rowA;
@@ -292,15 +291,13 @@ void callBlasMatxMat(double *A, int rowA, int colA, double *B, int rowB, int col
             m = rowA;
             n = rowB;
             k = colA;
-            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-                        m, n, k, alpha, A, k, B, colB, beta, C, n);
+            f_dgemm('T', 'N', n, m, k, alpha, B, colB, A, k, beta, C, n);
             break;
         case 3: // transA, transB
             m = colA;
             n = rowB;
             k = rowA;
-            cblas_dgemm(CblasRowMajor, CblasTrans, CblasTrans,
-                        m, n, k, alpha, A, colA, B, colB, beta, C, n);
+            f_dgemm('T', 'T', n, m, k, alpha, B, colB, A, colA, beta, C, n);
             break;
         default:
             printf("Impossible !!!!\n");
