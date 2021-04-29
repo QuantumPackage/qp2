@@ -676,33 +676,47 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       logical :: do_cycle
       if (excitation_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+        if (excitation_ref == 1) then
+          call get_excitation_degree(HF_bitmask,det(1,1),degree,N_int)
           do_cycle = do_cycle .and. (degree > excitation_max)
-        enddo
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
 
 
       if (excitation_alpha_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_alpha_max)
-        enddo
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree_spin(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_alpha_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
 
 
       if (excitation_beta_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_beta_max)
-        enddo
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,2),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,2,k),det(1,2),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_beta_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
-
 
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
