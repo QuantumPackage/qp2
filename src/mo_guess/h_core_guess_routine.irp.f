@@ -10,5 +10,5 @@ subroutine hcore_guess
                                      size(mo_one_e_integrals,2),label,1,.false.)
   call nullify_small_elements(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-12 )
   call save_mos
-  SOFT_TOUCH mo_coef mo_label
+  TOUCH mo_coef mo_label
 end

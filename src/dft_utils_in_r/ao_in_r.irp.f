@@ -120,43 +120,22 @@
  !$OMP END PARALLEL DO
  END_PROVIDER
 
-
- BEGIN_PROVIDER[double precision, aos_lapl_in_r_array_transp, (n_points_final_grid,ao_num,3)]
- implicit none
- !
- ! aos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth ao on the ith grid point
- !
- ! k = 1 : x, k= 2, y, k  3, z
- integer :: i,j,m
- do m = 1, 3
-  do i = 1, n_points_final_grid
-   do j = 1, ao_num
-    aos_lapl_in_r_array_transp(i,j,m) = aos_lapl_in_r_array(j,i,m) 
-   enddo
-  enddo
- enddo
- END_PROVIDER
-
-
- BEGIN_PROVIDER[double precision, aos_in_r_array_per_atom, (ao_num,n_pts_max_per_atom,nucl_num)]
-&BEGIN_PROVIDER[double precision, aos_in_r_array_per_atom_transp, (n_pts_max_per_atom,ao_num,nucl_num)]
+ BEGIN_PROVIDER[double precision, aos_grad_in_r_array_transp_bis, (n_points_final_grid,ao_num,3)]
  implicit none
  BEGIN_DOC
- ! aos_in_r_array_per_atom(i,j,k)        = value of the ith ao on the jth grid point attached on the kth atom 
+! Transposed gradients 
+! 
  END_DOC
- integer :: i,j,k
+ integer :: i,j,m
  double precision :: aos_array(ao_num), r(3)
- do k = 1, nucl_num
-  do i = 1, n_pts_per_atom(k)
-   r(1) = final_grid_points_per_atom(1,i,k)
-   r(2) = final_grid_points_per_atom(2,i,k)
-   r(3) = final_grid_points_per_atom(3,i,k)
-   call give_all_aos_at_r(r,aos_array)
-   do j = 1, ao_num
-    aos_in_r_array_per_atom(j,i,k) = aos_array(j)
-    aos_in_r_array_per_atom_transp(i,j,k) = aos_array(j)
+ double precision :: aos_grad_array(3,ao_num)
+ do m = 1, 3
+  do j = 1, ao_num
+   do i = 1, n_points_final_grid
+    aos_grad_in_r_array_transp_bis(i,j,m) = aos_grad_in_r_array(j,i,m)
    enddo
   enddo
  enddo
  END_PROVIDER
+
 
