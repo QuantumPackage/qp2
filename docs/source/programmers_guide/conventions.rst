@@ -29,7 +29,7 @@ be used. In addition, all the shell scripts should be under
 
 The exit code of the script should be 0 upon success only.
 
-Bash and Python2 are the only shell scripting language permitted for
+Bash and Python3 are the only shell scripting language permitted for
 executables.
 
 
@@ -73,11 +73,10 @@ Bash
 Python
 ------
 
-Only Python2 is supported. The reason is that some dependencies use Python2,
-and we do not want yet to add an extra dependency to Python3. 
+Only Python3 is supported.
 
-Python scripts should start with ``#!/usr/bin/env python2`` to mention
-explicitly that Python2 has to be used.
+Python scripts should start with ``#!/usr/bin/env python3`` to mention
+explicitly that Python3 has to be used, possibly from a conda installation.
 
 :command:`pylint` should be used to increase the quality of the source code.
 

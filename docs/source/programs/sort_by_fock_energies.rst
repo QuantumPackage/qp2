@@ -18,10 +18,10 @@ sort_by_fock_energies
  .. hlist:: 
     :columns: 3 
  
-    * :c:data:`fock_matrix_mo` 
     * :c:data:`ao_num` 
-    * :c:data:`mo_num` 
+    * :c:data:`fock_matrix_mo` 
     * :c:data:`mo_coef` 
+    * :c:data:`mo_num` 
  
  Calls: 
  

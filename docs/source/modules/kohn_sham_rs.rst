@@ -461,8 +461,8 @@ Subroutines / functions
     .. hlist::
        :columns: 3
 
-       * :c:data:`exchange_functional`
        * :c:data:`correlation_functional`
+       * :c:data:`exchange_functional`
 
     Called by:
 

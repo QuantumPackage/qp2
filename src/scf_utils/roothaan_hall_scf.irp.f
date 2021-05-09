@@ -23,6 +23,10 @@ END_DOC
       error_matrix_DIIS(ao_num,ao_num,max_dim_DIIS)                  &
       )
 
+  Fock_matrix_DIIS = 0.d0
+  error_matrix_DIIS = 0.d0
+  mo_coef_save = 0.d0
+
   call write_time(6)
 
   print*,'Energy of the guess = ',SCF_energy
@@ -62,7 +66,7 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if (scf_algorithm == 'DIIS') then
+    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
 
       ! Store Fock and error matrices at each iteration
       do j=1,ao_num
@@ -153,7 +157,7 @@ END_DOC
   enddo
 
  if (iteration_SCF < n_it_SCF_max) then
-   mo_label = "Canonical"
+   mo_label = 'Canonical'
  endif
 !
 ! End of Main SCF loop
@@ -164,7 +168,10 @@ END_DOC
   write(6,*)
 
   if(.not.frozen_orb_scf)then
-   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1),size(Fock_matrix_mo,2),mo_label,1,.true.)
+   call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &
+      size(Fock_matrix_mo,2),mo_label,1,.true.)
+   call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
+   call orthonormalize_mos
    call save_mos
   endif
 
@@ -195,7 +202,7 @@ END_DOC
   double precision,allocatable  :: C_vector_DIIS(:)
 
   double precision,allocatable  :: scratch(:,:)
-  integer                       :: i,j,k,i_DIIS,j_DIIS
+  integer                       :: i,j,k,l,i_DIIS,j_DIIS
   double precision :: rcond, ferr, berr
   integer, allocatable :: iwork(:)
   integer :: lwork
@@ -211,28 +218,22 @@ END_DOC
     scratch(ao_num,ao_num)                &
   )
 
-! Compute the matrices B and X
+  ! Compute the matrices B and X
   B_matrix_DIIS(:,:) = 0.d0
   do j=1,dim_DIIS
     j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
-    do i=1,dim_DIIS
 
+    do i=1,dim_DIIS
       i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
 
-! Compute product of two errors vectors
-
-      call dgemm('N','N',ao_num,ao_num,ao_num,                      &
-           1.d0,                                                    &
-           error_matrix_DIIS(1,1,i_DIIS),size(error_matrix_DIIS,1), &
-           error_matrix_DIIS(1,1,j_DIIS),size(error_matrix_DIIS,1), &
-           0.d0,                                                    &
-           scratch,size(scratch,1))
-
-! Compute Trace
-
-      do k=1,ao_num
-        B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + scratch(k,k)
+      ! Compute product of two errors vectors
+      do l=1,ao_num
+        do k=1,ao_num
+          B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + &
+            error_matrix_DIIS(k,l,i_DIIS) * error_matrix_DIIS(k,l,j_DIIS)
+        enddo
       enddo
+
     enddo
   enddo
 
@@ -305,6 +306,7 @@ END_DOC
     do k=1,dim_DIIS
       if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
       do i=1,ao_num
+        ! FPE here
         Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
             X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
       enddo

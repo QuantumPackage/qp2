@@ -80,7 +80,7 @@ git:
 	./create_git_sha1.sh
 
 ${QP_EZFIO}/Ocaml/ezfio.ml: 
-	$(NINJA) -C ${QP_ROOT}/config ${QP_ROOT}/lib/libezfio_irp.a
+	ninja -C ${QP_ROOT}/config ${QP_ROOT}/lib/libezfio_irp.a
 
 qp_edit.ml: ../scripts/ezfio_interface/qp_edit_template
 

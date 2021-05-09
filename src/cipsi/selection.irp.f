@@ -1,148 +1,5 @@
 use bitmasks
 
-BEGIN_PROVIDER [ double precision, pt2_match_weight, (N_states) ]
- implicit none
- BEGIN_DOC
- ! Weights adjusted along the selection to make the PT2 contributions
- ! of each state coincide.
- END_DOC
- pt2_match_weight(:) = 1.d0
-END_PROVIDER
-
-BEGIN_PROVIDER [ double precision, variance_match_weight, (N_states) ]
- implicit none
- BEGIN_DOC
- ! Weights adjusted along the selection to make the variances
- ! of each state coincide.
- END_DOC
- variance_match_weight(:) = 1.d0
-END_PROVIDER
-
-subroutine update_pt2_and_variance_weights(pt2_data, N_st)
-  implicit none
-  use selection_types
-  BEGIN_DOC
-! Updates the PT2- and Variance- matching weights.
-  END_DOC
-  integer, intent(in)          :: N_st
-  type(pt2_type), intent(in)   :: pt2_data
-  double precision             :: pt2(N_st)
-  double precision             :: variance(N_st)
-
-  double precision :: avg, element, dt, x
-  integer          :: k
-  integer, save    :: i_iter=0
-  integer, parameter :: i_itermax = 1
-  double precision, allocatable, save :: memo_variance(:,:), memo_pt2(:,:)
-
-  pt2(:)      = pt2_data % pt2(:)
-  variance(:) = pt2_data % variance(:)
-
-  if (i_iter == 0) then
-    allocate(memo_variance(N_st,i_itermax), memo_pt2(N_st,i_itermax))
-    memo_pt2(:,:) = 1.d0
-    memo_variance(:,:) = 1.d0
-  endif
-
-  i_iter = i_iter+1
-  if (i_iter > i_itermax) then
-    i_iter = 1
-  endif
-
-  dt = 2.0d0
-
-  avg = sum(pt2(1:N_st)) / dble(N_st) - 1.d-32 ! Avoid future division by zero
-  do k=1,N_st
-    element = exp(dt*(pt2(k)/avg -1.d0))
-    element = min(2.0d0 , element)
-    element = max(0.5d0 , element)
-    memo_pt2(k,i_iter) = element
-    pt2_match_weight(k) *= product(memo_pt2(k,:))
-  enddo
-
-  avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
-  do k=1,N_st
-    element = exp(dt*(variance(k)/avg -1.d0))
-    element = min(2.0d0 , element)
-    element = max(0.5d0 , element)
-    memo_variance(k,i_iter) = element
-    variance_match_weight(k) *= product(memo_variance(k,:))
-  enddo
-
-  if (N_det < 100) then
-    ! For tiny wave functions, weights are 1.d0
-    pt2_match_weight(:) = 1.d0
-    variance_match_weight(:) = 1.d0
-  endif
-
-  threshold_davidson_pt2 = min(1.d-6, &
-     max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
-
-  SOFT_TOUCH pt2_match_weight variance_match_weight threshold_davidson_pt2
-end
-
-
-BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
-   implicit none
-   BEGIN_DOC
-   ! Weights used in the selection criterion
-   END_DOC
-   select case (weight_selection)
-
-     case (0)
-      print *,  'Using input weights in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * state_average_weight(1:N_states)
-
-     case (1)
-      print *,  'Using 1/c_max^2 weight in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states)
-
-     case (2)
-      print *,  'Using pt2-matching weight in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-
-     case (3)
-      print *,  'Using variance-matching weight in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
-
-     case (4)
-      print *,  'Using variance- and pt2-matching weights in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states))
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-      print *, '# var weight ', real(variance_match_weight(:),4)
-
-     case (5)
-      print *,  'Using variance-matching weight in selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
-
-     case (6)
-      print *,  'Using CI coefficient-based selection'
-      selection_weight(1:N_states) = c0_weight(1:N_states)
-
-     case (7)
-      print *,  'Input weights multiplied by variance- and pt2-matching'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)) * state_average_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-      print *, '# var weight ', real(variance_match_weight(:),4)
-
-     case (8)
-      print *,  'Input weights multiplied by pt2-matching'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states) * state_average_weight(1:N_states)
-      print *, '# PT2 weight ', real(pt2_match_weight(:),4)
-
-     case (9)
-      print *,  'Input weights multiplied by variance-matching'
-      selection_weight(1:N_states) = c0_weight(1:N_states) * variance_match_weight(1:N_states) * state_average_weight(1:N_states)
-      print *, '# var weight ', real(variance_match_weight(:),4)
-
-    end select
-     print *, '# Total weight ', real(selection_weight(:),4)
-
-END_PROVIDER
-
 subroutine get_mask_phase(det1, pm, Nint)
   use bitmasks
   implicit none
@@ -151,27 +8,56 @@ subroutine get_mask_phase(det1, pm, Nint)
   integer(bit_kind), intent(out) :: pm(Nint,2)
   integer(bit_kind) :: tmp1, tmp2
   integer :: i
-  pm(1:Nint,1:2) = det1(1:Nint,1:2)
   tmp1 = 0_8
   tmp2 = 0_8
-  do i=1,Nint
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 1))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 1))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
-    pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
-    pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
-    pm(i,1) = ieor(pm(i,1), tmp1)
-    pm(i,2) = ieor(pm(i,2), tmp2)
-    if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
-    if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
-  end do
+  select case (Nint)
+
+BEGIN_TEMPLATE
+    case ($Nint)
+      do i=1,$Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+SUBST [ Nint ]
+1;;
+2;;
+3;;
+4;;
+END_TEMPLATE
+    case default
+      do i=1,Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+  end select
 
 end subroutine
 
@@ -309,15 +195,18 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
   integer                        :: l_a, nmax, idx
   integer, allocatable           :: indices(:), exc_degree(:), iorder(:)
+  double precision, parameter :: norm_thr = 1.d-16
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
 
+  ! Pre-compute excitation degrees wrt alpha determinants
   k=1
   do i=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,i),       &
         psi_det_generators(1,1,i_generator), exc_degree(i), N_int)
   enddo
 
+  ! Iterate on 0SD beta, and find alphas 0SDTQ such that exc_degree <= 4
   do j=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,j),        &
         psi_det_generators(1,2,i_generator), nt, N_int)
@@ -326,7 +215,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
         endif
@@ -334,11 +223,14 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
     enddo
   enddo
 
+  ! Pre-compute excitation degrees wrt beta determinants
   do i=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,i),        &
         psi_det_generators(1,2,i_generator), exc_degree(i), N_int)
   enddo
 
+  ! Iterate on 0S alpha, and find betas TQ such that exc_degree <= 4
+  ! Remove also contributions < 1.d-20)
   do j=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,j),       &
         psi_det_generators(1,1,i_generator), nt, N_int)
@@ -350,7 +242,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > 1.d-20) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
         endif
@@ -587,11 +479,17 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       endif
 
       do i=1,fullinteresting(0)
-        fullminilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,fullinteresting(i))
+        do k=1,N_int
+          fullminilist(k,1,i) = psi_det_sorted(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_det_sorted(k,2,fullinteresting(i))
+        enddo
       enddo
 
       do i=1,interesting(0)
-        minilist(1:N_int,1:2,i) = psi_det_sorted(1:N_int,1:2,interesting(i))
+        do k=1,N_int
+          minilist(k,1,i) = psi_det_sorted(k,1,interesting(i))
+          minilist(k,2,i) = psi_det_sorted(k,2,interesting(i))
+        enddo
       enddo
 
       do s2=s1,2
@@ -678,12 +576,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision :: delta_E, val, Hii, w, tmp, alpha_h_psi
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
-
-  logical, external :: detEq
-  double precision, allocatable :: values(:)
-  integer, allocatable          :: keys(:,:)
-  integer                       :: nkeys
   double precision :: s_weight(N_states,N_states)
+  PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
       s_weight(istate,jstate) = dsqrt(selection_weight(istate)*selection_weight(jstate))
@@ -700,9 +594,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   call apply_holes(psi_det_generators(1,1,i_generator), s1, h1, s2, h2, mask, ok, N_int)
   E_shift = 0.d0
 
-  if (h0_type == 'SOP') then
-    j = det_to_occ_pattern(i_generator)
-    E_shift = psi_det_Hii(i_generator) - psi_occ_pattern_Hii(j)
+  if (h0_type == 'CFG') then
+    j = det_to_configuration(i_generator)
+    E_shift = psi_det_Hii(i_generator) - psi_configuration_Hii(j)
   endif
 
   do p1=1,mo_num
@@ -735,6 +629,12 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       if(bannedOrb(p2, s2)) cycle
       if(banned(p1,p2)) cycle
 
+      if(pseudo_sym)then
+        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
+          w = 0.d0
+        endif
+      endif
+
       val = maxval(abs(mat(1:N_states, p1, p2)))
       if( val == 0d0) cycle
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
@@ -761,13 +661,66 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (.not.is_a_1h1p(det)) cycle
       endif
 
+      if (seniority_max >= 0) then
+        integer :: s
+        s = 0
+        do k=1,N_int
+          s = s + popcnt(ieor(det(k,1),det(k,2)))
+        enddo
+
+        if (s > seniority_max) cycle
+      endif
+
+
+      integer :: degree
+      logical :: do_cycle
+      if (excitation_max >= 0) then
+        do_cycle = .True.
+        if (excitation_ref == 1) then
+          call get_excitation_degree(HF_bitmask,det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_max)
+          enddo
+        endif
+        if (do_cycle) cycle
+      endif
+
+
+      if (excitation_alpha_max >= 0) then
+        do_cycle = .True.
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree_spin(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_alpha_max)
+          enddo
+        endif
+        if (do_cycle) cycle
+      endif
+
+
+      if (excitation_beta_max >= 0) then
+        do_cycle = .True.
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,2),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,2,k),det(1,2),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_beta_max)
+          enddo
+        endif
+        if (do_cycle) cycle
+      endif
+
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       w = 0d0
-
-!      integer(bit_kind) :: occ(N_int,2), n
-!      call occ_pattern_of_det(det,occ,N_int)
-!      call occ_pattern_to_dets_size(occ,n,elec_alpha_num,N_int)
 
       e_pert = 0.d0
       coef = 0.d0
@@ -792,11 +745,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
       enddo
 
-      do_diag = sum(dabs(coef)) > 0.001d0
+      do_diag = sum(dabs(coef)) > 0.001d0 .and. N_states > 1
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
-      integer :: iwork(3+5*(N_states+1)), info, k ,n
+      integer :: iwork(3+5*(N_states+1)), info, k 
 
       if (do_diag) then
         double precision :: pt2_matrix(N_states+1,N_states+1)
@@ -822,6 +775,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       endif
 
 
+
 !      ! Gram-Schmidt using input overlap matrix
 !      do istate=1,N_states
 !        do jstate=1,istate-1
@@ -834,12 +788,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
         alpha_h_psi = mat(istate, p1, p2)
 
-        do jstate=1,N_states
-          pt2_data % overlap(jstate,istate) += coef(jstate) * coef(istate)
-        enddo
-
-        pt2_data % variance(istate) += alpha_h_psi * alpha_h_psi
-        pt2_data % pt2(istate)      += e_pert(istate)
+        pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
+        pt2_data % variance(istate)  = pt2_data % variance(istate) + alpha_h_psi * alpha_h_psi
+        pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
 
 !!!DEBUG
 !        delta_E = E0(istate) - Hii + E_shift
@@ -864,41 +815,43 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
           case(5)
             ! Variance selection
-!            w = w - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)
-            w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(alpha_h_psi*mat(jstate,p1,p2)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)) & 
+                / c0_weight(istate)
+            else
+              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
+            endif
 
           case(6)
-!            w = w - coef(istate) * coef(istate) * s_weight(istate,istate)
-            w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(coef(istate)*coef(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate)) &
+                / c0_weight(istate)
+            else
+              w = min(w,- coef(istate) * coef(istate) * s_weight(istate,istate))
+            endif
 
           case default
             ! Energy selection
-!            w = w + e_pert(istate) * s_weight(istate,istate)
-            w = min(w, e_pert(istate) * s_weight(istate,istate))
-!            do jstate=1,N_states
-!              if (istate == jstate) cycle
-!              w = w + dabs(X(istate)*X(jstate)) * s_weight(istate,jstate)
-!            enddo
+            if (h0_type == 'CFG') then
+              w = min(w, e_pert(istate) * s_weight(istate,istate)) / c0_weight(istate)
+            else
+              w = min(w, e_pert(istate) * s_weight(istate,istate))
+            endif
 
         end select
       end do
 
 
-      if(pseudo_sym)then
-        if(dabs(mat(1, p1, p2)).lt.thresh_sym)then
-          w = 0.d0
-        endif
+      integer(bit_kind) :: occ(N_int,2), n
+      if (h0_type == 'CFG') then
+        do k=1,N_int
+          occ(k,1) = ieor(det(k,1),det(k,2))
+          occ(k,2) = iand(det(k,1),det(k,2))
+        enddo
+        call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
+        n = max(n,1)
+        w *= dsqrt(dble(n))
       endif
-
-!      w = dble(n) * w
 
       if(w <= buf%mini) then
         call add_to_selection_buffer(buf, det, w)
@@ -1675,7 +1628,7 @@ subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
           hij = mo_two_e_integral(p1, p2, h1, h2) * phase
         end if
-        mat(:, p1, p2) += coefs(:) * hij
+        mat(:, p1, p2) = mat(:, p1, p2) + coefs(:) * hij
       end do
     end do
   else ! AA BB
@@ -1692,7 +1645,7 @@ subroutine get_d0_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         else
           hij = (mo_two_e_integral(p1, p2, puti, putj) -  mo_two_e_integral(p2, p1, puti, putj))* get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
         end if
-        mat(:, puti, putj) += coefs(:) * hij
+        mat(:, puti, putj) = mat(:, puti, putj) + coefs(:) * hij
       end do
     end do
   end if
@@ -1751,18 +1704,18 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
       do putj=1, hfix-1
         if(lbanned(putj, ma) .or. banned(putj, puti,bant)) cycle
         hij = (mo_two_e_integral(p1, p2, putj, hfix)-mo_two_e_integral(p2,p1,putj,hfix)) * get_phase_bi(phasemask, ma, ma, putj, p1, hfix, p2, N_int)
-        tmp_row(1:N_states,putj) += hij * coefs(1:N_states)
+        tmp_row(1:N_states,putj) = tmp_row(1:N_states,putj) + hij * coefs(1:N_states)
       end do
       do putj=hfix+1, mo_num
         if(lbanned(putj, ma) .or. banned(putj, puti,bant)) cycle
         hij = (mo_two_e_integral(p1, p2, hfix, putj)-mo_two_e_integral(p2,p1,hfix,putj)) * get_phase_bi(phasemask, ma, ma, hfix, p1, putj, p2, N_int)
-        tmp_row(1:N_states,putj) += hij * coefs(1:N_states)
+        tmp_row(1:N_states,putj) = tmp_row(1:N_states,putj) + hij * coefs(1:N_states)
       end do
 
       if(ma == 1) then
-        mat(1:N_states,1:mo_num,puti) += tmp_row(1:N_states,1:mo_num)
+        mat(1:N_states,1:mo_num,puti) = mat(1:N_states,1:mo_num,puti) + tmp_row(1:N_states,1:mo_num)
       else
-        mat(1:N_states,puti,1:mo_num) += tmp_row(1:N_states,1:mo_num)
+        mat(1:N_states,puti,1:mo_num) = mat(1:N_states,puti,1:mo_num) + tmp_row(1:N_states,1:mo_num)
       end if
     end if
 
@@ -1776,22 +1729,22 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
       putj = p1
       if(.not. banned(putj,puti,bant)) then
         hij = mo_two_e_integral(p2,pfix,hfix,puti) * get_phase_bi(phasemask, ma, mi, hfix, p2, puti, pfix, N_int)
-        tmp_row(:,puti) += hij * coefs(:)
+        tmp_row(:,puti) = tmp_row(:,puti) + hij * coefs(:)
       end if
 
       putj = p2
       if(.not. banned(putj,puti,bant)) then
         hij = mo_two_e_integral(p1,pfix,hfix,puti) * get_phase_bi(phasemask, ma, mi, hfix, p1, puti, pfix, N_int)
-        tmp_row2(:,puti) += hij * coefs(:)
+        tmp_row2(:,puti) = tmp_row2(:,puti) + hij * coefs(:)
       end if
     end do
 
     if(mi == 1) then
-      mat(:,:,p1) += tmp_row(:,:)
-      mat(:,:,p2) += tmp_row2(:,:)
+      mat(:,:,p1) = mat(:,:,p1) + tmp_row(:,:)
+      mat(:,:,p2) = mat(:,:,p2) + tmp_row2(:,:)
     else
-      mat(:,p1,:) += tmp_row(:,:)
-      mat(:,p2,:) += tmp_row2(:,:)
+      mat(:,p1,:) = mat(:,p1,:) + tmp_row(:,:)
+      mat(:,p2,:) = mat(:,p2,:) + tmp_row2(:,:)
     end if
   else
     if(p(0,ma) == 3) then
@@ -1804,16 +1757,16 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         do putj=1,hfix-1
           if(lbanned(putj,ma) .or. banned(puti,putj,1)) cycle
           hij = (mo_two_e_integral(p1, p2, putj, hfix)-mo_two_e_integral(p2,p1,putj,hfix)) * get_phase_bi(phasemask, ma, ma, putj, p1, hfix, p2, N_int)
-          tmp_row(:,putj) += hij * coefs(:)
+          tmp_row(:,putj) = tmp_row(:,putj) + hij * coefs(:)
         end do
         do putj=hfix+1,mo_num
           if(lbanned(putj,ma) .or. banned(puti,putj,1)) cycle
           hij = (mo_two_e_integral(p1, p2, hfix, putj)-mo_two_e_integral(p2,p1,hfix,putj)) * get_phase_bi(phasemask, ma, ma, hfix, p1, putj, p2, N_int)
-          tmp_row(:,putj) += hij * coefs(:)
+          tmp_row(:,putj) = tmp_row(:,putj) + hij * coefs(:)
         end do
 
-        mat(:, :puti-1, puti) += tmp_row(:,:puti-1)
-        mat(:, puti, puti:) += tmp_row(:,puti:)
+        mat(:, :puti-1, puti) = mat(:, :puti-1, puti) + tmp_row(:,:puti-1)
+        mat(:, puti, puti:) = mat(:, puti, puti:) + tmp_row(:,puti:)
       end do
     else
       hfix = h(1,mi)
@@ -1827,19 +1780,19 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         putj = p2
         if(.not. banned(puti,putj,1)) then
           hij = mo_two_e_integral(pfix, p1, hfix, puti) * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p1, N_int)
-          tmp_row(:,puti) += hij * coefs(:)
+          tmp_row(:,puti) = tmp_row(:,puti) + hij * coefs(:)
         end if
 
         putj = p1
         if(.not. banned(puti,putj,1)) then
           hij = mo_two_e_integral(pfix, p2, hfix, puti) * get_phase_bi(phasemask, mi, ma, hfix, pfix, puti, p2, N_int)
-          tmp_row2(:,puti) += hij * coefs(:)
+          tmp_row2(:,puti) = tmp_row2(:,puti) + hij * coefs(:)
         end if
       end do
-      mat(:,:p2-1,p2) += tmp_row(:,:p2-1)
-      mat(:,p2,p2:) += tmp_row(:,p2:)
-      mat(:,:p1-1,p1) += tmp_row2(:,:p1-1)
-      mat(:,p1,p1:) += tmp_row2(:,p1:)
+      mat(:,:p2-1,p2) = mat(:,:p2-1,p2) + tmp_row(:,:p2-1)
+      mat(:,p2,p2:) = mat(:,p2,p2:) + tmp_row(:,p2:)
+      mat(:,:p1-1,p1) = mat(:,:p1-1,p1) + tmp_row2(:,:p1-1)
+      mat(:,p1,p1:) = mat(:,p1,p1:) + tmp_row2(:,p1:)
     end if
   end if
   deallocate(lbanned)
@@ -1862,7 +1815,7 @@ subroutine get_d1_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         if(bannedOrb(p1, s1) .or. bannedOrb(p2, s2) .or. banned(p1, p2, 1)) cycle
         call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
         call i_h_j(gen, det, N_int, hij)
-        mat(:, p1, p2) += coefs(:) * hij
+        mat(:, p1, p2) = mat(:, p1, p2) + coefs(:) * hij
       end do
     end do
 end
@@ -1915,9 +1868,9 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
 
         hij = (mo_two_e_integral(p1, p2, h1, h2) - mo_two_e_integral(p2,p1, h1, h2)) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
         if(ma == 1) then
-          mat(:, putj, puti) += coefs(:) * hij
+          mat(:, putj, puti) = mat(:, putj, puti) + coefs(:) * hij
         else
-          mat(:, puti, putj) += coefs(:) * hij
+          mat(:, puti, putj) = mat(:, puti, putj) + coefs(:) * hij
         end if
       end do
     else
@@ -1933,7 +1886,7 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
           p1 = p(turn2(i), 1)
 
           hij = mo_two_e_integral(p1, p2, h1, h2) * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2,N_int)
-          mat(:, puti, putj) += coefs(:) * hij
+          mat(:, puti, putj) = mat(:, puti, putj) + coefs(:) * hij
         end do
       end do
     end if
@@ -1953,7 +1906,7 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         p1 = p(i1, ma)
         p2 = p(i2, ma)
         hij = (mo_two_e_integral(p1, p2, h1, h2) - mo_two_e_integral(p2,p1, h1, h2)) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2,N_int)
-        mat(:, puti, putj) += coefs(:) * hij
+        mat(:, puti, putj) = mat(:, puti, putj) + coefs(:) * hij
       end do
       end do
     else if(tip == 3) then
@@ -1967,7 +1920,7 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         p2 = p(i, ma)
 
         hij = mo_two_e_integral(p1, p2, h1, h2) * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2,N_int)
-        mat(:, min(puti, putj), max(puti, putj)) += coefs(:) * hij
+        mat(:, min(puti, putj), max(puti, putj)) = mat(:, min(puti, putj), max(puti, putj)) + coefs(:) * hij
       end do
     else ! tip == 4
       puti = p(1, sp)
@@ -1978,7 +1931,7 @@ subroutine get_d2_reference(gen, phasemask, bannedOrb, banned, mat, mask, h, p, 
         h1 = h(1, mi)
         h2 = h(2, mi)
         hij = (mo_two_e_integral(p1, p2, h1, h2) - mo_two_e_integral(p2,p1, h1, h2)) * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2,N_int)
-        mat(:, puti, putj) += coefs(:) * hij
+        mat(:, puti, putj) = mat(:, puti, putj) + coefs(:) * hij
       end if
     end if
   end if

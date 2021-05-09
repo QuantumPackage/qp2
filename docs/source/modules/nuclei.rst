@@ -38,7 +38,7 @@ EZFIO parameters
     Nuclear coordinates in the format (:, {x,y,z})
  
  
-.. option:: disk_access_nuclear_repulsion
+.. option:: io_nuclear_repulsion
  
     Read/Write Nuclear Repulsion from/to disk [ Write | Read | None ]
  
@@ -255,10 +255,7 @@ Providers
        * :c:data:`ao_pseudo_integrals_local`
        * :c:data:`ao_pseudo_integrals_non_local`
        * :c:data:`ao_spread_x`
-       * :c:data:`ao_two_e_integral_alpha`
-       * :c:data:`ao_two_e_integral_erf_schwartz`
        * :c:data:`ao_two_e_integral_schwartz`
-       * :c:data:`ao_two_e_integrals_erf_in_map`
        * :c:data:`ao_two_e_integrals_in_map`
        * :c:data:`center_of_mass`
        * :c:data:`inertia_tensor`
@@ -498,7 +495,7 @@ Providers
     .. hlist::
        :columns: 3
 
-       * :c:data:`disk_access_nuclear_repulsion`
+       * :c:data:`io_nuclear_repulsion`
        * :c:data:`mpi_master`
        * :c:data:`nucl_charge`
        * :c:data:`nucl_coord`
@@ -512,11 +509,7 @@ Providers
 
        * :c:data:`ci_energy`
        * :c:data:`core_energy`
-       * :c:data:`core_energy_erf`
-       * :c:data:`hf_energy`
        * :c:data:`psi_energy_with_nucl_rep`
-       * :c:data:`pt2_e0_denominator`
-       * :c:data:`scf_energy`
 
  
 .. c:var:: slater_bragg_radii

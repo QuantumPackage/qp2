@@ -14,17 +14,16 @@ unset CCXX
 # Force GCC instead of ICC for dependencies
 export CC=gcc
 
+# Download submodules
+git submodule init
+git submodule update
 
 # /!\ When updating version, update also etc files
-
-EZFIO_TGZ="EZFIO-v2.0.3.tar.gz"
 BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
 BUBBLE_URL="https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz"
 DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
 BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
 F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
-GMP_URL="ftp://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
-IRPF90_URL="https://gitlab.com/scemama/irpf90/-/archive/v2.0.0/irpf90-v2.0.0.tar.gz"
 LIBCAP_URL="https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz"
 NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
 OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
@@ -126,13 +125,13 @@ source quantum_package.rc
 function fail() {
         echo "You can try to install it using the -i option."
         echo "Please refer to INSTALL.rst to install the missing dependencies."
-        exit 1
+        exit -1
 }
 
 function success() {
         echo ""
         echo "Configuration successful."
-        exit 1
+        exit 0
 }
 
 function download() {
@@ -178,15 +177,10 @@ function find_dir() {
 }
 
 
-# Extract EZFIO if needed
-EZFIO=$(find_dir "${QP_ROOT}"/external/ezfio)
-if [[ ${EZFIO} = $(not_found) ]] ; then
-            execute << EOF
-              cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file ${EZFIO_TGZ}
-              rm -rf ezfio
-              mv EZFIO ezfio || mv EZFIO-v*/ ezfio
-EOF
+# Install IRPF90 if needed
+IRPF90=$(find_exe irpf90)
+if [[ ${IRPF90} = $(not_found) ]] ; then
+        make -C ${QP_ROOT}/external/irpf90
 fi
 
 
@@ -211,7 +205,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp libcap bwrap ocaml ezfio docopt resultsFile bats"
+        PACKAGES="zlib ninja irpf90 zeromq f77zmq gmp libcap bwrap ocaml docopt resultsFile bats"
 fi
 
 
@@ -228,12 +222,10 @@ EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
-            download ${GMP_URL} "${QP_ROOT}"/external/gmp.tar.bz2
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --bzip2 --extract --file gmp.tar.bz2
-              rm gmp.tar.bz2
-              cd gmp*
+              tar --bzip2 --extract --file gmp-6.1.2.tar.bz2
+              cd gmp-6.1.2
               ./configure --prefix=$QP_ROOT && make -j 8
               make install
 EOF
@@ -246,7 +238,7 @@ EOF
               tar --gunzip --extract --file libcap.tar.gz
               rm libcap.tar.gz
               cd libcap-*/libcap
-              prefix=$QP_ROOT make install
+              prefix=$QP_ROOT make BUILD_GPERF=no install
 EOF
 
     elif [[ ${PACKAGE} = bwrap ]] ; then
@@ -263,13 +255,12 @@ EOF
 
     elif [[ ${PACKAGE} = irpf90 ]] ; then
 
-            # When changing version of irpf90, don't forget to update etc/irpf90.rc
-            download ${IRPF90_URL} "${QP_ROOT}"/external/irpf90.tar.gz
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file irpf90.tar.gz
               rm irpf90.tar.gz
-              cd irpf90-*
+              mv irpf90-* irpf90
+              cd irpf90
               make
 EOF
 
@@ -328,8 +319,8 @@ EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 #
-#                opam switch create ocaml-base-compiler.4.10.0
-                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
+#                opam switch create ocaml-base-compiler.4.11.1
+                opam init --verbose --yes --compiler=4.11.1 --disable-sandboxing
 
                 eval $(opam env)
                 opam install -y ${OCAML_PACKAGES}  || exit 1
@@ -348,9 +339,9 @@ EOF
 EOF
                 rm ${QP_ROOT}/external/opam_installer.sh
 #                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#                opam switch create ocaml-base-compiler.4.10.0     || exit 1
+#                opam switch create ocaml-base-compiler.4.11.1     || exit 1
 
-                opam init --verbose --yes --compiler=4.10.0 --disable-sandboxing
+                opam init --verbose --yes --compiler=4.11.1 --disable-sandboxing
                 eval $(opam env)
                 execute << EOF
                   opam install -y \${OCAML_PACKAGES}  || exit 1
@@ -410,6 +401,9 @@ EOF
               rm --recursive --force -- bats-core-1.1.0 \  "\${QP_ROOT}"/external/bats.tar.gz
 EOF
 
+    else
+        error "${PACKAGE} unknown."
+        fail
     fi
 
 
@@ -425,7 +419,7 @@ fi
 
 IRPF90=$(find_exe irpf90)
 if [[ ${IRPF90} = $(not_found) ]] ; then
-        error "IRPf90 (irpf90) is not installed."
+        error "IRPF90 (irpf90) is not installed."
         fail
 fi
 

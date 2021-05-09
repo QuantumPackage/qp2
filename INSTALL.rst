@@ -28,6 +28,12 @@ and need to be installed.
 When all dependencies have been installed, ( the :command:`configure` will tell you)
 source the :file:`quantum_package.rc` in order to load all environment variables and compile the |QP|.
 
+Now all the requirements are met, you can compile the programs using
+
+.. code:: bash
+
+   make
+
 
 Requirements
 ============
@@ -48,6 +54,7 @@ Requirements
 - `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
 - `libcap <https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git>`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
+- |pkg-config| : a tool which returns information about installed libraries
 
 
 When all the dependencies have been installed, go into the :file:`config`
@@ -79,7 +86,7 @@ The command is to be used as follows:
 
 .. code:: bash
 
-   ./configure --install <package>
+   ./configure --install=<package>
 
 The following packages are supported by the :command:`configure` installer:
 

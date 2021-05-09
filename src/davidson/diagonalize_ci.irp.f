@@ -40,6 +40,7 @@ END_PROVIDER
    double precision, allocatable  :: e_array(:)
    integer, allocatable           :: iorder(:)
    logical                        :: converged
+   logical                        :: do_csf
 
    PROVIDE threshold_davidson nthreads_davidson
    ! Guess values for the "N_states" states of the |CI| eigenvectors
@@ -55,11 +56,21 @@ END_PROVIDER
      enddo
    enddo
 
+!   Deactivated temporarily: bug in N_csf
+!   do_csf = s2_eig .and. only_expected_s2 .and. (expected_s2 == 0.d0)
+   do_csf = .False.
+
    if (diag_algorithm == "Davidson") then
 
-     call davidson_diag_HS2(psi_det,CI_eigenvectors, CI_s2, &
+     if (do_csf) then
+       call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
+         size(CI_eigenvectors,1),CI_electronic_energy,               &
+         N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+     else
+       call davidson_diag_HS2(psi_det,CI_eigenvectors, CI_s2, &
          size(CI_eigenvectors,1),CI_electronic_energy,               &
          N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+     endif
 
      integer :: N_states_diag_save
      N_states_diag_save = N_states_diag
@@ -71,25 +82,48 @@ END_PROVIDER
         N_states_diag  *= 2
         TOUCH N_states_diag
 
-        allocate (CI_electronic_energy_tmp (N_states_diag) )
-        allocate (CI_eigenvectors_tmp (N_det,N_states_diag) )
-        allocate (CI_s2_tmp (N_states_diag) )
+        if (do_csf) then
 
-        CI_electronic_energy_tmp(1:N_states_diag_save) = CI_electronic_energy(1:N_states_diag_save)
-        CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
-        CI_s2_tmp(1:N_states_diag_save) = CI_s2(1:N_states_diag_save)
+          allocate (CI_electronic_energy_tmp (N_states_diag) )
+          allocate (CI_eigenvectors_tmp (N_det,N_states_diag) )
 
-        call davidson_diag_HS2(psi_det,CI_eigenvectors_tmp, CI_s2_tmp, &
+          CI_electronic_energy_tmp(1:N_states_diag_save) = CI_electronic_energy(1:N_states_diag_save)
+          CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
+
+          call davidson_diag_H_csf(psi_det,CI_eigenvectors_tmp, &
+            size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
+            N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+
+          CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
+          CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
+
+          deallocate (CI_electronic_energy_tmp)
+          deallocate (CI_eigenvectors_tmp)
+
+        else
+
+          allocate (CI_electronic_energy_tmp (N_states_diag) )
+          allocate (CI_eigenvectors_tmp (N_det,N_states_diag) )
+          allocate (CI_s2_tmp (N_states_diag) )
+
+          CI_electronic_energy_tmp(1:N_states_diag_save) = CI_electronic_energy(1:N_states_diag_save)
+          CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
+          CI_s2_tmp(1:N_states_diag_save) = CI_s2(1:N_states_diag_save)
+
+          call davidson_diag_HS2(psi_det,CI_eigenvectors_tmp, CI_s2_tmp, &
             size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
             N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
 
-        CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
-        CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
-        CI_s2(1:N_states_diag_save) = CI_s2_tmp(1:N_states_diag_save)
+          CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
+          CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
+          CI_s2(1:N_states_diag_save) = CI_s2_tmp(1:N_states_diag_save)
 
-        deallocate (CI_electronic_energy_tmp)
-        deallocate (CI_eigenvectors_tmp)
-        deallocate (CI_s2_tmp)
+          deallocate (CI_electronic_energy_tmp)
+          deallocate (CI_eigenvectors_tmp)
+          deallocate (CI_s2_tmp)
+
+        endif
+
      enddo
      if (N_states_diag > N_states_diag_save) then
        N_states_diag = N_states_diag_save
@@ -110,6 +144,7 @@ END_PROVIDER
          H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
        enddo
        call lapack_diag(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
+       call nullify_small_elements(N_det,N_det,eigenvectors,size(eigenvectors,1),1.d-12)
        CI_electronic_energy(:) = 0.d0
        i_state = 0
        allocate (s2_eigvalues(N_det))

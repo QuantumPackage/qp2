@@ -15,7 +15,7 @@ END_PROVIDER
   pt2_n_tasks_max = min(pt2_n_tasks_max,1+N_det_generators/10000)
   call write_int(6,pt2_n_tasks_max,'pt2_n_tasks_max')
 
-  pt2_F(:) = int(sqrt(float(pt2_n_tasks_max)))
+  pt2_F(:) = max(int(sqrt(float(pt2_n_tasks_max))),1)
   do i=1,pt2_n_0(1+pt2_N_teeth/4)
     pt2_F(i) = pt2_n_tasks_max*pt2_min_parallel_tasks
   enddo
@@ -25,7 +25,6 @@ END_PROVIDER
   do i=1+pt2_n_0(pt2_N_teeth-pt2_N_teeth/10), N_det_generators
     pt2_F(i) = 1
   enddo
-
 
 END_PROVIDER
 
@@ -134,8 +133,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii selection_weight pseudo_sym
 
-  if (h0_type == 'SOP') then
-    PROVIDE psi_occ_pattern_hii det_to_occ_pattern
+  if (h0_type == 'CFG') then
+    PROVIDE psi_configuration_hii det_to_configuration
   endif
 
   if (N_det <= max(4,N_states) .or. pt2_N_teeth < 2) then
@@ -187,7 +186,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       if (zmq_put_ivector(zmq_to_qp_run_socket,1,'pt2_stoch_istate',pt2_stoch_istate,1) == -1) then
         stop 'Unable to put pt2_stoch_istate on ZMQ server'
       endif
-      if (zmq_put_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) then
+      if (zmq_put_dvector(zmq_to_qp_run_socket,1,'threshold_generators',(/threshold_generators/),1) == -1) then
         stop 'Unable to put threshold_generators on ZMQ server'
       endif
 
@@ -352,9 +351,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
     state_average_weight(:) = state_average_weight_save(:)
     TOUCH state_average_weight
+    call update_pt2_and_variance_weights(pt2_data, N_states)
   endif
 
-  call update_pt2_and_variance_weights(pt2_data, N_states)
 
 end subroutine
 

@@ -11,9 +11,8 @@ function run() {
   qp edit --check
   qp reset --mos
   qp set scf_utils n_it_scf_max 50
-  qp set ao_one_e_ints lin_dep_cutoff 1.e-50
   qp run scf
-#  qp set_frozen_core 
+#  qp set_frozen_core
   energy="$(ezfio get hartree_fock energy)"
   eq $energy $2 $thresh
 }
@@ -49,7 +48,7 @@ function run() {
 }
 
 @test "HBO" { # 0.805600 1.4543s
-  run  hbo.ezfio  -100.018582259096 
+  run  hbo.ezfio  -100.018582259096
 }
 
 @test "H2S" { # 1.655600 4.21402s
@@ -101,7 +100,7 @@ function run() {
 }
 
 @test "DHNO" { # 12.856700 16.5908s
-  run  dhno.ezfio  -130.427877782432 
+  run  dhno.ezfio  -130.427877782432
 }
 
 @test "NH3" { # 13.632200 34.7981s

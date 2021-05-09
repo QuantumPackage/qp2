@@ -76,7 +76,6 @@ Providers
 
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors_diag_h_mat`
 
  
 .. c:var:: elec_num_tab
@@ -108,5 +107,4 @@ Providers
 
        * :c:data:`diagonal_h_matrix_on_psi_det`
        * :c:data:`psi_det_hii`
-       * :c:data:`psi_selectors_diag_h_mat`
 

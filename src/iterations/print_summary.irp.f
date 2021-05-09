@@ -1,11 +1,11 @@
-subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_)
+subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s2_)
   use selection_types
   implicit none
   BEGIN_DOC
 ! Print the extrapolated energy in the output
   END_DOC
 
-  integer, intent(in)            :: n_det_, n_occ_pattern_, n_st
+  integer, intent(in)            :: n_det_, n_configuration_, n_st
   double precision, intent(in)   :: e_(n_st), s2_(n_st)
   type(pt2_type)  , intent(in)   :: pt2_data, pt2_data_err
   integer                        :: i, k
@@ -57,7 +57,10 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_occ_pattern_,n_st,s2_
   print *,  'N_det             = ', N_det_
   print *,  'N_states          = ', n_st
   if (s2_eig) then
-    print *,  'N_sop             = ', N_occ_pattern_
+    print *,  'N_cfg             = ', N_configuration_
+    if (only_expected_s2) then
+      print *,  'N_csf             = ', N_csf
+    endif
   endif
   print *,  ''
 

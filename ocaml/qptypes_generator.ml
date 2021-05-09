@@ -220,16 +220,16 @@ end = struct
   type t =
   | EN
   | HF
-  | SOP
+  | CFG
   [@@deriving sexp]
 
   let to_string = function
   | EN -> \"EN\"
   | HF -> \"HF\"
-  | SOP -> \"SOP\"
+  | CFG -> \"CFG\"
   let of_string  s =
     match (String.lowercase_ascii s) with
-    | \"sop\" -> SOP
+    | \"cfg\" -> CFG
     | \"en\"  -> EN
     | \"hf\"  -> HF
     | _ -> raise (Invalid_argument (\"Wrong Perturbation type : \"^s))

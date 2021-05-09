@@ -24,7 +24,7 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
 ! check whether position j is occupied
   if (iand(key_in(k,ispin),mask) /= 0_bit_kind) then
    key_in(k,ispin) = ibclr(key_in(k,ispin),j)
-  else 
+  else
    i_ok= -1
    return
   end if
@@ -35,7 +35,7 @@ subroutine do_single_excitation(key_in,i_hole,i_particle,ispin,i_ok)
   mask = ibset(0_bit_kind,j)
   if (iand(key_in(k,ispin),mask) == 0_bit_kind) then
    key_in(k,ispin) = ibset(key_in(k,ispin),j)
-  else 
+  else
    i_ok= -1
    return
   end if
@@ -99,11 +99,11 @@ logical function is_spin_flip_possible(key_in,i_flip,ispin)
   other_spin(1) = 2
   other_spin(2) = 1
   if(popcnt(iand(key_tmp(k,1),key_in(k,ispin))) == 1 .and. popcnt(iand(key_tmp(k,1),key_in(k,other_spin(ispin)))) == 0  )then
-    ! There is a spin "ispin" in the orbital i_flip   AND  There is no electron of opposit spin in the same orbital "i_flip"
+    ! There is a spin "ispin" in the orbital i_flip   AND
+    ! There is no electron of opposit spin in the same orbital "i_flip"
     is_spin_flip_possible = .True.
     return
   else
     return
   endif
 end
-

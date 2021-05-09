@@ -243,7 +243,7 @@ subroutine $subroutine_diexcOrg(key_in,key_mask,hole_1,particl_1,hole_2, particl
       ! Build array of the non-zero integrals of second excitation
       $filter_integrals
 
-        if (ispin == 1) then
+      if (ispin == 1) then
         integer                        :: jjj
 
         i=0

@@ -22,7 +22,7 @@ BEGIN_PROVIDER [ double precision, pt2_E0_denominator, (N_states) ]
      enddo
    else if (h0_type == "Barycentric") then
      pt2_E0_denominator(1:N_states) = barycentric_electronic_energy(1:N_states)
-   else if (h0_type == "SOP") then
+   else if (h0_type == "CFG") then
      pt2_E0_denominator(1:N_states) = psi_energy(1:N_states)
    else
      print *,  h0_type, ' not implemented'

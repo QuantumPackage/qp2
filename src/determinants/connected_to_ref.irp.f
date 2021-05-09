@@ -12,19 +12,6 @@ integer*8 function det_search_key(det,Nint)
 end
 
 
-integer*8 function occ_pattern_search_key(det,Nint)
-  use bitmasks
-  implicit none
-  BEGIN_DOC
-! Return an integer*8 corresponding to a determinant index for searching
-  END_DOC
-  integer, intent(in) :: Nint
-  integer(bit_kind), intent(in) :: det(Nint,2)
-  integer :: i
-  i = shiftr(elec_alpha_num, bit_kind_shift)+1
-  occ_pattern_search_key = int(shiftr(ior(det(i,1),det(i,2)),1)+sum(det),8)
-end
-
 
 
 logical function is_in_wavefunction(key,Nint)
@@ -45,6 +32,7 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
   use bitmasks
   BEGIN_DOC
 ! Returns the index of the determinant in the ``psi_det_sorted_bit`` array
+! using a binary search
   END_DOC
   implicit none
 
@@ -111,13 +99,11 @@ integer function get_index_in_psi_det_sorted_bit(key,Nint)
       enddo
       if (in_wavefunction) then
         get_index_in_psi_det_sorted_bit = i
-!        exit
         return
       endif
     endif
     i += 1
     if (i > N_det) then
-!      exit
       return
     endif
 

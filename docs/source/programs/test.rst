@@ -10,10 +10,9 @@ test
  
  
  
- Calls: 
+ Needs: 
  
  .. hlist:: 
     :columns: 3 
  
-    * :c:func:`two_e_integrals_index` 
-    * :c:func:`two_e_integrals_index_reverse` 
+    * :c:data:`mo_one_e_integrals` 

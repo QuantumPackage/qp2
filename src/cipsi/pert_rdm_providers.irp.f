@@ -71,9 +71,9 @@ subroutine fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fo
   call apply_holes(psi_det_generators(1,1,i_generator), s1, h1, s2, h2, mask, ok, N_int)
   E_shift = 0.d0
 
-  if (h0_type == 'SOP') then
-    j = det_to_occ_pattern(i_generator)
-    E_shift = psi_det_Hii(i_generator) - psi_occ_pattern_Hii(j)
+  if (h0_type == 'CFG') then
+    j = det_to_configuration(i_generator)
+    E_shift = psi_det_Hii(i_generator) - psi_configuration_Hii(j)
   endif
 
   do p1=1,mo_num

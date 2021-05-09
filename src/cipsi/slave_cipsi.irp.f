@@ -4,7 +4,7 @@ subroutine run_slave_cipsi
 ! Helper program for distributed parallelism
   END_DOC
 
-  call omp_set_nested(.false.)
+  call omp_set_max_active_levels(1)
   distributed_davidson = .False.
   read_wf = .False.
   SOFT_TOUCH read_wf distributed_davidson
@@ -100,7 +100,7 @@ subroutine run_slave_main
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector threshold_generators')
       IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',(/threshold_generators/),1) == -1) cycle
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector energy')
       IRP_ENDIF
@@ -122,7 +122,7 @@ subroutine run_slave_main
       IRP_ENDIF
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) cycle
       pt2_e0_denominator(1:N_states) = energy(1:N_states)
-      TOUCH pt2_e0_denominator state_average_weight threshold_generators selection_weight
+      TOUCH pt2_e0_denominator state_average_weight threshold_generators selection_weight psi_det psi_coef
 
       if (mpi_master) then
         print *,  'N_det', N_det
@@ -171,9 +171,9 @@ subroutine run_slave_main
       call write_double(6,(t1-t0),'Broadcast time')
 
       !---
-      call omp_set_nested(.True.)
+      call omp_set_max_active_levels(8)
       call davidson_slave_tcp(0)
-      call omp_set_nested(.False.)
+      call omp_set_max_active_levels(1)
       print *,  mpi_rank, ': Davidson done'
       !---
 
@@ -212,7 +212,7 @@ subroutine run_slave_main
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector threshold_generators')
       IRP_ENDIF
-      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',(/threshold_generators/),1) == -1) cycle
       IRP_IF MPI_DEBUG
         call mpi_print('zmq_get_dvector energy')
       IRP_ENDIF
@@ -230,7 +230,8 @@ subroutine run_slave_main
       IRP_ENDIF
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) cycle
       pt2_e0_denominator(1:N_states) = energy(1:N_states)
-      SOFT_TOUCH pt2_e0_denominator state_average_weight pt2_stoch_istate threshold_generators selection_weight
+      SOFT_TOUCH pt2_e0_denominator state_average_weight pt2_stoch_istate threshold_generators selection_weight psi_det psi_coef N_det_generators N_det_selectors
+
 
       call wall_time(t1)
       call write_double(6,(t1-t0),'Broadcast time')
@@ -296,11 +297,17 @@ subroutine run_slave_main
             print *,  'Number of threads', nproc_target
           endif
 
-          if (h0_type == 'SOP') then
-            PROVIDE det_to_occ_pattern
+          if (h0_type == 'CFG') then
+            PROVIDE det_to_configuration
           endif
 
-          PROVIDE global_selection_buffer 
+          PROVIDE global_selection_buffer pt2_N_teeth pt2_F N_det_generators
+          PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
+          PROVIDE psi_bilinear_matrix_rows psi_det_sorted_order psi_bilinear_matrix_order
+          PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
+          PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
+          PROVIDE psi_det_hii selection_weight pseudo_sym pt2_min_parallel_tasks
+
           if (mpi_master) then
             print *,  'Running PT2'
           endif

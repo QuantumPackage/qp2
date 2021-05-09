@@ -674,6 +674,19 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   ! of $\alpha$ and $\beta$ determinants
   END_DOC
   logical, intent(in)            :: truncate
+
+  call generate_all_alpha_beta_det_products
+  call update_wf_of_psi_bilinear_matrix(truncate)
+
+end
+
+subroutine update_wf_of_psi_bilinear_matrix(truncate)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Updates a wave function when psi_bilinear_matrix was modified
+  END_DOC
+  logical, intent(in)            :: truncate
   integer                        :: i,j,k
   integer(bit_kind)              :: tmp_det(N_int,2)
   integer                        :: idx
@@ -681,7 +694,6 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   double precision               :: norm(N_states)
   PROVIDE psi_bilinear_matrix
 
-  call generate_all_alpha_beta_det_products
   norm = 0.d0
   !$OMP PARALLEL DO DEFAULT(NONE)                                    &
       !$OMP PRIVATE(i,j,k,idx,tmp_det)                               &
@@ -717,7 +729,7 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
   enddo
   psi_det  = psi_det_sorted_bit
   psi_coef = psi_coef_sorted_bit
-  TOUCH psi_det psi_coef
+  TOUCH psi_det psi_coef N_det_beta_unique N_det_alpha_unique psi_det_beta_unique psi_det_alpha_unique
   psi_det  = psi_det_sorted
   psi_coef = psi_coef_sorted
   norm(1) = 0.d0
@@ -733,7 +745,7 @@ subroutine create_wf_of_psi_bilinear_matrix(truncate)
     endif
   enddo
   N_det = min(i,N_det)
-  SOFT_TOUCH psi_det psi_coef N_det
+  SOFT_TOUCH psi_det psi_coef N_det N_det_beta_unique N_det_alpha_unique psi_det_beta_unique psi_det_alpha_unique
 
 end
 
@@ -773,7 +785,7 @@ subroutine generate_all_alpha_beta_det_products
   deallocate(tmp_det)
   !$OMP END PARALLEL
   call copy_H_apply_buffer_to_wf
-  SOFT_TOUCH psi_det psi_coef N_det
+  SOFT_TOUCH psi_det psi_coef N_det N_det_beta_unique N_det_alpha_unique psi_det_alpha_unique psi_det_beta_unique
 end
 
 
@@ -1063,19 +1075,17 @@ subroutine get_all_spin_singles_and_doubles_1(buffer, idx, spindet, size_buffer,
   integer                        :: i
   include 'utils/constants.include.F'
   integer                        :: degree
-
+  integer                        :: add_double(0:64) = (/ 0, 0, 0, 0, 1, (0, i=1,60) /)
+  integer                        :: add_single(0:64) = (/ 0, 0, 1, 0, 0, (0, i=1,60) /)
 
   n_singles = 1
   n_doubles = 1
   do i=1,size_buffer
     degree =  popcnt(  xor( spindet, buffer(i) ) )
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
-    else if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
-    endif
+    doubles(n_doubles) = idx(i)
+    singles(n_singles) = idx(i)
+    n_doubles = n_doubles+add_double(degree)
+    n_singles = n_singles+add_single(degree)
   enddo
   n_singles = n_singles-1
   n_doubles = n_doubles-1
@@ -1101,15 +1111,14 @@ subroutine get_all_spin_singles_1(buffer, idx, spindet, size_buffer, singles, n_
   integer                        :: i
   integer(bit_kind)              :: v
   integer                        :: degree
+  integer                        :: add_single(0:64) = (/ 0, 0, 1, 0, 0, (0, i=1,60) /)
   include 'utils/constants.include.F'
 
   n_singles = 1
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    if (degree == 2) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
-    endif
+    singles(n_singles) = idx(i)
+    n_singles = n_singles+add_single(degree)
   enddo
   n_singles = n_singles-1
 
@@ -1133,14 +1142,13 @@ subroutine get_all_spin_doubles_1(buffer, idx, spindet, size_buffer, doubles, n_
   integer                        :: i
   include 'utils/constants.include.F'
   integer                        :: degree
+  integer                        :: add_double(0:64) = (/ 0, 0, 0, 0, 1, (0, i=1,60) /)
 
   n_doubles = 1
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
-    endif
+    doubles(n_doubles) = idx(i)
+    n_doubles = n_doubles+add_double(degree)
   enddo
   n_doubles = n_doubles-1
 
@@ -1181,16 +1189,10 @@ subroutine get_all_spin_singles_and_doubles_$N_int(buffer, idx, spindet, size_bu
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
     if ( degree == 4 ) then
@@ -1235,22 +1237,18 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 2).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
-      n_singles = n_singles+1
+    if ( degree /= 2 ) then
+      cycle
     endif
+
+    singles(n_singles) = idx(i)
+    n_singles = n_singles+1
 
   enddo
   n_singles = n_singles-1
@@ -1284,22 +1282,18 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
       xorvec(k) = xor( spindet(k), buffer(k,i) )
     enddo
 
-    if (xorvec(1) /= 0_8) then
-      degree = popcnt(xorvec(1))
-    else
-      degree = 0
-    endif
+    degree = 0
 
-    do k=2,$N_int
-      if ( (degree <= 4).and.(xorvec(k) /= 0_8) ) then
+    do k=1,$N_int
         degree = degree + popcnt(xorvec(k))
-      endif
     enddo
 
-    if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
-      n_doubles = n_doubles+1
+    if ( degree /= 4 ) then
+      cycle
     endif
+
+    doubles(n_doubles) = idx(i)
+    n_doubles = n_doubles+1
 
   enddo
 

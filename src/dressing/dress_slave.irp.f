@@ -50,14 +50,19 @@ subroutine run_wf
       ! Dress
       ! ---------
       if (zmq_get_psi(zmq_to_qp_run_socket,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'threshold_generators',threshold_generators,1) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'energy',energy,N_states) == -1) cycle
       if (zmq_get_N_det_generators (zmq_to_qp_run_socket, 1) == -1) cycle
       if (zmq_get_N_det_selectors(zmq_to_qp_run_socket, 1) == -1) cycle
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'state_average_weight',state_average_weight,N_states) == -1) cycle
+      if (zmq_get_dvector(zmq_to_qp_run_socket,1,'selection_weight',selection_weight,N_states) == -1) cycle
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'energy',energy,N_states) == -1) cycle
       if (zmq_get_dvector(zmq_to_qp_run_socket,1,'dress_stoch_istate',tmp,1) == -1) cycle
       dress_stoch_istate = int(tmp)
+      pt2_e0_denominator(1:N_states) = energy(1:N_states)
       psi_energy(1:N_states) = energy(1:N_states)
-      TOUCH psi_energy dress_stoch_istate state_average_weight
+      TOUCH pt2_e0_denominator dress_stoch_istate state_average_weight threshold_generators selection_weight
+
 
       PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
       PROVIDE psi_bilinear_matrix_rows psi_det_sorted_gen_order psi_bilinear_matrix_order

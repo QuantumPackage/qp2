@@ -10,5 +10,7 @@ program save_ortho_mos
   ! Thanks to the Lowdin orthonormalization, the new MOs are the most similar to the guess MOs.
   END_DOC
   call orthonormalize_mos
+  mo_label = 'Orthonormalized'
+  SOFT_TOUCH mo_label
   call save_mos
 end

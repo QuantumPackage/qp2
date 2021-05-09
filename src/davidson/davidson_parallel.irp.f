@@ -270,10 +270,12 @@ subroutine davidson_push_results_async_recv(zmq_socket_push,sending)
 ! Activate is zmq_socket_push is a REQ
 IRP_IF ZMQ_PUSH
 IRP_ELSE
-  character*(2) :: ok
+  character*(256) :: ok
   rc = f77_zmq_recv( zmq_socket_push, ok, 2, 0)
   if ((rc /= 2).and.(ok(1:2)/='ok')) then
     print *, irp_here, ': f77_zmq_recv( zmq_socket_push, ok, 2, 0)'
+    print *,  rc
+    print *,  ok
     stop -1
   endif
 IRP_ENDIF
@@ -329,6 +331,7 @@ end subroutine
 
 
 
+
 subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze, N_st)
   use f77_zmq
   implicit none
@@ -374,7 +377,6 @@ subroutine davidson_collector(zmq_to_qp_run_socket, zmq_socket_pull, v0, s0, sze
   deallocate(v_t,s_t)
 
 end subroutine
-
 
 
 
@@ -428,7 +430,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 
   integer :: istep, imin, imax, ishift, ipos
   integer, external :: add_task_to_taskserver
-  integer, parameter :: tasksize=10000
+  integer, parameter :: tasksize=20000
   character*(100000) :: task
   istep=1
   ishift=0
@@ -438,7 +440,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   ipos=1
   do imin=1,N_det,tasksize
     imax = min(N_det,imin-1+tasksize)
-    if (imin==1) then
+    if (imin<=N_det/2) then
       istep = 2
     else
       istep = 1
@@ -505,7 +507,9 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
     print *,  irp_here, ': Failed in zmq_set_running'
   endif
 
-  call omp_set_nested(.True.)
+
+  call omp_set_max_active_levels(5)
+
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
   if (ithread == 0 ) then
@@ -536,6 +540,10 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 !  N_states_diag = N_states_diag_save
 !  SOFT_TOUCH N_states_diag
 end
+
+
+
+
 
 
 BEGIN_PROVIDER [ integer, nthreads_davidson ]
