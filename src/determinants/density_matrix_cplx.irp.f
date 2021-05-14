@@ -309,6 +309,36 @@ END_PROVIDER
 END_PROVIDER
 
 
+ BEGIN_PROVIDER [ complex*16, one_e_dm_ao_alpha_complex_nst, (ao_num,ao_num,N_states) ]
+&BEGIN_PROVIDER [ complex*16, one_e_dm_ao_beta_complex_nst, (ao_num,ao_num,N_states) ]
+   BEGIN_DOC
+   ! One body density matrix on the |AO| basis : $\rho_{AO}(\alpha), \rho_{AO}(\beta)$.
+   END_DOC
+   implicit none
+   integer                        :: i,j,k,l,ist
+   complex*16               :: mo_alpha,mo_beta
+
+   one_e_dm_ao_alpha_complex_nst = (0.d0,0.d0)
+   one_e_dm_ao_beta_complex_nst = (0.d0,0.d0)
+   do ist = 1,N_states
+   do k = 1, ao_num
+     do l = 1, ao_num
+       do i = 1, mo_num
+         do j = 1, mo_num
+           mo_alpha = one_e_dm_mo_alpha_complex(j,i,ist)
+           mo_beta = one_e_dm_mo_beta_complex(j,i,ist)
+           !    if(dabs(dm_mo).le.1.d-10)cycle
+           one_e_dm_ao_alpha_complex_nst(l,k,ist) += dconjg(mo_coef_complex(k,i)) * mo_coef_complex(l,j) *  mo_alpha
+           one_e_dm_ao_beta_complex_nst(l,k,ist) += dconjg(mo_coef_complex(k,i)) * mo_coef_complex(l,j)  *  mo_beta
+         enddo
+       enddo
+     enddo
+   enddo
+   enddo
+
+END_PROVIDER
+
+
 !============================================!
 !                                            !
 !                    kpts                    !
