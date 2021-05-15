@@ -52,6 +52,8 @@
     - Added ~print_hamiltonian~
     - Added input for two body RDM
     - Added keyword ~save_wf_after_selection~
+    - Added a ~restore_symm~ flag to enforce the restoration of
+      symmetry in matrices
 
 *** Code
 
