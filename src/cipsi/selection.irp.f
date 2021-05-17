@@ -735,7 +735,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
-      integer :: iwork(3+5*(N_states+1)), info, k 
+      integer :: info, k , iwork(N_states+1)
 
       if (do_diag) then
         double precision :: pt2_matrix(N_states+1,N_states+1)
@@ -747,8 +747,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           pt2_matrix(N_states+1,istate) = mat(istate,p1,p2)
         enddo
 
-        call DSYEVD( 'V', 'U', N_states+1, pt2_matrix, N_states+1, eigvalues, &
-                     work, size(work), iwork, size(iwork), info )
+        call DSYEV( 'V', 'U', N_states+1, pt2_matrix, N_states+1, eigvalues, &
+                     work, size(work), info )
         if (info /= 0) then
           print *, 'error in '//irp_here
           stop -1
@@ -756,7 +756,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         pt2_matrix = dabs(pt2_matrix)
         iwork(1:N_states+1) = maxloc(pt2_matrix,DIM=1)
         do k=1,N_states
-          e_pert(iwork(k)) = eigvalues(k) - E0(iwork(k))
+          e_pert(k) = eigvalues(iwork(k)) - E0(k)
         enddo
       endif
 
