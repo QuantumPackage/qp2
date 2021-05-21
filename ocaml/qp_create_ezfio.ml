@@ -512,13 +512,14 @@ let run ?o b au c d m p cart xyz_file =
       let ao_num = List.length long_basis in
       Ezfio.set_ao_basis_ao_num ao_num;
       Ezfio.set_ao_basis_ao_basis b;
+      Ezfio.set_basis_basis b;
       let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
       and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
       and ao_power=
         let l = list_map (fun (x,_,_) -> x) long_basis in
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) l)@
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) l)@
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) l)
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.x)) l)@
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.y)) l)@
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.z)) l)
       in
       let ao_prim_num_max = List.fold_left (fun s x ->
         if x > s then x

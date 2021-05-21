@@ -2,7 +2,7 @@ open Qptypes
 open Qputils
 open Sexplib.Std
 
-type t = (Symmetry.Xyz.t * Gto.t * Nucl_number.t ) list [@@deriving sexp]
+type t = (Angmom.Xyz.t * Gto.t * Nucl_number.t ) list [@@deriving sexp]
 
 let of_basis b =
   let rec do_work accu = function
@@ -10,7 +10,7 @@ let of_basis b =
     | (g,n)::tail ->
         begin
           let new_accu =
-            Symmetry.Xyz.of_symmetry g.Gto.sym
+            Angmom.Xyz.of_symmetry g.Gto.sym
             |> List.rev_map (fun x-> (x,g,n))
           in
           do_work (new_accu@accu) tail
@@ -25,7 +25,7 @@ let to_basis b =
   | [] -> List.rev accu
   | (s,g,n)::tail ->
     let first_sym =
-      Symmetry.Xyz.of_symmetry g.Gto.sym
+      Angmom.Xyz.of_symmetry g.Gto.sym
       |> List.hd
     in
     let new_accu =
@@ -42,7 +42,7 @@ let to_basis b =
 let to_string b =
   let middle = list_map (fun (x,y,z) ->
      "( "^((string_of_int (Nucl_number.to_int z)))^", "^
-     (Symmetry.Xyz.to_string x)^", "^(Gto.to_string y)
+     (Angmom.Xyz.to_string x)^", "^(Gto.to_string y)
      ^" )"
   ) b
   |> String.concat ",\n"
