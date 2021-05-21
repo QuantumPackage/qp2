@@ -56,39 +56,6 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_coef_normalization_libint_factor, (ao_num) ]
-  implicit none
-  BEGIN_DOC
-  ! |AO| normalization for interfacing with libint
-  END_DOC
-  double precision               :: norm,overlap_x,overlap_y,overlap_z,C_A(3), c
-  integer                        :: l, powA(3), nz
-  integer                        :: i,j,k
-  nz=100
-  C_A(1) = 0.d0
-  C_A(2) = 0.d0
-  C_A(3) = 0.d0
-
-  do i=1,ao_num
-    powA(1) = ao_l(i)
-    powA(2) = 0
-    powA(3) = 0
-
-    ! Normalization of the contracted basis functions
-    norm = 0.d0
-    do j=1,ao_prim_num(i)
-     do k=1,ao_prim_num(i)
-      call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
-      norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
-     enddo
-    enddo
-    ao_coef_normalization_libint_factor(i) = ao_coef_normalization_factor(i) * sqrt(norm)
-
-  enddo
-
-END_PROVIDER
-
-
  BEGIN_PROVIDER [ double precision, ao_coef_normalized_ordered, (ao_num,ao_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_expo_ordered, (ao_num,ao_prim_num_max) ]
   implicit none

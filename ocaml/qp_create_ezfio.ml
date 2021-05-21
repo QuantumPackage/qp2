@@ -562,6 +562,57 @@ let run ?o b au c d m p cart xyz_file =
       and ao_expo = create_expo_coef `Expos
       in
       let () =
+        let shell_num = List.length basis in
+        let lc : (GaussianPrimitive.t * Qptypes.AO_coef.t) list list =
+             list_map ( fun (g,_) -> g.Gto.lc ) basis
+        in
+        let ang_mom =
+          list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  -> 
+            let x, _ = List.hd l in
+            Angmom.to_l x.GaussianPrimitive.sym |> Qptypes.Positive_int.to_int
+             ) lc
+        in
+        let expo =
+          list_map (fun l -> list_map (fun (x,_) -> Qptypes.AO_expo.to_float x.GaussianPrimitive.expo) l ) lc
+          |> List.concat
+        in
+        let coef =
+          list_map (fun l -> 
+            list_map (fun (_,x) -> Qptypes.AO_coef.to_float x) l
+             ) lc
+          |> List.concat
+        in
+        let shell_prim_num =
+          list_map List.length  lc
+        in
+        let shell_prim_idx =
+          let rec aux count accu = function
+          | [] -> List.rev accu
+          | l::rest ->
+            let newcount = count+(List.length l) in
+            aux newcount (count::accu) rest
+          in
+          aux 1 [] lc
+        in
+        let prim_num = List.length coef in
+        Ezfio.set_basis_typ "Gaussian";
+        Ezfio.set_basis_shell_num shell_num;
+        Ezfio.set_basis_prim_num prim_num ;
+        Ezfio.set_basis_shell_prim_num  (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
+        Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
+        Ezfio.set_basis_shell_prim_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_idx) ;
+        Ezfio.set_basis_shell_nucl (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |]
+          ~data:(list_map (fun (_,n) -> Nucl_number.to_int n) basis) ) ;
+        Ezfio.set_basis_shell_prim_coef (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
+        Ezfio.set_basis_shell_prim_expo (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
+
+
         Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
         Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
