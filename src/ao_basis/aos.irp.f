@@ -6,6 +6,23 @@ BEGIN_PROVIDER [ integer, ao_prim_num_max ]
  ao_prim_num_max = maxval(ao_prim_num)
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=0
+ do i=1,shell_num
+   n = shell_ang_mom(i)+1
+   do j=1,(n*(n+1))/2
+     k = k+1
+     ao_shell(k) = i
+   enddo
+ enddo
+
+END_PROVIDER
+
  BEGIN_PROVIDER [ double precision, ao_coef_normalized, (ao_num,ao_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_coef_normalization_factor, (ao_num) ]
   implicit none
@@ -30,7 +47,8 @@ END_PROVIDER
     ! Normalization of the primitives
     if (primitives_normalized) then
       do j=1,ao_prim_num(i)
-        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j),powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
+        call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
+           powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
         ao_coef_normalized(i,j) = ao_coef(i,j)/sqrt(norm)
       enddo
     else
@@ -198,38 +216,11 @@ END_PROVIDER
  END_DOC
  do i = 1, nucl_num
   Nucl_num_shell_Aos(i) = 0
-
   do j = 1, Nucl_N_Aos(i)
-   if(ao_l(Nucl_Aos(i,j))==0)then
-   ! S type function
-   Nucl_num_shell_Aos(i)+=1
-   Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
-   elseif(ao_l(Nucl_Aos(i,j))==1)then
-   ! P type function
-    if(ao_power(Nucl_Aos(i,j),1)==1)then
+    if (ao_power(Nucl_Aos(i,j),1) == ao_l(Nucl_Aos(i,j))) then
      Nucl_num_shell_Aos(i)+=1
      Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
     endif
-   elseif(ao_l(Nucl_Aos(i,j))==2)then
-   ! D type function
-    if(ao_power(Nucl_Aos(i,j),1)==2)then
-     Nucl_num_shell_Aos(i)+=1
-     Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
-    endif
-   elseif(ao_l(Nucl_Aos(i,j))==3)then
-   ! F type function
-    if(ao_power(Nucl_Aos(i,j),1)==3)then
-     Nucl_num_shell_Aos(i)+=1
-     Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
-    endif
-   elseif(ao_l(Nucl_Aos(i,j))==4)then
-   ! G type function
-    if(ao_power(Nucl_Aos(i,j),1)==4)then
-     Nucl_num_shell_Aos(i)+=1
-     Nucl_list_shell_Aos(i,Nucl_num_shell_Aos(i))=Nucl_Aos(i,j)
-    endif
-   endif
-
   enddo
  enddo
 
