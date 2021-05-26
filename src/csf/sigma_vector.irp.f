@@ -28,25 +28,22 @@
   detDimperBF = 0
   MS = elec_alpha_num-elec_beta_num
   ! number of cfgs = number of dets for 0 somos
-  n_CSF = cfg_seniority_index(0)-1
+  n_CSF = 0
   ncfgprev = cfg_seniority_index(0)
-  do i = 0-iand(MS,1)+2, NSOMOMax,2
-     if(cfg_seniority_index(i) .EQ. -1)then
-        ncfgpersomo = N_configuration + 1
-     else
-        ncfgpersomo = cfg_seniority_index(i)
-     endif
-  ncfg = ncfgpersomo - ncfgprev
-  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  if (i > 2) then
-    dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-  else
-    dimcsfpercfg = 1
-  endif
-  n_CSF += ncfg * dimcsfpercfg
-  !if(cfg_seniority_index(i+2) == -1) EXIT
-  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
-  ncfgprev = cfg_seniority_index(i)
+  do i = iand(MS,1), NSOMOMax-2,2
+    if(cfg_seniority_index(i+2) .EQ. -1) then
+      ncfgpersomo = N_configuration + 1
+    else
+      ncfgpersomo = cfg_seniority_index(i+2)
+    endif
+    ncfg = ncfgpersomo - ncfgprev
+    if(iand(MS,1) .EQ. 0) then
+      dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+    else
+      dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+    endif
+    n_CSF += ncfg * dimcsfpercfg
+    ncfgprev = cfg_seniority_index(i+2)
   enddo
   END_PROVIDER
 
