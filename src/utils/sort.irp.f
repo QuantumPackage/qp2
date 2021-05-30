@@ -57,7 +57,7 @@ BEGIN_TEMPLATE
   $type                          :: c, tmp
   integer                        :: itmp
   integer                        :: i, j
- 
+
   if(isize<2)return
 
   c = x( shiftr(first+last,1) )
@@ -262,6 +262,104 @@ SUBST [ X, type ]
  i2 ; integer*2 ;;
 END_TEMPLATE
 
+IRP_IF INTEL
+
+ subroutine sort(x,iorder,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  real ,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  call ippsSortIndexAscend_32f_I(x, iorder, isize)
+  iorder(:) = iorder(:)+1
+ end subroutine sort
+
+ subroutine dsort(x,iorder,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  real(8) ,intent(inout)         :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  call ippsSortIndexAscend_64f_I(x, iorder, isize)
+  iorder(:) = iorder(:)+1
+ end subroutine dsort
+
+ subroutine isort(x,iorder,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  integer ,intent(inout)         :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  integer, allocatable :: iorder1(:)
+  allocate(iorder1(isize*2))
+  n=4
+  call ippsSortRadixIndexAscend_32s(x, n, iorder, isize, iorder1)
+  iorder(1:isize) = iorder(1:isize)+1
+  deallocate(iorder1)
+  call iset_order(x,iorder,isize)
+ end subroutine isort
+
+ subroutine isort_noidx(x,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  integer ,intent(inout)         :: x(isize)
+  integer, allocatable :: iorder1(:)
+  integer :: n
+  call ippsSortRadixIndexGetBufferSize(isize, 11, n)
+  n = n/4
+  allocate(iorder1(n))
+  call ippsSortRadixAscend_32s_I(x, isize, iorder1)
+  deallocate(iorder1)
+ end subroutine isort_noidx
+
+
+BEGIN_TEMPLATE
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+!  call $Xradix_sort(x,iorder,isize,-1)
+  call quick_$Xsort(x,iorder,isize)
+ end subroutine $Xsort
+
+SUBST [ X, type ]
+ i8 ; integer*8 ;;
+ i2 ; integer*2 ;;
+END_TEMPLATE
+
+IRP_ELSE
+
 BEGIN_TEMPLATE
  subroutine $Xsort(x,iorder,isize)
   implicit none
@@ -289,9 +387,9 @@ BEGIN_TEMPLATE
   endif
  end subroutine $Xsort
 
-SUBST [ X, type, Y ]
-   ; real ; i ;;
- d ; double precision ; i8 ;;
+SUBST [ X, type ]
+   ; real ;;
+ d ; double precision ;;
 END_TEMPLATE
 
 BEGIN_TEMPLATE
@@ -315,6 +413,22 @@ SUBST [ X, type ]
  i8 ; integer*8 ;;
  i2 ; integer*2 ;;
 END_TEMPLATE
+
+ subroutine isort_noidx(x,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer, allocatable :: iorder
+  allocate(iorder)
+  iorder=0
+  call $Xradix_sort(x,iorder,isize,-1)
+  deallocate(iorder)
+ end subroutine $Xsort
+IRP_ENDIF
+
 
 BEGIN_TEMPLATE
  subroutine $Xset_order(x,iorder,isize)
@@ -413,10 +527,15 @@ SUBST [ X, type ]
  i2; integer*2 ;;
 END_TEMPLATE
 
+
 BEGIN_TEMPLATE
 
- recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
+recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
+IRP_IF INTEL
+  use intel
+IRP_ENDIF
   implicit none
+
   BEGIN_DOC
   ! Sort integer array x(isize) using the radix sort algorithm.
   ! iorder in input should be (1,2,3,...,isize), and in output
@@ -447,6 +566,15 @@ BEGIN_TEMPLATE
       print *,  irp_here, ': Unable to allocate arrays'
       stop
     endif
+
+    IRP_IF INTEL
+    if ( ($type == 4).and.($integer_size == 32).and.($is_big == .False.) ) then
+        $intel
+        iorder(:) = iorder(:)+1
+        return
+    endif
+    IRP_ENDIF
+
 
     i1=1_$int_type
     i2=1_$int_type
@@ -637,12 +765,13 @@ BEGIN_TEMPLATE
 
  end
 
-SUBST [ X, type, integer_size, is_big, big, int_type ]
- i  ; 4 ; 32 ; .False. ;      ; 4 ;;
- i8 ; 8 ; 64 ; .False. ;      ; 4 ;;
- i2 ; 2 ; 16 ; .False. ;      ; 4 ;;
- i  ; 4 ; 32 ; .True.  ; _big ; 8 ;;
- i8 ; 8 ; 64 ; .True.  ; _big ; 8 ;;
+SUBST [ X, type, integer_size, is_big, big, int_type, intel ]
+ i  ; 4 ; 32 ; .False. ;      ; 4 ; call ippsSortRadixIndexAscend_32s(x, 4, iorder, isize, iorder1) ;;
+ i8 ; 8 ; 64 ; .False. ;      ; 4 ; ;;
+ i2 ; 2 ; 16 ; .False. ;      ; 4 ; ;;
+ i  ; 4 ; 32 ; .True.  ; _big ; 8 ; ;;
+ i8 ; 8 ; 64 ; .True.  ; _big ; 8 ; ;;
 END_TEMPLATE
+
 
 

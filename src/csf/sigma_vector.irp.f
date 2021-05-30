@@ -1,54 +1,62 @@
-  BEGIN_PROVIDER [ integer, NSOMOMax]
- &BEGIN_PROVIDER [ integer, NCSFMax]
- &BEGIN_PROVIDER [ integer*8, NMO]
- &BEGIN_PROVIDER [ integer, NBFMax]
- &BEGIN_PROVIDER [ integer, n_CSF]
- &BEGIN_PROVIDER [ integer, maxDetDimPerBF]
-  implicit none
-  BEGIN_DOC
-  ! Documentation for NSOMOMax
-  ! The maximum number of SOMOs for the current calculation.
-  ! required for the calculation of prototype arrays.
-  END_DOC
-  NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
-  ! Note that here we need NSOMOMax + 2 sizes
-  NCSFMax = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2)-binom(NSOMOMax,((NSOMOMax+1)/2)+1)))) ! TODO: NCSFs for MS=0
-  NBFMax = NCSFMax
-  maxDetDimPerBF = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2))))
-  NMO = n_act_orb
-  integer i,j,k,l
-  integer startdet,enddet
-  integer ncfg,ncfgprev
-  integer NSOMO
-  integer dimcsfpercfg
-  integer detDimperBF
-  real*8 :: coeff
-  integer MS
-  integer ncfgpersomo
-  detDimperBF = 0
-  MS = elec_alpha_num-elec_beta_num
-  ! number of cfgs = number of dets for 0 somos
-  n_CSF = cfg_seniority_index(0)-1
-  ncfgprev = cfg_seniority_index(0)
-  do i = 0-iand(MS,1)+2, NSOMOMax,2
-     if(cfg_seniority_index(i) .EQ. -1)then
-        ncfgpersomo = N_configuration + 1
+ BEGIN_PROVIDER [ integer, NSOMOMax]
+&BEGIN_PROVIDER [ integer, NCSFMax]
+&BEGIN_PROVIDER [ integer*8, NMO]
+&BEGIN_PROVIDER [ integer, NBFMax]
+&BEGIN_PROVIDER [ integer, n_CSF]
+&BEGIN_PROVIDER [ integer, maxDetDimPerBF]
+   implicit none
+
+   BEGIN_DOC
+ ! The maximum number of SOMOs for the current calculation.
+ ! required for the calculation of prototype arrays.
+   END_DOC
+
+   integer                        :: i,j,k,l
+   integer                        :: startdet,enddet
+   integer                        :: ncfg,ncfgprev
+   integer                        :: NSOMO
+   integer                        :: dimcsfpercfg
+   integer                        :: detDimperBF
+   real*8                         :: coeff
+   integer                        :: MS
+   integer                        :: ncfgpersomo
+   double precision               :: bin_1, bin_2
+
+   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
+
+   bin_1 = binom(NSOMOMax, (NSOMOMax+1)/2)
+   bin_2 = binom(NSOMOMax,((NSOMOMax+1)/2)+1)
+
+   ! Note that here we need NSOMOMax + 2 sizes
+   NCSFMax = max(1,int(bin_1-bin_2))
+   NBFMax = NCSFMax
+   maxDetDimPerBF = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2))))
+   NMO = n_act_orb
+
+   detDimperBF = 0
+   MS = elec_alpha_num-elec_beta_num
+
+   ! number of cfgs = number of dets for 0 somos
+   n_CSF = cfg_seniority_index(0)-1
+   ncfgprev = cfg_seniority_index(0)
+   do i = 0-iand(MS,1)+2, cfg_nsomo_max,2
+     if(cfg_seniority_index(i) == -1)then
+       ncfgpersomo = N_configuration + 1
      else
-        ncfgpersomo = cfg_seniority_index(i)
+       ncfgpersomo = cfg_seniority_index(i)
      endif
-  ncfg = ncfgpersomo - ncfgprev
-  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  if (i > 2) then
-    dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-  else
-    dimcsfpercfg = 1
-  endif
-  n_CSF += ncfg * dimcsfpercfg
-  !if(cfg_seniority_index(i+2) == -1) EXIT
-  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
-  ncfgprev = cfg_seniority_index(i)
-  enddo
-  END_PROVIDER
+     ncfg = ncfgpersomo - ncfgprev
+     if (i > 2) then
+       bin_1 = binom(i-2, (i-2+1)/2)
+       bin_2 = binom(i-2,((i-2+1)/2)+1)
+       dimcsfpercfg = max(1,int(bin_1-bin_2))
+     else
+       dimcsfpercfg = 1
+     endif
+     n_CSF += ncfg * dimcsfpercfg
+     ncfgprev = cfg_seniority_index(i)
+   enddo
+END_PROVIDER
 
 
 subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
