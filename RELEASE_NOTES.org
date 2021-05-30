@@ -29,7 +29,7 @@
   - Disk-based Davidson when too much memory is required
   - Fixed bug in DIIS
   - Fixed bug in molden (Au -> Angs)
-    
+
 *** User interface
 
     - Added ~qp_basis~ script to install a basis set from the ~bse~
@@ -38,7 +38,7 @@
       ~psi_coef_qp_edit~ to accelerate the opening of qp_edit with
       large wave functions
     - Removed ~etc/ninja.rc~
-    - Added flag to specify if the AOs are normalized 
+    - Added flag to specify if the AOs are normalized
     - Added flag to specify if the primitive Gaussians are normalized
     - Added ~lin_dep_cutoff~, the cutoff for linear dependencies
     - Davidson convergence threshold can be adapted from PT2
@@ -51,7 +51,9 @@
     - Added ~print_energy~
     - Added ~print_hamiltonian~
     - Added input for two body RDM
-    - Added keyword ~save_wf_after_selection~ 
+    - Added keyword ~save_wf_after_selection~
+    - Added a ~restore_symm~ flag to enforce the restoration of
+      symmetry in matrices
 
 *** Code
 
@@ -75,11 +77,11 @@
     - Added ~V_ne_psi_energy~
     - Added ~h_core_guess~ routine
     - Fixed Laplacians in real space (indices)
-    - 
+    - Added LIB file to add extra libs in plugin
 
     ao_one_e_integral_zero
     banned_excitations
-      
 
 
-    
+
+
