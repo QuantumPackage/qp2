@@ -420,13 +420,16 @@ END_TEMPLATE
   ! Sort array x(isize).
   END_DOC
   integer,intent(in)             :: isize
-  $type,intent(inout)            :: x(isize)
-  integer, allocatable :: iorder
-  allocate(iorder)
-  iorder=0
-  call $Xradix_sort(x,iorder,isize,-1)
+  integer,intent(inout)            :: x(isize)
+  integer, allocatable :: iorder(:)
+  integer :: i
+  allocate(iorder(isize))
+  do i=1,isize
+   iorder(i)=i
+  enddo
+  call iradix_sort(x,iorder,isize,-1)
   deallocate(iorder)
- end subroutine $Xsort
+ end subroutine isort_noidx
 IRP_ENDIF
 
 
