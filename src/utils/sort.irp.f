@@ -38,15 +38,7 @@ BEGIN_TEMPLATE
   $type,intent(inout)            :: x(isize)
   integer,intent(inout)          :: iorder(isize)
   integer, external              :: omp_get_num_threads
-  if (omp_get_num_threads() == 1) then
-    !$OMP PARALLEL DEFAULT(SHARED)
-    !$OMP SINGLE
-    call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
-    !$OMP END SINGLE
-    !$OMP END PARALLEL
-  else
-    call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
-  endif
+  call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
  end
 
  recursive subroutine rec_$X_quicksort(x, iorder, isize, first, last, level)
@@ -89,16 +81,11 @@ BEGIN_TEMPLATE
     endif
   else
     if (first < i-1) then
-      !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(isize,first,i,level)
       call rec_$X_quicksort(x, iorder, isize, first, i-1,level/2)
-      !$OMP END TASK
     endif
     if (j+1 < last) then
-      !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(isize,last,j,level)
       call rec_$X_quicksort(x, iorder, isize, j+1, last,level/2)
-      !$OMP END TASK
     endif
-    !$OMP TASKWAIT
   endif
  end
 
@@ -716,23 +703,13 @@ recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
     endif
 
 
-!   !$OMP PARALLEL DEFAULT(SHARED) if (isize > 1000000)
-!   !$OMP SINGLE
     if (i3>1_$int_type) then
-!     !$OMP TASK FIRSTPRIVATE(iradix_new,i3) SHARED(x,iorder) if(i3 > 1000000)
       call $Xradix_sort$big(x,iorder,i3,iradix_new-1)
-!     !$OMP END TASK
     endif
 
     if (isize-i3>1_$int_type) then
-!     !$OMP TASK FIRSTPRIVATE(iradix_new,i3) SHARED(x,iorder) if(isize-i3 > 1000000)
       call $Xradix_sort$big(x(i3+1_$int_type),iorder(i3+1_$int_type),isize-i3,iradix_new-1)
-!     !$OMP END TASK
     endif
-
-!   !$OMP TASKWAIT
-!   !$OMP END SINGLE
-!   !$OMP END PARALLEL
 
     return
   endif
@@ -788,16 +765,11 @@ recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
 
 
   if (i1>1_$int_type) then
-    !$OMP TASK FIRSTPRIVATE(i0,iradix,i1) SHARED(x,iorder) if(i1 >1000000)
     call $Xradix_sort$big(x(i0+1_$int_type),iorder(i0+1_$int_type),i1,iradix-1)
-    !$OMP END TASK
   endif
   if (i0>1) then
-    !$OMP TASK FIRSTPRIVATE(i0,iradix) SHARED(x,iorder) if(i0 >1000000)
     call $Xradix_sort$big(x,iorder,i0,iradix-1)
-    !$OMP END TASK
   endif
-  !$OMP TASKWAIT
 
  end
 
