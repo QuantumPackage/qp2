@@ -253,12 +253,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   deallocate(exc_degree)
   nmax=k-1
 
-  allocate(iorder(nmax))
-  do i=1,nmax
-    iorder(i) = i
-  enddo
-  call isort(indices,iorder,nmax)
-  deallocate(iorder)
+  call isort_noidx(indices,nmax)
 
   ! Start with 32 elements. Size will double along with the filtering.
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
@@ -676,33 +671,47 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       logical :: do_cycle
       if (excitation_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+        if (excitation_ref == 1) then
+          call get_excitation_degree(HF_bitmask,det(1,1),degree,N_int)
           do_cycle = do_cycle .and. (degree > excitation_max)
-        enddo
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
 
 
       if (excitation_alpha_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_alpha_max)
-        enddo
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,1),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree_spin(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_alpha_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
 
 
       if (excitation_beta_max >= 0) then
         do_cycle = .True.
-        do k=1,N_dominant_dets_of_cfgs
-          call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-          do_cycle = do_cycle .and. (degree > excitation_beta_max)
-        enddo
+        if (excitation_ref == 1) then
+          call get_excitation_degree_spin(HF_bitmask,det(1,2),degree,N_int)
+          do_cycle = do_cycle .and. (degree > excitation_max)
+        else if (excitation_ref == 2) then
+          do k=1,N_dominant_dets_of_cfgs
+            call get_excitation_degree(dominant_dets_of_cfgs(1,2,k),det(1,2),degree,N_int)
+            do_cycle = do_cycle .and. (degree > excitation_beta_max)
+          enddo
+        endif
         if (do_cycle) cycle
       endif
-
 
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
@@ -735,7 +744,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       double precision :: eigvalues(N_states+1)
       double precision :: work(1+6*(N_states+1)+2*(N_states+1)**2)
-      integer :: iwork(3+5*(N_states+1)), info, k 
+      integer :: info, k , iwork(N_states+1)
 
       if (do_diag) then
         double precision :: pt2_matrix(N_states+1,N_states+1)
@@ -747,8 +756,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           pt2_matrix(N_states+1,istate) = mat(istate,p1,p2)
         enddo
 
-        call DSYEVD( 'V', 'U', N_states+1, pt2_matrix, N_states+1, eigvalues, &
-                     work, size(work), iwork, size(iwork), info )
+        call DSYEV( 'V', 'U', N_states+1, pt2_matrix, N_states+1, eigvalues, &
+                     work, size(work), info )
         if (info /= 0) then
           print *, 'error in '//irp_here
           stop -1
@@ -756,7 +765,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         pt2_matrix = dabs(pt2_matrix)
         iwork(1:N_states+1) = maxloc(pt2_matrix,DIM=1)
         do k=1,N_states
-          e_pert(iwork(k)) = eigvalues(k) - E0(iwork(k))
+          e_pert(k) = eigvalues(iwork(k)) - E0(k)
         enddo
       endif
 

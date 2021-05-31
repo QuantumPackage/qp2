@@ -108,6 +108,17 @@ def ninja_create_env_variable(pwd_config_file):
     lib_usr = get_compilation_option(pwd_config_file, "LIB")
 
     str_lib = " ".join([lib_lapack, EZFIO_LIB, ZMQ_LIB, LIB, lib_usr])
+
+    # Read all LIB files in modules
+    libfile = "LIB"
+    try:
+        content = ""
+        with open(libfile,'r') as f:
+            content = f.read()
+            str_lib += " "+content
+    except IOError:
+        pass
+
     l_string.append("LIB = {0} ".format(str_lib))
 
     l_string.append("")

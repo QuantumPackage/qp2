@@ -1,9 +1,9 @@
-  BEGIN_PROVIDER [ integer, NSOMOMax]
- &BEGIN_PROVIDER [ integer, NCSFMax]
- &BEGIN_PROVIDER [ integer*8, NMO]
- &BEGIN_PROVIDER [ integer, NBFMax]
- &BEGIN_PROVIDER [ integer, n_CSF]
- &BEGIN_PROVIDER [ integer, maxDetDimPerBF]
+ BEGIN_PROVIDER [ integer, NSOMOMax]
+&BEGIN_PROVIDER [ integer, NCSFMax]
+&BEGIN_PROVIDER [ integer*8, NMO]
+&BEGIN_PROVIDER [ integer, NBFMax]
+&BEGIN_PROVIDER [ integer, n_CSF]
+&BEGIN_PROVIDER [ integer, maxDetDimPerBF]
   implicit none
   BEGIN_DOC
   ! Documentation for NSOMOMax
@@ -45,7 +45,7 @@
     n_CSF += ncfg * dimcsfpercfg
     ncfgprev = cfg_seniority_index(i+2)
   enddo
-  END_PROVIDER
+END_PROVIDER
 
 
 subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
