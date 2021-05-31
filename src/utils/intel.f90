@@ -17,15 +17,15 @@ module intel
   interface
     subroutine ippsSortAscend_64s_I(pSrc, len) bind(C, name='ippsSortAscend_64s_I')
      use  iso_c_binding
-     integer*8, intent(in), value :: len
-     integer, intent(inout) :: pSrc(len)
+     integer, intent(in), value :: len
+     integer*8, intent(inout) :: pSrc(len)
     end
   end interface
   interface
     subroutine ippsSortAscend_64f_I(pSrc, len) bind(C, name='ippsSortAscend_64f_I')
      use  iso_c_binding
-     double precision, intent(in), value :: len
-     real, intent(inout) :: pSrc(len)
+     integer, intent(in), value :: len
+     double precision, intent(inout) :: pSrc(len)
     end
   end interface
 

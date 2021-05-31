@@ -310,10 +310,71 @@ BEGIN_TEMPLATE
 
 SUBST [ X, type, ityp, n, ippsz ]
    ; real ; 32f ; 4 ; 13 ;;
- d ; double precision ; 64f ; 8 ; 19;;
  i ; integer ; 32s ; 4 ; 11 ;;
- i8 ; integer*8 ; 64s ; 8 ; 17;;
  i2 ; integer*2 ; 16s ; 2 ; 7 ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  if (isize < 2) then
+    return
+  endif
+!  call sorted_$Xnumber(x,isize,n)
+!  if (isize == n) then
+!    return
+!  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+!    call heap_$Xsort(x,iorder,isize)
+    call quick_$Xsort(x,iorder,isize)
+  endif
+ end subroutine $Xsort
+
+SUBST [ X, type ]
+ d ; double precision ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  if (isize < 2) then
+    return
+  endif
+  call sorted_$Xnumber(x,isize,n)
+  if (isize == n) then
+    return
+  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+    call $Xradix_sort(x,iorder,isize,-1)
+  endif
+ end subroutine $Xsort
+
+SUBST [ X, type ]
+ i8 ; integer*8 ;;
 END_TEMPLATE
 
 !---------------------- END INTEL
