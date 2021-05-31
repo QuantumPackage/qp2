@@ -320,6 +320,34 @@ END_TEMPLATE
 IRP_ELSE
 !---------------------- NON-INTEL
 BEGIN_TEMPLATE
+
+ subroutine $Xsort_noidx(x,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer, allocatable           :: iorder(:)
+  integer                        :: i
+  allocate(iorder(isize))
+  do i=1,isize
+   iorder(i)=i
+  enddo
+  call $Xsort(x,iorder,isize)
+  deallocate(iorder)
+ end subroutine $Xsort_noidx
+
+SUBST [ X, type ]
+   ; real ;;
+ d ; double precision ;;
+ i ; integer ;;
+ i8 ; integer*8 ;;
+ i2 ; integer*2 ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
  subroutine $Xsort(x,iorder,isize)
   implicit none
   BEGIN_DOC
@@ -346,26 +374,39 @@ BEGIN_TEMPLATE
   endif
  end subroutine $Xsort
 
- subroutine $Xsort_noidx(x,isize)
-  implicit none
-  BEGIN_DOC
-  ! Sort array x(isize).
-  END_DOC
-  integer,intent(in)             :: isize
-  $type,intent(inout)            :: x(isize)
-  integer, allocatable           :: iorder(:)
-  integer                        :: i
-  allocate(iorder(isize))
-  do i=1,isize
-   iorder(i)=i
-  enddo
-  call $Xsort(x,iorder,isize)
-  deallocate(iorder)
- end subroutine $Xsort_noidx
-
 SUBST [ X, type ]
    ; real ;;
  d ; double precision ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  if (isize < 2) then
+    return
+  endif
+  call sorted_$Xnumber(x,isize,n)
+  if (isize == n) then
+    return
+  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+    call $Xradix_sort(x,iorder,isize,-1)
+  endif
+ end subroutine $Xsort
+
+SUBST [ X, type ]
  i ; integer ;;
  i8 ; integer*8 ;;
  i2 ; integer*2 ;;
