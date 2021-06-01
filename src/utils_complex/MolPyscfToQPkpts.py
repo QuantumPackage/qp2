@@ -133,7 +133,7 @@ def get_supcellPhase(cell, kpts=[], kmesh=[]):
     from pyscf import lib
 
     latt_vec = cell.lattice_vectors()
-    if len(kmesh)== 0:
+    if not bool(kmesh):
         # Guess kmesh
         scaled_k = cell.get_scaled_kpts(kpts).round(8)
         kmesh = (len(np.unique(scaled_k[:,0])),
