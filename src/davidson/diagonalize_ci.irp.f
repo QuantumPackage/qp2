@@ -57,8 +57,8 @@ END_PROVIDER
    enddo
 
 !   Deactivated temporarily: bug in N_csf
-!   do_csf = s2_eig .and. only_expected_s2 .and. (expected_s2 == 0.d0)
-   do_csf = .False.
+   do_csf = s2_eig .and. only_expected_s2 .and. (expected_s2 == 0.d0)
+!   do_csf = .False.
 
    if (diag_algorithm == "Davidson") then
 
