@@ -38,9 +38,6 @@
   n_CSF = 0
   ncfgprev = cfg_seniority_index(0)
   ncfgpersomo = ncfgprev
-  do i = 1, elec_num
-    print *,"i=",i," Ncfg= ",cfg_seniority_index(i)
-  enddo
   do i = iand(MS,1), NSOMOMax-2,2
     if(cfg_seniority_index(i) .EQ. -1) then
       cycle
@@ -79,7 +76,6 @@
       dimcsfpercfg = max(1,nint(binom1 - binom2))
     endif
     n_CSF += ncfg * dimcsfpercfg
-    print *,"i=",i," ncfg= ", ncfg, " dims=", dimcsfpercfg, " n_csf=", n_CSF, ncfgpersomo, ncfgprev
     if(cfg_seniority_index(i+2) > ncfgprev) then
       ncfgprev = cfg_seniority_index(i+2)
     else
