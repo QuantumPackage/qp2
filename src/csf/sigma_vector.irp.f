@@ -1,3 +1,9 @@
+ real*8 function lgamma(x)
+ implicit none
+ real*8, intent(in) :: x
+ lgamma = log(abs(gamma(x)))
+ end function lgamma
+  
   BEGIN_PROVIDER [ integer, NSOMOMax]
  &BEGIN_PROVIDER [ integer, NCSFMax]
  &BEGIN_PROVIDER [ integer*8, NMO]
@@ -22,33 +28,65 @@
   integer NSOMO
   integer dimcsfpercfg
   integer detDimperBF
-  real*8 :: coeff
+  real*8 :: coeff, binom1, binom2
   integer MS
   integer ncfgpersomo
+  real*8, external :: lgamma
   detDimperBF = 0
   MS = elec_alpha_num-elec_beta_num
   ! number of cfgs = number of dets for 0 somos
-  n_CSF = cfg_seniority_index(0)-1
+  n_CSF = 0
   ncfgprev = cfg_seniority_index(0)
-  do i = 0-iand(MS,1)+2, NSOMOMax,2
-     if(cfg_seniority_index(i) .EQ. -1)then
-        ncfgpersomo = N_configuration + 1
-     else
-        ncfgpersomo = cfg_seniority_index(i)
-     endif
-  ncfg = ncfgpersomo - ncfgprev
-  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  if (i > 2) then
-    dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-  else
-    dimcsfpercfg = 1
-  endif
-  n_CSF += ncfg * dimcsfpercfg
-  !if(cfg_seniority_index(i+2) == -1) EXIT
-  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
-  ncfgprev = cfg_seniority_index(i)
+  ncfgpersomo = ncfgprev
+  do i = iand(MS,1), NSOMOMax-2,2
+    if(cfg_seniority_index(i) .EQ. -1) then
+      cycle
+    endif
+    if(cfg_seniority_index(i+2) .EQ. -1) then
+      ncfgpersomo = N_configuration + 1
+    else
+      if(cfg_seniority_index(i+2) > ncfgpersomo) then
+          ncfgpersomo = cfg_seniority_index(i+2)
+      else
+        k = 0
+        do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
+          k = k + 2
+          ncfgpersomo = cfg_seniority_index(i+2+k)
+        enddo
+      endif
+    endif
+    ncfg = ncfgpersomo - ncfgprev
+    if(iand(MS,1) .EQ. 0) then
+      !dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+      binom1 = dexp(lgamma(1.0d0*(i+1))                            &
+                  - lgamma(1.0d0*((i/2)+1))                        &
+                  - lgamma(1.0d0*(i-((i/2))+1)));
+      binom2 = dexp(lgamma(1.0d0*(i+1))                            &
+                  - lgamma(1.0d0*(((i/2)+1)+1))                    &
+                  - lgamma(1.0d0*(i-((i/2)+1)+1)));
+      dimcsfpercfg = max(1,nint(binom1 - binom2))
+    else
+      !dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+      binom1 = dexp(lgamma(1.0d0*(i+1))                            &
+                  - lgamma(1.0d0*(((i+1)/2)+1))                    &
+                  - lgamma(1.0d0*(i-(((i+1)/2))+1)));
+      binom2 = dexp(lgamma(1.0d0*(i+1))                            &
+                  - lgamma(1.0d0*((((i+3)/2)+1)+1))                &
+                  - lgamma(1.0d0*(i-(((i+3)/2)+1)+1)));
+      dimcsfpercfg = max(1,nint(binom1 - binom2))
+    endif
+    n_CSF += ncfg * dimcsfpercfg
+    if(cfg_seniority_index(i+2) > ncfgprev) then
+      ncfgprev = cfg_seniority_index(i+2)
+    else
+      k = 0
+      do while(cfg_seniority_index(i+2+k) < ncfgprev)
+        k = k + 2
+        ncfgprev = cfg_seniority_index(i+2+k)
+      enddo
+    endif
   enddo
-  END_PROVIDER
+END_PROVIDER
 
 
 subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)

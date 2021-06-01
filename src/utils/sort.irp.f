@@ -38,15 +38,7 @@ BEGIN_TEMPLATE
   $type,intent(inout)            :: x(isize)
   integer,intent(inout)          :: iorder(isize)
   integer, external              :: omp_get_num_threads
-  if (omp_get_num_threads() == 1) then
-    !$OMP PARALLEL DEFAULT(SHARED)
-    !$OMP SINGLE
-    call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
-    !$OMP END SINGLE
-    !$OMP END PARALLEL
-  else
-    call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
-  endif
+  call rec_$X_quicksort(x,iorder,isize,1,isize,nproc)
  end
 
  recursive subroutine rec_$X_quicksort(x, iorder, isize, first, last, level)
@@ -57,7 +49,7 @@ BEGIN_TEMPLATE
   $type                          :: c, tmp
   integer                        :: itmp
   integer                        :: i, j
- 
+
   if(isize<2)return
 
   c = x( shiftr(first+last,1) )
@@ -89,16 +81,11 @@ BEGIN_TEMPLATE
     endif
   else
     if (first < i-1) then
-      !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(isize,first,i,level)
       call rec_$X_quicksort(x, iorder, isize, first, i-1,level/2)
-      !$OMP END TASK
     endif
     if (j+1 < last) then
-      !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(isize,last,j,level)
       call rec_$X_quicksort(x, iorder, isize, j+1, last,level/2)
-      !$OMP END TASK
     endif
-    !$OMP TASKWAIT
   endif
  end
 
@@ -262,7 +249,60 @@ SUBST [ X, type ]
  i2 ; integer*2 ;;
 END_TEMPLATE
 
+
+!---------------------- INTEL
+IRP_IF INTEL
+
 BEGIN_TEMPLATE
+ subroutine $Xsort(x,iorder,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  character, allocatable         :: tmp(:)
+  if (isize < 2) return
+  call ippsSortRadixIndexGetBufferSize(isize, $ippsz, n)
+  allocate(tmp(n))
+  call ippsSortRadixIndexAscend_$ityp(x, $n, iorder, isize, tmp)
+  deallocate(tmp)
+  iorder(1:isize) = iorder(1:isize)+1
+  call $Xset_order(x,iorder,isize)
+ end
+
+ subroutine $Xsort_noidx(x,isize)
+  use intel
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer                        :: n
+  character, allocatable         :: tmp(:)
+  if (isize < 2) return
+  call ippsSortRadixIndexGetBufferSize(isize, $ippsz, n)
+  allocate(tmp(n))
+  call ippsSortRadixAscend_$ityp_I(x, isize, tmp)
+  deallocate(tmp)
+ end
+
+SUBST [ X, type, ityp, n, ippsz ]
+   ; real ; 32f ; 4 ; 13 ;;
+ i ; integer ; 32s ; 4 ; 11 ;;
+ i2 ; integer*2 ; 16s ; 2 ; 7 ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
  subroutine $Xsort(x,iorder,isize)
   implicit none
   BEGIN_DOC
@@ -289,12 +329,12 @@ BEGIN_TEMPLATE
   endif
  end subroutine $Xsort
 
-SUBST [ X, type, Y ]
-   ; real ; i ;;
- d ; double precision ; i8 ;;
+SUBST [ X, type ]
+ d ; double precision ;;
 END_TEMPLATE
 
 BEGIN_TEMPLATE
+
  subroutine $Xsort(x,iorder,isize)
   implicit none
   BEGIN_DOC
@@ -306,8 +346,112 @@ BEGIN_TEMPLATE
   $type,intent(inout)            :: x(isize)
   integer,intent(inout)          :: iorder(isize)
   integer                        :: n
-!  call $Xradix_sort(x,iorder,isize,-1)
-  call quick_$Xsort(x,iorder,isize)
+  if (isize < 2) then
+    return
+  endif
+  call sorted_$Xnumber(x,isize,n)
+  if (isize == n) then
+    return
+  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+    call $Xradix_sort(x,iorder,isize,-1)
+  endif
+ end subroutine $Xsort
+
+SUBST [ X, type ]
+ i8 ; integer*8 ;;
+END_TEMPLATE
+
+!---------------------- END INTEL
+IRP_ELSE
+!---------------------- NON-INTEL
+BEGIN_TEMPLATE
+
+ subroutine $Xsort_noidx(x,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer, allocatable           :: iorder(:)
+  integer                        :: i
+  allocate(iorder(isize))
+  do i=1,isize
+   iorder(i)=i
+  enddo
+  call $Xsort(x,iorder,isize)
+  deallocate(iorder)
+ end subroutine $Xsort_noidx
+
+SUBST [ X, type ]
+   ; real ;;
+ d ; double precision ;;
+ i ; integer ;;
+ i8 ; integer*8 ;;
+ i2 ; integer*2 ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  if (isize < 2) then
+    return
+  endif
+!  call sorted_$Xnumber(x,isize,n)
+!  if (isize == n) then
+!    return
+!  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+!    call heap_$Xsort(x,iorder,isize)
+    call quick_$Xsort(x,iorder,isize)
+  endif
+ end subroutine $Xsort
+
+SUBST [ X, type ]
+   ; real ;;
+ d ; double precision ;;
+END_TEMPLATE
+
+BEGIN_TEMPLATE
+
+ subroutine $Xsort(x,iorder,isize)
+  implicit none
+  BEGIN_DOC
+  ! Sort array x(isize).
+  ! iorder in input should be (1,2,3,...,isize), and in output
+  ! contains the new order of the elements.
+  END_DOC
+  integer,intent(in)             :: isize
+  $type,intent(inout)            :: x(isize)
+  integer,intent(inout)          :: iorder(isize)
+  integer                        :: n
+  if (isize < 2) then
+    return
+  endif
+  call sorted_$Xnumber(x,isize,n)
+  if (isize == n) then
+    return
+  endif
+  if ( isize < 32) then
+    call insertion_$Xsort(x,iorder,isize)
+  else
+    call $Xradix_sort(x,iorder,isize,-1)
+  endif
  end subroutine $Xsort
 
 SUBST [ X, type ]
@@ -315,6 +459,11 @@ SUBST [ X, type ]
  i8 ; integer*8 ;;
  i2 ; integer*2 ;;
 END_TEMPLATE
+
+IRP_ENDIF
+!---------------------- END NON-INTEL
+
+
 
 BEGIN_TEMPLATE
  subroutine $Xset_order(x,iorder,isize)
@@ -413,10 +562,12 @@ SUBST [ X, type ]
  i2; integer*2 ;;
 END_TEMPLATE
 
+
 BEGIN_TEMPLATE
 
- recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
+recursive subroutine $Xradix_sort$big(x,iorder,isize,iradix)
   implicit none
+
   BEGIN_DOC
   ! Sort integer array x(isize) using the radix sort algorithm.
   ! iorder in input should be (1,2,3,...,isize), and in output
@@ -552,23 +703,13 @@ BEGIN_TEMPLATE
     endif
 
 
-!   !$OMP PARALLEL DEFAULT(SHARED) if (isize > 1000000)
-!   !$OMP SINGLE
     if (i3>1_$int_type) then
-!     !$OMP TASK FIRSTPRIVATE(iradix_new,i3) SHARED(x,iorder) if(i3 > 1000000)
       call $Xradix_sort$big(x,iorder,i3,iradix_new-1)
-!     !$OMP END TASK
     endif
 
     if (isize-i3>1_$int_type) then
-!     !$OMP TASK FIRSTPRIVATE(iradix_new,i3) SHARED(x,iorder) if(isize-i3 > 1000000)
       call $Xradix_sort$big(x(i3+1_$int_type),iorder(i3+1_$int_type),isize-i3,iradix_new-1)
-!     !$OMP END TASK
     endif
-
-!   !$OMP TASKWAIT
-!   !$OMP END SINGLE
-!   !$OMP END PARALLEL
 
     return
   endif
@@ -624,16 +765,11 @@ BEGIN_TEMPLATE
 
 
   if (i1>1_$int_type) then
-    !$OMP TASK FIRSTPRIVATE(i0,iradix,i1) SHARED(x,iorder) if(i1 >1000000)
     call $Xradix_sort$big(x(i0+1_$int_type),iorder(i0+1_$int_type),i1,iradix-1)
-    !$OMP END TASK
   endif
   if (i0>1) then
-    !$OMP TASK FIRSTPRIVATE(i0,iradix) SHARED(x,iorder) if(i0 >1000000)
     call $Xradix_sort$big(x,iorder,i0,iradix-1)
-    !$OMP END TASK
   endif
-  !$OMP TASKWAIT
 
  end
 
@@ -644,5 +780,6 @@ SUBST [ X, type, integer_size, is_big, big, int_type ]
  i  ; 4 ; 32 ; .True.  ; _big ; 8 ;;
  i8 ; 8 ; 64 ; .True.  ; _big ; 8 ;;
 END_TEMPLATE
+
 
 
