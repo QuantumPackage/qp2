@@ -34,7 +34,7 @@ BEGIN_PROVIDER [ double precision, shell_normalization_factor , (shell_num) ]
           do j=shell_prim_index(i),shell_prim_index(i)+shell_prim_num(i)-1
             call overlap_gaussian_xyz(C_A,C_A,prim_expo(j),prim_expo(k), &
               powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
-            norm = norm+c*prim_coef(j)*prim_coef(k)
+            norm = norm+c*prim_coef(j)*prim_coef(k) * prim_normalization_factor(j) * prim_normalization_factor(k)
           enddo
         enddo
         shell_normalization_factor(i) = 1.d0/dsqrt(norm)

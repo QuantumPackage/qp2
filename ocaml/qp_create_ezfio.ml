@@ -607,9 +607,9 @@ let run ?o b au c d m p cart xyz_file =
         Ezfio.set_basis_shell_nucl (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| shell_num |]
           ~data:(list_map (fun (_,n) -> Nucl_number.to_int n) basis) ) ;
-        Ezfio.set_basis_shell_prim_coef (Ezfio.ezfio_array_of_list
+        Ezfio.set_basis_prim_coef (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
-        Ezfio.set_basis_shell_prim_expo (Ezfio.ezfio_array_of_list
+        Ezfio.set_basis_prim_expo (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
 
 
