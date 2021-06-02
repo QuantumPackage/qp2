@@ -10,14 +10,14 @@ void buildTree(Tree *bftree,
 
     // Find the maximum parallel couplings 0
     //      the maximum anti-parallel couplings 1
-    int zeromax = MSmax + (NSOMOMax-MSmax)/2;
+    int zeromax = (NSOMOMax + MSmax)/2;
     int onemax = NSOMOMax - zeromax;
 
     // Exit condition
     if(isomo > NSOMOMax || icpl < 0 || izeros > zeromax ) return;
 
     // If we find a valid BF assign its address
-    if(isomo == NSOMOMax){
+    if(isomo == NSOMOMax && icpl == MSmax){
         (*inode)->addr = bftree->rootNode->addr;
         bftree->rootNode->addr += 1;
         return;
