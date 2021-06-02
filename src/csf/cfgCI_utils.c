@@ -68,10 +68,16 @@ void getBFIndexList(int NSOMO, int *BF1, int *IdxListBF1){
                     break;
                 }
             }
-            BFcopy[Iidx] = -1;
-            BFcopy[Jidx] = -1;
-            IdxListBF1[Jidx] = Iidx;
-            IdxListBF1[Iidx] = Jidx;
+            if(countN1 <= 0){
+                BFcopy[Iidx] = -1;
+                IdxListBF1[Iidx] = Iidx;
+            }
+            else{
+                BFcopy[Iidx] = -1;
+                BFcopy[Jidx] = -1;
+                IdxListBF1[Jidx] = Iidx;
+                IdxListBF1[Iidx] = Jidx;
+            }
         }
     }
 
@@ -87,6 +93,7 @@ void getIslands(int NSOMO, int *BF1, int *BF2, int *nislands, int *phasefactor){
     getBFIndexList(NSOMO, BF2, IdxListBF2);
 
     int sumids = 0;
+    int chainParity = 0;
     int maxcount=0;
     *nislands = 0;
     *phasefactor = 1;
@@ -103,10 +110,10 @@ void getIslands(int NSOMO, int *BF1, int *BF2, int *nislands, int *phasefactor){
         int nextId = BF1copy[i];
         maxcount = 0;
         while(BF1copy[thisId] != -1 && maxcount < 20){
-            if(maxcount==0) *nislands += 1;
-            if(maxcount==19) *nislands -= 1;
+            //if(maxcount== 0) *nislands += 1;
+            //if(maxcount==19) *nislands -= 1;
 
-            maxcount++;
+            if(nextId != thisId) maxcount++;
 
             // First the bra
             nextId = BF1copy[thisId];
@@ -117,15 +124,72 @@ void getIslands(int NSOMO, int *BF1, int *BF2, int *nislands, int *phasefactor){
             if(nextId < thisId) *phasefactor *= -1;
 
             // Then the ket
+            if(nextId == thisId && BF2copy[nextId] == -1 && chainParity > 1){
+                // Case with open chain
+                if(BF2copy[i] != -1) isOpen = 1;
+                else{
+                    if((chainParity & 1) == 0)
+                        *phasefactor = 0;
+                }
+                break;
+            }
+            else chainParity += 1;
             thisId = BF2copy[nextId];
+            if(thisId == -1){
+                break;
+            }
             BF2copy[thisId] = -1;
             BF2copy[nextId] = -1;
 
+            chainParity += 1;
             // Get the phase factor bra
             if(nextId < thisId) *phasefactor *= -1;
 
         }
-        
+        if(thisId == i && thisId != nextId) *nislands += 1;
+
+        // Open chanin case
+        thisId = i;
+        nextId = BF2copy[i];
+        maxcount = 0;
+        if(isOpen && BF2copy[i] != -1){
+            while(BF2copy[thisId] != -1 && maxcount < 20){
+                //if(maxcount== 0 && nextId != thisId) *nislands += 1;
+                //if(maxcount==19) *nislands -= 1;
+
+                if(nextId != thisId) maxcount++;
+
+                // First the bra
+                nextId = BF2copy[thisId];
+                BF2copy[thisId] = -1;
+                BF2copy[nextId] = -1;
+
+                chainParity += 1;
+
+                // Get the phase factor bra
+                if(nextId < thisId) *phasefactor *= -1;
+
+                // Then the ket
+                if(nextId == thisId && BF2copy[nextId] == -1 && chainParity > 1){
+                    // Case with open chain
+                    if((chainParity & 1) == 0) *phasefactor = 0;
+                    break;
+                }
+                thisId = BF1copy[nextId];
+                if(thisId == -1){
+                    break;
+                }
+                BF1copy[thisId] = -1;
+                BF1copy[nextId] = -1;
+                chainParity += 1;
+
+                // Get the phase factor bra
+                if(nextId < thisId) *phasefactor *= -1;
+
+            }
+            if((chainParity & 1) == 0 && isOpen) *phasefactor = 0;
+        }
+
         for(int j=0;j<NSOMO;j++)
             sumids += BF1copy[j];
         if(sumids == -1*NSOMO) break;
@@ -277,6 +341,7 @@ void gramSchmidt(double *overlapMatrix, int rows, int cols, double *orthoMatrix)
             for(int k=cols-1; k >= i; k--)
                 norm += orthoMatrix[i*cols + j]*orthoMatrix[i*cols + k]*overlapMatrix[j*cols+k];
         }
+        if(fabs(norm) < 1.0E-14) continue;
         norm = sqrt(norm);
         for(int j = rows-1; j >= i; j--){
             orthoMatrix[i*cols + j] /= norm;
@@ -1290,6 +1355,10 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     int idxq = 0;
     int *detslist = malloc(npairs*NSOMO*sizeof(int));
     double *phaselist = malloc(npairs*sizeof(double));
+    for(int ii = 0; ii < npairs; ++ii){
+        for(int jj = 0; jj < NSOMO; ++jj)
+            detslist[ii*NSOMO + jj]=0;
+    }
     for(int i=0;i<npairs;i++)
         phaselist[i] = 1.0;
     int shft = npairs;
@@ -1301,6 +1370,7 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     for(int i = 0; i < NSOMO; i++){
         idxp = BF1[i];
         idxq = BF1[idxp];
+        if(idxp==idxq) continue;
         // Do one pair only once
         if(donepq[idxp] > 0.0 || donepq[idxq] > 0.0) continue;
         fac *= 2.0;
@@ -1316,6 +1386,7 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
                 detslist[(k+j)*NSOMO + idxq] = 1;
                 phaselist[k+j] *=-1;
             }
+            if(shft == 0) break;
         }
         shft /= 2;
     }
