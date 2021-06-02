@@ -108,6 +108,7 @@ void getIslands(int NSOMO, int *BF1, int *BF2, int *nislands, int *phasefactor){
     for(int i = 0; i < NSOMO; i++){
         int thisId = i;
         int nextId = BF1copy[i];
+        int isOpen = 0;
         maxcount = 0;
         while(BF1copy[thisId] != -1 && maxcount < 20){
             //if(maxcount== 0) *nislands += 1;
