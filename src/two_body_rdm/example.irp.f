@@ -15,7 +15,7 @@ subroutine routine_active_only
  double precision :: wee_aa_st_av, rdm_aa_st_av
  double precision :: wee_bb_st_av, rdm_bb_st_av
  double precision :: wee_ab_st_av, rdm_ab_st_av
- double precision :: wee_tot_st_av, rdm_tot_st_av
+ double precision :: wee_tot_st_av, rdm_tot_st_av,spin_trace
  double precision :: wee_aa_st_av_2,wee_ab_st_av_2,wee_bb_st_av_2,wee_tot_st_av_2,wee_tot_st_av_3
 
  wee_ab  = 0.d0
@@ -38,6 +38,27 @@ subroutine routine_active_only
  provide act_2_rdm_ab_mo  act_2_rdm_aa_mo  act_2_rdm_bb_mo  act_2_rdm_spin_trace_mo 
  provide state_av_act_2_rdm_ab_mo  state_av_act_2_rdm_aa_mo  
  provide state_av_act_2_rdm_bb_mo  state_av_act_2_rdm_spin_trace_mo 
+ i = 1
+ j = 2
+! print*,'testing stuffs'
+! istate = 1
+! print*,'alpha/beta'
+! print*,'',j,i,j,i
+! print*,act_2_rdm_ab_mo(j,i,j,i,istate)
+! print*,'',i,j,i,j
+! print*,act_2_rdm_ab_mo(i,j,i,j,istate)
+! print*,'alpha/alpha'
+! print*,'',j,i,j,i
+! print*,act_2_rdm_aa_mo(j,i,j,i,istate)
+! print*,'',i,j,i,j
+! print*,act_2_rdm_aa_mo(i,j,i,j,istate)
+! print*,'spin_trace'
+! print*,'',j,i,j,i
+! print*,act_2_rdm_spin_trace_mo(j,i,j,i,istate)
+! print*,'',i,j,i,j
+! print*,act_2_rdm_spin_trace_mo(i,j,i,j,istate)
+! stop
+!
  print*,'**************************'
  print*,'**************************'
  do istate = 1, N_states
@@ -51,6 +72,19 @@ subroutine routine_active_only
       korb = list_act(k)
       do l = 1, n_act_orb
        lorb = list_act(l)
+       if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate)).gt.1.d-10)then
+        print*,'Error in act_2_rdm_spin_trace_mo'
+        print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l) - act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10"
+        print*,i,j,k,l
+        print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(j,i,l,k,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate))
+       endif
+
+       if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate)).gt.1.d-10)then
+        print*,'Error in act_2_rdm_spin_trace_mo'
+        print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate),istate).gt.1.d-10"
+        print*,i,j,k,l
+        print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(k,l,i,j,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate))
+       endif
 
        vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
@@ -59,7 +93,18 @@ subroutine routine_active_only
        rdmaa   =  act_2_rdm_aa_mo(l,k,j,i,istate)
        rdmbb   =  act_2_rdm_bb_mo(l,k,j,i,istate)
        rdmtot  =  act_2_rdm_spin_trace_mo(l,k,j,i,istate)
+       spin_trace = rdmaa + rdmbb + rdmab 
 
+       if(dabs(rdmtot- spin_trace).gt.1.d-10)then
+        print*,'Error    in non state average !!!!'
+        print*,l,k,j,i
+        print*,lorb,korb,jorb,iorb
+        print*,spin_trace,rdmtot,dabs(spin_trace - rdmtot)
+        print*,'rdmab,rdmaa,rdmbb'
+        print*, rdmab,rdmaa,rdmbb 
+
+       endif
+ 
 
        wee_ab(istate)    += vijkl * rdmab
        wee_aa(istate)    += vijkl * rdmaa
@@ -71,8 +116,8 @@ subroutine routine_active_only
     enddo
    enddo
    wee_aa_st_av_2  += wee_aa(istate)  * state_average_weight(istate)
-   wee_bb_st_av_2  += wee_aa(istate)  * state_average_weight(istate)
-   wee_ab_st_av_2  += wee_aa(istate)  * state_average_weight(istate)
+   wee_bb_st_av_2  += wee_bb(istate)  * state_average_weight(istate)
+   wee_ab_st_av_2  += wee_ab(istate)  * state_average_weight(istate)
    wee_tot_st_av_2 += wee_tot(istate) * state_average_weight(istate)
    wee_tot_st_av_3 += psi_energy_two_e(istate) * state_average_weight(istate)
    print*,''
@@ -87,7 +132,6 @@ subroutine routine_active_only
    print*,'Full energy '
    print*,'psi_energy_two_e(istate)= ',psi_energy_two_e(istate)
   enddo
-
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
  wee_ab_st_av  = 0.d0
@@ -103,10 +147,30 @@ subroutine routine_active_only
 
      vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
 
+       if(dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10)then
+        print*,'Error in state_av_act_2_rdm_spin_trace_mo'
+        print*,"dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10"
+        print*,i,j,k,l
+        print*,state_av_act_2_rdm_spin_trace_mo(i,j,k,l),state_av_act_2_rdm_spin_trace_mo(j,i,l,k),dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(j,i,l,k))
+       endif
+
+       if(dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(k,l,i,j)).gt.1.d-10)then
+        print*,'Error in state_av_act_2_rdm_spin_trace_mo'
+        print*,"dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(k,l,i,j)).gt.1.d-10"
+        print*,i,j,k,l
+        print*,state_av_act_2_rdm_spin_trace_mo(i,j,k,l),state_av_act_2_rdm_spin_trace_mo(k,l,i,j),dabs(state_av_act_2_rdm_spin_trace_mo(i,j,k,l) - state_av_act_2_rdm_spin_trace_mo(k,l,i,j))
+       endif
+
      rdm_aa_st_av  = state_av_act_2_rdm_aa_mo(l,k,j,i)
      rdm_bb_st_av  = state_av_act_2_rdm_bb_mo(l,k,j,i)
      rdm_ab_st_av  = state_av_act_2_rdm_ab_mo(l,k,j,i)
+     spin_trace = rdm_aa_st_av + rdm_bb_st_av + rdm_ab_st_av 
      rdm_tot_st_av = state_av_act_2_rdm_spin_trace_mo(l,k,j,i)
+     if(dabs(spin_trace - rdm_tot_st_av).gt.1.d-10)then
+      print*,'Error    !!!!'
+      print*,l,k,j,i
+      print*,spin_trace,rdm_tot_st_av,dabs(spin_trace - rdm_tot_st_av)
+     endif
 
      wee_aa_st_av += vijkl * rdm_aa_st_av
      wee_bb_st_av += vijkl * rdm_bb_st_av

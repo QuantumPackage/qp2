@@ -60,11 +60,18 @@
      ! If alpha/beta, electron 1 is alpha, electron 2 is beta
      ! Therefore you don't necessayr have symmetry between electron 1 and 2 
     nkeys += 1
-    values(nkeys) = c_1 
+    values(nkeys) = 0.5d0 * c_1 
     keys(1,nkeys) = h1
     keys(2,nkeys) = h2
     keys(3,nkeys) = h1
     keys(4,nkeys) = h2
+
+    nkeys += 1
+    values(nkeys) = 0.5d0 * c_1 
+    keys(1,nkeys) = h2
+    keys(2,nkeys) = h1
+    keys(3,nkeys) = h2
+    keys(4,nkeys) = h1
    enddo 
   enddo
  else if (alpha_alpha)then
@@ -236,11 +243,17 @@
  p2 = list_orb_reverse(p2)
  if(alpha_beta)then
    nkeys += 1
-   values(nkeys) = c_1 * phase
+   values(nkeys) = 0.5d0 * c_1 * phase
    keys(1,nkeys) = h1
    keys(2,nkeys) = h2
    keys(3,nkeys) = p1
    keys(4,nkeys) = p2
+   nkeys += 1
+   values(nkeys) = 0.5d0 * c_1 * phase
+   keys(1,nkeys) = h2
+   keys(2,nkeys) = h1
+   keys(3,nkeys) = p2
+   keys(4,nkeys) = p1 
  else if(spin_trace)then
    nkeys += 1
    values(nkeys) = 0.5d0 * c_1 * phase
@@ -250,10 +263,10 @@
    keys(4,nkeys) = p2
    nkeys += 1
    values(nkeys) = 0.5d0 * c_1 * phase
-   keys(1,nkeys) = p1
-   keys(2,nkeys) = p2
-   keys(3,nkeys) = h1
-   keys(4,nkeys) = h2 
+   keys(1,nkeys) = h2
+   keys(2,nkeys) = h1
+   keys(3,nkeys) = p2
+   keys(4,nkeys) = p1 
  endif
  end
 

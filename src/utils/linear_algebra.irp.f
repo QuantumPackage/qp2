@@ -1589,9 +1589,9 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   thresh2 = dsqrt(thresh)
   call nullify_small_elements(m,n,A,LDA,thresh)
 
-  if (.not.restore_symm) then
-    return
-  endif
+!  if (.not.restore_symm) then
+!    return
+!  endif
 
   ! TODO:  Costs O(n^4), but can be improved to (2 n^2 * log(n)):
   ! - copy all values in a 1D array

@@ -89,6 +89,24 @@
  enddo
  END_PROVIDER
 
+ BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_bis, (n_points_final_grid,mo_num,3)]
+ implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
+ integer :: i,j,m
+ do m = 1, 3
+  do j = 1, mo_num
+   do i = 1, n_points_final_grid
+    mos_grad_in_r_array_transp_bis(i,j,m) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
+
+
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
  implicit none
