@@ -143,10 +143,10 @@ subroutine print_generators_bitmasks_holes
      key_tmp(j,1) = generators_bitmask(j,1,i)
      key_tmp(j,2) = generators_bitmask(j,2,i)
    enddo
-   print*,''
-   print*,'index hole  = ',i
-   call print_det(key_tmp,N_int)
-   print*,''
+!   print*,''
+!   print*,'index hole  = ',i
+!   call print_det(key_tmp,N_int)
+!   print*,''
  enddo
  deallocate(key_tmp)
 

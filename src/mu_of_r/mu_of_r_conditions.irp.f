@@ -148,3 +148,4 @@
   mu_average_prov(istate) = mu_average_prov(istate) / elec_num_grid_becke(istate)
  enddo
  END_PROVIDER 
+

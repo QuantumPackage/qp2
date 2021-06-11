@@ -79,7 +79,7 @@
  END_DOC
  integer :: m
  integer  :: i,j
- mos_grad_in_r_array = 0.d0
+ mos_grad_in_r_array_tranp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
    do m = 1, 3
@@ -88,6 +88,24 @@
   enddo
  enddo
  END_PROVIDER
+
+ BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_bis, (n_points_final_grid,mo_num,3)]
+ implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
+ integer :: i,j,m
+ do m = 1, 3
+  do j = 1, mo_num
+   do i = 1, n_points_final_grid
+    mos_grad_in_r_array_transp_bis(i,j,m) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
+
 
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
@@ -115,8 +133,6 @@
  BEGIN_DOC
  ! mos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith mo on the jth grid point
  !
- ! mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth mo on the ith grid point
- !
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
@@ -127,3 +143,21 @@
  END_PROVIDER
 
 
+ BEGIN_PROVIDER[double precision, mos_lapl_in_r_array_tranp,(3,mo_num,n_points_final_grid)]
+ implicit none
+ BEGIN_DOC
+ ! mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplient of jth mo on the ith grid point
+ !
+ ! k = 1 : x, k= 2, y, k  3, z
+ END_DOC
+ integer :: m
+ integer  :: i,j
+ mos_lapl_in_r_array_tranp = 0.d0
+ do i = 1, n_points_final_grid
+  do j = 1, mo_num
+   do m = 1, 3
+     mos_lapl_in_r_array_tranp(m,j,i) = mos_lapl_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
