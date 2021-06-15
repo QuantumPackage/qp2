@@ -99,7 +99,9 @@ function find_libs () {
 }
 
 function find_exec () {
-  find ${QP_ROOT}/$1 -perm /u+x -type f
+  for i in $@ ; do
+     find ${QP_ROOT}/$i -perm /u+x -type f
+  done
 }
 
 
@@ -119,7 +121,7 @@ fi
 echo "Copying binary files"
 #     --------------------
 
-FORTRAN_EXEC=$(find_exec src)
+FORTRAN_EXEC=$(find_exec src/*/)
 if [[ -z $FORTRAN_EXEC ]] ; then
   error 'No Fortran binaries found.'
   exit 1

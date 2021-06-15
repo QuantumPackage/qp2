@@ -197,6 +197,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
   call write_int(6,sze,'Number of determinants')
+  call write_int(6,sze_csf,'Number of CSFs')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then

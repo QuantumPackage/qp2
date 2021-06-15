@@ -1,5 +1,5 @@
 type t =
-{ sym : Symmetry.t;
+{ sym : Angmom.t;
   expo : Qptypes.AO_expo.t;
 } [@@deriving sexp]
 
@@ -7,5 +7,5 @@ type t =
 val to_string : t -> string
 
 (** Creation *)
-val of_sym_expo : Symmetry.t -> Qptypes.AO_expo.t -> t
+val of_sym_expo : Angmom.t -> Qptypes.AO_expo.t -> t
 

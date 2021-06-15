@@ -5,7 +5,7 @@ type fmt =
 | Gaussian
 
 type t =
-  { sym : Symmetry.t ;
+  { sym : Angmom.t ;
     lc  : (GaussianPrimitive.t * Qptypes.AO_coef.t) list;
   } [@@deriving sexp]
 

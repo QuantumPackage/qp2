@@ -29,6 +29,7 @@
   - Disk-based Davidson when too much memory is required
   - Fixed bug in DIIS
   - Fixed bug in molden (Au -> Angs)
+  - Fixed bug with non-contiguous MOs in active space and deleter MOs
 
 *** User interface
 
@@ -52,6 +53,10 @@
     - Added ~print_hamiltonian~
     - Added input for two body RDM
     - Added keyword ~save_wf_after_selection~
+    - Added a ~restore_symm~ flag to enforce the restoration of
+      symmetry in matrices
+    - qp_export_as_tgz exports also plugin codes
+    - Added a basis module containing basis set information
 
 *** Code
 
@@ -76,6 +81,8 @@
     - Added ~h_core_guess~ routine
     - Fixed Laplacians in real space (indices)
     - Added LIB file to add extra libs in plugin
+    - Using Intel IPP for sorting when using Intel compiler
+    - Removed parallelism in sorting
 
     ao_one_e_integral_zero
     banned_excitations

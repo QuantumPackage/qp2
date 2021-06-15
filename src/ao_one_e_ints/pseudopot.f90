@@ -96,8 +96,12 @@ end
 ! x=cos(theta)
 
         double precision function ylm_real(l,m,x,phi)
-        implicit double precision (a-h,o-z)
-        DIMENSION PM(0:100,0:100)
+        implicit none
+        integer :: MM, iabs_m, m, l
+        double precision :: pi, fourpi, factor, x, phi, coef
+        double precision :: xchap, ychap, zchap
+        double precision, external :: fact
+        double precision :: PM(0:100,0:100), plm
         MM=100
         pi=dacos(-1.d0)
         fourpi=4.d0*pi
@@ -1150,8 +1154,10 @@ end
 !       Output:  PM(m,n) --- Pmn(x)
 !       =====================================================
 !
-        IMPLICIT DOUBLE PRECISION (P,X)
-        DIMENSION PM(0:MM,0:(N+1))
+        implicit none
+!        IMPLICIT DOUBLE PRECISION (P,X)
+        integer :: MM, N, I, J, M
+        double precision :: PM(0:MM,0:(N+1)), X, XQ, XS
         DOUBLE PRECISION, SAVE ::  INVERSE(100) = 0.D0
         DOUBLE PRECISION       :: LS, II, JJ
         IF (INVERSE(1) == 0.d0) THEN
@@ -1202,8 +1208,9 @@ end
 !  P_l^|m|(cos(theta))  exp(i m phi)
 
       subroutine erreur(x,n,rmoy,error)
-      implicit double precision(a-h,o-z)
-      dimension x(n)
+      implicit none
+      integer :: i, n
+      double precision :: x(n), rn, rn1, error, rmoy
 ! calcul de la moyenne
       rmoy=0.d0
       do i=1,n

@@ -26,7 +26,7 @@ let of_string = function
   | "J" | "j" -> J
   | "K" | "k" -> K
   | "L" | "l" -> L
-  | x -> raise (Failure ("Symmetry should be S|P|D|F|G|H|I|J|K|L,
+  | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L,
 not "^x^"."))
 
 let of_char = function
@@ -40,7 +40,7 @@ let of_char = function
   | 'J' | 'j' -> J
   | 'K' | 'k' -> K
   | 'L' | 'l' -> L
-  | x -> raise (Failure ("Symmetry should be S|P|D|F|G|H|I|J|K|L"))
+  | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L"))
 
 let to_l = function
   | S -> Positive_int.of_int 0
@@ -68,7 +68,7 @@ let of_l i =
   | 7 -> J
   | 8 -> K
   | 9 -> L
-  | x -> raise (Failure ("Symmetry should be S|P|D|F|G|H|I|J|K|L"))
+  | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L"))
 
 
 type st = t
