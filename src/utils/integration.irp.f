@@ -30,7 +30,11 @@ subroutine give_explicit_poly_and_gaussian_x(P_new,P_center,p,fact_k,iorder,alph
   ab = alpha * beta
   d_AB = (A_center - B_center) * (A_center - B_center)
   P_center = (alpha * A_center + beta * B_center) * p_inv
-  fact_k = exp(-ab*p_inv * d_AB)
+  if(dabs(ab*p_inv * d_AB).lt.50.d0)then
+   fact_k = exp(-ab*p_inv * d_AB)
+  else
+   fact_k = 0.d0
+  endif
 
   ! Recenter the polynomials P_a and P_b on x
   !DIR$ FORCEINLINE
@@ -78,6 +82,10 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !DIR$ FORCEINLINE
   call gaussian_product(alpha,A_center,beta,B_center,fact_k,p,P_center)
   if (fact_k < thresh) then
+    P_center = 0.d0
+    p = 1.d-10
+    P_new = 0.d0
+    iorder = -1
     fact_k = 0.d0
     return
   endif

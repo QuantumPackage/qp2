@@ -235,6 +235,7 @@ BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb,n_basis_orb,n_act
  END_DOC
  integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: integrals_array(mo_num,mo_num),get_two_e_integral
+ PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
  do orb_m = 1, n_act_orb ! electron 1 
   m = list_act(orb_m)
   do orb_n = 1, n_act_orb ! electron 2 
@@ -264,6 +265,7 @@ BEGIN_PROVIDER [double precision, two_e_int_ia_f, (n_basis_orb,n_basis_orb,n_ina
  END_DOC
  integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: integrals_array(mo_num,mo_num),get_two_e_integral
+ PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
  do orb_m = 1, n_act_orb ! electron 1 
   m = list_act(orb_m)
   do orb_n = 1, n_inact_orb ! electron 2 
@@ -293,6 +295,7 @@ BEGIN_PROVIDER [double precision, two_e_int_ii_f, (n_basis_orb,n_basis_orb,n_ina
  END_DOC
  integer :: orb_i,orb_j,i,j,orb_m,orb_n,m,n
  double precision :: get_two_e_integral,integrals_array(mo_num,mo_num)
+ PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
  do orb_m = 1, n_inact_orb ! electron 1 
   m = list_inact(orb_m)
   do orb_n = 1, n_inact_orb ! electron 2 

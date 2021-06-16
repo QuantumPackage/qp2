@@ -40,9 +40,9 @@ END_PROVIDER
 
   do i=1,ao_num
 
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
+    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
+    powA(2) = 0
+    powA(3) = 0
 
     ! Normalization of the primitives
     if (primitives_normalized) then
@@ -56,6 +56,10 @@ END_PROVIDER
         ao_coef_normalized(i,j) = ao_coef(i,j)
       enddo
     endif
+
+    powA(1) = ao_power(i,1)
+    powA(2) = ao_power(i,2)
+    powA(3) = ao_power(i,3)
 
     ! Normalization of the contracted basis functions
     if (ao_normalized) then
