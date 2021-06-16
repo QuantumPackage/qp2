@@ -62,7 +62,8 @@ void getIthBF(Node *inode, int isomo, bool foundBF, int NSOMOMax, int getaddr, i
 
     if(isomo == NSOMOMax){
         if(inode->addr == getaddr){
-            for(int i = NSOMOMax-1; i > -1; i--){
+            int i;
+            for(i = NSOMOMax-1; i > -1; i--){
                 vecBF[i] = inode->cpl;
                 inode = inode->PREV;
             }
@@ -150,7 +151,8 @@ void getIthDet(Node *inode, int isomo, bool foundBF, int NSOMOMax, int getaddr, 
 
     if(isomo == NSOMOMax){
         if(inode->addr == getaddr){
-            for(int i = NSOMOMax-1; i > -1; i--){
+            int i;
+            for(i = NSOMOMax-1; i > -1; i--){
                 vecBF[i] = inode->cpl;
                 inode = inode->PREV;
             }
@@ -224,7 +226,8 @@ void getDetlist(Node *inode, int isomo, int NSOMOMax, int *vecBF, int *detlist){
 
     if(isomo == NSOMOMax){
         int idet=0;
-        for(int k=0;k<NSOMOMax;k++){
+        int k;
+        for(k=0;k<NSOMOMax;k++){
             if(vecBF[k] == 1) idet = idet | (1<<(NSOMOMax-1-k));
         }
         detlist[inode->addr]=idet;
