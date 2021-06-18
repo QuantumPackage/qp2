@@ -296,6 +296,12 @@ end
  ! If true, the excitation is banned in the selection. Useful with local MOs.
  END_DOC
  banned_excitation = .False.
+ use_banned_excitation = .False.
+
+ ! DEACTIVATED
+ return
+ ! DEACTIVATED
+
  integer :: i,j, icount
  integer(key_kind)              :: idx
  double precision :: tmp
