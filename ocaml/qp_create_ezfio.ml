@@ -604,12 +604,33 @@ let run ?o b au c d m p cart xyz_file =
           ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
         Ezfio.set_basis_shell_prim_index (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_idx) ;
-        Ezfio.set_basis_shell_nucl (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |]
-          ~data:(list_map (fun (_,n) -> Nucl_number.to_int n) basis) ) ;
-        Ezfio.set_basis_shell_prim_coef (Ezfio.ezfio_array_of_list
+        Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| nucl_num |]
+          ~data:(
+          list_map (fun (_,n) -> Nucl_number.to_int n) basis
+          |> List.fold_left (fun accu i -> 
+            match accu with 
+            | [] -> []
+            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((h+1,i)::(h+1,j)::rest)
+          ) [(0,0)]
+          |> List.rev
+          |> List.map fst
+          )) ;
+        Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| nucl_num |]
+          ~data:(
+          list_map (fun (_,n) -> Nucl_number.to_int n) basis
+          |> List.fold_left (fun accu i -> 
+            match accu with 
+            | [] -> [(1,i)]
+            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((1,i)::(h,j)::rest)
+          ) []
+          |> List.rev
+          |> List.map fst
+          )) ;
+        Ezfio.set_basis_prim_coef (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
-        Ezfio.set_basis_shell_prim_expo (Ezfio.ezfio_array_of_list
+        Ezfio.set_basis_prim_expo (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
 
 
