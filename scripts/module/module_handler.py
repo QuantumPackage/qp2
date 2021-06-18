@@ -7,14 +7,17 @@ Usage:
     module_handler.py print_descendant      [<module_name>...]
     module_handler.py clean                 [ --all | <module_name>...]
     module_handler.py tidy                  [ --all | <module_name>...]
+    module_handler.py create_git_ignore     [ --all | <module_name>...]
 
 Options:
     print_descendant        Print the genealogy of the needed modules
     clean                   Used for ninja clean
     tidy                    A light version of clean, where only the intermediate
                             files are removed
+    create_git_ignore       deprecated
     NEED                    The path of NEED file.
                             by default try to open the file in the current path
+
 """
 import os
 import sys
@@ -212,7 +215,7 @@ if __name__ == '__main__':
         # Remove all produced ezfio_config files
         for filename in os.listdir( os.path.join(QP_EZFIO, "config") ):
             os.remove( os.path.join(QP_EZFIO, "config", filename) )
-            
+
 
     elif not arguments['<module_name>']:
         dir_ = os.getcwd()
@@ -237,7 +240,7 @@ if __name__ == '__main__':
 
         l_dir = ['IRPF90_temp', 'IRPF90_man']
         l_file = ["irpf90_entities", "tags", "irpf90.make", "Makefile",
-                  "Makefile.depend", ".ninja_log", ".ninja_deps", 
+                  "Makefile.depend", ".ninja_log", ".ninja_deps",
                   "ezfio_interface.irp.f"]
 
         for module in l_module:
