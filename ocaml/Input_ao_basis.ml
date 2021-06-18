@@ -9,7 +9,7 @@ module Ao_basis : sig
       ao_prim_num     : AO_prim_number.t array;
       ao_prim_num_max : AO_prim_number.t;
       ao_nucl         : Nucl_number.t array;
-      ao_power        : Symmetry.Xyz.t array;
+      ao_power        : Angmom.Xyz.t array;
       ao_coef         : AO_coef.t array;
       ao_expo         : AO_expo.t array;
       ao_cartesian    : bool;
@@ -32,7 +32,7 @@ end = struct
       ao_prim_num     : AO_prim_number.t array;
       ao_prim_num_max : AO_prim_number.t;
       ao_nucl         : Nucl_number.t array;
-      ao_power        : Symmetry.Xyz.t array;
+      ao_power        : Angmom.Xyz.t array;
       ao_coef         : AO_coef.t array;
       ao_expo         : AO_expo.t array;
       ao_cartesian    : bool;
@@ -87,7 +87,7 @@ end = struct
       if (data.(2*dim+i-1) > 0) then
         result.(i-1) <- result.(i-1)^"z"^(string_of_int data.(2*dim+i-1));
     done;
-    Array.map Symmetry.Xyz.of_string result
+    Array.map Angmom.Xyz.of_string result
   ;;
 
   let read_ao_coef () =
@@ -133,7 +133,7 @@ end = struct
     let ao_num = AO_number.to_int b.ao_num in
     let gto_array = Array.init (AO_number.to_int b.ao_num)
       (fun i ->
-        let s = Symmetry.Xyz.to_symmetry b.ao_power.(i) in
+        let s = Angmom.Xyz.to_symmetry b.ao_power.(i) in
         let ao_prim_num = AO_prim_number.to_int b.ao_prim_num.(i) in
         let prims = List.init ao_prim_num (fun j ->
           let prim = { GaussianPrimitive.sym  = s ;
@@ -217,9 +217,9 @@ end = struct
      let ao_power =
        let l = Array.to_list ao_power in 
        List.concat [
-         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.x) l) ;
-         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.y) l) ;
-         (list_map (fun a -> Positive_int.to_int a.Symmetry.Xyz.z) l) ]
+         (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.x) l) ;
+         (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.y) l) ;
+         (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.z) l) ]
      in
      Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
      ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
@@ -409,7 +409,7 @@ end = struct
       | [] -> []
       | (i,n,x)::tail  ->
           (Printf.sprintf " %5d  %6d     %-8s\n" i (Nucl_number.to_int n)
-            (Symmetry.Xyz.to_string x)
+            (Angmom.Xyz.to_string x)
           )::(do_work tail)
       in do_work l
       |> String.concat ""
@@ -496,7 +496,7 @@ md5                     = %s
     (b.ao_nucl |> Array.to_list |> list_map Nucl_number.to_string |>
       String.concat ", ")
     (b.ao_power |> Array.to_list |> list_map (fun x->
-      "("^(Symmetry.Xyz.to_string x)^")" )|> String.concat ", ")
+      "("^(Angmom.Xyz.to_string x)^")" )|> String.concat ", ")
     (b.ao_coef  |> Array.to_list |> list_map AO_coef.to_string
       |> String.concat ", ")
     (b.ao_expo  |> Array.to_list |> list_map AO_expo.to_string

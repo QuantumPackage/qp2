@@ -2,14 +2,14 @@ open Qptypes
 open Sexplib.Std
 
 type t =
-  { sym  : Symmetry.t ;
+  { sym  : Angmom.t ;
     expo : AO_expo.t ;
   } [@@deriving sexp]
 
 let to_string p =
   let { sym = s ; expo = e } = p in
   Printf.sprintf "(%s, %22e)"
-    (Symmetry.to_string s)
+    (Angmom.to_string s)
     (AO_expo.to_float e)
 
 

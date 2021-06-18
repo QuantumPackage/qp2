@@ -512,13 +512,14 @@ let run ?o b au c d m p cart xyz_file =
       let ao_num = List.length long_basis in
       Ezfio.set_ao_basis_ao_num ao_num;
       Ezfio.set_ao_basis_ao_basis b;
+      Ezfio.set_basis_basis b;
       let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
       and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
       and ao_power=
         let l = list_map (fun (x,_,_) -> x) long_basis in
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.x)) l)@
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.y)) l)@
-        (list_map (fun t -> Positive_int.to_int Symmetry.Xyz.(t.z)) l)
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.x)) l)@
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.y)) l)@
+        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.z)) l)
       in
       let ao_prim_num_max = List.fold_left (fun s x ->
         if x > s then x
@@ -561,6 +562,78 @@ let run ?o b au c d m p cart xyz_file =
       and ao_expo = create_expo_coef `Expos
       in
       let () =
+        let shell_num = List.length basis in
+        let lc : (GaussianPrimitive.t * Qptypes.AO_coef.t) list list =
+             list_map ( fun (g,_) -> g.Gto.lc ) basis
+        in
+        let ang_mom =
+          list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  -> 
+            let x, _ = List.hd l in
+            Angmom.to_l x.GaussianPrimitive.sym |> Qptypes.Positive_int.to_int
+             ) lc
+        in
+        let expo =
+          list_map (fun l -> list_map (fun (x,_) -> Qptypes.AO_expo.to_float x.GaussianPrimitive.expo) l ) lc
+          |> List.concat
+        in
+        let coef =
+          list_map (fun l -> 
+            list_map (fun (_,x) -> Qptypes.AO_coef.to_float x) l
+             ) lc
+          |> List.concat
+        in
+        let shell_prim_num =
+          list_map List.length  lc
+        in
+        let shell_prim_idx =
+          let rec aux count accu = function
+          | [] -> List.rev accu
+          | l::rest ->
+            let newcount = count+(List.length l) in
+            aux newcount (count::accu) rest
+          in
+          aux 1 [] lc
+        in
+        let prim_num = List.length coef in
+        Ezfio.set_basis_typ "Gaussian";
+        Ezfio.set_basis_shell_num shell_num;
+        Ezfio.set_basis_prim_num prim_num ;
+        Ezfio.set_basis_shell_prim_num  (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
+        Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
+        Ezfio.set_basis_shell_prim_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_idx) ;
+        Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| nucl_num |]
+          ~data:(
+          list_map (fun (_,n) -> Nucl_number.to_int n) basis
+          |> List.fold_left (fun accu i -> 
+            match accu with 
+            | [] -> []
+            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((h+1,i)::(h+1,j)::rest)
+          ) [(0,0)]
+          |> List.rev
+          |> List.map fst
+          )) ;
+        Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| nucl_num |]
+          ~data:(
+          list_map (fun (_,n) -> Nucl_number.to_int n) basis
+          |> List.fold_left (fun accu i -> 
+            match accu with 
+            | [] -> [(1,i)]
+            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((1,i)::(h,j)::rest)
+          ) []
+          |> List.rev
+          |> List.map fst
+          )) ;
+        Ezfio.set_basis_prim_coef (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
+        Ezfio.set_basis_prim_expo (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
+
+
         Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
         Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list

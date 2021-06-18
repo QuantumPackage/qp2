@@ -127,7 +127,9 @@ function zmq_port(ishift)
   END_DOC
   integer, intent(in)            :: ishift
   character*(8)                  :: zmq_port
+  !$OMP CRITICAL(write)
   write(zmq_port,'(I8)') zmq_port_start+ishift
+  !$OMP END CRITICAL(write)
   zmq_port = adjustl(trim(zmq_port))
 end
 
@@ -518,7 +520,9 @@ subroutine new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
   zmq_socket_pull      = new_zmq_pull_socket ()
+  !$OMP CRITICAL(write)
   write(name,'(A,I8.8)') trim(name_in)//'.', icount
+  !$OMP END CRITICAL(write)
   sze = len(trim(name))
   zmq_state = trim(name)
   call lowercase(name,sze)
@@ -582,7 +586,9 @@ subroutine end_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,name_in)
   integer, save                  :: icount=0
 
   icount = icount+1
+  !$OMP CRITICAL(write)
   write(name,'(A,I8.8)') trim(name_in)//'.', icount
+  !$OMP END CRITICAL(write)
   sze = len(trim(name))
   call lowercase(name,sze)
   if (name /= zmq_state) then
@@ -704,7 +710,9 @@ integer function disconnect_from_taskserver_state(zmq_to_qp_run_socket, worker_i
 
   disconnect_from_taskserver_state = -1
 
+  !$OMP CRITICAL(write)
   write(message,*) 'disconnect '//trim(state), worker_id
+  !$OMP END CRITICAL(write)
 
   sze = min(510,len(trim(message)))
   rc = f77_zmq_send(zmq_to_qp_run_socket, trim(message), sze, 0)
@@ -781,7 +789,9 @@ integer function zmq_abort(zmq_to_qp_run_socket)
   character*(512)                :: message
   zmq_abort = 0
 
+  !$OMP CRITICAL(write)
   write(message,*) 'abort '
+  !$OMP END CRITICAL(write)
 
 
   sze = len(trim(message))
@@ -823,7 +833,9 @@ integer function task_done_to_taskserver(zmq_to_qp_run_socket, worker_id, task_i
 
   task_done_to_taskserver = 0
 
+  !$OMP CRITICAL(write)
   write(message,*) 'task_done '//trim(zmq_state), worker_id, task_id
+  !$OMP END CRITICAL(write)
 
   sze = len(trim(message))
   rc = f77_zmq_send(zmq_to_qp_run_socket, trim(message), sze, 0)
@@ -856,9 +868,11 @@ integer function tasks_done_to_taskserver(zmq_to_qp_run_socket, worker_id, task_
 
   tasks_done_to_taskserver = 0
 
+  !$OMP CRITICAL(write)
   allocate(character(LEN=64+n_tasks*12) :: message)
   write(fmt,*) '(A,X,A,I10,X,', n_tasks, '(I11,1X))'
   write(message,*) 'task_done '//trim(zmq_state), worker_id, (task_id(k), k=1,n_tasks)
+  !$OMP END CRITICAL(write)
 
   sze = len(trim(message))
   rc = f77_zmq_send(zmq_to_qp_run_socket, trim(message), sze, 0)
@@ -900,7 +914,9 @@ integer function get_task_from_taskserver(zmq_to_qp_run_socket,worker_id,task_id
 
   get_task_from_taskserver = 0
 
+  !$OMP CRITICAL(write)
   write(message,*) 'get_task '//trim(zmq_state), worker_id
+  !$OMP END CRITICAL(write)
 
   sze = len(trim(message))
   rc = f77_zmq_send(zmq_to_qp_run_socket, message, sze, 0)
@@ -961,7 +977,9 @@ integer function get_tasks_from_taskserver(zmq_to_qp_run_socket,worker_id,task_i
 
   get_tasks_from_taskserver = 0
 
+  !$OMP CRITICAL(write)
   write(message,'(A,A,X,I10,I10)') 'get_tasks ', trim(zmq_state), worker_id, n_tasks
+  !$OMP END CRITICAL(write)
 
   sze = len(trim(message))
   rc = f77_zmq_send(zmq_to_qp_run_socket, message, sze, 0)
@@ -1061,7 +1079,9 @@ integer function zmq_delete_task(zmq_to_qp_run_socket,zmq_socket_pull,task_id,mo
 
   zmq_delete_task = 0
 
+  !$OMP CRITICAL(write)
   write(message,*) 'del_task ', zmq_state, task_id
+  !$OMP END CRITICAL(write)
   rc = f77_zmq_send(zmq_to_qp_run_socket,trim(message),len(trim(message)),0)
   if (rc /= len(trim(message))) then
     zmq_delete_task = -1
@@ -1101,7 +1121,9 @@ integer function zmq_delete_task_async_send(zmq_to_qp_run_socket,task_id,sending
   endif
   zmq_delete_task_async_send = 0
 
+  !$OMP CRITICAL(write)
   write(message,*) 'del_task ', zmq_state, task_id
+  !$OMP END CRITICAL(write)
   rc = f77_zmq_send(zmq_to_qp_run_socket,trim(message),len(trim(message)),0)
   if (rc /= len(trim(message))) then
     zmq_delete_task_async_send = -1
@@ -1159,8 +1181,10 @@ integer function zmq_delete_tasks(zmq_to_qp_run_socket,zmq_socket_pull,task_id,n
 
   allocate(character(LEN=64+n_tasks*12) :: message)
 
+  !$OMP CRITICAL(write)
   write(fmt,*) '(A,1X,A,1X,', n_tasks, '(I11,1X))'
   write(message,*) 'del_task '//trim(zmq_state), (task_id(k), k=1,n_tasks)
+  !$OMP END CRITICAL(write)
 
 
   rc = f77_zmq_send(zmq_to_qp_run_socket,trim(message),len(trim(message)),0)
@@ -1206,8 +1230,10 @@ integer function zmq_delete_tasks_async_send(zmq_to_qp_run_socket,task_id,n_task
 
   allocate(character(LEN=64+n_tasks*12) :: message)
 
+  !$OMP CRITICAL(write)
   write(fmt,*) '(A,1X,A,1X,', n_tasks, '(I11,1X))'
   write(message,*) 'del_task '//trim(zmq_state), (task_id(k), k=1,n_tasks)
+  !$OMP END CRITICAL(write)
 
 
   rc = f77_zmq_send(zmq_to_qp_run_socket,trim(message),len(trim(message)),0)

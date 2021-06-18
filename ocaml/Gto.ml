@@ -9,7 +9,7 @@ type fmt =
 | Gaussian
 
 type t =
-{ sym  : Symmetry.t ;
+{ sym  : Angmom.t ;
   lc   : ((GaussianPrimitive.t * AO_coef.t) list)
 } [@@deriving sexp]
 
@@ -47,7 +47,7 @@ let read_one in_channel =
   in
   let sym_str = String.sub buffer 0 2 in
   let   n_str = String.sub buffer 2 ((String.length buffer)-2) in
-  let sym = Symmetry.of_string (String_ext.strip sym_str) in
+  let sym = Angmom.of_string (String_ext.strip sym_str) in
   let n = int_of_string (String_ext.strip n_str) in
   (* Read all the primitives *)
   let rec read_lines result = function
@@ -82,7 +82,7 @@ let read_one in_channel =
 (** Write the GTO in Gamess format *)
 let to_string_gamess { sym = sym ; lc = lc } =
   let result =
-    Printf.sprintf "%s %3d" (Symmetry.to_string sym) (List.length lc)
+    Printf.sprintf "%s %3d" (Angmom.to_string sym) (List.length lc)
   in
   let rec do_work accu i = function
   | [] -> List.rev accu
@@ -102,7 +102,7 @@ let to_string_gamess { sym = sym ; lc = lc } =
 (** Write the GTO in Gaussian format *)
 let to_string_gaussian { sym = sym ; lc = lc } =
   let result =
-    Printf.sprintf "%s %3d   1.00" (Symmetry.to_string sym) (List.length lc)
+    Printf.sprintf "%s %3d   1.00" (Angmom.to_string sym) (List.length lc)
   in
   let rec do_work accu i = function
   | [] -> List.rev accu
