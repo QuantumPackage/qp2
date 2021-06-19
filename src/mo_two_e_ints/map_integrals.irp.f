@@ -298,10 +298,6 @@ end
  banned_excitation = .False.
  use_banned_excitation = .False.
 
- ! DEACTIVATED
- return
- ! DEACTIVATED
-
  integer :: i,j, icount
  integer(key_kind)              :: idx
  double precision :: tmp
