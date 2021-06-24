@@ -42,7 +42,7 @@ END_PROVIDER
    logical                        :: converged
    logical                        :: do_csf
 
-   PROVIDE threshold_davidson nthreads_davidson
+   PROVIDE threshold_davidson nthreads_davidson distributed_davidson
    ! Guess values for the "N_states" states of the |CI| eigenvectors
    do j=1,min(N_states,N_det)
      do i=1,N_det
