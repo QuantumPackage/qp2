@@ -40,16 +40,19 @@ END_PROVIDER
 
   do i=1,ao_num
 
-    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
-    powA(2) = 0
-    powA(3) = 0
+!    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
+!    powA(2) = 0
+!    powA(3) = 0
+    powA(1) = ao_power(i,1)
+    powA(2) = ao_power(i,2)
+    powA(3) = ao_power(i,3)
 
     ! Normalization of the primitives
     if (primitives_normalized) then
       do j=1,ao_prim_num(i)
         call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
            powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-        ao_coef_normalized(i,j) = ao_coef(i,j)/sqrt(norm)
+        ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
       enddo
     else
       do j=1,ao_prim_num(i)
@@ -70,7 +73,7 @@ END_PROVIDER
           norm = norm+c*ao_coef_normalized(i,j)*ao_coef_normalized(i,k)
         enddo
       enddo
-      ao_coef_normalization_factor(i) = 1.d0/sqrt(norm)
+      ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
     else
       ao_coef_normalization_factor(i) = 1.d0
     endif
