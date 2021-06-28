@@ -13,7 +13,7 @@ subroutine run_stochastic_cipsi
 
   double precision :: rss
   double precision, external :: memory_of_double
-  PROVIDE H_apply_buffer_allocated
+  PROVIDE H_apply_buffer_allocated distributed_davidson mo_two_e_integrals_in_map
 
   N_iter = 1
   threshold_generators = 1.d0
