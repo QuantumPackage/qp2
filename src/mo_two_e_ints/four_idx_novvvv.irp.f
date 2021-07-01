@@ -51,6 +51,13 @@ end
 
 
 subroutine four_idx_novvvv
+  print*,'********'
+  print*,'********'
+  print*,'********'
+  print*,'WARNING :: Using four_idx_novvvv, and we are not sure that this routine is not bugged ...'
+  print*,'********'
+  print*,'********'
+  print*,'********'
   use map_module
   implicit none
   BEGIN_DOC
