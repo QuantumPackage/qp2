@@ -434,6 +434,9 @@ subroutine hcalc_template(v,u,N_st,sze)
       v(i,istate) += H_matrix_all_dets(j,i) * u(j,istate)
     enddo
    enddo
+   do i = 1, sze
+    v(i,istate) += u(i,istate) * nuclear_repulsion
+   enddo
   enddo
 end
 

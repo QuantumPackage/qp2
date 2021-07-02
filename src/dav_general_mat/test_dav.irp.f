@@ -31,12 +31,13 @@ subroutine routine
   do j = 1, sze
    h_mat(j,i) = H_matrix_all_dets(j,i)
   enddo
-  H_jj(i) = H_mat(i,i)
+  H_jj(i) = H_mat(i,i) + nuclear_repulsion
+  h_mat(i,i) = H_mat(i,i) + nuclear_repulsion
  enddo
  provide nthreads_davidson
  call davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,h_mat)
- print*,'energies = ',energies + nuclear_repulsion
+ print*,'energies = ',energies 
  call davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,hcalc_template)
- print*,'energies = ',energies + nuclear_repulsion
+ print*,'energies = ',energies 
 end
 
