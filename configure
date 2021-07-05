@@ -82,7 +82,6 @@ function execute () {
 }
 
 PACKAGES=""
-OCAML_PACKAGES="ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt"
 
 while true ; do
     case "$1" in
@@ -299,55 +298,8 @@ EOF
 
     elif [[ ${PACKAGE} = ocaml ]] ; then
 
-            download ${OCAML_URL} "${QP_ROOT}"/external/opam_installer.sh
-
-            if [[ -n ${TRAVIS} ]] ; then
-                # Special commands for Travis CI
-                chmod +x "${QP_ROOT}"/external/opam_installer.sh
-                rm --force ${QP_ROOT}/bin/opam
-                if [[ -n ${NO_CACHE} ]] ; then
-                        rm -rf ${HOME}/.opam
-                fi
-                export OPAMROOT=${HOME}/.opam
-                cat << EOF | bash ${QP_ROOT}/external/opam_installer.sh --no-backup
-${QP_ROOT}/bin
-
-
-
-EOF
-
-                rm ${QP_ROOT}/external/opam_installer.sh
-#                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#
-#                opam switch create ocaml-base-compiler.4.11.1
-                opam init --verbose --yes --compiler=4.11.1 --disable-sandboxing
-
-                eval $(opam env)
-                opam install -y ${OCAML_PACKAGES}  || exit 1
-
-            else
-                # Conventional commands
-                execute << EOF
-                  chmod +x "${QP_ROOT}"/external/opam_installer.sh
-                  "${QP_ROOT}"/external/opam_installer.sh --no-backup
-EOF
-                execute << EOF
-                  rm --force ${QP_ROOT}/bin/opam
-                  export OPAMROOT=${OPAMROOT:-${QP_ROOT}/external/opam}
-                  echo ${QP_ROOT}/bin \
-                  | sh ${QP_ROOT}/external/opam_installer.sh
-EOF
-                rm ${QP_ROOT}/external/opam_installer.sh
-#                source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
-#                opam switch create ocaml-base-compiler.4.11.1     || exit 1
-
-                opam init --verbose --yes --compiler=4.11.1 --disable-sandboxing
-                eval $(opam env)
-                execute << EOF
-                  opam install -y \${OCAML_PACKAGES}  || exit 1
-EOF
-            fi
-
+            cd "${QP_ROOT}"/external/
+            ./ocaml-bundle.sh
 
     elif [[ ${PACKAGE} = bse ]] ; then
 
