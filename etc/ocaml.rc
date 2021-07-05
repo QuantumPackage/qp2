@@ -5,8 +5,9 @@ then
 
   # Comment these lines if you have a system-wide OCaml installation
   export PATH="${QP_ROOT}/external/ocaml-bundle/bootstrap/bin:$PATH"
-  eval $(opam env --root "${QP_ROOT}/external/ocaml-bundle/opam" --set-root)
-
+  if [[ -f "${QP_ROOT}/external/ocaml-bundle/bootstrap/bin/opam" ]] ; then
+    eval $(opam env --root "${QP_ROOT}/external/ocaml-bundle/opam" --set-root) 
+  fi
 fi
 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
