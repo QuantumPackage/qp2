@@ -18,18 +18,6 @@ export CC=gcc
 git submodule init
 git submodule update
 
-# /!\ When updating version, update also etc files
-BATS_URL="https://github.com/bats-core/bats-core/archive/v1.1.0.tar.gz"
-DOCOPT_URL="https://github.com/docopt/docopt/archive/0.6.2.tar.gz"
-BSE_URL="https://github.com/MolSSI-BSE/basis_set_exchange/archive/v0.8.11.tar.gz"
-F77ZMQ_URL="https://github.com/scemama/f77_zmq/archive/v4.2.5.tar.gz"
-NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip"
-OCAML_URL="https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh"
-RESULTS_URL="https://gitlab.com/scemama/resultsFile/-/archive/v2.0/resultsFile-v2.0.tar.gz"
-ZEROMQ_URL="https://github.com/zeromq/libzmq/releases/download/v4.2.5/zeromq-4.2.5.tar.gz"
-ZLIB_URL="https://www.zlib.net/zlib-1.2.11.tar.gz"
-
-
 function help()
 {
     cat <<EOF
@@ -39,16 +27,12 @@ Usage:
   $(basename $0) -c <file>    | --config=<file>
   $(basename $0) -h           | --help
   $(basename $0) -i <package> | --install=<package>
-  $(basename $0) -d <package> | --download=<package>
 
 Options:
   -c, --config=<file>      Define a COMPILATION configuration file,
                            in "${QP_ROOT}/config/".
   -h, --help               Print the HELP message
   -i, --install=<package>  INSTALL <package>. Use at your OWN RISK:
-                           no support will be provided for the installation of
-                           dependencies.
-  -d, --download=<package> DOWNLOAD <package>. Use at your OWN RISK:
                            no support will be provided for the installation of
                            dependencies.
 
@@ -102,14 +86,6 @@ while true ; do
             case "$2" in
                 "") help ; break;;
                 *) PACKAGES="${PACKAGE} $2"
-                   DO_INSTALL=1
-            esac
-            shift 2;;
-        -d|--download)
-            case "$2" in
-                "") help ; break;;
-                *) PACKAGES="${PACKAGE} $2"
-                   DO_DOWNLOAD=1
             esac
             shift 2;;
         -h|-help|--help)
@@ -141,16 +117,6 @@ function success() {
         echo ""
         echo "Configuration successful."
         exit 0
-}
-
-function download() {
-        echo "Downloading $1"
-        echo ""
-        printf "\e[0;34m"
-        wget --no-check-certificate $1 --output-document=$2 || error "Unable to download $1"
-        printf "\e[m"
-        echo "Saved dowloaded file as $2"
-        echo ""
 }
 
 function not_found() {
@@ -222,61 +188,41 @@ for PACKAGE in ${PACKAGES} ; do
 
     if [[ ${PACKAGE} = ninja ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${NINJA_URL} "${QP_ROOT}"/external/ninja.zip
-         fi
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              unzip "\${QP_ROOT}"/external/ninja.zip -d "\${QP_ROOT}"/bin
+              unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja.zip -d "\${QP_ROOT}"/bin
 EOF
-         fi
 
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --bzip2 --extract --file gmp-6.1.2.tar.bz2
+              tar --bzip2 --extract --file qp2-dependencies/gmp-6.1.2.tar.bz2
               cd gmp-6.1.2
               ./configure --prefix=$QP_ROOT && make -j 8
-              make install
+              make -j 8 install
 EOF
-         fi
 
     elif [[ ${PACKAGE} = zeromq ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${ZEROMQ_URL} "${QP_ROOT}"/external/zeromq.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               export CC=gcc
               export CXX=g++
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file zeromq.tar.gz
-              rm zeromq.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/zeromq-4.2.5.tar.gz
               cd zeromq-*
               ./configure --prefix="\$QP_ROOT" --without-libsodium --enable-libunwind=no
-              make
+              make -j 8
               make install
 EOF
-         fi
 
 
     elif [[ ${PACKAGE} = f77zmq ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${F77ZMQ_URL} "${QP_ROOT}"/external/f77_zmq.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file f77_zmq.tar.gz
-              rm f77_zmq.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/f77_zmq-4.2.5.tar.gz
               cd f77_zmq-*
               export ZMQ_H="\$QP_ROOT"/include/zmq.h
               make
@@ -284,100 +230,61 @@ EOF
               cp libf77zmq.so "\${QP_ROOT}"/lib
               cp f77_zmq_free.h "\${QP_ROOT}"/include
 EOF
-         fi
 
 
     elif [[ ${PACKAGE} = ocaml ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${OCAML_URL} "${QP_ROOT}"/external/ocaml-bundle.sh
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
+         execute <<EOF
+            source "${QP_ROOT}"/quantum_package.rc
             cd "${QP_ROOT}"/external/
-            cat << EOF | ./ocaml-bundle.sh
-
+            tar --gunzip --extract --file qp2-dependencies/ocaml-bundle_x86.tar.gz
+            echo | ./ocaml-bundle/compile.sh "${QP_ROOT}"
 
 EOF
-         fi
 
     elif [[ ${PACKAGE} = bse ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${BSE_URL} "${QP_ROOT}"/external/bse.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file bse.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/bse-v0.8.11.tar.gz
               pip install -e basis_set_exchange-*
 EOF
-         fi
 
     elif [[ ${PACKAGE} = zlib ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${ZLIB_URL} "${QP_ROOT}"/external/zlib.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file zlib.tar.gz
-              rm zlib.tar.gz && \
+              tar --gunzip --extract --file qp2-dependencies/zlib-1.2.11.tar.gz
               cd zlib-*/
               ./configure --prefix=${QP_ROOT} && \
               make && make install
 EOF
-         fi
 
 
     elif [[ ${PACKAGE} = docopt ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${DOCOPT_URL} "${QP_ROOT}"/external/docopt.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file docopt.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/docopt-0.6.2.tar.gz
               mv docopt-*/docopt.py "\${QP_ROOT}/external/Python"
-              rm --recursive --force -- docopt-*/ docopt.tar.gz
 EOF
-         fi
 
 
     elif [[ ${PACKAGE} = resultsFile ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${RESULTS_URL} "${QP_ROOT}"/external/resultsFile.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file resultsFile.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/resultsFile-v2.0.tar.gz
               mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
-              rm --recursive --force resultsFile-* resultsFile.tar.gz
 EOF
-         fi
 
     elif [[ ${PACKAGE} = bats ]] ; then
 
-         if [[ $DO_DOWNLOAD == 1 ]] ; then
-            download ${BATS_URL} "${QP_ROOT}"/external/bats.tar.gz
-         fi
-
-         if [[ $DO_INSTALL == 1 ]] ; then
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar -zxf bats.tar.gz
+              tar -zxf qp2-dependencies/bats-v1.1.0.tar.gz
               ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
-              rm --recursive --force -- bats-core-1.1.0 \  "\${QP_ROOT}"/external/bats.tar.gz
 EOF
-         fi
 
     else
         error "${PACKAGE} unknown."

@@ -4,3 +4,6 @@
 [submodule "external/irpf90"]
 	path = external/irpf90
 	url = https://gitlab.com/scemama/irpf90.git
+[submodule "external/qp2-dependencies"]
+	path = external/qp2-dependencies
+	url = git@github.com:QuantumPackage/qp2-dependencies.git
