@@ -151,6 +151,10 @@ function find_dir() {
         fi
 }
 
+# Make program believe stdin is a tty
+function faketty() {
+  script -qfc "$(printf "%q " "$@")" /dev/null
+}
 
 # Install IRPF90 if needed
 IRPF90=$(find_exe irpf90)
@@ -190,7 +194,7 @@ for PACKAGE in ${PACKAGES} ; do
 
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja.zip -d "\${QP_ROOT}"/bin
+              unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja-linux.zip -d "\${QP_ROOT}"/bin
 EOF
 
 
@@ -238,8 +242,9 @@ EOF
             source "${QP_ROOT}"/quantum_package.rc
             cd "${QP_ROOT}"/external/
             tar --gunzip --extract --file qp2-dependencies/ocaml-bundle_x86.tar.gz
-            echo | ./ocaml-bundle/compile.sh "${QP_ROOT}"
-
+            echo "" | faketty ./ocaml-bundle/bootstrap.sh "${QP_ROOT}"
+            echo n  | faketty ./ocaml-bundle/configure.sh "${QP_ROOT}"
+            echo "" | faketty ./ocaml-bundle/compile.sh "${QP_ROOT}"
 EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then
