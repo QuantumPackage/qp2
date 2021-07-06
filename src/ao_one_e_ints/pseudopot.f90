@@ -666,7 +666,7 @@ double precision int_prod_bessel_loc,binom_func,accu,prod,ylm,bigI,arg
  ac=dsqrt((a(1)-c(1))**2+(a(2)-c(2))**2+(a(3)-c(3))**2)
  bc=dsqrt((b(1)-c(1))**2+(b(2)-c(2))**2+(b(3)-c(3))**2)
  arg=g_a*ac**2+g_b*bc**2
- if(arg.gt.-dlog(10.d-20))then
+ if(arg.gt.-dlog(1.d-20))then
    Vloc=0.d0
    return
  endif
@@ -1839,7 +1839,7 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
     m_1 = m+m+1
     nlm = n+m+l
     pi=dacos(-1.d0)
-    a_over_b_square = (a/b)**2
+    a_over_b_square = (a*a)/(b*b)
 
     ! First term of the sequence
 
