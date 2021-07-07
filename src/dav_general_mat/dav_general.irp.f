@@ -237,7 +237,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
           call ortho_qr(U,size(U,1),sze,shift2)
 
 !            call H_S2_u_0_nstates_openmp(W(1,shift+1),U(1,shift+1),N_st_diag,sze)
-            call hpsi                   (W(1,shift+1),U(1,shift+1),N_st_diag,sze,h_mat)
+            call hpsi(W(1,shift+1),U(1,shift+1),N_st_diag,sze,h_mat)
       else
          ! Already computed in update below
          continue
