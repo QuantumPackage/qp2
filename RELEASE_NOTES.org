@@ -83,9 +83,7 @@
     - Added LIB file to add extra libs in plugin
     - Using Intel IPP for sorting when using Intel compiler
     - Removed parallelism in sorting
-
-    ao_one_e_integral_zero
-    banned_excitations
+    - Compute banned_excitations from exchange integrals to accelerate with local MOs
 
 
 

@@ -31,7 +31,7 @@ try:
     from docopt import docopt
     from qp_path import QP_SRC, QP_ROOT, QP_PLUGINS, QP_EZFIO
 except ImportError:
-    print("source .quantum_package.rc")
+    print("source quantum_package.rc")
     raise
 
 

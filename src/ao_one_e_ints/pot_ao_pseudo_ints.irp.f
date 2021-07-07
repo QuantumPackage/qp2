@@ -37,26 +37,58 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   integer                        :: num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,n_pt_in,m
+  integer                        :: i,j,k,l,m
   double precision               :: Vloc, Vpseudo
 
-  double precision               :: cpu_1, cpu_2, wall_1, wall_2, wall_0
+  double precision               :: wall_1, wall_2, wall_0
   integer                        :: thread_num
   integer                        :: omp_get_thread_num
+  double precision               :: c
+  double precision               :: Z
+
+  PROVIDE ao_coef_normalized_ordered_transp
+  PROVIDE pseudo_v_k_transp pseudo_n_k_transp pseudo_klocmax pseudo_dz_k_transp
 
   ao_pseudo_integrals_local = 0.d0
 
   print*, 'Providing the nuclear electron pseudo integrals (local)'
 
-  call wall_time(wall_1)
-  call cpu_time(cpu_1)
+  ! Dummy iteration for OpenMP
+  j=1
+  i=1
+  l=1
+  m=1
+  num_A = ao_nucl(j)
+  power_A(1:3)= ao_power(j,1:3)
+  A_center(1:3) = nucl_coord(num_A,1:3)
+  num_B = ao_nucl(i)
+  power_B(1:3)= ao_power(i,1:3)
+  B_center(1:3) = nucl_coord(num_B,1:3)
+  alpha = ao_expo_ordered_transp(l,j)
+  beta = ao_expo_ordered_transp(m,i)
+  c = 0.d0
+  do  k = 1, nucl_num
+    Z = nucl_charge(k)
 
+    C_center(1:3) = nucl_coord(k,1:3)
+
+    c = c + Vloc(pseudo_klocmax,                                     &
+        pseudo_v_k_transp (1,k),                                     &
+        pseudo_n_k_transp (1,k),                                     &
+        pseudo_dz_k_transp(1,k),                                     &
+        A_center,power_A,alpha,B_center,power_B,beta,C_center)
+
+  enddo
+
+
+  ao_pseudo_integrals_local = 0.d0
+  call wall_time(wall_1)
 
   thread_num = 0
   !$OMP PARALLEL                                                     &
       !$OMP DEFAULT (NONE)                                           &
       !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
-      !$OMP          num_A,num_B,Z,c,n_pt_in,                        &
+      !$OMP          num_A,num_B,Z,c,                                &
       !$OMP          wall_0,wall_2,thread_num)                       &
       !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,nucl_coord,ao_coef_normalized_ordered_transp,&
       !$OMP         ao_pseudo_integrals_local,nucl_num,nucl_charge,   &
@@ -66,7 +98,7 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   !$ thread_num = omp_get_thread_num()
 
   wall_0 = wall_1
-  !$OMP DO SCHEDULE (guided)
+  !$OMP DO
 
   do j = 1, ao_num
 
@@ -85,7 +117,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
 
         do m=1,ao_prim_num(i)
           beta = ao_expo_ordered_transp(m,i)
-          double precision               :: c
           c = 0.d0
 
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
@@ -93,7 +124,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
             cycle
           endif
           do  k = 1, nucl_num
-            double precision               :: Z
             Z = nucl_charge(k)
 
             C_center(1:3) = nucl_coord(k,1:3)
@@ -137,25 +167,28 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   integer                        :: num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,n_pt_in,m
+  integer                        :: i,j,k,l,m
   double precision               :: Vloc, Vpseudo
   integer                        :: omp_get_thread_num
 
-  double precision               :: cpu_1, cpu_2, wall_1, wall_2, wall_0
+  double precision               :: wall_1, wall_2, wall_0
   integer                        :: thread_num
+  double precision               :: c
+  double precision               :: Z
 
+  PROVIDE ao_coef_normalized_ordered_transp
+  PROVIDE pseudo_lmax pseudo_kmax pseudo_v_kl_transp pseudo_n_kl_transp pseudo_dz_kl_transp
   ao_pseudo_integrals_non_local = 0.d0
 
   print*, 'Providing the nuclear electron pseudo integrals (non-local)'
 
   call wall_time(wall_1)
-  call cpu_time(cpu_1)
   thread_num = 0
 
   !$OMP PARALLEL                                                     &
       !$OMP DEFAULT (NONE)                                           &
       !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
-      !$OMP          num_A,num_B,Z,c,n_pt_in,                        &
+      !$OMP          num_A,num_B,Z,c,                                &
       !$OMP          wall_0,wall_2,thread_num)                       &
       !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,nucl_coord,ao_coef_normalized_ordered_transp,&
       !$OMP         ao_pseudo_integrals_non_local,nucl_num,nucl_charge,&
@@ -184,7 +217,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
 
         do m=1,ao_prim_num(i)
           beta = ao_expo_ordered_transp(m,i)
-          double precision               :: c
           c = 0.d0
 
           if (dabs(ao_coef_normalized_ordered_transp(l,j)*ao_coef_normalized_ordered_transp(m,i))&
@@ -193,7 +225,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
           endif
 
           do  k = 1, nucl_num
-            double precision               :: Z
             Z = nucl_charge(k)
 
             C_center(1:3) = nucl_coord(k,1:3)
