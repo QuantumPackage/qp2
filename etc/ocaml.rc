@@ -4,8 +4,10 @@ if [[ -z $OPAMROOT ]]
 then
 
   # Comment these lines if you have a system-wide OCaml installation
-  export OPAMROOT=${QP_ROOT}/external/opam
-
+  export PATH="${QP_ROOT}/external/ocaml-bundle/bootstrap/bin:$PATH"
+  if [[ -f "${QP_ROOT}/external/ocaml-bundle/bootstrap/bin/opam" ]] ; then
+    eval $(opam env --root "${QP_ROOT}/external/ocaml-bundle/opam" --set-root) 
+  fi
 fi
 source ${OPAMROOT}/opam-init/init.sh > /dev/null 2> /dev/null || true
 
