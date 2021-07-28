@@ -161,3 +161,23 @@
   enddo
  enddo
  END_PROVIDER
+
+ BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_3, (3,n_points_final_grid,mo_num)]
+ implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
+ integer :: i,j,m
+ double precision :: mos_array(mo_num), r(3)
+ double precision :: mos_grad_array(3,mo_num)
+ do m = 1, 3
+  do j = 1, mo_num
+   do i = 1, n_points_final_grid
+    mos_grad_in_r_array_transp_3(m,i,j) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
+

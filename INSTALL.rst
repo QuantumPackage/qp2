@@ -20,13 +20,15 @@ Before anything, go into your :file:`quantum_package` directory and run
 
 This script will create the :file:`quantum_package.rc` bash script, which
 sets all the environment variables required for the normal operation of the
-*Quantum Package*.
+*Quantum Package*. It will also initialize the git submodules that are
+required, and tell you which external dependencies are missing and need to be
+installed. The required dependencies are located in the
+`external/qp2-dependencies` directory, such that once QP is configured the
+internet connection is not needed any more.
 
-Running this script will also tell you which external dependencies are missing
-and need to be installed.
-
-When all dependencies have been installed, ( the :command:`configure` will tell you)
-source the :file:`quantum_package.rc` in order to load all environment variables and compile the |QP|.
+When all dependencies have been installed, (the :command:`configure` will
+inform you) source the :file:`quantum_package.rc` in order to load all
+environment variables and compile the |QP|.
 
 Now all the requirements are met, you can compile the programs using
 
@@ -51,8 +53,6 @@ Requirements
 - |ZeroMQ| : networking library
 - `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
 - |OCaml| compiler with |OPAM| package manager
-- `Bubblewrap <https://github.com/projectatomic/bubblewrap>`_ : Sandboxing tool required by Opam
-- `libcap <https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git>`_ : POSIX capabilities required by Bubblewrap
 - |Ninja| : a parallel build system
 - |pkg-config| : a tool which returns information about installed libraries
 
@@ -95,9 +95,7 @@ The following packages are supported by the :command:`configure` installer:
 * zeromq
 * f77zmq
 * gmp
-* libcap
-* bwrap
-* ocaml  ( :math:`\approx` 10 minutes)
+* ocaml  (:math:`\approx` 5 minutes)
 * ezfio
 * docopt
 * resultsFile
@@ -111,19 +109,21 @@ Example:
 
 .. note::
 
-   When installing the ocaml package, you will be asked the location of where it should be installed.
-   A safe option is to enter the path proposed by the |QP|:
+  When installing the ocaml package, you will be asked the location of where
+  it should be installed.  A safe option is to enter the path proposed by the
+  |QP|:
 
-   QP>> Please install it here: /your_quantum_package_directory/bin
+  QP>> Please install it here: /your_quantum_package_directory/bin
 
-   So just enter the proposition of the |QP| and press enter.
+  So just enter the proposition of the |QP| and press enter.
 
 
 If the :command:`configure` executable fails to install a specific dependency
 -----------------------------------------------------------------------------
 
-If the :command:`configure` executable does not succeed to install a specific dependency,
-there are some proposition of how to download and install the minimal dependencies to compile and use the |QP|.
+If the :command:`configure` executable does not succeed to install a specific
+dependency, there are some proposition of how to download and install the
+minimal dependencies to compile and use the |QP|.
 
 
 Before doing anything below, try to install the packages with your package manager
