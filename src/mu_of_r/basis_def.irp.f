@@ -76,7 +76,11 @@ BEGIN_PROVIDER [integer, n_basis_orb]
  !
  ! It corresponds to all MOs except those defined as "deleted" 
  END_DOC
- n_basis_orb = n_all_but_del_orb
+ if(mu_of_r_potential == "pure_act")then
+  n_basis_orb = n_act_orb
+ else
+  n_basis_orb = n_all_but_del_orb
+ endif
 END_PROVIDER 
 
 BEGIN_PROVIDER [integer, list_basis, (n_basis_orb)]
@@ -89,9 +93,15 @@ BEGIN_PROVIDER [integer, list_basis, (n_basis_orb)]
  ! It corresponds to all MOs except those defined as "deleted" 
  END_DOC
  integer :: i
- do i = 1, n_all_but_del_orb
-   list_basis(i) = list_all_but_del_orb(i)
- enddo
+ if(mu_of_r_potential == "pure_act")then
+  do i = 1, n_act_orb
+   list_basis(i) = list_act(i)
+  enddo
+ else
+  do i = 1, n_all_but_del_orb
+    list_basis(i) = list_all_but_del_orb(i)
+  enddo
+ endif
 END_PROVIDER 
 
 BEGIN_PROVIDER [double precision, basis_mos_in_r_array, (n_basis_orb,n_points_final_grid)]
