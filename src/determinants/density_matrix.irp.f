@@ -415,6 +415,14 @@ END_PROVIDER
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, one_e_dm_ao, (ao_num, ao_num)]
+ implicit none
+   BEGIN_DOC
+   !  one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
+   END_DOC
+    one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
+END_PROVIDER 
+
 
 subroutine get_occupation_from_dets(istate,occupation)
   implicit none
