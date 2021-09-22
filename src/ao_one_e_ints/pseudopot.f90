@@ -1869,21 +1869,16 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
       qk = dble(q)
       two_qkmp1 = 2.d0*(qk+mk)+1.d0
       do k=0,q-1
-        ! possible FPE here. To be checked
+        if (s_q_k < 1.d-32) then
+          s_q_k = 0.d0
+          exit
+        endif
         s_q_k = two_qkmp1*qk*inverses(k)*s_q_k
-!        if (s_q_k < 1.d-32) then
-!          s_q_k = 0.d0
-!          exit
-!        endif
         sum=sum+s_q_k
         two_qkmp1 = two_qkmp1-2.d0
         qk = qk-1.d0
       enddo
       inverses(q) = a_over_b_square/(dble(q+n+q+n+3) * dble(q+1))
-!      do k=0,q
-!        sum=sum+s_q_k
-!        s_q_k = a_over_b_square * ( dble(2*(q-k+m)+1)*dble(q-k)/(dble(2*(k+n)+3) * dble(k+1)) ) * s_q_k
-!      enddo
 
       int=int+sum
 
@@ -1892,7 +1887,6 @@ double precision function int_prod_bessel(l,gam,n,m,a,b,arg)
       else
 
         !Compute the s_q+1_0
-!        s_q_0=s_q_0*(2.d0*q+nlm+1)*b**2/((2.d0*(m+q)+3)*4.d0*(q+1)*gam)
         s_q_0=s_q_0*(q+q+nlm+1)*b*b/(dble(8*(m+q)+12)*(q+1)*gam)
 
         if(mod(n+m+l,2).eq.1)s_q_0=s_q_0*dsqrt(pi*.5d0)

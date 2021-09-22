@@ -3,6 +3,7 @@
  implicit none
  BEGIN_DOC
  ! \Delta_{state-specific}. \Psi
+ ! Diagonal element is divided by 2 because Delta = D + D^t
  END_DOC
 
  integer :: i,ii,k,j, l

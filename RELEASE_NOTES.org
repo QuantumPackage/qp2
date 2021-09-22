@@ -30,6 +30,7 @@
   - Fixed bug in DIIS
   - Fixed bug in molden (Au -> Angs)
   - Fixed bug with non-contiguous MOs in active space and deleter MOs
+  - Complete network-free installation
 
 *** User interface
 
