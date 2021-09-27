@@ -209,7 +209,7 @@ ZeroMQ and its Fortran binding
 
 .. code:: bash
 
-   cp f77_zmq_free.h ${QP_ROOT}/src/ZMQ/f77_zmq.h
+   cp f77_zmq_free.h ${QP_ROOT}/src/zmq/f77_zmq.h
 
 
 Zlib

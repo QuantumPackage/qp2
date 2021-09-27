@@ -1,13 +1,11 @@
-
-subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
+subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_diag,dressing_state,dressing_vec,idress,converged,hcalc)
   use mmap_module
   implicit none
   BEGIN_DOC
-  ! Davidson diagonalization with specific diagonal elements of the H matrix
+  ! Davidson diagonalization.
   !
-  ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
-  !
-  ! u_in : guess coefficients on the various states. Overwritten on exit
+  ! u_in : guess coefficients on the various states. Overwritten
+  !   on exit
   !
   ! sze : leftmost dimension of u_in
   !
@@ -15,21 +13,21 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   !
   ! N_st : Number of eigenstates
   !
-  ! N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
-  !
   ! Initial guess vectors are not necessarily orthonormal
-  !
-  ! hcalc subroutine to compute W = H U (see routine hcalc_template for template of input/output)
   END_DOC
-  integer, intent(in)             :: sze, N_st, N_st_diag_in
-  double precision,  intent(in)   :: H_jj(sze)
-  double precision, intent(inout) :: u_in(sze,N_st_diag_in)
-  double precision, intent(out)   :: energies(N_st)
+  integer, intent(in)              :: sze, N_st, N_st_diag,idress
+  double precision, intent(inout)  :: u_in(sze,N_st_diag)
+  double precision,  intent(inout) :: H_jj(sze)
+  double precision, intent(out)    :: energies(N_st_diag)
+  double precision, intent(in)     :: dressing_vec(sze,N_st)
+  integer, intent(in)              :: dressing_state
+  logical, intent(out)             :: converged
   external hcalc
 
-  integer                        :: iter, N_st_diag
+  double precision :: f
+
+  integer                        :: iter
   integer                        :: i,j,k,l,m
-  logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
 
@@ -37,23 +35,40 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
   integer                        :: iter2, itertot
   double precision, allocatable  :: y(:,:), h(:,:), lambda(:)
+  double precision, allocatable  :: s_tmp(:,:)
+  double precision               :: diag_h_mat_elem
   double precision, allocatable  :: residual_norm(:)
   character*(16384)              :: write_buffer
   double precision               :: to_print(2,N_st)
   double precision               :: cpu, wall
   integer                        :: shift, shift2, itermax, istate
   double precision               :: r1, r2, alpha
+  logical                        :: state_ok(N_st_diag*davidson_sze_max)
   integer                        :: nproc_target
-  integer                        :: order(N_st_diag_in)
+  integer                        :: order(N_st_diag)
   double precision               :: cmax
-  double precision, allocatable  :: U(:,:), overlap(:,:)!, S_d(:,:)
+  double precision, allocatable  :: U(:,:), overlap(:,:)
   double precision, pointer      :: W(:,:)
   logical                        :: disk_based
-  double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
+  double precision               :: energy_shift(N_st_diag*davidson_sze_max)
+  !!!! TO CHANGE !!!!
+  integer :: idx_dress(1)
+  idx_dress = idress
+
+
+  if (dressing_state > 0) then
+    do k=1,N_st
+      do i=1,sze
+        H_jj(i)  += u_in(i,k) * dressing_vec(i,k)
+      enddo
+    enddo
+  endif
+
+  l = idx_dress(1)
+  f = 1.0d0/u_in(l,1)
 
   include 'constants.include.F'
 
-  N_st_diag = N_st_diag_in
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
   if (N_st_diag*3 > sze) then
     print *,  'error in Davidson :'
@@ -71,6 +86,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   endif
   overlap = 0.d0
 
+
   provide threshold_davidson !nthreads_davidson
   call write_time(6)
   write(6,'(A)') ''
@@ -84,7 +100,8 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   nproc_target = nproc
   double precision :: rss
   integer :: maxab
-  maxab = sze 
+!  maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
+  maxab = sze
 
   m=1
   disk_based = .False.
@@ -92,14 +109,14 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   do
     r1 = 8.d0 *                                   &! bytes
          ( dble(sze)*(N_st_diag*itermax)          &! U
-         + 1.d0*dble(sze*m)*(N_st_diag*itermax)  &! W
-         + 2.0d0*(N_st_diag*itermax)**2           &! h,y
-         + 2.d0*(N_st_diag*itermax)               &! s2,lambda
+         + 1.0d0*dble(sze*m)*(N_st_diag*itermax)  &! W
+         + 3.0d0*(N_st_diag*itermax)**2           &! h,y,s_tmp
+         + 1.d0*(N_st_diag*itermax)               &! lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_S2_u_0_nstates_zmq
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on collector
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on slave
-         + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
+                                                   ! In H_u_0_nstates_zmq
+         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on collector
+         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on slave
+         + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
            + 3.5d0*(maxab) )                      &! singles_a, singles_b, doubles, idx
@@ -130,7 +147,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   TOUCH nthreads_davidson
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
-  call write_int(6,sze,'Number of basis functions')
+  call write_int(6,sze,'Number of determinants')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -142,17 +159,17 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   write(6,'(A)') ''
   write_buffer = '====='
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================  ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = 'Iter'
   do i=1,N_st
-    write_buffer = trim(write_buffer)//'       Energy         Residual '
+    write_buffer = trim(write_buffer)//'       Energy        Residual '
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = '====='
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================  ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
 
@@ -162,15 +179,18 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   allocate(                                                          &
       ! Large
       U(sze,N_st_diag*itermax),                                      &
+
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
+      s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
       residual_norm(N_st_diag),                                      &
       lambda(N_st_diag*itermax))
 
   h = 0.d0
   U = 0.d0
   y = 0.d0
+  s_tmp = 0.d0
 
 
   ASSERT (N_st > 0)
@@ -182,24 +202,22 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
   converged = .False.
 
-  ! Initialize from N_st to N_st_diat with gaussian random numbers
-  ! to be sure to have overlap with any eigenvectors
   do k=N_st+1,N_st_diag
-    u_in(k,k) = 10.d0
     do i=1,sze
-      call random_number(r1)
-      call random_number(r2)
-      r1 = dsqrt(-2.d0*dlog(r1))
-      r2 = dtwo_pi*r2
-      u_in(i,k) = r1*dcos(r2)
+        call random_number(r1)
+        call random_number(r2)
+        r1 = dsqrt(-2.d0*dlog(r1))
+        r2 = dtwo_pi*r2
+        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
     enddo
+    u_in(k,k) = u_in(k,k) + 10.d0
   enddo
   ! Normalize all states 
   do k=1,N_st_diag
     call normalize(u_in(1,k),sze)
   enddo
-
   ! Copy from the guess input "u_in" to the working vectors "U"
+
   do k=1,N_st_diag
     do i=1,sze
       U(i,k) = u_in(i,k)
@@ -221,7 +239,6 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
       if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
-
          ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
           call ortho_qr(U,size(U,1),sze,shift2)
           call ortho_qr(U,size(U,1),sze,shift2)
@@ -233,17 +250,87 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
          continue
       endif
 
+      if (dressing_state > 0) then
+
+        if (N_st == 1) then
+
+
+          do istate=1,N_st_diag
+            do i=1,sze
+              W(i,shift+istate) += dressing_vec(i,1) *f * U(l,shift+istate)
+              W(l,shift+istate) += dressing_vec(i,1) *f * U(i,shift+istate)
+            enddo
+
+          enddo
+
+        else
+          print*,'Not implemented yet for multi state ...'
+          stop
+!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+!            psi_coef, size(psi_coef,1), &
+!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!
+!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!            dressing_vec, size(dressing_vec,1), s_tmp, size(s_tmp,1), &
+!            1.d0, W(1,shift+1), size(W,1))
+!
+!
+!          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
+!            dressing_vec, size(dressing_vec,1), &
+!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!
+!          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
+!            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
+!            1.d0, W(1,shift+1), size(W,1))
+
+        endif
+      endif
+
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
           0.d0, h, size(h,1))
+      call dgemm('T','N', shift2, shift2, sze,                       &
+          1.d0, U, size(U,1), U, size(U,1),                          &
+          0.d0, s_tmp, size(s_tmp,1))
 
-      ! Diagonalize h y = lambda y
+      ! Diagonalize h
       ! ---------------
 
-      call lapack_diag(lambda,y,h,size(h,1),shift2)
+       integer :: lwork, info
+       double precision, allocatable :: work(:)
+
+       y = h
+       lwork = -1
+       allocate(work(1))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       lwork = int(work(1))
+       deallocate(work)
+       allocate(work(lwork))
+       call dsygv(1,'V','U',shift2,y,size(y,1), &
+          s_tmp,size(s_tmp,1), lambda, work,lwork,info)
+       deallocate(work)
+       if (info /= 0) then
+         stop 'DSYGV Diagonalization failed'
+       endif
+
+      ! Compute Energy for each eigenvector
+      ! -----------------------------------
+
+      call dgemm('N','N',shift2,shift2,shift2,                       &
+          1.d0, h, size(h,1), y, size(y,1),                          &
+          0.d0, s_tmp, size(s_tmp,1))
+
+      call dgemm('T','N',shift2,shift2,shift2,                       &
+          1.d0, y, size(y,1), s_tmp, size(s_tmp,1),                  &
+          0.d0, h, size(h,1))
+
+      do k=1,shift2
+        lambda(k) = h(k,k)
+      enddo
 
       if (state_following) then
 
@@ -275,12 +362,6 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
         do k=1,N_st
           overlap(k,1) = lambda(k)
         enddo
-        do k=1,N_st
-          l = order(k)
-          if (k /= l) then
-            lambda(k) = overlap(l,1)
-          endif
-        enddo
 
       endif
 
@@ -306,7 +387,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(1,shift2+k),sze)
-          to_print(1,k) = lambda(k) 
+          to_print(1,k) = lambda(k) + nuclear_repulsion
           to_print(2,k) = residual_norm(k)
         endif
       enddo
@@ -314,20 +395,19 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
 
       if ((itertot>1).and.(iter == 1)) then
-        !don't print 
+        !don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:2,1:N_st)
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,E11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
       ! Check convergence
       if (iter > 1) then
           converged = dabs(maxval(residual_norm(1:N_st))) < threshold_davidson
-      endif   
-      
+      endif
 
       do k=1,N_st
-        if (residual_norm(k) > 1.e8) then
+        if (residual_norm(k) > 1.d8) then
           print *, 'Davidson failed'
           stop -1
         endif
@@ -345,6 +425,9 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
     enddo
 
+    ! Re-contract U and update W
+    ! --------------------------------
+
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
@@ -355,32 +438,29 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+
     do k=1,N_st_diag
       do i=1,sze
         U(i,k) = u_in(i,k)
       enddo
     enddo
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-    do j=1,N_st_diag
-      k=1
-      do while ((k<sze).and.(U(k,j) == 0.d0))
-        k = k+1
-      enddo
-      if (U(k,j) * u_in(k,j) < 0.d0) then
-        do i=1,sze
-          W(i,j) = -W(i,j)
-        enddo
-      endif
+
+  enddo
+
+
+  call nullify_small_elements(sze,N_st_diag,U,size(U,1),threshold_davidson_pt2)
+  do k=1,N_st_diag
+    do i=1,sze
+      u_in(i,k) = U(i,k)
     enddo
   enddo
 
-  do k=1,N_st
+  do k=1,N_st_diag
     energies(k) = lambda(k)
   enddo
-  write_buffer = '====='
+  write_buffer = '======'
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================  ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') trim(write_buffer)
   write(6,'(A)') ''
@@ -390,43 +470,13 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
   deallocate (                                                       &
       residual_norm,                                                 &
-      U, h,                                                 &
-      y,                                                             &
+      U, overlap,                                                    &
+      h, y, s_tmp,                                                   &
       lambda                                                         &
       )
-  deallocate(overlap)
   FREE nthreads_davidson
 end
 
-subroutine hcalc_template(v,u,N_st,sze)
-  use bitmasks
-  implicit none
-  BEGIN_DOC
-  ! Template of routine for the application of H
-  !
-  ! Here, it is done with the Hamiltonian matrix 
-  !
-  ! on the set of determinants of psi_det 
-  !
-  ! Computes $v = H | u \rangle$ 
-  !
-  END_DOC
-  integer, intent(in)              :: N_st,sze
-  double precision, intent(in)     :: u(sze,N_st)
-  double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,j,istate
-  v = 0.d0
-  do istate = 1, N_st
-   do i = 1, sze
-    do j = 1, sze
-      v(i,istate) += H_matrix_all_dets(j,i) * u(j,istate)
-    enddo
-   enddo
-   do i = 1, sze
-    v(i,istate) += u(i,istate) * nuclear_repulsion
-   enddo
-  enddo
-end
 
 
 
