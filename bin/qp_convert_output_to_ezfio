@@ -289,12 +289,17 @@ def write_ezfio(res, filename):
     for i in range(mo_num):
         energies.append(MOs[i].eigenvalue)
 
+    OccNum = []
     if res.occ_num is not None:
-        OccNum = []
         for i in MOindices:
             OccNum.append(res.occ_num[MO_type][i])
+    else:
+        for i in range(res.num_beta):
+            OccNum.append(2.)
+        for i in range(res.num_beta,res.num_alpha):
+            OccNum.append(1.)
 
-        while len(OccNum) < mo_num:
+    while len(OccNum) < mo_num:
             OccNum.append(0.)
 
     MoMatrix = []
@@ -317,8 +322,9 @@ def write_ezfio(res, filename):
     # ~#~#~#~#~ #
 
     ezfio.set_mo_basis_mo_num(mo_num)
-    ezfio.set_mo_basis_mo_occ(OccNum)
     ezfio.set_mo_basis_mo_coef(MoMatrix)
+    ezfio.set_mo_basis_mo_occ(OccNum)
+
     print("OK")
 
 
