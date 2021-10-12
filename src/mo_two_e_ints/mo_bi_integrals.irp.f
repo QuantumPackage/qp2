@@ -50,7 +50,8 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call cpu_time(cpu_1)
 
   if(no_vvvv_integrals)then
-    call four_idx_novvvv
+!    call four_idx_novvvv
+    call four_idx_novvvv_old
   else
     call add_integrals_to_map(full_ijkl_bitmask_4)
   endif

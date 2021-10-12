@@ -55,6 +55,10 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !        fact_k * [ sum (l_x = 0,i_order(1)) P_new(l_x,1) * (x-P_center(1))^l_x ] exp (- p (x-P_center(1))^2 )
   !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
   !               * [ sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z ] exp (- p (z-P_center(3))^2 )
+  !
+  ! WARNING ::: IF fact_k is too smal then: 
+  ! returns a "s" function centered in zero
+  ! with an inifinite exponent and a zero polynom coef
   END_DOC
   implicit none
   include 'constants.include.F'
@@ -82,10 +86,13 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !DIR$ FORCEINLINE
   call gaussian_product(alpha,A_center,beta,B_center,fact_k,p,P_center)
   if (fact_k < thresh) then
+    ! IF fact_k is too smal then: 
+    ! returns a "s" function centered in zero
+    ! with an inifinite exponent and a zero polynom coef
     P_center = 0.d0
-    p = 1.d-10
+    p = 1.d+15
     P_new = 0.d0
-    iorder = -1
+    iorder = 0
     fact_k = 0.d0
     return
   endif
