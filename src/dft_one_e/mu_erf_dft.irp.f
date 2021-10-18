@@ -58,6 +58,7 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
   r(3) = final_grid_points(3,i)
   call dm_dft_alpha_beta_at_r(r,dm_a,dm_b)
   rho = dm_a + dm_b
+  if(mu_of_r_dft(i).gt.1.d+3)cycle
   mu_of_r_dft_average += rho * mu_of_r_dft(i) * final_weight_at_r_vector(i)
  enddo
  mu_of_r_dft_average = mu_of_r_dft_average / dble(elec_alpha_num + elec_beta_num)

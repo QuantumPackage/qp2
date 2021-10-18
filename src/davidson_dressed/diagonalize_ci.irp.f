@@ -12,7 +12,7 @@ BEGIN_PROVIDER [ double precision, CI_energy_dressed, (N_states_diag) ]
   enddo
   do j=1,min(N_det,N_states)
     write(st,'(I4)') j
-    call write_double(6,CI_energy_dressed(j),'Energy of state '//trim(st))
+    call write_double(6,CI_energy_dressed(j),'Energy dressed of state '//trim(st))
     call write_double(6,CI_eigenvectors_s2_dressed(j),'S^2 of state '//trim(st))
   enddo
 
