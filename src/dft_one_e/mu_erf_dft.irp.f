@@ -44,8 +44,20 @@ BEGIN_PROVIDER [double precision, mu_rsc_of_r, (n_points_final_grid)]
   rho = dm_a + dm_b
   mu_rsc_of_r(i) = mu_rs_c(rho)
  enddo
+END_PROVIDER
 
+BEGIN_PROVIDER [double precision, mu_grad_rho, (n_points_final_grid)]
+ implicit none
+ integer :: i
+ double precision :: mu_grad_rho_func, r(3)
+ do i = 1, n_points_final_grid
+  r(1) = final_grid_points(1,i)
+  r(2) = final_grid_points(2,i)
+  r(3) = final_grid_points(3,i)
+  mu_grad_rho(i) = mu_grad_rho_func(r)
+ enddo
 END_PROVIDER 
+
 
 BEGIN_PROVIDER [double precision, mu_of_r_dft_average]
  implicit none
