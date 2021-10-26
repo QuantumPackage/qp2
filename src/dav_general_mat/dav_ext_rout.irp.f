@@ -3,7 +3,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   use mmap_module
   implicit none
   BEGIN_DOC
-  ! Davidson diagonalization with specific diagonal elements of the H matrix
+  ! Generic Davidson diagonalization 
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
   !
