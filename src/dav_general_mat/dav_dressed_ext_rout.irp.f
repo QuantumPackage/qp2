@@ -147,7 +147,7 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
   TOUCH nthreads_davidson
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
-  call write_int(6,sze,'Number of determinants')
+  call write_int(6,sze,'Number of basis function')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -387,7 +387,7 @@ subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_di
 
         if (k <= N_st) then
           residual_norm(k) = u_dot_u(U(1,shift2+k),sze)
-          to_print(1,k) = lambda(k) + nuclear_repulsion
+          to_print(1,k) = lambda(k) 
           to_print(2,k) = residual_norm(k)
         endif
       enddo

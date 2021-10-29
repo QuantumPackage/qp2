@@ -238,7 +238,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
 
   do while (.not.converged)
     itertot = itertot+1
-    if (itertot == 8) then
+    if (itertot == 2) then
       exit
     endif
 
