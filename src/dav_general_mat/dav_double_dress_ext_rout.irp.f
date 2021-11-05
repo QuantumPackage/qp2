@@ -207,8 +207,6 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
   ASSERT (N_st > 0)
   ASSERT (N_st_diag_in >= N_st)
   ASSERT (sze > 0)
-  ASSERT (Nint > 0)
-  ASSERT (Nint == N_int)
 
   ! Davidson iterations
   ! ===================
