@@ -22,6 +22,8 @@ BEGIN_PROVIDER [double precision, mu_of_r_dft, (n_points_final_grid)]
     mu_of_r_dft(i) = mu_of_r_hf(i)
    else if(mu_dft_type == "rsc")then
     mu_of_r_dft(i) = mu_rsc_of_r(i)
+   else if(mu_dft_type == "grad_rho")then
+    mu_of_r_dft(i) = mu_grad_rho(i)
    else 
     print*,'mu_dft_type is not of good type = ',mu_dft_type
     print*,'it must be of type Read, cst, hf, rsc'

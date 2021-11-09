@@ -17,7 +17,7 @@ double precision function mu_grad_rho_func(r)
  integer :: m
  double precision :: rho, dm_a, dm_b, grad_dm_a(3), grad_dm_b(3)
  double precision :: eta, grad_rho(3), grad_sqr
- eta = 0.135d0
+  eta = mu_erf
   call density_and_grad_alpha_beta(r,dm_a,dm_b, grad_dm_a, grad_dm_b)  
   rho = dm_a + dm_b
   do m = 1,3
