@@ -1,9 +1,11 @@
 
-subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
+subroutine davidson_general_ext_rout(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
   use mmap_module
   implicit none
   BEGIN_DOC
-  ! Generic Davidson diagonalization 
+  ! Generic Davidson diagonalization with ONE DIAGONAL DRESSING OPERATOR 
+  !
+  ! Dress_jj : DIAGONAL DRESSING of the Hamiltonian 
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
   !
@@ -22,7 +24,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   ! hcalc subroutine to compute W = H U (see routine hcalc_template for template of input/output)
   END_DOC
   integer, intent(in)             :: sze, N_st, N_st_diag_in
-  double precision,  intent(in)   :: H_jj(sze)
+  double precision,  intent(in)   :: H_jj(sze),Dress_jj(sze)
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
   double precision, intent(out)   :: energies(N_st)
   external hcalc
@@ -137,6 +139,15 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
     print *, 'Using swap space to reduce RAM'
   endif
 
+  double precision, allocatable   :: H_jj_tmp(:)
+  ASSERT (N_st > 0)
+  ASSERT (sze > 0)
+  allocate(H_jj_tmp(sze))
+
+  do i=1,sze
+    H_jj_tmp(i)  = H_jj(i) + Dress_jj(i)
+  enddo
+
   !---------------
 
   write(6,'(A)') ''
@@ -221,12 +232,16 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
       if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
+
          ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
           call ortho_qr(U,size(U,1),sze,shift2)
           call ortho_qr(U,size(U,1),sze,shift2)
           !    it does W = H U with W(sze,N_st_diag),U(sze,N_st_diag)
           !    where sze is the size of the vector, N_st_diag is the number of states 
           call hcalc(W(1,shift+1),U(1,shift+1),N_st_diag,sze)
+          ! Compute then the DIAGONAL PART OF THE DRESSING 
+          ! <i|W_k> += Dress_jj(i) * <i|U>
+          call dressing_diag_uv(W(1,shift+1),U(1,shift+1),Dress_jj,N_st_diag_in,sze)
       else
          ! Already computed in update below
          continue
@@ -300,7 +315,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
         do i=1,sze
           U(i,shift2+k) =  &
             (lambda(k) * U(i,shift2+k) - W(i,shift2+k) )      &
-              /max(H_jj(i) - lambda (k),1.d-2)
+              /max(H_jj_tmp(i) - lambda (k),1.d-2)
         enddo
 
         if (k <= N_st) then
@@ -344,9 +359,6 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
 
     enddo
 
-    ! Re-contract U and update W
-    ! --------------------------------
-
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
@@ -362,8 +374,8 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
         U(i,k) = u_in(i,k)
       enddo
     enddo
-    call ortho_qr(U,size(U,1),sze,N_st_diag)
-    call ortho_qr(U,size(U,1),sze,N_st_diag)
+      call ortho_qr(U,size(U,1),sze,N_st_diag)
+      call ortho_qr(U,size(U,1),sze,N_st_diag)
     do j=1,N_st_diag
       k=1
       do while ((k<sze).and.(U(k,j) == 0.d0))
@@ -429,6 +441,38 @@ subroutine hcalc_template(v,u,N_st,sze)
    enddo
   enddo
 end
+
+subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)
+  implicit none
+  BEGIN_DOC
+  ! Routine that computes the diagonal part of the dressing 
+  !
+  ! v(i) += u(i) * dress_diag(i)
+  !
+  ! !!!!!!!! WARNING !!!!!!!! the vector v is not initialized 
+  !
+  ! !!!!!!!! SO MAKE SURE THERE ARE SOME MEANINGFUL VALUES IN THERE
+  END_DOC
+  integer, intent(in)              :: N_st,sze
+  double precision, intent(in)     :: u(sze,N_st),dress_diag(sze)
+  double precision, intent(inout)  :: v(sze,N_st)
+  integer :: i,istate
+  do istate = 1, N_st
+   do i = 1, sze
+     v(i,istate) += dress_diag(i) * u(i,istate)
+   enddo
+  enddo
+end
+
+
+
+
+
+
+
+
+
+
 
 
 
