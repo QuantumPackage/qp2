@@ -3,8 +3,6 @@
 # Quantum Package configuration script
 #
 
-TEMP=$(getopt -o d:c:i:h -l download:,config:,install:,help -n $0 -- "$@") || exit 1
-eval set -- "$TEMP"
 
 export QP_ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "QP_ROOT="$QP_ROOT
@@ -24,17 +22,17 @@ function help()
 Quantum Package configuration script.
 
 Usage:
-  $(basename $0) -c <file>    | --config=<file>
-  $(basename $0) -h           | --help
-  $(basename $0) -i <package> | --install=<package>
+  $(basename $0) -c <file>    
+  $(basename $0) -h           
+  $(basename $0) -i <package> 
 
 Options:
-  -c, --config=<file>      Define a COMPILATION configuration file,
-                           in "${QP_ROOT}/config/".
-  -h, --help               Print the HELP message
-  -i, --install=<package>  INSTALL <package>. Use at your OWN RISK:
-                           no support will be provided for the installation of
-                           dependencies.
+  -c  <file>    Define a COMPILATION configuration file,
+                in "${QP_ROOT}/config/".
+  -h            Print the HELP message
+  -i <package>  INSTALL <package>. Use at your OWN RISK:
+                no support will be provided for the installation of
+                dependencies.
 
 Example:
   ./$(basename $0) -c config/gfortran.cfg
@@ -68,32 +66,31 @@ function execute () {
 }
 
 PACKAGES=""
+echo $@
 
-while true ; do
-    case "$1" in
-        -c|--config)
-            case "$2" in
+
+while getopts "d:c:i:h" c ; do
+    case "$c" in
+        c)
+            case "$OPTARG" in
                 "") help ; break;;
-                *) if [[ -f $2 ]] ; then
-                      CONFIG="$2"
+                *) if [[ -f $OPTARG ]] ; then
+                      CONFIG="$OPTARG"
                    else
-                      error "error: configuration file $2 not found."
+                      error "error: configuration file $OPTARG not found."
                       exit 1
                    fi
-            esac
-            shift 2;;
-        -i|--install)
-            case "$2" in
+            esac;;
+        i)
+            case "$OPTARG" in
                 "") help ; break;;
-                *) PACKAGES="${PACKAGE} $2"
-            esac
-            shift 2;;
-        -h|-help|--help)
+                *) PACKAGES="${PACKAGE} $OPTARG"
+            esac;;
+        h)
             help
             exit 0;;
-        --) shift ; break ;;
         *)
-            error $(basename $0)": unknown option $1, try --help"
+            error $(basename $0)": unknown option $c, try --help"
             exit 2;;
     esac
 done
