@@ -226,13 +226,11 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/f77_zmq-4.2.5.tar.gz
-              cd f77_zmq-*
+              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.2.tar.gz
+              cd f77-zmq-*
+              ./configure --prefix=\$QP_ROOT
               export ZMQ_H="\$QP_ROOT"/include/zmq.h
-              make
-              cp libf77zmq.a "\${QP_ROOT}"/lib
-              cp libf77zmq.so "\${QP_ROOT}"/lib
-              cp f77_zmq_free.h "\${QP_ROOT}"/include
+              make && make check && make install
 EOF
 
 
