@@ -1,9 +1,12 @@
  real*8 function logabsgamma(x)
  implicit none
  real*8, intent(in) :: x
- logabsgamma = log(abs(gamma(x)))
+ logabsgamma = 1.d32  ! Avoid floating point exception
+ if (x>0.d0) then
+   logabsgamma = log(abs(gamma(x)))
+ endif
  end function logabsgamma
-  
+
   BEGIN_PROVIDER [ integer, NSOMOMax]
  &BEGIN_PROVIDER [ integer, NCSFMax]
  &BEGIN_PROVIDER [ integer*8, NMO]
