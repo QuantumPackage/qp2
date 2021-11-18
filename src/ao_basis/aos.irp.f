@@ -23,6 +23,21 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, ao_first_of_shell, (shell_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Index of the shell to which the AO corresponds
+ END_DOC
+ integer :: i, j, k, n
+ k=1
+ do i=1,shell_num
+   ao_first_of_shell(i) = k
+   n = shell_ang_mom(i)+1
+   k = k+(n*(n+1))/2
+ enddo
+
+END_PROVIDER
+
  BEGIN_PROVIDER [ double precision, ao_coef_normalized, (ao_num,ao_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_coef_normalization_factor, (ao_num) ]
   implicit none

@@ -1,3 +1,15 @@
+double precision function derf_mu_x(mu,x)
+ implicit none
+ include 'utils/constants.include.F'
+ double precision, intent(in) :: mu,x
+  if(dabs(x).gt.1.d-6)then
+   derf_mu_x = derf(mu * x)/x
+  else
+   derf_mu_x =  inv_sq_pi * 2.d0 * mu * (1.d0 - mu*mu*x*x/3.d0)                                                           
+  endif                      
+end    
+
+
 double precision function binom_func(i,j)
   implicit none
   BEGIN_DOC
@@ -288,12 +300,12 @@ subroutine wall_time(t)
 end
 
 BEGIN_PROVIDER [ integer, nproc ]
+  use omp_lib
   implicit none
   BEGIN_DOC
   ! Number of current OpenMP threads
   END_DOC
 
-  integer                        :: omp_get_num_threads
   nproc = 1
   !$OMP PARALLEL
   !$OMP MASTER

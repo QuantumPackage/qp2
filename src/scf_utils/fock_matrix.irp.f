@@ -92,6 +92,27 @@
      enddo
    endif
 
+   if(no_oa_or_av_opt)then
+     do i = 1, n_act_orb
+       iorb = list_act(i)
+       do j = 1, n_inact_orb
+         jorb = list_inact(j)
+         Fock_matrix_mo(iorb,jorb) = 0.d0
+         Fock_matrix_mo(jorb,iorb) = 0.d0
+       enddo
+       do j = 1, n_virt_orb
+         jorb = list_virt(j)
+         Fock_matrix_mo(iorb,jorb) = 0.d0
+         Fock_matrix_mo(jorb,iorb) = 0.d0
+       enddo
+       do j = 1, n_core_orb
+         jorb = list_core(j)
+         Fock_matrix_mo(iorb,jorb) = 0.d0
+         Fock_matrix_mo(jorb,iorb) = 0.d0                                                                                                                 
+       enddo
+     enddo
+   endif
+
 END_PROVIDER
 
 

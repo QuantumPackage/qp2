@@ -1,4 +1,3 @@
-
 BEGIN_PROVIDER [ double precision, mo_overlap,(mo_num,mo_num) ]
   implicit none
   BEGIN_DOC

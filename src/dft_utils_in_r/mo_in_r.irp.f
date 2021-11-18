@@ -79,7 +79,7 @@
  END_DOC
  integer :: m
  integer  :: i,j
- mos_grad_in_r_array = 0.d0
+ mos_grad_in_r_array_tranp = 0.d0
  do i = 1, n_points_final_grid
   do j = 1, mo_num
    do m = 1, 3
@@ -88,6 +88,24 @@
   enddo
  enddo
  END_PROVIDER
+
+ BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_bis, (n_points_final_grid,mo_num,3)]
+ implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
+ integer :: i,j,m
+ do m = 1, 3
+  do j = 1, mo_num
+   do i = 1, n_points_final_grid
+    mos_grad_in_r_array_transp_bis(i,j,m) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
+
 
  BEGIN_PROVIDER [double precision, alpha_dens_kin_in_r, (n_points_final_grid)]
 &BEGIN_PROVIDER [double precision, beta_dens_kin_in_r, (n_points_final_grid)]
@@ -115,14 +133,50 @@
  BEGIN_DOC
  ! mos_lapl_in_r_array(i,j,k)          = value of the kth component of the laplacian of ith mo on the jth grid point
  !
- ! mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplacian of jth mo on the ith grid point
- !
  ! k = 1 : x, k= 2, y, k  3, z
  END_DOC
  integer :: m
  mos_lapl_in_r_array = 0.d0
  do m=1,3
   call dgemm('N','N',mo_num,n_points_final_grid,ao_num,1.d0,mo_coef_transp,mo_num,aos_lapl_in_r_array(1,1,m),ao_num,0.d0,mos_lapl_in_r_array(1,1,m),mo_num)
+ enddo
+ END_PROVIDER
+
+
+ BEGIN_PROVIDER[double precision, mos_lapl_in_r_array_tranp,(3,mo_num,n_points_final_grid)]
+ implicit none
+ BEGIN_DOC
+ ! mos_lapl_in_r_array_transp(i,j,k)   = value of the kth component of the laplient of jth mo on the ith grid point
+ !
+ ! k = 1 : x, k= 2, y, k  3, z
+ END_DOC
+ integer :: m
+ integer  :: i,j
+ mos_lapl_in_r_array_tranp = 0.d0
+ do i = 1, n_points_final_grid
+  do j = 1, mo_num
+   do m = 1, 3
+     mos_lapl_in_r_array_tranp(m,j,i) = mos_lapl_in_r_array(j,i,m)
+   enddo
+  enddo
+ enddo
+ END_PROVIDER
+
+ BEGIN_PROVIDER[double precision, mos_grad_in_r_array_transp_3, (3,n_points_final_grid,mo_num)]
+ implicit none
+ BEGIN_DOC
+! Transposed gradients 
+! 
+ END_DOC
+ integer :: i,j,m
+ double precision :: mos_array(mo_num), r(3)
+ double precision :: mos_grad_array(3,mo_num)
+ do m = 1, 3
+  do j = 1, mo_num
+   do i = 1, n_points_final_grid
+    mos_grad_in_r_array_transp_3(m,i,j) = mos_grad_in_r_array(j,i,m)
+   enddo
+  enddo
  enddo
  END_PROVIDER
 

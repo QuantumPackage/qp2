@@ -447,14 +447,24 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
-      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-      do k=1,N_st_diag
-        do i=1,sze
-           U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
-              /max(H_jj(i) - lambda (k),1.d-2)
+      if (without_diagonal) then
+        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+        do k=1,N_st_diag
+          do i=1,sze
+             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
+                /max(H_jj(i) - lambda (k),1.d-2)
+          enddo
         enddo
-      enddo
-      !$OMP END PARALLEL DO
+        !$OMP END PARALLEL DO
+      else
+        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+        do k=1,N_st_diag
+          do i=1,sze
+             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
+          enddo
+        enddo
+        !$OMP END PARALLEL DO
+      endif
 
       do k=1,N_st
         residual_norm(k) = u_dot_u(U(1,k),sze)

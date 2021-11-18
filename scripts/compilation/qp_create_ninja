@@ -709,6 +709,11 @@ def save_subninja_file(path_module):
                  "  description = Cleaning module {0}".format(path_module.rel),
                  ""]
 
+    l_string += ["rule make_tidy",
+                 "  command = module_handler.py tidy {0}".format(path_module.rel),
+                 "  description = Cleaning module {0}".format(path_module.rel),
+                 ""]
+
     l_string += ["rule executables",
             "  command = make -C {0} executables .gitignore qp_edit.native qp_run.native".format(join("$QP_ROOT","ocaml")),
                  "  description = Updating OCaml executables",
@@ -719,6 +724,7 @@ def save_subninja_file(path_module):
                  "build local: make_local_binaries dummy_target", "",
                  "build executables: executables local dummy_target", "",
                  "default executables", "", "build clean: make_clean dummy_target",
+                 "", "build tidy: make_tidy dummy_target",
                  ""]
 
     path_ninja_cur = join(path_module.abs, "build.ninja")
@@ -745,6 +751,10 @@ def create_build_ninja_global():
                  "  command = module_handler.py clean --all",
                  "  description = Cleaning all modules", ""]
 
+    l_string += ["rule make_tidy",
+                 "  command = module_handler.py tidy --all",
+                 "  description = Cleaning all modules", ""]
+
     l_string += ["rule make_ocaml",
                  "  command = make -C {0}/ocaml".format("$QP_ROOT"),
                  "  pool = console",
@@ -759,6 +769,8 @@ def create_build_ninja_global():
                  "default ocaml_target",
                  "",
                  "build clean: make_clean dummy_target",
+                 "",
+                 "build tidy: make_tidy dummy_target",
                  "", ]
 
     path_ninja_cur = join(QP_ROOT, "build.ninja")

@@ -30,6 +30,7 @@
   - Fixed bug in DIIS
   - Fixed bug in molden (Au -> Angs)
   - Fixed bug with non-contiguous MOs in active space and deleter MOs
+  - Complete network-free installation
 
 *** User interface
 
@@ -83,9 +84,7 @@
     - Added LIB file to add extra libs in plugin
     - Using Intel IPP for sorting when using Intel compiler
     - Removed parallelism in sorting
-
-    ao_one_e_integral_zero
-    banned_excitations
+    - Compute banned_excitations from exchange integrals to accelerate with local MOs
 
 
 

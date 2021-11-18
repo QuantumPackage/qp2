@@ -60,9 +60,11 @@ END_PROVIDER
         CI_eigenvectors_dressed(i,j) = psi_coef(i,j)
       enddo
     enddo
+    logical :: converged
+    converged = .False.
     call davidson_diag_HS2(psi_det,CI_eigenvectors_dressed, CI_eigenvectors_s2_dressed,&
         size(CI_eigenvectors_dressed,1), CI_electronic_energy_dressed,&
-        N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,1)
+        N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,1,converged)
 
   else if (diag_algorithm == "Lapack") then
 
@@ -156,7 +158,8 @@ subroutine diagonalize_CI_dressed
 !  eigenstates of the CI matrix
   END_DOC
   integer :: i,j
-  PROVIDE delta_ij
+!  PROVIDE delta_ij
+  PROVIDE dressing_column_h 
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors_dressed(i,j)

@@ -42,7 +42,7 @@ END_PROVIDER
    logical                        :: converged
    logical                        :: do_csf
 
-   PROVIDE threshold_davidson nthreads_davidson
+   PROVIDE threshold_davidson nthreads_davidson distributed_davidson
    ! Guess values for the "N_states" states of the |CI| eigenvectors
    do j=1,min(N_states,N_det)
      do i=1,N_det
@@ -56,9 +56,7 @@ END_PROVIDER
      enddo
    enddo
 
-!   Deactivated temporarily: bug in N_csf
-!   do_csf = s2_eig .and. only_expected_s2 .and. (expected_s2 == 0.d0)
-   do_csf = .False.
+   do_csf = s2_eig .and. only_expected_s2 .and. csf_based
 
    if (diag_algorithm == "Davidson") then
 

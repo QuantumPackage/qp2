@@ -41,7 +41,11 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_alpha_for_dft, (mo_num,mo_num, N_s
      elec_alpha_valence(istate) += one_e_dm_mo_alpha_for_dft(i,i,istate)
     enddo
     elec_alpha_valence(istate) = elec_alpha_frozen_num/elec_alpha_valence(istate)
-    one_e_dm_mo_alpha_for_dft(:,:,istate) = one_e_dm_mo_alpha_for_dft(:,:,istate) * elec_alpha_valence(istate)
+    if( dabs(elec_alpha_valence(istate)) .lt.1.d-12)then
+     one_e_dm_mo_alpha_for_dft = 0.d0
+    else
+     one_e_dm_mo_alpha_for_dft(:,:,istate) = one_e_dm_mo_alpha_for_dft(:,:,istate) * elec_alpha_valence(istate)
+    endif
    enddo 
    
   endif
@@ -55,6 +59,7 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
 ! density matrix for beta  electrons in the MO basis used for all DFT calculations based on the density
  END_DOC
  double precision :: delta_beta(mo_num,mo_num,N_states)
+ one_e_dm_mo_beta_for_dft = 0.d0
  if(density_for_dft .EQ. "damping_rs_dft")then
   delta_beta = one_e_dm_mo_beta - data_one_e_dm_beta_mo
   one_e_dm_mo_beta_for_dft = data_one_e_dm_beta_mo + damping_for_rs_dft * delta_beta
@@ -73,6 +78,7 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
   one_e_dm_mo_beta_for_dft(:,:,1) = one_e_dm_mo_beta_average(:,:)
  endif
 
+
  if(no_core_density)then
   integer :: ii,i,j
   do ii = 1, n_core_orb
@@ -82,17 +88,21 @@ BEGIN_PROVIDER [double precision, one_e_dm_mo_beta_for_dft, (mo_num,mo_num, N_st
     one_e_dm_mo_beta_for_dft(i,j,:) = 0.d0
    enddo
   enddo
+  double precision :: elec_beta_valence(N_states),elec_beta_frozen_num
+  integer :: istate 
   if(normalize_dm)then
-   double precision :: elec_beta_valence(N_states),elec_beta_frozen_num
    elec_beta_frozen_num = elec_beta_num - n_core_orb 
    elec_beta_valence = 0.d0
-   integer :: istate 
    do istate = 1, N_states
     do i = 1, mo_num
      elec_beta_valence(istate) += one_e_dm_mo_beta_for_dft(i,i,istate)
     enddo
-    elec_beta_valence(istate) = elec_beta_frozen_num/elec_beta_valence(istate)
-    one_e_dm_mo_beta_for_dft(:,:,istate) = one_e_dm_mo_beta_for_dft(:,:,istate) * elec_beta_valence(istate)
+    if(dabs(elec_beta_valence(istate)).lt.1.d-12)then
+     one_e_dm_mo_beta_for_dft = 0.d0
+    else
+     elec_beta_valence(istate) = elec_beta_frozen_num/elec_beta_valence(istate)
+     one_e_dm_mo_beta_for_dft(:,:,istate) = one_e_dm_mo_beta_for_dft(:,:,istate) * elec_beta_valence(istate)
+    endif
    enddo 
   endif
  endif
