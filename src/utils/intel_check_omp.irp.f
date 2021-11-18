@@ -4,13 +4,17 @@ subroutine intel_check_omp()
 
   implicit none
 
-  IRP_IF INTEL_CHECK_OMP
+  IRP_IF INTEL2021_CHECK_OMP
     call omp_set_max_active_levels(5)
-    print*,'INTEL_CHECK_OMP: true'
-  IRP_ELSE
+    print*,'INTEL2021_CHECK_OMP: true'
+  IRP_ENDIF
+  IRP_IF INTEL2019_CHECK_OMP
     call omp_set_nested(.True.)
-    !call omp_set_nested(.False.)
-    print*,'INTEL_CHECK_OMP: false'
+    print*,'INTEL2019_CHECK_OMP: true'
+  IRP_ENDIF
+  IRP_IF GNU_CHECK_OMP
+    call omp_set_nested(.True.)
+    print*,'GNU_CHECK_OMP: true'
   IRP_ENDIF
 
 end
