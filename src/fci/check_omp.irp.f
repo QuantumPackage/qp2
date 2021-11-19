@@ -218,7 +218,7 @@ program check_omp
     print*,'+'
     print*,'call omp_set_max_active_levels(5)'
     print*,''
-    print*,'Good luck...'
+    print*,'Try an other compiler and good luck...'
   endif
 
   if (is_working) then
