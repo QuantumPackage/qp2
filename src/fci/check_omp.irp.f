@@ -4,15 +4,19 @@ program check_omp
 
   implicit none
 
-  integer :: i,j,k,l,m,n,x,z,setting
+  integer :: i,j,k,l,m,n,x,z,setting,nb_setting
   double precision :: w1,w2,c1,c2
   double precision, allocatable :: accu(:,:,:,:) 
   logical :: must_exit, verbose, is_working
+  logical, allocatable :: is_working_n(:)
 
   x = 4
-  allocate(accu(x,x,x,x))
+  nb_setting = 4
 
-  verbose = .False.
+  allocate(accu(x,x,x,x))
+  allocate(is_working_n(nb_setting))
+
+  verbose = .True.
 
   accu = 0d0
   must_exit = .False.
@@ -39,11 +43,9 @@ program check_omp
   ! set the number of threads
   call omp_set_num_threads(2) 
 
-  do z = 1, 4
+  is_working_n = .True.
 
-    if (must_exit) then
-      exit
-    endif 
+  do z = 1, nb_setting
 
     call omp_set_max_active_levels(1)
     call omp_set_nested(.False.)
@@ -67,13 +69,13 @@ program check_omp
       !$OMP SHARED(accu) 
   
       if (verbose) then
-        print*,'Nb threads level 1:', omp_get_num_threads()
+        print*,'Setting:',setting,'Nb threads level 1:', omp_get_num_threads()
       endif
   
       !$OMP MASTER
       if (omp_get_num_threads()==1) then
         print*,'Setting',setting,"error at level 1"
-        setting = -1
+        is_working_n(z) = .False.
       endif
       !$OMP END MASTER
       
@@ -94,13 +96,13 @@ program check_omp
         !$OMP SHARED(accu)
   
         if (verbose) then
-          print*,'Nb threads level 2:', omp_get_num_threads()
+          print*,'Setting:',setting,'Nb threads level 2:', omp_get_num_threads()
         endif
   
         !$OMP MASTER 
-        if (omp_get_num_threads()==1 .and. setting >= 0) then
+        if (omp_get_num_threads()==1 .and. is_working_n(z)) then
           print*,'Setting',setting,"error at level 2"
-          setting = -1
+          is_working_n(z) = .False.
         endif
         !$OMP END MASTER
         
@@ -121,13 +123,13 @@ program check_omp
           !$OMP SHARED(accu)
           
           if (verbose) then 
-            print*,'Nb threads level 3:', omp_get_num_threads()
+            print*,'Setting:',setting,'Nb threads level 3:', omp_get_num_threads()
           endif
   
           !$OMP MASTER
-          if (omp_get_num_threads()==1 .and. setting >= 0) then
+          if (omp_get_num_threads()==1 .and. is_working_n(z)) then
            print*,'Setting',setting,"error at level 3"
-           setting = -1
+           is_working_n(z) = .False.
           endif
           !$OMP END MASTER
   
@@ -148,22 +150,13 @@ program check_omp
             !$OMP SHARED(accu)
             
             if (verbose) then
-              print*,'Nb threads level 4:', omp_get_num_threads()
+              print*,'Setting:',setting,'Nb threads level 4:', omp_get_num_threads()
             endif
 
             !$OMP MASTER
-            if (omp_get_num_threads()==1 .and. setting >= 0) then
+            if (omp_get_num_threads()==1 .and. is_working_n(z)) then
               print*,'Setting',setting,"error at level 4"
-            elseif(omp_get_num_threads()==1 .or. setting == 0) then
-            else
-              must_exit = .True.
-            endif
-
-            if ( z == 1 .and. setting == 0) then
-              is_working = .True.
-            elseif (z == 1 .and. setting == -1) then
-              is_working = .False.
-            else
+              is_working_n(z) = .False.
             endif
             !$OMP END MASTER
   
@@ -191,17 +184,17 @@ program check_omp
   
   print*,''
 
-  if (setting == 1) then
+  if (is_working_n(2)) then
     print*,'The parallelization works on 4 levels with:'
     print*,'call omp_set_max_active_levels(5)'
     print*,''
     print*,'Please use the irpf90 flags -DSET_MAX_ACT in qp2/config/${compiler_name}.cfg'
-  elseif (setting == 2) then
+  elseif (is_working_n(3)) then
     print*,'The parallelization works on 4 levels with:'
     print*,'call omp_set_nested(.True.)'
     print*,'' 
     print*,'Please use the irpf90 flag -DSET_NESTED in qp2/config/${compiler_name}.cfg'
-  elseif (setting == 3) then
+  elseif (is_working_n(4)) then
     print*,'The parallelization works on 4 levels with:'
     print*,'call omp_set_nested(.True.)'
     print*,'+'
@@ -221,7 +214,7 @@ program check_omp
     print*,'Try an other compiler and good luck...'
   endif
 
-  if (is_working) then
+  if (is_working_n(1)) then
     print*,''
     print*,'=========================================================='
     print*,'Your actual set up works for parallelization with 4 levels'
