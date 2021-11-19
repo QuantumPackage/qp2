@@ -1,4 +1,4 @@
-subroutine test_set_multiple_levels_omp()
+subroutine set_multiple_levels_omp()
 
 ! Doc : idk
 
