@@ -21,17 +21,27 @@ else
     list_files=${LIST}
     echo "Files that will be modified:"
     echo $list_files
-    
+   
+    # Flags that must be added 
+    FLAGS=$(./check_required_setup.sh $COMP)
+
     # Add the flags
     for file in $list_files
     do
         echo $file
-        ACTUAL=$(grep "IRPF90_FLAGS : --openmp" $file)
-        FLAGS=$(./check_required_setup.sh $COMP)
-        SPACE=" "
-        BASE="IRPF90_FLAGS : --openmp"
-        NEW=${BASE}${SPACE}${FLAGS}
+        BASE="IRPF90_FLAGS : --ninja"
+        ACTUAL=$(grep "$BASE" $file)
         
+        # To have only one time each flag	
+	grep " -DSET_MAX_ACT" $file && ${ACTUAL/" -DSET_MAX"/""}
+	grep " -DSET_NESTED" $file && ${ACTUAL/" -DSET_NESTED"/""}
+        SPACE=" "
+
+	NEW=${ACTUAL}${SPACE}${FLAGS}
+
+	# Debug
+        #echo ${NEW}
+
         sed "s/${ACTUAL}/${NEW}/" $file
         # -i # to change the files
     done
