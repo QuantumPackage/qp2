@@ -20,7 +20,7 @@ echo "1 2 3" >> $FILE
 for comp in $list_comp
 do
 	$comp --version > /dev/null \
-        && $comp -O0 -fopenmp check_omp_v2.f90 \
+        && $comp -O0 -fopenmp check_omp.f90 \
 	&& echo $(./a.out | grep "Tests:" | cut -d ":" -f2- ) $(echo " : ") $($comp --version | head -n 1) >> $FILE
 
 done

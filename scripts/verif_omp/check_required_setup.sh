@@ -9,7 +9,7 @@ then
 else
 
 $1 --version > /dev/null \
-&& $1 -O0 -fopenmp check_omp_v2.f90 \
+&& $1 -O0 -fopenmp check_omp.f90 \
 && ./a.out | tail -n 1
 
 

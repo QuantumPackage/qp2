@@ -288,7 +288,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call write_int(6,nproc_target,'Number of threads for PT2')
       call write_double(6,mem,'Memory (Gb)')
 
-      call omp_set_max_active_levels(1)
+      call set_multiple_levels_omp(.False.)
 
 
       print '(A)', '========== ======================= ===================== ===================== ==========='
@@ -315,7 +315,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       endif
       !$OMP END PARALLEL
       call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
-      call omp_set_max_active_levels(8)
+      call set_multiple_levels_omp(.True.)
 
       print '(A)', '========== ======================= ===================== ===================== ==========='
 
