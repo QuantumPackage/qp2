@@ -300,12 +300,12 @@ subroutine wall_time(t)
 end
 
 BEGIN_PROVIDER [ integer, nproc ]
+  use omp_lib
   implicit none
   BEGIN_DOC
   ! Number of current OpenMP threads
   END_DOC
 
-  integer                        :: omp_get_num_threads
   nproc = 1
   !$OMP PARALLEL
   !$OMP MASTER
