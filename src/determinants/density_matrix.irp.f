@@ -268,6 +268,44 @@ subroutine set_natural_mos
    soft_touch mo_occ
 end
 
+
+subroutine save_natural_mos_canon_label
+   implicit none
+   BEGIN_DOC
+   ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
+   ! the |MO| basis
+   END_DOC
+   call set_natural_mos_canon_label
+   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
+   call orthonormalize_mos
+   call save_mos
+end
+
+subroutine set_natural_mos_canon_label
+   implicit none
+   BEGIN_DOC
+   ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
+   ! in the |MO| basis
+   END_DOC
+   character*(64)                 :: label
+   double precision, allocatable  :: tmp(:,:)
+
+   label = "Canonical"
+    integer :: i,j,iorb,jorb
+    do i = 1, n_virt_orb
+     iorb = list_virt(i)
+     do j = 1, n_core_inact_act_orb
+      jorb = list_core_inact_act(j)
+     enddo
+    enddo
+   call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
+   soft_touch mo_occ
+end
+
+
+
+
+
 subroutine set_natorb_no_ov_rot
    implicit none
    BEGIN_DOC
