@@ -58,6 +58,7 @@
       symmetry in matrices
     - qp_export_as_tgz exports also plugin codes
     - Added a basis module containing basis set information
+    - Added qp_run truncate_wf
 
 *** Code
 
