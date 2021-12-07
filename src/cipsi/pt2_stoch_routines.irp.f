@@ -117,7 +117,6 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
-!  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
   type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
 !

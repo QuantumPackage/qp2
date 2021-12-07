@@ -60,6 +60,7 @@ subroutine add_to_selection_buffer(b, det, val)
     b%val(b%cur) = val
     if(b%cur == size(b%val)) then
       call sort_selection_buffer(b)
+      b%cur = b%cur-1
     end if
   end if
 end subroutine
@@ -144,8 +145,8 @@ subroutine sort_selection_buffer(b)
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
-  rss = memory_of_int(b%cur) + 2*N_int*memory_of_double(size(b%det,3))
-  call check_mem(rss,irp_here)
+!  rss = memory_of_int(b%cur) + 2*N_int*memory_of_double(size(b%det,3))
+!  call check_mem(rss,irp_here)
   allocate(iorder(b%cur), detmp(N_int, 2, size(b%det,3)))
   do i=1,b%cur
     iorder(i) = i
@@ -225,14 +226,14 @@ subroutine make_selection_buffer_s2(b)
       endif
       dup = .True.
       do k=1,N_int
-        if ( (tmp_array(k,1,i) /= tmp_array(k,1,j))                   &
-              .or. (tmp_array(k,2,i) /= tmp_array(k,2,j)) ) then
+        if ( (tmp_array(k,1,i) /= tmp_array(k,1,j)) .or. &
+             (tmp_array(k,2,i) /= tmp_array(k,2,j)) ) then
           dup = .False.
           exit
         endif
       enddo
       if (dup) then
-        val(i) = max(val(i), val(j))
+        val(i) = min(val(i), val(j))
         duplicate(j) = .True.
       endif
       j+=1
@@ -282,9 +283,6 @@ subroutine make_selection_buffer_s2(b)
     call configuration_to_dets_size(o(1,1,i),sze,elec_alpha_num,N_int)
     n_d = n_d + sze
     if (n_d > b%cur) then
-!      if (n_d - b%cur > b%cur - n_d + sze) then
-!        n_d = n_d - sze
-!      endif
       exit
     endif
   enddo
@@ -329,10 +327,11 @@ subroutine remove_duplicates_in_selection_buffer(b)
   integer(bit_kind), allocatable :: tmp_array(:,:,:)
   logical, allocatable           :: duplicate(:)
 
-  n_d = b%cur
   logical                        :: found_duplicates
   double precision               :: rss
   double precision, external     :: memory_of_double
+
+  n_d = b%cur
   rss = (4*N_int+4)*memory_of_double(n_d)
   call check_mem(rss,irp_here)
 
