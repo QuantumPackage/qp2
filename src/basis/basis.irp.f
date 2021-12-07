@@ -30,8 +30,10 @@ BEGIN_PROVIDER [ double precision, shell_normalization_factor , (shell_num) ]
         powA(3) = 0
 
         norm = 0.d0
-        do k=shell_prim_index(i),shell_prim_index(i)+shell_prim_num(i)-1
-          do j=shell_prim_index(i),shell_prim_index(i)+shell_prim_num(i)-1
+        do k=1, prim_num
+          if (shell_index(k) /= i) cycle
+          do j=1, prim_num
+            if (shell_index(j) /= i) cycle
             call overlap_gaussian_xyz(C_A,C_A,prim_expo(j),prim_expo(k), &
               powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
             norm = norm+c*prim_coef(j)*prim_coef(k) * prim_normalization_factor(j) * prim_normalization_factor(k)
@@ -91,7 +93,8 @@ BEGIN_PROVIDER [ double precision, prim_normalization_factor , (prim_num) ]
         powA(2) = 0
         powA(3) = 0
 
-        do k=shell_prim_index(i),shell_prim_index(i)+shell_prim_num(i)-1
+        do k=1, prim_num
+          if (shell_index(k) /= i) cycle
             call overlap_gaussian_xyz(C_A,C_A,prim_expo(k),prim_expo(k), &
               powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
             prim_normalization_factor(k) = 1.d0/dsqrt(norm)

@@ -585,12 +585,18 @@ let run ?o b au c d m p cart xyz_file =
         let shell_prim_num =
           list_map List.length  lc
         in
-        let shell_prim_idx =
+        Printf.printf "Coucou\n%!";
+        let shell_idx =
+          Printf.printf "Coucou\n%!";
+          let rec make_list n accu = function
+          | 0 -> accu
+          | i -> make_list n (n :: accu) (i-1)
+          in
           let rec aux count accu = function
           | [] -> List.rev accu
           | l::rest ->
-            let newcount = count+(List.length l) in
-            aux newcount (count::accu) rest
+            let new_l = make_list count accu (List.length l) in
+            aux (count+1) new_l rest
           in
           aux 1 [] lc
         in
@@ -602,20 +608,12 @@ let run ?o b au c d m p cart xyz_file =
           ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
         Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
-        Ezfio.set_basis_shell_prim_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_idx) ;
+        Ezfio.set_basis_shell_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| prim_num |] ~data:shell_idx) ;
         Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| nucl_num |]
-          ~data:(
-          list_map (fun (_,n) -> Nucl_number.to_int n) basis
-          |> List.fold_left (fun accu i -> 
-            match accu with 
-            | [] -> []
-            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((h+1,i)::(h+1,j)::rest)
-          ) [(0,0)]
-          |> List.rev
-          |> List.map fst
-          )) ;
+          ~rank:1 ~dim:[| shell_num |]
+          ~data:( list_map (fun (_,n) -> Nucl_number.to_int n) basis) 
+          ) ;
         Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| nucl_num |]
           ~data:(
