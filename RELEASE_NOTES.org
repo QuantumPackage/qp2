@@ -31,6 +31,7 @@
   - Fixed bug in molden (Au -> Angs)
   - Fixed bug with non-contiguous MOs in active space and deleter MOs
   - Complete network-free installation
+  - Fixed bug in selection when computing full PT2
 
 *** User interface
 
@@ -86,7 +87,7 @@
     - Using Intel IPP for sorting when using Intel compiler
     - Removed parallelism in sorting
     - Compute banned_excitations from exchange integrals to accelerate with local MOs
-
+  
 
 
 
