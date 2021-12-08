@@ -87,8 +87,8 @@ subroutine merge_selection_buffers(b1, b2)
   double precision :: rss
   double precision, external :: memory_of_double
   sze = max(size(b1%val), size(b2%val))
-  rss = memory_of_double(sze) + 2*N_int*memory_of_double(sze)
-  call check_mem(rss,irp_here)
+!  rss = memory_of_double(sze) + 2*N_int*memory_of_double(sze)
+!  call check_mem(rss,irp_here)
   allocate(val(sze), detmp(N_int, 2, sze))
   i1=1
   i2=1

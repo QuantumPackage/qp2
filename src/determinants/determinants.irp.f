@@ -84,7 +84,6 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
     else
       psi_det_size = 1
     endif
-    psi_det_size = max(psi_det_size,100000)
     call write_int(6,psi_det_size,'Dimension of the psi arrays')
   endif
   IRP_IF MPI_DEBUG

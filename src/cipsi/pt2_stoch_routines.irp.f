@@ -318,10 +318,10 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
       print '(A)', '========== ======================= ===================== ===================== ==========='
 
-    do k=1,N_states
-      pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
-    enddo
-    SOFT_TOUCH pt2_overlap
+      do k=1,N_states
+        pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
+      enddo
+      SOFT_TOUCH pt2_overlap
 
     enddo
     FREE pt2_stoch_istate
@@ -575,11 +575,11 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
       endif
       do i=1,n_tasks
         if(index(i).gt.size(pt2_data_I,1).or.index(i).lt.1)then
-         print*,'PB !!!'
-         print*,'If you see this, send a bug report with the following content'
-         print*,irp_here
-         print*,'i,index(i),size(pt2_data_I,1) = ',i,index(i),size(pt2_data_I,1)
-         stop -1
+          print*,'PB !!!'
+          print*,'If you see this, send a bug report with the following content'
+          print*,irp_here
+          print*,'i,index(i),size(pt2_data_I,1) = ',i,index(i),size(pt2_data_I,1)
+          stop -1
         endif
         call pt2_add(pt2_data_I(index(i)),1.d0,pt2_data_task(i))
         f(index(i)) -= 1
