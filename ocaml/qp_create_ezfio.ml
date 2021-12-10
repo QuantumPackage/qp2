@@ -585,9 +585,7 @@ let run ?o b au c d m p cart xyz_file =
         let shell_prim_num =
           list_map List.length  lc
         in
-        Printf.printf "Coucou\n%!";
         let shell_idx =
-          Printf.printf "Coucou\n%!";
           let rec make_list n accu = function
           | 0 -> accu
           | i -> make_list n (n :: accu) (i-1)
