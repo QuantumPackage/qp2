@@ -1,9 +1,12 @@
  real*8 function logabsgamma(x)
  implicit none
  real*8, intent(in) :: x
- logabsgamma = log(abs(gamma(x)))
+ logabsgamma = 1.d32  ! Avoid floating point exception
+ if (x>0.d0) then
+   logabsgamma = log(abs(gamma(x)))
+ endif
  end function logabsgamma
-  
+
   BEGIN_PROVIDER [ integer, NSOMOMax]
  &BEGIN_PROVIDER [ integer, NCSFMax]
  &BEGIN_PROVIDER [ integer*8, NMO]
@@ -56,24 +59,30 @@
       endif
     endif
     ncfg = ncfgpersomo - ncfgprev
-    if(iand(MS,1) .EQ. 0) then
-      !dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
-      binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                  - logabsgamma(1.0d0*((i/2)+1))                        &
-                  - logabsgamma(1.0d0*(i-((i/2))+1)));
-      binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                  - logabsgamma(1.0d0*(((i/2)+1)+1))                    &
-                  - logabsgamma(1.0d0*(i-((i/2)+1)+1)));
-      dimcsfpercfg = max(1,nint(binom1 - binom2))
+    if(i .EQ. 0 .OR. i .EQ. 1) then
+      dimcsfpercfg = 1
+    elseif( i .EQ. 3) then
+      dimcsfpercfg = 2
     else
-      !dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
-      binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                  - logabsgamma(1.0d0*(((i+1)/2)+1))                    &
-                  - logabsgamma(1.0d0*(i-(((i+1)/2))+1)));
-      binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                  - logabsgamma(1.0d0*((((i+3)/2)+1)+1))                &
-                  - logabsgamma(1.0d0*(i-(((i+3)/2)+1)+1)));
-      dimcsfpercfg = max(1,nint(binom1 - binom2))
+      if(iand(MS,1) .EQ. 0) then
+        !dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+        binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                    - logabsgamma(1.0d0*((i/2)+1))                        &
+                    - logabsgamma(1.0d0*(i-((i/2))+1)));
+        binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                    - logabsgamma(1.0d0*(((i/2)+1)+1))                    &
+                    - logabsgamma(1.0d0*(i-((i/2)+1)+1)));
+        dimcsfpercfg = max(1,nint(binom1 - binom2))
+      else
+        !dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+        binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                    - logabsgamma(1.0d0*(((i+1)/2)+1))                    &
+                    - logabsgamma(1.0d0*(i-(((i+1)/2))+1)));
+        binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                    - logabsgamma(1.0d0*((((i+3)/2)+1)+1))                &
+                    - logabsgamma(1.0d0*(i-(((i+3)/2)+1)+1)));
+        dimcsfpercfg = max(1,nint(binom1 - binom2))
+      endif
     endif
     n_CSF += ncfg * dimcsfpercfg
     if(cfg_seniority_index(i+2) > ncfgprev) then

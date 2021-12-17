@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+#
+"""
+Runs a Quantum Package calculation using a Gaussian input file.
+
+Usage:
+      qp_gaussian INPUT
+
+"""
+
+# Requires pymatgen (https://pymatgen.org/)
+# pip install pymatgen
+
+
+import os
+import sys
+import os.path
+
+try:
+    import qp_path
+except ImportError:
+    print("source quantum_package.rc")
+
+from docopt import docopt
+import pymatgen
+from pymatgen.io.gaussian import GaussianInput
+
+
+def main(arguments):
+
+    filename = arguments["INPUT"]
+
+    with open(filename,'r') as f:
+        text = f.read()
+
+    in_file = GaussianInput.from_string(text)
+
+    d = in_file.as_dict()
+    charge = ("%d"%(d["charge"])).replace('-','m')
+    basis  = d["basis_set"]
+    mult   = d["spin_multiplicity"]
+    natoms = len(d["molecule"]["sites"])
+    with open("g09.xyz","w") as f:
+      f.write("%d\n"%natoms)
+      f.write("%s\n"%d["title"])
+      f.write("%s\n"%in_file.get_cart_coords())
+
+    if basis is None:
+       print("Basis set not found. Use '/' before basis set")
+       sys.exit(1)
+
+    command = f"rm -rf g09.ezfio"
+    os.system(command)
+
+    command = f"qp_create_ezfio -c {charge} -m {mult} g09.xyz -b {basis} -o g09.ezfio"
+    os.system(command)
+
+    command = f"rm -rf g09.xyz"
+    os.system(command)
+
+    command = f"qp_run scf g09.ezfio"
+    os.system(command)
+
+    command = f"qp_set_frozen_core g09.ezfio"
+    os.system(command)
+
+    if d["functional"] == "FCI":
+      command = f"qp_run fci g09.ezfio"
+    elif d["functional"] == "CIS":
+      command = f"qp_run cis g09.ezfio"
+    elif d["functional"] == "CISD":
+      command = f"qp_run cisd g09.ezfio"
+
+    os.system(command)
+
+    
+
+
+
+
+if __name__ == '__main__':
+    ARGUMENTS = docopt(__doc__)
+    main(ARGUMENTS)

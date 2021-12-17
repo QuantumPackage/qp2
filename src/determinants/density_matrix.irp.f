@@ -368,12 +368,12 @@ BEGIN_PROVIDER [ double precision, c0_weight, (N_states) ]
        c = maxval(psi_coef(:,i) * psi_coef(:,i))
        c0_weight(i) = 1.d0/(c+1.d-20)
      enddo
-     c = 1.d0/minval(c0_weight(:))
+     c = 1.d0/sum(c0_weight(:))
      do i=1,N_states
        c0_weight(i) = c0_weight(i) * c
      enddo
    else
-     c0_weight = 1.d0
+     c0_weight(:) = 1.d0
    endif
 
 END_PROVIDER
@@ -390,7 +390,7 @@ BEGIN_PROVIDER [ double precision, state_average_weight, (N_states) ]
    if (weight_one_e_dm == 0) then
      state_average_weight(:) = c0_weight(:)
    else if (weight_one_e_dm == 1) then
-     state_average_weight(:) = 1./N_states
+     state_average_weight(:) = 1.d0/N_states
    else
      call ezfio_has_determinants_state_average_weight(exists)
      if (exists) then

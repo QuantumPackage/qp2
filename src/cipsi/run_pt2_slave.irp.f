@@ -31,12 +31,11 @@ subroutine run_pt2_slave(thread,iproc,energy)
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
-  call run_pt2_slave_large(thread,iproc,energy)
-!  if (N_det > nproc*(elec_alpha_num * (mo_num-elec_alpha_num))**2) then
-!    call run_pt2_slave_large(thread,iproc,energy)
-!  else
-!    call run_pt2_slave_small(thread,iproc,energy)
-!  endif
+  if (N_det > 100000 ) then
+    call run_pt2_slave_large(thread,iproc,energy)
+  else
+    call run_pt2_slave_small(thread,iproc,energy)
+  endif
 end
 
 subroutine run_pt2_slave_small(thread,iproc,energy)
@@ -67,7 +66,6 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
 
   double precision, external :: memory_of_double, memory_of_int
   integer :: bsize ! Size of selection buffers
-!  logical :: sending
 
   allocate(task_id(pt2_n_tasks_max), task(pt2_n_tasks_max))
   allocate(pt2_data(pt2_n_tasks_max), i_generator(pt2_n_tasks_max), subset(pt2_n_tasks_max))
@@ -85,7 +83,6 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
   buffer_ready = .False.
   n_tasks = 1
 
-!  sending = .False.
   done = .False.
   do while (.not.done)
 
@@ -119,14 +116,13 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     do k=1,n_tasks
       call pt2_alloc(pt2_data(k),N_states)
       b%cur = 0
-!double precision :: time2
-!call wall_time(time2)
+      double precision :: time2
+      call wall_time(time2)
       call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
-!call wall_time(time1)
-!print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
+      call wall_time(time1)
+!      print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
     call wall_time(time1)
-!print *,  '-->', i_generator(1), time1-time0, n_tasks
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then
@@ -164,6 +160,11 @@ end subroutine
 subroutine run_pt2_slave_large(thread,iproc,energy)
  use selection_types
  use f77_zmq
+ BEGIN_DOC
+! This subroutine can miss important determinants when the PT2 is completely
+! computed. It should be called only for large workloads where the PT2 is
+! interrupted before the end
+ END_DOC
   implicit none
 
   double precision, intent(in)    :: energy(N_states_diag)
@@ -234,30 +235,28 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
       ASSERT (b%N == bsize)
     endif
 
-    double precision :: time0, time1
-    call wall_time(time0)
     call pt2_alloc(pt2_data,N_states)
     b%cur = 0
     call select_connected(i_generator,energy,pt2_data,b,subset,pt2_F(i_generator))
-    call wall_time(time1)
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then
       done = .true.
     endif
     call sort_selection_buffer(b)
-    call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
     call omp_set_lock(global_selection_buffer_lock)
     global_selection_buffer%mini = b%mini
     call merge_selection_buffers(b,global_selection_buffer)
     b%cur=0
     call omp_unset_lock(global_selection_buffer_lock)
-    if ( iproc == 1 ) then
+    if ( iproc == 1 .or. i_generator < 100 .or. done) then
       call omp_set_lock(global_selection_buffer_lock)
+      call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
       call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), global_selection_buffer, (/task_id/), 1,sending)
       global_selection_buffer%cur = 0
       call omp_unset_lock(global_selection_buffer_lock)
     else
+      call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
       call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), b, (/task_id/), 1,sending)
     endif
 

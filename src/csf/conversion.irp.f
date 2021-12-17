@@ -1,3 +1,15 @@
+BEGIN_PROVIDER [ double precision, psi_csf_coef, (N_csf, N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Wafe function in CSF basis
+ END_DOC
+
+ double precision, allocatable :: buffer(:,:)
+ allocate ( buffer(N_det, N_states) )
+ buffer(1:N_det, 1:N_states) = psi_coef(1:N_det, 1:N_states)
+ call convertWFfromDETtoCSF(N_states, buffer, psi_csf_coef)
+END_PROVIDER
+
 subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
   use cfunctions
   use bitmasks
