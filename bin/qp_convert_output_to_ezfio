@@ -389,8 +389,6 @@ def write_ezfio(res, filename):
         n_beta = res.num_beta
         for i in range(nucl_num):
             charge[i] -= nucl_charge_remove[i]
-            n_alpha -= nucl_charge_remove[i]/2
-            n_beta -= nucl_charge_remove[i]/2
         ezfio.set_nuclei_nucl_charge(charge)
         ezfio.set_electrons_elec_alpha_num(n_alpha)
         ezfio.set_electrons_elec_beta_num(n_beta)
