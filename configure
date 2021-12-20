@@ -274,7 +274,7 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/resultsFile-v2.0.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/resultsFile-v2.3.tar.gz
               mv resultsFile-*/resultsFile "\${QP_ROOT}/external/Python/"
 EOF
 
