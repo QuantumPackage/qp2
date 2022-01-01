@@ -1767,6 +1767,56 @@ void calculateMETypeSOMOSOMO(int *BF1, int *BF2, int moi, int moj, double *facto
 //
 // ===================================================================
 
+void callcalcMEij_SOC(int Isomo, int Jsomo, int orbI, int orbJ, int MS, int NMO, double **ApqIJptr, int *rowsA, int *colsA){
+    // Get dets for I
+    int ndetI;
+    int ndetJ;
+
+    // Get detlist
+    int NSOMOI=0;
+    int NSOMOJ=0;
+    getSetBits(Isomo, &NSOMOI);
+    getSetBits(Jsomo, &NSOMOJ);
+
+    Tree dettreeI = (Tree){  .rootNode = NULL, .NBF = -1 };
+    dettreeI.rootNode = malloc(sizeof(Node));
+    (*dettreeI.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
+
+    genDetBasis(&dettreeI, Isomo, MS, &ndetI);
+
+
+    Tree dettreeJ = (Tree){  .rootNode = NULL, .NBF = -1 };
+    dettreeJ.rootNode = malloc(sizeof(Node));
+    (*dettreeJ.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
+
+    genDetBasis(&dettreeJ, Jsomo, MS, &ndetJ);
+
+    int detlistI[ndetI];
+    int detlistJ[ndetJ];
+    for(int i=0;i<ndetI;i++)
+        detlistI[i] = 0;
+    for(int i=0;i<ndetJ;i++)
+        detlistJ[i] = 0;
+
+    // Get detlist
+    getDetlistDriver(&dettreeI, NSOMOI, detlistI);
+    getDetlistDriver(&dettreeJ, NSOMOJ, detlistJ);
+
+    (*ApqIJptr) = malloc(ndetI*ndetJ*sizeof(double));
+    (*rowsA) = ndetI;
+    (*colsA) = ndetJ;
+
+    double *matelemdetbasis = (*ApqIJptr);
+
+    for(int i=0;i<ndetI;i++)
+        for(int j=0;j<ndetJ;j++)
+            matelemdetbasis[i*ndetJ + j]=0.0;
+
+    // Calculate matrix elements in det basis
+    calcMEdetpairGeneral_SOC(detlistI, detlistJ, orbI, orbJ, Isomo, Jsomo, ndetI, ndetJ, NMO, matelemdetbasis);
+
+}
+
 void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, int Isomo, int Jsomo, int ndetI, int ndetJ, int NMO, double *matelemdetbasis){
 
     // Calculation of phase
