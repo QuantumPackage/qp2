@@ -1761,3 +1761,362 @@ void calculateMETypeSOMOSOMO(int *BF1, int *BF2, int moi, int moj, double *facto
 
 
 }
+
+// ===================================================================
+// SOC Matrix Elements
+//
+// ===================================================================
+
+void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, int Isomo, int Jsomo, int ndetI, int ndetJ, int NMO, double *matelemdetbasis){
+
+    // Calculation of phase
+    // The following convention is used
+    // <J|a^{\dagger}_q a_p | I>
+    //
+    // The phase is calculated
+    // assuming all alpha electrons
+    // are on the left and all beta
+    // electrons are on the RHS
+    // of the alphas.
+
+    // There are three possibilities
+    // which need to be separated
+    // CASE 1. p > q
+    // CASE 2. p < q
+    // CASE 3. p == q
+
+    int maskI;
+    int nelecatI;
+    int noccorbI;
+    double phaseI=1.0;
+    double phaseJ=1.0;
+    unsigned int maskleft;
+    unsigned int maskright;
+    unsigned int psomo;
+    unsigned int qsomo;
+
+    int p,q; // The two orbitals p is always > q.
+
+    if(orbI > orbJ){
+        // CASE 1 : orbI > orbJ
+        p = orbI;
+        q = orbJ;
+
+        // Find the corresponding sub case
+        // 1. NdetI > NdetJ  (SOMO -> SOMO)
+        // 2. NdetI < NdetJ  (DOMO -> VMO)
+        // 3. NdetI == NdetJ (SOMO -> VMO and DOMO -> SOMO)
+
+        // Converting the above four cases into int:
+        int case_type = abs(ndetI - ndetJ) == 0 ? 3 : (ndetI > ndetJ ? 1 : 2);
+        p = orbI;
+        q = orbJ;
+
+        switch (case_type){
+            case 1:
+                // SOMO -> SOMO
+                // Find the orbital ids in model space
+                maskleft  =  (0 | ((1<<(p))-1));
+                maskright =  (0 | ((1<<(q))-1));
+                psomo = __builtin_popcount(Isomo & maskleft);
+                qsomo = __builtin_popcount(Isomo & maskright); // q has to be atleast 1
+                p = psomo;
+                q = qsomo;
+
+                for(int i=0;i<ndetI;i++){
+                    int idet = detlistI[i];
+                    int phase=1;
+                    // Apply remove and shft on Isomo
+                    idet = applyRemoveShftSOMOSOMO(idet, p, q, &phase);
+                    //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                    }
+                }
+                break;
+            case 2:
+                // DOMO -> VMO
+                // Find the orbital ids in model space
+                // As seen in Jsomo
+                // Here we apply a^{\dagger}_p a_q |J>
+                maskleft = (0 | ((1<<(p))-1));
+                maskright =(0 | ((1<<(q))-1));
+                psomo = __builtin_popcount(Jsomo & maskleft);
+                qsomo = __builtin_popcount(Jsomo & maskright); // q has to be atleast 1
+                p = psomo;
+                q = qsomo;
+
+                for(int i=0;i<ndetI;i++){
+                    // Get phase
+                    int idet = detlistI[i];
+                    //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                        // Calculate phase
+                        int phase=1;
+                        // Apply remove and shift on Jdet (orbital ids are inverted)
+                        jdet = applyRemoveShftSOMOSOMO(jdet, q, p, &phase);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                    }
+                }
+                break;
+            case 3:
+                // (SOMO -> VMO or DOMO -> SOMO)
+                noccorbI = __builtin_popcount(Isomo & (1<<(orbI-1)));
+
+                switch (noccorbI){
+                    case 0:
+                        // Case: DOMO -> SOMO
+                        // Find the orbital ids in model space
+                        // Ex:
+                        //      2 1 1 1 1
+                        //      p     q
+                        //      1 1 1 2 1
+                        // p = 4
+                        // q = 2
+                        // p is from Jsomo
+                        // q is from Isomo
+                        maskleft = ((1<<(p))-1);
+                        maskright =((1<<(q))-1);
+                        psomo = __builtin_popcount(Jsomo & maskleft);
+                        qsomo = __builtin_popcount(Isomo & maskright);
+                        p = psomo;
+                        q = qsomo;
+
+                        for(int i=0;i<ndetI;i++){
+                            int idet = detlistI[i];
+                            //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                            int phase=1;
+                            // Apply remove and shft on Isomo
+                            idet = applyRemoveShftAddDOMOSOMO(idet, p, q, &phase);
+                            for(int j=0;j<ndetJ;j++){
+                                int jdet = (detlistJ[j]);
+                                //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                                if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                            }
+                        }
+                        break;
+                    case 1:
+                        // Case: SOMO -> VMO
+                        // Find the orbital ids in model space
+                        // Ex:
+                        //      1 1 1 0 1
+                        //      p     q
+                        //      0 1 1 1 1
+                        // p = 4
+                        // q = 1
+                        // p is from Isomo
+                        // q is from Jsomo
+                        maskleft = ((1<<(p))-1);
+                        maskright =((1<<(q))-1);
+                        psomo = __builtin_popcount(Isomo & maskleft);
+                        qsomo = __builtin_popcount(Jsomo & maskright);
+                        p = psomo;
+                        q = qsomo;
+
+                        for(int i=0;i<ndetI;i++){
+                            int idet = detlistI[i];
+                            //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                            int phase=1;
+                            // Apply remove and shft on Isomo
+                            idet = applyRemoveShftAddSOMOVMO(idet, p, q, &phase);
+                            for(int j=0;j<ndetJ;j++){
+                                int jdet = (detlistJ[j]);
+                                //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                                if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                            }
+                        }
+                        break;
+                    default:
+                        printf("Something is wrong in calcMEdetpair\n");
+                        break;
+                }
+                break;
+            default:
+                printf("Something is wrong in calc ME\n");
+                break;
+        } // end select
+
+    } // end orbI > orbJ
+    else if(orbI < orbJ){
+        // CASE 2 orbI < orbJ
+        p = orbI;
+        q = orbJ;
+        // Find the corresponding sub case
+        // 1. NdetI > NdetJ  (SOMO -> SOMO)
+        // 2. NdetI < NdetJ  (DOMO -> VMO)
+        // 3. NdetI == NdetJ (SOMO -> VMO and DOMO -> SOMO)
+
+        // Converting the above four cases into int:
+        int case_type = abs(ndetI - ndetJ) == 0 ? 3 : (ndetI > ndetJ ? 1 : 2);
+
+        switch (case_type){
+            case 1:
+                // SOMO -> SOMO
+                // Find the orbital ids in model space
+                maskleft  =  (0 | ((1<<(p))-1));
+                maskright =  (0 | ((1<<(q))-1));
+                psomo = __builtin_popcount(Isomo & maskleft);
+                qsomo = __builtin_popcount(Isomo & maskright); // q has to be atleast 1
+                p = psomo;
+                q = qsomo;
+
+                for(int i=0;i<ndetI;i++){
+                    int idet = detlistI[i];
+                    //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                    int phase=1;
+                    // Apply remove and shft on Isomo
+                    idet = applyRemoveShftSOMOSOMO(idet, p, q, &phase);
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                    }
+                }
+                break;
+            case 2:
+                // DOMO -> VMO
+                // Find the orbital ids in model space
+                // As seen in Jsomo
+                // Here we apply a^{\dagger}_p a_q |J>
+                maskleft = (0 | ((1<<(p))-1));
+                maskright =(0 | ((1<<(q))-1));
+                psomo = __builtin_popcount(Jsomo & maskleft);
+                qsomo = __builtin_popcount(Jsomo & maskright); // q has to be atleast 1
+                p = psomo;
+                q = qsomo;
+
+                for(int i=0;i<ndetI;i++){
+                    // Get phase
+                    int idet = detlistI[i];
+                    //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                        // Calculate phase
+                        int phase=1;
+                        // Apply remove and shift on Jdet (orbital ids are inverted)
+                        jdet = applyRemoveShftSOMOSOMO(jdet, q, p, &phase);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                    }
+                }
+                break;
+            case 3:
+                // (SOMO -> VMO or DOMO -> SOMO)
+                // if Isomo[p] == 1 => SOMO -> VMO
+                // if Isomo[p] == 0 => DOMO -> SOMO
+                noccorbI = __builtin_popcount(Isomo & (1<<(orbI-1)));
+
+                switch (noccorbI){
+                    case 0:
+                        // Case: DOMO -> SOMO
+                        // Find the orbital ids in model space
+                        // Ex:
+                        //      1 1 1 2 1
+                        //      q     p
+                        //      2 1 1 1 1
+                        // p = 1
+                        // q = 4
+                        // p is from Jsomo
+                        // q is from Isomo
+                        maskleft = ((1<<(p))-1);
+                        maskright =((1<<(q))-1);
+                        psomo = __builtin_popcount(Jsomo & maskleft);
+                        qsomo = __builtin_popcount(Isomo & maskright);
+                        p = psomo;
+                        q = qsomo;
+
+                        for(int i=0;i<ndetI;i++){
+                            int idet = detlistI[i];
+                            //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                            int phase=1;
+                            // Apply remove and shft on Isomo
+                            idet = applyRemoveShftAddDOMOSOMO(idet, p, q, &phase);
+                            for(int j=0;j<ndetJ;j++){
+                                int jdet = (detlistJ[j]);
+                                //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                                if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                            }
+                        }
+                        break;
+                    case 1:
+                        // Case: SOMO -> VMO
+                        // Find the orbital ids in model space
+                        // Ex:
+                        //      0 1 1 1 1
+                        //      q     p
+                        //      1 1 1 0 1
+                        // p = 2
+                        // q = 4
+                        // p is from Isomo
+                        // q is from Jsomo
+                        maskleft = ((1<<(p))-1);
+                        maskright =((1<<(q))-1);
+                        psomo = __builtin_popcount(Isomo & maskleft);
+                        qsomo = __builtin_popcount(Jsomo & maskright);
+                        p = psomo;
+                        q = qsomo;
+
+                        for(int i=0;i<ndetI;i++){
+                            int idet = detlistI[i];
+                            //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
+                            int phase=1;
+                            // Apply remove and shft on Isomo
+                            idet = applyRemoveShftAddSOMOVMO(idet, p, q, &phase);
+                            for(int j=0;j<ndetJ;j++){
+                                int jdet = (detlistJ[j]);
+                                //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
+                                if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
+                            }
+                        }
+                        break;
+                    default:
+                        printf("Something is wrong in calcMEdetpair\n");
+                        break;
+                }
+                break;
+            default:
+                printf("Something is wrong in calc ME\n");
+                break;
+        } // end select
+    } // end orbI  < orbJ
+    else{
+        // CASE 3 : orbI == orbJ
+
+        // Three possibilities
+        // orbI = VMO
+        // orbI = SOMO
+        // orbI = DOMO
+        int noccorbI = __builtin_popcount((Isomo & (1<<(orbI-1))));
+        switch (noccorbI){
+            case 0:
+                // Matrix is 0
+                for(int i=0;i<ndetI;i++){
+                    int idet = detlistI[i];
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 0.0;
+                    }
+                }
+                break;
+            case 1:
+                // Matrix is Identity
+                for(int i=0;i<ndetI;i++){
+                    int idet = detlistI[i];
+                    for(int j=0;j<ndetJ;j++){
+                        int jdet = (detlistJ[j]);
+                        if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    } // end orbI == orbJ
+
+    return;
+}
+
