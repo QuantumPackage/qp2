@@ -1767,7 +1767,7 @@ void calculateMETypeSOMOSOMO(int *BF1, int *BF2, int moi, int moj, double *facto
 //
 // ===================================================================
 
-int applyRemoveShftAddSOMOVMO_SOMO(int idet, int p, int q, int *phase){
+int applyRemoveShftAddSOMOVMO_SOC(int idet, int p, int q, int *phase){
     // CSF: 1 1 1 1 0 1
     // DET: 1 0 1 0   1
     //        |     |
@@ -1847,7 +1847,7 @@ int applyRemoveShftAddSOMOVMO_SOMO(int idet, int p, int q, int *phase){
     return(outdet);
 }
 
-int applyRemoveShftAddDOMOSOMO_SOMO(int idet, int p, int q, int *phase){
+int applyRemoveShftAddDOMOSOMO_SOC(int idet, int p, int q, int *phase){
     // CSF: 1 2 1 1 1 1 1 1 1 1
     // DET: 1   0 0 1 1 0 0 1 0
     //          |       |
@@ -1924,7 +1924,7 @@ int applyRemoveShftAddDOMOSOMO_SOMO(int idet, int p, int q, int *phase){
     return(outdet);
 }
 
-int applyRemoveShftSOMOSOMO_SOMO(int idet, int p, int q, int *phase){
+int applyRemoveShftSOMOSOMO_SOC(int idet, int p, int q, int *phase){
     // CSF: 1 1 1 1 1 1 1 1 1 1
     // DET: 1 1 0 0 1 1 0 0 1 0
     //        |         |
