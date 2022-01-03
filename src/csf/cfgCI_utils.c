@@ -1767,156 +1767,232 @@ void calculateMETypeSOMOSOMO(int *BF1, int *BF2, int moi, int moj, double *facto
 //
 // ===================================================================
 
-void getApqIJMatrixDriverArrayInp_SOC(int64_t Isomo, int64_t Jsomo, int32_t orbp, int32_t orbq, int64_t MSI, int64_t MSJ, int64_t NMO, double *CSFICSFJApqIJ, int32_t rowsmax, int32_t colsmax){
+int applyRemoveShftAddSOMOVMO_SOMO(int idet, int p, int q, int *phase){
+    // CSF: 1 1 1 1 0 1
+    // DET: 1 0 1 0   1
+    //        |     |
+    //        p     q
+    //        p = 4
+    //        q = 1
+    //
+    //          result
+    //
+    // CSF: 1 0 1 1 1 1
+    // DET: 1   1 0 0 1
+    // maskp:
+    //      0   1 1 1 1
+    // maskq:
+    //      0   0 0 0 1
+    // maskpxq:
+    //      0   1 1 1 0
+    // maskqxqi:
+    //      1   0 0 0 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
 
-    double *overlapMatrixI;
-    double *overlapMatrixJ;
-    double *orthoMatrixI;
-    double *orthoMatrixJ;
-    double *bftodetmatrixI;
-    double *bftodetmatrixJ;
-    double *ApqIJ;
-    int NSOMO=0;
+    // Step 1: remove
+    // clear bits from p
+    int outdet = idet;
+    int occatp = __builtin_popcount(idet & (1UL << (p-1)));
+    // remove the bit at p
+    outdet &= ~(1UL << (p-1));
 
-    /***********************************
-                   Doing I
-    ************************************/
+    // Step 2: shift
+    if(q > p){
+        // start with q
 
-    int rowsbftodetI, colsbftodetI;
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
 
-    convertBFtoDetBasis(Isomo, MSI, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
+    else{
+        // shift bit to right
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
 
-    // Fill matrix
-    int rowsI = 0;
-    int colsI = 0;
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
 
-    getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MSI, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 << 1;
+        outdet = tmpdetp1 | tmpdetp2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
 
-    orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
-
-    gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
-
-    /***********************************
-                   Doing J
-    ************************************/
-
-    int rowsbftodetJ, colsbftodetJ;
-
-    convertBFtoDetBasis(Jsomo, MSJ, &bftodetmatrixJ, &rowsbftodetJ, &colsbftodetJ);
-
-    int rowsJ = 0;
-    int colsJ = 0;
-    // Fill matrix
-    getOverlapMatrix_withDet(bftodetmatrixJ, rowsbftodetJ, colsbftodetJ, Jsomo, MSJ, &overlapMatrixJ, &rowsJ, &colsJ, &NSOMO);
-
-    orthoMatrixJ = malloc(rowsJ*colsJ*sizeof(double));
-
-    gramSchmidt(overlapMatrixJ, rowsJ, colsJ, orthoMatrixJ);
-
-
-    int rowsA = 0;
-    int colsA = 0;
-
-    callcalcMEij_SOC(Isomo, Jsomo, orbp, orbq, MSI, MSJ, NMO, &ApqIJ, &rowsA, &colsA);
-
-    // Final ME in BF basis
-
-    // First transform I in bf basis
-    double *bfIApqIJ = malloc(rowsbftodetI*colsA*sizeof(double));
-
-    int transA=false;
-    int transB=false;
-    callBlasMatxMat(bftodetmatrixI, rowsbftodetI, colsbftodetI, ApqIJ, rowsA, colsA, bfIApqIJ, transA, transB);
-
-    // now transform I in csf basis
-    double *CSFIApqIJ = malloc(rowsI*colsA*sizeof(double));
-    transA = false;
-    transB = false;
-    callBlasMatxMat(orthoMatrixI, rowsI, colsI, bfIApqIJ, colsI, colsA, CSFIApqIJ, transA, transB);
-
-    // now transform J in BF basis
-    double *CSFIbfJApqIJ = malloc(rowsI*rowsbftodetJ*sizeof(double));
-    transA = false;
-    transB = true;
-    callBlasMatxMat(CSFIApqIJ, rowsI, colsA, bftodetmatrixJ, rowsbftodetJ, colsbftodetJ, CSFIbfJApqIJ, transA, transB);
-
-    // now transform J in CSF basis
-    //(*CSFICSFJApqIJptr) = malloc(rowsI*rowsJ*sizeof(double));
-    //(*rowsout) = rowsI;
-    //(*colsout) = rowsJ;
-
-    double *tmpCSFICSFJApqIJ = malloc(rowsI*rowsJ*sizeof(double));
-    transA = false;
-    transB = true;
-    callBlasMatxMat(CSFIbfJApqIJ, rowsI, rowsbftodetJ, orthoMatrixJ, rowsJ, colsJ, tmpCSFICSFJApqIJ, transA, transB);
-    // Transfer to actual buffer in Fortran order
-    for(int i = 0; i < rowsI; i++)
-        for(int j = 0; j < rowsJ; j++)
-            CSFICSFJApqIJ[j*rowsI + i] = tmpCSFICSFJApqIJ[i*rowsJ + j];
-
-
-    // Garbage collection
-    free(overlapMatrixI);
-    free(overlapMatrixJ);
-    free(orthoMatrixI);
-    free(orthoMatrixJ);
-    free(bftodetmatrixI);
-    free(bftodetmatrixJ);
-    free(ApqIJ);
-    free(bfIApqIJ);
-    free(CSFIApqIJ);
-    free(CSFIbfJApqIJ);
-    free(tmpCSFICSFJApqIJ);
+    // Done
+    return(outdet);
 }
 
-void callcalcMEij_SOC(int Isomo, int Jsomo, int orbI, int orbJ, int MSI, int MSJ, int NMO, double **ApqIJptr, int *rowsA, int *colsA){
-    // Get dets for I
-    int ndetI;
-    int ndetJ;
+int applyRemoveShftAddDOMOSOMO_SOMO(int idet, int p, int q, int *phase){
+    // CSF: 1 2 1 1 1 1 1 1 1 1
+    // DET: 1   0 0 1 1 0 0 1 0
+    //          |       |
+    //          p       q
+    //
+    //          result
+    //
+    // CSF: 1 1 1 1 1 1 2 1 1 1
+    // DET: 1 0 0 0 1 1   0 1 0
+    // maskp:
+    //      0   1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 1 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
 
-    // Get detlist
-    int NSOMOI=0;
-    int NSOMOJ=0;
-    getSetBits(Isomo, &NSOMOI);
-    getSetBits(Jsomo, &NSOMOJ);
+    // Step 1: remove
+    // clear bits from q
+    int outdet = idet;
+    int occatq = __builtin_popcount(idet & (1UL << (q-1)));
+    outdet &= ~(1UL << (q-1));
 
-    Tree dettreeI = (Tree){  .rootNode = NULL, .NBF = -1 };
-    dettreeI.rootNode = malloc(sizeof(Node));
-    (*dettreeI.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
+    // Step 2: shift
+    if(q > p){
+        // start with q
 
-    genDetBasis(&dettreeI, Isomo, MSI, &ndetI);
+        // shift mask between p and q
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
 
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 << 1;
+        outdet = tmpdetq1 | tmpdetq2;
 
-    Tree dettreeJ = (Tree){  .rootNode = NULL, .NBF = -1 };
-    dettreeJ.rootNode = malloc(sizeof(Node));
-    (*dettreeJ.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
+        // Step 3: Add bit at p + 1
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
+    else{
 
-    genDetBasis(&dettreeJ, Jsomo, MSJ, &ndetJ);
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
 
-    int detlistI[ndetI];
-    int detlistJ[ndetJ];
-    for(int i=0;i<ndetI;i++)
-        detlistI[i] = 0;
-    for(int i=0;i<ndetJ;i++)
-        detlistJ[i] = 0;
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
 
-    // Get detlist
-    getDetlistDriver(&dettreeI, NSOMOI, detlistI);
-    getDetlistDriver(&dettreeJ, NSOMOJ, detlistJ);
+        // Step 3: Add bit at p
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
 
-    (*ApqIJptr) = malloc(ndetI*ndetJ*sizeof(double));
-    (*rowsA) = ndetI;
-    (*colsA) = ndetJ;
+    // Done
+    return(outdet);
+}
 
-    double *matelemdetbasis = (*ApqIJptr);
+int applyRemoveShftSOMOSOMO_SOMO(int idet, int p, int q, int *phase){
+    // CSF: 1 1 1 1 1 1 1 1 1 1
+    // DET: 1 1 0 0 1 1 0 0 1 0
+    //        |         |
+    //        p         q
+    //
+    //          result
+    //
+    // CSF: 1   1 1 1 1   1 1 1
+    // DET: 1   0 0 1 1   0 1 0
+    // maskp:
+    //      0 1 1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 0 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpi =~maskp;
+    int maskqi =~maskq;
 
-    for(int i=0;i<ndetI;i++)
-        for(int j=0;j<ndetJ;j++)
-            matelemdetbasis[i*ndetJ + j]=0.0;
+    // Step 1: remove
+    // clear bits from p and q
+    int outdet = idet;
+    outdet &= ~(1UL << (p-1));
+    outdet &= ~(1UL << (q-1));
 
-    // Calculate matrix elements in det basis
-    calcMEdetpairGeneral_SOC(detlistI, detlistJ, orbI, orbJ, Isomo, Jsomo, ndetI, ndetJ, NMO, matelemdetbasis);
+    // calculate the phase
+    int occatp = idet & (1UL << (p-1));
+    int na, nb;
+    int tmpdet = outdet & (maskp ^ maskq);
+    na = __builtin_popcount(tmpdet);
+    nb = abs(p-q)-1 - na;
+    //int nfermions = occatp == 0 ? nb : na;
 
+    // Step 2: shift
+    if(q > p){
+        int nfermions = occatp == 0 ? na+nb : na+nb+1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // start with q
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+    }
+    else{
+        int nfermions = occatp == 0 ? na+nb+1 : na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // start with p
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+    }
+
+    // Done
+    return(outdet);
 }
 
 void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, int Isomo, int Jsomo, int ndetI, int ndetJ, int NMO, double *matelemdetbasis){
@@ -2272,231 +2348,155 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
     return;
 }
 
-int applyRemoveShftAddSOMOVMO_SOMO(int idet, int p, int q, int *phase){
-    // CSF: 1 1 1 1 0 1
-    // DET: 1 0 1 0   1
-    //        |     |
-    //        p     q
-    //        p = 4
-    //        q = 1
-    //
-    //          result
-    //
-    // CSF: 1 0 1 1 1 1
-    // DET: 1   1 0 0 1
-    // maskp:
-    //      0   1 1 1 1
-    // maskq:
-    //      0   0 0 0 1
-    // maskpxq:
-    //      0   1 1 1 0
-    // maskqxqi:
-    //      1   0 0 0 1
-    int maskp  = (1UL << p)-1;
-    int maskq  = (1UL << q)-1;
-    int maskpxq = (maskp ^ maskq);
-    int maskpxqi = ~(maskp ^ maskq);
+void callcalcMEij_SOC(int Isomo, int Jsomo, int orbI, int orbJ, int MSI, int MSJ, int NMO, double **ApqIJptr, int *rowsA, int *colsA){
+    // Get dets for I
+    int ndetI;
+    int ndetJ;
 
-    // Step 1: remove
-    // clear bits from p
-    int outdet = idet;
-    int occatp = __builtin_popcount(idet & (1UL << (p-1)));
-    // remove the bit at p
-    outdet &= ~(1UL << (p-1));
+    // Get detlist
+    int NSOMOI=0;
+    int NSOMOJ=0;
+    getSetBits(Isomo, &NSOMOI);
+    getSetBits(Jsomo, &NSOMOJ);
 
-    // Step 2: shift
-    if(q > p){
-        // start with q
+    Tree dettreeI = (Tree){  .rootNode = NULL, .NBF = -1 };
+    dettreeI.rootNode = malloc(sizeof(Node));
+    (*dettreeI.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
 
-        // calculate the phase
-        int na, nb;
-        int tmpdet = outdet & (maskpxq);
-        na = __builtin_popcount(tmpdet);
-        nb = __builtin_popcount(maskpxq) - na;
-        //int nfermions = occatp == 0 ? nb : na;
-        int nfermions = na+nb;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+    genDetBasis(&dettreeI, Isomo, MSI, &ndetI);
 
-        int tmpdetq1 = outdet & maskpxq;
-        int tmpdetq2 = outdet & maskpxqi;
-        tmpdetq1 = tmpdetq1 >> 1;
-        outdet = tmpdetq1 | tmpdetq2;
-        // put electron at q
-        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
-    }
-    else{
-        // shift bit to right
-        maskpxq = maskpxq >> 1;
-        maskpxqi = ~(maskpxq);
 
-        // calculate the phase
-        int na, nb;
-        int tmpdet = outdet & (maskpxq);
-        na = __builtin_popcount(tmpdet);
-        nb = __builtin_popcount(maskpxq) - na;
-        //int nfermions = occatp == 0 ? nb : na;
-        int nfermions = na+nb;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+    Tree dettreeJ = (Tree){  .rootNode = NULL, .NBF = -1 };
+    dettreeJ.rootNode = malloc(sizeof(Node));
+    (*dettreeJ.rootNode) = (Node){ .C0 = NULL, .C1 = NULL, .PREV = NULL, .addr = 0, .cpl = -1, .iSOMO = -1};
 
-        // start with p
-        // shift middle electrons to right
-        int tmpdetp1 = outdet & maskpxq;
-        int tmpdetp2 = outdet & maskpxqi;
-        tmpdetp1 = tmpdetp1 << 1;
-        outdet = tmpdetp1 | tmpdetp2;
-        // put electron at q
-        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
-    }
+    genDetBasis(&dettreeJ, Jsomo, MSJ, &ndetJ);
 
-    // Done
-    return(outdet);
+    int detlistI[ndetI];
+    int detlistJ[ndetJ];
+    for(int i=0;i<ndetI;i++)
+        detlistI[i] = 0;
+    for(int i=0;i<ndetJ;i++)
+        detlistJ[i] = 0;
+
+    // Get detlist
+    getDetlistDriver(&dettreeI, NSOMOI, detlistI);
+    getDetlistDriver(&dettreeJ, NSOMOJ, detlistJ);
+
+    (*ApqIJptr) = malloc(ndetI*ndetJ*sizeof(double));
+    (*rowsA) = ndetI;
+    (*colsA) = ndetJ;
+
+    double *matelemdetbasis = (*ApqIJptr);
+
+    for(int i=0;i<ndetI;i++)
+        for(int j=0;j<ndetJ;j++)
+            matelemdetbasis[i*ndetJ + j]=0.0;
+
+    // Calculate matrix elements in det basis
+    calcMEdetpairGeneral_SOC(detlistI, detlistJ, orbI, orbJ, Isomo, Jsomo, ndetI, ndetJ, NMO, matelemdetbasis);
+
 }
 
-int applyRemoveShftAddDOMOSOMO_SOMO(int idet, int p, int q, int *phase){
-    // CSF: 1 2 1 1 1 1 1 1 1 1
-    // DET: 1   0 0 1 1 0 0 1 0
-    //          |       |
-    //          p       q
-    //
-    //          result
-    //
-    // CSF: 1 1 1 1 1 1 2 1 1 1
-    // DET: 1 0 0 0 1 1   0 1 0
-    // maskp:
-    //      0   1 1 1 1 1 1 1 1
-    // maskq:
-    //      0 0 0 0 0 0 1 1 1 1
-    int maskp  = (1UL << p)-1;
-    int maskq  = (1UL << q)-1;
-    int maskpxq = (maskp ^ maskq);
-    int maskpxqi = ~(maskp ^ maskq);
+void getApqIJMatrixDriverArrayInp_SOC(int64_t Isomo, int64_t Jsomo, int32_t orbp, int32_t orbq, int64_t MSI, int64_t MSJ, int64_t NMO, double *CSFICSFJApqIJ, int32_t rowsmax, int32_t colsmax){
 
-    // Step 1: remove
-    // clear bits from q
-    int outdet = idet;
-    int occatq = __builtin_popcount(idet & (1UL << (q-1)));
-    outdet &= ~(1UL << (q-1));
+    double *overlapMatrixI;
+    double *overlapMatrixJ;
+    double *orthoMatrixI;
+    double *orthoMatrixJ;
+    double *bftodetmatrixI;
+    double *bftodetmatrixJ;
+    double *ApqIJ;
+    int NSOMO=0;
 
-    // Step 2: shift
-    if(q > p){
-        // start with q
+    /***********************************
+                   Doing I
+    ************************************/
 
-        // shift mask between p and q
-        maskpxq = maskpxq >> 1;
-        maskpxqi = ~(maskpxq);
-        // calculate the phase
-        int na, nb;
-        int tmpdet = outdet & (maskpxq);
-        na = __builtin_popcount(tmpdet);
-        nb = __builtin_popcount(maskpxq) - na;
-        // spin obb to that at q is moving
-        //int nfermions = occatq == 0 ? na : nb;
-        int nfermions = na + nb + 1;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+    int rowsbftodetI, colsbftodetI;
 
-        int tmpdetq1 = outdet & maskpxq;
-        int tmpdetq2 = outdet & maskpxqi;
-        tmpdetq1 = tmpdetq1 << 1;
-        outdet = tmpdetq1 | tmpdetq2;
+    convertBFtoDetBasis(Isomo, MSI, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
 
-        // Step 3: Add bit at p + 1
-        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
-    }
-    else{
+    // Fill matrix
+    int rowsI = 0;
+    int colsI = 0;
 
-        // calculate the phase
-        int na, nb;
-        int tmpdet = outdet & (maskpxq);
-        na = __builtin_popcount(tmpdet);
-        nb = __builtin_popcount(maskpxq) - na;
-        // spin obb to that at q is moving
-        //int nfermions = occatq == 0 ? na : nb;
-        int nfermions = na + nb + 1;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+    getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MSI, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
 
-        // start with p
-        // shift middle electrons to right
-        int tmpdetp1 = outdet & maskpxq;
-        int tmpdetp2 = outdet & maskpxqi;
-        tmpdetp1 = tmpdetp1 >> 1;
-        outdet = tmpdetp1 | tmpdetp2;
+    orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
 
-        // Step 3: Add bit at p
-        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
-    }
+    gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
 
-    // Done
-    return(outdet);
-}
+    /***********************************
+                   Doing J
+    ************************************/
 
-int applyRemoveShftSOMOSOMO_SOMO(int idet, int p, int q, int *phase){
-    // CSF: 1 1 1 1 1 1 1 1 1 1
-    // DET: 1 1 0 0 1 1 0 0 1 0
-    //        |         |
-    //        p         q
-    //
-    //          result
-    //
-    // CSF: 1   1 1 1 1   1 1 1
-    // DET: 1   0 0 1 1   0 1 0
-    // maskp:
-    //      0 1 1 1 1 1 1 1 1 1
-    // maskq:
-    //      0 0 0 0 0 0 0 1 1 1
-    int maskp  = (1UL << p)-1;
-    int maskq  = (1UL << q)-1;
-    int maskpi =~maskp;
-    int maskqi =~maskq;
+    int rowsbftodetJ, colsbftodetJ;
 
-    // Step 1: remove
-    // clear bits from p and q
-    int outdet = idet;
-    outdet &= ~(1UL << (p-1));
-    outdet &= ~(1UL << (q-1));
+    convertBFtoDetBasis(Jsomo, MSJ, &bftodetmatrixJ, &rowsbftodetJ, &colsbftodetJ);
 
-    // calculate the phase
-    int occatp = idet & (1UL << (p-1));
-    int na, nb;
-    int tmpdet = outdet & (maskp ^ maskq);
-    na = __builtin_popcount(tmpdet);
-    nb = abs(p-q)-1 - na;
-    //int nfermions = occatp == 0 ? nb : na;
+    int rowsJ = 0;
+    int colsJ = 0;
+    // Fill matrix
+    getOverlapMatrix_withDet(bftodetmatrixJ, rowsbftodetJ, colsbftodetJ, Jsomo, MSJ, &overlapMatrixJ, &rowsJ, &colsJ, &NSOMO);
 
-    // Step 2: shift
-    if(q > p){
-        int nfermions = occatp == 0 ? na+nb : na+nb+1;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
-        // start with q
-        // shift everything left of q
-        int tmpdetq1 = outdet & maskq;
-        int tmpdetq2 = outdet & maskqi;
-        tmpdetq2 = tmpdetq2 >> 1;
-        outdet = tmpdetq1 | tmpdetq2;
+    orthoMatrixJ = malloc(rowsJ*colsJ*sizeof(double));
 
-        // shift everything left of p
-        int tmpdetp1 = outdet & maskp;
-        int tmpdetp2 = outdet & maskpi;
-        tmpdetp2 = tmpdetp2 >> 1;
-        outdet = tmpdetp1 | tmpdetp2;
-    }
-    else{
-        int nfermions = occatp == 0 ? na+nb+1 : na+nb;
-        (*phase) = nfermions % 2 == 0 ? 1 : -1;
-        // start with p
-        // shift everything left of p
-        int tmpdetp1 = outdet & maskp;
-        int tmpdetp2 = outdet & maskpi;
-        tmpdetp2 = tmpdetp2 >> 1;
-        outdet = tmpdetp1 | tmpdetp2;
+    gramSchmidt(overlapMatrixJ, rowsJ, colsJ, orthoMatrixJ);
 
-        // shift everything left of q
-        int tmpdetq1 = outdet & maskq;
-        int tmpdetq2 = outdet & maskqi;
-        tmpdetq2 = tmpdetq2 >> 1;
-        outdet = tmpdetq1 | tmpdetq2;
-    }
 
-    // Done
-    return(outdet);
+    int rowsA = 0;
+    int colsA = 0;
+
+    callcalcMEij_SOC(Isomo, Jsomo, orbp, orbq, MSI, MSJ, NMO, &ApqIJ, &rowsA, &colsA);
+
+    // Final ME in BF basis
+
+    // First transform I in bf basis
+    double *bfIApqIJ = malloc(rowsbftodetI*colsA*sizeof(double));
+
+    int transA=false;
+    int transB=false;
+    callBlasMatxMat(bftodetmatrixI, rowsbftodetI, colsbftodetI, ApqIJ, rowsA, colsA, bfIApqIJ, transA, transB);
+
+    // now transform I in csf basis
+    double *CSFIApqIJ = malloc(rowsI*colsA*sizeof(double));
+    transA = false;
+    transB = false;
+    callBlasMatxMat(orthoMatrixI, rowsI, colsI, bfIApqIJ, colsI, colsA, CSFIApqIJ, transA, transB);
+
+    // now transform J in BF basis
+    double *CSFIbfJApqIJ = malloc(rowsI*rowsbftodetJ*sizeof(double));
+    transA = false;
+    transB = true;
+    callBlasMatxMat(CSFIApqIJ, rowsI, colsA, bftodetmatrixJ, rowsbftodetJ, colsbftodetJ, CSFIbfJApqIJ, transA, transB);
+
+    // now transform J in CSF basis
+    //(*CSFICSFJApqIJptr) = malloc(rowsI*rowsJ*sizeof(double));
+    //(*rowsout) = rowsI;
+    //(*colsout) = rowsJ;
+
+    double *tmpCSFICSFJApqIJ = malloc(rowsI*rowsJ*sizeof(double));
+    transA = false;
+    transB = true;
+    callBlasMatxMat(CSFIbfJApqIJ, rowsI, rowsbftodetJ, orthoMatrixJ, rowsJ, colsJ, tmpCSFICSFJApqIJ, transA, transB);
+    // Transfer to actual buffer in Fortran order
+    for(int i = 0; i < rowsI; i++)
+        for(int j = 0; j < rowsJ; j++)
+            CSFICSFJApqIJ[j*rowsI + i] = tmpCSFICSFJApqIJ[i*rowsJ + j];
+
+
+    // Garbage collection
+    free(overlapMatrixI);
+    free(overlapMatrixJ);
+    free(orthoMatrixI);
+    free(orthoMatrixJ);
+    free(bftodetmatrixI);
+    free(bftodetmatrixJ);
+    free(ApqIJ);
+    free(bfIApqIJ);
+    free(CSFIApqIJ);
+    free(CSFIbfJApqIJ);
+    free(tmpCSFICSFJApqIJ);
 }
 
