@@ -1767,9 +1767,493 @@ void calculateMETypeSOMOSOMO(int *BF1, int *BF2, int moi, int moj, double *facto
 //
 // ===================================================================
 
-int applyRemoveShftAddSOMOVMO_SOC(int idet, int p, int q, int *phase){
+int applyRemoveShftAddSOMOVMO_SOC_Sz(int idet, int p, int q, int *phase){
+    // Phase changes: phase = phase*-1
+    // 
     // CSF: 1 1 1 1 0 1
     // DET: 1 0 1 0   1
+    //        |     |
+    //        p     q
+    //        p = 4
+    //        q = 1
+    //
+    //          result
+    //
+    // CSF: 1 0 1 1 1 1
+    // DET: 1   1 0 0 1
+    // maskp:
+    //      0   1 1 1 1
+    // maskq:
+    //      0   0 0 0 1
+    // maskpxq:
+    //      0   1 1 1 0
+    // maskqxqi:
+    //      1   0 0 0 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
+
+    // Step 1: remove
+    // clear bits from p
+    int outdet = idet;
+    int occatp = __builtin_popcount(idet & (1UL << (p-1)));
+    // remove the bit at p
+    outdet &= ~(1UL << (p-1));
+
+    // Step 2: shift
+    if(q > p){
+        // start with q
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
+    else{
+        // shift bit to right
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 << 1;
+        outdet = tmpdetp1 | tmpdetp2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftAddDOMOSOMO_SOC_Sz(int idet, int p, int q, int *phase){
+    // CSF: 1 2 1 1 1 1 1 1 1 1
+    // DET: 1   0 0 1 1 0 0 1 0
+    //          |       |
+    //          p       q
+    //
+    //          result
+    //
+    // CSF: 1 1 1 1 1 1 2 1 1 1
+    // DET: 1 0 0 0 1 1   0 1 0
+    // maskp:
+    //      0   1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 1 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
+
+    // Step 1: remove
+    // clear bits from q
+    int outdet = idet;
+    int occatq = __builtin_popcount(idet & (1UL << (q-1)));
+    outdet &= ~(1UL << (q-1));
+
+    // Step 2: shift
+    if(q > p){
+        // start with q
+
+        // shift mask between p and q
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 << 1;
+        outdet = tmpdetq1 | tmpdetq2;
+
+        // Step 3: Add bit at p + 1
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
+    else{
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+
+        // Step 3: Add bit at p
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftSOMOSOMO_SOC_Sz(int idet, int p, int q, int *phase){
+    // CSF: 1 1 1 1 1 1 1 1 1 1
+    // DET: 1 1 0 0 1 1 0 0 1 0
+    //        |         |
+    //        p         q
+    //
+    //          result
+    //
+    // CSF: 1   1 1 1 1   1 1 1
+    // DET: 1   0 0 1 1   0 1 0
+    // maskp:
+    //      0 1 1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 0 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpi =~maskp;
+    int maskqi =~maskq;
+
+    // Step 1: remove
+    // clear bits from p and q
+    int outdet = idet;
+    outdet &= ~(1UL << (p-1));
+    outdet &= ~(1UL << (q-1));
+
+    // calculate the phase
+    int occatp = idet & (1UL << (p-1));
+    int na, nb;
+    int tmpdet = outdet & (maskp ^ maskq);
+    na = __builtin_popcount(tmpdet);
+    nb = abs(p-q)-1 - na;
+    //int nfermions = occatp == 0 ? nb : na;
+
+    // Step 2: shift
+    if(q > p){
+        int nfermions = occatp == 0 ? na+nb : na+nb+1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        // start with q
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+    }
+    else{
+        int nfermions = occatp == 0 ? na+nb+1 : na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // SOC Sz
+        (*phase) = (*phase) * -1;
+
+        // start with p
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftAddSOMOVMO_SOC_Sp(int idet, int p, int q, int *phase){
+    // S+ (increases Ms)
+    //
+    // CSF: 1 1 1 1 0 1
+    // DET: 1 0 1 0   1
+    //        |     |
+    //        p     q
+    //        p = 4
+    //        q = 1
+    //
+    //          result
+    //
+    // CSF: 1 0 1 1 1 1
+    // DET: 1   1 0 1 1
+    // maskp:
+    //      0   1 1 1 1
+    // maskq:
+    //      0   0 0 0 1
+    // maskpxq:
+    //      0   1 1 1 0
+    // maskqxqi:
+    //      1   0 0 0 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
+
+    // Step 1: remove
+    // clear bits from p
+    int outdet = idet;
+    int occatp = __builtin_popcount(idet & (1UL << (p-1)));
+    // remove the bit at p
+    outdet &= ~(1UL << (p-1));
+
+    // Step 2: shift
+    if(q > p){
+        // start with q
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
+    else{
+        // shift bit to right
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        //int nfermions = occatp == 0 ? nb : na;
+        int nfermions = na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 << 1;
+        outdet = tmpdetp1 | tmpdetp2;
+        // put electron at q
+        outdet = occatp == 0 ? outdet : outdet | (1UL<<(q-1));
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftAddDOMOSOMO_SOC_Sp(int idet, int p, int q, int *phase){
+    // S+ (increases Ms)
+    //
+    // CSF: 1 2 1 1 1 1 1 1 1 1
+    // DET: 1   0 0 1 1 0 0 1 0
+    //        |         |
+    //        p         q
+    //
+    //          result
+    //
+    // CSF: 1 1 1 1 1 1 2 1 1 1
+    // DET: 1 1 0 0 1 1   0 1 0
+    // maskp:
+    //      0   1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 1 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpxq = (maskp ^ maskq);
+    int maskpxqi = ~(maskp ^ maskq);
+
+    // Step 1: remove
+    // clear bits from q
+    int outdet = idet;
+    int occatq = __builtin_popcount(idet & (1UL << (q-1)));
+    outdet &= ~(1UL << (q-1));
+
+    // Step 2: shift
+    if(q > p){
+        // start with q
+
+        // shift mask between p and q
+        maskpxq = maskpxq >> 1;
+        maskpxqi = ~(maskpxq);
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        int tmpdetq1 = outdet & maskpxq;
+        int tmpdetq2 = outdet & maskpxqi;
+        tmpdetq1 = tmpdetq1 << 1;
+        outdet = tmpdetq1 | tmpdetq2;
+
+        // Step 3: Add bit at p + 1
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
+    else{
+
+        // calculate the phase
+        int na, nb;
+        int tmpdet = outdet & (maskpxq);
+        na = __builtin_popcount(tmpdet);
+        nb = __builtin_popcount(maskpxq) - na;
+        // spin obb to that at q is moving
+        //int nfermions = occatq == 0 ? na : nb;
+        int nfermions = na + nb + 1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+
+        // start with p
+        // shift middle electrons to right
+        int tmpdetp1 = outdet & maskpxq;
+        int tmpdetp2 = outdet & maskpxqi;
+        tmpdetp1 = tmpdetp1 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+
+        // Step 3: Add bit at p
+        outdet = occatq == 1 ? outdet | (1UL<<(p-1)) : outdet;
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftSOMOSOMO_SOC_Sp(int idet, int p, int q, int *phase){
+    // S+ (increases Ms)
+    //
+    // CSF: 1 1 1 1 1 1 1 1 1 1
+    // DET: 1 0 0 0 1 1 0 0 1 0
+    //        |         |
+    //        p         q
+    //
+    //          result
+    //
+    // CSF: 1   1 1 1 1   1 1 1
+    // DET: 1   0 0 1 1   0 1 0
+    // maskp:
+    //      0 1 1 1 1 1 1 1 1 1
+    // maskq:
+    //      0 0 0 0 0 0 0 1 1 1
+    int maskp  = (1UL << p)-1;
+    int maskq  = (1UL << q)-1;
+    int maskpi =~maskp;
+    int maskqi =~maskq;
+
+    // Step 1: remove
+    // clear bits from p and q
+    int outdet = idet;
+    outdet &= ~(1UL << (p-1));
+    outdet &= ~(1UL << (q-1));
+
+    // calculate the phase
+    int occatp = idet & (1UL << (p-1));
+    int na, nb;
+    int tmpdet = outdet & (maskp ^ maskq);
+    na = __builtin_popcount(tmpdet);
+    nb = abs(p-q)-1 - na;
+    //int nfermions = occatp == 0 ? nb : na;
+
+    // Step 2: shift
+    if(q > p){
+        int nfermions = occatp == 0 ? na+nb : na+nb+1;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // start with q
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+    }
+    else{
+        int nfermions = occatp == 0 ? na+nb+1 : na+nb;
+        (*phase) = nfermions % 2 == 0 ? 1 : -1;
+        // start with p
+        // shift everything left of p
+        int tmpdetp1 = outdet & maskp;
+        int tmpdetp2 = outdet & maskpi;
+        tmpdetp2 = tmpdetp2 >> 1;
+        outdet = tmpdetp1 | tmpdetp2;
+
+        // shift everything left of q
+        int tmpdetq1 = outdet & maskq;
+        int tmpdetq2 = outdet & maskqi;
+        tmpdetq2 = tmpdetq2 >> 1;
+        outdet = tmpdetq1 | tmpdetq2;
+    }
+
+    // Done
+    return(outdet);
+}
+
+int applyRemoveShftAddSOMOVMO_SOC_Sm(int idet, int p, int q, int *phase){
+    // S- (decreases Ms)
+    //
+    // CSF: 1 1 1 1 0 1
+    // DET: 1 1 1 0   1
     //        |     |
     //        p     q
     //        p = 4
@@ -1847,11 +2331,13 @@ int applyRemoveShftAddSOMOVMO_SOC(int idet, int p, int q, int *phase){
     return(outdet);
 }
 
-int applyRemoveShftAddDOMOSOMO_SOC(int idet, int p, int q, int *phase){
+int applyRemoveShftAddDOMOSOMO_SOC_Sm(int idet, int p, int q, int *phase){
+    // S- (decreases Ms)
+    //
     // CSF: 1 2 1 1 1 1 1 1 1 1
-    // DET: 1   0 0 1 1 0 0 1 0
-    //          |       |
-    //          p       q
+    // DET: 1   0 0 1 1 1 0 1 0
+    //        |         |
+    //        p         q
     //
     //          result
     //
@@ -1924,9 +2410,11 @@ int applyRemoveShftAddDOMOSOMO_SOC(int idet, int p, int q, int *phase){
     return(outdet);
 }
 
-int applyRemoveShftSOMOSOMO_SOC(int idet, int p, int q, int *phase){
+int applyRemoveShftSOMOSOMO_SOC_Sm(int idet, int p, int q, int *phase){
+    // S+ (increases Ms)
+    //
     // CSF: 1 1 1 1 1 1 1 1 1 1
-    // DET: 1 1 0 0 1 1 0 0 1 0
+    // DET: 1 1 0 0 1 1 1 0 1 0
     //        |         |
     //        p         q
     //
@@ -2055,7 +2543,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                     int idet = detlistI[i];
                     int phase=1;
                     // Apply remove and shft on Isomo
-                    idet = applyRemoveShftSOMOSOMO_SOMO(idet, p, q, &phase);
+                    idet = applyRemoveShftSOMOSOMO_SOC_Sp(idet, p, q, &phase);
                     //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                     for(int j=0;j<ndetJ;j++){
                         int jdet = (detlistJ[j]);
@@ -2086,7 +2574,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                         // Calculate phase
                         int phase=1;
                         // Apply remove and shift on Jdet (orbital ids are inverted)
-                        jdet = applyRemoveShftSOMOSOMO_SOMO(jdet, q, p, &phase);
+                        jdet = applyRemoveShftSOMOSOMO_SOC_Sp(jdet, q, p, &phase);
                         if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
                     }
                 }
@@ -2119,7 +2607,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                             //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                             int phase=1;
                             // Apply remove and shft on Isomo
-                            idet = applyRemoveShftAddDOMOSOMO_SOMO(idet, p, q, &phase);
+                            idet = applyRemoveShftAddDOMOSOMO_SOC_Sp(idet, p, q, &phase);
                             for(int j=0;j<ndetJ;j++){
                                 int jdet = (detlistJ[j]);
                                 //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
@@ -2150,7 +2638,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                             //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                             int phase=1;
                             // Apply remove and shft on Isomo
-                            idet = applyRemoveShftAddSOMOVMO_SOMO(idet, p, q, &phase);
+                            idet = applyRemoveShftAddSOMOVMO_SOC_Sp(idet, p, q, &phase);
                             for(int j=0;j<ndetJ;j++){
                                 int jdet = (detlistJ[j]);
                                 //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
@@ -2197,7 +2685,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                     //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                     int phase=1;
                     // Apply remove and shft on Isomo
-                    idet = applyRemoveShftSOMOSOMO_SOMO(idet, p, q, &phase);
+                    idet = applyRemoveShftSOMOSOMO_SOC_Sp(idet, p, q, &phase);
                     for(int j=0;j<ndetJ;j++){
                         int jdet = (detlistJ[j]);
                         //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
@@ -2227,7 +2715,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                         // Calculate phase
                         int phase=1;
                         // Apply remove and shift on Jdet (orbital ids are inverted)
-                        jdet = applyRemoveShftSOMOSOMO_SOMO(jdet, q, p, &phase);
+                        jdet = applyRemoveShftSOMOSOMO_SOC_Sp(jdet, q, p, &phase);
                         if(idet == jdet) matelemdetbasis[i*ndetJ + j] = 1.0*phase;
                     }
                 }
@@ -2262,7 +2750,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                             //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                             int phase=1;
                             // Apply remove and shft on Isomo
-                            idet = applyRemoveShftAddDOMOSOMO_SOMO(idet, p, q, &phase);
+                            idet = applyRemoveShftAddDOMOSOMO_SOC_Sp(idet, p, q, &phase);
                             for(int j=0;j<ndetJ;j++){
                                 int jdet = (detlistJ[j]);
                                 //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
@@ -2293,7 +2781,7 @@ void calcMEdetpairGeneral_SOC(int *detlistI, int *detlistJ, int orbI, int orbJ, 
                             //get_phase_cfg_to_qp_inpInt(detlistI[i], &phaseI);
                             int phase=1;
                             // Apply remove and shft on Isomo
-                            idet = applyRemoveShftAddSOMOVMO_SOMO(idet, p, q, &phase);
+                            idet = applyRemoveShftAddSOMOVMO_SOC_Sp(idet, p, q, &phase);
                             for(int j=0;j<ndetJ;j++){
                                 int jdet = (detlistJ[j]);
                                 //get_phase_cfg_to_qp_inpInt(detlistJ[j], &phaseJ);
