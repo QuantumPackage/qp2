@@ -131,7 +131,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii selection_weight pseudo_sym
-  PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
+  PROVIDE list_act list_inact list_core list_virt list_del seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
 
   if (h0_type == 'CFG') then
