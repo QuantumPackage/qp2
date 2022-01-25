@@ -35,9 +35,11 @@
     grad_rho_b_2 += grad_rho_b(m) * grad_rho_b(m)
     grad_rho_a_b += grad_rho_a(m) * grad_rho_b(m)
    enddo
-
+   
+   double precision :: mu_local
+   mu_local = mu_of_r_dft(i)
                              ! inputs
-   call GGA_sr_type_functionals(mu_erf_dft,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(mu_local,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    energy_x_sr_pbe(istate) += ex * weight
@@ -135,8 +137,10 @@ END_PROVIDER
     grad_rho_a_b += grad_rho_a(m) * grad_rho_b(m)
    enddo
 
+   double precision :: mu_local
+   mu_local = mu_of_r_dft(i)
                              ! inputs
-   call GGA_sr_type_functionals(mu_erf_dft,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(mu_local,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    vx_rho_a *= weight
@@ -292,8 +296,10 @@ END_PROVIDER
     grad_rho_a_b += grad_rho_a(m) * grad_rho_b(m)
    enddo
 
+   double precision :: mu_local
+   mu_local = mu_of_r_dft(i)
                              ! inputs
-   call GGA_sr_type_functionals(mu_erf_dft,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
+   call GGA_sr_type_functionals(mu_local,rho_a,rho_b,grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,                 &  ! outputs exchange
                              ex,vx_rho_a,vx_rho_b,vx_grad_rho_a_2,vx_grad_rho_b_2,vx_grad_rho_a_b, &  ! outputs correlation
                              ec,vc_rho_a,vc_rho_b,vc_grad_rho_a_2,vc_grad_rho_b_2,vc_grad_rho_a_b  )
    vx_rho_a *= weight

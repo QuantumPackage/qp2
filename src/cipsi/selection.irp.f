@@ -464,14 +464,14 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
-      if(pert_2rdm)then
-        allocate(coef_fullminilist_rev(N_states,fullinteresting(0)))
-        do i=1,fullinteresting(0)
-          do j = 1, N_states
-            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
-          enddo
-        enddo
-      endif
+!      if(pert_2rdm)then
+!        allocate(coef_fullminilist_rev(N_states,fullinteresting(0)))
+!        do i=1,fullinteresting(0)
+!          do j = 1, N_states
+!            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+!          enddo
+!        enddo
+!      endif
 
       do i=1,fullinteresting(0)
         do k=1,N_int
@@ -531,19 +531,19 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
 
-            if(.not.pert_2rdm)then
+!            if(.not.pert_2rdm)then
              call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
-            else
-             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
-            endif
+!            else
+!             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
+!            endif
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
       deallocate(fullminilist,minilist)
-      if(pert_2rdm)then
-        deallocate(coef_fullminilist_rev)
-      endif
+!      if(pert_2rdm)then
+!        deallocate(coef_fullminilist_rev)
+!      endif
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)

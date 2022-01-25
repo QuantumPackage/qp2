@@ -52,8 +52,8 @@ program molden
         l += 1
         if (l > ao_num) exit
       enddo
-      write(i_unit_output,*)''
     enddo
+    write(i_unit_output,*)''
   enddo
 
 
