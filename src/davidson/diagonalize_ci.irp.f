@@ -1,4 +1,3 @@
-
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   implicit none
   BEGIN_DOC
