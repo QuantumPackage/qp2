@@ -65,22 +65,11 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
     enddo
 
     ! Test 1
-!    if(iand(MS,1) .EQ. 0) then
-!      bfIcfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
-!    else
-!      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
-!    endif
-
-!    Test 2
-!    double precision :: binom1, binom2
-!    double precision, external :: logabsgamma
-!    binom1 = dexp(logabsgamma(1.0d0*(s+1))                            &
-!                - logabsgamma(1.0d0*(((s+1)/2)+1))                    &
-!                - logabsgamma(1.0d0*(s-(((s+1)/2))+1)));
-!    binom2 = dexp(logabsgamma(1.0d0*(s+1))                            &
-!                - logabsgamma(1.0d0*((((s+3)/2)+1)+1))                &
-!                - logabsgamma(1.0d0*(s-(((s+3)/2)+1)+1)));
-!    bfIcfg = max(1,nint(binom1 - binom2))
+    if(iand(MS,1) .EQ. 0) then
+      bfIcfg = max(1,nint((binom(s,s/2)-binom(s,s/2+1))))
+    else
+      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+    endif
 
     ! perhaps blocking with CFGs of same seniority
     ! can be more efficient
