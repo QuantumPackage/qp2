@@ -63,13 +63,14 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
       if (psi_configuration(k,1,i) == 0_bit_kind) cycle
       s = s + popcnt(psi_configuration(k,1,i))
     enddo
-
-    ! Test 1
-    if(iand(MS,1) .EQ. 0) then
-      bfIcfg = max(1,nint((binom(s,s/2)-binom(s,s/2+1))))
-    else
       bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
-    endif
+
+!    ! Test 1
+!    if(iand(MS,1) .EQ. 0) then
+!      bfIcfg = max(1,nint((binom(s,s/2)-binom(s,s/2+1))))
+!    else
+!      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+!    endif
 
     ! perhaps blocking with CFGs of same seniority
     ! can be more efficient
