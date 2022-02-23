@@ -88,7 +88,7 @@
     - Using Intel IPP for sorting when using Intel compiler
     - Removed parallelism in sorting
     - Compute banned_excitations from exchange integrals to accelerate with local MOs
-  
+
 
 
 
