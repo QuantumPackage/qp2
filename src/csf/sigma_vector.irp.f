@@ -65,23 +65,9 @@
       dimcsfpercfg = 2
     else
       if(iand(MS,1) .EQ. 0) then
-        !dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
-        binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                    - logabsgamma(1.0d0*((i/2)+1))                        &
-                    - logabsgamma(1.0d0*(i-((i/2))+1)));
-        binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                    - logabsgamma(1.0d0*(((i/2)+1)+1))                    &
-                    - logabsgamma(1.0d0*(i-((i/2)+1)+1)));
-        dimcsfpercfg = max(1,nint(binom1 - binom2))
+        dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
       else
-        !dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
-        binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                    - logabsgamma(1.0d0*(((i+1)/2)+1))                    &
-                    - logabsgamma(1.0d0*(i-(((i+1)/2))+1)));
-        binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
-                    - logabsgamma(1.0d0*((((i+3)/2)+1)+1))                &
-                    - logabsgamma(1.0d0*(i-(((i+3)/2)+1)+1)));
-        dimcsfpercfg = max(1,nint(binom1 - binom2))
+        dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
       endif
     endif
     n_CSF += ncfg * dimcsfpercfg
