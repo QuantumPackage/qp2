@@ -31,11 +31,11 @@ subroutine run_pt2_slave(thread,iproc,energy)
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
-  if (N_det > 100000 ) then
-    call run_pt2_slave_large(thread,iproc,energy)
-  else
+!  if (N_det > 100000 ) then
+!    call run_pt2_slave_large(thread,iproc,energy)
+!  else
     call run_pt2_slave_small(thread,iproc,energy)
-  endif
+!  endif
 end
 
 subroutine run_pt2_slave_small(thread,iproc,energy)
