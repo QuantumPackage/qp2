@@ -1,7 +1,7 @@
 BEGIN_PROVIDER [complex*16, chol_mo_integrals_complex, (mo_num_per_kpt,mo_num_per_kpt,chol_num_max,kpt_num,chol_unique_kpt_num)]
   implicit none
   BEGIN_DOC
-  !  df MO integrals
+  !  CD MO integrals
   END_DOC
   integer :: i,j,k,l
 
@@ -13,9 +13,9 @@ BEGIN_PROVIDER [complex*16, chol_mo_integrals_complex, (mo_num_per_kpt,mo_num_pe
                               chol_num_max,kpt_num,chol_unique_kpt_num)
   endif
 
-  if (write_df_mo_integrals) then
-    call ezfio_set_mo_two_e_ints_df_mo_integrals_complex(df_mo_integrals_complex)
-    print *,  'df MO integrals written to disk'
+  if (write_chol_mo_integrals) then
+    call ezfio_set_mo_two_e_ints_chol_mo_integrals_complex(chol_mo_integrals_complex)
+    print *,  'CD MO integrals written to disk'
   endif
 
 END_PROVIDER
@@ -24,7 +24,7 @@ subroutine mo_map_fill_from_chol_dot
   use map_module
   implicit none
   BEGIN_DOC
-  ! TODO: implement this (below is just copied from df as placeholder)
+  ! TODO: verify correct indexing and conj.transp.
   ! fill mo bielec integral map using 3-index cd integrals
   END_DOC
 
@@ -32,7 +32,8 @@ subroutine mo_map_fill_from_chol_dot
   integer :: ki,kk,kj,kl
   integer :: ii,ik,ij,il
   integer :: kikk2,kjkl2,jl2,ik2
-  integer :: i_mo,j_mo,i_df
+  integer :: i_mo,j_mo,i_cd
+  integer :: kQ, Q_idx
 
   complex*16,allocatable :: ints_ik(:,:,:), ints_jl(:,:,:)
 
@@ -56,7 +57,7 @@ subroutine mo_map_fill_from_chol_dot
   mo_num_kpt_2 = mo_num_per_kpt * mo_num_per_kpt
 
   size_buffer = min(mo_num_per_kpt*mo_num_per_kpt*mo_num_per_kpt,16000000)
-  print*, 'Providing the mo_bielec integrals from 3-index df integrals'
+  print*, 'Providing the mo_bielec integrals from 3-index CD integrals'
   call write_time(6)
 !  call ezfio_set_integrals_bielec_disk_access_mo_integrals('Write')
 !  TOUCH read_mo_integrals read_ao_integrals write_mo_integrals write_ao_integrals 
@@ -64,40 +65,47 @@ subroutine mo_map_fill_from_chol_dot
   call wall_time(wall_1)
   call cpu_time(cpu_1)
 
-  allocate( ints_jl(df_num,mo_num_per_kpt,mo_num_per_kpt))
-  allocate( ints_ik(df_num,mo_num_per_kpt,mo_num_per_kpt))
+  allocate( ints_jl(chol_num_max,mo_num_per_kpt,mo_num_per_kpt))
+  allocate( ints_ik(chol_num_max,mo_num_per_kpt,mo_num_per_kpt))
 
   wall_0 = wall_1
-  do kl=1, kpt_num
-    do kj=1, kl
+  do kQ = 1, kpt_num
+    Q_idx = kpt_sparse_map(kQ)
+    do kl = 1, kpt_num
+      kj = qktok2(kQ,kl)
+      assert(kQ == qktok2(kj,kl))
+      if (kj>kl) cycle
       call idx2_tri_int(kj,kl,kjkl2)
-      if (kj < kl) then
+      ints_jl = 0.d0
+      if (Q_idx > 0) then
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
-            do i_df=1,df_num
-              ints_jl(i_df,i_mo,j_mo) = dconjg(df_mo_integrals_complex(j_mo,i_mo,i_df,kjkl2))
+            do i_cd=1,chol_num(kQ)
+              ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx)
             enddo
           enddo
         enddo
       else
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
-            do i_df=1,df_num
-              ints_jl(i_df,i_mo,j_mo) = df_mo_integrals_complex(i_mo,j_mo,i_df,kjkl2)
+            do i_cd=1,chol_num(kQ)
+              ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx))
             enddo
           enddo
         enddo
       endif
 
       do kk=1,kl
-        ki=kconserv(kl,kk,kj)
+        ki = qktok2(minusk(kk),kQ)
+        assert(ki == kconserv(kl,kk,kj))
         if (ki>kl) cycle
         call idx2_tri_int(ki,kk,kikk2)
-        if (ki < kk) then
+        ints_ik = 0.d0
+        if (Q_idx > 0) then
           do i_mo=1,mo_num_per_kpt
             do j_mo=1,mo_num_per_kpt
-              do i_df=1,df_num
-                ints_ik(i_df,i_mo,j_mo) = dconjg(df_mo_integrals_complex(j_mo,i_mo,i_df,kikk2))
+              do i_cd=1,chol_num(kQ)
+                ints_ik(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,ki,Q_idx)
               enddo
             enddo
           enddo
@@ -105,8 +113,8 @@ subroutine mo_map_fill_from_chol_dot
         else
           do i_mo=1,mo_num_per_kpt
             do j_mo=1,mo_num_per_kpt
-              do i_df=1,df_num
-                ints_ik(i_df,i_mo,j_mo) = df_mo_integrals_complex(i_mo,j_mo,i_df,kikk2)
+              do i_cd=1,chol_num(kQ)
+                ints_ik(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kk,-Q_idx))
               enddo
             enddo
           enddo
@@ -118,10 +126,11 @@ subroutine mo_map_fill_from_chol_dot
             !$OMP  n_integrals_2, buffer_i_2, buffer_values_2, &
             !$OMP  idx_tmp, tmp_re, tmp_im, integral,sign,use_map1) &
             !$OMP  DEFAULT(NONE)  &
-            !$OMP  SHARED(size_buffer, kpt_num, df_num, mo_num_per_kpt, mo_num_kpt_2, &
+            !$OMP  SHARED(size_buffer, kpt_num, chol_num, mo_num_per_kpt, mo_num_kpt_2, &
             !$OMP  kl,kj,kjkl2,ints_jl, &
             !$OMP  ki,kk,kikk2,ints_ik, &
-            !$OMP  kconserv, df_mo_integrals_complex, mo_integrals_threshold, &
+            !$OMP  kQ, Q_idx, chol_num, &
+            !$OMP  kconserv, chol_mo_integrals_complex, mo_integrals_threshold, &
             !$OMP  mo_integrals_map, mo_integrals_map_2)
 
         allocate( &
@@ -149,7 +158,7 @@ subroutine mo_map_fill_from_chol_dot
                 call idx2_tri_int(i,k,ik2)
                 if (ik2 > jl2) exit
                 !integral = zdotc(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
-                integral = zdotu(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                integral = zdotu(chol_num(kQ),ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
 !                print*,i,k,j,l,real(integral),imag(integral)
                 if (cdabs(integral) < mo_integrals_threshold) then
                   cycle
@@ -209,15 +218,15 @@ subroutine mo_map_fill_from_chol_dot
           )
         !$OMP END PARALLEL
       enddo !kk
-    enddo !kj
+    enddo !kl
     call wall_time(wall_2)
     if (wall_2 - wall_0 > 1.d0) then
       wall_0 = wall_2
-      print*, 100.*float(kl)/float(kpt_num), '% in ',               &
+      print*, 100.*float(kQ)/float(kpt_num), '% in ',               &
           wall_2-wall_1,'s',map_mb(mo_integrals_map),'+',map_mb(mo_integrals_map_2),'MB'
     endif
 
-  enddo !kl
+  enddo !kQ
   deallocate( ints_jl,ints_ik )
 
   call map_sort(mo_integrals_map)
