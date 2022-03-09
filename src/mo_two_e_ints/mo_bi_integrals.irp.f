@@ -47,6 +47,12 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
       !call mo_map_fill_from_df_single
       call mo_map_fill_from_df_dot
       return
+    else if (read_chol_mo_integrals.or.read_chol_ao_integrals) then
+      PROVIDE chol_mo_integrals_complex
+      !call mo_map_fill_from_chol
+      !call mo_map_fill_from_chol_single
+      call mo_map_fill_from_chol_dot
+      return
     else
       PROVIDE ao_two_e_integrals_in_map
     endif
