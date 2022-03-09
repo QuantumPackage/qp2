@@ -266,10 +266,10 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
         call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), global_selection_buffer, (/task_id/), 1,sending)
         global_selection_buffer%cur = 0
         call omp_unset_lock(global_selection_buffer_lock)
-      else
-        call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
-        call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), b, (/task_id/), 1,sending)
       endif
+    else
+      call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
+      call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), b, (/task_id/), 1,sending)
     endif
 
     call pt2_dealloc(pt2_data)
