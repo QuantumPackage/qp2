@@ -253,22 +253,22 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     call sort_selection_buffer(b)
 
     call wall_time(time1)
-    if (time1-time0 > 15.d0) then
+!    if (time1-time0 > 15.d0) then
       call omp_set_lock(global_selection_buffer_lock)
       global_selection_buffer%mini = b%mini
       call merge_selection_buffers(b,global_selection_buffer)
       b%cur=0
       call omp_unset_lock(global_selection_buffer_lock)
       call wall_time(time0)
-      if ( iproc == 1 .or. i_generator < 100 .or. done) then
-        call omp_set_lock(global_selection_buffer_lock)
-        call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
-        call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), global_selection_buffer, (/task_id/), 1,sending)
-        global_selection_buffer%cur = 0
-        call omp_unset_lock(global_selection_buffer_lock)
-      endif
+!    endif
+
+    call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
+    if ( iproc == 1 .or. i_generator < 100 .or. done) then
+      call omp_set_lock(global_selection_buffer_lock)
+      call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), global_selection_buffer, (/task_id/), 1,sending)
+      global_selection_buffer%cur = 0
+      call omp_unset_lock(global_selection_buffer_lock)
     else
-      call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
       call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), b, (/task_id/), 1,sending)
     endif
 

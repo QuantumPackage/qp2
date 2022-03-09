@@ -92,38 +92,51 @@ subroutine merge_selection_buffers(b1, b2)
   allocate(val(sze), detmp(N_int, 2, sze))
   i1=1
   i2=1
-  do i=1,nmwen
-    if ( (i1 > b1%cur).and.(i2 > b2%cur) ) then
-      exit
-    else if (i1 > b1%cur) then
-        val(i) = b2%val(i2)
-        detmp(1:N_int,1,i) = b2%det(1:N_int,1,i2)
-        detmp(1:N_int,2,i) = b2%det(1:N_int,2,i2)
-        i2=i2+1
-    else if (i2 > b2%cur) then
-        val(i) = b1%val(i1)
-        detmp(1:N_int,1,i) = b1%det(1:N_int,1,i1)
-        detmp(1:N_int,2,i) = b1%det(1:N_int,2,i1)
-        i1=i1+1
-    else
-      if (b1%val(i1) <= b2%val(i2)) then
-        val(i) = b1%val(i1)
-        detmp(1:N_int,1,i) = b1%det(1:N_int,1,i1)
-        detmp(1:N_int,2,i) = b1%det(1:N_int,2,i1)
-        i1=i1+1
+
+  select case (N_int)
+BEGIN_TEMPLATE 
+  case $case
+    do i=1,nmwen
+      if ( (i1 > b1%cur).and.(i2 > b2%cur) ) then
+        exit
+      else if (i1 > b1%cur) then
+          val(i) = b2%val(i2)
+          detmp(1:$N_int,1,i) = b2%det(1:$N_int,1,i2)
+          detmp(1:$N_int,2,i) = b2%det(1:$N_int,2,i2)
+          i2=i2+1
+      else if (i2 > b2%cur) then
+          val(i) = b1%val(i1)
+          detmp(1:$N_int,1,i) = b1%det(1:$N_int,1,i1)
+          detmp(1:$N_int,2,i) = b1%det(1:$N_int,2,i1)
+          i1=i1+1
       else
-        val(i) = b2%val(i2)
-        detmp(1:N_int,1,i) = b2%det(1:N_int,1,i2)
-        detmp(1:N_int,2,i) = b2%det(1:N_int,2,i2)
-        i2=i2+1
+        if (b1%val(i1) <= b2%val(i2)) then
+          val(i) = b1%val(i1)
+          detmp(1:$N_int,1,i) = b1%det(1:$N_int,1,i1)
+          detmp(1:$N_int,2,i) = b1%det(1:$N_int,2,i1)
+          i1=i1+1
+        else
+          val(i) = b2%val(i2)
+          detmp(1:$N_int,1,i) = b2%det(1:$N_int,1,i2)
+          detmp(1:$N_int,2,i) = b2%det(1:$N_int,2,i2)
+          i2=i2+1
+        endif
       endif
-    endif
-  enddo
+    enddo
+    do i=nmwen+1,b2%N
+      val(i) = 0.d0
+!      detmp(1:$N_int,1,i) = 0_bit_kind
+!      detmp(1:$N_int,2,i) = 0_bit_kind
+    enddo
+SUBST [ case, N_int ]
+(1); 1;;
+(2); 2;;
+(3); 3;;
+(4); 4;;
+default; N_int;;
+END_TEMPLATE
+  end select
   deallocate(b2%det, b2%val)
-  do i=nmwen+1,b2%N
-    val(i) = 0.d0
-    detmp(1:N_int,1:2,i) = 0_bit_kind
-  enddo
   b2%det => detmp
   b2%val => val
   b2%mini = min(b2%mini,b2%val(b2%N))
