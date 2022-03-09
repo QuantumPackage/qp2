@@ -37,7 +37,7 @@ subroutine ao_map_fill_from_chol
   integer :: ki,kk,kj,kl
   integer :: ii,ik,ij,il
   integer :: kikk2,kjkl2,jl2,ik2
-  integer :: i_ao,j_ao,i_df
+  integer :: i_ao,j_ao,i_cd
 
   complex*16,allocatable :: ints_ik(:,:,:), ints_jl(:,:,:), ints_ikjl(:,:,:,:)
 
@@ -59,7 +59,7 @@ subroutine ao_map_fill_from_chol
   ao_num_kpt_2 = ao_num_per_kpt * ao_num_per_kpt
 
   size_buffer = min(ao_num_per_kpt*ao_num_per_kpt*ao_num_per_kpt,16000000)
-  print*, 'Providing the ao_bielec integrals from 3-index df integrals'
+  print*, 'Providing the ao_bielec integrals from 3-index cholesky integrals'
   call write_time(6)
 !  call ezfio_set_integrals_bielec_disk_access_mo_integrals('Write')
 !  TOUCH read_mo_integrals read_ao_integrals write_mo_integrals write_ao_integrals 
@@ -70,34 +70,43 @@ subroutine ao_map_fill_from_chol
   allocate( ints_jl(ao_num_per_kpt,ao_num_per_kpt,chol_num_max))
 
   wall_0 = wall_1
-  do kl=1, kpt_num
-    do kj=1, kl
+  !TODO: change loops so that we only iterate over "correct" slices (i.e. ik block is stored directly, not as conj. transp.)
+  !      possible cases for (ik,jl) are (+,+), (+,-), (-,+), (-,-)
+  !      where + is the slice used as stored, and - is the conj. transp. of the stored data
+  !      (+,+) and (-,-) give the same information; we should always use (+,+)
+  !      (+,-) and (-,+) give the same information; we should always use (+,-)
+  do kQ = 1, kpt_num
+    do kl = 1, kpt_num
+      kj = qktok2(kQ,kl)
+      assert(kQ == qktok2(kj,kl))
+      if (kj>kl) cycle
       call idx2_tri_int(kj,kl,kjkl2)
-      if (kj < kl) then
+      !TODO: verify the kj, kl as 4th index in expressions below
+      if (kpt_sparse_map(kQ) > 0) then
+        ints_jl = chol_ao_integrals_complex(:,:,:,kl,kpt_sparse_map(kQ))
+      else
         do i_ao=1,ao_num_per_kpt
           do j_ao=1,ao_num_per_kpt
-            do i_df=1,df_num
-              ints_jl(i_ao,j_ao,i_df) = dconjg(df_ao_integrals_complex(j_ao,i_ao,i_df,kjkl2))
+            do i_cd=1,chol_num_max
+              ints_jl(i_ao,j_ao,i_cd) = dconjg(chol_ao_integrals_complex(j_ao,i_ao,i_cd,kj,-kpt_sparse_map(kQ)))
             enddo
           enddo
         enddo
-      else
-        ints_jl = df_ao_integrals_complex(:,:,:,kjkl2)
       endif
 
-  !$OMP PARALLEL PRIVATE(i,k,j,l,ki,kk,ii,ik,ij,il,kikk2,jl2,ik2, &
-      !$OMP  ints_ik, ints_ikjl, i_ao, j_ao, i_df, &
+  !$OMP PARALLEL PRIVATE(i,k,j,l,ki,kk,ii,ik,ij,il,kikk2,jl2,ik2,kQ, &
+      !$OMP  ints_ik, ints_ikjl, i_ao, j_ao, i_cd, &
       !$OMP  n_integrals_1, buffer_i_1, buffer_values_1, &
       !$OMP  n_integrals_2, buffer_i_2, buffer_values_2, &
       !$OMP  idx_tmp, tmp_re, tmp_im, integral,sign,use_map1) &
       !$OMP  DEFAULT(NONE)  &
       !$OMP  SHARED(size_buffer, kpt_num, ao_num_per_kpt, ao_num_kpt_2, &
-      !$OMP  chol_num_max, chol_num, chol_unique_kpt_num, chol_kpt_map, &
+      !$OMP  chol_num_max, chol_num, chol_unique_kpt_num, kpt_sparse_map, qktok2, minusk, &
       !$OMP  kl,kj,kjkl2,ints_jl, & 
-      !$OMP  kconserv, df_ao_integrals_complex, ao_integrals_threshold, ao_integrals_map, ao_integrals_map_2)
+      !$OMP  kconserv, chol_ao_integrals_complex, ao_integrals_threshold, ao_integrals_map, ao_integrals_map_2)
   
   allocate( &
-    ints_ik(ao_num_per_kpt,ao_num_per_kpt,df_num), &
+    ints_ik(ao_num_per_kpt,ao_num_per_kpt,chol_num_max), &
     ints_ikjl(ao_num_per_kpt,ao_num_per_kpt,ao_num_per_kpt,ao_num_per_kpt), &
     buffer_i_1(size_buffer), &
     buffer_i_2(size_buffer), &
@@ -107,25 +116,26 @@ subroutine ao_map_fill_from_chol
 
   !$OMP DO SCHEDULE(guided)
       do kk=1,kl
-        ki=kconserv(kl,kk,kj)
+        ki = qktok2(minusk(kk),kQ)
+        assert(ki == kconserv(kl,kk,kj))
         if (ki>kl) cycle
       !  if ((kl == kj) .and. (ki > kk)) cycle
         call idx2_tri_int(ki,kk,kikk2)
       !  if (kikk2 > kjkl2) cycle
-        if (ki < kk) then
+      !TODO: check this! (ki, kk slice index and transpose/notranspose)
+        if (kpt_sparse_map(kQ) > 0) then
+          ints_ik = chol_ao_integrals_complex(:,:,:,ki,kpt_sparse_map(kQ))
+        else
           do i_ao=1,ao_num_per_kpt
             do j_ao=1,ao_num_per_kpt
-              do i_df=1,df_num
-                ints_ik(i_ao,j_ao,i_df) = dconjg(df_ao_integrals_complex(j_ao,i_ao,i_df,kikk2))
+              do i_cd=1,chol_num_max
+                ints_jl(i_ao,j_ao,i_cd) = dconjg(chol_ao_integrals_complex(j_ao,i_ao,i_cd,kk,-kpt_sparse_map(kQ)))
               enddo
             enddo
           enddo
-!          ints_ik = conjg(reshape(df_mo_integral_array(:,:,:,kikk2),(/mo_num_per_kpt,mo_num_per_kpt,df_num/),order=(/2,1,3/)))
-        else
-          ints_ik = df_ao_integrals_complex(:,:,:,kikk2)
         endif
 
-        call zgemm('N','T', ao_num_kpt_2, ao_num_kpt_2, df_num, &
+        call zgemm('N','T', ao_num_kpt_2, ao_num_kpt_2, chol_num(kQ), &
                (1.d0,0.d0), ints_ik, ao_num_kpt_2, &
                ints_jl, ao_num_kpt_2, &
                (0.d0,0.d0), ints_ikjl, ao_num_kpt_2)
@@ -204,15 +214,15 @@ subroutine ao_map_fill_from_chol
     buffer_values_2 &
     )
   !$OMP END PARALLEL
-    enddo !kj
+    enddo !kl
     call wall_time(wall_2)
     if (wall_2 - wall_0 > 1.d0) then
       wall_0 = wall_2
-      print*, 100.*float(kl)/float(kpt_num), '% in ',               &
+      print*, 100.*float(kQ)/float(kpt_num), '% in ',               &
           wall_2-wall_1,'s',map_mb(ao_integrals_map),'+',map_mb(ao_integrals_map_2),'MB'
     endif
 
-  enddo !kl
+  enddo !kQ
   deallocate( ints_jl ) 
 
   call map_sort(ao_integrals_map)
@@ -235,5 +245,5 @@ subroutine ao_map_fill_from_chol
   print*,' cpu  time :',cpu_2 - cpu_1, 's'
   print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
   
-end subroutine ao_map_fill_from_df
+end subroutine ao_map_fill_from_chol
 
