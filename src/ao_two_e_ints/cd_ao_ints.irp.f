@@ -29,7 +29,7 @@ subroutine ao_map_fill_from_chol
   use map_module
   implicit none
   BEGIN_DOC
-  ! TODO: below is copy/paste of DF code as placeholder; modify for CD
+  ! TODO: check indexing/conj.transp. of slices; restructure loops
   ! fill ao bielec integral map using 3-index cd integrals
   END_DOC
 
