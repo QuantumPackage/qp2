@@ -55,11 +55,13 @@ END_PROVIDER
 
 
 
- subroutine print_z_dipole_moment_only
+ subroutine print_dipole_moments
  implicit none
   print*, ''
   print*, ''
   print*,  '****************************************'
+  print*, 'x_dipole_moment                  = ',x_dipole_moment
+  print*, 'y_dipole_moment                  = ',y_dipole_moment
   print*, 'z_dipole_moment                  = ',z_dipole_moment
   print*,  '****************************************'
  end
