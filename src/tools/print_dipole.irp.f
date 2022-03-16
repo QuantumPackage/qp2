@@ -1,5 +1,5 @@
 program print_dipole
  implicit none
- call print_z_dipole_moment_only
+ call print_dipole_moments
 
 end
