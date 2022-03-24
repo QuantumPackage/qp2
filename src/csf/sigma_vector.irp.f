@@ -91,11 +91,9 @@
       ! Loop over l with a constraint to ensure that l <= size(cfg_seniority_index,1)-1
       ! Old version commented just below
       do l = min(size(cfg_seniority_index,1)-1, i+2), size(cfg_seniority_index,1)-1, 2
-        print*,'l'
         if (cfg_seniority_index(l) >= ncfgprev) then
           ncfgprev = cfg_seniority_index(l)
         endif
-        print*,'ncfgprev', ncfgprev
       enddo
       !k = 0
       !if ((i+2+k) < size(cfg_seniority_index,1)) then
