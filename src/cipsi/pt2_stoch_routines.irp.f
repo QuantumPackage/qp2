@@ -523,15 +523,15 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % pt2(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
           eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          eqta(:) = dsqrt(eqta(:) / (dble(c) - 1.5d0))
           pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 
 
