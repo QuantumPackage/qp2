@@ -783,7 +783,9 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
         alpha_h_psi = mat(istate, p1, p2)
 
-        pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
+        do k=1,N_states
+          pt2_data % overlap(k,istate) = pt2_data % overlap(k,istate) + coef(k) * coef(istate)
+        end do
         pt2_data % variance(istate)  = pt2_data % variance(istate) + alpha_h_psi * alpha_h_psi
         pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
 
