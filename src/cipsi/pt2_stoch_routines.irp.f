@@ -291,7 +291,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
 
       print '(A)', '========== ======================= ===================== ===================== ==========='
-      print '(A)', ' Samples          Energy                Variance               Norm^2          Seconds'
+      print '(A)', ' Samples          Energy                Variance               Norm^2            Seconds'
       print '(A)', '========== ======================= ===================== ===================== ==========='
 
       PROVIDE global_selection_buffer
@@ -523,21 +523,21 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % pt2(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
           eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          eqta(:) = dsqrt(eqta(:) / (dble(c) - 1.5d0))
           pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.4)', c, &
+            print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.1)', c, &
               pt2_data     % pt2(pt2_stoch_istate) +E, &
               pt2_data_err % pt2(pt2_stoch_istate), &
               pt2_data     % variance(pt2_stoch_istate), &
@@ -842,9 +842,8 @@ END_PROVIDER
    do t=1, pt2_N_teeth
      tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
      if (tooth_width == 0.d0) then
-       tooth_width = sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1)))
+       tooth_width = max(1.d-15,sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1))))
      endif
-     ASSERT(tooth_width > 0.d0)
      do i=pt2_n_0(t)+1, pt2_n_0(t+1)
        pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
      end do

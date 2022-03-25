@@ -474,17 +474,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 !      endif
 
       do i=1,fullinteresting(0)
-        do k=1,N_int
-          fullminilist(k,1,i) = psi_det_sorted(k,1,fullinteresting(i))
-          fullminilist(k,2,i) = psi_det_sorted(k,2,fullinteresting(i))
-        enddo
+        fullminilist(:,:,i) = psi_det_sorted(:,:,fullinteresting(i))
       enddo
 
       do i=1,interesting(0)
-        do k=1,N_int
-          minilist(k,1,i) = psi_det_sorted(k,1,interesting(i))
-          minilist(k,2,i) = psi_det_sorted(k,2,interesting(i))
-        enddo
+        minilist(:,:,i) = psi_det_sorted(:,:,interesting(i))
       enddo
 
       do s2=s1,2
@@ -1558,7 +1552,7 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Gives the inidices(+1) of the bits set to 1 in the bit string
+  ! Gives the indices(+1) of the bits set to 1 in the bit string
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
