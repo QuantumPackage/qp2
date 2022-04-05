@@ -77,28 +77,31 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
   END_DOC
   PROVIDE ezfio_filename
   logical                        :: exists
-  if (mpi_master) then
-    call ezfio_has_determinants_n_det(exists)
-    if (exists) then
-      call ezfio_get_determinants_n_det(psi_det_size)
-    else
-      psi_det_size = 1
+  psi_det_size = 1
+  PROVIDE mpi_master
+  if (read_wf) then
+    if (mpi_master) then
+      call ezfio_has_determinants_n_det(exists)
+      if (exists) then
+        call ezfio_get_determinants_n_det(psi_det_size)
+      else
+        psi_det_size = 1
+      endif
+      call write_int(6,psi_det_size,'Dimension of the psi arrays')
     endif
-    call write_int(6,psi_det_size,'Dimension of the psi arrays')
+    IRP_IF MPI_DEBUG
+      print *,  irp_here, mpi_rank
+      call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+    IRP_ENDIF
+    IRP_IF MPI
+      include 'mpif.h'
+      integer                        :: ierr
+      call MPI_BCAST( psi_det_size, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+      if (ierr /= MPI_SUCCESS) then
+        stop 'Unable to read psi_det_size with MPI'
+      endif
+    IRP_ENDIF
   endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call MPI_BCAST( psi_det_size, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read psi_det_size with MPI'
-    endif
-  IRP_ENDIF
-
 
 END_PROVIDER
 
