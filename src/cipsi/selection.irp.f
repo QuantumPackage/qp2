@@ -834,12 +834,13 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             endif
 
         end select
-      end do
 
-      ! To force the inclusion of determinants with a positive pt2 contribution
-      if (e_pert(istate) > 1d-8) then
-        w = -huge(1.0)
-      endif
+        ! To force the inclusion of determinants with a positive pt2 contribution
+        if (e_pert(istate) > 1d-8) then
+          w = -huge(1.0)
+        endif
+
+      end do
 
 !!!BEGIN_DEBUG
 !      ! To check if the pt2 is taking determinants already in the wf
