@@ -195,7 +195,10 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
   integer                        :: l_a, nmax, idx
   integer, allocatable           :: indices(:), exc_degree(:), iorder(:)
-  double precision, parameter :: norm_thr = 1.d-16
+
+  ! Removed to avoid introducing determinants already presents in the wf
+  !double precision, parameter :: norm_thr = 1.d-16
+
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
 
@@ -215,10 +218,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
+        ! Removed to avoid introducing determinants already presents in the wf
+        !if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
-        endif
+        !endif
       endif
     enddo
   enddo
@@ -242,10 +246,11 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
+        ! Removed to avoid introducing determinants already presents in the wf
+        !if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
-        endif
+        !endif
       endif
     enddo
   enddo
@@ -566,6 +571,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
+  logical, external :: is_in_wavefunction
   PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
@@ -830,8 +836,27 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             endif
 
         end select
+
+        ! To force the inclusion of determinants with a positive pt2 contribution
+        if (e_pert(istate) > 1d-8) then
+          w = -huge(1.0)
+        endif
+
       end do
 
+!!!BEGIN_DEBUG
+!      ! To check if the pt2 is taking determinants already in the wf
+!      if (is_in_wavefunction(det(N_int,1),N_int)) then
+!        print*, 'A determinant contributing to the pt2 is already in'
+!        print*, 'the wave function:'
+!        call  print_det(det(N_int,1),N_int)
+!        print*,'contribution to the pt2 for the states:', e_pert(:)
+!        print*,'error in the filtering in'
+!        print*, 'cipsi/selection.irp.f sub:  selecte_singles_and_doubles'
+!        print*, 'abort'
+!        call abort
+!      endif
+!!!END_DEBUG
 
       integer(bit_kind) :: occ(N_int,2), n
       if (h0_type == 'CFG') then
