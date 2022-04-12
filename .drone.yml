@@ -1,0 +1,36 @@
+---
+kind: pipeline
+type: ssh
+name: default
+
+clone:
+  depth: 10
+
+server:
+  host: 130.120.229.139
+  user: test
+  password:
+        from_secret: ssh_pass
+
+steps:
+- name: configure
+  pull: never
+  image: ubuntu/qp2_env
+  commands:
+  - ./configure -i all -c ./config/gfortran_debug.cfg
+  - source quantum_package.rc ; qp plugins download https://gitlab.com/scemama/qp_plugins_scemama
+  - source quantum_package.rc ; qp plugins install champ
+
+- name: compile
+  pull: never
+  image: ubuntu/qp2_env
+  commands:
+  - ninja
+
+- name: testing
+  pull: never
+  image: ubuntu/qp2_env
+  commands:
+  - qp test
+
+
