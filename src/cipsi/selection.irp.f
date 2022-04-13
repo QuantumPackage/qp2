@@ -729,7 +729,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         endif
         integer :: twice_hierarchy
         twice_hierarchy = degree + s/2
-        if (twice_hierarchy_max > twice_hierarchy_max) cycle
+        if (twice_hierarchy > twice_hierarchy_max) cycle
       endif
 
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
