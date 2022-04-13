@@ -585,7 +585,7 @@ END_PROVIDER
   enddo
   !$OMP ENDDO
   !$OMP END PARALLEL
-  call i8radix_sort(to_sort, psi_bilinear_matrix_transp_order, N_det,-1)
+  call i8sort(to_sort, psi_bilinear_matrix_transp_order, N_det)
   call iset_order(psi_bilinear_matrix_transp_rows,psi_bilinear_matrix_transp_order,N_det)
   call iset_order(psi_bilinear_matrix_transp_columns,psi_bilinear_matrix_transp_order,N_det)
   !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(l)

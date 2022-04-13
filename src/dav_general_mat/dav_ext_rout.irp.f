@@ -1,15 +1,15 @@
 
-subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,hcalc)
+subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
   use mmap_module
   implicit none
   BEGIN_DOC
-  ! Davidson diagonalization with specific diagonal elements of the H matrix
+  ! Generic Davidson diagonalization 
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
   !
   ! u_in : guess coefficients on the various states. Overwritten on exit
   !
-  ! dim_in : leftmost dimension of u_in
+  ! sze : leftmost dimension of u_in
   !
   ! sze : Number of determinants
   !
@@ -21,9 +21,9 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
   !
   ! hcalc subroutine to compute W = H U (see routine hcalc_template for template of input/output)
   END_DOC
-  integer, intent(in)             :: dim_in, sze, N_st, N_st_diag_in
+  integer, intent(in)             :: sze, N_st, N_st_diag_in
   double precision,  intent(in)   :: H_jj(sze)
-  double precision, intent(inout) :: u_in(dim_in,N_st_diag_in)
+  double precision, intent(inout) :: u_in(sze,N_st_diag_in)
   double precision, intent(out)   :: energies(N_st)
   external hcalc
 
@@ -157,19 +157,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
   write(6,'(A)') write_buffer(1:6+41*N_st)
 
 
-!  if (disk_based) then
-!    ! Create memory-mapped files for W and S
-!    type(c_ptr) :: ptr_w, ptr_s
-!    integer :: fd_s, fd_w
-!    call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-!        8, fd_w, .False., ptr_w)
-!    call mmap(trim(ezfio_work_dir)//'davidson_s', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-!        4, fd_s, .False., ptr_s)
-!    call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
-!    call c_f_pointer(ptr_s, s, (/sze,N_st_diag*itermax/))
-!  else
-    allocate(W(sze,N_st_diag*itermax))
-!  endif
+  allocate(W(sze,N_st_diag*itermax))
 
   allocate(                                                          &
       ! Large
@@ -233,7 +221,6 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
       if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
-
          ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
           call ortho_qr(U,size(U,1),sze,shift2)
           call ortho_qr(U,size(U,1),sze,shift2)
@@ -357,6 +344,9 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
 
     enddo
 
+    ! Re-contract U and update W
+    ! --------------------------------
+
     call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
         W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
@@ -372,8 +362,8 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
         U(i,k) = u_in(i,k)
       enddo
     enddo
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
-      call ortho_qr(U,size(U,1),sze,N_st_diag)
+    call ortho_qr(U,size(U,1),sze,N_st_diag)
+    call ortho_qr(U,size(U,1),sze,N_st_diag)
     do j=1,N_st_diag
       k=1
       do while ((k<sze).and.(U(k,j) == 0.d0))
@@ -398,7 +388,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,dim_in,sze,N_st,N_st_dia
   write(6,'(A)') ''
   call write_time(6)
 
-    deallocate(W)
+  deallocate(W)
 
   deallocate (                                                       &
       residual_norm,                                                 &

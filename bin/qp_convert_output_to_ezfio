@@ -195,48 +195,52 @@ def write_ezfio(res, filename):
     # P a r s i n g #
     # ~#~#~#~#~#~#~ #
 
+    inucl = {}
+    for i, a in enumerate(res.geometry):
+       inucl[a.coord] = i
+
     nbasis = 0
-    nucl_center = []
+    nucl_index = []
     curr_center = -1
     nucl_shell_num = []
     ang_mom = []
     nshell = 0
-    shell_prim_index = [1]
+    nshell_tot = 0
+    shell_index = []
     shell_prim_num = []
     for b in res.basis:
         s = b.sym
         if str.count(s, "y") + str.count(s, "x") == 0:
-          c = b.center
+          c = inucl[b.center]
           nshell += 1
+          nshell_tot += 1
           if c != curr_center:
              curr_center = c
-             nucl_center.append(nbasis+1)
              nucl_shell_num.append(nshell)
              nshell = 0
           nbasis += 1
+          nucl_index.append(c+1)
           coefficient += b.coef[:len(b.prim)]
           exponent += [p.expo for p in b.prim]
           ang_mom.append(str.count(s, "z"))
-          shell_prim_index.append(len(exponent)+1)
           shell_prim_num.append(len(b.prim))
-
-    nucl_shell_num.append(nshell+1)
-    nucl_shell_num = nucl_shell_num[1:]
+          shell_index += [nshell_tot+1] * len(b.prim)
 
     # ~#~#~#~#~ #
     # W r i t e #
     # ~#~#~#~#~ #
 
     ezfio.set_basis_basis("Read from ResultsFile")
-    ezfio.set_basis_basis_nucleus_index(nucl_center)
-    ezfio.set_basis_prim_num(len(coefficient))
     ezfio.set_basis_shell_num(len(ang_mom))
+    ezfio.set_basis_basis_nucleus_index(nucl_index)
+    ezfio.set_basis_prim_num(len(coefficient))
+
     ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
     ezfio.set_basis_prim_coef(coefficient)
     ezfio.set_basis_prim_expo(exponent)
     ezfio.set_basis_shell_ang_mom(ang_mom)
     ezfio.set_basis_shell_prim_num(shell_prim_num)
-    ezfio.set_basis_shell_prim_index(shell_prim_index)
+    ezfio.set_basis_shell_index(shell_index)
 
     print("OK")
 

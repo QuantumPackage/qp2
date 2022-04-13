@@ -4,7 +4,7 @@ subroutine run_slave_cipsi
 ! Helper program for distributed parallelism
   END_DOC
 
-  call omp_set_max_active_levels(1)
+  call set_multiple_levels_omp(.False.)
   distributed_davidson = .False.
   read_wf = .False.
   SOFT_TOUCH read_wf distributed_davidson
@@ -171,9 +171,9 @@ subroutine run_slave_main
       call write_double(6,(t1-t0),'Broadcast time')
 
       !---
-      call omp_set_max_active_levels(8)
+      call set_multiple_levels_omp(.True.)
       call davidson_slave_tcp(0)
-      call omp_set_max_active_levels(1)
+      call set_multiple_levels_omp(.False.)
       print *,  mpi_rank, ': Davidson done'
       !---
 
@@ -311,7 +311,7 @@ subroutine run_slave_main
           if (mpi_master) then
             print *,  'Running PT2'
           endif
-          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
+          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target)
           i = omp_get_thread_num()
           call run_pt2_slave(0,i,pt2_e0_denominator)
           !$OMP END PARALLEL

@@ -116,6 +116,7 @@ def get_l_module_descendant(d_child, l_module):
                 print("Error: ", file=sys.stderr)
                 print("`{0}` is not a submodule".format(module), file=sys.stderr)
                 print("Check the typo (spelling, case, '/', etc.) ", file=sys.stderr)
+#                pass
                 sys.exit(1)
 
     return list(set(l))

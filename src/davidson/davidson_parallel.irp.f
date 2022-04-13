@@ -508,7 +508,7 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   endif
 
 
-  call omp_set_max_active_levels(5)
+  call set_multiple_levels_omp(.True.)
 
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
