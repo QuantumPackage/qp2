@@ -59,13 +59,13 @@ function run_stoch() {
 
 @test "HCO" { # 12.2868s
   qp set_file hco.ezfio
-  run -113.389297812482 6.e-4  100000
+  run -113.393356604085 6.e-4  100000
 }
 
 @test "H2O2" { # 12.9214s
   qp set_file h2o2.ezfio
   qp set_mo_class --core="[1-2]" --act="[3-24]" --del="[25-38]"
-  run -151.00467 1.e-4  100000
+  run -151.005848404095 1.e-4  100000
 }
 
 @test "HBO" { # 13.3144s
