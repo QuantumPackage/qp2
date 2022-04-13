@@ -30,7 +30,8 @@
   - Fixed bug in DIIS
   - Fixed bug in molden (Au -> Angs)
   - Fixed bug with non-contiguous MOs in active space and deleter MOs
-  - Network-free installation
+  - Complete network-free installation
+  - Fixed bug in selection when computing full PT2
   - Updated version of f77-zmq
 
 *** User interface
@@ -59,6 +60,7 @@
       symmetry in matrices
     - qp_export_as_tgz exports also plugin codes
     - Added a basis module containing basis set information
+    - Added qp_run truncate_wf
 
 *** Code
 

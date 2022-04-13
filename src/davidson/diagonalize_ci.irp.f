@@ -1,9 +1,9 @@
-
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   implicit none
   BEGIN_DOC
   ! :c:data:`n_states` lowest eigenvalues of the |CI| matrix
   END_DOC
+  PROVIDE distributed_davidson
 
   integer                        :: j
   character*(8)                  :: st
@@ -247,6 +247,7 @@ subroutine diagonalize_CI
 !  eigenstates of the |CI| matrix.
   END_DOC
   integer                        :: i,j
+  PROVIDE distributed_davidson
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors(i,j)

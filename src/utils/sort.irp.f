@@ -356,7 +356,8 @@ BEGIN_TEMPLATE
   if ( isize < 32) then
     call insertion_$Xsort(x,iorder,isize)
   else
-    call $Xradix_sort(x,iorder,isize,-1)
+!    call $Xradix_sort(x,iorder,isize,-1)
+    call quick_$Xsort(x,iorder,isize)
   endif
  end subroutine $Xsort
 
@@ -450,7 +451,8 @@ BEGIN_TEMPLATE
   if ( isize < 32) then
     call insertion_$Xsort(x,iorder,isize)
   else
-    call $Xradix_sort(x,iorder,isize,-1)
+!    call $Xradix_sort(x,iorder,isize,-1)
+    call quick_$Xsort(x,iorder,isize)
   endif
  end subroutine $Xsort
 

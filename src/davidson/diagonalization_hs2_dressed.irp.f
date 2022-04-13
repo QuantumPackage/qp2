@@ -349,7 +349,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if ((iter > 1).or.(itertot == 1)) then
+!      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
@@ -359,10 +359,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
             call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
         endif
         S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
-      else
-         ! Already computed in update below
-         continue
-      endif
+!      else
+!         ! Already computed in update below
+!         continue
+!      endif
 
       if (dressing_state > 0) then
 

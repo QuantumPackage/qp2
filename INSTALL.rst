@@ -2,9 +2,9 @@
 Installation
 ============
 
-The |qp| can be downloaded on GitHub as an `archive
-<https://github.com/LCPQ/quantum_package/releases/latest>`_ or as a `git
-repository <https://github.com/LCPQ/quantum_package>`_.
+|qp| can be downloaded on GitHub as an `archive
+<https://github.com/QuantumPackage/qp2/releases>`_ or as a `git
+repository <https://github.com/QuantumPackage/qp2>`_.
 
 .. code:: bash
 
@@ -19,22 +19,31 @@ Before anything, go into your :file:`quantum_package` directory and run
 
 
 This script will create the :file:`quantum_package.rc` bash script, which
-sets all the environment variables required for the normal operation of the
-*Quantum Package*. It will also initialize the git submodules that are
+sets all the environment variables required for the normal operation of
+|qp|. It will also initialize the git submodules that are
 required, and tell you which external dependencies are missing and need to be
 installed. The required dependencies are located in the
-`external/qp2-dependencies` directory, such that once QP is configured the
+`external/qp2-dependencies` directory, such that once |qp| is configured the
 internet connection is not needed any more.
 
 When all dependencies have been installed, (the :command:`configure` will
-inform you) source the :file:`quantum_package.rc` in order to load all
-environment variables and compile the |QP|.
+inform you what is missing) source the :file:`quantum_package.rc` in order to
+load all environment variables and compile |QP|.
 
 Now all the requirements are met, you can compile the programs using
 
 .. code:: bash
 
    make
+
+
+Installation of dependencies via a Conda environment
+====================================================
+
+.. code:: bash
+
+  conda env create -f qp2.yml
+￼￼
 
 
 Requirements
@@ -64,8 +73,8 @@ architecture. Modify it if needed, and run :command:`configure` with
 
 .. code:: bash
 
-   cp ./config/gfortran.example config/gfortran.cfg
-   ./configure -c config/gfortran.cfg
+   cp ./config/gfortran.example config/gfortran_avx.cfg
+   ./configure -c config/gfortran_avx.cfg
 
 
 .. note::
@@ -86,45 +95,33 @@ The command is to be used as follows:
 
 .. code:: bash
 
-   ./configure --install=<package>
+   ./configure -i <package>
 
 The following packages are supported by the :command:`configure` installer:
 
 * ninja
-* irpf90
 * zeromq
 * f77zmq
 * gmp
 * ocaml  (:math:`\approx` 5 minutes)
-* ezfio
 * docopt
 * resultsFile
 * bats
+* zlib
 
 Example:
 
 .. code:: bash
 
-   ./configure -i ezfio
+   ./configure -i ninja
 
-.. note::
-
-  When installing the ocaml package, you will be asked the location of where
-  it should be installed.  A safe option is to enter the path proposed by the
-  |QP|:
-
-  QP>> Please install it here: /your_quantum_package_directory/bin
-
-  So just enter the proposition of the |QP| and press enter.
 
 
 If the :command:`configure` executable fails to install a specific dependency
 -----------------------------------------------------------------------------
 
-If the :command:`configure` executable does not succeed to install a specific
-dependency, there are some proposition of how to download and install the
-minimal dependencies to compile and use the |QP|.
-
+If the :command:`configure` executable does not succeed in installing a specific
+dependency, you should try to install the dependency on your system by yourself.
 
 Before doing anything below, try to install the packages with your package manager
 (:command:`apt`, :command:`yum`, etc).
@@ -149,11 +146,11 @@ IRPF90
 *IRPF90* is a Fortran code generator for programming using the Implicit Reference
 to Parameters (IRP) method.
 
-If you have *pip* for Python2, you can do 
+If you have *pip* for Python2, you can do
 
 .. code:: bash
 
-   python2 -m pip install --user irpf90
+   python3 -m pip install --user irpf90
 
 Otherwise,
 
@@ -209,7 +206,7 @@ ZeroMQ and its Fortran binding
 
 .. code:: bash
 
-   cp f77_zmq_free.h ${QP_ROOT}/src/ZMQ/f77_zmq.h
+   cp f77_zmq_free.h ${QP_ROOT}/src/zmq/f77_zmq.h
 
 
 Zlib
@@ -262,53 +259,6 @@ With Debian or Ubuntu, you can use
    sudo apt install libgmp-dev
 
 
-libcap
-------
-
-Libcap is a library for getting and setting POSIX.1e draft 15 capabilities.
-
-* Download the latest version of libcap here:
-  `<https://git.kernel.org/pub/scm/linux/kernel/git/morgan/libcap.git/snapshot/libcap-2.25.tar.gz>`_
-  and move it in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, go into the :file:`libcap-*/libcap` directory and run
-  the following command
-
-.. code:: bash
-
-   prefix=$QP_ROOT make install
-
-With Debian or Ubuntu, you can use
-
-.. code:: bash
-
-   sudo apt install libcap-dev
-
-
-Bubblewrap
-----------
-
-Bubblewrap is an unprivileged sandboxing tool.
-
-* Download Bubblewrap here:
-  `<https://github.com/projectatomic/bubblewrap/releases/download/v0.3.3/bubblewrap-0.3.3.tar.xz>`_
-  and move it in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, go into the :file:`bubblewrap-*` directory and run
-  the following commands
-
-.. code:: bash
-
-    ./configure --prefix=$QP_ROOT && make -j 8
-    make install-exec-am
-
-
-With Debian or Ubuntu, you can use
-
-.. code:: bash
-
-   sudo apt install bubblewrap
-
 
 
 OCaml
@@ -327,7 +277,7 @@ OCaml
   `<https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh>`_
   and move it in the :file:`${QP_ROOT}/external` directory
 
-* If you use OCaml only with the |qp|, you can install the OPAM directory
+* If you use OCaml only with |qp|, you can install the OPAM directory
   containing the compiler and all the installed libraries in the
   :file:`${QP_ROOT}/external` directory as
 
@@ -352,14 +302,14 @@ OCaml
 
   .. code:: bash
 
-      opam init --comp=4.07.1
+      opam init --comp=4.11.1
       eval `${QP_ROOT}/bin/opam env`
 
   If the installation fails because of bwrap, you can initialize opam using:
 
   .. code:: bash
 
-      opam init --disable-sandboxing --comp=4.07.1
+      opam init --disable-sandboxing --comp=4.11.1
       eval `${QP_ROOT}/bin/opam env`
 
 * Install the required external OCaml libraries
@@ -367,17 +317,6 @@ OCaml
   .. code:: bash
 
       opam install ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt
-
-
-EZFIO
------
-
-*EZFIO* is the Easy Fortran Input/Output library generator.
-
-* Download EZFIO here : `<https://gitlab.com/scemama/EZFIO/-/archive/master/EZFIO-master.tar.gz>`_ and move
-  the downloaded archive in the :file:`${QP_ROOT}/external` directory
-
-* Extract the archive, and rename it as :file:`${QP_ROOT}/external/ezfio`
 
 
 Docopt
@@ -406,11 +345,12 @@ resultsFile
 *resultsFile* is a Python package to extract data from output files of quantum chemistry
 codes.
 
-If you have *pip* for Python3, you can do 
+If you have *pip* for Python3, you can do
 
 .. code:: bash
 
    python3 -m pip install --user resultsFile
+
 
 
 
