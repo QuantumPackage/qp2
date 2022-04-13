@@ -713,6 +713,25 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (do_cycle) cycle
       endif
 
+      if (twice_hierarchy_max >= 0) then
+        s = 0
+        do k=1,N_int
+          s = s + popcnt(ieor(det(k,1),det(k,2)))
+        enddo
+        if ( mod(s,2)>0 ) stop 'For now, hierarchy CI is defined only for an even number of electrons'
+        if (excitation_ref == 1) then
+          call get_excitation_degree(HF_bitmask,det(1,1),degree,N_int)
+        else if (excitation_ref == 2) then
+          stop 'For now, hierarchy CI is defined only for a single reference determinant'
+!         do k=1,N_dominant_dets_of_cfgs
+!           call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
+!         enddo
+        endif
+        integer :: twice_hierarchy
+        twice_hierarchy = degree + s/2
+        if (twice_hierarchy_max > twice_hierarchy_max) cycle
+      endif
+
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       w = 0d0
