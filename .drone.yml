@@ -7,44 +7,22 @@ clone:
   depth: 10
 
 steps:
-- name: setup
-  image: ubuntu
-  commands:
-  - apt-get update
-  - DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    git \
-    curl \
-    wget \
-    python3 \
-    gfortran \
-    gcc \
-    g++ \
-    make \
-    build-essential \
-    rsync \
-    unzip \
-    libopenblas-dev \
-    pkg-config \
-    m4 \
-    python3
-  - ln -s /usr/bin/python3 /usr/bin/python
-
 
 - name: configure
-  image: ubuntu
+  image: scemama666/qp2_env
   commands:
   - ./configure -i all -c ./config/gfortran_debug.cfg
-  - source quantum_package.rc ; qp plugins download https://gitlab.com/scemama/qp_plugins_scemama
-  - source quantum_package.rc ; qp plugins install champ
+  - bash -c "source quantum_package.rc ; qp plugins download https://gitlab.com/scemama/qp_plugins_scemama"
+  - bash -c "source quantum_package.rc ; qp plugins install champ"
 
 - name: compile
-  image: ubuntu
+  image: scemama666/qp2_env
   commands:
-  - source quantum_package.rc ; ninja
+  - bash -c "source quantum_package.rc ; exec ninja"
 
 - name: testing
-  image: ubuntu
+  image: scemama666/qp2_env
   commands:
-  - source quantum_package.rc ; qp test -a
+  - bash -c "source quantum_package.rc ; qp test -a"
 
 
