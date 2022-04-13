@@ -1,0 +1,28 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+clone:
+  depth: 10
+
+steps:
+
+- name: configure
+  image: scemama666/qp2_env
+  commands:
+  - ./configure -i all -c ./config/gfortran_debug.cfg
+  - bash -c "source quantum_package.rc ; qp plugins download https://gitlab.com/scemama/qp_plugins_scemama"
+  - bash -c "source quantum_package.rc ; qp plugins install champ"
+
+- name: compile
+  image: scemama666/qp2_env
+  commands:
+  - bash -c "source quantum_package.rc ; exec ninja"
+
+- name: testing
+  image: scemama666/qp2_env
+  commands:
+  - bash -c "source quantum_package.rc ; qp test -a"
+
+
