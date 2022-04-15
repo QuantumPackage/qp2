@@ -17,6 +17,7 @@ import sys
 import numpy as np
 import os
 from docopt import docopt
+import gzip
 #fname = sys.argv[1]
 #qph5name = sys.argv[2]
 
@@ -25,6 +26,93 @@ def get_full_path(file_path):
     file_path = os.path.expandvars(file_path)
 #    file_path = os.path.abspath(file_path)
     return file_path
+
+
+def flatten(l):
+    res = []
+    for i in l:
+        if hasattr(i, "__iter__") and not isinstance(i, str):
+            res.extend(flatten(i))
+        else:
+            res.append(i)
+    return res
+
+#def write_array_do(self,dir,fil,rank,dims,dim_max,dat):
+#  if self.read_only:
+#    self.error('Read-only file.')
+#  l_filename = [ tempfile.mktemp(dir=dir.strip()), dir.strip()+'/'+fil+'.gz' ]
+#  try:
+#    file = StringIO.StringIO()
+#    file.write("%3d\n"%(rank,))
+#    for d in dims:
+#      file.write("%20d "%(d,))
+#    file.write("\n")
+#
+#    dat = flatten(dat)
+#    for i in range(dim_max):
+#      file.write("%24.15E\n"%(dat[i],))
+#    file.flush()
+#    buffer = file.getvalue()
+#    file.close()
+#    file = GzipFile(filename=l_filename[0],mode='wb')
+#    file.write(buffer.encode())
+#    file.close()
+#    os.rename(l_filename[0],l_filename[1])
+#  except:
+#    self.error("write_array_do",
+#      "Unable to write "+l_filename[1])
+
+#def set_ao_two_e_ints_df_ao_integrals_complex(self,df_ao_integrals_complex):
+#  rank = 5
+#  dims = list(range(rank))
+#  dims[0] = 2
+#  dims[1] = self.ao_basis_ao_num_per_kpt
+#  dims[2] = self.ao_basis_ao_num_per_kpt
+#  dims[3] = self.ao_two_e_ints_df_num
+#  dims[4] = self.nuclei_kpt_pair_num
+#
+#  dim_max = 1
+#  for d in dims:
+#    dim_max *= d
+#  self.acquire_lock('ao_two_e_ints_df_ao_integrals_complex')
+#  try:
+#   self.write_array_do(self.path_ao_two_e_ints,'df_ao_integrals_complex', rank,dims,dim_max,df_ao_integrals_complex)
+#
+def test_write_df_ao(rank,dims,dim_max,flatdata):
+    with gzip.open('test_ao_df_ints.gz','w') as f:
+        f.write(f'{rank:3d}\n'.encode())
+        for d in dims:
+            f.write(f'{d:20d} '.encode())
+        f.write("\n".encode())
+        for i in range(dim_max):
+            f.write(f'{flatdata[i]:25.15E}\n'.encode())
+    return
+
+def save_array_do(ezfioname,subdir,data,chunksize=16384):
+    dims = list(reversed(data.shape))
+    rank = len(dims)
+    flatdata = data.reshape(-1)
+    dim_max = 1
+    for i in dims:
+        dim_max *= i
+    with gzip.open(os.path.join(ezfioname,subdir)+'.gz','wb') as f:
+        f.write(f'{rank:3d}\n'.encode())
+        for d in dims:
+            f.write(f'{d:20d} '.encode())
+        f.write("\n".encode())
+        fmtstring = chunksize*'{:24.15E}\n'
+        for i in range(dim_max//chunksize):
+            #f.write((chunksize*'{:24.15E}\n').format(*flatdata[i*chunksize:(i+1)*chunksize]).encode())
+            #f.write(fmtstring.format(*flatdata[i*chunksize:(i+1)*chunksize]).encode())
+            f.write((''.join("%24.15E\n" % xi for xi in flatdata[i*chunksize:(i+1)*chunksize])).encode())
+            print(f'{i/(dim_max//chunksize):7.3f}% complete')
+        rem = dim_max%chunksize
+        if rem:
+            f.write((rem*'{:24.15E}\n').format(*flatdata[-rem:]).encode())
+    return
+
+
+
 
 def convert_mol(filename,qph5path):
     ezfio.set_file(filename)
@@ -387,7 +475,11 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #            ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
                 #dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
                 dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()]
-                ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
+                save_array_do(filename,'ao_two_e_ints/df_ao_integrals_complex',dfao_reim)
+                #ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
+                #dfao_dims = list(reversed(dfao_reim.shape))
+                #test_write_df_ao(,5,dfao_dims,dfao_reim.size,dfao_reim.ravel())
+
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
     
         if 'mo_two_e_ints' in qph5.keys():
