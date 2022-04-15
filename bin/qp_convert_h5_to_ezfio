@@ -385,7 +385,8 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #            dfao_im0=qph5['ao_two_e_ints/df_ao_integrals_imag'][()].transpose((3,2,1,0))
     #            dfao_cmplx0 = np.stack((dfao_re0,dfao_im0),axis=-1).tolist()
     #            ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
-                dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
+                #dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
+                dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()]
                 ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
     
