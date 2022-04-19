@@ -45,6 +45,21 @@ steps:
 - name: testing
   image: ubuntu
   commands:
-  - source quantum_package.rc ; qp test -a
+  - source quantum_package.rc ; TRAVIS=1 qp_test -a
 
+
+- name: re-configure
+  image: ubuntu
+  commands:
+  - ./configure -i all -c ./config/gfortran_avx.cfg
+
+- name: compile
+  image: ubuntu
+  commands:
+  - source quantum_package.rc ; ninja
+
+- name: testing
+  image: ubuntu
+  commands:
+  - source quantum_package.rc ; qp_test -a
 
