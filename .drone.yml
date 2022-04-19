@@ -12,8 +12,8 @@ steps:
   image: scemama666/qp2_env
   commands:
   - ./configure -i all -c ./config/gfortran_debug.cfg
-  - bash -c "source quantum_package.rc ; qp plugins download https://gitlab.com/scemama/qp_plugins_scemama"
-  - bash -c "source quantum_package.rc ; qp plugins install champ"
+  - bash -c "source quantum_package.rc ; exec qp_plugins download https://gitlab.com/scemama/qp_plugins_scemama"
+  - bash -c "source quantum_package.rc ; exec qp_plugins install champ"
 
 - name: compile
   image: scemama666/qp2_env
@@ -23,7 +23,7 @@ steps:
 - name: testing
   image: scemama666/qp2_env
   commands:
-  - bash -c "source quantum_package.rc ; TRAVIS=1 qp_test -a"
+  - bash -c "source quantum_package.rc ; TRAVIS=1 exec qp_test -a"
 
 
 - name: re-configure
@@ -34,10 +34,10 @@ steps:
 - name: compile
   image: ubuntu
   commands:
-  - bash -c "source quantum_package.rc ; ninja"
+  - bash -c "source quantum_package.rc ; exec ninja"
 
 - name: testing
   image: ubuntu
   commands:
-  - bash -c "source quantum_package.rc ; qp_test -a"
+  - bash -c "source quantum_package.rc ; exec qp_test -a"
 
