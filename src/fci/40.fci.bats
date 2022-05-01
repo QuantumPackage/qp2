@@ -77,7 +77,7 @@ function run_stoch() {
 @test "H2O" { # 11.3727s
   [[ -n $TRAVIS ]] && skip
   qp set_file h2o.ezfio
-  run -76.2361605151999 5.e-4  100000
+  run -76.2361605151999 2.e-3  100000
 }
 
 @test "ClO" { # 13.3755s

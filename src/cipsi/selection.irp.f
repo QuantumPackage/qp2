@@ -258,8 +258,6 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   deallocate(exc_degree)
   nmax=k-1
 
-  call isort_noidx(indices,nmax)
-
   ! Start with 32 elements. Size will double along with the filtering.
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
       interesting(0:32), fullinteresting(0:32))
