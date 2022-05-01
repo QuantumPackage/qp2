@@ -11,14 +11,14 @@ struct TYPE_comp_big {
 
 int compare_TYPE_big( const void * l, const void * r )
 {
-  const struct TYPE_comp_big * restrict _l= l;
-  const struct TYPE_comp_big * restrict _r= r;
-  if( _l->x > _r->x ) return 1;
-  if( _l->x < _r->x ) return -1;
+  const TYPE * restrict _l= l;
+  const TYPE * restrict _r= r;
+  if( *_l > *_r ) return 1;
+  if( *_l < *_r ) return -1;
   return 0;
 }
 
-void qsort_TYPE_big(TYPE* A_in, int32_t* iorder, int32_t isize) {
+void qsort_TYPE_big(TYPE* restrict A_in, int32_t* restrict iorder, int32_t isize) {
   struct TYPE_comp_big* A = malloc(isize * sizeof(struct TYPE_comp_big));
   if (A == NULL) return;
 
