@@ -9,6 +9,7 @@ Options:
     -o --output=EZFIO_DIR    Produced directory
                              by default is FILE.ezfio
     --noqmc                  don't include basis, cell, etc. for QMCPACK
+    -cd                      h5 contains cholesky decomposition informatin, these h5 result from RMG and the pyscf AFQMC converter of QMCPACK.
 
 """
 from ezfio import ezfio
@@ -137,6 +138,17 @@ def convert_mol(filename,qph5path):
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
     
     return
+
+def convert_kpts_cd(filename,qph5path,qmcpack=True):
+    
+    ezfio.set_file(filename)
+    ezfio.set_nuclei_is_complex(True)
+    # Dummy atom since AFQMC h5 has no atom information
+    nucl_num = 1
+    ezfio.set_nuclei_nucl_num(nucl_num)
+    ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
+    ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
+    ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
 
 def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_file(filename)
@@ -640,10 +652,16 @@ if __name__ == '__main__':
 
     if ARGUMENTS["--noqmc"]:
         qmcpack = False
+    if ARGUMENTS["--rmg"]:
+        rmg = True
     with h5py.File(FILE,'r') as qph5:
         do_kpts = ('kconserv' in qph5['nuclei'].keys())
     if (do_kpts):
         print("converting HDF5 to EZFIO for periodic system")
+        if cd:
+            print("Using RMG and AFQMC h5")
+            convert_kpts_cd(EZFIO_FILE,FILE,qmcpack)
+        else:
         convert_kpts(EZFIO_FILE,FILE,qmcpack)
     else:
         print("converting HDF5 to EZFIO for molecular system")
