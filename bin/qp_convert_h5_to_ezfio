@@ -257,18 +257,26 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
         if is_ao:
             ao_num_per_kpt = ao_num//kpt_num
             ezfio.set_io_chol_ao_integrals('Read')
-            ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
-
+            #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
+            L_list = []
             for i in len(nchol_per_kpt):
                 L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
                 L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
+                L = np.einsum("ijklm->ilkjm", A, B)
+                L_list.append(L)
+
                 #(6, 5184, 2)
+                """
                 for cmplx in range(2):
                     for ao_idx_i in range(ao_num_per_kpt):
                         for ao_idx_j in range(ao_num_per_kpt):
                             for chol_idx in range(nchol_per_kpt[i]):
                                 for kpt_idx in range(kpt_num):
-                                    ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_i][chol_idx][cmplx]
+                                    ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_j][chol_idx][cmplx]
+                """
+            ao_chol_two_e_ints = np.vstack(L_list)
+            ao_chol_two_e_ints = ao_chol_two_e_ints.transpose()
+            ezfio.set_chol_ao_integrals_complex(ao_chol_two_e_ints)
 
             #(2,ao_basis.ao_num_per_kpt,ao_basis.ao_num_per_kpt,ao_two_e_ints.chol_num_max,nuclei.kpt_num,nuclei.unique_kpt_num#)
             """
