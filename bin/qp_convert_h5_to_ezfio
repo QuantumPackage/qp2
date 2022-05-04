@@ -251,10 +251,26 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
         qph5[] 
         nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
         nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
+        nchol_per_kpt_max = max(nchol_per_kpt)
         ezfio.set_chol_num(nchol_per_kpt)
-        ezfio.set_chol_num_max(max(nchol_per_kpt))
+        ezfio.set_chol_num_max(nchol_per_kpt_max)
         if is_ao:
+            ao_num_per_kpt = ao_num//kpt_num
             ezfio.set_io_chol_ao_integrals('Read')
+            ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
+
+            for i in len(nchol_per_kpt):
+                L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
+                L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
+                #(6, 5184, 2)
+                for cmplx in range(2):
+                    for ao_idx_i in range(ao_num_per_kpt):
+                        for ao_idx_j in range(ao_num_per_kpt):
+                            for chol_idx in range(nchol_per_kpt[i]):
+                                for kpt_idx in range(kpt_num):
+                                    ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_i][chol_idx][cmplx]
+
+            #(2,ao_basis.ao_num_per_kpt,ao_basis.ao_num_per_kpt,ao_two_e_ints.chol_num_max,nuclei.kpt_num,nuclei.unique_kpt_num#)
             """
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
             ezfio.set_ao_two_e_ints_df_num(df_num)
