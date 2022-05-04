@@ -149,6 +149,134 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
+    with h5py.File(qph5path,'r') as qph5:
+        kpt_num = qph5['Hamiltonian']['KPoints'].shape[0]
+        elec_alpha_num =  qph5['Hamiltonian']['dims'][4]
+        elec_beta_num =  qph5['Hamiltonian']['dims'][5]
+        orb_num =  qph5['Hamiltonian']['dims'][3]
+        try:
+          is_ao =  json.loads(qph5['metadata'][()].decode("utf-8").replace("'",'"'))['ortho_ao']
+          if is_ao:
+            ao_num = orb_num
+          elif is_ao ==False:
+            mo_num = orb_num
+          else:
+              raise ValueError('Problem with ortho_ao key in metadata')
+        except:
+            raise UnicodeDecodeError('metadata not correctly parsed from HDF5 file')
+
+    ezfio.set_nuclei_kpt_num(kpt_num)
+    kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
+    ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
+    # don't multiply nuclei by kpt_num
+    # work in k-space, not in equivalent supercell
+    nucl_num_per_kpt = nucl_num 
+    ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+    # these are totals (kpt_num * num_per_kpt)
+    # need to change if we want to truncate orbital space within pyscf
+    ezfio.set_ao_basis_ao_num(ao_num)
+    ezfio.set_mo_basis_mo_num(mo_num)
+    ezfio.set_ao_basis_ao_num_per_kpt(ao_num//kpt_num)
+    ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
+    ezfio.electrons_elec_alpha_num = elec_alpha_num
+    ezfio.electrons_elec_beta_num  = elec_beta_num
+    ##########################################
+    #                                        #
+    #                Basis                   #
+    #                                        #
+    ##########################################
+    #TODO
+    ##########################################
+    #                                        #
+    #               MOCoeff                  #
+    #                                        #
+    ##########################################
+    #TODO
+    ##########################################
+    #                                        #
+    #            Integrals Mono              #
+    #                                        #
+    ##########################################
+    """
+      with h5py.File(qph5path,'r') as qph5:
+        if is_ao:
+            kin_ao_reim=
+            ovlp_ao_reim=
+            ne_ao_reim=
+    
+            ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
+            ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
+            ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
+            
+            ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+            ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+            ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+        else: 
+            kin_mo_reim=
+            ovlp_mo_reim=
+            ne_mo_reim=
+    
+            ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
+            
+            ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
+      """
+    ##########################################
+    #                                        #
+    #               k-points                 #
+    #                                        #
+    ##########################################
+    #TODO    
+    with h5py.File(qph5path,'r') as qph5:
+        kconserv = qph5['nuclei/kconserv'][()].tolist()
+    
+    ezfio.set_nuclei_kconserv(kconserv)
+    ezfio.set_nuclei_io_kconserv('Read')
+    # qktok2
+    # minuxk
+    # kpt_sparse_map
+    # unique_kpt_num
+    # io_kpt_symm 
+    ##########################################
+    #                                        #
+    #             Integrals Bi               #
+    #                                        #
+    ##########################################
+    
+    # should this be in ao_basis? ao_two_e_ints?
+      with h5py.File(qph5path,'r') as qph5:
+        qph5[] 
+        nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
+        nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
+        ezfio.set_chol_num(nchol_per_kpt)
+        ezfio.set_chol_num_max(max(nchol_per_kpt))
+        if is_ao:
+            ezfio.set_io_chol_ao_integrals('Read')
+            """
+            df_num = qph5['ao_two_e_ints'].attrs['df_num']
+            ezfio.set_ao_two_e_ints_df_num(df_num)
+            if 'df_ao_integrals' in qph5['ao_two_e_ints'].keys():
+                dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
+                ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
+                ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
+            """
+        else:
+            ezfio.set_io_chol_mo_integrals('Read')
+            """
+            ezfio.set_io_chol_mo_integrals('Read')
+            df_num = qph5['ao_two_e_ints'].attrs['df_num']
+            ezfio.set_ao_two_e_ints_df_num(df_num)
+            dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
+            ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
+            ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
+         """
+    return
+
+
+    
 
 def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_file(filename)
@@ -662,7 +790,7 @@ if __name__ == '__main__':
             print("Using RMG and AFQMC h5")
             convert_kpts_cd(EZFIO_FILE,FILE,qmcpack)
         else:
-        convert_kpts(EZFIO_FILE,FILE,qmcpack)
+            convert_kpts(EZFIO_FILE,FILE,qmcpack)
     else:
         print("converting HDF5 to EZFIO for molecular system")
         convert_mol(EZFIO_FILE,FILE)

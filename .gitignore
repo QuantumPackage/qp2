@@ -3,7 +3,6 @@ quantum_package_static.tar.gz
 build.ninja
 .ninja_log
 .ninja_deps
-bin/
 lib/
 config/qp_create_ninja.pickle
 src/*/.gitignore
