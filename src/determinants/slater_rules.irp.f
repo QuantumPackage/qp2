@@ -623,7 +623,8 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
+  PROVIDE ao_one_e_integrals mo_one_e_integrals
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)
@@ -681,7 +682,6 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
     case (1)
       call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
-      call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
       if (exc(0,1,1) == 1) then
         ! Single alpha
         m = exc(1,1,1)
@@ -699,10 +699,6 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
       hij = diag_H_mat_elem(key_i,Nint)
   end select
 end
-
-
-
-
 
 subroutine i_H_j_verbose(key_i,key_j,Nint,hij,hmono,hdouble,phase)
   use bitmasks
@@ -1037,7 +1033,6 @@ subroutine i_H_psi(key,keys,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
   endif
 
 end
-
 
 subroutine i_H_psi_minilist(key,keys,idx_key,N_minilist,coef,Nint,Ndet,Ndet_max,Nstate,i_H_psi_array)
   use bitmasks
