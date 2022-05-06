@@ -855,6 +855,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     with h5py.File(qph5path,'a') as qph5:
         kcon_f_phys = np.array(kconserv.transpose((1,2,0)),order='c')
         qph5.create_dataset('nuclei/kconserv',data=kcon_f_phys+1)
+        qph5.create_dataset('nuclei/kpts',data=kpts)
     
     if print_debug:
         print_kcon_chem_to_phys(kconserv,'K.qp')
