@@ -30,23 +30,23 @@ def get_full_path(file_path):
 def convert_mol(filename,qph5path):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(False)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_num = qph5['nuclei'].attrs['nucl_num']
         ao_num = qph5['ao_basis'].attrs['ao_num']
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_nucl_num(nucl_num)
-    
+
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -56,42 +56,42 @@ def convert_mol(filename,qph5path):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         do_pseudo = qph5['pseudo'].attrs['do_pseudo']
         ezfio.set_pseudo_do_pseudo(do_pseudo)
@@ -106,13 +106,13 @@ def convert_mol(filename,qph5path):
             ezfio.set_pseudo_pseudo_v_kl(qph5['pseudo/pseudo_v_kl'][()].tolist())
             ezfio.set_pseudo_pseudo_dz_k(qph5['pseudo/pseudo_dz_k'][()].tolist())
             ezfio.set_pseudo_pseudo_dz_kl(qph5['pseudo/pseudo_dz_kl'][()].tolist())
-    
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         #coeftmp = qph5['ao_basis/ao_coef'][()]
         #expotmp = qph5['ao_basis/ao_expo'][()]
@@ -122,25 +122,25 @@ def convert_mol(filename,qph5path):
         ezfio.set_ao_basis_ao_power(qph5['ao_basis/ao_power'][()].tolist())
         ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
         ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
-    
-      
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef = qph5['mo_basis/mo_coef'][()].tolist()
     ezfio.set_mo_basis_mo_coef(mo_coef)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
+
     return
 
 def convert_kpts_cd(filename,qph5path,qmcpack=True):
-    
+
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
     # Dummy atom since AFQMC h5 has no atom information
@@ -170,7 +170,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num 
+    nucl_num_per_kpt = nucl_num
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
@@ -203,23 +203,23 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
             kin_ao_reim=
             ovlp_ao_reim=
             ne_ao_reim=
-    
+
             ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
-            
+
             ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-        else: 
+        else:
             kin_mo_reim=
             ovlp_mo_reim=
             ne_mo_reim=
-    
+
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
-            
+
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
@@ -229,26 +229,25 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     #               k-points                 #
     #                                        #
     ##########################################
-    #TODO    
+    #TODO
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
-    
+
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
     # qktok2
     # minuxk
     # kpt_sparse_map
     # unique_kpt_num
-    # io_kpt_symm 
+    # io_kpt_symm
     ##########################################
     #                                        #
     #             Integrals Bi               #
     #                                        #
     ##########################################
-    
+
     # should this be in ao_basis? ao_two_e_ints?
       with h5py.File(qph5path,'r') as qph5:
-        qph5[] 
         nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
         nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
         nchol_per_kpt_max = max(nchol_per_kpt)
@@ -288,7 +287,6 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
             """
         else:
-            ezfio.set_io_chol_mo_integrals('Read')
             """
             ezfio.set_io_chol_mo_integrals('Read')
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
@@ -296,16 +294,38 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
             dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
-         """
-    return
+            """
+            mo_num_per_kpt = ao_num//kpt_num
+            ezfio.set_io_chol_mo_integrals('Read')
+            #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
+            L_list = []
+            for i in len(nchol_per_kpt):
+             L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
+             L.reshape(kpt_num, mo_num_per_kpt, mo_num_per_kpt, nchol_per_kpt[i], 2)
+             L = np.einsum("ijklm->ilkjm", A, B)
+             L_list.append(L)
+
+             #(6, 5184, 2)
+             """
+             for cmplx in range(2):
+                 for ao_idx_i in range(ao_num_per_kpt):
+                     for ao_idx_j in range(ao_num_per_kpt):
+                         for chol_idx in range(nchol_per_kpt[i]):
+                             for kpt_idx in range(kpt_num):
+                                 ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_j][chol_idx][cmplx]
+             """
+            mo_chol_two_e_ints = np.vstack(L_list)
+            mo_chol_two_e_ints = mo_chol_two_e_ints.transpose()
+            ezfio.set_chol_mo_integrals_complex(mo_chol_two_e_ints)
+            return
 
 
-    
+
 
 def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kpt_num = qph5['nuclei'].attrs['kpt_num']
         nucl_num = qph5['nuclei'].attrs['nucl_num']
@@ -313,16 +333,16 @@ def convert_kpts(filename,qph5path,qmcpack=True):
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
-    
+
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num 
+    nucl_num_per_kpt = nucl_num
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
-    
+
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
@@ -331,9 +351,9 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -343,57 +363,57 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis(Dummy)            #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
         ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-    
-    
+
+
     #Just need one (can clean this up later)
     ao_prim_num_max  = 5
-    
+
     d = [ [0] *ao_prim_num_max]*ao_num
     ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
     ezfio.set_ao_basis_ao_power(d)
     ezfio.set_ao_basis_ao_coef(d)
     ezfio.set_ao_basis_ao_expo(d)
-    
-    
+
+
     ###########################################
     ##                                        #
     ##                Pseudo                  #
@@ -431,7 +451,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #    ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
     #    ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
 
- 
+
     ##########################################
     #                                        #
     #                Basis(QMC)              #
@@ -448,7 +468,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
                 ezfio.set_qmcpack_qmc_lbas(qph5['qmcpack/qmc_lbas'][()].tolist())
                 ezfio.set_qmcpack_qmc_coef(qph5['qmcpack/qmc_coef'][()].tolist())
                 ezfio.set_qmcpack_qmc_expo(qph5['qmcpack/qmc_expo'][()].tolist())
-    
+
                 ezfio.set_qmcpack_qmc_pbc(qph5['qmcpack'].attrs['PBC'])
                 ezfio.set_qmcpack_qmc_cart(qph5['qmcpack'].attrs['cart'])
                 ezfio.set_qmcpack_qmc_pseudo(qph5['qmcpack'].attrs['Pseudo'])
@@ -466,15 +486,15 @@ def convert_kpts(filename,qph5path,qmcpack=True):
             print("to create ezfio without qmcpack data, use 'qp_convert_h5_to_ezfio --noqmc'")
             raise
 
- 
-      
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef_kpts = qph5['mo_basis/mo_coef_kpts'][()].tolist()
         mo_coef_cplx = qph5['mo_basis/mo_coef_complex'][()].tolist()
@@ -482,63 +502,63 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_mo_basis_mo_coef_complex(mo_coef_cplx)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
-    
+
+
     ##########################################
     #                                        #
     #            Integrals Mono              #
     #                                        #
     ##########################################
-        
+
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_one_e_ints' in qph5.keys():
             kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic_kpts'][()].tolist()
             ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap_kpts'][()].tolist()
             ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e_kpts'][()].tolist()
-    
+
             ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
-            
+
             ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-      
-        
+
+
     with h5py.File(qph5path,'r') as qph5:
         if 'mo_one_e_ints' in qph5.keys():
             kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic_kpts'][()].tolist()
             ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap_kpts'][()].tolist()
             ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e_kpts'][()].tolist()
-    
+
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
-            
+
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-      
+
     ##########################################
     #                                        #
     #               k-points                 #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
-    
+
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
-      
+
     ##########################################
     #                                        #
     #             Integrals Bi               #
     #                                        #
     ##########################################
-    
+
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_two_e_ints' in qph5.keys():
@@ -552,7 +572,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
                 dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
                 ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
-    
+
         if 'mo_two_e_ints' in qph5.keys():
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
             ezfio.set_ao_two_e_ints_df_num(df_num)
@@ -563,13 +583,13 @@ def convert_kpts(filename,qph5path,qmcpack=True):
             dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
-   
+
     return
 
 def convert_cplx(filename,qph5path):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kpt_num = qph5['nuclei'].attrs['kpt_num']
         nucl_num = qph5['nuclei'].attrs['nucl_num']
@@ -577,25 +597,25 @@ def convert_cplx(filename,qph5path):
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
-    
+
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num 
+    nucl_num_per_kpt = nucl_num
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
-    
+
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -605,56 +625,56 @@ def convert_cplx(filename,qph5path):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
 #    with h5py.File(qph5path,'r') as qph5:
 #        ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
 #        ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-#    
-#    
+#
+#
 #    #Just need one (can clean this up later)
 #    ao_prim_num_max  = 5
-#    
+#
 #    d = [ [0] *ao_prim_num_max]*ao_num
 #    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
 #    ezfio.set_ao_basis_ao_power(d)
 #    ezfio.set_ao_basis_ao_coef(d)
 #    ezfio.set_ao_basis_ao_expo(d)
-    
+
     ##########################################
     #                                        #
     #                Basis                   #
@@ -692,78 +712,78 @@ def convert_cplx(filename,qph5path):
         ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
         ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
 
-    
-    
-      
+
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef_reim = qph5['mo_basis/mo_coef_complex'][()].tolist()
     ezfio.set_mo_basis_mo_coef_complex(mo_coef_reim)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
-    
+
+
     ##########################################
     #                                        #
     #            Integrals Mono              #
     #                                        #
     ##########################################
-        
+
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_one_e_ints' in qph5.keys():
             kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic'][()].tolist()
             ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap'][()].tolist()
             ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e'][()].tolist()
-    
+
             ezfio.set_ao_one_e_ints_ao_integrals_kinetic_complex(kin_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_overlap_complex(ovlp_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_n_e_complex(ne_ao_reim)
-            
+
             ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-      
-        
+
+
     with h5py.File(qph5path,'r') as qph5:
         if 'mo_one_e_ints' in qph5.keys():
             kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic'][()].tolist()
             #ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap'][()].tolist()
             ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e'][()].tolist()
-    
+
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_complex(kin_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_overlap_complex(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            
+
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-      
+
     ##########################################
     #                                        #
     #               k-points                 #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
-    
+
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
-      
+
     ##########################################
     #                                        #
     #             Integrals Bi               #
     #                                        #
     ##########################################
-    
+
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_two_e_ints' in qph5.keys():
@@ -777,7 +797,7 @@ def convert_cplx(filename,qph5path):
                 dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
                 ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
-    
+
         if 'mo_two_e_ints' in qph5.keys():
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
             ezfio.set_ao_two_e_ints_df_num(df_num)
@@ -788,9 +808,9 @@ def convert_cplx(filename,qph5path):
             dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
-   
+
     return
-    
+
 
 if __name__ == '__main__':
     ARGUMENTS = docopt(__doc__)
@@ -827,4 +847,3 @@ if __name__ == '__main__':
 #
 #to be sure your MOs will be orthogonal, which is not the case when
 #the MOs are read from output files (not enough precision in output).""")
-
