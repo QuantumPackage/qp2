@@ -27,7 +27,7 @@ steps:
   - name: configure fast
     image: scemama666/qp2_env
     commands:
-    - ./configure -i all -c ./config/gfortran_avx.cfg
+    - ./configure -c ./config/gfortran_avx.cfg
 
   - name: compile fast
     image: scemama666/qp2_env
