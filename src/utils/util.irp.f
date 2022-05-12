@@ -39,7 +39,7 @@ double precision function binom_func(i,j)
   endif
 
   ! To avoid .999999 numbers
-  binom_func = binom_func + 0.5d0
+  binom_func = floor(binom_func + 0.5d0)
 
 end
 
