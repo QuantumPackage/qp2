@@ -159,10 +159,7 @@ subroutine copy_H_apply_buffer_to_wf
   enddo
 
   ! Update array sizes
-  if (psi_det_size < N_det) then
-    psi_det_size = N_det
-    TOUCH psi_det_size
-  endif
+  TOUCH N_det
 
   ! Restore backup in resized array
   do i=1,N_det_old
@@ -180,7 +177,7 @@ subroutine copy_H_apply_buffer_to_wf
 
   !$OMP PARALLEL DEFAULT(SHARED)                                     &
       !$OMP PRIVATE(j,k,i) FIRSTPRIVATE(N_det_old)                   &
-      !$OMP SHARED(N_int,H_apply_buffer,psi_det,psi_coef,N_states,psi_det_size)
+      !$OMP SHARED(N_int,H_apply_buffer,psi_det,psi_coef,N_states,N_det)
   j=0
   !$ j=omp_get_thread_num()
   do k=0,j-1

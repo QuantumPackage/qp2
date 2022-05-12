@@ -2,7 +2,7 @@ use bitmasks
 
 BEGIN_PROVIDER [ integer, psi_selectors_size ]
  implicit none
- psi_selectors_size = psi_det_size
+ psi_selectors_size = N_det
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_selectors_size) ]

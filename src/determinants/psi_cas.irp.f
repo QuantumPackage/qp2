@@ -1,8 +1,8 @@
 use bitmasks
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_cas, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_cas_coef,  (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_cas, (psi_det_size) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_cas, (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_cas_coef,  (N_det,n_states) ]
+&BEGIN_PROVIDER [ integer, idx_cas, (N_det) ]
 &BEGIN_PROVIDER [ integer, N_det_cas ]
   implicit none
   BEGIN_DOC
@@ -44,8 +44,8 @@ use bitmasks
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_cas_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_cas_coef_sorted_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_cas_sorted_bit, (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_cas_coef_sorted_bit, (N_det,N_states) ]
  implicit none
  BEGIN_DOC
  ! |CAS| determinants sorted to accelerate the search of a random determinant in the wave
@@ -58,9 +58,9 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas,  (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_non_cas_coef, (psi_det_size,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_non_cas,  (psi_det_size) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas,  (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_non_cas_coef, (N_det,n_states) ]
+&BEGIN_PROVIDER [ integer, idx_non_cas,  (N_det) ]
 &BEGIN_PROVIDER [ integer, N_det_non_cas ]
  implicit none
  BEGIN_DOC
@@ -97,8 +97,8 @@ END_PROVIDER
  N_det_non_cas = i_non_cas
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas_sorted_bit, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_non_cas_coef_sorted_bit, (psi_det_size,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_cas_sorted_bit, (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_non_cas_coef_sorted_bit, (N_det,N_states) ]
  implicit none
  BEGIN_DOC
  ! |CAS| determinants sorted to accelerate the search of a random determinant in the wave

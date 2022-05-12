@@ -10,7 +10,6 @@ integer function zmq_put_psi(zmq_to_qp_run_socket,worker_id)
 
   integer, external              :: zmq_put_N_states
   integer, external              :: zmq_put_N_det
-  integer, external              :: zmq_put_psi_det_size
   integer*8, external            :: zmq_put_psi_det
   integer*8, external            :: zmq_put_psi_coef
 
@@ -20,10 +19,6 @@ integer function zmq_put_psi(zmq_to_qp_run_socket,worker_id)
     return
   endif
   if (zmq_put_N_det(zmq_to_qp_run_socket, worker_id) == -1) then
-    zmq_put_psi = -1
-    return
-  endif
-  if (zmq_put_psi_det_size(zmq_to_qp_run_socket, worker_id) == -1) then
     zmq_put_psi = -1
     return
   endif
@@ -51,7 +46,6 @@ integer function zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
 
   integer, external              :: zmq_get_N_states
   integer, external              :: zmq_get_N_det
-  integer, external              :: zmq_get_psi_det_size
   integer*8, external            :: zmq_get_psi_det
   integer*8, external            :: zmq_get_psi_coef
 
@@ -65,19 +59,15 @@ integer function zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
     zmq_get_psi_notouch = -1
     return
   endif
-  if (zmq_get_psi_det_size(zmq_to_qp_run_socket, worker_id) == -1) then
-    zmq_get_psi_notouch = -1
-    return
-  endif
 
-  if (size(psi_det,kind=8) /= N_int*2_8*psi_det_size*bit_kind) then
+  if (size(psi_det,kind=8) /= N_int*2_8*N_det*bit_kind) then
     deallocate(psi_det)
-    allocate(psi_det(N_int,2,psi_det_size))
+    allocate(psi_det(N_int,2,N_det))
   endif
 
-  if (size(psi_coef,kind=8) /= psi_det_size*N_states) then
+  if (size(psi_coef,kind=8) /= N_det*N_states) then
     deallocate(psi_coef)
-    allocate(psi_coef(psi_det_size,N_states))
+    allocate(psi_coef(N_det,N_states))
   endif
 
   if (zmq_get_psi_det(zmq_to_qp_run_socket, worker_id) == -1_8) then
@@ -102,7 +92,7 @@ integer function zmq_get_psi(zmq_to_qp_run_socket, worker_id)
   integer, intent(in)            :: worker_id
   integer, external :: zmq_get_psi_notouch
   zmq_get_psi = zmq_get_psi_notouch(zmq_to_qp_run_socket, worker_id)
-  SOFT_TOUCH psi_det psi_coef psi_det_size N_det N_states
+  SOFT_TOUCH psi_det psi_coef N_det N_states
 
 end
 
@@ -266,7 +256,7 @@ integer function zmq_get_psi_bilinear(zmq_to_qp_run_socket, worker_id)
     return
   endif
 
-  SOFT_TOUCH psi_bilinear_matrix_values psi_bilinear_matrix_rows psi_bilinear_matrix_columns psi_bilinear_matrix_order psi_det psi_coef psi_det_size N_det N_states psi_det_beta_unique psi_det_alpha_unique N_det_beta_unique N_det_alpha_unique
+  SOFT_TOUCH psi_bilinear_matrix_values psi_bilinear_matrix_rows psi_bilinear_matrix_columns psi_bilinear_matrix_order psi_det psi_coef N_det N_states psi_det_beta_unique psi_det_alpha_unique N_det_beta_unique N_det_alpha_unique
 
 end
 
@@ -374,7 +364,6 @@ N_states ;;
 N_det ;;
 N_det_alpha_unique ;;
 N_det_beta_unique ;;
-psi_det_size ;;
 
 END_TEMPLATE
 

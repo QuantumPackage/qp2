@@ -20,11 +20,11 @@ BEGIN_PROVIDER [ integer, N_det_generators ]
   call write_int(6,N_det_generators,'Number of generators')
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_generators, (psi_det_size,N_states) ]
-&BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_gen, (N_int,2,psi_det_size) ]
-&BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (psi_det_size,N_states) ]
-&BEGIN_PROVIDER [ integer, psi_det_sorted_gen_order, (psi_det_size) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_generators, (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_generators, (N_det,N_states) ]
+&BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_gen, (N_int,2,N_det) ]
+&BEGIN_PROVIDER [ double precision, psi_coef_sorted_gen, (N_det,N_states) ]
+&BEGIN_PROVIDER [ integer, psi_det_sorted_gen_order, (N_det) ]
   implicit none
   BEGIN_DOC
   ! For Single reference wave functions, the generator is the

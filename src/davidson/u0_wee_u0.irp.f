@@ -4,7 +4,7 @@ BEGIN_PROVIDER [ double precision, psi_energy_two_e, (N_states) ]
 ! Energy of the current wave function
   END_DOC
   integer :: i,j
-  call u_0_H_u_0_two_e(psi_energy_two_e,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
+  call u_0_H_u_0_two_e(psi_energy_two_e,psi_coef,N_det,psi_det,N_int,N_states,N_det)
   do i=N_det+1,N_states
     psi_energy_two_e(i) = 0.d0
   enddo
