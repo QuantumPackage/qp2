@@ -542,12 +542,11 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
   integer                        :: i,j,k, ndet_qp_edit
 
   if (mpi_master) then
-    ndet_qp_edit = min(ndet,N_det_qp_edit)
 
     call ezfio_set_determinants_N_int(N_int)
     call ezfio_set_determinants_bit_kind(bit_kind)
     call ezfio_set_determinants_N_det(ndet)
-    call ezfio_set_determinants_N_det_qp_edit(ndet_qp_edit)
+    call ezfio_set_determinants_N_det_qp_edit(min(ndet,10000))
     call ezfio_set_determinants_n_states(nstates)
     call ezfio_set_determinants_mo_label(mo_label)
 
