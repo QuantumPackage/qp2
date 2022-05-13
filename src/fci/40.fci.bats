@@ -40,13 +40,6 @@ function run_stoch() {
   run_stoch -49.14104086  0.0001  10000
 }
 
-@test "F2" { # 0:03:34
-  [[ -n $TRAVIS ]] && skip
-  qp set_file f2.ezfio
-  qp set_frozen_core
-  run_stoch -199.30821487  0.002  100000
-}
-
 @test "NH3" { # 0:00:11
   qp set_file nh3.ezfio
   qp set_mo_class --core="[1-4]" --act="[5-72]"
@@ -184,5 +177,12 @@ function run_stoch() {
   qp set_file hcn.ezfio
   qp set_mo_class --core="[1,2]" --act="[3-40]" --del="[41-55]"
   run_stoch -93.09855896  5.e-4  50000
+}
+
+@test "F2" { # 0:03:34
+  [[ -n $TRAVIS ]] && skip
+  qp set_file f2.ezfio
+  qp set_frozen_core
+  run_stoch -199.30821487  0.002  100000
 }
 
