@@ -90,7 +90,7 @@ subroutine remove_small_contributions
   enddo
   !$OMP PARALLEL DEFAULT(NONE) &
   !$OMP PRIVATE(i,j,i_H_psi_array) &
-  !$OMP SHARED(k,psi_det_sorted,psi_coef_sorted,N_int,N_det,N_det,N_states, &
+  !$OMP SHARED(k,psi_det_sorted,psi_coef_sorted,N_int,N_det,N_states, &
   !$OMP   selection_criterion_min,keep,N_det_generators) &
   !$OMP REDUCTION(+:N_removed)
   !$OMP DO
