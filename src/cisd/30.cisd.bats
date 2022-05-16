@@ -77,7 +77,7 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file ch4.ezfio
   qp set_mo_class --core="[1]" --act="[2-30]" --del="[31-59]"
-  run -40.2403962667047 -39.8433221754964
+  run -40.2403962667047 -39.843315
 }
 
 @test "SiH3" { # 20.2202s 1.38648m
