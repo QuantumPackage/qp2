@@ -232,11 +232,13 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     #TODO
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
+        minusk = qph5['Hamiltonian']['MinusK'][:]+1 
+        QKTok2 = qph5['Hamiltonian']['QPTok2'][:]+1
 
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
-    # qktok2
-    # minuxk
+    ezfio.set_nuclei_minusk(minusk)
+    ezfio.set_nuclei_qktok2(QKTok2)
     # kpt_sparse_map
     # unique_kpt_num
     # io_kpt_symm
@@ -777,6 +779,7 @@ def convert_cplx(filename,qph5path):
 
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
+
 
     ##########################################
     #                                        #
