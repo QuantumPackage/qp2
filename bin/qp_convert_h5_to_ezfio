@@ -235,11 +235,20 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
         minusk = qph5['Hamiltonian']['MinusK'][:]+1 
         QKTok2 = qph5['Hamiltonian']['QPTok2'][:]+1
         unique_kpt_num = len(qph5['Hamiltonian']['KPFactorized'])
-
+        unique_k_idx = []
+        for i in qph5['Hamiltonian']['KPFactorized'].keys():
+            unique_k_idx.append(int(i[1:])+1)
+    kpt_sparse_map = np.zeros(kpt_num)
+    for i in range(kpt_num):
+        if i+1 is in uniq_k_idx:
+            kpt_sparse_map[i] = i+1 
+        else:
+            kpt_sparse_map[i] = -minusk[i]
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
     ezfio.set_nuclei_minusk(minusk)
     ezfio.set_nuclei_qktok2(QKTok2)
+    ezfio.set_nuclei_kpt_sparse_map(kpt_sparse_map)
     ezfio.set_nuclei_unique_kpt_num(unique_kpt_num)
     # kpt_sparse_map
     # unique_kpt_num
