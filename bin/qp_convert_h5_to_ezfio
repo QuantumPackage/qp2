@@ -234,11 +234,15 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
         kconserv = qph5['nuclei/kconserv'][()].tolist()
         minusk = qph5['Hamiltonian']['MinusK'][:]+1 
         QKTok2 = qph5['Hamiltonian']['QPTok2'][:]+1
+        unique_kpt_num = 1
+        while f'L{i}' in qph5['Hamiltonian']['KPFactorized'].keys():
+            unique_kpt_num += 1
 
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
     ezfio.set_nuclei_minusk(minusk)
     ezfio.set_nuclei_qktok2(QKTok2)
+    ezfio.set_nuclei_unique_kpt_num(unique_kpt_num)
     # kpt_sparse_map
     # unique_kpt_num
     # io_kpt_symm
