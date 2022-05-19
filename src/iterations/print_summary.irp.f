@@ -36,7 +36,7 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   write(*,fmt) '# E          ', e_(1:N_states_p)
   if (N_states_p > 1) then
     write(*,fmt) '# Excit. (au)', e_(1:N_states_p)-e_(1)
-    write(*,fmt) '# Excit. (eV)', (e_(1:N_states_p)-e_(1))*27.211396641308d0
+    write(*,fmt) '# Excit. (eV)', (e_(1:N_states_p)-e_(1))*ha_to_ev
   endif
   write(fmt,*) '(A13,', 2*N_states_p, '(1X,F14.8))'
   write(*,fmt) '# PT2 '//pt2_string, (pt2_data % pt2(k), pt2_data_err % pt2(k), k=1,N_states_p)
@@ -47,8 +47,8 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
   if (N_states_p > 1) then
     write(*,fmt) '# Excit. (au)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1)), &
       dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1)), k=1,N_states_p)
-    write(*,fmt) '# Excit. (eV)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1))*27.211396641308d0, &
-      dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1))*27.211396641308d0, k=1,N_states_p)
+    write(*,fmt) '# Excit. (eV)', ( (e_(k)+pt2_data % pt2(k)-e_(1)-pt2_data % pt2(1))*ha_to_ev, &
+      dsqrt(pt2_data_err % pt2(k)*pt2_data_err % pt2(k)+pt2_data_err % pt2(1)*pt2_data_err % pt2(1))*ha_to_ev, k=1,N_states_p)
   endif
   write(fmt,*) '(''# ============'',', N_states_p, '(1X,''=============================''))'
   write(*,fmt)
@@ -82,19 +82,19 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
     print *, 'Variational Energy difference (au | eV)'
     do i=2, N_states_p
       print*,'Delta E = ', (e_(i) - e_(1)), &
-        (e_(i) - e_(1)) * 27.211396641308d0
+        (e_(i) - e_(1)) * ha_to_ev
     enddo
     print *,  '-----'
     print*, 'Variational + perturbative Energy difference (au | eV)'
     do i=2, N_states_p
       print*,'Delta E = ', (e_(i)+ pt2_data % pt2(i) - (e_(1) + pt2_data % pt2(1))), &
-        (e_(i)+ pt2_data % pt2(i) - (e_(1) + pt2_data % pt2(1))) * 27.211396641308d0
+        (e_(i)+ pt2_data % pt2(i) - (e_(1) + pt2_data % pt2(1))) * ha_to_ev
     enddo
     print *,  '-----'
     print*, 'Variational + renormalized perturbative Energy difference (au | eV)'
     do i=2, N_states_p
       print*,'Delta E = ', (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))), &
-        (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))) * 27.211396641308d0
+        (e_(i)+ pt2_data % rpt2(i) - (e_(1) + pt2_data % rpt2(1))) * ha_to_ev
     enddo
   endif
 
