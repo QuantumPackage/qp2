@@ -69,7 +69,9 @@ subroutine run
   do i = 1,N_states
     k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
     delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
-    cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
+    if (elec_alpha_num + elec_beta_num >= 4) then
+      cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
+    endif
   enddo
   print *,  'N_det = ', N_det
   print*,''
@@ -78,26 +80,43 @@ subroutine run
   do i = 1,N_states
     print *,  i, CI_energy(i)
   enddo
-  print*,''
-  print*,'******************************'
-  print *,  'CISD+Q Energies'
-  do i = 1,N_states
-    print *,  i, cisdq(i)
-  enddo
+  if (elec_alpha_num + elec_beta_num >= 4) then
+    print*,''
+    print*,'******************************'
+    print *,  'CISD+Q Energies'
+    do i = 1,N_states
+      print *,  i, cisdq(i)
+    enddo
+  endif
   if (N_states > 1) then
-    print*,''
-    print*,'******************************'
-    print*,'Excitation energies (au)    (CISD+Q)'
-    do i = 2, N_states
-      print*, i ,CI_energy(i) - CI_energy(1), cisdq(i) - cisdq(1)
-    enddo
-    print*,''
-    print*,'******************************'
-    print*,'Excitation energies (eV)    (CISD+Q)'
-    do i = 2, N_states
-      print*, i ,(CI_energy(i) - CI_energy(1)) * ha_to_ev, &
-        (cisdq(i) - cisdq(1)) * ha_to_ev
-    enddo
+    if (elec_alpha_num + elec_beta_num >= 4) then
+      print*,''
+      print*,'******************************'
+      print*,'Excitation energies (au)    (CISD+Q)'
+      do i = 2, N_states
+        print*, i ,CI_energy(i) - CI_energy(1), cisdq(i) - cisdq(1)
+      enddo
+      print*,''
+      print*,'******************************'
+      print*,'Excitation energies (eV)    (CISD+Q)'
+      do i = 2, N_states
+        print*, i ,(CI_energy(i) - CI_energy(1)) * ha_to_ev, &
+          (cisdq(i) - cisdq(1)) * ha_to_ev
+      enddo
+    else
+      print*,''
+      print*,'******************************'
+      print*,'Excitation energies (au)    (CISD)'
+      do i = 2, N_states
+        print*, i ,CI_energy(i) - CI_energy(1)
+      enddo
+      print*,''
+      print*,'******************************'
+      print*,'Excitation energies (eV)    (CISD)'
+      do i = 2, N_states
+        print*, i ,(CI_energy(i) - CI_energy(1)) * ha_to_ev
+      enddo
+    endif
   endif
 
 end
