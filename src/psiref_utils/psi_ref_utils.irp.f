@@ -1,8 +1,8 @@
 use bitmasks
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_ref_sorted_bit, (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_ref_coef_sorted_bit, (N_det,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_ref_sorted_bit, (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_ref_coef_sorted_bit, (psi_det_size,N_states) ]
  implicit none
  BEGIN_DOC
  ! Reference determinants sorted to accelerate the search of a random determinant in the wave
@@ -14,7 +14,7 @@ use bitmasks
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,N_det) ]
+BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,psi_det_size) ]
  implicit none
  BEGIN_DOC
 ! Transposed psi_ref_coef
@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_transp, (n_states,N_det) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (N_det,n_states) ]
+BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (psi_det_size,n_states) ]
  implicit none
  BEGIN_DOC
 ! Normalized coefficients of the reference
@@ -43,7 +43,7 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_normalized,  (N_det,n_states) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,N_det) ]
+BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,psi_det_size) ]
  implicit none
  BEGIN_DOC
 ! Transposed psi_non_ref_coef
@@ -56,10 +56,10 @@ BEGIN_PROVIDER [ double precision, psi_non_ref_coef_transp, (n_states,N_det) ]
  enddo
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref,  (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef, (N_det,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_non_ref,  (N_det) ]
-&BEGIN_PROVIDER [ integer, idx_non_ref_rev,  (N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref,  (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef, (psi_det_size,n_states) ]
+&BEGIN_PROVIDER [ integer, idx_non_ref,  (psi_det_size) ]
+&BEGIN_PROVIDER [ integer, idx_non_ref_rev,  (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_det_non_ref ]
  implicit none
  BEGIN_DOC
@@ -102,8 +102,8 @@ END_PROVIDER
  endif
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_restart,  (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_restart, (N_det,n_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_restart,  (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_restart, (psi_det_size,n_states) ]
  implicit none
  BEGIN_DOC
   ! Set of determinants which are not part of the reference, defined from the application
@@ -144,8 +144,8 @@ END_PROVIDER
 
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_sorted_bit, (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_sorted_bit, (N_det,N_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_non_ref_sorted_bit, (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_non_ref_coef_sorted_bit, (psi_det_size,N_states) ]
  implicit none
  BEGIN_DOC
  ! Reference determinants sorted to accelerate the search of a random determinant in the wave

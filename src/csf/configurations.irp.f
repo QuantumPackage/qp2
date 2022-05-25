@@ -332,7 +332,7 @@ subroutine configuration_to_dets_tree_addressing(o,d,sze,n_alpha,Nint)
 end
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_configuration, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_configuration ]
  implicit none
  BEGIN_DOC

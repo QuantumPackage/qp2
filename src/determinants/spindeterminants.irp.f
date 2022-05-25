@@ -24,7 +24,7 @@ integer*8 function spin_det_search_key(det,Nint)
 end
 
 
-BEGIN_PROVIDER [ integer(bit_kind), psi_det_alpha, (N_int,N_det) ]
+BEGIN_PROVIDER [ integer(bit_kind), psi_det_alpha, (N_int,psi_det_size) ]
   implicit none
   BEGIN_DOC
   ! List of $\alpha$ determinants of psi_det
@@ -39,7 +39,7 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det_alpha, (N_int,N_det) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer(bit_kind), psi_det_beta, (N_int,N_det) ]
+BEGIN_PROVIDER [ integer(bit_kind), psi_det_beta, (N_int,psi_det_size) ]
   implicit none
   BEGIN_DOC
   ! List of $\beta$ determinants of psi_det
@@ -56,7 +56,7 @@ END_PROVIDER
 
 BEGIN_TEMPLATE
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_det_$alpha_unique, (N_int,N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_det_$alpha_unique, (N_int,psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_det_$alpha_unique ]
   implicit none
   BEGIN_DOC

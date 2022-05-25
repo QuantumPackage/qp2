@@ -6,7 +6,7 @@
 !
 ! psi_s2(i) = $\langle \Psi_i | S^2 | \Psi_i \rangle$
   END_DOC
-  call u_0_HS2_u_0(psi_energy,psi_s2,psi_coef,N_det,psi_det,N_int,N_states,N_det)
+  call u_0_HS2_u_0(psi_energy,psi_s2,psi_coef,N_det,psi_det,N_int,N_states,psi_det_size)
   integer :: i
   do i=N_det+1,N_states
     psi_energy(i) = 0.d0

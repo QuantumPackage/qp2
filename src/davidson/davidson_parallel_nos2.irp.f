@@ -99,7 +99,7 @@ subroutine davidson_nos2_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st,
 
   integer                        :: rc, ni, nj
   integer*8                      :: rc8
-  integer                        :: N_states_read, N_det_read
+  integer                        :: N_states_read, N_det_read, psi_det_size_read
   integer                        :: N_det_selectors_read, N_det_generators_read
 
   integer, external :: zmq_get_dvector

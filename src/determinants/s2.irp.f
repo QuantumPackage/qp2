@@ -110,7 +110,7 @@ END_PROVIDER
 ! array of the averaged values of the S^2 operator on the various states
  END_DOC
  integer :: i
- call u_0_S2_u_0(s2_values,psi_coef,n_det,psi_det,N_int,N_states,N_det)
+ call u_0_S2_u_0(s2_values,psi_coef,n_det,psi_det,N_int,N_states,psi_det_size)
  do i = 1, N_states
   s_values(i) = 0.5d0 *(-1.d0 + dsqrt(1.d0 + 4 * s2_values(i)))
  enddo

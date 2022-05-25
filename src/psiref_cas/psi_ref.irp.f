@@ -1,8 +1,8 @@
 use bitmasks
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_ref, (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_ref_coef,  (N_det,n_states) ]
-&BEGIN_PROVIDER [ integer, idx_ref, (N_det) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_ref, (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_ref_coef,  (psi_det_size,n_states) ]
+&BEGIN_PROVIDER [ integer, idx_ref, (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, N_det_ref ]
   implicit none
   BEGIN_DOC
@@ -26,7 +26,7 @@ use bitmasks
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, psi_ref_coef_inv, (N_det,n_states) ]
+BEGIN_PROVIDER [ double precision, psi_ref_coef_inv, (psi_det_size,n_states) ]
  implicit none
  BEGIN_DOC
  ! 1/psi_ref_coef
@@ -41,8 +41,8 @@ BEGIN_PROVIDER [ double precision, psi_ref_coef_inv, (N_det,n_states) ]
 END_PROVIDER
 
 
- BEGIN_PROVIDER [ integer(bit_kind), psi_ref_restart, (N_int,2,N_det) ]
-&BEGIN_PROVIDER [ double precision, psi_ref_coef_restart,  (N_det,n_states) ]
+ BEGIN_PROVIDER [ integer(bit_kind), psi_ref_restart, (N_int,2,psi_det_size) ]
+&BEGIN_PROVIDER [ double precision, psi_ref_coef_restart,  (psi_det_size,n_states) ]
   implicit none
   BEGIN_DOC
   ! Projection of the CAS wave function on the restart wave function.
