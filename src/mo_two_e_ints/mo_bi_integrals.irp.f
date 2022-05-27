@@ -53,7 +53,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
 !    call four_idx_novvvv
     call four_idx_novvvv_old
   else
-    if (ao_num*ao_num*ao_num*ao_num*32.d-9 < dble(qp_max_mem)) then
+    if (ao_num*ao_num*ao_num*ao_num*32.d-6 < dble(qp_max_mem)) then
       call four_idx_dgemm
     else
       call add_integrals_to_map(full_ijkl_bitmask_4)
