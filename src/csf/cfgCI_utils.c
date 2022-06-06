@@ -334,10 +334,21 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
                  Get Overlap
     ************************************/
     // Fill matrix
+
+    int rowsbftodetI, colsbftodetI;
+
+    /***********************************
+         Get BFtoDeterminant Matrix
+    ************************************/
+
+    printf("In convertcsftodet\n");
+    convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
+
     int rowsI = 0;
     int colsI = 0;
 
-    getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
+    //getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
+    getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
 
 
     /***********************************
@@ -347,14 +358,6 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
     orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
 
     gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
-
-    /***********************************
-         Get BFtoDeterminant Matrix
-    ************************************/
-
-    int rowsbftodetI, colsbftodetI;
-
-    convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
 
     /***********************************
          Get Final CSF to Det Matrix
@@ -1305,7 +1308,7 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
         donepq[i] = 0.0;
     for(int i=0;i<npairs;++i){
       for(int j=0;j<NSOMO;++j)
-        detslist[i*npairs + j]=0;
+        detslist[i*NSOMO + j]=0;
     }
 
     for(int i = 0; i < NSOMO; i++){
@@ -1337,8 +1340,11 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     for(int i = 0; i < npairs; i++){
         for(int j = 0; j < NSOMO; j++) {
             inpdet[j] = detslist[i*NSOMO + j];
+            printf(" %d ",inpdet[j]);
         }
+        printf("\n");
         findAddofDetDriver(dettree, NSOMO, inpdet, &addr);
+        printf("(%d) - addr  = %d\n",i,addr);
         // Calculate the phase for cfg to QP2 conversion
         //get_phase_cfg_to_qp_inpList(inpdet, NSOMO, &phase_cfg_to_qp);
         //rowvec[addr] = 1.0 * phaselist[i]*phase_cfg_to_qp/sqrt(fac);
