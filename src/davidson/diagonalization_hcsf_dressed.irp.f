@@ -267,8 +267,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
   do k=N_st+1,N_st_diag
     do i=1,sze
-        call random_number(r1)
-        call random_number(r2)
+        !call random_number(r1)
+        !call random_number(r2)
+        r1 = 0.5
+        r2 = 0.5
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
         u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
@@ -286,8 +288,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   enddo
 
   ! Make random verctors eigenstates of S2
-  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
-  call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
+  call convertWFfromDETtoCSF(N_st_diag,U,U_csf)
+  !call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
 
   do while (.not.converged)
     itertot = itertot+1
@@ -330,8 +332,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             do kk=1,N_st_diag
               do ii=1,sze_csf
                 tmpU(kk,ii) = U_csf(ii,shift+kk)
+                tmpU(kk,ii) = 0.0d0
               enddo
             enddo
+            tmpU(1,1) = 1.0d0
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             do kk=1,N_st_diag
               do ii=1,sze_csf
@@ -479,24 +483,24 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
-      if (without_diagonal) then
-        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-        do k=1,N_st_diag
-          do i=1,sze
-             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
-                /max(H_jj(i) - lambda (k),1.d-2)
-          enddo
+      !if (without_diagonal) then
+      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+      do k=1,N_st_diag
+        do i=1,sze
+           U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
+              /max(H_jj(i) - lambda (k),1.d-2)
         enddo
-        !$OMP END PARALLEL DO
-      else
-        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-        do k=1,N_st_diag
-          do i=1,sze
-             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
-          enddo
-        enddo
-        !$OMP END PARALLEL DO
-      endif
+      enddo
+      !$OMP END PARALLEL DO
+      !else
+      !  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+      !  do k=1,N_st_diag
+      !    do i=1,sze
+      !       U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
+      !    enddo
+      !  enddo
+      !  !$OMP END PARALLEL DO
+      !endif
 
       do k=1,N_st
         residual_norm(k) = u_dot_u(U(1,k),sze)
@@ -542,6 +546,15 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     ! Re-contract U
     ! -------------
+
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    do k=1,N_st_diag
+      do i=1,sze_csf
+        W_csf(i,k) = u_in(i,k)
+      enddo
+    enddo
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))

@@ -40,49 +40,68 @@
   detDimperBF = 0
   MS = elec_alpha_num-elec_beta_num
   ! number of cfgs = number of dets for 0 somos
-  n_CSF = 0
-  ncfgprev = cfg_seniority_index(0)
-  ncfgpersomo = ncfgprev
-  do i = iand(MS,1), NSOMOMax-2,2
-    if(cfg_seniority_index(i) .EQ. -1) then
-      cycle
-    endif
-    if(cfg_seniority_index(i+2) .EQ. -1) then
-      ncfgpersomo = N_configuration + 1
-    else
-      if(cfg_seniority_index(i+2) > ncfgpersomo) then
-          ncfgpersomo = cfg_seniority_index(i+2)
-      else
-        k = 0
-        do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
-          k = k + 2
-          ncfgpersomo = cfg_seniority_index(i+2+k)
-        enddo
-      endif
-    endif
-    ncfg = ncfgpersomo - ncfgprev
-    if(i .EQ. 0 .OR. i .EQ. 1) then
-      dimcsfpercfg = 1
-    elseif( i .EQ. 3) then
-      dimcsfpercfg = 2
-    else
-      if(iand(MS,1) .EQ. 0) then
-        dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
-      else
-        dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
-      endif
-    endif
-    n_CSF += ncfg * dimcsfpercfg
-    if(cfg_seniority_index(i+2) > ncfgprev) then
-      ncfgprev = cfg_seniority_index(i+2)
-    else
-      k = 0
-      do while(cfg_seniority_index(i+2+k) < ncfgprev)
-        k = k + 2
-        ncfgprev = cfg_seniority_index(i+2+k)
-      enddo
-    endif
+  n_CSF = cfg_seniority_index(NSOMOMin)-1
+  print *,"start=",n_CSF
+  ncfgprev = cfg_seniority_index(NSOMOMin)
+  !do i = 0-iand(MS,1)+2, NSOMOMax,2
+  do i = NSOMOMin+2, NSOMOMax,2
+     if(cfg_seniority_index(i) .EQ. -1)then
+        ncfgpersomo = N_configuration + 1
+     else
+        ncfgpersomo = cfg_seniority_index(i)
+     endif
+  ncfg = ncfgpersomo - ncfgprev
+  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
+  dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+  n_CSF += ncfg * dimcsfpercfg
+  print *,i,">(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
+  !if(cfg_seniority_index(i+2) == -1) EXIT
+  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
+  ncfgprev = cfg_seniority_index(i)
   enddo
+  !n_CSF = 0
+  !ncfgprev = cfg_seniority_index(0)
+  !ncfgpersomo = ncfgprev
+  !do i = iand(MS,1), NSOMOMax-2,2
+  !  if(cfg_seniority_index(i) .EQ. -1) then
+  !    cycle
+  !  endif
+  !  if(cfg_seniority_index(i+2) .EQ. -1) then
+  !    ncfgpersomo = N_configuration + 1
+  !  else
+  !    if(cfg_seniority_index(i+2) > ncfgpersomo) then
+  !        ncfgpersomo = cfg_seniority_index(i+2)
+  !    else
+  !      k = 0
+  !      do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
+  !        k = k + 2
+  !        ncfgpersomo = cfg_seniority_index(i+2+k)
+  !      enddo
+  !    endif
+  !  endif
+  !  ncfg = ncfgpersomo - ncfgprev
+  !  if(i .EQ. 0 .OR. i .EQ. 1) then
+  !    dimcsfpercfg = 1
+  !  elseif( i .EQ. 3) then
+  !    dimcsfpercfg = 2
+  !  else
+  !    if(iand(MS,1) .EQ. 0) then
+  !      dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+  !    else
+  !      dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+  !    endif
+  !  endif
+  !  n_CSF += ncfg * dimcsfpercfg
+  !  if(cfg_seniority_index(i+2) > ncfgprev) then
+  !    ncfgprev = cfg_seniority_index(i+2)
+  !  else
+  !    k = 0
+  !    do while(cfg_seniority_index(i+2+k) < ncfgprev)
+  !      k = k + 2
+  !      ncfgprev = cfg_seniority_index(i+2+k)
+  !    enddo
+  !  endif
+  !enddo
 END_PROVIDER
 
 
@@ -1477,14 +1496,14 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
-  allocate(listconnectedJ(N_INT,2,max(sze,100)))
-  allocate(alphas_Icfg(N_INT,2,max(sze,100)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,100)))
-  allocate(idxs_connectedI_alpha(max(sze,100)))
-  allocate(excitationIds(2,max(sze,100)))
-  allocate(excitationTypes(max(sze,100)))
-  allocate(diagfactors(max(sze,100)))
-  allocate(idslistconnectedJ(max(sze,100)))
+  allocate(listconnectedJ(N_INT,2,max(sze,1000)))
+  allocate(alphas_Icfg(N_INT,2,max(sze,1000)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,1000)))
+  allocate(idxs_connectedI_alpha(max(sze,1000)))
+  allocate(excitationIds(2,max(sze,1000)))
+  allocate(excitationTypes(max(sze,1000)))
+  allocate(diagfactors(max(sze,1000)))
+  allocate(idslistconnectedJ(max(sze,1000)))
   allocate(CCmattmp(n_st,NBFmax))
 
   ! Loop over all selected configurations
@@ -1643,11 +1662,13 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   do i = 1,n_CSF
     do kk=1,n_st
      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
+     print *,psi_in(kk,i)," | ",psi_out(kk,i)
     enddo
   enddo
   !$OMP END DO
 
   !$OMP END PARALLEL
+  stop
   call omp_set_max_active_levels(4)
 
   deallocate(diag_energies)

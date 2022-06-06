@@ -341,7 +341,6 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
          Get BFtoDeterminant Matrix
     ************************************/
 
-    printf("In convertcsftodet\n");
     convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
 
     int rowsI = 0;
