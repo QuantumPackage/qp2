@@ -1317,7 +1317,6 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
         donepq[idxp] = 1.0;
         donepq[idxq] = 1.0;
         for(int j = 0; j < npairs; j = j + shft){
-          printf("i=%d j=%d (%d,%d)\n",i,j,idxp,idxq);
             for(int k = 0; k < shft/2; k++){
                 detslist[(k+j)*NSOMO + idxp] = 1;
                 detslist[(k+j)*NSOMO + idxq] = 0;
@@ -1330,14 +1329,7 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
         }
         shft /= 2;
     }
-    for(int i=0;i<npairs;++i){
-      for(int j=0;j<NSOMO;++j)
-        printf(" %d ",detslist[i*NSOMO + j]);
-      printf("\n");
-    }
     
-
-    printf(" done detslist npairs=%d NSOMO=%d\n",npairs,NSOMO);
     // Now get the addresses
     int inpdet[NSOMO];
     int phase_cfg_to_qp=1;
@@ -1345,11 +1337,8 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     for(int i = 0; i < npairs; i++){
         for(int j = 0; j < NSOMO; j++) {
             inpdet[j] = detslist[i*NSOMO + j];
-          printf(" %d ",inpdet[j]);
-          printf("\n-- i=%d j=%d \n",i,j);
         }
         findAddofDetDriver(dettree, NSOMO, inpdet, &addr);
-        printf("(%d) add=%d\n",i,addr);
         // Calculate the phase for cfg to QP2 conversion
         //get_phase_cfg_to_qp_inpList(inpdet, NSOMO, &phase_cfg_to_qp);
         //rowvec[addr] = 1.0 * phaselist[i]*phase_cfg_to_qp/sqrt(fac);
@@ -1437,11 +1426,6 @@ void convertBFtoDetBasis(int64_t Isomo, int MS, double **bftodetmatrixptr, int *
         addI = i;
         getIthBFDriver(&bftree, NSOMO, addI, BF1);
         getBFIndexList(NSOMO, BF1, IdxListBF1);
-        printf("ms=%d \n",MS);
-        for(int j=0;j<NSOMO;++j)
-          printf(" %d(%d) ",BF1[j],IdxListBF1[j]);
-        printf("\n");
-
 
         // Get ith row
         getbftodetfunction(&dettree, NSOMO, MS, IdxListBF1, rowvec);
@@ -1451,6 +1435,11 @@ void convertBFtoDetBasis(int64_t Isomo, int MS, double **bftodetmatrixptr, int *
 
         for(int k=0;k<ndets;k++)
             rowvec[k]=0.0;
+
+        for(int j=0;j<NSOMO;++j){
+          BF1[j]=0;
+          IdxListBF1[j]=0;
+        }
     }
 
     // Garbage collection
@@ -1687,12 +1676,6 @@ void getApqIJMatrixDriverArrayInp(int64_t Isomo, int64_t Jsomo, int32_t orbp, in
     orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
 
     gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
-    for(int i=0;i<rowsI;++i) {
-      for(int j=0;j<colsI; ++j) {
-        printf(" %5.3f ",orthoMatrixI[j*rowsI + i]);
-      }
-      printf("\n");
-    }
 
     /***********************************
                    Doing J
@@ -1711,13 +1694,6 @@ void getApqIJMatrixDriverArrayInp(int64_t Isomo, int64_t Jsomo, int32_t orbp, in
     orthoMatrixJ = malloc(rowsJ*colsJ*sizeof(double));
 
     gramSchmidt(overlapMatrixJ, rowsJ, colsJ, orthoMatrixJ);
-
-    for(int i=0;i<rowsJ;++i) {
-      for(int j=0;j<colsJ; ++j) {
-        printf(" %5.3f ",orthoMatrixJ[j*rowsJ + i]);
-      }
-      printf("\n");
-    }
 
     int rowsA = 0;
     int colsA = 0;
