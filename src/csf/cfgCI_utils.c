@@ -68,10 +68,16 @@ void getBFIndexList(int NSOMO, int *BF1, int *IdxListBF1){
                     break;
                 }
             }
-            BFcopy[Iidx] = -1;
-            BFcopy[Jidx] = -1;
-            IdxListBF1[Jidx] = Iidx;
-            IdxListBF1[Iidx] = Jidx;
+            if(countN1 <= 0){
+                BFcopy[Iidx] = -1;
+                IdxListBF1[Iidx] = Iidx;
+            }
+            else{
+                BFcopy[Iidx] = -1;
+                BFcopy[Jidx] = -1;
+                IdxListBF1[Jidx] = Iidx;
+                IdxListBF1[Iidx] = Jidx;
+            }
         }
     }
 
@@ -328,10 +334,21 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
                  Get Overlap
     ************************************/
     // Fill matrix
+
+    int rowsbftodetI, colsbftodetI;
+
+    /***********************************
+         Get BFtoDeterminant Matrix
+    ************************************/
+
+    printf("In convertcsftodet\n");
+    convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
+
     int rowsI = 0;
     int colsI = 0;
 
-    getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
+    //getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
+    getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
 
 
     /***********************************
@@ -341,14 +358,6 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
     orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
 
     gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
-
-    /***********************************
-         Get BFtoDeterminant Matrix
-    ************************************/
-
-    int rowsbftodetI, colsbftodetI;
-
-    convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
 
     /***********************************
          Get Final CSF to Det Matrix
@@ -1297,12 +1306,16 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     double fac = 1.0;
     for(int i = 0; i < NSOMO; i++)
         donepq[i] = 0.0;
+    for(int i=0;i<npairs;++i){
+      for(int j=0;j<NSOMO;++j)
+        detslist[i*NSOMO + j]=0;
+    }
 
     for(int i = 0; i < NSOMO; i++){
         idxp = BF1[i];
         idxq = BF1[idxp];
         // Do one pair only once
-        if(donepq[idxp] > 0.0 || donepq[idxq] > 0.0) continue;
+        if(donepq[idxp] > 0.0 || donepq[idxq] > 0.0 || idxp == idxq) continue;
         fac *= 2.0;
         donepq[idxp] = 1.0;
         donepq[idxq] = 1.0;
@@ -1425,6 +1438,11 @@ void convertBFtoDetBasis(int64_t Isomo, int MS, double **bftodetmatrixptr, int *
 
         for(int k=0;k<ndets;k++)
             rowvec[k]=0.0;
+
+        for(int j=0;j<NSOMO;++j){
+          BF1[j]=0;
+          IdxListBF1[j]=0;
+        }
     }
 
     // Garbage collection
