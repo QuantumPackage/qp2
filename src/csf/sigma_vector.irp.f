@@ -21,7 +21,7 @@
   ! required for the calculation of prototype arrays.
   END_DOC
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
-  NSOMOMin = 0
+  NSOMOMin = max(0,cfg_nsomo_min-2)
   ! Note that here we need NSOMOMax + 2 sizes
   NCSFMax = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2)-binom(NSOMOMax,((NSOMOMax+1)/2)+1)))) ! TODO: NCSFs for MS=0
   NBFMax = NCSFMax
@@ -142,6 +142,117 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
 end subroutine get_phase_qp_to_cfg
 
 
+
+  BEGIN_PROVIDER [ real*8, DetToCSFTransformationMatrix, (0:NSOMOMax,NBFMax,maxDetDimPerBF)]
+ &BEGIN_PROVIDER [ real*8, psi_coef_config,  (n_CSF,1)]
+ &BEGIN_PROVIDER [ integer, psi_config_data, (N_configuration,2)]
+ &BEGIN_PROVIDER [ integer, psi_csf_to_config_data, (n_CSF)]
+  use cfunctions
+  implicit none
+  BEGIN_DOC
+  ! Documentation for DetToCSFTransformationMatrix
+  ! Provides the matrix of transformatons for the
+  ! conversion between determinant to CSF basis (in BFs)
+  END_DOC
+  integer*8 :: Isomo, Idomo
+  integer(bit_kind) :: Ialpha(N_int),Ibeta(N_int)
+  integer   :: rows, cols, i, j, k
+  integer   :: startdet, enddet, idx
+  integer*8 MS
+  integer ndetI
+  integer :: getNSOMO
+  real*8,dimension(:,:),allocatable    :: tempBuffer
+  real*8,dimension(:),allocatable    :: tempCoeff
+  real*8  :: norm_det1, phasedet
+
+  integer :: nt
+
+
+  norm_det1 = 0.d0
+  MS = elec_alpha_num - elec_beta_num
+  print *,"Maxbfdim=",NBFMax
+  print *,"Maxdetdim=",maxDetDimPerBF
+  print *,"n_CSF=",n_CSF
+  print *,"N_configurations=",N_configuration
+  print *,"n_core_orb=",n_core_orb
+  ! initialization
+  psi_coef_config = 0.d0
+  DetToCSFTransformationMatrix(0,:,:) = 1.d0
+  do i = 2-iand(elec_alpha_num-elec_beta_num,1), NSOMOMax,2
+    Isomo = IBSET(0_8, i) - 1_8
+    ! rows = Ncsfs
+    ! cols = Ndets
+    bfIcfg = max(1,nint((binom(i,(i+1)/2)-binom(i,((i+1)/2)+1))))
+    ndetI = max(1,nint((binom(i,(i+1)/2))))
+
+    allocate(tempBuffer(bfIcfg,ndetI))
+    call getCSFtoDETTransformationMatrix(Isomo, MS, NBFMax, maxDetDimPerBF, tempBuffer)
+    DetToCSFTransformationMatrix(i,1:bfIcfg,1:ndetI) =  tempBuffer(1:bfIcfg,1:ndetI)
+    deallocate(tempBuffer)
+  enddo
+
+  integer s, bfIcfg
+  integer countcsf
+  countcsf = 0
+  integer countdet
+  countdet = 0
+  integer istate
+  istate = 1
+  psi_csf_to_config_data(1) = 1
+  phasedet = 1.0d0
+  call omp_set_max_active_levels(1)
+  !$OMP PARALLEL
+  !$OMP MASTER
+  do i = 1,N_configuration
+      startdet = psi_configuration_to_psi_det(1,i)
+      enddet = psi_configuration_to_psi_det(2,i)
+      ndetI = enddet-startdet+1
+
+      allocate(tempCoeff(ndetI))
+      countdet = 1
+      do j = startdet, enddet
+         idx = psi_configuration_to_psi_det_data(j)
+         Ialpha(:) = psi_det(:,1,idx)
+         Ibeta(:)  = psi_det(:,2,idx)
+         call get_phase_qp_to_cfg(Ialpha, Ibeta, phasedet)
+         tempCoeff(countdet) = psi_coef(idx, istate)*phasedet
+         norm_det1 += tempCoeff(countdet)*tempCoeff(countdet)
+         countdet += 1
+      enddo
+
+       !print *,"dimcoef=",bfIcfg,norm_det1
+       !call printMatrix(tempCoeff,ndetI,1)
+
+      s = 0
+      do k=1,N_int
+        if (psi_configuration(k,1,i) == 0_bit_kind) cycle
+        s = s + popcnt(psi_configuration(k,1,i))
+      enddo
+      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+
+      ! perhaps blocking with CFGs of same seniority
+      ! can be more efficient
+      allocate(tempBuffer(bfIcfg,ndetI))
+      tempBuffer = DetToCSFTransformationMatrix(s,:bfIcfg,:ndetI)
+
+       call dgemm('N','N', bfIcfg, 1, ndetI, 1.d0, tempBuffer, size(tempBuffer,1), tempCoeff, size(tempCoeff,1), 0.d0, psi_coef_config(countcsf+1,1), size(psi_coef_config,1))
+       !call dgemv('N', NBFMax, maxDetDimPerBF, 1.d0, tempBuffer, size(tempBuffer,1), tempCoeff, 1, 0.d0, psi_coef_config(countcsf), 1)
+
+      deallocate(tempCoeff)
+      deallocate(tempBuffer)
+      psi_config_data(i,1) = countcsf + 1
+      do k=1,bfIcfg
+        psi_csf_to_config_data(countcsf+k) = i
+      enddo
+      countcsf += bfIcfg
+      psi_config_data(i,2) = countcsf
+  enddo
+  print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
+  !$OMP END MASTER
+  !$OMP END PARALLEL
+  call omp_set_max_active_levels(4)
+
+  END_PROVIDER
 
   BEGIN_PROVIDER [ integer, AIJpqMatrixDimsList, (NSOMOMin:NSOMOMax,4,NSOMOMax+1,NSOMOMax+1,2)]
  &BEGIN_PROVIDER [ integer, rowsmax]
@@ -781,117 +892,6 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
 end subroutine calculate_preconditioner_cfg
 
-  BEGIN_PROVIDER [ real*8, DetToCSFTransformationMatrix, (0:NSOMOMax,NBFMax,maxDetDimPerBF)]
- &BEGIN_PROVIDER [ real*8, psi_coef_config,  (n_CSF,1)]
- &BEGIN_PROVIDER [ integer, psi_config_data, (N_configuration,2)]
- &BEGIN_PROVIDER [ integer, psi_csf_to_config_data, (n_CSF)]
-  use cfunctions
-  implicit none
-  BEGIN_DOC
-  ! Documentation for DetToCSFTransformationMatrix
-  ! Provides the matrix of transformatons for the
-  ! conversion between determinant to CSF basis (in BFs)
-  END_DOC
-  integer*8 :: Isomo, Idomo
-  integer(bit_kind) :: Ialpha(N_int),Ibeta(N_int)
-  integer   :: rows, cols, i, j, k
-  integer   :: startdet, enddet, idx
-  integer*8 MS
-  integer ndetI
-  integer :: getNSOMO
-  real*8,dimension(:,:),allocatable    :: tempBuffer
-  real*8,dimension(:),allocatable    :: tempCoeff
-  real*8  :: norm_det1, phasedet
-
-  integer :: nt
-
-
-  norm_det1 = 0.d0
-  MS = elec_alpha_num - elec_beta_num
-  print *,"Maxbfdim=",NBFMax
-  print *,"Maxdetdim=",maxDetDimPerBF
-  print *,"n_CSF=",n_CSF
-  print *,"N_configurations=",N_configuration
-  print *,"n_core_orb=",n_core_orb
-  ! initialization
-  psi_coef_config = 0.d0
-  DetToCSFTransformationMatrix(0,:,:) = 1.d0
-  do i = 2-iand(elec_alpha_num-elec_beta_num,1), NSOMOMax,2
-    Isomo = IBSET(0_8, i) - 1_8
-    ! rows = Ncsfs
-    ! cols = Ndets
-    bfIcfg = max(1,nint((binom(i,(i+1)/2)-binom(i,((i+1)/2)+1))))
-    ndetI = max(1,nint((binom(i,(i+1)/2))))
-
-    allocate(tempBuffer(bfIcfg,ndetI))
-    call getCSFtoDETTransformationMatrix(Isomo, MS, NBFMax, maxDetDimPerBF, tempBuffer)
-    DetToCSFTransformationMatrix(i,1:bfIcfg,1:ndetI) =  tempBuffer(1:bfIcfg,1:ndetI)
-    deallocate(tempBuffer)
-  enddo
-
-  integer s, bfIcfg
-  integer countcsf
-  countcsf = 0
-  integer countdet
-  countdet = 0
-  integer istate
-  istate = 1
-  psi_csf_to_config_data(1) = 1
-  phasedet = 1.0d0
-  call omp_set_max_active_levels(1)
-  !$OMP PARALLEL
-  !$OMP MASTER
-  do i = 1,N_configuration
-      startdet = psi_configuration_to_psi_det(1,i)
-      enddet = psi_configuration_to_psi_det(2,i)
-      ndetI = enddet-startdet+1
-
-      allocate(tempCoeff(ndetI))
-      countdet = 1
-      do j = startdet, enddet
-         idx = psi_configuration_to_psi_det_data(j)
-         Ialpha(:) = psi_det(:,1,idx)
-         Ibeta(:)  = psi_det(:,2,idx)
-         call get_phase_qp_to_cfg(Ialpha, Ibeta, phasedet)
-         tempCoeff(countdet) = psi_coef(idx, istate)*phasedet
-         norm_det1 += tempCoeff(countdet)*tempCoeff(countdet)
-         countdet += 1
-      enddo
-
-       !print *,"dimcoef=",bfIcfg,norm_det1
-       !call printMatrix(tempCoeff,ndetI,1)
-
-      s = 0
-      do k=1,N_int
-        if (psi_configuration(k,1,i) == 0_bit_kind) cycle
-        s = s + popcnt(psi_configuration(k,1,i))
-      enddo
-      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
-
-      ! perhaps blocking with CFGs of same seniority
-      ! can be more efficient
-      allocate(tempBuffer(bfIcfg,ndetI))
-      tempBuffer = DetToCSFTransformationMatrix(s,:bfIcfg,:ndetI)
-
-       call dgemm('N','N', bfIcfg, 1, ndetI, 1.d0, tempBuffer, size(tempBuffer,1), tempCoeff, size(tempCoeff,1), 0.d0, psi_coef_config(countcsf+1,1), size(psi_coef_config,1))
-       !call dgemv('N', NBFMax, maxDetDimPerBF, 1.d0, tempBuffer, size(tempBuffer,1), tempCoeff, 1, 0.d0, psi_coef_config(countcsf), 1)
-
-      deallocate(tempCoeff)
-      deallocate(tempBuffer)
-      psi_config_data(i,1) = countcsf + 1
-      do k=1,bfIcfg
-        psi_csf_to_config_data(countcsf+k) = i
-      enddo
-      countcsf += bfIcfg
-      psi_config_data(i,2) = countcsf
-  enddo
-  print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
-  !$OMP END MASTER
-  !$OMP END PARALLEL
-  call omp_set_max_active_levels(4)
-
-  END_PROVIDER
-
 subroutine obtain_connected_I_foralpha_fromfilterdlist(idxI, nconnectedJ, idslistconnectedJ, listconnectedJ, Ialpha, connectedI, idxs_connectedI, nconnectedI, excitationIds, excitationTypes, diagfactors)
   implicit none
   use bitmasks
@@ -1348,10 +1348,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
       !$OMP     num_threads_max)
 
-  allocate(singlesI(N_INT,2,max(sze,100)))
-  allocate(idxs_singlesI(max(sze,100)))
-  allocate(excitationIds_single(2,max(sze,100)))
-  allocate(excitationTypes_single(max(sze,100)))
+  allocate(singlesI(N_INT,2,max(sze,1000)))
+  allocate(idxs_singlesI(max(sze,1000)))
+  allocate(excitationIds_single(2,max(sze,1000)))
+  allocate(excitationTypes_single(max(sze,1000)))
 !
 
   !!! Single Excitations !!!
@@ -1488,11 +1488,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(CCmattmp(n_st,NBFmax))
 
   ! Loop over all selected configurations
-  !$OMP DO SCHEDULE(dynamic,16)
+  !$OMP DO SCHEDULE(static)
   do i = istart_cfg,iend_cfg
-!       TKI = 0.d0
-!       GIJpqrs = 0.d0
-!       TKIGIJ = 0.d0
 
      ! if Seniority_range > 8 then
      ! continue
@@ -1552,6 +1549,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         allocate(GIJpqrs(totcolsTKI,nconnectedI))  ! gpqrs
         allocate(TKIGIJ(n_st,rowsTKI,nconnectedI))  ! TKI * gpqrs
         !print *,"\t---rowsTKI=",rowsTKI," totCols=",totcolsTKI
+        TKI = 0.d0
+        GIJpqrs = 0.d0
+        TKIGIJ = 0.d0
 
         totcolsTKI = 0
         do j = 1,nconnectedI
