@@ -458,7 +458,7 @@ end
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+ BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num+2) ]
 &BEGIN_PROVIDER [ integer, cfg_nsomo_max ]
 &BEGIN_PROVIDER [ integer, cfg_nsomo_min ]
   implicit none

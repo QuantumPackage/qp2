@@ -43,21 +43,24 @@
   n_CSF = cfg_seniority_index(NSOMOMin)-1
   ncfgprev = cfg_seniority_index(NSOMOMin)
   !do i = 0-iand(MS,1)+2, NSOMOMax,2
-  do i = NSOMOMin+2, NSOMOMax,2
-     if(cfg_seniority_index(i) .EQ. -1)then
-        ncfgpersomo = N_configuration + 1
-     else
-        ncfgpersomo = cfg_seniority_index(i)
-     endif
-  ncfg = ncfgpersomo - ncfgprev
-  !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
-  dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
-  n_CSF += ncfg * dimcsfpercfg
-  !if(cfg_seniority_index(i+2) == -1) EXIT
-  !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
-  ncfgprev = cfg_seniority_index(i)
-  enddo
-  !n_CSF = 0
+  !!print *," i=",0," dimcsf=",1," ncfg=",ncfgprev, " senor=",cfg_seniority_index(0)
+  !!do i = NSOMOMin+2, NSOMOMax,2
+  !!   if(cfg_seniority_index(i) .EQ. -1)then
+  !!      ncfgpersomo = N_configuration + 1
+  !!   else
+  !!      ncfgpersomo = cfg_seniority_index(i)
+  !!   endif
+  !!ncfg = ncfgpersomo - ncfgprev
+  !!!detDimperBF = max(1,nint((binom(i,(i+1)/2))))
+  !!!dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
+  !!n_CSF += ncfg * dimcsfpercfg
+  !!!if(cfg_seniority_index(i+2) == -1) EXIT
+  !!!if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
+  !!ncfgprev = cfg_seniority_index(i)
+  !!print *," i=",i," dimcsf=",dimcsfpercfg," ncfg=",ncfg, " senor=",cfg_seniority_index(i)
+  !!enddo
+  !!print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
+  n_CSF = 0
   !ncfgprev = cfg_seniority_index(0)
   !ncfgpersomo = ncfgprev
   !do i = iand(MS,1), NSOMOMax-2,2
@@ -90,6 +93,7 @@
   !    endif
   !  endif
   !  n_CSF += ncfg * dimcsfpercfg
+  !  print *," i=",i," dimcsf=",dimcsfpercfg," ncfg=",ncfg, " senor=",cfg_seniority_index(i)
   !  if(cfg_seniority_index(i+2) > ncfgprev) then
   !    ncfgprev = cfg_seniority_index(i+2)
   !  else
@@ -100,6 +104,38 @@
   !    enddo
   !  endif
   !enddo
+  n_CSF = 0
+  ncfgprev = cfg_seniority_index(0) ! should be 1
+  do i=NSOMOMin,NSOMOMax+2,2
+    !k=0
+    !do while((cfg_seniority_index(i+2+k) .eq. -1) .and. (k.le.NSOMOMax))
+    !  k=k+2
+    !end do
+    if(cfg_seniority_index(i).eq.-1)cycle
+    if(cfg_seniority_index(i+2).eq.-1)then
+      ncfg = N_configuration - ncfgprev + 1
+      if(ncfg .eq. 0)then
+        ncfg=1
+      endif
+    else
+      ncfg = cfg_seniority_index(i+2) - ncfgprev
+    endif
+    if(i .EQ. 0 .OR. i .EQ. 1) then
+      dimcsfpercfg = 1
+    elseif( i .EQ. 3) then
+      dimcsfpercfg = 2
+    else
+      if(iand(MS,1) .EQ. 0) then
+        dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+      else
+        dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+      endif
+    endif
+    n_CSF += ncfg*dimcsfpercfg
+    print *," i=",i," dimcsf=",dimcsfpercfg," ncfg=",ncfg, " ncfgprev=",ncfgprev, " senor=",cfg_seniority_index(i)
+    ncfgprev = cfg_seniority_index(i+2)
+  end do
+  print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
 END_PROVIDER
 
 
@@ -1307,6 +1343,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   do i=1,sze
     call omp_init_lock(lock(i))
   enddo
+  !do i=1,size(psi_config_data,1)
+  !  print *,"i=",i," psi_cfg_data_1=",psi_config_data(i,1)," psi_cfg_data_2=",psi_config_data(i,2)
+  !end do
 
   !print *," sze = ",sze
   allocate(diag_energies(n_CSF))
@@ -1325,8 +1364,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   maxnalphas = elec_num*mo_num
   Icfg(1,1) = psi_configuration(1,1,1)
   Icfg(1,2) = psi_configuration(1,2,1)
-  allocate(listconnectedJ(N_INT,2,max(sze,100)))
-  allocate(idslistconnectedJ(max(sze,100)))
+  allocate(listconnectedJ(N_INT,2,max(sze,10000)))
+  allocate(idslistconnectedJ(max(sze,10000)))
   call obtain_connected_J_givenI(1, Icfg, listconnectedJ, idslistconnectedJ, nconnectedmaxJ, nconnectedtotalmax)
   deallocate(listconnectedJ)
   deallocate(idslistconnectedJ)
@@ -1359,10 +1398,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
       !$OMP     num_threads_max)
 
-  allocate(singlesI(N_INT,2,max(sze,1000)))
-  allocate(idxs_singlesI(max(sze,1000)))
-  allocate(excitationIds_single(2,max(sze,1000)))
-  allocate(excitationTypes_single(max(sze,1000)))
+  allocate(singlesI(N_INT,2,max(sze,10000)))
+  allocate(idxs_singlesI(max(sze,10000)))
+  allocate(excitationIds_single(2,max(sze,10000)))
+  allocate(excitationTypes_single(max(sze,10000)))
 !
 
   !!!====================!!!
@@ -1460,6 +1499,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
       startj = psi_config_data(idxI,1)
       endj   = psi_config_data(idxI,2)
+      !print *,"i=",i," idxI=",idxI," startj=",startj," endj=",endj," sze=",sze
 
       !!! One-electron contribution !!!
       do ii = starti, endi
@@ -1467,11 +1507,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         do jj = startj, endj
           cntj = jj-startj+1
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
-          !call omp_set_lock(lock(jj))
+          !print *,"jj = ",jj
+          call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
           enddo
-          !call omp_unset_lock(lock(jj))
+          call omp_unset_lock(lock(jj))
         enddo
       enddo
 
@@ -1490,14 +1531,14 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
-  allocate(listconnectedJ(N_INT,2,max(sze,1000)))
-  allocate(alphas_Icfg(N_INT,2,max(sze,1000)))
-  allocate(connectedI_alpha(N_INT,2,max(sze,1000)))
-  allocate(idxs_connectedI_alpha(max(sze,1000)))
-  allocate(excitationIds(2,max(sze,1000)))
-  allocate(excitationTypes(max(sze,1000)))
-  allocate(diagfactors(max(sze,1000)))
-  allocate(idslistconnectedJ(max(sze,1000)))
+  allocate(listconnectedJ(N_INT,2,max(sze,10000)))
+  allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
+  allocate(connectedI_alpha(N_INT,2,max(sze,10000)))
+  allocate(idxs_connectedI_alpha(max(sze,10000)))
+  allocate(excitationIds(2,max(sze,10000)))
+  allocate(excitationTypes(max(sze,10000)))
+  allocate(diagfactors(max(sze,10000)))
+  allocate(idslistconnectedJ(max(sze,10000)))
   allocate(CCmattmp(n_st,NBFmax))
 
   !!!====================!!!
@@ -1630,11 +1671,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
                CCmattmp, size(CCmattmp,1) )
 
            do m = 1,colsikpq
-              !call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
               do kk = 1,n_st
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += CCmattmp(kk,m)
               enddo
-              !call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
            enddo
            totcolsTKI += colsikpq
         enddo
