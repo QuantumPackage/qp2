@@ -41,7 +41,6 @@
   MS = elec_alpha_num-elec_beta_num
   ! number of cfgs = number of dets for 0 somos
   n_CSF = cfg_seniority_index(NSOMOMin)-1
-  print *,"start=",n_CSF
   ncfgprev = cfg_seniority_index(NSOMOMin)
   !do i = 0-iand(MS,1)+2, NSOMOMax,2
   do i = NSOMOMin+2, NSOMOMax,2
@@ -54,7 +53,6 @@
   !detDimperBF = max(1,nint((binom(i,(i+1)/2))))
   dimcsfpercfg = max(1,nint((binom(i-2,(i-2+1)/2)-binom(i-2,((i-2+1)/2)+1))))
   n_CSF += ncfg * dimcsfpercfg
-  print *,i,">(",ncfg,ncfgprev,ncfgpersomo,")",",",detDimperBF,">",dimcsfpercfg, " | dimbas= ", n_CSF
   !if(cfg_seniority_index(i+2) == -1) EXIT
   !if(detDimperBF > maxDetDimPerBF) maxDetDimPerBF = detDimperBF
   ncfgprev = cfg_seniority_index(i)
@@ -189,11 +187,6 @@ end subroutine get_phase_qp_to_cfg
 
   norm_det1 = 0.d0
   MS = elec_alpha_num - elec_beta_num
-  print *,"Maxbfdim=",NBFMax
-  print *,"Maxdetdim=",maxDetDimPerBF
-  print *,"n_CSF=",n_CSF
-  print *,"N_configurations=",N_configuration
-  print *,"n_core_orb=",n_core_orb
   ! initialization
   psi_coef_config = 0.d0
   DetToCSFTransformationMatrix(0,:,:) = 1.d0
@@ -266,7 +259,6 @@ end subroutine get_phase_qp_to_cfg
       countcsf += bfIcfg
       psi_config_data(i,2) = countcsf
   enddo
-  print *,"Norm det=",norm_det1, size(psi_coef_config,1), " Dim csf=", countcsf
   !$OMP END MASTER
   !$OMP END PARALLEL
   call omp_set_max_active_levels(4)
@@ -1373,7 +1365,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(excitationTypes_single(max(sze,1000)))
 !
 
+  !!!====================!!!
   !!! Single Excitations !!!
+  !!!====================!!!
 
   !$OMP DO SCHEDULE(dynamic,16)
   do i=istart_cfg,iend_cfg
@@ -1473,11 +1467,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         do jj = startj, endj
           cntj = jj-startj+1
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
-          call omp_set_lock(lock(jj))
+          !call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
           enddo
-          call omp_unset_lock(lock(jj))
+          !call omp_unset_lock(lock(jj))
         enddo
       enddo
 
@@ -1505,6 +1499,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   allocate(diagfactors(max(sze,1000)))
   allocate(idslistconnectedJ(max(sze,1000)))
   allocate(CCmattmp(n_st,NBFmax))
+
+  !!!====================!!!
+  !!! Double Excitations !!!
+  !!!====================!!!
 
   ! Loop over all selected configurations
   !$OMP DO SCHEDULE(static)
@@ -1534,7 +1532,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
      ! TODO : remove doubly excited for return
-     ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
 
@@ -1546,6 +1543,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            cycle
         endif
 
+        ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
         totcolsTKI = 0
         rowsTKI = -1
         NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
@@ -1632,11 +1630,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
                CCmattmp, size(CCmattmp,1) )
 
            do m = 1,colsikpq
-              call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              !call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
               do kk = 1,n_st
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += CCmattmp(kk,m)
               enddo
-              call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              !call omp_unset_lock(lock(idxs_connectedI_alpha(j)+m-1))
            enddo
            totcolsTKI += colsikpq
         enddo
@@ -1662,13 +1660,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   do i = 1,n_CSF
     do kk=1,n_st
      psi_out(kk,i) += diag_energies(i)*psi_in(kk,i)
-     print *,psi_in(kk,i)," | ",psi_out(kk,i)
     enddo
   enddo
   !$OMP END DO
 
   !$OMP END PARALLEL
-  stop
   call omp_set_max_active_levels(4)
 
   deallocate(diag_energies)
