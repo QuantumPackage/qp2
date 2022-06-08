@@ -54,7 +54,7 @@ function run_stoch() {
 
 @test "HCO" { # 0:01:16 
   qp set_file hco.ezfio
-  run_stoch -113.41658256  1.e-3  50000
+  run_stoch -113.41658256  2.e-3  50000
 }
 
 @test "H2O2" { # 0:01:48 
@@ -66,7 +66,7 @@ function run_stoch() {
 @test "HBO" { # 0:00:46 
   [[ -n $TRAVIS ]] && skip
   qp set_file hbo.ezfio
-  run_stoch -100.22361288 1.e-4  50000
+  run_stoch -100.22361288 2.e-3  50000
 }
 
 @test "H2O" { # 0:01:05 
