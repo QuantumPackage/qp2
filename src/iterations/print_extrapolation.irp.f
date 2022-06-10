@@ -41,7 +41,7 @@ subroutine print_extrapolated_energy
   enddo
 
   print *,  ''
-  call ezfio_set_fci_energy_extrapolated(extrapolated_energy(2,1:N_states))
+  call ezfio_set_fci_energy_extrapolated(extrapolated_energy(min(N_iter,3),1:N_states))
 
 end subroutine
 
