@@ -38,7 +38,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     print*, 'MO integrals provided'
     return
   else
-    PROVIDE ao_two_e_integrals_in_map
+    PROVIDE ao_two_e_integrals_in_map 
   endif
 
   print *,  ''
@@ -53,7 +53,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
 !    call four_idx_novvvv
     call four_idx_novvvv_old
   else
-    if (ao_num*ao_num*ao_num*ao_num*32.d-6 < dble(qp_max_mem)) then
+    if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
       call four_idx_dgemm
     else
       call add_integrals_to_map(full_ijkl_bitmask_4)
@@ -247,13 +247,13 @@ subroutine add_integrals_to_map(mask_ijkl)
     return
   endif
 
-  size_buffer = min(ao_num*ao_num*ao_num,16000000)
-  print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
-      ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
-
   double precision               :: accu_bis
   accu_bis = 0.d0
   call wall_time(wall_1)
+
+  size_buffer = min( (qp_max_mem/(nproc*5)),mo_num*mo_num*mo_num)
+  print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
+      ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
   !$OMP PARALLEL PRIVATE(l1,k1,j1,i1,i2,i3,i4,i,j,k,l,c, ii1,kmax,   &
       !$OMP  two_e_tmp_0_idx, two_e_tmp_0, two_e_tmp_1,two_e_tmp_2,two_e_tmp_3,&
@@ -265,6 +265,10 @@ subroutine add_integrals_to_map(mask_ijkl)
       !$OMP  mo_coef_transp_is_built, list_ijkl,                     &
       !$OMP  mo_coef_is_built, wall_1,                               &
       !$OMP  mo_coef,mo_integrals_threshold,mo_integrals_map)
+
+  thread_num = 0
+  !$  thread_num = omp_get_thread_num()
+
   n_integrals = 0
   wall_0 = wall_1
   allocate(two_e_tmp_3(mo_num, n_j, n_k),                 &
@@ -275,8 +279,6 @@ subroutine add_integrals_to_map(mask_ijkl)
       buffer_i(size_buffer),                                         &
       buffer_value(size_buffer) )
 
-  thread_num = 0
-  !$  thread_num = omp_get_thread_num()
   !$OMP DO SCHEDULE(guided)
   do l1 = 1,ao_num
     two_e_tmp_3 = 0.d0
