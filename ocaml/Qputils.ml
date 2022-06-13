@@ -56,3 +56,7 @@ let string_of_string s = s
 let list_map f l =
   List.rev_map f l
   |> List.rev
+
+let socket_convert socket =
+    ((Obj.magic (Obj.repr socket)) : [ `Xsub ] Zmq.Socket.t )
+

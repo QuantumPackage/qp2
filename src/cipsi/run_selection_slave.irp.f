@@ -61,10 +61,14 @@ subroutine run_selection_slave(thread,iproc,energy)
         if (N /= buf%N) then
           print *, 'N=', N
           print *, 'buf%N=', buf%N
-          print *, 'bug in ', irp_here
-          stop '-1'
+          print *, 'In ', irp_here, ': N /= buf%N'
+          stop -1
         end if
       end if
+      if (i_generator > N_det_generators) then
+          print *, 'In ', irp_here, ': i_generator > N_det_generators'
+          stop -1
+      endif
       call select_connected(i_generator,energy,pt2_data,buf,subset,pt2_F(i_generator))
     endif
 

@@ -48,14 +48,15 @@ program cis
 !   * *del* orbitals which will be never occupied
 !
   END_DOC
-  read_wf = .False.
-  SOFT_TOUCH read_wf
+  read_wf = .True.
+  TOUCH read_wf
   call run
 end
 
 subroutine run
   implicit none
   integer                        :: i
+
 
   if(pseudo_sym)then
    call H_apply_cis_sym
@@ -74,7 +75,7 @@ subroutine run
     print*,'******************************************************'
     print*,'Excitation energies (au)                     (eV)'
     do i = 2, N_states
-      print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1)) * ha_to_ev
+      print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1))/0.0367502d0
     enddo
     print*,''
   endif
