@@ -88,7 +88,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m,kk,ii
+  integer                        :: i,j,k,l,m,kk,ii,ll
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -248,6 +248,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       residual_norm(N_st_diag),                                      &
       lambda(N_st_diag*itermax))
 
+
   h = 0.d0
   U = 0.d0
   y = 0.d0
@@ -340,6 +341,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 W_csf(ii,shift+kk)=tmpW(kk,ii)
               enddo
             enddo
+
             deallocate(tmpW)
             deallocate(tmpU)
         endif

@@ -1672,7 +1672,6 @@ void getApqIJMatrixDriverArrayInp(int64_t Isomo, int64_t Jsomo, int32_t orbp, in
     int colsI = 0;
 
     //getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
-    //getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
     getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
 
     orthoMatrixI = malloc(rowsI*colsI*sizeof(double));

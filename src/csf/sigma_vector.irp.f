@@ -1576,9 +1576,12 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
 
-        call obtain_connected_I_foralpha_fromfilterdlist(i,nconnectedJ, idslistconnectedJ, &
-          listconnectedJ, alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI, &
-          excitationIds,excitationTypes,diagfactors)
+        !call obtain_connected_I_foralpha_fromfilterdlist(i,nconnectedJ, idslistconnectedJ, &
+        !  listconnectedJ, alphas_Icfg(1,1,k),connectedI_alpha,idxs_connectedI_alpha,nconnectedI, &
+        !  excitationIds,excitationTypes,diagfactors)
+
+        call obtain_connected_I_foralpha(i, alphas_Icfg(1,1,k), connectedI_alpha, idxs_connectedI_alpha, &
+                                         nconnectedI, excitationIds, excitationTypes, diagfactors)
 
         if(nconnectedI .EQ. 0) then
            cycle
