@@ -341,6 +341,7 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
          Get BFtoDeterminant Matrix
     ************************************/
 
+
     convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
 
     int rowsI = 0;
@@ -1331,15 +1332,19 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
         }
         shft /= 2;
     }
-
+    
     // Now get the addresses
     int inpdet[NSOMO];
     int phase_cfg_to_qp=1;
     int addr = -1;
     for(int i = 0; i < npairs; i++){
-        for(int j = 0; j < NSOMO; j++)
+        for(int j = 0; j < NSOMO; j++) {
             inpdet[j] = detslist[i*NSOMO + j];
+            printf(" %d ",inpdet[j]);
+        }
+        printf("\n");
         findAddofDetDriver(dettree, NSOMO, inpdet, &addr);
+        printf("(%d) - addr  = %d\n",i,addr);
         // Calculate the phase for cfg to QP2 conversion
         //get_phase_cfg_to_qp_inpList(inpdet, NSOMO, &phase_cfg_to_qp);
         //rowvec[addr] = 1.0 * phaselist[i]*phase_cfg_to_qp/sqrt(fac);
@@ -1427,7 +1432,6 @@ void convertBFtoDetBasis(int64_t Isomo, int MS, double **bftodetmatrixptr, int *
         addI = i;
         getIthBFDriver(&bftree, NSOMO, addI, BF1);
         getBFIndexList(NSOMO, BF1, IdxListBF1);
-
 
         // Get ith row
         getbftodetfunction(&dettree, NSOMO, MS, IdxListBF1, rowvec);
@@ -1695,7 +1699,6 @@ void getApqIJMatrixDriverArrayInp(int64_t Isomo, int64_t Jsomo, int32_t orbp, in
     orthoMatrixJ = malloc(rowsJ*colsJ*sizeof(double));
 
     gramSchmidt(overlapMatrixJ, rowsJ, colsJ, orthoMatrixJ);
-
 
     int rowsA = 0;
     int colsA = 0;

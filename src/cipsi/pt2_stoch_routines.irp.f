@@ -290,9 +290,13 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call set_multiple_levels_omp(.False.)
 
 
-      print '(A)', '========== ======================= ===================== ===================== ==========='
-      print '(A)', ' Samples          Energy                Variance               Norm^2          Seconds'
-      print '(A)', '========== ======================= ===================== ===================== ==========='
+      ! old
+      !print '(A)', '========== ======================= ===================== ===================== ==========='
+      !print '(A)', ' Samples          Energy                Variance               Norm^2            Seconds'
+      !print '(A)', '========== ======================= ===================== ===================== ==========='
+      print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+      print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
+      print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
       PROVIDE global_selection_buffer
 
@@ -316,7 +320,10 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
       call set_multiple_levels_omp(.True.)
 
-      print '(A)', '========== ======================= ===================== ===================== ==========='
+      ! old
+      !print '(A)', '========== ======================= ===================== ===================== ==========='
+      print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
+
 
       do k=1,N_states
         pt2_overlap(pt2_stoch_istate,k) = pt2_data % overlap(k,pt2_stoch_istate)
@@ -413,6 +420,17 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
+
+  character(len=20) :: format_str1, str_error1, format_str2, str_error2
+  character(len=20) :: format_str3, str_error3, format_str4, str_error4
+  character(len=20) :: format_value1, format_value2, format_value3, format_value4
+  character(len=20) :: str_value1, str_value2, str_value3, str_value4
+  character(len=20) :: str_conv
+  double precision  :: value1, value2, value3, value4
+  double precision  :: error1, error2, error3, error4
+  integer           :: size1,size2,size3,size4
+
+  double precision :: conv_crit
 
   sending =.False.
 
@@ -523,28 +541,74 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % pt2(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
           eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          eqta(:) = dsqrt(eqta(:) / (dble(c) - 1.5d0))
           pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.4)', c, &
-              pt2_data     % pt2(pt2_stoch_istate) +E, &
-              pt2_data_err % pt2(pt2_stoch_istate), &
-              pt2_data     % variance(pt2_stoch_istate), &
-              pt2_data_err % variance(pt2_stoch_istate), &
-              pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate), &
-              pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate), &
-              time-time0
+
+            value1 =  pt2_data     % pt2(pt2_stoch_istate) + E
+            error1 =  pt2_data_err % pt2(pt2_stoch_istate)           
+            value2 =  pt2_data     % pt2(pt2_stoch_istate)
+            error2 =  pt2_data_err % pt2(pt2_stoch_istate)           
+            value3 =  pt2_data     % variance(pt2_stoch_istate)           
+            error3 =  pt2_data_err % variance(pt2_stoch_istate)           
+            value4 =  pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate)           
+            error4 =  pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate)           
+            
+            ! Max size of the values (FX.Y) with X=size
+            size1 = 15
+            size2 = 12
+            size3 = 12
+            size4 = 12
+
+            ! To generate the format: number(error)
+            call format_w_error(value1,error1,size1,8,format_value1,str_error1)
+            call format_w_error(value2,error2,size2,8,format_value2,str_error2)
+            call format_w_error(value3,error3,size3,8,format_value3,str_error3)
+            call format_w_error(value4,error4,size4,8,format_value4,str_error4)
+
+            ! value > string with the right format
+            write(str_value1,'('//format_value1//')') value1
+            write(str_value2,'('//format_value2//')') value2
+            write(str_value3,'('//format_value3//')') value3
+            write(str_value4,'('//format_value4//')') value4
+
+            ! Convergence criterion
+            conv_crit = dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
+                  (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) )
+            write(str_conv,'(G10.3)') conv_crit
+
+            write(*,'(I10,X,X,A20,X,A16,X,A16,X,A16,X,A12,X,F10.1)') c,&
+            adjustl(adjustr(str_value1)//'('//str_error1(1:1)//')'),&
+            adjustl(adjustr(str_value2)//'('//str_error2(1:1)//')'),&
+            adjustl(adjustr(str_value3)//'('//str_error3(1:1)//')'),&
+            adjustl(adjustr(str_value4)//'('//str_error4(1:1)//')'),&
+            adjustl(str_conv),& 
+            time-time0
+
+            ! Old print
+            !print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.1,1pE16.6,1pE16.6)', c, &
+            !  pt2_data     % pt2(pt2_stoch_istate) +E, &
+            !  pt2_data_err % pt2(pt2_stoch_istate), &
+            !  pt2_data     % variance(pt2_stoch_istate), &
+            !  pt2_data_err % variance(pt2_stoch_istate), &
+            !  pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+            !  pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+            !  time-time0, &
+            !  pt2_data     % pt2(pt2_stoch_istate), &
+            !  dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
+            !      (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) )
+
             if (stop_now .or. (                                      &
                   (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
                   (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) ) <= relative_error))) ) then
@@ -842,9 +906,8 @@ END_PROVIDER
    do t=1, pt2_N_teeth
      tooth_width = tilde_cW(pt2_n_0(t+1)) - tilde_cW(pt2_n_0(t))
      if (tooth_width == 0.d0) then
-       tooth_width = sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1)))
+       tooth_width = max(1.d-15,sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1))))
      endif
-     ASSERT(tooth_width > 0.d0)
      do i=pt2_n_0(t)+1, pt2_n_0(t+1)
        pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
      end do

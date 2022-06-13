@@ -136,6 +136,7 @@
     ncfgprev = cfg_seniority_index(i+2)
   end do
   print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
+
 END_PROVIDER
 
 

@@ -856,6 +856,7 @@ end subroutine
 !end subroutine
 !
  BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
+&BEGIN_PROVIDER [ integer, psi_configuration_n_det, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]
 
  implicit none
@@ -944,6 +945,29 @@ end subroutine
  enddo
 
  deallocate(dets, old_order)
+ integer :: ndet_conf
+ do i = 1, N_configuration
+  ndet_conf = psi_configuration_to_psi_det(2,i) - psi_configuration_to_psi_det(1,i) + 1
+  psi_configuration_n_det(i) = ndet_conf
+ enddo
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ integer, n_elec_alpha_for_psi_configuration, (N_configuration)]
+ implicit none
+ integer :: i,j,k,l
+ integer(bit_kind) :: det_tmp(N_int,2),det_alpha(N_int)
+ n_elec_alpha_for_psi_configuration = 0
+ do i = 1, N_configuration
+  j = psi_configuration_to_psi_det(2,i) 
+  det_tmp(:,:) = psi_det(:,:,j)
+  k = 0
+  do l = 1, N_int
+   det_alpha(N_int) = iand(det_tmp(l,1),psi_configuration(l,1,i))
+   k += popcnt(det_alpha(l))
+  enddo
+  n_elec_alpha_for_psi_configuration(i) = k
+ enddo
+
+END_PROVIDER 

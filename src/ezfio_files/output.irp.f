@@ -25,7 +25,7 @@ subroutine write_time(iunit)
   ct = ct - output_cpu_time_0
   call wall_time(wt)
   wt = wt - output_wall_time_0
-  write(6,'(A,F14.6,A,F14.6,A)') &
+  write(6,'(A,F14.2,A,F14.2,A)') &
     '.. >>>>> [ WALL TIME: ', wt, '  s ] [ CPU  TIME: ', ct, '  s ] <<<<< ..'
   write(6,*)
 end
