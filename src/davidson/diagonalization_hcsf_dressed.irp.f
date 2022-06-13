@@ -265,7 +265,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   ! ===================
 
   converged = .False.
-
+  kk=1
   do k=N_st+1,N_st_diag
     do i=1,sze
         !call random_number(r1)
@@ -276,7 +276,11 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         r2 = dtwo_pi*r2
         u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
     enddo
-    u_in(k,k) = u_in(k,k) + 10.d0
+    do while(POPCNT(AND(psi_det(1,1,kk),psi_det(1,2,kk))) .ne. 3)
+      kk=kk+1
+    end do
+    u_in(kk,k) = u_in(kk,k) + 10.d0
+    kk=kk+1
   enddo
   do k=1,N_st_diag
     call normalize(u_in(1,k),sze)
