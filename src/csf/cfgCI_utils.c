@@ -1344,7 +1344,7 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
         }
         printf("\n");
         findAddofDetDriver(dettree, NSOMO, inpdet, &addr);
-        printf("(%d) - addr  = %d\n",i,addr);
+        //printf("(%d) - addr  = %d\n",i,addr);
         // Calculate the phase for cfg to QP2 conversion
         //get_phase_cfg_to_qp_inpList(inpdet, NSOMO, &phase_cfg_to_qp);
         //rowvec[addr] = 1.0 * phaselist[i]*phase_cfg_to_qp/sqrt(fac);
