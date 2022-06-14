@@ -124,7 +124,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     stop -1
   endif
 
-  itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
+  itermax = max(2,min(davidson_sze_max, sze_csf/N_st_diag))+1
   itertot = 0
 
   if (state_following) then
