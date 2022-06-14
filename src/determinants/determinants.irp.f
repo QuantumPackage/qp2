@@ -77,7 +77,7 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
   END_DOC
   PROVIDE ezfio_filename
   logical                        :: exists
-  psi_det_size = 1
+  psi_det_size = N_states
   PROVIDE mpi_master
   if (read_wf) then
     if (mpi_master) then
@@ -85,7 +85,7 @@ BEGIN_PROVIDER [ integer, psi_det_size ]
       if (exists) then
         call ezfio_get_determinants_n_det(psi_det_size)
       else
-        psi_det_size = 1
+        psi_det_size = N_states
       endif
       call write_int(6,psi_det_size,'Dimension of the psi arrays')
     endif
