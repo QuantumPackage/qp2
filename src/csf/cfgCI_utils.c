@@ -1338,10 +1338,10 @@ void getbftodetfunction(Tree *dettree, int NSOMO, int MS, int *BF1, double *rowv
     int phase_cfg_to_qp=1;
     int addr = -1;
     for(int i = 0; i < npairs; i++){
-        //for(int j = 0; j < NSOMO; j++) {
-        //    inpdet[j] = detslist[i*NSOMO + j];
-        //    printf(" %d ",inpdet[j]);
-        //}
+        for(int j = 0; j < NSOMO; j++) {
+            inpdet[j] = detslist[i*NSOMO + j];
+            //printf(" %d ",inpdet[j]);
+        }
         //printf("\n");
         findAddofDetDriver(dettree, NSOMO, inpdet, &addr);
         //printf("(%d) - addr  = %d\n",i,addr);
