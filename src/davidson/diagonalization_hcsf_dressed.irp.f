@@ -88,7 +88,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m,kk,ii,ll
+  integer                        :: i,j,k,l,m,kk
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -110,7 +110,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   integer                        :: order(N_st_diag_in)
   double precision               :: cmax
   double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
-  double precision, allocatable  :: tmpU(:,:), tmpW(:,:)
   double precision, pointer      :: W(:,:), W_csf(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
@@ -248,7 +247,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       residual_norm(N_st_diag),                                      &
       lambda(N_st_diag*itermax))
 
-
   h = 0.d0
   U = 0.d0
   y = 0.d0
@@ -265,13 +263,12 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   ! ===================
 
   converged = .False.
+
   kk=1
   do k=N_st+1,N_st_diag
     do i=1,sze
-        !call random_number(r1)
-        !call random_number(r2)
-        r1 = 0.5
-        r2 = 0.5
+        call random_number(r1)
+        call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
         u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
@@ -293,8 +290,8 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   enddo
 
   ! Make random verctors eigenstates of S2
-  call convertWFfromDETtoCSF(N_st_diag,U,U_csf)
-  !call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
+  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
+  call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
     itertot = itertot+1
@@ -311,43 +308,11 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
-        !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
-        PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
+        call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
         if ((sze > 100000).and.distributed_davidson) then
-            !call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
-            allocate(tmpW(N_st_diag,sze_csf))
-            allocate(tmpU(N_st_diag,sze_csf))
-            do kk=1,N_st_diag
-              do ii=1,sze_csf
-                tmpU(kk,ii) = U_csf(ii,shift+kk)
-              enddo
-            enddo
-            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
-            do kk=1,N_st_diag
-              do ii=1,sze_csf
-                W_csf(ii,shift+kk)=tmpW(kk,ii)
-              enddo
-            enddo
-            deallocate(tmpW)
-            deallocate(tmpU)
+            call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
         else
-            !call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
-            allocate(tmpW(N_st_diag,sze_csf))
-            allocate(tmpU(N_st_diag,sze_csf))
-            do kk=1,N_st_diag
-              do ii=1,sze_csf
-                tmpU(kk,ii) = U_csf(ii,shift+kk)
-              enddo
-            enddo
-            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
-            do kk=1,N_st_diag
-              do ii=1,sze_csf
-                W_csf(ii,shift+kk)=tmpW(kk,ii)
-              enddo
-            enddo
-
-            deallocate(tmpW)
-            deallocate(tmpU)
+            call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
         endif
 !      else
 !         ! Already computed in update below
@@ -391,7 +356,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         endif
       endif
 
-      !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
+      call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
@@ -487,24 +452,24 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
-      !if (without_diagonal) then
-      !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-      do k=1,N_st_diag
-        do i=1,sze
-           U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
-              /max(H_jj(i) - lambda (k),1.d-2)
+      if (without_diagonal) then
+        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+        do k=1,N_st_diag
+          do i=1,sze
+             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
+                /max(H_jj(i) - lambda (k),1.d-2)
+          enddo
         enddo
-      enddo
-      !$OMP END PARALLEL DO
-      !else
-      !  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
-      !  do k=1,N_st_diag
-      !    do i=1,sze
-      !       U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
-      !    enddo
-      !  enddo
-      !  !$OMP END PARALLEL DO
-      !endif
+        !$OMP END PARALLEL DO
+      else
+        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+        do k=1,N_st_diag
+          do i=1,sze
+             U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
+          enddo
+        enddo
+        !$OMP END PARALLEL DO
+      endif
 
       do k=1,N_st
         residual_norm(k) = u_dot_u(U(1,k),sze)
@@ -550,15 +515,6 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     ! Re-contract U
     ! -------------
-
-    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
-        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
-    do k=1,N_st_diag
-      do i=1,sze_csf
-        W_csf(i,k) = u_in(i,k)
-      enddo
-    enddo
-    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
