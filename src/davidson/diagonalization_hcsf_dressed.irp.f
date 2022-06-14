@@ -263,29 +263,20 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   ! ===================
 
   converged = .False.
-
+  call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),U_csf(1,1))
   do k=N_st+1,N_st_diag
-    do i=1,sze
+    do i=1,sze_csf
         call random_number(r1)
         call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
-        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
+        U_csf(i,k) = r1*dcos(r2) * u_csf(i,k-N_st)
     enddo
-    u_in(k,k) = u_in(k,k) + 10.d0
+    U_csf(k,k) = u_csf(k,k) + 10.d0
   enddo
   do k=1,N_st_diag
-    call normalize(u_in(1,k),sze)
+    call normalize(U_csf(1,k),sze_csf)
   enddo
-
-  do k=1,N_st_diag
-    do i=1,sze
-      U(i,k) = u_in(i,k)
-    enddo
-  enddo
-
-  ! Make random verctors eigenstates of S2
-  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
   call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
