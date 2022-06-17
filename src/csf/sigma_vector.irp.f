@@ -1480,7 +1480,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      vmotype = -1
      nvmos = 0
      do kk = 1,n_act_orb
-     !do k = 1,mo_num
        k = list_act(kk)
        !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
        if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
@@ -1544,10 +1543,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
           end do
           endif
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* (h_act_ri(p,q) + core_act_contrib)
-          !print *,"jj = ",jj
-          !if(ii.eq.1 .and. jj.eq.177 )then
-          !  print *,"p=",p," q=",q," hact=",h_act_ri(p,q), " core_act=",core_act_contrib
-          !endif
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
@@ -1717,9 +1712,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
            do m = 1,colsikpq
               call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
-              !if((idxs_connectedI_alpha(j)+m-1).eq.177)then
-              !  print *,"CC=",CCmattmp(1,m)
-              !endif
               do kk = 1,n_st
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += CCmattmp(kk,m)
               enddo
@@ -1756,7 +1748,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   !$OMP END PARALLEL
   call omp_set_max_active_levels(4)
-  !print *," diag_enregy=",diag_energies(1), " psi_out(1,1)=",psi_out(1,1)
 
   deallocate(diag_energies)
   deallocate(bit_tmp)
