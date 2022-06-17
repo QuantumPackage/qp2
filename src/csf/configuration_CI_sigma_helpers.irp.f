@@ -61,7 +61,6 @@ use bitmasks
     ! find out all pq holes possible
     nholes = 0
     ! holes in SOMO
-    !do i = 1,mo_num
     do ii = 1,n_act_orb
       i = list_act(ii)
       if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
@@ -71,7 +70,6 @@ use bitmasks
       endif
     end do
     ! holes in DOMO
-    !do i = 1,mo_num
     do ii = 1,n_act_orb
       i = list_act(ii)
       if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
@@ -85,7 +83,6 @@ use bitmasks
     listvmos = -1
     vmotype = -1
     nvmos = 0
-    !do i = 1,mo_num
     do ii = 1,n_act_orb
       i = list_act(ii)
       if(IAND(Idomo,(IBSET(0_8,i-1))) .EQ. 0) then
@@ -323,12 +320,9 @@ END_PROVIDER
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
 
-  !print*,n_act_orb, "monum=",mo_num," n_core=",n_core_orb
-
   ! find out all pq holes possible
   nholes = 0
   ! holes in SOMO
-  !do i = 1,mo_num
   do ii = 1,n_act_orb
     i = list_act(ii)
      if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
@@ -338,7 +332,6 @@ END_PROVIDER
      endif
   end do
   ! holes in DOMO
-  !do i = 1,mo_num
   do ii = 1,n_act_orb
     i = list_act(ii)
      if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
@@ -352,7 +345,6 @@ END_PROVIDER
   listvmos = -1
   vmotype = -1
   nvmos = 0
-  !do i = 1,mo_num
   do ii = 1,n_act_orb
     i = list_act(ii)
      !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))

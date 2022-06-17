@@ -146,7 +146,6 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
         ! holes in SOMO
         Isomo = psi_configuration(1,1,i)
         Idomo = psi_configuration(1,2,i)
-        !do ii = 1,mo_num
         do iii = 1,n_act_orb
           ii = list_act(iii)
            if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
@@ -156,7 +155,6 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
            endif
         end do
         ! holes in DOMO
-        !do ii = 1,mo_num
         do iii = 1,n_act_orb
           ii = list_act(iii)
            if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
@@ -339,7 +337,6 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         ! holes in SOMO
         Isomo = psi_configuration(1,1,i)
         Idomo = psi_configuration(1,2,i)
-        !do ii = 1,mo_num
         do iii = 1,n_act_orb
           ii = list_act(iii)
            if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
@@ -349,7 +346,6 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            endif
         end do
         ! holes in DOMO
-        !do ii = 1,mo_num
         do iii = 1,n_act_orb
           ii = list_act(iii)
            if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
