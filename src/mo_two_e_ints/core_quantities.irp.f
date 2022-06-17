@@ -13,7 +13,19 @@ BEGIN_PROVIDER [double precision, core_energy]
    core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
   enddo
  enddo
+ !print *," core no nucl=",core_energy
+ ! core-active
+ do i = 1, n_core_orb
+  j = list_core(i)
+  !!! VJ
+  !!! TODO: Correct the loop over active electrons
+  do k = 1, (elec_num - 2*n_core_orb)/2
+   l = k + n_core_orb
+   core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
+  enddo
+ enddo
  core_energy += nuclear_repulsion
+ !print *," core no nucl=",core_energy
 
 END_PROVIDER
 
@@ -54,6 +66,46 @@ BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
    do k=1,mo_num
      do i=1,mo_num
        h_core_ri(i,j) = h_core_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
+     enddo
+   enddo
+ enddo
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, h_act_ri, (mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Active Hamiltonian with 3-index exchange integrals:
+ !
+ ! $\tilde{h}{pq} = h_{pq} - \frac{1}{2}\sum_{k} g(pk,kq)$
+ END_DOC
+
+ integer :: i,j, k
+ integer :: p,q, r
+ ! core-core contribution
+ h_act_ri = core_fock_operator
+ ! act-act contribution
+ do p=1,n_act_orb
+   j=list_act(p)
+   do q=1,n_act_orb
+     i=list_act(q)
+     h_act_ri(i,j) = mo_one_e_integrals(i,j)
+   enddo
+   do r=1,n_act_orb
+     k=list_act(r)
+     do q=1,n_act_orb
+       i=list_act(q)
+       h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
+     enddo
+   enddo
+ enddo
+ ! core-act contribution
+ do p=1,n_core_orb
+   j=list_core(p)
+   do k=1,mo_num
+     do q=1,n_act_orb
+       i=list_act(q)
+       h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
      enddo
    enddo
  enddo

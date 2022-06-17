@@ -249,6 +249,7 @@ subroutine generate_all_singles_cfg_with_type(bit_tmp,cfgInp,singles,idxs_single
   integer(bit_kind)              :: Jdet(Nint,2)
 
   integer           :: i,k, n_singles_ma, i_hole, i_particle, ex_type, addcfg
+  integer           :: ii,kk
   integer(bit_kind) :: single(Nint,2)
   logical           :: i_ok
 
@@ -257,8 +258,12 @@ subroutine generate_all_singles_cfg_with_type(bit_tmp,cfgInp,singles,idxs_single
   !TODO
   !Make list of Somo  and Domo for holes
   !Make list of Unocc and Somo for particles
-  do i_hole = 1+n_core_orb, n_core_orb + n_act_orb
-    do i_particle = 1+n_core_orb, n_core_orb + n_act_orb
+  !do i_hole = 1+n_core_orb, n_core_orb + n_act_orb
+  do ii = 1, n_act_orb
+    i_hole = list_act(ii)
+    !do i_particle = 1+n_core_orb, n_core_orb + n_act_orb
+    do kk = 1, n_act_orb
+      i_particle = list_act(kk)
       if(i_hole .EQ. i_particle) cycle
       addcfg = -1
       call do_single_excitation_cfg_with_type(cfgInp,single,i_hole,i_particle,ex_type,i_ok)

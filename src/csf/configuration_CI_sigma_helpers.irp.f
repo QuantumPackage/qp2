@@ -31,9 +31,9 @@ use bitmasks
   integer                        :: ndiffDOMO
   integer                        :: nxordiffSOMODOMO
   integer                        :: ndiffAll
-  integer                        :: i
-  integer                        :: j
-  integer                        :: k
+  integer                        :: i,ii
+  integer                        :: j,jj
+  integer                        :: k,kk
   integer                        :: kstart
   integer                        :: kend
   integer                        :: Nsomo_I
@@ -55,13 +55,15 @@ use bitmasks
 
     Icfg  = psi_configuration(:,:,idxI)
 
-    Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
-    Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+    Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+    Idomo = iand(act_bitmask(1,1),Icfg(1,2))
 
     ! find out all pq holes possible
     nholes = 0
     ! holes in SOMO
-    do i = 1,mo_num
+    !do i = 1,mo_num
+    do ii = 1,n_act_orb
+      i = list_act(ii)
       if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -69,7 +71,9 @@ use bitmasks
       endif
     end do
     ! holes in DOMO
-    do i = 1,mo_num
+    !do i = 1,mo_num
+    do ii = 1,n_act_orb
+      i = list_act(ii)
       if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -81,7 +85,9 @@ use bitmasks
     listvmos = -1
     vmotype = -1
     nvmos = 0
-    do i = 1,mo_num
+    !do i = 1,mo_num
+    do ii = 1,n_act_orb
+      i = list_act(ii)
       if(IAND(Idomo,(IBSET(0_8,i-1))) .EQ. 0) then
         if(IAND(Isomo,(IBSET(0_8,i-1))) .EQ. 0) then
           nvmos += 1
@@ -98,8 +104,8 @@ use bitmasks
     tableUniqueAlphas = .FALSE.
 
     ! Now find the allowed (p,q) excitations
-    Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
-    Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+    Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+    Idomo = iand(act_bitmask(1,1),Icfg(1,2))
     Nsomo_I = POPCNT(Isomo)
     if(Nsomo_I .EQ. 0) then
       kstart = 1
@@ -239,10 +245,10 @@ use bitmasks
     Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
     kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
     do k = kstart, idxI-1
-      diffSOMO = IEOR(Isomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
+      diffSOMO = IEOR(Isomo,iand(act_bitmask(1,1),psi_configuration(1,1,k)))
       ndiffSOMO = POPCNT(diffSOMO)
       if (ndiffSOMO /= 2) cycle
-      diffDOMO = IEOR(Idomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+      diffDOMO = IEOR(Idomo,iand(act_bitmask(1,1),psi_configuration(1,2,k)))
       xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
       ndiffDOMO = POPCNT(diffDOMO)
       nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
@@ -298,9 +304,9 @@ END_PROVIDER
   integer                            :: ndiffDOMO
   integer                            :: nxordiffSOMODOMO
   integer                            :: ndiffAll
-  integer                            :: i
-  integer                            :: j
-  integer                            :: k
+  integer                            :: i, ii
+  integer                            :: j, jj
+  integer                            :: k, kk
   integer                            :: kstart
   integer                            :: kend
   integer                            :: Nsomo_I
@@ -311,8 +317,8 @@ END_PROVIDER
   logical                            :: pqAlreadyGenQ
   logical                            :: pqExistsQ
   logical                            :: ppExistsQ
-  Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
-  Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+  Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+  Idomo = iand(act_bitmask(1,1),Icfg(1,2))
   !print*,"Input cfg"
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
@@ -322,7 +328,9 @@ END_PROVIDER
   ! find out all pq holes possible
   nholes = 0
   ! holes in SOMO
-  do i = 1,mo_num
+  !do i = 1,mo_num
+  do ii = 1,n_act_orb
+    i = list_act(ii)
      if(POPCNT(IAND(Isomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -330,7 +338,9 @@ END_PROVIDER
      endif
   end do
   ! holes in DOMO
-  do i = 1,mo_num
+  !do i = 1,mo_num
+  do ii = 1,n_act_orb
+    i = list_act(ii)
      if(POPCNT(IAND(Idomo,IBSET(0_8,i-1))) .EQ. 1) then
         nholes += 1
         listholes(nholes) = i
@@ -342,7 +352,9 @@ END_PROVIDER
   listvmos = -1
   vmotype = -1
   nvmos = 0
-  do i = 1,mo_num
+  !do i = 1,mo_num
+  do ii = 1,n_act_orb
+    i = list_act(ii)
      !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
      if(POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,i-1)))) .EQ. 0) then
         nvmos += 1
@@ -363,8 +375,8 @@ END_PROVIDER
   tableUniqueAlphas = .FALSE.
 
   ! Now find the allowed (p,q) excitations
-  Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
-  Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+  Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+  Idomo = iand(act_bitmask(1,1),Icfg(1,2))
   Nsomo_I = POPCNT(Isomo)
   if(Nsomo_I .EQ. 0) then
     kstart = 1
@@ -430,10 +442,10 @@ END_PROVIDER
         pqAlreadyGenQ = .FALSE.
         ! First check if it can be generated before
         do k = kstart, kend
-           diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
+           diffSOMO = IEOR(Jsomo,iand(act_bitmask(1,1),psi_configuration(1,1,k)))
            ndiffSOMO = POPCNT(diffSOMO)
            if((ndiffSOMO .NE. 0) .AND. (ndiffSOMO .NE. 2)) cycle
-           diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+           diffDOMO = IEOR(Jdomo,iand(act_bitmask(1,1),psi_configuration(1,2,k)))
            xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
            ndiffDOMO = POPCNT(diffDOMO)
            nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
@@ -534,11 +546,11 @@ END_PROVIDER
 
   ! Check if this Icfg has been previously generated as a mono
   ppExistsQ = .False.
-  Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
-  Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
+  Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+  Idomo = iand(act_bitmask(1,1),Icfg(1,2))
   do k = 1, idxI-1
-     diffSOMO = IEOR(Isomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,1,k)))
-     diffDOMO = IEOR(Idomo,iand(reunion_of_act_virt_bitmask(1,1),psi_configuration(1,2,k)))
+     diffSOMO = IEOR(Isomo,iand(act_bitmask(1,1),psi_configuration(1,1,k)))
+     diffDOMO = IEOR(Idomo,iand(act_bitmask(1,1),psi_configuration(1,2,k)))
      xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
      ndiffSOMO = POPCNT(diffSOMO)
      ndiffDOMO = POPCNT(diffDOMO)

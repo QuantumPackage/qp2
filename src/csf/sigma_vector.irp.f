@@ -810,7 +810,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   ! the configurations in psi_configuration
   ! returns : diag_energies :
   END_DOC
-  integer :: i,j,k,l,p,q,noccp,noccq, ii, jj
+  integer :: i,j,k,kk,l,p,q,noccp,noccq, ii, jj
   real*8,intent(out) :: diag_energies(n_CSF)
   integer                            :: nholes
   integer                            :: nvmos
@@ -838,16 +838,19 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   real*8            :: meCC
   real*8            :: ecore
 
-  PROVIDE h_core_ri
+  !PROVIDE h_core_ri
+  PROVIDE core_fock_operator
+  PROVIDE h_act_ri
   ! initialize energies
   diag_energies = 0.d0
+  !print *,"Core energy=",core_energy," nucler rep=",nuclear_repulsion, " n_core_orb=",n_core_orb," n_act_orb=",n_act_orb," mo_num=",mo_num
 
   ! calculate core energy
   !call get_core_energy(ecore)
-  !diag_energies = ecore
+  diag_energies = core_energy - nuclear_repulsion
 
   ! calculate the core energy
-  !print *,"Core energy=",ref_bitmask_energy
+  !print *,"Core 2energy=",ref_bitmask_energy
 
   do i=1,N_configuration
 
@@ -863,8 +866,9 @@ subroutine calculate_preconditioner_cfg(diag_energies)
      ! find out all pq holes possible
      nholes = 0
      ! holes in SOMO
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
+     !do k = 1,mo_num
+     do kk = 1,n_act_orb
+       k = list_act(kk)
         if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
            nholes += 1
            listholes(nholes) = k
@@ -874,7 +878,9 @@ subroutine calculate_preconditioner_cfg(diag_energies)
      ! holes in DOMO
      !do k = n_core_orb+1,n_core_orb + n_act_orb
      !do k = 1+n_core_inact_orb,n_core_orb+n_core_inact_act_orb
-     do k = 1,mo_num
+     !do k = 1,mo_num
+     do kk = 1,n_act_orb
+       k = list_act(kk)
         if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
            nholes += 1
            listholes(nholes) = k
@@ -887,7 +893,9 @@ subroutine calculate_preconditioner_cfg(diag_energies)
      vmotype = -1
      nvmos = 0
      !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
+     !do k = 1,mo_num
+     do kk = 1,n_act_orb
+       k = list_act(kk)
         !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
         if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
            nvmos += 1
@@ -916,7 +924,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
            ! one-electron term
            if(p.EQ.q) then
-              hpp = noccq * h_core_ri(p,q)!mo_one_e_integrals(q,q)
+              hpp = noccq * h_act_ri(p,q)!mo_one_e_integrals(q,q)
            else
               hpp = 0.d0
            endif
@@ -1295,7 +1303,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8,intent(in)              :: psi_in(n_st,sze)
   real*8,intent(out)             :: psi_out(n_st,sze)
   integer(bit_kind)              :: Icfg(N_INT,2)
-  integer                        :: i,j,k,l,p,q,noccp,noccq, ii, jj, m, n, idxI, kk, nocck,orbk
+  integer                        :: i,j,k,l,p,q,noccp,noccq, m, n, idxI, nocck,orbk
+  integer                        :: ii,jj,kk,ll,pp,qq
   integer(bit_kind),dimension(:,:,:),allocatable :: listconnectedJ
   integer(bit_kind),dimension(:,:,:),allocatable :: alphas_Icfg
   integer(bit_kind),dimension(:,:,:),allocatable :: singlesI
@@ -1394,10 +1403,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP   colsikpq, GIJpqrs,TKIGIJ,j,l,m,TKI,CCmattmp, moi, moj, mok, mol,&
       !$OMP   diagfac, tmpvar, diagfactors_0)                                            &
       !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
-      !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, AIJpqContainer,&
+      !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, core_energy, h_act_ri, AIJpqContainer,&
       !$OMP     sze, NalphaIcfg_list,alphasIcfg_list, bit_tmp,       &
       !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
-      !$OMP     num_threads_max)
+      !$OMP     n_core_orb, n_act_orb, list_act, num_threads_max)
 
   allocate(singlesI(N_INT,2,max(sze,10000)))
   allocate(idxs_singlesI(max(sze,10000)))
@@ -1430,8 +1439,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      ! list_core
      ! list_core_inact
      ! bitmasks
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
+     !do k = 1,mo_num
+     do kk = 1,n_act_orb
+       k = list_act(kk)
        if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
          nholes += 1
          listholes(nholes) = k
@@ -1439,8 +1449,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
        endif
      enddo
      ! holes in DOMO
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
+     !do k = 1,mo_num
+     do kk = 1,n_act_orb
+       k = list_act(kk)
        if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
          nholes += 1
          listholes(nholes) = k
@@ -1452,8 +1463,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      listvmos = -1
      vmotype = -1
      nvmos = 0
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     do k = 1,mo_num
+     do kk = 1,n_act_orb
+     !do k = 1,mo_num
+       k = list_act(kk)
        !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
        if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
          nvmos += 1
@@ -1507,7 +1519,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         cnti = ii-starti+1
         do jj = startj, endj
           cntj = jj-startj+1
-          meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
+          !meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
+          meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_act_ri(p,q)
           !print *,"jj = ",jj
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
@@ -1532,6 +1545,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
+  !print *," psi(60,1)=",psi_out(1,60)
+  
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
   allocate(connectedI_alpha(N_INT,2,max(sze,10000)))
@@ -1711,6 +1726,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   !$OMP END PARALLEL
   call omp_set_max_active_levels(4)
+  !print *," psi(60,1)=",psi_out(1,60)
+  !print *," diag_enregy=",diag_energies(1), " psi_out(1,1)=",psi_out(1,1)
 
   deallocate(diag_energies)
   deallocate(bit_tmp)
