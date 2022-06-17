@@ -2,13 +2,8 @@ double precision function ecmd_pbe_ueg_self_cont(dens,spin_pol,mu,e_PBE)
  implicit none
  ! dens = total density 
  ! spin_pol = spin_polarization (n_a - n_b)/dens
- ! e_PBE = PBE correlation (mu=0) energy evaluated at (dens,spin_pol,grad_rho) 
- ! e_PBE = epsilon_PBE * dens
- ! dens = a + b
- ! spin_pol = (a - b)/(a+b)
- ! spin_pol * dens = a - b
- ! a - b + a+b = 2 a
- ! a - b - a - b = - 2b
+ ! e_PBE = PBE correlation (mu=0) energy evaluated at  dens,spin_pol (and grad_rho) 
+ ! e_PBE = epsilon_PBE * dens which means that it is not the energy density but the energy density X the density
  double precision, intent(in) :: dens,spin_pol,mu,e_PBE
  double precision :: rho_a,rho_b,pi,g0_UEG_func,denom,beta
  pi = dacos(-1.d0)
@@ -31,7 +26,7 @@ end
 double precision function g0_UEG_func(rho_a,rho_b)
 ! Pair distribution function g0(n_alpha,n_beta) of the Colombic UEG 
 !
-! Taken from Eq. (46)  P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006).                                                                                                    
+! Taken from Eq. (46)  P. Gori-Giorgi and A. Savin, Phys. Rev. A 73, 032506 (2006). 
  implicit none
  double precision, intent(in) :: rho_a,rho_b
  double precision :: rho,pi,x
@@ -46,7 +41,7 @@ double precision function g0_UEG_func(rho_a,rho_b)
  E = 0.001859d0
  x = -d2*rs
  if (dabs(rho) > 1.d-20) then
-  rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) ! JT: serious bug fixed 20/03/19
+  rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) 
   x = -d2*rs
   if(dabs(x).lt.50.d0)then
    g0_UEG_func= 0.5d0 * (1d0+ rs* (-B + rs*(C + rs*(D + rs*E))))*dexp(x)
