@@ -13,19 +13,7 @@ BEGIN_PROVIDER [double precision, core_energy]
    core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
   enddo
  enddo
- !print *," core no nucl=",core_energy
- ! core-active
- do i = 1, n_core_orb
-  j = list_core(i)
-  !!! VJ
-  !!! TODO: Correct the loop over active electrons
-  do k = 1, (elec_num - 2*n_core_orb)/2
-   l = k + n_core_orb
-   core_energy += 2.d0 * (2.d0 * mo_two_e_integrals_jj(j,l) - mo_two_e_integrals_jj_exchange(j,l))
-  enddo
- enddo
  core_energy += nuclear_repulsion
- !print *," core no nucl=",core_energy
 
 END_PROVIDER
 
@@ -84,6 +72,7 @@ BEGIN_PROVIDER [ double precision, h_act_ri, (mo_num, mo_num) ]
  integer :: p,q, r
  ! core-core contribution
  h_act_ri = core_fock_operator
+ !print *,' Bef----hact(1,14)=',h_act_ri(4,14)
  ! act-act contribution
  do p=1,n_act_orb
    j=list_act(p)
@@ -100,14 +89,15 @@ BEGIN_PROVIDER [ double precision, h_act_ri, (mo_num, mo_num) ]
    enddo
  enddo
  ! core-act contribution
- do p=1,n_core_orb
-   j=list_core(p)
-   do k=1,mo_num
-     do q=1,n_act_orb
-       i=list_act(q)
-       h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
-     enddo
-   enddo
- enddo
+ !do p=1,n_act_orb
+ !  j=list_core(p)
+ !  do k=1,n_core_orb
+ !    do q=1,n_act_orb
+ !      i=list_act(q)
+ !      h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
+ !    enddo
+ !  enddo
+ !enddo
+ !print *,' Aft----hact(1,14)=',h_act_ri(4,14), mo_one_e_integrals(4,14)
 END_PROVIDER
 

@@ -837,6 +837,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   real*8            :: hpp
   real*8            :: meCC
   real*8            :: ecore
+  real*8            :: core_act_contrib
 
   !PROVIDE h_core_ri
   PROVIDE core_fock_operator
@@ -862,6 +863,8 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
      starti = psi_config_data(i,1)
      endi   = psi_config_data(i,2)
+
+     core_act_contrib = 0.0d0
 
      ! find out all pq holes possible
      nholes = 0
@@ -915,6 +918,13 @@ subroutine calculate_preconditioner_cfg(diag_energies)
         p = listholes(k)
         noccp = holetype(k)
 
+
+        ! core-active
+        do l = 1, n_core_orb
+         jj = list_core(l)
+         core_act_contrib += noccp * (2.d0 * mo_two_e_integrals_jj(jj,p) - mo_two_e_integrals_jj_exchange(jj,p))
+        enddo
+
         ! Calculate one-electron
         ! and two-electron coulomb terms
         do l=1,nholes
@@ -944,6 +954,10 @@ subroutine calculate_preconditioner_cfg(diag_energies)
         enddo
 
      enddo
+     !print *,"I=",i," core_act=",core_act_contrib
+     do j=starti,endi
+       diag_energies(j) += core_act_contrib
+     end do
   enddo
 
 end subroutine calculate_preconditioner_cfg
@@ -1345,6 +1359,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8, external               :: get_two_e_integral
   real*8,dimension(:),allocatable:: diag_energies
   real*8                         :: tmpvar, tmptot
+  real*8                         :: core_act_contrib
 
   integer(omp_lock_kind), allocatable :: lock(:)
   call omp_set_max_active_levels(1)
@@ -1404,9 +1419,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP   diagfac, tmpvar, diagfactors_0)                                            &
       !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
       !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, core_energy, h_act_ri, AIJpqContainer,&
-      !$OMP     sze, NalphaIcfg_list,alphasIcfg_list, bit_tmp,       &
+      !$OMP     pp, sze, NalphaIcfg_list,alphasIcfg_list, bit_tmp,       &
       !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
-      !$OMP     n_core_orb, n_act_orb, list_act, num_threads_max)
+      !$OMP     n_core_orb, n_act_orb, list_act, n, list_core,  list_core_is_built,core_act_contrib, num_threads_max,&
+      !$OMP     n_core_orb_is_built, mo_integrals_map, mo_integrals_map_is_built)
 
   allocate(singlesI(N_INT,2,max(sze,10000)))
   allocate(idxs_singlesI(max(sze,10000)))
@@ -1520,8 +1536,18 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         do jj = startj, endj
           cntj = jj-startj+1
           !meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
-          meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_act_ri(p,q)
+          core_act_contrib = 0.0d0
+          if(p.ne.q)then
+          do pp=1,n_core_orb
+            n=list_core(pp)
+            core_act_contrib += 2.d0 * get_two_e_integral(p,n,q,n,mo_integrals_map) - get_two_e_integral(p,n,n,q,mo_integrals_map)
+          end do
+          endif
+          meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* (h_act_ri(p,q) + core_act_contrib)
           !print *,"jj = ",jj
+          !if(ii.eq.1 .and. jj.eq.177 )then
+          !  print *,"p=",p," q=",q," hact=",h_act_ri(p,q), " core_act=",core_act_contrib
+          !endif
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
@@ -1545,7 +1571,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
-  !print *," psi(60,1)=",psi_out(1,60)
+  !print *," singles part psi(1,177)=",psi_out(1,177)
   
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
@@ -1691,6 +1717,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
            do m = 1,colsikpq
               call omp_set_lock(lock(idxs_connectedI_alpha(j)+m-1))
+              !if((idxs_connectedI_alpha(j)+m-1).eq.177)then
+              !  print *,"CC=",CCmattmp(1,m)
+              !endif
               do kk = 1,n_st
                  psi_out(kk,idxs_connectedI_alpha(j)+m-1) += CCmattmp(kk,m)
               enddo
@@ -1714,6 +1743,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationTypes)
   deallocate(diagfactors)
 
+  !print *," psi(1,177)=",psi_out(1,177)
 
   ! Add the diagonal contribution
   !$OMP DO
@@ -1726,7 +1756,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   !$OMP END PARALLEL
   call omp_set_max_active_levels(4)
-  !print *," psi(60,1)=",psi_out(1,60)
   !print *," diag_enregy=",diag_energies(1), " psi_out(1,1)=",psi_out(1,1)
 
   deallocate(diag_energies)

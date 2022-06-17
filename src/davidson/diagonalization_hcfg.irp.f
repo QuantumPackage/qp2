@@ -112,6 +112,7 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
   double precision, allocatable  :: tmpU(:,:), tmpW(:,:)
   double precision, pointer      :: W(:,:), W_csf(:,:)
+  double precision, pointer      :: W2(:,:), U2(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
 
@@ -234,11 +235,13 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     call c_f_pointer(ptr_w, W_csf, (/sze_csf,N_st_diag*itermax/))
   else
     allocate(W(sze,N_st_diag),W_csf(sze_csf,N_st_diag*itermax))
+    allocate(W2(sze,N_st_diag))
   endif
 
   allocate(                                                          &
       ! Large
       U(sze,N_st_diag),                                              &
+      U2(sze,N_st_diag),                                              &
       U_csf(sze_csf,N_st_diag*itermax),                              &
 
       ! Small
@@ -324,6 +327,10 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 tmpU(kk,ii) = U_csf(ii,shift+kk)
               enddo
             enddo
+            !do j=1,1
+            !  print *,"====> J=",j
+            !tmpU=0.0d0
+            !tmpU(1,j)=1.0d0
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             do kk=1,N_st_diag
               do ii=1,sze_csf
@@ -331,6 +338,20 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
               enddo
             enddo
 
+            !U_csf=0.0d0
+            !U_csf(j,1)=1.0d0
+            !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
+            !call H_u_0_nstates_openmp(U2,U,N_st_diag,sze)
+            !call convertWFfromDETtoCSF(N_st_diag,U2(1,1),W2(1,1))
+            !print *," w2=",W2(j,1)
+            !do i=1,sze_csf
+            !  print *, " i=",i,"qp=",W2(i,1)," my=",W_csf(i,1),dabs(dabs(W2(i,1))-dabs(W_csf(i,1)))
+            !  if(dabs(dabs(W2(i,1))-dabs(W_csf(i,1))) .ge. 1.0e-10)then
+            !    print *," somo=",psi_configuration(1,1,i)," domo=",psi_configuration(1,2,i)
+            !  endif
+            !end do
+            !end do
+            !stop
             deallocate(tmpW)
             deallocate(tmpU)
         endif
