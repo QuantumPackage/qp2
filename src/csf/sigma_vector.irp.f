@@ -51,11 +51,24 @@
       if(cfg_seniority_index(i+2) > ncfgpersomo) then
           ncfgpersomo = cfg_seniority_index(i+2)
       else
-        k = 0
-        do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
-          k = k + 2
-          ncfgpersomo = cfg_seniority_index(i+2+k)
+        ! l = i+k+2 
+        ! Loop over l with a constraint to ensure that l <= size(cfg_seniority_index,1)-1
+        ! Old version commented just below
+        do l = min(size(cfg_seniority_index,1)-1, i+2), size(cfg_seniority_index,1)-1, 2
+          if (cfg_seniority_index(l) >= ncfgpersomo) then
+            ncfgpersomo = cfg_seniority_index(l)
+          endif
         enddo
+        !k = 0
+        !if ((i+2+k) < size(cfg_seniority_index,1)) then
+        !  do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
+        !    k = k + 2
+        !    if ((i+2+k) >= size(cfg_seniority_index,1)) then
+        !      exit
+        !    endif
+        !    ncfgpersomo = cfg_seniority_index(i+2+k)
+        !  enddo
+        !endif
       endif
     endif
     ncfg = ncfgpersomo - ncfgprev
@@ -74,11 +87,24 @@
     if(cfg_seniority_index(i+2) > ncfgprev) then
       ncfgprev = cfg_seniority_index(i+2)
     else
-      k = 0
-      do while(cfg_seniority_index(i+2+k) < ncfgprev)
-        k = k + 2
-        ncfgprev = cfg_seniority_index(i+2+k)
+      ! l = i+k+2 
+      ! Loop over l with a constraint to ensure that l <= size(cfg_seniority_index,1)-1
+      ! Old version commented just below
+      do l = min(size(cfg_seniority_index,1)-1, i+2), size(cfg_seniority_index,1)-1, 2
+        if (cfg_seniority_index(l) >= ncfgprev) then
+          ncfgprev = cfg_seniority_index(l)
+        endif
       enddo
+      !k = 0
+      !if ((i+2+k) < size(cfg_seniority_index,1)) then
+      !  do while(cfg_seniority_index(i+2+k) < ncfgprev)
+      !    k = k + 2
+      !    if ((i+2+k) >= size(cfg_seniority_index,1)) then
+      !      exit
+      !    endif
+      !    ncfgprev = cfg_seniority_index(i+2+k)
+      !  enddo
+      !endif
     endif
   enddo
 END_PROVIDER
