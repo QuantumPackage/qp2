@@ -324,6 +324,7 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 tmpU(kk,ii) = U_csf(ii,shift+kk)
               enddo
             enddo
+            !tmpU(1,1)=1.0d0
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             do kk=1,N_st_diag
               do ii=1,sze_csf
@@ -331,6 +332,16 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
               enddo
             enddo
 
+            !U_csf = 0.0d0
+            !U_csf(1,1) = 1.0d0
+            !u_in = 0.0d0
+            !call convertWFfromCSFtoDET(N_st_diag,tmpU,U2)
+            !call H_u_0_nstates_openmp(u_in,U2,N_st_diag,sze)
+            !call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),W_csf2(1,1))
+            !do i=1,sze_csf
+            !  print *,"I=",i," qp=",W_csf2(i,1)," my=",W_csf(i,1), " diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !end do
+            !stop
             deallocate(tmpW)
             deallocate(tmpU)
         endif

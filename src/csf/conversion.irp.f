@@ -73,7 +73,6 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
 
     ! perhaps blocking with CFGs of same seniority
     ! can be more efficient
-    print *,"bfIcfg=",bfIcfg, " ndetI=",ndetI
     allocate(tempBuffer(bfIcfg,ndetI))
     tempBuffer = DetToCSFTransformationMatrix(s,:bfIcfg,:ndetI)
 

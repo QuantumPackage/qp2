@@ -32,8 +32,8 @@ void getncsfs1(int *inpnsomo, int *inpms, int *outncsfs){
 }
 
 void getncsfs(int NSOMO, int MS, int *outncsfs){
-    int nparcoupl = (NSOMO + MS)/2;
-    int nparcouplp1 = ((NSOMO + MS)/2)+1;
+    int nparcoupl = (NSOMO + MS)/2; // n_alpha
+    int nparcouplp1 = ((NSOMO + MS)/2)+1; // n_alpha + 1
     double tmpndets=0.0;
     if(NSOMO == 0){
         (*outncsfs) = 1;

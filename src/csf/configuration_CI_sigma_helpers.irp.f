@@ -107,7 +107,7 @@ use bitmasks
     if(Nsomo_I .EQ. 0) then
       kstart = 1
     else
-      kstart = cfg_seniority_index(max(0,Nsomo_I-2))
+      kstart = cfg_seniority_index(max(NSOMOMin,Nsomo_I-2))
     endif
     kend = idxI-1
 
@@ -121,14 +121,14 @@ use bitmasks
           Jsomo = IBCLR(Isomo,p-1)
           Jsomo = IBSET(Jsomo,q-1)
           Jdomo = Idomo
-          kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
+          kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
           kend = idxI-1
         else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
           ! SOMO -> SOMO
           Jsomo = IBCLR(Isomo,p-1)
           Jsomo = IBCLR(Jsomo,q-1)
           Jdomo = IBSET(Idomo,q-1)
-          kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-4)))
+          kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-4)))
           kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
           ! DOMO -> VMO
@@ -143,7 +143,7 @@ use bitmasks
           Jsomo = IBCLR(Jsomo,q-1)
           Jdomo = IBCLR(Idomo,p-1)
           Jdomo = IBSET(Jdomo,q-1)
-          kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
+          kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
           kend = idxI-1
         else
           print*,"Something went wrong in obtain_associated_alphaI"
@@ -227,11 +227,13 @@ use bitmasks
           endif
 
           ! SOMO
-          NalphaIcfg += 1
-          !print *,i,j,"|",NalphaIcfg
-          alphasIcfg_list(1,1,idxI,NalphaIcfg) = Jsomo
-          alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
-          NalphaIcfg_list(idxI) = NalphaIcfg
+          !print *,i,j,"|",NalphaIcfg, Jsomo, IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
+          if(POPCNT(Jsomo) .ge. NSOMOMin) then
+            NalphaIcfg += 1
+            alphasIcfg_list(1,1,idxI,NalphaIcfg) = Jsomo
+            alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jdomo,ISHFT(1_8,n_core_orb)-1)
+            NalphaIcfg_list(idxI) = NalphaIcfg
+          endif
         endif
       end do
     end do
@@ -240,7 +242,7 @@ use bitmasks
     ppExistsQ = .False.
     Isomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,1))
     Idomo = iand(reunion_of_act_virt_bitmask(1,1),Icfg(1,2))
-    kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
+    kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
     do k = kstart, idxI-1
       diffSOMO = IEOR(Isomo,iand(act_bitmask(1,1),psi_configuration(1,1,k)))
       ndiffSOMO = POPCNT(diffSOMO)
@@ -257,10 +259,12 @@ use bitmasks
     ! Diagonal part (pp,qq)
     if(nholes > 0 .AND. (.NOT. ppExistsQ))then
       ! SOMO
-      NalphaIcfg += 1
-      alphasIcfg_list(1,1,idxI,NalphaIcfg) = Icfg(1,1)
-      alphasIcfg_list(1,2,idxI,NalphaIcfg) = Icfg(1,2)
-      NalphaIcfg_list(idxI) = NalphaIcfg
+      if(POPCNT(Jsomo) .ge. NSOMOMin) then
+        NalphaIcfg += 1
+        alphasIcfg_list(1,1,idxI,NalphaIcfg) = Icfg(1,1)
+        alphasIcfg_list(1,2,idxI,NalphaIcfg) = Icfg(1,2)
+        NalphaIcfg_list(idxI) = NalphaIcfg
+      endif
     endif
 
     NalphaIcfg = 0
@@ -373,7 +377,7 @@ END_PROVIDER
   if(Nsomo_I .EQ. 0) then
     kstart = 1
   else
-    kstart = cfg_seniority_index(max(0,Nsomo_I-2))
+    kstart = cfg_seniority_index(max(NSOMOMin,Nsomo_I-2))
   endif
   kend = idxI-1
   !print *,"Isomo"
@@ -398,14 +402,14 @@ END_PROVIDER
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBSET(Jsomo,q-1)
            Jdomo = Idomo
-           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
+           kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
            kend = idxI-1
         else if(holetype(i) .EQ. 1 .AND. vmotype(j) .EQ. 2) then
            ! SOMO -> SOMO
            Jsomo = IBCLR(Isomo,p-1)
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBSET(Idomo,q-1)
-           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-4)))
+           kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-4)))
            kend = idxI-1
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
            ! DOMO -> VMO
@@ -420,7 +424,7 @@ END_PROVIDER
            Jsomo = IBCLR(Jsomo,q-1)
            Jdomo = IBCLR(Idomo,p-1)
            Jdomo = IBSET(Jdomo,q-1)
-           kstart = max(1,cfg_seniority_index(max(0,Nsomo_I-2)))
+           kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
            kend = idxI-1
         else
            print*,"Something went wrong in obtain_associated_alphaI"

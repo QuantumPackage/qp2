@@ -234,7 +234,7 @@ end subroutine get_phase_qp_to_cfg
   ! initialization
   psi_coef_config = 0.d0
   DetToCSFTransformationMatrix(0,:,:) = 1.d0
-  do i = 2-iand(elec_alpha_num-elec_beta_num,1), NSOMOMax,2
+  do i = 2-iand(MS,1), NSOMOMax,2
     Isomo = IBSET(0_8, i) - 1_8
     ! rows = Ncsfs
     ! cols = Ndets
@@ -287,7 +287,9 @@ end subroutine get_phase_qp_to_cfg
         if (psi_configuration(k,1,i) == 0_bit_kind) cycle
         s = s + popcnt(psi_configuration(k,1,i))
       enddo
-      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+      salpha = (s+MS)/2
+      bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
+      !bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
 
       ! perhaps blocking with CFGs of same seniority
       ! can be more efficient
@@ -1374,7 +1376,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   integer(omp_lock_kind), allocatable :: lock(:)
   call omp_set_max_active_levels(1)
 
-  print *," sze = ",sze
+  !print *," sze = ",sze
   allocate(lock(sze))
   do i=1,sze
     call omp_init_lock(lock(i))
@@ -1383,7 +1385,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   !  print *,"i=",i," psi_cfg_data_1=",psi_config_data(i,1)," psi_cfg_data_2=",psi_config_data(i,2)
   !end do
 
-  !print *," sze = ",sze
   allocate(diag_energies(n_CSF))
   call calculate_preconditioner_cfg(diag_energies)
 
@@ -1639,6 +1640,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         totcolsTKI = 0
         rowsTKI = -1
         NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
+        !print *,"alphas_Icfg=",alphas_Icfg(1,1,k)
         do j = 1,nconnectedI
            NSOMOI = getNSOMO(connectedI_alpha(:,:,j))
            p = excitationIds(1,j)
@@ -1648,6 +1650,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            ! for E_pp E_rs and E_ppE_rr case
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+           !print *,"j=",j," Nsomo=",NSOMOalpha," rowsikpq=",rowsikpq," colsikpq=",colsikpq, " p=",pmodel," q=",qmodel, " extyp=",extype
            totcolsTKI += colsikpq
            rowsTKI = rowsikpq
         enddo
