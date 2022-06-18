@@ -80,8 +80,6 @@ function qp()
       if [[ -d $NAME ]] ; then
         [[ -d $EZFIO_FILE ]] && ezfio unset_file
         ezfio set_file $NAME
-      else
-        qp_create_ezfio -h | more
       fi
       unset _ARGS
       ;;
