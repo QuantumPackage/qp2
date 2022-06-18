@@ -20,12 +20,15 @@
   ! The maximum number of SOMOs for the current calculation.
   ! required for the calculation of prototype arrays.
   END_DOC
+  integer MS, ialpha
+  MS = elec_alpha_num-elec_beta_num
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
   NSOMOMin = max(0,cfg_nsomo_min-2)
   ! Note that here we need NSOMOMax + 2 sizes
-  NCSFMax = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2)-binom(NSOMOMax,((NSOMOMax+1)/2)+1)))) ! TODO: NCSFs for MS=0
+  ialpha = (NSOMOMax + MS)/2
+  NCSFMax = max(1,nint((binom(NSOMOMax,ialpha)-binom(NSOMOMax,ialpha+1)))) ! TODO: NCSFs for MS=0 (CHECK)
   NBFMax = NCSFMax
-  maxDetDimPerBF = max(1,nint((binom(NSOMOMax,(NSOMOMax+1)/2))))
+  maxDetDimPerBF = max(1,nint((binom(NSOMOMax,ialpha))))
   NMO = n_act_orb
   integer i,j,k,l
   integer startdet,enddet
@@ -34,11 +37,9 @@
   integer dimcsfpercfg
   integer detDimperBF
   real*8 :: coeff, binom1, binom2
-  integer MS
   integer ncfgpersomo
   real*8, external :: logabsgamma
   detDimperBF = 0
-  MS = elec_alpha_num-elec_beta_num
   ! number of cfgs = number of dets for 0 somos
   n_CSF = cfg_seniority_index(NSOMOMin)-1
   ncfgprev = cfg_seniority_index(NSOMOMin)
@@ -105,7 +106,11 @@
   !  endif
   !enddo
   n_CSF = 0
-  ncfgprev = cfg_seniority_index(0) ! should be 1
+  print *," -9(((((((((((((( NSOMOMin=",NSOMOMin
+  ncfgprev = cfg_seniority_index(NSOMOMin) ! can be -1 
+  if(ncfgprev.eq.-1)then
+    ncfgprev=1
+  endif
   do i=NSOMOMin,NSOMOMax+2,2
     !k=0
     !do while((cfg_seniority_index(i+2+k) .eq. -1) .and. (k.le.NSOMOMax))
@@ -126,9 +131,11 @@
       dimcsfpercfg = 2
     else
       if(iand(MS,1) .EQ. 0) then
-        dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+        ialpha = (i + MS)/2
+        dimcsfpercfg = max(1,nint((binom(i,ialpha)-binom(i,ialpha+1))))
       else
-        dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+        ialpha = (i + MS)/2
+        dimcsfpercfg = max(1,nint((binom(i,ialpha)-binom(i,ialpha+1))))
       endif
     endif
     n_CSF += ncfg*dimcsfpercfg
@@ -212,7 +219,7 @@ end subroutine get_phase_qp_to_cfg
   integer(bit_kind) :: Ialpha(N_int),Ibeta(N_int)
   integer   :: rows, cols, i, j, k
   integer   :: startdet, enddet, idx
-  integer*8 MS
+  integer*8 MS, salpha
   integer ndetI
   integer :: getNSOMO
   real*8,dimension(:,:),allocatable    :: tempBuffer
@@ -231,8 +238,11 @@ end subroutine get_phase_qp_to_cfg
     Isomo = IBSET(0_8, i) - 1_8
     ! rows = Ncsfs
     ! cols = Ndets
-    bfIcfg = max(1,nint((binom(i,(i+1)/2)-binom(i,((i+1)/2)+1))))
-    ndetI = max(1,nint((binom(i,(i+1)/2))))
+    salpha = (i+MS)/2
+    bfIcfg = max(1,nint((binom(i,salpha)-binom(i,salpha+1))))
+    ndetI =  max(1,nint((binom(i,salpha))))
+    !bfIcfg = max(1,nint((binom(i,(i+1)/2)-binom(i,((i+1)/2)+1))))
+    !ndetI =  max(1,nint((binom(i,(i+1)/2))))
 
     allocate(tempBuffer(bfIcfg,ndetI))
     call getCSFtoDETTransformationMatrix(Isomo, MS, NBFMax, maxDetDimPerBF, tempBuffer)
@@ -1364,6 +1374,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   integer(omp_lock_kind), allocatable :: lock(:)
   call omp_set_max_active_levels(1)
 
+  print *," sze = ",sze
   allocate(lock(sze))
   do i=1,sze
     call omp_init_lock(lock(i))

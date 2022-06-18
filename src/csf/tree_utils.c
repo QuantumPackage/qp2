@@ -311,3 +311,13 @@ void callBlasMatxMat(double *A, int rowA, int colA, double *B, int rowB, int col
             break;
     }
 }
+
+void printRealMatrix(double *orthoMatrix, int rows, int cols){
+  int i,j;
+  for(i=0;i<rows;++i){
+    for(j=0;j<cols;++j){
+      printf(" %3.5f ",orthoMatrix[i*cols + j]);
+    }
+    printf("\n");
+  }
+}

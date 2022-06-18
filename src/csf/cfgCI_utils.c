@@ -342,7 +342,11 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
     ************************************/
 
 
+    //printf(" --- In convet ----\n");
     convertBFtoDetBasis(Isomo, MS, &bftodetmatrixI, &rowsbftodetI, &colsbftodetI);
+    //printf(" --- done bf det basis ---- row=%d col=%d\n",rowsbftodetI,colsbftodetI);
+
+    //printRealMatrix(bftodetmatrixI,rowsbftodetI,colsbftodetI);
 
     int rowsI = 0;
     int colsI = 0;
@@ -350,6 +354,8 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
     //getOverlapMatrix(Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
     getOverlapMatrix_withDet(bftodetmatrixI, rowsbftodetI, colsbftodetI, Isomo, MS, &overlapMatrixI, &rowsI, &colsI, &NSOMO);
 
+    //printf("Overlap matrix\n");
+    //printRealMatrix(overlapMatrixI,rowsI,colsI);
 
     /***********************************
          Get Orthonormalization Matrix
@@ -358,6 +364,9 @@ void convertCSFtoDetBasis(int64_t Isomo, int MS, int rowsmax, int colsmax, doubl
     orthoMatrixI = malloc(rowsI*colsI*sizeof(double));
 
     gramSchmidt(overlapMatrixI, rowsI, colsI, orthoMatrixI);
+
+    //printf("Ortho matrix\n");
+    //printRealMatrix(orthoMatrixI,rowsI,colsI);
 
     /***********************************
          Get Final CSF to Det Matrix
@@ -1367,7 +1376,9 @@ void convertBFtoDetBasis(int64_t Isomo, int MS, double **bftodetmatrixptr, int *
     int ndets = 0;
     int NBF = 0;
     double dNSOMO = NSOMO*1.0;
+    // MS = alpha_num - beta_num
     double nalpha = (NSOMO + MS)/2.0;
+    //printf(" in convertbftodet : MS=%d nalpha=%3.2f\n",MS,nalpha);
     ndets = (int)binom(dNSOMO, nalpha);
 
     Tree dettree = (Tree){  .rootNode = NULL, .NBF = -1 };
