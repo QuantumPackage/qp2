@@ -339,7 +339,10 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call H_u_0_nstates_openmp(u_in,U2,N_st_diag,sze)
             !call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),W_csf2(1,1))
             !do i=1,sze_csf
-            !  print *,"I=",i," qp=",W_csf2(i,1)," my=",W_csf(i,1), " diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  print *,"I=",i," qp=",W_csf2(i,1)," my=",W_csf(i,1)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  if(dabs(dabs(W_csf2(i,1))-dabs(W_csf(i,1))) .gt. 1.0e-10)then
+            !    print *,"somo=",psi_configuration(1,1,i)," domo=",psi_configuration(1,2,i)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  endif
             !end do
             !stop
             deallocate(tmpW)

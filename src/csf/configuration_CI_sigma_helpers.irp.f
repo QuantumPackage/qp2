@@ -44,9 +44,12 @@ use bitmasks
   logical                        :: pqAlreadyGenQ
   logical                        :: pqExistsQ
   logical                        :: ppExistsQ
+  integer*8                      :: MS
 
   double precision               :: t0, t1
   call wall_time(t0)
+
+  MS = elec_alpha_num-elec_beta_num
 
   allocate(tableUniqueAlphas(mo_num,mo_num))
   NalphaIcfg_list = 0
@@ -128,8 +131,13 @@ use bitmasks
           Jsomo = IBCLR(Isomo,p-1)
           Jsomo = IBCLR(Jsomo,q-1)
           Jdomo = IBSET(Idomo,q-1)
-          kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-4)))
-          kend = idxI-1
+          ! Check for Minimal alpha electrons (MS)
+          if(POPCNT(Jsomo).ge.MS)then
+            kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-4)))
+            kend = idxI-1
+          else
+            cycle
+          endif
         else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
           ! DOMO -> VMO
           Jsomo = IBSET(Isomo,p-1)
@@ -147,6 +155,10 @@ use bitmasks
           kend = idxI-1
         else
           print*,"Something went wrong in obtain_associated_alphaI"
+        endif
+        ! Check for Minimal alpha electrons (MS)
+        if(POPCNT(Jsomo).lt.MS)then
+          cycle
         endif
 
         ! Again, we don't have to search from 1
@@ -211,6 +223,12 @@ use bitmasks
             Jsomo = IBCLR(Isomo,p-1)
             Jsomo = IBCLR(Jsomo,q-1)
             Jdomo = IBSET(Idomo,q-1)
+            if(POPCNT(Jsomo).ge.MS)then
+              kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-4)))
+              kend = idxI-1
+            else
+              cycle
+            endif
           else if(holetype(i) .EQ. 2 .AND. vmotype(j) .EQ. 1) then
             ! DOMO -> VMO
             Jsomo = IBSET(Isomo,p-1)

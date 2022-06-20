@@ -205,12 +205,14 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer*8                                :: xordiffSOMODOMO
   integer                                  :: ndiffSOMO
   integer                                  :: ndiffDOMO
-  integer                                  :: nxordiffSOMODOMO
-  integer :: iii,ii,i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
-  integer :: listholes(mo_num)
-  integer :: holetype(mo_num)
-  integer :: end_index
-  integer :: Nsomo_alpha
+  integer                        :: nxordiffSOMODOMO
+  integer                        :: iii,ii,i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
+  integer                        :: listholes(mo_num)
+  integer                        :: holetype(mo_num)
+  integer                        :: end_index
+  integer                        :: Nsomo_alpha
+  integer*8                      :: MS
+  MS = elec_alpha_num-elec_beta_num
 
   nconnectedI = 0
   end_index = N_configuration
@@ -233,6 +235,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      Idomo = Ialpha(1,2)
      Jsomo = psi_configuration(1,1,i)
      Jdomo = psi_configuration(1,2,i)
+     ! Check for Minimal alpha electrons (MS)
+     if(POPCNT(Isomo).lt.MS)then
+       cycle
+     endif
      diffSOMO = IEOR(Isomo,Jsomo)
      ndiffSOMO = POPCNT(diffSOMO)
      !if(idxI.eq.1)then
@@ -299,6 +305,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
 !IRP_ELSE
               p = TRAILZ(Isomo) + 1
 !IRP_ENDIF
+              ! Check for Minimal alpha electrons (MS)
+              !if(POPCNT(Isomo).lt.MS)then
+              !  cycle
+              !endif
            end if
         case (2)
            ! DOMO -> SOMO

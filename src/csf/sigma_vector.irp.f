@@ -1578,7 +1578,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
-  !print *," singles part psi(1,177)=",psi_out(1,177)
+  !print *," singles part psi(1,5)=",psi_out(1,5)
   
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
@@ -1622,6 +1622,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
      ! TODO : remove doubly excited for return
+     !print *,"I=",i," isomo=",psi_configuration(1,1,i)," idomo=",psi_configuration(1,2,i), " psiout=",psi_out(1,5)
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
 
@@ -1640,7 +1641,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         totcolsTKI = 0
         rowsTKI = -1
         NSOMOalpha = getNSOMO(alphas_Icfg(:,:,k))
-        !print *,"alphas_Icfg=",alphas_Icfg(1,1,k)
         do j = 1,nconnectedI
            NSOMOI = getNSOMO(connectedI_alpha(:,:,j))
            p = excitationIds(1,j)
@@ -1690,6 +1690,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
             moj = excitationIds(2,l) ! s
             mol = excitationIds(1,l) ! r
             diagfac =  diagfactors_0 * diagfactors(l)* mo_two_e_integral(mok,mol,moi,moj)! g(pq,sr) = <ps,qr>
+            !print *,"p=",mok,"q=",mol,"r=",moi,"s=",moj
             do m = 1,colsikpq
                ! <ij|kl> = (ik|jl)
                GIJpqrs(totcolsTKI+m,l) = diagfac
@@ -1749,7 +1750,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationTypes)
   deallocate(diagfactors)
 
-  !print *," psi(1,177)=",psi_out(1,177)
+  !print *," psi(1,823)=",psi_out(1,823), " g(1 8, 3 15)=",mo_two_e_integral(1,8,3,15), " ncore=",n_core_orb
 
   ! Add the diagonal contribution
   !$OMP DO
