@@ -325,7 +325,14 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
               enddo
             enddo
             !tmpU(1,1)=1.0d0
+            double precision               :: irp_rdtsc
+            double precision               :: ticks_0, ticks_1
+            integer*8                      :: irp_imax
+            irp_imax = 1
+            ticks_0 = irp_rdtsc()
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            ticks_1 = irp_rdtsc()
+            print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
             do kk=1,N_st_diag
               do ii=1,sze_csf
                 W_csf(ii,shift+kk)=tmpW(kk,ii)
