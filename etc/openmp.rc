@@ -1,0 +1,1 @@
+export OMP_NESTED=True
