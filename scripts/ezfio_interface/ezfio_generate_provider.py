@@ -82,6 +82,8 @@ END_PROVIDER
     mpi_correspondance   = {"integer": "MPI_INTEGER",
                             "integer*8": "MPI_INTEGER8",
                             "character*(32)": "MPI_CHARACTER",
+                            "character*(64)": "MPI_CHARACTER",
+                            "character*(256)": "MPI_CHARACTER",
                             "logical": "MPI_LOGICAL",
                             "double precision": "MPI_DOUBLE_PRECISION"}
 

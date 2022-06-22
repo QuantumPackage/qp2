@@ -43,6 +43,7 @@ EZFIO_LIB = join("$QP_ROOT", "lib", "libezfio_irp.a")
 ZMQ_LIB = join("$QP_ROOT", "lib", "libf77zmq.a") + " "  + join("$QP_ROOT", "lib", "libzmq.a") + " -lstdc++ -lrt -ldl"
 ROOT_BUILD_NINJA = join("$QP_ROOT", "config", "build.ninja")
 ROOT_BUILD_NINJA_EXP =  join(QP_ROOT, "config", "build.ninja")
+ROOT_BUILD_NINJA_EXP_tmp =  join(QP_ROOT, "config", "build.ninja.tmp")
 header = r"""#
 #  _______                     _____
 #  __  __ \___  _______ _________  /____  ________ ___
@@ -57,7 +58,7 @@ header = r"""#
 #               /_/     \__,_/ \___/ /_/|_| \__,_/ _\__, / \___/
 #                                                  /____/
 #
-# https://github.com/LCPQ/quantum_package,
+# https://github.com/QuantumPackage/qp2,
 #
 # Generated automatically by {0}
 #
@@ -107,6 +108,17 @@ def ninja_create_env_variable(pwd_config_file):
     lib_usr = get_compilation_option(pwd_config_file, "LIB")
 
     str_lib = " ".join([lib_lapack, EZFIO_LIB, ZMQ_LIB, LIB, lib_usr])
+
+    # Read all LIB files in modules
+    libfile = "LIB"
+    try:
+        content = ""
+        with open(libfile,'r') as f:
+            content = f.read()
+            str_lib += " "+content
+    except IOError:
+        pass
+
     l_string.append("LIB = {0} ".format(str_lib))
 
     l_string.append("")
@@ -149,7 +161,7 @@ def get_l_module_with_ezfio_cfg():
     from os import listdir
     from os.path import isfile
 
-    return [real_join(QP_SRC, m) for m in listdir(QP_SRC)
+    return [real_join(QP_SRC, m) for m in sorted(listdir(QP_SRC))
             if isfile(real_join(QP_SRC, m, "EZFIO.cfg"))]
 
 
@@ -328,13 +340,13 @@ def ninja_symlink_build(path_module, l_symlink):
     if not l_symlink:
         return []
 
-    l_folder = [s.destination for s in l_symlink]
+    l_folder = [s.destination for s in sorted(l_symlink,key=lambda x:x.destination)]
 
     l_string = ["build l_symlink_{0} : phony {1}".format(path_module.rel,
                                                          " ".join(map(comp_path,l_folder))),
                 ""]
 
-    for symlink in l_symlink:
+    for symlink in sorted(l_symlink, key=lambda x: x.source+x.destination):
         l_string += ["build {0}: build_symlink {1}".format(*list(map(comp_path,(symlink.destination, symlink.source)))), ""]
 
     return l_string
@@ -360,7 +372,7 @@ def ninja_gitignore_build(path_module, d_binaries, l_symlink):
 
     path_gitignore = comp_path(join(path_module.abs, ".gitignore"))
 
-    l_b = list(map(comp_path,[i.abs for i in d_binaries[path_module]]))
+    l_b = sorted(list(map(comp_path,[i.abs for i in d_binaries[path_module]])))
 
     root = "build {0}: build_gitignore {1}".format(path_gitignore,
                                                    " ".join(l_b))
@@ -389,7 +401,7 @@ def get_l_file_for_module(path_module):
 
     l_template = []
 
-    for f in os.listdir(path_module.abs):
+    for f in sorted(os.listdir(path_module.abs)):
         if f.lower().endswith(tuple([".template.f", ".include.f"])):
             l_template.append(join(path_module.abs, f))
         elif f.endswith(".irp.f"):
@@ -495,10 +507,10 @@ def ninja_irpf90_make_build(path_module, l_needed_molule, d_irp):
     # D e p e n d a n c y #
     # ~#~#~#~#~#~#~#~#~#~ #
 
-    l_depend = list(map(comp_path,d_irp[path_module]["l_depend"]))
-    l_src = list(map(comp_path,d_irp[path_module]["l_src"]))
-    l_obj = list(map(comp_path,d_irp[path_module]["l_obj"]))
-    l_template = list(map(comp_path,d_irp[path_module]["l_template"]))
+    l_depend = sorted(list(map(comp_path,d_irp[path_module]["l_depend"])))
+    l_src = sorted(list(map(comp_path,d_irp[path_module]["l_src"])))
+    l_obj = sorted(list(map(comp_path,d_irp[path_module]["l_obj"])))
+    l_template = sorted(list(map(comp_path,d_irp[path_module]["l_template"])))
 
     if l_needed_molule:
         l_symlink = ["l_symlink_{0}".format(path_module.rel)]
@@ -511,7 +523,7 @@ def ninja_irpf90_make_build(path_module, l_needed_molule, d_irp):
     # N i n j a _ b u i l d #
     # ~#~#~#~#~#~#~#~#~#~#~ #
 
-    l_include_dir  = ["-I {0}".format(m.rel) for m in l_needed_molule]
+    l_include_dir  = ["-I {0}".format(m.rel) for m in sorted(l_needed_molule, key=lambda x:x.rel+x.abs) ]
 
     l_string = [
         "build {0}: build_irpf90.ninja {1}".format(str_creation, str_depend),
@@ -642,7 +654,7 @@ def ninja_binaries_build(path_module, l_children, d_binaries):
     # ~#~#~ #
 
     ninja_module_path = join(comp_path(path_module.abs), "IRPF90_temp/build.ninja")
-    l_abs_bin = list(map(comp_path,[binary.abs for binary in d_binaries[path_module]]))
+    l_abs_bin = sorted(list(map(comp_path,[binary.abs for binary in d_binaries[path_module]])))
 
     # ~#~#~#~#~#~ #
     # s t r i n g #
@@ -659,8 +671,7 @@ def ninja_binaries_build(path_module, l_children, d_binaries):
 
 def ninja_module_build(path_module, d_binaries):
 
-    l_abs_bin = list(map(comp_path,[binary.abs for binary in d_binaries[path_module]]))
-
+    l_abs_bin = sorted(list(map(comp_path,[binary.abs for binary in d_binaries[path_module]])))
     path_readme = os.path.join(comp_path(path_module.abs), "README.rst")
 
     l_string = ["build module_{0}: phony {1}".format(path_module.rel,
@@ -698,6 +709,11 @@ def save_subninja_file(path_module):
                  "  description = Cleaning module {0}".format(path_module.rel),
                  ""]
 
+    l_string += ["rule make_tidy",
+                 "  command = module_handler.py tidy {0}".format(path_module.rel),
+                 "  description = Cleaning module {0}".format(path_module.rel),
+                 ""]
+
     l_string += ["rule executables",
             "  command = make -C {0} executables .gitignore qp_edit.native qp_run.native".format(join("$QP_ROOT","ocaml")),
                  "  description = Updating OCaml executables",
@@ -708,6 +724,7 @@ def save_subninja_file(path_module):
                  "build local: make_local_binaries dummy_target", "",
                  "build executables: executables local dummy_target", "",
                  "default executables", "", "build clean: make_clean dummy_target",
+                 "", "build tidy: make_tidy dummy_target",
                  ""]
 
     path_ninja_cur = join(path_module.abs, "build.ninja")
@@ -734,6 +751,10 @@ def create_build_ninja_global():
                  "  command = module_handler.py clean --all",
                  "  description = Cleaning all modules", ""]
 
+    l_string += ["rule make_tidy",
+                 "  command = module_handler.py tidy --all",
+                 "  description = Cleaning all modules", ""]
+
     l_string += ["rule make_ocaml",
                  "  command = make -C {0}/ocaml".format("$QP_ROOT"),
                  "  pool = console",
@@ -748,6 +769,8 @@ def create_build_ninja_global():
                  "default ocaml_target",
                  "",
                  "build clean: make_clean dummy_target",
+                 "",
+                 "build tidy: make_tidy dummy_target",
                  "", ]
 
     path_ninja_cur = join(QP_ROOT, "build.ninja")
@@ -830,14 +853,14 @@ if __name__ == "__main__":
     dict_root = module_instance.dict_root
     dict_root_path = dict_module_genelogy_path(dict_root)
 
-    l_all_module = list(d_genealogy_path.keys())
+    l_all_module = sorted(list(d_genealogy_path.keys()))
 
     # ~#~#~#~#~#~#~#~#~#~#~#~#~ #
     # M o d u l e _ t o _ i r p #
     # ~#~#~#~#~#~#~#~#~#~#~#~#~ #
 
     d_binaries = get_dict_binaries(l_all_module, mode="development")
-    l_module = list(d_binaries.keys())
+    l_module = sorted(list(d_binaries.keys()), key=lambda x: x.rel+x.abs)
 
 
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
@@ -851,7 +874,6 @@ if __name__ == "__main__":
     # ~#~#~#~#~#~#~#~#~#~#~#~ #
 
     for module_to_compile in l_module:
-    
         if module_to_compile.rel == "dummy":
                 continue
 
@@ -884,6 +906,21 @@ if __name__ == "__main__":
     # S a v e s #
     # ~#~#~#~#~ #
 
-    with open(ROOT_BUILD_NINJA_EXP, "w+") as f:
+    with open(ROOT_BUILD_NINJA_EXP_tmp, "w+") as f:
         f.write(header)
         f.write("\n".join(l_string))
+
+    with open(ROOT_BUILD_NINJA_EXP_tmp, "r") as f:
+        a = f.read()
+
+    try:
+        with open(ROOT_BUILD_NINJA_EXP, "r") as f:
+           b = f.read()
+    except:
+           b = None
+
+    if a != b:
+       os.rename(ROOT_BUILD_NINJA_EXP_tmp, ROOT_BUILD_NINJA_EXP)
+    else:
+       os.remove(ROOT_BUILD_NINJA_EXP_tmp)
+
