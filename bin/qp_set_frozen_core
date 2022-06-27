@@ -7,12 +7,13 @@ setting all MOs as Active, except the n/2 first ones which are set as Core.
 If pseudo-potentials are used, all the MOs are set as Active.
 
 Usage:
-      qp_set_frozen_core [-q|--query] [(-l|-s|--large|--small)] EZFIO_DIR
+      qp_set_frozen_core [-q|--query] [(-l|-s|-u|--large|--small|--unset)] EZFIO_DIR
 
 Options:
     -q --query   Prints in the standard output the number of frozen MOs
     -l --large   Use a small core
     -s --small   Use a large core
+    -u --unset   Unset frozen core
 
 
 Default numbers of frozen electrons:
@@ -49,7 +50,7 @@ import os.path
 try:
     import qp_path
 except ImportError:
-    print("source .quantum_package.rc")
+    print("source quantum_package.rc")
     raise
 
 from docopt import docopt
@@ -88,7 +89,9 @@ def main(arguments):
                 elif charge <=  54: n_frozen += 9
                 elif charge <=  86: n_frozen += 18
                 elif charge <= 118: n_frozen += 27
+        elif arguments["--unset"]:
 
+              n_frozen = 0
         else:  # default                                                                      
             for charge in ezfio.nuclei_nucl_charge:
                 if   charge <=   4: pass

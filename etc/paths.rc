@@ -3,7 +3,7 @@
 QP_PYTHON=
 
 # Load dependencies
-for i in ezfio.rc irpf90.rc ninja.rc ocaml.rc 
+for i in ezfio.rc irpf90.rc ocaml.rc 
 do
   source $i
 done
@@ -34,9 +34,9 @@ export PATH=$(qp_prepend_export "PATH" "${QP_PYTHON}":"${QP_ROOT}"/bin:"${QP_ROO
 
 export LD_LIBRARY_PATH=$(qp_prepend_export "LD_LIBRARY_PATH" "${QP_ROOT}"/lib)
 
-
 export LIBRARY_PATH=$(qp_prepend_export "LIBRARY_PATH" "${QP_ROOT}"/lib:"${QP_ROOT}"/lib64)
 
+export PKG_CONFIG_PATH=$(qp_prepend_export "PKG_CONFIG_PATH" "${QP_ROOT}"/lib/pkgconfig)
 export C_INCLUDE_PATH=$(qp_prepend_export "C_INCLUDE_PATH" "${QP_ROOT}"/include)
 export CPATH=$(qp_prepend_export "CPATH" "${QP_ROOT}"/include)
 

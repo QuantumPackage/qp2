@@ -6,12 +6,18 @@ Module utilitary
 Usage:
     module_handler.py print_descendant      [<module_name>...]
     module_handler.py clean                 [ --all | <module_name>...]
-    module_handler.py create_git_ignore     [<module_name>...]
+    module_handler.py tidy                  [ --all | <module_name>...]
+    module_handler.py create_git_ignore     [ --all | <module_name>...]
 
 Options:
     print_descendant        Print the genealogy of the needed modules
+    clean                   Used for ninja clean
+    tidy                    A light version of clean, where only the intermediate
+                            files are removed
+    create_git_ignore       deprecated
     NEED                    The path of NEED file.
                             by default try to open the file in the current path
+
 """
 import os
 import sys
@@ -25,7 +31,7 @@ try:
     from docopt import docopt
     from qp_path import QP_SRC, QP_ROOT, QP_PLUGINS, QP_EZFIO
 except ImportError:
-    print("source .quantum_package.rc")
+    print("source quantum_package.rc")
     raise
 
 
@@ -110,6 +116,7 @@ def get_l_module_descendant(d_child, l_module):
                 print("Error: ", file=sys.stderr)
                 print("`{0}` is not a submodule".format(module), file=sys.stderr)
                 print("Check the typo (spelling, case, '/', etc.) ", file=sys.stderr)
+#                pass
                 sys.exit(1)
 
     return list(set(l))
@@ -209,7 +216,7 @@ if __name__ == '__main__':
         # Remove all produced ezfio_config files
         for filename in os.listdir( os.path.join(QP_EZFIO, "config") ):
             os.remove( os.path.join(QP_EZFIO, "config", filename) )
-            
+
 
     elif not arguments['<module_name>']:
         dir_ = os.getcwd()
@@ -230,11 +237,11 @@ if __name__ == '__main__':
         for module in l_module:
             print(" ".join(sorted(m.l_descendant_unique([module]))))
 
-    if arguments["clean"]:
+    if arguments["clean"] or arguments["tidy"]:
 
         l_dir = ['IRPF90_temp', 'IRPF90_man']
         l_file = ["irpf90_entities", "tags", "irpf90.make", "Makefile",
-                  "Makefile.depend", ".ninja_log", ".ninja_deps", 
+                  "Makefile.depend", ".ninja_log", ".ninja_deps",
                   "ezfio_interface.irp.f"]
 
         for module in l_module:
@@ -242,25 +249,25 @@ if __name__ == '__main__':
             l_symlink = m.l_descendant_unique([module])
             l_exe = get_binaries(module_abs)
 
+            for f in l_dir:
+                try:
+                    shutil.rmtree(os.path.join(module_abs, f))
+                except:
+                    pass
+
+            for symlink in l_symlink:
+                try:
+                    os.unlink(os.path.join(module_abs, symlink))
+                except:
+                    pass
+
+            for f in l_file:
+                try:
+                    os.remove(os.path.join(module_abs, f))
+                except:
+                    pass
+
             if arguments["clean"]:
-                for f in l_dir:
-                    try:
-                        shutil.rmtree(os.path.join(module_abs, f))
-                    except:
-                        pass
-
-                for symlink in l_symlink:
-                    try:
-                        os.unlink(os.path.join(module_abs, symlink))
-                    except:
-                        pass
-
-                for f in l_file:
-                    try:
-                        os.remove(os.path.join(module_abs, f))
-                    except:
-                        pass
-
                 for f in l_exe:
 
                     try:
@@ -268,6 +275,4 @@ if __name__ == '__main__':
                     except:
                         pass
 
-            if arguments["create_git_ignore"]:
-               pass
 

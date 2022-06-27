@@ -1,7 +1,7 @@
 # Configuration of IRPF90 package
 
 # Set the path of IRPF90 here:
-export IRPF90_PATH=${QP_ROOT}/external/irpf90-v2.0.0
+export IRPF90_PATH=${QP_ROOT}/external/irpf90
 export PATH=${PATH}:${IRPF90_PATH}/bin
 
 export IRPF90=${IRPF90_PATH}/bin/irpf90

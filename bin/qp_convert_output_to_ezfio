@@ -121,6 +121,7 @@ def write_ezfio(res, filename):
     exponent = []
 
     res.convert_to_cartesian()
+
     # ~#~#~#~#~#~#~ #
     # P a r s i n g #
     # ~#~#~#~#~#~#~ #
@@ -178,6 +179,72 @@ def write_ezfio(res, filename):
 
     print("OK")
 
+    #   _
+    #  |_)  _.  _ o  _
+    #  |_) (_| _> | _>
+    #
+
+    print("Basis\t\t...\t", end=' ')
+    # ~#~#~#~ #
+    # I n i t #
+    # ~#~#~#~ #
+
+    coefficient = []
+    exponent = []
+
+    # ~#~#~#~#~#~#~ #
+    # P a r s i n g #
+    # ~#~#~#~#~#~#~ #
+
+    inucl = {}
+    for i, a in enumerate(res.geometry):
+       inucl[a.coord] = i
+
+    nbasis = 0
+    nucl_index = []
+    curr_center = -1
+    nucl_shell_num = []
+    ang_mom = []
+    nshell = 0
+    nshell_tot = 0
+    shell_index = []
+    shell_prim_num = []
+    for b in res.basis:
+        s = b.sym
+        if str.count(s, "y") + str.count(s, "x") == 0:
+          c = inucl[b.center]
+          nshell += 1
+          nshell_tot += 1
+          if c != curr_center:
+             curr_center = c
+             nucl_shell_num.append(nshell)
+             nshell = 0
+          nbasis += 1
+          nucl_index.append(c+1)
+          coefficient += b.coef[:len(b.prim)]
+          exponent += [p.expo for p in b.prim]
+          ang_mom.append(str.count(s, "z"))
+          shell_prim_num.append(len(b.prim))
+          shell_index += [nshell_tot+1] * len(b.prim)
+
+    # ~#~#~#~#~ #
+    # W r i t e #
+    # ~#~#~#~#~ #
+
+    ezfio.set_basis_basis("Read from ResultsFile")
+    ezfio.set_basis_shell_num(len(ang_mom))
+    ezfio.set_basis_basis_nucleus_index(nucl_index)
+    ezfio.set_basis_prim_num(len(coefficient))
+
+    ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
+    ezfio.set_basis_prim_coef(coefficient)
+    ezfio.set_basis_prim_expo(exponent)
+    ezfio.set_basis_shell_ang_mom(ang_mom)
+    ezfio.set_basis_shell_prim_num(shell_prim_num)
+    ezfio.set_basis_shell_index(shell_index)
+
+    print("OK")
+
     #                _
     # |\/|  _   _   |_)  _.  _ o  _
     # |  | (_) _>   |_) (_| _> | _>
@@ -227,12 +294,17 @@ def write_ezfio(res, filename):
     for i in range(mo_num):
         energies.append(MOs[i].eigenvalue)
 
+    OccNum = []
     if res.occ_num is not None:
-        OccNum = []
         for i in MOindices:
             OccNum.append(res.occ_num[MO_type][i])
+    else:
+        for i in range(res.num_beta):
+            OccNum.append(2.)
+        for i in range(res.num_beta,res.num_alpha):
+            OccNum.append(1.)
 
-        while len(OccNum) < mo_num:
+    while len(OccNum) < mo_num:
             OccNum.append(0.)
 
     MoMatrix = []
@@ -255,8 +327,9 @@ def write_ezfio(res, filename):
     # ~#~#~#~#~ #
 
     ezfio.set_mo_basis_mo_num(mo_num)
-    ezfio.set_mo_basis_mo_occ(OccNum)
     ezfio.set_mo_basis_mo_coef(MoMatrix)
+    ezfio.set_mo_basis_mo_occ(OccNum)
+
     print("OK")
 
 
@@ -317,8 +390,6 @@ def write_ezfio(res, filename):
         n_beta = res.num_beta
         for i in range(nucl_num):
             charge[i] -= nucl_charge_remove[i]
-            n_alpha -= nucl_charge_remove[i]/2
-            n_beta -= nucl_charge_remove[i]/2
         ezfio.set_nuclei_nucl_charge(charge)
         ezfio.set_electrons_elec_alpha_num(n_alpha)
         ezfio.set_electrons_elec_beta_num(n_beta)

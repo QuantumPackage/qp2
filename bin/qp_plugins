@@ -6,6 +6,7 @@ Usage:
        qp_plugins download <url> [-n <name>]
        qp_plugins install <name>...
        qp_plugins uninstall <name>
+       qp_plugins remove    <name>
        qp_plugins update [-r <repo>]
        qp_plugins create -n <name> [-r <repo>] [<needed_modules>...]
 
@@ -23,6 +24,8 @@ Options:
     install                   Install a plugin
 
     uninstall                 Uninstall a plugin
+
+    remove                    Uninstall a plugin
 
     update                    Update the repository 
 
@@ -274,7 +277,7 @@ def main(arguments):
             subprocess.check_call(["qp_create_ninja", "update"])
             print("[ OK ]")
 
-    elif arguments["uninstall"]:
+    elif arguments["uninstall"] or arguments["remove"]:
 
         m_instance = ModuleHandler([QP_SRC])
         d_descendant = m_instance.dict_descendant
