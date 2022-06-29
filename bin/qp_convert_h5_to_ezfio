@@ -3,13 +3,13 @@
 convert hdf5 output (e.g. from PySCF) to ezfio
 
 Usage:
-    qp_convert_h5_to_ezfio [--noqmc] [-o EZFIO_DIR] FILE
+    qp_convert_h5_to_ezfio [--noqmc] [--rmg] [-o EZFIO_DIR] FILE
 
 Options:
     -o --output=EZFIO_DIR    Produced directory
                              by default is FILE.ezfio
     --noqmc                  don't include basis, cell, etc. for QMCPACK
-    -cd                      h5 contains cholesky decomposition informatin, these h5 result from RMG and the pyscf AFQMC converter of QMCPACK.
+    --rmg                      h5 contains cholesky decomposition informatin, these h5 result from RMG and the pyscf AFQMC converter of QMCPACK.
 
 """
 from ezfio import ezfio
@@ -175,6 +175,7 @@ def convert_mol(filename,qph5path):
     return
 
 def convert_kpts_cd(filename,qph5path,qmcpack=True):
+    import json
 
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
@@ -275,7 +276,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
             unique_k_idx.append(int(i[1:])+1)
     kpt_sparse_map = np.zeros(kpt_num)
     for i in range(kpt_num):
-        if i+1 is in uniq_k_idx:
+        if i+1 in uniq_k_idx:
             kpt_sparse_map[i] = i+1 
         else:
             kpt_sparse_map[i] = -minusk[i]
@@ -295,7 +296,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ##########################################
 
     # should this be in ao_basis? ao_two_e_ints?
-      with h5py.File(qph5path,'r') as qph5:
+    with h5py.File(qph5path,'r') as qph5:
         nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
         nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
         nchol_per_kpt_max = max(nchol_per_kpt)
@@ -871,6 +872,7 @@ if __name__ == '__main__':
 
     FILE = get_full_path(ARGUMENTS['FILE'])
     qmcpack = True
+    rmg = False
     if ARGUMENTS["--output"]:
         EZFIO_FILE = get_full_path(ARGUMENTS["--output"])
     else:
@@ -881,10 +883,13 @@ if __name__ == '__main__':
     if ARGUMENTS["--rmg"]:
         rmg = True
     with h5py.File(FILE,'r') as qph5:
-        do_kpts = ('kconserv' in qph5['nuclei'].keys())
-    if (do_kpts):
+        try:
+            do_kpts = ('kconserv' in qph5['nuclei'].keys())
+        except:
+            do_kpts = False
+    if (do_kpts or rmg):
         print("converting HDF5 to EZFIO for periodic system")
-        if cd:
+        if rmg:
             print("Using RMG and AFQMC h5")
             convert_kpts_cd(EZFIO_FILE,FILE,qmcpack)
         else:
