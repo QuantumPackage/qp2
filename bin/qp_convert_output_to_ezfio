@@ -146,7 +146,13 @@ def write_ezfio(res, filename):
     ezfio.set_ao_basis_ao_nucl(at)
     ezfio.set_ao_basis_ao_prim_num(num_prim)
     ezfio.set_ao_basis_ao_power(power_x + power_y + power_z)
-    ezfio.set_ao_basis_ao_normalized(False)
+    try:
+      if res.normf == 0:
+        ezfio.set_ao_basis_ao_normalized(True)
+      elif res.normf == 1:
+        ezfio.set_ao_basis_ao_normalized(False)
+    except:
+      ezfio.set_ao_basis_ao_normalized(True)
 
     # ~#~#~#~#~#~#~ #
     # P a r s i n g #
