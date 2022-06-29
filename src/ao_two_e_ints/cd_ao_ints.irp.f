@@ -1,4 +1,12 @@
-BEGIN_PROVIDER [complex*16, chol_ao_integrals_complex, (ao_num_per_kpt,ao_num_per_kpt,chol_num_max,kpt_num,chol_unique_kpt_num)]
+!BEGIN_PROVIDER [ integer, chol_num_max ]
+! implicit none
+! BEGIN_DOC
+! ! Max number of cholesky vectors.
+! END_DOC
+! chol_num_max = maxval(chol_num)
+!END_PROVIDER
+
+BEGIN_PROVIDER [complex*16, chol_ao_integrals_complex, (ao_num_per_kpt,ao_num_per_kpt,chol_num_max,kpt_num,unique_kpt_num)]
   implicit none
   BEGIN_DOC
   !  CD AO integrals
@@ -37,7 +45,7 @@ subroutine ao_map_fill_from_chol
   integer :: ki,kk,kj,kl
   integer :: ii,ik,ij,il
   integer :: kikk2,kjkl2,jl2,ik2
-  integer :: i_ao,j_ao,i_cd
+  integer :: i_ao,j_ao,i_cd,kq
 
   complex*16,allocatable :: ints_ik(:,:,:), ints_jl(:,:,:), ints_ikjl(:,:,:,:)
 
@@ -101,7 +109,7 @@ subroutine ao_map_fill_from_chol
       !$OMP  idx_tmp, tmp_re, tmp_im, integral,sign,use_map1) &
       !$OMP  DEFAULT(NONE)  &
       !$OMP  SHARED(size_buffer, kpt_num, ao_num_per_kpt, ao_num_kpt_2, &
-      !$OMP  chol_num_max, chol_num, chol_unique_kpt_num, kpt_sparse_map, qktok2, minusk, &
+      !$OMP  chol_num_max, chol_num, unique_kpt_num, kpt_sparse_map, qktok2, minusk, &
       !$OMP  kl,kj,kjkl2,ints_jl, & 
       !$OMP  kconserv, chol_ao_integrals_complex, ao_integrals_threshold, ao_integrals_map, ao_integrals_map_2)
   

@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [complex*16, chol_mo_integrals_complex, (mo_num_per_kpt,mo_num_per_kpt,chol_num_max,kpt_num,chol_unique_kpt_num)]
+BEGIN_PROVIDER [complex*16, chol_mo_integrals_complex, (mo_num_per_kpt,mo_num_per_kpt,chol_num_max,kpt_num,unique_kpt_num)]
   implicit none
   BEGIN_DOC
   !  CD MO integrals
@@ -10,7 +10,7 @@ BEGIN_PROVIDER [complex*16, chol_mo_integrals_complex, (mo_num_per_kpt,mo_num_pe
     print *,  'CD MO integrals read from disk'
   else
     call chol_mo_from_chol_ao(chol_mo_integrals_complex,chol_ao_integrals_complex,mo_num_per_kpt,ao_num_per_kpt, &
-                              chol_num_max,kpt_num,chol_unique_kpt_num)
+                              chol_num_max,kpt_num,unique_kpt_num)
   endif
 
   if (write_chol_mo_integrals) then
@@ -126,7 +126,7 @@ subroutine mo_map_fill_from_chol_dot
             !$OMP  n_integrals_2, buffer_i_2, buffer_values_2, &
             !$OMP  idx_tmp, tmp_re, tmp_im, integral,sign,use_map1) &
             !$OMP  DEFAULT(NONE)  &
-            !$OMP  SHARED(size_buffer, kpt_num, chol_num, mo_num_per_kpt, mo_num_kpt_2, &
+            !$OMP  SHARED(size_buffer, kpt_num, mo_num_per_kpt, mo_num_kpt_2, &
             !$OMP  kl,kj,kjkl2,ints_jl, &
             !$OMP  ki,kk,kikk2,ints_ik, &
             !$OMP  kQ, Q_idx, chol_num, &
