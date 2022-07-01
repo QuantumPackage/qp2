@@ -1,58 +1,21 @@
 subroutine save_mos
   implicit none
-  double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j
-
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
-  call ezfio_set_mo_basis_mo_num(mo_num)
-  call ezfio_set_mo_basis_mo_label(mo_label)
-  call ezfio_set_mo_basis_ao_md5(ao_md5)
-  allocate ( buffer(ao_num,mo_num) )
-  buffer = 0.d0
-  do j = 1, mo_num
-    do i = 1, ao_num
-      buffer(i,j) = mo_coef(i,j)
-    enddo
-  enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
-  call ezfio_set_mo_basis_mo_occ(mo_occ)
-  call ezfio_set_mo_basis_mo_class(mo_class)
-  deallocate (buffer)
-
-end
-
-
-subroutine save_mos_no_occ
-  implicit none
-  double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j
-
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
- !call ezfio_set_mo_basis_mo_num(mo_num)
- !call ezfio_set_mo_basis_mo_label(mo_label)
- !call ezfio_set_mo_basis_ao_md5(ao_md5)
-  allocate ( buffer(ao_num,mo_num) )
-  buffer = 0.d0
-  do j = 1, mo_num
-    do i = 1, ao_num
-      buffer(i,j) = mo_coef(i,j)
-    enddo
-  enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
-  deallocate (buffer)
-
+  BEGIN_DOC
+! Write MO data to disk
+  END_DOC
+  call save_mos_truncated(mo_num)
 end
 
 subroutine save_mos_truncated(n)
+  use trexio
   implicit none
+  BEGIN_DOC
+! Saves the first n MOs
+  END_DOC
+  integer, intent(in)            :: n
   double precision, allocatable  :: buffer(:,:)
-  integer                        :: i,j,n
+  integer                        :: i,j
 
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
-
-  call ezfio_set_mo_basis_mo_num(n)
-  call ezfio_set_mo_basis_mo_label(mo_label)
-  call ezfio_set_mo_basis_ao_md5(ao_md5)
   allocate ( buffer(ao_num,n) )
   buffer = 0.d0
   do j = 1, n
@@ -60,12 +23,96 @@ subroutine save_mos_truncated(n)
       buffer(i,j) = mo_coef(i,j)
     enddo
   enddo
-  call ezfio_set_mo_basis_mo_coef(buffer)
-  call ezfio_set_mo_basis_mo_occ(mo_occ)
-  call ezfio_set_mo_basis_mo_class(mo_class)
+  if (use_trexio) then
+    integer (trexio_exit_code) :: rc
+
+    rc = trexio_has_ao_num(trexio_file)
+    if (rc == TREXIO_HAS_NOT) then
+      rc = trexio_write_ao_num(trexio_file, ao_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
+    rc = trexio_write_mo_num(trexio_file, n)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_mo_type(trexio_file, mo_label, len(trim(mo_label)))
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_mo_occupation(trexio_file, mo_occ)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_mo_class(trexio_file, mo_class, len(mo_class(1)))
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_write_mo_coefficient(trexio_file, buffer)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_close(trexio_file)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    FREE trexio_file
+  else
+    call ezfio_set_mo_basis_mo_num(n)
+    call ezfio_set_mo_basis_mo_label(mo_label(1:n))
+    call ezfio_set_mo_basis_mo_occ(mo_occ(1:n))
+    call ezfio_set_mo_basis_mo_class(mo_class(1:n))
+    call ezfio_set_mo_basis_mo_coef(buffer)
+  endif
+  call ezfio_set_mo_basis_ao_md5(ao_md5)
+
   deallocate (buffer)
 
 end
+
+
+subroutine save_mo_coef
+  use trexio
+  implicit none
+  BEGIN_DOC
+! Saves the MO coefficients
+  END_DOC
+  double precision, allocatable  :: buffer(:,:)
+  integer                        :: i,j
+
+  allocate ( buffer(ao_num,mo_num) )
+  buffer = 0.d0
+  do j = 1, mo_num
+    do i = 1, ao_num
+      buffer(i,j) = mo_coef(i,j)
+    enddo
+  enddo
+  if (use_trexio) then
+    integer (trexio_exit_code) :: rc
+
+    rc = trexio_has_ao_num(trexio_file)
+    if (rc == TREXIO_HAS_NOT) then
+      rc = trexio_write_ao_num(trexio_file, ao_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
+    rc = trexio_has_mo_num(trexio_file)
+    if (rc == TREXIO_HAS_NOT) then
+      rc = trexio_write_mo_num(trexio_file, mo_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
+    rc = trexio_write_mo_coefficient(trexio_file, buffer)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    rc = trexio_close(trexio_file)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    FREE trexio_file
+  else
+    call ezfio_set_mo_basis_mo_coef(buffer)
+  endif
+  deallocate (buffer)
+
+end
+
+
+subroutine save_mos_no_occ
+  call save_mo_coef
+end
+
 
 subroutine mo_as_eigvectors_of_mo_matrix(matrix,n,m,label,sign,output)
   implicit none

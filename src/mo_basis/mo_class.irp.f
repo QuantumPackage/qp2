@@ -1,7 +1,4 @@
-! DO NOT MODIFY BY HAND
-! Created by $QP_ROOT/scripts/ezfio_interface/ei_handler.py
-! from file /home/eginer/programs/qp2/src/mo_basis/EZFIO.cfg
-
+use trexio
 
 BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
   implicit none
@@ -10,16 +7,27 @@ BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
   END_DOC
 
   logical                        :: has
-  PROVIDE ezfio_filename
+  integer(trexio_exit_code)      :: rc
+
+  PROVIDE ezfio_filename trexio_file
+
+  mo_class(:) = 'Active'
+
   if (mpi_master) then
     if (size(mo_class) == 0) return
 
-    call ezfio_has_mo_basis_mo_class(has)
-    if (has) then
-      write(6,'(A)') '.. >>>>> [ IO READ: mo_class ] <<<<< ..'
-      call ezfio_get_mo_basis_mo_class(mo_class)
+    if (use_trexio) then
+      rc = trexio_has_mo_class(trexio_file)
+      if (rc == TREXIO_SUCCESS) then
+        rc = trexio_read_mo_class(trexio_file, mo_class, len(mo_class(1)))
+        call trexio_assert(rc, TREXIO_SUCCESS)
+      endif
     else
-      mo_class(:) = 'Active'
+      call ezfio_has_mo_basis_mo_class(has)
+      if (has) then
+        write(6,'(A)') '.. >>>>> [ IO READ: mo_class ] <<<<< ..'
+        call ezfio_get_mo_basis_mo_class(mo_class)
+      endif
     endif
   endif
   IRP_IF MPI_DEBUG

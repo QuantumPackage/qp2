@@ -204,6 +204,7 @@ EOF
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT}
               make -j 8 && make -j 8 check && make -j 8 install
+              cp ${QP_ROOT}/include/trexio_f.f90 ${QP_ROOT}/src/ezfio_files
 EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then

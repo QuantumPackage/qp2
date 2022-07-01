@@ -1,3 +1,4 @@
+use trexio
 BEGIN_PROVIDER [ integer, mo_num ]
   implicit none
   BEGIN_DOC
@@ -5,37 +6,51 @@ BEGIN_PROVIDER [ integer, mo_num ]
   END_DOC
 
   logical                        :: has
-  PROVIDE ezfio_filename
+  integer                        :: ierr
+  integer(trexio_exit_code)      :: rc
+
+  PROVIDE ezfio_filename trexio_file
+
   if (mpi_master) then
-    call ezfio_has_mo_basis_mo_num(has)
-  endif
-  IRP_IF MPI_DEBUG
-    print *,  irp_here, mpi_rank
-    call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-  IRP_ENDIF
-  IRP_IF MPI
-    include 'mpif.h'
-    integer                        :: ierr
-    call MPI_BCAST( has, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) then
-      stop 'Unable to read mo_num with MPI'
+    if (use_trexio) then
+      rc = trexio_has_mo_num(trexio_file)
+      has = (rc == TREXIO_SUCCESS)
+    else
+      call ezfio_has_mo_basis_mo_num(has)
     endif
-  IRP_ENDIF
-  if (.not.has) then
-    mo_num = ao_ortho_canonical_num
-  else
-    if (mpi_master) then
-      call ezfio_get_mo_basis_mo_num(mo_num)
-    endif
+    IRP_IF MPI_DEBUG
+      print *,  irp_here, mpi_rank
+      call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+    IRP_ENDIF
     IRP_IF MPI
-      call MPI_BCAST( mo_num, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+      include 'mpif.h'
+      call MPI_BCAST( has, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
       if (ierr /= MPI_SUCCESS) then
         stop 'Unable to read mo_num with MPI'
       endif
     IRP_ENDIF
+    if (.not.has) then
+      mo_num = ao_ortho_canonical_num
+    else
+      if (mpi_master) then
+        if (use_trexio) then
+          rc = trexio_read_mo_num(trexio_file, mo_num)
+          call trexio_assert(rc, TREXIO_SUCCESS)
+        else
+          call ezfio_get_mo_basis_mo_num(mo_num)
+        endif
+      endif
+
+      IRP_IF MPI
+        call MPI_BCAST( mo_num, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+        if (ierr /= MPI_SUCCESS) then
+          stop 'Unable to read mo_num with MPI'
+        endif
+      IRP_ENDIF
+    endif
+    call write_int(6,mo_num,'mo_num')
+    ASSERT (mo_num > 0)
   endif
-  call write_int(6,mo_num,'mo_num')
-  ASSERT (mo_num > 0)
 
 END_PROVIDER
 
@@ -52,12 +67,16 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
   integer                        :: i, j
   double precision, allocatable  :: buffer(:,:)
   logical                        :: exists
-  PROVIDE ezfio_filename
-
+  integer(trexio_exit_code)      :: rc
+  PROVIDE ezfio_filename trexio_file
 
   if (mpi_master) then
-    ! Coefs
-    call ezfio_has_mo_basis_mo_coef(exists)
+    if (use_trexio) then
+      rc = trexio_has_mo_coefficient(trexio_file)
+      exists = (rc == TREXIO_SUCCESS)
+    else
+      call ezfio_has_mo_basis_mo_coef(exists)
+    endif
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
@@ -74,7 +93,12 @@ BEGIN_PROVIDER [ double precision, mo_coef, (ao_num,mo_num) ]
 
   if (exists) then
     if (mpi_master) then
-      call ezfio_get_mo_basis_mo_coef(mo_coef)
+      if (use_trexio) then
+          rc = trexio_read_mo_coefficient(trexio_file, mo_coef)
+          call trexio_assert(rc, TREXIO_SUCCESS)
+      else
+        call ezfio_get_mo_basis_mo_coef(mo_coef)
+      endif
       write(*,*) 'Read  mo_coef'
     endif
     IRP_IF MPI
@@ -105,12 +129,16 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
   integer                        :: i, j
   double precision, allocatable  :: buffer(:,:)
   logical                        :: exists
+  integer(trexio_exit_code)      :: rc
   PROVIDE ezfio_filename
 
-
   if (mpi_master) then
-    ! Coefs
-    call ezfio_has_mo_basis_mo_coef_imag(exists)
+    if (use_trexio) then
+      rc = trexio_has_mo_coefficient_im(trexio_file)
+      exists = (rc == TREXIO_SUCCESS)
+    else
+      call ezfio_has_mo_basis_mo_coef_imag(exists)
+    endif
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
@@ -127,7 +155,12 @@ BEGIN_PROVIDER [ double precision, mo_coef_imag, (ao_num,mo_num) ]
 
   if (exists) then
     if (mpi_master) then
-      call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
+      if (use_trexio) then
+          rc = trexio_read_mo_coefficient_im(trexio_file, mo_coef_imag)
+          call trexio_assert(rc, TREXIO_SUCCESS)
+      else
+        call ezfio_get_mo_basis_mo_coef_imag(mo_coef_imag)
+      endif
       write(*,*) 'Read  mo_coef_imag'
     endif
     IRP_IF MPI
@@ -171,14 +204,27 @@ BEGIN_PROVIDER [ character*(64), mo_label ]
   END_DOC
 
   logical                        :: exists
+  integer(trexio_exit_code)      :: rc
+
   PROVIDE ezfio_filename
   if (mpi_master) then
-    call ezfio_has_mo_basis_mo_label(exists)
-    if (exists) then
-      call ezfio_get_mo_basis_mo_label(mo_label)
-      mo_label = trim(mo_label)
+    if (use_trexio) then
+      rc = trexio_has_mo_type(trexio_file)
+      if (rc == TREXIO_SUCCESS) then
+        rc = trexio_read_mo_type(trexio_file, mo_label, 64)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+        mo_label = trim(mo_label)
+      else
+        mo_label = 'no_label'
+      endif
     else
-      mo_label = 'no_label'
+      call ezfio_has_mo_basis_mo_label(exists)
+      if (exists) then
+        call ezfio_get_mo_basis_mo_label(mo_label)
+        mo_label = trim(mo_label)
+      else
+        mo_label = 'no_label'
+      endif
     endif
     write(*,*) '* mo_label          ', trim(mo_label)
   endif
@@ -218,23 +264,34 @@ BEGIN_PROVIDER [ double precision, mo_occ, (mo_num) ]
   BEGIN_DOC
   ! |MO| occupation numbers
   END_DOC
+  integer(trexio_exit_code)      :: rc
   PROVIDE ezfio_filename elec_beta_num elec_alpha_num
+
+  mo_occ = 0.d0
+  integer :: i
+  do i=1,elec_beta_num
+    mo_occ(i) = 2.d0
+  enddo
+  do i=elec_beta_num+1,elec_alpha_num
+    mo_occ(i) = 1.d0
+  enddo
+
   if (mpi_master) then
-    logical :: exists
-    call ezfio_has_mo_basis_mo_occ(exists)
-    if (exists) then
-      call ezfio_get_mo_basis_mo_occ(mo_occ)
+    if (use_trexio) then
+      rc = trexio_has_mo_occupation(trexio_file)
+      if (rc == TREXIO_SUCCESS) then
+        rc = trexio_read_mo_occupation(trexio_file, mo_occ)
+        call trexio_assert(rc, TREXIO_SUCCESS)
+        write(*,*) 'Read mo_occ'
+      endif
     else
-      mo_occ = 0.d0
-      integer :: i
-      do i=1,elec_beta_num
-        mo_occ(i) = 2.d0
-      enddo
-      do i=elec_beta_num+1,elec_alpha_num
-        mo_occ(i) = 1.d0
-      enddo
+      logical :: exists
+      call ezfio_has_mo_basis_mo_occ(exists)
+      if (exists) then
+        call ezfio_get_mo_basis_mo_occ(mo_occ)
+        write(*,*) 'Read mo_occ'
+      endif
     endif
-    write(*,*) 'Read mo_occ'
   endif
   IRP_IF MPI_DEBUG
     print *,  irp_here, mpi_rank
