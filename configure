@@ -180,7 +180,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
 fi
 
 
@@ -193,6 +193,18 @@ for PACKAGE in ${PACKAGES} ; do
               unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja-linux.zip -d "\${QP_ROOT}"/bin
 EOF
 
+
+    elif [[ ${PACKAGE} = trexio ]] ; then
+
+            VERSION="2.2.0"
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              tar -zxf trexio-${VERSION}.tar.gz
+              cd trexio-${VERSION}
+              ./configure --prefix=\${QP_ROOT}
+              make -j 8 && make -j 8 check && make -j 8 install
+EOF
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
@@ -298,6 +310,12 @@ source quantum_package.rc
 NINJA=$(find_exe ninja)
 if [[ ${NINJA} = $(not_found) ]] ; then
         error "Ninja (ninja) is not installed."
+        fail
+fi
+
+TREXIO=$(find_lib -ltrexio)
+if [[ ${TREXIO} = $(not_found) ]] ; then
+        error "TREXIO (trexio) is not installed."
         fail
 fi
 
