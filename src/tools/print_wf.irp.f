@@ -32,9 +32,8 @@ subroutine routine
  double precision :: norm_mono_a,norm_mono_b
  double precision :: norm_mono_a_2,norm_mono_b_2
  double precision :: norm_mono_a_pert_2,norm_mono_b_pert_2
- double precision :: norm_mono_a_pert,norm_mono_b_pert,norm_double_1
+ double precision :: norm_mono_a_pert,norm_mono_b_pert
  double precision :: delta_e,coef_2_2
-
  norm_mono_a = 0.d0
  norm_mono_b = 0.d0
  norm_mono_a_2 = 0.d0
@@ -43,7 +42,6 @@ subroutine routine
  norm_mono_b_pert = 0.d0
  norm_mono_a_pert_2 = 0.d0
  norm_mono_b_pert_2 = 0.d0
- norm_double_1 = 0.d0
  do i = 1, min(N_det_print_wf,N_det)
   print*,''
   print*,'i = ',i
@@ -95,7 +93,6 @@ subroutine routine
     print*,'h1,p1 = ',h1,p1
     print*,'s2',s2
     print*,'h2,p2 = ',h2,p2
-    norm_double_1 += dabs(psi_coef_sorted(i,1)/psi_coef_sorted(1,1))
    endif
 
    print*,'<Ref| H |D_I> = ',hij
@@ -112,7 +109,6 @@ subroutine routine
  print*,''
  print*,'L1 norm of mono alpha = ',norm_mono_a
  print*,'L1 norm of mono beta  = ',norm_mono_b
- print*,'L1 norm of double exc = ',norm_double_1
  print*, '---'
  print*,'L2 norm of mono alpha = ',norm_mono_a_2
  print*,'L2 norm of mono beta  = ',norm_mono_b_2

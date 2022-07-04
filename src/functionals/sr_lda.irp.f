@@ -21,9 +21,7 @@
    weight = final_weight_at_r_vector(i)
    rhoa(istate) = one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rhob(istate) = one_e_dm_and_grad_beta_in_r(4,i,istate)
-   double precision :: mu_local
-   mu_local = mu_of_r_dft(i)
-   call ex_lda_sr(mu_local,rhoa(istate),rhob(istate),e_x,vx_a,vx_b)
+   call ex_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_x,vx_a,vx_b)
    energy_x_sr_lda(istate) += weight * e_x
   enddo
  enddo
@@ -50,9 +48,7 @@
    weight = final_weight_at_r_vector(i)
    rhoa(istate) = one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rhob(istate) = one_e_dm_and_grad_beta_in_r(4,i,istate)
-   double precision :: mu_local
-   mu_local = mu_of_r_dft(i)
-   call ec_lda_sr(mu_local,rhoa(istate),rhob(istate),e_c,vc_a,vc_b)
+   call ec_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_c,vc_a,vc_b)
    energy_c_sr_lda(istate) += weight * e_c
   enddo
  enddo
@@ -126,10 +122,8 @@ END_PROVIDER
    weight = final_weight_at_r_vector(i)
    rhoa(istate) = one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rhob(istate) = one_e_dm_and_grad_beta_in_r(4,i,istate)
-   double precision :: mu_local
-   mu_local = mu_of_r_dft(i)
-   call ec_lda_sr(mu_local,rhoa(istate),rhob(istate),e_c,sr_vc_a,sr_vc_b)
-   call ex_lda_sr(mu_local,rhoa(istate),rhob(istate),e_x,sr_vx_a,sr_vx_b)
+   call ec_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_c,sr_vc_a,sr_vc_b)
+   call ex_lda_sr(mu_erf_dft,rhoa(istate),rhob(istate),e_x,sr_vx_a,sr_vx_b)
    do j =1, ao_num
     aos_sr_vc_alpha_lda_w(j,i,istate) = sr_vc_a * aos_in_r_array(j,i)*weight
     aos_sr_vc_beta_lda_w(j,i,istate)  = sr_vc_b * aos_in_r_array(j,i)*weight
@@ -153,6 +147,8 @@ END_PROVIDER
  double precision :: mu,weight
  double precision :: e_c,sr_vc_a,sr_vc_b,e_x,sr_vx_a,sr_vx_b
  double precision, allocatable :: rhoa(:),rhob(:)
+ double precision :: mu_local
+ mu_local = mu_erf_dft
  allocate(rhoa(N_states), rhob(N_states))
  do istate = 1, N_states
   do i = 1, n_points_final_grid
@@ -162,8 +158,6 @@ END_PROVIDER
    weight = final_weight_at_r_vector(i)
    rhoa(istate) = one_e_dm_and_grad_alpha_in_r(4,i,istate)
    rhob(istate) = one_e_dm_and_grad_beta_in_r(4,i,istate)
-   double precision :: mu_local
-   mu_local = mu_of_r_dft(i)
    call ec_lda_sr(mu_local,rhoa(istate),rhob(istate),e_c,sr_vc_a,sr_vc_b)
    call ex_lda_sr(mu_local,rhoa(istate),rhob(istate),e_x,sr_vx_a,sr_vx_b)
    do j =1, ao_num

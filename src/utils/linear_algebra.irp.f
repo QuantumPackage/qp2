@@ -1649,3 +1649,103 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   enddo
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!subroutine svd_s(A, LDA, U, LDU, D, Vt, LDVt, m, n)
+!  implicit none
+!  BEGIN_DOC
+!  ! !!!
+!  ! DGESVD computes the singular value decomposition (SVD) of a real
+!  ! M-by-N matrix A, optionally computing the left and/or right singular
+!  ! vectors. The SVD is written:
+!  !      A = U * SIGMA * transpose(V)
+!  ! where SIGMA is an M-by-N matrix which is zero except for its
+!  ! min(m,n) diagonal elements, U is an M-by-M orthogonal matrix, and
+!  ! V is an N-by-N orthogonal matrix.  The diagonal elements of SIGMA
+!  ! are the singular values of A; they are real and non-negative, and
+!  ! are returned in descending order.  The first min(m,n) columns of
+!  ! U and V are the left and right singular vectors of A.
+!  !
+!  ! Note that the routine returns V**T, not V.
+!  ! !!!
+!  END_DOC
+!
+!  integer, intent(in)             :: LDA, LDU, LDVt, m, n
+!  double precision, intent(in)    :: A(LDA,n)
+!  double precision, intent(out)   :: U(LDU,m), Vt(LDVt,n), D(min(m,n))
+!  double precision,allocatable    :: work(:), A_tmp(:,:)
+!  integer                         :: info, lwork, i, j, k
+!
+!
+!   allocate (A_tmp(LDA,n))
+!   do k=1,n
+!     do i=1,m
+!       !A_tmp(i,k) = A(i,k) + 1d-16
+!       A_tmp(i,k) = A(i,k)
+!     enddo
+!   enddo
+! 
+!   ! Find optimal size for temp arrays
+!   allocate(work(1))
+!   lwork = -1
+!   ! 'A': all M columns of U are returned in array U
+!   ! 'A': all N rows of V**T are returned in the array VT
+!   call dgesvd('A', 'A', m, n, A_tmp, LDA, D, U, LDU, Vt, LDVt, work, lwork, info)
+!   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+!   if( info.ne.0 ) then
+!     print *, ' problem in first call DGESVD !!!!'
+!     print *, ' info = ', info
+!     print *, '  < 0 : if INFO = -i, the i-th argument had an illegal value.'
+!     print *, '  > 0 : if DBDSQR did not converge, INFO specifies how many  '
+!     print *, '        superdiagonals of an intermediate bidiagonal form B  '
+!     print *, '        did not converge to zero. See the description of WORK'
+!     print *, '        above for details.                                   '
+!     stop
+!   endif
+!   lwork = max(int(work(1)), 5*MIN(M,N))
+!   deallocate(work)
+!
+!   allocate(work(lwork))
+!
+!   call dgesvd('A', 'A', m, n, A_tmp, LDA, D, U, LDU, Vt, LDVt, work, lwork, info)
+!   if( info.ne.0 ) then
+!     print *, ' problem in second call DGESVD !!!!'
+!     print *, ' info = ', info
+!     print *, '  < 0 : if INFO = -i, the i-th argument had an illegal value.'
+!     print *, '  > 0 : if DBDSQR did not converge, INFO specifies how many  '
+!     print *, '        superdiagonals of an intermediate bidiagonal form B  '
+!     print *, '        did not converge to zero. See the description of WORK'
+!     print *, '        above for details.                                   '
+!     stop
+!   endif
+!
+!   deallocate(A_tmp,work)
+! 
+!   !do j=1, m
+!   !  do i=1, LDU
+!   !    if (dabs(U(i,j)) < 1.d-14)  U(i,j) = 0.d0
+!   !  enddo
+!   !enddo
+!   !do j = 1, n
+!   !  do i = 1, LDVt
+!   !    if (dabs(Vt(i,j)) < 1.d-14) Vt(i,j) = 0.d0
+!   !  enddo
+!   !enddo
+! 
+!end
+!

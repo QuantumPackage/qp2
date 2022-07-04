@@ -1,5 +1,5 @@
 
-subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
+subroutine davidson_general_ext_rout(u_in,H_jj,Dress_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
   use mmap_module
   implicit none
   BEGIN_DOC
@@ -410,6 +410,36 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
       )
   deallocate(overlap)
   FREE nthreads_davidson
+end
+
+subroutine hcalc_template(v,u,N_st,sze)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Template of routine for the application of H
+  !
+  ! Here, it is done with the Hamiltonian matrix 
+  !
+  ! on the set of determinants of psi_det 
+  !
+  ! Computes $v = H | u \rangle$ 
+  !
+  END_DOC
+  integer, intent(in)              :: N_st,sze
+  double precision, intent(in)     :: u(sze,N_st)
+  double precision, intent(inout)  :: v(sze,N_st)
+  integer :: i,j,istate
+  v = 0.d0
+  do istate = 1, N_st
+   do i = 1, sze
+    do j = 1, sze
+      v(i,istate) += H_matrix_all_dets(j,i) * u(j,istate)
+    enddo
+   enddo
+   do i = 1, sze
+    v(i,istate) += u(i,istate) * nuclear_repulsion
+   enddo
+  enddo
 end
 
 subroutine dressing_diag_uv(v,u,dress_diag,N_st,sze)

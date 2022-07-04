@@ -59,8 +59,6 @@ let () =
 *)
 
 
-exception Error of string
-
 type short_opt = char
 
 type long_opt = string

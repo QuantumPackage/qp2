@@ -47,37 +47,6 @@ program cisd
   PROVIDE N_states
   read_wf = .False.
   SOFT_TOUCH read_wf
-
-  integer :: i,k
-
-  if(pseudo_sym)then
-   call H_apply_cisd_sym
-  else
-   call H_apply_cisd
-  endif
-  double precision :: r1, r2
-  double precision, allocatable :: U_csf(:,:)
-
-  allocate(U_csf(N_csf,N_states))
-  U_csf = 0.d0
-  U_csf(1,1) = 1.d0
-  do k=2,N_states
-    do i=1,N_csf
-        call random_number(r1)
-        call random_number(r2)
-        r1 = dsqrt(-2.d0*dlog(r1))
-        r2 = dacos(-1.d0)*2.d0*r2
-        U_csf(i,k) = r1*dcos(r2)
-    enddo
-    U_csf(k,k) = U_csf(k,k) +100.d0
-  enddo
-  do k=1,N_states
-    call normalize(U_csf(1,k),N_csf)
-  enddo
-  call convertWFfromCSFtoDET(N_states,U_csf(1,1),psi_coef(1,1))
-  deallocate(U_csf)
-  SOFT_TOUCH psi_coef
-
   call run
 end
 
@@ -87,16 +56,20 @@ subroutine run
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
 
+  if(pseudo_sym)then
+   call H_apply_cisd_sym
+  else
+   call H_apply_cisd
+  endif
   psi_coef = ci_eigenvectors
-  call save_wavefunction_truncated(save_threshold)
+  SOFT_TOUCH psi_coef
+  call save_wavefunction
   call ezfio_set_cisd_energy(CI_energy)
 
   do i = 1,N_states
     k = maxloc(dabs(psi_coef_sorted(1:N_det,i)),dim=1)
     delta_E  = CI_electronic_energy(i) - diag_h_mat_elem(psi_det_sorted(1,1,k),N_int)
-    if (elec_alpha_num + elec_beta_num >= 4) then
-      cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
-    endif
+    cisdq(i) = CI_energy(i) + delta_E * (1.d0 - psi_coef_sorted(k,i)**2)
   enddo
   print *,  'N_det = ', N_det
   print*,''
@@ -105,43 +78,26 @@ subroutine run
   do i = 1,N_states
     print *,  i, CI_energy(i)
   enddo
-  if (elec_alpha_num + elec_beta_num >= 4) then
+  print*,''
+  print*,'******************************'
+  print *,  'CISD+Q Energies'
+  do i = 1,N_states
+    print *,  i, cisdq(i)
+  enddo
+  if (N_states > 1) then
     print*,''
     print*,'******************************'
-    print *,  'CISD+Q Energies'
-    do i = 1,N_states
-      print *,  i, cisdq(i)
+    print*,'Excitation energies (au)    (CISD+Q)'
+    do i = 2, N_states
+      print*, i ,CI_energy(i) - CI_energy(1), cisdq(i) - cisdq(1)
     enddo
-  endif
-  if (N_states > 1) then
-    if (elec_alpha_num + elec_beta_num >= 4) then
-      print*,''
-      print*,'******************************'
-      print*,'Excitation energies (au)    (CISD+Q)'
-      do i = 2, N_states
-        print*, i ,CI_energy(i) - CI_energy(1), cisdq(i) - cisdq(1)
-      enddo
-      print*,''
-      print*,'******************************'
-      print*,'Excitation energies (eV)    (CISD+Q)'
-      do i = 2, N_states
-        print*, i ,(CI_energy(i) - CI_energy(1)) * ha_to_ev, &
-          (cisdq(i) - cisdq(1)) * ha_to_ev
-      enddo
-    else
-      print*,''
-      print*,'******************************'
-      print*,'Excitation energies (au)    (CISD)'
-      do i = 2, N_states
-        print*, i ,CI_energy(i) - CI_energy(1)
-      enddo
-      print*,''
-      print*,'******************************'
-      print*,'Excitation energies (eV)    (CISD)'
-      do i = 2, N_states
-        print*, i ,(CI_energy(i) - CI_energy(1)) * ha_to_ev
-      enddo
-    endif
+    print*,''
+    print*,'******************************'
+    print*,'Excitation energies (eV)    (CISD+Q)'
+    do i = 2, N_states
+      print*, i ,(CI_energy(i) - CI_energy(1))/0.0367502d0, &
+        (cisdq(i) - cisdq(1)) / 0.0367502d0
+    enddo
   endif
 
 end

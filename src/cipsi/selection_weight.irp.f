@@ -38,11 +38,11 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
 
   avg = sum(pt2(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
 
-  dt = 4.d0 !* selection_factor
+  dt = 8.d0 !* selection_factor
   do k=1,N_st
-    element = pt2(k) !exp(dt*(pt2(k)/avg - 1.d0))
-!    element = min(2.0d0 , element)
-!    element = max(0.5d0 , element)
+    element = exp(dt*(pt2(k)/avg - 1.d0))
+    element = min(2.0d0 , element)
+    element = max(0.5d0 , element)
     pt2_match_weight(k) *= element
   enddo
 
@@ -50,9 +50,9 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
   avg = sum(variance(1:N_st)) / dble(N_st) + 1.d-32 ! Avoid future division by zero
 
   do k=1,N_st
-    element = variance(k) ! exp(dt*(variance(k)/avg -1.d0))
-!    element = min(2.0d0 , element)
-!    element = max(0.5d0 , element)
+    element = exp(dt*(variance(k)/avg -1.d0))
+    element = min(2.0d0 , element)
+    element = max(0.5d0 , element)
     variance_match_weight(k) *= element
   enddo
 
@@ -61,9 +61,6 @@ subroutine update_pt2_and_variance_weights(pt2_data, N_st)
     pt2_match_weight(:) = 1.d0
     variance_match_weight(:) = 1.d0
   endif
-
-  pt2_match_weight(:) = pt2_match_weight(:)/sum(pt2_match_weight(:))
-  variance_match_weight(:) = variance_match_weight(:)/sum(variance_match_weight(:))
 
   threshold_davidson_pt2 = min(1.d-6, &
      max(threshold_davidson, 1.e-1 * PT2_relative_error * minval(abs(pt2(1:N_states)))) )
@@ -90,7 +87,7 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       selection_weight(1:N_states) = c0_weight(1:N_states)
 
      case (2)
-      print *,  'Using PT2-matching weight in selection'
+      print *,  'Using pt2-matching weight in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * pt2_match_weight(1:N_states)
       print *, '# PT2 weight ', real(pt2_match_weight(:),4)
 
@@ -100,7 +97,7 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       print *, '# var weight ', real(variance_match_weight(:),4)
 
      case (4)
-      print *,  'Using variance- and PT2-matching weights in selection'
+      print *,  'Using variance- and pt2-matching weights in selection'
       selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states))
       print *, '# PT2 weight ', real(pt2_match_weight(:),4)
       print *, '# var weight ', real(variance_match_weight(:),4)
@@ -115,7 +112,7 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       selection_weight(1:N_states) = c0_weight(1:N_states)
 
      case (7)
-      print *,  'Input weights multiplied by variance- and PT2-matching'
+      print *,  'Input weights multiplied by variance- and pt2-matching'
       selection_weight(1:N_states) = c0_weight(1:N_states) * sqrt(variance_match_weight(1:N_states) * pt2_match_weight(1:N_states)) * state_average_weight(1:N_states)
       print *, '# PT2 weight ', real(pt2_match_weight(:),4)
       print *, '# var weight ', real(variance_match_weight(:),4)
@@ -131,7 +128,6 @@ BEGIN_PROVIDER [ double precision, selection_weight, (N_states) ]
       print *, '# var weight ', real(variance_match_weight(:),4)
 
     end select
-     selection_weight(:) = selection_weight(:)/sum(selection_weight(:))
      print *, '# Total weight ', real(selection_weight(:),4)
 
 END_PROVIDER

@@ -1,10 +1,19 @@
+
+! ---
+
 BEGIN_PROVIDER [ integer, ao_prim_num_max ]
- implicit none
+
  BEGIN_DOC
  ! Max number of primitives.
  END_DOC
- ao_prim_num_max = maxval(ao_prim_num)
+
+  implicit none
+  ao_prim_num_max = maxval(ao_prim_num)
+  call ezfio_set_ao_basis_ao_prim_num_max(ao_prim_num_max)
+
 END_PROVIDER
+
+! ---
 
 BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
  implicit none
@@ -19,21 +28,6 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
      k = k+1
      ao_shell(k) = i
    enddo
- enddo
-
-END_PROVIDER
-
-BEGIN_PROVIDER [ integer, ao_first_of_shell, (shell_num) ]
- implicit none
- BEGIN_DOC
- ! Index of the shell to which the AO corresponds
- END_DOC
- integer :: i, j, k, n
- k=1
- do i=1,shell_num
-   ao_first_of_shell(i) = k
-   n = shell_ang_mom(i)+1
-   k = k+(n*(n+1))/2
  enddo
 
 END_PROVIDER

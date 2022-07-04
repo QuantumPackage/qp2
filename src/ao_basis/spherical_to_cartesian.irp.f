@@ -1,7 +1,7 @@
 ! Spherical to cartesian transformation matrix obtained with
 ! Horton (http://theochem.github.com/horton/, 2015)
 
-! First index is the index of the cartesian AO, obtained by ao_power_index
+! First index is the index of the carteisan AO, obtained by ao_power_index
 ! Second index is the index of the spherical AO
 
 BEGIN_PROVIDER [ double precision, cart_to_sphe_0, (1,1) ]

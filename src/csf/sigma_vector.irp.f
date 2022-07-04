@@ -1,12 +1,9 @@
  real*8 function logabsgamma(x)
  implicit none
  real*8, intent(in) :: x
- logabsgamma = 1.d32  ! Avoid floating point exception
- if (x>0.d0) then
-   logabsgamma = log(abs(gamma(x)))
- endif
+ logabsgamma = log(abs(gamma(x)))
  end function logabsgamma
-
+  
   BEGIN_PROVIDER [ integer, NSOMOMax]
  &BEGIN_PROVIDER [ integer, NCSFMax]
  &BEGIN_PROVIDER [ integer*8, NMO]
@@ -51,60 +48,42 @@
       if(cfg_seniority_index(i+2) > ncfgpersomo) then
           ncfgpersomo = cfg_seniority_index(i+2)
       else
-        ! l = i+k+2 
-        ! Loop over l with a constraint to ensure that l <= size(cfg_seniority_index,1)-1
-        ! Old version commented just below
-        do l = min(size(cfg_seniority_index,1)-1, i+2), size(cfg_seniority_index,1)-1, 2
-          if (cfg_seniority_index(l) >= ncfgpersomo) then
-            ncfgpersomo = cfg_seniority_index(l)
-          endif
+        k = 0
+        do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
+          k = k + 2
+          ncfgpersomo = cfg_seniority_index(i+2+k)
         enddo
-        !k = 0
-        !if ((i+2+k) < size(cfg_seniority_index,1)) then
-        !  do while(cfg_seniority_index(i+2+k) < ncfgpersomo)
-        !    k = k + 2
-        !    if ((i+2+k) >= size(cfg_seniority_index,1)) then
-        !      exit
-        !    endif
-        !    ncfgpersomo = cfg_seniority_index(i+2+k)
-        !  enddo
-        !endif
       endif
     endif
     ncfg = ncfgpersomo - ncfgprev
-    if(i .EQ. 0 .OR. i .EQ. 1) then
-      dimcsfpercfg = 1
-    elseif( i .EQ. 3) then
-      dimcsfpercfg = 2
+    if(iand(MS,1) .EQ. 0) then
+      !dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
+      binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                  - logabsgamma(1.0d0*((i/2)+1))                        &
+                  - logabsgamma(1.0d0*(i-((i/2))+1)));
+      binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                  - logabsgamma(1.0d0*(((i/2)+1)+1))                    &
+                  - logabsgamma(1.0d0*(i-((i/2)+1)+1)));
+      dimcsfpercfg = max(1,nint(binom1 - binom2))
     else
-      if(iand(MS,1) .EQ. 0) then
-        dimcsfpercfg = max(1,nint((binom(i,i/2)-binom(i,i/2+1))))
-      else
-        dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
-      endif
+      !dimcsfpercfg = max(1,nint((binom(i,(i+1)/2)-binom(i,(i+3)/2))))
+      binom1 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                  - logabsgamma(1.0d0*(((i+1)/2)+1))                    &
+                  - logabsgamma(1.0d0*(i-(((i+1)/2))+1)));
+      binom2 = dexp(logabsgamma(1.0d0*(i+1))                            &
+                  - logabsgamma(1.0d0*((((i+3)/2)+1)+1))                &
+                  - logabsgamma(1.0d0*(i-(((i+3)/2)+1)+1)));
+      dimcsfpercfg = max(1,nint(binom1 - binom2))
     endif
     n_CSF += ncfg * dimcsfpercfg
     if(cfg_seniority_index(i+2) > ncfgprev) then
       ncfgprev = cfg_seniority_index(i+2)
     else
-      ! l = i+k+2 
-      ! Loop over l with a constraint to ensure that l <= size(cfg_seniority_index,1)-1
-      ! Old version commented just below
-      do l = min(size(cfg_seniority_index,1)-1, i+2), size(cfg_seniority_index,1)-1, 2
-        if (cfg_seniority_index(l) >= ncfgprev) then
-          ncfgprev = cfg_seniority_index(l)
-        endif
+      k = 0
+      do while(cfg_seniority_index(i+2+k) < ncfgprev)
+        k = k + 2
+        ncfgprev = cfg_seniority_index(i+2+k)
       enddo
-      !k = 0
-      !if ((i+2+k) < size(cfg_seniority_index,1)) then
-      !  do while(cfg_seniority_index(i+2+k) < ncfgprev)
-      !    k = k + 2
-      !    if ((i+2+k) >= size(cfg_seniority_index,1)) then
-      !      exit
-      !    endif
-      !    ncfgprev = cfg_seniority_index(i+2+k)
-      !  enddo
-      !endif
     endif
   enddo
 END_PROVIDER
