@@ -47,6 +47,37 @@ program cisd
   PROVIDE N_states
   read_wf = .False.
   SOFT_TOUCH read_wf
+
+  integer :: i,k
+
+  if(pseudo_sym)then
+   call H_apply_cisd_sym
+  else
+   call H_apply_cisd
+  endif
+  double precision :: r1, r2
+  double precision, allocatable :: U_csf(:,:)
+
+  allocate(U_csf(N_csf,N_states))
+  U_csf = 0.d0
+  U_csf(1,1) = 1.d0
+  do k=2,N_states
+    do i=1,N_csf
+        call random_number(r1)
+        call random_number(r2)
+        r1 = dsqrt(-2.d0*dlog(r1))
+        r2 = dacos(-1.d0)*2.d0*r2
+        U_csf(i,k) = r1*dcos(r2)
+    enddo
+    U_csf(k,k) = U_csf(k,k) +100.d0
+  enddo
+  do k=1,N_states
+    call normalize(U_csf(1,k),N_csf)
+  enddo
+  call convertWFfromCSFtoDET(N_states,U_csf(1,1),psi_coef(1,1))
+  deallocate(U_csf)
+  SOFT_TOUCH psi_coef
+
   call run
 end
 
@@ -56,13 +87,7 @@ subroutine run
   double precision               :: cisdq(N_states), delta_e
   double precision,external      :: diag_h_mat_elem
 
-  if(pseudo_sym)then
-   call H_apply_cisd_sym
-  else
-   call H_apply_cisd
-  endif
   psi_coef = ci_eigenvectors
-  SOFT_TOUCH psi_coef
   call save_wavefunction_truncated(save_threshold)
   call ezfio_set_cisd_energy(CI_energy)
 

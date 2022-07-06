@@ -130,7 +130,6 @@ subroutine four_idx_dgemm
   real(integral_kind), allocatable :: buffer_value(:)
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
 
-  print *, 'Storing'
   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l,buffer_value,buffer_i,n_integrals)
   allocate ( buffer_i(size_buffer), buffer_value(size_buffer) )
 
@@ -164,7 +163,6 @@ subroutine four_idx_dgemm
 
   deallocate (a1)
 
-  print *, 'Unique'
   call map_unique(mo_integrals_map)
 
   integer*8                      :: get_mo_map_size, mo_map_size
