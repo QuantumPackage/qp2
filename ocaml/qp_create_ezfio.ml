@@ -677,6 +677,7 @@ let run ?o b au c d m p cart xyz_file =
 
 let () =
 
+  try (
 
   let open Command_line in
   begin
@@ -734,7 +735,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
   let basis =
     match Command_line.get "basis" with
-    | None -> assert false
+    | None -> ""
     | Some x -> x
   in
 
@@ -773,10 +774,14 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
   let xyz_filename =
     match Command_line.anon_args () with
-    | [x] -> x
-    | _ -> (Command_line.help () ; failwith "input file is missing")
+    | []  -> failwith "input file is missing"
+    | x::_ -> x
   in
 
   run ?o:output basis au charge dummy multiplicity pseudo cart xyz_filename
+  )
+  with
+  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt
+  | Command_line.Error txt  -> Printf.eprintf "Command line error: %s\n%!" txt
 
 

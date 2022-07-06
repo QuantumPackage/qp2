@@ -101,7 +101,7 @@ let to_string_general ~f m =
   |> String.concat "\n"
 
 let to_string =
-  to_string_general ~f:(fun x -> Atom.to_string Units.Angstrom x)
+  to_string_general ~f:(fun x -> Atom.to_string ~units:Units.Angstrom x)
 
 let to_xyz =
   to_string_general ~f:Atom.to_xyz
@@ -113,7 +113,7 @@ let of_xyz_string
     s =
   let l = String_ext.split s ~on:'\n'
        |> List.filter (fun x -> x <> "")
-       |> list_map (fun x -> Atom.of_string units x)
+       |> list_map (fun x -> Atom.of_string ~units x)
   in
   let ne = ( get_charge {
         nuclei=l ;
