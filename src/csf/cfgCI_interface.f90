@@ -46,6 +46,24 @@ module cfunctions
            real   (kind=C_DOUBLE ),intent(out) :: csftodetmatrix(rowsmax,colsmax)
          end subroutine getCSFtoDETTransformationMatrix
       end interface
+       interface
+         subroutine gramSchmidt(A, m, n, B) bind(C, name='gramSchmidt')
+           import C_INT32_T, C_INT64_T, C_DOUBLE
+           integer(kind=C_INT32_T),value,intent(in) :: m
+           integer(kind=C_INT32_T),value,intent(in) :: n
+           real (kind=C_DOUBLE ),intent(in) :: A(m,n)
+           real (kind=C_DOUBLE ),intent(out) :: B(m,n)
+         end subroutine gramSchmidt
+      end interface
+       interface
+         subroutine gramSchmidt_qp(A, m, n, B) bind(C, name='gramSchmidt_qp')
+           import C_INT32_T, C_INT64_T, C_DOUBLE
+           integer(kind=C_INT32_T),value,intent(in) :: m
+           integer(kind=C_INT32_T),value,intent(in) :: n
+           real (kind=C_DOUBLE ),intent(in) :: A(m,n)
+           real (kind=C_DOUBLE ),intent(out) :: B(m,n)
+         end subroutine gramSchmidt_qp
+      end interface
 end module cfunctions
 
 subroutine f_dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC) &

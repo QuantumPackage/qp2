@@ -252,6 +252,26 @@ void generateAllBFs(int64_t Isomo, int64_t MS, Tree *bftree, int *NBF, int *NSOM
     buildTreeDriver(bftree, *NSOMO, MS, NBF);
 }
 
+void ortho_qr_csf(double *overlapMatrix, int lda, double *orthoMatrix, int rows, int cols);
+
+void gramSchmidt_qp(double *overlapMatrix, int rows, int cols, double *orthoMatrix){
+  int i,j;
+  //for(j=0;j<cols;++j){
+  //  for(i=0;i<rows;++i){
+  //    printf(" %3.2f ",overlapMatrix[j*rows + i]);
+  //  }
+  //  printf("\n");
+  //}
+  // Call the function ortho_qr from qp
+  ortho_qr_csf(overlapMatrix, rows, orthoMatrix, rows, cols);
+  //for(j=0;j<cols;++j){
+  //  for(i=0;i<rows;++i){
+  //    printf(" %3.2f ",orthoMatrix[j*rows + i]);
+  //  }
+  //  printf("\n");
+  //}
+}
+
 void gramSchmidt(double *overlapMatrix, int rows, int cols, double *orthoMatrix){
 
     // vector
