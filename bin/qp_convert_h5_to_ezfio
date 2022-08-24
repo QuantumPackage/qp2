@@ -22,12 +22,29 @@ import gzip
 #fname = sys.argv[1]
 #qph5name = sys.argv[2]
 
+def kconserv_p_from_qkk2_mk(qkk2,mk):
+    nk, nk2 = qkk2.shape
+    assert(nk == nk2)
+    kcon_p = np.zeros((nk,nk,nk),dtype=int)
+    for i in range(nk):
+        for j in range(nk):
+            for k in range(nk):
+                kcon_p[i,j,k] = qkk2[mk[j],qkk2[k,i]]
+    return kcon_p
+
+
 def get_full_path(file_path):
     file_path = os.path.expanduser(file_path)
     file_path = os.path.expandvars(file_path)
 #    file_path = os.path.abspath(file_path)
     return file_path
 
+def make_reim_identity_kblocks(nk,nm,na=None):
+    if na is None:
+        na = nm
+    single_block = np.eye(nm, na, dtype=np.complex128).view(dtype=np.float64).reshape((nm, na, 2))
+    kblocks = np.tile(single_block,[nk, 1, 1, 1])
+    return kblocks
 
 def flatten(l):
     res = []
@@ -174,7 +191,7 @@ def convert_mol(filename,qph5path):
 
     return
 
-def convert_kpts_cd(filename,qph5path,qmcpack=True):
+def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     import json
 
     ezfio.set_file(filename)
@@ -186,20 +203,36 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
     with h5py.File(qph5path,'r') as qph5:
-        kpt_num = qph5['Hamiltonian']['KPoints'].shape[0]
-        elec_alpha_num =  qph5['Hamiltonian']['dims'][4]
-        elec_beta_num =  qph5['Hamiltonian']['dims'][5]
-        orb_num =  qph5['Hamiltonian']['dims'][3]
-        try:
-          is_ao =  json.loads(qph5['metadata'][()].decode("utf-8").replace("'",'"'))['ortho_ao']
-          if is_ao:
-            ao_num = orb_num
-          elif is_ao ==False:
-            mo_num = orb_num
-          else:
-              raise ValueError('Problem with ortho_ao key in metadata')
-        except:
-            raise UnicodeDecodeError('metadata not correctly parsed from HDF5 file')
+        kpt_num = qph5['Hamiltonian/KPoints'][()].shape[0]
+        ham_dims = qph5['Hamiltonian/dims'][()]
+        NMOPerKP = qph5['Hamiltonian/NMOPerKP'][()]
+        _, _, kpt_num, orb_num, elec_alpha_num_tot, elec_beta_num_tot, _, nchol_maybe = ham_dims
+
+        #for now, all kpts must have same number of MOs
+        for nmoi in NMOPerKP:
+            if nmoi != NMOPerKP[0]:
+                print("ERROR: all KPs must have same number of MOs")
+                raise ValueError
+
+        #TODO: fix na, nb in rmg
+        assert(elec_alpha_num_tot % kpt_num == 0)
+        assert(elec_beta_num_tot % kpt_num == 0)
+        elec_alpha_num_per_kpt = elec_alpha_num_tot // kpt_num
+        elec_beta_num_per_kpt = elec_beta_num_tot // kpt_num
+        #elec_alpha_num_per_kpt =  qph5['Hamiltonian']['dims'][4]
+        #elec_beta_num_per_kpt =  qph5['Hamiltonian']['dims'][5]
+        #orb_num =  qph5['Hamiltonian']['dims'][3]
+        #try:
+        #  is_ao =  json.loads(qph5['metadata'][()].decode("utf-8").replace("'",'"'))['ortho_ao']
+        #  if is_ao:
+        #    ao_num = orb_num
+        #  elif is_ao ==False:
+        #    mo_num = orb_num
+        #  else:
+        #      raise ValueError('Problem with ortho_ao key in metadata')
+        #except:
+        #    raise UnicodeDecodeError('metadata not correctly parsed from HDF5 file')
+
 
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
@@ -210,12 +243,20 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
-    ezfio.set_ao_basis_ao_num(ao_num)
-    ezfio.set_mo_basis_mo_num(mo_num)
-    ezfio.set_ao_basis_ao_num_per_kpt(ao_num//kpt_num)
-    ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
-    ezfio.electrons_elec_alpha_num = elec_alpha_num
-    ezfio.electrons_elec_beta_num  = elec_beta_num
+    #if is_ao:
+    #    ao_num = orb_num*kpt_num
+    #TODO: fix this?
+    ao_num_tot = orb_num
+    ao_num_per_kpt = NMOPerKP[0]
+    mo_num_tot = orb_num
+    mo_num_per_kpt = NMOPerKP[0]
+    #mo_num_per_kpt = ao_num_per_kpt
+    ezfio.set_ao_basis_ao_num(ao_num_per_kpt * kpt_num)
+    ezfio.set_mo_basis_mo_num(mo_num_per_kpt * kpt_num)
+    ezfio.set_ao_basis_ao_num_per_kpt(ao_num_per_kpt)
+    ezfio.set_mo_basis_mo_num_per_kpt(mo_num_per_kpt)
+    ezfio.electrons_elec_alpha_num = elec_alpha_num_per_kpt * kpt_num
+    ezfio.electrons_elec_beta_num  = elec_beta_num_per_kpt * kpt_num
     ##########################################
     #                                        #
     #                Basis                   #
@@ -228,13 +269,38 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     #                                        #
     ##########################################
     #TODO
+    #coef_per_kpt = np.eye(mo_num_per_kpt, ao_num_per_kpt, dtype=np.complex128).view(dtype=np.float64).reshape((mo_num_per_kpt, ao_num_per_kpt, 2))
+
+    #mo_coef_kpts = np.tile(coef_per_kpt,[kpt_num, 1, 1, 1])
+    #qph5.create_dataset('mo_basis/mo_coef_kpts',data=make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+    ezfio.set_mo_basis_mo_coef_kpts(make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+
     ##########################################
     #                                        #
     #            Integrals Mono              #
     #                                        #
     ##########################################
+
+    with h5py.File(qph5path,'r') as qph5:
+        # we don't have separate kinetic, nuc-elec, pseudo 1e ints, so just combine in nuc-elec and set rest to zero
+        mono_ints_tot = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
+        for i in range(kpt_num):
+            mono_ints_tot[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
+        ovlp_ao_reim = make_reim_identity_kblocks(kpt_num,ao_num_per_kpt,ao_num_per_kpt)
+        kin_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
+        ne_ao_reim = mono_ints_tot
+
+        ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
+
+        ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+
+
     """
-      with h5py.File(qph5path,'r') as qph5:
+    with h5py.File(qph5path,'r') as qph5:
         if is_ao:
             kin_ao_reim=
             ovlp_ao_reim=
@@ -267,16 +333,19 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     ##########################################
     #TODO
     with h5py.File(qph5path,'r') as qph5:
-        kconserv = qph5['nuclei/kconserv'][()].tolist()
-        minusk = qph5['Hamiltonian']['MinusK'][:]+1 
-        QKTok2 = qph5['Hamiltonian']['QPTok2'][:]+1
+        #kconserv = qph5['nuclei/kconserv'][()].tolist()
+        #TODO: change this after rmg is fixed
+        #minusk = qph5['Hamiltonian']['MinusK'][:]+1
+        QKTok2 = qph5['Hamiltonian']['QKTok2'][:]+1
+        minusk = QKTok2[:,0]
+        kconserv = kconserv_p_from_qkk2_mk(QKTok2-1,minusk-1)+1
         unique_kpt_num = len(qph5['Hamiltonian']['KPFactorized'])
         unique_k_idx = []
         for i in qph5['Hamiltonian']['KPFactorized'].keys():
             unique_k_idx.append(int(i[1:])+1)
     kpt_sparse_map = np.zeros(kpt_num)
     for i in range(kpt_num):
-        if i+1 in uniq_k_idx:
+        if i+1 in unique_k_idx:
             kpt_sparse_map[i] = i+1 
         else:
             kpt_sparse_map[i] = -minusk[i]
@@ -298,16 +367,18 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
+        print(nchol_per_kpt)
         nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
+        print(nchol_per_kpt)
         nchol_per_kpt_max = max(nchol_per_kpt)
-        ezfio.set_chol_num(nchol_per_kpt)
-        ezfio.set_chol_num_max(nchol_per_kpt_max)
+        ezfio.set_ao_two_e_ints_chol_num(nchol_per_kpt)
+        ezfio.set_ao_two_e_ints_chol_num_max(nchol_per_kpt_max)
         if is_ao:
-            ao_num_per_kpt = ao_num//kpt_num
-            ezfio.set_io_chol_ao_integrals('Read')
+            #ao_num_per_kpt = ao_num//kpt_num
+            ezfio.set_ao_two_e_ints_io_chol_ao_integrals('Read')
             #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
             L_list = []
-            for i in len(nchol_per_kpt):
+            for i in range(len(nchol_per_kpt)):
                 L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
                 L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
                 L = np.einsum("ijklm->ilkjm", A, B)
@@ -344,7 +415,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True):
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
             """
-            mo_num_per_kpt = ao_num//kpt_num
+            #mo_num_per_kpt = ao_num//kpt_num
             ezfio.set_io_chol_mo_integrals('Read')
             #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
             L_list = []
