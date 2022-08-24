@@ -46,6 +46,13 @@ def make_reim_identity_kblocks(nk,nm,na=None):
     kblocks = np.tile(single_block,[nk, 1, 1, 1])
     return kblocks
 
+def make_reim_identity_block_diag(nk,nm,na=None):
+    from scipy.linalg import block_diag
+    kblocks = make_reim_identity_kblocks(nk,nm,na).view(dtype=np.complex128).squeeze()
+    kblockdiag = block_diag(*kblocks).view(dtype=np.float64).reshape((nk*nm,nk*na,2))
+    print(f'kblockdiag.shape = {kblockdiag.shape}')
+    return kblockdiag
+
 def flatten(l):
     res = []
     for i in l:
@@ -193,15 +200,16 @@ def convert_mol(filename,qph5path):
 
 def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     import json
+    from scipy.linalg import block_diag
 
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
     # Dummy atom since AFQMC h5 has no atom information
-    nucl_num = 1
-    ezfio.set_nuclei_nucl_num(nucl_num)
-    ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
-    ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
-    ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
+    #nucl_num = 1
+    #ezfio.set_nuclei_nucl_num(nucl_num)
+    #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
+    #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
+    #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
     with h5py.File(qph5path,'r') as qph5:
         kpt_num = qph5['Hamiltonian/KPoints'][()].shape[0]
         ham_dims = qph5['Hamiltonian/dims'][()]
@@ -239,8 +247,8 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num
-    ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+    #nucl_num_per_kpt = nucl_num
+    #ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     #if is_ao:
@@ -263,6 +271,29 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     #                                        #
     ##########################################
     #TODO
+    nucl_num = 1
+    ezfio.set_nuclei_nucl_num(nucl_num)
+    ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
+    ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
+    ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
+    nucl_num_per_kpt = nucl_num
+    ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+    ezfio.set_nuclei_io_kpt_symm('Read')
+    ezfio.set_ao_basis_ao_basis("dummy basis")
+
+    #nucleus on which each AO is centered
+    ao_nucl = [1 for i in range(ao_num_per_kpt)]*kpt_num
+    ezfio.set_ao_basis_ao_nucl(ao_nucl)
+
+
+    #Just need one (can clean this up later)
+    ao_prim_num_max  = 5
+
+    d = [ [0] *ao_prim_num_max]*ao_num_tot
+    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num_tot)
+    ezfio.set_ao_basis_ao_power(d)
+    ezfio.set_ao_basis_ao_coef(d)
+    ezfio.set_ao_basis_ao_expo(d)
     ##########################################
     #                                        #
     #               MOCoeff                  #
@@ -274,6 +305,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     #mo_coef_kpts = np.tile(coef_per_kpt,[kpt_num, 1, 1, 1])
     #qph5.create_dataset('mo_basis/mo_coef_kpts',data=make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
     ezfio.set_mo_basis_mo_coef_kpts(make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+    ezfio.set_mo_basis_mo_coef_complex(make_reim_identity_block_diag(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
 
     ##########################################
     #                                        #
@@ -334,21 +366,25 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     #TODO
     with h5py.File(qph5path,'r') as qph5:
         #kconserv = qph5['nuclei/kconserv'][()].tolist()
-        #TODO: change this after rmg is fixed
-        #minusk = qph5['Hamiltonian']['MinusK'][:]+1
+        minusk = qph5['Hamiltonian']['MinusK'][:]+1
         QKTok2 = qph5['Hamiltonian']['QKTok2'][:]+1
-        minusk = QKTok2[:,0]
+        #TODO: change this after rmg is fixed
+        #minusk = QKTok2[:,0]
         kconserv = kconserv_p_from_qkk2_mk(QKTok2-1,minusk-1)+1
         unique_kpt_num = len(qph5['Hamiltonian']['KPFactorized'])
         unique_k_idx = []
         for i in qph5['Hamiltonian']['KPFactorized'].keys():
             unique_k_idx.append(int(i[1:])+1)
-    kpt_sparse_map = np.zeros(kpt_num)
+        unique_k_idx.sort()
+    kpt_sparse_map = np.zeros(kpt_num,dtype=int)
+    isparse=0
+    #TODO: make robust: this assumes that for each pair, the one with data has a lower index
     for i in range(kpt_num):
         if i+1 in unique_k_idx:
-            kpt_sparse_map[i] = i+1 
+            kpt_sparse_map[i] = isparse+1
+            isparse += 1
         else:
-            kpt_sparse_map[i] = -minusk[i]
+            kpt_sparse_map[i] = -kpt_sparse_map[minusk[i]-1]
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
     ezfio.set_nuclei_minusk(minusk)
@@ -366,10 +402,18 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
 
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
-        nchol_per_kpt =  qph5['Hamiltonian']['NCholPerKP'][:]
+        nchol_per_kpt_all =  qph5['Hamiltonian']['NCholPerKP'][:]
+        print(nchol_per_kpt_all)
+        #nchol_per_kpt = nchol_per_kpt_all[nchol_per_kpt_all != 0]
+        nchol_per_kpt = nchol_per_kpt_all[np.array(unique_k_idx,dtype=int)-1]
         print(nchol_per_kpt)
-        nchol_per_kpt = nchol_per_kpt[nchol_per_kpt != 0]
-        print(nchol_per_kpt)
+        print(unique_k_idx)
+        #for i in range(kpt_num):
+        #    if i+1 in unique_k_idx:
+        #        print('* ',i,nchol_per_kpt_all[i])
+        #    else:
+        #        print('  ',i,nchol_per_kpt_all[i])
+
         nchol_per_kpt_max = max(nchol_per_kpt)
         ezfio.set_ao_two_e_ints_chol_num(nchol_per_kpt)
         ezfio.set_ao_two_e_ints_chol_num_max(nchol_per_kpt_max)
@@ -378,11 +422,16 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
             ezfio.set_ao_two_e_ints_io_chol_ao_integrals('Read')
             #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
             L_list = []
-            for i in range(len(nchol_per_kpt)):
-                L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
-                L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
-                L = np.einsum("ijklm->ilkjm", A, B)
-                L_list.append(L)
+            L_all = np.zeros((unique_kpt_num, kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max,2),dtype=np.float64)
+            print(kpt_sparse_map)
+            print(np.array(unique_k_idx)-1)
+            for i in range(unique_kpt_num):
+                ki = unique_k_idx[i]-1
+                print(i, ki)
+                L_i = qph5[f'Hamiltonian/KPFactorized/L{ki}'][()].reshape((kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[kpt_sparse_map[ki]-1], 2))
+                #L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
+                #L = np.einsum("ijklm->ilkjm", A, B)
+                L_all[i,:,:,:,:nchol_per_kpt[kpt_sparse_map[ki]-1],:] = L_i
 
                 #(6, 5184, 2)
                 """
@@ -393,9 +442,10 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                                 for kpt_idx in range(kpt_num):
                                     ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_j][chol_idx][cmplx]
                 """
-            ao_chol_two_e_ints = np.vstack(L_list)
-            ao_chol_two_e_ints = ao_chol_two_e_ints.transpose()
-            ezfio.set_chol_ao_integrals_complex(ao_chol_two_e_ints)
+            #ao_chol_two_e_ints = np.vstack(L_list)
+            #ao_chol_two_e_ints = ao_chol_two_e_ints.transpose()
+            #TODO: check dims/reshape/transpose
+            ezfio.set_ao_two_e_ints_chol_ao_integrals_complex(L_all)
 
             #(2,ao_basis.ao_num_per_kpt,ao_basis.ao_num_per_kpt,ao_two_e_ints.chol_num_max,nuclei.kpt_num,nuclei.unique_kpt_num#)
             """
