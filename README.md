@@ -35,6 +35,12 @@ https://arxiv.org/abs/1902.08154
 * [Download the latest release](http://github.com/QuantumPackage/qp2/releases)
 * [Read the documentation](https://quantum-package.readthedocs.io) 
 
+# Discussion list
+
+For any questions or announcements regarding QuantumPackage, you can join our discussion list by registering [here](https://groupes.renater.fr/sympa/subscribe/quantum_package) or by sending an email to `quantum_package-request@groupes.renater.fr` .
+You can also look over its [archives](https://groupes.renater.fr/sympa/arc/quantum_package).
+
+
 # Build status
 
 * Master [![master build status](https://travis-ci.com/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
