@@ -14,14 +14,14 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
- implicit none
- BEGIN_DOC
- ! Threshold of Davidson's algorithm, using PT2 as a guide
- END_DOC
- threshold_davidson_pt2 = threshold_davidson
-
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
+! implicit none
+! BEGIN_DOC
+! ! Threshold of Davidson's algorithm, using PT2 as a guide
+! END_DOC
+! threshold_davidson_pt2 = threshold_davidson
+!
+!END_PROVIDER
 
 
 
