@@ -1,4 +1,7 @@
-subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+
+! ---
+
+subroutine svd(A, LDA, U, LDU, D, Vt, LDVt, m, n)
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
@@ -1749,3 +1752,134 @@ end
 ! 
 !end
 !
+
+! ---
+
+subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
+
+  implicit none
+
+  integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
+  double precision, intent(in)  :: A(A_ldim,n)
+  double precision, intent(out) :: energy(E_ldim), V(V_ldim,n)
+
+  character*1                   :: JOBVL, JOBVR, BALANC, SENSE
+  integer                       :: i, j
+  integer                       :: ILO, IHI, lda, ldvl, ldvr, LWORK, INFO
+  double precision              :: ABNRM
+  integer,          allocatable :: iorder(:), IWORK(:)
+  double precision, allocatable :: WORK(:), SCALE_array(:), RCONDE(:), RCONDV(:)
+  double precision, allocatable :: Atmp(:,:), WR(:), WI(:), VL(:,:), VR(:,:), Vtmp(:)
+  double precision, allocatable :: energy_loc(:), V_loc(:,:)
+
+  allocate( Atmp(n,n), WR(n), WI(n), VL(1,1), VR(n,n) )
+  do i = 1, n
+    do j = 1, n
+      Atmp(j,i) = A(j,i)
+    enddo
+  enddo
+
+  JOBVL  = "N" ! computes the left  eigenvectors 
+  JOBVR  = "V" ! computes the right eigenvectors 
+  BALANC = "B" ! Diagonal scaling and Permutation for optimization
+  SENSE  = "V" ! Determines which reciprocal condition numbers are computed
+  lda  = n
+  ldvr = n
+  ldvl = 1
+
+  allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
+
+  LWORK = -1 ! to ask for the optimal size of WORK
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS 
+             , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
+             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES 
+             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS 
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
+             , WORK, LWORK, IWORK, INFO )
+
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK 
+  deallocate(WORK)
+  allocate(WORK(LWORK))
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
+             , n, Atmp, lda                                 &
+             , WR, WI                                       &
+             , VL, ldvl, VR, ldvr                           &
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
+             , WORK, LWORK, IWORK, INFO )
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  deallocate( WORK, SCALE_array, RCONDE, RCONDV, IWORK )
+  deallocate( VL, Atmp )
+
+
+  allocate( energy_loc(n), V_loc(n,n) )
+  energy_loc = 0.d0
+  V_loc = 0.d0
+
+  i = 1
+  do while(i .le. n)
+
+!    print*, i, WR(i), WI(i)
+
+    if( dabs(WI(i)) .gt. 1e-7 ) then
+
+      print*, ' Found an imaginary component to eigenvalue'
+      print*, ' Re(i) + Im(i)', i, WR(i), WI(i)
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = WR(i) * VR(j,i) - WI(i) * VR(j,i+1)
+      enddo
+      energy_loc(i+1) = WI(i)
+      do j = 1, n
+        V_loc(j,i+1) = WR(i) * VR(j,i+1) + WI(i) * VR(j,i)
+      enddo
+      i = i + 2
+
+    else
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = VR(j,i)
+      enddo
+      i = i + 1
+
+    endif
+
+  enddo
+
+  deallocate(WR, WI, VR)
+
+
+  ! ordering
+!  do j = 1, n
+!    write(444, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  allocate( iorder(n) )
+  do i = 1, n
+    iorder(i) = i
+  enddo
+  call dsort(energy_loc, iorder, n)
+  do i = 1, n
+    energy(i) = energy_loc(i)
+    do j = 1, n
+      V(j,i) = V_loc(j,iorder(i))
+    enddo
+  enddo
+  deallocate(iorder)
+!  do j = 1, n
+!    write(445, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  deallocate(V_loc, energy_loc)
+
+end subroutine diag_nonsym_right
+
+! ---
