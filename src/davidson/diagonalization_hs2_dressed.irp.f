@@ -88,12 +88,12 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   if (dressing_state > 0) then
     do k = 1, N_st
 
-    !  do i = 1, sze
-    !    H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
-    !  enddo
+      do i = 1, sze
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
+      enddo
 
-      l = dressed_column_idx(k)
-      H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
 
     enddo
   endif

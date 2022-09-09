@@ -61,9 +61,13 @@ subroutine davidson_diag_nonsym_h(dets_in, u_in, dim_in, energies, sze, N_st, N_
     do k = 1, N_st
       do l = 1, N_st
         f = overlap_states_inv(k,l)
-        do i = 1, N_det
-          H_jj(i) += f * dressing_delta(i,k) * psi_coef(i,l)
+
+        !do i = 1, N_det
+        !  H_jj(i) += f * dressing_delta(i,k) * psi_coef(i,l)
+        do i = 1, dim_in
+          H_jj(i) += f * dressing_delta(i,k) * u_in(i,l)
         enddo
+
       enddo
     enddo
   endif
@@ -417,7 +421,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k = 1, N_st_diag
         do i = 1, sze
-          U(i,shift2+k) = (lambda(k) * U(i,shift2+k) - W(i,shift2+k) ) / max(H_jj(i)-lambda(k), 1.d-2)
+          U(i,shift2+k) = (lambda(k) * U(i,shift2+k) - W(i,shift2+k)) / max(H_jj(i)-lambda(k), 1.d-2)
         enddo
 
         if(k <= N_st) then
@@ -428,7 +432,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
       enddo
       !$OMP END PARALLEL DO
 
-      if ((itertot>1).and.(iter == 1)) then
+      if((itertot>1).and.(iter == 1)) then
         !don't print
         continue
       else

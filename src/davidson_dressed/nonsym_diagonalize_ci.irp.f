@@ -60,6 +60,8 @@ END_PROVIDER
 
   if(diag_algorithm == "Davidson") then
 
+    ASSERT(n_states_diag .lt. n_states)
+
     do j = 1, min(N_states, N_det)
       do i = 1, N_det
         CI_eigenvectors_nonsym_dressed(i,j) = psi_coef(i,j)
