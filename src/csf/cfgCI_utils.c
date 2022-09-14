@@ -1798,7 +1798,6 @@ void getApqIJMatrixDriverArrayInp(int64_t Isomo, int64_t Jsomo, int32_t orbp, in
         for(int j = 0; j < rowsJ; j++)
             CSFICSFJApqIJ[j*rowsI + i] = tmpCSFICSFJApqIJ[i*rowsJ + j];
 
-
     // Garbage collection
     free(overlapMatrixI);
     free(overlapMatrixJ);

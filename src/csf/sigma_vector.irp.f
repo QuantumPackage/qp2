@@ -699,7 +699,7 @@ end subroutine get_phase_qp_to_cfg
   ! 3. SOMO -> VMO
   !print *,"Doing SOMO -> VMO"
   !AIJpqContainer(NSOMOMin,3,1,1,1,1) = 1.0d0
-  AIJpqContainer(1,1,1,1,3,NSOMOMin) = 1.0d0
+  AIJpqContainer(1,1,1:2,1:2,3,NSOMOMin) = 1.0d0
   do i = NSOMOMin, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -761,7 +761,7 @@ end subroutine get_phase_qp_to_cfg
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO -> SOMO"
   !AIJpqContainer(NSOMOMin,4,1,1,1,1) = 1.0d0
-  AIJpqContainer(1,1,1,1,4,NSOMOMin) = 1.0d0
+  AIJpqContainer(1,1,1:2,1:2,4,NSOMOMin) = 1.0d0
   do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -1562,9 +1562,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
             end do
           endif
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* (h_act_ri(p,q) + core_act_contrib)
-          if(jj.eq.1.and.ii.eq.1)then
-            print *,"CC=",AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI), " p=",p," q=",q
-          endif
+          !if(jj.eq.1.and.ii.eq.1)then
+          !  print *,"CC=",AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI), " p=",p," q=",q
+          !endif
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
@@ -1643,9 +1643,14 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         call obtain_connected_I_foralpha(i, alphas_Icfg(1,1,k), connectedI_alpha, idxs_connectedI_alpha, &
                                          nconnectedI, excitationIds, excitationTypes, diagfactors)
 
+        
         if(nconnectedI .EQ. 0) then
            cycle
         endif
+
+        !if(i .EQ. 1) then
+        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k))
+        !endif
 
         ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
         totcolsTKI = 0
@@ -1685,14 +1690,21 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            rowsTKI = rowsikpq
+           !if(i.eq.1) then
+           !  print *,rowsTKI,colsikpq," | ",pmodel,qmodel,extype,NSOMOalpha
+           !endif
            do m = 1,colsikpq
               do l = 1,rowsTKI
               do kk = 1,n_st
                  TKI(kk,l,totcolsTKI+m) = AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha) &
                     * psi_in(kk,idxs_connectedI_alpha(j)+m-1)
               enddo
+           !if(i.eq.1) then
+           !      print *,AIJpqContainer(l,m,pmodel,qmodel,extype,NSOMOalpha)
+           !endif
            enddo
            enddo
+
            diagfactors_0 = diagfactors(j)*0.5d0
            moi = excitationIds(1,j) ! p
            mok = excitationIds(2,j) ! q
