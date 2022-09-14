@@ -23,7 +23,13 @@
   integer MS, ialpha
   MS = elec_alpha_num-elec_beta_num
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
-  NSOMOMin = max(0,cfg_nsomo_min-2)
+  print *,'cfg_nsomo_min=',cfg_nsomo_min
+  print *,'cfg_nsomo_max=',cfg_nsomo_max
+  if(AND(cfg_nsomo_min , 1) .eq. 0)then
+    NSOMOMin = max(0,cfg_nsomo_min-2)
+  else
+    NSOMOMin = max(1,cfg_nsomo_min-2)
+  endif
   ! Note that here we need NSOMOMax + 2 sizes
   ialpha = (NSOMOMax + MS)/2
   NCSFMax = max(1,nint((binom(NSOMOMax,ialpha)-binom(NSOMOMax,ialpha+1)))) ! TODO: NCSFs for MS=0 (CHECK)
@@ -552,7 +558,7 @@ end subroutine get_phase_qp_to_cfg
   rows = -1
   cols = -1
   integer*8 MS
-  MS = 0
+  MS = elec_alpha_num-elec_beta_num
   real*8,dimension(:,:),allocatable :: meMatrix
   integer maxdim
 
@@ -931,7 +937,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
         noccp = holetype(k)
 
 
-        ! core-active
+        ! core-virtual
         do l = 1, n_core_orb
          jj = list_core(l)
          core_act_contrib += noccp * (2.d0 * mo_two_e_integrals_jj(jj,p) - mo_two_e_integrals_jj_exchange(jj,p))
@@ -1387,6 +1393,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
   allocate(diag_energies(n_CSF))
   call calculate_preconditioner_cfg(diag_energies)
+  !print *," diag energy =",diag_energies(1)
 
   MS = 0
   norm_coef_cfg=0.d0
@@ -1549,12 +1556,15 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
           !meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* h_core_ri(p,q)
           core_act_contrib = 0.0d0
           if(p.ne.q)then
-          do pp=1,n_core_orb
-            n=list_core(pp)
-            core_act_contrib += 2.d0 * get_two_e_integral(p,n,q,n,mo_integrals_map) - get_two_e_integral(p,n,n,q,mo_integrals_map)
-          end do
+            do pp=1,n_core_orb
+              n=list_core(pp)
+              core_act_contrib += 2.d0 * get_two_e_integral(p,n,q,n,mo_integrals_map) - get_two_e_integral(p,n,n,q,mo_integrals_map)
+            end do
           endif
           meCC1 = AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI)* (h_act_ri(p,q) + core_act_contrib)
+          if(jj.eq.1.and.ii.eq.1)then
+            print *,"CC=",AIJpqContainer(cnti,cntj,pmodel,qmodel,extype,NSOMOI), " p=",p," q=",q
+          endif
           call omp_set_lock(lock(jj))
           do kk = 1,n_st
             psi_out(kk,jj) = psi_out(kk,jj) + meCC1 * psi_in(kk,ii)
@@ -1578,7 +1588,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationIds_single)
   deallocate(excitationTypes_single)
 
-  !print *," singles part psi(1,5)=",psi_out(1,5)
+  !print *," singles part psi(1,1)=",psi_out(1,1)
   
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
@@ -1751,6 +1761,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(diagfactors)
 
   !print *," psi(1,823)=",psi_out(1,823), " g(1 8, 3 15)=",mo_two_e_integral(1,8,3,15), " ncore=",n_core_orb
+  !print *," psi(1,1)=",psi_out(1,1)
 
   ! Add the diagonal contribution
   !$OMP DO

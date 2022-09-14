@@ -360,10 +360,14 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
             double precision               :: ticks_0, ticks_1
             integer*8                      :: irp_imax
             irp_imax = 1
-            ticks_0 = irp_rdtsc()
+            !ticks_0 = irp_rdtsc()
+            !U = 0d0
+            !U(1,1)=1.0d0
             call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
-            ticks_1 = irp_rdtsc()
-            print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
+            !ticks_1 = irp_rdtsc()
+            !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
+            !print *,W(1,1)
+            !stop
         endif
         S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
 !      else

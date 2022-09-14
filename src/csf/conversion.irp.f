@@ -68,6 +68,7 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
       salpha = (s + MS)/2
       bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
     else
+      salpha = (s + MS)/2
       bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
     endif
 
