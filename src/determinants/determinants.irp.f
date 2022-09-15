@@ -537,6 +537,7 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
   double precision, intent(in)   :: psicoef(dim_psicoef,nstates)
   integer*8, allocatable         :: psi_det_save(:,:,:)
   double precision, allocatable  :: psi_coef_save(:,:)
+  double precision, allocatable  :: psi_coef_save2(:,:)
 
   double precision               :: accu_norm
   integer                        :: i,j,k, ndet_qp_edit
@@ -572,18 +573,17 @@ subroutine save_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psicoef)
     enddo
 
     call ezfio_set_determinants_psi_coef(psi_coef_save)
-    deallocate (psi_coef_save)
 
-    allocate (psi_coef_save(ndet_qp_edit,nstates))
+    allocate (psi_coef_save2(ndet_qp_edit,nstates))
     do k=1,nstates
       do i=1,ndet_qp_edit
-        psi_coef_save(i,k) = psicoef(i,k)
+        psi_coef_save2(i,k) = psi_coef_save(i,k)
       enddo
-      call normalize(psi_coef_save(1,k),ndet_qp_edit)
     enddo
 
-    call ezfio_set_determinants_psi_coef_qp_edit(psi_coef_save)
+    call ezfio_set_determinants_psi_coef_qp_edit(psi_coef_save2)
     deallocate (psi_coef_save)
+    deallocate (psi_coef_save2)
 
     call write_int(6,ndet,'Saved determinants')
   endif
