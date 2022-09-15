@@ -1,6 +1,7 @@
 # Quantum Package 2.2
 
-<img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250">
+<!--- img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250" --->
+<img src="https://trex-coe.eu/sites/default/files/styles/responsive_no_crop/public/2021-12/Risorsa%2014_0.png"  width="250">
 
 
 [![DOI](https://zenodo.org/badge/167513335.svg)](https://zenodo.org/badge/latestdoi/167513335)
@@ -34,6 +35,12 @@ https://arxiv.org/abs/1902.08154
 * [Download the latest release](http://github.com/QuantumPackage/qp2/releases)
 * [Read the documentation](https://quantum-package.readthedocs.io) 
 
+# Discussion list
+
+For any questions or announcements regarding QuantumPackage, you can join our discussion list by registering [here](https://groupes.renater.fr/sympa/subscribe/quantum_package) or by sending an email to `quantum_package-request@groupes.renater.fr` .
+You can also look over its [archives](https://groupes.renater.fr/sympa/arc/quantum_package).
+
+
 # Build status
 
 * Master [![master build status](https://travis-ci.com/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
@@ -44,9 +51,19 @@ https://arxiv.org/abs/1902.08154
 
 # Credits
 
+* [TREX Center of Excellence](https://trex-coe.eu)
+* [ERC PTEROSOR](https://lcpq.github.io/PTEROSOR)
 * [CNRS](http://www.cnrs.fr)
 * [Laboratoire de Chimie et Physique Quantiques](http://lcpq.ups-tlse.fr)
 * [Laboratoire de Chimie Théorique](http://www.lct.jussieu.fr)
 * [Argonne  Leadership Computing  Facility](http://alcf.anl.gov)
 * [CALMIP](https://www.calmip.univ-toulouse.fr)
 
+
+------------------------------
+
+<img src="https://lcpq.github.io/PTEROSOR/img/ERC.png" width="200" />
+
+[TREX: Targeting Real Chemical Accuracy at the Exascale](https://trex-coe.eu) project has received funding from the European Union’s Horizon 2020 - Research and Innovation program - under grant agreement no. 952165. The content of this document does not represent the opinion of the European Union, and the European Union is not responsible for any use that might be made of such content.
+
+[PTEROSOR](https://lcpq.github.io/PTEROSOR) project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement No. 863481).

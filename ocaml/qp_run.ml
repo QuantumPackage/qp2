@@ -110,7 +110,7 @@ let run slave ?prefix exe ezfio_file =
   let task_thread =
      let thread =
       Thread.create ( fun () ->
-         TaskServer.run port_number )
+         TaskServer.run ~port:port_number )
      in
      thread ();
   in

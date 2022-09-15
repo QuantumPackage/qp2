@@ -1,3 +1,5 @@
+exception Error of string
+
 type short_opt     = char
 type long_opt      = string 
 type optional      = Mandatory | Optional 
@@ -181,15 +183,16 @@ let set_specs specs_in =
     Getopt.parse_cmdline cmd_specs (fun x -> anon_args := !anon_args @ [x]);
 
     if show_help () then
-        (help () ; exit 0);
+        help ()
+    else
+        (* Check that all mandatory arguments are set *)
+        List.filter (fun x -> x.short <> ' ' && x.opt = Mandatory) !specs
+        |> List.iter (fun x -> 
+            match get x.long with
+            | Some _ -> ()
+            | None -> raise (Error ("--"^x.long^" option is missing."))
+            )
 
-    (* Check that all mandatory arguments are set *)
-    List.filter (fun x -> x.short <> ' ' && x.opt = Mandatory) !specs
-    |> List.iter (fun x -> 
-        match get x.long with
-        | Some _ -> ()
-        | None -> failwith ("Error: --"^x.long^" option is missing.")
-        )
 ;;
 
 
