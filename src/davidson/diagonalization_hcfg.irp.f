@@ -334,14 +334,6 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             !ticks_1 = irp_rdtsc()
             !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
-            !print *,' tmpW(1,2)=',tmpW(1,2)
-            !do ii=1,sze
-            !  if (dabs(tmpW(1,ii)) > 1e-18) then
-            !    print *,tmpW(1,ii)
-            !    print *,ii,"somo=",psi_configuration(1,1,ii)," domo=",psi_configuration(1,2,ii)
-            !  endif
-            !end do
-            !stop
             do kk=1,N_st_diag
               do ii=1,sze_csf
                 W_csf(ii,shift+kk)=tmpW(kk,ii)
