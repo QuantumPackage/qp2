@@ -761,7 +761,10 @@ end subroutine get_phase_qp_to_cfg
   ! 4. DOMO -> SOMO
   !print *,"Doing DOMO -> SOMO"
   !AIJpqContainer(NSOMOMin,4,1,1,1,1) = 1.0d0
-  AIJpqContainer(1,1,1:2,1:2,4,NSOMOMin) = 1.0d0
+  AIJpqContainer(1,1,1,1,4,NSOMOMin) = 1.0d0
+  AIJpqContainer(1,1,2,2,4,NSOMOMin) = 1.0d0
+  AIJpqContainer(1,1,2,1,4,NSOMOMin) =-1.0d0
+  AIJpqContainer(1,1,1,2,4,NSOMOMin) =-1.0d0
   do i = NSOMOMin+2, NSOMOMax, 2
      Isomo = ISHFT(1_8,i)-1
      do j = i,i, 2
@@ -778,6 +781,10 @@ end subroutine get_phase_qp_to_cfg
                  Isomo = ISHFT(1_8,i)-1
                  Jsomo = ISHFT(1_8,j)-1
               endif
+
+              !print *,"k,l=",k,l
+              !call debug_spindet(Jsomo,1)
+              !call debug_spindet(Isomo,1)
 
               !AIJpqContainer(i,4,k,l,:,:) = 0.0d0
               AIJpqContainer(:,:,k,l,4,i) = 0.0d0

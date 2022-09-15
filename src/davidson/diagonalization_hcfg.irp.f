@@ -324,7 +324,8 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
                 tmpU(kk,ii) = U_csf(ii,shift+kk)
               enddo
             enddo
-            !tmpU(1,1)=1.0d0
+            !tmpU     =0.0d0
+            !tmpU(1,2)=1.0d0
             double precision               :: irp_rdtsc
             double precision               :: ticks_0, ticks_1
             integer*8                      :: irp_imax
@@ -333,7 +334,13 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             !ticks_1 = irp_rdtsc()
             !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
-            !print *,' tmpW(1,1)=',tmpW(1,1)
+            !print *,' tmpW(1,2)=',tmpW(1,2)
+            !do ii=1,sze
+            !  if (dabs(tmpW(1,ii)) > 1e-18) then
+            !    print *,tmpW(1,ii)
+            !    print *,ii,"somo=",psi_configuration(1,1,ii)," domo=",psi_configuration(1,2,ii)
+            !  endif
+            !end do
             !stop
             do kk=1,N_st_diag
               do ii=1,sze_csf
