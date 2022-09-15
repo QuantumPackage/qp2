@@ -4,7 +4,7 @@ source $QP_ROOT/tests/bats/common.bats.sh
 source $QP_ROOT/quantum_package.rc
 
 function run() {
-  thresh=1.e-5
+  thresh=2.e-5
   test_exe cisd || skip
   qp edit --check
   qp set determinants n_states  2

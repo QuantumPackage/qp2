@@ -1,4 +1,5 @@
-subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_st_diag,Nint,dressing_state,converged)
+subroutine davidson_diag_h_csf(dets_in, u_in, dim_in, energies, sze, sze_csf, &
+                               N_st, N_st_diag, Nint, dressing_state,converged)
   use bitmasks
   implicit none
   BEGIN_DOC

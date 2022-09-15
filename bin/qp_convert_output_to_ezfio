@@ -146,6 +146,17 @@ def write_ezfio(res, filename):
     ezfio.set_ao_basis_ao_nucl(at)
     ezfio.set_ao_basis_ao_prim_num(num_prim)
     ezfio.set_ao_basis_ao_power(power_x + power_y + power_z)
+    try:
+      normf = res.normf
+      if normf == 0:
+        ezfio.set_ao_basis_ao_normalized(True)
+      elif normf == 1:
+        ezfio.set_ao_basis_ao_normalized(False)
+      else:
+        print("BUG in NORMF")
+        sys.exit(0)
+    except AttributeError:
+      ezfio.set_ao_basis_ao_normalized(True)
 
     # ~#~#~#~#~#~#~ #
     # P a r s i n g #

@@ -180,7 +180,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats bse"
 fi
 
 
@@ -353,12 +353,6 @@ echo "             (__)\       )\/\. "
 echo "                 ||----w |     "
 echo "                 ||     ||     "
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo ""
-echo "If you have PIP, you can install the Basis Set Exchange command-line tool:"
-echo ""
-echo "  ./configure -i bse"
-echo ""
-echo "This will enable the usage of qp_basis to install extra basis sets."
 echo ""
 echo ""
 printf "\e[m\n"
