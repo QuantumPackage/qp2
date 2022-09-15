@@ -102,7 +102,7 @@ subroutine ao_map_fill_from_chol
         enddo
       endif
 
-  !$OMP PARALLEL PRIVATE(i,k,j,l,ki,kk,ii,ik,ij,il,kikk2,jl2,ik2,kQ, &
+  !$OMP PARALLEL PRIVATE(i,k,j,l,ki,kk,ii,ik,ij,il,kikk2,jl2,ik2, &
       !$OMP  ints_ik, ints_ikjl, i_ao, j_ao, i_cd, &
       !$OMP  n_integrals_1, buffer_i_1, buffer_values_1, &
       !$OMP  n_integrals_2, buffer_i_2, buffer_values_2, &
@@ -110,7 +110,7 @@ subroutine ao_map_fill_from_chol
       !$OMP  DEFAULT(NONE)  &
       !$OMP  SHARED(size_buffer, kpt_num, ao_num_per_kpt, ao_num_kpt_2, &
       !$OMP  chol_num_max, chol_num, unique_kpt_num, kpt_sparse_map, qktok2, minusk, &
-      !$OMP  kl,kj,kjkl2,ints_jl, & 
+      !$OMP  kl,kj,kjkl2,ints_jl,kQ, & 
       !$OMP  kconserv, chol_ao_integrals_complex, ao_integrals_threshold, ao_integrals_map, ao_integrals_map_2)
   
   allocate( &
@@ -124,6 +124,8 @@ subroutine ao_map_fill_from_chol
 
   !$OMP DO SCHEDULE(guided)
       do kk=1,kl
+        !print*,'debug'
+        !print*,kQ,kl,kj,kk
         ki = qktok2(minusk(kk),kQ)
         assert(ki == kconserv(kl,kk,kj))
         if (ki>kl) cycle
