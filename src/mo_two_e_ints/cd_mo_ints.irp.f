@@ -81,7 +81,8 @@ subroutine mo_map_fill_from_chol_dot
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
             do i_cd=1,chol_num(kQ)
-              ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx)
+              !ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx)
+              ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx))
             enddo
           enddo
         enddo
@@ -89,7 +90,8 @@ subroutine mo_map_fill_from_chol_dot
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
             do i_cd=1,chol_num(kQ)
-              ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx))
+              !ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx))
+              ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx)
             enddo
           enddo
         enddo
@@ -268,7 +270,7 @@ subroutine chol_mo_from_chol_ao(cd_mo,cd_ao,n_mo,n_ao,n_cd,n_k,n_unique_k)
   complex*16,allocatable :: coef_i(:,:), coef_k(:,:), ints_ik(:,:), ints_tmp(:,:)
   double precision :: wall_1,wall_2,cpu_1,cpu_2
 
-  print*,'providing 3-index MO integrals from 3-index AO integrals'
+  print*,'providing 3-index CD MO integrals from 3-index CD AO integrals'
   
   cd_mo = 0.d0
 
@@ -315,7 +317,7 @@ subroutine chol_mo_from_chol_ao(cd_mo,cd_ao,n_mo,n_ao,n_cd,n_k,n_unique_k)
           )
   call wall_time(wall_2)
   call cpu_time(cpu_2)
-  print*,' 3-idx MO provided'
+  print*,' 3-idx CD MO provided'
   print*,'  cpu  time:',cpu_2-cpu_1,'s'
   print*,'  wall time:',wall_2-wall_1,'s  ( x ',(cpu_2-cpu_1)/(wall_2-wall_1),')'
 
