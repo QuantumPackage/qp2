@@ -61,6 +61,16 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
   include 'constants.include.F'
 
   N_st_diag = N_st_diag_in 
+!  print*,'trial vector'
+   do i = 1, sze
+    if(isnan(u_in(i,1)))then
+     print*,'pb in input vector of davidson_general_ext_rout_nonsym_b1space'
+     print*,i,u_in(i,1)
+     stop
+    else if (dabs(u_in(i,1)).lt.1.d-16)then
+     u_in(i,1) = 0.d0
+    endif
+   enddo
 
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
   if(N_st_diag*3 > sze) then
@@ -323,7 +333,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
         endif
       enddo
       deallocate(overlap)
-      if( lambda_tmp .lt. 0.8d0) then
+      if( lambda_tmp .lt. 0.5d0) then
         print *, ' very small overlap..'
         print*, ' max overlap = ', lambda_tmp, i_omax
         stop
@@ -520,7 +530,7 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
              , WORK, LWORK, IWORK, INFO )
 
   if(INFO .ne. 0) then
-    print*, 'dgeevx failed !!', INFO
+    print*, 'first dgeevx failed !!', INFO
     stop
   endif
 
@@ -534,7 +544,7 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
              , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
              , WORK, LWORK, IWORK, INFO )
   if(INFO .ne. 0) then
-    print*, 'dgeevx failed !!', INFO
+    print*, 'second dgeevx failed !!', INFO
     stop
   endif
 
