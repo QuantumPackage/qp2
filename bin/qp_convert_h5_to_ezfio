@@ -288,8 +288,8 @@ def convert_mol(filename,qph5path):
 def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     import json
     from scipy.linalg import block_diag
-    dump_fci, dump_cd = (False, False)
-    #dump_fci, dump_cd = (True, False)
+    #dump_fci, dump_cd = (False, False)
+    dump_fci, dump_cd = (True, False)
     #dump_fci, dump_cd = (False, True)
     #dump_fci2 = True
     dump_fci2 = False
@@ -594,14 +594,33 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                         kr = QKTok2[Qi,kp]-1
                         for ks in range(kpt_num):
                             kq = QKTok2[Qi,ks]-1
+                            # 3
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq]
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].transpose((1,0,2)).conj()
+                            #    W = np.einsum('rpn,qsn->pqrs',A,B)
+                            # 4
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq].transpose((1,0,2))
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].conj()
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            # 5
                             if Qneg:
                                 A = LQ0[kr].transpose((1,0,2)).conj()
-                                B = LQ0[kq]
-                                W = np.einsum('prn,sqn->pqrs',A,B)
+                                B = LQ0[kq].transpose((1,0,2))
+                                W = np.einsum('prn,qsn->pqrs',A,B)
                             else:
                                 A = LQ0[kp]
-                                B = LQ0[ks].transpose((1,0,2)).conj()
-                                W = np.einsum('rpn,qsn->pqrs',A,B)
+                                B = LQ0[ks].conj()
+                                W = np.einsum('prn,qsn->pqrs',A,B)
                             p0 = kp*ao_num_per_kpt
                             r0 = kr*ao_num_per_kpt
                             q0 = kq*ao_num_per_kpt
@@ -622,6 +641,11 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                 E1=0
                 E2j=0
                 E2k=0
+                print("Jij Kij")
+                for i in range(ao_num_tot):
+                    for j in range(ao_num_tot):
+                        print(f'{i:5d} {j:5d} {i:5d} {j:5d}  {Wfull[i,j,i,j].real:25.15E} {Wfull[i,j,i,j].imag:25.15E}')
+                        print(f'{i:5d} {j:5d} {j:5d} {i:5d}  {Wfull[i,j,j,i].real:25.15E} {Wfull[i,j,j,i].imag:25.15E}')
                 for imo, iocc in enumerate(mo_occ):
                     if iocc:
                         E1 += 2*H1[imo,imo]

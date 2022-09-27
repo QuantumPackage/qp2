@@ -91,14 +91,14 @@ subroutine ao_map_fill_from_chol
       call idx2_tri_int(kj,kl,kjkl2)
       !TODO: verify the kj, kl as 4th index in expressions below
       if (kpt_sparse_map(kQ) > 0) then
-        ints_jl = chol_ao_integrals_complex(:,:,:,kl,kpt_sparse_map(kQ))
-        !ints_jl = dconjg(chol_ao_integrals_complex(:,:,:,kl,kpt_sparse_map(kQ)))
+        !ints_jl = chol_ao_integrals_complex(:,:,:,kl,kpt_sparse_map(kQ))
+        ints_jl = dconjg(chol_ao_integrals_complex(:,:,:,kl,kpt_sparse_map(kQ)))
       else
         do i_ao=1,ao_num_per_kpt
           do j_ao=1,ao_num_per_kpt
             do i_cd=1,chol_num_max
-              ints_jl(i_ao,j_ao,i_cd) = dconjg(chol_ao_integrals_complex(j_ao,i_ao,i_cd,kj,-kpt_sparse_map(kQ)))
-              !ints_jl(i_ao,j_ao,i_cd) = chol_ao_integrals_complex(j_ao,i_ao,i_cd,kj,-kpt_sparse_map(kQ))
+              !ints_jl(i_ao,j_ao,i_cd) = dconjg(chol_ao_integrals_complex(j_ao,i_ao,i_cd,kj,-kpt_sparse_map(kQ)))
+              ints_jl(i_ao,j_ao,i_cd) = chol_ao_integrals_complex(j_ao,i_ao,i_cd,kj,-kpt_sparse_map(kQ))
             enddo
           enddo
         enddo

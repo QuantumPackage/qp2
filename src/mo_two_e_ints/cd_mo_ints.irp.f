@@ -160,7 +160,8 @@ subroutine mo_map_fill_from_chol_dot
                 call idx2_tri_int(i,k,ik2)
                 if (ik2 > jl2) exit
                 !integral = zdotc(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
-                integral = zdotu(chol_num(kQ),ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                !integral = zdotu(chol_num(kQ),ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                integral = zdotu(chol_num(kQ),ints_jl(1,il,ij),1,ints_ik(1,ii,ik),1)
 !                print*,i,k,j,l,real(integral),imag(integral)
                 if (cdabs(integral) < mo_integrals_threshold) then
                   cycle
