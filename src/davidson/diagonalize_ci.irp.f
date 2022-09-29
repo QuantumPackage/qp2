@@ -68,13 +68,21 @@ END_PROVIDER
 
    do_csf = s2_eig .and. only_expected_s2 .and. csf_based
 
-   if (diag_algorithm == "Davidson") then
+   if (diag_algorithm == 'Davidson') then
 
      if (do_csf) then
-       if (sigma_vector_algorithm == 'det') then
-         call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
-           size(CI_eigenvectors,1),CI_electronic_energy,               &
-           N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+!      if (sigma_vector_algorithm == 'det') then
+         call davidson_diag_H_csf (psi_det,                  &
+                                   CI_eigenvectors,          &
+                                   size(CI_eigenvectors,1),  &
+                                   CI_electronic_energy,     &
+                                   N_det,                    &
+                                   N_csf,                    &
+                                   min(N_csf,N_states),      &
+                                   min(N_csf,N_states_diag), &
+                                   N_int,                    &
+                                   0,                        &
+                                   converged)
 !       else if (sigma_vector_algorithm == 'cfg') then
 !       call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
 !         size(CI_eigenvectors,1),CI_electronic_energy,               &
@@ -82,11 +90,19 @@ END_PROVIDER
 !       else
 !         print *, irp_here
 !         stop 'bug'
-       endif
+!      endif
      else
-       call davidson_diag_HS2(psi_det,CI_eigenvectors, CI_s2, &
-         size(CI_eigenvectors,1),CI_electronic_energy,               &
-         N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+       call davidson_diag_HS2(psi_det,                  &
+                              CI_eigenvectors,          &
+                              CI_s2,                    &
+                              size(CI_eigenvectors,1),  &
+                              CI_electronic_energy,     &
+                              N_det,                    &
+                              min(N_det,N_states),      &
+                              min(N_det,N_states_diag), &
+                              N_int,                    &
+                              0,                        &
+                              converged)
      endif
 
      integer :: N_states_diag_save
@@ -107,9 +123,17 @@ END_PROVIDER
           CI_electronic_energy_tmp(1:N_states_diag_save) = CI_electronic_energy(1:N_states_diag_save)
           CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
 
-          call davidson_diag_H_csf(psi_det,CI_eigenvectors_tmp, &
-            size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
-            N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+          call davidson_diag_H_csf (psi_det,                      &
+                                    CI_eigenvectors_tmp,          &
+                                    size(CI_eigenvectors_tmp,1),  &
+                                    CI_electronic_energy_tmp,     &
+                                    N_det,                        &
+                                    N_csf,                        &
+                                    min(N_csf,N_states),          &
+                                    min(N_csf,N_states_diag),     &
+                                    N_int,                        &
+                                    0,                            &
+                                    converged)
 
           CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
           CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)
@@ -127,9 +151,17 @@ END_PROVIDER
           CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save) = CI_eigenvectors(1:N_det,1:N_states_diag_save)
           CI_s2_tmp(1:N_states_diag_save) = CI_s2(1:N_states_diag_save)
 
-          call davidson_diag_HS2(psi_det,CI_eigenvectors_tmp, CI_s2_tmp, &
-            size(CI_eigenvectors_tmp,1),CI_electronic_energy_tmp,               &
-            N_det,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+          call davidson_diag_HS2(psi_det,                     &
+                                 CI_eigenvectors_tmp,             &
+                                 CI_s2_tmp,                       &
+                                 size(CI_eigenvectors_tmp,1),     &
+                                 CI_electronic_energy_tmp,        &
+                                 N_det,                       &
+                                 min(N_det,N_states),         &
+                                 min(N_det,N_states_diag),    &
+                                 N_int,                       &
+                                 0,                           &
+                                 converged)
 
           CI_electronic_energy(1:N_states_diag_save) = CI_electronic_energy_tmp(1:N_states_diag_save)
           CI_eigenvectors(1:N_det,1:N_states_diag_save) = CI_eigenvectors_tmp(1:N_det,1:N_states_diag_save)

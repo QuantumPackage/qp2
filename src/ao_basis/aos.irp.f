@@ -1,11 +1,3 @@
-BEGIN_PROVIDER [ integer, ao_prim_num_max ]
- implicit none
- BEGIN_DOC
- ! Max number of primitives.
- END_DOC
- ao_prim_num_max = maxval(ao_prim_num)
-END_PROVIDER
-
 BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
  implicit none
  BEGIN_DOC
@@ -21,6 +13,32 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
    enddo
  enddo
 
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ double precision, ao_coef , (ao_num,ao_prim_num_max) ]
+&BEGIN_PROVIDER [ double precision, ao_expo , (ao_num,ao_prim_num_max) ]
+ implicit none
+ BEGIN_DOC
+! Primitive coefficients and exponents for each atomic orbital. Copied from shell info.
+ END_DOC
+
+ integer :: i, l
+ do i=1,ao_num
+   l = ao_shell(i)
+   ao_coef(i,:) = shell_coef(l,:)
+   ao_expo(i,:) = shell_expo(l,:)
+ end do
+
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ integer, ao_prim_num_max ]
+ implicit none
+ BEGIN_DOC
+ ! Max number of primitives.
+ END_DOC
+ ao_prim_num_max = shell_prim_num_max
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, ao_first_of_shell, (shell_num) ]
@@ -44,20 +62,20 @@ END_PROVIDER
   BEGIN_DOC
   ! Coefficients including the |AO| normalization
   END_DOC
+
+  do i=1,ao_num
+    l = ao_shell(i)
+    ao_coef_normalized(i,:) = shell_coef(l,:) * shell_normalization_factor(l)
+  end do
+
   double precision               :: norm,overlap_x,overlap_y,overlap_z,C_A(3), c
   integer                        :: l, powA(3), nz
   integer                        :: i,j,k
   nz=100
-  C_A(1) = 0.d0
-  C_A(2) = 0.d0
-  C_A(3) = 0.d0
-  ao_coef_normalized = 0.d0
+  C_A = 0.d0
 
   do i=1,ao_num
 
-!    powA(1) = ao_power(i,1) +  ao_power(i,2) +  ao_power(i,3)
-!    powA(2) = 0
-!    powA(3) = 0
     powA(1) = ao_power(i,1)
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
@@ -67,18 +85,9 @@ END_PROVIDER
       do j=1,ao_prim_num(i)
         call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
            powA,powA,overlap_x,overlap_y,overlap_z,norm,nz)
-        ao_coef_normalized(i,j) = ao_coef(i,j)/dsqrt(norm)
-      enddo
-    else
-      do j=1,ao_prim_num(i)
-        ao_coef_normalized(i,j) = ao_coef(i,j)
+        ao_coef_normalized(i,j) = ao_coef_normalized(i,j)/dsqrt(norm)
       enddo
     endif
-
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
-
     ! Normalization of the contracted basis functions
     if (ao_normalized) then
       norm = 0.d0
