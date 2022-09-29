@@ -11,8 +11,8 @@ Usage:
 
 Options:
     -q --query   Prints in the standard output the number of frozen MOs
-    -l --large   Use a small core
-    -s --small   Use a large core
+    -l --large   Use a large core
+    -s --small   Use a small core
     -u --unset   Unset frozen core
 
 
