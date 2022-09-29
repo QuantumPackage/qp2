@@ -444,14 +444,17 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
-  implicit none
+! ---
+
+BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) ]
+
   BEGIN_DOC
   !  Needed to compute Schwartz inequalities
   END_DOC
 
-  integer                        :: i,k
-  double precision               :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
+  implicit none
+  integer          :: i, k
+  double precision :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
 
   ao_two_e_integral_schwartz(1,1) = ao_two_e_integral(1,1,1,1)
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
@@ -468,6 +471,7 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz,(ao_num,ao_num)  ]
 
 END_PROVIDER
 
+! ---
 
 double precision function general_primitive_integral(dim,            &
       P_new,P_center,fact_p,p,p_inv,iorder_p,                        &
