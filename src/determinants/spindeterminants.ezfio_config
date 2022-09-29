@@ -9,7 +9,8 @@ spindeterminants
   psi_det_beta    integer*8 (spindeterminants_n_int*spindeterminants_bit_kind/8,spindeterminants_n_det_beta)
   psi_coef_matrix_rows    integer (spindeterminants_n_det)
   psi_coef_matrix_columns integer (spindeterminants_n_det)
-  psi_coef_matrix_values  double precision (spindeterminants_n_det,spindeterminants_n_states)
+  psi_coef_matrix_values      double precision (spindeterminants_n_det,spindeterminants_n_states)
+  psi_left_coef_matrix_values double precision (spindeterminants_n_det,spindeterminants_n_states)
   n_svd_coefs     integer
   n_svd_alpha     integer
   n_svd_beta      integer

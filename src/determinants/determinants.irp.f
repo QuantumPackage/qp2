@@ -171,22 +171,24 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det, (N_int,2,psi_det_size) ]
 
 END_PROVIDER
 
-
+! ---
 
 BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
-  implicit none
+
   BEGIN_DOC
   ! The wave function coefficients. Initialized with Hartree-Fock if the |EZFIO| file
   ! is empty.
   END_DOC
 
+  implicit none
   integer                        :: i,k, N_int2
   logical                        :: exists
   character*(64)                 :: label
 
   PROVIDE read_wf N_det mo_label ezfio_filename
+
   psi_coef = 0.d0
-  do i=1,min(N_states,psi_det_size)
+  do i = 1, min(N_states, psi_det_size)
     psi_coef(i,i) = 1.d0
   enddo
 
@@ -230,9 +232,9 @@ BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
     endif
   IRP_ENDIF
 
-
-
 END_PROVIDER
+
+! ---
 
 BEGIN_PROVIDER [ double precision, psi_average_norm_contrib, (psi_det_size) ]
   implicit none
