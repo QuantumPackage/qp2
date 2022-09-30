@@ -203,7 +203,7 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
   integer, allocatable           :: doubles(:)
   integer, allocatable           :: singles_a(:)
   integer, allocatable           :: singles_b(:)
-  integer, allocatable           :: idx(:), buffer_lrow(:), idx0(:)
+  integer, allocatable           :: idx(:), idx0(:)
   integer                        :: maxab, n_singles_a, n_singles_b, kcol_prev
   integer*8                      :: k8
   logical                        :: compute_singles
@@ -253,7 +253,7 @@ compute_singles=.True.
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
-      !$OMP          tmp_det2, hij, sij, idx, buffer_lrow, l, kcol_prev,          &
+      !$OMP          tmp_det2, hij, sij, idx, l, kcol_prev,          &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
 
@@ -264,7 +264,7 @@ compute_singles=.True.
       singles_a(maxab),                                              &
       singles_b(maxab),                                              &
       doubles(maxab),                                                &
-      idx(maxab), buffer_lrow(maxab), utl(N_st,block_size))
+      idx(maxab), utl(N_st,block_size))
 
   kcol_prev=-1
 
@@ -332,19 +332,17 @@ compute_singles=.True.
         l_a = psi_bilinear_matrix_columns_loc(lcol)
         ASSERT (l_a <= N_det)
 
+        !DIR$ UNROLL(8)
+        !DIR$ LOOP COUNT avg(50000)
         do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
           lrow = psi_bilinear_matrix_rows(l_a)
           ASSERT (lrow <= N_det_alpha_unique)
 
-          buffer_lrow(j) = lrow
+          buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, lrow)  ! hot spot
 
           ASSERT (l_a <= N_det)
           idx(j) = l_a
           l_a = l_a+1
-        enddo
-
-        do j=1,psi_bilinear_matrix_columns_loc(lcol+1) - psi_bilinear_matrix_columns_loc(lcol)
-          buffer(1:$N_int,j) = psi_det_alpha_unique(1:$N_int, buffer_lrow(j))  ! hot spot
         enddo
         j = j-1
 
@@ -791,7 +789,7 @@ compute_singles=.True.
 
   end do
   !$OMP END DO
-  deallocate(buffer, singles_a, singles_b, doubles, idx, buffer_lrow, utl)
+  deallocate(buffer, singles_a, singles_b, doubles, idx, utl)
   !$OMP END PARALLEL
 
 end

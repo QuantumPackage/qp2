@@ -17,7 +17,7 @@ program rs_ks_scf
   print*, '**************************'
   print*, 'mu_erf_dft = ',mu_erf_dft
   print*, '**************************'
-! call check_coherence_functional
+  call check_coherence_functional
   call create_guess
   call orthonormalize_mos
   call run

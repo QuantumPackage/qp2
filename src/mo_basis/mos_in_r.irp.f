@@ -1,9 +1,6 @@
 
 subroutine give_all_mos_at_r(r,mos_array)
  implicit none
- BEGIN_DOC
-! mos_array(i) = ith MO function evaluated at "r"
- END_DOC
  double precision, intent(in) :: r(3)
  double precision, intent(out) :: mos_array(mo_num)
  double precision :: aos_array(ao_num)

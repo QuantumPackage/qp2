@@ -38,7 +38,7 @@ subroutine print_basis_correction
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-UEG       , state ',istate,' = ',ecmd_pbe_ueg_mu_of_r(istate)
    enddo
 
-  else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
+  else if(mu_of_r_potential.EQ."cas_ful")then
    print*, ''
    print*,'Using a CAS-like two-body density to define mu(r)'
    print*,'This assumes that the CAS is a qualitative representation of the wave function ' 

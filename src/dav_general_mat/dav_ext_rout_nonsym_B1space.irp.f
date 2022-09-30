@@ -34,7 +34,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
   character*(16384)               :: write_buffer
   integer                         :: iter, N_st_diag
-  integer                         :: i, j, k, m
+  integer                         :: i, j, k, l, m
   integer                         :: iter2, itertot
   logical                         :: disk_based
   integer                         :: shift, shift2, itermax
@@ -49,8 +49,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
   double precision, allocatable   :: y(:,:), h(:,:), lambda(:)
   double precision, allocatable   :: residual_norm(:)
 
-  integer                         :: i_omax
   double precision                :: lambda_tmp
+  integer,          allocatable   :: i_omax(:)
   double precision, allocatable   :: U_tmp(:), overlap(:)
 
   double precision, allocatable :: W(:,:)
@@ -181,7 +181,8 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
       lambda(N_st_diag*itermax),                                     & 
-      residual_norm(N_st_diag)                                       &
+      residual_norm(N_st_diag),                                      &
+      i_omax(N_st)                                                   &
   )
 
   U = 0.d0
@@ -313,59 +314,42 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
       ! end test ------------------------------------------------------------------------
       !
 
+      ! TODO 
+      ! state_following is more efficient
+      do l = 1, N_st
 
-      allocate( overlap(N_st_diag) )
+        allocate( overlap(N_st_diag) )
 
-      do k = 1, N_st_diag
-        overlap(k) = 0.d0
-        do i = 1, sze
-          overlap(k) = overlap(k) + U(i,shift2+k) * u_in(i,1)
+        do k = 1, N_st_diag
+          overlap(k) = 0.d0
+          do i = 1, sze
+            overlap(k) = overlap(k) + U(i,shift2+k) * u_in(i,l)
+          enddo
+          overlap(k) = dabs(overlap(k))
+          !print *, ' overlap =', k, overlap(k)
         enddo
-        overlap(k) = dabs(overlap(k))
-        !print *, ' overlap =', k, overlap(k)
-      enddo
 
-      lambda_tmp = 0.d0 
-      do k = 1, N_st_diag
-        if(overlap(k) .gt. lambda_tmp) then 
-          i_omax = k
-          lambda_tmp = overlap(k)
+        lambda_tmp = 0.d0 
+        do k = 1, N_st_diag
+          if(overlap(k) .gt. lambda_tmp) then 
+            i_omax(l)  = k
+            lambda_tmp = overlap(k)
+          endif
+        enddo
+
+        deallocate(overlap)
+
+        if(lambda_tmp .lt. 0.7d0) then
+          print *, ' very small overlap ...', l, i_omax(l)
+          print *, ' max overlap = ', lambda_tmp
+          stop
+        endif
+
+        if(i_omax(l) .ne. l) then
+          print *, ' !!! WARNONG !!!'
+          print *, ' index of state', l, i_omax(l)
         endif
       enddo
-      deallocate(overlap)
-      if( lambda_tmp .lt. 0.5d0) then
-        print *, ' very small overlap..'
-        print*, ' max overlap = ', lambda_tmp, i_omax
-        stop
-      endif
-
-!      lambda_tmp     = lambda(1)
-!      lambda(1)      = lambda(i_omax)
-!      lambda(i_omax) = lambda_tmp
-!
-!      allocate( U_tmp(sze) )
-!      do i = 1, sze
-!        U_tmp(i)           = U(i,shift2+1)
-!        U(i,shift2+1)      = U(i,shift2+i_omax)
-!        U(i,shift2+i_omax) = U_tmp(i)
-!      enddo
-!      deallocate(U_tmp)
-!
-!      allocate( U_tmp(N_st_diag*itermax) )
-!      do i = 1, shift2
-!        U_tmp(i)    = y(i,1)
-!        y(i,1)      = y(i,i_omax)
-!        y(i,i_omax) = U_tmp(i)
-!      enddo
-!      deallocate(U_tmp)
-
-      ! ---
-
-      !do k = 1, N_st_diag
-      !  call normalize(U(1,shift2+k), sze)
-      !enddo
-
-      ! ---
 
       ! y(:,k) = rk
       ! W(:,k) = H x Bk 
@@ -385,16 +369,17 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
         do i = 1, sze
           U(i,shift2+k) = (lambda(k) * U(i,shift2+k) - W(i,shift2+k)) / max(H_jj(i)-lambda(k), 1.d-2)
         enddo
-        !if(k <= N_st) then
-        !  residual_norm(k) = u_dot_u(U(1,shift2+k), sze)
-        !  to_print(1,k) = lambda(k) 
-        !  to_print(2,k) = residual_norm(k)
-        !endif
+        if(k <= N_st) then
+          l = k
+          residual_norm(k) = u_dot_u(U(1,shift2+l), sze)
+          to_print(1,k)    = lambda(l) 
+          to_print(2,k)    = residual_norm(l)
+        endif
       enddo
       !$OMP END PARALLEL DO
-      residual_norm(1) = u_dot_u(U(1,shift2+i_omax), sze)
-      to_print(1,1) = lambda(i_omax) 
-      to_print(2,1) = residual_norm(1)
+      !residual_norm(1) = u_dot_u(U(1,shift2+1), sze)
+      !to_print(1,1) = lambda(1) 
+      !to_print(2,1) = residual_norm(1)
 
 
       if( (itertot > 1) .and. (iter == 1) ) then
@@ -479,140 +464,10 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
   call write_time(6)
 
   deallocate(W)
-  deallocate(U, h, y, lambda, residual_norm)
+  deallocate(U, h, y, lambda, residual_norm, i_omax)
 
   FREE nthreads_davidson
 
 end subroutine davidson_general_ext_rout_nonsym_b1space
 
 ! ---
-
-subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
-
-  implicit none
-
-  integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
-  double precision, intent(in)  :: A(A_ldim,n)
-  double precision, intent(out) :: energy(E_ldim), V(V_ldim,n)
-
-  character*1                   :: JOBVL, JOBVR, BALANC, SENSE
-  integer                       :: i, j
-  integer                       :: ILO, IHI, lda, ldvl, ldvr, LWORK, INFO
-  double precision              :: ABNRM
-  integer,          allocatable :: iorder(:), IWORK(:)
-  double precision, allocatable :: WORK(:), SCALE_array(:), RCONDE(:), RCONDV(:)
-  double precision, allocatable :: Atmp(:,:), WR(:), WI(:), VL(:,:), VR(:,:), Vtmp(:)
-  double precision, allocatable :: energy_loc(:), V_loc(:,:)
-
-  allocate( Atmp(n,n), WR(n), WI(n), VL(1,1), VR(n,n) )
-  do i = 1, n
-    do j = 1, n
-      Atmp(j,i) = A(j,i)
-    enddo
-  enddo
-
-  JOBVL  = "N" ! computes the left  eigenvectors 
-  JOBVR  = "V" ! computes the right eigenvectors 
-  BALANC = "B" ! Diagonal scaling and Permutation for optimization
-  SENSE  = "V" ! Determines which reciprocal condition numbers are computed
-  lda  = n 
-  ldvr = n 
-  ldvl = 1
-
-  allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
-
-  LWORK = -1 ! to ask for the optimal size of WORK
-  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS 
-             , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
-             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES 
-             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS 
-             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
-             , WORK, LWORK, IWORK, INFO )
-
-  if(INFO .ne. 0) then
-    print*, 'first dgeevx failed !!', INFO
-    stop
-  endif
-
-  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK 
-  deallocate(WORK)
-  allocate(WORK(LWORK))
-  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
-             , n, Atmp, lda                                 &
-             , WR, WI                                       &
-             , VL, ldvl, VR, ldvr                           &
-             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
-             , WORK, LWORK, IWORK, INFO )
-  if(INFO .ne. 0) then
-    print*, 'second dgeevx failed !!', INFO
-    stop
-  endif
-
-  deallocate( WORK, SCALE_array, RCONDE, RCONDV, IWORK )
-  deallocate( VL, Atmp )
-
-
-  allocate( energy_loc(n), V_loc(n,n) )
-  energy_loc = 0.d0
-  V_loc = 0.d0
-
-  i = 1
-  do while(i .le. n)
-
-!    print*, i, WR(i), WI(i)
-
-    if( dabs(WI(i)) .gt. 1e-7 ) then
-
-      print*, ' Found an imaginary component to eigenvalue'
-      print*, ' Re(i) + Im(i)', i, WR(i), WI(i)
-
-      energy_loc(i) = WR(i)
-      do j = 1, n 
-        V_loc(j,i) = WR(i) * VR(j,i) - WI(i) * VR(j,i+1)
-      enddo
-      energy_loc(i+1) = WI(i)
-      do j = 1, n
-        V_loc(j,i+1) = WR(i) * VR(j,i+1) + WI(i) * VR(j,i)
-      enddo
-      i = i + 2
-
-    else
-
-      energy_loc(i) = WR(i)
-      do j = 1, n 
-        V_loc(j,i) = VR(j,i)
-      enddo
-      i = i + 1
-
-    endif
-
-  enddo
-
-  deallocate(WR, WI, VR)
-
-
-  ! ordering
-!  do j = 1, n
-!    write(444, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
-!  enddo
-  allocate( iorder(n) )
-  do i = 1, n
-    iorder(i) = i
-  enddo
-  call dsort(energy_loc, iorder, n)
-  do i = 1, n
-    energy(i) = energy_loc(i)
-    do j = 1, n 
-      V(j,i) = V_loc(j,iorder(i))
-    enddo
-  enddo
-  deallocate(iorder)
-!  do j = 1, n
-!    write(445, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
-!  enddo
-  deallocate(V_loc, energy_loc)
-
-end subroutine diag_nonsym_right
-
-! ---
-

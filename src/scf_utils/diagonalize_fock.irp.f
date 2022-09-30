@@ -73,6 +73,11 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    liwork = -1
 
    F_save = F
+   !print *, ' Fock matrix'
+   !do i = 1, mo_num
+   !  write(*, '(1000(F16.10,X))') F_save(:,i)
+   !enddo
+
    call dsyevd( 'V', 'U', mo_num, F,                             &
        size(F,1), diag, work, lwork, iwork, liwork, info)
 
@@ -102,6 +107,16 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
        stop 1
      endif
    endif
+
+  !print *, ' eigenvalues'
+  !do i = 1, mo_num
+  !  write(*, '(1000(F16.10,X))') diag(i)
+  !enddo
+  !print *, ' eigenvectors'
+  !do i = 1, mo_num
+  !  write(*, '(1000(F16.10,X))') F(:,i)
+  !enddo
+
 
    call dgemm('N','N',ao_num,mo_num,mo_num, 1.d0,            &
        mo_coef, size(mo_coef,1), F, size(F,1),                       &

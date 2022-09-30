@@ -91,7 +91,7 @@ let run ?o b au c d m p cart xyz_file =
       | Element e -> Element.to_string e
       | Int_elem (i,e) -> Printf.sprintf "%d,%s" (Nucl_number.to_int i)  (Element.to_string e)
     in
-    Hashtbl.find basis_table key
+    Hashtbl.find basis_table key 
   in
 
   let temp_filename =
@@ -132,7 +132,7 @@ let run ?o b au c d m p cart xyz_file =
               Element.to_string elem.Atom.element
             in
             Hashtbl.add basis_table key new_channel
-          ) nuclei
+          ) nuclei 
         end
       | Some (key, basis) -> (*Aux basis *)
         begin
@@ -277,16 +277,6 @@ let run ?o b au c d m p cart xyz_file =
           ) nuclei
       in
 
-      let z_core =
-         List.map (fun x ->
-                Positive_int.to_int x.Pseudo.n_elec
-                |> float_of_int
-                ) pseudo
-      in
-      let nucl_num = (List.length z_core) in
-      Ezfio.set_pseudo_nucl_charge_remove (Ezfio.ezfio_array_of_list
-        ~rank:1 ~dim:[| nucl_num |] ~data:z_core);
-
       let molecule =
         let n_elec_to_remove =
           List.fold_left (fun accu x ->
@@ -303,13 +293,13 @@ let run ?o b au c d m p cart xyz_file =
           Molecule.nuclei =
             let charges =
               list_map (fun x -> Positive_int.to_int x.Pseudo.n_elec
-                |> Float.of_int) pseudo
+                |> Float.of_int) pseudo 
               |> Array.of_list
             in
             List.mapi (fun i x ->
               { x with Atom.charge = (Charge.to_float x.Atom.charge) -. charges.(i)
                 |> Charge.of_float }
-            ) molecule.Molecule.nuclei
+            ) molecule.Molecule.nuclei 
         }
       in
       let nuclei =
@@ -366,11 +356,11 @@ let run ?o b au c d m p cart xyz_file =
               in
               if (x > accu) then x
               else accu
-            ) 0 x.Pseudo.non_local
+            ) 0 x.Pseudo.non_local 
           in
           if (x > accu) then x
           else accu
-        ) 0 pseudo
+        ) 0 pseudo 
       in
 
      let kmax =
@@ -378,10 +368,10 @@ let run ?o b au c d m p cart xyz_file =
             list_map (fun x ->
                 List.filter (fun (y,_) ->
                     (Positive_int.to_int y.Pseudo.GaussianPrimitive_non_local.proj) = i)
-                  x.Pseudo.non_local
-                |> List.length ) pseudo
+                  x.Pseudo.non_local 
+                |> List.length ) pseudo 
             |> List.fold_left (fun accu x ->
-                if accu > x then accu else x) 0
+                if accu > x then accu else x) 0 
           )
         |> Array.fold_left (fun accu i ->
             if i > accu then i else accu) 0
@@ -406,11 +396,11 @@ let run ?o b au c d m p cart xyz_file =
             in
             tmp_array_dz_k.(i).(j) <- y;
             tmp_array_n_k.(i).(j)  <- z;
-          ) x.Pseudo.local
+          ) x.Pseudo.local 
         ) pseudo ;
         let concat_2d tmp_array =
           let data =
-            Array.map Array.to_list tmp_array
+            Array.map Array.to_list tmp_array 
             |> Array.to_list
             |> List.concat
           in
@@ -448,14 +438,14 @@ let run ?o b au c d m p cart xyz_file =
             tmp_array_dz_kl.(k).(i).(j) <- y;
             tmp_array_n_kl.(k).(i).(j)  <- z;
             last_idx.(k) <- i+1;
-           ) x.Pseudo.non_local
+           ) x.Pseudo.non_local 
         ) pseudo ;
         let concat_3d tmp_array =
           let data =
             Array.map (fun x ->
               Array.map Array.to_list x
               |> Array.to_list
-              |> List.concat) tmp_array
+              |> List.concat) tmp_array 
             |> Array.to_list
             |> List.concat
           in
@@ -523,8 +513,8 @@ let run ?o b au c d m p cart xyz_file =
       Ezfio.set_ao_basis_ao_num ao_num;
       Ezfio.set_ao_basis_ao_basis b;
       Ezfio.set_basis_basis b;
-      let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis
-      and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis
+      let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis 
+      and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis 
       and ao_power=
         let l = list_map (fun (x,_,_) -> x) long_basis in
         (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.x)) l)@
@@ -536,7 +526,7 @@ let run ?o b au c d m p cart xyz_file =
         else s) 0 ao_prim_num
       in
       let gtos =
-        list_map (fun (_,x,_) -> x) long_basis
+        list_map (fun (_,x,_) -> x) long_basis 
       in
 
       let create_expo_coef ec =
@@ -544,10 +534,10 @@ let run ?o b au c d m p cart xyz_file =
             begin match ec with
             | `Coefs -> list_map (fun x->
               list_map (fun (_,coef) ->
-                AO_coef.to_float coef) x.Gto.lc) gtos
+                AO_coef.to_float coef) x.Gto.lc) gtos 
             | `Expos -> list_map (fun x->
               list_map (fun (prim,_) -> AO_expo.to_float
-              prim.GaussianPrimitive.expo) x.Gto.lc) gtos
+              prim.GaussianPrimitive.expo) x.Gto.lc) gtos 
             end
           in
           let rec get_n n accu = function
@@ -577,7 +567,7 @@ let run ?o b au c d m p cart xyz_file =
              list_map ( fun (g,_) -> g.Gto.lc ) basis
         in
         let ang_mom =
-          list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  ->
+          list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  -> 
             let x, _ = List.hd l in
             Angmom.to_l x.GaussianPrimitive.sym |> Qptypes.Positive_int.to_int
              ) lc
@@ -587,7 +577,7 @@ let run ?o b au c d m p cart xyz_file =
           |> List.concat
         in
         let coef =
-          list_map (fun l ->
+          list_map (fun l -> 
             list_map (fun (_,x) -> Qptypes.AO_coef.to_float x) l
              ) lc
           |> List.concat
@@ -595,16 +585,12 @@ let run ?o b au c d m p cart xyz_file =
         let shell_prim_num =
           list_map List.length  lc
         in
-        let shell_idx =
-          let rec make_list n accu = function
-          | 0 -> accu
-          | i -> make_list n (n :: accu) (i-1)
-          in
+        let shell_prim_idx =
           let rec aux count accu = function
           | [] -> List.rev accu
           | l::rest ->
-            let new_l = make_list count accu (List.length l) in
-            aux (count+1) new_l rest
+            let newcount = count+(List.length l) in
+            aux newcount (count::accu) rest
           in
           aux 1 [] lc
         in
@@ -616,18 +602,26 @@ let run ?o b au c d m p cart xyz_file =
           ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
         Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
-        Ezfio.set_basis_shell_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| prim_num |] ~data:shell_idx) ;
+        Ezfio.set_basis_shell_prim_index (Ezfio.ezfio_array_of_list
+          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_idx) ;
         Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |]
-          ~data:( list_map (fun (_,n) -> Nucl_number.to_int n) basis)
-          ) ;
+          ~rank:1 ~dim:[| nucl_num |]
+          ~data:(
+          list_map (fun (_,n) -> Nucl_number.to_int n) basis
+          |> List.fold_left (fun accu i -> 
+            match accu with 
+            | [] -> []
+            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((h+1,i)::(h+1,j)::rest)
+          ) [(0,0)]
+          |> List.rev
+          |> List.map fst
+          )) ;
         Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
           ~rank:1 ~dim:[| nucl_num |]
           ~data:(
           list_map (fun (_,n) -> Nucl_number.to_int n) basis
-          |> List.fold_left (fun accu i ->
-            match accu with
+          |> List.fold_left (fun accu i -> 
+            match accu with 
             | [] -> [(1,i)]
             | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((1,i)::(h,j)::rest)
           ) []
@@ -677,7 +671,6 @@ let run ?o b au c d m p cart xyz_file =
 
 let () =
 
-  try (
 
   let open Command_line in
   begin
@@ -724,7 +717,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
       anonymous "FILE" Mandatory "Input file in xyz format or z-matrix.";
     ]
-    |> set_specs
+    |> set_specs 
   end;
 
 
@@ -735,7 +728,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
   let basis =
     match Command_line.get "basis" with
-    | None -> ""
+    | None -> assert false
     | Some x -> x
   in
 
@@ -748,7 +741,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
     | None -> 0
     | Some x -> ( if x.[0] = 'm' then
                     ~- (int_of_string (String.sub x 1 (String.length x - 1)))
-                  else
+                  else                                                                                                                                                       
                     int_of_string x )
   in
 
@@ -774,14 +767,10 @@ If a file with the same name as the basis set exists, this file will be read.  O
 
   let xyz_filename =
     match Command_line.anon_args () with
-    | []  -> failwith "input file is missing"
-    | x::_ -> x
+    | [x] -> x
+    | _ -> (Command_line.help () ; failwith "input file is missing")
   in
 
   run ?o:output basis au charge dummy multiplicity pseudo cart xyz_filename
-  )
-  with
-  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt
-  | Command_line.Error txt  -> Printf.eprintf "Command line error: %s\n%!" txt
 
 
