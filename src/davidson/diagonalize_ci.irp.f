@@ -1,19 +1,9 @@
-BEGIN_PROVIDER [ character*(3), sigma_vector_algorithm ]
- implicit none
- BEGIN_DOC
- ! If 'det', use <Psi_det|H|Psi_det> in Davidson
- !
- ! If 'cfg', use <Psi_csf|H|Psi_csf> in Davidson
- END_DOC
- sigma_vector_algorithm = 'det'
-END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   implicit none
   BEGIN_DOC
   ! :c:data:`n_states` lowest eigenvalues of the |CI| matrix
   END_DOC
-  PROVIDE distributed_davidson
 
   integer                        :: j
   character*(8)                  :: st
@@ -298,7 +288,6 @@ subroutine diagonalize_CI
 !  eigenstates of the |CI| matrix.
   END_DOC
   integer                        :: i,j
-  PROVIDE distributed_davidson
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors(i,j)

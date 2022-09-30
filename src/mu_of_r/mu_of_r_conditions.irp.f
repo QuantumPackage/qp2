@@ -26,7 +26,7 @@
   do ipoint = 1, n_points_final_grid
    if(mu_of_r_potential.EQ."hf")then
     mu_of_r_prov(ipoint,istate) =  mu_of_r_hf(ipoint)
-   else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
+   else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated")then
     mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
    else 
     print*,'you requested the following mu_of_r_potential'

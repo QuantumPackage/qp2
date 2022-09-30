@@ -258,8 +258,8 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       if (state_following) then
 
         overlap = -1.d0
-        do k=1,shift2
-          do i=1,shift2
+        do i=1,shift2
+          do k=1,shift2
             overlap(k,i) = dabs(y(k,i))
           enddo
         enddo
