@@ -92,41 +92,48 @@ subroutine overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,&
   overlap = overlap_x * overlap_y * overlap_z
 
 end
+              
+! ---
+              
+subroutine overlap_x_abs(A_center, B_center, alpha, beta, power_A, power_B, overlap_x, lower_exp_val, dx, nx)
 
-
-subroutine overlap_x_abs(A_center,B_center,alpha,beta,power_A,power_B,overlap_x,lower_exp_val,dx,nx)
-  implicit none
   BEGIN_DOC
   ! .. math                      ::
   !
   !  \int_{-infty}^{+infty} (x-A_center)^(power_A) * (x-B_center)^power_B * exp(-alpha(x-A_center)^2) * exp(-beta(x-B_center)^2) dx
   !
   END_DOC
-  integer                        :: i,j,k,l
-  integer,intent(in)             :: power_A,power_B
-  double precision, intent(in)   :: lower_exp_val
-  double precision,intent(in)    :: A_center, B_center,alpha,beta
-  double precision, intent(out)  :: overlap_x,dx
-  integer, intent(in)            :: nx
-  double precision               :: x_min,x_max,domain,x,factor,dist,p,p_inv,rho
-  double precision               :: P_center
-  if(power_A.lt.0.or.power_B.lt.0)then
+
+  implicit none
+
+  integer, intent(in)           :: power_A, power_B, nx
+  double precision, intent(in)  :: lower_exp_val, A_center, B_center, alpha, beta
+  double precision, intent(out) :: overlap_x, dx
+
+  integer                       :: i, j, k, l
+  double precision              :: x_min, x_max, domain, x, factor, dist, p, p_inv, rho
+  double precision              :: P_center
+  double precision              :: tmp
+
+  if(power_A.lt.0 .or. power_B.lt.0) then
     overlap_x = 0.d0
     dx = 0.d0
     return
   endif
-  p = alpha + beta
-  p_inv= 1.d0/p
-  rho = alpha * beta * p_inv
-  dist = (A_center - B_center)*(A_center - B_center)
+
+  p     = alpha + beta
+  p_inv = 1.d0/p
+  rho   = alpha * beta * p_inv
+  dist  = (A_center - B_center)*(A_center - B_center)
   P_center = (alpha * A_center + beta * B_center) * p_inv
-  if(rho*dist.gt.80.d0)then
+
+  if(rho*dist.gt.80.d0) then
    overlap_x= 0.d0
    return
   endif
+
   factor = dexp(-rho * dist)
 
-  double precision               :: tmp
 
   tmp = dsqrt(lower_exp_val/p)
   x_min = P_center - tmp

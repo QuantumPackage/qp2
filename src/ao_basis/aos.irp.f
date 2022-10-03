@@ -16,7 +16,7 @@ BEGIN_PROVIDER [ integer, ao_shell, (ao_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, ao_coef , (ao_num,ao_prim_num_max) ]
+ BEGIN_PROVIDER [ double precision, ao_coef , (ao_num,ao_prim_num_max) ]
 &BEGIN_PROVIDER [ double precision, ao_expo , (ao_num,ao_prim_num_max) ]
  implicit none
  BEGIN_DOC

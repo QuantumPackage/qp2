@@ -1179,7 +1179,7 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Gives the indices(+1) of the bits set to 1 in the bit string
+  ! Gives the inidices(+1) of the bits set to 1 in the bit string
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)
