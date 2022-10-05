@@ -613,14 +613,23 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                             #    B = LQ0[ks].conj()
                             #    W = np.einsum('prn,sqn->pqrs',A,B)
                             # 5
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq].transpose((1,0,2))
+                            #    W = np.einsum('prn,qsn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].conj()
+                            #    W = np.einsum('prn,qsn->pqrs',A,B)
+                            # 6
                             if Qneg:
                                 A = LQ0[kr].transpose((1,0,2)).conj()
                                 B = LQ0[kq].transpose((1,0,2))
-                                W = np.einsum('prn,qsn->pqrs',A,B)
+                                W = np.einsum('prn,sqn->pqrs',A,B)
                             else:
                                 A = LQ0[kp]
                                 B = LQ0[ks].conj()
-                                W = np.einsum('prn,qsn->pqrs',A,B)
+                                W = np.einsum('prn,sqn->pqrs',A,B)
                             p0 = kp*ao_num_per_kpt
                             r0 = kr*ao_num_per_kpt
                             q0 = kq*ao_num_per_kpt
@@ -630,7 +639,8 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                                     for ir in range(ao_num_per_kpt):
                                         for i_s in range(ao_num_per_kpt):
                                             v = W[ip,iq,ir,i_s]
-                                            print(f'{p0+ip:5d} {q0+iq:5d} {r0+ir:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
+                                            #print(f'{p0+ip:5d} {q0+iq:5d} {r0+ir:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
+                                            print(f'{p0+ip:5d} {r0+ir:5d} {q0+iq:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
                             Wfull[p0:p0+ao_num_per_kpt,q0:q0+ao_num_per_kpt,r0:r0+ao_num_per_kpt,s0:s0+ao_num_per_kpt] = W.copy()
                 H1 = np.zeros((ao_num_tot, ao_num_tot), dtype=np.complex128)
                 for Qi in range(kpt_num):
