@@ -288,11 +288,7 @@ def convert_mol(filename,qph5path):
 def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     import json
     from scipy.linalg import block_diag
-    #dump_fci, dump_cd = (False, False)
-    dump_fci, dump_cd = (True, False)
-    #dump_fci, dump_cd = (False, True)
-    #dump_fci2 = True
-    dump_fci2 = False
+    dump_fci, dump_cd, dump_fci2 = (False, False, False)
 
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
@@ -495,11 +491,11 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         nchol_per_kpt_all =  qph5['Hamiltonian']['NCholPerKP'][:]
-        print(nchol_per_kpt_all)
+        print(f'nchol_per_kpt_full = {nchol_per_kpt_all}')
         #nchol_per_kpt = nchol_per_kpt_all[nchol_per_kpt_all != 0]
         nchol_per_kpt = nchol_per_kpt_all[np.array(unique_k_idx,dtype=int)-1]
-        print(nchol_per_kpt)
-        print(unique_k_idx)
+        print(f'nchol_per_kpt = {nchol_per_kpt}')
+        print(f'unique_k_idx = {unique_k_idx}')
         #for i in range(kpt_num):
         #    if i+1 in unique_k_idx:
         #        print('* ',i,nchol_per_kpt_all[i])
@@ -515,11 +511,11 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
             #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
             L_list = []
             L_all = np.zeros((unique_kpt_num, kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max,2),dtype=np.float64)
-            print(kpt_sparse_map)
-            print(np.array(unique_k_idx)-1)
+            print(f'kpt_sparse_map = {kpt_sparse_map}')
+            print(f'unique_k_idx-1 = {np.array(unique_k_idx)-1}')
             for i in range(unique_kpt_num):
                 ki = unique_k_idx[i]-1
-                print(i, ki)
+                #print(i, ki)
                 L_i = qph5[f'Hamiltonian/KPFactorized/L{ki}'][()].reshape((kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[kpt_sparse_map[ki]-1], 2))
                 #L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
                 #L = np.einsum("ijklm->ilkjm", A, B)
@@ -839,6 +835,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
             """
         else:
+            raise NotImplementedError
             """
             ezfio.set_io_chol_mo_integrals('Read')
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
