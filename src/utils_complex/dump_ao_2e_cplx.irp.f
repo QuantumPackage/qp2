@@ -15,19 +15,21 @@ subroutine run
       do k=1,ao_num 
         do l=1,ao_num 
           tmp_cmplx = get_ao_two_e_integral_complex(i,j,k,l,ao_integrals_map,ao_integrals_map_2)
-          print'(4(I4),2(E23.15))',i,j,k,l,tmp_cmplx
+          if (cdabs(tmp_cmplx) .gt. 1E-10) then
+            print'(4(I4),2(E23.15))',i,k,j,l,tmp_cmplx
+          endif
         enddo
       enddo
     enddo
   enddo
-  print*,'map1'
-  do i=0,ao_integrals_map%map_size
-    print*,i,ao_integrals_map%map(i)%value(:)
-    print*,i,ao_integrals_map%map(i)%key(:)
-  enddo
-  print*,'map2'
-  do i=0,ao_integrals_map_2%map_size
-    print*,i,ao_integrals_map_2%map(i)%value(:)
-    print*,i,ao_integrals_map_2%map(i)%key(:)
-  enddo
+  !print*,'map1'
+  !do i=0,ao_integrals_map%map_size
+  !  print*,i,ao_integrals_map%map(i)%value(:)
+  !  print*,i,ao_integrals_map%map(i)%key(:)
+  !enddo
+  !print*,'map2'
+  !do i=0,ao_integrals_map_2%map_size
+  !  print*,i,ao_integrals_map_2%map(i)%value(:)
+  !  print*,i,ao_integrals_map_2%map(i)%key(:)
+  !enddo
 end

@@ -3,12 +3,13 @@
 convert hdf5 output (e.g. from PySCF) to ezfio
 
 Usage:
-    qp_convert_h5_to_ezfio [--noqmc] [-o EZFIO_DIR] FILE
+    qp_convert_h5_to_ezfio [--noqmc] [--rmg] [-o EZFIO_DIR] FILE
 
 Options:
     -o --output=EZFIO_DIR    Produced directory
                              by default is FILE.ezfio
     --noqmc                  don't include basis, cell, etc. for QMCPACK
+    --rmg                      h5 contains cholesky decomposition informatin, these h5 result from RMG and the pyscf AFQMC converter of QMCPACK.
 
 """
 from ezfio import ezfio
@@ -20,6 +21,104 @@ from docopt import docopt
 import gzip
 #fname = sys.argv[1]
 #qph5name = sys.argv[2]
+def idx2_tri(i,j):
+    """
+    for 0-indexed counting
+    """
+    p = max(i,j)
+    q = min(i,j)
+    return q + (p*(p+1))//2
+def idx2_tri_1(i,j):
+    """
+    for 1-indexed counting
+    """
+    p = max(i,j)
+    q = min(i,j)
+    return q + (p*(p-1))//2
+
+def idx4_cplx_1(i,j,k,l):
+    """
+    original function from qp2 (fortran counting)
+    """
+    p = idx2_tri_1(i,k)
+    q = idx2_tri_1(j,l)
+    i1 = idx2_tri_1(p,q)
+    return (i1,p,q)
+
+def ao_idx_map_sign(i,j,k,l):
+    """
+    qp2 indexing
+    """
+    idx,ik,jl = idx4_cplx_1(i,j,k,l)
+    ij = idx2_tri_1(i,j)
+    kl = idx2_tri_1(k,l)
+    idx = 2*idx - 1
+
+    if (ij==kl):
+        sign = 0.0
+        use_map1 = False
+    else:
+        if ik==jl:
+            if i<k:
+                sign = 1.0
+                use_map1 = True
+            else:
+                sign = -1.0
+                use_map1 = True
+        elif i==k:
+            if j<l:
+                sign = 1.0
+                use_map1 = True
+            else:
+                sign = -1.0
+                use_map1 = True
+        elif j==l:
+            if i<k:
+                sign = 1.0
+                use_map1 = True
+            else:
+                sign = -1.0
+                use_map1 = True
+        elif ((i<k) == (j<l)):
+            if i<k:
+                sign = 1.0
+                use_map1 = True
+            else:
+                sign = -1.0
+                use_map1 = True
+        else:
+            if ((j<l) == (ik<jl)):
+                sign = 1.0
+                use_map1 = False
+            else:
+                sign = -1.0
+                use_map1 = False
+    return (idx, use_map1, sign)
+def get_ao_int_cplx(i,j,k,l,map1,map2):
+    idx,use_m1,sgn = ao_idx_map_sign(i,j,k,l)
+    if use_m1:
+        tmp_re = map1[idx]
+        tmp_im = map1[idx+1]
+        tmp_im *= sgn
+    else:
+        tmp_re = map2[idx]
+        if sgn != 0.0:
+            tmp_im = map2[idx+1]
+            tmp_im *= sgn
+        else:
+            tmp_im = 0.0
+    return tmp_re + 1j*tmp_im
+def kconserv_p_from_qkk2_mk(qkk2,mk):
+    nk, nk2 = qkk2.shape
+    assert(nk == nk2)
+    kcon_p = np.zeros((nk,nk,nk),dtype=int)
+    for i in range(nk):
+        for j in range(nk):
+            for k in range(nk):
+                kcon_p[i,j,k] = qkk2[mk[j],qkk2[k,i]]
+                assert(qkk2[mk[j],qkk2[k,i]] == qkk2[qkk2[j,k],i])
+    return kcon_p
+
 
 def get_full_path(file_path):
     file_path = os.path.expanduser(file_path)
@@ -27,6 +126,19 @@ def get_full_path(file_path):
 #    file_path = os.path.abspath(file_path)
     return file_path
 
+def make_reim_identity_kblocks(nk,nm,na=None):
+    if na is None:
+        na = nm
+    single_block = np.eye(nm, na, dtype=np.complex128).view(dtype=np.float64).reshape((nm, na, 2))
+    kblocks = np.tile(single_block,[nk, 1, 1, 1])
+    return kblocks
+
+def make_reim_identity_block_diag(nk,nm,na=None):
+    from scipy.linalg import block_diag
+    kblocks = make_reim_identity_kblocks(nk,nm,na).view(dtype=np.complex128).squeeze()
+    kblockdiag = block_diag(*kblocks).view(dtype=np.float64).reshape((nk*nm,nk*na,2))
+    print(f'kblockdiag.shape = {kblockdiag.shape}')
+    return kblockdiag
 
 def flatten(l):
     res = []
@@ -64,23 +176,23 @@ def save_array_do(ezfioname,subdir,data,chunksize=16384):
 def convert_mol(filename,qph5path):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(False)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_num = qph5['nuclei'].attrs['nucl_num']
         ao_num = qph5['ao_basis'].attrs['ao_num']
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_nucl_num(nucl_num)
-    
+
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -90,42 +202,42 @@ def convert_mol(filename,qph5path):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         do_pseudo = qph5['pseudo'].attrs['do_pseudo']
         ezfio.set_pseudo_do_pseudo(do_pseudo)
@@ -140,13 +252,13 @@ def convert_mol(filename,qph5path):
             ezfio.set_pseudo_pseudo_v_kl(qph5['pseudo/pseudo_v_kl'][()].tolist())
             ezfio.set_pseudo_pseudo_dz_k(qph5['pseudo/pseudo_dz_k'][()].tolist())
             ezfio.set_pseudo_pseudo_dz_kl(qph5['pseudo/pseudo_dz_kl'][()].tolist())
-    
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         #coeftmp = qph5['ao_basis/ao_coef'][()]
         #expotmp = qph5['ao_basis/ao_expo'][()]
@@ -156,27 +268,613 @@ def convert_mol(filename,qph5path):
         ezfio.set_ao_basis_ao_power(qph5['ao_basis/ao_power'][()].tolist())
         ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
         ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
-    
-      
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef = qph5['mo_basis/mo_coef'][()].tolist()
     ezfio.set_mo_basis_mo_coef(mo_coef)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
+
     return
+
+def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
+    import json
+    from scipy.linalg import block_diag
+    dump_fci, dump_cd, dump_fci2 = (False, False, False)
+
+    ezfio.set_file(filename)
+    ezfio.set_nuclei_is_complex(True)
+    # Dummy atom since AFQMC h5 has no atom information
+    #nucl_num = 1
+    #ezfio.set_nuclei_nucl_num(nucl_num)
+    #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
+    #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
+    #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
+    with h5py.File(qph5path,'r') as qph5:
+        kpt_num = qph5['Hamiltonian/KPoints'][()].shape[0]
+        ham_dims = qph5['Hamiltonian/dims'][()]
+        NMOPerKP = qph5['Hamiltonian/NMOPerKP'][()]
+        _, _, kpt_num, orb_num, elec_alpha_num_tot, elec_beta_num_tot, _, nchol_maybe = ham_dims
+
+        #for now, all kpts must have same number of MOs
+        for nmoi in NMOPerKP:
+            if nmoi != NMOPerKP[0]:
+                print("ERROR: all KPs must have same number of MOs")
+                raise ValueError
+
+        #TODO: fix na, nb in rmg
+        assert(elec_alpha_num_tot % kpt_num == 0)
+        assert(elec_beta_num_tot % kpt_num == 0)
+        elec_alpha_num_per_kpt = elec_alpha_num_tot // kpt_num
+        elec_beta_num_per_kpt = elec_beta_num_tot // kpt_num
+        #elec_alpha_num_per_kpt =  qph5['Hamiltonian']['dims'][4]
+        #elec_beta_num_per_kpt =  qph5['Hamiltonian']['dims'][5]
+        #orb_num =  qph5['Hamiltonian']['dims'][3]
+        #try:
+        #  is_ao =  json.loads(qph5['metadata'][()].decode("utf-8").replace("'",'"'))['ortho_ao']
+        #  if is_ao:
+        #    ao_num = orb_num
+        #  elif is_ao ==False:
+        #    mo_num = orb_num
+        #  else:
+        #      raise ValueError('Problem with ortho_ao key in metadata')
+        #except:
+        #    raise UnicodeDecodeError('metadata not correctly parsed from HDF5 file')
+
+
+    ezfio.set_nuclei_kpt_num(kpt_num)
+    kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
+    ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
+    # don't multiply nuclei by kpt_num
+    # work in k-space, not in equivalent supercell
+    #nucl_num_per_kpt = nucl_num
+    #ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+    # these are totals (kpt_num * num_per_kpt)
+    # need to change if we want to truncate orbital space within pyscf
+    #if is_ao:
+    #    ao_num = orb_num*kpt_num
+    #TODO: fix this?
+    ao_num_tot = orb_num
+    ao_num_per_kpt = NMOPerKP[0]
+    mo_num_tot = orb_num
+    mo_num_per_kpt = NMOPerKP[0]
+    #mo_num_per_kpt = ao_num_per_kpt
+    ezfio.set_ao_basis_ao_num(ao_num_per_kpt * kpt_num)
+    ezfio.set_mo_basis_mo_num(mo_num_per_kpt * kpt_num)
+    ezfio.set_ao_basis_ao_num_per_kpt(ao_num_per_kpt)
+    ezfio.set_mo_basis_mo_num_per_kpt(mo_num_per_kpt)
+    ezfio.electrons_elec_alpha_num = elec_alpha_num_per_kpt * kpt_num
+    ezfio.electrons_elec_beta_num  = elec_beta_num_per_kpt * kpt_num
+    ##########################################
+    #                                        #
+    #                Basis                   #
+    #                                        #
+    ##########################################
+    #TODO
+    nucl_num = 1
+    ezfio.set_nuclei_nucl_num(nucl_num)
+    ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
+    ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
+    ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
+    nucl_num_per_kpt = nucl_num
+    ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+    ezfio.set_nuclei_io_kpt_symm('Read')
+    ezfio.set_ao_basis_ao_basis("dummy basis")
+
+    #nucleus on which each AO is centered
+    ao_nucl = [1 for i in range(ao_num_per_kpt)]*kpt_num
+    ezfio.set_ao_basis_ao_nucl(ao_nucl)
+
+
+    #Just need one (can clean this up later)
+    ao_prim_num_max  = 5
+
+    d = [ [0] *ao_prim_num_max]*ao_num_tot
+    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num_tot)
+    ezfio.set_ao_basis_ao_power(d)
+    ezfio.set_ao_basis_ao_coef(d)
+    ezfio.set_ao_basis_ao_expo(d)
+    ##########################################
+    #                                        #
+    #               MOCoeff                  #
+    #                                        #
+    ##########################################
+    #TODO
+    #coef_per_kpt = np.eye(mo_num_per_kpt, ao_num_per_kpt, dtype=np.complex128).view(dtype=np.float64).reshape((mo_num_per_kpt, ao_num_per_kpt, 2))
+
+    #mo_coef_kpts = np.tile(coef_per_kpt,[kpt_num, 1, 1, 1])
+    #qph5.create_dataset('mo_basis/mo_coef_kpts',data=make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+    ezfio.set_mo_basis_mo_coef_kpts(make_reim_identity_kblocks(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+    ezfio.set_mo_basis_mo_coef_complex(make_reim_identity_block_diag(kpt_num, mo_num_per_kpt, ao_num_per_kpt))
+
+    ##########################################
+    #                                        #
+    #            Integrals Mono              #
+    #                                        #
+    ##########################################
+
+    with h5py.File(qph5path,'r') as qph5:
+        # we don't have separate kinetic, nuc-elec, pseudo 1e ints, so just combine in nuc-elec and set rest to zero
+        mono_ints_tot = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
+        for i in range(kpt_num):
+            mono_ints_tot[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
+        ovlp_ao_reim = make_reim_identity_kblocks(kpt_num,ao_num_per_kpt,ao_num_per_kpt)
+        kin_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
+        ne_ao_reim = mono_ints_tot
+
+        ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
+        ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
+
+        ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+        ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+
+
+    """
+    with h5py.File(qph5path,'r') as qph5:
+        if is_ao:
+            kin_ao_reim=
+            ovlp_ao_reim=
+            ne_ao_reim=
+
+            ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
+            ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
+            ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
+
+            ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
+            ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
+            ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
+        else:
+            kin_mo_reim=
+            ovlp_mo_reim=
+            ne_mo_reim=
+
+            ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
+            ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
+
+            ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
+            ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
+      """
+    ##########################################
+    #                                        #
+    #               k-points                 #
+    #                                        #
+    ##########################################
+    #TODO
+    with h5py.File(qph5path,'r') as qph5:
+        #kconserv = qph5['nuclei/kconserv'][()].tolist()
+        minusk = qph5['Hamiltonian']['MinusK'][:]+1
+        QKTok2 = qph5['Hamiltonian']['QKTok2'][:]+1
+        #TODO: change this after rmg is fixed
+        #minusk = QKTok2[:,0]
+        kconserv = kconserv_p_from_qkk2_mk(QKTok2-1,minusk-1)+1
+        unique_kpt_num = len(qph5['Hamiltonian']['KPFactorized'])
+        unique_k_idx = []
+        for i in qph5['Hamiltonian']['KPFactorized'].keys():
+            unique_k_idx.append(int(i[1:])+1)
+        unique_k_idx.sort()
+    kpt_sparse_map = np.zeros(kpt_num,dtype=int)
+    isparse=0
+    #TODO: make robust: this assumes that for each pair, the one with data has a lower index
+    for i in range(kpt_num):
+        if i+1 in unique_k_idx:
+            kpt_sparse_map[i] = isparse+1
+            isparse += 1
+        else:
+            kpt_sparse_map[i] = -kpt_sparse_map[minusk[i]-1]
+    ezfio.set_nuclei_kconserv(kconserv.transpose(2,1,0))
+    ezfio.set_nuclei_io_kconserv('Read')
+    ezfio.set_nuclei_minusk(minusk)
+    ezfio.set_nuclei_qktok2(np.transpose(QKTok2)) #transposed for correct col-major ordering
+    ezfio.set_nuclei_kpt_sparse_map(kpt_sparse_map)
+    ezfio.set_nuclei_unique_kpt_num(unique_kpt_num)
+    # kpt_sparse_map
+    # unique_kpt_num
+    # io_kpt_symm
+    ##########################################
+    #                                        #
+    #             Integrals Bi               #
+    #                                        #
+    ##########################################
+
+    # should this be in ao_basis? ao_two_e_ints?
+    with h5py.File(qph5path,'r') as qph5:
+        nchol_per_kpt_all =  qph5['Hamiltonian']['NCholPerKP'][:]
+        print(f'nchol_per_kpt_full = {nchol_per_kpt_all}')
+        #nchol_per_kpt = nchol_per_kpt_all[nchol_per_kpt_all != 0]
+        nchol_per_kpt = nchol_per_kpt_all[np.array(unique_k_idx,dtype=int)-1]
+        print(f'nchol_per_kpt = {nchol_per_kpt}')
+        print(f'unique_k_idx = {unique_k_idx}')
+        #for i in range(kpt_num):
+        #    if i+1 in unique_k_idx:
+        #        print('* ',i,nchol_per_kpt_all[i])
+        #    else:
+        #        print('  ',i,nchol_per_kpt_all[i])
+
+        nchol_per_kpt_max = max(nchol_per_kpt)
+        ezfio.set_ao_two_e_ints_chol_num(nchol_per_kpt)
+        ezfio.set_ao_two_e_ints_chol_num_max(nchol_per_kpt_max)
+        if is_ao:
+            #ao_num_per_kpt = ao_num//kpt_num
+            ezfio.set_ao_two_e_ints_io_chol_ao_integrals('Read')
+            #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
+            L_list = []
+            L_all = np.zeros((unique_kpt_num, kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max,2),dtype=np.float64)
+            print(f'kpt_sparse_map = {kpt_sparse_map}')
+            print(f'unique_k_idx-1 = {np.array(unique_k_idx)-1}')
+            for i in range(unique_kpt_num):
+                ki = unique_k_idx[i]-1
+                #print(i, ki)
+                L_i = qph5[f'Hamiltonian/KPFactorized/L{ki}'][()].reshape((kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[kpt_sparse_map[ki]-1], 2))
+                #L.reshape(kpt_num, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt[i], 2)
+                #L = np.einsum("ijklm->ilkjm", A, B)
+                L_all[i,:,:,:,:nchol_per_kpt[kpt_sparse_map[ki]-1],:] = L_i
+
+                #(6, 5184, 2)
+                """
+                for cmplx in range(2):
+                    for ao_idx_i in range(ao_num_per_kpt):
+                        for ao_idx_j in range(ao_num_per_kpt):
+                            for chol_idx in range(nchol_per_kpt[i]):
+                                for kpt_idx in range(kpt_num):
+                                    ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_j][chol_idx][cmplx]
+                """
+            #ao_chol_two_e_ints = np.vstack(L_list)
+            #ao_chol_two_e_ints = ao_chol_two_e_ints.transpose()
+            #TODO: check dims/reshape/transpose
+            #ezfio.set_ao_two_e_ints_chol_ao_integrals_complex(L_all.transpose((5,2,3,4,1,0)))
+            ezfio.set_ao_two_e_ints_chol_ao_integrals_complex(L_all.transpose((0,1,4,3,2,5)))
+
+            def fortformat(x0):
+                x = f'{abs(x0):25.14E}'.strip()
+                xsign = '-' if (x0<0) else ''
+                e = x.find('E')
+                return xsign + f'0.{x[0]}{x[2:e]}{x[e:e+2]}{abs(int(x[e+1:])*1+1):02d}'
+            if dump_cd:
+                #for qi in range(unique_kpt_num):
+                #    for ki in range(kpt_num):
+                #        for i in range(ao_num_per_kpt):
+                #            for j in range(ao_num_per_kpt):
+                #                for ci in range(nchol_per_kpt_max):
+                #                    vr = L_all[qi,ki,i,j,ci,0]
+                #                    vi = L_all[qi,ki,i,j,ci,1]
+                #                    print(f'{qi:6d} {ki:6d} {i:6d} {j:6d} {ci:6d} {vr:25.15E} {vi:25.15E}')
+                Lnew = L_all.transpose((5,2,3,4,1,0))
+                #for qi in range(unique_kpt_num):
+                #    for ki in range(kpt_num):
+                #        for ci in range(nchol_per_kpt_max):
+                #            for j in range(ao_num_per_kpt):
+                #                for i in range(ao_num_per_kpt):
+                #                    vr = Lnew[0,i,j,ci,ki,qi]
+                #                    vi = Lnew[1,i,j,ci,ki,qi]
+                #                    print(f'{qi:6d} {ki:6d} {ci:6d} {j:6d} {i:6d} {vr:25.15E} {vi:25.15E}')
+                for qi in range(unique_kpt_num):
+                    for ki in range(kpt_num):
+                        for ci in range(nchol_per_kpt_max):
+                            for i in range(ao_num_per_kpt):
+                                for j in range(ao_num_per_kpt):
+                                    #vr = Lnew[0,i,j,ci,ki,qi]
+                                    #vi = Lnew[1,i,j,ci,ki,qi]
+                                    vr = L_all[qi,ki,i,j,ci,0]
+                                    vi = L_all[qi,ki,i,j,ci,1]
+                                    print(f'{qi+1:6d} {ki+1:6d} {ci+1:6d} {i+1:6d} {j+1:6d} {fortformat(vr):>25s} {fortformat(vi):>25s}')
+
+            if dump_fci:
+                Wfull = np.zeros((ao_num_tot, ao_num_tot, ao_num_tot, ao_num_tot), dtype=np.complex128)
+                for Qi in range(kpt_num):
+                    Qloc = abs(kpt_sparse_map[Qi])-1
+                    Qneg = (kpt_sparse_map[Qi] < 0)
+                    LQ00 = L_all[Qloc]
+                    #LQ0a = LQ00.view(dtype=np.complex128)
+                    #print(f'LQ0a.shape {LQ0a.shape}')
+                    #LQ0a1 = LQ0a.reshape((kpt_num,ao_num_per_kpt,ao_num_per_kpt,-1))
+                    #print(f'LQ0a1.shape {LQ0a1.shape}')
+                    LQ0 = LQ00[:,:,:,:,0] + 1j*LQ00[:,:,:,:,1]
+                    #print(f'LQ0.shape {LQ0.shape}')
+                    #print(f'abdiff {np.abs(LQ0a1 - LQ0).max()}')
+
+                    
+
+                    for kp in range(kpt_num):
+                        kr = QKTok2[Qi,kp]-1
+                        for ks in range(kpt_num):
+                            kq = QKTok2[Qi,ks]-1
+                            # 3
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq]
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].transpose((1,0,2)).conj()
+                            #    W = np.einsum('rpn,qsn->pqrs',A,B)
+                            # 4
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq].transpose((1,0,2))
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].conj()
+                            #    W = np.einsum('prn,sqn->pqrs',A,B)
+                            # 5
+                            #if Qneg:
+                            #    A = LQ0[kr].transpose((1,0,2)).conj()
+                            #    B = LQ0[kq].transpose((1,0,2))
+                            #    W = np.einsum('prn,qsn->pqrs',A,B)
+                            #else:
+                            #    A = LQ0[kp]
+                            #    B = LQ0[ks].conj()
+                            #    W = np.einsum('prn,qsn->pqrs',A,B)
+                            # 6
+                            if Qneg:
+                                A = LQ0[kr].transpose((1,0,2)).conj()
+                                B = LQ0[kq].transpose((1,0,2))
+                                W = np.einsum('prn,sqn->pqrs',A,B)
+                            else:
+                                A = LQ0[kp]
+                                B = LQ0[ks].conj()
+                                W = np.einsum('prn,sqn->pqrs',A,B)
+                            p0 = kp*ao_num_per_kpt
+                            r0 = kr*ao_num_per_kpt
+                            q0 = kq*ao_num_per_kpt
+                            s0 = ks*ao_num_per_kpt
+                            for ip in range(ao_num_per_kpt):
+                                for iq in range(ao_num_per_kpt):
+                                    for ir in range(ao_num_per_kpt):
+                                        for i_s in range(ao_num_per_kpt):
+                                            v = W[ip,iq,ir,i_s]
+                                            #print(f'{p0+ip:5d} {q0+iq:5d} {r0+ir:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
+                                            print(f'{p0+ip:5d} {r0+ir:5d} {q0+iq:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
+                            Wfull[p0:p0+ao_num_per_kpt,q0:q0+ao_num_per_kpt,r0:r0+ao_num_per_kpt,s0:s0+ao_num_per_kpt] = W.copy()
+                H1 = np.zeros((ao_num_tot, ao_num_tot), dtype=np.complex128)
+                for Qi in range(kpt_num):
+                    hi0 = qph5[f'Hamiltonian/H1_kp{Qi}'][()]
+                    hi = hi0[:,:,0] + 1j*hi0[:,:,1]
+                    H1[Qi*ao_num_per_kpt:(Qi+1)*ao_num_per_kpt,Qi*ao_num_per_kpt:(Qi+1)*ao_num_per_kpt] = hi.copy()
+                mo_occ = ([1,]* elec_alpha_num_per_kpt + [0,] * (ao_num_per_kpt - elec_alpha_num_per_kpt)) * kpt_num
+                E1=0
+                E2j=0
+                E2k=0
+                print("Jij Kij")
+                for i in range(ao_num_tot):
+                    for j in range(ao_num_tot):
+                        print(f'{i:5d} {j:5d} {i:5d} {j:5d}  {Wfull[i,j,i,j].real:25.15E} {Wfull[i,j,i,j].imag:25.15E}')
+                        print(f'{i:5d} {j:5d} {j:5d} {i:5d}  {Wfull[i,j,j,i].real:25.15E} {Wfull[i,j,j,i].imag:25.15E}')
+                for imo, iocc in enumerate(mo_occ):
+                    if iocc:
+                        E1 += 2*H1[imo,imo]
+                        for jmo, jocc in enumerate(mo_occ):
+                            if jocc:
+                                E2j += 2* Wfull[imo,jmo,imo,jmo]
+                                E2k -= Wfull[imo,jmo,jmo,imo]
+                print(f'E1  = {E1:25.15E}')
+                print(f'E2j = {E2j:25.15E}')
+                print(f'E2k = {E2k:25.15E}')
+                print(f'E2  = {E2j+E2k:25.15E}')
+
+
+            if dump_fci2:
+                ao_map1 = {}
+                ao_map2 = {}
+                ao_map1_idx = {}
+                ao_map2_idx = {}
+                Wdict = {}
+                for kQ in range(kpt_num):
+                    for kl in range(kpt_num):
+                        kj = QKTok2[kQ,kl]-1
+                        if (kj>kl):
+                            continue
+                        kjkl2 = idx2_tri(kj,kl)
+                        Qneg = (kpt_sparse_map[kQ] < 0)
+                        Qloc = abs(kpt_sparse_map[kQ]) - 1
+                        if not Qneg:
+                            ints_jl0 = L_all[Qloc,kl,:,:,:,:]
+                            ints_jl = ints_jl0[:,:,:,0]+1j*ints_jl0[:,:,:,1]
+                        else:
+                            ints_jl0 = L_all[Qloc,kj,:,:,:,:]
+                            ints_jl1 = ints_jl0[:,:,:,0]+1j*ints_jl0[:,:,:,1]
+                            ints_jl = ints_jl1.transpose((1,0,2)).conj()
+                        for kk in range(kl+1):
+                            ki = QKTok2[minusk[kk]-1,kQ]-1 #TODO: check
+                            if ki != kconserv[kl,kk,kj]-1:
+                                print(ki,kconserv[kl,kk,kj],kl,kk,kj)
+                                assert( ki == kconserv[kl,kk,kj]-1) #TODO: check
+                            if (ki > kl):
+                                continue
+                            kikk2 = idx2_tri(ki,kk)
+                            if not Qneg:
+                                ints_ik0 = L_all[Qloc,ki,:,:,:]
+                                ints_ik = ints_ik0[:,:,:,0] + 1j*ints_ik0[:,:,:,1]
+                            else:
+                                ints_ik0 = L_all[Qloc,kk,:,:,:]
+                                ints_ik1 = ints_ik0[:,:,:,0]+1j*ints_ik0[:,:,:,1]
+                                ints_ik = ints_ik1.transpose((1,0,2)).conj()
+                            ints_jl_flat = ints_jl.reshape((ao_num_per_kpt**2, -1))
+                            ints_ik_flat = ints_ik.reshape((ao_num_per_kpt**2, -1))
+
+                            ints_ikjl = np.einsum('an,bn->ab',ints_ik_flat,ints_jl_flat).reshape((ao_num_per_kpt,)*4)
+
+                            for il in range(ao_num_per_kpt):
+                                l = il + kl*ao_num_per_kpt
+                                for ij in range(ao_num_per_kpt):
+                                    j = ij + kj*ao_num_per_kpt
+                                    if (j>l):
+                                        break
+                                    jl2 = idx2_tri(j,l)
+                                    for ik in range(ao_num_per_kpt):
+                                        k = ik + kk*ao_num_per_kpt
+                                        if (k>l):
+                                            break
+                                        for ii in range(ao_num_per_kpt):
+                                            i = ii + ki*ao_num_per_kpt
+                                            if ((j==l) and (i>k)):
+                                                break
+                                            ik2 = idx2_tri(i,k)
+                                            if (ik2 > jl2):
+                                                break
+                                            integral = ints_ikjl[ii,ik,ij,il]
+                                            if abs(integral) < 1E-15:
+                                                continue
+                                            idx_tmp,use_map1,sign = ao_idx_map_sign(i+1,j+1,k+1,l+1)
+                                            tmp_re = integral.real
+                                            tmp_im = integral.imag
+                                            Wdict[i,j,k,l] = tmp_re + 1j*tmp_im
+                                            if use_map1:
+                                                if idx_tmp in ao_map1:
+                                                    print(idx_tmp,1)
+                                                    raise
+                                                ao_map1[idx_tmp] = tmp_re
+                                                ao_map1_idx[idx_tmp] = (i,j,k,l,'re')
+                                                if sign != 0.0:
+                                                    ao_map1[idx_tmp+1] = tmp_im*sign
+                                                    ao_map1_idx[idx_tmp+1] = (i,j,k,l,'im')
+                                            else:
+                                                if idx_tmp in ao_map2:
+                                                    print(idx_tmp,2)
+                                                    raise
+                                                ao_map2[idx_tmp] = tmp_re
+                                                ao_map2_idx[idx_tmp] = (i,j,k,l,'re')
+                                                if sign != 0.0:
+                                                    ao_map2[idx_tmp+1] = tmp_im*sign
+                                                    ao_map2_idx[idx_tmp+1] = (i,j,k,l,'im')
+#                for idx in ao_map1:
+#                    i,j,k,l,ax = ao_map1_idx[idx]
+#                    print(f'1,{idx},{i},{j},{k},{l},{ax},{ao_map1[idx]}')
+#                for idx in ao_map2:
+#                    i,j,k,l,ax = ao_map2_idx[idx]
+#                    print(f'2,{idx},{i},{j},{k},{l},{ax},{ao_map2[idx]}')
+                for idx in Wdict:
+                    i,j,k,l = idx
+                    v = Wdict[idx]
+                    print(f'{i+1:6d} {j+1:6d} {k+1:6d} {l+1:6d} {fortformat(v.real):>25s} {fortformat(v.imag):>25s}')
+
+
+                                            
+
+
+                #for Qi in range(kpt_num):
+                #    Qloc = abs(kpt_sparse_map[Qi])-1
+                #    Qneg = (kpt_sparse_map[Qi] < 0)
+                #    LQ00 = L_all[Qloc]
+                #    #LQ0a = LQ00.view(dtype=np.complex128)
+                #    #print(f'LQ0a.shape {LQ0a.shape}')
+                #    #LQ0a1 = LQ0a.reshape((kpt_num,ao_num_per_kpt,ao_num_per_kpt,-1))
+                #    #print(f'LQ0a1.shape {LQ0a1.shape}')
+                #    LQ0 = LQ00[:,:,:,:,0] + 1j*LQ00[:,:,:,:,1]
+                #    #print(f'LQ0.shape {LQ0.shape}')
+                #    #print(f'abdiff {np.abs(LQ0a1 - LQ0).max()}')
+
+                #    
+
+                #    for kp in range(kpt_num):
+                #        kr = QKTok2[Qi,kp]-1
+                #        for ks in range(kpt_num):
+                #            kq = QKTok2[Qi,ks]-1
+                #            if Qneg:
+                #                A = LQ0[kr].transpose((1,0,2)).conj()
+                #                B = LQ0[kq]
+                #                W = np.einsum('prn,sqn->pqrs',A,B)
+                #            else:
+                #                A = LQ0[kp]
+                #                B = LQ0[ks].transpose((1,0,2)).conj()
+                #                W = np.einsum('rpn,qsn->pqrs',A,B)
+                #            p0 = kp*ao_num_per_kpt
+                #            r0 = kr*ao_num_per_kpt
+                #            q0 = kq*ao_num_per_kpt
+                #            s0 = ks*ao_num_per_kpt
+                #            for ip in range(ao_num_per_kpt):
+                #                for iq in range(ao_num_per_kpt):
+                #                    for ir in range(ao_num_per_kpt):
+                #                        for i_s in range(ao_num_per_kpt):
+                #                            v = W[ip,iq,ir,i_s]
+                #                            print(f'{p0+ip:5d} {q0+iq:5d} {r0+ir:5d} {s0+i_s:5d} {v.real:25.15E} {v.imag:25.15E}')
+                #            Wfull[p0:p0+ao_num_per_kpt,q0:q0+ao_num_per_kpt,r0:r0+ao_num_per_kpt,s0:s0+ao_num_per_kpt] = W.copy()
+                #H1 = np.zeros((ao_num_tot, ao_num_tot), dtype=np.complex128)
+                #for Qi in range(kpt_num):
+                #    hi0 = qph5[f'Hamiltonian/H1_kp{Qi}'][()]
+                #    hi = hi0[:,:,0] + 1j*hi0[:,:,1]
+                #    H1[Qi*ao_num_per_kpt:(Qi+1)*ao_num_per_kpt,Qi*ao_num_per_kpt:(Qi+1)*ao_num_per_kpt] = hi.copy()
+                #mo_occ = ([1,]* elec_alpha_num_per_kpt + [0,] * (ao_num_per_kpt - elec_alpha_num_per_kpt)) * kpt_num
+                #E1=0
+                #E2j=0
+                #E2k=0
+                #for imo, iocc in enumerate(mo_occ):
+                #    if iocc:
+                #        E1 += 2*H1[imo,imo]
+                #        for jmo, jocc in enumerate(mo_occ):
+                #            if jocc:
+                #                E2j += 2* Wfull[imo,jmo,imo,jmo]
+                #                E2k -= Wfull[imo,jmo,jmo,imo]
+                #print(f'E1  = {E1:25.15E}')
+                #print(f'E2j = {E2j:25.15E}')
+                #print(f'E2k = {E2k:25.15E}')
+                #print(f'E2  = {E2j+E2k:25.15E}')
+
+
+                            
+
+            #(2,ao_basis.ao_num_per_kpt,ao_basis.ao_num_per_kpt,ao_two_e_ints.chol_num_max,nuclei.kpt_num,nuclei.unique_kpt_num#)
+            """
+            df_num = qph5['ao_two_e_ints'].attrs['df_num']
+            ezfio.set_ao_two_e_ints_df_num(df_num)
+            if 'df_ao_integrals' in qph5['ao_two_e_ints'].keys():
+                dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
+                ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
+                ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
+            """
+        else:
+            raise NotImplementedError
+            """
+            ezfio.set_io_chol_mo_integrals('Read')
+            df_num = qph5['ao_two_e_ints'].attrs['df_num']
+            ezfio.set_ao_two_e_ints_df_num(df_num)
+            dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
+            ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
+            ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
+            """
+            #mo_num_per_kpt = ao_num//kpt_num
+            ezfio.set_io_chol_mo_integrals('Read')
+            #ao_chol_two_e_ints = np.zeros((2, ao_num_per_kpt, ao_num_per_kpt, nchol_per_kpt_max, kpt_num, len(nchol_per_kpt)))
+            L_list = []
+            for i in len(nchol_per_kpt):
+             L = qph5['Hamiltonian']['KPFactorized'][f'L{i}'][:]
+             L.reshape(kpt_num, mo_num_per_kpt, mo_num_per_kpt, nchol_per_kpt[i], 2)
+             L = np.einsum("ijklm->ilkjm", A, B)
+             L_list.append(L)
+
+             #(6, 5184, 2)
+             """
+             for cmplx in range(2):
+                 for ao_idx_i in range(ao_num_per_kpt):
+                     for ao_idx_j in range(ao_num_per_kpt):
+                         for chol_idx in range(nchol_per_kpt[i]):
+                             for kpt_idx in range(kpt_num):
+                                 ao_chol_two_e_ints[cmplx][ao_idx_i][ao_idx_j][chol_idx][kpt_idx][i] = L[kpt_idx][ao_idx_i][ao_idx_j][chol_idx][cmplx]
+             """
+            mo_chol_two_e_ints = np.vstack(L_list)
+            mo_chol_two_e_ints = mo_chol_two_e_ints.transpose()
+            ezfio.set_chol_mo_integrals_complex(mo_chol_two_e_ints)
+            return
+
+
+
 
 def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kpt_num = qph5['nuclei'].attrs['kpt_num']
         nucl_num = qph5['nuclei'].attrs['nucl_num']
@@ -184,16 +882,16 @@ def convert_kpts(filename,qph5path,qmcpack=True):
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
-    
+
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num 
+    nucl_num_per_kpt = nucl_num
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
-    
+
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
@@ -202,9 +900,9 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_mo_basis_mo_num_per_kpt(mo_num//kpt_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -214,57 +912,57 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis(Dummy)            #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
         ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-    
-    
+
+
     #Just need one (can clean this up later)
     ao_prim_num_max  = 5
-    
+
     d = [ [0] *ao_prim_num_max]*ao_num
     ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
     ezfio.set_ao_basis_ao_power(d)
     ezfio.set_ao_basis_ao_coef(d)
     ezfio.set_ao_basis_ao_expo(d)
-    
-    
+
+
     ###########################################
     ##                                        #
     ##                Pseudo                  #
@@ -302,7 +1000,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #    ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
     #    ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
 
- 
+
     ##########################################
     #                                        #
     #                Basis(QMC)              #
@@ -319,7 +1017,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
                 ezfio.set_qmcpack_qmc_lbas(qph5['qmcpack/qmc_lbas'][()].tolist())
                 ezfio.set_qmcpack_qmc_coef(qph5['qmcpack/qmc_coef'][()].tolist())
                 ezfio.set_qmcpack_qmc_expo(qph5['qmcpack/qmc_expo'][()].tolist())
-    
+
                 ezfio.set_qmcpack_qmc_pbc(qph5['qmcpack'].attrs['PBC'])
                 ezfio.set_qmcpack_qmc_cart(qph5['qmcpack'].attrs['cart'])
                 ezfio.set_qmcpack_qmc_pseudo(qph5['qmcpack'].attrs['Pseudo'])
@@ -337,15 +1035,15 @@ def convert_kpts(filename,qph5path,qmcpack=True):
             print("to create ezfio without qmcpack data, use 'qp_convert_h5_to_ezfio --noqmc'")
             raise
 
- 
-      
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef_kpts = qph5['mo_basis/mo_coef_kpts'][()].tolist()
         mo_coef_cplx = qph5['mo_basis/mo_coef_complex'][()].tolist()
@@ -353,63 +1051,63 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     ezfio.set_mo_basis_mo_coef_complex(mo_coef_cplx)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
-    
+
+
     ##########################################
     #                                        #
     #            Integrals Mono              #
     #                                        #
     ##########################################
-        
+
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_one_e_ints' in qph5.keys():
             kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic_kpts'][()].tolist()
             ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap_kpts'][()].tolist()
             ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e_kpts'][()].tolist()
-    
+
             ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_n_e_kpts(ne_ao_reim)
-            
+
             ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-      
-        
+
+
     with h5py.File(qph5path,'r') as qph5:
         if 'mo_one_e_ints' in qph5.keys():
             kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic_kpts'][()].tolist()
             ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap_kpts'][()].tolist()
             ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e_kpts'][()].tolist()
-    
+
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_kpts(kin_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_overlap_kpts(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_n_e_kpts(ne_mo_reim)
-            
+
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-      
+
     ##########################################
     #                                        #
     #               k-points                 #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
-    
+
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
-      
+
     ##########################################
     #                                        #
     #             Integrals Bi               #
     #                                        #
     ##########################################
-    
+
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_two_e_ints' in qph5.keys():
@@ -428,7 +1126,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
                 #test_write_df_ao(,5,dfao_dims,dfao_reim.size,dfao_reim.ravel())
 
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
-    
+
         if 'mo_two_e_ints' in qph5.keys():
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
             ezfio.set_ao_two_e_ints_df_num(df_num)
@@ -439,13 +1137,13 @@ def convert_kpts(filename,qph5path,qmcpack=True):
             dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
-   
+
     return
 
 def convert_cplx(filename,qph5path):
     ezfio.set_file(filename)
     ezfio.set_nuclei_is_complex(True)
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kpt_num = qph5['nuclei'].attrs['kpt_num']
         nucl_num = qph5['nuclei'].attrs['nucl_num']
@@ -453,25 +1151,25 @@ def convert_cplx(filename,qph5path):
         mo_num = qph5['mo_basis'].attrs['mo_num']
         elec_alpha_num = qph5['electrons'].attrs['elec_alpha_num']
         elec_beta_num = qph5['electrons'].attrs['elec_beta_num']
-    
+
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
-    
+
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
-    nucl_num_per_kpt = nucl_num 
+    nucl_num_per_kpt = nucl_num
     ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
-    
+
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     ezfio.set_ao_basis_ao_num(ao_num)
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.electrons_elec_alpha_num = elec_alpha_num
     ezfio.electrons_elec_beta_num  = elec_beta_num
-    
-    
-    
+
+
+
     ##ao_num = mo_num
     ##Important !
     #import math
@@ -481,56 +1179,56 @@ def convert_cplx(filename,qph5path):
     #
     #ezfio.electrons_elec_alpha_num = int(nelec_alpha_per_kpt * n_kpts)
     #ezfio.electrons_elec_beta_num = int(nelec_beta_per_kpt * n_kpts)
-    
+
     #ezfio.electrons_elec_alpha_num = int(math.ceil(num_elec / 2.))
     #ezfio.electrons_elec_beta_num = int(math.floor(num_elec / 2.))
-    
+
     #ezfio.set_utils_num_kpts(n_kpts)
     #ezfio.set_integrals_bielec_df_num(n_aux)
-    
+
     #(old)Important
     #ezfio.set_nuclei_nucl_num(nucl_num)
     #ezfio.set_nuclei_nucl_charge([0.]*nucl_num)
     #ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
     #ezfio.set_nuclei_nucl_label( ['He'] * nucl_num )
-    
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         nucl_charge=qph5['nuclei/nucl_charge'][()].tolist()
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
-    
+
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
     if isinstance(nucl_label[0],bytes):
         nucl_label = list(map(lambda x:x.decode(),nucl_label))
     ezfio.set_nuclei_nucl_label(nucl_label)
-    
+
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
-    
-    
+
+
     ##########################################
     #                                        #
     #                Basis                   #
     #                                        #
     ##########################################
-    
+
 #    with h5py.File(qph5path,'r') as qph5:
 #        ezfio.set_ao_basis_ao_basis(qph5['ao_basis'].attrs['ao_basis'])
 #        ezfio.set_ao_basis_ao_nucl(qph5['ao_basis/ao_nucl'][()].tolist())
-#    
-#    
+#
+#
 #    #Just need one (can clean this up later)
 #    ao_prim_num_max  = 5
-#    
+#
 #    d = [ [0] *ao_prim_num_max]*ao_num
 #    ezfio.set_ao_basis_ao_prim_num([ao_prim_num_max]*ao_num)
 #    ezfio.set_ao_basis_ao_power(d)
 #    ezfio.set_ao_basis_ao_coef(d)
 #    ezfio.set_ao_basis_ao_expo(d)
-    
+
     ##########################################
     #                                        #
     #                Basis                   #
@@ -568,78 +1266,79 @@ def convert_cplx(filename,qph5path):
         ezfio.set_ao_basis_ao_coef(qph5['ao_basis/ao_coef'][()].tolist())
         ezfio.set_ao_basis_ao_expo(qph5['ao_basis/ao_expo'][()].tolist())
 
-    
-    
-      
+
+
+
     ##########################################
     #                                        #
     #               MO Coef                  #
     #                                        #
     ##########################################
-        
-    
+
+
     with h5py.File(qph5path,'r') as qph5:
         mo_coef_reim = qph5['mo_basis/mo_coef_complex'][()].tolist()
     ezfio.set_mo_basis_mo_coef_complex(mo_coef_reim)
     #maybe fix qp so we don't need this?
     #ezfio.set_mo_basis_mo_coef([[i for i in range(mo_num)] * ao_num])
-    
-    
+
+
     ##########################################
     #                                        #
     #            Integrals Mono              #
     #                                        #
     ##########################################
-        
+
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_one_e_ints' in qph5.keys():
             kin_ao_reim=qph5['ao_one_e_ints/ao_integrals_kinetic'][()].tolist()
             ovlp_ao_reim=qph5['ao_one_e_ints/ao_integrals_overlap'][()].tolist()
             ne_ao_reim=qph5['ao_one_e_ints/ao_integrals_n_e'][()].tolist()
-    
+
             ezfio.set_ao_one_e_ints_ao_integrals_kinetic_complex(kin_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_overlap_complex(ovlp_ao_reim)
             ezfio.set_ao_one_e_ints_ao_integrals_n_e_complex(ne_ao_reim)
-            
+
             ezfio.set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_overlap('Read')
             ezfio.set_ao_one_e_ints_io_ao_integrals_n_e('Read')
-      
-        
+
+
     with h5py.File(qph5path,'r') as qph5:
         if 'mo_one_e_ints' in qph5.keys():
             kin_mo_reim=qph5['mo_one_e_ints/mo_integrals_kinetic'][()].tolist()
             #ovlp_mo_reim=qph5['mo_one_e_ints/mo_integrals_overlap'][()].tolist()
             ne_mo_reim=qph5['mo_one_e_ints/mo_integrals_n_e'][()].tolist()
-    
+
             ezfio.set_mo_one_e_ints_mo_integrals_kinetic_complex(kin_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_overlap_complex(ovlp_mo_reim)
             #ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
             ezfio.set_mo_one_e_ints_mo_integrals_n_e_complex(ne_mo_reim)
-            
+
             ezfio.set_mo_one_e_ints_io_mo_integrals_kinetic('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_overlap('Read')
             #ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
             ezfio.set_mo_one_e_ints_io_mo_integrals_n_e('Read')
-      
+
     ##########################################
     #                                        #
     #               k-points                 #
     #                                        #
     ##########################################
-    
+
     with h5py.File(qph5path,'r') as qph5:
         kconserv = qph5['nuclei/kconserv'][()].tolist()
-    
+
     ezfio.set_nuclei_kconserv(kconserv)
     ezfio.set_nuclei_io_kconserv('Read')
-      
+
+
     ##########################################
     #                                        #
     #             Integrals Bi               #
     #                                        #
     ##########################################
-    
+
     # should this be in ao_basis? ao_two_e_ints?
     with h5py.File(qph5path,'r') as qph5:
         if 'ao_two_e_ints' in qph5.keys():
@@ -653,7 +1352,7 @@ def convert_cplx(filename,qph5path):
                 dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
                 ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
                 ezfio.set_ao_two_e_ints_io_df_ao_integrals('Read')
-    
+
         if 'mo_two_e_ints' in qph5.keys():
             df_num = qph5['ao_two_e_ints'].attrs['df_num']
             ezfio.set_ao_two_e_ints_df_num(df_num)
@@ -664,15 +1363,22 @@ def convert_cplx(filename,qph5path):
             dfmo_reim=qph5['mo_two_e_ints/df_mo_integrals'][()].tolist()
             ezfio.set_mo_two_e_ints_df_mo_integrals_complex(dfmo_reim)
             ezfio.set_mo_two_e_ints_io_df_mo_integrals('Read')
-   
+
     return
-    
+
 
 if __name__ == '__main__':
     ARGUMENTS = docopt(__doc__)
 
+    #for i in range(1,6):
+    #    for j in range(1,6):
+    #        for k in range(1,6):
+    #            for l in range(1,6):
+    #                idx,usem1,sgn = ao_idx_map_sign(i,j,k,l)
+    #                print(f'{i:4d} {j:4d} {k:4d} {l:4d}      {str(usem1)[0]:s}  {idx:6d}     {sgn:5.1f}')
     FILE = get_full_path(ARGUMENTS['FILE'])
     qmcpack = True
+    rmg = False
     if ARGUMENTS["--output"]:
         EZFIO_FILE = get_full_path(ARGUMENTS["--output"])
     else:
@@ -680,11 +1386,20 @@ if __name__ == '__main__':
 
     if ARGUMENTS["--noqmc"]:
         qmcpack = False
+    if ARGUMENTS["--rmg"]:
+        rmg = True
     with h5py.File(FILE,'r') as qph5:
-        do_kpts = ('kconserv' in qph5['nuclei'].keys())
-    if (do_kpts):
+        try:
+            do_kpts = ('kconserv' in qph5['nuclei'].keys())
+        except:
+            do_kpts = False
+    if (do_kpts or rmg):
         print("converting HDF5 to EZFIO for periodic system")
-        convert_kpts(EZFIO_FILE,FILE,qmcpack)
+        if rmg:
+            print("Using RMG and AFQMC h5")
+            convert_kpts_cd(EZFIO_FILE,FILE,qmcpack)
+        else:
+            convert_kpts(EZFIO_FILE,FILE,qmcpack)
     else:
         print("converting HDF5 to EZFIO for molecular system")
         convert_mol(EZFIO_FILE,FILE)
@@ -697,4 +1412,3 @@ if __name__ == '__main__':
 #
 #to be sure your MOs will be orthogonal, which is not the case when
 #the MOs are read from output files (not enough precision in output).""")
-

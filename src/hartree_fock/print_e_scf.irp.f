@@ -15,6 +15,9 @@ subroutine run
   print*,hf_one_electron_energy
   print*,hf_two_electron_energy
   print*,hf_energy
+  print*,'hf 2e J,K energy'
+  print*,hf_two_electron_energy_jk(1)
+  print*,hf_two_electron_energy_jk(2)
   
 end
 

@@ -358,6 +358,11 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_in_map ]
       print*, 'AO integrals provided from 3-index ao ints (periodic)'
       ao_two_e_integrals_in_map = .True.
       return
+    else if (read_chol_ao_integrals) then
+      call ao_map_fill_from_chol
+      print*, 'AO integrals provided from 3-index Cholesky ao ints (periodic)'
+      ao_two_e_integrals_in_map = .True.
+      return
     else
       print*,'calculation of periodic AOs not implemented'
       stop -1
