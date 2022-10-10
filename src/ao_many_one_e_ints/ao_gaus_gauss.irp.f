@@ -116,6 +116,7 @@ double precision function overlap_gauss_r12_ao(D_center,delta,i,j)
  if(ao_overlap_abs(j,i).lt.1.d-12)then
   return
  endif
+ ! TODO :: PUT CYCLES IN LOOPS
  num_A = ao_nucl(i)
  power_A(1:3)= ao_power(i,1:3)
  A_center(1:3) = nucl_coord(num_A,1:3)

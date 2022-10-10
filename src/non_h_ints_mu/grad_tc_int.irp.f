@@ -11,6 +11,8 @@ END_DOC
  double precision, allocatable :: b_mat(:,:,:,:),ac_mat(:,:,:,:)
 ! provide v_ij_erf_rk_cst_mu 
  provide v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
+! ao_non_hermit_term_chemist = non_h_ints
+! return
   call wall_time(wall0)
  allocate(b_mat(n_points_final_grid,ao_num,ao_num,3),ac_mat(ao_num, ao_num, ao_num, ao_num))
  !$OMP PARALLEL                  &
@@ -35,6 +37,9 @@ END_DOC
  !$OMP END DO
  !$OMP END PARALLEL
 
+
+ ! (A)                b_mat(ipoint,k,i,m) X v_ij_erf_rk_cst_mu(j,l,r1)
+ ! 1/2 \int dr1 x1 phi_k(1) d/dx1 phi_i(1) \int dr2 (1 - erf(mu_r12))/r12  phi_j(2) phi_l(2)
   ac_mat = 0.d0
   do m = 1, 3
    !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
@@ -60,6 +65,8 @@ END_DOC
  !$OMP END DO
  !$OMP END PARALLEL
 
+ ! (B)                b_mat(ipoint,k,i,m) X x_v_ij_erf_rk_cst_mu(j,l,r1,m)
+ ! 1/2 \int dr1 phi_k(1) d/dx1 phi_i(1) \int dr2 x2(1 - erf(mu_r12))/r12  phi_j(2) phi_l(2)
   do m = 1, 3
    !           A   B^T  dim(A,1)       dim(B,2)       dim(A,2)        alpha * A                LDA 
    call dgemm("N","N",ao_num*ao_num,ao_num*ao_num,n_points_final_grid,-1.d0,x_v_ij_erf_rk_cst_mu(1,1,1,m),ao_num*ao_num & 
@@ -75,6 +82,7 @@ END_DOC
   do l = 1, ao_num
    do i = 1, ao_num
     do k = 1, ao_num
+     !                          (ki|lj)           (ki|lj)           (lj|ki)
       ao_non_hermit_term_chemist(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)    
     enddo
    enddo

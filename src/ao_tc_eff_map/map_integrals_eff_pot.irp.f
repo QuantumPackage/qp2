@@ -78,7 +78,7 @@ double precision function get_ao_tc_sym_two_e_pot(i,j,k,l,map) result(result)
   use map_module
   implicit none
   BEGIN_DOC
-  ! Gets one |AO| two-electron integral from the |AO| map
+  ! Gets one |AO| two-electron integral from the |AO| map in PHYSICIST NOTATION
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx
