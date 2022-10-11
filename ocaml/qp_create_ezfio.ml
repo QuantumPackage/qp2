@@ -681,10 +681,8 @@ let () =
   let open Command_line in
   begin
     "Creates an EZFIO directory from a standard xyz file or from a z-matrix file in Gaussian format.  The basis set is defined as a single string if all the atoms are taken from the same basis set, otherwise specific elements can be defined as follows:
-
     -b \"cc-pcvdz | H:cc-pvdz | C:6-31g\"
     -b \"cc-pvtz | 1,H:sto-3g | 3,H:6-31g\"
-
 If a file with the same name as the basis set exists, this file will be read.  Otherwise, the basis set is obtained from the database.
 "   |> set_description_doc ;
     set_header_doc (Sys.argv.(0) ^ " - Quantum Package command");

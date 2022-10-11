@@ -1,4 +1,5 @@
-subroutine davidson_diag_h_csf(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_st_diag,Nint,dressing_state,converged)
+subroutine davidson_diag_h_csf(dets_in, u_in, dim_in, energies, sze, sze_csf, &
+                               N_st, N_st_diag, Nint, dressing_state,converged)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -299,7 +300,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-!      if ((iter > 1).or.(itertot == 1)) then
+      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
@@ -309,10 +310,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         else
             call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
         endif
-!      else
-!         ! Already computed in update below
-!         continue
-!      endif
+      else
+         ! Already computed in update below
+         continue
+      endif
 
       if (dressing_state > 0) then
 
@@ -508,8 +509,17 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     enddo
 
-    ! Re-contract U
-    ! -------------
+    ! Re-contract U and update W
+    ! --------------------------------
+
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    do k=1,N_st_diag
+      do i=1,sze_csf
+        W_csf(i,k) = u_in(i,k)
+      enddo
+    enddo
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))

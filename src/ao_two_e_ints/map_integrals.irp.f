@@ -326,9 +326,9 @@ double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
   use map_module
   implicit none
   BEGIN_DOC
-  ! Gets one AO bi-electronic integral from the AO map
+  ! Gets one AO bi-electronic integral from the AO map in PHYSICIST NOTATION
   !
-  ! i,j,k,l in physicist notation <ij|kl>
+  ! <1:k, 2:l |1:i, 2:j> 
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx

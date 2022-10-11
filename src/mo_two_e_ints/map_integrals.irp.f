@@ -302,21 +302,21 @@ end
  integer(key_kind)              :: idx
  double precision :: tmp
 
-!icount = 1 ! Avoid division by zero
-!do j=1,mo_num
-!  do i=1,j-1
-!   call two_e_integrals_index(i,j,j,i,idx)
-!   !DIR$ FORCEINLINE
-!   call map_get(mo_integrals_map,idx,tmp)
-!   banned_excitation(i,j) = dabs(tmp) < 1.d-14
-!   banned_excitation(j,i) = banned_excitation(i,j)
-!   if (banned_excitation(i,j)) icount = icount+2
-! enddo
-!enddo
-!use_banned_excitation =  (mo_num*mo_num) / icount <= 100  !1%
-!if (use_banned_excitation) then
-!  print *, 'Using sparsity of exchange integrals'
-!endif
+ icount = 1 ! Avoid division by zero
+ do j=1,mo_num
+   do i=1,j-1
+    call two_e_integrals_index(i,j,j,i,idx)
+    !DIR$ FORCEINLINE
+    call map_get(mo_integrals_map,idx,tmp)
+    banned_excitation(i,j) = dabs(tmp) < 1.d-14
+    banned_excitation(j,i) = banned_excitation(i,j)
+    if (banned_excitation(i,j)) icount = icount+2
+  enddo
+ enddo
+ use_banned_excitation =  (mo_num*mo_num) / icount <= 100  !1%
+ if (use_banned_excitation) then
+   print *, 'Using sparsity of exchange integrals'
+ endif
 
 END_PROVIDER
 

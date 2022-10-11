@@ -98,7 +98,7 @@ subroutine print_summary(e_,pt2_data,pt2_data_err,n_det_,n_configuration_,n_st,s
     enddo
   endif
 
-!  call print_energy_components()
+  call print_energy_components()
 
 end subroutine
 

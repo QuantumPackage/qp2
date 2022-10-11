@@ -7,46 +7,46 @@ clone:
   depth: 10
 
 steps:
+  - name: configure debug
+    image: scemama666/qp2_env
+    commands:
+    - ./configure -i all -c ./config/gfortran_debug.cfg
+    - bash -c "source quantum_package.rc ; exec qp_plugins download https://gitlab.com/scemama/qp_plugins_scemama"
+    - bash -c "source quantum_package.rc ; exec qp_plugins install champ"
 
-- name: configure
-  image: scemama666/qp2_env
-  commands:
-  - ./configure -i all -c ./config/gfortran_debug.cfg
-  - bash -c "source quantum_package.rc ; exec qp_plugins download https://gitlab.com/scemama/qp_plugins_scemama"
-  - bash -c "source quantum_package.rc ; exec qp_plugins install champ"
+  - name: compile debug
+    image: scemama666/qp2_env
+    commands:
+    - bash -c "source quantum_package.rc ; exec ninja"
 
-- name: compile
-  image: scemama666/qp2_env
-  commands:
-  - bash -c "source quantum_package.rc ; exec ninja"
+  - name: testing debug
+    image: scemama666/qp2_env
+    commands:
+    - bash -c "source quantum_package.rc ; TRAVIS=1 exec qp_test -a"
 
-- name: testing
-  image: scemama666/qp2_env
-  commands:
-  - bash -c "source quantum_package.rc ; TRAVIS=1 exec qp_test -a"
+  - name: configure fast
+    image: scemama666/qp2_env
+    commands:
+    - ./configure -c ./config/gfortran_avx.cfg
 
----
-kind: pipeline
-type: docker
-name: gfortran-avx
+  - name: compile fast
+    image: scemama666/qp2_env
+    commands:
+    - bash -c "source quantum_package.rc ; exec ninja"
 
-clone:
-  depth: 10
+  - name: testing fast
+    image: scemama666/qp2_env
+    commands:
+    - bash -c "source quantum_package.rc ; exec qp_test -a"
 
-steps:
-
-- name: configure
-  image: scemama666/qp2_env
-  commands:
-  - ./configure -i all -c ./config/gfortran_avx.cfg
-
-- name: compile
-  image: scemama666/qp2_env
-  commands:
-  - bash -c "source quantum_package.rc ; exec ninja"
-
-- name: testing
-  image: scemama666/qp2_env
-  commands:
-  - bash -c "source quantum_package.rc ; exec qp_test -a"
-
+  - name: notify
+    image: drillster/drone-email
+    settings:
+      host:
+        from_secret: hostname # irsamc.ups-tlse.fr
+      from:
+        from_secret: from # drone@irssv7.ups-tlse.fr
+      recipients:
+        from_secret: recipients # scemama@irsamc.ups-tlse.fr
+      when:
+        status: [changed, failure]

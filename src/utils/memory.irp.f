@@ -114,7 +114,7 @@ subroutine print_memory_usage()
   call resident_memory(rss)
   call total_memory(mem)
 
-  write(*,'(A,F14.3,A,F14.3,A)') &
+  write(*,'(A,F14.6,A,F14.6,A)') &
     '.. >>>>> [ RES  MEM : ', rss , &
         ' GB ] [ VIRT MEM : ', mem, ' GB ] <<<<< ..'
 end

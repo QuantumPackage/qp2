@@ -14,14 +14,14 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
- implicit none
- BEGIN_DOC
- ! Threshold of Davidson's algorithm, using PT2 as a guide
- END_DOC
- threshold_davidson_pt2 = threshold_davidson
-
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
+! implicit none
+! BEGIN_DOC
+! ! Threshold of Davidson's algorithm, using PT2 as a guide
+! END_DOC
+! threshold_davidson_pt2 = threshold_davidson
+!
+!END_PROVIDER
 
 
 
@@ -66,7 +66,7 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k
+  integer                        :: i,k,l
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -86,10 +86,15 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   !$OMP END PARALLEL
 
   if (dressing_state > 0) then
-    do k=1,N_st
-      do i=1,sze
-        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
+    do k = 1, N_st
+
+      do i = 1, sze
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
+
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+
     enddo
   endif
 
@@ -349,7 +354,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-!      if ((iter > 1).or.(itertot == 1)) then
+      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
@@ -359,10 +364,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
             call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
         endif
         S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
-!      else
-!         ! Already computed in update below
-!         continue
-!      endif
+      else
+         ! Already computed in update below
+         continue
+      endif
 
       if (dressing_state > 0) then
 

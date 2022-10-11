@@ -60,19 +60,14 @@ def main(arguments):
         print("Running tests for %s"%(bats_file))
         print("")
         if arguments["-v"]:
-            p = None
             if arguments["TEST"]:
                 test = "export TEST=%s ; "%arguments["TEST"]
             else:
                 test = ""
-            try:
-                os.system(test+" python3 bats_to_sh.py "+bats_file+
+            os.system(test+" python3 bats_to_sh.py "+bats_file+
                                     "| bash")
-            except:
-                if p:
-                    p.terminate()
         else:
-            subprocess.check_call(["bats", bats_file], env=os.environ)
+            subprocess.check_call(["bats", "--verbose-run", "--trace", bats_file], env=os.environ)
 
 
 

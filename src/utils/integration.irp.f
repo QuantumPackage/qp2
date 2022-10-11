@@ -412,6 +412,79 @@ subroutine recentered_poly2(P_new,x_A,x_P,a,P_new2,x_B,x_Q,b)
   enddo
 end
 
+subroutine pol_modif_center(A_center, B_center, iorder, A_pol, B_pol) 
+
+  BEGIN_DOC
+  ! 
+  ! Transform the pol centerd on A:
+  !       [ \sum_i ax_i (x-x_A)^i ] [ \sum_j ay_j (y-y_A)^j ] [ \sum_k az_k (z-z_A)^k ] 
+  ! to a pol centered on B
+  !       [ \sum_i bx_i (x-x_B)^i ] [ \sum_j by_j (y-y_B)^j ] [ \sum_k bz_k (z-z_B)^k ] 
+  !
+  END_DOC
+
+  ! useful for max_dim
+  include 'constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: iorder(3)
+  double precision, intent(in)  :: A_center(3), B_center(3)
+  double precision, intent(in)  :: A_pol(0:max_dim, 3)
+  double precision, intent(out) :: B_pol(0:max_dim, 3)
+
+  integer                       :: i, Lmax
+
+  do i = 1, 3
+    Lmax = iorder(i)
+    call pol_modif_center_x( A_center(i), B_center(i), Lmax, A_pol(0:Lmax, i), B_pol(0:Lmax, i) ) 
+  enddo
+
+  return
+end subroutine pol_modif_center
+
+
+
+subroutine pol_modif_center_x(A_center, B_center, iorder, A_pol, B_pol) 
+
+  BEGIN_DOC
+  ! 
+  ! Transform the pol centerd on A:
+  !       [ \sum_i ax_i (x-x_A)^i ] 
+  ! to a pol centered on B
+  !       [ \sum_i bx_i (x-x_B)^i ] 
+  !
+  ! bx_i = \sum_{j=i}^{iorder} ax_j (x_B - x_A)^(j-i) j! / [ i! (j-i)! ]
+  !      = \sum_{j=i}^{iorder} ax_j (x_B - x_A)^(j-i) binom_func(j,i)
+  !
+  END_DOC
+
+  implicit none
+
+  integer,          intent(in)  :: iorder
+  double precision, intent(in)  :: A_center, B_center
+  double precision, intent(in)  :: A_pol(0:iorder)
+  double precision, intent(out) :: B_pol(0:iorder)
+
+  integer                       :: i, j
+  double precision              :: fact_tmp, dx
+
+  double precision              :: binom_func
+
+  dx = B_center - A_center
+
+  do i = 0, iorder
+    fact_tmp = 0.d0
+    do j = i, iorder
+      fact_tmp += A_pol(j) * binom_func(j, i) * dx**dble(j-i)
+    enddo
+    B_pol(i) = fact_tmp
+  enddo
+
+  return
+end subroutine pol_modif_center_x
+
+
 
 
 
@@ -443,14 +516,16 @@ end
 
 
 
-double precision function rint(n,rho)
-  implicit none
+double precision function rint(n, rho)
+
   BEGIN_DOC
-!.. math::
-!
-!  \int_0^1 dx \exp(-p x^2) x^n
-!
+  !.. math::
+  !
+  !  \int_0^1 dx \exp(-p x^2) x^n
+  !
   END_DOC
+
+  implicit none
   include 'constants.include.F'
   double precision               :: rho,u,rint1,v,val0,rint_large_n,u_inv
   integer                        :: n,k
@@ -464,6 +539,7 @@ double precision function rint(n,rho)
       u=rho*u_inv
       rint=0.5d0*u_inv*sqpi*derf(u)
     endif
+!    print *, n, rho, rint
     return
   endif
   if(rho.lt.1.d0)then
@@ -487,6 +563,7 @@ double precision function rint(n,rho)
       rint=rint_large_n(n,rho)
     endif
   endif
+!  print *, n, rho, rint
 end
 
 
@@ -503,20 +580,24 @@ double precision function rint_sum(n_pt_out,rho,d1)
   integer                        :: n,k,i
   double precision               :: two_rho_inv, rint_tmp, di
 
+!  print *, ' rho = ', rho
 
   if(rho < 1.d0)then
 
     if(rho == 0.d0)then
       rint_sum=d1(0)
+!      print *, 0, d1(0), 1
     else
       u_inv=1.d0/dsqrt(rho)
       u=rho*u_inv
       rint_sum=0.5d0*u_inv*sqpi*derf(u) *d1(0)
+!      print *, 0, d1(0), 0.5d0*u_inv*sqpi*derf(u) 
     endif
 
     do i=2,n_pt_out,2
       n = shiftr(i,1)
       rint_sum = rint_sum + d1(i)*rint1(n,rho)
+!      print *, n, d1(i), rint1(n,rho)
     enddo
 
   else
@@ -532,19 +613,25 @@ double precision function rint_sum(n_pt_out,rho,d1)
     two_rho_inv = 0.5d0*u_inv*u_inv
     val0=0.5d0*u_inv*sqpi*derf(u)
     rint_sum=val0*d1(0)
+!    print *, 0, d1(0), val0
+
     rint_tmp=(val0-v)*two_rho_inv
     di = 3.d0
     do i=2,min(n_pt_out,40),2
       rint_sum = rint_sum + d1(i)*rint_tmp
+!      print *, i, d1(i), rint_tmp
       rint_tmp = (rint_tmp*di-v)*two_rho_inv
       di = di+2.d0
     enddo
     do i=42,n_pt_out,2
       n = shiftr(i,1)
       rint_sum = rint_sum + d1(i)*rint_large_n(n,rho)
+!      print *, i, d1(i), rint_large_n(n, rho)
     enddo
 
   endif
+
+!  print *, 'sum = ', rint_sum
 end
 
 double precision function hermite(n,x)
@@ -627,3 +714,94 @@ double precision function rint1(n,rho)
   write(*,*)'pb in rint1 k too large!'
   stop 1
 end
+
+! ---
+
+double precision function V_phi(n, m)
+
+  BEGIN_DOC
+  ! Computes the angular $\phi$ part of the nuclear attraction integral:
+  !
+  ! $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
+  END_DOC
+
+  implicit none
+  integer, intent(in) :: n, m
+
+  integer             :: i
+  double precision    :: prod
+
+  double precision    :: Wallis
+
+  prod = 1.d0
+  do i = 0, shiftr(n, 1)-1
+    prod = prod/ (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
+  enddo
+  V_phi = 4.d0 * prod * Wallis(m)
+
+end function V_phi
+
+! ---
+
+double precision function V_theta(n, m)
+
+  BEGIN_DOC
+  ! Computes the angular $\theta$ part of the nuclear attraction integral:
+  !
+  ! $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
+  END_DOC
+
+  implicit none
+  include 'utils/constants.include.F'
+  integer, intent(in) :: n, m
+
+  integer             :: i
+  double precision    :: prod
+
+  double precision    :: Wallis
+
+  V_theta = 0.d0
+  prod = 1.d0
+  do i = 0, shiftr(n, 1)-1
+    prod = prod / (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
+  enddo
+  V_theta = (prod + prod) * Wallis(m)
+
+end function V_theta
+
+! ---
+
+double precision function Wallis(n)
+
+  BEGIN_DOC
+  ! Wallis integral:
+  !
+  ! $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
+  END_DOC
+
+  implicit none
+  include 'utils/constants.include.F'
+
+  integer, intent(in) :: n
+
+  integer             :: p
+
+  double precision    :: fact
+
+  if(iand(n, 1) .eq. 0) then
+
+    Wallis = fact(shiftr(n, 1))
+    Wallis = pi * fact(n) / (dble(ibset(0_8, n)) * (Wallis + Wallis) * Wallis)
+
+  else
+
+    p = shiftr(n, 1)
+    Wallis = fact(p)
+    Wallis = dble(ibset(0_8, p+p)) * Wallis * Wallis / fact(p+p+1)
+
+  endif
+
+end function Wallis
+
+! ---
+

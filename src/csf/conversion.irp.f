@@ -1,15 +1,3 @@
-BEGIN_PROVIDER [ double precision, psi_csf_coef, (N_csf, N_states) ]
- implicit none
- BEGIN_DOC
- ! Wafe function in CSF basis
- END_DOC
-
- double precision, allocatable :: buffer(:,:)
- allocate ( buffer(N_det, N_states) )
- buffer(1:N_det, 1:N_states) = psi_coef(1:N_det, 1:N_states)
- call convertWFfromDETtoCSF(N_states, buffer, psi_csf_coef)
-END_PROVIDER
-
 subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
   use cfunctions
   use bitmasks
@@ -38,8 +26,6 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
 
   integer s, bfIcfg
   integer countcsf
-  integer MS
-  MS = elec_alpha_num-elec_beta_num
   countcsf = 0
   phasedet = 1.0d0
   do i = 1,N_configuration
@@ -58,17 +44,12 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
       enddo
     enddo
 
-    s = 0 ! s == total number of SOMOs
+    s = 0
     do k=1,N_int
       if (psi_configuration(k,1,i) == 0_bit_kind) cycle
       s = s + popcnt(psi_configuration(k,1,i))
     enddo
-
-    if(iand(s,1) .EQ. 0) then
-      bfIcfg = max(1,nint((binom(s,s/2)-binom(s,(s/2)+1))))
-    else
-      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
-    endif
+    bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
 
     ! perhaps blocking with CFGs of same seniority
     ! can be more efficient

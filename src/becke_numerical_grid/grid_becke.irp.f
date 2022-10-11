@@ -64,7 +64,8 @@ END_PROVIDER
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_angular,n_points_radial_grid,nucl_num)]
+ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_angular,n_points_radial_grid,nucl_num)]
+&BEGIN_PROVIDER [double precision, radial_points_per_atom, (n_points_radial_grid,nucl_num)]
   BEGIN_DOC
   ! x,y,z coordinates of grid points used for integration in 3d space
   END_DOC
@@ -72,6 +73,7 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_
   integer                        :: i,j,k
   double precision               :: dr,x_ref,y_ref,z_ref
   double precision               :: knowles_function
+  radial_points_per_atom = 0.D0
   do i = 1, nucl_num
     x_ref = nucl_coord(i,1)
     y_ref = nucl_coord(i,2)
@@ -83,7 +85,7 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom, (3,n_points_integration_
 
       ! value of the radial coordinate for the integration
       r = knowles_function(alpha_knowles(grid_atomic_number(i)),m_knowles,x)
-
+      radial_points_per_atom(j,i) = r
       ! explicit values of the grid points centered around each atom
       do k = 1, n_points_integration_angular
         grid_points_per_atom(1,k,j,i) =                              &

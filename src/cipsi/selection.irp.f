@@ -195,10 +195,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
   integer                        :: l_a, nmax, idx
   integer, allocatable           :: indices(:), exc_degree(:), iorder(:)
-
-  ! Removed to avoid introducing determinants already presents in the wf
-  !double precision, parameter :: norm_thr = 1.d-16
-
+  double precision, parameter :: norm_thr = 1.d-16
   allocate (indices(N_det),                                          &
       exc_degree(max(N_det_alpha_unique,N_det_beta_unique)))
 
@@ -218,11 +215,10 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
       i = psi_bilinear_matrix_rows(l_a)
       if (nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_order(psi_bilinear_matrix_order(l_a))
-        ! Removed to avoid introducing determinants already presents in the wf
-        !if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
-        !endif
+        endif
       endif
     enddo
   enddo
@@ -246,11 +242,10 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
         idx = psi_det_sorted_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        ! Removed to avoid introducing determinants already presents in the wf
-        !if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
+        if (psi_average_norm_contrib_sorted(idx) > norm_thr) then
           indices(k) = idx
           k=k+1
-        !endif
+        endif
       endif
     enddo
   enddo
@@ -469,21 +464,27 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
-!      if(pert_2rdm)then
-!        allocate(coef_fullminilist_rev(N_states,fullinteresting(0)))
-!        do i=1,fullinteresting(0)
-!          do j = 1, N_states
-!            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
-!          enddo
-!        enddo
-!      endif
+      if(pert_2rdm)then
+        allocate(coef_fullminilist_rev(N_states,fullinteresting(0)))
+        do i=1,fullinteresting(0)
+          do j = 1, N_states
+            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
+          enddo
+        enddo
+      endif
 
       do i=1,fullinteresting(0)
-        fullminilist(:,:,i) = psi_det_sorted(:,:,fullinteresting(i))
+        do k=1,N_int
+          fullminilist(k,1,i) = psi_det_sorted(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_det_sorted(k,2,fullinteresting(i))
+        enddo
       enddo
 
       do i=1,interesting(0)
-        minilist(:,:,i) = psi_det_sorted(:,:,interesting(i))
+        do k=1,N_int
+          minilist(k,1,i) = psi_det_sorted(k,1,interesting(i))
+          minilist(k,2,i) = psi_det_sorted(k,2,interesting(i))
+        enddo
       enddo
 
       do s2=s1,2
@@ -530,19 +531,19 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
 
-!            if(.not.pert_2rdm)then
+            if(.not.pert_2rdm)then
              call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
-!            else
-!             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
-!            endif
+            else
+             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
+            endif
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
       deallocate(fullminilist,minilist)
-!      if(pert_2rdm)then
-!        deallocate(coef_fullminilist_rev)
-!      endif
+      if(pert_2rdm)then
+        deallocate(coef_fullminilist_rev)
+      endif
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
@@ -571,7 +572,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
-  logical, external :: is_in_wavefunction
   PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
@@ -713,25 +713,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (do_cycle) cycle
       endif
 
-      if (twice_hierarchy_max >= 0) then
-        s = 0
-        do k=1,N_int
-          s = s + popcnt(ieor(det(k,1),det(k,2)))
-        enddo
-        if ( mod(s,2)>0 ) stop 'For now, hierarchy CI is defined only for an even number of electrons'
-        if (excitation_ref == 1) then
-          call get_excitation_degree(HF_bitmask,det(1,1),degree,N_int)
-        else if (excitation_ref == 2) then
-          stop 'For now, hierarchy CI is defined only for a single reference determinant'
-!         do k=1,N_dominant_dets_of_cfgs
-!           call get_excitation_degree(dominant_dets_of_cfgs(1,1,k),det(1,1),degree,N_int)
-!         enddo
-        endif
-        integer :: twice_hierarchy
-        twice_hierarchy = degree + s/2
-        if (twice_hierarchy > twice_hierarchy_max) cycle
-      endif
-
       Hii = diag_H_mat_elem_fock(psi_det_generators(1,1,i_generator),det,fock_diag_tmp,N_int)
 
       w = 0d0
@@ -853,27 +834,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             endif
 
         end select
-
-        ! To force the inclusion of determinants with a positive pt2 contribution
-        if (e_pert(istate) > 1d-8) then
-          w = -huge(1.0)
-        endif
-
       end do
 
-!!!BEGIN_DEBUG
-!      ! To check if the pt2 is taking determinants already in the wf
-!      if (is_in_wavefunction(det(N_int,1),N_int)) then
-!        print*, 'A determinant contributing to the pt2 is already in'
-!        print*, 'the wave function:'
-!        call  print_det(det(N_int,1),N_int)
-!        print*,'contribution to the pt2 for the states:', e_pert(:)
-!        print*,'error in the filtering in'
-!        print*, 'cipsi/selection.irp.f sub:  selecte_singles_and_doubles'
-!        print*, 'abort'
-!        call abort
-!      endif
-!!!END_DEBUG
 
       integer(bit_kind) :: occ(N_int,2), n
       if (h0_type == 'CFG') then
@@ -1594,7 +1556,7 @@ subroutine bitstring_to_list_in_selection( string, list, n_elements, Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Gives the indices(+1) of the bits set to 1 in the bit string
+  ! Gives the inidices(+1) of the bits set to 1 in the bit string
   END_DOC
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: string(Nint)

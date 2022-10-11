@@ -20,9 +20,10 @@ subroutine print_su_pbe_ot
  integer :: istate 
  do istate = 1, N_states
   write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-UEG       , state ',istate,' = ',ecmd_pbe_ueg_mu_of_r(istate)
+  write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ecmd_pbe_ueg_test  , state ',istate,' = ',ecmd_pbe_ueg_test(istate)
  enddo
- do istate = 1, N_states
-  write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD SU-PBE-OT     , state ',istate,' = ',ecmd_pbe_on_top_su_mu_of_r(istate)
- enddo
+! do istate = 1, N_states
+!  write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD SU-PBE-OT     , state ',istate,' = ',ecmd_pbe_on_top_su_mu_of_r(istate)
+! enddo
 
 end

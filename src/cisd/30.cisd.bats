@@ -4,7 +4,7 @@ source $QP_ROOT/tests/bats/common.bats.sh
 source $QP_ROOT/quantum_package.rc
 
 function run() {
-  thresh=1.e-5
+  thresh=2.e-5
   test_exe cisd || skip
   qp edit --check
   qp set determinants n_states  2
@@ -77,7 +77,7 @@ function run() {
   [[ -n $TRAVIS ]] && skip
   qp set_file ch4.ezfio
   qp set_mo_class --core="[1]" --act="[2-30]" --del="[31-59]"
-  run -40.2403962667047 -39.8433221754964
+  run -40.2403962667047 -39.843315
 }
 
 @test "SiH3" { # 20.2202s 1.38648m
