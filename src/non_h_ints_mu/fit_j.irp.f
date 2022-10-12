@@ -12,32 +12,44 @@ BEGIN_PROVIDER [ double precision, expo_j_xmu, (n_fit_1_erf_x) ]
 
 END_PROVIDER 
 
+! ---
+
  BEGIN_PROVIDER [double precision, expo_gauss_j_mu_x, (n_max_fit_slat)]
 &BEGIN_PROVIDER [double precision, coef_gauss_j_mu_x, (n_max_fit_slat)]
- implicit none
- BEGIN_DOC
-! J(mu,r12) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2) is expressed as 
-!
-! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
-!
-! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta*mu^2x^2) (see expo_j_xmu) 
-! 
-! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
-!
-! See Appendix 2 of JCP 154, 084119 (2021)
-!
- END_DOC
- integer :: i
- double precision :: expos(n_max_fit_slat),alpha,beta
- alpha = expo_j_xmu(1) * mu_erf
- call expo_fit_slater_gam(alpha,expos)
- beta = expo_j_xmu(2) * mu_erf**2.d0
- 
- do i = 1, n_max_fit_slat
-  expo_gauss_j_mu_x(i) = expos(i) + beta
-  coef_gauss_j_mu_x(i) = coef_fit_slat_gauss(i) / (2.d0 * mu_erf) * (- 1/dsqrt(dacos(-1.d0)))
- enddo
+
+  BEGIN_DOC
+  !
+  ! J(mu,r12) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2) is expressed as 
+  !
+  ! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+  !
+  ! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta*mu^2x^2) (see expo_j_xmu) 
+  ! 
+  ! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  !
+  ! See Appendix 2 of JCP 154, 084119 (2021)
+  !
+  END_DOC
+
+  implicit none
+  integer          :: i
+  double precision :: tmp
+  double precision :: expos(n_max_fit_slat), alpha, beta
+
+  tmp = -0.5d0 / (mu_erf * sqrt(dacos(-1.d0)))
+
+  alpha = expo_j_xmu(1) * mu_erf
+  call expo_fit_slater_gam(alpha, expos)
+  beta = expo_j_xmu(2) * mu_erf * mu_erf
+  
+  do i = 1, n_max_fit_slat
+    expo_gauss_j_mu_x(i) = expos(i) + beta
+    coef_gauss_j_mu_x(i) = tmp * coef_fit_slat_gauss(i) 
+  enddo
+
 END_PROVIDER 
+
+! ---
 
 double precision  function F_x_j(x)
  implicit none
@@ -89,3 +101,6 @@ double precision function j_mu_fit_gauss(x)
  enddo
  
 end
+
+! ---
+
