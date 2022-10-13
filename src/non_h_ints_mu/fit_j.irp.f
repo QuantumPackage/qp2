@@ -23,7 +23,7 @@ END_PROVIDER
   !
   ! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
   !
-  ! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta*mu^2x^2) (see expo_j_xmu) 
+  ! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta * x^2) (see expo_j_xmu) 
   ! 
   ! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
   !
@@ -45,6 +45,41 @@ END_PROVIDER
   do i = 1, n_max_fit_slat
     expo_gauss_j_mu_x(i) = expos(i) + beta
     coef_gauss_j_mu_x(i) = tmp * coef_fit_slat_gauss(i) 
+  enddo
+
+END_PROVIDER 
+
+! ---
+
+ BEGIN_PROVIDER [double precision, expo_gauss_j_mu_x_2, (n_max_fit_slat)]
+&BEGIN_PROVIDER [double precision, coef_gauss_j_mu_x_2, (n_max_fit_slat)]
+
+  BEGIN_DOC
+  !
+  ! J(mu,r12)^2 = 0.25/mu^2 F(r12*mu)^2
+  !
+  ! F(x) = 1 /pi * exp(-2 * alpha * x) exp(-2 * beta * x^2) 
+  ! 
+  ! The slater function exp(-2 * alpha * x) is fitted with n_max_fit_slat gaussians 
+  !
+  ! See Appendix 2 of JCP 154, 084119 (2021)
+  !
+  END_DOC
+
+  implicit none
+  integer          :: i
+  double precision :: tmp
+  double precision :: expos(n_max_fit_slat), alpha, beta
+
+  tmp = 0.25d0 / (mu_erf * mu_erf * dacos(-1.d0))
+
+  alpha = 2.d0 * expo_j_xmu(1) * mu_erf
+  call expo_fit_slater_gam(alpha, expos)
+  beta = 2.d0 * expo_j_xmu(2) * mu_erf * mu_erf
+  
+  do i = 1, n_max_fit_slat
+    expo_gauss_j_mu_x_2(i) = expos(i) + beta
+    coef_gauss_j_mu_x_2(i) = tmp * coef_fit_slat_gauss(i) 
   enddo
 
 END_PROVIDER 
