@@ -1,7 +1,85 @@
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, grad_1_u_ij_mu, (ao_num, ao_num,n_points_final_grid, 3)]
+ BEGIN_PROVIDER [ double precision, fact1_j12, (   n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, fact2_j12, (3, n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, fact3_j12, (   n_points_final_grid)]
+
+  implicit none
+  integer          :: ipoint, i, j, phase
+  double precision :: x, y, z, dx, dy, dz
+  double precision :: a, d, e, fact_r, fact_r_sq
+  double precision :: fact_x, fact_y, fact_z
+  double precision :: ax_der, ay_der, az_der, a_expo
+
+  do ipoint = 1, n_points_final_grid
+
+    x = final_grid_points(1,ipoint)
+    y = final_grid_points(2,ipoint)
+    z = final_grid_points(3,ipoint)
+  
+    ! ---
+
+    fact_r    = 1.d0
+    fact_r_sq = 1.d0
+    do j = 1, nucl_num
+      a  = j1b_pen(j)
+      dx = x - nucl_coord(j,1)
+      dy = y - nucl_coord(j,2)
+      dz = z - nucl_coord(j,3)
+      d  = x*x + y*y + z*z
+      e  = 1.d0 - dexp(-a*d)
+
+      fact_r    = fact_r    * e
+      fact_r_sq = fact_r_sq * e * e
+    enddo
+    fact1_j12(ipoint) = fact_r
+    fact3_j12(ipoint) = fact_r_sq
+
+    ! ---
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    do i = 1, List_all_comb_b2_size
+
+      phase  = 0
+      a_expo = 0.d0
+      ax_der = 0.d0
+      ay_der = 0.d0
+      az_der = 0.d0
+      do j = 1, nucl_num
+        a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+        dx = x - nucl_coord(j,1)
+        dy = y - nucl_coord(j,2)
+        dz = z - nucl_coord(j,3)
+      
+        phase  += List_all_comb_b2(j,i)
+        a_expo += a * (dx*dx + dy*dy + dz*dz)
+        ax_der += a * dx
+        ay_der += a * dy
+        az_der += a * dz
+      enddo
+      e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
+
+      fact_x += e * ax_der 
+      fact_y += e * ay_der 
+      fact_z += e * az_der 
+    enddo
+
+    fact2_j12(1,ipoint) = fact_x
+    fact2_j12(2,ipoint) = fact_y
+    fact2_j12(3,ipoint) = fact_z
+
+    ! ---
+
+  enddo
+
+END_PROVIDER
+  
+! ---
+
+BEGIN_PROVIDER [ double precision, grad_1_u_ij_mu, (ao_num, ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
   !
@@ -13,45 +91,32 @@ BEGIN_PROVIDER [ double precision, grad_1_u_ij_mu, (ao_num, ao_num,n_points_fina
   END_DOC
 
   implicit none
-  integer          :: ipoint, i, j, i_1s
-  double precision :: r(3)
-  double precision :: a, d, e, tmp1, tmp2, fact_r, fact_xyz(3)
+  integer          :: ipoint, i, j
+  double precision :: x, y, z, tmp_x, tmp_y, tmp_z, tmp0, tmp1, tmp2
 
   PROVIDE j1b_type j1b_pen
   
   if(j1b_type .eq. 3) then
 
     do ipoint = 1, n_points_final_grid
-      r(1) = final_grid_points(1,ipoint)
-      r(2) = final_grid_points(2,ipoint)
-      r(3) = final_grid_points(3,ipoint)
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      tmp0  = fact1_j12(ipoint)
+      tmp_x = fact2_j12(1,ipoint)
+      tmp_y = fact2_j12(2,ipoint)
+      tmp_z = fact2_j12(3,ipoint)
   
-      fact_r      = 1.d0
-      fact_xyz(1) = 1.d0
-      fact_xyz(2) = 1.d0
-      fact_xyz(3) = 1.d0
-      do i_1s = 1, nucl_num
-        a = j1b_pen(i_1s)
-        d = (r(1) - nucl_coord(i_1s,1)) * (r(1) - nucl_coord(i_1s,1)) &
-          + (r(2) - nucl_coord(i_1s,2)) * (r(2) - nucl_coord(i_1s,2)) &
-          + (r(3) - nucl_coord(i_1s,3)) * (r(3) - nucl_coord(i_1s,3)) 
-        e = dexp(-a*d)
-
-        fact_r      = fact_r      * (1.d0 - e)
-        fact_xyz(1) = fact_xyz(1) * (2.d0 * a * (r(1) - nucl_coord(i_1s,1)) * e)
-        fact_xyz(2) = fact_xyz(2) * (2.d0 * a * (r(2) - nucl_coord(i_1s,2)) * e)
-        fact_xyz(3) = fact_xyz(3) * (2.d0 * a * (r(3) - nucl_coord(i_1s,3)) * e)
-      enddo
-
       do j = 1, ao_num
         do i = 1, ao_num
 
-          tmp1 = fact_r * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint) 
-          tmp2 =          v_ij_u_cst_mu_j1b     (i,j,ipoint) 
+          tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint) 
+          tmp2 = v_ij_u_cst_mu_j1b(i,j,ipoint) 
 
-          grad_1_u_ij_mu(i,j,ipoint,1) = tmp1 * r(1) - fact_r * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) + fact_xyz(1) * tmp2
-          grad_1_u_ij_mu(i,j,ipoint,2) = tmp1 * r(2) - fact_r * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) + fact_xyz(2) * tmp2
-          grad_1_u_ij_mu(i,j,ipoint,3) = tmp1 * r(3) - fact_r * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) + fact_xyz(3) * tmp2
+          grad_1_u_ij_mu(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) + tmp_x * tmp2
+          grad_1_u_ij_mu(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) + tmp_y * tmp2
+          grad_1_u_ij_mu(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) + tmp_z * tmp2
         enddo
       enddo
     enddo
@@ -59,14 +124,14 @@ BEGIN_PROVIDER [ double precision, grad_1_u_ij_mu, (ao_num, ao_num,n_points_fina
   else
 
     do ipoint = 1, n_points_final_grid
-      r(1) = final_grid_points(1,ipoint)
-      r(2) = final_grid_points(2,ipoint)
-      r(3) = final_grid_points(3,ipoint)
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
       do j = 1, ao_num
         do i = 1, ao_num
-          grad_1_u_ij_mu(i,j,ipoint,1) = v_ij_erf_rk_cst_mu(i,j,ipoint) * r(1) - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1)
-          grad_1_u_ij_mu(i,j,ipoint,2) = v_ij_erf_rk_cst_mu(i,j,ipoint) * r(2) - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2)
-          grad_1_u_ij_mu(i,j,ipoint,3) = v_ij_erf_rk_cst_mu(i,j,ipoint) * r(3) - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3)
+          grad_1_u_ij_mu(i,j,ipoint,1) = v_ij_erf_rk_cst_mu(i,j,ipoint) * x - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1)
+          grad_1_u_ij_mu(i,j,ipoint,2) = v_ij_erf_rk_cst_mu(i,j,ipoint) * y - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2)
+          grad_1_u_ij_mu(i,j,ipoint,3) = v_ij_erf_rk_cst_mu(i,j,ipoint) * z - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3)
         enddo
       enddo
     enddo

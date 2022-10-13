@@ -134,7 +134,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
         call NAI_pol_x_mult_erf_ao(i, j, 1.d+9 , r, ints_coulomb)
 
         do m = 1, 3
-         x_v_ij_erf_rk_cst_mu_tmp(m,j,i,ipoint) = (ints(m) - ints_coulomb(m))
+          x_v_ij_erf_rk_cst_mu_tmp(m,j,i,ipoint) = (ints(m) - ints_coulomb(m))
         enddo
       enddo
     enddo
@@ -153,7 +153,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   enddo
 
   call wall_time(wall1)
-  print*,'wall time for x_v_ij_erf_rk_cst_mu_tmp',wall1 - wall0
+  print*, ' wall time for x_v_ij_erf_rk_cst_mu_tmp', wall1 - wall0
 
 END_PROVIDER 
 
