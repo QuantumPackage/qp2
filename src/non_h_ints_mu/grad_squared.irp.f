@@ -17,7 +17,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num,n_poin
  
   implicit none
   integer                    :: ipoint, i, j, m, igauss
-  double precision           :: r(3), delta, coef
+  double precision           :: r(3), delta, coef, tmp
   double precision           :: time0, time1
   double precision, external :: overlap_gauss_r12_ao
 
@@ -29,9 +29,10 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num,n_poin
   if(j1b_type .eq. 3) then
 
     do ipoint = 1, n_points_final_grid
+      tmp = fact3_j12(ipoint) 
       do j = 1, ao_num
         do i = 1, ao_num
-          gradu_squared_u_ij_mu(j,i,ipoint) += fact3_j12(ipoint) * int2_grad1u_grad2u_j1b(i,j,ipoint)
+          gradu_squared_u_ij_mu(j,i,ipoint) += tmp * int2_grad1u_grad2u_j1b(i,j,ipoint)
         enddo
       enddo
     enddo
@@ -47,7 +48,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num,n_poin
           do igauss = 1, n_max_fit_slat
             delta = expo_gauss_1_erf_x_2(igauss)
             coef  = coef_gauss_1_erf_x_2(igauss)
-            gradu_squared_u_ij_mu(j,i,ipoint) += -0.25d0 * coef *  overlap_gauss_r12_ao(r, delta, i, j)
+            gradu_squared_u_ij_mu(j,i,ipoint) += -0.25d0 * coef * overlap_gauss_r12_ao(r, delta, i, j)
           enddo
         enddo
       enddo
