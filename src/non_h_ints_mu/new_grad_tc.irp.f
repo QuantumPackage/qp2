@@ -1,81 +1,3 @@
-
-! ---
-
- BEGIN_PROVIDER [ double precision, fact1_j12, (   n_points_final_grid)]
-&BEGIN_PROVIDER [ double precision, fact2_j12, (3, n_points_final_grid)]
-&BEGIN_PROVIDER [ double precision, fact3_j12, (   n_points_final_grid)]
-
-  implicit none
-  integer          :: ipoint, i, j, phase
-  double precision :: x, y, z, dx, dy, dz
-  double precision :: a, d, e, fact_r, fact_r_sq
-  double precision :: fact_x, fact_y, fact_z
-  double precision :: ax_der, ay_der, az_der, a_expo
-
-  do ipoint = 1, n_points_final_grid
-
-    x = final_grid_points(1,ipoint)
-    y = final_grid_points(2,ipoint)
-    z = final_grid_points(3,ipoint)
-  
-    ! ---
-
-    fact_r    = 1.d0
-    fact_r_sq = 1.d0
-    do j = 1, nucl_num
-      a  = j1b_pen(j)
-      dx = x - nucl_coord(j,1)
-      dy = y - nucl_coord(j,2)
-      dz = z - nucl_coord(j,3)
-      d  = x*x + y*y + z*z
-      e  = 1.d0 - dexp(-a*d)
-
-      fact_r    = fact_r    * e
-      fact_r_sq = fact_r_sq * e * e
-    enddo
-    fact1_j12(ipoint) = fact_r
-    fact3_j12(ipoint) = fact_r_sq
-
-    ! ---
-
-    fact_x = 0.d0
-    fact_y = 0.d0
-    fact_z = 0.d0
-    do i = 1, List_all_comb_b2_size
-
-      phase  = 0
-      a_expo = 0.d0
-      ax_der = 0.d0
-      ay_der = 0.d0
-      az_der = 0.d0
-      do j = 1, nucl_num
-        a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
-        dx = x - nucl_coord(j,1)
-        dy = y - nucl_coord(j,2)
-        dz = z - nucl_coord(j,3)
-      
-        phase  += List_all_comb_b2(j,i)
-        a_expo += a * (dx*dx + dy*dy + dz*dz)
-        ax_der += a * dx
-        ay_der += a * dy
-        az_der += a * dz
-      enddo
-      e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
-
-      fact_x += e * ax_der 
-      fact_y += e * ay_der 
-      fact_z += e * az_der 
-    enddo
-
-    fact2_j12(1,ipoint) = fact_x
-    fact2_j12(2,ipoint) = fact_y
-    fact2_j12(3,ipoint) = fact_z
-
-    ! ---
-
-  enddo
-
-END_PROVIDER
   
 ! ---
 
@@ -103,10 +25,10 @@ BEGIN_PROVIDER [ double precision, grad_1_u_ij_mu, (ao_num, ao_num, n_points_fin
       y = final_grid_points(2,ipoint)
       z = final_grid_points(3,ipoint)
 
-      tmp0  = fact1_j12(ipoint)
-      tmp_x = fact2_j12(1,ipoint)
-      tmp_y = fact2_j12(2,ipoint)
-      tmp_z = fact2_j12(3,ipoint)
+      tmp0  = v_1b       (ipoint)
+      tmp_x = v_1b_grad(1,ipoint)
+      tmp_y = v_1b_grad(2,ipoint)
+      tmp_z = v_1b_grad(3,ipoint)
   
       do j = 1, ao_num
         do i = 1, ao_num

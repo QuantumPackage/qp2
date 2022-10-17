@@ -1,110 +1,6 @@
 
 ! ---
 
-BEGIN_PROVIDER [ integer, List_all_comb_b2_size]
-
-  implicit none
-
-  List_all_comb_b2_size = 2**nucl_num
-
-END_PROVIDER
-
-! ---
-
-BEGIN_PROVIDER [ integer, List_all_comb_b2, (nucl_num, List_all_comb_b2_size)]
-
-  implicit none
-  integer :: i, j
-
-  if(nucl_num .gt. 32) then
-    print *, ' nucl_num = ', nucl_num, '> 32'
-    stop
-  endif
-
-  List_all_comb_b2 = 0
-
-  do i = 0, List_all_comb_b2_size-1
-    do j = 0, nucl_num-1
-      if (btest(i,j)) then
-        List_all_comb_b2(j+1,i+1) = 1
-      endif
-    enddo
-  enddo
-
-END_PROVIDER
-
-! ---
-
- BEGIN_PROVIDER [ double precision, List_all_comb_b2_coef, (   List_all_comb_b2_size)]
-&BEGIN_PROVIDER [ double precision, List_all_comb_b2_expo, (   List_all_comb_b2_size)]
-&BEGIN_PROVIDER [ double precision, List_all_comb_b2_cent, (3, List_all_comb_b2_size)]
-
-  implicit none
-  integer          :: i, j, k, phase
-  double precision :: tmp_alphaj, tmp_alphak
-
-  provide j1b_pen
-
-  List_all_comb_b2_coef = 0.d0
-  List_all_comb_b2_expo = 0.d0
-  List_all_comb_b2_cent = 0.d0
-
-  do i = 1, List_all_comb_b2_size
-
-    do j = 1, nucl_num
-      tmp_alphaj = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
-
-      List_all_comb_b2_expo(i)   += tmp_alphaj
-      List_all_comb_b2_cent(1,i) += tmp_alphaj * nucl_coord(j,1)
-      List_all_comb_b2_cent(2,i) += tmp_alphaj * nucl_coord(j,2)
-      List_all_comb_b2_cent(3,i) += tmp_alphaj * nucl_coord(j,3)
-
-    enddo
-
-    ASSERT(List_all_comb_b2_expo(i) .gt. 0d0)
-    if(List_all_comb_b2_expo(i) .lt. 1d-10) cycle
-
-    List_all_comb_b2_cent(1,i) = List_all_comb_b2_cent(1,i) / List_all_comb_b2_expo(i) 
-    List_all_comb_b2_cent(2,i) = List_all_comb_b2_cent(2,i) / List_all_comb_b2_expo(i)
-    List_all_comb_b2_cent(3,i) = List_all_comb_b2_cent(3,i) / List_all_comb_b2_expo(i)
-  enddo
-
-  ! ---
-
-  do i = 1, List_all_comb_b2_size
-
-    do j = 2, nucl_num, 1
-      tmp_alphaj = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
-      do k = 1, j-1, 1
-        tmp_alphak = dble(List_all_comb_b2(k,i)) * j1b_pen(k)
-
-        List_all_comb_b2_coef(i) += tmp_alphaj * tmp_alphak * ( (nucl_coord(j,1) - nucl_coord(k,1)) * (nucl_coord(j,1) - nucl_coord(k,1)) &
-                                                              + (nucl_coord(j,2) - nucl_coord(k,2)) * (nucl_coord(j,2) - nucl_coord(k,2)) &
-                                                              + (nucl_coord(j,3) - nucl_coord(k,3)) * (nucl_coord(j,3) - nucl_coord(k,3)) )
-      enddo
-    enddo
-
-    if(List_all_comb_b2_expo(i) .lt. 1d-10) cycle
-
-    List_all_comb_b2_coef(i) = List_all_comb_b2_coef(i) / List_all_comb_b2_expo(i)
-  enddo
-
-  ! ---
-
-  do i = 1, List_all_comb_b2_size
-
-    phase = 0
-    do j = 1, nucl_num
-      phase += List_all_comb_b2(j,i)
-    enddo
-
-    List_all_comb_b2_coef(i) = (-1.d0)**dble(phase) * dexp(-List_all_comb_b2_coef(i))
-  enddo
-
-END_PROVIDER
-
-! ---
-
 BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
@@ -157,7 +53,6 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
 
           tmp(j,i,ipoint) += coef * (int_mu - int_coulomb)
         enddo
-
       enddo
     enddo
   enddo

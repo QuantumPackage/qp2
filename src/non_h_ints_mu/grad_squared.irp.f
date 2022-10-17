@@ -27,9 +27,10 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num,n_poin
   PROVIDE j1b_type j1b_pen
 
   if(j1b_type .eq. 3) then
+    ! v1_1b^2 \int d2 \phi_i(2) \phi_j(2) \frac{-[1 - \erf(\mu r12)]^2}{4} v2_1b^2
 
     do ipoint = 1, n_points_final_grid
-      tmp = fact3_j12(ipoint) 
+      tmp = v_1b(ipoint) * v_1b(ipoint) 
       do j = 1, ao_num
         do i = 1, ao_num
           gradu_squared_u_ij_mu(j,i,ipoint) += tmp * int2_grad1u_grad2u_j1b(i,j,ipoint)
