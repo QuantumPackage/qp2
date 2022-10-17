@@ -237,6 +237,30 @@ end function j12_mu
 
 ! ---
 
+double precision function j12_mu_gauss(r1, r2)
+
+  implicit none
+  double precision, intent(in) :: r1(3), r2(3)
+  integer                      :: i
+  double precision             :: r12, coef, expo
+
+  r12 = (r1(1) - r2(1)) * (r1(1) - r2(1)) &
+      + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
+      + (r1(3) - r2(3)) * (r1(3) - r2(3)) 
+
+  j12_mu_gauss = 0.d0
+  do i = 1, n_max_fit_slat
+    expo = expo_gauss_j_mu_x(i)
+    coef = coef_gauss_j_mu_x(i)
+
+    j12_mu_gauss += coef * dexp(-expo*r12)
+  enddo
+
+  return
+end function j12_mu_gauss
+
+! ---
+
 double precision function j1b_nucl(r)
 
   implicit none
@@ -535,63 +559,30 @@ end function grad1_z_j12_mu_num
 
 ! ---
 
-! ---------------------------------------------------------------------------------------
-
-double precision function grad1_x_j12_mu_exc(r1, r2)
+subroutine grad1_j12_mu_exc(r1, r2, grad)
 
   implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: r12
+  double precision, intent(in)  :: r1(3), r2(3)
+  double precision, intent(out) :: grad(3)
+  double precision              :: dx, dy, dz, r12, tmp
 
-  grad1_x_j12_mu_exc = 0.d0
+  grad = 0.d0
 
-  r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-             + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-             + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
+  dx = r1(1) - r2(1)
+  dy = r1(2) - r2(2)
+  dz = r1(3) - r2(3)
+
+  r12 = dsqrt( dx * dx + dy * dy + dz * dz )
   if(r12 .lt. 1d-10) return
 
-  grad1_x_j12_mu_exc = 0.5d0 * (1.d0 - derf(mu_erf * r12)) * (r1(1) - r2(1)) / r12
+  tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
+
+  grad(1) = tmp * dx 
+  grad(2) = tmp * dy 
+  grad(3) = tmp * dz 
 
   return
-end function grad1_x_j12_mu_exc
-
-double precision function grad1_y_j12_mu_exc(r1, r2)
-
-  implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: r12
-
-  grad1_y_j12_mu_exc = 0.d0
-
-  r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-             + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-             + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
-  if(r12 .lt. 1d-10) return
-
-  grad1_y_j12_mu_exc = 0.5d0 * (1.d0 - derf(mu_erf * r12)) * (r1(2) - r2(2)) / r12
-
-  return
-end function grad1_y_j12_mu_exc
-
-double precision function grad1_z_j12_mu_exc(r1, r2)
-
-  implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: r12
-
-  grad1_z_j12_mu_exc = 0.d0
-
-  r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-             + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-             + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
-  if(r12 .lt. 1d-10) return
-
-  grad1_z_j12_mu_exc = 0.5d0 * (1.d0 - derf(mu_erf * r12)) * (r1(3) - r2(3)) / r12
-
-  return
-end function grad1_z_j12_mu_exc
-
-! ---------------------------------------------------------------------------------------
+end subroutine grad1_j12_mu_exc
 
 ! ---
 

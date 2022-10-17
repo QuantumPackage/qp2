@@ -70,12 +70,20 @@ END_PROVIDER
   integer          :: i
   double precision :: tmp
   double precision :: expos(n_max_fit_slat), alpha, beta
+  double precision :: alpha_opt, beta_opt
+
+  !alpha_opt = 2.d0 * expo_j_xmu(1)
+  !beta_opt  = 2.d0 * expo_j_xmu(2)
+ 
+  ! direct opt
+  alpha_opt = 3.52751759d0
+  beta_opt  = 1.26214809d0
 
   tmp = 0.25d0 / (mu_erf * mu_erf * dacos(-1.d0))
 
-  alpha = 2.d0 * expo_j_xmu(1) * mu_erf
+  alpha = alpha_opt * mu_erf
   call expo_fit_slater_gam(alpha, expos)
-  beta = 2.d0 * expo_j_xmu(2) * mu_erf * mu_erf
+  beta = beta_opt * mu_erf * mu_erf
   
   do i = 1, n_max_fit_slat
     expo_gauss_j_mu_x_2(i) = expos(i) + beta
@@ -101,12 +109,20 @@ END_PROVIDER
   integer          :: i
   double precision :: tmp
   double precision :: expos(n_max_fit_slat), alpha, beta
+  double precision :: alpha_opt, beta_opt
+
+  !alpha_opt = expo_j_xmu(1) + expo_gauss_1_erf_x(1)
+  !beta_opt  = expo_j_xmu(2) + expo_gauss_1_erf_x(2)
+ 
+  ! direct opt
+  alpha_opt = 2.87875632d0
+  beta_opt  = 1.34801003d0
 
   tmp = -0.25d0 / (mu_erf * dsqrt(dacos(-1.d0)))
 
-  alpha = (expo_j_xmu(1) + expo_gauss_1_erf_x(1)) * mu_erf
+  alpha = alpha_opt * mu_erf
   call expo_fit_slater_gam(alpha, expos)
-  beta = (expo_j_xmu(2) + expo_gauss_1_erf_x(2)) * mu_erf * mu_erf
+  beta = beta_opt * mu_erf * mu_erf
   
   do i = 1, n_max_fit_slat
     expo_gauss_j_mu_1_erf(i) = expos(i) + beta
@@ -162,8 +178,8 @@ double precision function j_mu_fit_gauss(x)
  j_mu_fit_gauss = 0.d0
  do i = 1, n_max_fit_slat
   alpha = expo_gauss_j_mu_x(i) 
-  coef = coef_gauss_j_mu_x(i) 
-  j_mu_fit_gauss += coef_gauss_j_mu_x(i) * dexp(-expo_gauss_j_mu_x(i)*x*x)
+  coef  = coef_gauss_j_mu_x(i) 
+  j_mu_fit_gauss +=  coef * dexp(-alpha*x*x)
  enddo
  
 end

@@ -33,7 +33,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num,n_poin
       tmp = v_1b(ipoint) * v_1b(ipoint) 
       do j = 1, ao_num
         do i = 1, ao_num
-          gradu_squared_u_ij_mu(j,i,ipoint) += tmp * int2_grad1u_grad2u_j1b(i,j,ipoint)
+          gradu_squared_u_ij_mu(j,i,ipoint) += tmp * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)
         enddo
       enddo
     enddo

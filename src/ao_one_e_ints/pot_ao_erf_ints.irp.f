@@ -103,7 +103,7 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
       alpha2 = ao_expo_ordered_transp(j,j_ao)
 
       coef12 = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
-      if(coef12 .lt. 1d-14) cycle
+      if(dabs(coef12) .lt. 1d-14) cycle
 
       integral = NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A1, power_A2, alpha1, alpha2 &
                                         , beta, B_center, C_center, n_pt_in, mu_in )

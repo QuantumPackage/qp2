@@ -33,6 +33,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
   tmp = 0.d0
 
  !$OMP DO
+  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       do j = i, ao_num
@@ -141,6 +142,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b, (3, ao_num, ao_
   tmp = 0.d0
 
  !$OMP DO
+  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       do j = i, ao_num
@@ -235,6 +237,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
   tmp = 0.d0
 
  !$OMP DO
+  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       do j = i, ao_num
