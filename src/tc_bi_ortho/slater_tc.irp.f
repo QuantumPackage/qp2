@@ -24,7 +24,7 @@ subroutine htilde_mu_mat_bi_ortho_tot(key_j, key_i, Nint, htot)
    call htilde_mu_mat_bi_ortho(key_j,key_i, Nint, hmono,htwoe,hthree,htot)
   endif
 
-end subroutine htilde_mu_mat_tot
+end subroutine htilde_mu_mat_bi_ortho_tot
 
 ! --
 

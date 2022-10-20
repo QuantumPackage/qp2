@@ -1,7 +1,7 @@
 
 ! ---
 
-double precision function ao_two_e_integral(i,j,k,l)
+double precision function ao_two_e_integral(i, j, k, l)
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -29,7 +29,7 @@ double precision function ao_two_e_integral(i,j,k,l)
   if(use_cosgtos) then
     !print *, ' use_cosgtos for ao_two_e_integral ?', use_cosgtos
 
-    ao_two_e_integral = ao_two_e_integral_cosgtos(i,j,k,l)
+    ao_two_e_integral = ao_two_e_integral_cosgtos(i, j, k, l)
 
   else
 
