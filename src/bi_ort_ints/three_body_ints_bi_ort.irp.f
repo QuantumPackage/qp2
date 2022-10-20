@@ -53,26 +53,55 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
 
 END_PROVIDER 
 
-subroutine give_integrals_3_body_bi_ort(n,l,k,m,j,i,integral)
- implicit none
- double precision, intent(out) :: integral
- integer, intent(in) :: n,l,k,m,j,i
- double precision :: weight
- BEGIN_DOC
-! <n l k|-L|m j i> with a BI ORTHONORMAL ORBITALS 
- END_DOC
- integer :: ipoint,mm
- integral = 0.d0
- do mm = 1, 3
+! ---
+
+subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
+
+  BEGIN_DOC
+  !
+  ! < n l k | -L | m j i > with a BI-ORTHONORMAL ORBITALS 
+  !
+  END_DOC
+
+  implicit none
+  integer,           intent(in) :: n,l,k,m,j,i
+  double precision, intent(out) :: integral
+  integer                       :: ipoint
+  double precision              :: weight
+
+  integral = 0.d0
   do ipoint = 1, n_points_final_grid
-   weight = final_weight_at_r_vector(ipoint)                                                                          
-   integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) & 
-                      * x_W_ki_bi_ortho_erf_rk(ipoint,mm,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,mm,l,j) 
-   integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) & 
-                      * x_W_ki_bi_ortho_erf_rk(ipoint,mm,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,mm,k,i) 
-   integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) & 
-                      * x_W_ki_bi_ortho_erf_rk(ipoint,mm,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,mm,k,i) 
+    weight = final_weight_at_r_vector(ipoint)                                                                          
+
+!    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) & 
+!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,1,l,j)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,2,l,j)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,3,l,j)  )
+!    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) & 
+!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,1,k,i)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,2,k,i)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,3,k,i)  )
+!    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
+!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,1,k,i)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,2,k,i)  &
+!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,3,k,i)  )
+
+    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) & 
+              * ( int2_grad1_u12_bimo(1,ipoint,n,m) * int2_grad1_u12_bimo(1,ipoint,l,j)  &
+                + int2_grad1_u12_bimo(2,ipoint,n,m) * int2_grad1_u12_bimo(2,ipoint,l,j)  &
+                + int2_grad1_u12_bimo(3,ipoint,n,m) * int2_grad1_u12_bimo(3,ipoint,l,j)  )
+    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) & 
+              * ( int2_grad1_u12_bimo(1,ipoint,n,m) * int2_grad1_u12_bimo(1,ipoint,k,i)  &
+                + int2_grad1_u12_bimo(2,ipoint,n,m) * int2_grad1_u12_bimo(2,ipoint,k,i)  &
+                + int2_grad1_u12_bimo(3,ipoint,n,m) * int2_grad1_u12_bimo(3,ipoint,k,i)  )
+    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
+              * ( int2_grad1_u12_bimo(1,ipoint,l,j) * int2_grad1_u12_bimo(1,ipoint,k,i)  &
+                + int2_grad1_u12_bimo(2,ipoint,l,j) * int2_grad1_u12_bimo(2,ipoint,k,i)  &
+                + int2_grad1_u12_bimo(3,ipoint,l,j) * int2_grad1_u12_bimo(3,ipoint,k,i)  )
+
   enddo
- enddo
-end
+
+end subroutine give_integrals_3_body_bi_ort
+
+! ---
 

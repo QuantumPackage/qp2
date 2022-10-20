@@ -34,7 +34,7 @@ program debug_integ_jmu_modif
   !call test_int2_u2_j1b2()
   !call test_int2_grad1u2_grad2u2_j1b2()
 
-  !call test_grad_1_u_ij_mu()
+  !call test_int2_grad1_u12_ao()
   !call test_gradu_squared_u_ij_mu()
 
 end
@@ -287,16 +287,16 @@ end subroutine test_int2_grad1u2_grad2u2_j1b2
 
 ! ---
 
-subroutine test_grad_1_u_ij_mu()
+subroutine test_int2_grad1_u12_ao()
 
   implicit none
   integer          :: i, j, ipoint
   double precision :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision :: integ(3)
 
-  print*, ' test_grad_1_u_ij_mu ...'
+  print*, ' test_int2_grad1_u12_ao ...'
 
-  PROVIDE grad_1_u_ij_mu 
+  PROVIDE int2_grad1_u12_ao
 
   eps_ij  = 1d-6
   acc_tot = 0.d0
@@ -305,13 +305,13 @@ subroutine test_grad_1_u_ij_mu()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        call num_grad_1_u_ij_mu(i, j, ipoint, integ)
+        call num_int2_grad1_u12_ao(i, j, ipoint, integ)
 
-        i_exc  = grad_1_u_ij_mu(i,j,ipoint,1) 
+        i_exc  = int2_grad1_u12_ao(1,i,j,ipoint) 
         i_num  = integ(1)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
-          print *, ' problem in x part of grad_1_u_ij_mu on', i, j, ipoint
+          print *, ' problem in x part of int2_grad1_u12_ao on', i, j, ipoint
           print *, ' analyt integ = ', i_exc
           print *, ' numeri integ = ', i_num
           print *, ' diff         = ', acc_ij
@@ -319,11 +319,11 @@ subroutine test_grad_1_u_ij_mu()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = grad_1_u_ij_mu(i,j,ipoint,2) 
+        i_exc  = int2_grad1_u12_ao(2,i,j,ipoint) 
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
-          print *, ' problem in y part of grad_1_u_ij_mu on', i, j, ipoint
+          print *, ' problem in y part of int2_grad1_u12_ao on', i, j, ipoint
           print *, ' analyt integ = ', i_exc
           print *, ' numeri integ = ', i_num
           print *, ' diff         = ', acc_ij
@@ -331,11 +331,11 @@ subroutine test_grad_1_u_ij_mu()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = grad_1_u_ij_mu(i,j,ipoint,3) 
+        i_exc  = int2_grad1_u12_ao(3,i,j,ipoint) 
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
-          print *, ' problem in z part of grad_1_u_ij_mu on', i, j, ipoint
+          print *, ' problem in z part of int2_grad1_u12_ao on', i, j, ipoint
           print *, ' analyt integ = ', i_exc
           print *, ' numeri integ = ', i_num
           print *, ' diff         = ', acc_ij
@@ -352,7 +352,7 @@ subroutine test_grad_1_u_ij_mu()
   print*, ' normalz        = ', normalz
 
   return
-end subroutine test_grad_1_u_ij_mu
+end subroutine test_int2_grad1_u12_ao
 
 ! ---
 

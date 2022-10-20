@@ -90,7 +90,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
-  ! int dr x * phi_i(r) phi_j(r) 1s_j1b(r) (erf(mu(R) |r - R|) - 1)/|r - R|
+  ! int dr x phi_i(r) phi_j(r) 1s_j1b(r) (erf(mu(R) |r - R|) - 1)/|r - R|
   END_DOC
 
   implicit none
@@ -119,7 +119,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b, (3, ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
-  ! int dr x * phi_i(r) phi_j(r) 1s_j1b(r) (erf(mu(R) |r - R|) - 1)/|r - R|
+  ! int dr x phi_i(r) phi_j(r) 1s_j1b(r) (erf(mu(R) |r - R|) - 1)/|r - R|
   END_DOC
 
   implicit none

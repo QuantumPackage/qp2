@@ -1,51 +1,6 @@
 
 ! --- 
 
-!
-!            \int dr2 [-1 * \grad_r1 u(r1,r2)] \phi_i(r2) \phi_j(r2) x 1s_j1b(r2)
-!
-
-!BEGIN_PROVIDER [ double precision, num_grad_1_u_ij_mu, (ao_num, ao_num, n_points_final_grid, 3)]
-!
-!  implicit none
-!  
-!  integer                    :: i, j, ipoint, jpoint
-!  double precision           :: tmp, r1(3), r2(3), grad(3)
-!
-!  double precision, external :: ao_value
-!  double precision, external :: j12_nucl
-!
-!  num_grad_1_u_ij_mu = 0.d0
-!
-!  do j = 1, ao_num
-!    do i = 1, ao_num
-!
-!      do ipoint = 1, n_points_final_grid
-!        r1(1) = final_grid_points(1,ipoint)
-!        r1(2) = final_grid_points(2,ipoint)
-!        r1(3) = final_grid_points(3,ipoint)
-!
-!        do jpoint = 1, n_points_final_grid
-!          r2(1) = final_grid_points(1,jpoint)
-!          r2(2) = final_grid_points(2,jpoint)
-!          r2(3) = final_grid_points(3,jpoint)
-!          tmp   = ao_value(i, r2) * ao_value(j, r2) * j12_nucl(r1, r2) * final_weight_at_r_vector(jpoint)
-!
-!          call grad1_j12_mu_exc(r1, r2, grad)
-!
-!          num_grad_1_u_ij_mu(i,j,ipoint,1) += tmp * (-1.d0 * grad(1))
-!          num_grad_1_u_ij_mu(i,j,ipoint,2) += tmp * (-1.d0 * grad(2))
-!          num_grad_1_u_ij_mu(i,j,ipoint,3) += tmp * (-1.d0 * grad(3))
-!        enddo
-!
-!      enddo
-!    enddo
-!  enddo
-!
-!END_PROVIDER
-
-! ---
-
 double precision function num_v_ij_u_cst_mu_j1b(i, j, ipoint)
 
   BEGIN_DOC
@@ -289,7 +244,7 @@ end subroutine num_x_v_ij_erf_rk_cst_mu_j1b
 
 ! ---
 
-subroutine num_grad_1_u_ij_mu(i, j, ipoint, integ)
+subroutine num_int2_grad1_u12_ao(i, j, ipoint, integ)
 
   implicit none
 
@@ -328,7 +283,7 @@ subroutine num_grad_1_u_ij_mu(i, j, ipoint, integ)
   integ(3) = tmp_z
 
   return
-end subroutine num_grad_1_u_ij_mu
+end subroutine num_int2_grad1_u12_ao
 
 ! ---
 
