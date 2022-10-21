@@ -298,9 +298,15 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
   double precision, intent(out) :: ints(3)
 
   integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3), m
-  double precision              :: Ai_center(3), Aj_center(3), integral, alphai, alphaj, coef
+  double precision              :: Ai_center(3), Aj_center(3), integral, alphai, alphaj, coef, coefi
 
   double precision, external    :: NAI_pol_mult_erf_with1s
+
+  ASSERT(beta .ge. 0.d0)
+  if(beta .lt. 1d-10) then
+    call NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+    return
+  endif
 
   ints = 0.d0
   if(ao_overlap_abs(j_ao,i_ao) .lt. 1.d-12) then
@@ -316,26 +322,27 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
   n_pt_in = n_pt_max_integrals
 
   do i = 1, ao_prim_num(i_ao)
-    alphai = ao_expo_ordered_transp(i,i_ao)
+    alphai = ao_expo_ordered_transp           (i,i_ao)
+    coefi  = ao_coef_normalized_ordered_transp(i,i_ao)
 
     do m = 1, 3
 
-      power_xA = power_Ai
       ! x * phi_i(r) = x * (x-Ax)**ax = (x-Ax)**(ax+1) + Ax * (x-Ax)**ax
+      power_xA     = power_Ai
       power_xA(m) += 1
 
       do j = 1, ao_prim_num(j_ao)
-        alphaj = ao_expo_ordered_transp(j,j_ao)
-        coef   = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
+        alphaj = ao_expo_ordered_transp                   (j,j_ao)
+        coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao) 
 
         ! First term = (x-Ax)**(ax+1)
-        integral =  NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
-                                           , beta, b_center, c_center, n_pt_in, mu_in )
+        integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
+                                          , beta, B_center, C_center, n_pt_in, mu_in )
         ints(m) += integral * coef
 
         ! Second term = Ax * (x-Ax)**(ax)
-        integral =  NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj &
-                                           , beta, b_center, c_center, n_pt_in, mu_in )
+        integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj &
+                                          , beta, B_center, C_center, n_pt_in, mu_in )
         ints(m) += Ai_center(m) * integral * coef
 
       enddo

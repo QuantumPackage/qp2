@@ -61,7 +61,6 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
         integral = integral + j1b_gauss_2e_j2(i, k, j, l)
       endif
 
-
       if(abs(integral) < thr) then
         cycle
       endif

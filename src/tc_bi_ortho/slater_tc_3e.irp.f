@@ -207,6 +207,8 @@ subroutine single_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
 
 end
 
+! ---
+
 subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
@@ -244,7 +246,7 @@ subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
    return
   endif
 
-  if(core_tc_op)then
+  if(core_tc_op) then
    do i = 1, Nint
     key_i_core(i,1) = xor(key_i(i,1),core_bitmask(i,1))
     key_i_core(i,2) = xor(key_i(i,2),core_bitmask(i,2))
@@ -291,3 +293,6 @@ subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
     endif
   hthree  *= phase
  end
+
+! ---
+

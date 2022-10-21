@@ -17,23 +17,42 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   double precision           :: integral_sym, integral_nsym
   double precision, external :: get_ao_tc_sym_two_e_pot
 
-  PROVIDE ao_tc_sym_two_e_pot_in_map
+  provide j1b_type
 
-  do j = 1, ao_num
-    do l = 1, ao_num
-      do i = 1, ao_num
-        do k = 1, ao_num
+  if(j1b_type .eq. 3) then
 
-          integral_sym  = get_ao_tc_sym_two_e_pot(i,j,k,l,ao_tc_sym_two_e_pot_map)
-
-          ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
-          integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
-
-          ao_two_e_tc_tot(k,i,l,j) = integral_sym + integral_nsym 
+    do j = 1, ao_num
+      do l = 1, ao_num
+        do i = 1, ao_num
+          do k = 1, ao_num
+            ao_two_e_tc_tot(k,i,l,j) = ao_tc_int_chemist(k,i,l,j)
+            !write(222,*) ao_two_e_tc_tot(k,i,l,j) 
+          enddo
         enddo
       enddo
     enddo
-  enddo
+
+  else
+
+    PROVIDE ao_tc_sym_two_e_pot_in_map
+
+    do j = 1, ao_num
+      do l = 1, ao_num
+        do i = 1, ao_num
+          do k = 1, ao_num
+
+            integral_sym  = get_ao_tc_sym_two_e_pot(i, j, k, l, ao_tc_sym_two_e_pot_map)
+            ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
+            integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
+
+            ao_two_e_tc_tot(k,i,l,j) = integral_sym + integral_nsym 
+            !write(111,*) ao_two_e_tc_tot(k,i,l,j) 
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endif
 
 END_PROVIDER 
 
@@ -42,9 +61,11 @@ END_PROVIDER
 double precision function bi_ortho_mo_ints(l, k, j, i)
 
   BEGIN_DOC
+  !
   ! <mo^L_k mo^L_l | V^TC(r_12) | mo^R_i mo^R_j>
   !
   ! WARNING :: very naive, super slow, only used to DEBUG.
+  !
   END_DOC
 
   implicit none

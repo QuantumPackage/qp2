@@ -78,7 +78,7 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
   double precision, intent(in)   :: mu_in, C_center(3)
 
   integer                        :: i, j, power_A1(3), power_A2(3), n_pt_in
-  double precision               :: A1_center(3), A2_center(3), alpha1, alpha2, coef12, integral
+  double precision               :: A1_center(3), A2_center(3), alpha1, alpha2, coef12, coef1, integral
 
   double precision, external     :: NAI_pol_mult_erf_with1s, NAI_pol_mult_erf_ao
 
@@ -98,11 +98,12 @@ double precision function NAI_pol_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center,
 
   NAI_pol_mult_erf_ao_with1s = 0.d0
   do i = 1, ao_prim_num(i_ao)
-    alpha1 = ao_expo_ordered_transp(i,i_ao)
+    alpha1 = ao_expo_ordered_transp           (i,i_ao)
+    coef1  = ao_coef_normalized_ordered_transp(i,i_ao)
+
     do j = 1, ao_prim_num(j_ao)
       alpha2 = ao_expo_ordered_transp(j,j_ao)
-
-      coef12 = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
+      coef12 = coef1 * ao_coef_normalized_ordered_transp(j,j_ao)
       if(dabs(coef12) .lt. 1d-14) cycle
 
       integral = NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A1, power_A2, alpha1, alpha2 &
@@ -242,9 +243,9 @@ double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A
   A12_center(1) = (alpha1 * A1_center(1) + alpha2 * A2_center(1)) * alpha12_inv
   A12_center(2) = (alpha1 * A1_center(2) + alpha2 * A2_center(2)) * alpha12_inv
   A12_center(3) = (alpha1 * A1_center(3) + alpha2 * A2_center(3)) * alpha12_inv
-  dist12        = ( (A1_center(1) - A2_center(1)) * (A1_center(1) - A2_center(1)) &
-                  + (A1_center(2) - A2_center(2)) * (A1_center(2) - A2_center(2)) &
-                  + (A1_center(3) - A2_center(3)) * (A1_center(3) - A2_center(3)) )
+  dist12        = (A1_center(1) - A2_center(1)) * (A1_center(1) - A2_center(1)) &
+                + (A1_center(2) - A2_center(2)) * (A1_center(2) - A2_center(2)) &
+                + (A1_center(3) - A2_center(3)) * (A1_center(3) - A2_center(3))
 
   const_factor12 = dist12 * rho12
   if(const_factor12 > 80.d0) then
@@ -262,9 +263,9 @@ double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A
   P_center(1) = (alpha12 * A12_center(1) + beta * B_center(1)) * p_inv
   P_center(2) = (alpha12 * A12_center(2) + beta * B_center(2)) * p_inv
   P_center(3) = (alpha12 * A12_center(3) + beta * B_center(3)) * p_inv
-  dist        = ( (A12_center(1) - B_center(1)) * (A12_center(1) - B_center(1)) &
-                + (A12_center(2) - B_center(2)) * (A12_center(2) - B_center(2)) &
-                + (A12_center(3) - B_center(3)) * (A12_center(3) - B_center(3)) )
+  dist        = (A12_center(1) - B_center(1)) * (A12_center(1) - B_center(1)) &
+              + (A12_center(2) - B_center(2)) * (A12_center(2) - B_center(2)) &
+              + (A12_center(3) - B_center(3)) * (A12_center(3) - B_center(3))
 
   const_factor = const_factor12 + dist * rho
   if(const_factor > 80.d0) then
@@ -272,11 +273,9 @@ double precision function NAI_pol_mult_erf_with1s( A1_center, A2_center, power_A
     return
   endif
 
-  dist_integral = 0.d0
-  do i = 1, 3
-    dist_integral += (P_center(i)   - C_center(i)) * (P_center(i)   - C_center(i))
-  enddo
-
+  dist_integral = (P_center(1) - C_center(1)) * (P_center(1) - C_center(1)) &
+                + (P_center(2) - C_center(2)) * (P_center(2) - C_center(2)) &
+                + (P_center(3) - C_center(3)) * (P_center(3) - C_center(3))
 
   ! ---
 

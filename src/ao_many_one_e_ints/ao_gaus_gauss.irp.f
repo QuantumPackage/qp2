@@ -116,7 +116,7 @@ double precision function overlap_gauss_r12_ao(D_center, delta, i, j)
   double precision, intent(in) :: D_center(3), delta
  
   integer                      :: power_A(3), power_B(3), l, k
-  double precision             :: A_center(3), B_center(3), alpha, beta, coef, analytical_j
+  double precision             :: A_center(3), B_center(3), alpha, beta, coef, coef1, analytical_j
 
   double precision, external   :: overlap_gauss_r12
 
@@ -133,10 +133,12 @@ double precision function overlap_gauss_r12_ao(D_center, delta, i, j)
   B_center(1:3) = nucl_coord(ao_nucl(j),1:3)
 
   do l = 1, ao_prim_num(i)
-    alpha = ao_expo_ordered_transp(l,i)     
+    alpha = ao_expo_ordered_transp           (l,i)     
+    coef1 = ao_coef_normalized_ordered_transp(l,i) 
+
     do k = 1, ao_prim_num(j)
       beta = ao_expo_ordered_transp(k,j)
-      coef = ao_coef_normalized_ordered_transp(l,i) *  ao_coef_normalized_ordered_transp(k,j) 
+      coef = coef1 * ao_coef_normalized_ordered_transp(k,j) 
 
       if(dabs(coef) .lt. 1d-12) cycle
 
@@ -153,7 +155,9 @@ end function overlap_gauss_r12_ao
 double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, delta, i, j)
 
   BEGIN_DOC
+  !
   ! \int dr AO_i(r) AO_j(r) e^{-beta |r-B_center^2|} e^{-delta |r-D_center|^2}
+  !
   END_DOC
 
   implicit none
@@ -161,7 +165,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   double precision, intent(in) :: B_center(3), beta, D_center(3), delta
  
   integer                      :: power_A1(3), power_A2(3), l, k
-  double precision             :: A1_center(3), A2_center(3), alpha1, alpha2, coef12, analytical_j
+  double precision             :: A1_center(3), A2_center(3), alpha1, alpha2, coef1, coef12, analytical_j
   double precision             :: G_center(3), gama, fact_g, gama_inv
 
   double precision, external   :: overlap_gauss_r12, overlap_gauss_r12_ao
@@ -188,8 +192,8 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   fact_g      = beta * delta * gama_inv * ( (B_center(1) - D_center(1)) * (B_center(1) - D_center(1)) &
                                           + (B_center(2) - D_center(2)) * (B_center(2) - D_center(2)) &
                                           + (B_center(3) - D_center(3)) * (B_center(3) - D_center(3)) )
-  fact_g      = dexp(-fact_g)
-  if(fact_g .lt. 1.d-12) return
+  if(fact_g .gt. 80d0) return
+  fact_g = dexp(-fact_g)
 
   ! ---
 
@@ -200,11 +204,13 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   A2_center(1:3) = nucl_coord(ao_nucl(j),1:3)
 
   do l = 1, ao_prim_num(i)
-    alpha1 = ao_expo_ordered_transp(l,i)     
-    do k = 1, ao_prim_num(j)
-      alpha2 = ao_expo_ordered_transp(k,j)
-      coef12 = fact_g * ao_coef_normalized_ordered_transp(l,i) *  ao_coef_normalized_ordered_transp(k,j) 
+    alpha1 = ao_expo_ordered_transp                    (l,i)     
+    coef1  = fact_g * ao_coef_normalized_ordered_transp(l,i)
+    !if(dabs(coef1) .lt. 1d-12) cycle
 
+    do k = 1, ao_prim_num(j)
+      alpha2 = ao_expo_ordered_transp                   (k,j)
+      coef12 = coef1 * ao_coef_normalized_ordered_transp(k,j) 
       if(dabs(coef12) .lt. 1d-12) cycle
 
       analytical_j = overlap_gauss_r12(G_center, gama, A1_center, A2_center, power_A1, power_A2, alpha1, alpha2)

@@ -86,10 +86,8 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ki_bi_ortho_erf_rk_cst_mu, (mo_num, mo
 
     call ao_to_mo_bi_ortho( x_v_ij_erf_rk_cst_mu_transp     (1,1,1,ipoint), size(x_v_ij_erf_rk_cst_mu_transp,      1) &
                           , mo_x_v_ki_bi_ortho_erf_rk_cst_mu(1,1,1,ipoint), size(mo_x_v_ki_bi_ortho_erf_rk_cst_mu, 1) )
-
     call ao_to_mo_bi_ortho( x_v_ij_erf_rk_cst_mu_transp     (1,1,2,ipoint), size(x_v_ij_erf_rk_cst_mu_transp,      1) &
                           , mo_x_v_ki_bi_ortho_erf_rk_cst_mu(1,1,2,ipoint), size(mo_x_v_ki_bi_ortho_erf_rk_cst_mu, 1) )
-
     call ao_to_mo_bi_ortho( x_v_ij_erf_rk_cst_mu_transp     (1,1,3,ipoint), size(x_v_ij_erf_rk_cst_mu_transp,      1) &
                           , mo_x_v_ki_bi_ortho_erf_rk_cst_mu(1,1,3,ipoint), size(mo_x_v_ki_bi_ortho_erf_rk_cst_mu, 1) )
 
@@ -103,7 +101,55 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo, (3, ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3, n_points_final_grid)]
+
+  implicit none
+  integer          :: i, j, ipoint
+  double precision :: wall0, wall1
+
+  call wall_time(wall0)
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
+        int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao(1,j,i,ipoint)
+        int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao(2,j,i,ipoint)
+        int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao(3,j,i,ipoint)
+      enddo
+    enddo
+  enddo
+  call wall_time(wall1)
+  print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
+
+END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
+
+  implicit none
+  integer :: ipoint
+
+ !$OMP PARALLEL         &
+ !$OMP DEFAULT (NONE)   &
+ !$OMP PRIVATE (ipoint) & 
+ !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
+ !$OMP DO SCHEDULE (dynamic)
+  do ipoint = 1, n_points_final_grid
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo, (3, mo_num, mo_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
@@ -121,14 +167,12 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo, (3, ao_num, ao_num, n_po
  !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
 
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (1,1,1,ipoint), size(int2_grad1_u12_ao  , 1) &
-                          , int2_grad1_u12_bimo(1,1,1,ipoint), size(int2_grad1_u12_bimo, 1) )
-
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (2,1,1,ipoint), size(int2_grad1_u12_ao  , 1) &
-                          , int2_grad1_u12_bimo(2,1,1,ipoint), size(int2_grad1_u12_bimo, 1) )
-
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (3,1,1,ipoint), size(int2_grad1_u12_ao  , 1) &
-                          , int2_grad1_u12_bimo(3,1,1,ipoint), size(int2_grad1_u12_bimo, 1) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (1,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
+                          , int2_grad1_u12_bimo(1,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (2,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
+                          , int2_grad1_u12_bimo(2,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (3,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
+                          , int2_grad1_u12_bimo(3,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
 
   enddo
  !$OMP END DO

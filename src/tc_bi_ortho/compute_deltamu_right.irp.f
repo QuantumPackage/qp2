@@ -34,6 +34,7 @@ subroutine delta_right()
   !do k = 1, 1
 
     ! get < I_left | H_mu - H | psi_right > 
+    !call get_h_bitc_right(psi_det, psi_r_coef_bi_ortho(:,k), N_det, N_int, delta(:,k))
     call get_delta_bitc_right(psi_det, psi_r_coef_bi_ortho(:,k), N_det, N_int, delta(:,k))
 
     ! order as QMCCHEM

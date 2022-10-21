@@ -1,17 +1,24 @@
+
+! ---
+
 BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_num, mo_num, mo_num, mo_num)]
- implicit none
+
  BEGIN_DOC
 ! matrix element of the -L  three-body operator 
 !
 ! notice the -1 sign: in this way three_body_ints_bi_ort can be directly used to compute Slater rules :)
  END_DOC
- integer :: i,j,k,l,m,n
+
+ implicit none
+ integer          :: i, j, k, l, m, n
  double precision :: integral, wall1, wall0
- character*(128) :: name_file 
- three_body_ints_bi_ort = 0.d0
- print*,'Providing the three_body_ints_bi_ort ...'
- call wall_time(wall0)
- name_file = 'six_index_tensor'
+ character*(128)  :: name_file 
+
+  three_body_ints_bi_ort = 0.d0
+  print*,'Providing the three_body_ints_bi_ort ...'
+  call wall_time(wall0)
+  name_file = 'six_index_tensor'
+
 ! if(read_three_body_ints_bi_ort)then
 !  call read_fcidump_3_tc(three_body_ints_bi_ort)
 ! else
@@ -19,32 +26,37 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
 !   print*,'Reading three_body_ints_bi_ort from disk ...'
 !   call read_array_6_index_tensor(mo_num,three_body_ints_bi_ort,name_file)
 !  else
-  provide x_W_ki_bi_ortho_erf_rk mos_r_in_r_array_transp mos_l_in_r_array_transp
-  !$OMP PARALLEL                  &
-  !$OMP DEFAULT (NONE)            &
-  !$OMP PRIVATE (i,j,k,l,m,n,integral) & 
-  !$OMP SHARED (mo_num,three_body_ints_bi_ort)
-  !$OMP DO SCHEDULE (dynamic)
-   do i = 1, mo_num
+
+  !provide x_W_ki_bi_ortho_erf_rk 
+  provide mos_r_in_r_array_transp mos_l_in_r_array_transp
+
+ !$OMP PARALLEL                       &
+ !$OMP DEFAULT (NONE)                 &
+ !$OMP PRIVATE (i,j,k,l,m,n,integral) & 
+ !$OMP SHARED (mo_num,three_body_ints_bi_ort)
+ !$OMP DO SCHEDULE (dynamic)
+  do i = 1, mo_num
     do j = 1, mo_num
-     do m = 1, mo_num
-      do k = 1, mo_num
-       do l = 1, mo_num
-        do n = 1, mo_num
-           call give_integrals_3_body_bi_ort(n,l,k,m,j,i,integral)
-           three_body_ints_bi_ort(n,l,k,m,j,i) = -1.d0 * integral 
+      do m = 1, mo_num
+        do k = 1, mo_num
+          do l = 1, mo_num
+            do n = 1, mo_num
+              call give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
+
+              three_body_ints_bi_ort(n,l,k,m,j,i) = -1.d0 * integral 
+            enddo
+          enddo
         enddo
-       enddo
       enddo
-     enddo
     enddo
-   enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
 !  endif
 ! endif
- call wall_time(wall1)
- print*,'wall time for three_body_ints_bi_ort',wall1 - wall0
+
+  call wall_time(wall1)
+  print *, ' wall time for three_body_ints_bi_ort', wall1 - wall0
 ! if(write_three_body_ints_bi_ort)then
 !  print*,'Writing three_body_ints_bi_ort on disk ...'
 !  call write_array_6_index_tensor(mo_num,three_body_ints_bi_ort,name_file)
@@ -64,7 +76,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
   END_DOC
 
   implicit none
-  integer,           intent(in) :: n,l,k,m,j,i
+  integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
   integer                       :: ipoint
   double precision              :: weight
@@ -86,18 +98,31 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
 !                + x_W_ki_bi_ortho_erf_rk(ipoint,2,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,2,k,i)  &
 !                + x_W_ki_bi_ortho_erf_rk(ipoint,3,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,3,k,i)  )
 
-    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) & 
-              * ( int2_grad1_u12_bimo(1,ipoint,n,m) * int2_grad1_u12_bimo(1,ipoint,l,j)  &
-                + int2_grad1_u12_bimo(2,ipoint,n,m) * int2_grad1_u12_bimo(2,ipoint,l,j)  &
-                + int2_grad1_u12_bimo(3,ipoint,n,m) * int2_grad1_u12_bimo(3,ipoint,l,j)  )
-    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) & 
-              * ( int2_grad1_u12_bimo(1,ipoint,n,m) * int2_grad1_u12_bimo(1,ipoint,k,i)  &
-                + int2_grad1_u12_bimo(2,ipoint,n,m) * int2_grad1_u12_bimo(2,ipoint,k,i)  &
-                + int2_grad1_u12_bimo(3,ipoint,n,m) * int2_grad1_u12_bimo(3,ipoint,k,i)  )
-    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
-              * ( int2_grad1_u12_bimo(1,ipoint,l,j) * int2_grad1_u12_bimo(1,ipoint,k,i)  &
-                + int2_grad1_u12_bimo(2,ipoint,l,j) * int2_grad1_u12_bimo(2,ipoint,k,i)  &
-                + int2_grad1_u12_bimo(3,ipoint,l,j) * int2_grad1_u12_bimo(3,ipoint,k,i)  )
+!    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) & 
+!              * ( int2_grad1_u12_bimo(1,n,m,ipoint) * int2_grad1_u12_bimo(1,l,j,ipoint)        &
+!                + int2_grad1_u12_bimo(2,n,m,ipoint) * int2_grad1_u12_bimo(2,l,j,ipoint)        &
+!                + int2_grad1_u12_bimo(3,n,m,ipoint) * int2_grad1_u12_bimo(3,l,j,ipoint)        )
+!    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) & 
+!              * ( int2_grad1_u12_bimo(1,n,m,ipoint) * int2_grad1_u12_bimo(1,k,i,ipoint)        &
+!                + int2_grad1_u12_bimo(2,n,m,ipoint) * int2_grad1_u12_bimo(2,k,i,ipoint)        &
+!                + int2_grad1_u12_bimo(3,n,m,ipoint) * int2_grad1_u12_bimo(3,k,i,ipoint)        )
+!    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
+!              * ( int2_grad1_u12_bimo(1,l,j,ipoint) * int2_grad1_u12_bimo(1,k,i,ipoint)        &
+!                + int2_grad1_u12_bimo(2,l,j,ipoint) * int2_grad1_u12_bimo(2,k,i,ipoint)        &
+!                + int2_grad1_u12_bimo(3,l,j,ipoint) * int2_grad1_u12_bimo(3,k,i,ipoint)        )
+
+    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i)        & 
+              * ( int2_grad1_u12_bimo_transp(n,m,1,ipoint) * int2_grad1_u12_bimo_transp(l,j,1,ipoint) &
+                + int2_grad1_u12_bimo_transp(n,m,2,ipoint) * int2_grad1_u12_bimo_transp(l,j,2,ipoint) &
+                + int2_grad1_u12_bimo_transp(n,m,3,ipoint) * int2_grad1_u12_bimo_transp(l,j,3,ipoint) )
+    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j)        & 
+              * ( int2_grad1_u12_bimo_transp(n,m,1,ipoint) * int2_grad1_u12_bimo_transp(k,i,1,ipoint) &
+                + int2_grad1_u12_bimo_transp(n,m,2,ipoint) * int2_grad1_u12_bimo_transp(k,i,2,ipoint) &
+                + int2_grad1_u12_bimo_transp(n,m,3,ipoint) * int2_grad1_u12_bimo_transp(k,i,3,ipoint) )
+    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m)        &
+              * ( int2_grad1_u12_bimo_transp(l,j,1,ipoint) * int2_grad1_u12_bimo_transp(k,i,1,ipoint) &
+                + int2_grad1_u12_bimo_transp(l,j,2,ipoint) * int2_grad1_u12_bimo_transp(k,i,2,ipoint) &
+                + int2_grad1_u12_bimo_transp(l,j,3,ipoint) * int2_grad1_u12_bimo_transp(k,i,3,ipoint) )
 
   enddo
 

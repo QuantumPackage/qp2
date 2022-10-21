@@ -5,7 +5,7 @@ subroutine hmat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, htot)
 
   BEGIN_DOC
   !
-  ! <key_j | H | key_i > where | key_j > is developed on the LEFT basis and | key_i > is developed on the RIGHT basis
+  ! < key_j | H | key_i > where | key_j > is developed on the LEFT basis and | key_i > is developed on the RIGHT basis
   ! 
   END_DOC
 
@@ -13,11 +13,11 @@ subroutine hmat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, htot)
 
   implicit none
 
-  integer,           intent(in)  :: Nint
-  integer(bit_kind), intent(in)  :: key_i(Nint,2), key_j(Nint,2)
-  double precision, intent(out)  :: hmono, htwoe, htot
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
+  double precision, intent(out) :: hmono, htwoe, htot
 
-  integer                        :: degree 
+  integer                       :: degree 
 
   hmono = 0.d0
   htwoe = 0.d0
@@ -31,11 +31,11 @@ subroutine hmat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, htot)
     call diag_hmat_bi_ortho(Nint, key_i, hmono, htwoe)
     htot = htot + nuclear_repulsion
 
-  else if (degree == 1)then
+  else if (degree == 1) then
 
     call single_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
 
-  else if(degree == 2)then
+  else if(degree == 2) then
 
     call double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
 
@@ -59,8 +59,7 @@ subroutine diag_hmat_bi_ortho(Nint, key_i, hmono, htwoe)
   double precision, intent(out) :: hmono, htwoe
 
   integer                        :: occ(Nint*bit_kind_size,2)
-  integer                        :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
-  integer(bit_kind)              :: key_i_core(Nint,2)
+  integer                        :: Ne(2), i, j, ii, jj, ispin, jspin
 
   hmono = 0.d0
   htwoe = 0.d0
@@ -125,13 +124,11 @@ subroutine single_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
   double precision, intent(out) :: hmono, htwoe
 
   integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  integer                       :: Ne(2), i, j, ii, ispin, jspin
   integer                       :: degree,exc(0:2,2,2)
   integer                       :: h1, p1, h2, p2, s1, s2
   integer                       :: other_spin(2)
-  integer(bit_kind)             :: key_j_core(Nint,2), key_i_core(Nint,2)
   double precision              :: phase
-  double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
 
   other_spin(1) = 2
   other_spin(2) = 1
@@ -201,11 +198,10 @@ subroutine double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
   double precision, intent(out) :: hmono, htwoe
 
   integer                       :: occ(Nint*bit_kind_size,2)
-  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  integer                       :: Ne(2), i, j, ii, ispin, jspin
   integer                       :: degree,exc(0:2,2,2)
   integer                       :: h1, p1, h2, p2, s1, s2
   integer                       :: other_spin(2)
-  integer(bit_kind)             :: key_i_core(Nint,2)
   double precision              :: phase
 
   other_spin(1) = 2
@@ -225,7 +221,7 @@ subroutine double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
   call get_double_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
 
-  if(s1.ne.s2) then
+  if(s1 .ne. s2) then
 
     htwoe = mo_bi_ortho_coul_e(p2,p1,h2,h1) 
 
@@ -233,10 +229,8 @@ subroutine double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
 
     ! same spin two-body 
 
-    ! direct terms 
-    htwoe  = mo_bi_ortho_coul_e(p2,p1,h2,h1)  
-    ! exchange terms 
-    htwoe -= mo_bi_ortho_coul_e(p1,p2,h2,h1) 
+    !                    direct terms                 exchange terms 
+    htwoe = mo_bi_ortho_coul_e(p2,p1,h2,h1) - mo_bi_ortho_coul_e(p1,p2,h2,h1) 
 
   endif
 

@@ -10,13 +10,12 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s
-  double precision              :: r(3), int_mu, int_coulomb
-  double precision              :: coef, beta, B_center(3)
-  double precision              :: wall0, wall1
-  double precision, allocatable :: tmp(:,:,:)
-
-  double precision, external    :: NAI_pol_mult_erf_ao_with1s
+  integer                    :: i, j, ipoint, i_1s
+  double precision           :: r(3), int_mu, int_coulomb
+  double precision           :: coef, beta, B_center(3)
+  double precision           :: tmp
+  double precision           :: wall0, wall1
+  double precision, external :: NAI_pol_mult_erf_ao_with1s
 
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
@@ -28,19 +27,17 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points, &
  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,   &
  !$OMP          v_ij_erf_rk_cst_mu_j1b, mu_erf)
-
-  allocate( tmp(ao_num,ao_num,n_points_final_grid) )
-  tmp = 0.d0
-
  !$OMP DO
   !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+
     do i = 1, ao_num
       do j = i, ao_num
-        r(1) = final_grid_points(1,ipoint)
-        r(2) = final_grid_points(2,ipoint)
-        r(3) = final_grid_points(3,ipoint)
 
+        tmp = 0.d0
         do i_1s = 1, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
@@ -52,28 +49,18 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
           int_mu      = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
           int_coulomb = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
 
-          tmp(j,i,ipoint) += coef * (int_mu - int_coulomb)
+          tmp += coef * (int_mu - int_coulomb)
         enddo
+
+        v_ij_erf_rk_cst_mu_j1b(j,i,ipoint) = tmp
       enddo
     enddo
   enddo
  !$OMP END DO
-
- !$OMP CRITICAL
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = i, ao_num
-        v_ij_erf_rk_cst_mu_j1b(j,i,ipoint) += tmp(j,i,ipoint) 
-      enddo
-    enddo
-  enddo
- !$OMP END CRITICAL
-
-  deallocate( tmp )
  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
+    do i = 2, ao_num
       do j = 1, i-1
         v_ij_erf_rk_cst_mu_j1b(j,i,ipoint) = v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
       enddo
@@ -123,33 +110,34 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b, (3, ao_num, ao_
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s
-  double precision              :: coef, beta, B_center(3), r(3), ints(3), ints_coulomb(3)
-  double precision              :: wall0, wall1
-  double precision, allocatable :: tmp(:,:,:,:)
+  integer          :: i, j, ipoint, i_1s
+  double precision :: coef, beta, B_center(3), r(3), ints(3), ints_coulomb(3)
+  double precision :: tmp_x, tmp_y, tmp_z
+  double precision :: wall0, wall1
 
   call wall_time(wall0)
 
   x_v_ij_erf_rk_cst_mu_tmp_j1b = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                        &
- !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb, tmp) & 
+ !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
+ !$OMP          tmp_x, tmp_y, tmp_z)                                                  & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points,&
  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,  &
  !$OMP          x_v_ij_erf_rk_cst_mu_tmp_j1b, mu_erf)
-
-  allocate( tmp(3,ao_num,ao_num,n_points_final_grid) )
-  tmp = 0.d0
-
  !$OMP DO
   !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+
     do i = 1, ao_num
       do j = i, ao_num
-        r(1) = final_grid_points(1,ipoint)
-        r(2) = final_grid_points(2,ipoint)
-        r(3) = final_grid_points(3,ipoint)
 
+        tmp_x = 0.d0
+        tmp_y = 0.d0
+        tmp_z = 0.d0
         do i_1s = 1, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
@@ -161,32 +149,22 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b, (3, ao_num, ao_
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
 
-          tmp(1,j,i,ipoint) += coef * (ints(1) - ints_coulomb(1))
-          tmp(2,j,i,ipoint) += coef * (ints(2) - ints_coulomb(2))
-          tmp(3,j,i,ipoint) += coef * (ints(3) - ints_coulomb(3))
+          tmp_x += coef * (ints(1) - ints_coulomb(1))
+          tmp_y += coef * (ints(2) - ints_coulomb(2))
+          tmp_z += coef * (ints(3) - ints_coulomb(3))
         enddo
+
+        x_v_ij_erf_rk_cst_mu_tmp_j1b(1,j,i,ipoint) = tmp_x
+        x_v_ij_erf_rk_cst_mu_tmp_j1b(2,j,i,ipoint) = tmp_y
+        x_v_ij_erf_rk_cst_mu_tmp_j1b(3,j,i,ipoint) = tmp_z
       enddo
     enddo
   enddo
  !$OMP END DO
-
- !$OMP CRITICAL
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = i, ao_num
-        x_v_ij_erf_rk_cst_mu_tmp_j1b(1,j,i,ipoint) += tmp(1,j,i,ipoint)
-        x_v_ij_erf_rk_cst_mu_tmp_j1b(2,j,i,ipoint) += tmp(2,j,i,ipoint)
-        x_v_ij_erf_rk_cst_mu_tmp_j1b(3,j,i,ipoint) += tmp(3,j,i,ipoint)
-      enddo
-    enddo
-  enddo
- !$OMP END CRITICAL
-
-  deallocate( tmp )
  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
+    do i = 2, ao_num
       do j = 1, i-1
         x_v_ij_erf_rk_cst_mu_tmp_j1b(1,j,i,ipoint) = x_v_ij_erf_rk_cst_mu_tmp_j1b(1,i,j,ipoint)
         x_v_ij_erf_rk_cst_mu_tmp_j1b(2,j,i,ipoint) = x_v_ij_erf_rk_cst_mu_tmp_j1b(2,i,j,ipoint)
@@ -202,6 +180,7 @@ END_PROVIDER
 
 ! ---
 
+! TODO analytically
 BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
@@ -211,13 +190,13 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
   END_DOC
 
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
-  double precision              :: r(3), int_fit, expo_fit, coef_fit
-  double precision              :: coef, beta, B_center(3)
-  double precision              :: wall0, wall1
-  double precision, allocatable :: tmp(:,:,:)
+  integer                    :: i, j, ipoint, i_1s, i_fit
+  double precision           :: r(3), int_fit, expo_fit, coef_fit
+  double precision           :: coef, beta, B_center(3)
+  double precision           :: tmp
+  double precision           :: wall0, wall1
 
-  double precision, external    :: overlap_gauss_r12_ao_with1s
+  double precision, external :: overlap_gauss_r12_ao_with1s
 
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
@@ -232,19 +211,17 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b)
-
-  allocate( tmp(ao_num,ao_num,n_points_final_grid) )
-  tmp = 0.d0
-
  !$OMP DO
   !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+
     do i = 1, ao_num
       do j = i, ao_num
-        r(1) = final_grid_points(1,ipoint)
-        r(2) = final_grid_points(2,ipoint)
-        r(3) = final_grid_points(3,ipoint)
 
+        tmp = 0.d0
         do i_1s = 1, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
@@ -259,29 +236,19 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
             coef_fit = coef_gauss_j_mu_x(i_fit)
             int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
 
-            tmp(j,i,ipoint) += coef * coef_fit * int_fit
+            tmp += coef * coef_fit * int_fit
           enddo
         enddo
+
+        v_ij_u_cst_mu_j1b(j,i,ipoint) = tmp
       enddo
     enddo
   enddo
  !$OMP END DO
-
- !$OMP CRITICAL
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = i, ao_num
-        v_ij_u_cst_mu_j1b(j,i,ipoint) += tmp(j,i,ipoint) 
-      enddo
-    enddo
-  enddo
- !$OMP END CRITICAL
-
-  deallocate( tmp )
  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
+    do i = 2, ao_num
       do j = 1, i-1
         v_ij_u_cst_mu_j1b(j,i,ipoint) = v_ij_u_cst_mu_j1b(i,j,ipoint)
       enddo
@@ -294,3 +261,4 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 END_PROVIDER 
 
 ! ---
+

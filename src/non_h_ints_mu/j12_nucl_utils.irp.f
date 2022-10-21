@@ -586,4 +586,38 @@ end subroutine grad1_j12_mu_exc
 
 ! ---
 
+subroutine grad1_jmu_modif_num(r1, r2, grad)
+
+  implicit none
+
+  double precision, intent(in)  :: r1(3), r2(3)
+  double precision, intent(out) :: grad(3)
+
+  double precision              :: tmp0, tmp1, tmp2, tmp3, tmp4, grad_u12(3)
+
+  double precision, external    :: j12_mu
+  double precision, external    :: j1b_nucl
+  double precision, external    :: grad_x_j1b_nucl
+  double precision, external    :: grad_y_j1b_nucl
+  double precision, external    :: grad_z_j1b_nucl
+
+  call grad1_j12_mu_exc(r1, r2, grad_u12)
+
+  tmp0 = j1b_nucl(r1) 
+  tmp1 = j1b_nucl(r2)
+  tmp2 = j12_mu(r1, r2)
+  tmp3 = tmp0 * tmp1
+  tmp4 = tmp2 * tmp1
+
+  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl(r1)
+  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl(r1)
+  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl(r1)
+
+  return
+end subroutine grad1_jmu_modif_num
+
+! ---
+
+
+
 
