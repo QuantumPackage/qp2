@@ -147,7 +147,7 @@ subroutine ao_map_fill_from_chol
           enddo
         endif
 
-        call zgemm('N','T', ao_num_kpt_2, ao_num_kpt_2, chol_num(kQ), &
+        call zgemm('N','T', ao_num_kpt_2, ao_num_kpt_2, chol_num(abs(kpt_sparse_map(kQ))), &
                (1.d0,0.d0), ints_ik, ao_num_kpt_2, &
                ints_jl, ao_num_kpt_2, &
                (0.d0,0.d0), ints_ikjl, ao_num_kpt_2)

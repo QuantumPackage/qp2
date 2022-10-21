@@ -80,7 +80,7 @@ subroutine mo_map_fill_from_chol_dot
       if (Q_idx > 0) then
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
-            do i_cd=1,chol_num(kQ)
+            do i_cd=1,chol_num(abs(Q_idx))
               !ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx)
               ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(i_mo,j_mo,i_cd,kl,Q_idx))
             enddo
@@ -89,7 +89,7 @@ subroutine mo_map_fill_from_chol_dot
       else
         do i_mo=1,mo_num_per_kpt
           do j_mo=1,mo_num_per_kpt
-            do i_cd=1,chol_num(kQ)
+            do i_cd=1,chol_num(abs(Q_idx))
               !ints_jl(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx))
               ints_jl(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(j_mo,i_mo,i_cd,kj,-Q_idx)
             enddo
@@ -106,7 +106,7 @@ subroutine mo_map_fill_from_chol_dot
         if (Q_idx > 0) then
           do i_mo=1,mo_num_per_kpt
             do j_mo=1,mo_num_per_kpt
-              do i_cd=1,chol_num(kQ)
+              do i_cd=1,chol_num(abs(Q_idx))
                 ints_ik(i_cd,i_mo,j_mo) = chol_mo_integrals_complex(i_mo,j_mo,i_cd,ki,Q_idx)
               enddo
             enddo
@@ -115,7 +115,7 @@ subroutine mo_map_fill_from_chol_dot
         else
           do i_mo=1,mo_num_per_kpt
             do j_mo=1,mo_num_per_kpt
-              do i_cd=1,chol_num(kQ)
+              do i_cd=1,chol_num(abs(Q_idx))
                 ints_ik(i_cd,i_mo,j_mo) = dconjg(chol_mo_integrals_complex(j_mo,i_mo,i_cd,kk,-Q_idx))
               enddo
             enddo
@@ -160,8 +160,8 @@ subroutine mo_map_fill_from_chol_dot
                 call idx2_tri_int(i,k,ik2)
                 if (ik2 > jl2) exit
                 !integral = zdotc(df_num,ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
-                !integral = zdotu(chol_num(kQ),ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
-                integral = zdotu(chol_num(kQ),ints_jl(1,il,ij),1,ints_ik(1,ii,ik),1)
+                !integral = zdotu(chol_num(abs(Q_idx)),ints_jl(1,ij,il),1,ints_ik(1,ii,ik),1)
+                integral = zdotu(chol_num(abs(Q_idx)),ints_jl(1,il,ij),1,ints_ik(1,ii,ik),1)
 !                print*,i,k,j,l,real(integral),imag(integral)
                 if (cdabs(integral) < mo_integrals_threshold) then
                   cycle
@@ -292,7 +292,7 @@ subroutine chol_mo_from_chol_ao(cd_mo,cd_ao,n_mo,n_ao,n_cd,n_k,n_unique_k)
       Q_idx = kpt_sparse_map(kQ)
       if (Q_idx < 0) cycle
 
-      do mu=1, chol_num(kQ)
+      do mu=1, chol_num(abs(Q_idx))
         ints_ik = cd_ao(:,:,mu,ki,Q_idx)
         call zgemm('C','N',n_mo,n_ao,n_ao, &
               (1.d0,0.d0), coef_i, n_ao, &
