@@ -20,7 +20,7 @@ END_PROVIDER
 !
 ! J(mu,r12) = 0.5/mu * F(r12*mu) where F(x) =  x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
 !
-! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta*mu^2x^2) (see expo_j_xmu) 
+! F(x) is fitted by - 1/sqrt(pi) * exp(-alpha * x) exp(-beta * x^2) (see expo_j_xmu) 
 ! 
 ! The slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
 !

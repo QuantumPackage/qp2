@@ -28,7 +28,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, ao_num)]
  implicit none
  BEGIN_DOC
- ! tc_grad_and_lapl_ao(k,i,l,j) = <kl | -1/2 \Delta_1 u(r1,r2) - \grad_1 u(r1,r2) | ij>
+ ! tc_grad_and_lapl_ao(k,i,l,j) = <kl | -1/2 \Delta_1 u(r1,r2) - \grad_1 u(r1,r2) .\grad_1| ij>
  !
  ! = 1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2 \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2) 
  !

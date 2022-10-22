@@ -1,13 +1,14 @@
 program test_non_h
  implicit none
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 50
-  my_n_pt_a_grid = 74
-!  my_n_pt_r_grid = 10 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
+!  my_n_pt_r_grid = 50
+!  my_n_pt_a_grid = 74
+  my_n_pt_r_grid = 10 ! small grid for quick debug
+  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 !call routine_grad_squared
- call routine_fit
+! call routine_fit
+ call routine_grad_squared_new
 end
 
 subroutine routine_lapl_grad
@@ -77,6 +78,38 @@ subroutine routine_grad_squared
      endif 
      accu += contrib
     enddo
+   enddo
+  enddo
+ enddo
+ print*,'accu      = ',accu/count_n
+ print*,'accu/rel  = ',accu_relat/count_n
+
+end
+
+subroutine routine_grad_squared_new
+ implicit none
+ integer :: i,j,k,l,ipoint
+ double precision :: grad_squared, get_ao_tc_sym_two_e_pot,new,accu,contrib
+ double precision :: count_n,accu_relat
+ accu = 0.d0
+ accu_relat = 0.d0
+ count_n = 0.d0
+ do i = 1, ao_num
+  do j = 1, ao_num
+   do ipoint = 1, n_points_final_grid
+     grad_squared  = grad_1_squared_u_ij_mu(j,i,ipoint)
+     new = grad_1_squared_u_ij_mu_new(ipoint,j,i)
+     contrib    = dabs(new - grad_squared)
+     if(dabs(grad_squared).gt.1.d-12)then
+      count_n += 1.d0
+      accu_relat += 2.0d0 * contrib/dabs(grad_squared+new)
+     endif
+     if(contrib.gt.1.d-10)then
+      print*,i,j,ipoint
+      print*,grad_squared,new,contrib
+      print*,2.0d0*contrib/dabs(grad_squared+new+1.d-12)
+     endif 
+     accu += contrib
    enddo
   enddo
  enddo

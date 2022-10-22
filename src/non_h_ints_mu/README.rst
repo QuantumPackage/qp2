@@ -9,3 +9,7 @@ The two providers are :
 +) ao_non_hermit_term_chemist which returns the non hermitian part of the two-electron TC Hamiltonian on the MO basis. 
 +) mo_non_hermit_term_chemist which returns the non hermitian part of the two-electron TC Hamiltonian on the BI-ORTHO MO basis. 
 
+
+!\sum_mm = 1,3 \sum_R phi_i(R) \phi_k(R) grad_1_u_ij_mu(j,l,R,mm)  grad_1_u_ij_mu(m,n,R,mm)
+!\sum_mm+= 1,3 \sum_R phi_j(R) \phi_l(R) grad_1_u_ij_mu(i,k,R,mm)  grad_1_u_ij_mu(m,n,R,mm)
+!\sum_mm+= 1,3 \sum_R phi_m(R) \phi_n(R) grad_1_u_ij_mu(i,k,R,mm)  grad_1_u_ij_mu(j,l,R,mm)
