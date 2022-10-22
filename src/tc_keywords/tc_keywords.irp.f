@@ -4,4 +4,5 @@ program tc_keywords
 ! TODO : Put the documentation of the program here
   END_DOC
   print *, 'Hello world'
+ provide j1b_pen
 end
