@@ -254,6 +254,7 @@ double precision function general_primitive_integral_gauss(dim,      &
   rho_old = (p*q)/(p+q)
   prefactor = pi_3 * inv_pq_3_2 * fact_p * fact_q 
   do i = 1, n_gauss_eff_pot ! browse the gaussians with different expo/coef
+  !do i = 1, n_gauss_eff_pot-1
    aa = expo_gauss_eff_pot(i) 
    c_a = coef_gauss_eff_pot(i)
    t_a = dsqrt( aa /(rho_old + aa) ) 

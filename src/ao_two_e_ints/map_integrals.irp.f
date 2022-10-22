@@ -321,8 +321,9 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
   !$OMP END PARALLEL DO
 END_PROVIDER
 
+! ---
 
-double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
+double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
   use map_module
   implicit none
   BEGIN_DOC

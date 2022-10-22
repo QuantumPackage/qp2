@@ -8,9 +8,9 @@ BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
 
   ao_one_e_integrals_tc_tot = ao_one_e_integrals      
 
-  provide j1b_gauss
+  provide j1b_type
 
-  if(j1b_gauss .eq. 1) then
+  if( (j1b_type .eq. 1) .or. (j1b_type .eq. 2) ) then
 
     do i = 1, ao_num
       do j = 1, ao_num
@@ -24,12 +24,17 @@ BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
 
 END_PROVIDER
 
+! ---
+
 BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
- implicit none
- BEGIN_DOC
-! mo_bi_ortho_tc_one_e(k,i) = <MO^L_k | h_c | MO^R_i>
- END_DOC
- integer :: i,k,p,q
+
+  BEGIN_DOC
+  !
+  ! mo_bi_ortho_tc_one_e(k,i) = <MO^L_k | h_c | MO^R_i>
+  !
+  END_DOC
+
+  implicit none
  
   call ao_to_mo_bi_ortho(ao_one_e_integrals_tc_tot, ao_num, mo_bi_ortho_tc_one_e, mo_num)
 
