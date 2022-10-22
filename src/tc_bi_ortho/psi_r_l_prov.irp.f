@@ -41,6 +41,15 @@ BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (psi_det_size,N_states) 
         enddo
         deallocate(psi_l_coef_bi_ortho_read)
 
+      else
+
+        print*, 'psi_l_coef_bi_ortho are psi_coef'
+        do k=1,N_states
+          do i=1,N_det
+            psi_l_coef_bi_ortho(i,k) = psi_coef(i,k)
+          enddo
+        enddo
+
       endif
     endif
   endif
@@ -99,6 +108,15 @@ BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) 
           enddo
         enddo
         deallocate(psi_r_coef_bi_ortho_read)
+
+      else
+
+        print*, 'psi_r_coef_bi_ortho are psi_coef'
+        do k=1,N_states
+          do i=1,N_det
+            psi_r_coef_bi_ortho(i,k) = psi_coef(i,k)
+          enddo
+        enddo
 
       endif
     endif

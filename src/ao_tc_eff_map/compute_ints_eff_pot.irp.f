@@ -1,9 +1,11 @@
+
+
 subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_value)
 
   use map_module
 
   BEGIN_DOC
-  !  Parallel client for AO integrals of the TC integrals involving purely hermitian operators 
+  !  Parallel client for AO integrals
   END_DOC
 
   implicit none
@@ -21,13 +23,10 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
 
   logical, external               :: ao_two_e_integral_zero
   double precision                :: ao_tc_sym_two_e_pot, ao_two_e_integral_erf
-  double precision                :: j1b_gauss_erf, j1b_gauss_coul
-  double precision                :: j1b_gauss_coul_debug
-  double precision                :: j1b_gauss_coul_modifdebug
-  double precision                :: j1b_gauss_coulerf
+  double precision                :: j1b_gauss_2e_j1, j1b_gauss_2e_j2
 
 
-  PROVIDE j1b_gauss
+  PROVIDE j1b_type
 
   thr = ao_integrals_threshold
 
@@ -45,7 +44,7 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
         exit
       endif
 
-      if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < thr ) then
+      if (ao_two_e_integral_erf_schwartz(i,k)*ao_two_e_integral_erf_schwartz(j,l) < thr) then
         cycle
       endif
 
@@ -54,11 +53,13 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
       integral_erf = ao_two_e_integral_erf(i, k, j, l)
       integral     = integral_erf + integral_pot
 
-      if( j1b_gauss .eq. 1 ) then
-        integral = integral                   & 
-                 + j1b_gauss_coulerf(i, k, j, l)
+      if( j1b_type .eq. 1 ) then
+        !print *, ' j1b type 1 is added'
+        integral = integral + j1b_gauss_2e_j1(i, k, j, l)
+      elseif( j1b_type .eq. 2 ) then
+        !print *, ' j1b type 2 is added'
+        integral = integral + j1b_gauss_2e_j2(i, k, j, l)
       endif
-
 
       if(abs(integral) < thr) then
         cycle

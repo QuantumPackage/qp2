@@ -27,42 +27,52 @@ END_PROVIDER
 
 END_PROVIDER
 
+! ---
+
 BEGIN_PROVIDER [ double precision, ao_tc_sym_two_e_pot_cache, (0:64*64*64*64) ]
+
   use map_module
- implicit none
- BEGIN_DOC
- ! Cache of |AO| integrals for fast access
- END_DOC
- PROVIDE ao_tc_sym_two_e_pot_in_map
- integer                        :: i,j,k,l,ii
- integer(key_kind)              :: idx
- real(integral_kind)            :: integral
+  implicit none
+
+  BEGIN_DOC
+  ! Cache of |AO| integrals for fast access
+  END_DOC
+
+  integer                        :: i,j,k,l,ii
+  integer(key_kind)              :: idx
+  real(integral_kind)            :: integral
+
+  PROVIDE ao_tc_sym_two_e_pot_in_map
+
  !$OMP PARALLEL DO PRIVATE (i,j,k,l,idx,ii,integral)
- do l=ao_tc_sym_two_e_pot_cache_min,ao_tc_sym_two_e_pot_cache_max
-   do k=ao_tc_sym_two_e_pot_cache_min,ao_tc_sym_two_e_pot_cache_max
-     do j=ao_tc_sym_two_e_pot_cache_min,ao_tc_sym_two_e_pot_cache_max
-       do i=ao_tc_sym_two_e_pot_cache_min,ao_tc_sym_two_e_pot_cache_max
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index(i,j,k,l,idx)
-         !DIR$ FORCEINLINE
-         call map_get(ao_tc_sym_two_e_pot_map,idx,integral)
-         ii = l-ao_tc_sym_two_e_pot_cache_min
-         ii = ior( ishft(ii,6), k-ao_tc_sym_two_e_pot_cache_min)
-         ii = ior( ishft(ii,6), j-ao_tc_sym_two_e_pot_cache_min)
-         ii = ior( ishft(ii,6), i-ao_tc_sym_two_e_pot_cache_min)
-         ao_tc_sym_two_e_pot_cache(ii) = integral
-       enddo
-     enddo
-   enddo
- enddo
- !$OMP END PARALLEL DO
+  do l = ao_tc_sym_two_e_pot_cache_min, ao_tc_sym_two_e_pot_cache_max
+    do k = ao_tc_sym_two_e_pot_cache_min, ao_tc_sym_two_e_pot_cache_max
+      do j = ao_tc_sym_two_e_pot_cache_min, ao_tc_sym_two_e_pot_cache_max
+        do i = ao_tc_sym_two_e_pot_cache_min, ao_tc_sym_two_e_pot_cache_max
+          !DIR$ FORCEINLINE
+          call two_e_integrals_index(i, j, k, l, idx)
+          !DIR$ FORCEINLINE
+          call map_get(ao_tc_sym_two_e_pot_map, idx, integral)
+          ii = l-ao_tc_sym_two_e_pot_cache_min
+          ii = ior( ishft(ii,6), k-ao_tc_sym_two_e_pot_cache_min)
+          ii = ior( ishft(ii,6), j-ao_tc_sym_two_e_pot_cache_min)
+          ii = ior( ishft(ii,6), i-ao_tc_sym_two_e_pot_cache_min)
+          ao_tc_sym_two_e_pot_cache(ii) = integral
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 
 END_PROVIDER
 
+! ---
 
-subroutine insert_into_ao_tc_sym_two_e_pot_map(n_integrals,buffer_i, buffer_values)
+subroutine insert_into_ao_tc_sym_two_e_pot_map(n_integrals, buffer_i, buffer_values)
+
   use map_module
   implicit none
+
   BEGIN_DOC
   ! Create new entry into |AO| map
   END_DOC
@@ -72,21 +82,30 @@ subroutine insert_into_ao_tc_sym_two_e_pot_map(n_integrals,buffer_i, buffer_valu
   real(integral_kind), intent(inout) :: buffer_values(n_integrals)
 
   call map_append(ao_tc_sym_two_e_pot_map, buffer_i, buffer_values, n_integrals)
+
 end
 
-double precision function get_ao_tc_sym_two_e_pot(i,j,k,l,map) result(result)
+! ---
+
+double precision function get_ao_tc_sym_two_e_pot(i, j, k, l, map) result(result)
+
   use map_module
+
   implicit none
+
   BEGIN_DOC
-  ! Gets one |AO| two-electron integral from the |AO| map in PHYSICIST NOTATION
+  ! Gets one |AO| two-electron integral from the |AO| map
   END_DOC
+
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx
   type(map_type), intent(inout)  :: map
   integer                        :: ii
   real(integral_kind)            :: tmp
   logical, external              :: ao_two_e_integral_zero
+
   PROVIDE ao_tc_sym_two_e_pot_in_map ao_tc_sym_two_e_pot_cache ao_tc_sym_two_e_pot_cache_min
+
   !DIR$ FORCEINLINE
 !  if (ao_two_e_integral_zero(i,j,k,l)) then
   if (.False.) then
@@ -100,9 +119,9 @@ double precision function get_ao_tc_sym_two_e_pot(i,j,k,l,map) result(result)
     ii = ior(ii, i-ao_tc_sym_two_e_pot_cache_min)
     if (iand(ii, -64) /= 0) then
       !DIR$ FORCEINLINE
-      call two_e_integrals_index(i,j,k,l,idx)
+      call two_e_integrals_index(i, j, k, l, idx)
       !DIR$ FORCEINLINE
-      call map_get(map,idx,tmp)
+      call map_get(map, idx, tmp)
       tmp = tmp
     else
       ii = l-ao_tc_sym_two_e_pot_cache_min
@@ -112,9 +131,12 @@ double precision function get_ao_tc_sym_two_e_pot(i,j,k,l,map) result(result)
       tmp = ao_tc_sym_two_e_pot_cache(ii)
     endif
   endif
+
   result = tmp
+
 end
 
+! ---
 
 subroutine get_many_ao_tc_sym_two_e_pot(j,k,l,sze,out_val)
   use map_module

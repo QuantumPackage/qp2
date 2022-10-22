@@ -94,29 +94,39 @@ BEGIN_PROVIDER [double precision, expos_slat_gauss_1_erf_x, (n_fit_1_erf_x)]
  expos_slat_gauss_1_erf_x(2) = 0.756023d0
 END_PROVIDER 
 
+! ---
+
  BEGIN_PROVIDER [double precision, expo_gauss_1_erf_x, (n_max_fit_slat)]
 &BEGIN_PROVIDER [double precision, coef_gauss_1_erf_x, (n_max_fit_slat)]
- implicit none
- BEGIN_DOC
-! (1 - erf(mu*x)) = \sum_i coef_gauss_1_erf_x(i) * exp(-expo_gauss_1_erf_x(i) * x^2)
-!
-! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2) 
-!
-! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
-!
-! See Appendix 2 of JCP 154, 084119 (2021)
- END_DOC
- integer :: i
- double precision :: expos(n_max_fit_slat),alpha,beta
- alpha = expos_slat_gauss_1_erf_x(1) * mu_erf
- call expo_fit_slater_gam(alpha,expos)
- beta = expos_slat_gauss_1_erf_x(2) * mu_erf**2.d0
+
+  BEGIN_DOC
+  !
+  ! (1 - erf(mu*x)) = \sum_i coef_gauss_1_erf_x(i) * exp(-expo_gauss_1_erf_x(i) * x^2)
+  !
+  ! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2) 
+  !
+  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  !
+  ! See Appendix 2 of JCP 154, 084119 (2021)
+  !
+  END_DOC
+
+  implicit none
+  integer          :: i
+  double precision :: expos(n_max_fit_slat), alpha, beta
+
+  alpha = expos_slat_gauss_1_erf_x(1) * mu_erf
+  call expo_fit_slater_gam(alpha, expos)
+  beta = expos_slat_gauss_1_erf_x(2) * mu_erf * mu_erf
  
- do i = 1, n_max_fit_slat
-  expo_gauss_1_erf_x(i) = expos(i) + beta
-  coef_gauss_1_erf_x(i) = coef_fit_slat_gauss(i)
- enddo
+  do i = 1, n_max_fit_slat
+    expo_gauss_1_erf_x(i) = expos(i) + beta
+    coef_gauss_1_erf_x(i) = coef_fit_slat_gauss(i)
+  enddo
+
 END_PROVIDER 
+
+! ---
 
 double precision function fit_1_erf_x(x)
  implicit none
