@@ -47,7 +47,7 @@ BEGIN_PROVIDER [ double precision, j1b_pen, (nucl_num) ]
  
     integer :: i
     do i = 1, nucl_num
-      j1b_pen(i) = 1.d0
+      j1b_pen(i) = 100.d0
     enddo
 
   endif

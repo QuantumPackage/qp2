@@ -128,10 +128,10 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
 
     if(itermax > 4) then
       itermax = itermax - 1
-    else if (m==1.and.disk_based_davidson) then
-      m = 0
-      disk_based = .True.
-      itermax = 6
+!    else if (m==1.and.disk_based_davidson) then
+!      m = 0
+!      disk_based = .True.
+!      itermax = 6
     else
       nproc_target = nproc_target - 1
     endif
