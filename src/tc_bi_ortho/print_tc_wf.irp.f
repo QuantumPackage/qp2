@@ -24,7 +24,7 @@ subroutine write_l_r_wf
  output=trim(ezfio_filename)//'.tc_wf'
  i_unit_output = getUnitAndOpen(output,'w')
  integer :: i
- print*,'Writing the left-right wf'
+ print*,'Writing the left-right wf, and usual psi'
  do i = 1, N_det
   write(i_unit_output,*)i,psi_l_coef_sorted_bi_ortho_left(i),psi_r_coef_sorted_bi_ortho_right(i)
  enddo
