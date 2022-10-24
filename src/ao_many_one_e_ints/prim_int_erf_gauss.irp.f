@@ -142,7 +142,7 @@ double precision function erf_mu_gauss(D_center,delta,mu,A_center,B_center,power
   !
   ! .. math::
   ! 
-  !   \int dr exp(-delta (r - D)^2 ) erf(mu*|r-r'|)/ |r-r'| * (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
+  !   \int dr exp(-delta (r - D)^2 ) erf(mu*|r-D|)/ |r-D| * (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
   !
   END_DOC
 

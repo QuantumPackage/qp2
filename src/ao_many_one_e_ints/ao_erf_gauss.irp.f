@@ -105,7 +105,7 @@ end function phi_j_erf_mu_r_phi
 subroutine erfc_mu_gauss_xyz_ij_ao(i, j, mu, C_center, delta, gauss_ints)
  implicit none
  BEGIN_DOC
-  ! gauss_ints(m) =   \int dr exp(-delta (r - C)^2 ) x/y/z * ( 1 - erf(mu |r-r'|))/ |r-r'| * AO_i(r') * AO_j(r')
+  ! gauss_ints(m) =   \int dr exp(-delta (r - C)^2 ) x/y/z * ( 1 - erf(mu |r-C|))/ |r-C| * AO_i(r) * AO_j(r)
   !
   ! with m = 1 ==> x, m = 2, m = 3 ==> z
   !

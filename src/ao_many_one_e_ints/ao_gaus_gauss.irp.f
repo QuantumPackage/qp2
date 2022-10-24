@@ -170,7 +170,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
 
   double precision, external   :: overlap_gauss_r12, overlap_gauss_r12_ao
 
-  ASSERT(beta .gt. 0.d0)
+  ASSERT(beta .ge. 0.d0)
   if(beta .lt. 1d-10) then
     overlap_gauss_r12_ao_with1s = overlap_gauss_r12_ao(D_center, delta, i, j)
     return

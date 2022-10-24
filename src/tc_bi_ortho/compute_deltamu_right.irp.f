@@ -42,7 +42,7 @@ subroutine delta_right()
 
   enddo
 
-  call ezfio_set_dmc_dress_dmc_delta_h(delta)
+!  call ezfio_set_dmc_dress_dmc_delta_h(delta)
 
   deallocate(delta)
 
