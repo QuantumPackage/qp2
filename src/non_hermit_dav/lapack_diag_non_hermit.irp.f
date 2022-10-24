@@ -610,7 +610,7 @@ subroutine impose_biorthog_qr(m, n, Vl, Vr)
   accu_nd = dsqrt(accu_nd)
 
   thr_d  = 1d-10
-  thr_nd = 1d-12
+  thr_nd = 1d-08
   if((accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n)) .lt. thr_d)) then
     print *, ' bi-orthogonal vectors without QR !'
     deallocate(S)
@@ -1675,7 +1675,7 @@ subroutine check_weighted_biorthog(n, m, W, Vl, Vr, accu_d, accu_nd, S, stop_ifn
   double precision, allocatable :: SS(:,:), tmp(:,:)
 
   thr_d  = 1d-6
-  thr_nd = 1d-10
+  thr_nd = 1d-08
 
   print *, ' check weighted bi-orthogonality'
 
@@ -1742,7 +1742,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, stop_ifnot)
   double precision, allocatable :: SS(:,:)
 
   thr_d  = 1d-6
-  thr_nd = 1d-10
+  thr_nd = 1d-08
 
   print *, ' check bi-orthogonality'
 
