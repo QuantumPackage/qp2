@@ -58,29 +58,25 @@ subroutine routine_save_rotated_mos
   do j = 1, n_degen
    write(*,'(100(F8.4,X))')stmp(:,j)
   enddo
-  T    = 0.d0
-  Snew = 0.d0
-  call maxovl(n_degen, n_degen, stmp, T, Snew)
-  print*,'overlap after'
-  do j = 1, n_degen
-   write(*,'(100(F16.10,X))')Snew(:,j)
-  enddo
-!  mo_l_coef_new = 0.D0
-!  do j = 1, n_degen
-!   do k = 1, n_degen
-!    do m = 1, ao_num
-!     mo_l_coef_new(m,j) += T(k,j) * mo_l_coef_tmp(m,k) 
-!    enddo 
-!   enddo
-!  enddo
-  call dgemm( 'N', 'N', ao_num, n_degen, n_degen, 1.d0               &
-            , mo_l_coef_tmp, size(mo_l_coef_tmp, 1), T(1,1), size(T, 1) &
-            , 0.d0, mo_l_coef_new, size(mo_l_coef_new, 1) )
-  call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_r_coef_tmp,ao_overlap,stmp)
-  print*,'Overlap test'
-  do j = 1, n_degen
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+  if(maxovl_tc)then
+   T    = 0.d0
+   Snew = 0.d0
+   call maxovl(n_degen, n_degen, stmp, T, Snew)
+   print*,'overlap after'
+   do j = 1, n_degen
+    write(*,'(100(F16.10,X))')Snew(:,j)
+   enddo
+   call dgemm( 'N', 'N', ao_num, n_degen, n_degen, 1.d0               &
+             , mo_l_coef_tmp, size(mo_l_coef_tmp, 1), T(1,1), size(T, 1) &
+             , 0.d0, mo_l_coef_new, size(mo_l_coef_new, 1) )
+   call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_r_coef_tmp,ao_overlap,stmp)
+   print*,'Overlap test'
+   do j = 1, n_degen
+    write(*,'(100(F16.10,X))')stmp(:,j)
+   enddo
+  else 
+   mo_l_coef_new = mo_l_coef_tmp
+  endif
   call impose_biorthog_svd_overlap(ao_num, n_degen, ao_overlap, mo_l_coef_new, mo_r_coef_tmp)
   call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_r_coef_tmp,ao_overlap,stmp)
   print*,'LAST OVERLAP '
