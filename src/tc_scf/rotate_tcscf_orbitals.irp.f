@@ -142,7 +142,7 @@ subroutine rotate_degen_eigvec(n, m, e0, C0, W0, L0, R0)
     deg_num(i) = 1
   enddo
 
-  de_thr = 1d-10
+  de_thr = thr_degen_tc
 
   do i = 1, m-1
     ei = e0(i)

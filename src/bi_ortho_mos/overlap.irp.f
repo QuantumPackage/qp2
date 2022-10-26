@@ -118,3 +118,21 @@ END_PROVIDER
    enddo
  enddo
 END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, angle_left_right, (mo_num)]
+ implicit none
+ BEGIN_DOC
+  ! angle_left_right(i) = angle between the left-eigenvector chi_i and the right-eigenvector phi_i
+ END_DOC
+ integer :: i,j
+ double precision :: left,right,arg
+ do i = 1, mo_num
+  left = overlap_mo_l(i,i)
+  right = overlap_mo_r(i,i)
+  arg = min(overlap_bi_ortho(i,i)/(left*right),1.d0)
+  arg = max(arg,-1.d0)
+  angle_left_right(i) = dacos(arg) * 180.d0/dacos(-1.d0)
+ enddo
+END_PROVIDER 
+
+

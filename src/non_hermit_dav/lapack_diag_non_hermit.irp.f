@@ -1393,7 +1393,7 @@ subroutine impose_orthog_degen_eigvec(n, e0, C0)
     deg_num(i) = 1
   enddo
 
-  de_thr = 1d-10
+  de_thr = thr_degen_tc
 
   do i = 1, n-1
     ei = e0(i)
@@ -1853,7 +1853,7 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
     deg_num(i) = 1
   enddo
 
-  de_thr = 1d-10
+  de_thr = thr_degen_tc
 
   do i = 1, n-1
     ei = e0(i)
@@ -1955,7 +1955,7 @@ subroutine impose_orthog_biorthog_degen_eigvec(n, e0, L0, R0)
     deg_num(i) = 1
   enddo
 
-  de_thr = 1d-10
+  de_thr = thr_degen_tc
 
   do i = 1, n-1
     ei = e0(i)
@@ -2049,7 +2049,7 @@ subroutine impose_unique_biorthog_degen_eigvec(n, e0, C0, W0, L0, R0)
     deg_num(i) = 1
   enddo
 
-  de_thr = 1d-10
+  de_thr = thr_degen_tc
 
   do i = 1, n-1
     ei = e0(i)

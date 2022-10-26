@@ -166,9 +166,10 @@ subroutine routine_scf()
   endif
 
   print*,'Energy converged !'
-  print*,'Diagonal Fock elements '
+  print*,'Final TC energy = ', TC_HF_energy
+  print*,'Diag Fock elem, product of left/right norm, angle left/right '
   do i = 1, mo_num
-   print*,i,Fock_matrix_tc_mo_tot(i,i)
+   write(*,'(I3,X,100(F16.10,X))')i,Fock_matrix_tc_mo_tot(i,i),overlap_mo_l(i,i)*overlap_mo_r(i,i),angle_left_right(i)
   enddo
 
   deallocate(rho_old, rho_new)
