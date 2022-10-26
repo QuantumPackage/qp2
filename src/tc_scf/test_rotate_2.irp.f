@@ -14,6 +14,8 @@ subroutine routine
  allocate(mo_l_coef_good(ao_num, mo_num), mo_r_coef_good(ao_num,mo_num))
  double precision, allocatable :: mo_r_coef_new(:,:)
  double precision :: norm
+ mo_r_coef_good = mo_r_coef
+ mo_l_coef_good = mo_l_coef
  allocate(mo_r_coef_new(ao_num, mo_num))
  mo_r_coef_new = mo_r_coef
  do i = 1, mo_num
@@ -114,21 +116,31 @@ subroutine routine
  enddo
 
  allocate(stmp(mo_num, mo_num))
- call build_s_matrix(ao_num,n_degen,mo_l_coef_good,mo_r_coef_good,ao_overlap,stmp)
+ print*,'l coef'
+ do i = 1, mo_num
+  write(*,'(100(F8.4,X))')mo_l_coef_good(:,i)
+ enddo
+ print*,'r coef'
+ do i = 1, mo_num
+  write(*,'(100(F8.4,X))')mo_r_coef_good(:,i)
+ enddo
+ call build_s_matrix(ao_num,mo_num,mo_l_coef_good,mo_r_coef_good,ao_overlap,stmp)
   print*,'LEFT/RIGHT OVERLAP '
   do j = 1, mo_num
    write(*,'(100(F16.10,X))')stmp(:,j)
   enddo
- call build_s_matrix(ao_num,n_degen,mo_l_coef_good,mo_l_coef_good,ao_overlap,stmp)
+ call build_s_matrix(ao_num,mo_num,mo_l_coef_good,mo_l_coef_good,ao_overlap,stmp)
   print*,'LEFT/LEFT OVERLAP '
   do j = 1, mo_num
    write(*,'(100(F16.10,X))')stmp(:,j)
   enddo
- call build_s_matrix(ao_num,n_degen,mo_r_coef_good,mo_r_coef_good,ao_overlap,stmp)
+ call build_s_matrix(ao_num,mo_num,mo_r_coef_good,mo_r_coef_good,ao_overlap,stmp)
   print*,'RIGHT/RIGHT OVERLAP '
   do j = 1, mo_num
    write(*,'(100(F16.10,X))')stmp(:,j)
   enddo
+  call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef_good)
+  call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef_good)
 end
 
 subroutine build_s_matrix(m,n,C1,C2,overlap,smat)
