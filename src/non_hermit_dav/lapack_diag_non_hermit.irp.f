@@ -1254,6 +1254,105 @@ end subroutine impose_orthog_svd
 
 ! ---
 
+subroutine impose_orthog_svd_overlap(n, m, C,overlap)
+
+  implicit none
+
+  integer,          intent(in)    :: n, m
+  double precision, intent(in   ) :: overlap(n,n)
+  double precision, intent(inout) :: C(n,m)
+
+  integer                         :: i, j, num_linear_dependencies
+  double precision                :: threshold
+  double precision, allocatable   :: S(:,:), tmp(:,:),Stmp(:,:)
+  double precision, allocatable   :: U(:,:), Vt(:,:), D(:)
+
+  print *, ' apply SVD to orthogonalize vectors'
+
+  ! ---
+
+  allocate(S(m,m),Stmp(n,m))
+
+  ! S = C.T x overlap x C
+  call dgemm( 'N', 'N', n, m, n, 1.d0      &
+            , overlap, size(overlap, 1), C, size(C, 1) &
+            , 0.d0, Stmp, size(Stmp, 1) )
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , C, size(C, 1), Stmp, size(Stmp, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' eigenvec overlap bef SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+
+  ! ---
+ 
+  allocate(U(m,m), Vt(m,m), D(m))
+
+  call svd(S, m, U, m, D, Vt, m, m, m)
+
+  deallocate(S)
+
+  threshold               = 1.d-6
+  num_linear_dependencies = 0
+  do i = 1, m
+    if(abs(D(i)) <= threshold) then
+      D(i) = 0.d0
+      num_linear_dependencies += 1
+    else
+      ASSERT (D(i) > 0.d0)
+      D(i) = 1.d0 / dsqrt(D(i))
+    endif
+  enddo
+  if(num_linear_dependencies > 0) then
+    write(*,*) ' linear dependencies = ', num_linear_dependencies
+    write(*,*) ' m                   = ', m
+    stop
+  endif
+
+  ! ---
+
+  allocate(tmp(n,m))
+
+  ! tmp <-- C x U
+  call dgemm( 'N', 'N', n, m, m, 1.d0      &
+            , C, size(C, 1), U, size(U, 1) &
+            , 0.d0, tmp, size(tmp, 1) )
+
+  deallocate(U, Vt)
+
+  ! C <-- tmp x sigma^-0.5
+  do j = 1, m
+    do i = 1, n
+      C(i,j) = tmp(i,j) * D(j)
+    enddo
+  enddo
+
+  deallocate(D, tmp)
+
+  ! ---
+
+  allocate(S(m,m))
+
+  ! S = C.T x C
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , C, size(C, 1), C, size(C, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' eigenvec overlap aft SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+
+  deallocate(S)
+
+  ! ---
+
+end subroutine impose_orthog_svd
+
+! ---
+
 subroutine impose_orthog_GramSchmidt(n, m, C)
 
   implicit none
@@ -2300,6 +2399,119 @@ subroutine impose_biorthog_svd(n, m, L, R)
 
   call dgemm( 'T', 'N', m, m, n, 1.d0      &
             , L, size(L, 1), R, size(R, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' overlap bef SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+
+  ! ---
+ 
+  allocate(U(m,m), Vt(m,m), D(m))
+
+  call svd(S, m, U, m, D, Vt, m, m, m)
+
+  deallocate(S)
+
+  threshold               = 1.d-6
+  num_linear_dependencies = 0
+  do i = 1, m
+    if(abs(D(i)) <= threshold) then
+      D(i) = 0.d0
+      num_linear_dependencies += 1
+    else
+      ASSERT (D(i) > 0.d0)
+      D(i) = 1.d0 / dsqrt(D(i))
+    endif
+  enddo
+  if(num_linear_dependencies > 0) then
+    write(*,*) ' linear dependencies = ', num_linear_dependencies
+    write(*,*) ' m                   = ', m
+    stop
+  endif
+
+  allocate(V(m,m))
+  do i = 1, m
+    do j = 1, m
+      V(j,i) = Vt(i,j)
+    enddo
+  enddo
+  deallocate(Vt)
+
+  ! ---
+
+  allocate(tmp(n,m))
+
+  ! tmp <-- R x V
+  call dgemm( 'N', 'N', n, m, m, 1.d0      &
+            , R, size(R, 1), V, size(V, 1) &
+            , 0.d0, tmp, size(tmp, 1) )
+  deallocate(V)
+  ! R <-- tmp x sigma^-0.5
+  do j = 1, m
+    do i = 1, n
+      R(i,j) = tmp(i,j) * D(j)
+    enddo
+  enddo
+
+  ! tmp <-- L x U
+  call dgemm( 'N', 'N', n, m, m, 1.d0      &
+            , L, size(L, 1), U, size(U, 1) &
+            , 0.d0, tmp, size(tmp, 1) )
+  deallocate(U)
+  ! L <-- tmp x sigma^-0.5
+  do j = 1, m
+    do i = 1, n
+      L(i,j) = tmp(i,j) * D(j)
+    enddo
+  enddo
+
+  deallocate(D, tmp)
+
+  ! ---
+
+  allocate(S(m,m))
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , L, size(L, 1), R, size(R, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' overlap aft SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+  deallocate(S)
+
+  ! ---
+
+end subroutine impose_biorthog_svd
+
+! ---
+
+
+subroutine impose_biorthog_svd_overlap(n, m, overlap, L, R)
+
+  implicit none
+
+  integer,          intent(in)    :: n, m
+  double precision, intent(in)    :: overlap(n,n)
+  double precision, intent(inout) :: L(n,m), R(n,m)
+
+  integer                         :: i, j, num_linear_dependencies
+  double precision                :: threshold
+  double precision, allocatable   :: S(:,:), tmp(:,:),Stmp(:,:)
+  double precision, allocatable   :: U(:,:), V(:,:), Vt(:,:), D(:)
+
+  ! ---
+
+  allocate(S(m,m),Stmp(n,m))
+
+  ! S = C.T x overlap x C
+  call dgemm( 'N', 'N', n, m, n, 1.d0      &
+            , overlap, size(overlap, 1), R, size(R, 1) &
+            , 0.d0, Stmp, size(Stmp, 1) )
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , L, size(L, 1), Stmp, size(Stmp, 1) &
             , 0.d0, S, size(S, 1) )
 
   print *, ' overlap bef SVD: '

@@ -329,6 +329,7 @@ subroutine non_hrmt_bieig(n, A, leigvec, reigvec, n_real_eigv, eigval)
   n_good = 0
   thr    = 1.d-5
   do i = 1, n
+      print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
@@ -392,8 +393,8 @@ subroutine non_hrmt_bieig(n, A, leigvec, reigvec, n_real_eigv, eigval)
   ! -------------------------------------------------------------------------------------
   !                               check bi-orthogonality
 
-  thr_d  = 1d-8
-  thr_nd = 1d-8
+  thr_d  = 1d-10 ! -7
+  thr_nd = 1d-10 ! -7
 
   allocate( S(n_real_eigv,n_real_eigv) )
   call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, .false.)
@@ -422,8 +423,8 @@ subroutine non_hrmt_bieig(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
     ! ---
 
-    !call impose_orthog_degen_eigvec(n, eigval, reigvec)
-    !call impose_orthog_degen_eigvec(n, eigval, leigvec)
+!   call impose_orthog_degen_eigvec(n, eigval, reigvec)
+!   call impose_orthog_degen_eigvec(n, eigval, leigvec)
 
     call impose_biorthog_degen_eigvec(n, eigval, leigvec, reigvec)
 
@@ -1037,6 +1038,72 @@ subroutine split_matrix_degen(aw,n,shift)
    i+=1
   endif
  enddo
+
+end
+
+subroutine give_degen(a,n,shift,list_degen,n_degen_list)
+ implicit none
+ BEGIN_DOC
+ ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
+ !
+ ! for each of these sets, list_degen(1,i) = first degenerate element of the set i, 
+ !
+ !                         list_degen(2,i) = last degenerate element of the set i.
+ END_DOC
+ double precision,intent(in) :: A(n)
+ double precision,intent(in)    :: shift
+ integer, intent(in) :: n
+ integer, intent(out) :: list_degen(2,n),n_degen_list
+ integer :: i,j,n_degen,k
+ logical :: keep_on
+ double precision,allocatable :: Aw(:)
+ list_degen = -1
+ allocate(Aw(n))
+ Aw = A
+ i=1
+ k = 0
+ do while(i.lt.n)
+  if(dabs(Aw(i)-Aw(i+1)).lt.shift)then
+   k+=1
+   j=1
+   list_degen(1,k) = i
+   keep_on = .True.
+   do while(keep_on)
+    if(i+j.gt.n)then
+     keep_on = .False.
+     exit
+    endif
+    if(dabs(Aw(i)-Aw(i+j)).lt.shift)then
+     j+=1
+    else
+     keep_on=.False.
+     exit
+    endif
+   enddo
+   n_degen = j
+   list_degen(2,k) = list_degen(1,k)-1 + n_degen
+   j=0
+   keep_on = .True.
+   do while(keep_on)
+    if(i+j+1.gt.n)then
+     keep_on = .False.
+     exit
+    endif
+    if(dabs(Aw(i+j)-Aw(i+j+1)).lt.shift)then
+     Aw(i+j) += (j-n_degen/2) * shift
+     j+=1
+    else 
+     keep_on = .False.
+     exit
+    endif
+   enddo
+   Aw(i+n_degen-1) += (n_degen-1-n_degen/2) * shift
+   i+=n_degen
+  else 
+   i+=1
+  endif
+ enddo
+ n_degen_list = k
 
 end
 

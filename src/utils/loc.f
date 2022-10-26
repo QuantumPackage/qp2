@@ -12,8 +12,10 @@ C     W: new overlap matrix
 C
 C 
       implicit real*8(a-h,o-y),logical*1(z)
-      parameter (id1=700)
-      dimension s(id1,id1),t(id1,id1),w(id1,id1)
+!      parameter (id1=700)
+!      dimension s(id1,id1),t(id1,id1),w(id1,id1)
+      double precision, intent(inout) :: s(n,n)
+      double precision, intent(out) :: t(n,n),w(n,n)
       data small/1.d-6/
 
       zprt=.true.
