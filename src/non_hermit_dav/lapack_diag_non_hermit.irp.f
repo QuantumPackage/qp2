@@ -1281,10 +1281,10 @@ subroutine impose_orthog_svd_overlap(n, m, C,overlap)
             , C, size(C, 1), Stmp, size(Stmp, 1) &
             , 0.d0, S, size(S, 1) )
 
-  print *, ' eigenvec overlap bef SVD: '
-  do i = 1, m
-    write(*, '(1000(F16.10,X))') S(i,:)
-  enddo
+! print *, ' eigenvec overlap bef SVD: '
+! do i = 1, m
+!   write(*, '(1000(F16.10,X))') S(i,:)
+! enddo
 
   ! ---
  
@@ -1340,10 +1340,10 @@ subroutine impose_orthog_svd_overlap(n, m, C,overlap)
             , C, size(C, 1), C, size(C, 1) &
             , 0.d0, S, size(S, 1) )
 
-  print *, ' eigenvec overlap aft SVD: '
-  do i = 1, m
-    write(*, '(1000(F16.10,X))') S(i,:)
-  enddo
+! print *, ' eigenvec overlap aft SVD: '
+! do i = 1, m
+!   write(*, '(1000(F16.10,X))') S(i,:)
+! enddo
 
   deallocate(S)
 
@@ -2516,7 +2516,7 @@ subroutine impose_biorthog_svd_overlap(n, m, overlap, L, R)
 
   print *, ' overlap bef SVD: '
   do i = 1, m
-    write(*, '(1000(F16.10,X))') S(i,:)
+    write(*, '(1000(F25.16,X))') S(i,:)
   enddo
 
   ! ---
@@ -2530,6 +2530,7 @@ subroutine impose_biorthog_svd_overlap(n, m, overlap, L, R)
   threshold               = 1.d-6
   num_linear_dependencies = 0
   do i = 1, m
+    print*,'D(i) = ',D(i)
     if(abs(D(i)) <= threshold) then
       D(i) = 0.d0
       num_linear_dependencies += 1
@@ -2585,11 +2586,18 @@ subroutine impose_biorthog_svd_overlap(n, m, overlap, L, R)
   ! ---
 
   allocate(S(m,m))
+!  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+!            , L, size(L, 1), R, size(R, 1) &
+!            , 0.d0, S, size(S, 1) )
+  ! S = C.T x overlap x C
+  call dgemm( 'N', 'N', n, m, n, 1.d0      &
+            , overlap, size(overlap, 1), R, size(R, 1) &
+            , 0.d0, Stmp, size(Stmp, 1) )
   call dgemm( 'T', 'N', m, m, n, 1.d0      &
-            , L, size(L, 1), R, size(R, 1) &
+            , L, size(L, 1), Stmp, size(Stmp, 1) &
             , 0.d0, S, size(S, 1) )
 
-  print *, ' overlap aft SVD: '
+  print *, ' overlap aft SVD with overlap: '
   do i = 1, m
     write(*, '(1000(F16.10,X))') S(i,:)
   enddo

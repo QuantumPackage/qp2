@@ -19,7 +19,7 @@ program tc_scf
   !call orthonormalize_mos
 
   call routine_scf()
-  call routine_save_rotated_mos
+  call minimize_tc_orb_angles
   call print_energy_and_mos
 
 
@@ -126,6 +126,7 @@ subroutine routine_scf()
       print*,'***'
       e_delta = dabs( TC_HF_energy - e_save )
       print*, 'it, delta E = ', it, e_delta
+      print*, 'it, gradient= ',grad_non_hermit_right
       e_save    = TC_HF_energy
       mo_l_coef = fock_tc_leigvec_ao
       mo_r_coef = fock_tc_reigvec_ao
@@ -181,13 +182,3 @@ end subroutine routine_scf
 
 ! ---
 
-subroutine print_energy_and_mos
- implicit none
- integer :: i
-  print*,'Energy converged !'
-  print*,'Final TC energy = ', TC_HF_energy
-  print*,'Diag Fock elem, product of left/right norm, angle left/right '
-  do i = 1, mo_num
-   write(*,'(I3,X,100(F16.10,X))')i,Fock_matrix_tc_mo_tot(i,i),overlap_mo_l(i,i)*overlap_mo_r(i,i),angle_left_right(i)
-  enddo
-end
