@@ -135,7 +135,7 @@ END_PROVIDER
   angle_left_right(i) = dacos(arg) * 180.d0/dacos(-1.d0)
  enddo
  double precision :: angle(mo_num)
- angle(1:mo_num) = dabs(angle_left_right(i))
+ angle(1:mo_num) = dabs(angle_left_right(1:mo_num))
  max_angle_left_right = maxval(angle)
 END_PROVIDER 
 
