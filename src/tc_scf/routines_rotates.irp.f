@@ -7,6 +7,7 @@ subroutine minimize_tc_orb_angles
  thr_deg = thr_degen_tc
  call print_energy_and_mos
  i = 1
+ print*,'Minimizing the angles between the TC orbitals'
  do while (.not. good_angles)
   print*,'iteration = ',i
   call routine_save_rotated_mos(thr_deg,good_angles)
@@ -58,14 +59,13 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
  ! compute the overlap between the left and rescaled right
  call build_s_matrix(ao_num,mo_num,mo_r_coef_new,mo_r_coef_new,ao_overlap,s_mat)
  call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
- print*,'fock_matrix_mo'
- do i = 1, mo_num
-  print*,i,fock_diag(i),angle_left_right(i)
- enddo
+!print*,'fock_matrix_mo'
+!do i = 1, mo_num
+! print*,i,fock_diag(i),angle_left_right(i)
+!enddo
    
  do i = 1, n_degen_list
   ifirst = list_degen(1,i)
-!  if(ifirst.ne.12)cycle
   ilast  = list_degen(2,i)
   n_degen = ilast - ifirst +1
   print*,'ifirst,n_degen = ',ifirst,n_degen
@@ -93,60 +93,50 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
    write(*,'(100(F8.4,X))')stmp(:,j)
   enddo
   call build_s_matrix(ao_num,n_degen,mo_l_coef_tmp,mo_l_coef_tmp,ao_overlap,stmp)
-   print*,'LEFT/LEFT OVERLAP '
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')stmp(:,j)
-   enddo
+  !print*,'LEFT/LEFT OVERLAP '
+  !do j = 1, n_degen
+  ! write(*,'(100(F16.10,X))')stmp(:,j)
+  !enddo
   call build_s_matrix(ao_num,n_degen,mo_r_coef_tmp,mo_r_coef_tmp,ao_overlap,stmp)
-   print*,'RIGHT/RIGHT OVERLAP '
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')stmp(:,j)
-   enddo
+  !print*,'RIGHT/RIGHT OVERLAP '
+  !do j = 1, n_degen
+  ! write(*,'(100(F16.10,X))')stmp(:,j)
+  !enddo
   if(maxovl_tc)then
    T    = 0.d0
    Snew = 0.d0
    call maxovl(n_degen, n_degen, stmp, T, Snew)
-   print*,'overlap after'
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')Snew(:,j)
-   enddo
+  !print*,'overlap after'
+  !do j = 1, n_degen
+  ! write(*,'(100(F16.10,X))')Snew(:,j)
+  !enddo
    call dgemm( 'N', 'N', ao_num, n_degen, n_degen, 1.d0               &
              , mo_l_coef_tmp, size(mo_l_coef_tmp, 1), T(1,1), size(T, 1) &
              , 0.d0, mo_l_coef_new, size(mo_l_coef_new, 1) )
    call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_r_coef_tmp,ao_overlap,stmp)
-   print*,'Overlap test'
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')stmp(:,j)
-   enddo
+  !print*,'Overlap test'
+  !do j = 1, n_degen
+  ! write(*,'(100(F16.10,X))')stmp(:,j)
+  !enddo
   else 
    mo_l_coef_new = mo_l_coef_tmp
   endif
-  call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_l_coef_new,ao_overlap,stmp)
-   print*,'LEFT/LEFT OVERLAP '
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')stmp(:,j)
-   enddo
-  call build_s_matrix(ao_num,n_degen,mo_r_coef_tmp,mo_r_coef_tmp,ao_overlap,stmp)
-   print*,'RIGHT/RIGHT OVERLAP '
-   do j = 1, n_degen
-    write(*,'(100(F16.10,X))')stmp(:,j)
-   enddo
   call impose_biorthog_svd_overlap(ao_num, n_degen, ao_overlap, mo_l_coef_new, mo_r_coef_tmp)
   call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_r_coef_tmp,ao_overlap,stmp)
-  print*,'LAST OVERLAP '
-  do j = 1, n_degen
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'LAST OVERLAP '
+ !do j = 1, n_degen
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
   call build_s_matrix(ao_num,n_degen,mo_l_coef_new,mo_l_coef_new,ao_overlap,stmp)
-  print*,'LEFT OVERLAP '
-  do j = 1, n_degen
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'LEFT OVERLAP '
+ !do j = 1, n_degen
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
   call build_s_matrix(ao_num,n_degen,mo_r_coef_tmp,mo_r_coef_tmp,ao_overlap,stmp)
-  print*,'RIGHT OVERLAP '
-  do j = 1, n_degen
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'RIGHT OVERLAP '
+ !do j = 1, n_degen
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
   do j = 1, n_degen
    mo_l_coef_good(1:ao_num,j+ifirst-1) = mo_l_coef_new(1:ao_num,j)
    mo_r_coef_good(1:ao_num,j+ifirst-1) = mo_r_coef_tmp(1:ao_num,j)
@@ -157,29 +147,21 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
  enddo
 
  allocate(stmp(mo_num, mo_num))
- print*,'l coef'
- do i = 1, mo_num
-  write(*,'(100(F8.4,X))')mo_l_coef_good(:,i)
- enddo
- print*,'r coef'
- do i = 1, mo_num
-  write(*,'(100(F8.4,X))')mo_r_coef_good(:,i)
- enddo
  call build_s_matrix(ao_num,mo_num,mo_l_coef_good,mo_r_coef_good,ao_overlap,stmp)
-  print*,'LEFT/RIGHT OVERLAP '
-  do j = 1, mo_num
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'LEFT/RIGHT OVERLAP '
+ !do j = 1, mo_num
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
  call build_s_matrix(ao_num,mo_num,mo_l_coef_good,mo_l_coef_good,ao_overlap,stmp)
-  print*,'LEFT/LEFT OVERLAP '
-  do j = 1, mo_num
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'LEFT/LEFT OVERLAP '
+ !do j = 1, mo_num
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
  call build_s_matrix(ao_num,mo_num,mo_r_coef_good,mo_r_coef_good,ao_overlap,stmp)
-  print*,'RIGHT/RIGHT OVERLAP '
-  do j = 1, mo_num
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'RIGHT/RIGHT OVERLAP '
+ !do j = 1, mo_num
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
   mo_r_coef = mo_r_coef_good
   mo_l_coef = mo_l_coef_good
   call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
@@ -191,6 +173,7 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
   double precision :: max_angle
   max_angle = maxval(new_angles)
   good_angles = max_angle.lt.45.d0
+  print*,'max_angle = ',max_angle
   
 end
 
@@ -221,20 +204,20 @@ subroutine orthog_functions(m,n,coef,overlap)
  integer :: j
  allocate(stmp(n,n))
   call build_s_matrix(m,n,coef,coef,overlap,stmp)
-  print*,'overlap before'
-  do j = 1, n
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+! print*,'overlap before'
+! do j = 1, n
+!  write(*,'(100(F16.10,X))')stmp(:,j)
+! enddo
   call impose_orthog_svd_overlap(m, n, coef,overlap)
   call build_s_matrix(m,n,coef,coef,overlap,stmp)
   do j = 1, n
    coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
   enddo
-  print*,'overlap after'
   call build_s_matrix(m,n,coef,coef,overlap,stmp)
-  do j = 1, n
-   write(*,'(100(F16.10,X))')stmp(:,j)
-  enddo
+ !print*,'overlap after'
+ !do j = 1, n
+ ! write(*,'(100(F16.10,X))')stmp(:,j)
+ !enddo
 end
 
 subroutine print_angles_tc
@@ -260,4 +243,25 @@ subroutine print_energy_and_mos
   do i = 1, mo_num
    write(*,'(I3,X,100(F16.10,X))')i,Fock_matrix_tc_mo_tot(i,i),overlap_mo_l(i,i)*overlap_mo_r(i,i),angle_left_right(i)
   enddo
+end
+
+subroutine sort_by_tc_fock
+ implicit none 
+ integer, allocatable :: iorder(:)
+ double precision, allocatable :: mo_l_tmp(:,:), mo_r_tmp(:,:),fock(:)
+ allocate(iorder(mo_num),fock(mo_num),mo_l_tmp(ao_num, mo_num),mo_r_tmp(ao_num,mo_num))
+ integer :: i
+ mo_l_tmp = mo_l_coef
+ mo_r_tmp = mo_r_coef
+ do i = 1, mo_num
+  iorder(i) = i
+  fock(i) = Fock_matrix_tc_mo_tot(i,i)
+ enddo
+ call dsort(fock,iorder,mo_num)
+ do i = 1, mo_num
+  mo_l_coef(1:ao_num,i) = mo_l_tmp(1:ao_num,iorder(i))
+  mo_r_coef(1:ao_num,i) = mo_r_tmp(1:ao_num,iorder(i))
+ enddo
+ touch mo_l_coef mo_r_coef
+
 end
