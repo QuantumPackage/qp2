@@ -240,6 +240,13 @@ subroutine print_energy_and_mos
   print*,'TC energy = ', TC_HF_energy
   print*,'TC SCF energy gradient = ',grad_non_hermit
   print*,'Max angle Left/right  = ',max_angle_left_right
+  if(max_angle_left_right.lt.45.d0)then
+   print*,'Maximum angle BELOW 45 degrees, everthing is OK !'
+  else if(max_angle_left_right.gt.45.d0.and.max_angle_left_right.lt.75.d0)then
+   print*,'Maximum angle between 45 and 75 degrees, this is not the best for TC-CI calculations ...'
+  else if(max_angle_left_right.gt.75.d0)then
+   print*,'Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
+  endif
   print*,'Diag Fock elem, product of left/right norm, angle left/right '
   do i = 1, mo_num
    write(*,'(I3,X,100(F16.10,X))')i,Fock_matrix_tc_mo_tot(i,i),overlap_mo_l(i,i)*overlap_mo_r(i,i),angle_left_right(i)
