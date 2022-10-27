@@ -239,6 +239,7 @@ subroutine print_energy_and_mos
   print*,''
   print*,'TC energy = ', TC_HF_energy
   print*,'TC SCF energy gradient = ',grad_non_hermit
+  print*,'Max angle Left/right  = ',max_angle_left_right
   print*,'Diag Fock elem, product of left/right norm, angle left/right '
   do i = 1, mo_num
    write(*,'(I3,X,100(F16.10,X))')i,Fock_matrix_tc_mo_tot(i,i),overlap_mo_l(i,i)*overlap_mo_r(i,i),angle_left_right(i)

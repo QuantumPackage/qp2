@@ -119,7 +119,8 @@ END_PROVIDER
  enddo
 END_PROVIDER 
 
-BEGIN_PROVIDER [ double precision, angle_left_right, (mo_num)]
+ BEGIN_PROVIDER [ double precision, angle_left_right, (mo_num)]
+&BEGIN_PROVIDER [ double precision, max_angle_left_right]
  implicit none
  BEGIN_DOC
   ! angle_left_right(i) = angle between the left-eigenvector chi_i and the right-eigenvector phi_i
@@ -133,6 +134,9 @@ BEGIN_PROVIDER [ double precision, angle_left_right, (mo_num)]
   arg = max(arg,-1.d0)
   angle_left_right(i) = dacos(arg) * 180.d0/dacos(-1.d0)
  enddo
+ double precision :: angle(mo_num)
+ angle(1:mo_num) = dabs(angle_left_right(i))
+ max_angle_left_right = maxval(angle)
 END_PROVIDER 
 
 
