@@ -314,7 +314,7 @@ subroutine non_hrmt_bieig(n, A, leigvec, reigvec, n_real_eigv, eigval)
   !  write(*, '(1000(F16.10,X))') VL(:,i)
   !enddo
 
-  thr_diag = 1d-10
+  thr_diag = 1d-08
   thr_norm = 1d+10
   call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
 
