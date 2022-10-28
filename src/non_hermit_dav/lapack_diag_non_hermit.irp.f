@@ -2530,7 +2530,6 @@ subroutine impose_biorthog_svd_overlap(n, m, overlap, L, R)
   threshold               = 1.d-6
   num_linear_dependencies = 0
   do i = 1, m
-    print*,'D(i) = ',D(i)
     if(abs(D(i)) <= threshold) then
       D(i) = 0.d0
       num_linear_dependencies += 1
