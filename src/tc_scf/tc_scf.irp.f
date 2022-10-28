@@ -115,7 +115,8 @@ subroutine routine_scf()
 
     !do while( it .lt. n_it_tcscf_max .and. (e_delta .gt. dsqrt(thresh_tcscf)) )
     !do while( it .lt. n_it_tcscf_max .and. (e_delta .gt. thresh_tcscf) )
-    do while( it .lt. n_it_tcscf_max .and. (rho_delta .gt. thresh_tcscf) )
+    !do while( it .lt. n_it_tcscf_max .and. (rho_delta .gt. thresh_tcscf) )
+    do while( it .lt. n_it_tcscf_max .and. (grad_non_hermit_right.gt. dsqrt(thresh_tcscf)) )
 
       it += 1
       print*,'iteration = ', it
