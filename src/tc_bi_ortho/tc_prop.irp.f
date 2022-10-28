@@ -67,8 +67,8 @@ BEGIN_PROVIDER [ double precision, tc_transition_matrix, (mo_num, mo_num,N_state
    write(*,'(100(F16.10,X))')-dm_tmp(:,i)
   enddo
 !    call non_hrmt_diag_split_degen( mo_num, dm_tmp&
-    call non_hrmt_fock_mat( mo_num, dm_tmp&
-!   call non_hrmt_bieig( mo_num, dm_tmp&
+!    call non_hrmt_fock_mat( mo_num, dm_tmp&
+   call non_hrmt_bieig( mo_num, dm_tmp&
                       , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo& 
                       , n_real, natorb_tc_eigval )
  double precision :: accu

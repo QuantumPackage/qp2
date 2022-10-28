@@ -59,10 +59,10 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
  ! compute the overlap between the left and rescaled right
  call build_s_matrix(ao_num,mo_num,mo_r_coef_new,mo_r_coef_new,ao_overlap,s_mat)
  call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
-!print*,'fock_matrix_mo'
-!do i = 1, mo_num
-! print*,i,fock_diag(i),angle_left_right(i)
-!enddo
+ print*,'fock_matrix_mo'
+ do i = 1, mo_num
+  print*,i,fock_diag(i),angle_left_right(i)
+ enddo
    
  do i = 1, n_degen_list
   ifirst = list_degen(1,i)
