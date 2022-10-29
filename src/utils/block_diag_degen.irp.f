@@ -75,7 +75,6 @@ subroutine diagonalize_dm_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,rei
     list_same_degen(icount) = list_degen(index_degen,m)
    enddo
   enddo
-  print*,'icount = ',icount
   print*,'list of elements '
   do icount = 1, size_mat
    print*,icount,list_same_degen(icount)
@@ -103,18 +102,20 @@ subroutine diagonalize_dm_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,rei
   deallocate(mat_tmp,list_same_degen)
   deallocate(eigval_tmp,leigvec_tmp,reigvec_tmp)
  enddo
- print*,'icount,n',icount,n
+ if(icount.ne.n)then
+  print*,'pb !! (icount.ne.n)'
+  print*,'icount,n',icount,n
+  stop
+ endif
  
  deallocate(iorder)
  allocate(iorder(n))
- print*,'before sort '
  do i = 1, n
-  print*,'i,eigval(i) = ',i,eigval_unsrtd(i)
   iorder(i) = i
  enddo
  call dsort(eigval_unsrtd,iorder,n)
- print*,'after sort '
  do i = 1, n
+  print*,'sorted eigenvalues '
   i_good = iorder(i)
   eigval(i) = eigval_unsrtd(i)
   print*,'i,eigval(i) = ',i,eigval(i)
@@ -157,7 +158,6 @@ subroutine give_degen_full_list(A,n,thr,list_degen,n_degen_list)
   icount = 1
   do j = i+1, n
    if(dabs(A(i)-A(j)).lt.thr.and.is_ok(j))then
-!    print*,A(i),A(j)
     is_ok(j) = .False.
     icount += 1
     list_degen(n_degen_list,icount) = j
