@@ -1,11 +1,11 @@
 
-subroutine diagonalize_dm_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,reigvec,eigval)
+subroutine diag_mat_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,reigvec,eigval)
  implicit none
  integer, intent(in) :: n
  double precision, intent(in) :: fock_diag(n),mat_ref(n,n),thr_deg
  double precision, intent(out):: leigvec(n,n),reigvec(n,n),eigval(n)
  BEGIN_DOC
-! subroutine that diagonalizes a matrix mat_ref BY BLOCK 
+! subroutine that diagonalizes a matrix mat_ref BY BLOCK
 !
 ! the blocks are defined by the elements having the SAME DEGENERACIES in the entries "fock_diag"
 !

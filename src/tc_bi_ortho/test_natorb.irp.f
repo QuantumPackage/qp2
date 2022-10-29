@@ -32,7 +32,7 @@ subroutine routine
  thr_deg = 1.d-6
  mat_ref = -one_e_dm_mo
  print*,'diagonalization by block'
- call diagonalize_dm_per_fock_degen(fock_diag,mat_ref,mo_num,thr_deg,leigvec,reigvec,eigval)
+ call diag_mat_per_fock_degen(fock_diag,mat_ref,mo_num,thr_deg,leigvec,reigvec,eigval)
  call non_hrmt_bieig( mo_num, mat_ref&
                      , leigvec_ref, reigvec_ref& 
                      , n_real, eigval_ref)

@@ -52,31 +52,32 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
  enddo
  double precision, allocatable :: fock_diag(:),s_mat(:,:)
  integer, allocatable :: list_degen(:,:)
- allocate(list_degen(2,mo_num),s_mat(mo_num,mo_num),fock_diag(mo_num))
+ allocate(list_degen(mo_num,0:mo_num),s_mat(mo_num,mo_num),fock_diag(mo_num))
  do i = 1, mo_num
   fock_diag(i) = Fock_matrix_tc_mo_tot(i,i)
  enddo
  ! compute the overlap between the left and rescaled right
  call build_s_matrix(ao_num,mo_num,mo_r_coef_new,mo_r_coef_new,ao_overlap,s_mat)
- call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
+! call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
+ call give_degen_full_list(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
  print*,'fock_matrix_mo'
  do i = 1, mo_num
   print*,i,fock_diag(i),angle_left_right(i)
  enddo
    
  do i = 1, n_degen_list
-  ifirst = list_degen(1,i)
-  ilast  = list_degen(2,i)
-  n_degen = ilast - ifirst +1
-  print*,'ifirst,n_degen = ',ifirst,n_degen
+!  ifirst = list_degen(1,i)
+!  ilast  = list_degen(2,i)
+!  n_degen = ilast - ifirst +1
+  n_degen = list_degen(i,0)
   double precision, allocatable :: stmp(:,:),T(:,:),Snew(:,:),smat2(:,:)
   double precision, allocatable :: mo_l_coef_tmp(:,:),mo_r_coef_tmp(:,:),mo_l_coef_new(:,:)
   allocate(stmp(n_degen,n_degen),smat2(n_degen,n_degen))
   allocate(mo_r_coef_tmp(ao_num,n_degen),mo_l_coef_tmp(ao_num,n_degen),mo_l_coef_new(ao_num,n_degen))
   allocate(T(n_degen,n_degen),Snew(n_degen,n_degen))
   do j = 1, n_degen
-   mo_r_coef_tmp(1:ao_num,j) = mo_r_coef_new(1:ao_num,j+ifirst-1)
-   mo_l_coef_tmp(1:ao_num,j) = mo_l_coef(1:ao_num,j+ifirst-1)
+   mo_r_coef_tmp(1:ao_num,j) = mo_r_coef_new(1:ao_num,list_degen(i,j))
+   mo_l_coef_tmp(1:ao_num,j) = mo_l_coef(1:ao_num,list_degen(i,j))
   enddo
   ! Orthogonalization of right functions
   print*,'Orthogonalization of RIGHT functions'
@@ -138,8 +139,10 @@ subroutine routine_save_rotated_mos(thr_deg,good_angles)
  ! write(*,'(100(F16.10,X))')stmp(:,j)
  !enddo
   do j = 1, n_degen
-   mo_l_coef_good(1:ao_num,j+ifirst-1) = mo_l_coef_new(1:ao_num,j)
-   mo_r_coef_good(1:ao_num,j+ifirst-1) = mo_r_coef_tmp(1:ao_num,j)
+!   mo_l_coef_good(1:ao_num,j+ifirst-1) = mo_l_coef_new(1:ao_num,j)
+!   mo_r_coef_good(1:ao_num,j+ifirst-1) = mo_r_coef_tmp(1:ao_num,j)
+   mo_l_coef_good(1:ao_num,list_degen(i,j)) = mo_l_coef_new(1:ao_num,j)
+   mo_r_coef_good(1:ao_num,list_degen(i,j)) = mo_r_coef_tmp(1:ao_num,j)
   enddo
   deallocate(stmp,smat2)
   deallocate(mo_r_coef_tmp,mo_l_coef_tmp,mo_l_coef_new)
