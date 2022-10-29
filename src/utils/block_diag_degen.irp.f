@@ -29,10 +29,10 @@ subroutine diag_mat_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,reigvec,e
  reigvec_unsrtd = 0.d0
  eigval_unsrtd  = 0.d0
 
- allocate(list_degen(mo_num,0:mo_num))
+ allocate(list_degen(n,0:n))
 
  ! obtain degeneracies 
- call give_degen_full_list(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
+ call give_degen_full_list(fock_diag,n,thr_deg,list_degen,n_degen_list)
  allocate(iorder(n_degen_list),list_degen_sorted(n_degen_list))
  do i =1, n_degen_list
   n_degen = list_degen(i,0) 
@@ -102,9 +102,9 @@ subroutine diag_mat_per_fock_degen(fock_diag,mat_ref,n,thr_deg,leigvec,reigvec,e
   deallocate(mat_tmp,list_same_degen)
   deallocate(eigval_tmp,leigvec_tmp,reigvec_tmp)
  enddo
- if(icount.ne.n)then
-  print*,'pb !! (icount.ne.n)'
-  print*,'icount,n',icount,n
+ if(icount_eigval.ne.n)then
+  print*,'pb !! (icount_eigval.ne.n)'
+  print*,'icount_eigval,n',icount_eigval,n
   stop
  endif
  

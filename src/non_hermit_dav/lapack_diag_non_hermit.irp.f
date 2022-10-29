@@ -930,11 +930,15 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
 
     tmp_abs = tmp_abs + tmp
     V_nrm   = V_nrm   + U_nrm 
-    print *, j, tmp, U_nrm
+    write(*,'(I4,X,(100(F25.16,X)))')j,eigval(j), tmp, U_nrm
 
   enddo
 
-  tmp_rel = tmp_abs / tmp_nrm
+  if(tmp_abs.lt.10.d-10)then
+   tmp_rel = thr_diag/10.d0
+  else
+   tmp_rel = tmp_abs / tmp_nrm
+  endif
   tmp_dif = dabs(V_nrm - dble(m))
 
   if( stop_ifnot .and. ((tmp_rel .gt. thr_diag) .or. (tmp_dif .gt. thr_norm)) ) then
@@ -969,13 +973,20 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
 
     tmp_abs = tmp_abs + tmp
     V_nrm   = V_nrm   + U_nrm 
-    print *, j, tmp, U_nrm
+    write(*,'(I4,X,(100(F25.16,X)))')j,eigval(j), tmp, U_nrm
 
   enddo
 
-  tmp_rel = tmp_abs / tmp_nrm
+  if(tmp_abs.lt.10.d-10)then
+   tmp_rel = thr_diag/10.d0
+  else
+   tmp_rel = tmp_abs / tmp_nrm
+  endif
   if( stop_ifnot .and. ((tmp_rel .gt. thr_diag) .or. (tmp_dif .gt. thr_norm)) ) then
     print *, ' error in left-eigenvectors'
+    print *, ' err tol   = ',thr_diag, thr_norm
+    print *, '(tmp_rel .gt. thr_diag) = ',(tmp_rel .gt. thr_diag)
+    print *, '(tmp_dif .gt. thr_norm) = ',(tmp_dif .gt. thr_norm)
     print *, ' err estim = ', tmp_abs, tmp_rel
     print *, ' CR norm   = ', V_nrm 
     stop

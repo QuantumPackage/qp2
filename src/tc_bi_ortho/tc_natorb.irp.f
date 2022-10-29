@@ -8,17 +8,23 @@
  ! natorb_tc_leigvec_mo : LEFT  eigenvectors of the ground state transition matrix (equivalent of natural orbitals)
  ! natorb_tc_eigval     : eigenvalues of the ground state transition matrix (equivalent of the occupation numbers). WARNINING :: can be negative !!
  END_DOC
-  double precision, allocatable :: dm_tmp(:,:)
+  double precision, allocatable :: dm_tmp(:,:),fock_diag(:)
+  double precision :: thr_deg
   integer :: i,j,k,n_real
-  allocate( dm_tmp(mo_num,mo_num))
+  allocate( dm_tmp(mo_num,mo_num),fock_diag(mo_num))
   dm_tmp(:,:) = -tc_transition_matrix(:,:,1,1)
   print*,'dm_tmp'
   do i = 1, mo_num
+   fock_diag(i) = fock_matrix_tc_mo_tot(i,i)
    write(*,'(100(F16.10,X))')-dm_tmp(:,i)
   enddo
-   call non_hrmt_bieig( mo_num, dm_tmp&
-                      , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo& 
-                      , n_real, natorb_tc_eigval )
+  thr_deg = thr_degen_tc
+  call diag_mat_per_fock_degen(fock_diag,dm_tmp,mo_num,thr_deg,& 
+                               natorb_tc_leigvec_mo,natorb_tc_reigvec_mo,&
+                               natorb_tc_eigval)
+!   call non_hrmt_bieig( mo_num, dm_tmp&
+!                      , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo& 
+!                      , n_real, natorb_tc_eigval )
  double precision :: accu
   accu = 0.d0
   do i = 1, n_real
