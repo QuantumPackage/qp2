@@ -18,7 +18,7 @@
    fock_diag(i) = fock_matrix_tc_mo_tot(i,i)
    write(*,'(100(F16.10,X))')-dm_tmp(:,i)
   enddo
-  thr_deg = thr_degen_tc
+  thr_deg = 1.d-3
   call diag_mat_per_fock_degen(fock_diag,dm_tmp,mo_num,thr_deg,& 
                                natorb_tc_leigvec_mo,natorb_tc_reigvec_mo,&
                                natorb_tc_eigval)

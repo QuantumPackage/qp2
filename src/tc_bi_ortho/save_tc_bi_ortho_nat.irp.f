@@ -10,6 +10,7 @@
    read_wf = .True.
    touch read_wf
    touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+   call print_energy_and_mos
    call save_tc_natorb
  end
  
