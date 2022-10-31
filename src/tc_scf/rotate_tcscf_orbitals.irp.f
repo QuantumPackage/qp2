@@ -73,7 +73,7 @@ subroutine maximize_overlap()
 
   ! ---
 
-  call rotate_degen_eigvec(n, m, e, C, W, L, R)
+  call rotate_degen_eigvec_to_maximize_overlap(n, m, e, C, W, L, R)
 
   ! ---
    
@@ -115,7 +115,7 @@ end subroutine maximize_overlap
 
 ! ---
 
-subroutine rotate_degen_eigvec(n, m, e0, C0, W0, L0, R0)
+subroutine rotate_degen_eigvec_to_maximize_overlap(n, m, e0, C0, W0, L0, R0)
 
   implicit none
 
@@ -124,7 +124,7 @@ subroutine rotate_degen_eigvec(n, m, e0, C0, W0, L0, R0)
   double precision, intent(inout) :: L0(n,m), R0(n,m)
 
 
-  integer                         :: i, j, k, kk, mm, id1
+  integer                         :: i, j, k, kk, mm, id1, tot_deg
   double precision                :: ei, ej, de, de_thr
   integer,          allocatable   :: deg_num(:)
   double precision, allocatable   :: L(:,:), R(:,:), C(:,:), Lnew(:,:), Rnew(:,:), tmp(:,:)
@@ -162,11 +162,18 @@ subroutine rotate_degen_eigvec(n, m, e0, C0, W0, L0, R0)
     enddo
   enddo
 
+  tot_deg = 0
   do i = 1, m
     if(deg_num(i).gt.1) then
       print *, ' degen on', i, deg_num(i)
+      tot_deg = tot_deg + 1
     endif
   enddo
+
+  if(tot_deg .eq. 0) then
+    print *, ' no degen'
+    return
+  endif
 
   ! ---
 
@@ -243,6 +250,122 @@ subroutine rotate_degen_eigvec(n, m, e0, C0, W0, L0, R0)
 
   deallocate(S, Snew, T)
 
-end subroutine rotate_degen_eigvec
+end subroutine rotate_degen_eigvec_to_maximize_overlap
+
+! ---
+
+subroutine fix_right_to_one()
+
+  implicit none
+  integer                       :: i, j, m, n, mm, tot_deg
+  double precision              :: accu_d, accu_nd
+  double precision              :: de_thr, ei, ej, de
+  double precision              :: thr_d, thr_nd
+  integer,          allocatable :: deg_num(:)
+  double precision, allocatable :: R0(:,:), L0(:,:), W(:,:), e0(:)
+  double precision, allocatable :: R(:,:), L(:,:), S(:,:), Stmp(:,:), tmp(:,:)
+
+  thr_d  = 1d-7
+  thr_nd = 1d-7
+
+  n = ao_num
+  m = mo_num
+
+  allocate(L0(n,m), R0(n,m), W(n,n), e0(m))
+  L0 = mo_l_coef
+  R0 = mo_r_coef
+  W  = ao_overlap
+
+  print*, ' fock matrix diag elements'
+  do i = 1, m
+    e0(i) = Fock_matrix_tc_mo_tot(i,i)
+    print*, e0(i)
+  enddo
+
+  ! ---
+
+  allocate( deg_num(m) )
+  do i = 1, m
+    deg_num(i) = 1
+  enddo
+
+  de_thr = 1d-6
+
+  do i = 1, m-1
+    ei = e0(i)
+
+    ! already considered in degen vectors
+    if(deg_num(i).eq.0) cycle
+
+    do j = i+1, m
+      ej = e0(j)
+      de = dabs(ei - ej)
+
+      if(de .lt. de_thr) then
+        deg_num(i) = deg_num(i) + 1
+        deg_num(j) = 0
+      endif
+
+    enddo
+  enddo
+
+  deallocate(e0)
+
+  tot_deg = 0
+  do i = 1, m
+    if(deg_num(i).gt.1) then
+      print *, ' degen on', i, deg_num(i)
+      tot_deg = tot_deg + 1
+    endif
+  enddo
+
+  if(tot_deg .eq. 0) then
+    print *, ' no degen'
+    return
+  endif
+
+  ! ---
+
+  do i = 1, m
+    mm = deg_num(i)
+
+    if(mm .gt. 1) then
+
+      allocate(L(n,mm), R(n,mm))
+      do j = 1, mm
+        L(1:n,j) = L0(1:n,i+j-1)
+        R(1:n,j) = R0(1:n,i+j-1)
+      enddo
+
+      ! ---
+
+      call impose_weighted_orthog_svd(n, mm, W, R)
+      call impose_weighted_biorthog_qr(n, mm, thr_d, thr_nd, R, W, L)
+
+      ! ---
+
+      do j = 1, mm
+        L0(1:n,i+j-1) = L(1:n,j)
+        R0(1:n,i+j-1) = R(1:n,j)
+      enddo
+      deallocate(L, R)
+
+    endif
+  enddo
+
+  call check_weighted_biorthog_binormalize(n, m, L0, W, R0, thr_d, thr_nd, .true.)
+
+  deallocate(W, deg_num)
+
+  mo_l_coef = L0
+  mo_r_coef = R0
+  deallocate(L0, R0)
+
+  call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
+  call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
+  print *, ' orbitals are rotated '
+
+  return
+end subroutine fix_right_to_one
 
 ! ---

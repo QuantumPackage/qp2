@@ -11,20 +11,24 @@
   integer                       :: n_real_tc 
   integer                       :: i, k, l
   double precision              :: accu_d, accu_nd, accu_tmp
+  double precision              :: thr_d, thr_nd
   double precision              :: norm
   double precision, allocatable :: eigval_right_tmp(:)
+
+  thr_d  = 1d-6
+  thr_nd = 1d-6
 
   allocate( eigval_right_tmp(mo_num) )
 
   PROVIDE Fock_matrix_tc_mo_tot
 
- call non_hrmt_bieig( mo_num, Fock_matrix_tc_mo_tot          &
-                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
-                    , n_real_tc, eigval_right_tmp )
+  call non_hrmt_bieig( mo_num, Fock_matrix_tc_mo_tot, thr_d, thr_nd &
+                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo       & 
+                     , n_real_tc, eigval_right_tmp )
   !if(max_ov_tc_scf)then
-!    call non_hrmt_fock_mat( mo_num, Fock_matrix_tc_mo_tot &
-!                       , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
-!                       , n_real_tc, eigval_right_tmp )
+  ! call non_hrmt_fock_mat( mo_num, Fock_matrix_tc_mo_tot, thr_d, thr_nd &
+  !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
+  !                    , n_real_tc, eigval_right_tmp )
   !else 
   ! call non_hrmt_diag_split_degen_bi_orthog( mo_num, Fock_matrix_tc_mo_tot &
   !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
@@ -59,17 +63,17 @@
       else
         accu_tmp = overlap_fock_tc_eigvec_mo(k,i)
         accu_nd += accu_tmp * accu_tmp
-        if(dabs(overlap_fock_tc_eigvec_mo(k,i)).gt.1.d-10)then
-         print*,'k,i',k,i,overlap_fock_tc_eigvec_mo(k,i)
+        if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thr_nd)then
+         print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
         endif
       endif
     enddo 
   enddo
   accu_nd = dsqrt(accu_nd)/accu_d
 
-  if( accu_nd .gt. 1d-8 ) then
+  if(accu_nd .gt. thr_nd) then
     print *, ' bi-orthog failed'
-    print*,'accu_nd MO = ', accu_nd
+    print*,'accu_nd MO = ', accu_nd, thr_nd
     print*,'overlap_fock_tc_eigvec_mo = '
     do i = 1, mo_num
       write(*,'(100(F16.10,X))') overlap_fock_tc_eigvec_mo(i,:)
@@ -77,13 +81,13 @@
    stop
   endif
 
-  if( dabs(accu_d - dble(mo_num)) .gt. 1e-7 ) then
+  if( dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thr_d ) then
     print *, 'mo_num     = ', mo_num 
-    print *, 'accu_d  MO = ', accu_d
+    print *, 'accu_d  MO = ', accu_d, thr_d
     print *, 'normalizing vectors ...'
     do i = 1, mo_num
       norm = dsqrt(dabs(overlap_fock_tc_eigvec_mo(i,i)))
-      if( norm.gt.1e-7 ) then
+      if(norm .gt. thr_d) then
         do k = 1, mo_num
           fock_tc_reigvec_mo(k,i) *= 1.d0/norm
           fock_tc_leigvec_mo(k,i) *= 1.d0/norm

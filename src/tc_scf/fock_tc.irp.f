@@ -116,17 +116,23 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   endif
 END_PROVIDER
 
+! ---
 
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num, mo_num)]
-  implicit none
+
   BEGIN_DOC
- ! Total alpha+beta  TC Fock matrix : h_c + Two-e^TC terms on the MO basis
+  ! Total alpha+beta  TC Fock matrix : h_c + Two-e^TC terms on the MO basis
   END_DOC
+
+  implicit none
+
   Fock_matrix_tc_mo_tot = 0.5d0 * (Fock_matrix_tc_mo_alpha + Fock_matrix_tc_mo_beta)
   if(three_body_h_tc) then
     Fock_matrix_tc_mo_tot += fock_3_mat
   endif
+
   !call restore_symmetry(mo_num, mo_num, Fock_matrix_tc_mo_tot, mo_num, 1.d-10)
+
 END_PROVIDER 
 
 ! ---
