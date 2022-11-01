@@ -458,8 +458,9 @@ end
 
 END_PROVIDER
 
- BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num) ]
+ BEGIN_PROVIDER [ integer, cfg_seniority_index, (0:elec_num+2) ]
 &BEGIN_PROVIDER [ integer, cfg_nsomo_max ]
+&BEGIN_PROVIDER [ integer, cfg_nsomo_min ]
   implicit none
   BEGIN_DOC
  ! Returns the index in psi_configuration of the first cfg with
@@ -467,9 +468,10 @@ END_PROVIDER
  !
  ! cfg_nsomo_max : Max number of SOMO in the current wave function
  END_DOC
- integer :: i, k, s, sold
+ integer :: i, k, s, sold, soldmin
  cfg_seniority_index(:) = -1
  sold = -1
+ soldmin = 2000
  cfg_nsomo_max = 0
  do i=1,N_configuration
    s = 0
@@ -481,6 +483,10 @@ END_PROVIDER
      sold = s
      cfg_seniority_index(s) = i
      cfg_nsomo_max = s
+   endif
+   if (soldmin .GT. s ) then
+     soldmin = s
+     cfg_nsomo_min = s
    endif
  enddo
 END_PROVIDER
@@ -743,41 +749,112 @@ BEGIN_PROVIDER [ integer(bit_kind), dominant_dets_of_cfgs, (N_int,2,N_dominant_d
  enddo
 END_PROVIDER
 
-subroutine binary_search_cfg(cfgInp,addcfg)
+subroutine binary_search_cfg(cfgInp,addcfg,bit_tmp)
   use bitmasks
   implicit none
   BEGIN_DOC
   ! Documentation for binary_search
-  ! 
-  ! Does a binary search to find 
+  !
+  ! Does a binary search to find
   ! the address of a configuration in a list of
   ! configurations.
   END_DOC
   integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
   integer          , intent(out) :: addcfg
-  integer :: i,j,k,r,l
-  integer*8 :: key, key2
-  logical :: found
-  !integer*8, allocatable :: bit_tmp(:)
-  !integer*8, external            :: configuration_search_key
+  integer*8,          intent(in) :: bit_tmp(0:N_configuration+1)
 
-  !allocate(bit_tmp(0:N_configuration))
-  !bit_tmp(0) = 0
-  do i=1,N_configuration
-    !bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
-    found = .True.
-    do k=1,N_int
-      found = found .and. (psi_configuration(k,1,i) == cfgInp(k,1)) &
-                    .and. (psi_configuration(k,2,i) == cfgInp(k,2))
-    enddo
-    if (found) then
-      addcfg = i
-      exit
+  logical                        :: found
+  integer                        :: l, r, j, k
+  integer*8                      :: key
+
+  integer*8, external            :: configuration_search_key
+
+  key = configuration_search_key(cfgInp,N_int)
+
+  ! Binary search
+  l = 0
+  r = N_configuration+1
+IRP_IF WITHOUT_SHIFTRL
+  j = ishft(r-l,-1)
+IRP_ELSE
+  j = shiftr(r-l,1)
+IRP_ENDIF
+  do while (j>=1)
+    j = j+l
+    if (bit_tmp(j) == key) then
+      ! Find 1st element which matches the key
+      if (j > 1) then
+        do while (j>1 .and. bit_tmp(j-1) == key)
+          j = j-1
+        enddo
+      endif
+      ! Find correct element matching the key
+      do while (bit_tmp(j) == key)
+        found = .True.
+        do k=1,N_int
+          found = found .and. (psi_configuration(k,1,j) == cfgInp(k,1))&
+                        .and. (psi_configuration(k,2,j) == cfgInp(k,2))
+        enddo
+        if (found) then
+          addcfg = j
+          return
+        endif
+        j = j+1
+      enddo
+      addcfg = -1
+      return
+    else if (bit_tmp(j) > key) then
+      r = j
+    else
+      l = j
     endif
+IRP_IF WITHOUT_SHIFTRL
+    j = ishft(r-l,-1)
+IRP_ELSE
+    j = shiftr(r-l,1)
+IRP_ENDIF
   enddo
+
+  addcfg = -1
+  return
 
 end subroutine
 
+!subroutine binary_search_cfg(cfgInp,addcfg)
+!  use bitmasks
+!  implicit none
+!  BEGIN_DOC
+!  ! Documentation for binary_search
+!  ! 
+!  ! Does a binary search to find 
+!  ! the address of a configuration in a list of
+!  ! configurations.
+!  END_DOC
+!  integer(bit_kind), intent(in)  :: cfgInp(N_int,2)
+!  integer          , intent(out) :: addcfg
+!  integer :: i,j,k,r,l
+!  integer*8 :: key, key2
+!  logical :: found
+!  !integer*8, allocatable :: bit_tmp(:)
+!  !integer*8, external            :: configuration_search_key
+!
+!  !allocate(bit_tmp(0:N_configuration))
+!  !bit_tmp(0) = 0
+!  do i=1,N_configuration
+!    !bit_tmp(i) = configuration_search_key(psi_configuration(1,1,i),N_int)
+!    found = .True.
+!    do k=1,N_int
+!      found = found .and. (psi_configuration(k,1,i) == cfgInp(k,1)) &
+!                    .and. (psi_configuration(k,2,i) == cfgInp(k,2))
+!    enddo
+!    if (found) then
+!      addcfg = i
+!      exit
+!    endif
+!  enddo
+!
+!end subroutine
+!
  BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det, (2,N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_n_det, (N_configuration) ]
 &BEGIN_PROVIDER [ integer, psi_configuration_to_psi_det_data, (N_det) ]

@@ -24,7 +24,7 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
   double precision, intent(out)  :: psi_coef_cfg_out(n_CSF,N_st)
   integer*8                      :: Isomo, Idomo, mask
   integer(bit_kind)              :: Ialpha(N_int) ,Ibeta(N_int)
-  integer                        :: rows, cols, i, j, k
+  integer                        :: rows, cols, i, j, k, salpha
   integer                        :: startdet, enddet
   integer                        :: ndetI
   integer                        :: getNSOMO
@@ -65,9 +65,11 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
     enddo
 
     if(iand(s,1) .EQ. 0) then
-      bfIcfg = max(1,nint((binom(s,s/2)-binom(s,(s/2)+1))))
+      salpha = (s + MS)/2
+      bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
     else
-      bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+      salpha = (s + MS)/2
+      bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
     endif
 
     ! perhaps blocking with CFGs of same seniority
@@ -99,7 +101,7 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
   double precision,intent(in)    :: psi_coef_cfg_in(n_CSF,N_st)
   double precision,intent(out)   :: psi_coef_det(N_det,N_st)
   double precision               :: tmp_psi_coef_det(maxDetDimPerBF,N_st)
-  integer                        :: s, bfIcfg
+  integer                        :: s, bfIcfg, salpha
   integer                        :: countcsf
   integer(bit_kind)              :: Ialpha(N_int), Ibeta(N_int)
   integer                        :: rows, cols, i, j, k
@@ -110,6 +112,8 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
   double precision,allocatable   :: tempCoeff (:,:)
   double precision               :: phasedet
   integer                        :: idx
+  integer MS
+  MS = elec_alpha_num-elec_beta_num
 
   countcsf = 0
 
@@ -123,7 +127,8 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
       if (psi_configuration(k,1,i) == 0_bit_kind) cycle
       s = s + popcnt(psi_configuration(k,1,i))
     enddo
-    bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+    salpha = (s + MS)/2
+    bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
 
     allocate(tempCoeff(bfIcfg,N_st))
 

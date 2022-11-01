@@ -59,3 +59,45 @@ BEGIN_PROVIDER [ double precision, h_core_ri, (mo_num, mo_num) ]
  enddo
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, h_act_ri, (mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Active Hamiltonian with 3-index exchange integrals:
+ !
+ ! $\tilde{h}{pq} = h_{pq} - \frac{1}{2}\sum_{k} g(pk,kq)$
+ END_DOC
+
+ integer :: i,j, k
+ integer :: p,q, r
+ ! core-core contribution
+ h_act_ri = core_fock_operator
+ !print *,' Bef----hact(1,14)=',h_act_ri(4,14)
+ ! act-act contribution
+ do p=1,n_act_orb
+   j=list_act(p)
+   do q=1,n_act_orb
+     i=list_act(q)
+     h_act_ri(i,j) = mo_one_e_integrals(i,j)
+   enddo
+   do r=1,n_act_orb
+     k=list_act(r)
+     do q=1,n_act_orb
+       i=list_act(q)
+       h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
+     enddo
+   enddo
+ enddo
+ ! core-act contribution
+ !do p=1,n_act_orb
+ !  j=list_core(p)
+ !  do k=1,n_core_orb
+ !    do q=1,n_act_orb
+ !      i=list_act(q)
+ !      h_act_ri(i,j) = h_act_ri(i,j) - 0.5 * big_array_exchange_integrals(k,i,j)
+ !    enddo
+ !  enddo
+ !enddo
+ !print *,' Aft----hact(1,14)=',h_act_ri(4,14), mo_one_e_integrals(4,14)
+END_PROVIDER
+
