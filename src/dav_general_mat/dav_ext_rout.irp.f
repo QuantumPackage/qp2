@@ -196,7 +196,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
   enddo
   ! Normalize all states 
   do k=1,N_st_diag
-    call normalize(u_in(1,k),sze)
+    call normalize(u_in(:,k),sze)
   enddo
 
   ! Copy from the guess input "u_in" to the working vectors "U"
@@ -226,7 +226,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
           call ortho_qr(U,size(U,1),sze,shift2)
           !    it does W = H U with W(sze,N_st_diag),U(sze,N_st_diag)
           !    where sze is the size of the vector, N_st_diag is the number of states 
-          call hcalc(W(1,shift+1),U(1,shift+1),N_st_diag,sze)
+          call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
       else
          ! Already computed in update below
          continue
@@ -288,9 +288,9 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
       ! --------------------------------------------------
 
       call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(1,shift2+1), size(U,1))
+          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1), size(U,1))
       call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(1,shift2+1), size(W,1))
+          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(:,shift2+1), size(W,1))
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
@@ -304,7 +304,7 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
         enddo
 
         if (k <= N_st) then
-          residual_norm(k) = u_dot_u(U(1,shift2+k),sze)
+          residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
           to_print(1,k) = lambda(k) 
           to_print(2,k) = residual_norm(k)
         endif
