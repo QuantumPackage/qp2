@@ -149,7 +149,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   character*(16384)              :: write_buffer
   double precision               :: to_print(3,N_st)
   double precision               :: cpu, wall
-  integer                        :: shift, shift2, itermax, istate
+  integer                        :: shift, shift2, itermax, istate, ii
   double precision               :: r1, r2, alpha
   logical                        :: state_ok(N_st_diag_in*davidson_sze_max)
   integer                        :: nproc_target
@@ -356,7 +356,14 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         if ((sze > 100000).and.distributed_davidson) then
             call H_S2_u_0_nstates_zmq   (W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
         else
+            double precision               :: irp_rdtsc
+            double precision               :: ticks_0, ticks_1
+            integer*8                      :: irp_imax
+            irp_imax = 1
+            !ticks_0 = irp_rdtsc()
             call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+            !ticks_1 = irp_rdtsc()
+            !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
         endif
         S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
 !      else

@@ -31,7 +31,8 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
   double precision, intent(inout) :: u_in(sze,N_st_diag)
   double precision, intent(out)   :: energies(N_st_diag)
   logical, intent(out)            :: converged
-  external hcalc
+
+  external                        :: hcalc
 
   double precision, allocatable   :: H_jj_tmp(:)
   ASSERT (N_st > 0)
@@ -224,7 +225,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
     u_in(k,k) = u_in(k,k) + 10.d0
   enddo
   do k=1,N_st_diag_in
-    call normalize(u_in(1,k),sze)
+    call normalize(u_in(:,k),sze)
   enddo
 
   do k=1,N_st_diag_in
@@ -248,10 +249,10 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
       if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
-        call hcalc(W(1,shift+1),U(1,shift+1),N_st_diag_in,sze)
+        call hcalc(W(:,shift+1),U(:,shift+1),N_st_diag_in,sze)
         ! Compute then the DIAGONAL PART OF THE DRESSING 
         ! <i|W_k> += Dress_jj(i) * <i|U>
-        call dressing_diag_uv(W(1,shift+1),U(1,shift+1),Dress_jj,N_st_diag_in,sze)
+        call dressing_diag_uv(W(:,shift+1),U(:,shift+1),Dress_jj,N_st_diag_in,sze)
       else
          ! Already computed in update below
          continue
@@ -275,20 +276,20 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
 !
 !          call dgemm('T','N', N_st, N_st_diag_in, sze, 1.d0, &
 !            psi_coef, size(psi_coef,1), &
-!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!            U(:,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 !
 !          call dgemm('N','N', sze, N_st_diag_in, N_st, 1.0d0, &
 !            Dressing_vec, size(Dressing_vec,1), s_tmp, size(s_tmp,1), &
-!            1.d0, W(1,shift+1), size(W,1))
+!            1.d0, W(:,shift+1), size(W,1))
 !
 !
 !          call dgemm('T','N', N_st, N_st_diag_in, sze, 1.d0, &
 !            Dressing_vec, size(Dressing_vec,1), &
-!            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+!            U(:,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 !
 !          call dgemm('N','N', sze, N_st_diag_in, N_st, 1.0d0, &
 !            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-!            1.d0, W(1,shift+1), size(W,1))
+!            1.d0, W(:,shift+1), size(W,1))
 !
         endif
 
@@ -376,9 +377,9 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
       ! --------------------------------------------------
 
       call dgemm('N','N', sze, N_st_diag_in, shift2,                    &
-          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(1,shift2+1), size(U,1))
+          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(:,shift2+1), size(U,1))
       call dgemm('N','N', sze, N_st_diag_in, shift2,                    &
-          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(1,shift2+1), size(W,1))
+          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(:,shift2+1), size(W,1))
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
@@ -392,7 +393,7 @@ subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies
         enddo
 
         if (k <= N_st) then
-          residual_norm(k) = u_dot_u(U(1,shift2+k),sze)
+          residual_norm(k) = u_dot_u(U(:,shift2+k),sze)
           to_print(1,k) = lambda(k) 
           to_print(2,k) = residual_norm(k)
         endif
