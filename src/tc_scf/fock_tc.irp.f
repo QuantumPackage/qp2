@@ -76,13 +76,13 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_beta, (ao_num, ao_num)]
 END_PROVIDER 
 ! ---
 
-BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
-  implicit none
-  BEGIN_DOC
- ! Total alpha+beta TC Fock matrix : h_c + Two-e^TC terms on the AO basis
-  END_DOC
-  Fock_matrix_tc_ao_tot = 0.5d0 * (Fock_matrix_tc_ao_alpha + Fock_matrix_tc_ao_beta)
-END_PROVIDER
+!BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
+!  implicit none
+!  BEGIN_DOC
+! ! Total alpha+beta TC Fock matrix : h_c + Two-e^TC terms on the AO basis
+!  END_DOC
+!  Fock_matrix_tc_ao_tot = 0.5d0 * (Fock_matrix_tc_ao_alpha + Fock_matrix_tc_ao_beta)
+!END_PROVIDER
 
 ! ---
 
@@ -94,6 +94,9 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
   if(bi_ortho)then
    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                          , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
+   if(three_body_h_tc)then
+    Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+   endif
   else
    call ao_to_mo(  Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                  , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
@@ -110,6 +113,9 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   if(bi_ortho)then
    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                          , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
+   if(three_body_h_tc)then
+    Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
+   endif
   else
    call ao_to_mo(  Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                  , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
