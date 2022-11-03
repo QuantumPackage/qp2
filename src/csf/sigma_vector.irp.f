@@ -835,7 +835,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   ! the configurations in psi_configuration
   ! returns : diag_energies :
   END_DOC
-  integer :: i,j,k,kk,l,p,q,noccp,noccq, ii, jj
+  integer :: i,j,k,kk,l,p,q,noccp,noccq, ii, jj, iii
   real*8,intent(out) :: diag_energies(n_CSF)
   integer                            :: nholes
   integer                            :: nvmos
@@ -863,6 +863,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   real*8            :: meCC
   real*8            :: ecore
   real*8            :: core_act_contrib
+  integer                        :: listall(N_int*bit_kind_size), nelall
 
   !PROVIDE h_core_ri
   PROVIDE core_fock_operator
@@ -894,47 +895,61 @@ subroutine calculate_preconditioner_cfg(diag_energies)
      ! find out all pq holes possible
      nholes = 0
      ! holes in SOMO
-     !do k = 1,mo_num
-     do kk = 1,n_act_orb
-       k = list_act(kk)
-        if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 1
-        endif
-     enddo
-     ! holes in DOMO
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     !do k = 1+n_core_inact_orb,n_core_orb+n_core_inact_act_orb
-     !do k = 1,mo_num
-     do kk = 1,n_act_orb
-       k = list_act(kk)
-        if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
-           nholes += 1
-           listholes(nholes) = k
-           holetype(nholes) = 2
-        endif
-     enddo
+     !do kk = 1,n_act_orb
+     !  k = list_act(kk)
+     !   if(POPCNT(IAND(Isomo,IBSET(0_8,k-1))) .EQ. 1) then
+     !      nholes += 1
+     !      listholes(nholes) = k
+     !      holetype(nholes) = 1
+     !   endif
+     !enddo
+     call bitstring_to_list(psi_configuration(1,1,i),listall,nelall,N_int)
 
-     ! find vmos
-     listvmos = -1
-     vmotype = -1
-     nvmos = 0
-     !do k = n_core_orb+1,n_core_orb + n_act_orb
-     !do k = 1,mo_num
-     do kk = 1,n_act_orb
-       k = list_act(kk)
-        !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
-        if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 0
-        else if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0 ) then
-           nvmos += 1
-           listvmos(nvmos) = k
-           vmotype(nvmos) = 1
-        end if
-     enddo
+     do iii=1,nelall
+       nholes += 1
+       listholes(nholes) = listall(iii)
+       holetype(nholes) = 1
+     end do
+
+     ! holes in DOMO
+     !do kk = 1,n_act_orb
+     !  k = list_act(kk)
+     !   if(POPCNT(IAND(Idomo,IBSET(0_8,k-1))) .EQ. 1) then
+     !      nholes += 1
+     !      listholes(nholes) = k
+     !      holetype(nholes) = 2
+     !   endif
+     !enddo
+     call bitstring_to_list(psi_configuration(1,2,i),listall,nelall,N_int)
+
+     do iii=1,nelall
+       if(listall(iii) .gt. n_core_orb)then
+         nholes += 1
+         listholes(nholes) = listall(iii)
+         holetype(nholes) = 2
+       endif
+     end do
+
+
+     !!! find vmos
+     !!listvmos = -1
+     !!vmotype = -1
+     !!nvmos = 0
+     !!!do k = n_core_orb+1,n_core_orb + n_act_orb
+     !!!do k = 1,mo_num
+     !!do kk = 1,n_act_orb
+     !!  k = list_act(kk)
+     !!   !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
+     !!   if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 0 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0) then
+     !!      nvmos += 1
+     !!      listvmos(nvmos) = k
+     !!      vmotype(nvmos) = 0
+     !!   else if(POPCNT(IAND(Isomo,(IBSET(0_8,k-1)))) .EQ. 1 .AND. POPCNT(IAND(Idomo,(IBSET(0_8,k-1)))) .EQ. 0 ) then
+     !!      nvmos += 1
+     !!      listvmos(nvmos) = k
+     !!      vmotype(nvmos) = 1
+     !!   end if
+     !!enddo
      !print *,"I=",i
      !call debug_spindet(psi_configuration(1,1,i),N_int)
      !call debug_spindet(psi_configuration(1,2,i),N_int)
@@ -1413,8 +1428,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   !nconnectedtotalmax = 1000
   !nconnectedmaxJ = 1000
   maxnalphas = elec_num*mo_num
-  Icfg(1,1) = psi_configuration(1,1,1)
-  Icfg(1,2) = psi_configuration(1,2,1)
+  Icfg(:,1) = psi_configuration(:,1,1)
+  Icfg(:,2) = psi_configuration(:,2,1)
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(idslistconnectedJ(max(sze,10000)))
   call obtain_connected_J_givenI(1, Icfg, listconnectedJ, idslistconnectedJ, nconnectedmaxJ, nconnectedtotalmax)
@@ -1632,9 +1647,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
 
      Nalphas_Icfg = NalphaIcfg_list(i)
      alphas_Icfg(1:n_int,1:2,1:Nalphas_Icfg) = alphasIcfg_list(1:n_int,1:2,i,1:Nalphas_Icfg)
-     if(Nalphas_Icfg .GT. maxnalphas) then
-       print *,"Nalpha > maxnalpha"
-     endif
+     !if(Nalphas_Icfg .GT. maxnalphas) then
+     !  print *,"Nalpha > maxnalpha"
+     !endif
 
      call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
@@ -1650,14 +1665,14 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         call obtain_connected_I_foralpha(i, alphas_Icfg(1,1,k), connectedI_alpha, idxs_connectedI_alpha, &
                                          nconnectedI, excitationIds, excitationTypes, diagfactors)
 
+        !if(i .EQ. 1) then
+        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k))
+        !endif
+
         
         if(nconnectedI .EQ. 0) then
            cycle
         endif
-
-        !if(i .EQ. 1) then
-        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k))
-        !endif
 
         ! Here we do 2x the loop. One to count for the size of the matrix, then we compute.
         totcolsTKI = 0

@@ -352,6 +352,11 @@ end
    psi_configuration(k,1,i) = ieor(psi_det(k,1,i),psi_det(k,2,i))
    psi_configuration(k,2,i) = iand(psi_det(k,1,i),psi_det(k,2,i))
   enddo
+ if(i.eq.1)then
+   print *,'Preparing PSI_CONFIGURATION i=',i
+            print *," Icfg somo=",psi_configuration(1,1,1), " ", psi_configuration(2,1,1)
+            print *," Icfg domo=",psi_configuration(1,2,1), " ", psi_configuration(2,2,1)
+ endif
  enddo
 
  ! Sort
