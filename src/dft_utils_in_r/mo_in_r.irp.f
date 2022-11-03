@@ -181,3 +181,30 @@
  END_PROVIDER
 
 
+ BEGIN_PROVIDER [double precision, mo_abs_dist_per_nuclei, (mo_num,nucl_num)]
+  implicit none
+  BEGIN_DOC
+  ! mo_abs_dist_per_nuclei(j,i_nucl) = <phi_j| |r-R_nucl| |phi_j>
+  END_DOC
+  integer :: ipoint,i_nucl,m,j
+  double precision :: weight, r(3),r_nucl(3),dist
+  mo_abs_dist_per_nuclei = 0.d0
+  do ipoint = 1, n_points_final_grid
+   r(1) = final_grid_points(1,ipoint)
+   r(2) = final_grid_points(2,ipoint)
+   r(3) = final_grid_points(3,ipoint)
+   weight = final_weight_at_r_vector(ipoint)
+   do i_nucl = 1, nucl_num
+    dist = 0.d0
+    do m = 1, 3
+     r_nucl(m) = r(m) - nucl_coord_transp(m,i_nucl) 
+     r_nucl(m) *= r_nucl(m)
+     dist += r_nucl(m)
+    enddo
+    dist = dsqrt(dist)
+    do j = 1, mo_num
+     mo_abs_dist_per_nuclei(j,i_nucl) += weight * mos_in_r_array(j,ipoint)*mos_in_r_array(j,ipoint) * dist
+    enddo
+   enddo
+  enddo
+ END_PROVIDER 
