@@ -33,8 +33,9 @@ BEGIN_PROVIDER [ double precision, fock_a_aba_3e_bi_orth, (mo_num, mo_num)]
  do i = 1, mo_num
   do a = 1, mo_num
    
-   do j = 1, elec_beta_num
-    do k = 1, elec_alpha_num
+   do j = 1, elec_alpha_num ! a
+    do k = 1, elec_beta_num ! b
+                                                                       !   a b a   a b a
       call  give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int )! < a k j | i k j >
       call  give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)! < a k j | j k i > : E_13 
       fock_a_aba_3e_bi_orth(a,i) += direct_int - exch_13_int 
@@ -82,7 +83,7 @@ BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
  BEGIN_DOC
  ! fock_a_tot_3e_bi_orth = bi-ortho 3-e Fock matrix for alpha electrons from all possible spin contributions 
  END_DOC
- fock_a_tot_3e_bi_orth = fock_a_aaa_3e_bi_orth + fock_a_abb_3e_bi_orth + fock_a_aba_3e_bi_orth
+ fock_a_tot_3e_bi_orth = fock_a_abb_3e_bi_orth + fock_a_aba_3e_bi_orth + fock_a_aaa_3e_bi_orth 
 
 END_PROVIDER 
 
@@ -121,8 +122,8 @@ BEGIN_PROVIDER [ double precision, fock_b_bab_3e_bi_orth, (mo_num, mo_num)]
  do i = 1, mo_num
   do a = 1, mo_num
    
-   do j = 1, elec_alpha_num
-    do k = 1, elec_beta_num
+   do j = 1, elec_beta_num
+    do k = 1, elec_alpha_num
       !                                                                    b a b   b a b
       call  give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int) ! < a k j | i k j >
       call  give_integrals_3_body_bi_ort(a, k, j, j, k, i, exch_13_int)! < a k j | j k i > : E_13

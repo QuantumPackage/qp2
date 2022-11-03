@@ -134,8 +134,8 @@ subroutine routine_3()
    print*, ' HF det'
    call debug_det(det_i, N_int)
  
-   do i = 1, elec_alpha_num ! occupied
-     do a = elec_alpha_num+1, mo_num ! virtual 
+   do i = 1, elec_num_tab(s1)
+     do a = elec_num_tab(s1)+1, mo_num ! virtual 
  
  
        det_i = ref_bitmask
@@ -162,6 +162,7 @@ subroutine routine_3()
          print*, ' warning on', i, a
          print*, ref,new,err_ai
        endif
+       print*, ref,new,err_ai
        err_tot += err_ai
  
        write(22, *) htilde_ij

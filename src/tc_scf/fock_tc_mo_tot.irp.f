@@ -113,6 +113,9 @@
        enddo
      enddo
    endif
+  if(.not.bi_ortho .and. three_body_h_tc)then
+   Fock_matrix_tc_mo_tot += fock_3_mat
+  endif
 
 END_PROVIDER
 
