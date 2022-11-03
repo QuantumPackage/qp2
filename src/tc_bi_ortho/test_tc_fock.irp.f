@@ -120,44 +120,53 @@ subroutine routine_3()
   implicit none
   integer                        :: i, a, i_ok, s1
   double precision               :: hmono, htwoe, hthree, htilde_ij
-  double precision               :: err_ai, err_tot
+  double precision               :: err_ai, err_tot, ref, new
   integer(bit_kind), allocatable :: det_i(:,:)
 
   allocate(det_i(N_int,2))
 
   err_tot = 0.d0
  
-  s1 = 1
+  do s1 = 1, 2
 
-  det_i = ref_bitmask
-  call debug_det(det_i, N_int)
-  print*, ' HF det'
-  call debug_det(det_i, N_int)
-
-  do i = 1, elec_alpha_num ! occupied
-    do a = elec_alpha_num+1, mo_num ! virtual 
-
-
-      det_i = ref_bitmask
-      call do_single_excitation(det_i, i, a, s1, i_ok)
-      if(i_ok == -1) then
-       print*, 'PB !!'
-       print*, i, a
-       stop
-      endif
-      !print*, ' excited det'
-      !call debug_det(det_i, N_int)
-
-      call htilde_mu_mat_bi_ortho(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
-      err_ai = dabs(htilde_ij)
-      if(err_ai .gt. 1d-7) then
-        print*, ' warning on', i, a
-        print*, hmono, htwoe, htilde_ij
-      endif
-      err_tot += err_ai
-
-      write(22, *) htilde_ij
-    enddo
+   det_i = ref_bitmask
+   call debug_det(det_i, N_int)
+   print*, ' HF det'
+   call debug_det(det_i, N_int)
+ 
+   do i = 1, elec_alpha_num ! occupied
+     do a = elec_alpha_num+1, mo_num ! virtual 
+ 
+ 
+       det_i = ref_bitmask
+       call do_single_excitation(det_i, i, a, s1, i_ok)
+       if(i_ok == -1) then
+        print*, 'PB !!'
+        print*, i, a
+        stop
+       endif
+       !print*, ' excited det'
+       !call debug_det(det_i, N_int)
+ 
+       call htilde_mu_mat_bi_ortho(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
+       if(dabs(hthree).lt.1.d-10)cycle
+       ref = hthree 
+       if(s1 == 1)then
+        new = fock_a_tot_3e_bi_orth(a,i)
+       else if(s1 == 2)then
+        new = fock_b_tot_3e_bi_orth(a,i)
+       endif
+       err_ai = dabs(dabs(ref) - dabs(new))
+       if(err_ai .gt. 1d-7) then
+         print*,'s1 = ',s1
+         print*, ' warning on', i, a
+         print*, ref,new,err_ai
+       endif
+       err_tot += err_ai
+ 
+       write(22, *) htilde_ij
+     enddo
+   enddo
   enddo
 
   print *, ' err_tot = ', err_tot
