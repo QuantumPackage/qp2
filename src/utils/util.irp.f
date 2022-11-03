@@ -411,3 +411,28 @@ subroutine lowercase(txt,n)
   enddo
 end
 
+subroutine v2_over_x(v,x,res)
+
+  !BEGIN_DOC
+  ! Two by two diagonalization to avoid the divergence in v^2/x when x goes to 0
+  !END_DOC
+
+  implicit none
+
+  double precision, intent(in)  :: v, x
+  double precision, intent(out) :: res
+
+  double precision :: delta_E, tmp, val
+
+  res = 0d0
+  delta_E = x
+  if (v == 0.d0) return
+
+  val = 2d0 * v
+  tmp = dsqrt(delta_E * delta_E + val * val)
+  if (delta_E < 0.d0) then
+      tmp = -tmp
+  endif
+  res = 0.5d0 * (tmp - delta_E)
+
+end
