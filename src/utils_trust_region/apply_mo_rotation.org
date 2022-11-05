@@ -25,9 +25,9 @@ subroutine apply_mo_rotation(R,prev_mos)
   
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the new MOs knowing the rotation matrix
-  !END_DOC
+  END_DOC
 
   implicit none
 

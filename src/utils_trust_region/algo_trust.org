@@ -136,9 +136,9 @@ subroutine trust_region_step_w_expected_e(n,H,W,e_val,v_grad,prev_criterion,rho,
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the step and the expected criterion/energy after the step
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -208,9 +208,9 @@ subroutine trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, cri
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute if the step should be cancelled
-  !END_DOC
+  END_DOC
 
   implicit none
  

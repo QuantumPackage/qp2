@@ -8,9 +8,9 @@ Can be done in OMP (for the first part and with omp critical for the second)
 #+BEGIN_SRC f90 :comments org :tangle vec_to_mat_v2.irp.f 
 subroutine vec_to_mat_v2(n,m,v_x,m_x)
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Vector to antisymmetric matrix
-  !END_DOC
+  END_DOC
   
   implicit none
   

@@ -61,10 +61,10 @@ subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
 
   implicit none
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Rotation matrix to rotate the molecular orbitals.
   ! If the rotation is too large the transformation is not unitary and must be cancelled.
-  !END_DOC
+  END_DOC
 
   include 'pi.h'
 
