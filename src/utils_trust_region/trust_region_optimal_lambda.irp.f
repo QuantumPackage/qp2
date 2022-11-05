@@ -153,9 +153,9 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Research the optimal lambda to constrain the step size in the trust region
-  !END_DOC
+  END_DOC
 
   implicit none
   
@@ -508,9 +508,9 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -644,9 +644,9 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
-  !END_DOC
+  END_DOC
   
   implicit none
 
@@ -792,9 +792,9 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute ||x(lambda)||^2
-  !END_DOC
+  END_DOC
   
   implicit none
 
@@ -903,9 +903,9 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
-  !END_DOC
+  END_DOC
   
   implicit none
 
@@ -1000,9 +1000,9 @@ function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -1102,9 +1102,9 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute ||x(lambda)||^2
-  !END_DOC
+  END_DOC
   
   implicit none
 
@@ -1184,9 +1184,9 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the first derivative of (1/||x||^2 - 1/Delta^2)^2
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -1340,9 +1340,9 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the second derivative of (1/||x||^2 - 1/Delta^2)^2
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -1498,9 +1498,9 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the first derivative of (1/||x||^2 - 1/Delta^2)^2
-  !END_DOC
+  END_DOC
 
   implicit none
 
@@ -1592,9 +1592,9 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the second derivative of (1/||x||^2 - 1/Delta^2)^2
-  !END_DOC
+  END_DOC
 
   implicit none
 

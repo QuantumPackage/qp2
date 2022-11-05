@@ -33,9 +33,9 @@ subroutine trust_region_expected_e(n,v_grad,H,x,prev_energy,e_model)
    
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute the expected criterion/energy after the application of the step x
-  !END_DOC
+  END_DOC
 
   implicit none
 

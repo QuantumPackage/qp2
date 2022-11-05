@@ -47,9 +47,9 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compute rho, the agreement between the predicted criterion/energy and the real one
-  !END_DOC
+  END_DOC
 
   implicit none
    

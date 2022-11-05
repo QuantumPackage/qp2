@@ -375,9 +375,9 @@ subroutine trust_region_step(n,nb_iter,v_grad,rho,e_val,w,x,delta)
 
   include 'pi.h'
 
-  !BEGIN_DOC
+  BEGIN_DOC
   ! Compuet the step in the trust region
-  !END_DOC
+  END_DOC
 
   implicit none
 
