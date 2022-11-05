@@ -1,21 +1,16 @@
 # mo_localization
 
-Please, use the ifort compiler  
-  
-Some parameters can be changed with qp edit in the utils_trust_region section 
- 
+Some parameters can be changed with qp edit in the mo_localization section
+(cf below). Similarly for the trust region parameters in the 
+utils_trust_region section. The localization without the trust region 
+is not available for the moment.  
+
+The irf.f files can be generated from the org ones using emacs. 
 If you modify the .org files, don't forget to do (you need emacs):  
 ``` 
 ./TANGLE_org_mode.sh  
 ninja  
 ```  
-
-The documentation can be read using:  
-Ctrl-C Ctrl-e l p  
-after opening the filename.org in emacs. It will produce a  
-filename.pdf.  
-(Not available for all the files)  
-!!! Warning: the documentation can contain some errors !!! 
 
 # Orbital localisation
 To localize the MOs:  
@@ -24,7 +19,7 @@ qp run localization
 ```
 After that the ezfio directory contains the localized MOs  
  
-But the mo_class must be defined before, run 
+But to do so the mo_class must be defined before, run 
 ```
 qp set_mo_class -q
 ```
@@ -44,7 +39,7 @@ qp set mo_localization security_mo_class false
 
 Before the localization, a kick is done for each mo class  
 (except the deleted ones) to break the MOs. This is done by   
-doing a given rotation between the MOs.
+doing a rotation between the MOs.
 This feature can be removed by setting:
 ```
 qp set mo_localization kick_in_mos false
