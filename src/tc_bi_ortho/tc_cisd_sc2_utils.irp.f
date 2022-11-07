@@ -2,7 +2,7 @@
 &BEGIN_PROVIDER [ double precision, leigvec_tc_cisd_sc2_bi_ortho, (N_det,N_states)]
 &BEGIN_PROVIDER [ double precision, eigval_tc_cisd_sc2_bi_ortho, (N_states)]
  implicit none
- integer :: it,n_real,degree,i
+ integer :: it,n_real,degree,i,istate
  double precision :: e_before, e_current,thr, hmono,htwoe,hthree
  double precision, allocatable :: e_corr_dets(:),h0j(:), h_sc2(:,:), dressing_dets(:)
  double precision, allocatable :: leigvec_tc_bi_orth_tmp(:,:),reigvec_tc_bi_orth_tmp(:,:),eigval_right_tmp(:)
@@ -36,6 +36,24 @@
   call non_hrmt_real_diag(N_det,h_sc2,& 
        leigvec_tc_bi_orth_tmp,reigvec_tc_bi_orth_tmp,& 
        n_real,eigval_right_tmp)
+  print*,'eigval_right_tmp(1)',eigval_right_tmp(1)
+  double precision, allocatable :: H_jj(:),vec_tmp(:,:),eigval_tmp(:)
+  external                         htc_bi_ortho_calc_tdav
+  external                         htcdag_bi_ortho_calc_tdav
+  logical                       :: converged
+  allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),eigval_tmp(N_states))
+  do i = 1, N_det
+    call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
+  enddo
+  vec_tmp = 0.d0
+  do istate = 1, N_states
+   vec_tmp(:,istate) = reigvec_tc_bi_orth(:,istate)
+  enddo
+  do istate = N_states+1, n_states_diag
+   vec_tmp(istate,istate) = 1.d0
+  enddo
+  call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
+  print*,'eigval_tmp(1) = ',eigval_tmp(1)
   do i = 1, N_det 
    e_corr_dets(i) = reigvec_tc_bi_orth_tmp(i,1) * h0j(i)/reigvec_tc_bi_orth_tmp(1,1)
   enddo
