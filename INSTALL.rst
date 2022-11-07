@@ -10,6 +10,62 @@ repository <https://github.com/QuantumPackage/qp2>`_.
 
   git clone https://github.com/QuantumPackage/qp2
 
+QP has a long list of dependencies:
+
+- GNU Linux OS
+- Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran
+- `GNU make`_
+- `Autoconf`_
+- `Python`_ > 3.7
+- |IRPF90| : Fortran code generator
+- |EZFIO| : Easy Fortran Input/Output library generator
+- |BLAS| and |LAPACK|
+- `Zlib`_
+- `GNU Patch`_
+- |ZeroMQ| : networking library
+- `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
+- |OCaml| compiler with |OPAM| package manager
+- |Ninja| : a parallel build system
+- |pkg-config| : a tool which returns information about installed libraries
+
+so we don't recommend the installation of all the dependencies by hand.
+
+Preferred installation method: Guix
+===================================
+
+|qp| is very easy to install on systems that have
+access to `Guix <https://guix.gnu.org/en>`_. To install Guix
+on your system, follow the `Guix installation instructions
+<https://guix.gnu.org/manual/en/html_node/Binary-Installation.html>`_.
+
+One Guix is installed, all the dependencies required for compiling
+and running |qp| can be installed using:
+
+.. code:: bash
+
+  guix package -L guix -m guix/manifest.scm 
+
+in the :file:`qp2` root directory.
+
+Installation on a x86_64 system without network access
+======================================================
+
+Fetch the :file:`qp2-environment.tar.gz` archive containing all the
+dependencies `here <http://localhost>`_.  Unpack the archive in the
+:file:`guix` directory:
+
+.. code:: bash
+
+   $ cd qp2/guix
+   $ wget qp2-environment.tar.gz
+   $ tar -zxf qp2-environment.tar.gz
+   $ ls
+   gnu  manifest.scm  qp2-environment.tar.gz  qp2.scm
+
+That's it!
+
+Compilation
+===========
 
 Before anything, go into your :file:`quantum_package` directory and run
 
@@ -36,34 +92,6 @@ Now all the requirements are met, you can compile the programs using
 
    make
 
-
-Installation of dependencies via a Conda environment
-====================================================
-
-.. code:: bash
-
-  conda env create -f qp2.yml
-￼￼
-
-
-Requirements
-============
-
-- Linux OS
-- Fortran compiler : GNU Fortran, Intel Fortran or IBM XL Fortran
-- `GNU make`_
-- `Autoconf`_
-- `Python`_ > 3.7
-- |IRPF90| : Fortran code generator
-- |EZFIO| : Easy Fortran Input/Output library generator
-- |BLAS| and |LAPACK|
-- `Zlib`_
-- `GNU Patch`_
-- |ZeroMQ| : networking library
-- `GMP <https://gmplib.org/>`_ : Gnu Multiple Precision Arithmetic Library
-- |OCaml| compiler with |OPAM| package manager
-- |Ninja| : a parallel build system
-- |pkg-config| : a tool which returns information about installed libraries
 
 
 When all the dependencies have been installed, go into the :file:`config`
@@ -352,5 +380,14 @@ If you have *pip* for Python3, you can do
    python3 -m pip install --user resultsFile
 
 
+
+
+Installation of dependencies via a Conda environment
+====================================================
+
+.. code:: bash
+
+  conda env create -f qp2.yml
+￼￼
 
 

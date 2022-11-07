@@ -1,0 +1,17 @@
+# Default flags for Guix
+
+export GUIX_BUILD_OPTIONS="-L $QP_ROOT/guix"
+
+export QP_GUIX_ROOT=$(ls -d $QP_ROOT/guix/gnu/store/*profile)
+
+if [[ -d "$QP_GUIX_ROOT" ]] ;
+then
+  export PATH=$QP_GUIX_ROOT/bin:$PATH
+  unset LD_LIBRARY_PATH=
+  export LIBRARY_PATH=$LIBRARY_PATH:$QP_GUIX_ROOT/lib
+  export C_INCLUDE_PATH=$C_INCLUDE_PATH:$QP_GUIX_ROOT/include
+  export CPATH=$CPATH:$QP_GUIX_ROOT/include
+fi
+
+
+
