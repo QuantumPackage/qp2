@@ -47,22 +47,6 @@ and running |qp| can be installed using:
 
 in the :file:`qp2` root directory.
 
-Installation on a x86_64 system without network access
-======================================================
-
-Fetch the :file:`qp2-environment.tar.gz` archive containing all the
-dependencies `here <http://localhost>`_.  Unpack the archive in the
-:file:`guix` directory:
-
-.. code:: bash
-
-   $ cd qp2/guix
-   $ wget qp2-environment.tar.gz
-   $ tar -zxf qp2-environment.tar.gz
-   $ ls
-   gnu  manifest.scm  qp2-environment.tar.gz  qp2.scm
-
-That's it!
 
 Compilation
 ===========
