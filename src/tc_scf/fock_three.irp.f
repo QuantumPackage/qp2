@@ -16,6 +16,7 @@ BEGIN_PROVIDER [ double precision, fock_3_mat, (mo_num, mo_num)]
      fock_3_mat(j,i) = -contrib
     enddo
    enddo
+  else if(bi_ortho.and.three_body_h_tc)then
 !!  !$OMP END DO
 !!  !$OMP END PARALLEL
 !!  do i = 1, mo_num

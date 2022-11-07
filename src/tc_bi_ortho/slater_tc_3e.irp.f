@@ -169,8 +169,6 @@ subroutine single_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
        !   is == ispin  in :::   s1 is is  s1 is is      s1 is is s1 is is
        !                       < h1 j  i | p1 j  i > - < h1 j  i | p1 i j >
        !                                                   
-!      direct_int =   three_body_ints_bi_ort(jj,ii,p1,jj,ii,h1) ! USES THE 6-IDX tensor 
-!      exchange_int = three_body_ints_bi_ort(jj,ii,p1,ii,jj,h1) ! USES THE 6-IDX tensor 
        direct_int   = three_e_4_idx_direct_bi_ort(jj,ii,p1,h1)  
        exchange_int = three_e_4_idx_exch23_bi_ort(jj,ii,p1,h1) 
        hthree += direct_int - exchange_int
@@ -182,14 +180,10 @@ subroutine single_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
       ii = occ(i,ispin)  ! other spin 
       do j = 1, Ne(s1)   ! same spin 
        jj = occ(j,s1)    ! same spin 
-!      direct_int = three_body_ints_bi_ort(jj,ii,p1,jj,ii,h1) ! USES THE 6-IDX tensor 
-!      exchange_int = three_body_ints_bi_ort(jj,ii,p1,h1,ii,jj) ! exchange the spin s1 :: 6-IDX tensor
        direct_int   = three_e_4_idx_direct_bi_ort(jj,ii,p1,h1)
        exchange_int = three_e_4_idx_exch13_bi_ort(jj,ii,p1,h1)
        !              < h1 j  i | p1 j i > - < h1 j i | j p1 i >
        hthree += direct_int - exchange_int
-!       print*,'h1,p1,ii,jj = ',h1,p1,ii,jj
-!       print*,direct_int, exchange_int
       enddo
      enddo
 !
