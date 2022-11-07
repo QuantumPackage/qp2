@@ -484,11 +484,11 @@ subroutine dress_calc(v,dress,u,N_st,sze)
   integer, intent(in)              :: N_st,sze
   double precision, intent(in)     :: u(sze,N_st),dress(sze)
   double precision, intent(inout)  :: v(sze,N_st)
-  integer :: i,j,istate
+  integer :: i,istate
   
   do istate = 1, N_st
    do i = 1, sze
-    v(i,istate) += dress(i) * u(j,istate)
+    v(i,istate) += dress(i) * u(i,istate)
    enddo
   enddo
 end
