@@ -214,7 +214,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 ! Resolution with the Newton method:
 
 
-! Initialization
+  ! Initialization
   epsilon = 1d-4
   lambda =MAX(0d0, -e_val(1))
   
@@ -295,9 +295,9 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   print*, 'w_1^T . g =', tmp_wtg(1)
 
   ! Debug
-  if (debug) then
-      print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
-  endif
+  !if (debug) then
+  !    print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
+  !endif
 
   ! Initialization  
   i = 1

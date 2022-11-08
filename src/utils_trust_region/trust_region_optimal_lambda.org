@@ -294,9 +294,9 @@ Resolution with the Newton method:
   print*, 'w_1^T . g =', tmp_wtg(1)
 
   ! Debug
-  if (debug) then
-      print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
-  endif
+  !if (debug) then
+  !    print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
+  !endif
 
   ! Initialization  
   i = 1

@@ -60,12 +60,12 @@ subroutine apply_mo_rotation(R,prev_mos)
   prev_mos = mo_coef
   mo_coef = new_mos
 
-  if (debug) then  
-    print*,'New mo_coef : '
-    do i = 1, mo_num
-      write(*,'(100(F10.5))') mo_coef(i,:)
-    enddo
-  endif
+  !if (debug) then  
+  !  print*,'New mo_coef : '
+  !  do i = 1, mo_num
+  !    write(*,'(100(F10.5))') mo_coef(i,:)
+  !  enddo
+  !endif
 
   ! Save the new MOs and change the label
   mo_label = 'MCSCF'
