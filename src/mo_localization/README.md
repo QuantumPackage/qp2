@@ -85,6 +85,23 @@ symmetry with just a small change in the energy:
 qp set mo_localization angle_pre_rot 1e-3
 ``` 
 
+# With or without hessian + trust region
+With hessian +  trust region
+```
+qp set mo_localization localisation_use_hessian true
+```
+It uses the trust region algorithm with the diagonal of the hessian of the
+localization criterion with respect to the MO rotations.
+
+Without the hessian and the trust region
+```
+qp set mo_localization localisation_use_hessian false
+```
+By doing so it does not require to store the hessian but the
+convergence is not easy, in particular for virtual MOs.
+It seems that it not possible to converge with Pipek-Mezey
+localization with this approach.
+
 # Further improvements: 
 - Cleaner repo 
 - Correction of the errors in the documentations 

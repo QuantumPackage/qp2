@@ -295,147 +295,222 @@ subroutine run_localization
 
     ! Size for the 2D -> 1D transformation 
     tmp_n = tmp_list_size * (tmp_list_size - 1)/2
-  
-    ! Allocation of temporary arrays
-    allocate(v_grad(tmp_n), H(tmp_n, tmp_n), tmp_m_x(tmp_list_size, tmp_list_size))
-    allocate(tmp_R(tmp_list_size, tmp_list_size))
-    allocate(tmp_x(tmp_n), W(tmp_n,tmp_n), e_val(tmp_n), key(tmp_n))
 
-    ! ### Initialization ###
-    delta = 0d0 ! can be deleted (normally)
-    nb_iter = 0 ! Must start at 0 !!!
-    rho = 0.5d0 ! Must be 0.5
+    ! Without hessian + trust region 
+    if (.not. localization_use_hessian) then
+       
+      ! Allocation of temporary arrays
+      allocate(v_grad(tmp_n), tmp_m_x(tmp_list_size, tmp_list_size))
+      allocate(tmp_R(tmp_list_size, tmp_list_size), tmp_x(tmp_n))
 
-    ! Compute the criterion before the loop
-    call criterion_localization(tmp_list_size, tmp_list, prev_criterion)
+      ! Criterion
+      call criterion_localization(tmp_list_size, tmp_list, prev_criterion)
 
-    ! Loop until the convergence
-    do while (not_converged)
+      ! Init
+      nb_iter = 0
+      delta = 1d0
 
-      print*,''
-      print*,'***********************'
-      print*,'Iteration', nb_iter
-      print*,'***********************'
-      print*,''
-  
-      ! Gradient
-      call gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
-      ! Diagonal hessian
-      call hessian_localization(tmp_n, tmp_list_size, tmp_list, H)
-      
-      ! Diagonalization of the diagonal hessian by hands
-      !call diagonalization_hessian(tmp_n,H,e_val,w)
-      do i = 1, tmp_n
-        e_val(i) = H(i,i)
-      enddo
+      !Loop
+      do while (not_converged)
+         
+        print*,''
+        print*,'***********************'
+        print*,'Iteration', nb_iter
+        print*,'***********************'
+        print*,''
+        
+        ! Angles of rotation
+        call theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
+        tmp_m_x = - tmp_m_x * delta
 
-      ! Key list for dsort
-      do i = 1, tmp_n 
-        key(i) = i
-      enddo
-
-      ! Sort of the eigenvalues
-      call dsort(e_val, key, tmp_n)
-
-      ! Eigenvectors
-      W = 0d0
-      do i = 1, tmp_n
-        j = key(i)
-        W(j,i) = 1d0
-      enddo
-
-      ! To enter in the loop just after
-      cancel_step = .True.
-      nb_sub_iter = 0 
-
-      ! Loop to reduce the trust radius until the criterion decreases and rho >= thresh_rho
-      do while (cancel_step)
-        print*,'-----------------------------'
-        print*, mo_class(tmp_list(1))
-        print*,'Iteration:', nb_iter
-        print*,'Sub iteration:', nb_sub_iter
-        print*,'-----------------------------'
-
-        ! Hessian,gradient,Criterion -> x 
-        call trust_region_step_w_expected_e(tmp_n, H, W, e_val, v_grad, prev_criterion, &
-             rho, nb_iter, delta, criterion_model, tmp_x, must_exit)
-
-        ! Internal loop exit condition
-        if (must_exit) then
-          print*,'trust_region_step_w_expected_e sent: Exit'
-          exit 
-        endif
-
-        ! 1D tmp -> 2D tmp 
-        call vec_to_mat_v2(tmp_n, tmp_list_size, tmp_x, tmp_m_x)
-
-        ! Rotation submatrix (square matrix tmp_list_size by tmp_list_size)
+        ! Rotation submatrix
         call rotation_matrix(tmp_m_x, tmp_list_size, tmp_R, tmp_list_size, tmp_list_size, &
              info, enforce_step_cancellation)
 
+        ! To ensure that the rotation matrix is unitary
         if (enforce_step_cancellation) then
           print*, 'Step cancellation, too large error in the rotation matrix'
-          rho = 0d0
+          delta = delta * 0.5d0
           cycle
+        else
+          delta = min(delta * 2d0, 1d0)
         endif
 
-        ! tmp_R to R, subspace to full space
+        ! Full rotation matrix and application of the rotation
         call sub_to_full_rotation_matrix(tmp_list_size, tmp_list, tmp_R, R)
-      
-        ! Rotation of the MOs
-        call apply_mo_rotation(R, prev_mos)   
+        call apply_mo_rotation(R, prev_mos)
 
-        ! Update the things related to mo_coef
+        ! Update the needed data
         call update_data_localization()
 
-        ! Update the criterion
+        ! New criterion
         call criterion_localization(tmp_list_size, tmp_list, criterion)
         print*,'Criterion:', trim(mo_class(tmp_list(1))), nb_iter, criterion
+        print*,'Max elem :', max_elem
+        print*,'Delta    :', delta
+        
+        nb_iter = nb_iter + 1
 
-        ! Criterion -> step accepted or rejected 
-        call trust_region_is_step_cancelled(nb_iter, prev_criterion, criterion, &
-             criterion_model, rho, cancel_step)
-
-        ! Cancellation of the step, previous MOs
-        if (cancel_step) then
-          mo_coef = prev_mos
+        ! Exit
+        if (nb_iter >= localization_max_nb_iter .or. dabs(max_elem) < thresh_loc_max_elem_grad) then
+           not_converged = .False.
         endif
-
-        nb_sub_iter = nb_sub_iter + 1
       enddo
-      !call save_mos() !### depend of the time for 1 iteration
 
-      ! To exit the external loop if must_exti = .True.
-      if (must_exit) then
-        exit
-      endif 
+      ! Save the changes
+      call update_data_localization()
+      call save_mos()
+      TOUCH mo_coef
 
-      ! Step accepted, nb iteration + 1
-      nb_iter = nb_iter + 1
+      ! Deallocate
+      deallocate(v_grad, tmp_m_x, tmp_list)
+      deallocate(tmp_R, tmp_x)
 
-      ! External loop exit conditions
-      if (DABS(max_elem) < thresh_loc_max_elem_grad) then
-        not_converged = .False.
-      endif
-      if (nb_iter > localization_max_nb_iter) then
-        not_converged = .False.
-      endif
-    enddo
-
-    ! Deallocation of temporary arrays
-    deallocate(v_grad, H, tmp_m_x, tmp_R, tmp_list, tmp_x, W, e_val, key)
+    ! Trust region
+    else
     
-    ! Save the MOs
-    call save_mos()
-    TOUCH mo_coef
+      ! Allocation of temporary arrays
+      allocate(v_grad(tmp_n), H(tmp_n, tmp_n), tmp_m_x(tmp_list_size, tmp_list_size))
+      allocate(tmp_R(tmp_list_size, tmp_list_size))
+      allocate(tmp_x(tmp_n), W(tmp_n,tmp_n), e_val(tmp_n), key(tmp_n))
+
+      ! ### Initialization ###
+      delta = 0d0 ! can be deleted (normally)
+      nb_iter = 0 ! Must start at 0 !!!
+      rho = 0.5d0 ! Must be 0.5
+
+      ! Compute the criterion before the loop
+      call criterion_localization(tmp_list_size, tmp_list, prev_criterion)
+
+      ! Loop until the convergence
+      do while (not_converged)
+
+        print*,''
+        print*,'***********************'
+        print*,'Iteration', nb_iter
+        print*,'***********************'
+        print*,''
+  
+        ! Gradient
+        call gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
+        ! Diagonal hessian
+        call hessian_localization(tmp_n, tmp_list_size, tmp_list, H)
+        
+        ! Diagonalization of the diagonal hessian by hands
+        !call diagonalization_hessian(tmp_n,H,e_val,w)
+        do i = 1, tmp_n
+          e_val(i) = H(i,i)
+        enddo
+
+        ! Key list for dsort
+        do i = 1, tmp_n 
+          key(i) = i
+        enddo
+
+        ! Sort of the eigenvalues
+        call dsort(e_val, key, tmp_n)
+
+        ! Eigenvectors
+        W = 0d0
+        do i = 1, tmp_n
+          j = key(i)
+          W(j,i) = 1d0
+        enddo
+
+        ! To enter in the loop just after
+        cancel_step = .True.
+        nb_sub_iter = 0 
+
+        ! Loop to reduce the trust radius until the criterion decreases and rho >= thresh_rho
+        do while (cancel_step)
+          print*,'-----------------------------'
+          print*, mo_class(tmp_list(1))
+          print*,'Iteration:', nb_iter
+          print*,'Sub iteration:', nb_sub_iter
+          print*,'-----------------------------'
+
+          ! Hessian,gradient,Criterion -> x 
+          call trust_region_step_w_expected_e(tmp_n, H, W, e_val, v_grad, prev_criterion, &
+               rho, nb_iter, delta, criterion_model, tmp_x, must_exit)
+
+          ! Internal loop exit condition
+          if (must_exit) then
+            print*,'trust_region_step_w_expected_e sent: Exit'
+            exit 
+          endif
+
+          ! 1D tmp -> 2D tmp 
+          call vec_to_mat_v2(tmp_n, tmp_list_size, tmp_x, tmp_m_x)
+
+          ! Rotation submatrix (square matrix tmp_list_size by tmp_list_size)
+          call rotation_matrix(tmp_m_x, tmp_list_size, tmp_R, tmp_list_size, tmp_list_size, &
+               info, enforce_step_cancellation)
+
+          if (enforce_step_cancellation) then
+            print*, 'Step cancellation, too large error in the rotation matrix'
+            rho = 0d0
+            cycle
+          endif
+
+          ! tmp_R to R, subspace to full space
+          call sub_to_full_rotation_matrix(tmp_list_size, tmp_list, tmp_R, R)
+        
+          ! Rotation of the MOs
+          call apply_mo_rotation(R, prev_mos)   
+
+          ! Update the things related to mo_coef
+          call update_data_localization()
+
+          ! Update the criterion
+          call criterion_localization(tmp_list_size, tmp_list, criterion)
+          print*,'Criterion:', trim(mo_class(tmp_list(1))), nb_iter, criterion
+
+          ! Criterion -> step accepted or rejected 
+          call trust_region_is_step_cancelled(nb_iter, prev_criterion, criterion, &
+               criterion_model, rho, cancel_step)
+
+          ! Cancellation of the step, previous MOs
+          if (cancel_step) then
+            mo_coef = prev_mos
+          endif
+
+          nb_sub_iter = nb_sub_iter + 1
+        enddo
+        !call save_mos() !### depend of the time for 1 iteration
+
+        ! To exit the external loop if must_exti = .True.
+        if (must_exit) then
+          exit
+        endif 
+
+        ! Step accepted, nb iteration + 1
+        nb_iter = nb_iter + 1
+
+        ! External loop exit conditions
+        if (DABS(max_elem) < thresh_loc_max_elem_grad) then
+          not_converged = .False.
+        endif
+        if (nb_iter > localization_max_nb_iter) then
+          not_converged = .False.
+        endif
+      enddo
+
+      ! Deallocation of temporary arrays
+      deallocate(v_grad, H, tmp_m_x, tmp_R, tmp_list, tmp_x, W, e_val, key)
+      
+      ! Save the MOs
+      call save_mos()
+      TOUCH mo_coef
  
-    ! Debug
-    if (debug_hf) then
-      touch mo_coef
-      print*,'HF energy:', HF_energy
+      ! Debug
+      if (debug_hf) then
+        touch mo_coef
+        print*,'HF energy:', HF_energy
+      endif
+      
     endif
-    
   enddo
+
 
   TOUCH mo_coef 
 

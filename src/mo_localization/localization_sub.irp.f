@@ -38,9 +38,8 @@ subroutine gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_ele
   elseif (localization_method== 'pipek') then
     call gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
   else
-    v_grad = 0d0
-    max_elem = 0d0
-    norm_grad = 0d0
+    print*,'Unkown method:'//localization_method
+    call abort
   endif
 
 end
@@ -74,7 +73,8 @@ subroutine hessian_localization(tmp_n, tmp_list_size, tmp_list, H)
   elseif (localization_method == 'pipek') then
     call hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
   else
-    H = 0d0
+    print*,'Unkown method: '//localization_method
+    call abort
   endif
 
 end
@@ -106,7 +106,8 @@ subroutine criterion_localization(tmp_list_size, tmp_list,criterion)
     !call criterion_PM(tmp_list_size, tmp_list,criterion)
     call criterion_PM_v3(tmp_list_size, tmp_list, criterion)
   else
-    criterion = 0d0
+    print*,'Unkown method: '//localization_method
+    call abort
   endif
 
 end
@@ -129,7 +130,43 @@ subroutine update_data_localization()
   elseif (localization_method == 'pipek') then
     ! Nothing required
   else
+    print*,'Unkown method: '//localization_method
+    call abort
   endif
+end
+
+
+
+! Angles:
+
+! Output:
+! | tmp_m_x(tmp_list_size, tmp_list_size) | double precision | Angles for the rotations in the subspace |
+! | max_elem                              | double precision | Maximal angle                            |
+
+
+
+subroutine theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
+  
+  include 'pi.h'
+
+  implicit none
+
+  BEGIN_DOC
+  ! Compute the rotation angles between the MOs for the chosen localization method
+  END_DOC
+  
+  integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
+  double precision, intent(out) :: tmp_m_x(tmp_list_size,tmp_list_size), max_elem
+
+  if (localization_method == 'boys') then
+    call theta_FB(tmp_list, tmp_list_size, tmp_m_x, max_elem)
+  elseif (localization_method== 'pipek') then
+    call theta_PM(tmp_list, tmp_list_size, tmp_m_x, max_elem)
+  else
+    print*,'Unkown method: '//localization_method
+    call abort
+  endif
+
 end
 
 ! Gradient
@@ -526,7 +563,7 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   BEGIN_DOC
   ! Compute gradient for the Pipek-Mezey localization
   END_DOC
-  
+
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:), tmp_int(:,:)
@@ -539,54 +576,54 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   m_grad = 0d0
 
   do a = 1, nucl_num ! loop over the nuclei
-    tmp_int = 0d0 ! Initialization for each nuclei
+     tmp_int = 0d0 ! Initialization for each nuclei
 
-    ! Loop over the MOs of the a given mo_class to compute <i|Q_a|j>
-    do tmp_j = 1, tmp_list_size
-      j = tmp_list(tmp_j) 
-      do tmp_i = 1, tmp_list_size
-        i = tmp_list(tmp_i)
-        do rho = 1, ao_num ! loop over all the AOs
-          do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
-            mu = nucl_aos(a,b) ! AO centered on atom a 
+     ! Loop over the MOs of the a given mo_class to compute <i|P_a|j>
+     do tmp_j = 1, tmp_list_size
+        j = tmp_list(tmp_j) 
+        do tmp_i = 1, tmp_list_size
+           i = tmp_list(tmp_i)
+           do rho = 1, ao_num ! loop over all the AOs
+              do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
+                 mu = nucl_aos(a,b) ! AO centered on atom a 
 
-            tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
-                                   + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+                 tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
+                      + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
 
-          enddo
-        enddo  
-      enddo
-    enddo
+              enddo
+           enddo
+        enddo
+     enddo
 
-    ! Gradient
-    do tmp_j = 1, tmp_list_size
-      do tmp_i = 1, tmp_list_size
+     ! Gradient
+     do tmp_j = 1, tmp_list_size
+        do tmp_i = 1, tmp_list_size
 
-        m_grad(tmp_i,tmp_j) = m_grad(tmp_i,tmp_j) +  4d0 * tmp_int(tmp_i,tmp_j) * (tmp_int(tmp_i,tmp_i) - tmp_int(tmp_j,tmp_j))
+           m_grad(tmp_i,tmp_j) = m_grad(tmp_i,tmp_j) +  4d0 * tmp_int(tmp_i,tmp_j) * (tmp_int(tmp_i,tmp_i) - tmp_int(tmp_j,tmp_j))
 
-      enddo
-    enddo
+        enddo
+     enddo
 
   enddo
 
   ! 2D -> 1D
   do tmp_k = 1, tmp_n
-    call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
-    v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
+     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
+     v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
   enddo
 
   ! Maximum element in the gradient
   max_elem = 0d0
   do tmp_k = 1, tmp_n
-    if (ABS(v_grad(tmp_k)) > max_elem) then
-      max_elem = ABS(v_grad(tmp_k))
-    endif
-  enddo 
-  
+     if (ABS(v_grad(tmp_k)) > max_elem) then
+        max_elem = ABS(v_grad(tmp_k))
+     endif
+  enddo
+
   ! Norm of the gradient
   norm_grad = 0d0
   do tmp_k = 1, tmp_n
-    norm_grad = norm_grad + v_grad(tmp_k)**2
+     norm_grad = norm_grad + v_grad(tmp_k)**2
   enddo
   norm_grad = dsqrt(norm_grad)
 
@@ -596,7 +633,7 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   ! Deallocation
   deallocate(m_grad,tmp_int)
 
-end
+end subroutine grad_pipek
 
 ! Gradient
 
@@ -1311,6 +1348,236 @@ subroutine criterion_FB(tmp_list_size, tmp_list, criterion)
   criterion = - criterion
 
 end subroutine
+
+subroutine theta_FB(l, n, m_x, max_elem)
+
+  include 'pi.h'
+
+  BEGIN_DOC
+  ! Compute the angles to minimize the Foster-Boys criterion by using pairwise rotations of the MOs
+  ! Warning: you must give - the angles to build the rotation matrix...
+  END_DOC
+
+  implicit none
+
+  integer, intent(in)           :: n, l(n)
+  double precision, intent(out) :: m_x(n,n), max_elem
+
+  integer                       :: i,j, tmp_i, tmp_j
+  double precision, allocatable :: cos4theta(:,:), sin4theta(:,:)
+  double precision, allocatable :: A(:,:), B(:,:), beta(:,:), gamma(:,:)
+  integer                       :: idx_i,idx_j
+
+  allocate(cos4theta(n, n), sin4theta(n, n))
+  allocate(A(n,n), B(n,n), beta(n,n), gamma(n,n))
+
+  do tmp_j = 1, n
+    j = l(tmp_j)
+    do tmp_i = 1, n
+      i = l(tmp_i)
+      A(tmp_i,tmp_j) = mo_dipole_x(i,j)**2 - 0.25d0 * (mo_dipole_x(i,i) - mo_dipole_x(j,j))**2 &
+                     + mo_dipole_y(i,j)**2 - 0.25d0 * (mo_dipole_y(i,i) - mo_dipole_y(j,j))**2 &
+                     + mo_dipole_z(i,j)**2 - 0.25d0 * (mo_dipole_z(i,i) - mo_dipole_z(j,j))**2
+    enddo
+    A(j,j) = 0d0
+  enddo
+
+  do tmp_j = 1, n
+    j = l(tmp_j)
+    do tmp_i = 1, n
+      i = l(tmp_i)
+      B(tmp_i,tmp_j) = mo_dipole_x(i,j) * (mo_dipole_x(i,i) - mo_dipole_x(j,j)) &
+                     + mo_dipole_y(i,j) * (mo_dipole_y(i,i) - mo_dipole_y(j,j)) &
+                     + mo_dipole_z(i,j) * (mo_dipole_z(i,i) - mo_dipole_z(j,j))
+    enddo
+  enddo
+
+  !do tmp_j = 1, n
+  !  j = l(tmp_j)
+  !  do tmp_i = 1, n
+  !    i = l(tmp_i)
+  !    beta(tmp_i,tmp_j) =  (mo_dipole_x(i,i) - mo_dipole_x(j,j)) - 4d0 * mo_dipole_x(i,j)**2 &
+  !               + (mo_dipole_y(i,i) - mo_dipole_y(j,j)) - 4d0 * mo_dipole_y(i,j)**2 &
+  !               + (mo_dipole_z(i,i) - mo_dipole_z(j,j)) - 4d0 * mo_dipole_z(i,j)**2
+  !  enddo
+  !enddo
+
+  !do tmp_j = 1, n
+  !  j = l(tmp_j)
+  !  do tmp_i = 1, n
+  !    i = l(tmp_i)
+  !    gamma(tmp_i,tmp_j) = 4d0 * ( mo_dipole_x(i,j) * (mo_dipole_x(i,i) - mo_dipole_x(j,j)) &
+  !                       + mo_dipole_y(i,j) * (mo_dipole_y(i,i) - mo_dipole_y(j,j)) &
+  !                       + mo_dipole_z(i,j) * (mo_dipole_z(i,i) - mo_dipole_z(j,j)))
+  !  enddo
+  !enddo
+
+  !
+  !do j = 1, n
+  !  do i = 1, n
+  !    cos4theta(i,j) = - A(i,j) / dsqrt(A(i,j)**2 + B(i,j)**2)
+  !  enddo
+  !enddo
+
+  !do j = 1, n
+  !  do i = 1, n
+  !    sin4theta(i,j) = B(i,j) / dsqrt(A(i,j)**2 + B(i,j)**2)
+  !  enddo
+  !enddo
+
+  ! Theta
+  do j = 1, n
+    do i = 1, n
+      m_x(i,j) = 0.25d0 * atan2(B(i,j), -A(i,j))
+      !m_x(i,j) = 0.25d0 * atan2(sin4theta(i,j), cos4theta(i,j))
+    enddo
+  enddo
+
+  ! Enforce a perfect antisymmetry
+  do j = 1, n-1
+    do i = j+1, n
+      m_x(j,i) = - m_x(i,j)
+    enddo
+  enddo
+  do i = 1, n
+    m_x(i,i) = 0d0
+  enddo
+
+  ! Max
+  max_elem = 0d0
+  do j = 1, n-1
+    do i = j+1, n
+      if (dabs(m_x(i,j)) > dabs(max_elem)) then
+        max_elem = m_x(i,j)
+        !idx_i = i
+        !idx_j = j
+      endif
+    enddo
+  enddo
+
+  ! Debug
+  !print*,''
+  !print*,'sin/B'
+  !do i = 1, n
+  !  write(*,'(100F10.4)') sin4theta(i,:)
+  !  !B(i,:)
+  !enddo
+  !print*,'cos/A'
+  !do i = 1, n
+  !  write(*,'(100F10.4)') cos4theta(i,:)
+  !  !A(i,:)
+  !enddo
+  !print*,'X'
+  !!m_x = 0d0
+  !!m_x(idx_i,idx_j) = max_elem
+  !!m_x(idx_j,idx_i) = -max_elem
+  !do i = 1, n
+  !  write(*,'(100F10.4)') m_x(i,:)
+  !enddo
+  !print*,idx_i,idx_j,max_elem
+
+  max_elem = dabs(max_elem)
+  
+  deallocate(cos4theta, sin4theta)
+  deallocate(A,B,beta,gamma)
+  
+end
+
+subroutine theta_PM(l, n, m_x, max_elem)
+  
+  include 'pi.h'
+
+  BEGIN_DOC
+  ! Compute the angles to minimize the Foster-Boys criterion by using pairwise rotations of the MOs
+  ! Warning: you must give - the angles to build the rotation matrix...
+  END_DOC
+
+  implicit none
+
+  integer, intent(in)           :: n, l(n)
+  double precision, intent(out) :: m_x(n,n), max_elem
+
+  integer                       :: a,b,i,j,tmp_i,tmp_j,rho,mu,nu,idx_i,idx_j
+  double precision, allocatable :: Aij(:,:), Bij(:,:), Pa(:,:)
+
+  allocate(Aij(n,n), Bij(n,n), Pa(n,n))
+
+  do a = 1, nucl_num ! loop over the nuclei
+    Pa = 0d0 ! Initialization for each nuclei
+
+    ! Loop over the MOs of the a given mo_class to compute <i|P_a|j>
+    do tmp_j = 1, n
+      j = l(tmp_j) 
+      do tmp_i = 1, n
+         i = l(tmp_i)
+        do rho = 1, ao_num ! loop over all the AOs
+          do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
+            mu = nucl_aos(a,b) ! AO centered on atom a 
+
+            Pa(tmp_i,tmp_j) = Pa(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
+                                   + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
+
+          enddo
+        enddo  
+      enddo
+    enddo
+
+    ! A
+    do j = 1, n
+      do i = 1, n
+        Aij(i,j) = Aij(i,j) + Pa(i,j)**2 - 0.25d0 * (Pa(i,i) - Pa(j,j))**2
+      enddo
+    enddo
+    
+    ! B
+    do j = 1, n
+      do i = 1, n
+        Bij(i,j) = Bij(i,j) + Pa(i,j) * (Pa(i,i) - Pa(j,j))
+      enddo
+    enddo
+
+  enddo
+
+  ! Theta
+  do j = 1, n
+    do i = 1, n
+      m_x(i,j) = 0.25d0 * atan2(Bij(i,j), -Aij(i,j))
+    enddo
+  enddo
+
+  ! Enforce a perfect antisymmetry
+  do j = 1, n-1
+    do i = j+1, n
+      m_x(j,i) = - m_x(i,j)
+    enddo
+  enddo
+  do i = 1, n
+    m_x(i,i) = 0d0
+  enddo
+
+  ! Max
+  max_elem = 0d0
+  do j = 1, n-1
+    do i = j+1, n
+      if (dabs(m_x(i,j)) > dabs(max_elem)) then
+        max_elem = m_x(i,j)
+        idx_i = i
+        idx_j = j
+      endif
+    enddo
+  enddo
+
+  ! Debug
+  !do i = 1, n
+  !  write(*,'(100F10.4)') m_x(i,:)
+  !enddo
+  !print*,'Max',idx_i,idx_j,max_elem
+
+  max_elem = dabs(max_elem)
+
+  deallocate(Aij,Bij,Pa)
+
+end
 
 ! Spatial extent
 
