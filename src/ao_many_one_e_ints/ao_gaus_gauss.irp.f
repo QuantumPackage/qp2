@@ -192,7 +192,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   fact_g      = beta * delta * gama_inv * ( (B_center(1) - D_center(1)) * (B_center(1) - D_center(1)) &
                                           + (B_center(2) - D_center(2)) * (B_center(2) - D_center(2)) &
                                           + (B_center(3) - D_center(3)) * (B_center(3) - D_center(3)) )
-  if(fact_g .gt. 80d0) return
+  if(fact_g .gt. 10d0) return
   fact_g = dexp(-fact_g)
 
   ! ---
@@ -206,7 +206,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
   do l = 1, ao_prim_num(i)
     alpha1 = ao_expo_ordered_transp                    (l,i)     
     coef1  = fact_g * ao_coef_normalized_ordered_transp(l,i)
-    !if(dabs(coef1) .lt. 1d-12) cycle
+    if(dabs(coef1) .lt. 1d-12) cycle
 
     do k = 1, ao_prim_num(j)
       alpha2 = ao_expo_ordered_transp                   (k,j)
