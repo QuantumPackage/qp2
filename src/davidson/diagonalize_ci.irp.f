@@ -310,7 +310,7 @@ END_PROVIDER
        H_prime(1:N_det,1:N_det) = h_matrix_all_dets_complex(1:N_det,1:N_det) +  &
          alpha * s2_matrix_all_dets(1:N_det,1:N_det)
        do j=1,N_det
-         H_prime(j,j) = H_prime(j,j) + alpha*(s_z2_sz - expected_s2)
+         H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
        enddo
        call lapack_diag_complex(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
        ci_electronic_energy_complex(:) = 0.d0
