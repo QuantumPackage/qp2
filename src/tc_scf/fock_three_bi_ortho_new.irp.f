@@ -11,6 +11,7 @@ BEGIN_PROVIDER [ double precision, fock_a_abb_3e_bi_orth, (mo_num, mo_num)]
    
    do j = 1, elec_beta_num
     do k = j+1, elec_beta_num
+      ! see contrib_3e_soo
       call  give_integrals_3_body_bi_ort(a, k, j, i, k, j, direct_int) ! < a k j | i k j >
       call  give_integrals_3_body_bi_ort(a, k, j, i, j, k, exch_23_int)! < a k j | i j k > : E_23
       fock_a_abb_3e_bi_orth(a,i) += direct_int - exch_23_int 

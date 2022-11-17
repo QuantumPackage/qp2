@@ -169,7 +169,7 @@ END_PROVIDER
 
     do j = 1, nucl_num
       tmp_alphaj = dble(List_all_comb_b3(j,i)) * j1b_pen(j)
-
+      print*,List_all_comb_b3(j,i),j1b_pen(j)
       List_all_comb_b3_expo(i)   += tmp_alphaj
       List_all_comb_b3_cent(1,i) += tmp_alphaj * nucl_coord(j,1)
       List_all_comb_b3_cent(2,i) += tmp_alphaj * nucl_coord(j,2)
