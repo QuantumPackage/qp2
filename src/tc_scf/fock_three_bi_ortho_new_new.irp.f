@@ -71,19 +71,25 @@ BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth_new, (mo_num, mo_num)]
     enddo
    enddo
 
-   do j = 1, elec_beta_num
+   do j = 1, elec_alpha_num
     do k = elec_beta_num+1, elec_alpha_num
      call contrib_3e_sss(a,i,j,k,contrib_sss)
      fock_a_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_sss 
     enddo
    enddo
-  
-   do j = elec_beta_num+1, elec_alpha_num
-    do k = elec_beta_num+1, elec_alpha_num
-     call contrib_3e_sss(a,i,j,k,contrib_sss)
-     fock_a_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_sss 
-    enddo
-   enddo
+!   do j = 1, elec_beta_num
+!    do k = elec_beta_num+1, elec_alpha_num
+!     call contrib_3e_sss(a,i,j,k,contrib_sss)
+!     fock_a_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_sss 
+!    enddo
+!   enddo
+!  
+!   do j = elec_beta_num+1, elec_alpha_num
+!    do k = elec_beta_num+1, elec_alpha_num
+!     call contrib_3e_sss(a,i,j,k,contrib_sss)
+!     fock_a_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_sss 
+!    enddo
+!   enddo
 
   enddo
  enddo
@@ -119,22 +125,28 @@ BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth_new, (mo_num, mo_num)]
  do i = 1, mo_num
   do a = 1, mo_num
    
-   do j = 1, elec_beta_num
-    do k = 1, elec_beta_num
-      call contrib_3e_sss(a,i,j,k,contrib_sss)
-      call contrib_3e_soo(a,i,j,k,contrib_soo)
-      call contrib_3e_sos(a,i,j,k,contrib_sos)
-      fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * (contrib_sss + contrib_soo) + contrib_sos
-    enddo
-   enddo
-!   fock_b_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
+!   do j = 1, elec_beta_num
+!    do k = 1, elec_beta_num
+!      call contrib_3e_sss(a,i,j,k,contrib_sss)
+!      call contrib_3e_soo(a,i,j,k,contrib_soo)
+!      call contrib_3e_sos(a,i,j,k,contrib_sos)
+!      fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * (contrib_sss + contrib_soo) + contrib_sos
+!    enddo
+!   enddo
+   fock_b_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
 
    do j = elec_beta_num + 1, elec_alpha_num 
-    do k = 1, elec_beta_num
+    do k = 1, elec_alpha_num
       call contrib_3e_soo(a,i,j,k,contrib_soo)
       fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_soo 
     enddo
    enddo
+!   do j = elec_beta_num + 1, elec_alpha_num 
+!    do k = 1, elec_beta_num
+!      call contrib_3e_soo(a,i,j,k,contrib_soo)
+!      fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_soo 
+!    enddo
+!   enddo
 
    do j = 1, elec_beta_num
     do k = elec_beta_num+1, elec_alpha_num
@@ -144,12 +156,12 @@ BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth_new, (mo_num, mo_num)]
     enddo
    enddo
 
-   do j = elec_beta_num+1, elec_alpha_num
-    do k = elec_beta_num+1, elec_alpha_num
-     call contrib_3e_soo(a,i,j,k,contrib_soo)
-     fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_soo
-    enddo
-   enddo
+!   do j = elec_beta_num+1, elec_alpha_num
+!    do k = elec_beta_num+1, elec_alpha_num
+!     call contrib_3e_soo(a,i,j,k,contrib_soo)
+!     fock_b_tot_3e_bi_orth_new(a,i) += 0.5d0 * contrib_soo
+!    enddo
+!   enddo
 
   enddo
  enddo
