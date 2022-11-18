@@ -1,28 +1,28 @@
 
-BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth_new, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
  implicit none
  integer :: i,a,j,k
  double precision :: contrib_sss, contrib_sos, contrib_soo,contrib
- fock_a_tot_3e_bi_orth_new = 0.d0
+ fock_a_tot_3e_bi_orth = 0.d0
  do i = 1, mo_num
   do a = 1, mo_num
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp1_bi_ortho(a,i)
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp2_bi_ortho(a,i)
+   fock_a_tot_3e_bi_orth(a,i) += fock_cs_3e_bi_orth(a,i)
+   fock_a_tot_3e_bi_orth(a,i) += fock_a_tmp1_bi_ortho(a,i)
+   fock_a_tot_3e_bi_orth(a,i) += fock_a_tmp2_bi_ortho(a,i)
   enddo
  enddo
 END_PROVIDER 
 
-BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth_new, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, fock_b_tot_3e_bi_orth, (mo_num, mo_num)]
  implicit none
  integer :: i,a,j,k
  double precision :: contrib_sss, contrib_sos, contrib_soo,contrib
- fock_b_tot_3e_bi_orth_new = 0.d0
+ fock_b_tot_3e_bi_orth = 0.d0
  do i = 1, mo_num
   do a = 1, mo_num
-   fock_b_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
-   fock_b_tot_3e_bi_orth_new(a,i) += fock_b_tmp2_bi_ortho(a,i)
-   fock_b_tot_3e_bi_orth_new(a,i) += fock_b_tmp1_bi_ortho(a,i)
+   fock_b_tot_3e_bi_orth(a,i) += fock_cs_3e_bi_orth(a,i)
+   fock_b_tot_3e_bi_orth(a,i) += fock_b_tmp2_bi_ortho(a,i)
+   fock_b_tot_3e_bi_orth(a,i) += fock_b_tmp1_bi_ortho(a,i)
   enddo
  enddo
 END_PROVIDER 
