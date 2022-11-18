@@ -1,16 +1,14 @@
-BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
+
+BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth_new, (mo_num, mo_num)]
  implicit none
  integer :: i,a,j,k
- double precision :: contrib_sss
- fock_a_tmp2_bi_ortho = 0.d0
+ double precision :: contrib_sss, contrib_sos, contrib_soo,contrib
+ fock_a_tot_3e_bi_orth_new = 0.d0
  do i = 1, mo_num
   do a = 1, mo_num
-   do j = 1, elec_alpha_num
-    do k = elec_beta_num+1, elec_alpha_num
-      call contrib_3e_sss(a,i,j,k,contrib_sss)
-      fock_a_tmp2_bi_ortho(a,i) += 0.5d0 * contrib_sss
-    enddo
-   enddo
+   fock_a_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
+   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp1_bi_ortho(a,i)
+   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp2_bi_ortho(a,i)
   enddo
  enddo
 END_PROVIDER 
@@ -66,21 +64,6 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
 END_PROVIDER 
 
 
-
-BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth_new, (mo_num, mo_num)]
- implicit none
- integer :: i,a,j,k
- double precision :: contrib_sss, contrib_sos, contrib_soo,contrib
- fock_a_tot_3e_bi_orth_new = 0.d0
- do i = 1, mo_num
-  do a = 1, mo_num
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_cs_3e_bi_orth(a,i)
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp1_bi_ortho(a,i)
-   fock_a_tot_3e_bi_orth_new(a,i) += fock_a_tmp2_bi_ortho(a,i)
-  enddo
- enddo
-END_PROVIDER 
-
 BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
  implicit none
  integer :: i,a,j,k
@@ -108,6 +91,24 @@ BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
  enddo
  fock_a_tmp1_bi_ortho = - fock_a_tmp1_bi_ortho
 END_PROVIDER 
+
+BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
+ implicit none
+ integer :: i,a,j,k
+ double precision :: contrib_sss
+ fock_a_tmp2_bi_ortho = 0.d0
+ do i = 1, mo_num
+  do a = 1, mo_num
+   do j = 1, elec_alpha_num
+    do k = elec_beta_num+1, elec_alpha_num
+      call contrib_3e_sss(a,i,j,k,contrib_sss)
+      fock_a_tmp2_bi_ortho(a,i) += 0.5d0 * contrib_sss
+    enddo
+   enddo
+  enddo
+ enddo
+END_PROVIDER 
+
 
 
 
