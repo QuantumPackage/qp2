@@ -1,44 +1,4 @@
-BEGIN_PROVIDER [ character*(64), diag_algorithm ]
-  implicit none
-  BEGIN_DOC
-  ! Diagonalization algorithm (Davidson or Lapack)
-  END_DOC
-  if (N_det > N_det_max_full) then
-    diag_algorithm = "Davidson"
-  else
-    diag_algorithm = "Lapack"
-  endif
-
-  if (N_det < N_states) then
-    diag_algorithm = "Lapack"
-  endif
-END_PROVIDER
-
-!BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
-! implicit none
-! BEGIN_DOC
-! ! Threshold of Davidson's algorithm, using PT2 as a guide
-! END_DOC
-! threshold_davidson_pt2 = threshold_davidson
-!
-!END_PROVIDER
-
-
-
-BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
- implicit none
- BEGIN_DOC
- ! Index of the dressed columns
- END_DOC
- integer :: i
- double precision :: tmp
- integer, external :: idamax
- do i=1,N_states
-   dressed_column_idx(i) = idamax(N_det, psi_coef(1,i), 1)
- enddo
-END_PROVIDER
-
-subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_diag,Nint,dressing_state,converged)
+subroutine davidson_diag_h_cfg(dets_in,u_in,dim_in,energies,sze,sze_csf,N_st,N_st_diag,Nint,dressing_state,converged)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -55,18 +15,17 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   !
   ! N_st : Number of eigenstates
   !
-  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
-  integer, intent(in)            :: dim_in, sze, N_st, N_st_diag, Nint
+  integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
   double precision, intent(inout) :: u_in(dim_in,N_st_diag)
-  double precision, intent(out)  :: energies(N_st_diag), s2_out(N_st_diag)
+  double precision, intent(out)  :: energies(N_st_diag)
   integer, intent(in)            :: dressing_state
   logical, intent(out)           :: converged
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k,l
+  integer                        :: i,k
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -86,24 +45,19 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   !$OMP END PARALLEL
 
   if (dressing_state > 0) then
-    do k = 1, N_st
-
-      do i = 1, sze
-        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
+    do k=1,N_st
+      do i=1,sze
+        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
       enddo
-
-      !l = dressed_column_idx(k)
-      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
-
     enddo
   endif
 
-  call davidson_diag_hjj_sjj(dets_in,u_in,H_jj,S2_out,energies,dim_in,sze,N_st,N_st_diag,Nint,dressing_state,converged)
-  deallocate (H_jj)
+  call davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N_st,N_st_diag,Nint,dressing_state,converged)
+  deallocate(H_jj)
 end
 
 
-subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_st,N_st_diag_in,Nint,dressing_state,converged)
+subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N_st,N_st_diag_in,Nint,dressing_state,converged)
   use bitmasks
   use mmap_module
   implicit none
@@ -111,8 +65,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   ! Davidson diagonalization with specific diagonal elements of the H matrix
   !
   ! H_jj : specific diagonal H matrix elements to diagonalize de Davidson
-  !
-  ! S2_out : Output : s^2
   !
   ! dets_in : bitmasks corresponding to determinants
   !
@@ -127,18 +79,16 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   !
   ! N_st_diag_in : Number of states in which H is diagonalized. Assumed > sze
   !
-  ! Initial guess vectors are not necessarily orthonormal
   END_DOC
-  integer, intent(in)            :: dim_in, sze, N_st, N_st_diag_in, Nint
+  integer, intent(in)            :: dim_in, sze, sze_csf, N_st, N_st_diag_in, Nint
   integer(bit_kind), intent(in)  :: dets_in(Nint,2,sze)
   double precision,  intent(in)  :: H_jj(sze)
   integer, intent(in)            :: dressing_state
-  double precision,  intent(inout) :: s2_out(N_st_diag_in)
   double precision, intent(inout) :: u_in(dim_in,N_st_diag_in)
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: i,j,k,l,m,kk,ii,ll
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
@@ -146,30 +96,29 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   integer                        :: k_pairs, kl
 
   integer                        :: iter2, itertot
-  double precision, allocatable  :: y(:,:), h(:,:), h_p(:,:), lambda(:), s2(:)
-  real, allocatable              :: y_s(:,:)
-  double precision, allocatable  :: s_(:,:), s_tmp(:,:)
+  double precision, allocatable  :: y(:,:), h(:,:), lambda(:)
+  double precision, allocatable  :: s_tmp(:,:)
   double precision               :: diag_h_mat_elem
   double precision, allocatable  :: residual_norm(:)
   character*(16384)              :: write_buffer
-  double precision               :: to_print(3,N_st)
+  double precision               :: to_print(2,N_st)
   double precision               :: cpu, wall
-  integer                        :: shift, shift2, itermax, istate, ii
+  integer                        :: shift, shift2, itermax, istate
   double precision               :: r1, r2, alpha
   logical                        :: state_ok(N_st_diag_in*davidson_sze_max)
   integer                        :: nproc_target
   integer                        :: order(N_st_diag_in)
   double precision               :: cmax
-  double precision, allocatable  :: U(:,:), overlap(:,:), S_d(:,:)
-  double precision, pointer      :: W(:,:)
-  real, pointer                  :: S(:,:)
+  double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
+  double precision, allocatable  :: tmpU(:,:), tmpW(:,:)
+  double precision, pointer      :: W(:,:), W_csf(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
 
   include 'constants.include.F'
 
   N_st_diag = N_st_diag_in
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, S, y, y_s, S_d, h, lambda
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: U, W, y, h, lambda
   if (N_st_diag*3 > sze) then
     print *,  'error in Davidson :'
     print *,  'Increase n_det_max_full to ', N_st_diag*3
@@ -207,16 +156,17 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   call resident_memory(rss)
   do
     r1 = 8.d0 *                                   &! bytes
-         ( dble(sze)*(N_st_diag*itermax)          &! U
-         + 1.5d0*dble(sze*m)*(N_st_diag*itermax)  &! W,S
-         + 1.d0*dble(sze)*(N_st_diag)             &! S_d
-         + 4.5d0*(N_st_diag*itermax)**2           &! h,y,y_s,s_,s_tmp
-         + 2.d0*(N_st_diag*itermax)               &! s2,lambda
+         ( dble(sze)*(N_st_diag)                  &! U
+         + dble(sze_csf)*(N_st_diag*itermax)      &! U_csf
+         + dble(sze)*(N_st_diag)                  &! W
+         + dble(sze_csf)*(N_st_diag*itermax)      &! W_csf
+         + 3.0d0*(N_st_diag*itermax)**2           &! h,y,s_tmp
+         + 1.d0*(N_st_diag*itermax)               &! lambda
          + 1.d0*(N_st_diag)                       &! residual_norm
-                                                   ! In H_S2_u_0_nstates_zmq
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on collector
-         + 3.d0*(N_st_diag*N_det)                 &! u_t, v_t, s_t on slave
-         + 0.5d0*maxab                            &! idx0 in H_S2_u_0_nstates_openmp_work_*
+                                                   ! In H_u_0_nstates_zmq
+         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on collector
+         + 2.d0*(N_st_diag*N_det)                 &! u_t, v_t, on slave
+         + 0.5d0*maxab                            &! idx0 in H_u_0_nstates_openmp_work_*
          + nproc_target *                         &! In OMP section
            ( 1.d0*(N_int*maxab)                   &! buffer
            + 3.5d0*(maxab) )                      &! singles_a, singles_b, doubles, idx
@@ -248,6 +198,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   call write_int(6,N_st,'Number of states')
   call write_int(6,N_st_diag,'Number of states in diagonalization')
   call write_int(6,sze,'Number of determinants')
+  call write_int(6,sze_csf,'Number of CSFs')
   call write_int(6,nproc_target,'Number of threads for diagonalization')
   call write_double(6, r1, 'Memory(Gb)')
   if (disk_based) then
@@ -259,17 +210,17 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   write(6,'(A)') ''
   write_buffer = '====='
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================ =========== ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = 'Iter'
   do i=1,N_st
-    write_buffer = trim(write_buffer)//'       Energy          S^2       Residual '
+    write_buffer = trim(write_buffer)//'       Energy        Residual '
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
   write_buffer = '====='
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================ =========== ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') write_buffer(1:6+41*N_st)
 
@@ -280,34 +231,27 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     integer :: fd_s, fd_w
     call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
         8, fd_w, .False., ptr_w)
-    call mmap(trim(ezfio_work_dir)//'davidson_s', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-        4, fd_s, .False., ptr_s)
-    call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
-    call c_f_pointer(ptr_s, s, (/sze,N_st_diag*itermax/))
+    call c_f_pointer(ptr_w, W_csf, (/sze_csf,N_st_diag*itermax/))
   else
-    allocate(W(sze,N_st_diag*itermax), S(sze,N_st_diag*itermax))
+    allocate(W(sze,N_st_diag),W_csf(sze_csf,N_st_diag*itermax))
   endif
 
   allocate(                                                          &
       ! Large
-      U(sze,N_st_diag*itermax),                                      &
-      S_d(sze,N_st_diag),                                            &
+      U(sze,N_st_diag),                                              &
+      U_csf(sze_csf,N_st_diag*itermax),                              &
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
-      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
-      s_(N_st_diag*itermax,N_st_diag*itermax),                       &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
       residual_norm(N_st_diag),                                      &
-      s2(N_st_diag*itermax),                                         &
-      y_s(N_st_diag*itermax,N_st_diag*itermax),                      &
       lambda(N_st_diag*itermax))
+
 
   h = 0.d0
   U = 0.d0
   y = 0.d0
-  s_ = 0.d0
   s_tmp = 0.d0
 
 
@@ -321,27 +265,21 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   ! ===================
 
   converged = .False.
-
+  call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),U_csf(1,1))
   do k=N_st+1,N_st_diag
-    do i=1,sze
+    do i=1,sze_csf
         call random_number(r1)
         call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
-        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
+        U_csf(i,k) = r1*dcos(r2) * u_csf(i,k-N_st)
     enddo
-    u_in(k,k) = u_in(k,k) + 10.d0
+    U_csf(k,k) = u_csf(k,k) + 10.d0
   enddo
   do k=1,N_st_diag
-    call normalize(u_in(1,k),sze)
+    call normalize(U_csf(1,k),sze_csf)
   enddo
-
-  do k=1,N_st_diag
-    do i=1,sze
-      U(i,k) = u_in(i,k)
-    enddo
-  enddo
-
+  call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
     itertot = itertot+1
@@ -354,27 +292,74 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if ((iter > 1).or.(itertot == 1)) then
+!      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
+        !call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift+1),U)
+        PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
         if ((sze > 100000).and.distributed_davidson) then
-            call H_S2_u_0_nstates_zmq   (W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+            !call H_u_0_nstates_zmq   (W,U,N_st_diag,sze)
+            allocate(tmpW(N_st_diag,sze_csf))
+            allocate(tmpU(N_st_diag,sze_csf))
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                tmpU(kk,ii) = U_csf(ii,shift+kk)
+              enddo
+            enddo
+            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                W_csf(ii,shift+kk)=tmpW(kk,ii)
+              enddo
+            enddo
+            deallocate(tmpW)
+            deallocate(tmpU)
         else
+            !call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
+            allocate(tmpW(N_st_diag,sze_csf))
+            allocate(tmpU(N_st_diag,sze_csf))
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                tmpU(kk,ii) = U_csf(ii,shift+kk)
+              enddo
+            enddo
+            !tmpU     =0.0d0
+            !tmpU(1,2)=1.0d0
             double precision               :: irp_rdtsc
             double precision               :: ticks_0, ticks_1
             integer*8                      :: irp_imax
             irp_imax = 1
             !ticks_0 = irp_rdtsc()
-            call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
+            call calculate_sigma_vector_cfg_nst_naive_store(tmpW,tmpU,N_st_diag,sze_csf,1,sze_csf,0,1)
             !ticks_1 = irp_rdtsc()
             !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
+            do kk=1,N_st_diag
+              do ii=1,sze_csf
+                W_csf(ii,shift+kk)=tmpW(kk,ii)
+              enddo
+            enddo
+
+            !U_csf = 0.0d0
+            !U_csf(1,1) = 1.0d0
+            !u_in = 0.0d0
+            !call convertWFfromCSFtoDET(N_st_diag,tmpU,U2)
+            !call H_u_0_nstates_openmp(u_in,U2,N_st_diag,sze)
+            !call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),W_csf2(1,1))
+            !do i=1,sze_csf
+            !  print *,"I=",i," qp=",W_csf2(i,1)," my=",W_csf(i,1)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  if(dabs(dabs(W_csf2(i,1))-dabs(W_csf(i,1))) .gt. 1.0e-10)then
+            !    print *,"somo=",psi_configuration(1,1,i)," domo=",psi_configuration(1,2,i)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  endif
+            !end do
+            !stop
+            deallocate(tmpW)
+            deallocate(tmpU)
         endif
-        S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
-      else
-         ! Already computed in update below
-         continue
-      endif
+!      else
+!         ! Already computed in update below
+!         continue
+!      endif
 
       if (dressing_state > 0) then
 
@@ -385,10 +370,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           f = 1.0d0/psi_coef(l,1)
           do istate=1,N_st_diag
             do i=1,sze
-              W(i,shift+istate) += dressing_column_h(i,1) *f * U(l,shift+istate)
-              W(l,shift+istate) += dressing_column_h(i,1) *f * U(i,shift+istate)
-              S(i,shift+istate) += real(dressing_column_s(i,1) *f * U(l,shift+istate))
-              S(l,shift+istate) += real(dressing_column_s(i,1) *f * U(i,shift+istate))
+              W(i,istate) += dressing_column_h(i,1) *f * U(l,istate)
+              W(l,istate) += dressing_column_h(i,1) *f * U(i,istate)
             enddo
 
           enddo
@@ -397,81 +380,37 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
           call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
             psi_coef, size(psi_coef,1), &
-            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+            U(1,1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
           call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
             dressing_column_h, size(dressing_column_h,1), s_tmp, size(s_tmp,1), &
-            1.d0, W(1,shift+1), size(W,1))
-
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-            dressing_column_s, size(dressing_column_s,1), s_tmp, size(s_tmp,1), &
-            1.d0, S_d, size(S_d,1))
+            1.d0, W(1,1), size(W,1))
 
 
           call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
             dressing_column_h, size(dressing_column_h,1), &
-            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
+            U(1,1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
 
           call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
             psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-            1.d0, W(1,shift+1), size(W,1))
-
-          call dgemm('T','N', N_st, N_st_diag, sze, 1.d0, &
-            dressing_column_s, size(dressing_column_s,1), &
-            U(1,shift+1), size(U,1), 0.d0, s_tmp, size(s_tmp,1))
-
-          call dgemm('N','N', sze, N_st_diag, N_st, 1.0d0, &
-            psi_coef, size(psi_coef,1), s_tmp, size(s_tmp,1), &
-            1.d0, S_d, size(S_d,1))
+            1.d0, W(1,1), size(W,1))
 
         endif
       endif
 
-      ! Compute s_kl = <u_k | S_l> = <u_k| S2 |u_l>
-      ! -------------------------------------------
-
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k) COLLAPSE(2)
-       do j=1,shift2
-         do i=1,shift2
-           s_(i,j) = 0.d0
-           do k=1,sze
-             s_(i,j) = s_(i,j) + U(k,i) * dble(S(k,j))
-           enddo
-          enddo
-        enddo
-        !$OMP END PARALLEL DO
+      !call convertWFfromDETtoCSF(N_st_diag,W,W_csf(1,shift+1))
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
 
-      call dgemm('T','N', shift2, shift2, sze,                       &
-          1.d0, U, size(U,1), W, size(W,1),                          &
-          0.d0, h, size(h_p,1))
-      call dgemm('T','N', shift2, shift2, sze,                       &
-          1.d0, U, size(U,1), U, size(U,1),                          &
+      call dgemm('T','N', shift2, shift2, sze_csf,                       &
+          1.d0, U_csf, size(U_csf,1), W_csf, size(W_csf,1),                          &
+          0.d0, h, size(h,1))
+      call dgemm('T','N', shift2, shift2, sze_csf,                       &
+          1.d0, U_csf, size(U_csf,1), U_csf, size(U_csf,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
 
-      ! Penalty method
-      ! --------------
-
-      if (s2_eig) then
-        h_p = s_
-        do k=1,shift2
-          h_p(k,k) = h_p(k,k) - expected_s2
-        enddo
-        if (only_expected_s2) then
-          alpha = 0.1d0
-          h_p = h + alpha*h_p
-        else
-          alpha = 0.0001d0
-          h_p = h + alpha*h_p
-        endif
-      else
-        h_p = h
-        alpha = 0.d0
-      endif
-
-      ! Diagonalize h_p
+      ! Diagonalize h
       ! ---------------
 
        integer :: lwork, info
@@ -507,51 +446,11 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         lambda(k) = h(k,k)
       enddo
 
-      ! Compute S2 for each eigenvector
-      ! -------------------------------
-
-      call dgemm('N','N',shift2,shift2,shift2,                       &
-          1.d0, s_, size(s_,1), y, size(y,1),                        &
-          0.d0, s_tmp, size(s_tmp,1))
-
-      call dgemm('T','N',shift2,shift2,shift2,                       &
-          1.d0, y, size(y,1), s_tmp, size(s_tmp,1),                  &
-          0.d0, s_, size(s_,1))
-
-      do k=1,shift2
-        s2(k) = s_(k,k)
-      enddo
-
-      if (only_expected_s2) then
-          do k=1,shift2
-            state_ok(k) = (dabs(s2(k)-expected_s2) < 0.6d0)
-          enddo
-      else
-        do k=1,size(state_ok)
-          state_ok(k) = .True.
-        enddo
-      endif
-
-      do k=1,shift2
-        if (.not. state_ok(k)) then
-          do l=k+1,shift2
-            if (state_ok(l)) then
-              call dswap(shift2, y(1,k), 1, y(1,l), 1)
-              call dswap(1, s2(k), 1, s2(l), 1)
-              call dswap(1, lambda(k), 1, lambda(l), 1)
-              state_ok(k) = .True.
-              state_ok(l) = .False.
-              exit
-            endif
-          enddo
-        endif
-      enddo
-
       if (state_following) then
 
         overlap = -1.d0
-        do k=1,shift2
-          do i=1,shift2
+        do i=1,shift2
+          do k=1,shift2
             overlap(k,i) = dabs(y(k,i))
           enddo
         enddo
@@ -576,57 +475,56 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         enddo
         do k=1,N_st
           overlap(k,1) = lambda(k)
-          overlap(k,2) = s2(k)
-        enddo
-        do k=1,N_st
-          l = order(k)
-          if (k /= l) then
-            lambda(k) = overlap(l,1)
-            s2(k) = overlap(l,2)
-          endif
         enddo
 
       endif
 
 
-      ! Express eigenvectors of h in the determinant basis
-      ! --------------------------------------------------
+      ! Express eigenvectors of h in the csf basis
+      ! ------------------------------------------
 
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, U, size(U,1), y, size(y,1), 0.d0, U(1,shift2+1), size(U,1))
-      call dgemm('N','N', sze, N_st_diag, shift2,                    &
-          1.d0, W, size(W,1), y, size(y,1), 0.d0, W(1,shift2+1), size(W,1))
+      call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
+          1.d0, U_csf, size(U_csf,1), y, size(y,1), 0.d0, U_csf(1,shift2+1), size(U_csf,1))
+      call convertWFfromCSFtoDET(N_st_diag,U_csf(1,shift2+1),U)
 
-      y_s(:,:) = real(y(:,:))
-      call sgemm('N','N', sze, N_st_diag, shift2,                    &
-          1., S, size(S,1), y_s, size(y_s,1), 0., S(1,shift2+1), size(S,1))
+      call dgemm('N','N', sze_csf, N_st_diag, shift2,                    &
+          1.d0, W_csf, size(W_csf,1), y, size(y,1), 0.d0, W_csf(1,shift2+1), size(W_csf,1))
+      call convertWFfromCSFtoDET(N_st_diag,W_csf(1,shift2+1),W)
 
       ! Compute residual vector and davidson step
       ! -----------------------------------------
 
+      !if (without_diagonal) then
       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
       do k=1,N_st_diag
         do i=1,sze
-          U(i,shift2+k) =  &
-            (lambda(k) * U(i,shift2+k) - W(i,shift2+k) )      &
+           U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )      &
               /max(H_jj(i) - lambda (k),1.d-2)
         enddo
-
-        if (k <= N_st) then
-          residual_norm(k) = u_dot_u(U(1,shift2+k),sze)
-          to_print(1,k) = lambda(k) + nuclear_repulsion
-          to_print(2,k) = s2(k)
-          to_print(3,k) = residual_norm(k)
-        endif
       enddo
       !$OMP END PARALLEL DO
+      !else
+      !  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,k)
+      !  do k=1,N_st_diag
+      !    do i=1,sze
+      !       U(i,k) =  (lambda(k) * U(i,k) - W(i,k) )  
+      !    enddo
+      !  enddo
+      !  !$OMP END PARALLEL DO
+      !endif
 
+      do k=1,N_st
+        residual_norm(k) = u_dot_u(U(1,k),sze)
+        to_print(1,k) = lambda(k) + nuclear_repulsion
+        to_print(2,k) = residual_norm(k)
+      enddo
+      call convertWFfromDETtoCSF(N_st_diag,U,U_csf(1,shift2+1))
 
       if ((itertot>1).and.(iter == 1)) then
         !don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:3,1:N_st)
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,E11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
       ! Check convergence
@@ -657,33 +555,26 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
     enddo
 
-    ! Re-contract U and update S and W
-    ! --------------------------------
+    ! Re-contract U
+    ! -------------
 
-    call sgemm('N','N', sze, N_st_diag, shift2, 1.,      &
-        S, size(S,1), y_s, size(y_s,1), 0., S(1,shift2+1), size(S,1))
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
-      do i=1,sze
-        S(i,k) = S(i,shift2+k)
+      do i=1,sze_csf
+        W_csf(i,k) = u_in(i,k)
       enddo
     enddo
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
-        W, size(W,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
     do k=1,N_st_diag
-      do i=1,sze
-        W(i,k) = u_in(i,k)
+      do i=1,sze_csf
+        U_csf(i,k) = u_in(i,k)
       enddo
     enddo
-
-    call dgemm('N','N', sze, N_st_diag, shift2, 1.d0,      &
-        U, size(U,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
-
-    do k=1,N_st_diag
-      do i=1,sze
-        U(i,k) = u_in(i,k)
-      enddo
-    enddo
+    call convertWFfromCSFtoDET(N_st_diag,U_csf,U)
 
   enddo
 
@@ -697,11 +588,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   do k=1,N_st_diag
     energies(k) = lambda(k)
-    s2_out(k) = s2(k)
   enddo
   write_buffer = '======'
   do i=1,N_st
-    write_buffer = trim(write_buffer)//' ================ =========== ==========='
+    write_buffer = trim(write_buffer)//' ================ ==========='
   enddo
   write(6,'(A)') trim(write_buffer)
   write(6,'(A)') ''
@@ -713,18 +603,14 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
     call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 8, fd_w, ptr_w )
     fd_w = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_w','r')
     close(fd_w,status='delete')
-    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 4, fd_s, ptr_s )
-    fd_s = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_s','r')
-    close(fd_s,status='delete')
   else
-    deallocate(W,S)
+    deallocate(W, W_csf)
   endif
 
   deallocate (                                                       &
       residual_norm,                                                 &
-      U, overlap,                                                    &
-      h, y_s, S_d,                                                   &
-      y, s_, s_tmp,                                                  &
+      U, U_csf, overlap,                                             &
+      h, y, s_tmp,                                                   &
       lambda                                                         &
       )
   FREE nthreads_davidson
