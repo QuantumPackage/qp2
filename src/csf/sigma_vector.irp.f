@@ -26,8 +26,6 @@
     NSOMOMin = max(0,cfg_nsomo_min-2)
   else
     NSOMOMin = max(1,cfg_nsomo_min-2)
-  else
-    NSOMOMin = max(1,cfg_nsomo_min-2)
   endif
   ! Note that here we need NSOMOMax + 2 sizes
   ialpha = (NSOMOMax + MS)/2
