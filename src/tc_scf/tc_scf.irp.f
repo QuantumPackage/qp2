@@ -81,8 +81,8 @@ subroutine routine_scf()
   print*,'TC HF total energy = ', TC_HF_energy
   print*,'TC HF 1 e   energy = ', TC_HF_one_electron_energy
   print*,'TC HF 2 e   energy = ', TC_HF_two_e_energy
-  if(.not. bi_ortho)then
-  print*,'TC HF 3 body       = ', diag_three_elem_hf
+  if(three_body_h_tc)then
+   print*,'TC HF 3 body       = ', diag_three_elem_hf
   endif
   print*,'***'
   e_delta = 10.d0
@@ -124,6 +124,9 @@ subroutine routine_scf()
       print*,'TC HF total energy = ', TC_HF_energy
       print*,'TC HF 1 e   energy = ', TC_HF_one_electron_energy
       print*,'TC HF 2 non hermit = ', TC_HF_two_e_energy
+      if(three_body_h_tc)then
+       print*,'TC HF 3 body       = ', diag_three_elem_hf
+      endif
       print*,'***'
       e_delta = dabs( TC_HF_energy - e_save )
       print*, 'it, delta E = ', it, e_delta
