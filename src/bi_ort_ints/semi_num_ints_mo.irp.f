@@ -127,6 +127,9 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 
   implicit none
   integer :: ipoint
 
+ print*,'providing int2_grad1_u12_bimo_transp'
+ double precision :: wall0, wall1
+ call wall_time(wall0)
  !$OMP PARALLEL         &
  !$OMP DEFAULT (NONE)   &
  !$OMP PRIVATE (ipoint) & 
@@ -142,6 +145,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 
   enddo
  !$OMP END DO
  !$OMP END PARALLEL
+ call wall_time(wall1)
+ print*,'Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
 
 END_PROVIDER 
 

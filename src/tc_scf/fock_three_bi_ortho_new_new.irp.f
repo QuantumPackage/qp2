@@ -154,6 +154,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
 END_PROVIDER 
 
 subroutine contrib_3e_sss(a,i,j,k,integral)
+ implicit none
  integer, intent(in) :: a,i,j,k
  BEGIN_DOC
  ! returns the pure same spin contribution to F(a,i) from two orbitals j,k
@@ -173,6 +174,7 @@ subroutine contrib_3e_sss(a,i,j,k,integral)
 end
 
 subroutine contrib_3e_soo(a,i,j,k,integral)
+ implicit none
  integer, intent(in) :: a,i,j,k
  BEGIN_DOC
  ! returns the same spin / opposite spin / opposite spin contribution to F(a,i) from two orbitals j,k
