@@ -165,7 +165,7 @@ subroutine overlap_gaussian_xyz_v(A_center,B_center,alpha,beta,power_A,&
   END_DOC
   include 'constants.include.F'
   integer,intent(in)             :: dim, n_points
-  double precision,intent(in)    :: A_center(3,n_points),B_center(3)  ! center of the x1 functions
+  double precision,intent(in)    :: A_center(n_points,3),B_center(3)  ! center of the x1 functions
   double precision, intent(in)   :: alpha,beta
   integer,intent(in)             :: power_A(3), power_B(3) ! power of the x1 functions
   double precision, intent(out)  :: overlap(n_points)
@@ -177,7 +177,7 @@ subroutine overlap_gaussian_xyz_v(A_center,B_center,alpha,beta,power_A,&
   double precision               :: F_integral
 
   ldp = maxval( power_A(1:3) + power_B(1:3) )
-  allocate(P_new(0:ldp,3,n_points), P_center(3,n_points), fact_p(n_points), &
+  allocate(P_new(n_points,0:ldp,3), P_center(n_points,3), fact_p(n_points), &
            fact_pp(n_points), pp(n_points))
 
   call give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_p,iorder_p,alpha,beta,power_A,power_B,A_center,B_center,n_points)
@@ -197,19 +197,19 @@ subroutine overlap_gaussian_xyz_v(A_center,B_center,alpha,beta,power_A,&
       cycle
     endif
 
-    overlap_x = P_new(0,1,ipoint) * F_integral_tab(0)
+    overlap_x = P_new(ipoint,0,1) * F_integral_tab(0)
     do i = 1,iorder_p(1)
-      overlap_x = overlap_x + P_new(i,1,ipoint) * F_integral_tab(i)
+      overlap_x = overlap_x + P_new(ipoint,i,1) * F_integral_tab(i)
     enddo
 
-    overlap_y = P_new(0,2,ipoint) * F_integral_tab(0)
+    overlap_y = P_new(ipoint,0,2) * F_integral_tab(0)
     do i = 1,iorder_p(2)
-      overlap_y = overlap_y + P_new(i,2,ipoint) * F_integral_tab(i)
+      overlap_y = overlap_y + P_new(ipoint,i,2) * F_integral_tab(i)
     enddo
 
-    overlap_z = P_new(0,3,ipoint) * F_integral_tab(0)
+    overlap_z = P_new(ipoint,0,3) * F_integral_tab(0)
     do i = 1,iorder_p(3)
-      overlap_z = overlap_z + P_new(i,3,ipoint) * F_integral_tab(i)
+      overlap_z = overlap_z + P_new(ipoint,i,3) * F_integral_tab(i)
     enddo
 
     overlap(ipoint) = overlap_x * overlap_y * overlap_z * fact_pp(ipoint)

@@ -56,7 +56,7 @@ end
 
 !---
 
-subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B,alpha,beta,rvec,n_points)
+subroutine overlap_gauss_r12_v(D_center,delta,A_center,B_center,power_A,power_B,alpha,beta,rvec,n_points)
   BEGIN_DOC
   ! Computes the following integral :
   !
@@ -70,7 +70,7 @@ subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B
   implicit none
   include 'constants.include.F'
   integer, intent(in)            :: n_points
-  double precision, intent(in)   :: D_center_(n_points,3), delta  ! pure gaussian "D"
+  double precision, intent(in)   :: D_center(n_points,3), delta  ! pure gaussian "D"
   double precision, intent(in)   :: A_center(3),B_center(3),alpha,beta ! gaussian/polynoms "A" and "B"
   integer, intent(in)            :: power_A(3),power_B(3)
   double precision, intent(out)  :: rvec(n_points)
@@ -92,14 +92,7 @@ subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B
 
   maxab = maxval(power_A(1:3))
 
-  double precision, allocatable :: D_center(:,:)
-  allocate(D_center(3,n_points))
-  D_center(1,1:n_points) = D_center_(1:n_points,1)
-  D_center(2,1:n_points) = D_center_(1:n_points,2)
-  D_center(3,1:n_points) = D_center_(1:n_points,3)
-
-
-  allocate (A_new(0:maxab, 3, n_points), A_center_new(3, n_points), &
+  allocate (A_new(n_points, 0:maxab, 3), A_center_new(n_points, 3), &
             fact_a_new(n_points), iorder_a_new(3), overlap(n_points) )
 
   call give_explicit_poly_and_gaussian_v(A_new, maxab, A_center_new, &
@@ -118,9 +111,9 @@ subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B
         iorder_tmp(3) = lz
         call overlap_gaussian_xyz_v(A_center_new,B_center,alpha_new,beta,iorder_tmp,power_B,overlap,dim1,n_points)
         do ipoint=1,n_points
-          rvec(ipoint) = rvec(ipoint) + A_new(lx,1,ipoint) * &
-                                        A_new(ly,2,ipoint) * &
-                                        A_new(lz,3,ipoint) * overlap(ipoint)
+          rvec(ipoint) = rvec(ipoint) + A_new(ipoint,lx,1) * &
+                                        A_new(ipoint,ly,2) * &
+                                        A_new(ipoint,lz,3) * overlap(ipoint)
         enddo
       enddo
     enddo

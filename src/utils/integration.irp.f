@@ -147,12 +147,12 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorde
   integer, intent(in)            :: n_points, ldp
   integer, intent(in)            :: a(3),b(3)         ! powers : (x-xa)**a_x = (x-A(1))**a(1)
   double precision, intent(in)   :: alpha, beta       ! exponents
-  double precision, intent(in)   :: A_center(3,n_points) ! A center
+  double precision, intent(in)   :: A_center(n_points,3) ! A center
   double precision, intent(in)   :: B_center (3)         ! B center
-  double precision, intent(out)  :: P_center(3,n_points) ! new center
+  double precision, intent(out)  :: P_center(n_points,3) ! new center
   double precision, intent(out)  :: p                 ! new exponent
   double precision, intent(out)  :: fact_k(n_points)            ! constant factor
-  double precision, intent(out)  :: P_new(0:ldp,3,n_points)! polynomial
+  double precision, intent(out)  :: P_new(n_points,0:ldp,3)! polynomial
   integer, intent(out)           :: iorder(3)         ! i_order(i) = order of the polynomials
 
   double precision, allocatable  :: P_a(:,:,:), P_b(:,:,:)
@@ -161,82 +161,54 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorde
 
   call gaussian_product_v(alpha,A_center,beta,B_center,fact_k,p,P_center,n_points)
 
-!TODO TRANSP
-double precision, allocatable :: P_a_(:,:,:), P_b_(:,:,:), A_center_(:,:), P_center_(:,:), P_new_(:,:,:)
-allocate(A_center_(n_points,3), P_center_(n_points,3), P_new_(n_points,0:ldp,3))
-A_center_(1:n_points,1) = A_center(1,1:n_points)
-A_center_(1:n_points,2) = A_center(2,1:n_points)
-A_center_(1:n_points,3) = A_center(3,1:n_points)
-P_center_(1:n_points,1) = P_center(1,1:n_points)
-P_center_(1:n_points,2) = P_center(2,1:n_points)
-P_center_(1:n_points,3) = P_center(3,1:n_points)
-
   if ( ior(ior(b(1),b(2)),b(3)) == 0 ) then  ! b == (0,0,0)
-
 
     lda = maxval(a)
     ldb = 0
-    allocate(P_a_(n_points,0:lda,3), P_b_(n_points,0:0,3))
+    allocate(P_a(n_points,0:lda,3), P_b(n_points,0:0,3))
 
-
-    call recentered_poly2_v0(P_a_,lda,A_center_,P_center_,a,P_b_,B_center,P_center_,n_points)
+    call recentered_poly2_v0(P_a,lda,A_center,P_center,a,P_b,B_center,P_center,n_points)
 
     iorder(1:3) = a(1:3)
     do ipoint=1,n_points
       do xyz=1,3
-        P_new_(ipoint,0,xyz) = P_a_(ipoint,0,xyz) * P_b_(ipoint,0,xyz)
+        P_new(ipoint,0,xyz) = P_a(ipoint,0,xyz) * P_b(ipoint,0,xyz)
         do i=1,a(xyz)
-          P_new_(ipoint,i,xyz) = P_new_(ipoint,i,xyz) + P_b_(ipoint,0,xyz) * P_a_(ipoint,i,xyz)
+          P_new(ipoint,i,xyz) = P_new(ipoint,i,xyz) + P_b(ipoint,0,xyz) * P_a(ipoint,i,xyz)
         enddo
       enddo
     enddo
 
-do ipoint=1,n_points
-do i=0,ldp
-P_new(i,1,ipoint) = P_new_(ipoint,i,1)
-P_new(i,2,ipoint) = P_new_(ipoint,i,2)
-P_new(i,3,ipoint) = P_new_(ipoint,i,3)
-enddo
-enddo
     return
 
   endif
 
   lda = maxval(a)
   ldb = maxval(b)
-  allocate(P_a_(n_points,0:lda,3), P_b_(n_points,0:ldb,3))
+  allocate(P_a(n_points,0:lda,3), P_b(n_points,0:ldb,3))
 
-  call recentered_poly2_v(P_a_,lda,A_center_,P_center_,a,P_b_,ldb,B_center,P_center_,b,n_points)
-
+  call recentered_poly2_v(P_a,lda,A_center,P_center,a,P_b,ldb,B_center,P_center,b,n_points)
 
   iorder(1:3) = a(1:3) + b(1:3)
 
   do xyz=1,3
     if (b(xyz) == 0) then
       do ipoint=1,n_points
-        P_new_(ipoint,0,xyz) = P_a_(ipoint,0,xyz) * P_b_(ipoint,0,xyz)
+        P_new(ipoint,0,xyz) = P_a(ipoint,0,xyz) * P_b(ipoint,0,xyz)
         do i=1,a(xyz)
-          P_new_(ipoint,i,xyz) = P_new_(ipoint,i,xyz) + P_b_(ipoint,0,xyz) * P_a_(ipoint,i,xyz)
+          P_new(ipoint,i,xyz) = P_new(ipoint,i,xyz) + P_b(ipoint,0,xyz) * P_a(ipoint,i,xyz)
         enddo
       enddo
     else
       do i=0,iorder(xyz)
         do ipoint=1,n_points
-          P_new_(ipoint,i,xyz) = 0.d0
+          P_new(ipoint,i,xyz) = 0.d0
         enddo
       enddo
-      call multiply_poly_v(P_a_(1,0,xyz), a(xyz),P_b_(1,0,xyz),b(xyz),P_new_(1,0,xyz),ldp,n_points)
+      call multiply_poly_v(P_a(1,0,xyz), a(xyz),P_b(1,0,xyz),b(xyz),P_new(1,0,xyz),ldp,n_points)
     endif
   enddo
 
-
-do ipoint=1,n_points
-do i=0,ldp
-P_new(i,1,ipoint) = P_new_(ipoint,i,1)
-P_new(i,2,ipoint) = P_new_(ipoint,i,2)
-P_new(i,3,ipoint) = P_new_(ipoint,i,3)
-enddo
-enddo
 end
 
 !-
@@ -353,9 +325,9 @@ subroutine gaussian_product_v(a,xa,b,xb,k,p,xp,n_points)
 
   integer, intent(in)            :: n_points
   double precision, intent(in)   :: a,b         ! Exponents
-  double precision, intent(in)   :: xa(3,n_points),xb(3) ! Centers
+  double precision, intent(in)   :: xa(n_points,3),xb(3) ! Centers
   double precision, intent(out)  :: p ! New exponent
-  double precision, intent(out)  :: xp(3,n_points)       ! New center
+  double precision, intent(out)  :: xp(n_points,3)       ! New center
   double precision, intent(out)  :: k(n_points) ! Constant
 
   double precision               :: p_inv
@@ -377,20 +349,20 @@ subroutine gaussian_product_v(a,xa,b,xb,k,p,xp,n_points)
   bpxb(3) = bp*xb(3)
 
   do ipoint=1,n_points
-    xab(1) = xa(1,ipoint)-xb(1)
-    xab(2) = xa(2,ipoint)-xb(2)
-    xab(3) = xa(3,ipoint)-xb(3)
+    xab(1) = xa(ipoint,1)-xb(1)
+    xab(2) = xa(ipoint,2)-xb(2)
+    xab(3) = xa(ipoint,3)-xb(3)
     k(ipoint) = ab*(xab(1)*xab(1)+xab(2)*xab(2)+xab(3)*xab(3))
     if (k(ipoint) > 40.d0) then
       k(ipoint)=0.d0
-      xp(1,ipoint) = 0.d0
-      xp(2,ipoint) = 0.d0
-      xp(3,ipoint) = 0.d0
+      xp(ipoint,1) = 0.d0
+      xp(ipoint,2) = 0.d0
+      xp(ipoint,3) = 0.d0
     else
       k(ipoint) = dexp(-k(ipoint))
-      xp(1,ipoint) = ap*xa(1,ipoint)+bpxb(1)
-      xp(2,ipoint) = ap*xa(2,ipoint)+bpxb(2)
-      xp(3,ipoint) = ap*xa(3,ipoint)+bpxb(3)
+      xp(ipoint,1) = ap*xa(ipoint,1)+bpxb(1)
+      xp(ipoint,2) = ap*xa(ipoint,2)+bpxb(2)
+      xp(ipoint,3) = ap*xa(ipoint,3)+bpxb(3)
     endif
   enddo
 end subroutine

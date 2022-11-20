@@ -176,8 +176,8 @@ END_PROVIDER
 
     enddo
 
-    ASSERT(List_all_comb_b3_expo(i) .gt. 0d0)
     if(List_all_comb_b3_expo(i) .lt. 1d-10) cycle
+    ASSERT(List_all_comb_b3_expo(i) .gt. 0d0)
 
     List_all_comb_b3_cent(1,i) = List_all_comb_b3_cent(1,i) / List_all_comb_b3_expo(i) 
     List_all_comb_b3_cent(2,i) = List_all_comb_b3_cent(2,i) / List_all_comb_b3_expo(i)
