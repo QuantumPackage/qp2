@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
 
   implicit none
   integer                       :: i, j, ipoint, i_1s, i_fit
-  double precision              :: r(3), int_fit, expo_fit, coef_fit
+  double precision              :: r(3), expo_fit, coef_fit
   double precision              :: coef, beta, B_center(3)
   double precision              :: tmp
   double precision              :: wall0, wall1
@@ -22,7 +22,6 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
   provide mu_erf final_grid_points_transp j1b_pen
   call wall_time(wall0)
 
- allocate(int_fit_v(n_points_final_grid))
  int2_grad1u2_grad2u2_j1b2(:,:,:) = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                       &
@@ -34,6 +33,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
      !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,    &
      !$OMP          List_all_comb_b3_cent, int2_grad1u2_grad2u2_j1b2,&
      !$OMP          ao_overlap_abs)
+
+ allocate(int_fit_v(n_points_final_grid))
  !$OMP DO SCHEDULE(dynamic)
  do i = 1, ao_num
    do j = i, ao_num
@@ -66,6 +67,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
    enddo
  enddo
  !$OMP END DO
+ deallocate(int_fit_v)
  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
@@ -84,70 +86,74 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
-
+  
   BEGIN_DOC
   !
   ! int dr2 phi_i(r2) phi_j(r2) 1s_j1b(r2)^2 [u_12^mu]^2
   !
   END_DOC
-
+  
   implicit none
-  integer                       :: i, j, ipoint, i_1s, i_fit
-  double precision              :: r(3), int_fit, expo_fit, coef_fit
-  double precision              :: coef, beta, B_center(3), tmp
-  double precision              :: wall0, wall1
-
-  double precision, external    :: overlap_gauss_r12_ao_with1s
-
-  provide mu_erf final_grid_points j1b_pen
+  integer                        :: i, j, ipoint, i_1s, i_fit
+  double precision               :: r(3), expo_fit, coef_fit
+  double precision               :: coef, beta, B_center(3), tmp
+  double precision               :: wall0, wall1
+  double precision, allocatable  :: int_fit_v(:)
+  
+  double precision, external     :: overlap_gauss_r12_ao_with1s
+  
+  provide mu_erf final_grid_points_transp j1b_pen
   call wall_time(wall0)
-
+  
   int2_u2_j1b2 = 0.d0
-
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, tmp)                   &
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, &
- !$OMP          final_grid_points, n_max_fit_slat,                  &
- !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
- !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       &
- !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
- !$OMP DO
-  !do ipoint = 1, 10
-  do ipoint = 1, n_points_final_grid
-    r(1) = final_grid_points(1,ipoint)
-    r(2) = final_grid_points(2,ipoint)
-    r(3) = final_grid_points(3,ipoint)
-
-    do i = 1, ao_num
-      do j = i, ao_num
-
-        tmp = 0.d0
-        do i_1s = 1, List_all_comb_b3_size
-
-          coef        = List_all_comb_b3_coef  (i_1s)
-          beta        = List_all_comb_b3_expo  (i_1s)
-          B_center(1) = List_all_comb_b3_cent(1,i_1s)
-          B_center(2) = List_all_comb_b3_cent(2,i_1s)
-          B_center(3) = List_all_comb_b3_cent(3,i_1s)
-
-          do i_fit = 1, n_max_fit_slat
-
-            expo_fit = expo_gauss_j_mu_x_2(i_fit)
-            coef_fit = coef_gauss_j_mu_x_2(i_fit)
-            int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
-
-            tmp += coef * coef_fit * int_fit
+  
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+      !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,&
+      !$OMP          coef_fit, expo_fit, int_fit_v, tmp)             &
+      !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size,&
+      !$OMP          final_grid_points_transp, n_max_fit_slat,       &
+      !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,       &
+      !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,   &
+      !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
+  allocate(int_fit_v(n_points_final_grid))
+  !$OMP DO
+  do i = 1, ao_num
+    do j = i, ao_num
+      
+      tmp = 0.d0
+      do i_1s = 1, List_all_comb_b3_size
+        
+        coef        = List_all_comb_b3_coef  (i_1s)
+        beta        = List_all_comb_b3_expo  (i_1s)
+        B_center(1) = List_all_comb_b3_cent(1,i_1s)
+        B_center(2) = List_all_comb_b3_cent(2,i_1s)
+        B_center(3) = List_all_comb_b3_cent(3,i_1s)
+        
+        do i_fit = 1, n_max_fit_slat
+          
+          expo_fit = expo_gauss_j_mu_x_2(i_fit)
+          coef_fit = coef_gauss_j_mu_x_2(i_fit) * coef
+          
+          do ipoint = 1, n_points_final_grid
+            r(1) = final_grid_points_transp(ipoint,1)
+            r(2) = final_grid_points_transp(ipoint,2)
+            r(3) = final_grid_points_transp(ipoint,3)
+            
+            int_fit_v(ipoint) = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
+          enddo
+          
+          do ipoint = 1, n_points_final_grid
+            int2_u2_j1b2(j,i,ipoint) += coef_fit * int_fit_v(ipoint)
           enddo
         enddo
-
-        int2_u2_j1b2(j,i,ipoint) = tmp
       enddo
+      
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
+  !$OMP END DO
+  deallocate(int_fit_v)
+  !$OMP END PARALLEL
+  
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
@@ -155,10 +161,10 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
       enddo
     enddo
   enddo
-
+  
   call wall_time(wall1)
   print*, ' wall time for int2_u2_j1b2', wall1 - wall0
-
+  
 END_PROVIDER
 
 ! ---
