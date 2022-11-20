@@ -176,7 +176,7 @@ subroutine overlap_gaussian_xyz_v(A_center,B_center,alpha,beta,power_A,&
   integer                        :: nmax
   double precision               :: F_integral
 
-  ldp = max_dim
+  ldp = maxval( power_A(1:3) + power_B(1:3) )
   allocate(P_new(0:ldp,3,n_points), P_center(3,n_points), fact_p(n_points), &
            fact_pp(n_points), pp(n_points))
 

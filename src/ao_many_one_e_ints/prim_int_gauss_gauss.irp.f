@@ -90,7 +90,7 @@ subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B
   thr = 1.d-10
   d(:) = 0
 
-  maxab = maxval(d(1:3))
+  maxab = maxval(power_A(1:3))
 
   double precision, allocatable :: D_center(:,:)
   allocate(D_center(3,n_points))
