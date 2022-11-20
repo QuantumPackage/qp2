@@ -92,9 +92,9 @@ subroutine overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,&
   overlap = overlap_x * overlap_y * overlap_z
 
 end
-              
+
 ! ---
-              
+
 subroutine overlap_x_abs(A_center, B_center, alpha, beta, power_A, power_B, overlap_x, lower_exp_val, dx, nx)
 
   BEGIN_DOC
@@ -151,4 +151,67 @@ subroutine overlap_x_abs(A_center, B_center, alpha, beta, power_A, power_B, over
 end
 
 
+! ---
 
+subroutine overlap_gaussian_xyz_v(A_center,B_center,alpha,beta,power_A,&
+      power_B,overlap_x,overlap_y,overlap_z,overlap,dim, n_points)
+  implicit none
+  BEGIN_DOC
+  !.. math::
+  !
+  !   S_x = \int (x-A_x)^{a_x} exp(-\alpha(x-A_x)^2)  (x-B_x)^{b_x} exp(-beta(x-B_x)^2) dx \\
+  !   S = S_x S_y S_z
+  !
+  END_DOC
+  include 'constants.include.F'
+  integer,intent(in)             :: dim, n_points
+  double precision,intent(in)    :: A_center(3),B_center(3)  ! center of the x1 functions
+  double precision, intent(in)   :: alpha,beta
+  integer,intent(in)             :: power_A(3), power_B(3) ! power of the x1 functions
+  double precision, intent(out)  :: overlap_x(n_points),overlap_y(n_points),overlap_z(n_points),overlap(n_points)
+  double precision               :: P_new(0:max_dim,3),P_center(3),fact_p,p
+  double precision               :: F_integral_tab(0:max_dim)
+  integer                        :: iorder_p(3)
+
+  call give_explicit_poly_and_gaussian(P_new,P_center,p,fact_p,iorder_p,alpha,beta,power_A,power_B,A_center,B_center,dim)
+   if(fact_p.lt.1d-20)then
+     overlap_x = 1.d-10
+     overlap_y = 1.d-10
+     overlap_z = 1.d-10
+     overlap = 1.d-10
+     return
+   endif
+  integer                        :: nmax
+  double precision               :: F_integral
+  nmax = maxval(iorder_p)
+  do i = 0,nmax
+    F_integral_tab(i) = F_integral(i,p)
+  enddo
+  overlap_x = P_new(0,1) * F_integral_tab(0)
+  overlap_y = P_new(0,2) * F_integral_tab(0)
+  overlap_z = P_new(0,3) * F_integral_tab(0)
+
+  integer                        :: i
+  do i = 1,iorder_p(1)
+    overlap_x = overlap_x + P_new(i,1) * F_integral_tab(i)
+  enddo
+  call gaussian_product_x(alpha,A_center(1),beta,B_center(1),fact_p,p,P_center(1))
+  overlap_x *= fact_p
+
+  do i = 1,iorder_p(2)
+    overlap_y = overlap_y + P_new(i,2) * F_integral_tab(i)
+  enddo
+  call gaussian_product_x(alpha,A_center(2),beta,B_center(2),fact_p,p,P_center(2))
+  overlap_y *= fact_p
+
+  do i = 1,iorder_p(3)
+    overlap_z = overlap_z + P_new(i,3) * F_integral_tab(i)
+  enddo
+  call gaussian_product_x(alpha,A_center(3),beta,B_center(3),fact_p,p,P_center(3))
+  overlap_z *= fact_p
+
+  overlap = overlap_x * overlap_y * overlap_z
+
+end
+
+! ---
