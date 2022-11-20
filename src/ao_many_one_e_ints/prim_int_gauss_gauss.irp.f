@@ -56,7 +56,7 @@ end
 
 !---
 
-subroutine overlap_gauss_r12_v(D_center,delta,A_center,B_center,power_A,power_B,alpha,beta,rvec,n_points)
+subroutine overlap_gauss_r12_v(D_center_,delta,A_center,B_center,power_A,power_B,alpha,beta,rvec,n_points)
   BEGIN_DOC
   ! Computes the following integral :
   !
@@ -70,59 +70,66 @@ subroutine overlap_gauss_r12_v(D_center,delta,A_center,B_center,power_A,power_B,
   implicit none
   include 'constants.include.F'
   integer, intent(in)            :: n_points
-  double precision, intent(in)   :: D_center(3,n_points), delta  ! pure gaussian "D"
+  double precision, intent(in)   :: D_center_(n_points,3), delta  ! pure gaussian "D"
   double precision, intent(in)   :: A_center(3),B_center(3),alpha,beta ! gaussian/polynoms "A" and "B"
   integer, intent(in)            :: power_A(3),power_B(3)
   double precision, intent(out)  :: rvec(n_points)
 
-  double precision               :: overlap_x,overlap_y,overlap_z,overlap
+  double precision, allocatable  :: overlap(:)
+  double precision               :: overlap_x, overlap_y, overlap_z
 
   integer                        :: maxab
   integer, allocatable           :: iorder_a_new(:)
   double precision, allocatable  :: A_new(:,:,:), A_center_new(:,:)
   double precision, allocatable  :: fact_a_new(:)
   double precision               :: alpha_new
-  double precision               :: accu,coefx,coefy,coefz,coefxy,coefxyz,thr
+  double precision               :: accu,thr, coefxy
   integer                        :: d(3),i,lx,ly,lz,iorder_tmp(3),dim1, ipoint
 
   dim1=100
   thr = 1.d-10
   d(:) = 0
 
-!  maxab = maxval(d(1:3))
-  maxab = max_dim
+  maxab = maxval(d(1:3))
+
+  double precision, allocatable :: D_center(:,:)
+  allocate(D_center(3,n_points))
+  D_center(1,1:n_points) = D_center_(1:n_points,1)
+  D_center(2,1:n_points) = D_center_(1:n_points,2)
+  D_center(3,1:n_points) = D_center_(1:n_points,3)
+
+
   allocate (A_new(0:maxab, 3, n_points), A_center_new(3, n_points), &
-            fact_a_new(n_points), iorder_a_new(3))
+            fact_a_new(n_points), iorder_a_new(3), overlap(n_points) )
 
   call give_explicit_poly_and_gaussian_v(A_new, maxab, A_center_new, &
         alpha_new, fact_a_new, iorder_a_new , delta, alpha, d, power_A, &
         D_center, A_center, n_points)
 
   do ipoint=1,n_points
+    rvec(ipoint) = 0.d0
+  enddo
 
-    ! The new gaussian exp(-delta (r - D)^2 ) (x-A_x)^a \exp(-\alpha (x-A_x)^2
-    accu = 0.d0
-    do lx = 0, iorder_a_new(1)
-      coefx = A_new(lx,1,ipoint)
-      if(dabs(coefx).lt.thr)cycle
-      iorder_tmp(1) = lx
-      do ly = 0, iorder_a_new(2)
-        coefy = A_new(ly,2,ipoint)
-        coefxy = coefx * coefy
-        if(dabs(coefxy).lt.thr)cycle
-        iorder_tmp(2) = ly
-        do lz = 0, iorder_a_new(3)
-          coefz = A_new(lz,3,ipoint)
-          coefxyz = coefxy * coefz
-          if(dabs(coefxyz).lt.thr)cycle
-          iorder_tmp(3) = lz
-          call overlap_gaussian_xyz(A_center_new(1,ipoint),B_center,alpha_new,beta,iorder_tmp,power_B,overlap_x,overlap_y,overlap_z,overlap,dim1)
-          accu += coefxyz * overlap
+  do lx = 0, iorder_a_new(1)
+    iorder_tmp(1) = lx
+    do ly = 0, iorder_a_new(2)
+      iorder_tmp(2) = ly
+      do lz = 0, iorder_a_new(3)
+        iorder_tmp(3) = lz
+        call overlap_gaussian_xyz_v(A_center_new,B_center,alpha_new,beta,iorder_tmp,power_B,overlap,dim1,n_points)
+        do ipoint=1,n_points
+          rvec(ipoint) = rvec(ipoint) + A_new(lx,1,ipoint) * &
+                                        A_new(ly,2,ipoint) * &
+                                        A_new(lz,3,ipoint) * overlap(ipoint)
         enddo
       enddo
     enddo
-    rvec(ipoint) = fact_a_new(ipoint) * accu
-  end do
+  enddo
+
+  do ipoint=1,n_points
+    rvec(ipoint) = rvec(ipoint) * fact_a_new(ipoint)
+  enddo
+  deallocate(A_new, A_center_new, fact_a_new, iorder_a_new, overlap)
 end
 
 !---

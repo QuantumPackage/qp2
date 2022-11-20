@@ -160,7 +160,7 @@ subroutine overlap_gauss_r12_ao_v(D_center, delta, i, j, resv, n_points)
 
   implicit none
   integer,          intent(in) :: i, j, n_points
-  double precision, intent(in) :: D_center(3,n_points), delta
+  double precision, intent(in) :: D_center(n_points,3), delta
   double precision, intent(out) :: resv(n_points)
 
   integer                      :: power_A(3), power_B(3), l, k
@@ -284,7 +284,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, delta, i, j, 
 
   implicit none
   integer,          intent(in)  :: i, j, n_points
-  double precision, intent(in)  :: B_center(3), beta, D_center(3,n_points), delta
+  double precision, intent(in)  :: B_center(3), beta, D_center(n_points,3), delta
   double precision, intent(out) :: resv(n_points)
 
   integer                      :: power_A1(3), power_A2(3), l, k
@@ -321,19 +321,19 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, delta, i, j, 
   A1_center(1:3) = nucl_coord(ao_nucl(i),1:3)
   A2_center(1:3) = nucl_coord(ao_nucl(j),1:3)
 
-  allocate (fact_g(n_points), G_center(3,n_points), analytical_j(n_points) )
+  allocate (fact_g(n_points), G_center(n_points,3), analytical_j(n_points) )
 
   bg = beta * gama_inv
   dg = delta * gama_inv
   bdg = bg * delta 
   do ipoint=1,n_points
-    G_center(1,ipoint) = bg * B_center(1) + dg * D_center(1,ipoint)
-    G_center(2,ipoint) = bg * B_center(2) + dg * D_center(2,ipoint)
-    G_center(3,ipoint) = bg * B_center(3) + dg * D_center(3,ipoint)
+    G_center(ipoint,1) = bg * B_center(1) + dg * D_center(ipoint,1)
+    G_center(ipoint,2) = bg * B_center(2) + dg * D_center(ipoint,2)
+    G_center(ipoint,3) = bg * B_center(3) + dg * D_center(ipoint,3)
     fact_g(ipoint) = bdg * ( &
-          (B_center(1) - D_center(1,ipoint)) * (B_center(1) - D_center(1,ipoint))  &
-        + (B_center(2) - D_center(2,ipoint)) * (B_center(2) - D_center(2,ipoint))  &
-        + (B_center(3) - D_center(3,ipoint)) * (B_center(3) - D_center(3,ipoint)) )
+          (B_center(1) - D_center(ipoint,1)) * (B_center(1) - D_center(ipoint,1))  &
+        + (B_center(2) - D_center(ipoint,2)) * (B_center(2) - D_center(ipoint,2))  &
+        + (B_center(3) - D_center(ipoint,3)) * (B_center(3) - D_center(ipoint,3)) )
 
     if(fact_g(ipoint) < 10d0) then
       fact_g(ipoint) = dexp(-fact_g(ipoint))

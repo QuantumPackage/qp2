@@ -403,6 +403,46 @@ subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
 end subroutine
 
 
+!-
+
+subroutine gaussian_product_x_v(a,xa,b,xb,k,p,xp,n_points)
+  implicit none
+  BEGIN_DOC
+  ! Gaussian product in 1D with multiple xa
+  ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+  END_DOC
+
+  integer, intent(in) :: n_points
+  double precision  , intent(in) :: a,b      ! Exponents
+  double precision  , intent(in) :: xa(n_points),xb    ! Centers
+  double precision  , intent(out) :: p(n_points)       ! New exponent
+  double precision  , intent(out) :: xp(n_points) ! New center
+  double precision  , intent(out) :: k(n_points)       ! Constant
+
+  double precision               :: p_inv
+  integer :: ipoint
+
+  ASSERT (a>0.)
+  ASSERT (b>0.)
+
+  double precision               :: xab, ab
+
+  p = a+b
+  p_inv = 1.d0/(a+b)
+  ab = a*b*p_inv
+  do ipoint = 1, n_points
+    xab = xa(ipoint)-xb
+    k(ipoint) = ab*xab*xab
+    if (k(ipoint) > 40.d0) then
+      k(ipoint)=0.d0
+      cycle
+    endif
+    k(ipoint) = exp(-k(ipoint))
+    xp(ipoint) = (a*xa(ipoint)+b*xb)*p_inv
+  enddo
+end subroutine
+
+
 
 
 
