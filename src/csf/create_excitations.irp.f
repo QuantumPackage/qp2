@@ -226,7 +226,7 @@ subroutine generate_all_singles_cfg(cfg,singles,n_singles,Nint)
   enddo
 end
 
-subroutine generate_all_singles_cfg_with_type(cfgInp,singles,idxs_singles,pq_singles,ex_type_singles,n_singles,Nint)
+subroutine generate_all_singles_cfg_with_type(bit_tmp,cfgInp,singles,idxs_singles,pq_singles,ex_type_singles,n_singles,Nint)
   implicit none
   use bitmasks
   BEGIN_DOC
@@ -238,6 +238,7 @@ subroutine generate_all_singles_cfg_with_type(cfgInp,singles,idxs_singles,pq_sin
   ! ex_type_singles : on output contains type of excitations  :
   !
   END_DOC
+  integer*8, intent(in)          :: bit_tmp(0:N_configuration+1)
   integer, intent(in)            :: Nint
   integer, intent(inout)         :: n_singles
   integer, intent(out)           :: idxs_singles(*)
@@ -248,20 +249,26 @@ subroutine generate_all_singles_cfg_with_type(cfgInp,singles,idxs_singles,pq_sin
   integer(bit_kind)              :: Jdet(Nint,2)
 
   integer           :: i,k, n_singles_ma, i_hole, i_particle, ex_type, addcfg
+  integer           :: ii,kk
   integer(bit_kind) :: single(Nint,2)
   logical           :: i_ok
+
 
   n_singles = 0
   !TODO
   !Make list of Somo  and Domo for holes
   !Make list of Unocc and Somo for particles
-  do i_hole = 1+n_core_orb, n_core_orb + n_act_orb
-    do i_particle = 1+n_core_orb, n_core_orb + n_act_orb
+  !do i_hole = 1+n_core_orb, n_core_orb + n_act_orb
+  do ii = 1, n_act_orb
+    i_hole = list_act(ii)
+    !do i_particle = 1+n_core_orb, n_core_orb + n_act_orb
+    do kk = 1, n_act_orb
+      i_particle = list_act(kk)
       if(i_hole .EQ. i_particle) cycle
       addcfg = -1
       call do_single_excitation_cfg_with_type(cfgInp,single,i_hole,i_particle,ex_type,i_ok)
       if (i_ok) then
-        call binary_search_cfg(single,addcfg)
+        call binary_search_cfg(single,addcfg,bit_tmp)
         if(addcfg .EQ. -1) cycle
         n_singles = n_singles + 1
         do k=1,Nint

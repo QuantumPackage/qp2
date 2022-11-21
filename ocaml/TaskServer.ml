@@ -776,7 +776,7 @@ let run ~port =
       Zmq.Socket.create zmq_context Zmq.Socket.rep
     in
     Zmq.Socket.set_linger_period rep_socket 1_000_000;
-    bind_socket "REP" rep_socket port;
+    bind_socket ~socket_type:"REP" ~socket:rep_socket ~port;
 
     let initial_program_state =
     {   queue = Queuing_system.create () ;

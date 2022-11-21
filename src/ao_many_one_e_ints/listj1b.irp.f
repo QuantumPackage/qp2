@@ -63,7 +63,6 @@ END_PROVIDER
       tmp_cent_z               += tmp_alphaj * nucl_coord(j,3)
     enddo
 
-    ASSERT(List_all_comb_b2_expo(i) .gt. 0d0)
     if(List_all_comb_b2_expo(i) .lt. 1d-10) cycle
 
     List_all_comb_b2_cent(1,i) = tmp_cent_x / List_all_comb_b2_expo(i) 
@@ -177,8 +176,8 @@ END_PROVIDER
 
     enddo
 
-    ASSERT(List_all_comb_b3_expo(i) .gt. 0d0)
     if(List_all_comb_b3_expo(i) .lt. 1d-10) cycle
+    ASSERT(List_all_comb_b3_expo(i) .gt. 0d0)
 
     List_all_comb_b3_cent(1,i) = List_all_comb_b3_cent(1,i) / List_all_comb_b3_expo(i) 
     List_all_comb_b3_cent(2,i) = List_all_comb_b3_cent(2,i) / List_all_comb_b3_expo(i)

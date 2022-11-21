@@ -1,0 +1,169 @@
+#+TITLE: Quick sort binding for Fortran
+
+* C template
+
+#+NAME: c_template
+#+BEGIN_SRC c
+struct TYPE_comp_big {
+  TYPE    x;
+  int32_t i;
+};
+
+int compare_TYPE_big( const void * l, const void * r )
+{
+  const TYPE * restrict _l= l;
+  const TYPE * restrict _r= r;
+  if( *_l > *_r ) return 1;
+  if( *_l < *_r ) return -1;
+  return 0;
+}
+
+void qsort_TYPE_big(TYPE* restrict A_in, int32_t* restrict iorder, int32_t isize) {
+  struct TYPE_comp_big* A = malloc(isize * sizeof(struct TYPE_comp_big));
+  if (A == NULL) return;
+
+  for (int i=0 ; i<isize ; ++i) {
+    A[i].x = A_in[i];
+    A[i].i = iorder[i];
+  }
+
+  qsort( (void*) A, (size_t) isize, sizeof(struct TYPE_comp_big), compare_TYPE_big);
+
+  for (int i=0 ; i<isize ; ++i) {
+    A_in[i] = A[i].x;
+    iorder[i] = A[i].i;
+  }
+  free(A);
+}
+
+void qsort_TYPE_noidx_big(TYPE* A, int32_t isize) {
+  qsort( (void*) A, (size_t) isize, sizeof(TYPE), compare_TYPE_big);
+}
+#+END_SRC
+
+* Fortran template
+
+#+NAME:f_template
+#+BEGIN_SRC f90
+subroutine Lsort_big_c(A, iorder, isize) bind(C, name="qsort_TYPE_big")
+  use iso_c_binding
+  integer(c_int32_t), value :: isize
+  integer(c_int32_t)        :: iorder(isize)
+  real   (c_TYPE)         :: A(isize)
+end subroutine Lsort_big_c
+
+subroutine Lsort_noidx_big_c(A, isize) bind(C, name="qsort_TYPE_noidx_big")
+  use iso_c_binding
+  integer(c_int32_t), value :: isize
+  real   (c_TYPE)         :: A(isize)
+end subroutine Lsort_noidx_big_c
+
+#+END_SRC
+
+#+NAME:f_template2
+#+BEGIN_SRC f90
+subroutine Lsort_big(A, iorder, isize) 
+  use qsort_module
+  use iso_c_binding
+  integer(c_int32_t)        :: isize
+  integer(c_int32_t)        :: iorder(isize)
+  real   (c_TYPE)         :: A(isize)
+  call Lsort_big_c(A, iorder, isize)
+end subroutine Lsort_big
+
+subroutine Lsort_noidx_big(A, isize)
+  use iso_c_binding
+  use qsort_module
+  integer(c_int32_t) :: isize
+  real   (c_TYPE)    :: A(isize)
+  call Lsort_noidx_big_c(A, isize)
+end subroutine Lsort_noidx_big
+
+#+END_SRC
+
+* Python scripts for type replacements
+
+#+NAME: replaced
+#+begin_src python :results output :noweb yes
+data = """
+<<c_template>>
+"""
+for typ in ["int16_t", "int32_t", "int64_t", "double", "float"]:
+    print( data.replace("TYPE", typ).replace("_big", "") )
+    print( data.replace("int32_t", "int64_t").replace("TYPE", typ) )
+#+end_src
+
+#+NAME: replaced_f
+#+begin_src python :results output :noweb yes
+data = """
+<<f_template>>
+"""
+c1 = {
+    "int16_t": "i2",
+    "int32_t": "i",
+    "int64_t": "i8",
+    "double": "d",
+    "float": ""
+}
+c2 = {
+    "int16_t": "integer",
+    "int32_t": "integer",
+    "int64_t": "integer",
+    "double": "real",
+    "float": "real"
+}
+
+for typ in ["int16_t", "int32_t", "int64_t", "double", "float"]:
+    print( data.replace("real",c2[typ]).replace("L",c1[typ]).replace("TYPE", typ).replace("_big", "") )
+    print( data.replace("real",c2[typ]).replace("L",c1[typ]).replace("int32_t", "int64_t").replace("TYPE", typ) )
+#+end_src
+
+#+NAME: replaced_f2
+#+begin_src python :results output :noweb yes
+data = """
+<<f_template2>>
+"""
+c1 = {
+    "int16_t": "i2",
+    "int32_t": "i",
+    "int64_t": "i8",
+    "double": "d",
+    "float": ""
+}
+c2 = {
+    "int16_t": "integer",
+    "int32_t": "integer",
+    "int64_t": "integer",
+    "double": "real",
+    "float": "real"
+}
+
+for typ in ["int16_t", "int32_t", "int64_t", "double", "float"]:
+    print( data.replace("real",c2[typ]).replace("L",c1[typ]).replace("TYPE", typ).replace("_big", "") )
+    print( data.replace("real",c2[typ]).replace("L",c1[typ]).replace("int32_t", "int64_t").replace("TYPE", typ) )
+#+end_src
+
+* Generated C file
+  
+#+BEGIN_SRC c :comments link :tangle qsort.c :noweb yes
+#include <stdlib.h>
+#include <stdint.h>
+<<replaced()>>
+#+END_SRC
+
+* Generated Fortran file
+
+#+BEGIN_SRC f90 :tangle qsort_module.f90 :noweb yes
+module qsort_module
+  use iso_c_binding
+  
+  interface
+     <<replaced_f()>>
+  end interface
+
+end module qsort_module
+
+<<replaced_f2()>>
+
+#+END_SRC
+
