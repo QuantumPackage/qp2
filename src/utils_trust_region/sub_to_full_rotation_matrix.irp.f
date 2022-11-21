@@ -1,0 +1,64 @@
+! Rotation matrix in a subspace to rotation matrix in the full space
+
+! Usually, we are using a list of MOs, for exemple the active ones. When
+! we compute a rotation matrix to rotate the MOs, we just compute a
+! rotation matrix for these MOs in order to reduce the size of the
+! matrix which has to be computed. Since the computation of a rotation
+! matrix scale in $O(N^3)$ with $N$ the number of MOs, it's better to
+! reuce the number of MOs involved.
+! After that we replace the rotation matrix in the full space by
+! building the elements of the rotation matrix in the full space from
+! the elements of the rotation matrix in the subspace and adding some 0
+! on the extradiagonal elements and some 1 on the diagonal elements,
+! for the MOs that are not involved in the rotation.
+
+! Provided:
+! | mo_num      | integer | Number of MOs                 |
+
+! Input:
+! | m           | integer          | Size of tmp_list, m <= mo_num   |
+! | tmp_list(m) | integer          | List of MOs                     |
+! | tmp_R(m,m)  | double precision | Rotation matrix in the space of |
+! |             |                  | the MOs containing by tmp_list  |
+
+! Output:
+! | R(mo_num,mo_num | double precision | Rotation matrix in the space |
+! |                 |                  | of all the MOs               |
+
+! Internal:
+! | i,j         | integer | indexes in the full space |
+! | tmp_i,tmp_j | integer | indexes in the subspace   |
+
+
+subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
+
+  BEGIN_DOC
+  ! Compute the full rotation matrix from a smaller one
+  END_DOC
+  
+  implicit none
+
+  ! in
+  integer, intent(in)           :: m, tmp_list(m)
+  double precision, intent(in)  :: tmp_R(m,m)
+  
+  ! out
+  double precision, intent(out) :: R(mo_num,mo_num)
+ 
+  ! internal
+  integer                       :: i,j,tmp_i,tmp_j
+
+  ! tmp_R to R, subspace to full space
+  R = 0d0
+  do i = 1, mo_num
+    R(i,i) = 1d0 ! 1 on the diagonal because it is a rotation matrix, 1 = nothing change for the corresponding orbital
+  enddo
+  do tmp_j = 1, m
+    j = tmp_list(tmp_j)
+    do tmp_i = 1, m
+      i = tmp_list(tmp_i)
+      R(i,j) = tmp_R(tmp_i,tmp_j)
+    enddo
+  enddo
+ 
+end

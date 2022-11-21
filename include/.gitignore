@@ -5,3 +5,4 @@ zconf.h
 zlib.h
 zmq_utils.h
 f77_zmq_free.h
+f77_zmq.h

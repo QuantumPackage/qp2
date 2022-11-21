@@ -369,7 +369,7 @@ else
       echo ""
       echo "${QP_ROOT}/build.ninja does not exist,"
       echo "you need to specify the COMPILATION configuration file."
-      echo "See  ./configure --help  for more details."
+      echo "See  ./configure -h  for more details."
       echo ""
 fi
 

@@ -47,6 +47,7 @@ void generateAllBFs(int64_t Isomo, int64_t MS, Tree *bftree, int *NBF, int *NSOM
 void getSetBits(int64_t n, int *nsetbits);
 void getOverlapMatrix(int64_t Isomo, int64_t MS, double **overlapMatrixptr, int *rows, int *cols, int *NSOMOout);
 void getOverlapMatrix_withDet(double *bftodetmatrixI, int rowsbftodetI, int colsbftodetI, int64_t Isomo, int64_t MS, double **overlapMatrixI, int *rowsI, int *colsI, int *NSOMO);
+void gramSchmidt_qp(double *overlapMatrix, int rows, int cols, double *orthoMatrix);
 void gramSchmidt(double *overlapMatrix, int rows, int cols, double *orthoMatrix);
 
 

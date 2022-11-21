@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "tree_utils.h"
 
 void buildTree(Tree *bftree,
@@ -52,6 +53,7 @@ void buildTreeDriver(Tree *bftree, int NSOMO, int MS, int *NBF){
     int icpl  = 0; // keep track of the ith ms (cannot be -ve)
     int addr  = 0; // Counts the total BF's
 
+    assert(bftree->rootNode->addr == 0);
     buildTree(bftree, &(bftree->rootNode), isomo, izeros, icpl, NSOMO, MS);
 
     *NBF = bftree->rootNode->addr;
@@ -264,6 +266,8 @@ void genDetBasis(Tree *dettree, int Isomo, int MS, int *ndets){
     int NSOMO=0;
     getSetBits(Isomo, &NSOMO);
     genDetsDriver(dettree, NSOMO, MS, ndets);
+    // Closed shell case
+    if(NSOMO==0) (*ndets) = 1;
 
 }
 
@@ -310,4 +314,14 @@ void callBlasMatxMat(double *A, int rowA, int colA, double *B, int rowB, int col
             printf("Impossible !!!!\n");
             break;
     }
+}
+
+void printRealMatrix(double *orthoMatrix, int rows, int cols){
+  int i,j;
+  for(i=0;i<rows;++i){
+    for(j=0;j<cols;++j){
+      printf(" %3.5f ",orthoMatrix[i*cols + j]);
+    }
+    printf("\n");
+  }
 }

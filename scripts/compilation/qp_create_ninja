@@ -121,6 +121,7 @@ def ninja_create_env_variable(pwd_config_file):
 
     l_string.append("LIB = {0} ".format(str_lib))
 
+    l_string.append("CONFIG_FILE = {0}".format(pwd_config_file))
     l_string.append("")
 
     return l_string

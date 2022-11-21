@@ -1,3 +1,16 @@
+BEGIN_PROVIDER [ double precision, psi_csf_coef, (N_csf, N_states) ]
+ implicit none
+ BEGIN_DOC
+ ! Wafe function in CSF basis
+ END_DOC
+
+ double precision, allocatable :: buffer(:,:)
+ allocate ( buffer(N_det, N_states) )
+ buffer(1:N_det, 1:N_states) = psi_coef(1:N_det, 1:N_states)
+ call convertWFfromDETtoCSF(N_states, buffer, psi_csf_coef)
+END_PROVIDER
+
+
 subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
   use cfunctions
   use bitmasks
@@ -12,7 +25,7 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
   double precision, intent(out)  :: psi_coef_cfg_out(n_CSF,N_st)
   integer*8                      :: Isomo, Idomo, mask
   integer(bit_kind)              :: Ialpha(N_int) ,Ibeta(N_int)
-  integer                        :: rows, cols, i, j, k
+  integer                        :: rows, cols, i, j, k, salpha
   integer                        :: startdet, enddet
   integer                        :: ndetI
   integer                        :: getNSOMO
@@ -26,6 +39,8 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
 
   integer s, bfIcfg
   integer countcsf
+  integer MS
+  MS = elec_alpha_num-elec_beta_num
   countcsf = 0
   phasedet = 1.0d0
   do i = 1,N_configuration
@@ -44,12 +59,19 @@ subroutine convertWFfromDETtoCSF(N_st,psi_coef_det_in, psi_coef_cfg_out)
       enddo
     enddo
 
-    s = 0
+    s = 0 ! s == total number of SOMOs
     do k=1,N_int
       if (psi_configuration(k,1,i) == 0_bit_kind) cycle
       s = s + popcnt(psi_configuration(k,1,i))
     enddo
-    bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+
+    if(iand(s,1) .EQ. 0) then
+      salpha = (s + MS)/2
+      bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
+    else
+      salpha = (s + MS)/2
+      bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
+    endif
 
     ! perhaps blocking with CFGs of same seniority
     ! can be more efficient
@@ -80,7 +102,7 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
   double precision,intent(in)    :: psi_coef_cfg_in(n_CSF,N_st)
   double precision,intent(out)   :: psi_coef_det(N_det,N_st)
   double precision               :: tmp_psi_coef_det(maxDetDimPerBF,N_st)
-  integer                        :: s, bfIcfg
+  integer                        :: s, bfIcfg, salpha
   integer                        :: countcsf
   integer(bit_kind)              :: Ialpha(N_int), Ibeta(N_int)
   integer                        :: rows, cols, i, j, k
@@ -91,6 +113,8 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
   double precision,allocatable   :: tempCoeff (:,:)
   double precision               :: phasedet
   integer                        :: idx
+  integer MS
+  MS = elec_alpha_num-elec_beta_num
 
   countcsf = 0
 
@@ -104,7 +128,8 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
       if (psi_configuration(k,1,i) == 0_bit_kind) cycle
       s = s + popcnt(psi_configuration(k,1,i))
     enddo
-    bfIcfg = max(1,nint((binom(s,(s+1)/2)-binom(s,((s+1)/2)+1))))
+    salpha = (s + MS)/2
+    bfIcfg = max(1,nint((binom(s,salpha)-binom(s,salpha+1))))
 
     allocate(tempCoeff(bfIcfg,N_st))
 

@@ -89,7 +89,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, intent(out)  :: energies(N_st_diag_in)
 
   integer                        :: iter, N_st_diag
-  integer                        :: i,j,k,l,m
+  integer                        :: i,j,k,l,m,kk
   logical, intent(inout)         :: converged
 
   double precision, external     :: u_dot_v, u_dot_u
