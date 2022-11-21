@@ -2,44 +2,79 @@
 &BEGIN_PROVIDER [ double precision, leigvec_tc_cisd_sc2_bi_ortho, (N_det,N_states)]
 &BEGIN_PROVIDER [ double precision, eigval_tc_cisd_sc2_bi_ortho, (N_states)]
  implicit none
- integer :: it,n_real,degree,i
- double precision :: e_before, e_current,thr, hmono,htwoe,hthree
+ integer :: it,n_real,degree,i,istate
+ double precision :: e_before, e_current,thr, hmono,htwoe,hthree,accu
  double precision, allocatable :: e_corr_dets(:),h0j(:), h_sc2(:,:), dressing_dets(:)
  double precision, allocatable :: leigvec_tc_bi_orth_tmp(:,:),reigvec_tc_bi_orth_tmp(:,:),eigval_right_tmp(:)
  allocate(leigvec_tc_bi_orth_tmp(N_det,N_det),reigvec_tc_bi_orth_tmp(N_det,N_det),eigval_right_tmp(N_det))
  allocate(e_corr_dets(N_det),h0j(N_det),h_sc2(N_det,N_det),dressing_dets(N_det))
+ allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),eigval_tmp(N_states))
+ dressing_dets = 0.d0
  do i = 1, N_det
+  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
   if(degree == 1 .or. degree == 2)then
    call htilde_mu_mat_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,h0j(i))
   endif
  enddo
+ reigvec_tc_bi_orth_tmp = 0.d0
  do i = 1, N_det 
-  e_corr_dets(i) = reigvec_tc_bi_orth(i,1) * h0j(i)/reigvec_tc_bi_orth(1,1)
+  reigvec_tc_bi_orth_tmp(i,1) = psi_r_coef_bi_ortho(i,1) 
  enddo
- print*,'Starting from ',eigval_right_tc_bi_orth(1)
+ vec_tmp = 0.d0
+ do istate = 1, N_states
+  vec_tmp(:,istate) = reigvec_tc_bi_orth_tmp(:,istate)
+ enddo
+ do istate = N_states+1, n_states_diag
+  vec_tmp(istate,istate) = 1.d0
+ enddo
+ print*,'Diagonalizing the TC CISD '
+ call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
+ do i = 1, N_det 
+  e_corr_dets(i) = reigvec_tc_bi_orth_tmp(i,1) * h0j(i)/reigvec_tc_bi_orth_tmp(1,1)
+ enddo
+ E_before = eigval_tmp(1)
+ print*,'Starting from ',E_before
 
- e_before = 0.d0
  e_current = 10.d0
  thr = 1.d-5
  it = 0
  dressing_dets = 0.d0
+  double precision, allocatable :: H_jj(:),vec_tmp(:,:),eigval_tmp(:)
+  external                         htc_bi_ortho_calc_tdav
+  external                         htcdag_bi_ortho_calc_tdav
+  logical                       :: converged
  do while (dabs(E_before-E_current).gt.thr)
   it += 1
   E_before = E_current
-  h_sc2 = htilde_matrix_elmt_bi_ortho
+!  h_sc2 = htilde_matrix_elmt_bi_ortho
   call get_cisd_sc2_dressing(psi_det,e_corr_dets,N_det,dressing_dets)
   do i = 1, N_det
-   print*,'dressing_dets(i) = ',dressing_dets(i)
+!   print*,'dressing_dets(i) = ',dressing_dets(i)
    h_sc2(i,i) += dressing_dets(i)
   enddo
-  call non_hrmt_real_diag(N_det,h_sc2,& 
-       leigvec_tc_bi_orth_tmp,reigvec_tc_bi_orth_tmp,& 
-       n_real,eigval_right_tmp)
+  print*,'********************'
+  print*,'iteration       ',it
+!  call non_hrmt_real_diag(N_det,h_sc2,& 
+!       leigvec_tc_bi_orth_tmp,reigvec_tc_bi_orth_tmp,& 
+!       n_real,eigval_right_tmp)
+!  print*,'eigval_right_tmp(1)',eigval_right_tmp(1)
+  vec_tmp = 0.d0
+  do istate = 1, N_states
+   vec_tmp(:,istate) = reigvec_tc_bi_orth_tmp(:,istate)
+  enddo
+  do istate = N_states+1, n_states_diag
+   vec_tmp(istate,istate) = 1.d0
+  enddo
+  call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
+  print*,'outside Davidson'
+  print*,'eigval_tmp(1) = ',eigval_tmp(1)
   do i = 1, N_det 
+   reigvec_tc_bi_orth_tmp(i,1) = vec_tmp(i,1)
    e_corr_dets(i) = reigvec_tc_bi_orth_tmp(i,1) * h0j(i)/reigvec_tc_bi_orth_tmp(1,1)
   enddo
-  E_current = eigval_right_tmp(1)
+!  E_current = eigval_right_tmp(1)
+  E_current = eigval_tmp(1)
   print*,'it, E(SC)^2 = ',it,E_current
  enddo
  eigval_tc_cisd_sc2_bi_ortho(1:N_states) = eigval_right_tmp(1:N_states)

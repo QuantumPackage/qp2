@@ -13,105 +13,44 @@ program test_tc_fock
 
   !call routine_1
   !call routine_2
-  call routine_3()
+!  call routine_3()
 
+ call test_3e
 end
 
 ! ---
 
-subroutine routine_0
+subroutine test_3e
  implicit none
-  use bitmasks ! you need to include the bitmasks_module.f90 features
- integer :: i,a,j,m,i_ok
- integer :: exc(0:2,2,2),h1,p1,s1,h2,p2,s2,degree
-
- integer(bit_kind), allocatable :: det_i(:,:)
- double precision :: hmono,htwoe,hthree,htilde_ij,phase
- double precision :: same, op, tot, accu
- allocate(det_i(N_int,2))
- s1 = 1
- accu = 0.d0
- do i = 1, elec_alpha_num ! occupied
-  do a = elec_alpha_num+1, mo_num ! virtual 
-    det_i = ref_bitmask
-    call do_single_excitation(det_i,i,a,s1,i_ok)
-    if(i_ok == -1)then
-     print*,'PB !!'
-     print*,i,a
-     stop
-    endif
-!    call debug_det(det_i,N_int)
-    call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
-    call htilde_mu_mat_bi_ortho(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-    op   = fock_3_mat_a_op_sh_bi_orth(a,i)
-    same = fock_3_mat_a_sa_sh_bi_orth(a,i)
-!    same = 0.d0
-    tot = same + op
-    if(dabs(tot - phase*hthree).gt.1.d-10)then
-     print*,'------'
-     print*,i,a,phase
-     print*,'hthree = ',phase*hthree
-     print*,'fock   = ',tot
-     print*,'same,op= ',same,op
-     print*,dabs(tot - phase*hthree)
-     stop
-    endif
-    accu += dabs(tot - phase*hthree)
-  enddo
- enddo
+ double precision :: integral_aaa,integral_aab,integral_abb,integral_bbb,accu
+ double precision ::  hmono, htwoe, hthree, htot
+ call htilde_mu_mat_bi_ortho(ref_bitmask, ref_bitmask, N_int, hmono, htwoe, hthree, htot)
+! call diag_htilde_three_body_ints_bi_ort(N_int, ref_bitmask, hthree)
+ print*,'hmono = ',hmono
+ print*,'htwoe = ',htwoe
+ print*,'hthree= ',hthree
+ print*,'htot  = ',htot
+ print*,''
+ print*,''
+ print*,'TC_one= ',TC_HF_one_electron_energy
+ print*,'TC_two= ',TC_HF_two_e_energy
+ print*,'TC_3e = ',diag_three_elem_hf
+ print*,'TC_tot= ',TC_HF_energy
+ print*,''
+ print*,''
+ call give_aaa_contrib(integral_aaa)
+ print*,'integral_aaa = ',integral_aaa
+ call give_aab_contrib(integral_aab)
+ print*,'integral_aab = ',integral_aab
+ call give_abb_contrib(integral_abb)
+ print*,'integral_abb = ',integral_abb
+ call give_bbb_contrib(integral_bbb)
+ print*,'integral_bbb = ',integral_bbb
+ accu = integral_aaa + integral_aab + integral_abb + integral_bbb
  print*,'accu = ',accu
+ print*,'delta = ',hthree - accu
 
-end subroutine routine_0
-
-! ---
-
-subroutine routine_1
-
-  implicit none
-  integer          :: i, a
-  double precision :: accu
-
-  accu = 0.d0
-  do i = 1, mo_num
-    do a = 1, mo_num
-      accu += dabs( fock_3_mat_a_op_sh_bi_orth_old(a,i) - fock_3_mat_a_op_sh_bi_orth(a,i) )
-      !if(dabs( fock_3_mat_a_op_sh_bi_orth_old(a,i) - fock_3_mat_a_op_sh_bi_orth(a,i) ) .gt. 1.d-10)then
-        print*, i, a
-        print*, dabs( fock_3_mat_a_op_sh_bi_orth_old(a,i) - fock_3_mat_a_op_sh_bi_orth(a,i) ) &
-              , fock_3_mat_a_op_sh_bi_orth_old(a,i), fock_3_mat_a_op_sh_bi_orth(a,i)
-      !endif
-    enddo
-  enddo
-
-  print *, 'accu = ', accu
-
-end subroutine routine_1
-
-! ---
-
-subroutine routine_2
-
-  implicit none
-  integer          :: i, a
-  double precision :: accu
-
-  accu = 0.d0
-  do i = 1, mo_num
-    do a = 1, mo_num
-      accu += dabs( fock_3_mat_a_sa_sh_bi_orth_old(a,i) - fock_3_mat_a_sa_sh_bi_orth(a,i) )
-      !if(dabs( fock_3_mat_a_sa_sh_bi_orth_old(a,i) - fock_3_mat_a_sa_sh_bi_orth(a,i) ) .gt. 1.d-10)then
-        print*, i, a
-        print*, dabs( fock_3_mat_a_sa_sh_bi_orth_old(a,i) - fock_3_mat_a_sa_sh_bi_orth(a,i) ) &
-              , fock_3_mat_a_sa_sh_bi_orth_old(a,i), fock_3_mat_a_sa_sh_bi_orth(a,i)
-      !endif
-    enddo
-  enddo
-
-  print *, 'accu = ', accu
-
-end subroutine routine_2
-
-! ---
+end
 
 subroutine routine_3()
 

@@ -1,9 +1,20 @@
+BEGIN_PROVIDER [ character*(3), sigma_vector_algorithm ]
+ implicit none
+ BEGIN_DOC
+ ! If 'det', use <Psi_det|H|Psi_det> in Davidson
+ !
+ ! If 'cfg', use <Psi_csf|H|Psi_csf> in Davidson
+ END_DOC
+ sigma_vector_algorithm = 'det'
+ !sigma_vector_algorithm = 'cfg'
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
   implicit none
   BEGIN_DOC
   ! :c:data:`n_states` lowest eigenvalues of the |CI| matrix
   END_DOC
+  PROVIDE distributed_davidson
 
   integer                        :: j
   character*(8)                  :: st
@@ -61,7 +72,7 @@ END_PROVIDER
    if (diag_algorithm == 'Davidson') then
 
      if (do_csf) then
-!      if (sigma_vector_algorithm == 'det') then
+       if (sigma_vector_algorithm == 'det') then
          call davidson_diag_H_csf (psi_det,                  &
                                    CI_eigenvectors,          &
                                    size(CI_eigenvectors,1),  &
@@ -73,14 +84,14 @@ END_PROVIDER
                                    N_int,                    &
                                    0,                        &
                                    converged)
-!       else if (sigma_vector_algorithm == 'cfg') then
-!       call davidson_diag_H_csf(psi_det,CI_eigenvectors, &
-!         size(CI_eigenvectors,1),CI_electronic_energy,               &
-!         N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
-!       else
-!         print *, irp_here
-!         stop 'bug'
-!      endif
+       else if (sigma_vector_algorithm == 'cfg') then
+          call davidson_diag_H_cfg(psi_det,CI_eigenvectors, &
+          size(CI_eigenvectors,1),CI_electronic_energy,               &
+          N_det,N_csf,min(N_det,N_states),min(N_det,N_states_diag),N_int,0,converged)
+       else
+          print *, irp_here
+          stop 'bug'
+       endif
      else
        call davidson_diag_HS2(psi_det,                  &
                               CI_eigenvectors,          &
