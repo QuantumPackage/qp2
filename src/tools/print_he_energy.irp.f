@@ -5,10 +5,45 @@ program print_he_energy
 
   implicit none
 
-  !call print_energy1()
+  call print_overlap()
+
+  call print_energy1()
   call print_energy2()
 
 end 
+
+! ---
+
+subroutine print_overlap()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: S_ij
+
+  print *, ' ao_overlap:'
+  do i = 1, ao_num
+    do j = 1, ao_num
+      print *, j, i, ao_overlap(j,i)
+    enddo
+  enddo
+
+
+  print *, ' mo_overlap:'
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      S_ij = 0.d0
+      do k = 1, ao_num
+        do l = 1, ao_num
+          S_ij += mo_coef(k,i) * ao_overlap(k,l) * mo_coef(l,j)
+        enddo
+      enddo
+      
+      print *, i, j, S_ij
+    enddo
+  enddo
+
+end subroutine print_overlap
 
 ! ---
 

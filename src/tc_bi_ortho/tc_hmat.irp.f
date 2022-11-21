@@ -18,6 +18,10 @@
       do j = 1, N_det
         ! < J | Htilde | I >
         call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+
+        print *, ' hmono  = ', hmono
+        print *, ' htwoe  = ', htwoe
+        print *, ' hthree = ', hthree
         htilde_matrix_elmt_bi_ortho(j,i) = htot
       enddo
     enddo

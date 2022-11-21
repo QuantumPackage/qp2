@@ -356,6 +356,7 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
   ! Eigvalue(n) = WR(n) + i * WI(n)
   allocate(WR(n), WI(n), VL(n,n), VR(n,n), Aw(n,n))
   Aw = A
+  !print *, ' matrix to diagonalize', Aw
   call lapack_diag_non_sym(n, Aw, WR, WI, VL, VR)
 
   ! ---
@@ -1212,6 +1213,7 @@ subroutine impose_orthog_svd(n, m, C)
   num_linear_dependencies = 0
   do i = 1, m
     if(abs(D(i)) <= threshold) then
+      write(*,*) ' D(i) = ', D(i)
       D(i) = 0.d0
       num_linear_dependencies += 1
     else
@@ -1690,11 +1692,13 @@ subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
 
   ! S(i,i) = -1
   do i = 1, m
-    if( (S(i,i) + 1.d0) .lt. thr_d ) then
+    if(S(i,i) .lt. 0.d0) then
+    !if( (S(i,i) + 1.d0) .lt. thr_d ) then
       do j = 1, n
         Vl(j,i) = -1.d0 * Vl(j,i)
       enddo
-      S(i,i) = 1.d0
+      !S(i,i) = 1.d0
+      S(i,i) = -S(i,i)
     endif
   enddo
 
@@ -1726,6 +1730,7 @@ subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
           Vr(j,i) = Vr(j,i) * s_tmp 
         enddo
       endif
+
     enddo
 
   endif
@@ -1978,7 +1983,7 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
   
   do i = 1, n
     if(deg_num(i).gt.1) then
-      print *, ' degen on', i, deg_num(i)
+      print *, ' degen on', i, deg_num(i), e0(i)
     endif
   enddo
 
@@ -2001,6 +2006,8 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
 
       call impose_orthog_svd(n, m, L)
       call impose_orthog_svd(n, m, R)
+      !call impose_orthog_GramSchmidt(n, m, L)
+      !call impose_orthog_GramSchmidt(n, m, R)
 
       ! ---
 

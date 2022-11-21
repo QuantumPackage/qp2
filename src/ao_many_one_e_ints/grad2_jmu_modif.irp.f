@@ -32,7 +32,6 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_grad1u2_grad2u2_j1b2)
  !$OMP DO
-  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -42,22 +41,41 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
       do j = i, ao_num
 
         tmp = 0.d0
-        do i_1s = 1, List_all_comb_b3_size
+        do i_fit = 1, n_max_fit_slat
 
-          coef        = List_all_comb_b3_coef  (i_1s)
-          beta        = List_all_comb_b3_expo  (i_1s)
-          B_center(1) = List_all_comb_b3_cent(1,i_1s)
-          B_center(2) = List_all_comb_b3_cent(2,i_1s)
-          B_center(3) = List_all_comb_b3_cent(3,i_1s)
+          expo_fit = expo_gauss_1_erf_x_2(i_fit)
+          coef_fit = coef_gauss_1_erf_x_2(i_fit)
 
-          do i_fit = 1, n_max_fit_slat
+          ! ---
 
-            expo_fit = expo_gauss_1_erf_x_2(i_fit)
-            coef_fit = coef_gauss_1_erf_x_2(i_fit)
-            int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
+          coef        = List_all_comb_b3_coef  (1)
+          beta        = List_all_comb_b3_expo  (1)
+          B_center(1) = List_all_comb_b3_cent(1,1)
+          B_center(2) = List_all_comb_b3_cent(2,1)
+          B_center(3) = List_all_comb_b3_cent(3,1)
+
+          int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
+          if(dabs(int_fit) .lt. 1d-10) cycle
+
+          tmp += -0.25d0 * coef * coef_fit * int_fit
+
+          ! ---
+
+          do i_1s = 2, List_all_comb_b3_size
+
+            coef        = List_all_comb_b3_coef  (i_1s)
+            beta        = List_all_comb_b3_expo  (i_1s)
+            B_center(1) = List_all_comb_b3_cent(1,i_1s)
+            B_center(2) = List_all_comb_b3_cent(2,i_1s)
+            B_center(3) = List_all_comb_b3_cent(3,i_1s)
+
+            int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
 
             tmp += -0.25d0 * coef * coef_fit * int_fit
           enddo
+
+          ! ---
+
         enddo
 
         int2_grad1u2_grad2u2_j1b2(j,i,ipoint) = tmp
@@ -112,7 +130,6 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
  !$OMP DO
-  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -122,22 +139,41 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
       do j = i, ao_num
 
         tmp = 0.d0
-        do i_1s = 1, List_all_comb_b3_size
+        do i_fit = 1, n_max_fit_slat
 
-          coef        = List_all_comb_b3_coef  (i_1s)
-          beta        = List_all_comb_b3_expo  (i_1s)
-          B_center(1) = List_all_comb_b3_cent(1,i_1s)
-          B_center(2) = List_all_comb_b3_cent(2,i_1s)
-          B_center(3) = List_all_comb_b3_cent(3,i_1s)
+          expo_fit = expo_gauss_j_mu_x_2(i_fit)
+          coef_fit = coef_gauss_j_mu_x_2(i_fit)
 
-          do i_fit = 1, n_max_fit_slat
+          ! ---
 
-            expo_fit = expo_gauss_j_mu_x_2(i_fit)
-            coef_fit = coef_gauss_j_mu_x_2(i_fit)
-            int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
+          coef        = List_all_comb_b3_coef  (1)
+          beta        = List_all_comb_b3_expo  (1)
+          B_center(1) = List_all_comb_b3_cent(1,1)
+          B_center(2) = List_all_comb_b3_cent(2,1)
+          B_center(3) = List_all_comb_b3_cent(3,1)
+
+          int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
+          if(dabs(int_fit) .lt. 1d-10) cycle
+
+          tmp += coef * coef_fit * int_fit
+
+          ! ---
+
+          do i_1s = 2, List_all_comb_b3_size
+         
+            coef        = List_all_comb_b3_coef  (i_1s)
+            beta        = List_all_comb_b3_expo  (i_1s)
+            B_center(1) = List_all_comb_b3_cent(1,i_1s)
+            B_center(2) = List_all_comb_b3_cent(2,i_1s)
+            B_center(3) = List_all_comb_b3_cent(3,i_1s)
+
+            int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
 
             tmp += coef * coef_fit * int_fit
           enddo
+
+          ! ---
+
         enddo
 
         int2_u2_j1b2(j,i,ipoint) = tmp
@@ -205,21 +241,52 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_p
         tmp_x = 0.d0
         tmp_y = 0.d0
         tmp_z = 0.d0
-        do i_1s = 1, List_all_comb_b3_size
+        do i_fit = 1, n_max_fit_slat
 
-          coef        = List_all_comb_b3_coef  (i_1s)
-          beta        = List_all_comb_b3_expo  (i_1s)
-          B_center(1) = List_all_comb_b3_cent(1,i_1s)
-          B_center(2) = List_all_comb_b3_cent(2,i_1s)
-          B_center(3) = List_all_comb_b3_cent(3,i_1s)
+          expo_fit = expo_gauss_j_mu_1_erf(i_fit)
+          coef_fit = coef_gauss_j_mu_1_erf(i_fit)
+
+          ! ---
+
+          coef        = List_all_comb_b3_coef  (1)
+          beta        = List_all_comb_b3_expo  (1)
+          B_center(1) = List_all_comb_b3_cent(1,1)
+          B_center(2) = List_all_comb_b3_cent(2,1)
+          B_center(3) = List_all_comb_b3_cent(3,1)
           dist        = (B_center(1) - r(1)) * (B_center(1) - r(1)) &
                       + (B_center(2) - r(2)) * (B_center(2) - r(2)) &
                       + (B_center(3) - r(3)) * (B_center(3) - r(3)) 
 
-          do i_fit = 1, n_max_fit_slat
+          alpha_1s     = beta + expo_fit
+          alpha_1s_inv = 1.d0 / alpha_1s 
 
-            expo_fit = expo_gauss_j_mu_1_erf(i_fit)
-            coef_fit = coef_gauss_j_mu_1_erf(i_fit)
+          centr_1s(1)  = alpha_1s_inv * (beta * B_center(1) + expo_fit * r(1))
+          centr_1s(2)  = alpha_1s_inv * (beta * B_center(2) + expo_fit * r(2))
+          centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
+
+          expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist 
+          coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
+          if(dabs(coef_tmp) .lt. 1d-10) cycle
+            
+          call NAI_pol_x_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s, 1.d+9, r, int_fit)
+          if( (dabs(int_fit(1)) + dabs(int_fit(2)) + dabs(int_fit(3))) .lt. 3d-10 ) cycle
+
+          tmp_x += coef_tmp * int_fit(1)
+          tmp_y += coef_tmp * int_fit(2)
+          tmp_z += coef_tmp * int_fit(3)
+
+          ! ---
+
+          do i_1s = 2, List_all_comb_b3_size
+          
+            coef        = List_all_comb_b3_coef  (i_1s)
+            beta        = List_all_comb_b3_expo  (i_1s)
+            B_center(1) = List_all_comb_b3_cent(1,i_1s)
+            B_center(2) = List_all_comb_b3_cent(2,i_1s)
+            B_center(3) = List_all_comb_b3_cent(3,i_1s)
+            dist        = (B_center(1) - r(1)) * (B_center(1) - r(1)) &
+                        + (B_center(2) - r(2)) * (B_center(2) - r(2)) &
+                        + (B_center(3) - r(3)) * (B_center(3) - r(3)) 
 
             alpha_1s     = beta + expo_fit
             alpha_1s_inv = 1.d0 / alpha_1s 
@@ -229,9 +296,8 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_p
             centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
 
             expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist 
-            !if(expo_coef_1s .gt. 80.d0) cycle
             coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
-            !if(dabs(coef_tmp) .lt. 1d-10) cycle
+            if(dabs(coef_tmp) .lt. 1d-10) cycle
             
             call NAI_pol_x_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s, 1.d+9, r, int_fit)
 
@@ -239,6 +305,9 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_p
             tmp_y += coef_tmp * int_fit(2)
             tmp_z += coef_tmp * int_fit(3)
           enddo
+
+          ! ---
+
         enddo
 
         int2_u_grad1u_x_j1b2(1,j,i,ipoint) = tmp_x
@@ -306,21 +375,49 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
         r(3) = final_grid_points(3,ipoint)
 
         tmp = 0.d0
-        do i_1s = 1, List_all_comb_b3_size
+        do i_fit = 1, n_max_fit_slat
 
-          coef        = List_all_comb_b3_coef  (i_1s)
-          beta        = List_all_comb_b3_expo  (i_1s)
-          B_center(1) = List_all_comb_b3_cent(1,i_1s)
-          B_center(2) = List_all_comb_b3_cent(2,i_1s)
-          B_center(3) = List_all_comb_b3_cent(3,i_1s)
+          expo_fit = expo_gauss_j_mu_1_erf(i_fit)
+          coef_fit = coef_gauss_j_mu_1_erf(i_fit)
+
+          ! ---
+
+          coef        = List_all_comb_b3_coef  (1)
+          beta        = List_all_comb_b3_expo  (1)
+          B_center(1) = List_all_comb_b3_cent(1,1)
+          B_center(2) = List_all_comb_b3_cent(2,1)
+          B_center(3) = List_all_comb_b3_cent(3,1)
           dist        = (B_center(1) - r(1)) * (B_center(1) - r(1)) &
                       + (B_center(2) - r(2)) * (B_center(2) - r(2)) &
                       + (B_center(3) - r(3)) * (B_center(3) - r(3))
 
-          do i_fit = 1, n_max_fit_slat
+          alpha_1s     = beta + expo_fit
+          alpha_1s_inv = 1.d0 / alpha_1s 
+          centr_1s(1)  = alpha_1s_inv * (beta * B_center(1) + expo_fit * r(1))
+          centr_1s(2)  = alpha_1s_inv * (beta * B_center(2) + expo_fit * r(2))
+          centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
 
-            expo_fit = expo_gauss_j_mu_1_erf(i_fit)
-            coef_fit = coef_gauss_j_mu_1_erf(i_fit)
+          expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist
+          coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
+          if(dabs(coef_tmp) .lt. 1d-10) cycle
+
+          int_fit = NAI_pol_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s,  1.d+9, r)
+          if(dabs(int_fit) .lt. 1d-10) cycle
+
+          tmp += coef_tmp * int_fit
+
+          ! ---
+
+          do i_1s = 2, List_all_comb_b3_size
+
+            coef        = List_all_comb_b3_coef  (i_1s)
+            beta        = List_all_comb_b3_expo  (i_1s)
+            B_center(1) = List_all_comb_b3_cent(1,i_1s)
+            B_center(2) = List_all_comb_b3_cent(2,i_1s)
+            B_center(3) = List_all_comb_b3_cent(3,i_1s)
+            dist        = (B_center(1) - r(1)) * (B_center(1) - r(1)) &
+                        + (B_center(2) - r(2)) * (B_center(2) - r(2)) &
+                        + (B_center(3) - r(3)) * (B_center(3) - r(3))
 
             alpha_1s     = beta + expo_fit
             alpha_1s_inv = 1.d0 / alpha_1s 
@@ -329,14 +426,16 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
             centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
 
             expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist
-            !if(expo_coef_1s .gt. 80.d0) cycle
             coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
-            !if(dabs(coef_tmp) .lt. 1d-10) cycle
+            if(dabs(coef_tmp) .lt. 1d-10) cycle
             
             int_fit = NAI_pol_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s,  1.d+9, r)
 
             tmp += coef_tmp * int_fit
           enddo
+
+          ! ---
+
         enddo
 
         int2_u_grad1u_j1b2(j,i,ipoint) = tmp

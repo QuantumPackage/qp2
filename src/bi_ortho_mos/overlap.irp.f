@@ -58,7 +58,7 @@
   accu_nd = accu_nd/dble(mo_num**2-mo_num)
   if(dabs(accu_d-1.d0).gt.1.d-10.or.dabs(accu_nd).gt.1.d-10)then
     print*,'Warning !!!'
-    print*,'Average trace of overlap_bi_ortho is different from 1 by ', accu_d
+    print*,'Average trace of overlap_bi_ortho is different from 1 by ', dabs(accu_d-1.d0)
     print*,'And bi orthogonality is off by an average of ',accu_nd
     print*,'****************'
     print*,'Overlap matrix betwee mo_l_coef and mo_r_coef  '
