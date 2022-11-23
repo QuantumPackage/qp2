@@ -458,37 +458,37 @@ subroutine ortho_canonical_complex(overlap,LDA,N,C,LDC,m,cutoff)
 end
 
 
-subroutine ortho_qr_complex(A,LDA,m,n)
-  implicit none
-  BEGIN_DOC
-  ! Orthogonalization using Q.R factorization
-  !
-  ! A : matrix to orthogonalize
-  !
-  ! LDA : leftmost dimension of A
-  !
-  ! n : Number of rows of A
-  !
-  ! m : Number of columns of A
-  !
-  END_DOC
-  integer, intent(in)            :: m,n, LDA
-  complex*16, intent(inout) :: A(LDA,n)
-
-  integer                        :: lwork, info
-  integer, allocatable           :: jpvt(:)
-  complex*16, allocatable  :: tau(:), work(:)
-
-  allocate (jpvt(n), tau(n), work(1))
-  LWORK=-1
-  call  zgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  LWORK=2*int(WORK(1))
-  deallocate(WORK)
-  allocate(WORK(LWORK))
-  call  zgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  call  zungqr(m, n, n, A, LDA, tau, WORK, LWORK, INFO)
-  deallocate(WORK,jpvt,tau)
-end
+!!subroutine ortho_qr_complex(A,LDA,m,n)
+!!  implicit none
+!!  BEGIN_DOC
+!!  ! Orthogonalization using Q.R factorization
+!!  !
+!!  ! A : matrix to orthogonalize
+!!  !
+!!  ! LDA : leftmost dimension of A
+!!  !
+!!  ! n : Number of rows of A
+!!  !
+!!  ! m : Number of columns of A
+!!  !
+!!  END_DOC
+!!  integer, intent(in)            :: m,n, LDA
+!!  complex*16, intent(inout) :: A(LDA,n)
+!!
+!!  integer                        :: lwork, info
+!!  integer, allocatable           :: jpvt(:)
+!!  complex*16, allocatable  :: tau(:), work(:)
+!!
+!!  allocate (jpvt(n), tau(n), work(1))
+!!  LWORK=-1
+!!  call  zgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
+!!  LWORK=2*int(WORK(1))
+!!  deallocate(WORK)
+!!  allocate(WORK(LWORK))
+!!  call  zgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
+!!  call  zungqr(m, n, n, A, LDA, tau, WORK, LWORK, INFO)
+!!  deallocate(WORK,jpvt,tau)
+!!end
 
 subroutine ortho_qr_unblocked_complex(A,LDA,m,n)
   implicit none
@@ -1132,103 +1132,103 @@ subroutine ortho_svd(A,LDA,m,n)
   deallocate(U,D, Vt)
 
 end
-
-subroutine ortho_qr_withB(A,LDA,B,m,n)
-  implicit none
-  BEGIN_DOC
-  ! Orthogonalization using Q.R factorization
-  !
-  ! A : Overlap Matrix
-  !
-  ! LDA : leftmost dimension of A
-  !
-  ! m : Number of rows of A
-  !
-  ! n : Number of columns of A
-  !
-  ! B : Output orthogonal basis
-  !
-  END_DOC
-  integer, intent(in)            :: m,n, LDA
-  double precision, intent(inout) :: A(LDA,n)
-  double precision, intent(inout) :: B(LDA,n)
-
-  integer                        :: LWORK, INFO
-  integer, allocatable           :: jpvt(:)
-  double precision, allocatable  :: TAU(:), WORK(:)
-  double precision, allocatable  :: C(:,:)
-  double precision :: norm
-  integer :: i,j
-
-  allocate (TAU(min(m,n)), WORK(1))
-  allocate (jpvt(n))
-  !print *," In function ortho"
-  B = A
-
-  jpvt(1:n)=1
-
-  LWORK=-1
-  call dgeqp3( m, n, A, LDA, jpvt, TAU, WORK, LWORK, INFO )
-
-  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  LWORK=max(n,int(WORK(1)))
-
-  deallocate(WORK)
-  allocate(WORK(LWORK))
-  call dgeqp3(m, n, A, LDA, jpvt, TAU, WORK, LWORK, INFO )
-  print *,A
-  print *,jpvt
-  deallocate(WORK,TAU)
-  !stop
-
-  !LWORK=-1
-  !call dgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
-  !! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  !LWORK=max(n,int(WORK(1)))
-
-  !deallocate(WORK)
-  !allocate(WORK(LWORK))
-  !call dgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
-
-  !LWORK=-1
-  !call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
-  !! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
-  !LWORK=max(n,int(WORK(1)))
-
-  !deallocate(WORK)
-  !allocate(WORK(LWORK))
-  !call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
-  !
-  !allocate(C(LDA,n))
-  !call dgemm('N','N',m,n,n,1.0d0,B,LDA,A,LDA,0.0d0,C,LDA)
-  !norm = 0.0d0
-  !B = 0.0d0
-  !!print *,C
-  !do i=1,m
-  !  norm = 0.0d0
-  !  do j=1,n
-  !    norm = norm + C(j,i)*C(j,i)
-  !  end do
-  !  norm = 1.0d0/dsqrt(norm)
-  !  do j=1,n
-  !    B(j,i) = C(j,i)
-  !  end do
-  !end do
-  !print *,B
-
-
-  !deallocate(WORK,TAU)
-end
-
-subroutine ortho_qr_csf(A, LDA, B, m, n) bind(C, name="ortho_qr_csf")
-  use iso_c_binding
-  integer(c_int32_t), value      :: LDA
-  integer(c_int32_t), value      :: m
-  integer(c_int32_t), value      :: n
-  integer(c_int16_t)             :: A(LDA,n)
-  integer(c_int16_t)             :: B(LDA,n)
-  call ortho_qr_withB(A,LDA,B,m,n)
-end subroutine ortho_qr_csf
+!!
+!!subroutine ortho_qr_withB(A,LDA,B,m,n)
+!!  implicit none
+!!  BEGIN_DOC
+!!  ! Orthogonalization using Q.R factorization
+!!  !
+!!  ! A : Overlap Matrix
+!!  !
+!!  ! LDA : leftmost dimension of A
+!!  !
+!!  ! m : Number of rows of A
+!!  !
+!!  ! n : Number of columns of A
+!!  !
+!!  ! B : Output orthogonal basis
+!!  !
+!!  END_DOC
+!!  integer, intent(in)            :: m,n, LDA
+!!  double precision, intent(inout) :: A(LDA,n)
+!!  double precision, intent(inout) :: B(LDA,n)
+!!
+!!  integer                        :: LWORK, INFO
+!!  integer, allocatable           :: jpvt(:)
+!!  double precision, allocatable  :: TAU(:), WORK(:)
+!!  double precision, allocatable  :: C(:,:)
+!!  double precision :: norm
+!!  integer :: i,j
+!!
+!!  allocate (TAU(min(m,n)), WORK(1))
+!!  allocate (jpvt(n))
+!!  !print *," In function ortho"
+!!  B = A
+!!
+!!  jpvt(1:n)=1
+!!
+!!  LWORK=-1
+!!  call dgeqp3( m, n, A, LDA, jpvt, TAU, WORK, LWORK, INFO )
+!!
+!!  ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+!!  LWORK=max(n,int(WORK(1)))
+!!
+!!  deallocate(WORK)
+!!  allocate(WORK(LWORK))
+!!  call dgeqp3(m, n, A, LDA, jpvt, TAU, WORK, LWORK, INFO )
+!!  print *,A
+!!  print *,jpvt
+!!  deallocate(WORK,TAU)
+!!  !stop
+!!
+!!  !LWORK=-1
+!!  !call dgeqrf( m, n, A, LDA, TAU, WORK, LWORK, INFO )
+!!  !! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+!!  !LWORK=max(n,int(WORK(1)))
+!!
+!!  !deallocate(WORK)
+!!  !allocate(WORK(LWORK))
+!!  !call dgeqrf(m, n, A, LDA, TAU, WORK, LWORK, INFO )
+!!
+!!  !LWORK=-1
+!!  !call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+!!  !! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+!!  !LWORK=max(n,int(WORK(1)))
+!!
+!!  !deallocate(WORK)
+!!  !allocate(WORK(LWORK))
+!!  !call dorgqr(m, n, n, A, LDA, TAU, WORK, LWORK, INFO)
+!!  !
+!!  !allocate(C(LDA,n))
+!!  !call dgemm('N','N',m,n,n,1.0d0,B,LDA,A,LDA,0.0d0,C,LDA)
+!!  !norm = 0.0d0
+!!  !B = 0.0d0
+!!  !!print *,C
+!!  !do i=1,m
+!!  !  norm = 0.0d0
+!!  !  do j=1,n
+!!  !    norm = norm + C(j,i)*C(j,i)
+!!  !  end do
+!!  !  norm = 1.0d0/dsqrt(norm)
+!!  !  do j=1,n
+!!  !    B(j,i) = C(j,i)
+!!  !  end do
+!!  !end do
+!!  !print *,B
+!!
+!!
+!!  !deallocate(WORK,TAU)
+!!end
+!!
+!!subroutine ortho_qr_csf(A, LDA, B, m, n) bind(C, name="ortho_qr_csf")
+!!  use iso_c_binding
+!!  integer(c_int32_t), value      :: LDA
+!!  integer(c_int32_t), value      :: m
+!!  integer(c_int32_t), value      :: n
+!!  integer(c_int16_t)             :: A(LDA,n)
+!!  integer(c_int16_t)             :: B(LDA,n)
+!!  call ortho_qr_withB(A,LDA,B,m,n)
+!!end subroutine ortho_qr_csf
 
 subroutine ortho_qr(A,LDA,m,n)
   implicit none
