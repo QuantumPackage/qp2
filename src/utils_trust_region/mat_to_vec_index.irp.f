@@ -1,0 +1,61 @@
+! Matrix to vector index
+
+! *Compute the index i of a vector element from the indexes p,q of a
+! matrix element*
+
+! Lower diagonal matrix (p,q), p > q -> vector (i)
+
+! If a matrix is antisymmetric it can be reshaped as a vector. And the
+! vector can be reshaped as an antisymmetric matrix
+
+! \begin{align*}
+! \begin{pmatrix}
+! 0 & -1 & -2 & -4 \\
+! 1 & 0  & -3 & -5 \\
+! 2 & 3 & 0  & -6  \\
+! 4 & 5 & 6 & 0
+! \end{pmatrix}
+! \Leftrightarrow
+! \begin{pmatrix}
+! 1 & 2 & 3 & 4 & 5 & 6
+! \end{pmatrix}
+! \end{align*}
+
+! !!! Here the algorithm only work for the lower diagonal !!!
+
+! Input:
+! | p,q | integer | indexes of a matrix element in the lower diagonal |
+! |     |         | p > q, q -> column                                |
+! |     |         | p -> row,                                         |
+! |     |         | q -> column                                       |
+
+! Input:
+! | i | integer | corresponding index in the vector |
+
+
+subroutine mat_to_vec_index(p,q,i)
+
+  include 'pi.h'
+
+  implicit none
+  
+  ! Variables
+  
+  ! in
+  integer, intent(in) :: p,q
+  
+  ! out
+  integer, intent(out) :: i 
+
+  ! internal
+  integer :: a,b
+  double precision :: da
+
+  ! Calculation
+ 
+  a = p-1
+  b = a*(a-1)/2
+  
+  i = q+b
+
+end subroutine
