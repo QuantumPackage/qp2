@@ -112,7 +112,7 @@
   !  endif
   !enddo
   n_CSF = 0
-  print *," -9(((((((((((((( NSOMOMin=",NSOMOMin
+  !print *," -9(((((((((((((( NSOMOMin=",NSOMOMin
   ncfgprev = cfg_seniority_index(NSOMOMin) ! can be -1 
   if(ncfgprev.eq.-1)then
     ncfgprev=1
@@ -145,10 +145,10 @@
       endif
     endif
     n_CSF += ncfg*dimcsfpercfg
-    print *," i=",i," dimcsf=",dimcsfpercfg," ncfg=",ncfg, " ncfgprev=",ncfgprev, " senor=",cfg_seniority_index(i)
+    !print *," i=",i," dimcsf=",dimcsfpercfg," ncfg=",ncfg, " ncfgprev=",ncfgprev, " senor=",cfg_seniority_index(i)
     ncfgprev = cfg_seniority_index(i+2)
   end do
-  print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
+  !print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
 
 END_PROVIDER
 
@@ -342,8 +342,8 @@ end subroutine get_phase_qp_to_cfg
   nsomomin = elec_alpha_num-elec_beta_num
   rowsmax = 0
   colsmax = 0
-  print *,"NSOMOMax = ",NSOMOMax
-  print *,"NSOMOMin = ",NSOMOMin
+  !print *,"NSOMOMax = ",NSOMOMax
+  !print *,"NSOMOMin = ",NSOMOMin
   !allocate(AIJpqMatrixDimsList(NSOMOMax,NSOMOMax,4,NSOMOMax,NSOMOMax,2))
   ! Type
   ! 1. SOMO -> SOMO
@@ -525,7 +525,7 @@ end subroutine get_phase_qp_to_cfg
         end do
      end do
   end do
-  print *,"Rowsmax=",rowsmax," Colsmax=",colsmax
+  !print *,"Rowsmax=",rowsmax," Colsmax=",colsmax
   END_PROVIDER
 
   BEGIN_PROVIDER [ real*8, AIJpqContainer, (NBFMax,NBFmax,NSOMOMax+1,NSOMOMax+1,4,NSOMOMin:NSOMOMax)]

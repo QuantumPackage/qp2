@@ -173,10 +173,7 @@ BEGIN_PROVIDER [integer, n_core_inact_act_orb ]
   END_DOC
   n_core_inact_act_orb = (n_core_orb + n_inact_orb + n_act_orb)
 END_PROVIDER
- 
 
-
- 
  BEGIN_PROVIDER [ integer(bit_kind), core_bitmask , (N_int,2) ]
    implicit none
    BEGIN_DOC
@@ -443,5 +440,4 @@ BEGIN_PROVIDER [integer, list_all_but_del_orb, (n_all_but_del_orb)]
   endif
  enddo
 
-END_PROVIDER 
-
+END_PROVIDER
