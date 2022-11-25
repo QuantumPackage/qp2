@@ -47,7 +47,9 @@ subroutine give_explicit_poly_and_gaussian_x(P_new,P_center,p,fact_k,iorder,alph
 end
 
 
+! TODO remove dim
 subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,beta,a,b,A_center,B_center,dim)
+
   BEGIN_DOC
   ! Transforms the product of
   !          (x-x_A)^a(1) (x-x_B)^b(1) (x-x_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3) exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
@@ -60,6 +62,7 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
   END_DOC
+
   implicit none
   include 'constants.include.F'
   integer, intent(in)            :: dim
@@ -129,7 +132,8 @@ end
 
 !---
 
-subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorder,alpha,beta,a,b,A_center,B_center,n_points)
+subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center, p, fact_k, iorder, alpha, beta, a, b, A_center, LD_A, B_center, n_points)
+
   BEGIN_DOC
   ! Transforms the product of
   !          (x-x_A)^a(1) (x-x_B)^b(1) (x-x_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3) exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
@@ -142,24 +146,26 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorde
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
   END_DOC
-  implicit none
+
   include 'constants.include.F'
-  integer, intent(in)            :: n_points, ldp
-  integer, intent(in)            :: a(3),b(3)         ! powers : (x-xa)**a_x = (x-A(1))**a(1)
-  double precision, intent(in)   :: alpha, beta       ! exponents
-  double precision, intent(in)   :: A_center(n_points,3) ! A center
-  double precision, intent(in)   :: B_center (3)         ! B center
-  double precision, intent(out)  :: P_center(n_points,3) ! new center
-  double precision, intent(out)  :: p                 ! new exponent
-  double precision, intent(out)  :: fact_k(n_points)            ! constant factor
-  double precision, intent(out)  :: P_new(n_points,0:ldp,3)! polynomial
-  integer, intent(out)           :: iorder(3)         ! i_order(i) = order of the polynomials
 
-  double precision, allocatable  :: P_a(:,:,:), P_b(:,:,:)
+  implicit none
+  integer,          intent(in)  :: n_points, ldp, LD_A
+  integer,          intent(in)  :: a(3), b(3)              ! powers : (x-xa)**a_x = (x-A(1))**a(1)
+  double precision, intent(in)  :: alpha, beta             ! exponents
+  double precision, intent(in)  :: A_center(LD_A,3)        ! A center
+  double precision, intent(in)  :: B_center(3)             ! B center
+  integer,          intent(out) :: iorder(3)               ! i_order(i) = order of the polynomials
+  double precision, intent(out) :: P_center(n_points,3)    ! new center
+  double precision, intent(out) :: p                       ! new exponent
+  double precision, intent(out) :: fact_k(n_points)        ! constant factor
+  double precision, intent(out) :: P_new(n_points,0:ldp,3) ! polynomial
 
-  integer                        :: n_new,i,j, ipoint, lda, ldb, xyz
+  integer                       :: n_new, i, j, ipoint, lda, ldb, xyz
+  double precision, allocatable :: P_a(:,:,:), P_b(:,:,:)
 
-  call gaussian_product_v(alpha,A_center,beta,B_center,fact_k,p,P_center,n_points)
+
+  call gaussian_product_v(alpha, A_center, LD_A, beta, B_center, fact_k, p, P_center, n_points)
 
   if ( ior(ior(b(1),b(2)),b(3)) == 0 ) then  ! b == (0,0,0)
 
@@ -167,13 +173,13 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorde
     ldb = 0
     allocate(P_a(n_points,0:lda,3), P_b(n_points,0:0,3))
 
-    call recentered_poly2_v0(P_a,lda,A_center,P_center,a,P_b,B_center,P_center,n_points)
+    call recentered_poly2_v0(P_a, lda, A_center, LD_A, P_center, a, P_b, B_center, P_center, n_points)
 
     iorder(1:3) = a(1:3)
-    do ipoint=1,n_points
-      do xyz=1,3
+    do ipoint = 1, n_points
+      do xyz = 1, 3
         P_new(ipoint,0,xyz) = P_a(ipoint,0,xyz) * P_b(ipoint,0,xyz)
-        do i=1,a(xyz)
+        do i = 1, a(xyz)
           P_new(ipoint,i,xyz) = P_new(ipoint,i,xyz) + P_b(ipoint,0,xyz) * P_a(ipoint,i,xyz)
         enddo
       enddo
@@ -187,31 +193,31 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center,p,fact_k,iorde
   ldb = maxval(b)
   allocate(P_a(n_points,0:lda,3), P_b(n_points,0:ldb,3))
 
-  call recentered_poly2_v(P_a,lda,A_center,P_center,a,P_b,ldb,B_center,P_center,b,n_points)
+  call recentered_poly2_v(P_a, lda, A_center, LD_A, P_center, a, P_b, ldb, B_center, P_center, b, n_points)
 
   iorder(1:3) = a(1:3) + b(1:3)
 
-  do xyz=1,3
+  do xyz = 1, 3
     if (b(xyz) == 0) then
-      do ipoint=1,n_points
+      do ipoint = 1, n_points
         P_new(ipoint,0,xyz) = P_a(ipoint,0,xyz) * P_b(ipoint,0,xyz)
-        do i=1,a(xyz)
+        do i = 1, a(xyz)
           P_new(ipoint,i,xyz) = P_new(ipoint,i,xyz) + P_b(ipoint,0,xyz) * P_a(ipoint,i,xyz)
         enddo
       enddo
     else
-      do i=0,iorder(xyz)
-        do ipoint=1,n_points
+      do i = 0, iorder(xyz)
+        do ipoint = 1, n_points
           P_new(ipoint,i,xyz) = 0.d0
         enddo
       enddo
-      call multiply_poly_v(P_a(1,0,xyz), a(xyz),P_b(1,0,xyz),b(xyz),P_new(1,0,xyz),ldp,n_points)
+      call multiply_poly_v(P_a(1,0,xyz), a(xyz), P_b(1,0,xyz), b(xyz), P_new(1,0,xyz), ldp, n_points)
     endif
   enddo
 
-end
+end subroutine give_explicit_poly_and_gaussian_v
 
-!-
+! ---
 
 subroutine give_explicit_poly_and_gaussian_double(P_new,P_center,p,fact_k,iorder,alpha,beta,gama,a,b,A_center,B_center,Nucl_center,dim)
   BEGIN_DOC
@@ -273,15 +279,16 @@ subroutine give_explicit_poly_and_gaussian_double(P_new,P_center,p,fact_k,iorder
 
 end
 
+! ---
 
+subroutine gaussian_product(a, xa, b, xb, k, p, xp)
 
-subroutine gaussian_product(a,xa,b,xb,k,p,xp)
-  implicit none
   BEGIN_DOC
   ! Gaussian product in 1D.
   ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
   END_DOC
 
+  implicit none
   double precision, intent(in)   :: a,b         ! Exponents
   double precision, intent(in)   :: xa(3),xb(3) ! Centers
   double precision, intent(out)  :: p           ! New exponent
@@ -312,32 +319,38 @@ subroutine gaussian_product(a,xa,b,xb,k,p,xp)
   xp(1) = (a*xa(1)+b*xb(1))*p_inv
   xp(2) = (a*xa(2)+b*xb(2))*p_inv
   xp(3) = (a*xa(3)+b*xb(3))*p_inv
+
 end subroutine
 
 !---
-subroutine gaussian_product_v(a,xa,b,xb,k,p,xp,n_points)
-  implicit none
+
+subroutine gaussian_product_v(a, xa, LD_xa, b, xb, k, p, xp, n_points)
+
   BEGIN_DOC
+  !
   ! Gaussian product in 1D.
   ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+  !
   ! Using multiple A centers
+  !
   END_DOC
 
-  integer, intent(in)            :: n_points
-  double precision, intent(in)   :: a,b         ! Exponents
-  double precision, intent(in)   :: xa(n_points,3),xb(3) ! Centers
-  double precision, intent(out)  :: p ! New exponent
-  double precision, intent(out)  :: xp(n_points,3)       ! New center
-  double precision, intent(out)  :: k(n_points) ! Constant
+  implicit none
 
-  double precision               :: p_inv
+  integer,          intent(in)  :: LD_xa, n_points
+  double precision, intent(in)  :: a, b                  ! Exponents
+  double precision, intent(in)  :: xa(LD_xa,3), xb(3)    ! Centers
+  double precision, intent(out) :: p                     ! New exponent
+  double precision, intent(out) :: xp(n_points,3)        ! New center
+  double precision, intent(out) :: k(n_points)           ! Constant
 
-  integer :: ipoint
+  integer                       :: ipoint
+  double precision              :: p_inv
+  double precision              :: xab(3), ab, ap, bp, bpxb(3)
+  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: xab
+
   ASSERT (a>0.)
   ASSERT (b>0.)
-
-  double precision               :: xab(3), ab, ap, bp, bpxb(3)
-  !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: xab
 
   p = a+b
   p_inv = 1.d0/(a+b)
@@ -348,7 +361,7 @@ subroutine gaussian_product_v(a,xa,b,xb,k,p,xp,n_points)
   bpxb(2) = bp*xb(2)
   bpxb(3) = bp*xb(3)
 
-  do ipoint=1,n_points
+  do ipoint = 1, n_points
     xab(1) = xa(ipoint,1)-xb(1)
     xab(2) = xa(ipoint,2)-xb(2)
     xab(3) = xa(ipoint,3)-xb(3)
@@ -365,18 +378,19 @@ subroutine gaussian_product_v(a,xa,b,xb,k,p,xp,n_points)
       xp(ipoint,3) = ap*xa(ipoint,3)+bpxb(3)
     endif
   enddo
-end subroutine
 
+end subroutine gaussian_product_v
 
+! ---
 
+subroutine gaussian_product_x(a, xa, b, xb, k, p, xp)
 
-subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
-  implicit none
   BEGIN_DOC
   ! Gaussian product in 1D.
   ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
   END_DOC
 
+  implicit none
   double precision  , intent(in) :: a,b      ! Exponents
   double precision  , intent(in) :: xa,xb    ! Centers
   double precision  , intent(out) :: p       ! New exponent
@@ -625,16 +639,20 @@ subroutine recentered_poly2(P_new,x_A,x_P,a,P_new2,x_B,x_Q,b)
   do i =  21,b
     P_new2(i) =  binom_func(b,b-i) * pows_b(b-i)
   enddo
+
 end
 
-!-
-subroutine recentered_poly2_v(P_new,lda,x_A,x_P,a,P_new2,ldb,x_B,x_Q,b,n_points)
-  implicit none
+! ---
+
+subroutine recentered_poly2_v(P_new, lda, x_A, LD_xA, x_P, a, P_new2, ldb, x_B, x_Q, b, n_points)
+
   BEGIN_DOC
   ! Recenter two polynomials
   END_DOC
-  integer, intent(in)            :: a(3),b(3), n_points, lda, ldb
-  double precision, intent(in)   :: x_A(n_points,3),x_P(n_points,3),x_B(3),x_Q(n_points,3)
+
+  implicit none
+  integer, intent(in)            :: a(3), b(3), n_points, lda, ldb, LD_xA
+  double precision, intent(in)   :: x_A(LD_xA,3), x_P(n_points,3), x_B(3), x_Q(n_points,3)
   double precision, intent(out)  :: P_new(n_points,0:lda,3),P_new2(n_points,0:ldb,3)
   double precision               :: binom_func
   integer                        :: i,j,k,l, minab(3), maxab(3),ipoint, xyz
@@ -645,7 +663,6 @@ subroutine recentered_poly2_v(P_new,lda,x_A,x_P,a,P_new2,ldb,x_B,x_Q,b,n_points)
   minab(1:3) = max(min(a(1:3),b(1:3)),(/0,0,0/))
 
   allocate( pows_a(n_points,-2:maxval(maxab)+4), pows_b(n_points,-2:maxval(maxab)+4) )
-
 
   do xyz=1,3
     if ((a(xyz)<0).or.(b(xyz)<0) ) cycle
@@ -698,27 +715,34 @@ subroutine recentered_poly2_v(P_new,lda,x_A,x_P,a,P_new2,ldb,x_B,x_Q,b,n_points)
       enddo
     enddo
   enddo
-end
 
+end subroutine recentered_poly2_v
 
-subroutine recentered_poly2_v0(P_new,lda,x_A,x_P,a,P_new2,x_B,x_Q,n_points)
-  implicit none
+! ---
+
+subroutine recentered_poly2_v0(P_new, lda, x_A, LD_xA, x_P, a, P_new2, x_B, x_Q, n_points)
+
   BEGIN_DOC
   ! Recenter two polynomials. Special case for b=(0,0,0)
   END_DOC
-  integer, intent(in)            :: a(3), n_points, lda
-  double precision, intent(in)   :: x_A(n_points,3),x_P(n_points,3),x_B(3),x_Q(n_points,3)
-  double precision, intent(out)  :: P_new(n_points,0:lda,3),P_new2(n_points,3)
-  double precision               :: binom_func
-  integer                        :: i,j,k,l, xyz, ipoint, maxab(3)
-  double precision, allocatable  :: pows_a(:,:), pows_b(:,:)
-  double precision               :: fa
+
+  implicit none
+  integer,          intent(in)  :: a(3), n_points, lda, LD_xA
+  double precision, intent(in)  :: x_A(LD_xA,3) 
+  double precision, intent(in)  :: x_B(3)
+  double precision, intent(in)  :: x_P(n_points,3), x_Q(n_points,3)
+  double precision, intent(out) :: P_new(n_points,0:lda,3), P_new2(n_points,3)
+  integer                       :: i, j, k, l, xyz, ipoint, maxab(3)
+  double precision              :: fa
+  double precision, allocatable :: pows_a(:,:), pows_b(:,:)
+
+  double precision              :: binom_func
 
   maxab(1:3) = max(a(1:3),(/0,0,0/))
 
   allocate( pows_a(n_points,-2:maxval(maxab)+4), pows_b(n_points,-2:maxval(maxab)+4) )
 
-  do xyz=1,3
+  do xyz = 1, 3
     if (a(xyz)<0) cycle
     do ipoint=1,n_points
       pows_a(ipoint,0) = 1.d0
@@ -736,25 +760,25 @@ subroutine recentered_poly2_v0(P_new,lda,x_A,x_P,a,P_new2,x_B,x_Q,n_points)
       P_new (ipoint,0,xyz) =  pows_a(ipoint,a(xyz))
       P_new2(ipoint,xyz) =  pows_b(ipoint,0)
     enddo
-    do i =  1,min(a(xyz),20)
-      fa = binom_transp(a(xyz)-i,a(xyz))
-      do ipoint=1,n_points
-        P_new (ipoint,i,xyz) =  fa * pows_a(ipoint,a(xyz)-i)
+    do i = 1, min(a(xyz), 20)
+      fa = binom_transp(a(xyz)-i, a(xyz))
+      do ipoint = 1, n_points
+        P_new(ipoint,i,xyz) = fa * pows_a(ipoint,a(xyz)-i)
       enddo
     enddo
-    do i = 21,a(xyz)
-      fa = binom_func(a(xyz),a(xyz)-i)
-      do ipoint=1,n_points
-        P_new (ipoint,i,xyz) =  fa * pows_a(ipoint,a(xyz)-i)
+    do i = 21, a(xyz)
+      fa = binom_func(a(xyz), a(xyz)-i)
+      do ipoint = 1, n_points
+        P_new(ipoint,i,xyz) = fa * pows_a(ipoint,a(xyz)-i)
       enddo
     enddo
 
   enddo !xyz
 
   deallocate(pows_a, pows_b)
-end
 
-!--
+end subroutine recentered_poly2_v0
+
 !--
 
 subroutine pol_modif_center(A_center, B_center, iorder, A_pol, B_pol)

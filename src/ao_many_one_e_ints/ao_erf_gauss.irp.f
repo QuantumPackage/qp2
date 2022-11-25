@@ -233,9 +233,6 @@ subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
   double precision              :: NAI_pol_mult_erf
 
   ints = 0.d0
-  if(ao_overlap_abs(j_ao,i_ao).lt.1.d-12) then
-    return
-  endif
 
   num_A         = ao_nucl(i_ao)
   power_A(1:3)  = ao_power(i_ao,1:3)
@@ -275,7 +272,7 @@ end subroutine NAI_pol_x_mult_erf_ao
 
 ! ---
 
-subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, ints, n_points)
+subroutine NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
 
   BEGIN_DOC
   !
@@ -293,20 +290,16 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, ints, n_points)
 
   implicit none
 
-  integer,          intent(in)  :: i_ao, j_ao, n_points
-  double precision, intent(in)  :: mu_in, C_center(n_points,3)
-  double precision, intent(out) :: ints(n_points,3)
+  integer,          intent(in)  :: i_ao, j_ao, LD_C, LD_ints, n_points
+  double precision, intent(in)  :: mu_in, C_center(LD_C,3)
+  double precision, intent(out) :: ints(LD_ints,3)
 
   integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in
   integer                       :: power_xA(3), m, ipoint
   double precision              :: A_center(3), B_center(3), alpha, beta, coef
   double precision, allocatable :: integral(:)
-  double precision              :: NAI_pol_mult_erf
 
-  ints = 0.d0
-  if(ao_overlap_abs(j_ao,i_ao).lt.1.d-12) then
-    return
-  endif
+  ints(1:LD_ints,1:3) = 0.d0
 
   num_A         = ao_nucl(i_ao)
   power_A(1:3)  = ao_power(i_ao,1:3)
@@ -318,13 +311,15 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, ints, n_points)
   n_pt_in = n_pt_max_integrals
 
   allocate(integral(n_points))
+  integral = 0.d0
+
   do i = 1, ao_prim_num(i_ao)
     alpha = ao_expo_ordered_transp(i,i_ao)
 
     do m = 1, 3
 
-      power_xA = power_A
       ! x * phi_i(r) = x * (x-Ax)**ax = (x-Ax)**(ax+1) + Ax * (x-Ax)**ax
+      power_xA = power_A
       power_xA(m) += 1
 
       do j = 1, ao_prim_num(j_ao)
@@ -332,20 +327,101 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, ints, n_points)
         coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
 
         ! First term = (x-Ax)**(ax+1)
-        call NAI_pol_mult_erf_v(A_center, B_center, power_xA, power_B, alpha, beta, C_center, n_pt_in, mu_in, integral, n_points)
-        do ipoint=1,n_points
+        call NAI_pol_mult_erf_v(A_center, B_center, power_xA, power_B, alpha, beta, C_center(1:LD_C,1:3), LD_C, n_pt_in, mu_in, integral(1:n_points), n_points, n_points)
+        do ipoint = 1, n_points
           ints(ipoint,m) += integral(ipoint) * coef
         enddo
 
         ! Second term = Ax * (x-Ax)**(ax)
-        call NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in, mu_in, integral, n_points)
-        do ipoint=1,n_points
+        call NAI_pol_mult_erf_v(A_center, B_center, power_A, power_B, alpha, beta, C_center(1:LD_C,1:3), LD_C, n_pt_in, mu_in, integral(1:n_points), n_points, n_points)
+        do ipoint = 1, n_points
           ints(ipoint,m) += A_center(m) * integral(ipoint) * coef
         enddo
 
       enddo
     enddo
   enddo
+
+  deallocate(integral)
+
+end subroutine NAI_pol_x_mult_erf_ao_v0
+
+! ---
+
+subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! $\int_{-\infty}^{infty} dr x * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! $\int_{-\infty}^{infty} dr y * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! $\int_{-\infty}^{infty} dr z * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao, LD_C, LD_ints, n_points(3)
+  double precision, intent(in)  :: mu_in, C_center(LD_C,3,3)
+  double precision, intent(out) :: ints(LD_ints,3)
+
+  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, LD_integral
+  integer                       :: power_xA(3), m, ipoint, n_points_m
+  double precision              :: A_center(3), B_center(3), alpha, beta, coef
+  double precision, allocatable :: integral(:)
+
+  ints(1:LD_ints,1:3) = 0.d0
+
+  num_A         = ao_nucl(i_ao)
+  power_A(1:3)  = ao_power(i_ao,1:3)
+  A_center(1:3) = nucl_coord(num_A,1:3)
+  num_B         = ao_nucl(j_ao)
+  power_B(1:3)  = ao_power(j_ao,1:3)
+  B_center(1:3) = nucl_coord(num_B,1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  LD_integral = max(max(n_points(1), n_points(2)), n_points(3))
+  allocate(integral(LD_integral))
+  integral = 0.d0
+
+  do i = 1, ao_prim_num(i_ao)
+    alpha = ao_expo_ordered_transp(i,i_ao)
+
+    do m = 1, 3
+      n_points_m = n_points(m)
+
+      ! x * phi_i(r) = x * (x-Ax)**ax = (x-Ax)**(ax+1) + Ax * (x-Ax)**ax
+      power_xA = power_A
+      power_xA(m) += 1
+
+      do j = 1, ao_prim_num(j_ao)
+        beta = ao_expo_ordered_transp(j,j_ao)
+        coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
+
+        ! First term = (x-Ax)**(ax+1)
+        call NAI_pol_mult_erf_v( A_center, B_center, power_xA, power_B, alpha, beta & 
+                               , C_center(1:LD_C,1:3,m), LD_C, n_pt_in, mu_in, integral(1:LD_integral), LD_integral, n_points_m)
+        do ipoint = 1, n_points_m
+          ints(ipoint,m) += integral(ipoint) * coef
+        enddo
+
+        ! Second term = Ax * (x-Ax)**(ax)
+        call NAI_pol_mult_erf_v( A_center, B_center, power_A, power_B, alpha, beta &
+                               , C_center(1:LD_C,1:3,m), LD_C, n_pt_in, mu_in, integral(1:LD_integral), LD_integral, n_points_m)
+        do ipoint = 1, n_points_m
+          ints(ipoint,m) += A_center(m) * integral(ipoint) * coef
+        enddo
+
+      enddo
+    enddo
+  enddo
+
   deallocate(integral)
 
 end subroutine NAI_pol_x_mult_erf_ao_v
@@ -775,9 +851,6 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
   endif
 
   ints = 0.d0
-  if(ao_overlap_abs(j_ao,i_ao) .lt. 1.d-12) then
-    return
-  endif
 
   power_Ai(1:3) = ao_power(i_ao,1:3)
   power_Aj(1:3) = ao_power(j_ao,1:3)
@@ -802,13 +875,11 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
         coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
 
         ! First term = (x-Ax)**(ax+1)
-        integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj &
-                                          , beta, B_center, C_center, n_pt_in, mu_in )
+        integral = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
         ints(m) += integral * coef
 
         ! Second term = Ax * (x-Ax)**(ax)
-        integral = NAI_pol_mult_erf_with1s( Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj &
-                                          , beta, B_center, C_center, n_pt_in, mu_in )
+        integral = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
         ints(m) += Ai_center(m) * integral * coef
 
       enddo
@@ -817,9 +888,9 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
 
 end subroutine NAI_pol_x_mult_erf_ao_with1s
 
-!--
+! ---
 
-subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, mu_in, C_center, ints, n_points)
+subroutine NAI_pol_x_mult_erf_ao_with1s_v0(i_ao, j_ao, beta, B_center, LD_B, mu_in, C_center, LD_C, ints, LD_ints, n_points)
 
   BEGIN_DOC
   !
@@ -837,25 +908,23 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, mu_in, C_c
 
   implicit none
 
-  integer,          intent(in)   :: i_ao, j_ao, n_points
-  double precision, intent(in)   :: beta, B_center(n_points,3), mu_in, C_center(n_points,3)
-  double precision, intent(out)  :: ints(n_points,3)
+  integer,          intent(in)  :: i_ao, j_ao, LD_B, LD_C, LD_ints, n_points
+  double precision, intent(in)  :: beta, mu_in
+  double precision, intent(in)  :: B_center(LD_B,3), C_center(LD_C,3)
+  double precision, intent(out) :: ints(LD_ints,3)
 
-  integer                        :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3), m
-  double precision               :: Ai_center(3), Aj_center(3), alphai, alphaj, coef, coefi
+  integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3), m
+  double precision              :: Ai_center(3), Aj_center(3), alphai, alphaj, coef, coefi
 
-  integer                        :: ipoint
+  integer                       :: ipoint
   double precision, allocatable :: integral(:)
 
   if(beta .lt. 1d-10) then
-    call NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, ints, n_points)
+    call NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
     return
   endif
 
-  ints(:,:) = 0.d0
-  if(ao_overlap_abs(j_ao,i_ao) .lt. 1.d-12) then
-    return
-  endif
+  ints(1:LD_ints,1:3) = 0.d0
 
   power_Ai(1:3) = ao_power(i_ao,1:3)
   power_Aj(1:3) = ao_power(j_ao,1:3)
@@ -866,6 +935,8 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, mu_in, C_c
   n_pt_in = n_pt_max_integrals
 
   allocate(integral(n_points))
+  integral = 0.d0
+
   do i = 1, ao_prim_num(i_ao)
     alphai = ao_expo_ordered_transp           (i,i_ao)
     coefi  = ao_coef_normalized_ordered_transp(i,i_ao)
@@ -881,15 +952,17 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, mu_in, C_c
         coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
 
         ! First term = (x-Ax)**(ax+1)
-        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_xA, power_Aj, alphai, &
-            alphaj, beta, B_center, C_center, n_pt_in, mu_in, integral, n_points)
+
+        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj, beta &
+                                      , B_center(1:LD_B,1:3), LD_B, C_center(1:LD_C,1:3), LD_C, n_pt_in, mu_in, integral(1:n_points), n_points, n_points)
+
         do ipoint = 1, n_points
           ints(ipoint,m) += integral(ipoint) * coef
         enddo
 
         ! Second term = Ax * (x-Ax)**(ax)
-        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_Ai, power_Aj, alphai, &
-          alphaj, beta, B_center, C_center, n_pt_in, mu_in, integral, n_points)
+        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj, beta &
+                                      , B_center(1:LD_B,1:3), LD_B, C_center(1:LD_C,1:3), LD_C, n_pt_in, mu_in, integral(1:n_points), n_points, n_points)
         do ipoint = 1, n_points
           ints(ipoint,m) += Ai_center(m) * integral(ipoint) * coef
         enddo
@@ -897,10 +970,100 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, mu_in, C_c
       enddo
     enddo
   enddo
+
   deallocate(integral)
 
-end subroutine NAI_pol_x_mult_erf_ao_with1s
+end subroutine NAI_pol_x_mult_erf_ao_with1s_v0
 
+! ---
+
+subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, LD_B, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! $\int_{-\infty}^{infty} dr x * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! $\int_{-\infty}^{infty} dr y * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! $\int_{-\infty}^{infty} dr z * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao, LD_B, LD_C, LD_ints, n_points(3)
+  double precision, intent(in)  :: beta, mu_in
+  double precision, intent(in)  :: B_center(LD_B,3,3), C_center(LD_C,3,3)
+  double precision, intent(out) :: ints(LD_ints,3)
+
+  integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, power_xA(3), m
+  double precision              :: Ai_center(3), Aj_center(3), alphai, alphaj, coef, coefi
+
+  integer                       :: ipoint, n_points_m, LD_integral
+  double precision, allocatable :: integral(:)
+
+  if(beta .lt. 1d-10) then
+    print *, 'small beta', i_ao, j_ao
+    call NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_ints, n_points)
+    return
+  endif
+
+  ints(1:LD_ints,1:3) = 0.d0
+
+  power_Ai(1:3) = ao_power(i_ao,1:3)
+  power_Aj(1:3) = ao_power(j_ao,1:3)
+
+  Ai_center(1:3) = nucl_coord(ao_nucl(i_ao),1:3)
+  Aj_center(1:3) = nucl_coord(ao_nucl(j_ao),1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  LD_integral = max(max(n_points(1), n_points(2)), n_points(3))
+  allocate(integral(LD_integral))
+  integral = 0.d0
+
+  do i = 1, ao_prim_num(i_ao)
+    alphai = ao_expo_ordered_transp           (i,i_ao)
+    coefi  = ao_coef_normalized_ordered_transp(i,i_ao)
+
+    do m = 1, 3
+      n_points_m = n_points(m)
+
+      ! x * phi_i(r) = x * (x-Ax)**ax = (x-Ax)**(ax+1) + Ax * (x-Ax)**ax
+      power_xA     = power_Ai
+      power_xA(m) += 1
+
+      do j = 1, ao_prim_num(j_ao)
+        alphaj = ao_expo_ordered_transp                   (j,j_ao)
+        coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
+
+        ! First term = (x-Ax)**(ax+1)
+
+        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_xA, power_Aj, alphai, alphaj, beta &
+                                      , B_center(1:LD_B,1:3,m), LD_B, C_center(1:LD_C,1:3,m), LD_C, n_pt_in, mu_in, integral(1:LD_integral), LD_integral, n_points_m)
+
+        do ipoint = 1, n_points_m
+          ints(ipoint,m) += integral(ipoint) * coef
+        enddo
+
+        ! Second term = Ax * (x-Ax)**(ax)
+        call NAI_pol_mult_erf_with1s_v( Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj, beta &
+                                      , B_center(1:LD_B,1:3,m), LD_B, C_center(1:LD_C,1:3,m), LD_C, n_pt_in, mu_in, integral(1:LD_integral), LD_integral, n_points_m)
+        do ipoint = 1, n_points_m
+          ints(ipoint,m) += Ai_center(m) * integral(ipoint) * coef
+        enddo
+
+      enddo
+    enddo
+  enddo
+
+  deallocate(integral)
+
+end subroutine NAI_pol_x_mult_erf_ao_with1s_v
 
 ! ---
 
