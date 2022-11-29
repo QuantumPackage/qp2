@@ -1237,7 +1237,7 @@ end
       integer nptsgridmax,nptsgrid,ik
       double precision p,q,r,s
       parameter(nptsgridmax=50)
-      double precision :: coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
+      double precision coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
       common/pseudos/coefs_pseudo,ptsgrid
 
       p=1.d0/dsqrt(2.d0)

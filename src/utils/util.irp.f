@@ -328,7 +328,7 @@ BEGIN_PROVIDER [ integer, nproc ]
   ! Number of current OpenMP threads
   END_DOC
 
-  integer                        :: omp_get_num_threads
+  integer, external              :: omp_get_num_threads
   nproc = 1
   !$OMP PARALLEL
   !$OMP MASTER

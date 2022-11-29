@@ -246,7 +246,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file qp2-dependencies/bse-v0.8.11.tar.gz
-              pip install -e basis_set_exchange-*
+              python3 -m pip install -e basis_set_exchange-*
 EOF
 
     elif [[ ${PACKAGE} = zlib ]] ; then

@@ -438,7 +438,7 @@ subroutine bitstring_to_list_ab( string, list, n_elements, Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Gives the inidices(+1) of the bits set to 1 in the bit string
+  ! Gives the indices(+1) of the bits set to 1 in the bit string
   ! For alpha/beta determinants.
   END_DOC
   integer, intent(in)            :: Nint

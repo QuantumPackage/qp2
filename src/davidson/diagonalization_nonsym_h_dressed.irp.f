@@ -317,7 +317,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if( (iter > 1) .or. (itertot == 1) ) then
+!      if( (iter > 1) .or. (itertot == 1) ) then
 
         ! Gram-Schmidt to orthogonalize all new guess with the previous vectors 
         call ortho_qr(U, size(U, 1), sze, shift2)
@@ -331,10 +331,10 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
         else
           call H_u_0_nstates_openmp(W(1,shift+1), U(1,shift+1), N_st_diag, sze)
         endif
-      else
-         ! Already computed in update below
-         continue
-      endif
+!      else
+!         ! Already computed in update below
+!         continue
+!      endif
 
       if(dressing_state > 0) then
 

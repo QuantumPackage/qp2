@@ -288,8 +288,6 @@ double precision function NAI_pol_mult(A_center,B_center,power_A,power_B,alpha,b
   ! sum of integrals of type : int {t,[0,1]}  exp-(rho.(P-Q)^2 * t^2) * t^i
   do i =0 ,n_pt_out,2
     accu +=  d(i) * rint(i/2,const)
-
-!    print *, i/2, const, d(i), rint(shiftr(i, 1), const)
   enddo
   NAI_pol_mult = accu * coeff
 

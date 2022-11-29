@@ -60,6 +60,7 @@ subroutine add_to_selection_buffer(b, det, val)
     b%val(b%cur) = val
     if(b%cur == size(b%val)) then
       call sort_selection_buffer(b)
+      b%cur = b%cur-1
     end if
   end if
 end subroutine
@@ -86,43 +87,56 @@ subroutine merge_selection_buffers(b1, b2)
   double precision :: rss
   double precision, external :: memory_of_double
   sze = max(size(b1%val), size(b2%val))
-  rss = memory_of_double(sze) + 2*N_int*memory_of_double(sze)
-  call check_mem(rss,irp_here)
+!  rss = memory_of_double(sze) + 2*N_int*memory_of_double(sze)
+!  call check_mem(rss,irp_here)
   allocate(val(sze), detmp(N_int, 2, sze))
   i1=1
   i2=1
-  do i=1,nmwen
-    if ( (i1 > b1%cur).and.(i2 > b2%cur) ) then
-      exit
-    else if (i1 > b1%cur) then
-        val(i) = b2%val(i2)
-        detmp(1:N_int,1,i) = b2%det(1:N_int,1,i2)
-        detmp(1:N_int,2,i) = b2%det(1:N_int,2,i2)
-        i2=i2+1
-    else if (i2 > b2%cur) then
-        val(i) = b1%val(i1)
-        detmp(1:N_int,1,i) = b1%det(1:N_int,1,i1)
-        detmp(1:N_int,2,i) = b1%det(1:N_int,2,i1)
-        i1=i1+1
-    else
-      if (b1%val(i1) <= b2%val(i2)) then
-        val(i) = b1%val(i1)
-        detmp(1:N_int,1,i) = b1%det(1:N_int,1,i1)
-        detmp(1:N_int,2,i) = b1%det(1:N_int,2,i1)
-        i1=i1+1
+
+  select case (N_int)
+BEGIN_TEMPLATE 
+  case $case
+    do i=1,nmwen
+      if ( (i1 > b1%cur).and.(i2 > b2%cur) ) then
+        exit
+      else if (i1 > b1%cur) then
+          val(i) = b2%val(i2)
+          detmp(1:$N_int,1,i) = b2%det(1:$N_int,1,i2)
+          detmp(1:$N_int,2,i) = b2%det(1:$N_int,2,i2)
+          i2=i2+1
+      else if (i2 > b2%cur) then
+          val(i) = b1%val(i1)
+          detmp(1:$N_int,1,i) = b1%det(1:$N_int,1,i1)
+          detmp(1:$N_int,2,i) = b1%det(1:$N_int,2,i1)
+          i1=i1+1
       else
-        val(i) = b2%val(i2)
-        detmp(1:N_int,1,i) = b2%det(1:N_int,1,i2)
-        detmp(1:N_int,2,i) = b2%det(1:N_int,2,i2)
-        i2=i2+1
+        if (b1%val(i1) <= b2%val(i2)) then
+          val(i) = b1%val(i1)
+          detmp(1:$N_int,1,i) = b1%det(1:$N_int,1,i1)
+          detmp(1:$N_int,2,i) = b1%det(1:$N_int,2,i1)
+          i1=i1+1
+        else
+          val(i) = b2%val(i2)
+          detmp(1:$N_int,1,i) = b2%det(1:$N_int,1,i2)
+          detmp(1:$N_int,2,i) = b2%det(1:$N_int,2,i2)
+          i2=i2+1
+        endif
       endif
-    endif
-  enddo
+    enddo
+    do i=nmwen+1,b2%N
+      val(i) = 0.d0
+!      detmp(1:$N_int,1,i) = 0_bit_kind
+!      detmp(1:$N_int,2,i) = 0_bit_kind
+    enddo
+SUBST [ case, N_int ]
+(1); 1;;
+(2); 2;;
+(3); 3;;
+(4); 4;;
+default; N_int;;
+END_TEMPLATE
+  end select
   deallocate(b2%det, b2%val)
-  do i=nmwen+1,b2%N
-    val(i) = 0.d0
-    detmp(1:N_int,1:2,i) = 0_bit_kind
-  enddo
   b2%det => detmp
   b2%val => val
   b2%mini = min(b2%mini,b2%val(b2%N))
@@ -144,8 +158,8 @@ subroutine sort_selection_buffer(b)
 
   double precision :: rss
   double precision, external :: memory_of_double, memory_of_int
-  rss = memory_of_int(b%cur) + 2*N_int*memory_of_double(size(b%det,3))
-  call check_mem(rss,irp_here)
+!  rss = memory_of_int(b%cur) + 2*N_int*memory_of_double(size(b%det,3))
+!  call check_mem(rss,irp_here)
   allocate(iorder(b%cur), detmp(N_int, 2, size(b%det,3)))
   do i=1,b%cur
     iorder(i) = i
@@ -225,14 +239,14 @@ subroutine make_selection_buffer_s2(b)
       endif
       dup = .True.
       do k=1,N_int
-        if ( (tmp_array(k,1,i) /= tmp_array(k,1,j))                   &
-              .or. (tmp_array(k,2,i) /= tmp_array(k,2,j)) ) then
+        if ( (tmp_array(k,1,i) /= tmp_array(k,1,j)) .or. &
+             (tmp_array(k,2,i) /= tmp_array(k,2,j)) ) then
           dup = .False.
           exit
         endif
       enddo
       if (dup) then
-        val(i) = max(val(i), val(j))
+        val(i) = min(val(i), val(j))
         duplicate(j) = .True.
       endif
       j+=1
@@ -282,9 +296,6 @@ subroutine make_selection_buffer_s2(b)
     call configuration_to_dets_size(o(1,1,i),sze,elec_alpha_num,N_int)
     n_d = n_d + sze
     if (n_d > b%cur) then
-!      if (n_d - b%cur > b%cur - n_d + sze) then
-!        n_d = n_d - sze
-!      endif
       exit
     endif
   enddo
@@ -329,10 +340,11 @@ subroutine remove_duplicates_in_selection_buffer(b)
   integer(bit_kind), allocatable :: tmp_array(:,:,:)
   logical, allocatable           :: duplicate(:)
 
-  n_d = b%cur
   logical                        :: found_duplicates
   double precision               :: rss
   double precision, external     :: memory_of_double
+
+  n_d = b%cur
   rss = (4*N_int+4)*memory_of_double(n_d)
   call check_mem(rss,irp_here)
 

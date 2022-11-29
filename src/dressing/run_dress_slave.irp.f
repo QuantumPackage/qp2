@@ -72,7 +72,8 @@ subroutine run_dress_slave(thread,iproce,energy)
   provide psi_energy
   ending = dress_N_cp+1
   ntask_tbd = 0
-  call omp_set_max_active_levels(8)
+  call set_multiple_levels_omp(.True.)
+!  call omp_set_max_active_levels(8)
 
   !$OMP PARALLEL DEFAULT(SHARED) &
   !$OMP PRIVATE(interesting, breve_delta_m, task_id) &
@@ -84,7 +85,8 @@ subroutine run_dress_slave(thread,iproce,energy)
   zmq_socket_push      = new_zmq_push_socket(thread)
   integer, external :: connect_to_taskserver
   !$OMP CRITICAL
-  call omp_set_max_active_levels(1)
+  call set_multiple_levels_omp(.False.)
+!  call omp_set_max_active_levels(1)
   if (connect_to_taskserver(zmq_to_qp_run_socket,worker_id,thread) == -1) then
     print *,  irp_here, ': Unable to connect to task server'
     stop -1
@@ -296,7 +298,8 @@ subroutine run_dress_slave(thread,iproce,energy)
   !$OMP END CRITICAL
 
   !$OMP END PARALLEL
-  call omp_set_max_active_levels(1)
+  call set_multiple_levels_omp(.False.)
+!  call omp_set_max_active_levels(1)
 !  do i=0,dress_N_cp+1
 !    call omp_destroy_lock(lck_sto(i))
 !  end do

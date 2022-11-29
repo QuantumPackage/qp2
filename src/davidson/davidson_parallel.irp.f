@@ -508,7 +508,8 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
   endif
 
 
-  call omp_set_max_active_levels(5)
+  call set_multiple_levels_omp(.True.)
+!  call omp_set_max_active_levels(5)
 
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
@@ -544,21 +545,6 @@ end
 
 
 
-
-
-!BEGIN_PROVIDER [ integer, nthreads_davidson ]
-! implicit none
-! BEGIN_DOC
-! ! Number of threads for Davidson
-! END_DOC
-! nthreads_davidson = nproc
-! character*(32) :: env
-! call getenv('QP_NTHREADS_DAVIDSON',env)
-! if (trim(env) /= '') then
-!   read(env,*) nthreads_davidson
-!   call write_int(6,nthreads_davidson,'Target number of threads for <Psi|H|Psi>')
-! endif
-!END_PROVIDER
 
 
 integer function zmq_put_N_states_diag(zmq_to_qp_run_socket,worker_id)
