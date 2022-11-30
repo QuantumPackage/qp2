@@ -303,6 +303,25 @@ fi
 
 ZEROMQ=$(find_lib -lzmq)
 if [[ ${ZEROMQ} = $(not_found) ]] ; then
+
+        MAKE=$(find_exe make)
+        if [[ ${MAKE} = $(not_found) ]] ; then
+                error "make is not installed."
+                fail
+        fi
+
+        M4=$(find_exe autoreconf)
+        if [[ ${M4} = $(not_found) ]] ; then
+                error "autoreconf is not installed."
+                fail
+        fi
+
+        M4=$(find_exe m4)
+        if [[ ${M4} = $(not_found) ]] ; then
+                error "m4 preprocesssor is not installed."
+                fail
+        fi
+
         error "ZeroMQ (zeromq) is not installed."
         fail
 fi
