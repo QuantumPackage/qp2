@@ -38,11 +38,6 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
       ao_integrals_n_e = 0.d0
 
-      !        _
-      ! /|  / |_)
-      !  | /  | \
-      !
-
       !$OMP PARALLEL                                                   &
           !$OMP DEFAULT (NONE)                                         &
           !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
@@ -106,7 +101,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     endif
 
 
-    IF(DO_PSEUDO) THEN
+    IF(do_pseudo) THEN
        ao_integrals_n_e += ao_pseudo_integrals
     ENDIF
 

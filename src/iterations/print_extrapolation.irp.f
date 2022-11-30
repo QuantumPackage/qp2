@@ -35,12 +35,13 @@ subroutine print_extrapolated_energy
     do k=2,min(N_iter,8)
       write(*,'(F11.4,X,3(X,F18.8))') pt2_iterations(i,N_iter+1-k), extrapolated_energy(k,i), &
           extrapolated_energy(k,i) - extrapolated_energy(k,1), &
-          (extrapolated_energy(k,i) - extrapolated_energy(k,1) ) * 27.211396641308d0
+          (extrapolated_energy(k,i) - extrapolated_energy(k,1) ) * ha_to_ev
     enddo
     write(*,*)  '=========== ', '=================== ', '=================== ', '==================='
   enddo
 
   print *,  ''
+  call ezfio_set_fci_energy_extrapolated(extrapolated_energy(min(N_iter,3),1:N_states))
 
 end subroutine
 

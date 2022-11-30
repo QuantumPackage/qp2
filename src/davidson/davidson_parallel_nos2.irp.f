@@ -465,7 +465,7 @@ subroutine H_u_0_nstates_zmq(v_0,u_0,N_st,sze)
   endif
 
   call set_multiple_levels_omp(.True.)
-!  call omp_set_max_active_levels(4)
+
   !$OMP PARALLEL DEFAULT(shared) NUM_THREADS(2) PRIVATE(ithread)
   ithread = omp_get_thread_num()
   if (ithread == 0 ) then

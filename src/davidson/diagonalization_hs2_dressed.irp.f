@@ -77,9 +77,9 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   !$OMP END PARALLEL
 
   if (dressing_state > 0) then
-    do k = 1, N_st
+    do k=1,N_st
 
-      do i = 1, sze
+      do i=1,sze
         H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
 

@@ -12,16 +12,6 @@ BEGIN_PROVIDER [double precision, SCF_density_matrix_ao_alpha, (ao_num,ao_num) ]
      SCF_density_matrix_ao_alpha = 0.d0
    endif
 
-!  integer          :: i, j
-!  double precision :: trace_density
-!  trace_density = 0.d0
-!  do i = 1, ao_num !elec_alpha_num
-!    do j = 1, ao_num !elec_alpha_num
-!      trace_density = trace_density &
-!                    + SCF_density_matrix_ao_alpha(j,i) * ao_overlap(j,i)
-!    enddo
-!  enddo
-!  print *, ' trace of SCF_density_matrix_ao_alpha =', trace_density
 
 END_PROVIDER
 

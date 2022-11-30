@@ -74,7 +74,7 @@ subroutine run
     print*,'******************************************************'
     print*,'Excitation energies (au)                     (eV)'
     do i = 2, N_states
-      print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1))/0.0367502d0
+      print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1)) * ha_to_ev
     enddo
     print*,''
   endif

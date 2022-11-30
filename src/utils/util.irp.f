@@ -37,6 +37,10 @@ double precision function binom_func(i,j)
   else
     binom_func = dexp( logfact(i)-logfact(j)-logfact(i-j) )
   endif
+
+  ! To avoid .999999 numbers
+  binom_func = floor(binom_func + 0.5d0)
+
 end
 
 

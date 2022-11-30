@@ -55,10 +55,23 @@ subroutine routine_s2
  integer :: i,j,k
  double precision :: accu(N_states)
 
- print *,  'Weights of the CFG'
+ integer :: weights(0:16), ix
+ double precision :: x
+
+ weights(:) = 0
  do i=1,N_det
-   print *,  i, real(weight_configuration(det_to_configuration(i),:)), real(sum(weight_configuration(det_to_configuration(i),:)))
+   x = -dlog(1.d-32+sum(weight_configuration(det_to_configuration(i),:)))/dlog(10.d0)
+   ix = min(int(x), 16)
+   weights(ix) += 1
  enddo
+
+ print *,  'Histogram of the weights of the CFG'
+ do i=0,15
+   print *, '  10^{-', i, '}   ', weights(i) 
+ end do
+ print *, '< 10^{-', 15, '}   ', weights(16) 
+
+
  print*, 'Min weight of the configuration?'
  read(5,*) wmin
 

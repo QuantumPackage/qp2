@@ -5,7 +5,6 @@ subroutine run_slave_cipsi
   END_DOC
 
   call set_multiple_levels_omp(.False.)
-!  call omp_set_max_active_levels(1)
   distributed_davidson = .False.
   read_wf = .False.
   SOFT_TOUCH read_wf distributed_davidson
@@ -173,10 +172,8 @@ subroutine run_slave_main
 
       !---
       call set_multiple_levels_omp(.True.)
-!      call omp_set_max_active_levels(8)
       call davidson_slave_tcp(0)
       call set_multiple_levels_omp(.False.)
-!      call omp_set_max_active_levels(1)
       print *,  mpi_rank, ': Davidson done'
       !---
 

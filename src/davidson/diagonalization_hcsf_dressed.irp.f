@@ -300,7 +300,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if ((iter > 1).or.(itertot == 1)) then
+!      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
@@ -310,10 +310,10 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         else
             call H_u_0_nstates_openmp(W,U,N_st_diag,sze)
         endif
-      else
-         ! Already computed in update below
-         continue
-      endif
+!      else
+!         ! Already computed in update below
+!         continue
+!      endif
 
       if (dressing_state > 0) then
 
