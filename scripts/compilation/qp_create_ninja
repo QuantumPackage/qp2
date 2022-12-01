@@ -99,9 +99,19 @@ def ninja_create_env_variable(pwd_config_file):
     l_string = ["builddir = {0}".format(os.path.dirname(ROOT_BUILD_NINJA)),
                 ""]
 
+
     for flag in ["FC", "FCFLAGS", "IRPF90", "IRPF90_FLAGS"]:
         str_ = "{0} = {1}".format(flag, get_compilation_option(pwd_config_file,
                                                                flag))
+        includefile = flag
+        try:
+            content = ""
+            with open(includefile,'r') as f:
+                content = f.read()
+                str_ += " "+content
+        except IOError:
+            pass
+
         l_string.append(str_)
 
     lib_lapack = get_compilation_option(pwd_config_file, "LAPACK_LIB")
@@ -120,6 +130,7 @@ def ninja_create_env_variable(pwd_config_file):
         pass
 
     l_string.append("LIB = {0} ".format(str_lib))
+
 
     l_string.append("CONFIG_FILE = {0}".format(pwd_config_file))
     l_string.append("")
