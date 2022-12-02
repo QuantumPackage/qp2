@@ -1,7 +1,7 @@
 program print_dipole
  implicit none
  read_wf = .True.
- TOUCH read_wf
- call print_dipole_moments
+ SOFT_TOUCH read_wf
+ call print_z_dipole_moment_only
 
 end

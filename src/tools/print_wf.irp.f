@@ -17,6 +17,7 @@ program print_wf
  ! psi_coef_sorted are the wave function stored in the |EZFIO| directory.
  read_wf = .True.
  touch read_wf
+ call write_wf
  call routine
 end
 
@@ -124,3 +125,19 @@ subroutine routine
  print*,'L2 norm of pert beta  = ',norm_mono_b_pert_2
 
 end
+
+subroutine write_wf
+ implicit none
+ character*(128) :: output
+ integer :: i_unit_output,getUnitAndOpen                                                                                 
+ output=trim(ezfio_filename)//'.wf'
+ i_unit_output = getUnitAndOpen(output,'w')
+ integer :: i
+ print*,'Writing the sorted wf'
+ do i = 1, N_det
+  write(i_unit_output,*)i,psi_coef_sorted(i,1)/psi_coef_sorted(1,1)
+ enddo
+
+
+end
+

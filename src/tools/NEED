@@ -2,4 +2,5 @@ fci
 mo_two_e_erf_ints
 aux_quantities
 hartree_fock
+dft_utils_in_r
 two_body_rdm

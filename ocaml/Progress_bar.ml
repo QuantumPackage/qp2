@@ -10,7 +10,7 @@ type t =
   next       : float;
 }
 
-let init ?(bar_length=20) ?(start_value=0.) ?(end_value=1.) ~title =
+let init ?(bar_length=20) ?(start_value=0.) ?(end_value=1.) title =
   { title ; start_value ; end_value ; bar_length ; cur_value=start_value ;
     init_time= Unix.time () ; dirty = false ; next = Unix.time () }
 

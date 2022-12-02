@@ -228,7 +228,7 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
 
-      if ((iter > 1).or.(itertot == 1)) then
+!      if ((iter > 1).or.(itertot == 1)) then
         ! Compute |W_k> = \sum_i |i><i|H|u_k>
         ! -----------------------------------
 
@@ -238,10 +238,10 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 
 !            call H_S2_u_0_nstates_openmp(W(:,shift+1),U(:,shift+1),N_st_diag,sze)
             call hpsi(W(:,shift+1),U(:,shift+1),N_st_diag,sze,h_mat)
-      else
-         ! Already computed in update below
-         continue
-      endif
+!      else
+!         ! Already computed in update below
+!         continue
+!      endif
 
       ! Compute h_kl = <u_k | W_l> = <u_k| H |u_l>
       ! -------------------------------------------
@@ -258,8 +258,8 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
       if (state_following) then
 
         overlap = -1.d0
-        do k=1,shift2
-          do i=1,shift2
+        do i=1,shift2
+          do k=1,shift2
             overlap(k,i) = dabs(y(k,i))
           enddo
         enddo

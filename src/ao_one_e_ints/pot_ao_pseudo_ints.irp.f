@@ -28,7 +28,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals, (ao_num,ao_num)]
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
-  use omp_lib
   implicit none
   BEGIN_DOC
   ! Local pseudo-potential
@@ -43,6 +42,7 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
 
   double precision               :: wall_1, wall_2, wall_0
   integer                        :: thread_num
+  integer, external              :: omp_get_thread_num
   double precision               :: c
   double precision               :: Z
 
@@ -158,7 +158,6 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
 
 
  BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_non_local, (ao_num,ao_num)]
-  use omp_lib
   implicit none
   BEGIN_DOC
   ! Non-local pseudo-potential
@@ -170,6 +169,7 @@ BEGIN_PROVIDER [ double precision, ao_pseudo_integrals_local, (ao_num,ao_num)]
   integer                        :: power_A(3),power_B(3)
   integer                        :: i,j,k,l,m
   double precision               :: Vloc, Vpseudo
+  integer, external              :: omp_get_thread_num
 
   double precision               :: wall_1, wall_2, wall_0
   integer                        :: thread_num

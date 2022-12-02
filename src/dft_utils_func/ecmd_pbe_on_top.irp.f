@@ -67,6 +67,7 @@ subroutine ec_md_on_top_PBE_mu_corrected(mu,r,two_dm,eps_c_md_on_top_PBE)
  double precision :: pi
  pi = 4.d0 * datan(1.d0)
  mu_correction_of_on_top = on_top  / ( 1.d0 + 2.d0/(dsqrt(pi)*mu) )
+!  mu_correction_of_on_top = on_top  * dexp(-1.d0/(dsqrt(pi)*mu))
  mu_correction_of_on_top = max(mu_correction_of_on_top ,1.d-15)
  end
 

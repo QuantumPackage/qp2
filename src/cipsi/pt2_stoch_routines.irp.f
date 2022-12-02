@@ -117,6 +117,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
+!  integer, intent(inout)         :: N_in
   double precision, intent(in)   :: relative_error, E(N_states)
   type(pt2_type), intent(inout)  :: pt2_data, pt2_data_err
 !
@@ -131,7 +132,7 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted
   PROVIDE psi_det_hii selection_weight pseudo_sym
-  PROVIDE list_act list_inact list_core list_virt list_del seniority_max
+  PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
 
   if (h0_type == 'CFG') then
@@ -288,12 +289,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       call write_double(6,mem,'Memory (Gb)')
 
       call set_multiple_levels_omp(.False.)
+!      call omp_set_max_active_levels(1)
 
 
-      ! old
-      !print '(A)', '========== ======================= ===================== ===================== ==========='
-      !print '(A)', ' Samples          Energy                Variance               Norm^2            Seconds'
-      !print '(A)', '========== ======================= ===================== ===================== ==========='
       print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
       print '(A)', ' Samples           Energy             PT2            Variance          Norm^2       Convergence    Seconds'
       print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
@@ -319,9 +317,8 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
       !$OMP END PARALLEL
       call end_parallel_job(zmq_to_qp_run_socket, zmq_socket_pull, 'pt2')
       call set_multiple_levels_omp(.True.)
+!      call omp_set_max_active_levels(8)
 
-      ! old
-      !print '(A)', '========== ======================= ===================== ===================== ==========='
       print '(A)', '========== ==================== ================ ================ ================ ============= ==========='
 
 
@@ -908,6 +905,7 @@ END_PROVIDER
      if (tooth_width == 0.d0) then
        tooth_width = max(1.d-15,sum(tilde_w(pt2_n_0(t):pt2_n_0(t+1))))
      endif
+     ASSERT(tooth_width > 0.d0)
      do i=pt2_n_0(t)+1, pt2_n_0(t+1)
        pt2_w(i) = tilde_w(i) * pt2_W_T / tooth_width
      end do

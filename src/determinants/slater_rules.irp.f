@@ -472,35 +472,6 @@ subroutine bitstring_to_list_ab( string, list, n_elements, Nint)
 
 end
 
-!subroutine bitstring_to_list( string, list, n_elements, Nint)
-!  use bitmasks
-!  implicit none
-!  BEGIN_DOC
-!  ! Gives the indices(+1) of the bits set to 1 in the bit string
-!  END_DOC
-!  integer, intent(in)            :: Nint
-!  integer(bit_kind), intent(in)  :: string(Nint)
-!  integer, intent(out)           :: list(Nint*bit_kind_size)
-!  integer, intent(out)           :: n_elements
-!
-!  integer                        :: i, j, ishift
-!  integer(bit_kind)              :: l
-!
-!  n_elements = 0
-!  ishift = 1
-!  do i=1,Nint
-!    l = string(i)
-!    do while (l /= 0_bit_kind)
-!      j = trailz(l)
-!      n_elements = n_elements + 1
-!      l = ibclr(l,j)
-!      list(n_elements) = ishift+j
-!    enddo
-!    ishift = ishift + bit_kind_size
-!  enddo
-!
-!end
-
 
 subroutine i_H_j_s2(key_i,key_j,Nint,hij,s2)
   use bitmasks
@@ -623,8 +594,7 @@ subroutine i_H_j(key_i,key_j,Nint,hij)
   integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase
   integer                        :: n_occ_ab(2)
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
-  PROVIDE ao_one_e_integrals mo_one_e_integrals
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals
 
   ASSERT (Nint > 0)
   ASSERT (Nint == N_int)

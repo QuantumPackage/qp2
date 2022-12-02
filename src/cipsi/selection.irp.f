@@ -258,6 +258,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   deallocate(exc_degree)
   nmax=k-1
 
+  call isort_noidx(indices,nmax)
+
   ! Start with 32 elements. Size will double along with the filtering.
   allocate(preinteresting(0:32), prefullinteresting(0:32),     &
       interesting(0:32), fullinteresting(0:32))
@@ -569,7 +571,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
-  logical, external :: is_in_wavefunction
   PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
@@ -800,9 +801,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
         alpha_h_psi = mat(istate, p1, p2)
 
-        do k=1,N_states
-          pt2_data % overlap(k,istate) = pt2_data % overlap(k,istate) + coef(k) * coef(istate)
-        end do
+        pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
         pt2_data % variance(istate)  = pt2_data % variance(istate) + alpha_h_psi * alpha_h_psi
         pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
 
@@ -864,6 +863,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 !!!BEGIN_DEBUG
 !      ! To check if the pt2 is taking determinants already in the wf
 !      if (is_in_wavefunction(det(N_int,1),N_int)) then
+!        logical, external :: is_in_wavefunction
 !        print*, 'A determinant contributing to the pt2 is already in'
 !        print*, 'the wave function:'
 !        call  print_det(det(N_int,1),N_int)

@@ -5,7 +5,10 @@ build.ninja
 .ninja_deps
 bin/
 lib/
+lib64/
+libexec/
 config/qp_create_ninja.pickle
 src/*/.gitignore
 ezfio_interface.irp.f
 share
+*.swp

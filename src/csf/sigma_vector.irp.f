@@ -6,7 +6,6 @@
    logabsgamma = log(abs(gamma(x)))
  endif
  end function logabsgamma
-
   BEGIN_PROVIDER [ integer, NSOMOMax]
  &BEGIN_PROVIDER [ integer, NSOMOMin]
  &BEGIN_PROVIDER [ integer, NCSFMax]
@@ -23,8 +22,6 @@
   integer MS, ialpha
   MS = elec_alpha_num-elec_beta_num
   NSOMOMax = min(elec_num, cfg_nsomo_max + 2)
-  print *,'cfg_nsomo_min=',cfg_nsomo_min
-  print *,'cfg_nsomo_max=',cfg_nsomo_max
   if(AND(cfg_nsomo_min , 1) .eq. 0)then
     NSOMOMin = max(0,cfg_nsomo_min-2)
   else
@@ -172,7 +169,7 @@ subroutine get_phase_qp_to_cfg(Ialpha, Ibeta, phaseout)
   integer                        :: nbetas
   integer                        :: count, k
 
-  ! Initliaze deta and detb
+  ! Initialize deta and detb
   deta = Ialpha
   detb = Ibeta
 

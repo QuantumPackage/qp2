@@ -54,6 +54,7 @@ subroutine routine_s2
  double precision, allocatable :: psi_coef_tmp(:,:)
  integer :: i,j,k
  double precision :: accu(N_states)
+
  integer :: weights(0:16), ix
  double precision :: x
 

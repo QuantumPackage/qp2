@@ -125,7 +125,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     stop -1
   endif
 
-  itermax = max(2,min(davidson_sze_max, sze_csf/N_st_diag))+1
+  itermax = max(2,min(davidson_sze_max, sze/N_st_diag))+1
   itertot = 0
 
   if (state_following) then
@@ -264,20 +264,29 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   ! ===================
 
   converged = .False.
-  call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),U_csf(1,1))
+
   do k=N_st+1,N_st_diag
-    do i=1,sze_csf
+    do i=1,sze
         call random_number(r1)
         call random_number(r2)
         r1 = dsqrt(-2.d0*dlog(r1))
         r2 = dtwo_pi*r2
-        U_csf(i,k) = r1*dcos(r2) * u_csf(i,k-N_st)
+        u_in(i,k) = r1*dcos(r2) * u_in(i,k-N_st)
     enddo
-    U_csf(k,k) = u_csf(k,k) + 10.d0
+    u_in(k,k) = u_in(k,k) + 10.d0
   enddo
   do k=1,N_st_diag
-    call normalize(U_csf(1,k),sze_csf)
+    call normalize(u_in(1,k),sze)
   enddo
+
+  do k=1,N_st_diag
+    do i=1,sze
+      U(i,k) = u_in(i,k)
+    enddo
+  enddo
+
+  ! Make random verctors eigenstates of S2
+  call convertWFfromDETtoCSF(N_st_diag,U(1,1),U_csf(1,1))
   call convertWFfromCSFtoDET(N_st_diag,U_csf(1,1),U(1,1))
 
   do while (.not.converged)
@@ -500,8 +509,17 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
 
     enddo
 
-    ! Re-contract U
-    ! -------------
+    ! Re-contract U and update W
+    ! --------------------------------
+
+    call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
+        W_csf, size(W_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))
+    do k=1,N_st_diag
+      do i=1,sze_csf
+        W_csf(i,k) = u_in(i,k)
+      enddo
+    enddo
+    call convertWFfromCSFtoDET(N_st_diag,W_csf,W)
 
     call dgemm('N','N', sze_csf, N_st_diag, shift2, 1.d0,      &
         U_csf, size(U_csf,1), y, size(y,1), 0.d0, u_in, size(u_in,1))

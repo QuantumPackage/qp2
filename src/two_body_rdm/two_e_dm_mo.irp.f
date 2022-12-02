@@ -1,8 +1,9 @@
 BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    implicit none
    BEGIN_DOC
-   ! \sum_{\sigma \sigma'}
-   ! <Psi| a^{\dagger}_{i \sigma} a^{\dagger}_{j \sigma'} a_{l \sigma'} a_{k \sigma} |Psi>
+   ! two_e_dm_bb_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of beta/beta electrons
+   !
+   ! <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \beta} a_{l \beta} a_{k \beta} |Psi>
    !
    ! where the indices (i,j,k,l) belong to all MOs.
    !
@@ -11,7 +12,7 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO are set to zero
    ! The state-averaged two-electron energy :
    !
-   !   \sum_{i,j,k,l = 1, mo_num} two_e_dm_mo(i,j,k,l) * < kk ll | ii jj >
+   !   \sum_{i,j,k,l = 1, mo_num} two_e_dm_mo(i,j,k,l) * < ii jj | kk ll >
    END_DOC
    two_e_dm_mo = 0.d0
    integer                        :: i,j,k,l,iorb,jorb,korb,lorb,istate

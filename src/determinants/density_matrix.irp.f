@@ -262,86 +262,17 @@ subroutine set_natural_mos
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
       jorb = list_core_inact_act(j)
+      if(one_e_dm_mo(iorb,jorb).ne. 0.d0)then
+        print*,'AHAHAH'
+        print*,iorb,jorb,one_e_dm_mo(iorb,jorb)
+        stop
+      endif
      enddo
     enddo
    call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
    soft_touch mo_occ
+
 end
-
-
-subroutine save_natural_mos_canon_label
-   implicit none
-   BEGIN_DOC
-   ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
-   ! the |MO| basis
-   END_DOC
-   call set_natural_mos_canon_label
-   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
-   call orthonormalize_mos
-   call save_mos
-end
-
-subroutine set_natural_mos_canon_label
-   implicit none
-   BEGIN_DOC
-   ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
-   ! in the |MO| basis
-   END_DOC
-   character*(64)                 :: label
-   double precision, allocatable  :: tmp(:,:)
-
-   label = "Canonical"
-    integer :: i,j,iorb,jorb
-    do i = 1, n_virt_orb
-     iorb = list_virt(i)
-     do j = 1, n_core_inact_act_orb
-      jorb = list_core_inact_act(j)
-     enddo
-    enddo
-   call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)
-   soft_touch mo_occ
-end
-
-
-
-
-
-subroutine set_natorb_no_ov_rot
-   implicit none
-   BEGIN_DOC
-   ! Set natural orbitals, obtained by diagonalization of the one-body density matrix
-   ! in the |MO| basis
-   END_DOC
-   character*(64)                 :: label
-   double precision, allocatable  :: tmp(:,:)
-   allocate(tmp(mo_num, mo_num))
-   label = "Natural"
-   tmp = one_e_dm_mo
-    integer :: i,j,iorb,jorb
-    do i = 1, n_virt_orb
-     iorb = list_virt(i)
-     do j = 1, n_core_inact_act_orb
-      jorb = list_core_inact_act(j)
-      tmp(iorb, jorb) = 0.d0
-      tmp(jorb, iorb) = 0.d0
-     enddo
-    enddo
-   call mo_as_svd_vectors_of_mo_matrix_eig(tmp,size(tmp,1),mo_num,mo_num,mo_occ,label)
-   soft_touch mo_occ
-end
-
-subroutine save_natural_mos_no_ov_rot
-   implicit none
-   BEGIN_DOC
-   ! Save natural orbitals, obtained by diagonalization of the one-body density matrix in
-   ! the |MO| basis
-   END_DOC
-   call set_natorb_no_ov_rot
-   call nullify_small_elements(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
-   call orthonormalize_mos
-   call save_mos
-end
-
 subroutine save_natural_mos
    implicit none
    BEGIN_DOC
@@ -368,7 +299,7 @@ BEGIN_PROVIDER [ double precision, c0_weight, (N_states) ]
        c = maxval(psi_coef(:,i) * psi_coef(:,i))
        c0_weight(i) = 1.d0/(c+1.d-20)
      enddo
-     c = 1.d0/sum(c0_weight(:))
+     c = 1.d0/minval(c0_weight(:))
      do i=1,N_states
        c0_weight(i) = c0_weight(i) * c
      enddo

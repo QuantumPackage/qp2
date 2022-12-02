@@ -1095,9 +1095,9 @@ double precision function overlap_orb_ylm_grid(nptsgrid,r_orb,npower_orb,center_
 implicit none
 !! PSEUDOS
 integer nptsgridmax,nptsgrid
-double precision coefs_pseudo,ptsgrid
 parameter(nptsgridmax=50)
-common/pseudos/coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
+double precision coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
+common/pseudos/coefs_pseudo,ptsgrid
 !!!!!
 integer npower_orb(3),l,m,i
 double precision x,g_orb,two_pi,dx,dphi,term,orb_phi,ylm_real,sintheta,r_orb,phi,center_orb(3)
@@ -1235,10 +1235,10 @@ end
       subroutine initpseudos(nptsgrid)
       implicit none
       integer nptsgridmax,nptsgrid,ik
-      double precision coefs_pseudo,ptsgrid
       double precision p,q,r,s
       parameter(nptsgridmax=50)
-      common/pseudos/coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
+      double precision coefs_pseudo(nptsgridmax),ptsgrid(nptsgridmax,3)
+      common/pseudos/coefs_pseudo,ptsgrid
 
       p=1.d0/dsqrt(2.d0)
       q=1.d0/dsqrt(3.d0)

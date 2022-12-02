@@ -14,6 +14,7 @@ double precision, parameter :: thresh = 1.d-15
 double precision, parameter :: cx_lda = -0.73855876638202234d0
 double precision, parameter :: c_2_4_3 = 2.5198420997897464d0
 double precision, parameter :: cst_lda = -0.93052573634909996d0
-double precision, parameter :: c_4_3 = 1.3333333333333333d0
-double precision, parameter :: c_1_3 = 0.3333333333333333d0
-
+double precision, parameter :: c_4_3 = 4.d0/3.d0
+double precision, parameter :: c_1_3 = 1.d0/3.d0
+double precision, parameter :: sq_op5 = dsqrt(0.5d0)
+double precision, parameter :: dlog_2pi =  dlog(2.d0*dacos(-1.d0))

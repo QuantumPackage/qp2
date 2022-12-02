@@ -14,15 +14,6 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
- implicit none
- BEGIN_DOC
- ! Threshold of Davidson's algorithm, using PT2 as a guide
- END_DOC
- threshold_davidson_pt2 = threshold_davidson
-
-END_PROVIDER
-
 
 
 BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
@@ -66,7 +57,7 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k
+  integer                        :: i,k,l
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -87,9 +78,14 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
 
   if (dressing_state > 0) then
     do k=1,N_st
+
       do i=1,sze
-        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
+
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+
     enddo
   endif
 
@@ -149,7 +145,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   character*(16384)              :: write_buffer
   double precision               :: to_print(3,N_st)
   double precision               :: cpu, wall
-  integer                        :: shift, shift2, itermax, istate, ii
+  integer                        :: shift, shift2, itermax, istate
   double precision               :: r1, r2, alpha
   logical                        :: state_ok(N_st_diag_in*davidson_sze_max)
   integer                        :: nproc_target
@@ -356,14 +352,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         if ((sze > 100000).and.distributed_davidson) then
             call H_S2_u_0_nstates_zmq   (W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
         else
-            double precision               :: irp_rdtsc
-            double precision               :: ticks_0, ticks_1
-            integer*8                      :: irp_imax
-            irp_imax = 1
-            !ticks_0 = irp_rdtsc()
             call H_S2_u_0_nstates_openmp(W(1,shift+1),S_d,U(1,shift+1),N_st_diag,sze)
-            !ticks_1 = irp_rdtsc()
-            !print *,' ----Cycles:',(ticks_1-ticks_0)/dble(irp_imax)," ----"
         endif
         S(1:sze,shift+1:shift+N_st_diag) = real(S_d(1:sze,1:N_st_diag))
 !      else

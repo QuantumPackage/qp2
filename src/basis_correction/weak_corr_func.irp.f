@@ -81,3 +81,54 @@ BEGIN_PROVIDER [double precision, ecmd_pbe_ueg_mu_of_r, (N_states)]
  print*,'Time for the ecmd_pbe_ueg_mu_of_r:',wall1-wall0
 
 END_PROVIDER
+
+BEGIN_PROVIDER [double precision, ecmd_pbe_ueg_test, (N_states)]
+BEGIN_DOC
+! test of the routines contained in pbe_ueg_self_contained.irp.f
+END_DOC
+implicit none
+double precision :: weight
+integer :: ipoint,istate,m
+double precision :: mu,rho_a,rho_b
+double precision :: dens,spin_pol,grad_rho,e_PBE,delta_rho
+double precision :: ecmd_pbe_ueg_self_cont,eps_c_md_PBE
+ecmd_pbe_ueg_test = 0.d0
+ 
+do istate = 1, N_states
+ do ipoint = 1, n_points_final_grid
+  weight=final_weight_at_r_vector(ipoint)
+
+  ! mu(r) defined by Eq. (37) of J. Chem. Phys. 149, 194301 (2018)
+  mu    = mu_of_r_prov(ipoint,istate)
+
+  ! conversion from rho_a,rho_b --> dens,spin_pol
+  rho_a = one_e_dm_and_grad_alpha_in_r(4,ipoint,istate)
+  rho_b = one_e_dm_and_grad_beta_in_r(4,ipoint,istate)
+  dens = rho_a + rho_b
+  spin_pol = (rho_a - rho_b)/(max(dens,1.d-12))
+  delta_rho = rho_a - rho_b
+
+  ! conversion from grad_rho_a ... to sigma 
+  double precision :: grad_rho_a(3),grad_rho_b(3),grad_rho_a_2(3),grad_rho_b_2(3),grad_rho_a_b(3)
+  double precision :: sigmacc,sigmaco,sigmaoo
+  grad_rho_b(1:3) = one_e_dm_and_grad_beta_in_r(1:3,ipoint,istate)
+  grad_rho_a(1:3) = one_e_dm_and_grad_alpha_in_r(1:3,ipoint,istate)
+  grad_rho_a_2 = 0.d0
+  grad_rho_b_2 = 0.d0
+  grad_rho_a_b = 0.d0
+  do m = 1, 3
+   grad_rho_a_2 += grad_rho_a(m)*grad_rho_a(m)
+   grad_rho_b_2 += grad_rho_b(m)*grad_rho_b(m)
+   grad_rho_a_b += grad_rho_a(m)*grad_rho_b(m)
+  enddo
+  call grad_rho_ab_to_grad_rho_oc(grad_rho_a_2,grad_rho_b_2,grad_rho_a_b,sigmaoo,sigmacc,sigmaco)
+
+  ! call the PBE energy 
+  call ec_pbe_only(0.d0,dens,delta_rho,sigmacc,sigmaco,sigmaoo,e_PBE)
+  eps_c_md_PBE  = ecmd_pbe_ueg_self_cont(dens,spin_pol,mu,e_PBE)
+
+  ecmd_pbe_ueg_test(istate) += eps_c_md_PBE * weight
+ enddo
+enddo
+!
+END_PROVIDER

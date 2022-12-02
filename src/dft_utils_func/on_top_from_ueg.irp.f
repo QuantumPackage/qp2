@@ -37,15 +37,13 @@ double precision function g0_UEG_mu_inf(rho_a,rho_b)
   rs = (3d0 / (4d0*pi*rho))**(1d0/3d0) ! JT: serious bug fixed 20/03/19
   x = -d2*rs
   if(dabs(x).lt.50.d0)then
-!   g0_UEG_mu_inf= 0.5d0 * (1d0- B*rs + C*rs**2 + D*rs**3 + E*rs**4)*dexp(x)
-   g0_UEG_mu_inf= 0.5d0 * (1d0+ rs* (-B + rs*(C + rs*(D + rs*E))))*dexp(x)
+   g0_UEG_mu_inf= 0.5d0 * (1d0- B*rs + C*rs**2 + D*rs**3 + E*rs**4)*dexp(x)
   else
    g0_UEG_mu_inf= 0.d0
   endif
  else
   g0_UEG_mu_inf= 0.d0
  endif
- g0_UEG_mu_inf = max(g0_UEG_mu_inf,1.d-14)
 
 end
 

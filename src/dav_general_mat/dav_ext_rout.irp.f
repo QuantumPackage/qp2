@@ -247,8 +247,8 @@ subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,co
       if (state_following) then
 
         overlap = -1.d0
-        do k=1,shift2
-          do i=1,shift2
+        do i=1,shift2
+          do k=1,shift2
             overlap(k,i) = dabs(y(k,i))
           enddo
         enddo

@@ -1,4 +1,7 @@
-subroutine svd(A,LDA,U,LDU,D,Vt,LDVt,m,n)
+
+! ---
+
+subroutine svd(A, LDA, U, LDU, D, Vt, LDVt, m, n)
   implicit none
   BEGIN_DOC
   ! Compute A = U.D.Vt
@@ -1747,3 +1750,236 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   enddo
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!subroutine svd_s(A, LDA, U, LDU, D, Vt, LDVt, m, n)
+!  implicit none
+!  BEGIN_DOC
+!  ! !!!
+!  ! DGESVD computes the singular value decomposition (SVD) of a real
+!  ! M-by-N matrix A, optionally computing the left and/or right singular
+!  ! vectors. The SVD is written:
+!  !      A = U * SIGMA * transpose(V)
+!  ! where SIGMA is an M-by-N matrix which is zero except for its
+!  ! min(m,n) diagonal elements, U is an M-by-M orthogonal matrix, and
+!  ! V is an N-by-N orthogonal matrix.  The diagonal elements of SIGMA
+!  ! are the singular values of A; they are real and non-negative, and
+!  ! are returned in descending order.  The first min(m,n) columns of
+!  ! U and V are the left and right singular vectors of A.
+!  !
+!  ! Note that the routine returns V**T, not V.
+!  ! !!!
+!  END_DOC
+!
+!  integer, intent(in)             :: LDA, LDU, LDVt, m, n
+!  double precision, intent(in)    :: A(LDA,n)
+!  double precision, intent(out)   :: U(LDU,m), Vt(LDVt,n), D(min(m,n))
+!  double precision,allocatable    :: work(:), A_tmp(:,:)
+!  integer                         :: info, lwork, i, j, k
+!
+!
+!   allocate (A_tmp(LDA,n))
+!   do k=1,n
+!     do i=1,m
+!       !A_tmp(i,k) = A(i,k) + 1d-16
+!       A_tmp(i,k) = A(i,k)
+!     enddo
+!   enddo
+! 
+!   ! Find optimal size for temp arrays
+!   allocate(work(1))
+!   lwork = -1
+!   ! 'A': all M columns of U are returned in array U
+!   ! 'A': all N rows of V**T are returned in the array VT
+!   call dgesvd('A', 'A', m, n, A_tmp, LDA, D, U, LDU, Vt, LDVt, work, lwork, info)
+!   ! /!\ int(WORK(1)) becomes negative when WORK(1) > 2147483648
+!   if( info.ne.0 ) then
+!     print *, ' problem in first call DGESVD !!!!'
+!     print *, ' info = ', info
+!     print *, '  < 0 : if INFO = -i, the i-th argument had an illegal value.'
+!     print *, '  > 0 : if DBDSQR did not converge, INFO specifies how many  '
+!     print *, '        superdiagonals of an intermediate bidiagonal form B  '
+!     print *, '        did not converge to zero. See the description of WORK'
+!     print *, '        above for details.                                   '
+!     stop
+!   endif
+!   lwork = max(int(work(1)), 5*MIN(M,N))
+!   deallocate(work)
+!
+!   allocate(work(lwork))
+!
+!   call dgesvd('A', 'A', m, n, A_tmp, LDA, D, U, LDU, Vt, LDVt, work, lwork, info)
+!   if( info.ne.0 ) then
+!     print *, ' problem in second call DGESVD !!!!'
+!     print *, ' info = ', info
+!     print *, '  < 0 : if INFO = -i, the i-th argument had an illegal value.'
+!     print *, '  > 0 : if DBDSQR did not converge, INFO specifies how many  '
+!     print *, '        superdiagonals of an intermediate bidiagonal form B  '
+!     print *, '        did not converge to zero. See the description of WORK'
+!     print *, '        above for details.                                   '
+!     stop
+!   endif
+!
+!   deallocate(A_tmp,work)
+! 
+!   !do j=1, m
+!   !  do i=1, LDU
+!   !    if (dabs(U(i,j)) < 1.d-14)  U(i,j) = 0.d0
+!   !  enddo
+!   !enddo
+!   !do j = 1, n
+!   !  do i = 1, LDVt
+!   !    if (dabs(Vt(i,j)) < 1.d-14) Vt(i,j) = 0.d0
+!   !  enddo
+!   !enddo
+! 
+!end
+!
+
+! ---
+
+subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
+
+  implicit none
+
+  integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
+  double precision, intent(in)  :: A(A_ldim,n)
+  double precision, intent(out) :: energy(E_ldim), V(V_ldim,n)
+
+  character*1                   :: JOBVL, JOBVR, BALANC, SENSE
+  integer                       :: i, j
+  integer                       :: ILO, IHI, lda, ldvl, ldvr, LWORK, INFO
+  double precision              :: ABNRM
+  integer,          allocatable :: iorder(:), IWORK(:)
+  double precision, allocatable :: WORK(:), SCALE_array(:), RCONDE(:), RCONDV(:)
+  double precision, allocatable :: Atmp(:,:), WR(:), WI(:), VL(:,:), VR(:,:), Vtmp(:)
+  double precision, allocatable :: energy_loc(:), V_loc(:,:)
+
+  allocate( Atmp(n,n), WR(n), WI(n), VL(1,1), VR(n,n) )
+  do i = 1, n
+    do j = 1, n
+      Atmp(j,i) = A(j,i)
+    enddo
+  enddo
+
+  JOBVL  = "N" ! computes the left  eigenvectors 
+  JOBVR  = "V" ! computes the right eigenvectors 
+  BALANC = "B" ! Diagonal scaling and Permutation for optimization
+  SENSE  = "V" ! Determines which reciprocal condition numbers are computed
+  lda  = n
+  ldvr = n
+  ldvl = 1
+
+  allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
+
+  LWORK = -1 ! to ask for the optimal size of WORK
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS 
+             , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
+             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES 
+             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS 
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
+             , WORK, LWORK, IWORK, INFO )
+
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK 
+  deallocate(WORK)
+  allocate(WORK(LWORK))
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
+             , n, Atmp, lda                                 &
+             , WR, WI                                       &
+             , VL, ldvl, VR, ldvr                           &
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
+             , WORK, LWORK, IWORK, INFO )
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  deallocate( WORK, SCALE_array, RCONDE, RCONDV, IWORK )
+  deallocate( VL, Atmp )
+
+
+  allocate( energy_loc(n), V_loc(n,n) )
+  energy_loc = 0.d0
+  V_loc = 0.d0
+
+  i = 1
+  do while(i .le. n)
+
+!    print*, i, WR(i), WI(i)
+
+    if( dabs(WI(i)) .gt. 1e-7 ) then
+
+      print*, ' Found an imaginary component to eigenvalue'
+      print*, ' Re(i) + Im(i)', i, WR(i), WI(i)
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = WR(i) * VR(j,i) - WI(i) * VR(j,i+1)
+      enddo
+      energy_loc(i+1) = WI(i)
+      do j = 1, n
+        V_loc(j,i+1) = WR(i) * VR(j,i+1) + WI(i) * VR(j,i)
+      enddo
+      i = i + 2
+
+    else
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = VR(j,i)
+      enddo
+      i = i + 1
+
+    endif
+
+  enddo
+
+  deallocate(WR, WI, VR)
+
+
+  ! ordering
+!  do j = 1, n
+!    write(444, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  allocate( iorder(n) )
+  do i = 1, n
+    iorder(i) = i
+  enddo
+  call dsort(energy_loc, iorder, n)
+  do i = 1, n
+    energy(i) = energy_loc(i)
+    do j = 1, n
+      V(j,i) = V_loc(j,iorder(i))
+    enddo
+  enddo
+  deallocate(iorder)
+!  do j = 1, n
+!    write(445, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  deallocate(V_loc, energy_loc)
+
+end subroutine diag_nonsym_right
+
+! ---
+
+

@@ -59,16 +59,17 @@ END_PROVIDER
 
 END_PROVIDER
 
+
 BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid,3)]
   implicit none
   BEGIN_DOC
-! Transposed final_grid_points
+  !  final_grid_points_transp(j,1:3) = (/ x, y, z /) of the jth grid point
   END_DOC
-
-  integer :: i,j
-  do j=1,3
-    do i=1,n_points_final_grid
-      final_grid_points_transp(i,j) = final_grid_points(j,i)
-    enddo
+  integer :: i
+  do i=1,n_points_final_grid
+    final_grid_points_transp(i,1) = final_grid_points(1,i)
+    final_grid_points_transp(i,2) = final_grid_points(2,i)
+    final_grid_points_transp(i,3) = final_grid_points(3,i)
   enddo
 END_PROVIDER
+

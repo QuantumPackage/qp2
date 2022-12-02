@@ -4,10 +4,10 @@
 
 ! Gradient:
 
-! qp_edit : 
+! qp_edit :
 ! | localization_method | method for the localization |
 
-! Input: 
+! Input:
 ! | tmp_n                   | integer          | Number of parameters in the MO subspace           |
 ! | tmp_list_size           | integer          | Number of MOs in the mo_class we want to localize |
 ! | tmp_list(tmp_list_size) | integer          | MOs in the mo_class                               |
@@ -20,7 +20,7 @@
 
 
 subroutine gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
-  
+
   include 'pi.h'
 
   implicit none
@@ -28,7 +28,7 @@ subroutine gradient_localization(tmp_n, tmp_list_size, tmp_list, v_grad, max_ele
   BEGIN_DOC
   ! Compute the gradient of the chosen localization method
   END_DOC
-  
+
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
 
@@ -90,7 +90,7 @@ end
 subroutine criterion_localization(tmp_list_size, tmp_list,criterion)
 
   include 'pi.h'
-  
+
   implicit none
 
   BEGIN_DOC
@@ -146,7 +146,7 @@ end
 
 
 subroutine theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
-  
+
   include 'pi.h'
 
   implicit none
@@ -154,7 +154,7 @@ subroutine theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
   BEGIN_DOC
   ! Compute the rotation angles between the MOs for the chosen localization method
   END_DOC
-  
+
   integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: tmp_m_x(tmp_list_size,tmp_list_size), max_elem
 
@@ -170,7 +170,7 @@ subroutine theta_localization(tmp_list, tmp_list_size, tmp_m_x, max_elem)
 end
 
 ! Gradient
-! Input: 
+! Input:
 ! | tmp_n                   | integer          | Number of parameters in the MO subspace           |
 ! | tmp_list_size           | integer          | Number of MOs in the mo_class we want to localize |
 ! | tmp_list(tmp_list_size) | integer          | MOs in the mo_class                               |
@@ -188,13 +188,13 @@ end
 
 
 subroutine gradient_FB(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
-  
+
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the gradient for the Foster-Boys localization
   END_DOC
-  
+
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:)
@@ -220,11 +220,11 @@ subroutine gradient_FB(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
                            +4d0 * mo_dipole_z(i,j) * (mo_dipole_z(i,i) - mo_dipole_z(j,j))
     enddo
   enddo
-  
+
   ! 2D -> 1D
   do tmp_k = 1, tmp_n
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
-    v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
+    v_grad(tmp_k) = m_grad(tmp_i,tmp_j)
   enddo
 
   ! Maximum element in the gradient
@@ -233,8 +233,8 @@ subroutine gradient_FB(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
     if (ABS(v_grad(tmp_k)) > max_elem) then
       max_elem = ABS(v_grad(tmp_k))
     endif
-  enddo 
- 
+  enddo
+
   ! Norm of the gradient
   norm_grad = 0d0
   do tmp_k = 1, tmp_n
@@ -243,7 +243,7 @@ subroutine gradient_FB(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   norm_grad = dsqrt(norm_grad)
 
   print*, 'Maximal element in the gradient:', max_elem
-  print*, 'Norm of the gradient:', norm_grad  
+  print*, 'Norm of the gradient:', norm_grad
 
   ! Deallocation
   deallocate(m_grad)
@@ -261,7 +261,7 @@ end subroutine
 ! Gradient (OMP)
 
 subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_grad)
-  
+
   use omp_lib
 
   implicit none
@@ -269,7 +269,7 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
   BEGIN_DOC
   ! Compute the gradient for the Foster-Boys localization
   END_DOC
-  
+
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:)
@@ -310,8 +310,8 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
   !$OMP DO
   do tmp_k = 1, tmp_n
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
-    v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
-  enddo 
+    v_grad(tmp_k) = m_grad(tmp_i,tmp_j)
+  enddo
   !$OMP END DO
 
   !$OMP END PARALLEL
@@ -324,7 +324,7 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
     if (ABS(v_grad(tmp_k)) > max_elem) then
       max_elem = ABS(v_grad(tmp_k))
     endif
-  enddo 
+  enddo
 
   ! Norm of the gradient
   norm_grad = 0d0
@@ -334,7 +334,7 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
   norm_grad = dsqrt(norm_grad)
 
   print*, 'Maximal element in the gradient:', max_elem
-  print*, 'Norm of the gradient:', norm_grad  
+  print*, 'Norm of the gradient:', norm_grad
 
   ! Deallocation
   deallocate(m_grad)
@@ -349,7 +349,7 @@ subroutine gradient_FB_omp(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, nor
 
 end subroutine
 
-! Hessian 
+! Hessian
 
 ! Output:
 ! | H(tmp_n,tmp_n) | double precision | Gradient in the subspace        |
@@ -367,7 +367,7 @@ end subroutine
 subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the diagonal hessian for the Foster-Boys localization
   END_DOC
@@ -377,7 +377,7 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
   double precision, allocatable :: beta(:,:)
   integer                       :: i,j,tmp_k,tmp_i, tmp_j
   double precision              :: max_elem, t1,t2,t3
-   
+
   print*,''
   print*,'---hessian_FB---'
   print*,''
@@ -387,7 +387,7 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
 
   ! Allocation
   allocate(beta(tmp_list_size,tmp_list_size))
-  
+
   ! Calculation
   do tmp_j = 1, tmp_list_size
     j = tmp_list(tmp_j)
@@ -405,7 +405,7 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
     H(tmp_k,tmp_k) = 4d0 * beta(tmp_i, tmp_j)
   enddo
-  
+
   ! Min elem
   max_elem = 0d0
   do tmp_k = 1, tmp_n
@@ -423,7 +423,7 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
     endif
   enddo
   print*, 'Max elem H:', max_elem
-  
+
   ! Near 0
   max_elem = 1d10
   do tmp_k = 1, tmp_n
@@ -435,7 +435,7 @@ subroutine hessian_FB(tmp_n, tmp_list_size, tmp_list, H)
 
   ! Deallocation
   deallocate(beta)
- 
+
   call wall_time(t2)
   t3 = t2 - t1
   print*,'Time in hessian_FB:', t3
@@ -461,7 +461,7 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
   double precision, allocatable :: beta(:,:)
   integer                       :: i,j,tmp_k,tmp_i,tmp_j
   double precision              :: max_elem, t1,t2,t3
-   
+
   print*,''
   print*,'---hessian_FB_omp---'
   print*,''
@@ -479,7 +479,7 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
       !$OMP SHARED(tmp_n,tmp_list_size,beta,H,mo_dipole_x,mo_dipole_y,mo_dipole_z,tmp_list) &
       !$OMP DEFAULT(NONE)
 
-  
+
   ! Calculation
   !$OMP DO
   do tmp_j = 1, tmp_list_size
@@ -497,11 +497,11 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
   !$OMP DO
   do j = 1, tmp_n
     do i = 1, tmp_n
-      H(i,j) = 0d0 
+      H(i,j) = 0d0
     enddo
   enddo
   !$OMP END DO
-  
+
   ! Diagonalm of the hessian
   !$OMP DO
   do tmp_k = 1, tmp_n
@@ -509,7 +509,7 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
     H(tmp_k,tmp_k) = 4d0 * beta(tmp_i, tmp_j)
   enddo
   !$OMP END DO
-  
+
   !$OMP END PARALLEL
 
   call omp_set_max_active_levels(4)
@@ -531,7 +531,7 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
     endif
   enddo
   print*, 'Max elem H:', max_elem
-  
+
   ! Near 0
   max_elem = 1d10
   do tmp_k = 1, tmp_n
@@ -543,7 +543,7 @@ subroutine hessian_FB_omp(tmp_n, tmp_list_size, tmp_list, H)
 
   ! Deallocation
   deallocate(beta)
- 
+
   call wall_time(t2)
   t3 = t2 - t1
   print*,'Time in hessian_FB_omp:', t3
@@ -567,12 +567,12 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:), tmp_int(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho 
+  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
 
   ! Allocation
   allocate(m_grad(tmp_list_size, tmp_list_size), tmp_int(tmp_list_size, tmp_list_size))
 
-  ! Initialization 
+  ! Initialization
   m_grad = 0d0
 
   do a = 1, nucl_num ! loop over the nuclei
@@ -580,12 +580,12 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
 
      ! Loop over the MOs of the a given mo_class to compute <i|P_a|j>
      do tmp_j = 1, tmp_list_size
-        j = tmp_list(tmp_j) 
+        j = tmp_list(tmp_j)
         do tmp_i = 1, tmp_list_size
            i = tmp_list(tmp_i)
            do rho = 1, ao_num ! loop over all the AOs
               do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
-                 mu = nucl_aos(a,b) ! AO centered on atom a 
+                 mu = nucl_aos(a,b) ! AO centered on atom a
 
                  tmp_int(tmp_i,tmp_j) = tmp_int(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
                       + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
@@ -609,7 +609,7 @@ subroutine grad_pipek(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gra
   ! 2D -> 1D
   do tmp_k = 1, tmp_n
      call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
-     v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
+     v_grad(tmp_k) = m_grad(tmp_i,tmp_j)
   enddo
 
   ! Maximum element in the gradient
@@ -654,7 +654,7 @@ end subroutine grad_pipek
 ! $\sum_{\mu \in A}$ -> sum over the AOs which belongs to atom A
 ! $c^t$ -> expansion coefficient of orbital |t>
 
-! Input: 
+! Input:
 ! | tmp_n                   | integer          | Number of parameters in the MO subspace           |
 ! | tmp_list_size           | integer          | Number of MOs in the mo_class we want to localize |
 ! | tmp_list(tmp_list_size) | integer          | MOs in the mo_class                               |
@@ -689,7 +689,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   BEGIN_DOC
   ! Compute gradient for the Pipek-Mezey localization
   END_DOC
-  
+
   integer, intent(in)           :: tmp_n, tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: v_grad(tmp_n), max_elem, norm_grad
   double precision, allocatable :: m_grad(:,:), tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
@@ -713,12 +713,12 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
     do j = 1, ao_num
 
       tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
- 
+
     enddo
   enddo
 
   call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
- 
+
   m_grad = 0d0
 
   do a = 1, nucl_num ! loop over the nuclei
@@ -748,7 +748,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
 
       enddo
     enddo
-    
+
     do b = 1, nucl_n_aos(a)
       mu = nucl_aos(a,b)
       do tmp_i = 1, tmp_list_size
@@ -756,14 +756,14 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
         tmp_CS(tmp_i,b) = CS(tmp_i,mu)
 
       enddo
-    enddo   
+    enddo
 
     call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
- 
+
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
 
-        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))   
+        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))
 
       enddo
     enddo
@@ -783,7 +783,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
   ! 2D -> 1D
   do tmp_k = 1, tmp_n
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
-    v_grad(tmp_k) = m_grad(tmp_i,tmp_j) 
+    v_grad(tmp_k) = m_grad(tmp_i,tmp_j)
   enddo
 
   ! Maximum element in the gradient
@@ -792,7 +792,7 @@ subroutine gradient_PM(tmp_n, tmp_list_size, tmp_list, v_grad, max_elem, norm_gr
     if (ABS(v_grad(tmp_k)) > max_elem) then
       max_elem = ABS(v_grad(tmp_k))
     endif
-  enddo 
+  enddo
 
   ! Norm of the gradient
   norm_grad = 0d0
@@ -832,7 +832,7 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
   double precision, allocatable :: beta(:,:),tmp_int(:,:)
   integer                       :: i,j,tmp_k,tmp_i, tmp_j, a,b,rho,mu
   double precision              :: max_elem
-    
+
   ! Allocation
   allocate(beta(tmp_list_size,tmp_list_size),tmp_int(tmp_list_size,tmp_list_size))
 
@@ -853,7 +853,7 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
                                    + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
 
           enddo
-        enddo  
+        enddo
       enddo
     enddo
 
@@ -865,7 +865,7 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
 
       enddo
     enddo
-  
+
   enddo
 
   H = 0d0
@@ -873,7 +873,7 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
     H(tmp_k,tmp_k) = 4d0 * beta(tmp_i, tmp_j)
   enddo
-  
+
 !  max_elem = 0d0
 !  do tmp_k = 1, tmp_n
 !    if (H(tmp_k,tmp_k) < max_elem) then
@@ -889,7 +889,7 @@ subroutine hess_pipek(tmp_n, tmp_list_size, tmp_list, H)
 !    endif
 !  enddo
 !  print*, 'Max elem H:', max_elem
-!  
+!
 !  max_elem = 1d10
 !  do tmp_k = 1, tmp_n
 !    if (ABS(H(tmp_k,tmp_k)) < ABS(max_elem)) then
@@ -925,7 +925,7 @@ end
 subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute diagonal hessian for the Pipek-Mezey localization
   END_DOC
@@ -935,7 +935,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
   double precision, allocatable :: beta(:,:),tmp_int(:,:),CS(:,:),tmp_mo_coef(:,:),tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
   integer                       :: i,j,tmp_k,tmp_i, tmp_j, a,b,rho,mu
   double precision              :: max_elem, t1,t2,t3
-    
+
   print*,''
   print*,'---hessian_PM---'
   print*,''
@@ -953,12 +953,12 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     do j = 1, ao_num
 
       tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
- 
+
     enddo
   enddo
 
   call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
- 
+
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
 
@@ -975,7 +975,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     !    enddo
     !  enddo
     !enddo
- 
+
     allocate(tmp_mo_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
 
     do tmp_i = 1, tmp_list_size
@@ -986,7 +986,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
 
       enddo
     enddo
-    
+
     do b = 1, nucl_n_aos(a)
       mu = nucl_aos(a,b)
       do tmp_i = 1, tmp_list_size
@@ -994,14 +994,14 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
         tmp_CS(tmp_i,b) = CS(tmp_i,mu)
 
       enddo
-    enddo   
+    enddo
 
     call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
- 
+
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
 
-        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))   
+        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))
 
       enddo
     enddo
@@ -1016,7 +1016,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
 
       enddo
     enddo
-  
+
   enddo
 
   H = 0d0
@@ -1024,7 +1024,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     call vec_to_mat_index(tmp_k,tmp_i,tmp_j)
     H(tmp_k,tmp_k) = 4d0 * beta(tmp_i, tmp_j)
   enddo
-  
+
   max_elem = 0d0
   do tmp_k = 1, tmp_n
     if (H(tmp_k,tmp_k) < max_elem) then
@@ -1040,7 +1040,7 @@ subroutine hessian_PM(tmp_n, tmp_list_size, tmp_list, H)
     endif
   enddo
   print*, 'Max elem H:', max_elem
-  
+
   max_elem = 1d10
   do tmp_k = 1, tmp_n
     if (ABS(H(tmp_k,tmp_k)) < ABS(max_elem)) then
@@ -1067,18 +1067,18 @@ end
 subroutine compute_crit_pipek(criterion)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the Pipek-Mezey localization criterion
   END_DOC
 
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:)
-  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho 
+  integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
 
   ! Allocation
   allocate(tmp_int(mo_num, mo_num))
- 
+
   criterion = 0d0
 
   do a = 1, nucl_num ! loop over the nuclei
@@ -1093,16 +1093,16 @@ subroutine compute_crit_pipek(criterion)
                                  + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,i))
 
         enddo
-      enddo  
+      enddo
     enddo
 
-    do i = 1, mo_num 
+    do i = 1, mo_num
       criterion = criterion + tmp_int(i,i)**2
     enddo
 
   enddo
-  
-  criterion = - criterion 
+
+  criterion = - criterion
 
   deallocate(tmp_int)
 
@@ -1114,7 +1114,7 @@ end
 ! \begin{align*}
 ! \mathcal{P} = \sum_{i=1}^n \sum_{A=1}^N \left[ <i|P_A|i> \right]^2
 ! \end{align*}
-! with 
+! with
 ! \begin{align*}
 ! <s|P_A|t> = \frac{1}{2} \sum_{\rho} \sum_{\mu \in A} \left[ c_{\rho}^{s*} S_{\rho \nu} c_{\mu}^{t} +c_{\mu}^{s*} S_{\mu \rho} c_{\rho}^t \right]
 ! \end{align*}
@@ -1123,7 +1123,7 @@ end
 subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the Pipek-Mezey localization criterion
   END_DOC
@@ -1132,18 +1132,18 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:),CS(:,:)
   integer                       :: i,j,k,tmp_i,tmp_j,tmp_k, a, b, mu ,rho
-  
+
   print*,''
   print*,'---criterion_PM---'
-  
+
   ! Allocation
   allocate(tmp_int(tmp_list_size, tmp_list_size),CS(mo_num,ao_num))
-  
+
   ! Initialization
   criterion = 0d0
 
   call dgemm('T','N',mo_num,ao_num,ao_num,1d0,mo_coef,size(mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
- 
+
   do a = 1, nucl_num ! loop over the nuclei
     tmp_int = 0d0
 
@@ -1151,7 +1151,7 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
         i = tmp_list(tmp_i)
         do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
           mu = nucl_aos(a,b)
-          
+
           tmp_int(tmp_i,tmp_i) = tmp_int(tmp_i,tmp_i) + 0.5d0 * (CS(i,mu) * mo_coef(mu,i) + mo_coef(mu,i) * CS(i,mu))
 
                                  !  (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
@@ -1165,8 +1165,8 @@ subroutine criterion_PM(tmp_list_size,tmp_list,criterion)
     enddo
 
   enddo
-  
-  criterion = - criterion 
+
+  criterion = - criterion
 
   deallocate(tmp_int,CS)
 
@@ -1180,11 +1180,11 @@ end
 subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the Pipek-Mezey localization criterion
   END_DOC
-  
+
   integer, intent(in)           :: tmp_list_size, tmp_list(tmp_list_size)
   double precision, intent(out) :: criterion
   double precision, allocatable :: tmp_int(:,:), CS(:,:), tmp_mo_coef(:,:), tmp_mo_coef2(:,:),tmp_accu(:,:),tmp_CS(:,:)
@@ -1193,7 +1193,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   print*,''
   print*,'---criterion_PM_v3---'
-  
+
   call wall_time(t1)
 
   ! Allocation
@@ -1208,16 +1208,16 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
     do j = 1, ao_num
 
       tmp_mo_coef(j,tmp_i) = mo_coef(j,i)
- 
+
     enddo
   enddo
 
   ! ao_overlap(ao_num,ao_num)
   ! mo_coef(ao_num,mo_num)
   call dgemm('T','N',tmp_list_size,ao_num,ao_num,1d0,tmp_mo_coef,size(tmp_mo_coef,1),ao_overlap,size(ao_overlap,1),0d0,CS,size(CS,1))
- 
+
   do a = 1, nucl_num ! loop over the nuclei
-  
+
     do j = 1, tmp_list_size
       do i = 1, tmp_list_size
         tmp_int(i,j) = 0d0
@@ -1239,7 +1239,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
     !enddo
 
     allocate(tmp_mo_coef2(nucl_n_aos(a),tmp_list_size),tmp_CS(tmp_list_size,nucl_n_aos(a)))
- 
+
     do tmp_i = 1, tmp_list_size
       do b = 1, nucl_n_aos(a)
         mu = nucl_aos(a,b)
@@ -1248,7 +1248,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
       enddo
     enddo
-    
+
     do b = 1, nucl_n_aos(a)
       mu = nucl_aos(a,b)
       do tmp_i = 1, tmp_list_size
@@ -1256,15 +1256,15 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
          tmp_CS(tmp_i,b) = CS(tmp_i,mu)
 
       enddo
-    enddo   
+    enddo
 
     call dgemm('N','N',tmp_list_size,tmp_list_size,nucl_n_aos(a),1d0,tmp_CS,size(tmp_CS,1),tmp_mo_coef2,size(tmp_mo_coef2,1),0d0,tmp_accu,size(tmp_accu,1))
- 
+
     ! Integrals
     do tmp_j = 1, tmp_list_size
       do tmp_i = 1, tmp_list_size
 
-        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))   
+        tmp_int(tmp_i,tmp_j) = 0.5d0 * (tmp_accu(tmp_i,tmp_j) + tmp_accu(tmp_j,tmp_i))
 
       enddo
     enddo
@@ -1278,7 +1278,7 @@ subroutine criterion_PM_v3(tmp_list_size,tmp_list,criterion)
 
   enddo
 
-  criterion = - criterion 
+  criterion = - criterion
 
   deallocate(tmp_int,CS,tmp_accu,tmp_mo_coef)
 
@@ -1477,14 +1477,14 @@ subroutine theta_FB(l, n, m_x, max_elem)
   !print*,idx_i,idx_j,max_elem
 
   max_elem = dabs(max_elem)
-  
+
   deallocate(cos4theta, sin4theta)
   deallocate(A,B,beta,gamma)
-  
+
 end
 
 subroutine theta_PM(l, n, m_x, max_elem)
-  
+
   include 'pi.h'
 
   BEGIN_DOC
@@ -1507,18 +1507,18 @@ subroutine theta_PM(l, n, m_x, max_elem)
 
     ! Loop over the MOs of the a given mo_class to compute <i|P_a|j>
     do tmp_j = 1, n
-      j = l(tmp_j) 
+      j = l(tmp_j)
       do tmp_i = 1, n
          i = l(tmp_i)
         do rho = 1, ao_num ! loop over all the AOs
           do b = 1, nucl_n_aos(a) ! loop over the number of AOs which belongs to the nuclei a
-            mu = nucl_aos(a,b) ! AO centered on atom a 
+            mu = nucl_aos(a,b) ! AO centered on atom a
 
             Pa(tmp_i,tmp_j) = Pa(tmp_i,tmp_j) + 0.5d0 * (mo_coef(rho,i) * ao_overlap(rho,mu) * mo_coef(mu,j) &
                                    + mo_coef(mu,i) * ao_overlap(mu,rho) * mo_coef(rho,j))
 
           enddo
-        enddo  
+        enddo
       enddo
     enddo
 
@@ -1528,7 +1528,7 @@ subroutine theta_PM(l, n, m_x, max_elem)
         Aij(i,j) = Aij(i,j) + Pa(i,j)**2 - 0.25d0 * (Pa(i,i) - Pa(j,j))**2
       enddo
     enddo
-    
+
     ! B
     do j = 1, n
       do i = 1, n
@@ -1581,7 +1581,7 @@ end
 
 ! Spatial extent
 
-! The spatial extent of an orbital $i$ is computed as 
+! The spatial extent of an orbital $i$ is computed as
 ! \begin{align*}
 ! \sum_{\lambda=x,y,z}\sqrt{<i|\lambda^2|i> - <i|\lambda|i>^2}
 ! \end{align*}
@@ -1596,14 +1596,14 @@ subroutine compute_spatial_extent(spatial_extent)
   BEGIN_DOC
   ! Compute the spatial extent of the MOs
   END_DOC
- 
+
   double precision, intent(out) :: spatial_extent(mo_num)
   double precision              :: average_core, average_act, average_inact, average_virt
   double precision              :: std_var_core, std_var_act, std_var_inact, std_var_virt
   integer                       :: i,j,k,l
 
   spatial_extent = 0d0
-  
+
   do i = 1, mo_num
     spatial_extent(i) = mo_spread_x(i,i) - mo_dipole_x(i,i)**2
   enddo
@@ -1631,7 +1631,7 @@ subroutine compute_spatial_extent(spatial_extent)
     call compute_average_sp_ext(spatial_extent, list_act, dim_list_act_orb, average_act)
     call compute_std_var_sp_ext(spatial_extent, list_act, dim_list_act_orb, average_act, std_var_act)
   endif
-  
+
   average_inact = 0d0
   std_var_inact = 0d0
   if (dim_list_inact_orb >= 2) then
@@ -1661,12 +1661,12 @@ subroutine compute_spatial_extent(spatial_extent)
   print*, 'virt:', dim_list_virt_orb
   print*, 'mo_num:', mo_num
   print*,''
-   
+
   print*,'-- Core MOs --'
   print*,'Average:', average_core
   print*,'Std var:', std_var_core
   print*,''
-  
+
   print*,'-- Active MOs --'
   print*,'Average:', average_act
   print*,'Std var:', std_var_act
@@ -1692,7 +1692,7 @@ end
 subroutine compute_average_sp_ext(spatial_extent, list, list_size, average)
 
   implicit none
-  
+
   BEGIN_DOC
   ! Compute the average spatial extent of the MOs
   END_DOC
@@ -1701,7 +1701,7 @@ subroutine compute_average_sp_ext(spatial_extent, list, list_size, average)
   double precision, intent(in) :: spatial_extent(mo_num)
   double precision, intent(out) :: average
   integer :: i, tmp_i
-  
+
   average = 0d0
   do tmp_i = 1, list_size
     i = list(tmp_i)
@@ -1732,7 +1732,7 @@ subroutine compute_std_var_sp_ext(spatial_extent, list, list_size, average, std_
     i = list(tmp_i)
     std_var = std_var + (spatial_extent(i) - average)**2
   enddo
-  
+
   std_var = dsqrt(1d0/DBLE(list_size) * std_var)
 
 end
@@ -1779,7 +1779,7 @@ subroutine apply_pre_rotation()
         enddo
       enddo
     endif
-    
+
     ! Pre rotation for active MOs
     if (dim_list_act_orb >= 2) then
       do tmp_j = 1, dim_list_act_orb
@@ -1796,7 +1796,7 @@ subroutine apply_pre_rotation()
         enddo
       enddo
     endif
-  
+
     ! Pre rotation for inactive MOs
     if (dim_list_inact_orb >= 2) then
       do tmp_j = 1, dim_list_inact_orb
@@ -1813,7 +1813,7 @@ subroutine apply_pre_rotation()
         enddo
       enddo
     endif
-  
+
     ! Pre rotation for virtual MOs
     if (dim_list_virt_orb >= 2) then
       do tmp_j = 1, dim_list_virt_orb
@@ -1830,21 +1830,21 @@ subroutine apply_pre_rotation()
         enddo
       enddo
     endif
-  
+
     ! Nothing for deleted ones
-  
+
     ! Compute pre rotation matrix from pre_rot
     call rotation_matrix(pre_rot,mo_num,R,mo_num,mo_num,info,enforce_step_cancellation)
-   
+
     if (enforce_step_cancellation) then
       print*, 'Cancellation of the pre rotation, too big error in the rotation matrix'
       print*, 'Reduce the angle for the pre rotation, abort'
       call abort
     endif
-  
+
     ! New Mos (we don't car eabout the previous MOs prev_mos)
     call apply_mo_rotation(R,prev_mos)
-  
+
     ! Update the things related to mo_coef
     TOUCH mo_coef
     call save_mos
@@ -1885,19 +1885,19 @@ subroutine x_tmp_orb_loc_v2(tmp_n, tmp_list_size, tmp_list, v_grad, H,tmp_x, tmp
   ! min element in the hessian
   if (lambda < 0d0) then
     lambda = -lambda + 1d-6
-  endif  
-  
+  endif
+
   print*, 'lambda', lambda
- 
+
   ! Good
   do tmp_k = 1, tmp_n
     if (ABS(H(tmp_k,tmp_k)) > 1d-6) then
        tmp_x(tmp_k) = - 1d0/(ABS(H(tmp_k,tmp_k))+lambda) * v_grad(tmp_k)!(-v_grad(tmp_k))
-      !x(tmp_k) = - 1d0/(ABS(H(tmp_k,tmp_k))+lambda) * (-v_grad(tmp_k)) 
+      !x(tmp_k) = - 1d0/(ABS(H(tmp_k,tmp_k))+lambda) * (-v_grad(tmp_k))
     endif
   enddo
 
-  ! 1D tmp -> 2D tmp 
+  ! 1D tmp -> 2D tmp
   tmp_m_x = 0d0
   do tmp_j = 1, tmp_list_size - 1
     do tmp_i = tmp_j + 1, tmp_list_size
@@ -1909,7 +1909,7 @@ subroutine x_tmp_orb_loc_v2(tmp_n, tmp_list_size, tmp_list, v_grad, H,tmp_x, tmp
   ! Antisym
   do tmp_i = 1, tmp_list_size - 1
     do tmp_j = tmp_i + 1, tmp_list_size
-      tmp_m_x(tmp_i,tmp_j) = - tmp_m_x(tmp_j,tmp_i) 
+      tmp_m_x(tmp_i,tmp_j) = - tmp_m_x(tmp_j,tmp_i)
     enddo
   enddo
 
@@ -1947,16 +1947,17 @@ subroutine ao_to_mo_no_sym(A_ao,LDA_ao,A_mo,LDA_mo)
 end
 
 subroutine run_sort_by_fock_energies()
-  
+
   implicit none
-  
+
   BEGIN_DOC
   ! Saves the current MOs ordered by diagonal element of the Fock operator.
   END_DOC
-  
+
   integer                        :: i,j,k,l,tmp_i,tmp_k,tmp_list_size
   integer, allocatable           :: iorder(:)
-  double precision, allocatable  :: fock_energies_tmp(:), tmp_mo_coef(:,:), tmp_list(:)
+  double precision, allocatable  :: fock_energies_tmp(:), tmp_mo_coef(:,:)
+  integer, allocatable           :: tmp_list(:)
 
 !  allocate(iorder(mo_num), fock_energies_tmp(mo_num), new_mo_coef(ao_num, mo_num))
 !
@@ -2006,7 +2007,7 @@ subroutine run_sort_by_fock_energies()
       else
         tmp_list = list_virt
       endif
-      print*,'MO class: ',trim(mo_class(tmp_list(1)))
+      print*,'MO class: ', trim(mo_class(tmp_list(1)))
 
       allocate(iorder(tmp_list_size), fock_energies_tmp(tmp_list_size), tmp_mo_coef(ao_num,tmp_list_size))
       !print*,'MOs before sorting them by f_p^p energies:'
@@ -2016,9 +2017,9 @@ subroutine run_sort_by_fock_energies()
         iorder(i) = i
         !print*, tmp_i, fock_energies_tmp(i)
       enddo
-  
+
       call dsort(fock_energies_tmp, iorder, tmp_list_size)
-      
+
       print*,'MOs after sorting them by f_p^p energies:'
       do i = 1, tmp_list_size
         k = iorder(i)
@@ -2042,7 +2043,7 @@ subroutine run_sort_by_fock_energies()
         print*,'HF energy:', HF_energy
       endif
       print*,''
-      
+
       deallocate(iorder, fock_energies_tmp, tmp_list, tmp_mo_coef)
     endif
 
@@ -2050,5 +2051,5 @@ subroutine run_sort_by_fock_energies()
 
   touch mo_coef
   call save_mos
-  
+
 end
