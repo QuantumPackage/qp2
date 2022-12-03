@@ -584,8 +584,8 @@ use bitmasks
     Jcfg  = psi_configuration(:,:,idxI)
 
     do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+      Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
+      Idomo(i) = iand(act_bitmask(i,1),psi_configuration(i,2,idxI))
     enddo
 
     ! find out all pq holes possible
@@ -638,8 +638,8 @@ use bitmasks
 
     ! Now find the allowed (p,q) excitations
     do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+      Isomo(i) = iand(reunion_of_act_virt_bitmask(i,1),psi_configuration(i,1,idxI))
+      Idomo(i) = iand(reunion_of_act_virt_bitmask(i,2),psi_configuration(i,2,idxI))
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
@@ -659,21 +659,24 @@ use bitmasks
         Jsomo(iint) = IBCLR(Jsomo(iint),ipos)
       else if(holetype(i) == 2)then
         Jdomo(iint) = IBCLR(Jdomo(iint),ipos)
+        Jsomo(iint) = IBSET(Jsomo(iint),ipos)
       endif
 
       do j = 1,nvmos
         qq  = listvmos(j)
+        if(pp.eq.qq) cycle
         jint = shiftr(qq-1,bit_kind_shift) + 1
         jpos = qq-shiftl((iint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
           Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
           Jdomo(jint) = IBSET(Jdomo(jint),jpos)
+          Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
         endif
 
         do ii=1, N_int
-          Jcfg(i,1) = Jsomo(i)
-          Jcfg(i,2) = Jdomo(i)
+          Jcfg(ii,1) = Jsomo(ii)
+          Jcfg(ii,2) = Jdomo(ii)
         enddo
 
         call bitstring_to_list(Jcfg,listall,nelall,N_int)
@@ -685,6 +688,7 @@ use bitmasks
             Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
           else if(vmotype(j) == 2)then
             Jdomo(jint) = IBCLR(Jdomo(jint),jpos)
+            Jsomo(jint) = IBSET(Jsomo(jint),jpos)
           endif
           cycle
         endif
@@ -730,11 +734,14 @@ use bitmasks
             Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
           else if(vmotype(j) == 2)then
             Jdomo(jint) = IBCLR(Jdomo(jint),jpos)
+            Jsomo(jint) = IBSET(Jsomo(jint),jpos)
           endif
           cycle
         endif
 
         pqExistsQ = .FALSE.
+
+        !print *, " ndiffSOMO=",ndiffSOMO, " ndiffDOMO=", ndiffDOMO, " nxordiffSOMODOMO=",nxordiffSOMODOMO, " p=",pp," q=",qq
 
         if(.NOT. pqExistsQ) then
           tableUniqueAlphas(pp,qq) = .TRUE.
@@ -745,16 +752,18 @@ use bitmasks
           Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
           Jdomo(jint) = IBCLR(Jdomo(jint),jpos)
+          Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         endif
       end do
       if(holetype(i) == 1)then
         Jsomo(iint) = IBSET(Jsomo(iint),ipos)
       else if(holetype(i) == 2)then
         Jdomo(iint) = IBSET(Jdomo(iint),ipos)
+        Jsomo(iint) = IBCLR(Jsomo(iint),ipos)
       endif
     end do
 
-    !print *,tableUniqueAlphas(:,:)
+    print *,tableUniqueAlphas(:,:)
 
     ! prune list of alphas
     do i=1, N_int
@@ -763,6 +772,7 @@ use bitmasks
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
+    print *, " Isomo=",Isomo(1), " Idomo=", Idomo(1)
 
     NalphaIcfg = 0
     do i = 1, nholes
@@ -791,21 +801,22 @@ use bitmasks
             Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
           else if(vmotype(j) == 2)then
             Jdomo(jint) = IBCLR(Jdomo(jint),jpos)
+            Jsomo(jint) = IBSET(Jsomo(jint),jpos)
           endif
           cycle
         endif
         if(tableUniqueAlphas(pp,qq)) then
 
         do ii=1, N_int
-          Jcfg(i,1) = Jsomo(i)
-          Jcfg(i,2) = Jdomo(i)
+          Jcfg(ii,1) = Jsomo(ii)
+          Jcfg(ii,2) = Jdomo(ii)
         enddo
 
           call bitstring_to_list(Jcfg,listall,nelall,N_int)
           Nsomo_J = nelall
 
           if(Nsomo_J .ge. NSOMOMin) then
-            !print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
+            print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
             NalphaIcfg += 1
             alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
             if(n_core_orb .le. 63)then
@@ -843,8 +854,8 @@ use bitmasks
     ! Check if this Icfg has been previously generated as a mono
     ppExistsQ = .False.
     do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+      Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
+      Idomo(i) = iand(act_bitmask(i,1),psi_configuration(i,2,idxI))
     enddo
 
     kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
@@ -1044,8 +1055,8 @@ END_PROVIDER
         endif
 
         do ii=1, N_int
-          Jcfg(i,1) = Jsomo(i)
-          Jcfg(i,2) = Jdomo(i)
+          Jcfg(ii,1) = Jsomo(ii)
+          Jcfg(ii,2) = Jdomo(ii)
         enddo
 
         call bitstring_to_list(Jcfg,listall,nelall,N_int)
