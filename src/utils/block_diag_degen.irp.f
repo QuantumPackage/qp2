@@ -155,7 +155,7 @@ end
 
 ! ---
 
-subroutine give_degen_full_list(A,n,thr,list_degen,n_degen_list)
+subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
 
   BEGIN_DOC
   ! you enter with an array A(n) and spits out all the elements degenerated up to thr

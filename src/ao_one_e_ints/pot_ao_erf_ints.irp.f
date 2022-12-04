@@ -575,17 +575,17 @@ subroutine give_polynomial_mult_center_one_e_erf_opt(A_center, B_center, power_A
   accu = 0.d0
   ASSERT (n_pt_in > 1)
 
-  R1x(0)  = (P_center(1) - A_center(1))
-  R1x(1)  = 0.d0
-  R1x(2)  = -(P_center(1) - C_center(1))* p_new
+  R1x(0) = (P_center(1) - A_center(1))
+  R1x(1) = 0.d0
+  R1x(2) = -(P_center(1) - C_center(1))* p_new
   ! R1x = (P_x - A_x) - (P_x - C_x) ( t * mu/sqrt(p+mu^2) )^2
-  R1xp(0)  = (P_center(1) - B_center(1))
-  R1xp(1)  = 0.d0
-  R1xp(2)  =-(P_center(1) - C_center(1))* p_new
+  R1xp(0) = (P_center(1) - B_center(1))
+  R1xp(1) = 0.d0
+  R1xp(2) =-(P_center(1) - C_center(1))* p_new
   !R1xp = (P_x - B_x) - (P_x - C_x) ( t * mu/sqrt(p+mu^2) )^2
-  R2x(0)  =  p_inv_2
-  R2x(1)  = 0.d0
-  R2x(2)  = -p_inv_2 * p_new
+  R2x(0) =  p_inv_2
+  R2x(1) = 0.d0
+  R2x(2) = -p_inv_2 * p_new
   !R2x  = 0.5 / p - 0.5/p ( t * mu/sqrt(p+mu^2) )^2
 
   do i = 0, n_pt_in
@@ -609,13 +609,13 @@ subroutine give_polynomial_mult_center_one_e_erf_opt(A_center, B_center, power_A
     return
   endif
 
-  R1x(0)  = (P_center(2) - A_center(2))
-  R1x(1)  = 0.d0
-  R1x(2)  = -(P_center(2) - C_center(2))* p_new
+  R1x(0) = (P_center(2) - A_center(2))
+  R1x(1) = 0.d0
+  R1x(2) = -(P_center(2) - C_center(2))* p_new
   ! R1x = (P_x - A_x) - (P_x - C_x) ( t * mu/sqrt(p+mu^2) )^2
-  R1xp(0)  = (P_center(2) - B_center(2))
-  R1xp(1)  = 0.d0
-  R1xp(2)  =-(P_center(2) - C_center(2))* p_new
+  R1xp(0) = (P_center(2) - B_center(2))
+  R1xp(1) = 0.d0
+  R1xp(2) =-(P_center(2) - C_center(2))* p_new
   !R1xp = (P_x - B_x) - (P_x - C_x) ( t * mu/sqrt(p+mu^2) )^2
   a_y = power_A(2)
   b_y = power_B(2)
@@ -628,13 +628,13 @@ subroutine give_polynomial_mult_center_one_e_erf_opt(A_center, B_center, power_A
     return
   endif
 
-  R1x(0)  = (P_center(3) - A_center(3))
-  R1x(1)  = 0.d0
-  R1x(2)  = -(P_center(3) - C_center(3)) * p_new
+  R1x(0) = (P_center(3) - A_center(3))
+  R1x(1) = 0.d0
+  R1x(2) = -(P_center(3) - C_center(3)) * p_new
   ! R1x = (P_x - A_x) - (P_x - C_x) ( t * mu/sqrt(p+mu^2) )^2
-  R1xp(0)  = (P_center(3) - B_center(3))
-  R1xp(1)  = 0.d0
-  R1xp(2)  =-(P_center(3) - C_center(3)) * p_new
+  R1xp(0) = (P_center(3) - B_center(3))
+  R1xp(1) = 0.d0
+  R1xp(2) =-(P_center(3) - C_center(3)) * p_new
   !R2x  = 0.5 / p - 0.5/p ( t * mu/sqrt(p+mu^2) )^2
   a_z = power_A(3)
   b_z = power_B(3)
@@ -663,16 +663,15 @@ end subroutine give_polynomial_mult_center_one_e_erf_opt
 
 ! ---
 
+subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
 
-
-subroutine give_polynomial_mult_center_one_e_erf(A_center,B_center,alpha,beta,&
-      power_A,power_B,C_center,n_pt_in,d,n_pt_out,mu_in)
   BEGIN_DOC
   ! Returns the explicit polynomial in terms of the $t$ variable of the
   ! following polynomial:
   !
   ! $I_{x1}(a_x, d_x,p,q) \times I_{x1}(a_y, d_y,p,q) \times I_{x1}(a_z, d_z,p,q)$.
   END_DOC
+
   implicit none
   integer, intent(in)            :: n_pt_in
   integer,intent(out)            :: n_pt_out

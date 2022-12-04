@@ -28,7 +28,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,         &
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_grad1u2_grad2u2_j1b2)
@@ -42,7 +42,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
       do j = i, ao_num
 
         tmp = 0.d0
-        do i_fit = 1, n_max_fit_slat
+        do i_fit = 1, ng_fit_jast
 
           expo_fit = expo_gauss_1_erf_x_2(i_fit)
           coef_fit = coef_gauss_1_erf_x_2(i_fit)
@@ -120,7 +120,7 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
@@ -134,7 +134,7 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
       do j = i, ao_num
 
         tmp = 0.d0
-        do i_fit = 1, n_max_fit_slat
+        do i_fit = 1, ng_fit_jast
 
           expo_fit = expo_gauss_j_mu_x_2(i_fit)
           coef_fit = coef_gauss_j_mu_x_2(i_fit)
@@ -213,7 +213,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_p
  !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,     & 
  !$OMP          tmp_x, tmp_y, tmp_z)                                & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,       &
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_u_grad1u_x_j1b2)
@@ -230,7 +230,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_p
         tmp_x = 0.d0
         tmp_y = 0.d0
         tmp_z = 0.d0
-        do i_fit = 1, n_max_fit_slat
+        do i_fit = 1, ng_fit_jast
 
           expo_fit = expo_gauss_j_mu_1_erf(i_fit)
           coef_fit = coef_gauss_j_mu_1_erf(i_fit)
@@ -330,7 +330,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
  !$OMP          coef_fit, expo_fit, int_fit, tmp, alpha_1s, dist,   &
  !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp)     & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,       &
  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
  !$OMP          List_all_comb_b3_cent, int2_u_grad1u_j1b2)
@@ -343,7 +343,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
         r(3) = final_grid_points(3,ipoint)
 
         tmp = 0.d0
-        do i_fit = 1, n_max_fit_slat
+        do i_fit = 1, ng_fit_jast
 
           expo_fit = expo_gauss_j_mu_1_erf(i_fit)
           coef_fit = coef_gauss_j_mu_1_erf(i_fit)

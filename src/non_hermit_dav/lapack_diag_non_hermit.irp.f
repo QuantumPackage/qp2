@@ -1269,7 +1269,7 @@ end subroutine impose_orthog_svd
 
 ! ---
 
-subroutine impose_orthog_svd_overlap(n, m, C,overlap)
+subroutine impose_orthog_svd_overlap(n, m, C, overlap)
 
   implicit none
 
@@ -1279,27 +1279,27 @@ subroutine impose_orthog_svd_overlap(n, m, C,overlap)
 
   integer                         :: i, j, num_linear_dependencies
   double precision                :: threshold
-  double precision, allocatable   :: S(:,:), tmp(:,:),Stmp(:,:)
+  double precision, allocatable   :: S(:,:), tmp(:,:), Stmp(:,:)
   double precision, allocatable   :: U(:,:), Vt(:,:), D(:)
 
   print *, ' apply SVD to orthogonalize vectors'
 
   ! ---
 
-  allocate(S(m,m),Stmp(n,m))
-
   ! S = C.T x overlap x C
-  call dgemm( 'N', 'N', n, m, n, 1.d0      &
+  allocate(S(m,m), Stmp(n,m))
+  call dgemm( 'N', 'N', n, m, n, 1.d0                  &
             , overlap, size(overlap, 1), C, size(C, 1) &
             , 0.d0, Stmp, size(Stmp, 1) )
-  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+  call dgemm( 'T', 'N', m, m, n, 1.d0            &
             , C, size(C, 1), Stmp, size(Stmp, 1) &
             , 0.d0, S, size(S, 1) )
+  deallocate(Stmp)
 
-! print *, ' eigenvec overlap bef SVD: '
-! do i = 1, m
-!   write(*, '(1000(F16.10,X))') S(i,:)
-! enddo
+  print *, ' eigenvec overlap bef SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
 
   ! ---
  
@@ -1348,23 +1348,23 @@ subroutine impose_orthog_svd_overlap(n, m, C,overlap)
 
   ! ---
 
-  allocate(S(m,m))
-
-  ! S = C.T x C
-  call dgemm( 'T', 'N', m, m, n, 1.d0      &
-            , C, size(C, 1), C, size(C, 1) &
+  ! S = C.T x overlap x C
+  allocate(S(m,m), Stmp(n,m))
+  call dgemm( 'N', 'N', n, m, n, 1.d0                  &
+            , overlap, size(overlap, 1), C, size(C, 1) &
+            , 0.d0, Stmp, size(Stmp, 1) )
+  call dgemm( 'T', 'N', m, m, n, 1.d0            &
+            , C, size(C, 1), Stmp, size(Stmp, 1) &
             , 0.d0, S, size(S, 1) )
+  deallocate(Stmp)
 
-! print *, ' eigenvec overlap aft SVD: '
-! do i = 1, m
-!   write(*, '(1000(F16.10,X))') S(i,:)
-! enddo
-
+  print *, ' eigenvec overlap aft SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
   deallocate(S)
 
-  ! ---
-
-end subroutine impose_orthog_svd
+end subroutine impose_orthog_svd_overlap
 
 ! ---
 
@@ -2780,8 +2780,6 @@ end subroutine check_weighted_biorthog_binormalize
 
 ! ---
 
-
-
 subroutine impose_weighted_biorthog_svd(n, m, overlap, L, R)
 
   implicit none
@@ -2894,8 +2892,7 @@ subroutine impose_weighted_biorthog_svd(n, m, overlap, L, R)
   enddo
   deallocate(S)
 
-  ! ---
-
+  return
 end subroutine impose_weighted_biorthog_svd
 
 ! ---

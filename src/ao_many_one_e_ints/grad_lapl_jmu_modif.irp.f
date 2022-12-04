@@ -248,7 +248,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b)
@@ -263,7 +263,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
       do j = i, ao_num
 
         tmp = 0.d0
-        do i_fit = 1, n_max_fit_slat
+        do i_fit = 1, ng_fit_jast
 
           expo_fit = expo_gauss_j_mu_x(i_fit)
           coef_fit = coef_gauss_j_mu_x(i_fit)

@@ -257,11 +257,11 @@ subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
         coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
 
         ! First term = (x-Ax)**(ax+1)
-        integral =  NAI_pol_mult_erf(A_center, B_center, power_xA, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+        integral = NAI_pol_mult_erf(A_center, B_center, power_xA, power_B, alpha, beta, C_center, n_pt_in, mu_in)
         ints(m) += integral * coef
 
         ! Second term = Ax * (x-Ax)**(ax)
-        integral =  NAI_pol_mult_erf(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+        integral = NAI_pol_mult_erf(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in, mu_in)
         ints(m) += A_center(m) * integral * coef
 
       enddo
@@ -812,8 +812,6 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_z(i_ao, j_ao, beta, B_cen
   enddo
 
 end function NAI_pol_x_mult_erf_ao_with1s_z
-
-! ---
 
 ! ---
 

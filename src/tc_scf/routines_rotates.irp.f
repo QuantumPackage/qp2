@@ -96,6 +96,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 !  n_degen = ilast - ifirst +1
 
     n_degen = list_degen(i,0)
+    if(n_degen .eq. 1) cycle
 
     allocate(stmp(n_degen,n_degen), smat2(n_degen,n_degen))
     allocate(mo_r_coef_tmp(ao_num,n_degen), mo_l_coef_tmp(ao_num,n_degen), mo_l_coef_new(ao_num,n_degen))
@@ -221,41 +222,57 @@ subroutine build_s_matrix(m, n, C1, C2, overlap, smat)
   double precision, intent(in)  :: C1(m,n), C2(m,n), overlap(m,m)
   double precision, intent(out) :: smat(n,n)
   integer                       :: i, j, k, l
+  double precision, allocatable :: S_tmp(:,:)
 
-  smat = 0.D0
-  do i = 1, n
-    do j = 1, n
-      do k = 1, m
-        do l = 1, m
-          smat(i,j) += C1(k,i) * overlap(l,k) * C2(l,j) 
-        enddo
-      enddo
-    enddo
-  enddo
+  smat = 0.d0
+
+  !do i = 1, n
+  !  do j = 1, n
+  !    do k = 1, m
+  !      do l = 1, m
+  !        smat(i,j) += C1(k,i) * overlap(l,k) * C2(l,j) 
+  !      enddo
+  !    enddo
+  !  enddo
+  !enddo
+
+  ! C1.T x overlap
+  allocate(S_tmp(n,m))
+  call dgemm( 'T', 'N', n, m, m, 1.d0                    &
+            , C1, size(C1, 1), overlap, size(overlap, 1) &
+            , 0.d0, S_tmp, size(S_tmp, 1) )
+  ! C1.T x overlap x C2
+  call dgemm( 'N', 'N', n, n, m, 1.d0                     &
+            , S_tmp, size(S_tmp, 1), C2(1,1), size(C2, 1) &
+            , 0.d0, smat, size(smat, 1) )
+  deallocate(S_tmp)
 
 end
 
 ! ---
 
-subroutine orthog_functions(m,n,coef,overlap)
- implicit none
- integer, intent(in) :: m,n
- double precision, intent(in)    :: overlap(m,m)
- double precision, intent(inout) :: coef(m,n)
- double precision, allocatable :: stmp(:,:)
- integer :: j
- allocate(stmp(n,n))
-  call build_s_matrix(m,n,coef,coef,overlap,stmp)
+subroutine orthog_functions(m, n, coef, overlap)
+
+  implicit none
+
+  integer,          intent(in)    :: m, n
+  double precision, intent(in)    :: overlap(m,m)
+  double precision, intent(inout) :: coef(m,n)
+  double precision, allocatable   :: stmp(:,:)
+  integer                         :: j
+
+  allocate(stmp(n,n))
+  call build_s_matrix(m, n, coef, coef, overlap, stmp)
 ! print*,'overlap before'
 ! do j = 1, n
 !  write(*,'(100(F16.10,X))')stmp(:,j)
 ! enddo
-  call impose_orthog_svd_overlap(m, n, coef,overlap)
-  call build_s_matrix(m,n,coef,coef,overlap,stmp)
+  call impose_orthog_svd_overlap(m, n, coef, overlap)
+  call build_s_matrix(m, n, coef, coef, overlap, stmp)
   do j = 1, n
-   coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
+    coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
   enddo
-  call build_s_matrix(m,n,coef,coef,overlap,stmp)
+  call build_s_matrix(m, n, coef, coef, overlap, stmp)
 
  !print*,'overlap after'
  !do j = 1, n

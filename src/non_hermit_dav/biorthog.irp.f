@@ -328,7 +328,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !                  track & sort the real eigenvalues 
 
   n_good = 0
-  thr    = 1.d-5
+  thr    = 1.d-3
   do i = 1, n
     print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
