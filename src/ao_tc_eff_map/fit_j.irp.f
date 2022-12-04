@@ -169,7 +169,7 @@ END_PROVIDER
 
   tmp = 0.25d0 / (mu_erf * mu_erf)
   do i = 1, ng_fit_jast
-    coef_gauss_j_mu_x_2(i) = tmp * coef_fit_slat_gauss(i) 
+    coef_gauss_j_mu_x_2(i) = tmp * coef_gauss_j_mu_x_2(i)
   enddo
 
 END_PROVIDER 
