@@ -157,32 +157,57 @@ end
 
   implicit none
   integer          :: i
-  double precision :: expos(ng_fit_jast), alpha, beta
+  double precision :: expos(ng_fit_jast), alpha, beta, tmp
 
   if(ng_fit_jast .eq. 1) then
 
-    coef_gauss_j_mu_x = (/ 0.85345277d0 /)
-    expo_gauss_j_mu_x = (/ 6.23519457d0 /)
+    coef_gauss_1_erf_x_2 = (/ 0.85345277d0 /)
+    expo_gauss_1_erf_x_2 = (/ 6.23519457d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
 
   elseif(ng_fit_jast .eq. 2) then
 
-    coef_gauss_j_mu_x = (/ 0.31030624d0 , 0.64364964d0 /)
-    expo_gauss_j_mu_x = (/ 55.39184787d0, 3.92151407d0 /)
+    coef_gauss_1_erf_x_2 = (/ 0.31030624d0 , 0.64364964d0 /)
+    expo_gauss_1_erf_x_2 = (/ 55.39184787d0, 3.92151407d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
 
   elseif(ng_fit_jast .eq. 3) then
 
-    coef_gauss_j_mu_x = (/ 0.33206082d0 , 0.52347449d0, 0.12605012d0   /)
-    expo_gauss_j_mu_x = (/ 19.90272209d0, 3.2671671d0 , 336.47320445d0 /)
+    coef_gauss_1_erf_x_2 = (/ 0.33206082d0 , 0.52347449d0, 0.12605012d0   /)
+    expo_gauss_1_erf_x_2 = (/ 19.90272209d0, 3.2671671d0 , 336.47320445d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
 
   elseif(ng_fit_jast .eq. 5) then
 
-    coef_gauss_j_mu_x = (/ 0.02956716d0, 0.17025555d0, 0.32774114d0, 0.39034764d0, 0.07822781d0 /)
-    expo_gauss_j_mu_x = (/ 6467.28126d0, 46.9071990d0, 9.09617721d0, 2.76883328d0, 360.367093d0 /)
+    coef_gauss_1_erf_x_2 = (/ 0.02956716d0, 0.17025555d0, 0.32774114d0, 0.39034764d0, 0.07822781d0 /)
+    expo_gauss_1_erf_x_2 = (/ 6467.28126d0, 46.9071990d0, 9.09617721d0, 2.76883328d0, 360.367093d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
 
   elseif(ng_fit_jast .eq. 6) then
 
-    coef_gauss_j_mu_x = (/ 0.18331042d0  , 0.10971118d0  , 0.29949169d0  , 0.34853132d0  , 0.0394275d0   , 0.01874444d0   /)
-    expo_gauss_j_mu_x = (/ 2.54293498d+01, 1.40317872d+02, 7.14630801d+00, 2.65517675d+00, 1.45142619d+03, 1.00000000d+04 /)
+    coef_gauss_1_erf_x_2 = (/ 0.18331042d0  , 0.10971118d0  , 0.29949169d0  , 0.34853132d0  , 0.0394275d0   , 0.01874444d0   /)
+    expo_gauss_1_erf_x_2 = (/ 2.54293498d+01, 1.40317872d+02, 7.14630801d+00, 2.65517675d+00, 1.45142619d+03, 1.00000000d+04 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
 
   elseif(ng_fit_jast .eq. 20) then
 
@@ -202,7 +227,6 @@ end
     stop
 
   endif
-
 
 END_PROVIDER 
 
