@@ -402,13 +402,18 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     ##########################################
 
     with h5py.File(qph5path,'r') as qph5:
-        # we don't have separate kinetic, nuc-elec, pseudo 1e ints, so just combine in nuc-elec and set rest to zero
-        mono_ints_tot = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
-        for i in range(kpt_num):
-            mono_ints_tot[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
         ovlp_ao_reim = make_reim_identity_kblocks(kpt_num,ao_num_per_kpt,ao_num_per_kpt)
+        ne_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
         kin_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
-        ne_ao_reim = mono_ints_tot
+        try:
+            #TODO: ensure pseudo is included in nuc-elec term?
+            for i in range(kpt_num):
+                ne_ao_reim[i] = qph5[f'Hamiltonian/H1_nuc_kp{i}'][()]
+                kin_ao_reim[i] = qph5[f'Hamiltonian/H1_kinetic_kp{i}'][()]
+        except KeyError:
+            # QE/pyscf doesn't have separate kinetic, nuc-elec, pseudo 1e ints, so just combine in nuc-elec and set rest to zero
+            for i in range(kpt_num):
+                ne_ao_reim[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
 
         ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
         ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
