@@ -69,9 +69,9 @@ END_DOC
     if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
 
       ! Store Fock and error matrices at each iteration
+      index_dim_DIIS = mod(dim_DIIS-1,max_dim_DIIS)+1
       do j=1,ao_num
         do i=1,ao_num
-          index_dim_DIIS = mod(dim_DIIS-1,max_dim_DIIS)+1
           Fock_matrix_DIIS (i,j,index_dim_DIIS) = Fock_matrix_AO(i,j)
           error_matrix_DIIS(i,j,index_dim_DIIS) = FPS_SPF_matrix_AO(i,j)
         enddo
