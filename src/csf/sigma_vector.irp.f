@@ -858,7 +858,6 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   real*8, external  :: mo_two_e_integral
   real*8            :: hpp
   real*8            :: meCC
-  real*8            :: ecore
   real*8            :: core_act_contrib
 
   !PROVIDE h_core_ri
@@ -869,7 +868,6 @@ subroutine calculate_preconditioner_cfg(diag_energies)
   !print *,"Core energy=",core_energy," nucler rep=",nuclear_repulsion, " n_core_orb=",n_core_orb," n_act_orb=",n_act_orb," mo_num=",mo_num
 
   ! calculate core energy
-  !call get_core_energy(ecore)
   diag_energies = core_energy - nuclear_repulsion
 
   ! calculate the core energy
