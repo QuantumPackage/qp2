@@ -1,3 +1,5 @@
+! ---
+
  BEGIN_PROVIDER [ double precision, fock_tc_reigvec_mo, (mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, fock_tc_leigvec_mo, (mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, eigval_fock_tc_mo, (mo_num)]
@@ -9,31 +11,49 @@
 
   implicit none
   integer                       :: n_real_tc 
-  integer                       :: i, k, l
+  integer                       :: i, j, k, l
   double precision              :: accu_d, accu_nd, accu_tmp
   double precision              :: thr_d, thr_nd
   double precision              :: norm
   double precision, allocatable :: eigval_right_tmp(:)
+  double precision, allocatable :: F_tmp(:,:)
 
   thr_d  = 1d-6
   thr_nd = 1d-6
 
-  allocate( eigval_right_tmp(mo_num) )
+  allocate( eigval_right_tmp(mo_num), F_tmp(mo_num,mo_num) )
 
   PROVIDE Fock_matrix_tc_mo_tot
 
-  call non_hrmt_bieig( mo_num, Fock_matrix_tc_mo_tot, thr_d, thr_nd &
-                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo       & 
+  do i = 1, mo_num
+    do j = 1, mo_num
+      F_tmp(j,i) = Fock_matrix_tc_mo_tot(j,i)
+    enddo
+  enddo
+  ! insert level shift here
+  do i = elec_beta_num+1, elec_alpha_num
+    F_tmp(i,i) += 0.5d0 * level_shift_tcscf
+  enddo
+  do i = elec_alpha_num+1, mo_num
+    F_tmp(i,i) += level_shift_tcscf
+  enddo
+
+  call non_hrmt_bieig( mo_num, F_tmp, thr_d, thr_nd           &
+                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
                      , n_real_tc, eigval_right_tmp )
+
   !if(max_ov_tc_scf)then
-  ! call non_hrmt_fock_mat( mo_num, Fock_matrix_tc_mo_tot, thr_d, thr_nd &
+  ! call non_hrmt_fock_mat( mo_num, F_tmp, thr_d, thr_nd        &
   !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
   !                    , n_real_tc, eigval_right_tmp )
   !else 
-  ! call non_hrmt_diag_split_degen_bi_orthog( mo_num, Fock_matrix_tc_mo_tot &
+  ! call non_hrmt_diag_split_degen_bi_orthog( mo_num, F_tmp     &
   !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
   !                    , n_real_tc, eigval_right_tmp )
   !endif
+
+  deallocate(F_tmp)
+
 
 !  if(n_real_tc .ne. mo_num)then
 !   print*,'n_real_tc ne mo_num ! ',n_real_tc
@@ -42,8 +62,11 @@
 
   eigval_fock_tc_mo = eigval_right_tmp
 !  print*,'Eigenvalues of Fock_matrix_tc_mo_tot'
-!  do i = 1, mo_num
+!  do i = 1, elec_alpha_num
 !    print*, i, eigval_fock_tc_mo(i)
+!  enddo
+!  do i = elec_alpha_num+1, mo_num 
+!    print*, i, eigval_fock_tc_mo(i) - level_shift_tcscf
 !  enddo
 !  deallocate( eigval_right_tmp )
 
@@ -101,6 +124,8 @@
   endif
  
 END_PROVIDER 
+
+! ---
 
  BEGIN_PROVIDER [ double precision, fock_tc_reigvec_ao, (ao_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, fock_tc_leigvec_ao, (ao_num, mo_num)]

@@ -22,7 +22,7 @@ BEGIN_PROVIDER [ double precision, TCSCF_bi_ort_dm_ao_beta, (ao_num, ao_num) ]
 !
 ! This is the equivalent of the beta density of the HF Slater determinant, but with a couple of bi-orthonormal Slater determinant |Chi_0> and |Phi_0>
  END_DOC
-  call dgemm( 'N', 'T', ao_num, ao_num, elec_beta_num, 1.d0               &
+  call dgemm( 'N', 'T', ao_num, ao_num, elec_beta_num, 1.d0                &
             , mo_l_coef, size(mo_l_coef, 1), mo_r_coef, size(mo_r_coef, 1) &
             , 0.d0, TCSCF_bi_ort_dm_ao_beta, size(TCSCF_bi_ort_dm_ao_beta, 1) )
 END_PROVIDER

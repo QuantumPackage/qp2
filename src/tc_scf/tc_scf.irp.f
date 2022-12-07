@@ -18,10 +18,15 @@ program tc_scf
   !call create_guess
   !call orthonormalize_mos
 
-  call routine_scf()
+  PROVIDE tcscf_algorithm
+  if(tcscf_algorithm == 'DIIS') then
+    call rh_tcscf()
+  else
+    call simple_tcscf()
+  endif
+
   call minimize_tc_orb_angles()
   call print_energy_and_mos()
-
 
 end
 
@@ -64,7 +69,7 @@ end subroutine create_guess
 
 ! ---
 
-subroutine routine_scf()
+subroutine simple_tcscf()
 
   implicit none
   integer                       :: i, j, it
@@ -79,9 +84,9 @@ subroutine routine_scf()
   !print*,'grad_hermit = ', grad_hermit
   print*,'***'
   print*,'TC HF total energy = ', TC_HF_energy
-  print*,'TC HF 1 e   energy = ', TC_HF_one_electron_energy
+  print*,'TC HF 1 e   energy = ', TC_HF_one_e_energy
   print*,'TC HF 2 e   energy = ', TC_HF_two_e_energy
-  if(three_body_h_tc)then
+  if(three_body_h_tc) then
    print*,'TC HF 3 body       = ', diag_three_elem_hf
   endif
   print*,'***'
@@ -98,7 +103,6 @@ subroutine routine_scf()
    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
    TOUCH mo_l_coef mo_r_coef
-
 
   else
 
@@ -122,7 +126,7 @@ subroutine routine_scf()
       print*,'iteration = ', it
       print*,'***'
       print*,'TC HF total energy = ', TC_HF_energy
-      print*,'TC HF 1 e   energy = ', TC_HF_one_electron_energy
+      print*,'TC HF 1 e   energy = ', TC_HF_one_e_energy
       print*,'TC HF 2 non hermit = ', TC_HF_two_e_energy
       if(three_body_h_tc)then
        print*,'TC HF 3 body       = ', diag_three_elem_hf
@@ -161,7 +165,7 @@ subroutine routine_scf()
       print*,'iteration = ', it
       print*,'***'
       print*,'TC HF total energy = ', TC_HF_energy
-      print*,'TC HF 1 e   energy = ', TC_HF_one_electron_energy
+      print*,'TC HF 1 e   energy = ', TC_HF_one_e_energy
       print*,'TC HF 2 e   energy = ', TC_HF_two_e_energy
       print*,'TC HF 3 body       = ', diag_three_elem_hf
       print*,'***'
@@ -174,11 +178,11 @@ subroutine routine_scf()
   endif
 
   print*,'Energy converged !'
-  call print_energy_and_mos
+  call print_energy_and_mos()
 
   deallocate(rho_old, rho_new)
 
-end subroutine routine_scf
+end subroutine simple_tcscf
 
 ! ---
 

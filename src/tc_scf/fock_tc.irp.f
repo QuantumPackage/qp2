@@ -141,27 +141,49 @@ END_PROVIDER
  BEGIN_PROVIDER [ double precision, grad_non_hermit_left]
 &BEGIN_PROVIDER [ double precision, grad_non_hermit_right]
 &BEGIN_PROVIDER [ double precision, grad_non_hermit]
- implicit none
+
+  implicit none
   integer :: i, k
-  grad_non_hermit_left = 0.d0
+
+  grad_non_hermit_left  = 0.d0
   grad_non_hermit_right = 0.d0
+
   do i = 1, elec_beta_num ! doc --> SOMO
     do k = elec_beta_num+1, elec_alpha_num
-      grad_non_hermit_left+= dabs(Fock_matrix_tc_mo_tot(k,i))
-      grad_non_hermit_right+= dabs(Fock_matrix_tc_mo_tot(i,k))
+      grad_non_hermit_left  += dabs(Fock_matrix_tc_mo_tot(k,i))
+      grad_non_hermit_right += dabs(Fock_matrix_tc_mo_tot(i,k))
     enddo
   enddo
+
   do i = 1, elec_beta_num ! doc --> virt 
     do k = elec_alpha_num+1, mo_num
-      grad_non_hermit_left+= dabs(Fock_matrix_tc_mo_tot(k,i))
-      grad_non_hermit_right+= dabs(Fock_matrix_tc_mo_tot(i,k))
+      grad_non_hermit_left  += dabs(Fock_matrix_tc_mo_tot(k,i))
+      grad_non_hermit_right += dabs(Fock_matrix_tc_mo_tot(i,k))
     enddo
   enddo
+
   do i = elec_beta_num+1, elec_alpha_num ! SOMO --> virt 
     do k = elec_alpha_num+1, mo_num
-      grad_non_hermit_left+= dabs(Fock_matrix_tc_mo_tot(k,i))
-      grad_non_hermit_right+= dabs(Fock_matrix_tc_mo_tot(i,k))
+      grad_non_hermit_left  += dabs(Fock_matrix_tc_mo_tot(k,i))
+      grad_non_hermit_right += dabs(Fock_matrix_tc_mo_tot(i,k))
     enddo
   enddo
- grad_non_hermit = grad_non_hermit_left + grad_non_hermit_right
+
+  grad_non_hermit = grad_non_hermit_left + grad_non_hermit_right
+
 END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
+
+  implicit none
+
+  call mo_to_ao_bi_ortho( Fock_matrix_tc_mo_tot, size(Fock_matrix_tc_mo_tot, 1) &
+                        , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) )
+
+END_PROVIDER
+
+! ---
+
+
