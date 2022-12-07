@@ -27,6 +27,7 @@ BEGIN_PROVIDER [double precision, Q_alpha, (ao_num, ao_num) ]
 
   implicit none
 
+  Q_alpha = 0.d0
   call dgemm( 'N', 'T', ao_num, ao_num, elec_alpha_num, 1.d0               &
             , mo_r_coef, size(mo_r_coef, 1), mo_l_coef, size(mo_l_coef, 1) &
             , 0.d0, Q_alpha, size(Q_alpha, 1) )
@@ -47,6 +48,7 @@ BEGIN_PROVIDER [ double precision, Q_beta, (ao_num, ao_num) ]
 
   implicit none
 
+  Q_beta = 0.d0
   call dgemm( 'N', 'T', ao_num, ao_num, elec_beta_num, 1.d0                &
             , mo_r_coef, size(mo_r_coef, 1), mo_l_coef, size(mo_l_coef, 1) &
             , 0.d0, Q_beta, size(Q_beta, 1) )
@@ -113,14 +115,17 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
             , 0.d0, FQS_SQF_ao, size(FQS_SQF_ao, 1) )
 
   ! S x Q
+  tmp = 0.d0
   call dgemm( 'N', 'N', ao_num, ao_num, ao_num, 1.d0                       &
             , ao_overlap, size(ao_overlap, 1), Q_matrix, size(Q_matrix, 1) &
             , 0.d0, tmp, size(tmp, 1) )
 
-  ! F x P x S - S x P x F
+  ! F x Q x S - S x Q x F
   call dgemm( 'N', 'N', ao_num, ao_num, ao_num, -1.d0                                  &
             , tmp, size(tmp, 1), Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) &
             , 1.d0, FQS_SQF_ao, size(FQS_SQF_ao, 1) )
+
+  deallocate(tmp)
 
 END_PROVIDER
 

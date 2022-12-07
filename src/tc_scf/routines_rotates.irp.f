@@ -116,7 +116,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
     print *, ' ------------------------------------'
     call orthog_functions(ao_num, n_degen, mo_l_coef_tmp, ao_overlap)
 
-    print *, ' Overlap lef-right '
+    print *, ' Overlap left-right '
     call build_s_matrix(ao_num, n_degen, mo_r_coef_tmp, mo_l_coef_tmp, ao_overlap, stmp)
     do j = 1, n_degen
      write(*,'(100(F8.4,X))') stmp(:,j)

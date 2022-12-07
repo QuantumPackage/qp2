@@ -15,8 +15,8 @@ program tc_scf
 !  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
-  !call create_guess
-  !call orthonormalize_mos
+  call create_guess()
+  call orthonormalize_mos()
 
   PROVIDE tcscf_algorithm
   if(tcscf_algorithm == 'DIIS') then
@@ -42,7 +42,8 @@ subroutine create_guess
   logical :: exists
 
   PROVIDE ezfio_filename
-  call ezfio_has_mo_basis_mo_coef(exists)
+  !call ezfio_has_mo_basis_mo_coef(exists)
+  exists = .false.
 
   if (.not.exists) then
     mo_label = 'Guess'
@@ -106,7 +107,7 @@ subroutine simple_tcscf()
 
   else
 
-   print*,'grad_hermit = ',grad_hermit
+   print *, ' grad_hermit = ', grad_hermit
    call save_good_hermit_tc_eigvectors
    TOUCH mo_coef 
    call save_mos
@@ -117,44 +118,55 @@ subroutine simple_tcscf()
 
   if(bi_ortho) then
 
-    !do while( it .lt. n_it_tcscf_max .and. (e_delta .gt. dsqrt(thresh_tcscf)) )
-    !do while( it .lt. n_it_tcscf_max .and. (e_delta .gt. thresh_tcscf) )
-    !do while( it .lt. n_it_tcscf_max .and. (rho_delta .gt. thresh_tcscf) )
-    do while( it .lt. n_it_tcscf_max .and. (grad_non_hermit_right.gt. dsqrt(thresh_tcscf)) )
+    !do while(e_delta .gt. dsqrt(thresh_tcscf)) )
+    !do while(e_delta .gt. thresh_tcscf) )
+    !do while(rho_delta .gt. thresh_tcscf) )
+    !do while(grad_non_hermit_right .gt. dsqrt(thresh_tcscf))
+    do while(grad_non_hermit .gt. dsqrt(thresh_tcscf))
 
       it += 1
-      print*,'iteration = ', it
-      print*,'***'
-      print*,'TC HF total energy = ', TC_HF_energy
-      print*,'TC HF 1 e   energy = ', TC_HF_one_e_energy
-      print*,'TC HF 2 non hermit = ', TC_HF_two_e_energy
-      if(three_body_h_tc)then
-       print*,'TC HF 3 body       = ', diag_three_elem_hf
+      if(it > n_it_tcscf_max) then
+        print *, ' max of TCSCF iterations is reached ', n_it_TCSCF_max
+        exit
       endif
-      print*,'***'
-      e_delta = dabs( TC_HF_energy - e_save )
-      print*, 'it, delta E = ', it, e_delta
-      print*, 'it, gradient= ',grad_non_hermit_right
+
+
+      print *, ' ***'
+      print *, ' iteration = ', it
+
+      print *, ' TC HF total energy = ', TC_HF_energy
+      print *, ' TC HF 1 e   energy = ', TC_HF_one_e_energy
+      print *, ' TC HF 2 non hermit = ', TC_HF_two_e_energy
+      if(three_body_h_tc) then
+        print *, ' TC HF 3 body       = ', diag_three_elem_hf
+      endif
+      e_delta = dabs(TC_HF_energy - e_save)
+
+      print *, ' delta E  = ', e_delta
+      print *, ' gradient = ', grad_non_hermit
+      !print *, ' gradient= ', grad_non_hermit_right
+
+      !rho_new   = TCSCF_bi_ort_dm_ao
+      !!print*, rho_new
+      !rho_delta = 0.d0
+      !do i = 1, ao_num 
+      !  do j = 1, ao_num 
+      !    rho_delta += dabs(rho_new(j,i) - rho_old(j,i))
+      !  enddo
+      !enddo
+      !print *, ' rho_delta =', rho_delta
+      !rho_old = rho_new
+
       e_save    = TC_HF_energy
       mo_l_coef = fock_tc_leigvec_ao
       mo_r_coef = fock_tc_reigvec_ao
-
-      rho_new   = TCSCF_bi_ort_dm_ao
-      !print*, rho_new
-      rho_delta = 0.d0
-      do i = 1, ao_num 
-        do j = 1, ao_num 
-          rho_delta += dabs(rho_new(j,i) - rho_old(j,i))
-        enddo
-      enddo
-      print*, ' rho_delta =', rho_delta
-      rho_old = rho_new
-
       call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
       TOUCH mo_l_coef mo_r_coef
-
       call ezfio_set_tc_scf_bitc_energy(TC_HF_energy)
+
+      print *, ' ***'
+      print *, ''
 
     enddo
 
@@ -162,13 +174,14 @@ subroutine simple_tcscf()
    do while( (grad_hermit.gt.dsqrt(thresh_tcscf)) .and. it .lt. n_it_tcscf_max )
       print*,'grad_hermit = ',grad_hermit
       it += 1
-      print*,'iteration = ', it
-      print*,'***'
-      print*,'TC HF total energy = ', TC_HF_energy
-      print*,'TC HF 1 e   energy = ', TC_HF_one_e_energy
-      print*,'TC HF 2 e   energy = ', TC_HF_two_e_energy
-      print*,'TC HF 3 body       = ', diag_three_elem_hf
-      print*,'***'
+      print *, 'iteration = ', it
+      print *, '***'
+      print *, 'TC HF total energy = ', TC_HF_energy
+      print *, 'TC HF 1 e   energy = ', TC_HF_one_e_energy
+      print *, 'TC HF 2 e   energy = ', TC_HF_two_e_energy
+      print *, 'TC HF 3 body       = ', diag_three_elem_hf
+      print *, '***'
+      print *, ''
       call save_good_hermit_tc_eigvectors
       TOUCH mo_coef 
       call save_mos

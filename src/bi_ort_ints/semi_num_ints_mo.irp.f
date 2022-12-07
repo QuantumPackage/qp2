@@ -122,35 +122,40 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
 
 END_PROVIDER 
 
+! ---
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
 
   implicit none
   integer :: ipoint
+  double precision :: wall0, wall1
 
- print*,'providing int2_grad1_u12_bimo_transp'
- double precision :: wall0, wall1
- call wall_time(wall0)
- !$OMP PARALLEL         &
- !$OMP DEFAULT (NONE)   &
- !$OMP PRIVATE (ipoint) & 
- !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
- !$OMP DO SCHEDULE (dynamic)
-  do ipoint = 1, n_points_final_grid
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
- call wall_time(wall1)
- print*,'Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
+  !print *, ' providing int2_grad1_u12_bimo_transp'
+
+  call wall_time(wall0)
+  !$OMP PARALLEL         &
+  !$OMP DEFAULT (NONE)   &
+  !$OMP PRIVATE (ipoint) & 
+  !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
+  !$OMP DO SCHEDULE (dynamic)
+   do ipoint = 1, n_points_final_grid
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+   enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(wall1)
+  !print *, ' Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
 
 END_PROVIDER 
 
 ! ---
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid,3, mo_num, mo_num )]
  implicit none
  integer          :: i, j, ipoint

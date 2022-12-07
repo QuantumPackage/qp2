@@ -283,16 +283,16 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   ! -------------------------------------------------------------------------------------
   !
 
-  print *, ' '
-  print *, ' Computing the left/right eigenvectors ...'
-  print *, ' '
+  !print *, ' '
+  !print *, ' Computing the left/right eigenvectors ...'
+  !print *, ' '
 
-  allocate( WR(n), WI(n), VL(n,n), VR(n,n) ) 
+  allocate(WR(n), WI(n), VL(n,n), VR(n,n)) 
   
-  print *, ' fock matrix'
-  do i = 1, n
-    write(*, '(1000(F16.10,X))') A(i,:)
-  enddo
+  !print *, ' fock matrix'
+  !do i = 1, n
+  !  write(*, '(1000(F16.10,X))') A(i,:)
+  !enddo
 
   !thr_cut = 1.d-15
   !call cancel_small_elmts(A, n, thr_cut)
@@ -301,11 +301,11 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   call lapack_diag_non_sym(n, A, WR, WI, VL, VR)
   !call lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
 
-  print *, ' '
-  print *, ' eigenvalues'
-  do i = 1, n
-    write(*, '(1000(F16.10,X))') WR(i), WI(i)
-  enddo
+  !print *, ' '
+  !print *, ' eigenvalues'
+  !do i = 1, n
+  !  write(*, '(1000(F16.10,X))') WR(i), WI(i)
+  !enddo
   !print *, ' right eigenvect bef' 
   !do i = 1, n
   !  write(*, '(1000(F16.10,X))') VR(:,i)
@@ -328,9 +328,10 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !                  track & sort the real eigenvalues 
 
   n_good = 0
-  thr    = 1.d-3
+  !thr    = 100d0
+  thr    = Im_thresh_tcscf
   do i = 1, n
-    print*, 'Re(i) + Im(i)', WR(i), WI(i)
+    !print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
@@ -402,23 +403,24 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   if( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .lt. thr_d) ) then
 
-    print *, ' lapack vectors are normalized and bi-orthogonalized'
+    !print *, ' lapack vectors are normalized and bi-orthogonalized'
     deallocate(S)
     return
 
-  elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
+  ! accu_nd is modified after adding the normalization
+  !elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
 
-    print *, ' lapack vectors are not normalized but bi-orthogonalized'
-    call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
+  !  print *, ' lapack vectors are not normalized but bi-orthogonalized'
+  !  call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
 
-    call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
+  !  call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
 
-    deallocate(S)
-    return
+  !  deallocate(S)
+  !  return
 
   else
 
-    print *, ' lapack vectors are not normalized neither bi-orthogonalized'
+    !print *, ' lapack vectors are not normalized neither bi-orthogonalized'
 
     ! ---
 

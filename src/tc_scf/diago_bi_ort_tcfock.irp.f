@@ -76,6 +76,8 @@
             , fock_tc_reigvec_mo, size(fock_tc_reigvec_mo, 1) &
             , 0.d0, overlap_fock_tc_eigvec_mo, size(overlap_fock_tc_eigvec_mo, 1) )
 
+  ! ---
+
   accu_d  = 0.d0
   accu_nd = 0.d0
   do i = 1, mo_num
@@ -92,22 +94,24 @@
       endif
     enddo 
   enddo
-  accu_nd = dsqrt(accu_nd)/accu_d
-
+  accu_nd = dsqrt(accu_nd) / accu_d
   if(accu_nd .gt. thr_nd) then
     print *, ' bi-orthog failed'
-    print*,'accu_nd MO = ', accu_nd, thr_nd
-    print*,'overlap_fock_tc_eigvec_mo = '
+    print *, ' accu_nd MO = ', accu_nd, thr_nd
+    print *, ' overlap_fock_tc_eigvec_mo = '
     do i = 1, mo_num
       write(*,'(100(F16.10,X))') overlap_fock_tc_eigvec_mo(i,:)
     enddo
-   stop
+    stop
   endif
 
-  if( dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thr_d ) then
-    print *, 'mo_num     = ', mo_num 
-    print *, 'accu_d  MO = ', accu_d, thr_d
-    print *, 'normalizing vectors ...'
+  ! ---
+
+  if(dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thr_d) then
+
+    print *, ' mo_num     = ', mo_num 
+    print *, ' accu_d  MO = ', accu_d, thr_d
+    print *, ' normalizing vectors ...'
     do i = 1, mo_num
       norm = dsqrt(dabs(overlap_fock_tc_eigvec_mo(i,i)))
       if(norm .gt. thr_d) then
@@ -117,12 +121,43 @@
         enddo
       endif
     enddo
+
     call dgemm( "T", "N", mo_num, mo_num, mo_num, 1.d0          &
               , fock_tc_leigvec_mo, size(fock_tc_leigvec_mo, 1) &
               , fock_tc_reigvec_mo, size(fock_tc_reigvec_mo, 1) &
               , 0.d0, overlap_fock_tc_eigvec_mo, size(overlap_fock_tc_eigvec_mo, 1) )
+
+    accu_d  = 0.d0
+    accu_nd = 0.d0
+    do i = 1, mo_num
+      do k = 1, mo_num
+        if(i==k) then
+          accu_tmp = overlap_fock_tc_eigvec_mo(k,i)
+          accu_d  += dabs(accu_tmp)
+        else
+          accu_tmp = overlap_fock_tc_eigvec_mo(k,i)
+          accu_nd += accu_tmp * accu_tmp
+          if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thr_nd)then
+           print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
+          endif
+        endif
+      enddo 
+    enddo
+    accu_nd = dsqrt(accu_nd) / accu_d
+    if(accu_nd .gt. thr_nd) then
+      print *, ' bi-orthog failed'
+      print *, ' accu_nd MO = ', accu_nd, thr_nd
+      print *, ' overlap_fock_tc_eigvec_mo = '
+      do i = 1, mo_num
+        write(*,'(100(F16.10,X))') overlap_fock_tc_eigvec_mo(i,:)
+      enddo
+      stop
+    endif
+
   endif
  
+  ! ---
+
 END_PROVIDER 
 
 ! ---

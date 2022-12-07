@@ -61,7 +61,7 @@ subroutine mo_to_ao_bi_ortho(A_mo, LDA_mo, A_ao, LDA_ao)
             , 0.d0, tmp_1, size(tmp_1, 1) )
 
   ! (ao_overlap x mo_r_coef) x A_mo
-  allocate( tmp_1(ao_num,mo_num) )
+  allocate( tmp_2(ao_num,mo_num) )
   call dgemm( 'N', 'N', ao_num, mo_num, mo_num, 1.d0 &
             , tmp_1, size(tmp_1, 1), A_mo, LDA_mo    &
             , 0.d0, tmp_2, size(tmp_2, 1) )
@@ -73,7 +73,7 @@ subroutine mo_to_ao_bi_ortho(A_mo, LDA_mo, A_ao, LDA_ao)
             , 0.d0, tmp_1, size(tmp_1, 1) )
 
   ! (ao_overlap x mo_r_coef) x A_mo x (ao_overlap x mo_l_coef).T
-  call dgemm( 'N', 'T', ao_num, mo_num, mo_num, 1.d0       &
+  call dgemm( 'N', 'T', ao_num, ao_num, mo_num, 1.d0       &
             , tmp_2, size(tmp_2, 1), tmp_1, size(tmp_1, 1) &
             , 0.d0, A_ao, LDA_ao )
   

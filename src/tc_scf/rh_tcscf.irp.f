@@ -16,7 +16,8 @@ subroutine rh_tcscf()
   double precision              :: energy_TCSCF_previous, delta_energy_TCSCF
   double precision              :: gradie_TCSCF_previous, delta_gradie_TCSCF
   double precision              :: max_error_DIIS_TCSCF
-  double precision              :: level_shift_TCSCF_save
+  double precision              :: level_shift_save
+  double precision              :: delta_energy_tmp, delta_gradie_tmp
   double precision, allocatable :: F_DIIS(:,:,:), e_DIIS(:,:,:)
   double precision, allocatable :: mo_r_coef_save(:,:), mo_l_coef_save(:,:)
 
@@ -60,19 +61,14 @@ subroutine rh_tcscf()
   PROVIDE FQS_SQF_ao Fock_matrix_tc_ao_tot
 
   do while( (max_error_DIIS_TCSCF > threshold_DIIS_nonzero_TCSCF) .or. &
-            (dabs(delta_energy_TCSCF) > thresh_TCSCF)             .or. &
-            (dabs(delta_gradie_TCSCF) > dsqrt(thresh_TCSCF))           )
+            !(dabs(delta_energy_TCSCF) > thresh_TCSCF)             .or. &
+            (dabs(gradie_TCSCF_previous) > dsqrt(thresh_TCSCF))        )
 
     iteration_TCSCF += 1
     if(iteration_TCSCF > n_it_TCSCF_max) then
       print *, ' max of TCSCF iterations is reached ', n_it_TCSCF_max
       exit
     endif
-
-    ! TODO
-    !if(frozen_orb_scf) then
-    !  call initialize_mo_coef_begin_iteration
-    !endif
 
     ! current size of the DIIS space
     dim_DIIS = min(dim_DIIS+1, max_dim_DIIS_TCSCF)
@@ -91,13 +87,19 @@ subroutine rh_tcscf()
       enddo
 
       ! Compute the extrapolated Fock matrix
-      call extrapolate_TC_Fock_matrix( e_DIIS, F_DIIS                   &
+      call extrapolate_TC_Fock_matrix( e_DIIS, F_DIIS                                        &
                                      , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) &
                                      , iteration_TCSCF, dim_DIIS )
 
       Fock_matrix_tc_ao_alpha = 0.5d0 * Fock_matrix_tc_ao_tot
       Fock_matrix_tc_ao_beta  = 0.5d0 * Fock_matrix_tc_ao_tot
-      TOUCH Fock_matrix_tc_ao_alpha Fock_matrix_tc_ao_beta
+      !TOUCH Fock_matrix_tc_ao_alpha Fock_matrix_tc_ao_beta
+
+      call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
+                            , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
+      call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta , size(Fock_matrix_tc_ao_beta , 1) &
+                            , Fock_matrix_tc_mo_beta , size(Fock_matrix_tc_mo_beta , 1) )
+      TOUCH Fock_matrix_tc_mo_alpha Fock_matrix_tc_mo_beta
 
     endif
 
@@ -109,15 +111,54 @@ subroutine rh_tcscf()
 
     ! ---
 
-    ! TODO
-    !if(frozen_orb_scf) then
-    ! call reorder_core_orb
-    ! call initialize_mo_coef_begin_iteration
-    !endif
-
     ! calculate error vectors
     max_error_DIIS_TCSCF = maxval(abs(FQS_SQF_mo))
 
+    ! ---
+
+    delta_energy_tmp = TC_HF_energy    - energy_TCSCF_previous
+    delta_gradie_tmp = grad_non_hermit - gradie_TCSCF_previous
+
+    ! ---
+
+    do while((dabs(delta_energy_tmp) > 0.1d0) .and. (iteration_TCSCF > 1))
+!      print *, ' very big step  : ', delta_energy_tmp
+!      print *, ' TC level shift = ', level_shift_TCSCF
+
+      mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num) 
+      mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num) 
+
+      if(level_shift_TCSCF <= .1d0) then
+        level_shift_TCSCF = 1.d0
+      else
+        level_shift_TCSCF = level_shift_TCSCF * 3.0d0
+      endif
+      TOUCH mo_l_coef mo_r_coef level_shift_TCSCF
+
+      mo_l_coef(1:ao_num,1:mo_num) = fock_tc_leigvec_ao(1:ao_num,1:mo_num)
+      mo_r_coef(1:ao_num,1:mo_num) = fock_tc_reigvec_ao(1:ao_num,1:mo_num)
+      TOUCH mo_l_coef mo_r_coef
+
+      delta_energy_tmp = TC_HF_energy - energy_TCSCF_previous
+
+      if(level_shift_TCSCF - level_shift_save > 40.d0) then
+        level_shift_TCSCF = level_shift_save * 4.d0
+        SOFT_TOUCH level_shift_TCSCF
+        exit
+      endif
+
+      dim_DIIS = 0
+    enddo
+!    print *, ' very big step  : ', delta_energy_tmp
+!    print *, ' TC level shift = ', level_shift_TCSCF
+
+    ! ---
+
+    level_shift_TCSCF = 0.d0
+    !level_shift_TCSCF = level_shift_TCSCF * 0.5d0
+    SOFT_TOUCH level_shift_TCSCF
+
+    gradie_TCSCF       = grad_non_hermit
     energy_TCSCF       = TC_HF_energy
     energy_TCSCF_1e    = TC_HF_one_e_energy
     energy_TCSCF_2e    = TC_HF_two_e_energy
@@ -125,78 +166,17 @@ subroutine rh_tcscf()
     if(three_body_h_tc) then
       energy_TCSCF_3e  = diag_three_elem_hf
     endif
-    gradie_TCSCF       = grad_non_hermit
     delta_energy_TCSCF = energy_TCSCF - energy_TCSCF_previous
     delta_gradie_TCSCF = gradie_TCSCF - gradie_TCSCF_previous
 
-    if((TCSCF_algorithm == 'DIIS') .and. (delta_gradie_TCSCF > 0.d0)) then
-      Fock_matrix_tc_ao_tot(1:ao_num,1:ao_num) = F_DIIS(1:ao_num,1:ao_num,index_dim_DIIS)
-      Fock_matrix_tc_ao_alpha = 0.5d0 * Fock_matrix_tc_ao_tot
-      Fock_matrix_tc_ao_beta  = 0.5d0 * Fock_matrix_tc_ao_tot
-      TOUCH Fock_matrix_tc_ao_alpha Fock_matrix_tc_ao_beta
-    endif
-
-    ! ---
-
-    level_shift_TCSCF_save = level_shift_TCSCF
-
-    mo_r_coef_save(1:ao_num,1:mo_num) = mo_r_coef(1:ao_num,1:mo_num)
-    mo_l_coef_save(1:ao_num,1:mo_num) = mo_l_coef(1:ao_num,1:mo_num)
-
-    do while(delta_gradie_TCSCF > 0.d0)
-
-      mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num)
-      mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num)
-
-      if(level_shift_TCSCF <= .1d0) then
-        level_shift_TCSCF = 1.d0
-      else
-        level_shift_TCSCF = level_shift_TCSCF * 3.0d0
-      endif
-      TOUCH mo_r_coef mo_l_coef level_shift_TCSCF
-
-      mo_l_coef(1:ao_num,1:mo_num) = fock_tc_leigvec_ao(1:ao_num,1:mo_num)
-      mo_r_coef(1:ao_num,1:mo_num) = fock_tc_reigvec_ao(1:ao_num,1:mo_num)
-
-      !if(frozen_orb_scf) then
-      !  call reorder_core_orb
-      !  call initialize_mo_coef_begin_iteration
-      !endif
-      TOUCH mo_l_coef mo_r_coef
-
-      energy_TCSCF       = TC_HF_energy
-      energy_TCSCF_1e    = TC_HF_one_e_energy
-      energy_TCSCF_2e    = TC_HF_two_e_energy
-      energy_TCSCF_3e    = 0.d0
-      if(three_body_h_tc) then
-        energy_TCSCF_3e  = diag_three_elem_hf
-      endif
-      gradie_TCSCF       = grad_non_hermit
-      delta_energy_TCSCF = energy_TCSCF - energy_TCSCF_previous
-      delta_gradie_TCSCF = gradie_TCSCF - gradie_TCSCF_previous
-
-      if(level_shift_TCSCF - level_shift_TCSCF_save > 40.d0) then
-        level_shift_TCSCF = level_shift_TCSCF_save * 4.d0
-        SOFT_TOUCH level_shift_TCSCF
-        exit
-      endif
-
-      dim_DIIS = 0
-    enddo
-
-    ! ---
-
-    level_shift_TCSCF = level_shift_TCSCF * 0.5d0
-    SOFT_TOUCH level_shift_TCSCF
-
     energy_TCSCF_previous = energy_TCSCF
-    energy_TCSCF_1e       = TC_HF_one_e_energy
-    energy_TCSCF_2e       = TC_HF_two_e_energy
-    energy_TCSCF_3e       = 0.d0
-    if(three_body_h_tc) then
-      energy_TCSCF_3e     = diag_three_elem_hf
-    endif
-    gradie_TCSCF_previous = grad_non_hermit
+    gradie_TCSCF_previous = gradie_TCSCF
+
+
+    level_shift_save = level_shift_TCSCF
+    mo_l_coef_save(1:ao_num,1:mo_num) = mo_l_coef(1:ao_num,1:mo_num)
+    mo_r_coef_save(1:ao_num,1:mo_num) = mo_r_coef(1:ao_num,1:mo_num)
+
 
     print *, ' iteration         = ', iteration_TCSCF
     print *, ' total TC energy   = ', energy_TCSCF 
@@ -204,35 +184,24 @@ subroutine rh_tcscf()
     print *, ' 2-e   TC energy   = ', energy_TCSCF_2e
     print *, ' 3-e   TC energy   = ', energy_TCSCF_3e
     print *, ' |delta TC energy| = ', delta_energy_TCSCF
+    print *, ' TC gradient       = ', gradie_TCSCF
     print *, ' delta TC gradient = ', delta_gradie_TCSCF
     print *, ' max TC DIIS error = ', max_error_DIIS_TCSCF 
     print *, ' TC DIIS dim       = ', dim_DIIS
     print *, ' TC level shift    = ', level_shift_TCSCF
+    print *, ' '
 
-    if(delta_gradie_TCSCF < 0.d0) then
-      call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
-      call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
-      call ezfio_set_tc_scf_bitc_energy(energy_TCSCF)
-    endif
+    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
+    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
 
     if(qp_stop()) exit
   enddo
 
   ! ---
 
-  !if(iteration_TCSCF < n_it_TCSCF_max) then
-  !  mo_label = 'Canonical'
-  !endif
-
-  !if(.not.frozen_orb_scf) then
-  ! call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo, size(Fock_matrix_mo,1), size(Fock_matrix_mo, 2), mo_label, 1, .true.)
-  ! call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef, 1), 1.d-10)
-  ! call orthonormalize_mos
-  ! call save_mos
-  !endif
-  !call write_double(6, energy_TCSCF, 'TCSCF energy')
-
   call write_time(6)
+
+  deallocate(mo_r_coef_save, mo_l_coef_save, F_DIIS, e_DIIS)
 
 end
 
