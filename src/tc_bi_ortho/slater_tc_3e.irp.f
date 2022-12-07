@@ -66,7 +66,7 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
      enddo
     enddo
    enddo
-   print*,'aab = ',accu
+   !print*,'aab = ',accu
   
    ! beta/beta/alpha three-body
   accu = 0.d0
@@ -83,7 +83,7 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
      enddo
     enddo
    enddo
-   print*,'abb = ',accu
+   !print*,'abb = ',accu
 
    ! alpha/alpha/alpha three-body
    accu = 0.d0
@@ -99,7 +99,7 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
      enddo
     enddo
    enddo
-   print*,'aaa = ',accu
+   !print*,'aaa = ',accu
 
    ! beta/beta/beta three-body
    accu = 0.d0
@@ -115,7 +115,7 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
      enddo
     enddo
    enddo
-   print*,'bbb = ',accu
+   !print*,'bbb = ',accu
   endif
 
 end

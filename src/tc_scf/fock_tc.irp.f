@@ -122,6 +122,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   endif
 END_PROVIDER
 
+! ---
 
 !BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num, mo_num)]
 !  implicit none

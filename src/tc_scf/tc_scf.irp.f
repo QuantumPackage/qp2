@@ -19,8 +19,8 @@ program tc_scf
   !call orthonormalize_mos
 
   call routine_scf()
-  call minimize_tc_orb_angles
-  call print_energy_and_mos
+  call minimize_tc_orb_angles()
+  call print_energy_and_mos()
 
 
 end
