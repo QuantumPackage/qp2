@@ -15,7 +15,7 @@
    ! 
    ! Rcc = Acc Fcc^a + Bcc Fcc^b
    ! Roo = Aoo Foo^a + Boo Foo^b
-   ! Rcc = Avv Fvv^a + Bvv Fvv^b
+   ! Rvv = Avv Fvv^a + Bvv Fvv^b
    ! Fcv = (F^a + F^b)/2
    ! 
    ! F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
