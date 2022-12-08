@@ -168,7 +168,6 @@ END_PROVIDER
 
     do j = 1, nucl_num
       tmp_alphaj = dble(List_all_comb_b3(j,i)) * j1b_pen(j)
-!      print*,List_all_comb_b3(j,i),j1b_pen(j)
       List_all_comb_b3_expo(i)   += tmp_alphaj
       List_all_comb_b3_cent(1,i) += tmp_alphaj * nucl_coord(j,1)
       List_all_comb_b3_cent(2,i) += tmp_alphaj * nucl_coord(j,2)
@@ -219,6 +218,10 @@ END_PROVIDER
 
     List_all_comb_b3_coef(i) = (-1.d0)**dble(phase) * facto * dexp(-List_all_comb_b3_coef(i))
   enddo
+
+  print *, ' 1st coeff & expo of lists'
+  print*, List_all_comb_b2_coef(1), List_all_comb_b2_expo(1)
+  print*, List_all_comb_b3_coef(1), List_all_comb_b3_expo(1)
 
 END_PROVIDER
 
