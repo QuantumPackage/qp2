@@ -750,7 +750,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (delta_E < 0.d0) then
             tmp = -tmp
         endif
+
+        !e_pert(istate) = alpha_h_psi * alpha_h_psi / (E0(istate) - Hii)
         e_pert(istate) = 0.5d0 * (tmp - delta_E)
+
         if (dabs(alpha_h_psi) > 1.d-4) then
           coef(istate) = e_pert(istate) / alpha_h_psi
         else

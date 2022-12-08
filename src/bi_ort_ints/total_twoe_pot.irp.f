@@ -45,6 +45,9 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
             ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
             integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
 
+            !print *, ' sym     integ = ', integral_sym
+            !print *, ' non-sym integ = ', integral_nsym
+
             ao_two_e_tc_tot(k,i,l,j) = integral_sym + integral_nsym 
             !write(111,*) ao_two_e_tc_tot(k,i,l,j) 
           enddo

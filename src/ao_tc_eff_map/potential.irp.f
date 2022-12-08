@@ -142,26 +142,95 @@ double precision function fit_1_erf_x(x)
 
 end
 
- BEGIN_PROVIDER [double precision, expo_gauss_1_erf_x_2, (n_max_fit_slat)]
-&BEGIN_PROVIDER [double precision, coef_gauss_1_erf_x_2, (n_max_fit_slat)]
- implicit none
- BEGIN_DOC
-! (1 - erf(mu*x))^2 = \sum_i coef_gauss_1_erf_x_2(i) * exp(-expo_gauss_1_erf_x_2(i) * x^2)
-!
-! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2)
-!
-! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
- END_DOC
- integer :: i
- double precision :: expos(n_max_fit_slat),alpha,beta
- alpha = 2.d0 * expos_slat_gauss_1_erf_x(1) * mu_erf
- call expo_fit_slater_gam(alpha,expos)
- beta = 2.d0 * expos_slat_gauss_1_erf_x(2) * mu_erf**2.d0
- do i = 1, n_max_fit_slat
-  expo_gauss_1_erf_x_2(i) = expos(i) + beta
-  coef_gauss_1_erf_x_2(i) = coef_fit_slat_gauss(i)
- enddo
+! ---
+
+ BEGIN_PROVIDER [double precision, expo_gauss_1_erf_x_2, (ng_fit_jast)]
+&BEGIN_PROVIDER [double precision, coef_gauss_1_erf_x_2, (ng_fit_jast)]
+
+  BEGIN_DOC
+  ! (1 - erf(mu*x))^2 = \sum_i coef_gauss_1_erf_x_2(i) * exp(-expo_gauss_1_erf_x_2(i) * x^2)
+  !
+  ! This is based on a fit of (1 - erf(mu*x)) by exp(-alpha * x) exp(-beta*mu^2x^2)
+  !
+  ! and the slater function exp(-alpha * x) is fitted with n_max_fit_slat gaussians 
+  END_DOC
+
+  implicit none
+  integer          :: i
+  double precision :: expos(ng_fit_jast), alpha, beta, tmp
+
+  if(ng_fit_jast .eq. 1) then
+
+    coef_gauss_1_erf_x_2 = (/ 0.85345277d0 /)
+    expo_gauss_1_erf_x_2 = (/ 6.23519457d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 2) then
+
+    coef_gauss_1_erf_x_2 = (/ 0.31030624d0 , 0.64364964d0 /)
+    expo_gauss_1_erf_x_2 = (/ 55.39184787d0, 3.92151407d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 3) then
+
+    coef_gauss_1_erf_x_2 = (/ 0.33206082d0 , 0.52347449d0, 0.12605012d0   /)
+    expo_gauss_1_erf_x_2 = (/ 19.90272209d0, 3.2671671d0 , 336.47320445d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 5) then
+
+    coef_gauss_1_erf_x_2 = (/ 0.02956716d0, 0.17025555d0, 0.32774114d0, 0.39034764d0, 0.07822781d0 /)
+    expo_gauss_1_erf_x_2 = (/ 6467.28126d0, 46.9071990d0, 9.09617721d0, 2.76883328d0, 360.367093d0 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 6) then
+
+    coef_gauss_1_erf_x_2 = (/ 0.18331042d0  , 0.10971118d0  , 0.29949169d0  , 0.34853132d0  , 0.0394275d0   , 0.01874444d0   /)
+    expo_gauss_1_erf_x_2 = (/ 2.54293498d+01, 1.40317872d+02, 7.14630801d+00, 2.65517675d+00, 1.45142619d+03, 1.00000000d+04 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 20) then
+
+    ASSERT(n_max_fit_slat == 20)
+
+    alpha = 2.d0 * expos_slat_gauss_1_erf_x(1) * mu_erf
+    call expo_fit_slater_gam(alpha, expos)
+    beta = 2.d0 * expos_slat_gauss_1_erf_x(2) * mu_erf * mu_erf
+    do i = 1, n_max_fit_slat
+      expo_gauss_1_erf_x_2(i) = expos(i) + beta
+      coef_gauss_1_erf_x_2(i) = coef_fit_slat_gauss(i)
+    enddo
+
+  else
+
+    print *, ' not implemented yet'
+    stop
+
+  endif
+
 END_PROVIDER 
+
+! ---
 
 double precision function fit_1_erf_x_2(x)
  implicit none
