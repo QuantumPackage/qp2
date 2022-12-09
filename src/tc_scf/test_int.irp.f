@@ -11,18 +11,18 @@ program test_ints
   my_grid_becke  = .True.
 !  my_n_pt_r_grid = 30
 !  my_n_pt_a_grid = 50
-  my_n_pt_r_grid = 3 ! small grid for quick debug
-  my_n_pt_a_grid = 6 ! small grid for quick debug
+  my_n_pt_r_grid = 10 ! small grid for quick debug
+  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
-! call routine_int2_u_grad1u_j1b2 
-! call routine_v_ij_erf_rk_cst_mu_j1b
-! call routine_x_v_ij_erf_rk_cst_mu_tmp_j1b
-! call routine_v_ij_u_cst_mu_j1b
+ call routine_int2_u_grad1u_j1b2 
+ call routine_v_ij_erf_rk_cst_mu_j1b
+ call routine_x_v_ij_erf_rk_cst_mu_tmp_j1b
+ call routine_v_ij_u_cst_mu_j1b
 
 !
 ! call routine_test_j1b
 
- call routine_int2_grad1u2_grad2u2_j1b2
+! call routine_int2_grad1u2_grad2u2_j1b2
 end
 
 subroutine routine_test_j1b
