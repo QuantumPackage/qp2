@@ -32,7 +32,7 @@ subroutine test_3e
  print*,'htot  = ',htot
  print*,''
  print*,''
- print*,'TC_one= ',TC_HF_one_electron_energy
+ print*,'TC_one= ',tc_hf_one_e_energy
  print*,'TC_two= ',TC_HF_two_e_energy
  print*,'TC_3e = ',diag_three_elem_hf
  print*,'TC_tot= ',TC_HF_energy

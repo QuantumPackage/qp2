@@ -109,18 +109,18 @@ END_PROVIDER
      beta        = List_all_comb_b3_expo  (i_1s)
      center(1:3) = List_all_comb_b3_cent(1:3,i_1s)
      if(dabs(coef).lt.thr)cycle
-!     int_j1b = 0.d0
-!     do ipoint = 1, n_points_final_grid
-!      r(1:3) = final_grid_points(1:3,ipoint)
-!      weight = final_weight_at_r_vector(ipoint)
-!      dist  = ( center(1) - r(1) )*( center(1) - r(1) )
-!      dist += ( center(2) - r(2) )*( center(2) - r(2) )
-!      dist += ( center(3) - r(3) )*( center(3) - r(3) )
-!      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
-!     enddo
-!     if(dabs(coef)*dabs(int_j1b).gt.thr)then
+     int_j1b = 0.d0
+     do ipoint = 1, n_points_final_grid
+      r(1:3) = final_grid_points(1:3,ipoint)
+      weight = final_weight_at_r_vector(ipoint)
+      dist  = ( center(1) - r(1) )*( center(1) - r(1) )
+      dist += ( center(2) - r(2) )*( center(2) - r(2) )
+      dist += ( center(3) - r(3) )*( center(3) - r(3) )
+      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
+     enddo
+     if(dabs(coef)*dabs(int_j1b).gt.thr)then
       List_comb_b3_size_thr(j,i) += 1
-!     endif
+     endif
    enddo
   enddo 
  enddo
@@ -157,22 +157,22 @@ END_PROVIDER
      beta = max(beta,1.d-10)
      center(1:3) = List_all_comb_b3_cent(1:3,i_1s)
      if(dabs(coef).lt.thr)cycle
-!     int_j1b = 0.d0
-!     do ipoint = 1, n_points_final_grid
-!      r(1:3) = final_grid_points(1:3,ipoint)
-!      weight = final_weight_at_r_vector(ipoint)
-!      dist  = ( center(1) - r(1) )*( center(1) - r(1) )
-!      dist += ( center(2) - r(2) )*( center(2) - r(2) )
-!      dist += ( center(3) - r(3) )*( center(3) - r(3) )
-!      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
-!     enddo
-!     if(dabs(coef)*dabs(int_j1b).gt.thr)then
+     int_j1b = 0.d0
+     do ipoint = 1, n_points_final_grid
+      r(1:3) = final_grid_points(1:3,ipoint)
+      weight = final_weight_at_r_vector(ipoint)
+      dist  = ( center(1) - r(1) )*( center(1) - r(1) )
+      dist += ( center(2) - r(2) )*( center(2) - r(2) )
+      dist += ( center(3) - r(3) )*( center(3) - r(3) )
+      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
+     enddo
+     if(dabs(coef)*dabs(int_j1b).gt.thr)then
       icount += 1
       List_comb_thr_b3_coef(icount,j,i) = coef
       List_comb_thr_b3_expo(icount,j,i) = beta
       List_comb_thr_b3_cent(1:3,icount,j,i) = center(1:3)
-!      ao_abs_comb_b3_j1b(icount,j,i) = int_j1b
-!     endif
+      ao_abs_comb_b3_j1b(icount,j,i) = int_j1b
+     endif
    enddo
   enddo 
  enddo

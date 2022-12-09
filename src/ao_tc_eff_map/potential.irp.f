@@ -165,7 +165,7 @@ end
     expo_gauss_1_erf_x_2 = (/ 6.23519457d0 /)
 
     tmp = mu_erf * mu_erf
-    do i = 1, n_max_fit_slat
+    do i = 1, ng_fit_jast
       expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
     enddo
 
@@ -175,7 +175,7 @@ end
     expo_gauss_1_erf_x_2 = (/ 55.39184787d0, 3.92151407d0 /)
 
     tmp = mu_erf * mu_erf
-    do i = 1, n_max_fit_slat
+    do i = 1, ng_fit_jast
       expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
     enddo
 
@@ -185,7 +185,7 @@ end
     expo_gauss_1_erf_x_2 = (/ 19.90272209d0, 3.2671671d0 , 336.47320445d0 /)
 
     tmp = mu_erf * mu_erf
-    do i = 1, n_max_fit_slat
+    do i = 1, ng_fit_jast
       expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
     enddo
 
@@ -195,7 +195,7 @@ end
     expo_gauss_1_erf_x_2 = (/ 6467.28126d0, 46.9071990d0, 9.09617721d0, 2.76883328d0, 360.367093d0 /)
 
     tmp = mu_erf * mu_erf
-    do i = 1, n_max_fit_slat
+    do i = 1, ng_fit_jast
       expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
     enddo
 
@@ -205,7 +205,7 @@ end
     expo_gauss_1_erf_x_2 = (/ 2.54293498d+01, 1.40317872d+02, 7.14630801d+00, 2.65517675d+00, 1.45142619d+03, 1.00000000d+04 /)
 
     tmp = mu_erf * mu_erf
-    do i = 1, n_max_fit_slat
+    do i = 1, ng_fit_jast
       expo_gauss_1_erf_x_2(i) = tmp * expo_gauss_1_erf_x_2(i)
     enddo
 

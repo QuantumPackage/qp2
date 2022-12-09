@@ -221,7 +221,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
  !$OMP          beta_ij_u, factor_ij_1s_u, center_ij_1s_u,          &
  !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_j1b)                   & 
  !$OMP SHARED  (n_points_final_grid, ao_num,  & 
- !$OMP          final_grid_points, n_max_fit_slat,                  &
+ !$OMP          final_grid_points, ng_fit_jast,                  &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_b2_size_thr,       & 
  !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_test,ao_abs_comb_b2_j1b,      &
@@ -248,7 +248,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
 
-          do i_fit = 1, n_max_fit_slat
+          do i_fit = 1, ng_fit_jast
 
             expo_fit = expo_gauss_j_mu_x(i_fit)
             coef_fit = coef_gauss_j_mu_x(i_fit)

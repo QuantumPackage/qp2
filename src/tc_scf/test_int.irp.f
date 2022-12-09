@@ -305,16 +305,16 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
     do i = 1, ao_num
      do j = 1, ao_num
       array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!     !array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
       array_ref(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      array(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      array_ref(j,i,l,k) += int2_grad1u2_grad2u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      array_ref(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!     !array(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!     !array_ref(j,i,l,k) += int2_grad1u2_grad2u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!     !array_ref(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
       if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint)).gt.1.d-6)then
        if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint)).gt.1.d-6)then
         print*,j,i,ipoint
         print*,int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) , int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint))
-        print*,int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) , int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint))
+!        print*,int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) , int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint))
         stop
        endif
       endif
