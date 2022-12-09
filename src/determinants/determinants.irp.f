@@ -329,6 +329,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_det_sorted_bit, (N_int,2,psi_det_size) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_sorted_bit, (psi_det_size,N_states) ]
+&BEGIN_PROVIDER [ integer, psi_det_sorted_bit_order, (psi_det_size) ]
    implicit none
    BEGIN_DOC
    ! Determinants on which we apply $\langle i|H|psi \rangle$ for perturbation.
@@ -337,8 +338,8 @@ END_PROVIDER
    ! function.
    END_DOC
 
-   call sort_dets_by_det_search_key(N_det, psi_det, psi_coef, size(psi_coef,1),       &
-       psi_det_sorted_bit, psi_coef_sorted_bit, N_states)
+   call sort_dets_by_det_search_key_ordered(N_det, psi_det, psi_coef, size(psi_coef,1),       &
+       psi_det_sorted_bit, psi_coef_sorted_bit, N_states, psi_det_sorted_bit_order)
 
 END_PROVIDER
 
@@ -1003,5 +1004,50 @@ BEGIN_PROVIDER [ double precision, psi_det_Hii, (N_det) ]
  enddo
  !$OMP END PARALLEL DO
 END_PROVIDER
+
+
+subroutine sort_dets_by_det_search_key_ordered(Ndet, det_in, coef_in, sze, det_out, coef_out, N_st, iorder)
+   use bitmasks
+   implicit none
+   integer, intent(in)            :: Ndet, N_st, sze
+   integer(bit_kind), intent(in)  :: det_in  (N_int,2,sze)
+   double precision , intent(in)  :: coef_in(sze,N_st)
+   integer(bit_kind), intent(out) :: det_out (N_int,2,sze)
+   double precision , intent(out) :: coef_out(sze,N_st)
+   integer, intent(out)           :: iorder(sze)
+   BEGIN_DOC
+   ! Determinants are sorted according to their :c:func:`det_search_key`.
+   ! Useful to accelerate the search of a random determinant in the wave
+   ! function.
+   !
+   ! /!\ The first dimension of coef_out and coef_in need to be psi_det_size
+   !
+   END_DOC
+   integer                        :: i,j,k
+   integer*8, allocatable         :: bit_tmp(:)
+   integer*8, external            :: det_search_key
+
+   allocate ( bit_tmp(Ndet) )
+
+   do i=1,Ndet
+     iorder(i) = i
+     !$DIR FORCEINLINE
+     bit_tmp(i) = det_search_key(det_in(1,1,i),N_int)
+   enddo
+   call i8sort(bit_tmp,iorder,Ndet)
+   !DIR$ IVDEP
+   do i=1,Ndet
+     do j=1,N_int
+       det_out(j,1,i) = det_in(j,1,iorder(i))
+       det_out(j,2,i) = det_in(j,2,iorder(i))
+     enddo
+     do k=1,N_st
+       coef_out(i,k) = coef_in(iorder(i),k)
+     enddo
+   enddo
+
+   deallocate(bit_tmp)
+
+end
 
 
