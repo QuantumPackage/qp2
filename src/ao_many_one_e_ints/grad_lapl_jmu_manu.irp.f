@@ -25,7 +25,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
 
  !$OMP PARALLEL DEFAULT (NONE)                                                         &
  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, int_mu, int_coulomb, tmp, int_j1b)& 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_b2_size_thr, final_grid_points, &
+ !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points, &
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,ao_abs_comb_b2_j1b,  &
  !$OMP          v_ij_erf_rk_cst_mu_j1b_test, mu_erf,                                   &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
@@ -41,7 +41,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
         if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
-        do i_1s = 1, List_comb_b2_size_thr(j,i)
+        do i_1s = 1, List_comb_thr_b2_size(j,i)
 
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
@@ -129,7 +129,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
  !$OMP PARALLEL DEFAULT (NONE)                                                        &
  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
  !$OMP          int_j1b, tmp_x, tmp_y, tmp_z)                                                  & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_b2_size_thr, final_grid_points,&
+ !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points,&
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,  &
  !$OMP          x_v_ij_erf_rk_cst_mu_tmp_j1b_test, mu_erf,ao_abs_comb_b2_j1b,         &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
@@ -147,7 +147,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
         tmp_x = 0.d0
         tmp_y = 0.d0
         tmp_z = 0.d0
-        do i_1s = 1, List_comb_b2_size_thr(j,i)
+        do i_1s = 1, List_comb_thr_b2_size(j,i)
 
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
@@ -223,7 +223,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
  !$OMP SHARED  (n_points_final_grid, ao_num,  & 
  !$OMP          final_grid_points, ng_fit_jast,                  &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
- !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_b2_size_thr,       & 
+ !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,       & 
  !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_test,ao_abs_comb_b2_j1b,      &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
  !$OMP DO
@@ -238,7 +238,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
         if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
-        do i_1s = 1, List_comb_b2_size_thr(j,i)
+        do i_1s = 1, List_comb_thr_b2_size(j,i)
 
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
