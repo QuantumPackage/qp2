@@ -177,7 +177,7 @@ subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_
   double precision, allocatable :: analytical_j(:)
 
   resv(:) = 0.d0
-  if(ao_overlap_abs(j,i).lt.1.d-12) then
+  if(ao_overlap_abs(j,i) .lt. 1.d-12) then
     return
   endif
 
@@ -313,9 +313,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
   ASSERT(beta .gt. 0.d0)
 
   if(beta .lt. 1d-10) then
-
     call overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_points)
-
     return
   endif
 
@@ -332,19 +330,20 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
   A1_center(1:3) = nucl_coord(ao_nucl(i),1:3)
   A2_center(1:3) = nucl_coord(ao_nucl(j),1:3)
 
-  allocate (fact_g(n_points), G_center(n_points,3), analytical_j(n_points) )
+  allocate(fact_g(n_points), G_center(n_points,3), analytical_j(n_points))
 
   bg  = beta  * gama_inv
   dg  = delta * gama_inv
   bdg = bg * delta 
-  do ipoint=1,n_points
+
+  do ipoint = 1, n_points
+
     G_center(ipoint,1) = bg * B_center(1) + dg * D_center(ipoint,1)
     G_center(ipoint,2) = bg * B_center(2) + dg * D_center(ipoint,2)
     G_center(ipoint,3) = bg * B_center(3) + dg * D_center(ipoint,3)
-    fact_g(ipoint) = bdg * ( &
-          (B_center(1) - D_center(ipoint,1)) * (B_center(1) - D_center(ipoint,1))  &
-        + (B_center(2) - D_center(ipoint,2)) * (B_center(2) - D_center(ipoint,2))  &
-        + (B_center(3) - D_center(ipoint,3)) * (B_center(3) - D_center(ipoint,3)) )
+    fact_g(ipoint) = bdg * ( (B_center(1) - D_center(ipoint,1)) * (B_center(1) - D_center(ipoint,1)) &
+                           + (B_center(2) - D_center(ipoint,2)) * (B_center(2) - D_center(ipoint,2)) &
+                           + (B_center(3) - D_center(ipoint,3)) * (B_center(3) - D_center(ipoint,3)) )
 
     if(fact_g(ipoint) < 10d0) then
       fact_g(ipoint) = dexp(-fact_g(ipoint))
@@ -368,8 +367,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
       do ipoint = 1, n_points
         coef12f = coef12 * fact_g(ipoint)
         resv(ipoint) += coef12f * analytical_j(ipoint)
-      end do
-
+      enddo
     enddo
   enddo
 

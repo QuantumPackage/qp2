@@ -21,8 +21,11 @@ program tc_scf
   PROVIDE tcscf_algorithm
   if(tcscf_algorithm == 'DIIS') then
     call rh_tcscf()
-  else
+  elseif(tcscf_algorithm == 'Simple') then
     call simple_tcscf()
+  else
+    print *, ' not implemented yet', tcscf_algorithm
+    stop
   endif
 
   call minimize_tc_orb_angles()
@@ -127,7 +130,7 @@ subroutine simple_tcscf()
       it += 1
       if(it > n_it_tcscf_max) then
         print *, ' max of TCSCF iterations is reached ', n_it_TCSCF_max
-        exit
+        stop
       endif
 
 
@@ -190,7 +193,7 @@ subroutine simple_tcscf()
 
   endif
 
-  print*,'Energy converged !'
+  print *, ' TCSCF Simple converged !'
   call print_energy_and_mos()
 
   deallocate(rho_old, rho_new)
