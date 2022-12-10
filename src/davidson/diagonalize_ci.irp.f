@@ -299,6 +299,7 @@ subroutine diagonalize_CI
 !  eigenstates of the |CI| matrix.
   END_DOC
   integer                        :: i,j
+  PROVIDE distributed_davidson
   do j=1,N_states
     do i=1,N_det
       psi_coef(i,j) = CI_eigenvectors(i,j)

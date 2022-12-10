@@ -22,7 +22,7 @@ subroutine ZMQ_selection(N_in, pt2_data)
     PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
     PROVIDE psi_bilinear_matrix_transp_order selection_weight pseudo_sym
     PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
-    PROVIDE pert_2rdm excitation_beta_max  excitation_alpha_max excitation_max
+    PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
 
     call new_parallel_job(zmq_to_qp_run_socket,zmq_socket_pull,'selection')
 

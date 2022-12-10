@@ -235,11 +235,11 @@ subroutine get_mo_two_e_integrals_erf_ij(k,l,sze,out_array,map)
 
   logical :: integral_is_in_map
   if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
+    call i8sort(hash,iorder,kk)
   else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
+    call isort(hash,iorder,kk)
   else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
+    call i2sort(hash,iorder,kk)
   endif
 
   call map_get_many(mo_integrals_erf_map, hash, tmp_val, kk)
@@ -290,11 +290,11 @@ subroutine get_mo_two_e_integrals_erf_i1j1(k,l,sze,out_array,map)
 
   logical :: integral_is_in_map
   if (key_kind == 8) then
-    call i8radix_sort(hash,iorder,kk,-1)
+    call i8sort(hash,iorder,kk)
   else if (key_kind == 4) then
-    call iradix_sort(hash,iorder,kk,-1)
+    call isort(hash,iorder,kk)
   else if (key_kind == 2) then
-    call i2radix_sort(hash,iorder,kk,-1)
+    call i2sort(hash,iorder,kk)
   endif
 
   call map_get_many(mo_integrals_erf_map, hash, tmp_val, kk)

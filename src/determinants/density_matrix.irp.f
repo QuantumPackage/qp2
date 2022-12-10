@@ -304,7 +304,7 @@ BEGIN_PROVIDER [ double precision, c0_weight, (N_states) ]
        c0_weight(i) = c0_weight(i) * c
      enddo
    else
-     c0_weight = 1.d0
+     c0_weight(:) = 1.d0
    endif
 
 END_PROVIDER
@@ -321,7 +321,7 @@ BEGIN_PROVIDER [ double precision, state_average_weight, (N_states) ]
    if (weight_one_e_dm == 0) then
      state_average_weight(:) = c0_weight(:)
    else if (weight_one_e_dm == 1) then
-     state_average_weight(:) = 1./N_states
+     state_average_weight(:) = 1.d0/N_states
    else
      call ezfio_has_determinants_state_average_weight(exists)
      if (exists) then
@@ -383,6 +383,14 @@ END_PROVIDER
    enddo
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, one_e_dm_ao, (ao_num, ao_num)]
+ implicit none
+   BEGIN_DOC
+   !  one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
+   END_DOC
+    one_e_dm_ao = one_e_dm_ao_alpha + one_e_dm_ao_beta 
+END_PROVIDER 
 
 
 subroutine get_occupation_from_dets(istate,occupation)

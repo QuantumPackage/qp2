@@ -282,9 +282,7 @@ subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
   double precision               :: get_two_e_integral
   integer                        :: m,n,p,q
   integer                        :: i,j,k
-  integer                        :: occ(Nint*bit_kind_size,2)
   double precision               :: diag_H_mat_elem, phase,phase_2
-  integer                        :: n_occ_ab(2)
   PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals ref_bitmask_two_e_energy
 
   ASSERT (Nint > 0)
@@ -342,7 +340,6 @@ subroutine i_H_j_two_e(key_i,key_j,Nint,hij)
     case (1)
       call get_single_excitation(key_i,key_j,exc,phase,Nint)
       !DIR$ FORCEINLINE
-      call bitstring_to_list_ab(key_i, occ, n_occ_ab, Nint)
       if (exc(0,1,1) == 1) then
         ! Mono alpha
         m = exc(1,1,1)

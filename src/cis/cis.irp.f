@@ -62,6 +62,7 @@ subroutine run
   else
    call H_apply_cis
   endif
+  print*,''
   print *,  'N_det = ', N_det
   print*,'******************************'
   print *,  'Energies  of the states:'
@@ -69,11 +70,13 @@ subroutine run
     print *,  i, CI_energy(i)
   enddo
   if (N_states > 1) then
-    print*,'******************************'
-    print*,'Excitation energies '
+    print*,''
+    print*,'******************************************************'
+    print*,'Excitation energies (au)                     (eV)'
     do i = 2, N_states
-      print*, i ,CI_energy(i) - CI_energy(1)
+      print*, i ,CI_energy(i) - CI_energy(1), (CI_energy(i) - CI_energy(1)) * ha_to_ev
     enddo
+    print*,''
   endif
 
   call ezfio_set_cis_energy(CI_energy)

@@ -2,7 +2,7 @@ open Qputils
 open Qptypes
 
 type ezfio_or_address = EZFIO of string | ADDRESS of string
-type req_or_sub = REQ | SUB 
+type req_or_sub = REQ | SUB
 
 let localport = 42379
 
@@ -29,7 +29,7 @@ let () =
   end;
 
   let arg =
-    let x = 
+    let x =
       match Command_line.anon_args () with
       | [x] -> x
       | _ -> begin
@@ -44,7 +44,7 @@ let () =
   in
 
 
-  let localhost = 
+  let localhost =
      Lazy.force TaskServer.ip_address
   in
 
@@ -52,28 +52,28 @@ let () =
   let long_address  =
     match arg with
     | ADDRESS x -> x
-    | EZFIO   x -> 
-	let ic = 
+    | EZFIO   x ->
+	let ic =
 	  Filename.concat  (Qpackage.ezfio_work x)  "qp_run_address"
           |> open_in
 	in
-        let result = 
+        let result =
           input_line ic
           |> String.trim
         in
         close_in ic;
         result
   in
-  
+
   let protocol, address, port =
     match String.split_on_char ':' long_address with
     | t :: a :: p :: [] -> t, a, int_of_string p
-    | _ -> failwith @@ 
+    | _ -> failwith @@
            Printf.sprintf "%s : Malformed address" long_address
   in
 
 
-  let zmq_context = 
+  let zmq_context =
     Zmq.Context.create ()
   in
 
@@ -105,10 +105,10 @@ let () =
 
 
   let create_socket  sock_type  bind_or_connect  addr =
-    let socket = 
+    let socket =
       Zmq.Socket.create zmq_context sock_type
     in
-    let () = 
+    let () =
       try
         bind_or_connect socket addr
       with
@@ -131,37 +131,64 @@ let () =
   Sys.set_signal  Sys.sigint   handler;
 
 
-  let new_thread req_or_sub addr_in addr_out =
+  let new_thread_req addr_in addr_out =
     let socket_in, socket_out =
-      match req_or_sub with
-      | REQ ->
           create_socket  Zmq.Socket.router  Zmq.Socket.bind     addr_in,
           create_socket  Zmq.Socket.dealer  Zmq.Socket.connect  addr_out
-      | SUB ->
-          create_socket  Zmq.Socket.sub  Zmq.Socket.connect  addr_in,
-          create_socket  Zmq.Socket.pub  Zmq.Socket.bind     addr_out
     in
 
-    if req_or_sub = SUB then
-        Zmq.Socket.subscribe  socket_in  "";
 
-
-
-   let action_in = 
-      match req_or_sub with
-        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
-        | SUB -> (fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out)
+    let action_in =
+        fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out
     in
 
-    let action_out = 
-      match req_or_sub with
-        | REQ -> (fun () -> Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in )
-        | SUB -> (fun () -> () )
+    let action_out =
+        fun () -> Zmq.Socket.recv_all  socket_out |> Zmq.Socket.send_all  socket_in
     in
 
     let pollitem =
       Zmq.Poll.mask_of
-        [| (socket_in,  Zmq.Poll.In) ; (socket_out, Zmq.Poll.In) |]
+        [| (socket_convert socket_in,  Zmq.Poll.In) ; (socket_convert socket_out, Zmq.Poll.In) |]
+    in
+
+    while !run_status do
+
+        let polling =
+          Zmq.Poll.poll  ~timeout:1000  pollitem
+        in
+
+        match polling with
+          | [| Some Zmq.Poll.In ; Some Zmq.Poll.In |]     -> ( action_out () ; action_in () )
+          | [| _                ; Some Zmq.Poll.In |]     ->   action_out ()
+          | [| Some Zmq.Poll.In ; _                |]     ->   action_in  ()
+          | _                    -> ()
+    done;
+
+    Zmq.Socket.close  socket_in;
+    Zmq.Socket.close  socket_out;
+  in
+
+  let new_thread_sub addr_in addr_out =
+    let socket_in, socket_out =
+          create_socket  Zmq.Socket.sub  Zmq.Socket.connect  addr_in,
+          create_socket  Zmq.Socket.pub  Zmq.Socket.bind     addr_out
+    in
+
+    Zmq.Socket.subscribe  socket_in  "";
+
+
+
+   let action_in =
+        fun () -> Zmq.Socket.recv_all  socket_in  |> Zmq.Socket.send_all  socket_out
+    in
+
+    let action_out =
+        fun () -> ()
+    in
+
+    let pollitem =
+      Zmq.Poll.mask_of
+        [| (socket_convert socket_in,  Zmq.Poll.In) ; (socket_convert socket_out, Zmq.Poll.In) |]
     in
 
 
@@ -173,8 +200,8 @@ let () =
 
         match polling with
           | [| Some Zmq.Poll.In ; Some Zmq.Poll.In |]     -> ( action_out () ; action_in () )
-          | [| _                ; Some Zmq.Poll.In |]     ->   action_out () 
-          | [| Some Zmq.Poll.In ; _                |]     ->   action_in  () 
+          | [| _                ; Some Zmq.Poll.In |]     ->   action_out ()
+          | [| Some Zmq.Poll.In ; _                |]     ->   action_in  ()
           | _                    -> ()
     done;
 
@@ -193,8 +220,8 @@ let () =
       Printf.sprintf "tcp://*:%d"  localport
     in
 
-    let f () = 
-      new_thread  REQ  addr_in  addr_out
+    let f () =
+      new_thread_req  addr_in  addr_out
     in
 
     (Thread.create f) ()
@@ -211,8 +238,8 @@ let () =
       Printf.sprintf "tcp://*:%d" (localport+2)
     in
 
-    let f () = 
-      new_thread  REQ  addr_in  addr_out
+    let f () =
+      new_thread_req  addr_in  addr_out
     in
     (Thread.create f) ()
   in
@@ -227,8 +254,8 @@ let () =
       Printf.sprintf "tcp://*:%d" (localport+1)
     in
 
-    let f () = 
-      new_thread  SUB  addr_in  addr_out
+    let f () =
+      new_thread_sub  addr_in  addr_out
     in
     (Thread.create f) ()
   in
@@ -236,7 +263,7 @@ let () =
 
 
   let input_thread =
-    let f () = 
+    let f () =
       let addr_out =
         match arg with
         | EZFIO _ -> None
@@ -248,22 +275,22 @@ let () =
         Printf.sprintf "tcp://*:%d"  (localport+9)
       in
 
-      let socket_in = 
+      let socket_in =
         create_socket  Zmq.Socket.rep  Zmq.Socket.bind     addr_in
       in
 
       let socket_out =
-        match addr_out with 
+        match addr_out with
         | Some addr_out -> Some (
             create_socket  Zmq.Socket.req  Zmq.Socket.connect  addr_out)
         | None -> None
       in
 
-      let temp_file = 
+      let temp_file =
         Filename.temp_file "qp_tunnel" ".tar.gz"
       in
 
-      let get_ezfio_filename () = 
+      let get_ezfio_filename () =
         match arg with
         | EZFIO x -> x
         | ADDRESS _ ->
@@ -277,9 +304,9 @@ let () =
           end
       in
 
-      let get_input () = 
+      let get_input () =
         match arg with
-        | EZFIO x -> 
+        | EZFIO x ->
           begin
             Printf.sprintf "tar --exclude=\"*.gz.*\" -zcf %s %s" temp_file x
             |> Sys.command |> ignore;
@@ -291,11 +318,11 @@ let () =
             in
             ignore @@ Unix.lseek  fd  0  Unix.SEEK_SET ;
             let bstr =
-                Unix.map_file  fd  Bigarray.char 
+                Unix.map_file  fd  Bigarray.char
                   Bigarray.c_layout false [| len |]
                 |> Bigarray.array1_of_genarray
             in
-            let result = 
+            let result =
               String.init len (fun i -> bstr.{i}) ;
             in
             Unix.close fd;
@@ -313,7 +340,7 @@ let () =
           end
       in
 
-      let () = 
+      let () =
         match socket_out with
         | None -> ()
         | Some socket_out ->
@@ -329,7 +356,7 @@ let () =
           | ADDRESS _ ->
             begin
               Printf.printf "Getting input... %!";
-              let ezfio_filename = 
+              let ezfio_filename =
                 get_ezfio_filename ()
               in
               Printf.printf "%s%!" ezfio_filename;
@@ -343,7 +370,7 @@ let () =
               |> Sys.command |> ignore ;
               let oc =
                 Filename.concat  (Qpackage.ezfio_work ezfio_filename)  "qp_run_address"
-                |> open_out 
+                |> open_out
               in
               Printf.fprintf oc "tcp://%s:%d\n"  localhost  localport;
               close_out oc;
@@ -359,9 +386,9 @@ let () =
       let action () =
         match Zmq.Socket.recv socket_in with
         | "get_input" -> get_input ()
-                        |> Zmq.Socket.send socket_in 
+                        |> Zmq.Socket.send socket_in
         | "get_ezfio_filename" -> get_ezfio_filename ()
-                        |> Zmq.Socket.send socket_in 
+                        |> Zmq.Socket.send socket_in
         | "test" -> Zmq.Socket.send socket_in "OK"
         | x -> Printf.sprintf "Message '%s' not understood" x
                |> Zmq.Socket.send socket_in
@@ -372,7 +399,7 @@ On remote hosts, create ssh tunnel using:
  ssh -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d -L %d:%s:%d %s &
 Or from this host connect to clients using:
  ssh -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d -R %d:localhost:%d <host> &
-%!" 
+%!"
                 (port  ) localhost (localport  )
                 (port+1) localhost (localport+1)
                 (port+2) localhost (localport+2)
@@ -392,12 +419,12 @@ Or from this host connect to clients using:
           match polling.(0) with
             | Some Zmq.Poll.In     -> action ()
             | None                 -> ()
-            | Some Zmq.Poll.In_out 
+            | Some Zmq.Poll.In_out
             | Some Zmq.Poll.Out    -> ()
 
       done;
 
-      let () = 
+      let () =
         match socket_out with
         | Some socket_out -> Zmq.Socket.close  socket_out
         | None -> ()
@@ -415,7 +442,7 @@ Or from this host connect to clients using:
   Thread.join ocaml_thread;
   Zmq.Context.terminate zmq_context;
   Printf.printf "qp_tunnel exited properly.\n"
-  
+
 
 
 

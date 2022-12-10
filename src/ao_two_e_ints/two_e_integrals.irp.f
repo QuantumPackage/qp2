@@ -603,10 +603,7 @@ double precision function general_primitive_integral(dim,            &
   !DIR$ FORCEINLINE
   call multiply_poly(d_poly ,n_pt_tmp ,Iz_pol,n_Iz,d1,n_pt_out)
   double precision               :: rint_sum
-
   accu = accu + rint_sum(n_pt_out,const,d1)
-!  print *, n_pt_out, d1(0:n_pt_out)
-!  print *, accu
 
   general_primitive_integral = fact_p * fact_q * accu *pi_5_2*p_inv*q_inv/dsqrt(p+q)
 end
@@ -871,15 +868,6 @@ subroutine give_polynom_mult_center_x(P_center,Q_center,a_x,d_x,p,q,n_pt_in,pq_i
   !DIR$ FORCEINLINE
   call I_x1_pol_mult(a_x,d_x,B10,B01,B00,C00,D00,d,n_pt1,n_pt_in)
   n_pt_out = n_pt1
-
-!  print *, ' '
-!  print *, a_x, d_x
-!  print *, B10, B01, B00, C00, D00
-!  print *, n_pt1, d(0:n_pt1)
-!  print *, ' '
-
-
-
   if(n_pt1<0)then
     n_pt_out = -1
     do i = 0,n_pt_in

@@ -529,10 +529,14 @@ subroutine orb_range_2_rdm_state_av_openmp_work_$N_int(big_array,dim1,norb,list_
        c_average += c_1(l) * c_1(l) * state_weights(l) 
      enddo
      
-     call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     if (nkeys > 0) then
+       call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     endif
      nkeys = 0
      call orb_range_diag_to_all_2_rdm_dm_buffer(tmp_det,c_average,orb_bitmask,list_orb_reverse,ispin,sze_buff,nkeys,keys,values)
-     call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     if (nkeys > 0) then
+       call update_keys_values(keys,values,nkeys,dim1,big_array,lock_2rdm)
+     endif
      nkeys = 0
      
    end do

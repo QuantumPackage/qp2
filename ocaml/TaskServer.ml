@@ -155,7 +155,7 @@ let new_job msg program_state rep_socket pair_socket =
           ~start_value:0.
           ~end_value:1.
           ~bar_length:20
-          ~title:(Message.State.to_string state)
+          (Message.State.to_string state)
     in
 
     let result =

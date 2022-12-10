@@ -315,7 +315,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !  write(*, '(1000(F16.10,X))') VL(:,i)
   !enddo
 
-  thr_diag = 1d-07
+  thr_diag = 1d-06
   thr_norm = 1d+10
   call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
 
@@ -337,19 +337,21 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
     else
       print*, 'Found an imaginary component to eigenvalue on i = ', i
       print*, 'Re(i) + Im(i)', WR(i), WI(i)
-      stop
     endif
   enddo
 
+  if(n_good.ne.n)then
+   print*,'there are some imaginary eigenvalues '
+   thr_diag = 1d-03
+   n_good = n
+  endif
   allocate(list_good(n_good), iorder(n_good))
 
   n_good = 0
   do i = 1, n
-    if( dabs(WI(i)).lt.thr ) then
-      n_good += 1
-      list_good(n_good) = i
-      eigval(n_good) = WR(i)
-    endif
+    n_good += 1
+    list_good(n_good) = i
+    eigval(n_good) = WR(i)
   enddo
 
   deallocate( WR, WI )

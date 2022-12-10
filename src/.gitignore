@@ -1,0 +1,11 @@
+*
+!README.rst
+!*/
+*/*
+!*/*.*
+*/*.o
+*/build.ninja
+*/ezfio_interface.irp.f
+*/.gitignore
+*/*.swp
+

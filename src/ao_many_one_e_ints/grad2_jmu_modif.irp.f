@@ -351,7 +351,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
           ! ---
 
           int_fit = NAI_pol_mult_erf_ao_with1s(i, j, expo_fit, r, 1.d+9, r)
-          if(dabs(int_fit) .lt. 1d-10) cycle
+!          if(dabs(int_fit) .lt. 1d-10) cycle
 
           tmp += coef_fit * int_fit
 
@@ -375,9 +375,10 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
             centr_1s(3)  = alpha_1s_inv * (beta * B_center(3) + expo_fit * r(3))
 
             expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist
+!            if(expo_coef_1s .gt. 80.d0) cycle
             coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
-            if(dabs(coef_tmp) .lt. 1d-10) cycle
-            
+!            if(dabs(coef_tmp) .lt. 1d-10) cycle
+
             int_fit = NAI_pol_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s,  1.d+9, r)
 
             tmp += coef_tmp * int_fit
