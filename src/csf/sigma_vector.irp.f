@@ -1654,7 +1654,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
      ! TODO : remove doubly excited for return
-     !print *,"I=",i," isomo=",psi_configuration(1,1,i)," idomo=",psi_configuration(1,2,i), " psiout=",psi_out(1,5)
+     !print *,"I=",i," isomo=",psi_configuration(1,1,i)," idomo=",psi_configuration(1,2,i), " psiout=",psi_out(1,5), "Nalphas_Icfg=",Nalphas_Icfg
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
 
@@ -1807,6 +1807,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   !$OMP END DO
 
   !$OMP END PARALLEL
+  !print *," ----- "
+  !do i=1,sze
+  !  print *,"i=",i," psi_out(i)=",psi_out(1,i)
+  !end do
   call omp_set_max_active_levels(4)
 
   deallocate(diag_energies)

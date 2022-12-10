@@ -763,7 +763,7 @@ use bitmasks
       endif
     end do
 
-    print *,tableUniqueAlphas(:,:)
+    !print *,tableUniqueAlphas(:,:)
 
     ! prune list of alphas
     do i=1, N_int
@@ -772,7 +772,7 @@ use bitmasks
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
-    print *, " Isomo=",Isomo(1), " Idomo=", Idomo(1)
+    !print *, " Isomo=",Isomo(1), " Idomo=", Idomo(1)
 
     NalphaIcfg = 0
     do i = 1, nholes
@@ -816,7 +816,7 @@ use bitmasks
           Nsomo_J = nelall
 
           if(Nsomo_J .ge. NSOMOMin) then
-            print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
+            !print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
             NalphaIcfg += 1
             alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
             if(n_core_orb .le. 63)then
@@ -861,6 +861,7 @@ use bitmasks
     kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
     ndiffDOMO = 0
     do k = kstart, idxI-1
+      ndiffSOMO = 0
       do ii=1,N_int
         diffSOMO = IEOR(Icfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))
         ndiffSOMO += POPCNT(diffSOMO(ii))

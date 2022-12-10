@@ -482,6 +482,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         diagfactors(nconnectedI) = 1.0d0
      else if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
         ! find out all pq holes possible
+        !print *,"I = ",i
+        !print *,"I somo= ",psi_configuration(1,1,i), " domo=", psi_configuration(1,2,i)
+        !print *,"alp somo= ",Ialpha(1,1), " domo=", Ialpha(1,2)
         nholes = 0
         ! holes in SOMO
         !Isomo = psi_configuration(1,1,i)
@@ -549,6 +552,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
               excitationTypes(nconnectedI) = extyp
               diagfactors(nconnectedI) = 2.0d0
            endif
+           !print *,excitationIds(1,nconnectedI), excitationIds(2,nconnectedI)
         enddo
      endif
   end do
