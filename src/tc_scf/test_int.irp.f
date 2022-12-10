@@ -9,10 +9,10 @@ program test_ints
   print *, 'starting ...'
 
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 10
-!  my_n_pt_a_grid = 50
+  my_n_pt_r_grid = 30
+  my_n_pt_a_grid = 50
 !  my_n_pt_r_grid = 10 ! small grid for quick debug
-  my_n_pt_a_grid = 14 ! small grid for quick debug
+!  my_n_pt_a_grid = 14 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   my_n_pt_r_extra_grid = 30
@@ -38,8 +38,17 @@ program test_ints
 ! call routine_int2_grad1u2_grad2u2_j1b2
 ! call routine_int2_u_grad1u_j1b2
 ! call test_total_grad_lapl
- call test_total_grad_square
+! call test_total_grad_square
+ call test_ao_tc_int_chemist
 
+end
+
+subroutine test_ao_tc_int_chemist
+ implicit none
+ provide ao_tc_int_chemist
+! provide ao_tc_int_chemist_test
+! provide tc_grad_square_ao_test
+! provide tc_grad_and_lapl_ao_test
 end
 
 subroutine routine_test_j1b
