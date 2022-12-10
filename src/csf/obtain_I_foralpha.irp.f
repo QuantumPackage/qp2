@@ -315,86 +315,35 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            !print *,"obt SOMO -> VMO"
            extyp = 3
            if(N_int .eq. 1) then
-           IJsomo = IEOR(Isomo, Jsomo)
-!IRP_IF WITHOUT_TRAILZ
-!           p = (popcnt(ieor( IAND(Isomo,IJsomo) , IAND(Isomo,IJsomo) -1))-1) + 1
-!IRP_ELSE
-           p = TRAILZ(IAND(Isomo,IJsomo)) + 1
-!IRP_ENDIF
-           IJsomo = IBCLR(IJsomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!           q = (popcnt(ieor(IJsomo,IJsomo-1))-1) + 1
-!IRP_ELSE
-           q = TRAILZ(IJsomo) + 1
-!IRP_ENDIF
-           !print *," p=",p," q=",q
-           !call get_single_excitation_cfg(Jcfg, Icfg, p, q, N_int)
-         else
-  exc = 0
-  do ii = 1,2
-    ishift = 1-bit_kind_size
-    do l=1,N_int
-      ishift = ishift + bit_kind_size
-      if (Jcfg(l,ii) == Icfg(l,ii)) then
-        cycle
-      endif
-      tmp = xor( Jcfg(l,ii), Icfg(l,ii) )
-      particle = iand(tmp, Icfg(l,ii))
-      hole     = iand(tmp, Jcfg(l,ii))
-      if (particle /= 0_bit_kind) then
-        tz = trailz(particle)
-        exc(0,2,ii) = 1
-        exc(1,2,ii) = tz+ishift
-        !print *,"part ",tz+ishift, " ii=",ii, exc(1,2,2)
-      endif
-      if (hole /= 0_bit_kind) then
-        tz = trailz(hole)
-        exc(0,1,ii) = 1
-        exc(1,1,ii) = tz+ishift
-        !print *,"hole ",tz+ishift, " ii=",ii, exc(1,1,2)
-      endif
-
-      if ( iand(exc(0,1,ii),exc(0,2,ii)) /= 1) then  ! exc(0,1,ii)/=1 and exc(0,2,ii) /= 1
-        cycle
-      endif
-
-      high = max(exc(1,1,ii), exc(1,2,ii))-1
-      low  = min(exc(1,1,ii), exc(1,2,ii))
-
-      ASSERT (low >= 0)
-      ASSERT (high > 0)
-
-      k = shiftr(high,bit_kind_shift)+1
-      j = shiftr(low,bit_kind_shift)+1
-      m = iand(high,bit_kind_size-1)
-      n = iand(low,bit_kind_size-1)
-
-      if (j==k) then
-        nperm = nperm + popcnt(iand(Jcfg(j,ii),           &
-            iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
-                  not(shiftl(1_bit_kind,n))+1_bit_kind)) )
-      else
-        nperm = nperm + popcnt(                                    &
-             iand(Jcfg(j,ii),                                   &
-                  iand(not(0_bit_kind),                            &
-                       (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
-             + popcnt(iand(Jcfg(k,ii),                          &
-                           (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
-
-        do iii=j+1,k-1
-          nperm = nperm + popcnt(Jcfg(iii,ii))
-        end do
-
-      endif
-
-      ! Set p and q
-      q = max(exc(1,1,1),exc(1,1,2))
-      p = max(exc(1,2,1),exc(1,2,2))
-      exit
-
-    enddo
-  enddo
-endif
+             IJsomo = IEOR(Isomo, Jsomo)
+             p = TRAILZ(IAND(Isomo,IJsomo)) + 1
+             IJsomo = IBCLR(IJsomo,p-1)
+             q = TRAILZ(IJsomo) + 1
+             !print *," p=",p," q=",q
+             !call get_single_excitation_cfg(Jcfg, Icfg, p, q, N_int)
+           else
+             ! Find p
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               if(popcnt(IAND(Isomo,IJsomo)) > 0)then
+                 p = TRAILZ(IAND(Isomo,IJsomo)) + 1 + ii * bit_kind_size
+                 EXIT
+               endif
+             end do
+             ! Find q
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               IJsomo = IBCLR(IJsomo,p-1)
+               if(popcnt(IJsomo) > 0)then
+                 q = TRAILZ(IJsomo) + 1 + ii * bit_kind_size
+                 EXIT
+               endif
+             enddo
+           endif
            !assert ( p == pp)
            !assert ( q == qq)
            !print *," --- p=",p," q=",q
@@ -409,88 +358,35 @@ endif
               !print *,"obt DOMO -> VMO"
               extyp = 2
               if(N_int.eq.1)then
-!IRP_IF WITHOUT_TRAILZ
-!              p = (popcnt(ieor( IEOR(Idomo,Jdomo),IEOR(Idomo,Jdomo) -1))-1) + 1
-!IRP_ELSE
-              p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-!IRP_ENDIF
-              Isomo = IEOR(Isomo, Jsomo)
-              Isomo = IBCLR(Isomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!              q = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
-!IRP_ELSE
-              q = TRAILZ(Isomo) + 1
-!IRP_ENDIF
-  else
-    exc=0
-  exc(0,1,1) = 0
-  exc(0,2,1) = 0
-  exc(0,1,2) = 0
-  exc(0,2,2) = 0
-  do ii = 1,2
-    ishift = 1-bit_kind_size
-    do l=1,N_int
-      ishift = ishift + bit_kind_size
-      if (Jcfg(l,ii) == Icfg(l,ii)) then
-        cycle
-      endif
-      tmp = xor( Jcfg(l,ii), Icfg(l,ii) )
-      particle = iand(tmp, Icfg(l,ii))
-      hole     = iand(tmp, Jcfg(l,ii))
-      if (particle /= 0_bit_kind) then
-        tz = trailz(particle)
-        exc(0,2,ii) = 1
-        exc(1,2,ii) = tz+ishift
-        !print *,"part ",tz+ishift, " ii=",ii
-      endif
-      if (hole /= 0_bit_kind) then
-        tz = trailz(hole)
-        exc(0,1,ii) = 1
-        exc(1,1,ii) = tz+ishift
-        !print *,"hole ",tz+ishift, " ii=",ii
-      endif
+                p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+                Isomo = IEOR(Isomo, Jsomo)
+                Isomo = IBCLR(Isomo,p-1)
+                q = TRAILZ(Isomo) + 1
+              else
 
-      if ( iand(exc(0,1,ii),exc(0,2,ii)) /= 1) then  ! exc(0,1,ii)/=1 and exc(0,2,ii) /= 1
-        cycle
-      endif
-
-      high = max(exc(1,1,ii), exc(1,2,ii))-1
-      low  = min(exc(1,1,ii), exc(1,2,ii))
-
-      ASSERT (low >= 0)
-      ASSERT (high > 0)
-
-      k = shiftr(high,bit_kind_shift)+1
-      j = shiftr(low,bit_kind_shift)+1
-      m = iand(high,bit_kind_size-1)
-      n = iand(low,bit_kind_size-1)
-
-      if (j==k) then
-        nperm = nperm + popcnt(iand(Jcfg(j,ii),           &
-            iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
-                  not(shiftl(1_bit_kind,n))+1_bit_kind)) )
-      else
-        nperm = nperm + popcnt(                                    &
-             iand(Jcfg(j,ii),                                   &
-                  iand(not(0_bit_kind),                            &
-                       (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
-             + popcnt(iand(Jcfg(k,ii),                          &
-                           (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
-
-        do iii=j+1,k-1
-          nperm = nperm + popcnt(Jcfg(iii,ii))
-        end do
-
-      endif
-
-      ! Set p and q
-      q = max(exc(1,1,1),exc(1,1,2))
-      p = max(exc(1,2,1),exc(1,2,2))
-      exit
-
-    enddo
-  enddo
-endif
+                ! Find p
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Idomo = Ialpha(ii,2)
+                  Jdomo = psi_configuration(ii,2,i)
+                  if(popcnt(IEOR(Idomo,Jdomo)) > 0)then
+                    p = TRAILZ(IEOR(Idomo,Jdomo)) + 1 + ii * bit_kind_size
+                    EXIT
+                  endif
+                end do
+                ! Find q
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Isomo = IEOR(Isomo, Jsomo)
+                  Isomo = IBCLR(Isomo,p-1)
+                  if(popcnt(Isomo) > 0)then
+                    q = TRAILZ(Isomo) + 1 + ii * bit_kind_size
+                    EXIT
+                  endif
+                end do
+              endif
            !assert ( p == pp)
            !assert ( q == qq)
            else
@@ -498,183 +394,75 @@ endif
               !print *,"obt SOMO -> SOMO"
               extyp = 1
               if(N_int.eq.1)then
-!IRP_IF WITHOUT_TRAILZ
-!              q = (popcnt(ieor( IEOR(Idomo,Jdomo), IEOR(Idomo,Jdomo)-1))-1) + 1
-!IRP_ELSE
-              q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-!IRP_ENDIF
-              Isomo = IEOR(Isomo, Jsomo)
-              Isomo = IBCLR(Isomo,q-1)
-!IRP_IF WITHOUT_TRAILZ
-!              p = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
-!IRP_ELSE
-              p = TRAILZ(Isomo) + 1
-!IRP_ENDIF
-              ! Check for Minimal alpha electrons (MS)
-              !if(POPCNT(Isomo).lt.MS)then
-              !  cycle
-              !endif
-  else
-  exc=0
-  exc(0,1,1) = 0
-  exc(0,2,1) = 0
-  exc(0,1,2) = 0
-  exc(0,2,2) = 0
-  do ii = 1,2
-    ishift = 1-bit_kind_size
-    do l=1,N_int
-      ishift = ishift + bit_kind_size
-      if (Jcfg(l,ii) == Icfg(l,ii)) then
-        cycle
-      endif
-      tmp = xor( Jcfg(l,ii), Icfg(l,ii) )
-      particle = iand(tmp, Icfg(l,ii))
-      hole     = iand(tmp, Jcfg(l,ii))
-      if (particle /= 0_bit_kind) then
-        tz = trailz(particle)
-        exc(0,2,ii) = 1
-        exc(1,2,ii) = tz+ishift
-        !print *,"part ",tz+ishift, " ii=",ii
-      endif
-      if (hole /= 0_bit_kind) then
-        tz = trailz(hole)
-        exc(0,1,ii) = 1
-        exc(1,1,ii) = tz+ishift
-        !print *,"hole ",tz+ishift, " ii=",ii
-      endif
-
-      if ( iand(exc(0,1,ii),exc(0,2,ii)) /= 1) then  ! exc(0,1,ii)/=1 and exc(0,2,ii) /= 1
-        cycle
-      endif
-
-      high = max(exc(1,1,ii), exc(1,2,ii))-1
-      low  = min(exc(1,1,ii), exc(1,2,ii))
-
-      ASSERT (low >= 0)
-      ASSERT (high > 0)
-
-      k = shiftr(high,bit_kind_shift)+1
-      j = shiftr(low,bit_kind_shift)+1
-      m = iand(high,bit_kind_size-1)
-      n = iand(low,bit_kind_size-1)
-
-      if (j==k) then
-        nperm = nperm + popcnt(iand(Jcfg(j,ii),           &
-            iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
-                  not(shiftl(1_bit_kind,n))+1_bit_kind)) )
-      else
-        nperm = nperm + popcnt(                                    &
-             iand(Jcfg(j,ii),                                   &
-                  iand(not(0_bit_kind),                            &
-                       (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
-             + popcnt(iand(Jcfg(k,ii),                          &
-                           (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
-
-        do iii=j+1,k-1
-          nperm = nperm + popcnt(Jcfg(iii,ii))
-        end do
-
-      endif
-
-      ! Set p and q
-      q = max(exc(1,1,1),exc(1,1,2))
-      p = max(exc(1,2,1),exc(1,2,2))
-      exit
-
-    enddo
-  enddo
-endif
+                q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+                Isomo = IEOR(Isomo, Jsomo)
+                Isomo = IBCLR(Isomo,q-1)
+                p = TRAILZ(Isomo) + 1
+                ! Check for Minimal alpha electrons (MS)
+                !if(POPCNT(Isomo).lt.MS)then
+                !  cycle
+                !endif
+              else
+                ! Find p
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Idomo = Ialpha(ii,2)
+                  Jdomo = psi_configuration(ii,2,i)
+                  if(popcnt(IEOR(Idomo,Jdomo)) > 0)then
+                    q = TRAILZ(IEOR(Idomo,Jdomo)) + 1 + ii * bit_kind_size
+                    EXIT
+                  endif
+                enddo
+                ! Find q
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Isomo = IEOR(Isomo, Jsomo)
+                  Isomo = IBCLR(Isomo,q-1)
+                  if(popcnt(Isomo) > 0)then
+                    p = TRAILZ(Isomo) + 1 + ii * bit_kind_size
+                    EXIT
+                  endif
+                enddo
+              endif
            !assert ( p == pp)
            !assert ( q == qq)
-           end if
+           endif
         case (2)
            ! DOMO -> SOMO
            !print *,"obt DOMO -> SOMO"
            extyp = 4
            if(N_int.eq.1)then
-           IJsomo = IEOR(Isomo, Jsomo)
-!IRP_IF WITHOUT_TRAILZ
-!           p = (popcnt(ieor( IAND(Jsomo,IJsomo), IAND(Jsomo,IJsomo)-1))-1) + 1
-!IRP_ELSE
-           p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
-!IRP_ENDIF
-           IJsomo = IBCLR(IJsomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!           q = (popcnt(ieor( IJsomo , IJsomo -1))-1) + 1
-!IRP_ELSE
-           q = TRAILZ(IJsomo) + 1
-!IRP_ENDIF
-
-  else
-  exc=0
-  exc(0,1,1) = 0
-  exc(0,2,1) = 0
-  exc(0,1,2) = 0
-  exc(0,2,2) = 0
-  do ii = 1,2
-    ishift = 1-bit_kind_size
-    do l=1,N_int
-      ishift = ishift + bit_kind_size
-      if (Jcfg(l,ii) == Icfg(l,ii)) then
-        cycle
-      endif
-      tmp = xor( Jcfg(l,ii), Icfg(l,ii) )
-      particle = iand(tmp, Icfg(l,ii))
-      hole     = iand(tmp, Jcfg(l,ii))
-      if (particle /= 0_bit_kind) then
-        tz = trailz(particle)
-        exc(0,2,ii) = 1
-        exc(1,2,ii) = tz+ishift
-        !print *,"part ",tz+ishift, " ii=",ii
-      endif
-      if (hole /= 0_bit_kind) then
-        tz = trailz(hole)
-        exc(0,1,ii) = 1
-        exc(1,1,ii) = tz+ishift
-        !print *,"hole ",tz+ishift, " ii=",ii
-      endif
-
-      if ( iand(exc(0,1,ii),exc(0,2,ii)) /= 1) then  ! exc(0,1,ii)/=1 and exc(0,2,ii) /= 1
-        cycle
-      endif
-
-      high = max(exc(1,1,ii), exc(1,2,ii))-1
-      low  = min(exc(1,1,ii), exc(1,2,ii))
-
-      ASSERT (low >= 0)
-      ASSERT (high > 0)
-
-      k = shiftr(high,bit_kind_shift)+1
-      j = shiftr(low,bit_kind_shift)+1
-      m = iand(high,bit_kind_size-1)
-      n = iand(low,bit_kind_size-1)
-
-      if (j==k) then
-        nperm = nperm + popcnt(iand(Jcfg(j,ii),           &
-            iand( shiftl(1_bit_kind,m)-1_bit_kind,            &
-                  not(shiftl(1_bit_kind,n))+1_bit_kind)) )
-      else
-        nperm = nperm + popcnt(                                    &
-             iand(Jcfg(j,ii),                                   &
-                  iand(not(0_bit_kind),                            &
-                       (not(shiftl(1_bit_kind,n)) + 1_bit_kind) ))) &
-             + popcnt(iand(Jcfg(k,ii),                          &
-                           (shiftl(1_bit_kind,m) - 1_bit_kind ) ))
-
-        do iii=j+1,k-1
-          nperm = nperm + popcnt(Jcfg(iii,ii))
-        end do
-
-      endif
-
-      ! Set p and q
-      q = max(exc(1,1,1),exc(1,1,2))
-      p = max(exc(1,2,1),exc(1,2,2))
-      exit
-
-    enddo
-  enddo
-endif
+             IJsomo = IEOR(Isomo, Jsomo)
+             p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
+             IJsomo = IBCLR(IJsomo,p-1)
+             q = TRAILZ(IJsomo) + 1
+           else
+             ! Find p
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               Idomo = Ialpha(ii,2)
+               Jdomo = psi_configuration(ii,2,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               if(popcnt(IAND(Jsomo,IJsomo)) > 0)then
+                 p = TRAILZ(IAND(Jsomo,IJsomo)) + 1 + ii * bit_kind_size
+                 EXIT
+               endif
+             enddo
+             ! Find q
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               IJsomo = IBCLR(IJsomo,p-1)
+               if(popcnt(IJsomo) > 0)then
+                 q = TRAILZ(IJsomo) + 1 + ii * bit_kind_size
+                 EXIT
+               endif
+             enddo
+           endif
            !assert ( p == pp)
            !assert ( q == qq)
         case default
