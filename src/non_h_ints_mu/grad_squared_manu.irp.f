@@ -116,7 +116,7 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao
     do j = 1, ao_num
       do i = 1, ao_num
 
-        tmp9 = int2_u_grad1u_j1b2(i,j,ipoint)
+        tmp9 = int2_u_grad1u_j1b2_test(i,j,ipoint)
 
         u12_grad1_u12_j1b_grad1_j1b_test(i,j,ipoint) = tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2_test(1,i,j,ipoint) &
                                                      + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2_test(2,i,j,ipoint) &

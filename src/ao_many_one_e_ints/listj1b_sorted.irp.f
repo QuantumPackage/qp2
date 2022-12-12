@@ -116,7 +116,7 @@ END_PROVIDER
       dist  = ( center(1) - r(1) )*( center(1) - r(1) )
       dist += ( center(2) - r(2) )*( center(2) - r(2) )
       dist += ( center(3) - r(3) )*( center(3) - r(3) )
-      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
+      int_j1b += dabs(aos_in_r_array_extra_transp(ipoint,i) * aos_in_r_array_extra_transp(ipoint,j))*dexp(-beta*dist) * weight
      enddo
      if(dabs(coef)*dabs(int_j1b).gt.thr)then
       List_comb_thr_b3_size(j,i) += 1

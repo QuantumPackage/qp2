@@ -1,4 +1,29 @@
+ BEGIN_PROVIDER [ double precision, expo_j_xmu_1gauss ]
+&BEGIN_PROVIDER [ double precision, coef_j_xmu_1gauss ]
+ implicit none
+ BEGIN_DOC
+ ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+ !
+ ! with a single gaussian. 
+ !
+ ! Such a function can be used to screen integrals with F(x). 
+ END_DOC
+ expo_j_xmu_1gauss  = 0.5d0
+ coef_j_xmu_1gauss  = 1.d0
+END_PROVIDER 
 ! ---
+
+ BEGIN_PROVIDER [ double precision, expo_good_j_mu_1gauss ]
+&BEGIN_PROVIDER [ double precision, coef_good_j_mu_1gauss ]
+ implicit none
+ BEGIN_DOC
+ ! exponent of Gaussian in order to obtain an upper bound of J(r12,mu)
+ !
+ ! Can be used to scree integrals with J(r12,mu)
+ END_DOC
+ expo_good_j_mu_1gauss = 2.D0 * mu_erf * expo_j_xmu_1gauss
+ coef_good_j_mu_1gauss = 0.5d0/mu_erf * coef_j_xmu_1gauss
+ END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, expo_j_xmu, (n_fit_1_erf_x) ]
  implicit none

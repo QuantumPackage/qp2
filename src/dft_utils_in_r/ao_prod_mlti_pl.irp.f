@@ -38,15 +38,15 @@ BEGIN_PROVIDER [ double precision, ao_prod_center, (3, ao_num, ao_num)]
    enddo
   enddo
  enddo
- do i = 1, ao_num
-  do j = 1, ao_num
-   if(dabs(ao_overlap_abs_grid(j,i)).gt.1.d-10)then
-    do m = 1, 3
-     ao_prod_center(m,j,i) *= 1.d0/ao_overlap_abs_grid(j,i)
-    enddo
-   endif
-  enddo
- enddo
+! do i = 1, ao_num
+!  do j = 1, ao_num
+!   if(dabs(ao_overlap_abs_grid(j,i)).gt.1.d-10)then
+!    do m = 1, 3
+!     ao_prod_center(m,j,i) *= 1.d0/ao_overlap_abs_grid(j,i)
+!    enddo
+!   endif
+!  enddo
+! enddo
 
 END_PROVIDER 
 
@@ -76,13 +76,13 @@ BEGIN_PROVIDER [ double precision, ao_prod_sigma, (ao_num, ao_num)]
   enddo
  enddo
 
- do i = 1, ao_num
-  do j = 1, ao_num
-   if(dabs(ao_overlap_abs_grid(j,i)).gt.1.d-10)then
-     ao_prod_sigma(j,i) *= 1.d0/ao_overlap_abs_grid(j,i)
-   endif
-  enddo
- enddo
+! do i = 1, ao_num
+!  do j = 1, ao_num
+!   if(dabs(ao_overlap_abs_grid(j,i)).gt.1.d-10)then
+!     ao_prod_sigma(j,i) *= 1.d0/ao_overlap_abs_grid(j,i)
+!   endif
+!  enddo
+! enddo
 
 END_PROVIDER 
 

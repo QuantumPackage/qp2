@@ -14,7 +14,7 @@ program test_ints
 !  my_n_pt_r_grid = 10 ! small grid for quick debug
 !  my_n_pt_a_grid = 14 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
-
+  my_extra_grid_becke = .True.
   my_n_pt_r_extra_grid = 30
   my_n_pt_a_extra_grid = 50 ! small extra_grid for quick debug
   touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
@@ -39,7 +39,8 @@ program test_ints
 ! call routine_int2_u_grad1u_j1b2
 ! call test_total_grad_lapl
 ! call test_total_grad_square
- call test_ao_tc_int_chemist
+! call test_ao_tc_int_chemist
+ call test_grid_points_ao
 
 end
 
@@ -583,4 +584,52 @@ subroutine test_total_grad_square
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
 
+end
+
+subroutine test_grid_points_ao
+ implicit none
+ integer :: i,j,ipoint,icount,icount_good, icount_bad,icount_full
+ double precision :: thr
+ thr = 1.d-10
+! print*,'max_n_pts_grid_ao_prod = ',max_n_pts_grid_ao_prod
+! print*,'n_pts_grid_ao_prod'
+ do i = 1, ao_num
+  do j = i, ao_num
+  icount = 0
+  icount_good = 0
+  icount_bad = 0
+  icount_full = 0
+  do ipoint = 1, n_points_final_grid
+!   if(dabs(int2_u_grad1u_x_j1b2_test(1,j,i,ipoint)) & 
+! + dabs(int2_u_grad1u_x_j1b2_test(2,j,i,ipoint)) &
+! + dabs(int2_u_grad1u_x_j1b2_test(2,j,i,ipoint)) )
+!   if(dabs(int2_u2_j1b2_test(j,i,ipoint)).gt.thr)then
+!    icount += 1
+!   endif
+   if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
+    icount_full += 1
+   endif
+   if(dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint)).gt.thr)then
+    icount += 1
+    if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
+    icount_good += 1
+    else
+    print*,j,i,ipoint
+    print*,dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint)),dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)),dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint))/dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint))
+    icount_bad  += 1
+    endif
+   endif
+!   if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr)then
+!   endif
+  enddo
+   print*,''
+   print*,j,i
+   print*,icount,icount_full, icount_bad!,n_pts_grid_ao_prod(j,i)
+   print*,dble(icount)/dble(n_points_final_grid),dble(icount_full)/dble(n_points_final_grid)
+!          dble(n_pts_grid_ao_prod(j,i))/dble(n_points_final_grid)
+!   if(icount.gt.n_pts_grid_ao_prod(j,i))then
+!    print*,'pb !!'
+!   endif
+  enddo
+ enddo
 end
