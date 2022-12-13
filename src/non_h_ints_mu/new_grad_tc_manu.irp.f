@@ -95,34 +95,38 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
   double precision              :: weight1, contrib_x, contrib_y, contrib_z, tmp_x, tmp_y, tmp_z
   double precision              :: ao_k_r, ao_i_r, ao_i_dx, ao_i_dy, ao_i_dz
   double precision, allocatable :: ac_mat(:,:,:,:)
+  double precision :: wall0, wall1
 
+  provide int2_grad1_u12_ao_test 
+  call wall_time(wall0)
   allocate(ac_mat(ao_num,ao_num,ao_num,ao_num))
   ac_mat = 0.d0
 
   do ipoint = 1, n_points_final_grid
     weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
+    do j = 1, ao_num
+      do l = 1, ao_num
+       contrib_x = int2_grad1_u12_ao_test(1,l,j,ipoint)
+       contrib_y = int2_grad1_u12_ao_test(2,l,j,ipoint)
+       contrib_z = int2_grad1_u12_ao_test(3,l,j,ipoint)
+       do i = 1, ao_num
+         ao_i_r  = weight1 * aos_in_r_array                (i,ipoint)
+         ao_i_dx = weight1 * aos_grad_in_r_array_transp(1,i,ipoint)
+         ao_i_dy = weight1 * aos_grad_in_r_array_transp(2,i,ipoint)
+         ao_i_dz = weight1 * aos_grad_in_r_array_transp(3,i,ipoint)
+       
+         do k = 1, ao_num
+           ao_k_r = aos_in_r_array(k,ipoint)
+       
+           tmp_x = ao_k_r * ao_i_dx - ao_i_r * aos_grad_in_r_array_transp(1,k,ipoint) 
+           tmp_y = ao_k_r * ao_i_dy - ao_i_r * aos_grad_in_r_array_transp(2,k,ipoint) 
+           tmp_z = ao_k_r * ao_i_dz - ao_i_r * aos_grad_in_r_array_transp(3,k,ipoint) 
 
-    do i = 1, ao_num
-      ao_i_r  = weight1 * aos_in_r_array_transp         (ipoint,i)
-      ao_i_dx = weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,1)
-      ao_i_dy = weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,2)
-      ao_i_dz = weight1 * aos_grad_in_r_array_transp_bis(ipoint,i,3)
+           tmp_x *= contrib_x 
+           tmp_y *= contrib_y 
+           tmp_z *= contrib_z 
 
-      do k = 1, ao_num
-        ao_k_r = aos_in_r_array_transp(ipoint,k)
-
-        tmp_x = ao_k_r * ao_i_dx - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1) 
-        tmp_y = ao_k_r * ao_i_dy - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2) 
-        tmp_z = ao_k_r * ao_i_dz - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3) 
-
-        do j = 1, ao_num
-          do l = 1, ao_num
-
-            contrib_x = int2_grad1_u12_ao_test(1,l,j,ipoint) * tmp_x 
-            contrib_y = int2_grad1_u12_ao_test(2,l,j,ipoint) * tmp_y 
-            contrib_z = int2_grad1_u12_ao_test(3,l,j,ipoint) * tmp_z 
-
-            ac_mat(k,i,l,j) += contrib_x + contrib_y + contrib_z
+            ac_mat(k,i,l,j) += tmp_x + tmp_y + tmp_z
           enddo
         enddo
       enddo
@@ -139,6 +143,8 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
     enddo
   enddo
 
+  call wall_time(wall1)
+  print*,'wall time for tc_grad_and_lapl_ao_test',wall1 - wall0
   deallocate(ac_mat)
 
 END_PROVIDER 

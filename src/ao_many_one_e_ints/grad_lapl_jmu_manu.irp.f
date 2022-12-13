@@ -119,7 +119,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
   double precision :: coef, beta, B_center(3), r(3), ints(3), ints_coulomb(3)
   double precision :: tmp_x, tmp_y, tmp_z
   double precision :: wall0, wall1
-  double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b
+  double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b,factor_ij_1s,beta_ij,center_ij_1s
   dsqpi_3_2 = (dacos(-1.d0))**(3/2)
 
   call wall_time(wall0)
@@ -128,7 +128,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
 
  !$OMP PARALLEL DEFAULT (NONE)                                                        &
  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
- !$OMP          int_j1b, tmp_x, tmp_y, tmp_z)                                                  & 
+ !$OMP          int_j1b, tmp_x, tmp_y, tmp_z,factor_ij_1s,beta_ij,center_ij_1s)                                                  & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points,&
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,  &
  !$OMP          x_v_ij_erf_rk_cst_mu_tmp_j1b_test, mu_erf,ao_abs_comb_b2_j1b,         &
@@ -157,6 +157,10 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
 
+          ! approximate 1 - erf(mu r12) = exp(-2 mu r12^2)
+!          !DIR$ FORCEINLINE
+!          call gaussian_product(expo_good_j_mu_1gauss,r,beta,B_center,factor_ij_1s,beta_ij,center_ij_1s)
+!          if(dabs(coef * factor_ij_1s*int_j1b).lt.1.d-10)cycle 
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
 

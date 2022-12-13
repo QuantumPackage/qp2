@@ -9,8 +9,11 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
 
   implicit none
   integer                       :: ipoint, i, j, k, l
-  double precision              :: weight1, ao_ik_r, ao_i_r
+  double precision              :: weight1, ao_ik_r, ao_i_r,contrib,contrib2
   double precision, allocatable :: ac_mat(:,:,:,:), bc_mat(:,:,:,:)
+  double precision :: wall1, wall0
+  provide u12sq_j1bsq_test u12_grad1_u12_j1b_grad1_j1b_test grad12_j12_test
+  call wall_time(wall0)
 
   allocate(ac_mat(ao_num,ao_num,ao_num,ao_num))
   ac_mat = 0.d0
@@ -20,16 +23,18 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
   do ipoint = 1, n_points_final_grid
     weight1 = final_weight_at_r_vector(ipoint)
 
-    do i = 1, ao_num
-      ao_i_r = weight1 * aos_in_r_array_transp(ipoint,i)
+    do j = 1, ao_num
+      do l = 1, ao_num
+        contrib =  u12sq_j1bsq_test(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b_test(l,j,ipoint) 
+        contrib2=grad12_j12_test(l,j,ipoint)
+        do i = 1, ao_num
+          ao_i_r = weight1 * aos_in_r_array(i,ipoint)
+        
+          do k = 1, ao_num
+            ao_ik_r = ao_i_r * aos_in_r_array(k,ipoint)
 
-      do k = 1, ao_num
-        ao_ik_r = ao_i_r * aos_in_r_array_transp(ipoint,k)
-
-        do j = 1, ao_num
-          do l = 1, ao_num
-            ac_mat(k,i,l,j) += ao_ik_r * ( u12sq_j1bsq_test(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b_test(l,j,ipoint) )
-            bc_mat(k,i,l,j) += ao_ik_r * grad12_j12_test(l,j,ipoint)
+            ac_mat(k,i,l,j) += ao_ik_r * contrib
+            bc_mat(k,i,l,j) += ao_ik_r * contrib2
           enddo
         enddo
       enddo
@@ -45,6 +50,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
       enddo
     enddo
   enddo
+  call wall_time(wall1)
+  print*,'wall time for tc_grad_square_ao_test',wall1 - wall0
 
   deallocate(ac_mat)
   deallocate(bc_mat)

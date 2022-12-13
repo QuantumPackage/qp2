@@ -11,8 +11,8 @@ program test_ints
   my_grid_becke  = .True.
   my_n_pt_r_grid = 30
   my_n_pt_a_grid = 50
-!  my_n_pt_r_grid = 10 ! small grid for quick debug
-!  my_n_pt_a_grid = 14 ! small grid for quick debug
+!  my_n_pt_r_grid = 15 ! small grid for quick debug
+!  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
   my_extra_grid_becke = .True.
   my_n_pt_r_extra_grid = 30
@@ -40,8 +40,19 @@ program test_ints
 ! call test_total_grad_lapl
 ! call test_total_grad_square
 ! call test_ao_tc_int_chemist
- call test_grid_points_ao
+! call test_grid_points_ao
+ call test_tc_scf
 
+end
+
+subroutine test_tc_scf
+ implicit none
+! provide tc_grad_square_ao_test
+  provide tc_grad_and_lapl_ao_test
+! provide int2_u_grad1u_x_j1b2_test
+! provide x_v_ij_erf_rk_cst_mu_tmp_j1b_test
+! print*,'TC_HF_energy = ',TC_HF_energy
+! print*,'grad_non_hermit = ',grad_non_hermit
 end
 
 subroutine test_ao_tc_int_chemist
@@ -309,17 +320,18 @@ end
 subroutine routine_int2_grad1u2_grad2u2_j1b2
  implicit none
  integer :: i,j,ipoint,k,l
+ integer :: ii , jj
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
  double precision, allocatable :: ints(:,:,:)
  allocate(ints(ao_num, ao_num, n_points_final_grid))
-! do ipoint = 1, n_points_final_grid
-!  do i = 1, ao_num
-!   do j = 1, ao_num
-!    read(33,*)ints(j,i,ipoint)
-!   enddo
-!  enddo
-! enddo
+ do ipoint = 1, n_points_final_grid
+  do i = 1, ao_num
+   do j = 1, ao_num
+    read(33,*)ints(j,i,ipoint)
+   enddo
+  enddo
+ enddo
 
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
@@ -331,17 +343,17 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
 !     !array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
 !      array_ref(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
 !     !array(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-       array_ref(j,i,l,k) += int2_grad1u2_grad2u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!     !array_ref(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!       array_ref(j,i,l,k) += int2_grad1u2_grad2u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
 !      if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint)).gt.1.d-6)then
-!       if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint)).gt.1.d-6)then
+!       if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint)).gt.1.d-6)then
 !        print*,j,i,ipoint
-!        print*,int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) , int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(j,i,ipoint))
-!        print*,int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) , int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) - int2_grad1u2_grad2u2_j1b2_test_no_v(i,j,ipoint))
+!        print*,int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) , int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint))
+!        print*,int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) , int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) - int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint))
 !        stop
 !       endif
 !      endif
@@ -350,23 +362,35 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
    enddo
   enddo
  enddo
+ double precision :: e_ref, e_new
  accu_relat = 0.d0
  accu_abs   = 0.d0
-  do k = 1, ao_num
-   do l = 1, ao_num
-    do i = 1, ao_num
-     do j = 1, ao_num
-      contrib = dabs(array(j,i,l,k) - array_ref(j,i,l,k))
-      accu_abs += contrib
-      if(dabs(array_ref(j,i,l,k)).gt.1.d-10)then
-       accu_relat += contrib/dabs(array_ref(j,i,l,k))
-      endif
+ e_ref = 0.d0
+ e_new = 0.d0
+ do ii = 1, elec_alpha_num
+  do jj = ii, elec_alpha_num
+   do k = 1, ao_num
+    do l = 1, ao_num
+     do i = 1, ao_num
+      do j = 1, ao_num
+       e_ref += mo_coef(j,ii) * mo_coef(i,ii) * array_ref(j,i,l,k) * mo_coef(l,jj) * mo_coef(k,jj)
+       e_new += mo_coef(j,ii) * mo_coef(i,ii) * array(j,i,l,k) * mo_coef(l,jj) * mo_coef(k,jj)
+       contrib = dabs(array(j,i,l,k) - array_ref(j,i,l,k))
+       accu_abs += contrib
+!       if(dabs(array_ref(j,i,l,k)).gt.1.d-10)then
+!        accu_relat += contrib/dabs(array_ref(j,i,l,k))
+!       endif
+      enddo
      enddo
     enddo
    enddo
+
   enddo
- print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
- print*,'accu_relat = ',accu_relat/dble(ao_num)**4
+ enddo
+ print*,'e_ref = ',e_ref
+ print*,'e_new = ',e_new
+! print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
+! print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
   
 

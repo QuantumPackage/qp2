@@ -5,13 +5,13 @@
  integer :: i_1s,i,j,ipoint
  double precision :: coef,beta,center(3),int_j1b,thr
  double precision :: r(3),weight,dist
- thr = 1.d-12
+ thr = 1.d-15
  List_comb_thr_b2_size = 0
  do i = 1, ao_num
   do j = i, ao_num
    do i_1s = 1, List_all_comb_b2_size
      coef        = List_all_comb_b2_coef  (i_1s)
-     if(dabs(coef).lt.1.d-12)cycle
+     if(dabs(coef).lt.1.d-15)cycle
      beta        = List_all_comb_b2_expo  (i_1s)
      beta = max(beta,1.d-12)
      center(1:3) = List_all_comb_b2_cent(1:3,i_1s)
@@ -51,7 +51,7 @@ END_PROVIDER
  integer :: i_1s,i,j,ipoint,icount
  double precision :: coef,beta,center(3),int_j1b,thr
  double precision :: r(3),weight,dist
- thr = 1.d-12
+ thr = 1.d-15
  ao_abs_comb_b2_j1b = 10000000.d0
  do i = 1, ao_num
   do j = i, ao_num
@@ -100,7 +100,7 @@ END_PROVIDER
  integer :: i_1s,i,j,ipoint
  double precision :: coef,beta,center(3),int_j1b,thr
  double precision :: r(3),weight,dist
- thr = 1.d-12
+ thr = 1.d-15
  List_comb_thr_b3_size = 0
  do i = 1, ao_num
   do j = 1, ao_num
@@ -146,7 +146,7 @@ END_PROVIDER
  integer :: i_1s,i,j,ipoint,icount
  double precision :: coef,beta,center(3),int_j1b,thr
  double precision :: r(3),weight,dist
- thr = 1.d-12
+ thr = 1.d-15
  ao_abs_comb_b3_j1b = 10000000.d0
  do i = 1, ao_num
   do j = 1, ao_num
@@ -164,7 +164,7 @@ END_PROVIDER
       dist  = ( center(1) - r(1) )*( center(1) - r(1) )
       dist += ( center(2) - r(2) )*( center(2) - r(2) )
       dist += ( center(3) - r(3) )*( center(3) - r(3) )
-      int_j1b += dabs(aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j))*dexp(-beta*dist) * weight
+      int_j1b += dabs(aos_in_r_array_extra_transp(ipoint,i) * aos_in_r_array_extra_transp(ipoint,j))*dexp(-beta*dist) * weight
      enddo
      if(dabs(coef)*dabs(int_j1b).gt.thr)then
       icount += 1
