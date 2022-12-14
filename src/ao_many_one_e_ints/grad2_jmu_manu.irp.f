@@ -17,8 +17,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2_test, (ao_num, ao_n
   double precision, allocatable :: int_fit_v(:)
   double precision, external    :: overlap_gauss_r12_ao_with1s
   double precision :: int_gauss,dsqpi_3_2,int_j1b
-  double precision :: factor_ij_1s,beta_ij,center_ij_1s(3)
-  dsqpi_3_2 = (dacos(-1.d0))**(3/2)
+  double precision :: factor_ij_1s,beta_ij,center_ij_1s(3),sq_pi_3_2 
+  sq_pi_3_2 = (dacos(-1.d0))**(3/2)
 
   provide mu_erf final_grid_points_transp j1b_pen List_comb_thr_b3_coef
   call wall_time(wall0)
@@ -33,7 +33,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2_test, (ao_num, ao_n
      !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,      &
      !$OMP          List_comb_thr_b3_coef, List_comb_thr_b3_expo,    &
      !$OMP          List_comb_thr_b3_cent, int2_grad1u2_grad2u2_j1b2_test, ao_abs_comb_b3_j1b,&
-     !$OMP          ao_overlap_abs,dsqpi_3_2)
+     !$OMP          ao_overlap_abs,sq_pi_3_2)
  !$OMP DO SCHEDULE(dynamic)
  do ipoint = 1, n_points_final_grid
    r(1) = final_grid_points(1,ipoint)
@@ -60,7 +60,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2_test, (ao_num, ao_n
            !DIR$ FORCEINLINE
            call gaussian_product(expo_fit,r,beta,B_center,factor_ij_1s,beta_ij,center_ij_1s)
            coef_fit = -0.25d0 *  coef_gauss_1_erf_x_2(i_fit) * coef
-           if(dabs(coef_fit*factor_ij_1s*int_j1b).lt.1.d-10)cycle
+!           if(dabs(coef_fit*factor_ij_1s*int_j1b).lt.1.d-10)cycle ! old version
+           if(dabs(coef_fit*factor_ij_1s*int_j1b*sq_pi_3_2*(beta_ij)**(-3/2)).lt.1.d-10)cycle
   
 !           call overlap_gauss_r12_ao_with1s_v(B_center, beta, final_grid_points_transp, &
 !                 expo_fit, i, j, int_fit_v, n_points_final_grid)
@@ -200,7 +201,8 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2_test, (ao_num, ao_num, n_points_
 
   double precision, external    :: overlap_gauss_r12_ao
   double precision, external    :: overlap_gauss_r12_ao_with1s
-  double precision :: factor_ij_1s,beta_ij,center_ij_1s(3)
+  double precision :: factor_ij_1s,beta_ij,center_ij_1s(3),sq_pi_3_2
+  sq_pi_3_2 = (dacos(-1.d0))**(3/2)
 
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
@@ -213,7 +215,7 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2_test, (ao_num, ao_num, n_points_
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b3_size, & 
  !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
- !$OMP          List_comb_thr_b3_coef, List_comb_thr_b3_expo,       & 
+ !$OMP          List_comb_thr_b3_coef, List_comb_thr_b3_expo,sq_pi_3_2,       & 
  !$OMP          List_comb_thr_b3_cent, int2_u2_j1b2_test,ao_abs_comb_b3_j1b)
  !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -242,7 +244,8 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2_test, (ao_num, ao_num, n_points_
             coef_fit = coef_gauss_j_mu_x_2(i_fit)
             !DIR$ FORCEINLINE
             call gaussian_product(expo_fit,r,beta,B_center,factor_ij_1s,beta_ij,center_ij_1s)
-            if(dabs(coef_fit*coef*factor_ij_1s*int_j1b).lt.1.d-10)cycle
+!            if(dabs(coef_fit*coef*factor_ij_1s*int_j1b).lt.1.d-10)cycle ! old version
+            if(dabs(coef_fit*coef*factor_ij_1s*int_j1b*sq_pi_3_2*(beta_ij)**(-3/2)).lt.1.d-10)cycle
           
             ! ---
           
@@ -291,8 +294,8 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2_test, (3, ao_num, ao_num
   double precision :: coef, beta, B_center(3), dist
   double precision :: alpha_1s, alpha_1s_inv, centr_1s(3), expo_coef_1s, coef_tmp
   double precision :: tmp_x, tmp_y, tmp_z, int_j1b
-  double precision :: wall0, wall1
-
+  double precision :: wall0, wall1, sq_pi_3_2,sq_alpha
+  sq_pi_3_2 = dacos(-1.D0)**(3/2)
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
 
@@ -302,12 +305,12 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2_test, (3, ao_num, ao_num
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          coef_fit, expo_fit, int_fit, alpha_1s, dist,        &
  !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,     & 
- !$OMP          tmp_x, tmp_y, tmp_z,int_j1b)                        & 
+ !$OMP          tmp_x, tmp_y, tmp_z,int_j1b,sq_alpha)                        & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b3_size, & 
  !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,       &
  !$OMP          List_comb_thr_b3_coef, List_comb_thr_b3_expo,       & 
- !$OMP          List_comb_thr_b3_cent, int2_u_grad1u_x_j1b2_test,ao_abs_comb_b3_j1b)
+ !$OMP          List_comb_thr_b3_cent, int2_u_grad1u_x_j1b2_test,ao_abs_comb_b3_j1b,sq_pi_3_2)
  !$OMP DO
 
   do ipoint = 1, n_points_final_grid
@@ -348,7 +351,9 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2_test, (3, ao_num, ao_num
 
             expo_coef_1s = beta * expo_fit * alpha_1s_inv * dist 
             coef_tmp = coef * coef_fit * dexp(-expo_coef_1s)
-            if(dabs(coef_tmp*int_j1b) .lt. 1d-10) cycle
+            sq_alpha = alpha_1s_inv * dsqrt(alpha_1s_inv)
+!            if(dabs(coef_tmp*int_j1b) .lt. 1d-10) cycle ! old version
+            if(dabs(coef_tmp*int_j1b*sq_pi_3_2*sq_alpha) .lt. 1d-10) cycle
             
             call NAI_pol_x_mult_erf_ao_with1s(i, j, alpha_1s, centr_1s, 1.d+9, r, int_fit)
 
@@ -450,7 +455,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2_test, (ao_num, ao_num, n_p
 
             expo_fit = expo_gauss_j_mu_1_erf(i_fit)
             call gaussian_product(expo_fit,r,beta,B_center,factor_ij_1s,beta_ij,center_ij_1s)
-!            if(factor_ij_1s*dabs(coef*int_j1b)*dsqpi_3_2*beta_ij**(-3/2).lt.1.d-15)cycle
+            if(factor_ij_1s*dabs(coef*int_j1b)*dsqpi_3_2*beta_ij**(-3/2).lt.1.d-15)cycle
             coef_fit = coef_gauss_j_mu_1_erf(i_fit)
 
             alpha_1s     = beta + expo_fit

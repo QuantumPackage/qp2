@@ -41,14 +41,21 @@ program test_ints
 ! call test_total_grad_square
 ! call test_ao_tc_int_chemist
 ! call test_grid_points_ao
- call test_tc_scf
+! call test_tc_scf
+ call test_int_gauss
 
 end
 
 subroutine test_tc_scf
  implicit none
+ integer :: i
+! provide int2_u_grad1u_x_j1b2_test
+ provide x_v_ij_erf_rk_cst_mu_tmp_j1b_test
+! do i = 1, ng_fit_jast
+!  print*,expo_gauss_1_erf_x_2(i),coef_gauss_1_erf_x_2(i)
+! enddo
 ! provide tc_grad_square_ao_test
-  provide tc_grad_and_lapl_ao_test
+!  provide tc_grad_and_lapl_ao_test
 ! provide int2_u_grad1u_x_j1b2_test
 ! provide x_v_ij_erf_rk_cst_mu_tmp_j1b_test
 ! print*,'TC_HF_energy = ',TC_HF_energy
@@ -656,4 +663,42 @@ subroutine test_grid_points_ao
 !   endif
   enddo
  enddo
+end
+
+subroutine test_int_gauss
+ implicit none
+ integer :: i,j
+ print*,'center'
+ do i = 1, ao_num
+  do j = i, ao_num
+   print*,j,i
+   print*,ao_prod_sigma(j,i),ao_overlap_abs_grid(j,i)
+   print*,ao_prod_center(1:3,j,i)
+  enddo
+ enddo
+ print*,''
+ double precision :: weight, r(3),integral_1,pi,center(3),f_r,alpha,distance,integral_2
+ center = 0.d0
+ pi = dacos(-1.d0)
+ integral_1 = 0.d0
+ integral_2 = 0.d0
+ alpha = 0.75d0
+ do i = 1,  n_points_final_grid
+  ! you get x, y and z of the ith grid point
+  r(1) = final_grid_points(1,i)
+  r(2) = final_grid_points(2,i)
+  r(3) = final_grid_points(3,i)
+  weight = final_weight_at_r_vector(i)
+  distance = dsqrt( (r(1) - center(1))**2 +  (r(2) - center(2))**2 + (r(3) - center(3))**2 )
+  f_r = dexp(-alpha * distance*distance)
+  ! you add the contribution of the grid point to the integral
+  integral_1 += f_r * weight
+  integral_2 += f_r * distance * weight
+ enddo
+ print*,'integral_1      =',integral_1
+ print*,'(pi/alpha)**1.5 =',(pi / alpha)**1.5
+ print*,'integral_2      =',integral_2
+ print*,'(pi/alpha)**1.5 =',2.d0*pi / (alpha)**2
+
+
 end

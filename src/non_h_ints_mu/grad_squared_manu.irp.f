@@ -99,6 +99,7 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao
   double precision           :: time0, time1
   double precision, external :: overlap_gauss_r12_ao
 
+  provide int2_u_grad1u_x_j1b2_test
   print*, ' providing u12_grad1_u12_j1b_grad1_j1b_test ...'
   call wall_time(time0)
 
@@ -147,7 +148,7 @@ BEGIN_PROVIDER [ double precision, grad12_j12_test, (ao_num, ao_num, n_points_fi
   double precision           :: tmp1
   double precision           :: time0, time1
   double precision, external :: overlap_gauss_r12_ao
-
+  provide int2_grad1u2_grad2u2_j1b2_test
   print*, ' providing grad12_j12_test ...'
   call wall_time(time0)
 

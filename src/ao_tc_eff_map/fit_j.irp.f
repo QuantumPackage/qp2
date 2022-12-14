@@ -13,6 +13,16 @@
 END_PROVIDER 
 ! ---
 
+BEGIN_PROVIDER [ double precision, expo_erfc_gauss ]
+ implicit none 
+ expo_erfc_gauss = 1.41211d0
+END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, expo_erfc_mu_gauss ]
+ implicit none 
+ expo_erfc_mu_gauss = expo_erfc_gauss * mu_erf * mu_erf
+END_PROVIDER 
+
  BEGIN_PROVIDER [ double precision, expo_good_j_mu_1gauss ]
 &BEGIN_PROVIDER [ double precision, coef_good_j_mu_1gauss ]
  implicit none

@@ -50,7 +50,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
-
+          ! TODO :: cycle on the 1 - erf(mur12)
           int_mu      = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
           int_coulomb = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
 
@@ -122,6 +122,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
   double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b,factor_ij_1s,beta_ij,center_ij_1s
   dsqpi_3_2 = (dacos(-1.d0))**(3/2)
 
+  provide expo_erfc_mu_gauss ao_prod_sigma ao_prod_center
   call wall_time(wall0)
 
   x_v_ij_erf_rk_cst_mu_tmp_j1b_test = 0.d0
@@ -132,9 +133,9 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points,&
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,  &
  !$OMP          x_v_ij_erf_rk_cst_mu_tmp_j1b_test, mu_erf,ao_abs_comb_b2_j1b,         &
- !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
+ !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma)
+! !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2,expo_erfc_mu_gauss)
  !$OMP DO
-  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -142,7 +143,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-10)cycle
 
         tmp_x = 0.d0
         tmp_y = 0.d0
@@ -157,10 +158,14 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
 
-          ! approximate 1 - erf(mu r12) = exp(-2 mu r12^2)
-!          !DIR$ FORCEINLINE
-!          call gaussian_product(expo_good_j_mu_1gauss,r,beta,B_center,factor_ij_1s,beta_ij,center_ij_1s)
-!          if(dabs(coef * factor_ij_1s*int_j1b).lt.1.d-10)cycle 
+!          if(ao_prod_center(1,j,i).ne.10000.d0)then
+!           ! approximate 1 - erf(mu r12) by a gaussian * 10
+!           !DIR$ FORCEINLINE
+!           call gaussian_product(expo_erfc_mu_gauss,r,     &
+!                ao_prod_sigma(j,i),ao_prod_center(1,j,i),  & 
+!                factor_ij_1s,beta_ij,center_ij_1s)
+!           if(dabs(coef * factor_ij_1s*int_j1b*10.d0 * dsqpi_3_2 * beta_ij**(-3/2)).lt.1.d-10)cycle 
+!          endif
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
 
