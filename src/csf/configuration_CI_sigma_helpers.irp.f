@@ -875,7 +875,7 @@ use bitmasks
       ndiffDOMO = 0
       nxordiffSOMODOMO = 0
       do ii=1,N_int
-        diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,1),psi_configuration(ii,2,k)))
+        diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,2),psi_configuration(ii,2,k)))
         xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
         ndiffDOMO += POPCNT(diffDOMO)
         nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
@@ -1221,7 +1221,7 @@ END_PROVIDER
       ndiffDOMO = 0
       nxordiffSOMODOMO = 0
       do ii=1,N_int
-        diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,1),psi_configuration(ii,2,k)))
+        diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,2),psi_configuration(ii,2,k)))
         xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
         ndiffDOMO += POPCNT(diffDOMO)
         nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
