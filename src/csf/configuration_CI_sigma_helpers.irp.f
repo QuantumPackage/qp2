@@ -524,7 +524,7 @@ use bitmasks
 !!!
 !!!END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,mo_num*(mo_num))]
+ BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,mo_num*12)]
 &BEGIN_PROVIDER [ integer, NalphaIcfg_list, (N_configuration) ]
   implicit none
   !use bitmasks
@@ -549,7 +549,8 @@ use bitmasks
   integer(bit_kind)              :: Isomo(N_int), Isomop(N_int), Isomoq(N_int) 
   integer(bit_kind)              :: Jdomo(N_int), Jdomop(N_int), Jdomoq(N_int)
   integer(bit_kind)              :: Jsomo(N_int), Jsomop(N_int), Jsomoq(N_int)
-  integer(bit_kind)              :: diffDOMO(N_int), xordiffSOMODOMO(N_int), diffSOMO(N_int)
+  !integer(bit_kind)              :: diffDOMO(N_int), xordiffSOMODOMO(N_int), diffSOMO(N_int)
+  integer(bit_kind)              :: diffDOMO, xordiffSOMODOMO, diffSOMO
   integer                        :: ndiffSOMO
   integer                        :: ndiffDOMO
   integer                        :: nxordiffSOMODOMO
@@ -674,13 +675,15 @@ use bitmasks
           Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
         endif
 
+        Nsomo_J=0
         do ii=1, N_int
           Jcfg(ii,1) = Jsomo(ii)
           Jcfg(ii,2) = Jdomo(ii)
+          Nsomo_J += POPCNT(Jsomo(ii))
         enddo
 
-        call bitstring_to_list(Jcfg,listall,nelall,N_int)
-        Nsomo_J = nelall
+        !call bitstring_to_list(Jcfg(1,1),listall,nelall,N_int)
+        !Nsomo_J = nelall
 
         ! Check for Minimal alpha electrons (MS)
         if(Nsomo_J.lt.MS)then
@@ -705,15 +708,13 @@ use bitmasks
           ndiffDOMO = 0
           nxordiffSOMODOMO = 0
           do ii = 1, N_int
-            Jsomo = Jcfg(ii,1)
-            Jdomo = Jcfg(ii,2)
-            diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,k)))
-            ndiffSOMO += POPCNT(diffSOMO(ii))
-            diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,k)))
+            diffSOMO = IEOR(Jcfg(ii,1),iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,k)))
+            ndiffSOMO += POPCNT(diffSOMO)
+            diffDOMO = IEOR(Jcfg(ii,2),iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,k)))
             xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-            ndiffDOMO += POPCNT(diffDOMO(ii))
-            nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO(ii))
-            nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO
+            ndiffDOMO += POPCNT(diffDOMO)
+            nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
+            nxordiffSOMODOMO += POPCNT(diffSOMO) + POPCNT(diffDOMO)
           end do
 
           if((ndiffSOMO .ne. 0) .and. (ndiffSOMO .ne. 2)) cycle
@@ -818,6 +819,7 @@ use bitmasks
           if(Nsomo_J .ge. NSOMOMin) then
             !print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
             NalphaIcfg += 1
+            !print *," Idx = ",idxI, " Nalpha=",NalphaIcfg
             alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
             if(n_core_orb .le. 63)then
               alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jcfg(1,2),ISHFT(1_8,n_core_orb)-1)
@@ -864,7 +866,7 @@ use bitmasks
       ndiffSOMO = 0
       do ii=1,N_int
         diffSOMO = IEOR(Icfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))
-        ndiffSOMO += POPCNT(diffSOMO(ii))
+        ndiffSOMO += POPCNT(diffSOMO)
       end do
       ! ndiffSOMO cannot be 0 (I /= k)
       ! if ndiffSOMO /= 2 then it has to be greater than 2 and hense
@@ -875,8 +877,8 @@ use bitmasks
       do ii=1,N_int
         diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,1),psi_configuration(ii,2,k)))
         xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-        ndiffDOMO += POPCNT(diffDOMO(ii))
-        nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO(ii))
+        ndiffDOMO += POPCNT(diffDOMO)
+        nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
       end do
       if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4)) then
         ppExistsQ = .TRUE.
@@ -926,7 +928,8 @@ END_PROVIDER
   integer(bit_kind)                  :: Isomo(N_int), Isomop(N_int), Isomoq(N_int) 
   integer(bit_kind)                  :: Jdomo(N_int), Jdomop(N_int), Jdomoq(N_int)
   integer(bit_kind)                  :: Jsomo(N_int), Jsomop(N_int), Jsomoq(N_int)
-  integer(bit_kind)                  :: diffDOMO(N_int), xordiffSOMODOMO(N_int), diffSOMO(N_int)
+  !integer(bit_kind)                  :: diffDOMO(N_int), xordiffSOMODOMO(N_int), diffSOMO(N_int)
+  integer(bit_kind)                  :: diffDOMO, xordiffSOMODOMO, diffSOMO
   integer                            :: ndiffSOMO
   integer                            :: ndiffDOMO
   integer                            :: nxordiffSOMODOMO
@@ -1084,15 +1087,13 @@ END_PROVIDER
           ndiffDOMO = 0
           nxordiffSOMODOMO = 0
           do ii = 1, N_int
-            Jsomo = Jcfg(ii,1)
-            Jdomo = Jcfg(ii,2)
-            diffSOMO = IEOR(Jsomo,iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,k)))
-            ndiffSOMO += POPCNT(diffSOMO(ii))
-            diffDOMO = IEOR(Jdomo,iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,k)))
+            diffSOMO = IEOR(Jcfg(ii,1),iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,k)))
+            ndiffSOMO += POPCNT(diffSOMO)
+            diffDOMO = IEOR(Jcfg(ii,2),iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,k)))
             xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-            ndiffDOMO += POPCNT(diffDOMO(ii))
-            nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO(ii))
-            nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO
+            ndiffDOMO += POPCNT(diffDOMO)
+            nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
+            nxordiffSOMODOMO += POPCNT(diffSOMO) + POPCNT(diffDOMO)
           end do
            if((ndiffSOMO .NE. 0) .AND. (ndiffSOMO .NE. 2)) cycle
            !if(POPCNT(IEOR(diffSOMO,diffDOMO)) .LE. 1 .AND. ndiffDOMO .LT. 3) then
@@ -1211,7 +1212,7 @@ END_PROVIDER
   do k = 1, idxI-1
       do ii=1,N_int
         diffSOMO = IEOR(Icfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))
-        ndiffSOMO += POPCNT(diffSOMO(ii))
+        ndiffSOMO += POPCNT(diffSOMO)
       end do
       ! ndiffSOMO cannot be 0 (I /= k)
       ! if ndiffSOMO /= 2 then it has to be greater than 2 and hense
@@ -1222,8 +1223,8 @@ END_PROVIDER
       do ii=1,N_int
         diffDOMO = IEOR(Icfg(ii,2),iand(act_bitmask(ii,1),psi_configuration(ii,2,k)))
         xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-        ndiffDOMO += POPCNT(diffDOMO(ii))
-        nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO(ii))
+        ndiffDOMO += POPCNT(diffDOMO)
+        nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
       end do
      if((ndiffSOMO+ndiffDOMO+nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
         ppExistsQ = .TRUE.
