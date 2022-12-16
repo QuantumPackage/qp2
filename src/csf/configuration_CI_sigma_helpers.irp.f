@@ -524,7 +524,7 @@ use bitmasks
 !!!
 !!!END_PROVIDER
 
- BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,mo_num*12)]
+ BEGIN_PROVIDER [ integer(bit_kind), alphasIcfg_list , (N_int,2,N_configuration,mo_num*mo_num)]
 &BEGIN_PROVIDER [ integer, NalphaIcfg_list, (N_configuration) ]
   implicit none
   !use bitmasks
