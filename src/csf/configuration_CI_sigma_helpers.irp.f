@@ -586,7 +586,7 @@ use bitmasks
 
     do i=1, N_int
       Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,1),psi_configuration(i,2,idxI))
+      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
     enddo
 
     ! find out all pq holes possible
@@ -667,7 +667,7 @@ use bitmasks
         qq  = listvmos(j)
         if(pp.eq.qq) cycle
         jint = shiftr(qq-1,bit_kind_shift) + 1
-        jpos = qq-shiftl((iint-1),bit_kind_shift)-1
+        jpos = qq-shiftl((jint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
           Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
@@ -769,7 +769,7 @@ use bitmasks
     ! prune list of alphas
     do i=1, N_int
       Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,1),psi_configuration(i,2,idxI))
+      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
@@ -790,7 +790,7 @@ use bitmasks
       do j = 1, nvmos
         qq  = listvmos(j)
         jint = shiftr(qq-1,bit_kind_shift) + 1
-        jpos = qq-shiftl((iint-1),bit_kind_shift)-1
+        jpos = qq-shiftl((jint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
           Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
@@ -857,7 +857,7 @@ use bitmasks
     ppExistsQ = .False.
     do i=1, N_int
       Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,1),psi_configuration(i,2,idxI))
+      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
     enddo
 
     kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
@@ -953,7 +953,7 @@ END_PROVIDER
 
   do i=1, N_int
     Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-    Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+    Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
   enddo
 
   !print*,"Input cfg"
@@ -985,6 +985,7 @@ END_PROVIDER
 
   ! find vmos
     ! Take into account N_int
+    nvmos=0
     do ii = 1, n_act_orb
       iii = list_act(ii)
       iint = shiftr(iii-1,bit_kind_shift) + 1
@@ -1014,7 +1015,7 @@ END_PROVIDER
     ! Now find the allowed (p,q) excitations
     do i=1, N_int
       Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+      Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
@@ -1051,7 +1052,7 @@ END_PROVIDER
      do j = 1,nvmos
         qq  = listvmos(j)
         jint = shiftr(qq-1,bit_kind_shift) + 1
-        jpos = qq-shiftl((iint-1),bit_kind_shift)-1
+        jpos = qq-shiftl((jint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
           Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
@@ -1157,7 +1158,7 @@ END_PROVIDER
   ! prune list of alphas
     do i=1, N_int
       Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,1),Icfg(i,2))
+      Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
       Jsomo(i) = Isomo(i)
       Jdomo(i) = Idomo(i)
     enddo
@@ -1176,7 +1177,7 @@ END_PROVIDER
      do j = 1, nvmos
         qq  = listvmos(j)
         jint = shiftr(qq-1,bit_kind_shift) + 1
-        jpos = qq-shiftl((iint-1),bit_kind_shift)-1
+        jpos = qq-shiftl((jint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
           Jsomo(jint) = IBSET(Jsomo(jint),jpos)
         else if(vmotype(j) == 2)then
@@ -1207,8 +1208,8 @@ END_PROVIDER
 
   ! Check if this Icfg has been previously generated as a mono
   ppExistsQ = .False.
-  Isomo = iand(act_bitmask(1,1),Icfg(1,1))
-  Idomo = iand(act_bitmask(1,1),Icfg(1,2))
+  !Isomo = iand(act_bitmask(1,1),Icfg(1,1))
+  !Idomo = iand(act_bitmask(1,2),Icfg(1,2))
   do k = 1, idxI-1
       do ii=1,N_int
         diffSOMO = IEOR(Icfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))

@@ -324,14 +324,14 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            ! SOMO -> VMO
            !print *,"obt SOMO -> VMO"
            extyp = 3
-           if(N_int .eq. 1) then
-             IJsomo = IEOR(Isomo, Jsomo)
-             p = TRAILZ(IAND(Isomo,IJsomo)) + 1
-             IJsomo = IBCLR(IJsomo,p-1)
-             q = TRAILZ(IJsomo) + 1
-             !print *," p=",p," q=",q
-             !call get_single_excitation_cfg(Jcfg, Icfg, p, q, N_int)
-           else
+           !if(N_int .eq. 1) then
+           !  IJsomo = IEOR(Isomo, Jsomo)
+           !  p = TRAILZ(IAND(Isomo,IJsomo)) + 1
+           !  IJsomo = IBCLR(IJsomo,p-1)
+           !  q = TRAILZ(IJsomo) + 1
+           !  !print *," p=",p," q=",q
+           !  !call get_single_excitation_cfg(Jcfg, Icfg, p, q, N_int)
+           !else
              ! Find p
              do ii=1,N_int
                Isomo = Ialpha(ii,1)
@@ -357,7 +357,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                  EXIT
                endif
              enddo
-           endif
+           !endif
            !assert ( p == pp)
            !assert ( q == qq)
            !print *," 1--- p=",p," q=",q
@@ -369,12 +369,12 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
               ! DOMO -> VMO
               !print *,"obt DOMO -> VMO"
               extyp = 2
-              if(N_int.eq.1)then
-                p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-                Isomo = IEOR(Isomo, Jsomo)
-                Isomo = IBCLR(Isomo,p-1)
-                q = TRAILZ(Isomo) + 1
-              else
+              !if(N_int.eq.1)then
+              !  p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              !  Isomo = IEOR(Isomo, Jsomo)
+              !  Isomo = IBCLR(Isomo,p-1)
+              !  q = TRAILZ(Isomo) + 1
+              !else
 
                 ! Find p
                 do ii=1,N_int
@@ -402,23 +402,23 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                     EXIT
                   endif
                 end do
-              endif
+              !endif
            !assert ( p == pp)
            !assert ( q == qq)
            else
               ! SOMO -> SOMO
               !print *,"obt SOMO -> SOMO"
               extyp = 1
-              if(N_int.eq.1)then
-                q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-                Isomo = IEOR(Isomo, Jsomo)
-                Isomo = IBCLR(Isomo,q-1)
-                p = TRAILZ(Isomo) + 1
-                ! Check for Minimal alpha electrons (MS)
-                !if(POPCNT(Isomo).lt.MS)then
-                !  cycle
-                !endif
-              else
+              !if(N_int.eq.1)then
+              !  q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              !  Isomo = IEOR(Isomo, Jsomo)
+              !  Isomo = IBCLR(Isomo,q-1)
+              !  p = TRAILZ(Isomo) + 1
+              !  ! Check for Minimal alpha electrons (MS)
+              !  !if(POPCNT(Isomo).lt.MS)then
+              !  !  cycle
+              !  !endif
+              !else
                 ! Find p
                 !print *,"Ialpha somo=",Ialpha(1,1), Ialpha(2,1)," Ialpha domo=",Ialpha(1,2), Ialpha(2,2)
                 !print *,"J somo=",psi_configuration(1,1,i), psi_configuration(2,1,i)," J domo=",psi_configuration(1,2,i),&
@@ -449,7 +449,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                     EXIT
                   endif
                 enddo
-              endif
+              !endif
            !assert ( p == pp)
            !assert ( q == qq)
            endif
@@ -458,12 +458,12 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            ! DOMO -> SOMO
            !print *,"obt DOMO -> SOMO"
            extyp = 4
-           if(N_int.eq.1)then
-             IJsomo = IEOR(Isomo, Jsomo)
-             p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
-             IJsomo = IBCLR(IJsomo,p-1)
-             q = TRAILZ(IJsomo) + 1
-           else
+           !if(N_int.eq.1)then
+           !  IJsomo = IEOR(Isomo, Jsomo)
+           !  p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
+           !  IJsomo = IBCLR(IJsomo,p-1)
+           !  q = TRAILZ(IJsomo) + 1
+           !else
              ! Find p
              do ii=1,N_int
                Isomo = Ialpha(ii,1)
@@ -491,7 +491,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                  EXIT
                endif
              enddo
-           endif
+           !endif
            !assert ( p == pp)
            !assert ( q == qq)
            !print *," 3--- p=",p," q=",q
