@@ -1892,8 +1892,10 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
                                          nconnectedI, excitationIds, excitationTypes, diagfactors)
 
         !if(i .EQ. 1) then
-        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),alphas_Icfg(2,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
-        !   kcfgDOMO=',alphas_Icfg(1,2,k),alphas_Icfg(2,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
+        !   !print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),alphas_Icfg(2,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
+        !   !kcfgDOMO=',alphas_Icfg(1,2,k),alphas_Icfg(2,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
+        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
+        !   kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
         !endif
 
         
@@ -1913,9 +1915,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            extype = excitationTypes(j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
            ! for E_pp E_rs and E_ppE_rr case
-           !if(k.eq.722)then
-           !  print *,"j=",j," k=",k,"p=",p,"q=",q,"NSOMOalpha=",NSOMOalpha, "pmodel=",pmodel,"qmodel=",qmodel, "extype=",extype
-           !endif
+           if(i.eq.1)then
+             print *,"j=",j," k=",k,"p=",p,"q=",q,"NSOMOalpha=",NSOMOalpha, "pmodel=",pmodel,"qmodel=",qmodel, "extype=",extype
+           endif
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
            !print *,"j=",j," Nsomo=",NSOMOalpha," rowsikpq=",rowsikpq," colsikpq=",colsikpq, " p=",pmodel," q=",qmodel, " extyp=",extype

@@ -591,6 +591,7 @@ use bitmasks
 
     ! find out all pq holes possible
     nholes = 0
+    listholes=-1
         call bitstring_to_list(Isomo,listall,nelall,N_int)
 
         do iii=1,nelall
@@ -638,12 +639,19 @@ use bitmasks
     tableUniqueAlphas = .FALSE.
 
     ! Now find the allowed (p,q) excitations
-    do i=1, N_int
-      Isomo(i) = iand(reunion_of_act_virt_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(reunion_of_act_virt_bitmask(i,2),psi_configuration(i,2,idxI))
-      Jsomo(i) = Isomo(i)
-      Jdomo(i) = Idomo(i)
+    do ii=1, N_int
+      !Isomo(ii) = iand(reunion_of_act_virt_bitmask(i,1),psi_configuration(ii,1,idxI))
+      !Idomo(ii) = iand(reunion_of_act_virt_bitmask(i,2),psi_configuration(ii,2,idxI))
+      Isomo(ii) = psi_configuration(ii,1,idxI)
+      Idomo(ii) = psi_configuration(ii,2,idxI)
+      Jsomo(ii) = Isomo(ii)
+      Jdomo(ii) = Idomo(ii)
     enddo
+    !print *,"I=",idxI
+    !print *,"Isomo=",Isomo(1)!, Isomo(2)
+    !print *,"Idomo=",Idomo(1)!, Idomo(2)
+    !print *,listholes
+    !print *,listvmos
 
     if(Nsomo_I .EQ. 0) then
       kstart = 1
@@ -789,6 +797,7 @@ use bitmasks
 
       do j = 1, nvmos
         qq  = listvmos(j)
+        if(pp.eq.qq) cycle
         jint = shiftr(qq-1,bit_kind_shift) + 1
         jpos = qq-shiftl((jint-1),bit_kind_shift)-1
         if(vmotype(j) == 1)then
@@ -797,31 +806,25 @@ use bitmasks
           Jdomo(jint) = IBSET(Jdomo(jint),jpos)
           Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
         endif
-        if(pp .EQ. qq) then
-          if(vmotype(j) == 1)then
-            Jsomo(jint) = IBCLR(Jsomo(jint),jpos)
-          else if(vmotype(j) == 2)then
-            Jdomo(jint) = IBCLR(Jdomo(jint),jpos)
-            Jsomo(jint) = IBSET(Jsomo(jint),jpos)
-          endif
-          cycle
-        endif
+        
         if(tableUniqueAlphas(pp,qq)) then
 
+        Nsomo_J = 0
         do ii=1, N_int
           Jcfg(ii,1) = Jsomo(ii)
           Jcfg(ii,2) = Jdomo(ii)
+          Nsomo_J += POPCNT(Jsomo(ii))
         enddo
 
-          call bitstring_to_list(Jcfg,listall,nelall,N_int)
-          Nsomo_J = nelall
+          !call bitstring_to_list(Jcfg,listall,nelall,N_int)
+          !Nsomo_J = nelall
 
           if(Nsomo_J .ge. NSOMOMin) then
             !print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
             NalphaIcfg += 1
             !print *," Idx = ",idxI, " Nalpha=",NalphaIcfg
             alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
-            if(n_core_orb .le. 63)then
+            if(n_core_orb .le. 64)then
               alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jcfg(1,2),ISHFT(1_8,n_core_orb)-1)
             else
               n_core_orb_64 = n_core_orb
