@@ -264,15 +264,15 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   Icfg = Ialpha
   Nsomo_alpha = 0
   !print *," Ialpha="
-  do i=1,N_int
-    Isomo = Ialpha(i,1)
-    Idomo = Ialpha(i,2)
+  do ii=1,N_int
+    Isomo = Ialpha(ii,1)
+    Idomo = Ialpha(ii,2)
     Nsomo_alpha += POPCNT(Isomo)
     !print *,Isomo, Idomo, "Nsomo=",Nsomo_alpha
   end do
   end_index = min(N_configuration,cfg_seniority_index(min(Nsomo_alpha+4,elec_num))-1)
-  if(end_index .LT. 0) end_index= N_configuration
-  !end_index = N_configuration
+  if(end_index .LT. 0 .OR. end_index .lt. idxI) end_index= N_configuration
+  end_index = N_configuration
 
 
   p = 0
@@ -283,17 +283,6 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
      if(Nsomo_alpha .lt. MS)then
        cycle
      endif
-     !Isomo = Ialpha(1,1)
-     !Idomo = Ialpha(1,2)
-     !Jsomo = psi_configuration(1,1,i)
-     !Jdomo = psi_configuration(1,2,i)
-     !diffSOMO = IEOR(Isomo,Jsomo)
-     !ndiffSOMO = POPCNT(diffSOMO)
-     !diffDOMO = IEOR(Idomo,Jdomo)
-     !xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-     !ndiffDOMO = POPCNT(diffDOMO)
-     !nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
-     !nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
 
      ndiffSOMO = 0
      ndiffDOMO = 0
@@ -315,6 +304,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
        nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
        nxordiffSOMODOMO += POPCNT(diffSOMO) + POPCNT(diffDOMO)
      end do
+     !if(idxI.eq.218)then
+     !  print *,"I=",idxI,"Nsomo_alpha=",Nsomo_alpha,"nxordiffSOMODOMO(4)=",nxordiffSOMODOMO, " ndiffSOMO(2)=",ndiffSOMO, " ndiffDOMO=",ndiffDOMO
+     !endif
      !Jcfg = psi_configuration(:,:,i)
      !print *,"nxordiffSOMODOMO(4)=",nxordiffSOMODOMO, " ndiffSOMO(2)=",ndiffSOMO
 
@@ -391,14 +383,14 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                 do ii=1,N_int
                   Isomo = Ialpha(ii,1)
                   Jsomo = psi_configuration(ii,1,i)
-                  Isomo = IEOR(Isomo, Jsomo)
+                  IJsomo = IEOR(Isomo, Jsomo)
                   iint = shiftr(p-1,bit_kind_shift) + 1
                   ipos = p-shiftl((iint-1),bit_kind_shift)
                   if(iint .eq. ii)then
-                    Isomo = IBCLR(Isomo,ipos-1)
+                    IJsomo = IBCLR(IJsomo,ipos-1)
                   endif
-                  if(popcnt(Isomo) > 0)then
-                    q = TRAILZ(Isomo) + 1 + (ii-1) * bit_kind_size
+                  if(popcnt(IJsomo) > 0)then
+                    q = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
                     EXIT
                   endif
                 end do
@@ -437,15 +429,15 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
                 do ii=1,N_int
                   Isomo = Ialpha(ii,1)
                   Jsomo = psi_configuration(ii,1,i)
-                  Isomo = IEOR(Isomo, Jsomo)
+                  IJsomo = IEOR(Isomo, Jsomo)
                   iint = shiftr(q-1,bit_kind_shift) + 1
                   ipos = q-shiftl((iint-1),bit_kind_shift)
                   if(iint .eq. ii)then
-                    Isomo = IBCLR(Isomo,ipos-1)
+                    IJsomo = IBCLR(IJsomo,ipos-1)
                   endif
                   !print *,"ii=",ii," Isomo=",Isomo
-                  if(popcnt(Isomo) > 0)then
-                    p = TRAILZ(Isomo) + 1 + (ii-1) * bit_kind_size
+                  if(popcnt(IJsomo) > 0)then
+                    p = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
                     EXIT
                   endif
                 enddo
@@ -502,9 +494,9 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         endi   = psi_config_data(i,2)
         nconnectedExtradiag+=1
         nconnectedI += 1
-        do k=1,N_int
-          connectedI(k,1,nconnectedI) = psi_configuration(k,1,i)
-          connectedI(k,2,nconnectedI) = psi_configuration(k,2,i)
+        do ii=1,N_int
+          connectedI(ii,1,nconnectedI) = psi_configuration(ii,1,i)
+          connectedI(ii,2,nconnectedI) = psi_configuration(ii,2,i)
         enddo
         idxs_connectedI(nconnectedI)=starti
         excitationIds(1,nconnectedI)=p
