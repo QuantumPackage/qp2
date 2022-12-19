@@ -149,7 +149,6 @@
     ncfgprev = cfg_seniority_index(i+2)
   end do
   !print *," ^^^^^ N_CSF = ",n_CSF," N_CFG=",N_configuration
-
 END_PROVIDER
 
 
@@ -881,10 +880,10 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
   do i=1,N_configuration
 
-     Isomo = psi_configuration(1,1,i)
-     Idomo = psi_configuration(1,2,i)
-     Icfg(1,1) = psi_configuration(1,1,i)
-     Icfg(1,2) = psi_configuration(1,2,i)
+     !Isomo = psi_configuration(1,1,i)
+     !Idomo = psi_configuration(1,2,i)
+     !Icfg(1,1) = psi_configuration(1,1,i)
+     !Icfg(1,2) = psi_configuration(1,2,i)
      !NSOMOI = getNSOMO(psi_configuration(:,:,i))
 
      starti = psi_config_data(i,1)
@@ -894,6 +893,7 @@ subroutine calculate_preconditioner_cfg(diag_energies)
 
      ! find out all pq holes possible
      nholes = 0
+     listholes = -1
      ! holes in SOMO
      !do kk = 1,n_act_orb
      !  k = list_act(kk)
@@ -1258,10 +1258,6 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
 
   ! TODO Flag (print) when model space indices is > 64
   do ii=1,N_int
-    !Isomo = Ialpha(ii,1)
-    !Idomo = Ialpha(ii,2)
-    !Jsomo = Jcfg(ii,1)
-    !Jdomo = Jcfg(ii,2)
     Isomo(ii) = Ialpha(ii,1)
     Idomo(ii) = Ialpha(ii,2)
     Jsomo(ii) = Jcfg(ii,1)
@@ -1292,26 +1288,30 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
           tmpp = 0
           !print *,"iint=",iint, " p=",p
           do ii=1,iint-1
-            mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-            Isomotmp = IAND(Isomo(ii),mask)
-            tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+            !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+            !Isomotmp = IAND(Isomo(ii),mask)
+            !tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+            tmpp += POPCNT(Isomo(ii))
           end do
           mask = ISHFT(1_bit_kind,ipos+1) - 1
           Isomotmp = IAND(Isomo(iint),mask)
-          pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          pmodel = tmpp + POPCNT(Isomotmp)
           !print *,"iint=",iint, " ipos=",ipos,"pmodel=",pmodel, XOR(Isomotmp,mask),Isomo(iint)
 
           iint = shiftr(q-1,bit_kind_shift) + 1
           ipos = q-shiftl((iint-1),bit_kind_shift)-1
           tmpq = 0
           do ii=1,iint-1
-            mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-            Isomotmp = IAND(Isomo(ii),mask)
-            tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+            !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+            !Isomotmp = IAND(Isomo(ii),mask)
+            !tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+            tmpq += POPCNT(Isomo(ii))
           end do
           mask = ISHFT(1_bit_kind,ipos+1) - 1
           Isomotmp = IAND(Isomo(iint),mask)
-          qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+          qmodel = tmpq + POPCNT(Isomotmp)
           !print *,"iint=",iint, " ipos=",ipos,"qmodel=",qmodel
        case (2)
           ! DOMO -> VMO
@@ -1328,25 +1328,29 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
           ipos = p-shiftl((iint-1),bit_kind_shift)-1
           tmpp = 0
           do ii=1,iint-1
-            mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-            Jsomotmp = IAND(Jsomo(ii),mask)
-            tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+            !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+            !Jsomotmp = IAND(Jsomo(ii),mask)
+            !tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+            tmpp += POPCNT(Jsomo(ii))
           end do
           mask = ISHFT(1_bit_kind,ipos+1) - 1
           Jsomotmp = IAND(Jsomo(iint),mask)
-          pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          pmodel = tmpp + POPCNT(Jsomotmp)
 
           iint = shiftr(q-1,bit_kind_shift) + 1
           ipos = q-shiftl((iint-1),bit_kind_shift)-1
           tmpq = 0
           do ii=1,iint-1
-            mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-            Jsomotmp = IAND(Jsomo(ii),mask)
-            tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+            !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+            !Jsomotmp = IAND(Jsomo(ii),mask)
+            !tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+            tmpq += POPCNT(Jsomo(ii))
           end do
           mask = ISHFT(1_bit_kind,ipos+1) - 1
           Jsomotmp = IAND(Jsomo(iint),mask)
-          qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+          qmodel = tmpq + POPCNT(Jsomotmp)
        case (3)
           ! SOMO -> VMO
           !print *,"type -> SOMO -> VMO"
@@ -1363,25 +1367,29 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
              ipos = p-shiftl((iint-1),bit_kind_shift)-1
              tmpp = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Isomotmp = IAND(Isomo(ii),mask)
-               tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Isomotmp = IAND(Isomo(ii),mask)
+               !tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               tmpp += POPCNT(Isomo(ii))
              end do
-             mask = ISHFT(1_8,ipos+1) - 1
+             mask = ISHFT(1_bit_kind,ipos+1) - 1
              Isomotmp = IAND(Isomo(iint),mask)
-             pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+             !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+             pmodel = tmpp + POPCNT(Isomotmp)
 
              iint = shiftr(q-1,bit_kind_shift) + 1
              ipos = q-shiftl((iint-1),bit_kind_shift)-1
              tmpq = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Jsomotmp = IAND(Jsomo(ii),mask)
-               tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Jsomotmp = IAND(Jsomo(ii),mask)
+               !tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               tmpq += POPCNT(Jsomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Jsomotmp = IAND(Jsomo(iint),mask)
-             qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask)) + 1
+             !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask)) + 1
+             qmodel = tmpq + POPCNT(Jsomotmp) + 1
           else
              !mask = ISHFT(1_8,p) - 1
              !Isomo = IAND(Isomo,mask)
@@ -1394,25 +1402,29 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
              ipos = p-shiftl((iint-1),bit_kind_shift)-1
              tmpp = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Isomotmp = IAND(Isomo(ii),mask)
-               tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Isomotmp = IAND(Isomo(ii),mask)
+               !tmpp += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               tmpp += POPCNT(Isomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Isomotmp = IAND(Isomo(iint),mask)
-             pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask)) + 1
+             !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask)) + 1
+             pmodel = tmpp + POPCNT(Isomotmp) + 1
 
              iint = shiftr(q-1,bit_kind_shift) + 1
              ipos = q-shiftl((iint-1),bit_kind_shift)-1
              tmpq = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Jsomotmp = IAND(Jsomo(ii),mask)
-               tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Jsomotmp = IAND(Jsomo(ii),mask)
+               !tmpq += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               tmpq += POPCNT(Jsomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Jsomotmp = IAND(Jsomo(iint),mask)
-             qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+             !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+             qmodel = tmpq + POPCNT(Jsomotmp)
           endif
        case (4)
           ! DOMO -> SOMO
@@ -1431,25 +1443,29 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
              ipos = p-shiftl((iint-1),bit_kind_shift)-1
              tmpp = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Jsomotmp = IAND(Jsomo(ii),mask)
-               tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Jsomotmp = IAND(Jsomo(ii),mask)
+               !tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               tmpp += POPCNT(Jsomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Jsomotmp = IAND(Jsomo(iint),mask)
-             pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+             !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+             pmodel = tmpp + POPCNT(Jsomotmp)
 
              iint = shiftr(q-1,bit_kind_shift) + 1
              ipos = q-shiftl((iint-1),bit_kind_shift)-1
              tmpq = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Isomotmp = IAND(Isomo(ii),mask)
-               tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Isomotmp = IAND(Isomo(ii),mask)
+               !tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               tmpq += POPCNT(Isomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Isomotmp = IAND(Isomo(iint),mask)
-             qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask)) + 1
+             !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask)) + 1
+             qmodel = tmpq + POPCNT(Isomotmp) + 1
           else
              !mask = ISHFT(1_8,p) - 1
              !Jsomo = IAND(Jsomo,mask)
@@ -1462,25 +1478,29 @@ subroutine convertOrbIdsToModelSpaceIds(Ialpha, Jcfg, p, q, extype, pmodel, qmod
              ipos = p-shiftl((iint-1),bit_kind_shift)-1
              tmpp = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Jsomotmp = IAND(Jsomo(ii),mask)
-               tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Jsomotmp = IAND(Jsomo(ii),mask)
+               !tmpp += POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask))
+               tmpp += POPCNT(Jsomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Jsomotmp = IAND(Jsomo(iint),mask)
-             pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask)) + 1
+             !pmodel = tmpp + POPCNT(mask) - POPCNT(XOR(Jsomotmp,mask)) + 1
+             pmodel = tmpp + POPCNT(Jsomotmp) + 1
 
              iint = shiftr(q-1,bit_kind_shift) + 1
              ipos = q-shiftl((iint-1),bit_kind_shift)-1
              tmpq = 0
              do ii=1,iint-1
-               mask = ISHFT(1_bit_kind,-1)-1_bit_kind
-               Isomotmp = IAND(Isomo(ii),mask)
-               tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               !mask = ISHFT(1_bit_kind,-1)-1_bit_kind
+               !Isomotmp = IAND(Isomo(ii),mask)
+               !tmpq += POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+               tmpq += POPCNT(Isomo(ii))
              end do
              mask = ISHFT(1_bit_kind,ipos+1) - 1
              Isomotmp = IAND(Isomo(iint),mask)
-             qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+             !qmodel = tmpq + POPCNT(mask) - POPCNT(XOR(Isomotmp,mask))
+             qmodel = tmpq + POPCNT(Isomotmp)
           endif
        case default
           print *,"something is wrong in convertOrbIdsToModelSpaceIds"
@@ -1560,6 +1580,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   real*8                         :: tmpvar, tmptot
   real*8                         :: core_act_contrib
   integer :: listall(N_int*bit_kind_size), nelall
+  integer :: countelec
 
   integer(omp_lock_kind), allocatable :: lock(:)
   call omp_set_max_active_levels(1)
@@ -1621,7 +1642,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
       !$OMP shared(istart_cfg, iend_cfg, psi_configuration, mo_num, psi_config_data,&
       !$OMP    N_int, N_st, psi_out, psi_in, h_core_ri, core_energy, h_act_ri, AIJpqContainer,&
       !$OMP     pp, sze, NalphaIcfg_list,alphasIcfg_list, bit_tmp,       &
-      !$OMP     qq, iint, jint, ipos, jpos, nelall, listall, Nsomo_I, &
+      !$OMP     qq, iint, jint, ipos, jpos, nelall, listall, Nsomo_I, countelec,&
       !$OMP     AIJpqMatrixDimsList, diag_energies, n_CSF, lock, NBFmax,nconnectedtotalmax, nconnectedmaxJ,maxnalphas,&
       !$OMP     n_core_orb, n_act_orb, list_act, n, list_core,  list_core_is_built,core_act_contrib, num_threads_max,&
       !$OMP     n_core_orb_is_built, mo_integrals_map, mo_integrals_map_is_built)
@@ -1650,7 +1671,7 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      Isomo(ii) = Icfg(ii,1)
      Idomo(ii) = Icfg(ii,2)
     enddo
-     NSOMOI = getNSOMO(Icfg)
+    NSOMOI = getNSOMO(Icfg)
 
      ! find out all pq holes possible
      nholes = 0
@@ -1680,9 +1701,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
     ! enddo
 
     ! ! find vmos
-     listvmos = -1
-     vmotype = -1
-     nvmos = 0
     ! do kk = 1,n_act_orb
     !   k = list_act(kk)
     !   !print *,i,IBSET(0,i-1),POPCNT(IAND(Isomo,(IBSET(0_8,i-1)))), POPCNT(IAND(Idomo,(IBSET(0_8,i-1))))
@@ -1720,6 +1738,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         end do
 
 
+     listvmos = -1
+     vmotype = -1
+     nvmos = 0
   ! find vmos
     ! Take into account N_int
     do ii = 1, n_act_orb
@@ -1835,6 +1856,9 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   deallocate(excitationTypes_single)
 
   !print *," singles part psi(1,1)=",psi_out(1,1)
+  !do i=1,n_CSF
+  !  print *,"i=",i," psi(i)=",psi_out(1,i)
+  !enddo
   
   allocate(listconnectedJ(N_INT,2,max(sze,10000)))
   allocate(alphas_Icfg(N_INT,2,max(sze,10000)))
@@ -1849,7 +1873,6 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
   !!!====================!!!
   !!! Double Excitations !!!
   !!!====================!!!
-
   ! Loop over all selected configurations
   !$OMP DO SCHEDULE(static)
   do i = istart_cfg,iend_cfg
@@ -1880,7 +1903,8 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
      !call obtain_connected_J_givenI(i, Icfg, listconnectedJ, idslistconnectedJ, nconnectedJ, ntotJ)
 
      ! TODO : remove doubly excited for return
-     !print *,"I=",i," isomo=",psi_configuration(1,1,i)," idomo=",psi_configuration(1,2,i), " psiout=",psi_out(1,5), "Nalphas_Icfg=",Nalphas_Icfg
+     !print *,"I=",i,"isomo=",psi_configuration(1,1,i),psi_configuration(2,1,i),POPCNT(psi_configuration(1,1,i)),POPCNT(psi_configuration(2,1,i)),&
+     !"idomo=",psi_configuration(1,2,i),psi_configuration(2,2,i),POPCNT(psi_configuration(1,2,i)),POPCNT(psi_configuration(2,2,i)), "Nalphas_Icfg=",Nalphas_Icfg
      do k = 1,Nalphas_Icfg
         ! Now generate all singly excited with respect to a given alpha CFG
 
@@ -1891,11 +1915,11 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
         call obtain_connected_I_foralpha(i, alphas_Icfg(1,1,k), connectedI_alpha, idxs_connectedI_alpha, &
                                          nconnectedI, excitationIds, excitationTypes, diagfactors)
 
-        !if(i .EQ. 1) then
-        !   !print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),alphas_Icfg(2,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
-        !   !kcfgDOMO=',alphas_Icfg(1,2,k),alphas_Icfg(2,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
-        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
-        !   kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
+        !if(i .EQ. 218) then
+        !   print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),alphas_Icfg(2,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
+        !   kcfgDOMO=',alphas_Icfg(1,2,k),alphas_Icfg(2,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
+        !   !print *,'k=',k,' kcfgSOMO=',alphas_Icfg(1,1,k),' ',POPCNT(alphas_Icfg(1,1,k)),' &
+        !   !kcfgDOMO=',alphas_Icfg(1,2,k),' ',POPCNT(alphas_Icfg(1,2,k)), " NconnectedI=",nconnectedI
         !endif
 
         
@@ -1911,15 +1935,22 @@ subroutine calculate_sigma_vector_cfg_nst_naive_store(psi_out, psi_in, n_st, sze
            NSOMOI = getNSOMO(connectedI_alpha(:,:,j))
            p = excitationIds(1,j)
            q = excitationIds(2,j)
-           !print *,"j=",j, " p=",p," q=",q
            extype = excitationTypes(j)
+           !print *,"K=",k,"j=",j, "countelec=",countelec," p=",p," q=",q, " extype=",extype, "NSOMOalpha=",NSOMOalpha," NSOMOI=",NSOMOI, "alphas_Icfg(1,1,k)=",alphas_Icfg(1,1,k), &
+           !alphas_Icfg(2,1,k), " domo=",alphas_Icfg(1,2,k), alphas_Icfg(2,2,k), " connected somo=",connectedI_alpha(1,1,j), &
+           !connectedI_alpha(2,1,j), " domo=",connectedI_alpha(1,2,j), connectedI_alpha(2,2,j)
            call convertOrbIdsToModelSpaceIds(alphas_Icfg(1,1,k), connectedI_alpha(1,1,j), p, q, extype, pmodel, qmodel)
            ! for E_pp E_rs and E_ppE_rr case
-           if(i.eq.1)then
-             print *,"j=",j," k=",k,"p=",p,"q=",q,"NSOMOalpha=",NSOMOalpha, "pmodel=",pmodel,"qmodel=",qmodel, "extype=",extype
-           endif
            rowsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,1)
            colsikpq = AIJpqMatrixDimsList(NSOMOalpha,extype,pmodel,qmodel,2)
+           !if(i.eq.218)then
+           !  print *,"j=",j," k=",k,"p=",p,"q=",q,"NSOMOalpha=",NSOMOalpha, "pmodel=",pmodel,"qmodel=",qmodel, "extype=",extype,&
+           !  "conn somo=",connectedI_alpha(1,1,j),connectedI_alpha(2,1,j),&
+           !  "conn domo=",connectedI_alpha(1,2,j),connectedI_alpha(2,2,j)
+           !  do m=1,colsikpq
+           !    print *,idxs_connectedI_alpha(j)+m-1
+           !  enddo
+           !endif
            !print *,"j=",j," Nsomo=",NSOMOalpha," rowsikpq=",rowsikpq," colsikpq=",colsikpq, " p=",pmodel," q=",qmodel, " extyp=",extype
            totcolsTKI += colsikpq
            rowsTKI = rowsikpq
