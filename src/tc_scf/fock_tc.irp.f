@@ -89,7 +89,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
 
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                           , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
-    if(three_body_h_tc) then
+    if(three_body_h_tc.and.elec_alpha_num == elec_beta_num) then
       Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
     endif
 
@@ -116,7 +116,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                          , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
 
-    if(three_body_h_tc) then
+    if(three_body_h_tc.and.elec_alpha_num == elec_beta_num) then
       Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
     endif
 
