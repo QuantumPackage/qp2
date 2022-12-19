@@ -5,8 +5,8 @@ BEGIN_PROVIDER [ character*(3), sigma_vector_algorithm ]
  !
  ! If 'cfg', use <Psi_csf|H|Psi_csf> in Davidson
  END_DOC
- !sigma_vector_algorithm = 'det'
- sigma_vector_algorithm = 'cfg'
+ sigma_vector_algorithm = 'det'
+ !sigma_vector_algorithm = 'cfg'
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, CI_energy, (N_states_diag) ]
