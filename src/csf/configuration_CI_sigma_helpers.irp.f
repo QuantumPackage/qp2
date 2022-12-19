@@ -565,6 +565,7 @@ use bitmasks
   integer                        :: p, pp, p_s
   integer                        :: q, qq, q_s
   integer                        :: countalphas
+  integer                        :: countelec
   logical                        :: pqAlreadyGenQ
   logical                        :: pqExistsQ
   logical                        :: ppExistsQ
@@ -584,9 +585,11 @@ use bitmasks
     Icfg  = psi_configuration(:,:,idxI)
     Jcfg  = psi_configuration(:,:,idxI)
 
-    do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
+    !print *,"idxI=",idxI
+    do ii=1, N_int
+      Isomo(ii) = iand(act_bitmask(ii,1),psi_configuration(ii,1,idxI))
+      Idomo(ii) = iand(act_bitmask(ii,2),psi_configuration(ii,2,idxI))
+      !print *,Isomo(ii), Idomo(ii)
     enddo
 
     ! find out all pq holes possible
@@ -640,24 +643,22 @@ use bitmasks
 
     ! Now find the allowed (p,q) excitations
     do ii=1, N_int
-      !Isomo(ii) = iand(reunion_of_act_virt_bitmask(i,1),psi_configuration(ii,1,idxI))
-      !Idomo(ii) = iand(reunion_of_act_virt_bitmask(i,2),psi_configuration(ii,2,idxI))
-      Isomo(ii) = psi_configuration(ii,1,idxI)
-      Idomo(ii) = psi_configuration(ii,2,idxI)
+      !Isomo(ii) = iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,idxI))
+      !Idomo(ii) = iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,idxI))
+      Isomo(ii) = iand(act_bitmask(ii,1),psi_configuration(ii,1,idxI))
+      Idomo(ii) = iand(act_bitmask(ii,2),psi_configuration(ii,2,idxI))
+      !Isomo(ii) = psi_configuration(ii,1,idxI)
+      !Idomo(ii) = psi_configuration(ii,2,idxI)
       Jsomo(ii) = Isomo(ii)
       Jdomo(ii) = Idomo(ii)
     enddo
-    !print *,"I=",idxI
-    !print *,"Isomo=",Isomo(1)!, Isomo(2)
-    !print *,"Idomo=",Idomo(1)!, Idomo(2)
-    !print *,listholes
-    !print *,listvmos
 
     if(Nsomo_I .EQ. 0) then
       kstart = 1
     else
       kstart = cfg_seniority_index(max(NSOMOMin,Nsomo_I-2))
     endif
+    kstart = 1
     kend = idxI-1
 
     do i = 1,nholes
@@ -690,9 +691,6 @@ use bitmasks
           Nsomo_J += POPCNT(Jsomo(ii))
         enddo
 
-        !call bitstring_to_list(Jcfg(1,1),listall,nelall,N_int)
-        !Nsomo_J = nelall
-
         ! Check for Minimal alpha electrons (MS)
         if(Nsomo_J.lt.MS)then
           if(vmotype(j) == 1)then
@@ -716,9 +714,9 @@ use bitmasks
           ndiffDOMO = 0
           nxordiffSOMODOMO = 0
           do ii = 1, N_int
-            diffSOMO = IEOR(Jcfg(ii,1),iand(reunion_of_act_virt_bitmask(ii,1),psi_configuration(ii,1,k)))
+            diffSOMO = IEOR(Jcfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))
             ndiffSOMO += POPCNT(diffSOMO)
-            diffDOMO = IEOR(Jcfg(ii,2),iand(reunion_of_act_virt_bitmask(ii,2),psi_configuration(ii,2,k)))
+            diffDOMO = IEOR(Jcfg(ii,2),iand(act_bitmask(ii,2),psi_configuration(ii,2,k)))
             xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
             ndiffDOMO += POPCNT(diffDOMO)
             nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
@@ -773,15 +771,25 @@ use bitmasks
     end do
 
     !print *,tableUniqueAlphas(:,:)
-
     ! prune list of alphas
-    do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
-      Jsomo(i) = Isomo(i)
-      Jdomo(i) = Idomo(i)
+    do ii=1, N_int
+      Isomo(ii) = iand(act_bitmask(ii,1),psi_configuration(ii,1,idxI))
+      Idomo(ii) = iand(act_bitmask(ii,2),psi_configuration(ii,2,idxI))
+      !Isomo(ii) = psi_configuration(ii,1,idxI)
+      !Idomo(ii) = psi_configuration(ii,2,idxI)
+      Jsomo(ii) = Isomo(ii)
+      Jdomo(ii) = Idomo(ii)
     enddo
     !print *, " Isomo=",Isomo(1), " Idomo=", Idomo(1)
+
+    !countelec=0
+    !do ii=1, N_int
+    !  countelec += POPCNT(Icfg(ii,1))*1 + POPCNT(Icfg(ii,2))*2
+    !enddo
+    !if(countelec .ne. 14)then
+    !  print *," idxI=",idxI, "00countelec=",countelec, " bit_kind_size=",bit_kind_size, " nvmo=",nvmos," mo_num=",mo_num
+    !  stop
+    !endif
 
     NalphaIcfg = 0
     do i = 1, nholes
@@ -809,21 +817,23 @@ use bitmasks
         
         if(tableUniqueAlphas(pp,qq)) then
 
-        Nsomo_J = 0
-        do ii=1, N_int
-          Jcfg(ii,1) = Jsomo(ii)
-          Jcfg(ii,2) = Jdomo(ii)
-          Nsomo_J += POPCNT(Jsomo(ii))
-        enddo
-
-          !call bitstring_to_list(Jcfg,listall,nelall,N_int)
-          !Nsomo_J = nelall
+          Nsomo_J = 0
+          countelec = 0
+          do ii=1, N_int
+            Jcfg(ii,1) = Jsomo(ii)
+            Jcfg(ii,2) = Jdomo(ii)
+            Nsomo_J += POPCNT(Jsomo(ii))
+            countelec += POPCNT(Jsomo(ii))*1 + POPCNT(Jdomo(ii))*2
+          enddo
 
           if(Nsomo_J .ge. NSOMOMin) then
             !print *," Idx = ",idxI, "p = ",pp, " q = ",qq," Jsomo=",Jsomo(1), " Jdomo=",IOR(Jdomo(1),ISHFT(1_8,n_core_orb)-1)
             NalphaIcfg += 1
-            !print *," Idx = ",idxI, " Nalpha=",NalphaIcfg
+            !if(idxI.eq.8)then
+            !  print *," 1 Idx = ",idxI, " Nalpha=",NalphaIcfg, " n_core_orb=",n_core_orb
+            !endif
             alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
+            alphasIcfg_list(:,2,idxI,NalphaIcfg) = Jcfg(:,2)
             if(n_core_orb .le. 64)then
               alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jcfg(1,2),ISHFT(1_8,n_core_orb)-1)
             else
@@ -839,6 +849,7 @@ use bitmasks
             endif
             NalphaIcfg_list(idxI) = NalphaIcfg
           endif
+          !print *,"         ", NalphaIcfg, Jsomo(1), Jsomo(2), "|", Jdomo(1), Jdomo(2)
         endif
 
         if(vmotype(j) == 1)then
@@ -858,12 +869,14 @@ use bitmasks
 
     ! Check if this Icfg has been previously generated as a mono
     ppExistsQ = .False.
-    do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),psi_configuration(i,1,idxI))
-      Idomo(i) = iand(act_bitmask(i,2),psi_configuration(i,2,idxI))
+    do ii=1, N_int
+      Isomo(ii) = iand(act_bitmask(ii,1),psi_configuration(ii,1,idxI))
+      Idomo(ii) = iand(act_bitmask(ii,2),psi_configuration(ii,2,idxI))
     enddo
+    !Icfg  = psi_configuration(:,:,idxI)
 
-    kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
+    !kstart = max(1,cfg_seniority_index(max(NSOMOMin,Nsomo_I-2)))
+    kstart = 1
     ndiffDOMO = 0
     do k = kstart, idxI-1
       ndiffSOMO = 0
@@ -871,7 +884,7 @@ use bitmasks
         diffSOMO = IEOR(Icfg(ii,1),iand(act_bitmask(ii,1),psi_configuration(ii,1,k)))
         ndiffSOMO += POPCNT(diffSOMO)
       end do
-      ! ndiffSOMO cannot be 0 (I /= k)
+      ! ndiffSOMO cannot be 0 (I /= k) if idxI is a single ex
       ! if ndiffSOMO /= 2 then it has to be greater than 2 and hense
       ! this Icfg could not have been generated before.
       if (ndiffSOMO /= 2) cycle
@@ -897,9 +910,11 @@ use bitmasks
         alphasIcfg_list(:,2,idxI,NalphaIcfg) = Icfg(:,2)
         NalphaIcfg_list(idxI) = NalphaIcfg
       endif
+          !print *,"         ---> ", NalphaIcfg, Icfg(1,1), Icfg(2,1), "|", Icfg(1,2), Icfg(2,2)
     endif
 
     NalphaIcfg = 0
+
   enddo ! end loop idxI
   call wall_time(t1)
   print *, 'Preparation : ', t1 - t0
@@ -954,9 +969,9 @@ END_PROVIDER
   logical                            :: ppExistsQ
   integer :: listall(N_int*bit_kind_size), nelall
 
-  do i=1, N_int
-    Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-    Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
+  do ii=1, N_int
+    Isomo(ii) = iand(act_bitmask(ii,1),Icfg(ii,1))
+    Idomo(ii) = iand(act_bitmask(ii,2),Icfg(ii,2))
   enddo
 
   !print*,"Input cfg"
@@ -1016,11 +1031,11 @@ END_PROVIDER
   tableUniqueAlphas = .FALSE.
 
     ! Now find the allowed (p,q) excitations
-    do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
-      Jsomo(i) = Isomo(i)
-      Jdomo(i) = Idomo(i)
+    do ii=1, N_int
+      Isomo(ii) = iand(act_bitmask(ii,1),Icfg(ii,1))
+      Idomo(ii) = iand(act_bitmask(ii,2),Icfg(ii,2))
+      Jsomo(ii) = Isomo(ii)
+      Jdomo(ii) = Idomo(ii)
     enddo
 
   ! Now find the allowed (p,q) excitations
@@ -1159,11 +1174,11 @@ END_PROVIDER
   !print *,tableUniqueAlphas(:,:)
 
   ! prune list of alphas
-    do i=1, N_int
-      Isomo(i) = iand(act_bitmask(i,1),Icfg(i,1))
-      Idomo(i) = iand(act_bitmask(i,2),Icfg(i,2))
-      Jsomo(i) = Isomo(i)
-      Jdomo(i) = Idomo(i)
+    do ii=1, N_int
+      Isomo(ii) = iand(act_bitmask(ii,1),Icfg(ii,1))
+      Idomo(ii) = iand(act_bitmask(ii,2),Icfg(ii,2))
+      Jsomo(ii) = Isomo(ii)
+      Jdomo(ii) = Idomo(ii)
     enddo
 
   NalphaIcfg = 0
@@ -1191,7 +1206,8 @@ END_PROVIDER
            ! SOMO
            NalphaIcfg += 1
            alphasIcfg_list(:,1,idxI,NalphaIcfg) = Jcfg(:,1)
-           if(n_core_orb .le. 63)then
+           alphasIcfg_list(:,2,idxI,NalphaIcfg) = Jcfg(:,2)
+           if(n_core_orb .le. 64)then
              alphasIcfg_list(1,2,idxI,NalphaIcfg) = IOR(Jcfg(1,2),ISHFT(1_8,n_core_orb)-1)
            else
              n_core_orb_64 = n_core_orb
