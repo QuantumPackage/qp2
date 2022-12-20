@@ -114,6 +114,7 @@ subroutine convertWFfromCSFtoDET(N_st,psi_coef_cfg_in, psi_coef_det)
   integer                        :: idx
   integer MS
   MS = elec_alpha_num-elec_beta_num
+  !print *,"size=",size(tmp_psi_coef_det,1)," ",size(tmp_psi_coef_det,2)
 
   countcsf = 0
 

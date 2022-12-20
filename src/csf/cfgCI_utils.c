@@ -253,9 +253,9 @@ void generateAllBFs(int64_t Isomo, int64_t MS, Tree *bftree, int *NBF, int *NSOM
     buildTreeDriver(bftree, *NSOMO, MS, NBF);
 }
 
-void ortho_qr_csf(double *overlapMatrix, int lda, double *orthoMatrix, int rows, int cols);
+//void ortho_qr_csf(double *overlapMatrix, int lda, double *orthoMatrix, int rows, int cols);
 
-// QR to orthogonalize CSFs does not work
+
 //void gramSchmidt_qp(double *overlapMatrix, int rows, int cols, double *orthoMatrix){
 //  int i,j;
 //  //for(j=0;j<cols;++j){

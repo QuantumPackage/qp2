@@ -112,6 +112,8 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
   double precision, allocatable  :: U(:,:), U_csf(:,:), overlap(:,:)
   double precision, allocatable  :: tmpU(:,:), tmpW(:,:)
   double precision, pointer      :: W(:,:), W_csf(:,:)
+  !double precision, pointer      :: W2(:,:), W_csf2(:,:)
+  !double precision, allocatable  :: U2(:,:), U_csf2(:,:)
   logical                        :: disk_based
   double precision               :: energy_shift(N_st_diag_in*davidson_sze_max)
 
@@ -234,12 +236,15 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
     call c_f_pointer(ptr_w, W_csf, (/sze_csf,N_st_diag*itermax/))
   else
     allocate(W(sze,N_st_diag),W_csf(sze_csf,N_st_diag*itermax))
+    !allocate(W2(sze,N_st_diag),W_csf2(sze_csf,N_st_diag*itermax))
   endif
 
   allocate(                                                          &
       ! Large
       U(sze,N_st_diag),                                              &
+      !U2(sze,N_st_diag),                                              &
       U_csf(sze_csf,N_st_diag*itermax),                              &
+      !U_csf2(sze_csf,N_st_diag*itermax),                              &
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
@@ -325,7 +330,7 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
               enddo
             enddo
             !tmpU     =0.0d0
-            !tmpU(1,2)=1.0d0
+            !tmpU(1,1)=1.0d0
             double precision               :: irp_rdtsc
             double precision               :: ticks_0, ticks_1
             integer*8                      :: irp_imax
@@ -348,9 +353,9 @@ subroutine davidson_diag_cfg_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
             !call convertWFfromDETtoCSF(N_st_diag,u_in(1,1),W_csf2(1,1))
             !do i=1,sze_csf
             !  print *,"I=",i," qp=",W_csf2(i,1)," my=",W_csf(i,1)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
-            !  if(dabs(dabs(W_csf2(i,1))-dabs(W_csf(i,1))) .gt. 1.0e-10)then
-            !    print *,"somo=",psi_configuration(1,1,i)," domo=",psi_configuration(1,2,i)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
-            !  endif
+            !  !if(dabs(dabs(W_csf2(i,1))-dabs(W_csf(i,1))) .gt. 1.0e-10)then
+            !  !  print *,"somo=",psi_configuration(1,1,i)," domo=",psi_configuration(1,2,i)," diff=",dabs(W_csf2(i,1))-dabs(W_csf(i,1))
+            !  !endif
             !end do
             !stop
             deallocate(tmpW)
