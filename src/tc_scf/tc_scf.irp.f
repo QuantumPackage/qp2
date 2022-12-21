@@ -170,7 +170,7 @@ subroutine simple_tcscf()
       TOUCH mo_l_coef mo_r_coef
       call ezfio_set_tc_scf_bitc_energy(TC_HF_energy)
 
-      !call test_fock_3e_uhf_mo()
+      call test_fock_3e_uhf_mo()
 
       print *, ' ***'
       print *, ''
@@ -226,9 +226,9 @@ subroutine test_fock_3e_uhf_mo()
 
       diff_ij = dabs(fock_3e_uhf_mo_a(j,i) - fock_a_tot_3e_bi_orth(j,i))
       if(diff_ij .gt. thr_ih) then
-        print *, ' difference on ', j, i
-        print *, ' MANU : ', fock_a_tot_3e_bi_orth(j,i)
-        print *, ' UHF  : ', fock_3e_uhf_mo_a     (j,i)
+        !print *, ' difference on ', j, i
+        !print *, ' MANU : ', fock_a_tot_3e_bi_orth(j,i)
+        !print *, ' UHF  : ', fock_3e_uhf_mo_a     (j,i)
         !stop
       endif
 
@@ -249,9 +249,9 @@ subroutine test_fock_3e_uhf_mo()
 
       diff_ij = dabs(fock_3e_uhf_mo_b(j,i) - fock_b_tot_3e_bi_orth(j,i))
       if(diff_ij .gt. thr_ih) then
-        print *, ' difference on ', j, i
-        print *, ' MANU : ', fock_b_tot_3e_bi_orth(j,i)
-        print *, ' UHF  : ', fock_3e_uhf_mo_b     (j,i)
+        !print *, ' difference on ', j, i
+        !print *, ' MANU : ', fock_b_tot_3e_bi_orth(j,i)
+        !print *, ' UHF  : ', fock_3e_uhf_mo_b     (j,i)
         !stop
       endif
 

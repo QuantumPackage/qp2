@@ -25,7 +25,7 @@ program test_ints
  !call routine_int2_grad1u2_grad2u2_j1b2
 
 
-  call test_fock_3e_uhf_ao()
+  !call test_fock_3e_uhf_ao()
   call test_fock_3e_uhf_mo()
 
 end

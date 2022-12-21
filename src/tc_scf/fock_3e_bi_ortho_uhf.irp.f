@@ -8,6 +8,8 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
   double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
   double precision :: ti, tf
 
+  PROVIDE mo_l_coef mo_r_coef
+
   !print *, ' PROVIDING fock_3e_uhf_mo_cs ...'
   call wall_time(ti)
 
@@ -51,6 +53,8 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
   integer          :: a, b, i, j, o
   double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
   double precision :: ti, tf
+
+  PROVIDE mo_l_coef mo_r_coef
 
   !print *, ' PROVIDING fock_3e_uhf_mo_a ...'
   call wall_time(ti)
@@ -146,6 +150,8 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
   integer          :: a, b, i, j, o
   double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
   double precision :: ti, tf
+
+  PROVIDE mo_l_coef mo_r_coef
 
   !print *, ' PROVIDING fock_3e_uhf_mo_b ...'
   call wall_time(ti)
