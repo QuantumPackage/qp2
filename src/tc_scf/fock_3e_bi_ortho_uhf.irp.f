@@ -239,11 +239,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_a, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: g, d, e, k, mu, nu
-  double precision :: dm_ge_a, dm_ge_b, dm_ge
-  double precision :: dm_dk_a, dm_dk_b, dm_dk
-  double precision :: i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu
-  double precision :: ti, tf
+  integer                       :: g, d, e, k, mu, nu
+  double precision              :: dm_ge_a, dm_ge_b, dm_ge
+  double precision              :: dm_dk_a, dm_dk_b, dm_dk
+  double precision              :: i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu
+  double precision              :: ti, tf
+  double precision, allocatable :: f_tmp(:,:)
 
   print *, ' PROVIDING fock_3e_uhf_ao_a ...'
   call wall_time(ti)
@@ -251,47 +252,97 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_a, (ao_num, ao_num)]
   fock_3e_uhf_ao_a = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                                &
- !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk,         &
+ !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
  !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
  !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_a)
+
+  allocate(f_tmp(ao_num,ao_num))
+  f_tmp = 0.d0
+
  !$OMP DO
   do g = 1, ao_num
     do e = 1, ao_num
       dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
       dm_ge_b = TCSCF_bi_ort_dm_ao_beta (g,e)
       dm_ge   = dm_ge_a + dm_ge_b
-
       do d = 1, ao_num
         do k = 1, ao_num
           dm_dk_a = TCSCF_bi_ort_dm_ao_alpha(d,k)
           dm_dk_b = TCSCF_bi_ort_dm_ao_beta (d,k)
           dm_dk   = dm_dk_a + dm_dk_b
-
           do mu = 1, ao_num
             do nu = 1, ao_num
-
               call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, e, k, i_mugd_nuek)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, e, k, nu, i_mugd_eknu)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, k, nu, e, i_mugd_knue)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, k, e, i_mugd_nuke)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, e, nu, k, i_mugd_enuk)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, k, e, nu, i_mugd_kenu)
-
-              fock_3e_uhf_ao_a(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
-                                                 + dm_ge_a * dm_dk_a * i_mugd_eknu &
-                                                 + dm_ge_a * dm_dk_a * i_mugd_knue &
-                                                 - dm_ge   * dm_dk_a * i_mugd_kenu &
-                                                 - dm_ge_a * dm_dk   * i_mugd_enuk &
-                                                 - dm_ge_a * dm_dk_a * i_mugd_nuke &
-                                                 - dm_ge_b * dm_dk_b * i_mugd_nuke )
+              f_tmp(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
+                                      + dm_ge_a * dm_dk_a * i_mugd_eknu &
+                                      + dm_ge_a * dm_dk_a * i_mugd_knue &
+                                      - dm_ge_a * dm_dk   * i_mugd_enuk &
+                                      - dm_ge   * dm_dk_a * i_mugd_kenu &
+                                      - dm_ge_a * dm_dk_a * i_mugd_nuke &
+                                      - dm_ge_b * dm_dk_b * i_mugd_nuke )
             enddo
           enddo
         enddo
       enddo
     enddo
   enddo
- !$OMP END DO
+ !$OMP END DO NOWAIT
+
+ !$OMP CRITICAL
+  do mu = 1, ao_num
+    do nu = 1, ao_num
+      fock_3e_uhf_ao_a(mu,nu) += f_tmp(mu,nu)
+    enddo
+  enddo
+ !$OMP END CRITICAL
+
+  deallocate(f_tmp)
  !$OMP END PARALLEL
+
+! TODO
+! !$OMP PARALLEL DEFAULT (NONE)                                                                &
+! !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk,         &
+! !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
+! !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_a)
+! !$OMP DO
+!  do g = 1, ao_num
+!    do e = 1, ao_num
+!      dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
+!      dm_ge_b = TCSCF_bi_ort_dm_ao_beta (g,e)
+!      dm_ge   = dm_ge_a + dm_ge_b
+!      do d = 1, ao_num
+!        do k = 1, ao_num
+!          dm_dk_a = TCSCF_bi_ort_dm_ao_alpha(d,k)
+!          dm_dk_b = TCSCF_bi_ort_dm_ao_beta (d,k)
+!          dm_dk   = dm_dk_a + dm_dk_b
+!          do mu = 1, ao_num
+!            do nu = 1, ao_num
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, e, k, i_mugd_nuek)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, e, k, nu, i_mugd_eknu)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, k, nu, e, i_mugd_knue)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, k, e, i_mugd_nuke)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, e, nu, k, i_mugd_enuk)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, k, e, nu, i_mugd_kenu)
+!              fock_3e_uhf_ao_a(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
+!                                                 + dm_ge_a * dm_dk_a * i_mugd_eknu &
+!                                                 + dm_ge_a * dm_dk_a * i_mugd_knue &
+!                                                 - dm_ge_a * dm_dk   * i_mugd_enuk &
+!                                                 - dm_ge   * dm_dk_a * i_mugd_kenu &
+!                                                 - dm_ge_a * dm_dk_a * i_mugd_nuke &
+!                                                 - dm_ge_b * dm_dk_b * i_mugd_nuke )
+!            enddo
+!          enddo
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+! !$OMP END DO
+! !$OMP END PARALLEL
 
   call wall_time(tf)
   print *, ' total Wall time for fock_3e_uhf_ao_a =', tf - ti
@@ -314,11 +365,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_b, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: g, d, e, k, mu, nu
-  double precision :: dm_ge_a, dm_ge_b, dm_ge
-  double precision :: dm_dk_a, dm_dk_b, dm_dk
-  double precision :: i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu
-  double precision :: ti, tf
+  integer                       :: g, d, e, k, mu, nu
+  double precision              :: dm_ge_a, dm_ge_b, dm_ge
+  double precision              :: dm_dk_a, dm_dk_b, dm_dk
+  double precision              :: i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu
+  double precision              :: ti, tf
+  double precision, allocatable :: f_tmp(:,:)
 
   print *, ' PROVIDING fock_3e_uhf_ao_b ...'
   call wall_time(ti)
@@ -326,47 +378,95 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_b, (ao_num, ao_num)]
   fock_3e_uhf_ao_b = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                                &
- !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk,         &
+ !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
  !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
  !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_b)
+
+  allocate(f_tmp(ao_num,ao_num))
+  f_tmp = 0.d0
+
  !$OMP DO
   do g = 1, ao_num
     do e = 1, ao_num
       dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
       dm_ge_b = TCSCF_bi_ort_dm_ao_beta (g,e)
       dm_ge   = dm_ge_a + dm_ge_b
-
       do d = 1, ao_num
         do k = 1, ao_num
           dm_dk_a = TCSCF_bi_ort_dm_ao_alpha(d,k)
           dm_dk_b = TCSCF_bi_ort_dm_ao_beta (d,k)
           dm_dk   = dm_dk_a + dm_dk_b
-
           do mu = 1, ao_num
             do nu = 1, ao_num
-
               call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, e, k, i_mugd_nuek)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, e, k, nu, i_mugd_eknu)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, k, nu, e, i_mugd_knue)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, k, e, i_mugd_nuke)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, e, nu, k, i_mugd_enuk)
               call give_integrals_3_body_bi_ort_ao(mu, g, d, k, e, nu, i_mugd_kenu)
-
-              fock_3e_uhf_ao_b(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
-                                                 + dm_ge_b * dm_dk_b * i_mugd_eknu &
-                                                 + dm_ge_b * dm_dk_b * i_mugd_knue &
-                                                 - dm_ge   * dm_dk_b * i_mugd_kenu &
-                                                 - dm_ge_b * dm_dk   * i_mugd_enuk &
-                                                 - dm_ge_b * dm_dk_b * i_mugd_nuke &
-                                                 - dm_ge_a * dm_dk_a * i_mugd_nuke )
+              f_tmp(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
+                                      + dm_ge_b * dm_dk_b * i_mugd_eknu &
+                                      + dm_ge_b * dm_dk_b * i_mugd_knue &
+                                      - dm_ge_b * dm_dk   * i_mugd_enuk &
+                                      - dm_ge   * dm_dk_b * i_mugd_kenu &
+                                      - dm_ge_b * dm_dk_b * i_mugd_nuke &
+                                      - dm_ge_a * dm_dk_a * i_mugd_nuke )
             enddo
           enddo
         enddo
       enddo
     enddo
   enddo
- !$OMP END DO
+ !$OMP END DO NOWAIT
+
+ !$OMP CRITICAL
+  do mu = 1, ao_num
+    do nu = 1, ao_num
+      fock_3e_uhf_ao_b(mu,nu) += f_tmp(mu,nu)
+    enddo
+  enddo
+ !$OMP END CRITICAL
+
+  deallocate(f_tmp)
  !$OMP END PARALLEL
+
+! TODO
+! !$OMP PARALLEL DO DEFAULT (NONE)                                                             &
+! !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk,         &
+! !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
+! !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_b)
+!  do g = 1, ao_num
+!    do e = 1, ao_num
+!      dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
+!      dm_ge_b = TCSCF_bi_ort_dm_ao_beta (g,e)
+!      dm_ge   = dm_ge_a + dm_ge_b
+!      do d = 1, ao_num
+!        do k = 1, ao_num
+!          dm_dk_a = TCSCF_bi_ort_dm_ao_alpha(d,k)
+!          dm_dk_b = TCSCF_bi_ort_dm_ao_beta (d,k)
+!          dm_dk   = dm_dk_a + dm_dk_b
+!          do mu = 1, ao_num
+!            do nu = 1, ao_num
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, e, k, i_mugd_nuek)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, e, k, nu, i_mugd_eknu)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, k, nu, e, i_mugd_knue)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, nu, k, e, i_mugd_nuke)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, e, nu, k, i_mugd_enuk)
+!              call give_integrals_3_body_bi_ort_ao(mu, g, d, k, e, nu, i_mugd_kenu)
+!              fock_3e_uhf_ao_b(mu,nu) -= 0.5d0 * ( dm_ge   * dm_dk   * i_mugd_nuek &
+!                                                 + dm_ge_b * dm_dk_b * i_mugd_eknu &
+!                                                 + dm_ge_b * dm_dk_b * i_mugd_knue &
+!                                                 - dm_ge_b * dm_dk   * i_mugd_enuk &
+!                                                 - dm_ge   * dm_dk_b * i_mugd_kenu &
+!                                                 - dm_ge_b * dm_dk_b * i_mugd_nuke &
+!                                                 - dm_ge_a * dm_dk_a * i_mugd_nuke )
+!            enddo
+!          enddo
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+! !$OMP END PARALLEL DO
 
   call wall_time(tf)
   print *, ' total Wall time for fock_3e_uhf_ao_b =', tf - ti

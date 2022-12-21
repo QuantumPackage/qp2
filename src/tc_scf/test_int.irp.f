@@ -25,7 +25,7 @@ program test_ints
  !call routine_int2_grad1u2_grad2u2_j1b2
 
 
-  !call test_fock_3e_uhf_ao()
+  call test_fock_3e_uhf_ao()
   call test_fock_3e_uhf_mo()
 
 end
@@ -364,10 +364,9 @@ subroutine test_fock_3e_uhf_ao()
   thr_ih = 1d-7
 
   PROVIDE fock_a_tot_3e_bi_orth fock_b_tot_3e_bi_orth
+  PROVIDE fock_3e_uhf_ao_a fock_3e_uhf_ao_b
 
   ! ---
-
-  PROVIDE fock_3e_uhf_ao_a 
 
   allocate(fock_3e_uhf_ao_a_mo(mo_num,mo_num))
   call ao_to_mo_bi_ortho( fock_3e_uhf_ao_a   , size(fock_3e_uhf_ao_a   , 1) &
@@ -397,8 +396,6 @@ subroutine test_fock_3e_uhf_ao()
 
   ! ---
 
-  PROVIDE fock_3e_uhf_ao_b
-
   allocate(fock_3e_uhf_ao_b_mo(mo_num,mo_num))
   call ao_to_mo_bi_ortho( fock_3e_uhf_ao_b   , size(fock_3e_uhf_ao_b   , 1) &
                         , fock_3e_uhf_ao_b_mo, size(fock_3e_uhf_ao_b_mo, 1) )
@@ -421,6 +418,7 @@ subroutine test_fock_3e_uhf_ao()
     enddo
   enddo
   print *, ' diff on F_b = ', diff_tot/norm
+  print *, ' '
 
   deallocate(fock_3e_uhf_ao_b_mo)
 
