@@ -1,11 +1,26 @@
+! ---
 
  BEGIN_PROVIDER [ double precision, ao_two_e_integral_alpha, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_two_e_integral_beta ,  (ao_num, ao_num) ]
- use map_module
- implicit none
+&BEGIN_PROVIDER [ double precision, ao_two_e_integral_beta , (ao_num, ao_num) ]
+
  BEGIN_DOC
- ! Alpha and Beta Fock matrices in AO basis set
+ !
+ ! 2-e part of alpha and beta Fock matrices (F^{a} & F^{b}) in AO basis set
+ ! 
+ ! F^{a} = h + G^{a}
+ ! F^{b} = h + G^{b}
+ ! 
+ ! where : 
+ !         F^{a} = J^{a} + J^{b} - K^{a} ==> G_{ij}^{a} = \sum_{k,l} P_{kl} (kl|ij) - P_{kl}^{a} (ki|lj)
+ !         F^{b} = J^{a} + J^{b} - K^{b} ==> G_{ij}^{b} = \sum_{k,l} P_{kl} (kl|ij) - P_{kl}^{b} (ki|lj)
+ ! 
+ ! and P_{kl} = P_{kl}^{a} + P_{kl}^{b} 
+ !
  END_DOC
+
+ use map_module
+
+ implicit none
 
  integer                        :: i,j,k,l,k1,r,s
  integer                        :: i0,j0,k0,l0
@@ -152,6 +167,8 @@
  endif
 
 END_PROVIDER
+
+! ---
 
  BEGIN_PROVIDER [ double precision, Fock_matrix_ao_alpha, (ao_num, ao_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_ao_beta,  (ao_num, ao_num) ]

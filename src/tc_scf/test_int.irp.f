@@ -6,7 +6,7 @@ program test_ints
 
   implicit none
 
-  print *, 'starting ...'
+  print *, ' starting test_ints ...'
 
   my_grid_becke  = .True.
   my_n_pt_r_grid = 30
@@ -14,6 +14,7 @@ program test_ints
 !  my_n_pt_r_grid = 15 ! small grid for quick debug
 !  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   my_extra_grid_becke = .True.
   my_n_pt_r_extra_grid = 30
   my_n_pt_a_extra_grid = 50 ! small extra_grid for quick debug
@@ -44,7 +45,12 @@ program test_ints
 ! call test_tc_scf
  call test_int_gauss
 
+  !call test_fock_3e_uhf_ao()
+  call test_fock_3e_uhf_mo()
+
 end
+
+! ---
 
 subroutine test_tc_scf
  implicit none
@@ -69,6 +75,8 @@ subroutine test_ao_tc_int_chemist
 ! provide tc_grad_square_ao_test
 ! provide tc_grad_and_lapl_ao_test
 end
+
+! ---
 
 subroutine routine_test_j1b
  implicit none
@@ -332,13 +340,13 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
  double precision, allocatable :: ints(:,:,:)
  allocate(ints(ao_num, ao_num, n_points_final_grid))
- do ipoint = 1, n_points_final_grid
-  do i = 1, ao_num
-   do j = 1, ao_num
-    read(33,*)ints(j,i,ipoint)
-   enddo
-  enddo
- enddo
+! do ipoint = 1, n_points_final_grid
+!  do i = 1, ao_num
+!   do j = 1, ao_num
+!    read(33,*)ints(j,i,ipoint)
+!   enddo
+!  enddo
+! enddo
 
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
@@ -563,9 +571,146 @@ subroutine routine_v_ij_u_cst_mu_j1b
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
-  
-
 end
+
+! ---
+
+subroutine test_fock_3e_uhf_ao()
+
+  implicit none
+  integer                       :: i, j
+  double precision              :: diff_tot, diff_ij, thr_ih, norm
+  double precision, allocatable :: fock_3e_uhf_ao_a_mo(:,:), fock_3e_uhf_ao_b_mo(:,:)
+
+  thr_ih = 1d-7
+
+  PROVIDE fock_a_tot_3e_bi_orth fock_b_tot_3e_bi_orth
+  PROVIDE fock_3e_uhf_ao_a fock_3e_uhf_ao_b
+
+  ! ---
+
+  allocate(fock_3e_uhf_ao_a_mo(mo_num,mo_num))
+  call ao_to_mo_bi_ortho( fock_3e_uhf_ao_a   , size(fock_3e_uhf_ao_a   , 1) &
+                        , fock_3e_uhf_ao_a_mo, size(fock_3e_uhf_ao_a_mo, 1) )
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_ao_a_mo(j,i) - fock_a_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' MANU : ', fock_a_tot_3e_bi_orth(j,i)
+        print *, ' UHF  : ', fock_3e_uhf_ao_a_mo  (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_a_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_a = ', diff_tot / norm
+  print *, ' '
+
+  deallocate(fock_3e_uhf_ao_a_mo)
+
+  ! ---
+
+  allocate(fock_3e_uhf_ao_b_mo(mo_num,mo_num))
+  call ao_to_mo_bi_ortho( fock_3e_uhf_ao_b   , size(fock_3e_uhf_ao_b   , 1) &
+                        , fock_3e_uhf_ao_b_mo, size(fock_3e_uhf_ao_b_mo, 1) )
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_ao_b_mo(j,i) - fock_b_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' MANU : ', fock_b_tot_3e_bi_orth(j,i)
+        print *, ' UHF  : ', fock_3e_uhf_ao_b_mo  (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_b_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_b = ', diff_tot/norm
+  print *, ' '
+
+  deallocate(fock_3e_uhf_ao_b_mo)
+
+  ! ---
+
+end subroutine test_fock_3e_uhf_ao()
+
+! ---
+
+subroutine test_fock_3e_uhf_mo()
+
+  implicit none
+  integer          :: i, j
+  double precision :: diff_tot, diff_ij, thr_ih, norm
+
+  thr_ih = 1d-12
+
+  PROVIDE fock_a_tot_3e_bi_orth fock_b_tot_3e_bi_orth
+  PROVIDE fock_3e_uhf_mo_a fock_3e_uhf_mo_b
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_mo_a(j,i) - fock_a_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' MANU : ', fock_a_tot_3e_bi_orth(j,i)
+        print *, ' UHF  : ', fock_3e_uhf_mo_a     (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_a_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_a = ', diff_tot / norm
+  print *, '      norm_a = ', norm
+  print *, ' '
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_mo_b(j,i) - fock_b_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' MANU : ', fock_b_tot_3e_bi_orth(j,i)
+        print *, ' UHF  : ', fock_3e_uhf_mo_b     (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_b_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_b = ', diff_tot/norm
+  print *, '      norm_b = ', norm
+  print *, ' '
+
+  ! ---
+
+end subroutine test_fock_3e_uhf_mo()
+
+! ---
 
 subroutine test_total_grad_lapl
  implicit none
@@ -702,3 +847,4 @@ subroutine test_int_gauss
 
 
 end
+

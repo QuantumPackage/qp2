@@ -182,6 +182,27 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid,3
  enddo
 END_PROVIDER 
 
+! ---
+
+BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
+
+  implicit none
+  integer :: i, j, ipoint
+
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
+        int2_grad1_u12_ao_t(ipoint,1,j,i) = int2_grad1_u12_ao(1,j,i,ipoint)
+        int2_grad1_u12_ao_t(ipoint,2,j,i) = int2_grad1_u12_ao(2,j,i,ipoint)
+        int2_grad1_u12_ao_t(ipoint,3,j,i) = int2_grad1_u12_ao(3,j,i,ipoint)
+      enddo                                  
+    enddo
+  enddo
+
+END_PROVIDER 
+
+! ---
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo, (3, mo_num, mo_num, n_points_final_grid)]
 
   BEGIN_DOC

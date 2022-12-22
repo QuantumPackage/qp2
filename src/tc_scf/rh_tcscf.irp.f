@@ -67,10 +67,9 @@ subroutine rh_tcscf()
     iteration_TCSCF += 1
     if(iteration_TCSCF > n_it_TCSCF_max) then
       print *, ' max of TCSCF iterations is reached ', n_it_TCSCF_max
-      exit
+      stop
     endif
 
-    ! current size of the DIIS space
     dim_DIIS = min(dim_DIIS+1, max_dim_DIIS_TCSCF)
 
     ! ---
@@ -86,10 +85,7 @@ subroutine rh_tcscf()
         enddo
       enddo
 
-      ! Compute the extrapolated Fock matrix
-      call extrapolate_TC_Fock_matrix( e_DIIS, F_DIIS                                        &
-                                     , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) &
-                                     , iteration_TCSCF, dim_DIIS )
+      call extrapolate_TC_Fock_matrix(e_DIIS, F_DIIS, Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1), iteration_TCSCF, dim_DIIS)
 
       Fock_matrix_tc_ao_alpha = 0.5d0 * Fock_matrix_tc_ao_tot
       Fock_matrix_tc_ao_beta  = 0.5d0 * Fock_matrix_tc_ao_tot
@@ -100,7 +96,6 @@ subroutine rh_tcscf()
       call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta , size(Fock_matrix_tc_ao_beta , 1) &
                             , Fock_matrix_tc_mo_beta , size(Fock_matrix_tc_mo_beta , 1) )
       TOUCH Fock_matrix_tc_mo_alpha Fock_matrix_tc_mo_beta
-
     endif
 
     ! ---
@@ -121,9 +116,10 @@ subroutine rh_tcscf()
 
     ! ---
 
-    do while((dabs(delta_energy_tmp) > 0.1d0) .and. (iteration_TCSCF > 1))
-!      print *, ' very big step  : ', delta_energy_tmp
-!      print *, ' TC level shift = ', level_shift_TCSCF
+    do while((delta_gradie_tmp > 1.d-7) .and. (iteration_TCSCF > 1))
+    !do while((dabs(delta_energy_tmp) > 0.5d0) .and. (iteration_TCSCF > 1))
+      print *, ' very big or bad step  : ', delta_energy_tmp, delta_gradie_tmp
+      print *, ' TC level shift = ', level_shift_TCSCF
 
       mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num) 
       mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num) 
@@ -139,7 +135,8 @@ subroutine rh_tcscf()
       mo_r_coef(1:ao_num,1:mo_num) = fock_tc_reigvec_ao(1:ao_num,1:mo_num)
       TOUCH mo_l_coef mo_r_coef
 
-      delta_energy_tmp = TC_HF_energy - energy_TCSCF_previous
+      delta_energy_tmp = TC_HF_energy    - energy_TCSCF_previous
+      delta_gradie_tmp = grad_non_hermit - gradie_TCSCF_previous
 
       if(level_shift_TCSCF - level_shift_save > 40.d0) then
         level_shift_TCSCF = level_shift_save * 4.d0
@@ -183,7 +180,7 @@ subroutine rh_tcscf()
     print *, ' 1-e   TC energy   = ', energy_TCSCF_1e
     print *, ' 2-e   TC energy   = ', energy_TCSCF_2e
     print *, ' 3-e   TC energy   = ', energy_TCSCF_3e
-    print *, ' |delta TC energy| = ', delta_energy_TCSCF
+    print *, ' |delta TC energy| = ', dabs(delta_energy_TCSCF)
     print *, ' TC gradient       = ', gradie_TCSCF
     print *, ' delta TC gradient = ', delta_gradie_TCSCF
     print *, ' max TC DIIS error = ', max_error_DIIS_TCSCF 
@@ -198,6 +195,9 @@ subroutine rh_tcscf()
   enddo
 
   ! ---
+
+  print *, ' TCSCF DIIS converged !'
+  call print_energy_and_mos()
 
   call write_time(6)
 

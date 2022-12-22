@@ -1,4 +1,4 @@
-subroutine Roothaan_Hall_SCF
+subroutine Roothaan_Hall_SCF_MODIF
 
 BEGIN_DOC
 ! Roothaan-Hall algorithm for SCF Hartree-Fock calculation
@@ -66,8 +66,8 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if( (scf_algorithm == 'DIIS') .and. (dabs(Delta_energy_SCF) > 1.d-6))  then
-    !if(scf_algorithm == 'DIIS') then
+    if( (scf_algorithm == 'DIIS_MODIF') .and. (dabs(Delta_energy_SCF) > 1.d-6) )  then
+    !if(scf_algorithm == 'DIIS_MODIF') then
 
       ! Store Fock and error matrices at each iteration
       index_dim_DIIS = mod(dim_DIIS-1,max_dim_DIIS)+1
@@ -85,11 +85,15 @@ END_DOC
           Fock_matrix_AO,size(Fock_matrix_AO,1),                       &
           iteration_SCF,dim_DIIS                                       &
           )
+      call ao_to_mo(Fock_matrix_AO, size(Fock_matrix_AO, 1), Fock_matrix_MO, size(Fock_matrix_MO, 1))
+      do i = 1, mo_num
+        Fock_matrix_diag_MO(i) = Fock_matrix_MO(i,i)
+      enddo
+      TOUCH Fock_matrix_MO Fock_matrix_diag_MO
 
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
-      TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
-
+      !Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
+      !Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+      !TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
     endif
 
     MO_coef = eigenvectors_Fock_matrix_MO
@@ -108,11 +112,17 @@ END_DOC
 
     energy_SCF = SCF_energy
     Delta_energy_SCF = energy_SCF - energy_SCF_previous
-    if ( (SCF_algorithm == 'DIIS').and.(Delta_energy_SCF > 0.d0) ) then
-      Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
-      TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
+    if( (SCF_algorithm == 'DIIS_MODIF') .and. (Delta_energy_SCF > 0.d0) ) then
+      Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS(1:ao_num,1:ao_num,index_dim_DIIS)
+      call ao_to_mo(Fock_matrix_AO, size(Fock_matrix_AO, 1), Fock_matrix_MO, size(Fock_matrix_MO, 1))
+      do i = 1, mo_num
+        Fock_matrix_diag_MO(i) = Fock_matrix_MO(i,i)
+      enddo
+      TOUCH Fock_matrix_MO Fock_matrix_diag_MO
+
+      !Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
+      !Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+      !TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
     endif
 
     double precision :: level_shift_save
@@ -184,137 +194,3 @@ END_DOC
 
 end
 
-subroutine extrapolate_Fock_matrix(               &
-           error_matrix_DIIS,Fock_matrix_DIIS,    &
-           Fock_matrix_AO_,size_Fock_matrix_AO,   &
-           iteration_SCF,dim_DIIS                 &
-           )
-
-BEGIN_DOC
-! Compute the extrapolated Fock matrix using the DIIS procedure
-END_DOC
-
-  implicit none
-
-  integer,intent(inout)         :: dim_DIIS
-  double precision,intent(in)   :: Fock_matrix_DIIS(ao_num,ao_num,dim_DIIS),error_matrix_DIIS(ao_num,ao_num,dim_DIIS)
-  integer,intent(in)            :: iteration_SCF, size_Fock_matrix_AO
-  double precision,intent(inout):: Fock_matrix_AO_(size_Fock_matrix_AO,ao_num)
-
-  double precision,allocatable  :: B_matrix_DIIS(:,:),X_vector_DIIS(:)
-  double precision,allocatable  :: C_vector_DIIS(:)
-
-  double precision,allocatable  :: scratch(:,:)
-  integer                       :: i,j,k,l,i_DIIS,j_DIIS
-  double precision :: rcond, ferr, berr
-  integer, allocatable :: iwork(:)
-  integer :: lwork
-
-  if (dim_DIIS < 1) then
-    return
-  endif
-
-  allocate(                               &
-    B_matrix_DIIS(dim_DIIS+1,dim_DIIS+1), &
-    X_vector_DIIS(dim_DIIS+1),            &
-    C_vector_DIIS(dim_DIIS+1),            &
-    scratch(ao_num,ao_num)                &
-  )
-
-  ! Compute the matrices B and X
-  B_matrix_DIIS(:,:) = 0.d0
-  do j=1,dim_DIIS
-    j_DIIS = min(dim_DIIS,mod(iteration_SCF-j,max_dim_DIIS)+1)
-
-    do i=1,dim_DIIS
-      i_DIIS = min(dim_DIIS,mod(iteration_SCF-i,max_dim_DIIS)+1)
-
-      ! Compute product of two errors vectors
-      do l=1,ao_num
-        do k=1,ao_num
-          B_matrix_DIIS(i,j) = B_matrix_DIIS(i,j) + &
-            error_matrix_DIIS(k,l,i_DIIS) * error_matrix_DIIS(k,l,j_DIIS)
-        enddo
-      enddo
-
-    enddo
-  enddo
-
-! Pad B matrix and build the X matrix
-
-  C_vector_DIIS(:) = 0.d0
-  do i=1,dim_DIIS
-    B_matrix_DIIS(i,dim_DIIS+1) = -1.d0
-    B_matrix_DIIS(dim_DIIS+1,i) = -1.d0
-  enddo
-  C_vector_DIIS(dim_DIIS+1) = -1.d0
-
-  deallocate(scratch)
-
-! Estimate condition number of B
-  double precision :: anorm
-  integer              :: info
-  integer,allocatable  :: ipiv(:)
-  double precision, allocatable :: AF(:,:)
-  double precision, external :: dlange
-
-  lwork = max((dim_DIIS+1)**2, (dim_DIIS+1)*5)
-  allocate(AF(dim_DIIS+1,dim_DIIS+1))
-  allocate(ipiv(2*(dim_DIIS+1)), iwork(2*(dim_DIIS+1)) )
-  allocate(scratch(lwork,1))
-  scratch(:,1) = 0.d0
-
-  anorm = dlange('1', dim_DIIS+1, dim_DIIS+1, B_matrix_DIIS, &
-              size(B_matrix_DIIS,1), scratch(1,1))
-
-  AF(:,:) = B_matrix_DIIS(:,:)
-  call dgetrf(dim_DIIS+1,dim_DIIS+1,AF,size(AF,1),ipiv,info)
-  if (info /= 0) then
-    dim_DIIS = 0
-    return
-  endif
-
-  call dgecon( '1', dim_DIIS+1, AF, &
-    size(AF,1), anorm, rcond, scratch, iwork, info )
-  if (info /= 0) then
-    dim_DIIS = 0
-    return
-  endif
-
- if (rcond < 1.d-14) then
-   dim_DIIS = 0
-   return
- endif
-
-! Solve the linear system C = B.X
-
-  X_vector_DIIS = C_vector_DIIS
-  call dgesv ( dim_DIIS+1 , 1, B_matrix_DIIS, size(B_matrix_DIIS,1), &
-      ipiv , X_vector_DIIS , size(X_vector_DIIS,1), info)
-
-  deallocate(scratch,AF,iwork)
-
-  if(info < 0) then
-    stop 'bug in DIIS'
-  endif
-
-  ! Compute extrapolated Fock matrix
-
-
-  !$OMP PARALLEL DO PRIVATE(i,j,k) DEFAULT(SHARED) if (ao_num > 200)
-  do j=1,ao_num
-    do i=1,ao_num
-      Fock_matrix_AO_(i,j) = 0.d0
-    enddo
-    do k=1,dim_DIIS
-      if (dabs(X_vector_DIIS(k)) < 1.d-10) cycle
-      do i=1,ao_num
-        ! FPE here
-        Fock_matrix_AO_(i,j) = Fock_matrix_AO_(i,j) +            &
-            X_vector_DIIS(k)*Fock_matrix_DIIS(i,j,dim_DIIS-k+1)
-      enddo
-    enddo
-  enddo
-  !$OMP END PARALLEL DO
-
-end

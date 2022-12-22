@@ -31,13 +31,22 @@
           density_b = TCSCF_density_matrix_ao_beta (l,j)
           density   = density_a + density_b                      
 
+          !!                                         rho(l,j)   *      < k l| T | i j>
+          !two_e_tc_non_hermit_integral_alpha(k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
+          !!                                         rho(l,j)   *      < k l| T | i j>
+          !two_e_tc_non_hermit_integral_beta (k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
+          !!                                         rho_a(l,j) *      < l k| T | i j>
+          !two_e_tc_non_hermit_integral_alpha(k,i) -= density_a * ao_two_e_tc_tot(k,j,l,i)
+          !!                                         rho_b(l,j) *      < l k| T | i j>
+          !two_e_tc_non_hermit_integral_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
+
           !                                         rho(l,j)   *      < k l| T | i j>
-          two_e_tc_non_hermit_integral_alpha(k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
+          two_e_tc_non_hermit_integral_alpha(k,i) += density   * ao_two_e_tc_tot(k,i,l,j)
           !                                         rho(l,j)   *      < k l| T | i j>
-          two_e_tc_non_hermit_integral_beta (k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
-          !                                         rho_a(l,j) *      < l k| T | i j>
+          two_e_tc_non_hermit_integral_beta (k,i) += density   * ao_two_e_tc_tot(k,i,l,j)
+          !                                         rho_a(l,j) *      < k l| T | j i>
           two_e_tc_non_hermit_integral_alpha(k,i) -= density_a * ao_two_e_tc_tot(k,j,l,i)
-          !                                         rho_b(l,j) *      < l k| T | i j>
+          !                                         rho_b(l,j) *      < k l| T | j i>
           two_e_tc_non_hermit_integral_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
 
         enddo
@@ -84,13 +93,23 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
   END_DOC
 
   implicit none
+  double precision, allocatable :: tmp(:,:)
 
   if(bi_ortho) then
 
+    !allocate(tmp(ao_num,ao_num))
+    !tmp = Fock_matrix_tc_ao_alpha
+    !if(three_body_h_tc) then
+    !  tmp += fock_3e_uhf_ao_a
+    !endif
+    !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1))
+    !deallocate(tmp)
+
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                           , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
-    if(three_body_h_tc.and.elec_alpha_num == elec_beta_num) then
-      Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+    if(three_body_h_tc) then
+      !Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+      Fock_matrix_tc_mo_alpha += fock_3e_uhf_mo_a
     endif
 
   else
@@ -110,14 +129,23 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   END_DOC
 
   implicit none
+  double precision, allocatable :: tmp(:,:)
 
   if(bi_ortho) then
 
-   call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
-                         , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
+    !allocate(tmp(ao_num,ao_num))
+    !tmp = Fock_matrix_tc_ao_beta
+    !if(three_body_h_tc) then
+    !  tmp += fock_3e_uhf_ao_b
+    !endif
+    !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1))
+    !deallocate(tmp)
 
-    if(three_body_h_tc.and.elec_alpha_num == elec_beta_num) then
-      Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
+    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
+                          , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
+    if(three_body_h_tc) then
+      !Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
+      Fock_matrix_tc_mo_beta += fock_3e_uhf_mo_b
     endif
 
   else

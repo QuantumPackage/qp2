@@ -21,8 +21,11 @@ program tc_scf
   PROVIDE tcscf_algorithm
   if(tcscf_algorithm == 'DIIS') then
     call rh_tcscf()
-  else
+  elseif(tcscf_algorithm == 'Simple') then
     call simple_tcscf()
+  else
+    print *, ' not implemented yet', tcscf_algorithm
+    stop
   endif
 
   call minimize_tc_orb_angles()
@@ -127,7 +130,7 @@ subroutine simple_tcscf()
       it += 1
       if(it > n_it_tcscf_max) then
         print *, ' max of TCSCF iterations is reached ', n_it_TCSCF_max
-        exit
+        stop
       endif
 
 
@@ -142,8 +145,10 @@ subroutine simple_tcscf()
       endif
       e_delta = dabs(TC_HF_energy - e_save)
 
-      print *, ' delta E  = ', e_delta
-      print *, ' gradient = ', grad_non_hermit
+      print *, ' delta E           = ', e_delta
+      print *, ' gradient          = ', grad_non_hermit
+      print *, ' max TC DIIS error = ', maxval(abs(FQS_SQF_mo))
+
       !print *, ' gradient= ', grad_non_hermit_right
 
       !rho_new   = TCSCF_bi_ort_dm_ao
@@ -164,6 +169,8 @@ subroutine simple_tcscf()
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
       TOUCH mo_l_coef mo_r_coef
       call ezfio_set_tc_scf_bitc_energy(TC_HF_energy)
+
+      call test_fock_3e_uhf_mo()
 
       print *, ' ***'
       print *, ''
@@ -190,7 +197,7 @@ subroutine simple_tcscf()
 
   endif
 
-  print*,'Energy converged !'
+  print *, ' TCSCF Simple converged !'
   call print_energy_and_mos()
 
   deallocate(rho_old, rho_new)
@@ -198,4 +205,65 @@ subroutine simple_tcscf()
 end subroutine simple_tcscf
 
 ! ---
+
+subroutine test_fock_3e_uhf_mo()
+
+  implicit none
+  integer          :: i, j
+  double precision :: diff_tot, diff_ij, thr_ih, norm
+
+  thr_ih = 1d-12
+
+  PROVIDE fock_a_tot_3e_bi_orth fock_b_tot_3e_bi_orth
+  PROVIDE fock_3e_uhf_mo_a fock_3e_uhf_mo_b
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_mo_a(j,i) - fock_a_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        !print *, ' difference on ', j, i
+        !print *, ' MANU : ', fock_a_tot_3e_bi_orth(j,i)
+        !print *, ' UHF  : ', fock_3e_uhf_mo_a     (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_a_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_a = ', diff_tot / norm
+  print *, '      norm_a = ', norm
+  print *, ' '
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      diff_ij = dabs(fock_3e_uhf_mo_b(j,i) - fock_b_tot_3e_bi_orth(j,i))
+      if(diff_ij .gt. thr_ih) then
+        !print *, ' difference on ', j, i
+        !print *, ' MANU : ', fock_b_tot_3e_bi_orth(j,i)
+        !print *, ' UHF  : ', fock_3e_uhf_mo_b     (j,i)
+        !stop
+      endif
+
+      norm     += dabs(fock_b_tot_3e_bi_orth(j,i))
+      diff_tot += diff_ij
+    enddo
+  enddo
+  print *, ' diff on F_b = ', diff_tot/norm
+  print *, '      norm_b = ', norm
+  print *, ' '
+
+  ! ---
+
+end subroutine test_fock_3e_uhf_mo()
 

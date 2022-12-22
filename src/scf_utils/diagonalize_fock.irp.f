@@ -57,7 +57,6 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    do i = elec_beta_num+1, elec_alpha_num
      F(i,i) += 0.5d0*level_shift
    enddo
-
    do i = elec_alpha_num+1, mo_num
      F(i,i) += level_shift
    enddo
