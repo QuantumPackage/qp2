@@ -96,7 +96,6 @@ subroutine filter_not_connected(key1,key2,Nint,sze,idx)
   idx(0) = l-1
 end
 
-
 subroutine filter_connected(key1,key2,Nint,sze,idx)
   use bitmasks
   implicit none

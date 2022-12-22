@@ -49,7 +49,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
 
         int_mu      = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
         int_coulomb = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
-        if(dabs(int_mu - int_coulomb) .lt. 1d-10) cycle
+!        if(dabs(coef)*dabs(int_mu - int_coulomb) .lt. 1d-12) cycle
 
         tmp += coef * (int_mu - int_coulomb)
 
@@ -169,7 +169,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b, (3, ao_num, ao_
         call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
         call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
 
-        if( (dabs(ints(1)-ints_coulomb(1)) + dabs(ints(2)-ints_coulomb(2)) + dabs(ints(3)-ints_coulomb(3))) .lt. 3d-10) cycle
+!        if( dabs(coef)*(dabs(ints(1)-ints_coulomb(1)) + dabs(ints(2)-ints_coulomb(2)) + dabs(ints(3)-ints_coulomb(3))) .lt. 3d-10) cycle
 
         tmp_x += coef * (ints(1) - ints_coulomb(1))
         tmp_y += coef * (ints(2) - ints_coulomb(2))
@@ -277,7 +277,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
           B_center(3) = List_all_comb_b2_cent(3,1)
 
           int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
-          if(dabs(int_fit) .lt. 1d-10) cycle
+!          if(dabs(int_fit*coef) .lt. 1d-12) cycle
 
           tmp += coef * coef_fit * int_fit
 
