@@ -128,6 +128,8 @@ BEGIN_PROVIDER [double precision, diag_three_elem_hf]
       call give_abb_contrib(integral_abb)
       call give_bbb_contrib(integral_bbb)
       diag_three_elem_hf = integral_aaa + integral_aab + integral_abb + integral_bbb
+!      print*,'integral_aaa + integral_aab + integral_abb + integral_bbb'
+!      print*,integral_aaa , integral_aab , integral_abb , integral_bbb
 
     endif
 

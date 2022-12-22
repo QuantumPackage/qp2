@@ -108,15 +108,27 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
   double precision :: wall0, wall1
 
   call wall_time(wall0)
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = 1, ao_num
-        int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao(1,j,i,ipoint)
-        int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao(2,j,i,ipoint)
-        int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao(3,j,i,ipoint)
-      enddo
-    enddo
-  enddo
+  if(test_cycle_tc)then
+   do ipoint = 1, n_points_final_grid
+     do i = 1, ao_num
+       do j = 1, ao_num
+         int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao_test(1,j,i,ipoint)
+         int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao_test(2,j,i,ipoint)
+         int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao_test(3,j,i,ipoint)
+       enddo
+     enddo
+   enddo
+  else
+   do ipoint = 1, n_points_final_grid
+     do i = 1, ao_num
+       do j = 1, ao_num
+         int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao(1,j,i,ipoint)
+         int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao(2,j,i,ipoint)
+         int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao(3,j,i,ipoint)
+       enddo
+     enddo
+   enddo
+  endif
   call wall_time(wall1)
   print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
 
@@ -178,8 +190,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3,
   integer :: i, j, ipoint
 
   do ipoint = 1, n_points_final_grid
-    do i = 1, mo_num
-      do j = 1, mo_num
+    do i = 1, ao_num
+      do j = 1, ao_num
         int2_grad1_u12_ao_t(ipoint,1,j,i) = int2_grad1_u12_ao(1,j,i,ipoint)
         int2_grad1_u12_ao_t(ipoint,2,j,i) = int2_grad1_u12_ao(2,j,i,ipoint)
         int2_grad1_u12_ao_t(ipoint,3,j,i) = int2_grad1_u12_ao(3,j,i,ipoint)
