@@ -127,7 +127,6 @@ double precision function overlap_abs_gauss_r12(D_center,delta,A_center,B_center
     enddo
   enddo
   overlap_abs_gauss_r12= accu
->>>>>>> f7e58e4a636af0ab066aa644a74ab56cb4de6041
 end
 
 !---
