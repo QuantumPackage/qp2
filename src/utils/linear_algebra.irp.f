@@ -1136,7 +1136,6 @@ subroutine ortho_svd(A,LDA,m,n)
 
 end
 
-! QR to orthonormalize CSFs does not work :-(
 !subroutine ortho_qr_withB(A,LDA,B,m,n)
 !  implicit none
 !  BEGIN_DOC
@@ -1223,7 +1222,7 @@ end
 !
 !  !deallocate(WORK,TAU)
 !end
-
+!
 !subroutine ortho_qr_csf(A, LDA, B, m, n) bind(C, name="ortho_qr_csf")
 !  use iso_c_binding
 !  integer(c_int32_t), value      :: LDA
@@ -1233,6 +1232,7 @@ end
 !  integer(c_int16_t)             :: B(LDA,n)
 !  call ortho_qr_withB(A,LDA,B,m,n)
 !end subroutine ortho_qr_csf
+
 
 subroutine ortho_qr(A,LDA,m,n)
   implicit none
