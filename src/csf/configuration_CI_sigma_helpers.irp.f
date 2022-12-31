@@ -978,7 +978,7 @@ END_PROVIDER
   !call debug_spindet(Isomo,1)
   !call debug_spindet(Idomo,1)
 
-  alphasIcfg = 0_bit_kind
+  alphasIcfg(:,:,1) = 0_bit_kind
 
   ! find out all pq holes possible
     nholes = 0
