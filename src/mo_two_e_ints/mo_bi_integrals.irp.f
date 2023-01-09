@@ -247,7 +247,7 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   call wall_time(wall_1)
 
-  size_buffer = min( (qp_max_mem/(nproc*5)),mo_num*mo_num*mo_num)
+  size_buffer = min(mo_num*mo_num*mo_num,8000000)
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
