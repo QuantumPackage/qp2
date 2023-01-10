@@ -1155,7 +1155,7 @@ END_PROVIDER
         !end do
 
         if(.NOT. pqExistsQ) then
-           tableUniqueAlphas(p,q) = .TRUE.
+           tableUniqueAlphas(pp,qq) = .TRUE.
            !print *,p,q
            !call debug_spindet(Jsomo,1)
            !call debug_spindet(Jdomo,1)
