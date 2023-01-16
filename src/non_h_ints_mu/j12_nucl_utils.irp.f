@@ -237,6 +237,23 @@ end function j12_mu
 
 ! ---
 
+double precision function j12_mu_r12(r12)
+
+  include 'constants.include.F'
+
+  implicit none
+  double precision, intent(in) :: r12
+  double precision             :: mu_r12
+
+  mu_r12 = mu_erf * r12
+
+  j12_mu_r12 = 0.5d0 * r12 * (1.d0 - derf(mu_r12)) - inv_sq_pi_2 * dexp(-mu_r12*mu_r12) / mu_erf
+
+  return
+end function j12_mu_r12
+
+! ---
+
 double precision function j12_mu_gauss(r1, r2)
 
   implicit none

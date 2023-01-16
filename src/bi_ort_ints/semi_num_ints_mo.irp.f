@@ -107,50 +107,69 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
+  print *, ' providing int2_grad1_u12_ao_transp ...'
   call wall_time(wall0)
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = 1, ao_num
-        int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao(1,j,i,ipoint)
-        int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao(2,j,i,ipoint)
-        int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao(3,j,i,ipoint)
-      enddo
-    enddo
-  enddo
+
+  if(test_cycle_tc)then
+   do ipoint = 1, n_points_final_grid
+     do i = 1, ao_num
+       do j = 1, ao_num
+         int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao_test(j,i,ipoint,1)
+         int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao_test(j,i,ipoint,2)
+         int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao_test(j,i,ipoint,3)
+       enddo
+     enddo
+   enddo
+  else
+   do ipoint = 1, n_points_final_grid
+     do i = 1, ao_num
+       do j = 1, ao_num
+         int2_grad1_u12_ao_transp(j,i,1,ipoint) = int2_grad1_u12_ao(j,i,ipoint,1)
+         int2_grad1_u12_ao_transp(j,i,2,ipoint) = int2_grad1_u12_ao(j,i,ipoint,2)
+         int2_grad1_u12_ao_transp(j,i,3,ipoint) = int2_grad1_u12_ao(j,i,ipoint,3)
+       enddo
+     enddo
+   enddo
+  endif
   call wall_time(wall1)
   print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
 
 END_PROVIDER 
 
+! ---
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
 
   implicit none
   integer :: ipoint
+  double precision :: wall0, wall1
 
- print*,'providing int2_grad1_u12_bimo_transp'
- double precision :: wall0, wall1
- call wall_time(wall0)
- !$OMP PARALLEL         &
- !$OMP DEFAULT (NONE)   &
- !$OMP PRIVATE (ipoint) & 
- !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
- !$OMP DO SCHEDULE (dynamic)
-  do ipoint = 1, n_points_final_grid
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                          , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
- call wall_time(wall1)
- print*,'Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
+  !print *, ' providing int2_grad1_u12_bimo_transp'
+
+  call wall_time(wall0)
+  !$OMP PARALLEL         &
+  !$OMP DEFAULT (NONE)   &
+  !$OMP PRIVATE (ipoint) & 
+  !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
+  !$OMP DO SCHEDULE (dynamic)
+   do ipoint = 1, n_points_final_grid
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                           , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+   enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(wall1)
+  !print *, ' Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
 
 END_PROVIDER 
 
 ! ---
+
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid,3, mo_num, mo_num )]
  implicit none
  integer          :: i, j, ipoint
@@ -165,35 +184,22 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid,3
  enddo
 END_PROVIDER 
 
-BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo, (3, mo_num, mo_num, n_points_final_grid)]
+! ---
 
-  BEGIN_DOC
-  !
-  ! int2_grad1_u12_bimo(:,k,i,ipoint) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \chi_k(r2) \phi_i(r2) 
-  !
-  END_DOC
+BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
 
   implicit none
-  integer :: ipoint
-  print*,'Wrong !!'
-  stop
- !$OMP PARALLEL         &
- !$OMP DEFAULT (NONE)   &
- !$OMP PRIVATE (ipoint) & 
- !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao,int2_grad1_u12_bimo)
- !$OMP DO SCHEDULE (dynamic)
+  integer :: i, j, ipoint
+
   do ipoint = 1, n_points_final_grid
-
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (1,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
-                          , int2_grad1_u12_bimo(1,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (2,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
-                          , int2_grad1_u12_bimo(2,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
-    call ao_to_mo_bi_ortho( int2_grad1_u12_ao  (3,1,1,ipoint), size(int2_grad1_u12_ao  , 2) &
-                          , int2_grad1_u12_bimo(3,1,1,ipoint), size(int2_grad1_u12_bimo, 2) )
-
+    do i = 1, ao_num
+      do j = 1, ao_num
+        int2_grad1_u12_ao_t(ipoint,1,j,i) = int2_grad1_u12_ao(j,i,ipoint,1)
+        int2_grad1_u12_ao_t(ipoint,2,j,i) = int2_grad1_u12_ao(j,i,ipoint,2)
+        int2_grad1_u12_ao_t(ipoint,3,j,i) = int2_grad1_u12_ao(j,i,ipoint,3)
+      enddo                                  
+    enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
 
 END_PROVIDER 
 

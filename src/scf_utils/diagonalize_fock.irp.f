@@ -20,6 +20,12 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
      enddo
    enddo
 
+  !print *, ' Fock_matrix_MO :'
+  !do i = 1, mo_num
+  !  write(*, '(100(f15.7, 2x))') (Fock_matrix_MO(j,i), j = 1, mo_num)
+  !enddo
+
+
    if(frozen_orb_scf)then
      integer                        :: iorb,jorb
      do i = 1, n_core_orb
@@ -57,7 +63,6 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    do i = elec_beta_num+1, elec_alpha_num
      F(i,i) += 0.5d0*level_shift
    enddo
-
    do i = elec_alpha_num+1, mo_num
      F(i,i) += level_shift
    enddo
@@ -90,6 +95,10 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
    call dsyevd( 'V', 'U', mo_num, F,                             &
        size(F,1), diag, work, lwork, iwork, liwork, info)
    deallocate(iwork)
+  !print*, ' Fock eigval:'
+  !do i = 1, mo_num
+  !  print *, diag(i)
+  !enddo
 
 
    if (info /= 0) then
