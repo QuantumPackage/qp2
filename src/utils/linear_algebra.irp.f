@@ -1675,111 +1675,6 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
 end
 
 subroutine restore_symmetry(m,n,A,LDA,thresh)
-  implicit none
-  BEGIN_DOC
-! Tries to find the matrix elements that are the same, and sets them
-! to the average value.
-! If restore_symm is False, only nullify small elements
-  END_DOC
-  integer, intent(in) :: m,n,LDA
-  double precision, intent(inout) :: A(LDA,n)
-  double precision, intent(in) :: thresh
-  integer :: i,j,k,l
-  logical, allocatable :: done(:,:)
-  double precision :: f, g, count, thresh2
-  thresh2 = dsqrt(thresh)
-  call nullify_small_elements(m,n,A,LDA,thresh)
-
-  ! Debug
-  !double precision, allocatable :: B(:,:)
-  !double precision :: max_diff, ti,tf
-  !allocate(B(m,n))
-  !B = A
-  !call wall_time(ti)
-  !call restore_symmetry_fast(m,n,B,LDA,thresh)
-  !call wall_time(tf)
-  !print*,''
-  !print*,'Restore_symmetry'
-  !print*,'Fast version:',tf-ti,'s'
-  !call wall_time(ti)
-
-!  if (.not.restore_symm) then
-!    return
-!  endif
-
-  ! TODO:  Costs O(n^4), but can be improved to (2 n^2 * log(n)):
-  ! - copy all values in a 1D array
-  ! - sort 1D array
-  ! - average nearby elements
-  ! - for all elements, find matching value in the sorted 1D array
-
-  allocate(done(m,n))
-
-  do j=1,n
-    do i=1,m
-      done(i,j) = A(i,j) == 0.d0
-    enddo
-  enddo
-
-  do j=1,n
-    do i=1,m
-      if ( done(i,j) ) cycle
-      done(i,j) = .True.
-      count = 1.d0
-      f = 1.d0/A(i,j)
-      do l=1,n
-        do k=1,m
-          if ( done(k,l) ) cycle
-          g = f * A(k,l)
-          if ( dabs(dabs(g) - 1.d0) < thresh2 ) then
-            count = count + 1.d0
-            if (g>0.d0) then
-              A(i,j) = A(i,j) + A(k,l)
-            else
-              A(i,j) = A(i,j) - A(k,l)
-            end if
-          endif
-        enddo
-      enddo
-      if (count > 1.d0) then
-        A(i,j) = A(i,j) / count
-        do l=1,n
-          do k=1,m
-            if ( done(k,l) ) cycle
-            g = f * A(k,l)
-            if ( dabs(dabs(g) - 1.d0) < thresh2 ) then
-              done(k,l) = .True.
-              if (g>0.d0) then
-                A(k,l) = A(i,j)
-              else
-                A(k,l) = -A(i,j)
-              end if
-            endif
-          enddo
-        enddo
-      endif
-
-    enddo
-  enddo
-
-  ! Debug
-  !call wall_time(tf)
-  !print*,'Old version:',tf-ti,'s'
-
-  !max_diff = 0d0
-  !do j = 1, n
-  !  do i = 1, n
-  !    if (dabs(A(i,j)-B(i,j)) > max_diff) then
-  !      max_diff = dabs(A(i,j)-B(i,j))
-  !    endif
-  !  enddo
-  !enddo
-  !print*,'Max diff:', max_diff
-  !deallocate(B)
-
-end
-
-subroutine restore_symmetry_fast(m,n,A,LDA,thresh)
 
   implicit none
 
@@ -1794,58 +1689,53 @@ subroutine restore_symmetry_fast(m,n,A,LDA,thresh)
   double precision, intent(in) :: thresh
 
   double precision, allocatable :: copy(:), copy_sign(:)
-  integer, allocatable :: key(:)
+  integer, allocatable :: key(:), ii(:), jj(:)
   integer :: sze, pi, pf, idx, i,j,k
   double precision :: average, val, thresh2
 
   thresh2 = dsqrt(thresh)
-  call nullify_small_elements(m,n,A,LDA,thresh)
- 
+
   sze = m * n
 
-  allocate(copy(sze),copy_sign(sze),key(sze))
-  
+  allocate(copy(sze),copy_sign(sze),key(sze),ii(sze),jj(sze))
+
   ! Copy to 1D
-  !$OMP PARALLEL &
-  !$OMP SHARED(A,m,n,sze,copy_sign,copy,key) &
+  !$OMP PARALLEL if (m>100) &
+  !$OMP SHARED(A,m,n,sze,copy_sign,copy,key,ii,jj) &
   !$OMP PRIVATE(i,j,k) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO
+  !$OMP DO COLLAPSE(2)
   do j = 1, n
     do i = 1, m
-      copy(i+(j-1)*m) = A(i,j)
+      k = i+(j-1)*m
+      copy(k) = A(i,j)
+      copy_sign(k) = sign(1.d0,copy(k))
+      copy(k) = -dabs(copy(k))
+      key(k) = k
+      ii(k) = i
+      jj(k) = j
     enddo
-  enddo
-  !$OMP END DO
-  ! Copy sign
-  !$OMP DO
-  do i = 1,sze
-    copy_sign(i) = sign(1d0,copy(i))
-    copy(i) = dabs(copy(i))
-  enddo
-  !$OMP END DO NOWAIT
-  ! Keys
-  !$OMP DO
-  do i = 1, sze
-   key(i) = i
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
   ! Sort
   call dsort(copy,key,sze)
+  call iset_order(ii,key,sze)
+  call iset_order(jj,key,sze)
+  call dset_order(copy_sign,key,sze)
 
-  !TODO 
+  !TODO
   ! Parallelization with OMP
 
-  ! Jump all the elements below thresh
-  i = 1 
-  do while (copy(i) <= thresh) 
-    i = i + 1
-  enddo
+!  ! Skip all the elements below thresh
+!  i = 1
+!  do while (copy(i) <= thresh)
+!    i = i + 1
+!  enddo
 
   ! Symmetrize
-  do while(i < sze)
+  do while( (i < sze).and.(-copy(i) > thresh) )
     pi = i
     pf = i
     val = 1d0/copy(i)
@@ -1862,7 +1752,7 @@ subroutine restore_symmetry_fast(m,n,A,LDA,thresh)
       do j = pi, pf
         average = average + copy(j)
       enddo
-      average = average / (pf-pi+1)
+      average = average / (pf-pi+1.d0)
       do j = pi, pf
         copy(j) = average
       enddo
@@ -1872,24 +1762,23 @@ subroutine restore_symmetry_fast(m,n,A,LDA,thresh)
     ! Update i
     i = i + 1
   enddo
+  copy(i:) = 0.d0
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(m,sze,copy_sign,copy,key,A) &
+  !$OMP PARALLEL if (sze>10000) &
+  !$OMP SHARED(m,sze,copy_sign,copy,key,A,ii,jj) &
   !$OMP PRIVATE(i,j,k,idx) &
   !$OMP DEFAULT(NONE)
   ! copy -> A
   !$OMP DO
   do k = 1, sze
-      idx = key(k)
-      i = mod(idx-1,m) + 1
-      j = (idx-1) / m + 1
-      ! New value with the right sign
-      A(i,j) = sign(copy(k),copy_sign(idx))
+      i = ii(k)
+      j = jj(k)
+      A(i,j) = sign(copy(k),copy_sign(k))
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
-  deallocate(copy,copy_sign,key)
+  deallocate(copy,copy_sign,key,ii,jj)
 
 end
 
