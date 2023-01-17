@@ -17,6 +17,8 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
 
   double precision :: NAI_pol_mult_erf_ao
 
+  print*, ' providing v_ij_erf_rk_cst_mu ...'
+
   provide mu_erf final_grid_points 
   call wall_time(wall0)
 
@@ -54,7 +56,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for v_ij_erf_rk_cst_mu  ', wall1 - wall0
+  print*, ' wall time for v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -72,6 +74,8 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_transp, (n_points_final_gr
   double precision :: int_mu, int_coulomb
   double precision :: wall0, wall1
   double precision :: NAI_pol_mult_erf_ao
+
+  print *, ' providing v_ij_erf_rk_cst_mu_transp ...'
 
   provide mu_erf final_grid_points 
   call wall_time(wall0)
@@ -107,7 +111,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_transp, (n_points_final_gr
   enddo
 
   call wall_time(wall1)
-  print *, ' wall time for v_ij_erf_rk_cst_mu_transp  ', wall1 - wall0
+  print *, ' wall time for v_ij_erf_rk_cst_mu_transp = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -123,6 +127,8 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   integer          :: i, j, ipoint
   double precision :: r(3), ints(3), ints_coulomb(3)
   double precision :: wall0, wall1
+
+  print*, ' providing x_v_ij_erf_rk_cst_mu_tmp ...'
 
   call wall_time(wall0)
 
@@ -162,13 +168,13 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp, (3, ao_num, ao_num,
   enddo
 
   call wall_time(wall1)
-  print*, ' wall time for x_v_ij_erf_rk_cst_mu_tmp', wall1 - wall0
+  print *, ' wall time for x_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num,n_points_final_grid,3)]
+BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
   ! int dr x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/|r - R|
@@ -177,6 +183,8 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num,n_point
   implicit none
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
+
+  print *, ' providing x_v_ij_erf_rk_cst_mu ...'
 
   call wall_time(wall0)
 
@@ -191,7 +199,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu, (ao_num, ao_num,n_point
   enddo
 
   call wall_time(wall1)
-  print *, ' wall time for x_v_ij_erf_rk_cst_mu', wall1 - wall0
+  print *, ' wall time for x_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -207,6 +215,8 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num,
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
+  print *, ' providing x_v_ij_erf_rk_cst_mu_transp ...'
+
   call wall_time(wall0)
 
   do ipoint = 1, n_points_final_grid
@@ -220,13 +230,13 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp, (ao_num, ao_num,
   enddo
 
   call wall_time(wall1)
-  print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp', wall1 - wall0
+  print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp = ', wall1 - wall0
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_final_grid,ao_num, ao_num,3)]
+BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_final_grid, ao_num, ao_num, 3)]
 
   BEGIN_DOC
   ! int dr x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/|r - R|
@@ -235,6 +245,8 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_fi
   implicit none
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
+
+  print *, ' providing x_v_ij_erf_rk_cst_mu_transp_bis ...'
 
   call wall_time(wall0)
 
@@ -249,7 +261,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_transp_bis, (n_points_fi
   enddo
 
   call wall_time(wall1)
-  print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp_bis', wall1 - wall0
+  print *, ' wall time for x_v_ij_erf_rk_cst_mu_transp_bis = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -268,7 +280,9 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_fin
  double precision :: r(3), ints(3), ints_coulomb(3)
  double precision :: wall0, wall1
 
- call wall_time(wall0)
+  print *, ' providing d_dx_v_ij_erf_rk_cst_mu_tmp ...'
+
+  call wall_time(wall0)
 
  !$OMP PARALLEL                                 &
  !$OMP DEFAULT (NONE)                           &
@@ -295,7 +309,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_fin
  !$OMP END PARALLEL
 
   call wall_time(wall1)
-  print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu_tmp', wall1 - wall0
+  print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -315,6 +329,8 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
+  print *, ' providing d_dx_v_ij_erf_rk_cst_mu ...'
+
   call wall_time(wall0)
   do i = 1, ao_num
     do j = 1, ao_num
@@ -327,7 +343,7 @@ BEGIN_PROVIDER [ double precision, d_dx_v_ij_erf_rk_cst_mu, (n_points_final_grid
   enddo
 
   call wall_time(wall1)
-  print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu', wall1 - wall0
+  print *, ' wall time for d_dx_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -347,6 +363,8 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
   integer          :: i, j, ipoint
   double precision :: r(3), ints(3), ints_coulomb(3)
   double precision :: wall0, wall1
+
+  print *, ' providing x_d_dx_v_ij_erf_rk_cst_mu_tmp ...'
 
   call wall_time(wall0)
 
@@ -375,7 +393,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu_tmp, (3, n_points_f
  !$OMP END PARALLEL
 
   call wall_time(wall1)
-  print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu_tmp', wall1 - wall0
+  print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu_tmp = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -395,6 +413,8 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_gr
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
+  print *, ' providing x_d_dx_v_ij_erf_rk_cst_mu ...'
+
   call wall_time(wall0)
 
   do i = 1, ao_num
@@ -408,7 +428,7 @@ BEGIN_PROVIDER [ double precision, x_d_dx_v_ij_erf_rk_cst_mu, (n_points_final_gr
   enddo
  
   call wall_time(wall1)
-  print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu', wall1 - wall0
+  print *, ' wall time for x_d_dx_v_ij_erf_rk_cst_mu = ', wall1 - wall0
 
 END_PROVIDER 
 

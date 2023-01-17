@@ -306,7 +306,7 @@ subroutine test_int2_grad1_u12_ao()
 
         call num_int2_grad1_u12_ao(i, j, ipoint, integ)
 
-        i_exc  = int2_grad1_u12_ao(1,i,j,ipoint) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,1) 
         i_num  = integ(1)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -318,7 +318,7 @@ subroutine test_int2_grad1_u12_ao()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = int2_grad1_u12_ao(2,i,j,ipoint) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,2) 
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -330,7 +330,7 @@ subroutine test_int2_grad1_u12_ao()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = int2_grad1_u12_ao(3,i,j,ipoint) 
+        i_exc  = int2_grad1_u12_ao(i,j,ipoint,3) 
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -382,7 +382,7 @@ subroutine test_int2_u_grad1u_total_j1b2()
 
         call num_int2_u_grad1u_total_j1b2(i, j, ipoint, integ)
 
-        i_exc  = x * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(1,i,j,ipoint) 
+        i_exc  = x * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(i,j,ipoint,1)
         i_num  = integ(1)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -394,7 +394,7 @@ subroutine test_int2_u_grad1u_total_j1b2()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = y * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(2,i,j,ipoint) 
+        i_exc  = y * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(i,j,ipoint,2) 
         i_num  = integ(2)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then
@@ -406,7 +406,7 @@ subroutine test_int2_u_grad1u_total_j1b2()
         acc_tot += acc_ij
         normalz += dabs(i_num)
 
-        i_exc  = z * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(3,i,j,ipoint) 
+        i_exc  = z * int2_u_grad1u_j1b2(i,j,ipoint) - int2_u_grad1u_x_j1b2(i,j,ipoint,3) 
         i_num  = integ(3)
         acc_ij = dabs(i_exc - i_num)
         if(acc_ij .gt. eps_ij) then

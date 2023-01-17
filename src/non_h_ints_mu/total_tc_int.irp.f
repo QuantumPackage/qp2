@@ -7,6 +7,7 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
   integer          :: i, j, k, l
   double precision :: wall1, wall0
 
+  print *, ' providing ao_tc_int_chemist ...'
   call wall_time(wall0)
   
   if(test_cycle_tc)then
@@ -36,6 +37,7 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist_test, (ao_num, ao_num, ao_nu
   integer          :: i, j, k, l
   double precision :: wall1, wall0
 
+  print *, ' providing ao_tc_int_chemist_test ...'
   call wall_time(wall0)
 
    do j = 1, ao_num
@@ -47,8 +49,10 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist_test, (ao_num, ao_num, ao_nu
        enddo
      enddo
    enddo
+
   call wall_time(wall1)
   print *, ' wall time for ao_tc_int_chemist_test ', wall1 - wall0
+
 END_PROVIDER 
 
 ! ---

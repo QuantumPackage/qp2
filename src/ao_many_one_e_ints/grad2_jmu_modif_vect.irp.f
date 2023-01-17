@@ -241,7 +241,7 @@
 !
 !! ---
 !
-!BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (3, ao_num, ao_num, n_points_final_grid)]
+!BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (ao_num, ao_num, n_points_final_grid, 3)]
 !
 !  BEGIN_DOC
 !  !
@@ -308,7 +308,7 @@
 !
 !          ! ---
 !
-!          int2_u_grad1u_x_j1b2(1,j,i,ipoint) += coef_fit * int_fit_v(ipoint,1)
+!          int2_u_grad1u_x_j1b2(j,i,ipoint,1) += coef_fit * int_fit_v(ipoint,1)
 !
 !          if(dabs(int_fit_v(ipoint,1)) .gt. 1d-10) then
 !            i_mask_grid1 += 1
@@ -320,7 +320,7 @@
 !
 !          ! ---
 !
-!          int2_u_grad1u_x_j1b2(2,j,i,ipoint) += coef_fit * int_fit_v(ipoint,2)
+!          int2_u_grad1u_x_j1b2(j,i,ipoint,2) += coef_fit * int_fit_v(ipoint,2)
 !
 !          if(dabs(int_fit_v(ipoint,2)) .gt. 1d-10) then
 !            i_mask_grid2 += 1
@@ -332,7 +332,7 @@
 !
 !          ! ---
 !
-!          int2_u_grad1u_x_j1b2(3,j,i,ipoint) += coef_fit * int_fit_v(ipoint,3)
+!          int2_u_grad1u_x_j1b2(j,i,ipoint,3) += coef_fit * int_fit_v(ipoint,3)
 !
 !          if(dabs(int_fit_v(ipoint,3)) .gt. 1d-10) then
 !            i_mask_grid3 += 1
@@ -408,15 +408,15 @@
 !          call NAI_pol_x_mult_erf_ao_with1s_v(i, j, alpha_1s, centr_1s, n_points_final_grid, 1.d+9, r_mask_grid, n_points_final_grid, int_fit_v, n_points_final_grid, i_mask_grid)
 !
 !          do ipoint = 1, i_mask_grid1
-!            int2_u_grad1u_x_j1b2(1,j,i,n_mask_grid(ipoint,1)) += coef * dexp(-expo_coef_1s * dist(ipoint,1)) * int_fit_v(ipoint,1)
+!            int2_u_grad1u_x_j1b2(j,i,n_mask_grid(ipoint,1),1) += coef * dexp(-expo_coef_1s * dist(ipoint,1)) * int_fit_v(ipoint,1)
 !          enddo
 !
 !          do ipoint = 1, i_mask_grid2
-!            int2_u_grad1u_x_j1b2(2,j,i,n_mask_grid(ipoint,2)) += coef * dexp(-expo_coef_1s * dist(ipoint,2)) * int_fit_v(ipoint,2)
+!            int2_u_grad1u_x_j1b2(j,i,n_mask_grid(ipoint,2),2) += coef * dexp(-expo_coef_1s * dist(ipoint,2)) * int_fit_v(ipoint,2)
 !          enddo
 !
 !          do ipoint = 1, i_mask_grid3
-!            int2_u_grad1u_x_j1b2(3,j,i,n_mask_grid(ipoint,3)) += coef * dexp(-expo_coef_1s * dist(ipoint,3)) * int_fit_v(ipoint,3)
+!            int2_u_grad1u_x_j1b2(j,i,n_mask_grid(ipoint,3),3) += coef * dexp(-expo_coef_1s * dist(ipoint,3)) * int_fit_v(ipoint,3)
 !          enddo
 !
 !        enddo
@@ -439,15 +439,15 @@
 !  do ipoint = 1, n_points_final_grid
 !    do i = 2, ao_num
 !      do j = 1, i-1
-!        int2_u_grad1u_x_j1b2(1,j,i,ipoint) = int2_u_grad1u_x_j1b2(1,i,j,ipoint)
-!        int2_u_grad1u_x_j1b2(2,j,i,ipoint) = int2_u_grad1u_x_j1b2(2,i,j,ipoint)
-!        int2_u_grad1u_x_j1b2(3,j,i,ipoint) = int2_u_grad1u_x_j1b2(3,i,j,ipoint)
+!        int2_u_grad1u_x_j1b2(j,i,ipoint,1) = int2_u_grad1u_x_j1b2(i,j,ipoint,1)
+!        int2_u_grad1u_x_j1b2(j,i,ipoint,2) = int2_u_grad1u_x_j1b2(i,j,ipoint,2)
+!        int2_u_grad1u_x_j1b2(j,i,ipoint,3) = int2_u_grad1u_x_j1b2(i,j,ipoint,3)
 !      enddo
 !    enddo
 !  enddo
 !
 !  call wall_time(wall1)
-!  print*, ' wall time for int2_u_grad1u_x_j1b2', wall1 - wall0
+!  print*, ' wall time for int2_u_grad1u_x_j1b2 =', wall1 - wall0
 !
 !END_PROVIDER
 !

@@ -259,7 +259,7 @@ subroutine orthog_functions(m, n, coef, overlap)
   double precision, intent(in)    :: overlap(m,m)
   double precision, intent(inout) :: coef(m,n)
   double precision, allocatable   :: stmp(:,:)
-  integer                         :: j
+  integer                         :: j, k
 
   allocate(stmp(n,n))
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
@@ -270,7 +270,13 @@ subroutine orthog_functions(m, n, coef, overlap)
   call impose_orthog_svd_overlap(m, n, coef, overlap)
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
   do j = 1, n
-    coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
+    ! ---
+    ! TODO: MANU check ici
+    !coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
+    do k = 1, m
+      coef(k,j) *= 1.d0/dsqrt(stmp(j,j))
+    enddo
+    ! ---
   enddo
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
 

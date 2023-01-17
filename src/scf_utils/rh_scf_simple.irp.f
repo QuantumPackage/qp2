@@ -63,35 +63,34 @@ END_DOC
     energy_SCF = SCF_energy
     Delta_energy_SCF = energy_SCF - energy_SCF_previous
 
-    double precision :: level_shift_save
-    level_shift_save = level_shift
-    mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
-    do while (Delta_energy_SCF > 0.d0)
-      mo_coef(1:ao_num,1:mo_num) = mo_coef_save
-      if (level_shift <= .1d0) then
-        level_shift = 1.d0
-      else
-        level_shift = level_shift * 3.0d0
-      endif
-      TOUCH mo_coef level_shift
-      mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
-      if(frozen_orb_scf)then
-        call reorder_core_orb
-        call initialize_mo_coef_begin_iteration
-      endif
-      TOUCH mo_coef
-      Delta_energy_SCF = SCF_energy - energy_SCF_previous
-      energy_SCF = SCF_energy
-      if (level_shift-level_shift_save > 40.d0) then
-        level_shift = level_shift_save * 4.d0
-        SOFT_TOUCH level_shift
-        exit
-      endif
+    !double precision :: level_shift_save
+    !level_shift_save = level_shift
+    !mo_coef_save(1:ao_num,1:mo_num) = mo_coef(1:ao_num,1:mo_num)
+    !do while (Delta_energy_SCF > 0.d0)
+    !  mo_coef(1:ao_num,1:mo_num) = mo_coef_save
+    !  if (level_shift <= .1d0) then
+    !    level_shift = 1.d0
+    !  else
+    !    level_shift = level_shift * 3.0d0
+    !  endif
+    !  TOUCH mo_coef level_shift
+    !  mo_coef(1:ao_num,1:mo_num) = eigenvectors_Fock_matrix_MO(1:ao_num,1:mo_num)
+    !  if(frozen_orb_scf)then
+    !    call reorder_core_orb
+    !    call initialize_mo_coef_begin_iteration
+    !  endif
+    !  TOUCH mo_coef
+    !  Delta_energy_SCF = SCF_energy - energy_SCF_previous
+    !  energy_SCF = SCF_energy
+    !  if (level_shift-level_shift_save > 40.d0) then
+    !    level_shift = level_shift_save * 4.d0
+    !    SOFT_TOUCH level_shift
+    !    exit
+    !  endif
+    !enddo
+    !level_shift = level_shift * 0.5d0
+    !SOFT_TOUCH level_shift
 
-    enddo
-
-    level_shift = level_shift * 0.5d0
-    SOFT_TOUCH level_shift
     energy_SCF_previous = energy_SCF
 
 !   Print results at the end of each iteration
@@ -100,7 +99,7 @@ END_DOC
       iteration_SCF, energy_SCF, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
 
     if(Delta_energy_SCF < 0.d0) then
-      call save_mos
+      call save_mos()
     endif
     if(qp_stop()) exit
 

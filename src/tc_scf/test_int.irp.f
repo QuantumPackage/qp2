@@ -25,7 +25,7 @@ program test_ints
 !! OK
 !call routine_v_ij_erf_rk_cst_mu_j1b
 !! OK 
-! call routine_x_v_ij_erf_rk_cst_mu_tmp_j1b
+! call routine_x_v_ij_erf_rk_cst_mu_j1b
 !! OK
 ! call routine_v_ij_u_cst_mu_j1b
 
@@ -43,10 +43,15 @@ program test_ints
 ! call test_ao_tc_int_chemist
 ! call test_grid_points_ao
 ! call test_tc_scf
- call test_int_gauss
+ !call test_int_gauss
 
   !call test_fock_3e_uhf_ao()
-  call test_fock_3e_uhf_mo()
+  !call test_fock_3e_uhf_mo()
+
+  !call test_tc_grad_and_lapl_ao()
+  !call test_tc_grad_square_ao()
+
+  call test_two_e_tc_non_hermit_integral()
 
 end
 
@@ -56,14 +61,8 @@ subroutine test_tc_scf
  implicit none
  integer :: i
 ! provide int2_u_grad1u_x_j1b2_test
- provide x_v_ij_erf_rk_cst_mu_tmp_j1b_test
-! do i = 1, ng_fit_jast
-!  print*,expo_gauss_1_erf_x_2(i),coef_gauss_1_erf_x_2(i)
-! enddo
-! provide tc_grad_square_ao_test
-!  provide tc_grad_and_lapl_ao_test
-! provide int2_u_grad1u_x_j1b2_test
-! provide x_v_ij_erf_rk_cst_mu_tmp_j1b_test
+ provide x_v_ij_erf_rk_cst_mu_j1b_test
+! provide x_v_ij_erf_rk_cst_mu_j1b_test
 ! print*,'TC_HF_energy = ',TC_HF_energy
 ! print*,'grad_non_hermit = ',grad_non_hermit
 end
@@ -212,7 +211,7 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
 end
 
 
-subroutine routine_x_v_ij_erf_rk_cst_mu_tmp_j1b
+subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
  implicit none
  integer :: i,j,ipoint,k,l,m
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -242,8 +241,8 @@ subroutine routine_x_v_ij_erf_rk_cst_mu_tmp_j1b
     do i = 1, ao_num
      do j = 1, ao_num
       do m = 1, 3
-       array(j,i,l,k)     += x_v_ij_erf_rk_cst_mu_tmp_j1b_test(m,j,i,ipoint) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
-       array_ref(j,i,l,k) += x_v_ij_erf_rk_cst_mu_tmp_j1b(m,j,i,ipoint)      * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array(j,i,l,k)     += x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array_ref(j,i,l,k) += x_v_ij_erf_rk_cst_mu_j1b     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
       enddo
      enddo
     enddo
@@ -500,8 +499,8 @@ subroutine routine_int2_u_grad1u_x_j1b2
     do i = 1, ao_num
      do j = 1, ao_num
       do m = 1, 3
-       array(j,i,l,k)     += int2_u_grad1u_x_j1b2_test(m,j,i,ipoint) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
-       array_ref(j,i,l,k) += int2_u_grad1u_x_j1b2(m,j,i,ipoint)      * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array(j,i,l,k)     += int2_u_grad1u_x_j1b2_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array_ref(j,i,l,k) += int2_u_grad1u_x_j1b2     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
       enddo
      enddo
     enddo
@@ -708,7 +707,7 @@ subroutine test_fock_3e_uhf_mo()
 
   ! ---
 
-end subroutine test_fock_3e_uhf_mo()
+end subroutine test_fock_3e_uhf_mo
 
 ! ---
 
@@ -776,9 +775,9 @@ subroutine test_grid_points_ao
   icount_bad = 0
   icount_full = 0
   do ipoint = 1, n_points_final_grid
-!   if(dabs(int2_u_grad1u_x_j1b2_test(1,j,i,ipoint)) & 
-! + dabs(int2_u_grad1u_x_j1b2_test(2,j,i,ipoint)) &
-! + dabs(int2_u_grad1u_x_j1b2_test(2,j,i,ipoint)) )
+!   if(dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,1)) & 
+!    + dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,2)) &
+!    + dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,3)) )
 !   if(dabs(int2_u2_j1b2_test(j,i,ipoint)).gt.thr)then
 !    icount += 1
 !   endif
@@ -848,3 +847,157 @@ subroutine test_int_gauss
 
 end
 
+! ---
+
+subroutine test_tc_grad_and_lapl_ao()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  thr_ih = 1d-10
+
+  PROVIDE tc_grad_and_lapl_ao tc_grad_and_lapl_ao_loop
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, ao_num
+    do j = 1, ao_num
+      do k = 1, ao_num
+        do l = 1, ao_num
+
+          diff = dabs(tc_grad_and_lapl_ao_loop(l,k,j,i) - tc_grad_and_lapl_ao(l,k,j,i))
+          if(diff .gt. thr_ih) then
+            print *, ' difference on ', l, k, j, i
+            print *, ' loops : ', tc_grad_and_lapl_ao_loop(l,k,j,i)
+            print *, ' lapack: ', tc_grad_and_lapl_ao     (l,k,j,i)
+            !stop
+          endif
+
+          norm     += dabs(tc_grad_and_lapl_ao_loop(l,k,j,i))
+          diff_tot += diff
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print *, ' diff tot = ', diff_tot / norm
+  print *, '     norm = ', norm
+  print *, ' '
+
+  return
+
+end
+
+! ---
+
+subroutine test_tc_grad_square_ao()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  thr_ih = 1d-10
+
+  PROVIDE tc_grad_square_ao tc_grad_square_ao_loop
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, ao_num
+    do j = 1, ao_num
+      do k = 1, ao_num
+        do l = 1, ao_num
+
+          diff = dabs(tc_grad_square_ao_loop(l,k,j,i) - tc_grad_square_ao(l,k,j,i))
+          if(diff .gt. thr_ih) then
+            print *, ' difference on ', l, k, j, i
+            print *, ' loops : ', tc_grad_square_ao_loop(l,k,j,i)
+            print *, ' lapack: ', tc_grad_square_ao     (l,k,j,i)
+            !stop
+          endif
+
+          norm     += dabs(tc_grad_square_ao_loop(l,k,j,i))
+          diff_tot += diff
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print *, ' diff tot = ', diff_tot / norm
+  print *, '     norm = ', norm
+  print *, ' '
+
+  return
+
+end
+
+! ---
+
+subroutine test_two_e_tc_non_hermit_integral()
+
+  implicit none
+  integer          :: i, j
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  thr_ih = 1d-10
+
+  PROVIDE two_e_tc_non_hermit_integral_beta two_e_tc_non_hermit_integral_alpha
+  PROVIDE two_e_tc_non_hermit_integral_seq_beta two_e_tc_non_hermit_integral_seq_alpha
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, ao_num
+    do j = 1, ao_num
+
+      diff = dabs(two_e_tc_non_hermit_integral_seq_alpha(j,i) - two_e_tc_non_hermit_integral_alpha(j,i))
+      if(diff .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' seq         : ', two_e_tc_non_hermit_integral_seq_alpha(j,i)
+        print *, ' //          : ', two_e_tc_non_hermit_integral_alpha    (j,i)
+        !stop
+      endif
+
+      norm     += dabs(two_e_tc_non_hermit_integral_seq_alpha(j,i))
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot a = ', diff_tot / norm
+  print *, '     norm a = ', norm
+  print *, ' '
+
+  ! ---
+
+  norm     = 0.d0
+  diff_tot = 0.d0
+  do i = 1, ao_num
+    do j = 1, ao_num
+
+      diff = dabs(two_e_tc_non_hermit_integral_seq_beta(j,i) - two_e_tc_non_hermit_integral_beta(j,i))
+      if(diff .gt. thr_ih) then
+        print *, ' difference on ', j, i
+        print *, ' seq         : ', two_e_tc_non_hermit_integral_seq_beta(j,i)
+        print *, ' //          : ', two_e_tc_non_hermit_integral_beta    (j,i)
+        !stop
+      endif
+
+      norm     += dabs(two_e_tc_non_hermit_integral_seq_beta(j,i))
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot b = ', diff_tot / norm
+  print *, '     norm b = ', norm
+  print *, ' '
+
+  ! ---
+
+  return
+
+end
+
+! ---
+
+>>>>>>> 92a4e33f8a21717cab0c0e4f8412ed6903afb04a

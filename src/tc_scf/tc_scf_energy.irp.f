@@ -10,6 +10,8 @@
   implicit none
   integer :: i, j
 
+  PROVIDE mo_l_coef mo_r_coef
+
   TC_HF_energy = nuclear_repulsion
   TC_HF_one_e_energy = 0.d0
   TC_HF_two_e_energy = 0.d0

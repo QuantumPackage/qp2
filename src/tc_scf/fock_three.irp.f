@@ -79,6 +79,8 @@ BEGIN_PROVIDER [double precision, diag_three_elem_hf]
   double precision :: contrib, weight, four_third, one_third, two_third, exchange_int_231
   double precision :: integral_aaa, hthree, integral_aab, integral_abb, integral_bbb
 
+  PROVIDE mo_l_coef mo_r_coef
+
   !print *, ' providing diag_three_elem_hf'
 
   if(.not. three_body_h_tc) then
