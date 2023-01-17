@@ -14,21 +14,36 @@ program save_bitcpsileft_for_qmcchem
 
   e_ref = 0.d0
   iunit = 13
-  open(unit=iunit,file=trim(ezfio_filename)//'/simulation/e_ref',action='write')
-  call ezfio_has_fci_energy_pt2(exists)
+  open(unit=iunit, file=trim(ezfio_filename)//'/simulation/e_ref', action='write')
 
-  if(.not.exists) then
-    call ezfio_has_fci_energy(exists)
-
+    call ezfio_has_fci_energy_pt2(exists)
     if(.not.exists) then
-      call ezfio_has_tc_scf_bitc_energy(exists)
-      if(exists) then
-        call ezfio_get_tc_scf_bitc_energy(e_ref)
+
+      call ezfio_has_fci_energy(exists)
+      if(.not.exists) then
+
+        call ezfio_has_cisd_energy(exists)
+        if(.not.exists) then
+
+          call ezfio_has_tc_scf_bitc_energy(exists)
+          if(exists) then
+            call ezfio_get_tc_scf_bitc_energy(e_ref)
+          endif
+
+        else
+          call ezfio_get_cisd_energy(e_ref)
+        endif
+
+      else
+        call ezfio_get_fci_energy(e_ref)
       endif
+
+      else
+        call ezfio_get_fci_energy_pt2(e_ref)
     endif
 
-  endif
-  write(iunit,*) e_ref
+    write(iunit,*) e_ref
+
   close(iunit)
 
 end

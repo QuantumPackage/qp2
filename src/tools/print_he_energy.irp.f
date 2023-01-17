@@ -7,8 +7,8 @@ program print_he_energy
 
   call print_overlap()
 
-  call print_energy1()
-  call print_energy2()
+  !call print_energy1()
+  !call print_energy2()
 
 end 
 

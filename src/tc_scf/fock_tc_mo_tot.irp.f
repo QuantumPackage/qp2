@@ -73,6 +73,29 @@
              + (Fock_matrix_tc_mo_beta(i,j) - Fock_matrix_tc_mo_alpha(i,j))
        enddo
      enddo
+     if(three_body_h_tc)then
+      ! C-O
+      do j = 1, elec_beta_num
+       do i = elec_beta_num+1, elec_alpha_num
+        Fock_matrix_tc_mo_tot(i,j) += 0.5d0*(fock_a_tot_3e_bi_orth(i,j) + fock_b_tot_3e_bi_orth(i,j))
+        Fock_matrix_tc_mo_tot(j,i) += 0.5d0*(fock_a_tot_3e_bi_orth(j,i) + fock_b_tot_3e_bi_orth(j,i))
+       enddo
+      enddo
+      ! C-V
+      do j = 1, elec_beta_num
+       do i = elec_alpha_num+1, mo_num
+        Fock_matrix_tc_mo_tot(i,j) += 0.5d0*(fock_a_tot_3e_bi_orth(i,j) + fock_b_tot_3e_bi_orth(i,j))
+        Fock_matrix_tc_mo_tot(j,i) += 0.5d0*(fock_a_tot_3e_bi_orth(j,i) + fock_b_tot_3e_bi_orth(j,i))
+       enddo
+      enddo
+      ! O-V
+      do j = elec_beta_num+1, elec_alpha_num
+       do i = elec_alpha_num+1, mo_num
+        Fock_matrix_tc_mo_tot(i,j) += 0.5d0*(fock_a_tot_3e_bi_orth(i,j) + fock_b_tot_3e_bi_orth(i,j))
+        Fock_matrix_tc_mo_tot(j,i) += 0.5d0*(fock_a_tot_3e_bi_orth(j,i) + fock_b_tot_3e_bi_orth(j,i))
+       enddo
+      enddo
+     endif
 
    endif
 

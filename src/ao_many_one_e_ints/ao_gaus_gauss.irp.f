@@ -156,6 +156,53 @@ end function overlap_gauss_r12_ao
 
 ! --
 
+double precision function overlap_abs_gauss_r12_ao(D_center, delta, i, j)
+
+  BEGIN_DOC
+  ! \int dr AO_i(r) AO_j(r) e^{-delta |r-D_center|^2}
+  END_DOC
+
+  implicit none
+  integer,          intent(in) :: i, j
+  double precision, intent(in) :: D_center(3), delta
+
+  integer                      :: power_A(3), power_B(3), l, k
+  double precision             :: A_center(3), B_center(3), alpha, beta, coef, coef1, analytical_j
+
+  double precision, external   :: overlap_abs_gauss_r12
+
+  overlap_abs_gauss_r12_ao = 0.d0
+
+  if(ao_overlap_abs(j,i).lt.1.d-12) then
+    return
+  endif
+
+  power_A(1:3) = ao_power(i,1:3)
+  power_B(1:3) = ao_power(j,1:3)
+
+  A_center(1:3) = nucl_coord(ao_nucl(i),1:3)
+  B_center(1:3) = nucl_coord(ao_nucl(j),1:3)
+
+  do l = 1, ao_prim_num(i)
+    alpha = ao_expo_ordered_transp           (l,i)
+    coef1 = ao_coef_normalized_ordered_transp(l,i)
+
+    do k = 1, ao_prim_num(j)
+      beta = ao_expo_ordered_transp(k,j)
+      coef = coef1 * ao_coef_normalized_ordered_transp(k,j)
+
+      if(dabs(coef) .lt. 1d-12) cycle
+
+      analytical_j = overlap_abs_gauss_r12(D_center, delta, A_center, B_center, power_A, power_B, alpha, beta)
+
+      overlap_abs_gauss_r12_ao += dabs(coef * analytical_j)
+    enddo
+  enddo
+
+end function overlap_gauss_r12_ao
+
+! --
+
 subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_points)
 
   BEGIN_DOC
@@ -177,7 +224,7 @@ subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_
   double precision, allocatable :: analytical_j(:)
 
   resv(:) = 0.d0
-  if(ao_overlap_abs(j,i).lt.1.d-12) then
+  if(ao_overlap_abs(j,i) .lt. 1.d-12) then
     return
   endif
 
@@ -313,9 +360,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
   ASSERT(beta .gt. 0.d0)
 
   if(beta .lt. 1d-10) then
-
     call overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_points)
-
     return
   endif
 
@@ -332,19 +377,20 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
   A1_center(1:3) = nucl_coord(ao_nucl(i),1:3)
   A2_center(1:3) = nucl_coord(ao_nucl(j),1:3)
 
-  allocate (fact_g(n_points), G_center(n_points,3), analytical_j(n_points) )
+  allocate(fact_g(n_points), G_center(n_points,3), analytical_j(n_points))
 
   bg  = beta  * gama_inv
   dg  = delta * gama_inv
   bdg = bg * delta 
-  do ipoint=1,n_points
+
+  do ipoint = 1, n_points
+
     G_center(ipoint,1) = bg * B_center(1) + dg * D_center(ipoint,1)
     G_center(ipoint,2) = bg * B_center(2) + dg * D_center(ipoint,2)
     G_center(ipoint,3) = bg * B_center(3) + dg * D_center(ipoint,3)
-    fact_g(ipoint) = bdg * ( &
-          (B_center(1) - D_center(ipoint,1)) * (B_center(1) - D_center(ipoint,1))  &
-        + (B_center(2) - D_center(ipoint,2)) * (B_center(2) - D_center(ipoint,2))  &
-        + (B_center(3) - D_center(ipoint,3)) * (B_center(3) - D_center(ipoint,3)) )
+    fact_g(ipoint) = bdg * ( (B_center(1) - D_center(ipoint,1)) * (B_center(1) - D_center(ipoint,1)) &
+                           + (B_center(2) - D_center(ipoint,2)) * (B_center(2) - D_center(ipoint,2)) &
+                           + (B_center(3) - D_center(ipoint,3)) * (B_center(3) - D_center(ipoint,3)) )
 
     if(fact_g(ipoint) < 10d0) then
       fact_g(ipoint) = dexp(-fact_g(ipoint))
@@ -368,8 +414,7 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
       do ipoint = 1, n_points
         coef12f = coef12 * fact_g(ipoint)
         resv(ipoint) += coef12f * analytical_j(ipoint)
-      end do
-
+      enddo
     enddo
   enddo
 

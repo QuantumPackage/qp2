@@ -70,52 +70,76 @@ subroutine give_fock_ia_three_e_total(i,a,contrib)
 
 end
 
+! ---
+
 BEGIN_PROVIDER [double precision, diag_three_elem_hf]
- implicit none
- integer :: i,j,k,ipoint,mm
- double precision :: contrib,weight,four_third,one_third,two_third,exchange_int_231
- print*,'providing diag_three_elem_hf'
- if(.not.three_body_h_tc)then
-  diag_three_elem_hf = 0.d0
- else
-  if(.not.bi_ortho)then
-   one_third = 1.d0/3.d0
-   two_third = 2.d0/3.d0
-   four_third = 4.d0/3.d0
-   diag_three_elem_hf = 0.d0
-   do i = 1, elec_beta_num
-    do j = 1, elec_beta_num
-     do k = 1, elec_beta_num
-      call  give_integrals_3_body(k,j,i,j,i,k,exchange_int_231)   
-      diag_three_elem_hf += two_third * exchange_int_231
-     enddo
-    enddo
-   enddo
-   do mm = 1, 3
-    do ipoint = 1, n_points_final_grid
-     weight = final_weight_at_r_vector(ipoint)                                                                          
-     contrib   = 3.d0 * fock_3_w_kk_sum(ipoint,mm) * fock_3_rho_beta(ipoint) * fock_3_w_kk_sum(ipoint,mm)  & 
-                -2.d0 * fock_3_w_kl_mo_k_mo_l(ipoint,mm) * fock_3_w_kk_sum(ipoint,mm)                                 & 
-                -1.d0 * fock_3_rho_beta(ipoint) * fock_3_w_kl_w_kl(ipoint,mm)
-     contrib  *= four_third
-     contrib  += -two_third  * fock_3_rho_beta(ipoint)     * fock_3_w_kl_w_kl(ipoint,mm) & 
-                - four_third * fock_3_w_kk_sum(ipoint,mm)  * fock_3_w_kl_mo_k_mo_l(ipoint,mm)
-     diag_three_elem_hf += weight * contrib
-    enddo
-   enddo
-   diag_three_elem_hf = - diag_three_elem_hf
+
+  implicit none
+  integer          :: i, j, k, ipoint, mm
+  double precision :: contrib, weight, four_third, one_third, two_third, exchange_int_231
+  double precision :: integral_aaa, hthree, integral_aab, integral_abb, integral_bbb
+
+  PROVIDE mo_l_coef mo_r_coef
+
+  !print *, ' providing diag_three_elem_hf'
+
+  if(.not. three_body_h_tc) then
+
+    diag_three_elem_hf = 0.d0
+
   else
-   double precision :: integral_aaa,hthree, integral_aab,integral_abb,integral_bbb
-   provide mo_l_coef mo_r_coef
-   call give_aaa_contrib(integral_aaa)
-   call give_aab_contrib(integral_aab)
-   call give_abb_contrib(integral_abb)
-   call give_bbb_contrib(integral_bbb)
-   diag_three_elem_hf = integral_aaa + integral_aab + integral_abb + integral_bbb
+
+    if(.not. bi_ortho) then
+
+      ! ---
+
+      one_third  = 1.d0/3.d0
+      two_third  = 2.d0/3.d0
+      four_third = 4.d0/3.d0
+      diag_three_elem_hf = 0.d0
+      do i = 1, elec_beta_num
+        do j = 1, elec_beta_num
+          do k = 1, elec_beta_num
+            call give_integrals_3_body(k, j, i, j, i, k,exchange_int_231)   
+            diag_three_elem_hf += two_third * exchange_int_231
+          enddo
+        enddo
+      enddo
+      do mm = 1, 3
+        do ipoint = 1, n_points_final_grid
+          weight  = final_weight_at_r_vector(ipoint)                                                                          
+          contrib = 3.d0 * fock_3_w_kk_sum(ipoint,mm) * fock_3_rho_beta(ipoint) * fock_3_w_kk_sum(ipoint,mm) & 
+                  - 2.d0 * fock_3_w_kl_mo_k_mo_l(ipoint,mm) * fock_3_w_kk_sum(ipoint,mm)                     & 
+                  - 1.d0 * fock_3_rho_beta(ipoint) * fock_3_w_kl_w_kl(ipoint,mm)
+          contrib *= four_third
+          contrib += -two_third  * fock_3_rho_beta(ipoint)    * fock_3_w_kl_w_kl(ipoint,mm) & 
+                     -four_third * fock_3_w_kk_sum(ipoint,mm) * fock_3_w_kl_mo_k_mo_l(ipoint,mm)
+          diag_three_elem_hf += weight * contrib
+       enddo
+      enddo
+
+      diag_three_elem_hf = - diag_three_elem_hf
+
+      ! ---
+
+    else
+
+      provide mo_l_coef mo_r_coef
+      call give_aaa_contrib(integral_aaa)
+      call give_aab_contrib(integral_aab)
+      call give_abb_contrib(integral_abb)
+      call give_bbb_contrib(integral_bbb)
+      diag_three_elem_hf = integral_aaa + integral_aab + integral_abb + integral_bbb
+!      print*,'integral_aaa + integral_aab + integral_abb + integral_bbb'
+!      print*,integral_aaa , integral_aab , integral_abb , integral_bbb
+
+    endif
+
   endif
- endif
+
 END_PROVIDER 
 
+! ---
 
 BEGIN_PROVIDER [ double precision, fock_3_mat_a_op_sh, (mo_num, mo_num)]
  implicit none 
