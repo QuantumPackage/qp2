@@ -248,3 +248,71 @@ END_PROVIDER
 
 ! ---
 
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO_a, (AO_num, AO_num)]
+
+  implicit none
+  double precision, allocatable  :: scratch(:,:)
+
+  allocate(scratch(AO_num, AO_num))
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                                                 &
+            , Fock_Matrix_AO_alpha, size(Fock_Matrix_AO_alpha, 1), SCF_density_matrix_ao_alpha, size(SCF_Density_Matrix_AO_alpha, 1) &
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                     &
+            , scratch, size(scratch, 1), AO_Overlap, size(AO_Overlap, 1) &
+            , 0.d0, FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                             &
+            , AO_Overlap, size(AO_Overlap, 1), SCF_density_matrix_ao_alpha, size(SCF_density_matrix_ao_alpha, 1) & 
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, -1.d0                                        &
+            , scratch, size(scratch, 1), Fock_Matrix_AO_alpha, size(Fock_Matrix_AO_alpha, 1) &
+            , 1.d0, FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1) )
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO_b, (AO_num, AO_num)]
+
+  implicit none
+  double precision, allocatable  :: scratch(:,:)
+
+  allocate(scratch(AO_num, AO_num))
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                                             &
+            , Fock_Matrix_AO_beta, size(Fock_Matrix_AO_beta, 1), SCF_density_matrix_ao_beta, size(SCF_Density_Matrix_AO_beta, 1) &
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                     &
+            , scratch, size(scratch, 1), AO_Overlap, size(AO_Overlap, 1) &
+            , 0.d0, FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                           &
+            , AO_Overlap, size(AO_Overlap, 1), SCF_density_matrix_ao_beta, size(SCF_density_matrix_ao_beta, 1) & 
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, -1.d0                                      &
+            , scratch, size(scratch, 1), Fock_Matrix_AO_beta, size(Fock_Matrix_AO_beta, 1) &
+            , 1.d0, FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1) )
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO_a, (mo_num, mo_num)]
+  implicit none
+  call ao_to_mo(FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1), FPS_SPF_Matrix_MO_a, size(FPS_SPF_Matrix_MO_a, 1))
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO_b, (mo_num, mo_num)]
+  implicit none
+  call ao_to_mo(FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1), FPS_SPF_Matrix_MO_b, size(FPS_SPF_Matrix_MO_b, 1))
+END_PROVIDER
+
+! ---
+

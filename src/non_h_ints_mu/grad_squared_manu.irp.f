@@ -10,51 +10,75 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
   implicit none
   integer                       :: ipoint, i, j, k, l
   double precision              :: weight1, ao_ik_r, ao_i_r,contrib,contrib2
-  double precision, allocatable :: ac_mat(:,:,:,:), bc_mat(:,:,:,:)
-  double precision :: wall1, wall0
+  double precision              :: time0, time1
+  double precision, allocatable :: ac_mat(:,:,:,:), b_mat(:,:,:), tmp(:,:,:)
+
+  print*, ' providing tc_grad_square_ao_test ...'
+  call wall_time(time0)
+
   provide u12sq_j1bsq_test u12_grad1_u12_j1b_grad1_j1b_test grad12_j12_test
-  call wall_time(wall0)
 
-  allocate(ac_mat(ao_num,ao_num,ao_num,ao_num))
-  ac_mat = 0.d0
-  allocate(bc_mat(ao_num,ao_num,ao_num,ao_num))
-  bc_mat = 0.d0
+  allocate(ac_mat(ao_num,ao_num,ao_num,ao_num), b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
 
-  do ipoint = 1, n_points_final_grid
-    weight1 = final_weight_at_r_vector(ipoint)
-
-    do j = 1, ao_num
-      do l = 1, ao_num
-        contrib =  u12sq_j1bsq_test(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b_test(l,j,ipoint) 
-        contrib2=grad12_j12_test(l,j,ipoint)
-        do i = 1, ao_num
-          ao_i_r = weight1 * aos_in_r_array(i,ipoint)
-        
-          do k = 1, ao_num
-            ao_ik_r = ao_i_r * aos_in_r_array(k,ipoint)
-
-            ac_mat(k,i,l,j) += ao_ik_r * contrib
-            bc_mat(k,i,l,j) += ao_ik_r * contrib2
-          enddo
-        enddo
+  b_mat = 0.d0
+ !$OMP PARALLEL               &
+ !$OMP DEFAULT (NONE)         &
+ !$OMP PRIVATE (i, k, ipoint) & 
+ !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+ !$OMP DO SCHEDULE (static)
+  do i = 1, ao_num
+    do k = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+        b_mat(ipoint,k,i) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,k)
       enddo
     enddo
   enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
 
+  tmp = 0.d0
+ !$OMP PARALLEL               &
+ !$OMP DEFAULT (NONE)         &
+ !$OMP PRIVATE (j, l, ipoint) & 
+ !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq_test, u12_grad1_u12_j1b_grad1_j1b_test, grad12_j12_test)
+ !$OMP DO SCHEDULE (static)
+  do ipoint = 1, n_points_final_grid
+    do j = 1, ao_num
+      do l = 1, ao_num
+        tmp(l,j,ipoint) = u12sq_j1bsq_test(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b_test(l,j,ipoint) + 0.5d0 * grad12_j12_test(l,j,ipoint)
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  ac_mat = 0.d0
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+            , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+            , 1.d0, ac_mat, ao_num*ao_num)
+  deallocate(tmp, b_mat)
+
+ !$OMP PARALLEL             &
+ !$OMP DEFAULT (NONE)       &
+ !$OMP PRIVATE (i, j, k, l) & 
+ !$OMP SHARED (ac_mat, tc_grad_square_ao_test, ao_num)
+ !$OMP DO SCHEDULE (static)
   do j = 1, ao_num
     do l = 1, ao_num
       do i = 1, ao_num
         do k = 1, ao_num
-          tc_grad_square_ao_test(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) + bc_mat(k,i,l,j)
+          tc_grad_square_ao_test(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
         enddo
       enddo
     enddo
   enddo
-  call wall_time(wall1)
-  print*,'wall time for tc_grad_square_ao_test',wall1 - wall0
+ !$OMP END DO
+ !$OMP END PARALLEL
 
   deallocate(ac_mat)
-  deallocate(bc_mat)
+
+  call wall_time(time1)
+  print*, ' Wall time for tc_grad_square_ao_test = ', time1 - time0
 
 END_PROVIDER 
 
@@ -88,6 +112,7 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq_test, (ao_num, ao_num, n_points_f
 
 END_PROVIDER 
 
+! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao_num, n_points_final_grid) ]
  
@@ -99,8 +124,9 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao
   double precision           :: time0, time1
   double precision, external :: overlap_gauss_r12_ao
 
-  provide int2_u_grad1u_x_j1b2_test
   print*, ' providing u12_grad1_u12_j1b_grad1_j1b_test ...'
+
+  provide int2_u_grad1u_x_j1b2_test
   call wall_time(time0)
 
   do ipoint = 1, n_points_final_grid
@@ -126,9 +152,9 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao
 
         tmp9 = int2_u_grad1u_j1b2_test(i,j,ipoint)
 
-        u12_grad1_u12_j1b_grad1_j1b_test(i,j,ipoint) = tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2_test(1,i,j,ipoint) &
-                                                     + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2_test(2,i,j,ipoint) &
-                                                     + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2_test(3,i,j,ipoint)
+        u12_grad1_u12_j1b_grad1_j1b_test(i,j,ipoint) = tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2_test(i,j,ipoint,1) &
+                                                     + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2_test(i,j,ipoint,2) &
+                                                     + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2_test(i,j,ipoint,3)
       enddo
     enddo
   enddo
@@ -192,3 +218,4 @@ BEGIN_PROVIDER [ double precision, grad12_j12_test, (ao_num, ao_num, n_points_fi
 END_PROVIDER 
 
 ! ---
+

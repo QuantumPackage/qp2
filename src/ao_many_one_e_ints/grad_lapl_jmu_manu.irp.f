@@ -17,7 +17,10 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
   double precision           :: wall0, wall1
   double precision, external :: NAI_pol_mult_erf_ao_with1s
   double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2
-  dsqpi_3_2 = (dacos(-1.d0))**(3/2)
+
+  print*, ' providing v_ij_erf_rk_cst_mu_j1b_test ...'
+
+  dsqpi_3_2 = (dacos(-1.d0))**(1.5d0)
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
 
@@ -38,7 +41,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -46,7 +49,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -86,53 +89,27 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_nu
   END_DOC
 
   implicit none
-  integer          :: i, j, ipoint
-  double precision :: wall0, wall1
-
-  call wall_time(wall0)
-
-  do ipoint = 1, n_points_final_grid
-    do i = 1, ao_num
-      do j = 1, ao_num
-        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,1) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(1,j,i,ipoint)
-        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,2) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(2,j,i,ipoint)
-        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,3) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(3,j,i,ipoint)
-      enddo
-    enddo
-  enddo
-
-  call wall_time(wall1)
-  print*, ' wall time for x_v_ij_erf_rk_cst_mu_j1b_test', wall1 - wall0
-
-END_PROVIDER 
-
-! ---
-
-BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num, ao_num, n_points_final_grid)]
-
-  BEGIN_DOC
-  ! int dr x phi_i(r) phi_j(r) 1s_j1b(r) (erf(mu(R) |r - R|) - 1)/|r - R|
-  END_DOC
-
-  implicit none
   integer          :: i, j, ipoint, i_1s
   double precision :: coef, beta, B_center(3), r(3), ints(3), ints_coulomb(3)
   double precision :: tmp_x, tmp_y, tmp_z
   double precision :: wall0, wall1
   double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b,factor_ij_1s,beta_ij,center_ij_1s
-  dsqpi_3_2 = (dacos(-1.d0))**(3/2)
+
+  print*, ' providing x_v_ij_erf_rk_cst_mu_j1b_test ...'
+
+  dsqpi_3_2 = (dacos(-1.d0))**(1.5d0)
 
   provide expo_erfc_mu_gauss ao_prod_sigma ao_prod_center
   call wall_time(wall0)
 
-  x_v_ij_erf_rk_cst_mu_tmp_j1b_test = 0.d0
+  x_v_ij_erf_rk_cst_mu_j1b_test = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                                        &
  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
- !$OMP          int_j1b, tmp_x, tmp_y, tmp_z,factor_ij_1s,beta_ij,center_ij_1s)                                                  & 
+ !$OMP          int_j1b, tmp_x, tmp_y, tmp_z,factor_ij_1s,beta_ij,center_ij_1s)       & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_comb_thr_b2_size, final_grid_points,&
  !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo, List_comb_thr_b2_cent,  &
- !$OMP          x_v_ij_erf_rk_cst_mu_tmp_j1b_test, mu_erf,ao_abs_comb_b2_j1b,         &
+ !$OMP          x_v_ij_erf_rk_cst_mu_j1b_test, mu_erf,ao_abs_comb_b2_j1b,         &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma)
 ! !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2,expo_erfc_mu_gauss)
  !$OMP DO
@@ -143,7 +120,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-10)cycle
 
         tmp_x = 0.d0
         tmp_y = 0.d0
@@ -153,7 +130,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -164,7 +141,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
 !           call gaussian_product(expo_erfc_mu_gauss,r,     &
 !                ao_prod_sigma(j,i),ao_prod_center(1,j,i),  & 
 !                factor_ij_1s,beta_ij,center_ij_1s)
-!           if(dabs(coef * factor_ij_1s*int_j1b*10.d0 * dsqpi_3_2 * beta_ij**(-3/2)).lt.1.d-10)cycle 
+!           if(dabs(coef * factor_ij_1s*int_j1b*10.d0 * dsqpi_3_2 * beta_ij**(-1.5d0)).lt.1.d-10)cycle 
 !          endif
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
           call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
@@ -174,9 +151,9 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
           tmp_z += coef * (ints(3) - ints_coulomb(3))
         enddo
 
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(1,j,i,ipoint) = tmp_x
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(2,j,i,ipoint) = tmp_y
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(3,j,i,ipoint) = tmp_z
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,1) = tmp_x
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,2) = tmp_y
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,3) = tmp_z
       enddo
     enddo
   enddo
@@ -186,15 +163,15 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(1,j,i,ipoint) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(1,i,j,ipoint)
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(2,j,i,ipoint) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(2,i,j,ipoint)
-        x_v_ij_erf_rk_cst_mu_tmp_j1b_test(3,j,i,ipoint) = x_v_ij_erf_rk_cst_mu_tmp_j1b_test(3,i,j,ipoint)
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,1) = x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,1)
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,2) = x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,2)
+        x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,3) = x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,3)
       enddo
     enddo
   enddo
 
   call wall_time(wall1)
-  print*, ' wall time for x_v_ij_erf_rk_cst_mu_tmp_j1b_test', wall1 - wall0
+  print*, ' wall time for x_v_ij_erf_rk_cst_mu_j1b_test', wall1 - wall0
 
 END_PROVIDER 
 
@@ -218,7 +195,10 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
 
   double precision, external :: overlap_gauss_r12_ao_with1s
   double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b
-  dsqpi_3_2 = (dacos(-1.d0))**(3/2)
+
+  print*, ' providing v_ij_u_cst_mu_j1b_test ...'
+
+  dsqpi_3_2 = (dacos(-1.d0))**(1.5d0)
 
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
@@ -244,7 +224,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -252,7 +232,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -311,7 +291,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
 
   double precision, external :: overlap_gauss_r12_ao_with1s
   double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b
-  dsqpi_3_2 = (dacos(-1.d0))**(3/2)
+  dsqpi_3_2 = (dacos(-1.d0))**(1.5d0)
 
   provide mu_erf final_grid_points j1b_pen
   call wall_time(wall0)
@@ -337,7 +317,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -345,7 +325,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)

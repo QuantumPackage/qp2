@@ -38,7 +38,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     print*, 'MO integrals provided'
     return
   else
-    PROVIDE ao_two_e_integrals_in_map 
+    PROVIDE ao_two_e_integrals_in_map
   endif
 
   print *,  ''
@@ -245,18 +245,16 @@ subroutine add_integrals_to_map(mask_ijkl)
     return
   endif
 
-  double precision               :: accu_bis
-  accu_bis = 0.d0
   call wall_time(wall_1)
 
-  size_buffer = min( (qp_max_mem/(nproc*5)),mo_num*mo_num*mo_num)
+  size_buffer = min(mo_num*mo_num*mo_num,8000000)
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
   !$OMP PARALLEL PRIVATE(l1,k1,j1,i1,i2,i3,i4,i,j,k,l,c, ii1,kmax,   &
       !$OMP  two_e_tmp_0_idx, two_e_tmp_0, two_e_tmp_1,two_e_tmp_2,two_e_tmp_3,&
       !$OMP  buffer_i,buffer_value,n_integrals,wall_2,i0,j0,k0,l0,   &
-      !$OMP  wall_0,thread_num,accu_bis)                             &
+      !$OMP  wall_0,thread_num)                             &
       !$OMP  DEFAULT(NONE)                                           &
       !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,n_l,   &
       !$OMP  mo_coef_transp,                                         &
@@ -434,10 +432,10 @@ subroutine add_integrals_to_map(mask_ijkl)
   !$OMP END DO NOWAIT
   deallocate (two_e_tmp_1,two_e_tmp_2,two_e_tmp_3)
 
-  integer                        :: index_needed
-
-  call insert_into_mo_integrals_map(n_integrals,buffer_i,buffer_value,&
-      real(mo_integrals_threshold,integral_kind))
+  if (n_integrals > 0) then
+    call insert_into_mo_integrals_map(n_integrals,buffer_i,buffer_value,&
+        real(mo_integrals_threshold,integral_kind))
+  endif
   deallocate(buffer_i, buffer_value)
   !$OMP END PARALLEL
   call map_merge(mo_integrals_map)
@@ -527,12 +525,10 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
 
   call wall_time(wall_1)
   call cpu_time(cpu_1)
-  double precision               :: accu_bis
-  accu_bis = 0.d0
   !$OMP PARALLEL PRIVATE(m,l1,k1,j1,i1,i2,i3,i4,i,j,k,l,c, ii1,kmax, &
       !$OMP  two_e_tmp_0_idx, two_e_tmp_0, two_e_tmp_1,two_e_tmp_2,two_e_tmp_3,&
       !$OMP  buffer_i,buffer_value,n_integrals,wall_2,i0,j0,k0,l0,   &
-      !$OMP  wall_0,thread_num,accu_bis)                             &
+      !$OMP  wall_0,thread_num)                             &
       !$OMP  DEFAULT(NONE)                                           &
       !$OMP  SHARED(size_buffer,ao_num,mo_num,n_i,n_j,n_k,       &
       !$OMP  mo_coef_transp,                                         &
@@ -729,8 +725,6 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
   enddo
   !$OMP END DO NOWAIT
   deallocate (two_e_tmp_1,two_e_tmp_2,two_e_tmp_3)
-
-  integer                        :: index_needed
 
   call insert_into_mo_integrals_map(n_integrals,buffer_i,buffer_value,&
       real(mo_integrals_threshold,integral_kind))

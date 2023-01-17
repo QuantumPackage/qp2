@@ -38,6 +38,7 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
   integer :: holetype(mo_num)
   integer :: end_index
   integer :: Nsomo_I
+  integer :: listall(N_int*bit_kind_size), nelall
 
   ! 
   ! 2 2 1 1 0 0 : 1 1 0 0 0 0
@@ -65,9 +66,12 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
 
   ! Since CFGs are sorted wrt to seniority
   ! we don't have to search the full CFG list
-  Isomo = givenI(1,1)
-  Idomo = givenI(1,2)
-  Nsomo_I = POPCNT(Isomo)
+  Nsomo_I = 0
+  do i=1,N_int
+    Isomo = givenI(i,1)
+    Idomo = givenI(i,2)
+    Nsomo_I += POPCNT(Isomo)
+  end do
   end_index = min(N_configuration,cfg_seniority_index(min(Nsomo_I+6,elec_num))-1)
   if(end_index .LT. 0) end_index= N_configuration
   !end_index = N_configuration
@@ -83,17 +87,24 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
      !  idxs_connectedI(nconnectedI)=i
      !  cycle
      !endif
-     Isomo = givenI(1,1)
-     Idomo = givenI(1,2)
-     Jsomo = psi_configuration(1,1,i)
-     Jdomo = psi_configuration(1,2,i)
-     diffSOMO = IEOR(Isomo,Jsomo)
-     ndiffSOMO = POPCNT(diffSOMO)
-     diffDOMO = IEOR(Idomo,Jdomo)
-     xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-     ndiffDOMO = POPCNT(diffDOMO)
-     nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
-     nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
+
+     ndiffSOMO = 0
+     ndiffDOMO = 0
+     nxordiffSOMODOMO = 0
+     do ii=1,N_int
+       Isomo = givenI(ii,1)
+       Idomo = givenI(ii,2)
+       Jsomo = psi_configuration(ii,1,i)
+       Jdomo = psi_configuration(ii,2,i)
+       diffSOMO = IEOR(Isomo,Jsomo)
+       ndiffSOMO += POPCNT(diffSOMO)
+       diffDOMO = IEOR(Idomo,Jdomo)
+       xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
+       ndiffDOMO += POPCNT(diffDOMO)
+       nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
+       nxordiffSOMODOMO += POPCNT(diffSOMO) + POPCNT(diffDOMO)
+     end do
+
      if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
        !-------
        ! MONO |
@@ -144,25 +155,45 @@ subroutine obtain_connected_J_givenI(idxI, givenI, connectedI, idxs_connectedI, 
         ! find out all pq holes possible
         nholes = 0
         ! holes in SOMO
-        Isomo = psi_configuration(1,1,i)
-        Idomo = psi_configuration(1,2,i)
-        do iii = 1,n_act_orb
-          ii = list_act(iii)
-           if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
-              nholes += 1
-              listholes(nholes) = ii
-              holetype(nholes) = 1
-           endif
+        !Isomo = psi_configuration(1,1,i)
+        !Idomo = psi_configuration(1,2,i)
+        !do iii = 1,n_act_orb
+        !  ii = list_act(iii)
+        !   if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
+        !      nholes += 1
+        !      listholes(nholes) = ii
+        !      holetype(nholes) = 1
+        !   endif
+        !end do
+       
+        call bitstring_to_list(psi_configuration(1,1,i),listall,nelall,N_int)
+
+        do iii=1,nelall
+          nholes += 1
+          listholes(nholes) = listall(iii)
+          holetype(nholes) = 1
         end do
+
         ! holes in DOMO
-        do iii = 1,n_act_orb
-          ii = list_act(iii)
-           if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
-              nholes += 1
-              listholes(nholes) = ii
-              holetype(nholes) = 2
-           endif
+        !do iii = 1,n_act_orb
+        !  ii = list_act(iii)
+        !   if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
+        !      nholes += 1
+        !      listholes(nholes) = ii
+        !      holetype(nholes) = 2
+        !   endif
+        !end do
+        
+        call bitstring_to_list(psi_configuration(1,2,i),listall,nelall,N_int)
+
+        do iii=1,nelall
+          if(listall(iii) .gt. n_core_orb)then
+            nholes += 1
+            listholes(nholes) = listall(iii)
+            holetype(nholes) = 2
+          endif
         end do
+
         ntotalconnectedI += max(1,(psi_config_data(i,2)-psi_config_data(i,1)+1)*nholes)
      endif
   end do
@@ -199,6 +230,8 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer*8                                :: Isomo
   integer*8                                :: Jdomo
   integer*8                                :: Jsomo
+  integer(bit_kind)                        :: Jcfg(N_int,2)
+  integer(bit_kind)                        :: Icfg(N_int,2)
   integer*8                                :: IJsomo
   integer*8                                :: diffSOMO
   integer*8                                :: diffDOMO
@@ -209,132 +242,261 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
   integer                        :: iii,ii,i,j,k,l,p,q,nsomoJ,nsomoalpha,starti,endi,extyp,nholes
   integer                        :: listholes(mo_num)
   integer                        :: holetype(mo_num)
-  integer                        :: end_index
-  integer                        :: Nsomo_alpha
+  integer                        :: end_index, ishift
+  integer                        :: Nsomo_alpha, pp,qq, nperm, iint, ipos
   integer*8                      :: MS
+  integer                        :: exc(0:2,2,2), tz, m, n, high, low
+  integer                        :: listall(N_int*bit_kind_size), nelall
+  integer                        :: nconnectedExtradiag, nconnectedDiag
+  integer(bit_kind)              :: hole, particle, tmp
   MS = elec_alpha_num-elec_beta_num
 
+  nconnectedExtradiag=0
+  nconnectedDiag=0
   nconnectedI = 0
   end_index = N_configuration
 
   ! Since CFGs are sorted wrt to seniority
   ! we don't have to search the full CFG list
-  Isomo = Ialpha(1,1)
-  Idomo = Ialpha(1,2)
-  Nsomo_alpha = POPCNT(Isomo)
+  !Isomo = Ialpha(1,1)
+  !Idomo = Ialpha(1,2)
+  !Nsomo_alpha = POPCNT(Isomo)
+  Icfg = Ialpha
+  Nsomo_alpha = 0
+  !print *," Ialpha="
+  do ii=1,N_int
+    Isomo = Ialpha(ii,1)
+    Idomo = Ialpha(ii,2)
+    Nsomo_alpha += POPCNT(Isomo)
+    !print *,Isomo, Idomo, "Nsomo=",Nsomo_alpha
+  end do
   end_index = min(N_configuration,cfg_seniority_index(min(Nsomo_alpha+4,elec_num))-1)
-  if(end_index .LT. 0) end_index= N_configuration
+  if(end_index .LT. 0 .OR. end_index .lt. idxI) end_index= N_configuration
   end_index = N_configuration
 
 
   p = 0
   q = 0
-  if (N_int > 1) stop 'obtain_connected_i_foralpha : N_int > 1'
+  !if (N_int > 1) stop 'obtain_connected_i_foralpha : N_int > 1'
   do i=idxI,end_index
-     Isomo = Ialpha(1,1)
-     Idomo = Ialpha(1,2)
-     Jsomo = psi_configuration(1,1,i)
-     Jdomo = psi_configuration(1,2,i)
      ! Check for Minimal alpha electrons (MS)
-     if(POPCNT(Isomo).lt.MS)then
+     if(Nsomo_alpha .lt. MS)then
        cycle
      endif
-     diffSOMO = IEOR(Isomo,Jsomo)
-     ndiffSOMO = POPCNT(diffSOMO)
-     !if(idxI.eq.1)then
-     !  print *," \t idxI=",i," diffS=",ndiffSOMO," popJs=", POPCNT(Jsomo)," popIs=",POPCNT(Isomo)
+
+     ndiffSOMO = 0
+     ndiffDOMO = 0
+     nxordiffSOMODOMO = 0
+     nsomoJ=0
+     nsomoalpha=0
+     do ii=1,N_int
+       Isomo = Ialpha(ii,1)
+       Idomo = Ialpha(ii,2)
+       Jsomo = psi_configuration(ii,1,i)
+       Jdomo = psi_configuration(ii,2,i)
+       nsomoJ += POPCNT(Jsomo)
+       nsomoalpha += POPCNT(Isomo)
+       diffSOMO = IEOR(Isomo,Jsomo)
+       ndiffSOMO += POPCNT(diffSOMO)
+       diffDOMO = IEOR(Idomo,Jdomo)
+       xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
+       ndiffDOMO += POPCNT(diffDOMO)
+       nxordiffSOMODOMO += POPCNT(xordiffSOMODOMO)
+       nxordiffSOMODOMO += POPCNT(diffSOMO) + POPCNT(diffDOMO)
+     end do
+     !if(idxI.eq.218)then
+     !  print *,"I=",idxI,"Nsomo_alpha=",Nsomo_alpha,"nxordiffSOMODOMO(4)=",nxordiffSOMODOMO, " ndiffSOMO(2)=",ndiffSOMO, " ndiffDOMO=",ndiffDOMO
      !endif
-     diffDOMO = IEOR(Idomo,Jdomo)
-     xordiffSOMODOMO = IEOR(diffSOMO,diffDOMO)
-     ndiffDOMO = POPCNT(diffDOMO)
-     nxordiffSOMODOMO = POPCNT(xordiffSOMODOMO)
-     nxordiffSOMODOMO += ndiffSOMO + ndiffDOMO 
+     !Jcfg = psi_configuration(:,:,i)
+     !print *,"nxordiffSOMODOMO(4)=",nxordiffSOMODOMO, " ndiffSOMO(2)=",ndiffSOMO
+
      if((nxordiffSOMODOMO .EQ. 4) .AND. ndiffSOMO .EQ. 2) then
         select case(ndiffDOMO)
         case (0)
            ! SOMO -> VMO
            !print *,"obt SOMO -> VMO"
            extyp = 3
-           IJsomo = IEOR(Isomo, Jsomo)
-!IRP_IF WITHOUT_TRAILZ
-!           p = (popcnt(ieor( IAND(Isomo,IJsomo) , IAND(Isomo,IJsomo) -1))-1) + 1
-!IRP_ELSE
-           p = TRAILZ(IAND(Isomo,IJsomo)) + 1
-!IRP_ENDIF
-           IJsomo = IBCLR(IJsomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!           q = (popcnt(ieor(IJsomo,IJsomo-1))-1) + 1
-!IRP_ELSE
-           q = TRAILZ(IJsomo) + 1
-!IRP_ENDIF
+           !if(N_int .eq. 1) then
+           !  IJsomo = IEOR(Isomo, Jsomo)
+           !  p = TRAILZ(IAND(Isomo,IJsomo)) + 1
+           !  IJsomo = IBCLR(IJsomo,p-1)
+           !  q = TRAILZ(IJsomo) + 1
+           !  !print *," p=",p," q=",q
+           !  !call get_single_excitation_cfg(Jcfg, Icfg, p, q, N_int)
+           !else
+             ! Find p
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               if(popcnt(IAND(Isomo,IJsomo)) > 0)then
+                 p = TRAILZ(IAND(Isomo,IJsomo)) + 1 + (ii-1) * bit_kind_size
+                 EXIT
+               endif
+             end do
+             ! Find q
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               iint = shiftr(p-1,bit_kind_shift) + 1
+               ipos = p-shiftl((iint-1),bit_kind_shift)
+               if(iint .eq. ii)then
+                 IJsomo = IBCLR(IJsomo,ipos-1)
+               endif
+               if(popcnt(IJsomo) > 0)then
+                 q = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
+                 EXIT
+               endif
+             enddo
+           !endif
+           !assert ( p == pp)
+           !assert ( q == qq)
+           !print *," 1--- p=",p," q=",q
         case (1)
            ! DOMO -> VMO
            ! or
            ! SOMO -> SOMO
-           nsomoJ = POPCNT(Jsomo)
-           nsomoalpha = POPCNT(Isomo)
            if(nsomoJ .GT. nsomoalpha) then
               ! DOMO -> VMO
               !print *,"obt DOMO -> VMO"
               extyp = 2
-!IRP_IF WITHOUT_TRAILZ
-!              p = (popcnt(ieor( IEOR(Idomo,Jdomo),IEOR(Idomo,Jdomo) -1))-1) + 1
-!IRP_ELSE
-              p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-!IRP_ENDIF
-              Isomo = IEOR(Isomo, Jsomo)
-              Isomo = IBCLR(Isomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!              q = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
-!IRP_ELSE
-              q = TRAILZ(Isomo) + 1
-!IRP_ENDIF
+              !if(N_int.eq.1)then
+              !  p = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              !  Isomo = IEOR(Isomo, Jsomo)
+              !  Isomo = IBCLR(Isomo,p-1)
+              !  q = TRAILZ(Isomo) + 1
+              !else
+
+                ! Find p
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Idomo = Ialpha(ii,2)
+                  Jdomo = psi_configuration(ii,2,i)
+                  if(popcnt(IEOR(Idomo,Jdomo)) > 0)then
+                    p = TRAILZ(IEOR(Idomo,Jdomo)) + 1 + (ii-1) * bit_kind_size
+                    EXIT
+                  endif
+                end do
+                ! Find q
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  IJsomo = IEOR(Isomo, Jsomo)
+                  iint = shiftr(p-1,bit_kind_shift) + 1
+                  ipos = p-shiftl((iint-1),bit_kind_shift)
+                  if(iint .eq. ii)then
+                    IJsomo = IBCLR(IJsomo,ipos-1)
+                  endif
+                  if(popcnt(IJsomo) > 0)then
+                    q = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
+                    EXIT
+                  endif
+                end do
+              !endif
+           !assert ( p == pp)
+           !assert ( q == qq)
            else
               ! SOMO -> SOMO
               !print *,"obt SOMO -> SOMO"
               extyp = 1
-!IRP_IF WITHOUT_TRAILZ
-!              q = (popcnt(ieor( IEOR(Idomo,Jdomo), IEOR(Idomo,Jdomo)-1))-1) + 1
-!IRP_ELSE
-              q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
-!IRP_ENDIF
-              Isomo = IEOR(Isomo, Jsomo)
-              Isomo = IBCLR(Isomo,q-1)
-!IRP_IF WITHOUT_TRAILZ
-!              p = (popcnt(ieor(Isomo,Isomo-1))-1) + 1
-!IRP_ELSE
-              p = TRAILZ(Isomo) + 1
-!IRP_ENDIF
-              ! Check for Minimal alpha electrons (MS)
-              !if(POPCNT(Isomo).lt.MS)then
-              !  cycle
+              !if(N_int.eq.1)then
+              !  q = TRAILZ(IEOR(Idomo,Jdomo)) + 1
+              !  Isomo = IEOR(Isomo, Jsomo)
+              !  Isomo = IBCLR(Isomo,q-1)
+              !  p = TRAILZ(Isomo) + 1
+              !  ! Check for Minimal alpha electrons (MS)
+              !  !if(POPCNT(Isomo).lt.MS)then
+              !  !  cycle
+              !  !endif
+              !else
+                ! Find p
+                !print *,"Ialpha somo=",Ialpha(1,1), Ialpha(2,1)," Ialpha domo=",Ialpha(1,2), Ialpha(2,2)
+                !print *,"J somo=",psi_configuration(1,1,i), psi_configuration(2,1,i)," J domo=",psi_configuration(1,2,i),&
+                !psi_configuration(2,2,i)
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  Idomo = Ialpha(ii,2)
+                  Jdomo = psi_configuration(ii,2,i)
+                  if(popcnt(IEOR(Idomo,Jdomo)) > 0)then
+                    q = TRAILZ(IEOR(Idomo,Jdomo)) + 1 + (ii-1) * bit_kind_size
+                    EXIT
+                  endif
+                enddo
+                ! Find q
+                do ii=1,N_int
+                  Isomo = Ialpha(ii,1)
+                  Jsomo = psi_configuration(ii,1,i)
+                  IJsomo = IEOR(Isomo, Jsomo)
+                  iint = shiftr(q-1,bit_kind_shift) + 1
+                  ipos = q-shiftl((iint-1),bit_kind_shift)
+                  if(iint .eq. ii)then
+                    IJsomo = IBCLR(IJsomo,ipos-1)
+                  endif
+                  !print *,"ii=",ii," Isomo=",Isomo
+                  if(popcnt(IJsomo) > 0)then
+                    p = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
+                    EXIT
+                  endif
+                enddo
               !endif
-           end if
+           !assert ( p == pp)
+           !assert ( q == qq)
+           endif
+           !print *," 2--- p=",p," q=",q
         case (2)
            ! DOMO -> SOMO
            !print *,"obt DOMO -> SOMO"
            extyp = 4
-           IJsomo = IEOR(Isomo, Jsomo)
-!IRP_IF WITHOUT_TRAILZ
-!           p = (popcnt(ieor( IAND(Jsomo,IJsomo), IAND(Jsomo,IJsomo)-1))-1) + 1
-!IRP_ELSE
-           p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
-!IRP_ENDIF
-           IJsomo = IBCLR(IJsomo,p-1)
-!IRP_IF WITHOUT_TRAILZ
-!           q = (popcnt(ieor( IJsomo , IJsomo -1))-1) + 1
-!IRP_ELSE
-           q = TRAILZ(IJsomo) + 1
-!IRP_ENDIF
+           !if(N_int.eq.1)then
+           !  IJsomo = IEOR(Isomo, Jsomo)
+           !  p = TRAILZ(IAND(Jsomo,IJsomo)) + 1
+           !  IJsomo = IBCLR(IJsomo,p-1)
+           !  q = TRAILZ(IJsomo) + 1
+           !else
+             ! Find p
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               Idomo = Ialpha(ii,2)
+               Jdomo = psi_configuration(ii,2,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               if(popcnt(IAND(Jsomo,IJsomo)) > 0)then
+                 p = TRAILZ(IAND(Jsomo,IJsomo)) + 1 + (ii-1) * bit_kind_size
+                 EXIT
+               endif
+             enddo
+             ! Find q
+             do ii=1,N_int
+               Isomo = Ialpha(ii,1)
+               Jsomo = psi_configuration(ii,1,i)
+               IJsomo = IEOR(Isomo, Jsomo)
+               iint = shiftr(p-1,bit_kind_shift) + 1
+               ipos = p-shiftl((iint-1),bit_kind_shift)
+               if(iint .eq. ii)then
+                 IJsomo = IBCLR(IJsomo,ipos-1)
+               endif
+               if(popcnt(IJsomo) > 0)then
+                 q = TRAILZ(IJsomo) + 1 + (ii-1) * bit_kind_size
+                 EXIT
+               endif
+             enddo
+           !endif
+           !assert ( p == pp)
+           !assert ( q == qq)
+           !print *," 3--- p=",p," q=",q
         case default
            print *,"something went wront in get connectedI"
         end select
         starti = psi_config_data(i,1)
         endi   = psi_config_data(i,2)
+        nconnectedExtradiag+=1
         nconnectedI += 1
-        do k=1,N_int
-          connectedI(k,1,nconnectedI) = psi_configuration(k,1,i)
-          connectedI(k,2,nconnectedI) = psi_configuration(k,2,i)
+        do ii=1,N_int
+          connectedI(ii,1,nconnectedI) = psi_configuration(ii,1,i)
+          connectedI(ii,2,nconnectedI) = psi_configuration(ii,2,i)
         enddo
         idxs_connectedI(nconnectedI)=starti
         excitationIds(1,nconnectedI)=p
@@ -343,27 +505,50 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
         diagfactors(nconnectedI) = 1.0d0
      else if((ndiffSOMO + ndiffDOMO) .EQ. 0) then
         ! find out all pq holes possible
+        !print *,"I = ",i
+        !print *,"I somo= ",psi_configuration(1,1,i), " domo=", psi_configuration(1,2,i)
+        !print *,"alp somo= ",Ialpha(1,1), " domo=", Ialpha(1,2)
         nholes = 0
         ! holes in SOMO
-        Isomo = psi_configuration(1,1,i)
-        Idomo = psi_configuration(1,2,i)
-        do iii = 1,n_act_orb
-          ii = list_act(iii)
-           if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
-              nholes += 1
-              listholes(nholes) = ii
-              holetype(nholes) = 1
-           endif
+        !Isomo = psi_configuration(1,1,i)
+        !Idomo = psi_configuration(1,2,i)
+        !do iii = 1,n_act_orb
+        !  ii = list_act(iii)
+        !   if(POPCNT(IAND(Isomo,IBSET(0_8,ii-1))) .EQ. 1) then
+        !      nholes += 1
+        !      listholes(nholes) = ii
+        !      holetype(nholes) = 1
+        !   endif
+        !end do
+        call bitstring_to_list(psi_configuration(1,1,i),listall,nelall,N_int)
+
+        do iii=1,nelall
+          nholes += 1
+          listholes(nholes) = listall(iii)
+          holetype(nholes) = 1
         end do
+
         ! holes in DOMO
-        do iii = 1,n_act_orb
-          ii = list_act(iii)
-           if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
-              nholes += 1
-              listholes(nholes) = ii
-              holetype(nholes) = 2
-           endif
+        !do iii = 1,n_act_orb
+        !  ii = list_act(iii)
+        !   if(POPCNT(IAND(Idomo,IBSET(0_8,ii-1))) .EQ. 1) then
+        !      nholes += 1
+        !      listholes(nholes) = ii
+        !      holetype(nholes) = 2
+        !   endif
+        !end do
+        nelall=0
+        listall=0
+        call bitstring_to_list(psi_configuration(1,2,i),listall,nelall,N_int)
+
+        do iii=1,nelall
+          if(listall(iii) .gt. n_core_orb)then
+            nholes += 1
+            listholes(nholes) = listall(iii)
+            holetype(nholes) = 2
+          endif
         end do
+
 
         do k=1,nholes
            p = listholes(k)
@@ -372,6 +557,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            if(holetype(k) .EQ. 1) then
               starti = psi_config_data(i,1)
               endi   = psi_config_data(i,2)
+              nconnectedDiag+=1
               nconnectedI += 1
               connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
               idxs_connectedI(nconnectedI)=starti
@@ -382,6 +568,7 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
            else
               starti = psi_config_data(i,1)
               endi   = psi_config_data(i,2)
+              nconnectedDiag+=1
               nconnectedI += 1
               connectedI(:,:,nconnectedI) = psi_configuration(:,:,i)
               idxs_connectedI(nconnectedI)=starti
@@ -390,8 +577,10 @@ subroutine obtain_connected_I_foralpha(idxI, Ialpha, connectedI, idxs_connectedI
               excitationTypes(nconnectedI) = extyp
               diagfactors(nconnectedI) = 2.0d0
            endif
+           !print *,excitationIds(1,nconnectedI), excitationIds(2,nconnectedI)
         enddo
      endif
   end do
+  !print *,"nconnectedExtradiag=",nconnectedExtradiag," nconnectedDiad=",nconnectedDiag
 
 end subroutine obtain_connected_I_foralpha

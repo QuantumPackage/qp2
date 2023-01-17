@@ -13,13 +13,9 @@
   integer                       :: n_real_tc 
   integer                       :: i, j, k, l
   double precision              :: accu_d, accu_nd, accu_tmp
-  double precision              :: thr_d, thr_nd
   double precision              :: norm
   double precision, allocatable :: eigval_right_tmp(:)
   double precision, allocatable :: F_tmp(:,:)
-
-  thr_d  = 1d-6
-  thr_nd = 1d-6
 
   allocate( eigval_right_tmp(mo_num), F_tmp(mo_num,mo_num) )
 
@@ -38,13 +34,13 @@
     F_tmp(i,i) += level_shift_tcscf
   enddo
 
-  call non_hrmt_bieig( mo_num, F_tmp, thr_d, thr_nd           &
-                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
+  call non_hrmt_bieig( mo_num, F_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag &
+                     , fock_tc_leigvec_mo, fock_tc_reigvec_mo                       & 
                      , n_real_tc, eigval_right_tmp )
 
   !if(max_ov_tc_scf)then
-  ! call non_hrmt_fock_mat( mo_num, F_tmp, thr_d, thr_nd        &
-  !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
+  ! call non_hrmt_fock_mat( mo_num, F_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag &
+  !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo                          & 
   !                    , n_real_tc, eigval_right_tmp )
   !else 
   ! call non_hrmt_diag_split_degen_bi_orthog( mo_num, F_tmp     &
@@ -88,16 +84,16 @@
       else
         accu_tmp = overlap_fock_tc_eigvec_mo(k,i)
         accu_nd += accu_tmp * accu_tmp
-        if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thr_nd)then
+        if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thresh_biorthog_nondiag)then
          print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
         endif
       endif
     enddo 
   enddo
   accu_nd = dsqrt(accu_nd) / accu_d
-  if(accu_nd .gt. thr_nd) then
+  if(accu_nd .gt. thresh_biorthog_nondiag) then
     print *, ' bi-orthog failed'
-    print *, ' accu_nd MO = ', accu_nd, thr_nd
+    print *, ' accu_nd MO = ', accu_nd, thresh_biorthog_nondiag
     print *, ' overlap_fock_tc_eigvec_mo = '
     do i = 1, mo_num
       write(*,'(100(F16.10,X))') overlap_fock_tc_eigvec_mo(i,:)
@@ -107,14 +103,14 @@
 
   ! ---
 
-  if(dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thr_d) then
+  if(dabs(accu_d - dble(mo_num))/dble(mo_num) .gt. thresh_biorthog_diag) then
 
     print *, ' mo_num     = ', mo_num 
-    print *, ' accu_d  MO = ', accu_d, thr_d
+    print *, ' accu_d  MO = ', accu_d, thresh_biorthog_diag
     print *, ' normalizing vectors ...'
     do i = 1, mo_num
       norm = dsqrt(dabs(overlap_fock_tc_eigvec_mo(i,i)))
-      if(norm .gt. thr_d) then
+      if(norm .gt. thresh_biorthog_diag) then
         do k = 1, mo_num
           fock_tc_reigvec_mo(k,i) *= 1.d0/norm
           fock_tc_leigvec_mo(k,i) *= 1.d0/norm
@@ -137,16 +133,16 @@
         else
           accu_tmp = overlap_fock_tc_eigvec_mo(k,i)
           accu_nd += accu_tmp * accu_tmp
-          if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thr_nd)then
+          if(dabs(overlap_fock_tc_eigvec_mo(k,i)) .gt. thresh_biorthog_nondiag)then
            print *, 'k,i', k, i, overlap_fock_tc_eigvec_mo(k,i)
           endif
         endif
       enddo 
     enddo
     accu_nd = dsqrt(accu_nd) / accu_d
-    if(accu_nd .gt. thr_nd) then
+    if(accu_nd .gt. thresh_biorthog_diag) then
       print *, ' bi-orthog failed'
-      print *, ' accu_nd MO = ', accu_nd, thr_nd
+      print *, ' accu_nd MO = ', accu_nd, thresh_biorthog_nondiag
       print *, ' overlap_fock_tc_eigvec_mo = '
       do i = 1, mo_num
         write(*,'(100(F16.10,X))') overlap_fock_tc_eigvec_mo(i,:)
@@ -177,6 +173,7 @@ END_PROVIDER
   double precision              :: accu, accu_d
   double precision, allocatable :: tmp(:,:)
 
+  PROVIDE mo_l_coef mo_r_coef
 
 !  ! MO_R x R
    call dgemm( 'N', 'N', ao_num, mo_num, mo_num, 1.d0          &

@@ -63,15 +63,14 @@ END_PROVIDER
   ! Coefficients including the |AO| normalization
   END_DOC
 
-  do i=1,ao_num
-    l = ao_shell(i)
-    ao_coef_normalized(i,:) = shell_coef(l,:) * shell_normalization_factor(l)
-  end do
 
   double precision               :: norm,overlap_x,overlap_y,overlap_z,C_A(3), c
-  integer                        :: l, powA(3), nz
+  integer                        :: l, powA(3)
+  integer, parameter             :: nz=100
   integer                        :: i,j,k
-  nz=100
+
+   ao_coef_normalized(:,:) = ao_coef(:,:)
+
   C_A = 0.d0
 
   do i=1,ao_num
@@ -80,7 +79,7 @@ END_PROVIDER
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
 
-    ! Normalization of the primitives
+    ! GAMESS-type normalization of the primitives
     if (primitives_normalized) then
       do j=1,ao_prim_num(i)
         call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,j), &
@@ -91,6 +90,7 @@ END_PROVIDER
     ! Normalization of the contracted basis functions
     if (ao_normalized) then
       norm = 0.d0
+      l = ao_shell(i)
       do j=1,ao_prim_num(i)
         do k=1,ao_prim_num(i)
           call overlap_gaussian_xyz(C_A,C_A,ao_expo(i,j),ao_expo(i,k),powA,powA,overlap_x,overlap_y,overlap_z,c,nz)
@@ -98,6 +98,7 @@ END_PROVIDER
         enddo
       enddo
       ao_coef_normalization_factor(i) = 1.d0/dsqrt(norm)
+      ao_coef_normalized(i,:) *= ao_coef_normalization_factor(i)
     else
       ao_coef_normalization_factor(i) = 1.d0
     endif

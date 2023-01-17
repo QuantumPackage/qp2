@@ -1136,7 +1136,6 @@ subroutine ortho_svd(A,LDA,m,n)
 
 end
 
-! QR to orthonormalize CSFs does not work :-(
 !subroutine ortho_qr_withB(A,LDA,B,m,n)
 !  implicit none
 !  BEGIN_DOC
@@ -1223,7 +1222,7 @@ end
 !
 !  !deallocate(WORK,TAU)
 !end
-
+!
 !subroutine ortho_qr_csf(A, LDA, B, m, n) bind(C, name="ortho_qr_csf")
 !  use iso_c_binding
 !  integer(c_int32_t), value      :: LDA
@@ -1233,6 +1232,7 @@ end
 !  integer(c_int16_t)             :: B(LDA,n)
 !  call ortho_qr_withB(A,LDA,B,m,n)
 !end subroutine ortho_qr_csf
+
 
 subroutine ortho_qr(A,LDA,m,n)
   implicit none
@@ -1697,7 +1697,7 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   ! TODO:  Costs O(n^4), but can be improved to (2 n^2 * log(n)):
   ! - copy all values in a 1D array
   ! - sort 1D array
-  ! - average nearby elements 
+  ! - average nearby elements
   ! - for all elements, find matching value in the sorted 1D array
 
   allocate(done(m,n))
@@ -1800,7 +1800,7 @@ end
 !       A_tmp(i,k) = A(i,k)
 !     enddo
 !   enddo
-! 
+!
 !   ! Find optimal size for temp arrays
 !   allocate(work(1))
 !   lwork = -1
@@ -1836,7 +1836,7 @@ end
 !   endif
 !
 !   deallocate(A_tmp,work)
-! 
+!
 !   !do j=1, m
 !   !  do i=1, LDU
 !   !    if (dabs(U(i,j)) < 1.d-14)  U(i,j) = 0.d0
@@ -1847,7 +1847,7 @@ end
 !   !    if (dabs(Vt(i,j)) < 1.d-14) Vt(i,j) = 0.d0
 !   !  enddo
 !   !enddo
-! 
+!
 !end
 !
 
@@ -1877,8 +1877,8 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
     enddo
   enddo
 
-  JOBVL  = "N" ! computes the left  eigenvectors 
-  JOBVR  = "V" ! computes the right eigenvectors 
+  JOBVL  = "N" ! computes the left  eigenvectors
+  JOBVR  = "V" ! computes the right eigenvectors
   BALANC = "B" ! Diagonal scaling and Permutation for optimization
   SENSE  = "V" ! Determines which reciprocal condition numbers are computed
   lda  = n
@@ -1888,10 +1888,10 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
   allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
 
   LWORK = -1 ! to ask for the optimal size of WORK
-  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS 
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS
              , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
-             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES 
-             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS 
+             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES
+             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS
              , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
              , WORK, LWORK, IWORK, INFO )
 
@@ -1900,7 +1900,7 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
     stop
   endif
 
-  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK 
+  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK
   deallocate(WORK)
   allocate(WORK(LWORK))
   call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
@@ -1981,6 +1981,8 @@ subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
 end subroutine diag_nonsym_right
 
 ! ---
+
+! Taken from GammCor thanks to Michal Hapka :-)
 
 
 subroutine pivoted_cholesky( A, rank, tol, ndim, U)
