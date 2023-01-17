@@ -126,6 +126,8 @@ subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
       return
 
     case(0)
+      ! Avoid uninitialized phase
+      phase = 1d0 
       return
 
   end select
