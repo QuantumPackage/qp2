@@ -260,13 +260,9 @@ subroutine fix_right_to_one()
   integer                       :: i, j, m, n, mm, tot_deg
   double precision              :: accu_d, accu_nd
   double precision              :: de_thr, ei, ej, de
-  double precision              :: thr_d, thr_nd
   integer,          allocatable :: deg_num(:)
   double precision, allocatable :: R0(:,:), L0(:,:), W(:,:), e0(:)
   double precision, allocatable :: R(:,:), L(:,:), S(:,:), Stmp(:,:), tmp(:,:)
-
-  thr_d  = 1d-7
-  thr_nd = 1d-7
 
   n = ao_num
   m = mo_num
@@ -340,7 +336,7 @@ subroutine fix_right_to_one()
       ! ---
 
       call impose_weighted_orthog_svd(n, mm, W, R)
-      call impose_weighted_biorthog_qr(n, mm, thr_d, thr_nd, R, W, L)
+      call impose_weighted_biorthog_qr(n, mm, thresh_biorthog_diag, thresh_biorthog_nondiag, R, W, L)
 
       ! ---
 
@@ -353,7 +349,7 @@ subroutine fix_right_to_one()
     endif
   enddo
 
-  call check_weighted_biorthog_binormalize(n, m, L0, W, R0, thr_d, thr_nd, .true.)
+  call check_weighted_biorthog_binormalize(n, m, L0, W, R0, thresh_biorthog_diag, thresh_biorthog_nondiag, .true.)
 
   deallocate(W, deg_num)
 

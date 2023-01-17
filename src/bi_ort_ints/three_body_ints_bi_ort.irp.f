@@ -15,7 +15,7 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
  character*(128)  :: name_file 
 
   three_body_ints_bi_ort = 0.d0
-  print*,'Providing the three_body_ints_bi_ort ...'
+  print *, ' Providing the three_body_ints_bi_ort ...'
   call wall_time(wall0)
   name_file = 'six_index_tensor'
 
@@ -71,7 +71,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL ORBITALS 
+  ! < n l k | -L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS 
   !
   END_DOC
 
@@ -104,12 +104,11 @@ end subroutine give_integrals_3_body_bi_ort
 
 ! ---
 
-
 subroutine give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL ORBITALS 
+  ! < n l k | -L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS 
   !
   END_DOC
 
@@ -170,3 +169,39 @@ end subroutine give_integrals_3_body_bi_ort_old
 
 ! ---
 
+subroutine give_integrals_3_body_bi_ort_ao(n, l, k, m, j, i, integral)
+
+  BEGIN_DOC
+  !
+  ! < n l k | -L | m j i > with a BI-ORTHONORMAL ATOMIC ORBITALS 
+  !
+  END_DOC
+
+  implicit none
+  integer,          intent(in)  :: n, l, k, m, j, i
+  double precision, intent(out) :: integral
+  integer                       :: ipoint
+  double precision              :: weight
+
+  integral = 0.d0
+  do ipoint = 1, n_points_final_grid
+    weight = final_weight_at_r_vector(ipoint)                                                                          
+
+    integral += weight * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,i) & 
+              * ( int2_grad1_u12_ao_t(ipoint,1,n,m) * int2_grad1_u12_ao_t(ipoint,1,l,j)    &
+                + int2_grad1_u12_ao_t(ipoint,2,n,m) * int2_grad1_u12_ao_t(ipoint,2,l,j)    &
+                + int2_grad1_u12_ao_t(ipoint,3,n,m) * int2_grad1_u12_ao_t(ipoint,3,l,j) )
+    integral += weight * aos_in_r_array_transp(ipoint,l) * aos_in_r_array_transp(ipoint,j) & 
+              * ( int2_grad1_u12_ao_t(ipoint,1,n,m) * int2_grad1_u12_ao_t(ipoint,1,k,i)    &
+                + int2_grad1_u12_ao_t(ipoint,2,n,m) * int2_grad1_u12_ao_t(ipoint,2,k,i)    &
+                + int2_grad1_u12_ao_t(ipoint,3,n,m) * int2_grad1_u12_ao_t(ipoint,3,k,i) )
+    integral += weight * aos_in_r_array_transp(ipoint,n) * aos_in_r_array_transp(ipoint,m) &
+              * ( int2_grad1_u12_ao_t(ipoint,1,l,j) * int2_grad1_u12_ao_t(ipoint,1,k,i)    &
+                + int2_grad1_u12_ao_t(ipoint,2,l,j) * int2_grad1_u12_ao_t(ipoint,2,k,i)    &
+                + int2_grad1_u12_ao_t(ipoint,3,l,j) * int2_grad1_u12_ao_t(ipoint,3,k,i) )
+
+  enddo
+
+end subroutine give_integrals_3_body_bi_ort_ao
+
+! ---
