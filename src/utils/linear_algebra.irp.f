@@ -1704,7 +1704,7 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   !$OMP SHARED(A,m,n,sze,copy_sign,copy,key,ii,jj) &
   !$OMP PRIVATE(i,j,k) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO COLLAPSE(2)
+  !$OMP DO
   do j = 1, n
     do i = 1, m
       k = i+(j-1)*m
