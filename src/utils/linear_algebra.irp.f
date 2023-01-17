@@ -1835,13 +1835,21 @@ subroutine restore_symmetry_fast(m,n,A,LDA,thresh)
   ! Sort
   call dsort(copy,key,sze)
 
+  !TODO 
+  ! Parallelization with OMP
+
+  ! Jump all the elements below thresh
+  i = 1 
+  do while (copy(i) <= thresh) 
+    i = i + 1
+  enddo
+
   ! Symmetrize
-  i = 1
   do while(i < sze)
     pi = i
     pf = i
-    val = copy(i)
-    do while (dabs(val - copy(pf+1)) < thresh2)
+    val = 1d0/copy(i)
+    do while (dabs(val * copy(pf+1) - 1d0) < thresh2)
       pf = pf + 1
       ! if pf == sze, copy(pf+1) will not be valid
       if (pf == sze) then
