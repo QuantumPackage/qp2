@@ -43,6 +43,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (3, ao_num, ao_num, n
   
       do j = 1, ao_num
         do i = 1, ao_num
+!         if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
 
           tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint)
           tmp2 = v_ij_u_cst_mu_j1b_test(i,j,ipoint)

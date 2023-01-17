@@ -38,7 +38,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -46,7 +46,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b_test, (ao_num, ao_num,
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -143,7 +143,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-10)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
 
         tmp_x = 0.d0
         tmp_y = 0.d0
@@ -153,7 +153,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_tmp_j1b_test, (3, ao_num
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -244,7 +244,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -252,7 +252,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
@@ -337,7 +337,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
 
     do i = 1, ao_num
       do j = i, ao_num
-        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
+        if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-12)cycle
 
         tmp = 0.d0
         do i_1s = 1, List_comb_thr_b2_size(j,i)
@@ -345,7 +345,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
-          if(dabs(coef)*dabs(int_j1b).lt.1.d-10)cycle
+          if(dabs(coef)*dabs(int_j1b).lt.1.d-14)cycle
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
