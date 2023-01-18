@@ -1735,6 +1735,7 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
 !  enddo
 
   ! Symmetrize
+  i = 1
   do while( (i < sze).and.(-copy(i) > thresh) )
     pi = i
     pf = i
