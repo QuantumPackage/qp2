@@ -2,6 +2,11 @@
 import os
 import sys
 
+# First argument is the EZFIO file
+# It reads a file EZFIO_point_charges.xyz written in this way:
+# charge x y z (Angstrom)
+# for all charges
+
 
 def zip_in_ezfio(ezfio,tmp):
   tmpzip=tmp+".gz"
@@ -22,9 +27,10 @@ EZFIO=EZFIO.replace("/", "")
 print(EZFIO)
 
 # Reading the point charges and convert the Angstrom geometry in Bohr for QP
-f = open('point_charges.xyz','r')
+f = open(EZFIO+'_point_charges.xyz','r')
 lines = f.readlines()
-convert_angs_to_bohr=1.88973
+convert_angs_to_bohr=1.8897259885789233
+
 n_charges=0
 coord_x=[]
 coord_y=[]

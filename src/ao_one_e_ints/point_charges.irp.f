@@ -204,7 +204,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_pt_chrg, (ao_num,ao_num)]
           !$OMP DEFAULT (NONE)                                         &
           !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
           !$OMP          num_A,num_B,Z,c,c1,n_pt_in)                      &
-          !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,pts_charge_coord,ao_coef_normalized_ordered_transp,&
+          !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,pts_charge_coord,ao_coef_normalized_ordered_transp,nucl_coord,&
           !$OMP         n_pt_max_integrals,ao_integrals_pt_chrg,n_pts_charge,pts_charge_z)
 
       n_pt_in = n_pt_max_integrals
@@ -214,13 +214,13 @@ BEGIN_PROVIDER [ double precision, ao_integrals_pt_chrg, (ao_num,ao_num)]
       do j = 1, ao_num
         num_A = ao_nucl(j)
         power_A(1:3)= ao_power(j,1:3)
-        A_center(1:3) = pts_charge_coord(num_A,1:3)
+        A_center(1:3) = nucl_coord(num_A,1:3)
 
         do i = 1, ao_num
 
           num_B = ao_nucl(i)
           power_B(1:3)= ao_power(i,1:3)
-          B_center(1:3) = pts_charge_coord(num_B,1:3)
+          B_center(1:3) = nucl_coord(num_B,1:3)
 
           do l=1,ao_prim_num(j)
             alpha = ao_expo_ordered_transp(l,j)
@@ -240,7 +240,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_pt_chrg, (ao_num,ao_num)]
                 c1 = NAI_pol_mult( A_center, B_center, power_A, power_B &
                                  , alpha, beta, C_center, n_pt_in )
 
-                c = c - Z * c1
+                c = c + Z * c1
 
               enddo
               ao_integrals_pt_chrg(i,j) = ao_integrals_pt_chrg(i,j)  &
