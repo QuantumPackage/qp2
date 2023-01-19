@@ -515,4 +515,3 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2_test, (ao_num, ao_num, n_p
 END_PROVIDER
 
 ! ---
-

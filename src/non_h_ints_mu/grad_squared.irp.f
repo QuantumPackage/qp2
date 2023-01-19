@@ -300,6 +300,7 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
 END_PROVIDER 
 
 ! ---
+! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num, n_points_final_grid) ]
  
