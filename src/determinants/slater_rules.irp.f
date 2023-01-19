@@ -1790,12 +1790,12 @@ double precision function diag_H_mat_elem(det_in,Nint)
   integer                        :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
-  ASSERT (tmp(1) == nexc(1))
-  ASSERT (tmp(2) == nexc(2))
+  ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta 
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(hole, occ_hole, tmp, Nint)
-  ASSERT (tmp(1) == nexc(1))
-  ASSERT (tmp(2) == nexc(2))
+  ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
 
   det_tmp = ref_bitmask
   do ispin=1,2

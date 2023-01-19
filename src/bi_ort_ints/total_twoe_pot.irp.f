@@ -199,3 +199,29 @@ END_PROVIDER
 
 ! ---
 
+
+ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj, (mo_num,mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_exchange, (mo_num,mo_num) ]
+&BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj_anti, (mo_num,mo_num) ]
+  implicit none
+  BEGIN_DOC
+  ! mo_bi_ortho_tc_two_e_jj(i,j) = J_ij = <ji|W-K|ji>
+  ! mo_bi_ortho_tc_two_e_jj_exchange(i,j) = K_ij = <ij|W-K|ji>
+  ! mo_bi_ortho_tc_two_e_jj_anti(i,j) = J_ij - K_ij
+  END_DOC
+
+  integer                        :: i,j
+  double precision               :: get_two_e_integral
+
+  mo_bi_ortho_tc_two_e_jj = 0.d0
+  mo_bi_ortho_tc_two_e_jj_exchange = 0.d0
+
+  do i=1,mo_num
+    do j=1,mo_num
+      mo_bi_ortho_tc_two_e_jj(i,j) = mo_bi_ortho_tc_two_e(j,i,j,i)
+      mo_bi_ortho_tc_two_e_jj_exchange(i,j) = mo_bi_ortho_tc_two_e(i,j,j,i)
+      mo_bi_ortho_tc_two_e_jj_anti(i,j) = mo_bi_ortho_tc_two_e_jj(i,j) - mo_bi_ortho_tc_two_e_jj_exchange(i,j)
+    enddo
+  enddo
+
+END_PROVIDER
