@@ -55,6 +55,9 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   enddo
 
   if (nexc(1)+nexc(2) == 0) then
+    hmono = ref_tc_energy_1e
+    htwoe = ref_tc_energy_2e
+    hthree= ref_tc_energy_3e
     htot = ref_tc_energy_tot
     return
   endif
@@ -75,7 +78,6 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   hmono = ref_tc_energy_1e
   htwoe = ref_tc_energy_2e 
   hthree= ref_tc_energy_3e
-
   do ispin=1,2
     na = elec_num_tab(ispin)
     nb = elec_num_tab(iand(ispin,1)+1)
@@ -110,7 +112,9 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
 
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
+  integer                        :: k,l,i,jj,mm,j,m
+  double precision :: three_e_diag_parrallel_spin, direct_int, exchange_int
+  
 
   if (iorb < 1) then
     print *,  irp_here, ': iorb < 1'
@@ -151,6 +155,39 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   do i=1,nb
     htwoe = htwoe + mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
+
+  if(three_body_h_tc)then
+   !!!!! 3-e part 
+   !! same-spin/same-spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    do m = j+1, na
+     mm = occ(m,ispin)
+     hthree += three_e_diag_parrallel_spin(mm,jj,iorb)
+    enddo
+   enddo
+   !! same-spin/oposite-spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    do m = 1, nb
+     mm = occ(m,other_spin)
+     direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+     exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+     hthree += direct_int - exchange_int
+    enddo
+   enddo
+   !! oposite-spin/opposite-spin
+    do j = 1, nb
+     jj = occ(j,other_spin) 
+     do m = j+1, nb 
+      mm = occ(m,other_spin) 
+      direct_int = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      hthree += direct_int - exchange_int
+     enddo
+    enddo
+  endif
+
   na = na+1
 end
 
@@ -172,10 +209,11 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   integer, intent(inout)         :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hmono,htwoe,hthree
-
+  
+  double precision  :: direct_int, exchange_int, three_e_diag_parrallel_spin
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
-  integer                        :: k,l,i
+  integer                        :: k,l,i,jj,mm,j,m
   integer                        :: tmp(2)
 
   ASSERT (iorb > 0)
@@ -204,6 +242,38 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   do i=1,nb
     htwoe= htwoe- mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
+
+  if(three_body_h_tc)then
+   !!!!! 3-e part 
+   !! same-spin/same-spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    do m = j+1, na
+     mm = occ(m,ispin)
+     hthree -= three_e_diag_parrallel_spin(mm,jj,iorb)
+    enddo
+   enddo
+   !! same-spin/oposite-spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    do m = 1, nb
+     mm = occ(m,other_spin)
+     direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+     exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+     hthree -= (direct_int - exchange_int)
+    enddo
+   enddo
+   !! oposite-spin/opposite-spin
+    do j = 1, nb
+     jj = occ(j,other_spin) 
+     do m = j+1, nb 
+      mm = occ(m,other_spin) 
+      direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+      hthree -= (direct_int - exchange_int)
+     enddo
+    enddo
+  endif
 
 end
 
