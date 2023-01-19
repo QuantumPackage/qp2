@@ -1,6 +1,6 @@
 
 
-subroutine  single_htilde_mu_mat_fock_bi_ortho (Nint, key_j, key_i, hmono, htwoe, htot)
+subroutine  single_htilde_mu_mat_fock_bi_ortho (Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
   !!
@@ -14,7 +14,7 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho (Nint, key_j, key_i, hmono, htwoe
   implicit none
   integer,           intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
-  double precision, intent(out) :: hmono, htwoe, htot
+  double precision, intent(out) :: hmono, htwoe, hthree, htot
   integer                       :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
   integer                       :: degree,exc(0:2,2,2)
@@ -27,108 +27,20 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho (Nint, key_j, key_i, hmono, htwoe
   other_spin(1) = 2
   other_spin(2) = 1
 
-  hmono = 0.d0
-  htwoe= 0.d0
-  htot = 0.d0
+  hmono  = 0.d0
+  htwoe  = 0.d0
+  hthree = 0.d0
+  htot   = 0.d0
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.ne.1)then
    return
   endif
-   call bitstring_to_list_ab(key_i, occ, Ne, Nint)
+  call bitstring_to_list_ab(key_i, occ, Ne, Nint)
 
   call get_single_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc,1,h1,p1,h2,p2,s1,s2)
   call get_single_excitation_from_fock_tc(key_i,key_j,h1,p1,s1,phase,hmono,htwoe,hthree,htot)
 end
-
- BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals, (mo_num,mo_num, mo_num)]
-&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals,(mo_num,mo_num, mo_num)]
- implicit none
- BEGIN_DOC
- ! tc_2e_3idx_coulomb_integrals(j,k,i)  = <jk|ji> 
- !
- ! tc_2e_3idx_exchange_integrals(j,k,i) = <kj|ji> 
- END_DOC
- integer :: i,j,k,l
- double precision :: get_two_e_integral
- double precision :: integral
-
- do k = 1, mo_num
-  do i = 1, mo_num
-   do j = 1, mo_num
-     tc_2e_3idx_coulomb_integrals(j, k,i) = mo_bi_ortho_tc_two_e(j ,k ,j ,i ) 
-     tc_2e_3idx_exchange_integrals(j,k,i) = mo_bi_ortho_tc_two_e(k ,j ,j ,i ) 
-   enddo
-  enddo
- enddo
-
-END_PROVIDER
-
-
-BEGIN_PROVIDER [double precision, fock_op_2_e_tc_closed_shell, (mo_num, mo_num) ]
- implicit none
- BEGIN_DOC
-! Closed-shell part of the Fock operator for the TC operator
- END_DOC
- integer :: h0,p0,h,p,k0,k,i
- integer :: n_occ_ab(2)
- integer :: occ(N_int*bit_kind_size,2)
- integer :: n_occ_ab_virt(2)
- integer :: occ_virt(N_int*bit_kind_size,2)
- integer(bit_kind) :: key_test(N_int)
- integer(bit_kind) :: key_virt(N_int,2)
-
- call bitstring_to_list_ab(ref_closed_shell_bitmask, occ, n_occ_ab, N_int)
- do i = 1, N_int
-  key_virt(i,1) = full_ijkl_bitmask(i)
-  key_virt(i,2) = full_ijkl_bitmask(i)
-  key_virt(i,1) = xor(key_virt(i,1),ref_closed_shell_bitmask(i,1))
-  key_virt(i,2) = xor(key_virt(i,2),ref_closed_shell_bitmask(i,2))
- enddo
- call bitstring_to_list_ab(key_virt, occ_virt, n_occ_ab_virt, N_int)
- ! docc ---> virt single excitations
- do h0 = 1,  n_occ_ab(1)
-  h=occ(h0,1)
-  do p0 = 1, n_occ_ab_virt(1)
-   p = occ_virt(p0,1)
-   accu = 0.d0
-   do k0 = 1, n_occ_ab(1)
-    k = occ(k0,1)
-    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - array_exchange(k,p,h)
-   enddo
-   fock_op_2_e_tc_closed_shell(p,h) = accu 
-  enddo
- enddo
-
- ! virt ---> virt single excitations
- do h0 = 1,  n_occ_ab_virt(1)
-  h=occ_virt(h0,1)
-  do p0 = 1, n_occ_ab_virt(1)
-   p = occ_virt(p0,1)
-   accu = 0.d0
-   do k0 = 1, n_occ_ab(1)
-    k = occ(k0,1)
-    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - array_exchange(k,p,h)
-   enddo
-   fock_op_2_e_tc_closed_shell(p,h) = accu 
-  enddo
- enddo
-
- ! docc ---> docc single excitations
- do h0 = 1,  n_occ_ab(1)
-  h=occ(h0,1)
-  do p0 = 1, n_occ_ab(1)
-   p = occ(p0,1)
-   accu = 0.d0
-   do k0 = 1, n_occ_ab(1)
-    k = occ(k0,1)
-    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - array_exchange(k,p,h)
-   enddo
-   fock_op_2_e_tc_closed_shell(p,h) = accu 
-  enddo
- enddo
-
-END_PROVIDER
 
 
 subroutine get_single_excitation_from_fock_tc(key_i,key_j,h,p,spin,phase,hmono,htwoe,hthree,htot)
@@ -199,4 +111,116 @@ subroutine get_single_excitation_from_fock_tc(key_i,key_j,h,p,spin,phase,hmono,h
  htot  = htwoe + hmono + hthree
 
 end
+
+
+BEGIN_PROVIDER [double precision, fock_op_2_e_tc_closed_shell, (mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+! Closed-shell part of the Fock operator for the TC operator
+ END_DOC
+ integer :: h0,p0,h,p,k0,k,i
+ integer :: n_occ_ab(2)
+ integer :: occ(N_int*bit_kind_size,2)
+ integer :: n_occ_ab_virt(2)
+ integer :: occ_virt(N_int*bit_kind_size,2)
+ integer(bit_kind) :: key_test(N_int)
+ integer(bit_kind) :: key_virt(N_int,2)
+ double precision :: accu
+
+ fock_op_2_e_tc_closed_shell = -1000.d0
+ call bitstring_to_list_ab(ref_closed_shell_bitmask, occ, n_occ_ab, N_int)
+ do i = 1, N_int
+  key_virt(i,1) = full_ijkl_bitmask(i)
+  key_virt(i,2) = full_ijkl_bitmask(i)
+  key_virt(i,1) = xor(key_virt(i,1),ref_closed_shell_bitmask(i,1))
+  key_virt(i,2) = xor(key_virt(i,2),ref_closed_shell_bitmask(i,2))
+ enddo
+ call bitstring_to_list_ab(key_virt, occ_virt, n_occ_ab_virt, N_int)
+ ! docc ---> virt single excitations
+ do h0 = 1,  n_occ_ab(1)
+  h=occ(h0,1)
+  do p0 = 1, n_occ_ab_virt(1)
+   p = occ_virt(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+ do h0 = 1, n_occ_ab_virt(1)
+  h = occ_virt(h0,1)
+  do p0 = 1,  n_occ_ab(1)
+   p=occ(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+ ! virt ---> virt single excitations
+ do h0 = 1,  n_occ_ab_virt(1)
+  h=occ_virt(h0,1)
+  do p0 = 1, n_occ_ab_virt(1)
+   p = occ_virt(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+ do h0 = 1, n_occ_ab_virt(1)
+  h = occ_virt(h0,1)
+  do p0 = 1,  n_occ_ab_virt(1)
+   p=occ_virt(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+
+ ! docc ---> docc single excitations
+ do h0 = 1,  n_occ_ab(1)
+  h=occ(h0,1)
+  do p0 = 1, n_occ_ab(1)
+   p = occ(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+ do h0 = 1, n_occ_ab(1)
+  h = occ(h0,1)
+  do p0 = 1,  n_occ_ab(1)
+   p=occ(p0,1)
+   accu = 0.d0
+   do k0 = 1, n_occ_ab(1)
+    k = occ(k0,1)
+    accu += 2.d0 * tc_2e_3idx_coulomb_integrals(k,p,h) - tc_2e_3idx_exchange_integrals(k,p,h)
+   enddo
+   fock_op_2_e_tc_closed_shell(p,h) = accu 
+  enddo
+ enddo
+
+! do i = 1, mo_num
+!  write(*,'(100(F10.5,X))')fock_op_2_e_tc_closed_shell(:,i)
+! enddo
+
+END_PROVIDER
 

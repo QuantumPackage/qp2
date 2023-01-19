@@ -28,7 +28,7 @@ BEGIN_PROVIDER [double precision, fock_operator_closed_shell_ref_bitmask, (mo_nu
  integer :: occ_virt(N_int*bit_kind_size,2)
  integer(bit_kind) :: key_test(N_int)
  integer(bit_kind) :: key_virt(N_int,2)
-
+ fock_operator_closed_shell_ref_bitmask = 0.d0
  call bitstring_to_list_ab(ref_closed_shell_bitmask, occ, n_occ_ab, N_int)
  do i = 1, N_int
   key_virt(i,1) = full_ijkl_bitmask(i)

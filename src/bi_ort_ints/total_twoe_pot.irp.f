@@ -225,3 +225,26 @@ END_PROVIDER
   enddo
 
 END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals, (mo_num,mo_num, mo_num)]
+&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals,(mo_num,mo_num, mo_num)]
+ implicit none
+ BEGIN_DOC
+ ! tc_2e_3idx_coulomb_integrals(j,k,i)  = <jk|ji> 
+ !
+ ! tc_2e_3idx_exchange_integrals(j,k,i) = <kj|ji> 
+ END_DOC
+ integer :: i,j,k,l
+ double precision :: get_two_e_integral
+ double precision :: integral
+
+ do i = 1, mo_num
+  do k = 1, mo_num
+   do j = 1, mo_num
+     tc_2e_3idx_coulomb_integrals(j, k,i) = mo_bi_ortho_tc_two_e(j ,k ,j ,i ) 
+     tc_2e_3idx_exchange_integrals(j,k,i) = mo_bi_ortho_tc_two_e(k ,j ,j ,i ) 
+   enddo
+  enddo
+ enddo
+
+END_PROVIDER
