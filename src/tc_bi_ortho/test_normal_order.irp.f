@@ -10,6 +10,7 @@ program test_normal_order
   read_wf = .True.
   touch read_wf
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+  call provide_all_three_ints_bi_ortho
   call test
 end
 
@@ -28,7 +29,7 @@ subroutine test
  s2 = 2
  accu = 0.d0
  do h1 = 1, elec_beta_num
-  do p1 = elec_beta_num+1, mo_num
+  do p1 = elec_alpha_num+1, mo_num
    do h2 = 1, elec_beta_num
     do p2 = elec_beta_num+1, mo_num
      det_i = ref_bitmask
@@ -38,36 +39,37 @@ subroutine test
      call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
      call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
      hthree *= phase
-     normal = normal_two_body_bi_orth_ab(p2,h2,p1,h1)
+!     normal = normal_two_body_bi_orth_ab(p2,h2,p1,h1)
+     normal = eff_2_e_from_3_e_ab(p2,p1,h2,h1)
      accu += dabs(hthree-normal)
     enddo
    enddo
   enddo
  enddo
- print*,'accu opposite spin = ',accu
+print*,'accu opposite spin = ',accu
 
- s1 = 2 
- s2 = 2
- accu = 0.d0
- do h1 = 1, elec_beta_num
-  do p1 = elec_beta_num+1, mo_num
-   do h2 = h1+1, elec_beta_num
-    do p2 = elec_beta_num+1, mo_num
-     det_i = ref_bitmask
-     call do_single_excitation(det_i,h1,p1,s1,i_ok)
-     call do_single_excitation(det_i,h2,p2,s2,i_ok)
-     if(i_ok.ne.1)cycle
-     call htilde_mu_mat_bi_ortho(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-     call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
-     call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
-     hthree *= phase
-     normal = normal_two_body_bi_orth_aa_bb(p2,h2,p1,h1)
-     accu += dabs(hthree-normal)
-    enddo
-   enddo
-  enddo
- enddo
- print*,'accu same spin = ',accu
+!s1 = 2 
+!s2 = 2
+!accu = 0.d0
+!do h1 = 1, elec_beta_num
+! do p1 = elec_beta_num+1, mo_num
+!  do h2 = h1+1, elec_beta_num
+!   do p2 = elec_beta_num+1, mo_num
+!    det_i = ref_bitmask
+!    call do_single_excitation(det_i,h1,p1,s1,i_ok)
+!    call do_single_excitation(det_i,h2,p2,s2,i_ok)
+!    if(i_ok.ne.1)cycle
+!    call htilde_mu_mat_bi_ortho(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+!    call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
+!    call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
+!    hthree *= phase
+!    normal = normal_two_body_bi_orth_aa_bb(p2,h2,p1,h1)
+!    accu += dabs(hthree-normal)
+!   enddo
+!  enddo
+! enddo
+!enddo
+!print*,'accu same spin = ',accu
 end
 
 
