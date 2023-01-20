@@ -18,37 +18,50 @@ subroutine test_slater_tc_opt
  implicit none
  integer :: i,j
  double precision :: hmono, htwoe, htot, hthree 
- double precision :: hnewmono, hnewtwoe, hnewthnewree, hnewtot
+ double precision :: hnewmono, hnewtwoe, hnewthree, hnewtot
  double precision :: accu_d ,i_count, accu
  accu = 0.d0
  accu_d = 0.d0
  i_count = 0.d0
  do i = 1, N_det
-! do i = 14,14
+! do i = 1,1
   call diag_htilde_mu_mat_bi_ortho(N_int, psi_det(1,1,i), hmono, htwoe, htot)
   call htilde_mu_mat_bi_ortho(psi_det(1,1,i), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
-  call diag_htilde_mu_mat_fock_bi_ortho(N_int, psi_det(1,1,i), hnewmono, hnewtwoe, hnewthnewree, hnewtot)
-!  print*,hthree,hnewthnewree
+  call diag_htilde_mu_mat_fock_bi_ortho(N_int, psi_det(1,1,i), hnewmono, hnewtwoe, hnewthree, hnewtot)
+!  print*,hthree,hnewthree
 !  print*,htot,hnewtot,dabs(hnewtot-htot)
   accu_d += dabs(htot-hnewtot) 
-!  if(dabs(htot-hnewtot).gt.1.d-8)then
+  if(dabs(htot-hnewtot).gt.1.d-8)then
    print*,i
    print*,htot,hnewtot,dabs(htot-hnewtot)
-!  endif
-  do j = 1, N_det
+  endif
+!  do j = 319,319
+  do j = 1,N_det
    if(i==j)cycle
-   call single_htilde_mu_mat_bi_ortho(N_int, psi_det(1,1,j), psi_det(1,1,i), hmono, htwoe, htot)
-   call single_htilde_mu_mat_fock_bi_ortho (N_int, psi_det(1,1,j), psi_det(1,1,i), hnewmono, hnewtwoe, hnewthnewree, hnewtot)
-   if(dabs(htot).gt.1.d-10)then
-    if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
-     print*,j,i
+   integer :: degree 
+   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   if(degree .ne. 1)cycle
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call single_htilde_mu_mat_fock_bi_ortho (N_int, psi_det(1,1,j), psi_det(1,1,i), hnewmono, hnewtwoe, hnewthree, hnewtot)
+!   print*,'j,i',j,i
+!   print*,htot,hnewtot,dabs(htot-hnewtot) 
+!   print*,hthree,hnewthree,dabs(hthree-hnewthree) 
+   if(dabs(hthree).gt.1.d-15)then
+!    if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
      i_count += 1.D0
-     print*,htot,hnewtot,dabs(htot-hnewtot) 
      accu += dabs(htot-hnewtot) 
+    if(dabs(hthree-hnewthree).gt.1.d-8.or.dabs(hthree-hnewthree).gt.dabs(hthree))then
+     print*,j,i
+     call debug_det(psi_det(1,1,i),N_int)
+     call debug_det(psi_det(1,1,j),N_int)
+!     print*,htot,hnewtot,dabs(htot-hnewtot) 
+     print*,hthree,hnewthree,dabs(hthree-hnewthree) 
+     stop
     endif
    endif
   enddo
  enddo
  print*,'accu_d = ',accu_d/N_det
+ print*,'accu   = ',accu/i_count
 
 end

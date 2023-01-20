@@ -106,9 +106,243 @@ subroutine get_single_excitation_from_fock_tc(key_i,key_j,h,p,spin,phase,hmono,h
   htwoe -= buffer_x(i)
  enddo
  hthree = 0.d0
+ if (three_body_h_tc)then
+  call three_comp_fock_elem(key_i,h,p,spin,hthree)
+ endif
+
+
  htwoe = htwoe * phase
  hmono = hmono * phase
+ hthree = hthree * phase
  htot  = htwoe + hmono + hthree
+
+end
+
+subroutine three_comp_fock_elem(key_i,h_fock,p_fock,ispin_fock,hthree)
+ implicit none
+ integer,intent(in) :: h_fock,p_fock,ispin_fock
+ integer(bit_kind), intent(in) :: key_i(N_int,2)
+ double precision, intent(out) :: hthree
+ integer :: nexc(2),i,ispin,na,nb
+ integer(bit_kind) :: hole(N_int,2)
+ integer(bit_kind) :: particle(N_int,2)
+ integer :: occ_hole(N_int*bit_kind_size,2)
+ integer :: occ_particle(N_int*bit_kind_size,2)
+ integer :: n_occ_ab_hole(2),n_occ_ab_particle(2)
+ integer(bit_kind)              :: det_tmp(N_int,2)
+
+
+  nexc(1) = 0
+  nexc(2) = 0
+  !! Get all the holes and particles of key_i with respect to the ROHF determinant
+  do i=1,N_int
+    hole(i,1)     = xor(key_i(i,1),ref_bitmask(i,1))
+    hole(i,2)     = xor(key_i(i,2),ref_bitmask(i,2))
+    particle(i,1) = iand(hole(i,1),key_i(i,1))
+    particle(i,2) = iand(hole(i,2),key_i(i,2))
+    hole(i,1)     = iand(hole(i,1),ref_bitmask(i,1))
+    hole(i,2)     = iand(hole(i,2),ref_bitmask(i,2))
+    nexc(1)       = nexc(1) + popcnt(hole(i,1))
+    nexc(2)       = nexc(2) + popcnt(hole(i,2))
+  enddo
+  integer                        :: tmp(2)
+  !DIR$ FORCEINLINE
+  call bitstring_to_list_ab(particle, occ_particle, tmp, N_int)
+  ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta 
+  !DIR$ FORCEINLINE
+  call bitstring_to_list_ab(hole, occ_hole, tmp, N_int)
+  ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
+
+  !! Initialize the matrix element with the reference ROHF Slater determinant Fock element
+  if(ispin_fock==1)then
+   hthree = fock_a_tot_3e_bi_orth(p_fock,h_fock) 
+  else 
+   hthree = fock_b_tot_3e_bi_orth(p_fock,h_fock) 
+  endif
+  det_tmp = ref_bitmask
+  do ispin=1,2
+    na = elec_num_tab(ispin)
+    nb = elec_num_tab(iand(ispin,1)+1)
+    do i=1,nexc(ispin)
+      !DIR$ FORCEINLINE
+      call fock_ac_tc_operator( occ_particle(i,ispin), ispin, det_tmp, h_fock,p_fock, ispin_fock, hthree, N_int,na,nb)
+      !DIR$ FORCEINLINE
+      call fock_a_tc_operator ( occ_hole    (i,ispin), ispin, det_tmp, h_fock,p_fock, ispin_fock, hthree, N_int,na,nb)
+    enddo
+  enddo
+end
+
+subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,Nint,na,nb)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Routine that computes the contribution to the three-electron part of the Fock operator 
+  !
+  ! a^dagger_{p_fock} a_{h_fock} of spin ispin_fock
+  ! 
+  ! on top of a determinant 'key' on which you ADD an electron of spin ispin in orbital iorb
+  ! 
+  ! in output, the determinant key is changed by the ADDITION of that electron 
+  !
+  ! the output hthree is INCREMENTED
+  END_DOC
+  integer, intent(in)              :: iorb, ispin, Nint, h_fock,p_fock, ispin_fock
+  integer, intent(inout)           :: na, nb
+  integer(bit_kind), intent(inout) :: key(Nint,2)
+  double precision, intent(inout)  :: hthree
+
+  integer                        :: occ(Nint*bit_kind_size,2)
+  integer                        :: other_spin
+  integer                        :: k,l,i,jj,j
+  double precision :: three_e_single_parrallel_spin, direct_int, exchange_int
+  
+
+  if (iorb < 1) then
+    print *,  irp_here, ': iorb < 1'
+    print *,  iorb, mo_num
+    stop -1
+  endif
+  if (iorb > mo_num) then
+    print *,  irp_here, ': iorb > mo_num'
+    print *,  iorb, mo_num
+    stop -1
+  endif
+
+  ASSERT (ispin > 0)
+  ASSERT (ispin < 3)
+  ASSERT (Nint > 0)
+
+  integer                        :: tmp(2)
+  !DIR$ FORCEINLINE
+  call bitstring_to_list_ab(key, occ, tmp, Nint)
+  ASSERT (tmp(1) == elec_alpha_num)
+  ASSERT (tmp(2) == elec_beta_num)
+
+  k = shiftr(iorb-1,bit_kind_shift)+1
+  ASSERT (k >0)
+  l = iorb - shiftl(k-1,bit_kind_shift)-1
+  ASSERT (l >= 0)
+  key(k,ispin) = ibset(key(k,ispin),l)
+  other_spin = iand(ispin,1)+1
+
+
+  !! spin of other electrons == ispin 
+  if(ispin == ispin_fock)then
+   !! in what follows :: jj == other electrons in the determinant 
+   !!                 :: iorb == electron that has been added of spin ispin
+   !!                 :: p_fock, h_fock == hole particle of spin ispin_fock
+   !! jj = ispin = ispin_fock >> pure parallel spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    hthree += three_e_single_parrallel_spin(jj,iorb,p_fock,h_fock)
+   enddo
+   !! spin of jj == other spin than ispin AND ispin_fock
+   !! exchange between the iorb and (h_fock, p_fock)
+   do j = 1, nb
+    jj = occ(j,other_spin) 
+    direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch12_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree += direct_int - exchange_int
+   enddo
+  else !! ispin NE to ispin_fock
+   !! jj = ispin BUT NON EQUAL TO ispin_fock 
+   !! exchange between the jj and iorb
+   do j = 1, na
+    jj = occ(j,ispin)
+    direct_int   = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch23_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree += direct_int - exchange_int
+   enddo
+   !! jj = other_spin than ispin BUT jj == ispin_fock
+   !! exchange between jj and (h_fock,p_fock)
+   do j = 1, nb
+    jj = occ(j,other_spin) 
+    direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch13_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree += direct_int - exchange_int
+   enddo
+  endif
+
+  na = na+1
+end
+
+subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,Nint,na,nb)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Routine that computes the contribution to the three-electron part of the Fock operator 
+  !
+  ! a^dagger_{p_fock} a_{h_fock} of spin ispin_fock
+  ! 
+  ! on top of a determinant 'key' on which you REMOVE an electron of spin ispin in orbital iorb
+  ! 
+  ! in output, the determinant key is changed by the REMOVAL of that electron 
+  !
+  ! the output hthree is INCREMENTED
+  END_DOC
+  integer, intent(in)            :: iorb, ispin, Nint, h_fock,p_fock, ispin_fock
+  integer, intent(inout)         :: na, nb
+  integer(bit_kind), intent(inout) :: key(Nint,2)
+  double precision, intent(inout) :: hthree
+  
+  double precision  :: direct_int, exchange_int, three_e_single_parrallel_spin
+  integer                        :: occ(Nint*bit_kind_size,2)
+  integer                        :: other_spin
+  integer                        :: k,l,i,jj,mm,j,m
+  integer                        :: tmp(2)
+
+  ASSERT (iorb > 0)
+  ASSERT (ispin > 0)
+  ASSERT (ispin < 3)
+  ASSERT (Nint > 0)
+
+  k = shiftr(iorb-1,bit_kind_shift)+1
+  ASSERT (k>0)
+  l = iorb - shiftl(k-1,bit_kind_shift)-1
+  key(k,ispin) = ibclr(key(k,ispin),l)
+  other_spin = iand(ispin,1)+1
+
+  !DIR$ FORCEINLINE
+  call bitstring_to_list_ab(key, occ, tmp, Nint)
+  na = na-1
+  !! spin of other electrons == ispin 
+  if(ispin == ispin_fock)then
+   !! in what follows :: jj == other electrons in the determinant 
+   !!                 :: iorb == electron that has been added of spin ispin
+   !!                 :: p_fock, h_fock == hole particle of spin ispin_fock
+   !! jj = ispin = ispin_fock >> pure parallel spin
+   do j = 1, na
+    jj = occ(j,ispin)
+    hthree -= three_e_single_parrallel_spin(jj,iorb,p_fock,h_fock)
+   enddo
+   !! spin of jj == other spin than ispin AND ispin_fock
+   !! exchange between the iorb and (h_fock, p_fock)
+   do j = 1, nb
+    jj = occ(j,other_spin) 
+    direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch12_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree -= direct_int - exchange_int
+   enddo
+  else !! ispin NE to ispin_fock
+   !! jj = ispin BUT NON EQUAL TO ispin_fock 
+   !! exchange between the jj and iorb
+   do j = 1, na
+    jj = occ(j,ispin)
+    direct_int   = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch23_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree -= direct_int - exchange_int
+   enddo
+   !! jj = other_spin than ispin BUT jj == ispin_fock
+   !! exchange between jj and (h_fock,p_fock)
+   do j = 1, nb
+    jj = occ(j,other_spin) 
+    direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    exchange_int = three_e_4_idx_exch13_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    hthree -= direct_int - exchange_int
+   enddo
+  endif
 
 end
 
