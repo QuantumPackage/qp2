@@ -40,22 +40,21 @@ subroutine test_slater_tc_opt
    if(i==j)cycle
    integer :: degree 
    call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
-   if(degree .ne. 1)cycle
+!   if(degree .ne. 1)cycle
    call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
-   call single_htilde_mu_mat_fock_bi_ortho (N_int, psi_det(1,1,j), psi_det(1,1,i), hnewmono, hnewtwoe, hnewthree, hnewtot)
-!   print*,'j,i',j,i
-!   print*,htot,hnewtot,dabs(htot-hnewtot) 
-!   print*,hthree,hnewthree,dabs(hthree-hnewthree) 
-   if(dabs(hthree).gt.1.d-15)then
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hnewmono, hnewtwoe, hnewthree, hnewtot)
+!   if(dabs(hthree).gt.1.d-15)then
+   if(dabs(htot).gt.1.d-15)then
 !    if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
      i_count += 1.D0
      accu += dabs(htot-hnewtot) 
-    if(dabs(hthree-hnewthree).gt.1.d-8.or.dabs(hthree-hnewthree).gt.dabs(hthree))then
+!    if(dabs(hthree-hnewthree).gt.1.d-8.or.dabs(hthree-hnewthree).gt.dabs(hthree))then
+    if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
      print*,j,i
      call debug_det(psi_det(1,1,i),N_int)
      call debug_det(psi_det(1,1,j),N_int)
-!     print*,htot,hnewtot,dabs(htot-hnewtot) 
-     print*,hthree,hnewthree,dabs(hthree-hnewthree) 
+     print*,htot,hnewtot,dabs(htot-hnewtot) 
+!     print*,hthree,hnewthree,dabs(hthree-hnewthree) 
      stop
     endif
    endif
