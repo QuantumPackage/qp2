@@ -209,7 +209,13 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_ab, (mo_num, mo_num, mo_num,
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
+ call give_contrib_for_abab(1,1,1,1,occ,Ne,contrib)
  eff_2_e_from_3_e_ab = 0.d0
+ !$OMP PARALLEL                                                                         &
+ !$OMP DEFAULT (NONE)                                                                   &
+ !$OMP PRIVATE (hh1, h1, hh2, h2, pp1, p1, pp2, p2, contrib) & 
+ !$OMP SHARED (n_act_orb, list_act, Ne,occ, eff_2_e_from_3_e_ab)
+ !$OMP DO SCHEDULE (static) 
   do hh1 = 1, n_act_orb !! alpha 
     h1 = list_act(hh1) 
     do hh2 = 1, n_act_orb !! beta 
@@ -224,6 +230,8 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_ab, (mo_num, mo_num, mo_num,
       enddo
     enddo
   enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
 
 END_PROVIDER 
 
@@ -276,7 +284,13 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_aa, (mo_num, mo_num, mo_num,
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
+ call give_contrib_for_aaaa(1 ,1 ,1 ,1 ,occ,Ne,contrib)
  eff_2_e_from_3_e_aa = 100000000.d0
+ !$OMP PARALLEL                                                                         &
+ !$OMP DEFAULT (NONE)                                                                   &
+ !$OMP PRIVATE (hh1, h1, hh2, h2, pp1, p1, pp2, p2, contrib) & 
+ !$OMP SHARED (n_act_orb, list_act, Ne,occ, eff_2_e_from_3_e_aa)
+ !$OMP DO SCHEDULE (static) 
   do hh1 = 1, n_act_orb !! alpha 
     h1 = list_act(hh1) 
     do hh2 = hh1+1, n_act_orb !! alpha
@@ -291,6 +305,8 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_aa, (mo_num, mo_num, mo_num,
       enddo
     enddo
   enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
 
 END_PROVIDER 
 
@@ -341,7 +357,13 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_bb, (mo_num, mo_num, mo_num,
  double precision :: contrib
  allocate( occ(N_int*bit_kind_size,2) )
  call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
+ call give_contrib_for_bbbb(1,1 ,1 ,1 ,occ,Ne,contrib)
  eff_2_e_from_3_e_bb = 100000000.d0
+ !$OMP PARALLEL                                                                         &
+ !$OMP DEFAULT (NONE)                                                                   &
+ !$OMP PRIVATE (hh1, h1, hh2, h2, pp1, p1, pp2, p2, contrib) & 
+ !$OMP SHARED (n_act_orb, list_act, Ne,occ, eff_2_e_from_3_e_bb)
+ !$OMP DO SCHEDULE (static) 
   do hh1 = 1, n_act_orb !! beta 
     h1 = list_act(hh1) 
     do hh2 = hh1+1, n_act_orb !! beta
@@ -356,6 +378,8 @@ BEGIN_PROVIDER [ double precision, eff_2_e_from_3_e_bb, (mo_num, mo_num, mo_num,
       enddo
     enddo
   enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
 
 END_PROVIDER 
 
