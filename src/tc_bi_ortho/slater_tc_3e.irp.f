@@ -256,20 +256,16 @@ subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
     if(Ne(1)+Ne(2).ge.3)then
      if(s1==s2)then ! same spin excitation 
       ispin = other_spin(s1)
-!      print*,'htilde ij'
-     do m = 1, Ne(ispin) ! direct(other_spin) - exchange(s1)
-      mm = occ(m,ispin)
-!!    direct_int = three_body_ints_bi_ort(mm,p2,p1,mm,h2,h1)
-!!    exchange_int = three_body_ints_bi_ort(mm,p2,p1,mm,h1,h2)
-      direct_int = three_e_5_idx_direct_bi_ort(mm,p2,h2,p1,h1) 
-      exchange_int = three_e_5_idx_exch12_bi_ort(mm,p2,h2,p1,h1)
-!      print*,direct_int,exchange_int
-      hthree += direct_int - exchange_int
-     enddo
-     do m = 1, Ne(s1) ! pure contribution from s1 
-      mm = occ(m,s1)
-      hthree += three_e_double_parrallel_spin(mm,p2,h2,p1,h1)
-     enddo 
+      do m = 1, Ne(ispin) ! direct(other_spin) - exchange(s1)
+       mm = occ(m,ispin)
+       direct_int = three_e_5_idx_direct_bi_ort(mm,p2,h2,p1,h1) 
+       exchange_int = three_e_5_idx_exch12_bi_ort(mm,p2,h2,p1,h1)
+       hthree += direct_int - exchange_int
+      enddo
+      do m = 1, Ne(s1) ! pure contribution from s1 
+       mm = occ(m,s1)
+       hthree += three_e_double_parrallel_spin(mm,p2,h2,p1,h1)
+      enddo 
      else ! different spin excitation 
        do m = 1, Ne(s1)
         mm = occ(m,s1) ! 
