@@ -196,7 +196,7 @@ subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
   integer                        :: k,l,i,jj,j
-  double precision :: three_e_single_parrallel_spin, direct_int, exchange_int
+  double precision :: direct_int, exchange_int
   
 
   if (iorb < 1) then
@@ -236,7 +236,7 @@ subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,
    !! jj = ispin = ispin_fock >> pure parallel spin
    do j = 1, na
     jj = occ(j,ispin)
-    hthree += three_e_single_parrallel_spin(jj,iorb,p_fock,h_fock)
+    hthree += three_e_single_parrallel_spin_prov(jj,iorb,p_fock,h_fock)
    enddo
    !! spin of jj == other spin than ispin AND ispin_fock
    !! exchange between the iorb and (h_fock, p_fock)
@@ -287,7 +287,7 @@ subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,N
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hthree
   
-  double precision  :: direct_int, exchange_int, three_e_single_parrallel_spin
+  double precision  :: direct_int, exchange_int
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
   integer                        :: k,l,i,jj,mm,j,m
@@ -315,7 +315,7 @@ subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,N
    !! jj = ispin = ispin_fock >> pure parallel spin
    do j = 1, na
     jj = occ(j,ispin)
-    hthree -= three_e_single_parrallel_spin(jj,iorb,p_fock,h_fock)
+    hthree -= three_e_single_parrallel_spin_prov(jj,iorb,p_fock,h_fock)
    enddo
    !! spin of jj == other spin than ispin AND ispin_fock
    !! exchange between the iorb and (h_fock, p_fock)

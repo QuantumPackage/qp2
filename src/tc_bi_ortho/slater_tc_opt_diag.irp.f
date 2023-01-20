@@ -113,7 +113,7 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
   integer                        :: k,l,i,jj,mm,j,m
-  double precision :: three_e_diag_parrallel_spin, direct_int, exchange_int
+  double precision ::  direct_int, exchange_int
   
 
   if (iorb < 1) then
@@ -163,7 +163,7 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     jj = occ(j,ispin)
     do m = j+1, na
      mm = occ(m,ispin)
-     hthree += three_e_diag_parrallel_spin(mm,jj,iorb)
+     hthree += three_e_diag_parrallel_spin_prov(mm,jj,iorb)
     enddo
    enddo
    !! same-spin/oposite-spin
@@ -210,7 +210,7 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   integer(bit_kind), intent(inout) :: key(Nint,2)
   double precision, intent(inout) :: hmono,htwoe,hthree
   
-  double precision  :: direct_int, exchange_int, three_e_diag_parrallel_spin
+  double precision  :: direct_int, exchange_int
   integer                        :: occ(Nint*bit_kind_size,2)
   integer                        :: other_spin
   integer                        :: k,l,i,jj,mm,j,m
@@ -250,7 +250,7 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     jj = occ(j,ispin)
     do m = j+1, na
      mm = occ(m,ispin)
-     hthree -= three_e_diag_parrallel_spin(mm,jj,iorb)
+     hthree -= three_e_diag_parrallel_spin_prov(mm,jj,iorb)
     enddo
    enddo
    !! same-spin/oposite-spin

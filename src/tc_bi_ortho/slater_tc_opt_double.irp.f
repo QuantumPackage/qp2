@@ -84,7 +84,7 @@ subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
  integer :: n_occ_ab_hole(2),n_occ_ab_particle(2)
  integer(bit_kind)              :: det_tmp(N_int,2)
  integer :: ipart, ihole
- double precision :: direct_int, exchange_int, three_e_double_parrallel_spin
+ double precision :: direct_int, exchange_int
 
   nexc(1) = 0
   nexc(2) = 0
@@ -118,9 +118,9 @@ subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
     ispin = 1 ! i==alpha ==> pure same spin terms
     do i = 1, nexc(ispin) ! number of couple of holes/particles 
      ipart=occ_particle(i,ispin)
-     hthree += three_e_double_parrallel_spin(ipart,p2,h2,p1,h1)
+     hthree += three_e_double_parrallel_spin_prov(ipart,p2,h2,p1,h1)
      ihole=occ_hole(i,ispin)
-     hthree -= three_e_double_parrallel_spin(ihole,p2,h2,p1,h1)
+     hthree -= three_e_double_parrallel_spin_prov(ihole,p2,h2,p1,h1)
     enddo
     ispin = 2 ! i==beta ==> alpha/alpha/beta terms
     do i = 1, nexc(ispin) ! number of couple of holes/particles 
@@ -145,9 +145,9 @@ subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
    ispin = 2 ! i==beta  ==> pure same spin terms
    do i = 1, nexc(ispin) ! number of couple of holes/particles 
     ipart=occ_particle(i,ispin)
-    hthree += three_e_double_parrallel_spin(ipart,p2,h2,p1,h1)
+    hthree += three_e_double_parrallel_spin_prov(ipart,p2,h2,p1,h1)
     ihole=occ_hole(i,ispin)
-    hthree -= three_e_double_parrallel_spin(ihole,p2,h2,p1,h1)
+    hthree -= three_e_double_parrallel_spin_prov(ihole,p2,h2,p1,h1)
    enddo
    ispin = 1 ! i==alpha==> beta/beta/alpha terms
    do i = 1, nexc(ispin) ! number of couple of holes/particles 
@@ -305,13 +305,12 @@ subroutine give_contrib_for_aaaa(h1,h2,p1,p2,occ,Ne,contrib)
  double precision, intent(out) :: contrib
  integer :: mm,m 
  double precision :: direct_int, exchange_int
- double precision :: three_e_double_parrallel_spin
  !! h1,p1 == alpha 
  !! h2,p2 == alpha
  contrib = 0.d0
  do mm = 1, Ne(1) !! alpha ==> pure parallele spin contribution
    m = occ(mm,1)
-   contrib += three_e_double_parrallel_spin(m,p2,h2,p1,h1)
+   contrib += three_e_double_parrallel_spin_prov(m,p2,h2,p1,h1)
  enddo
 
  do mm = 1, Ne(2) !! beta
@@ -371,13 +370,12 @@ subroutine give_contrib_for_bbbb(h1,h2,p1,p2,occ,Ne,contrib)
  double precision, intent(out) :: contrib
  integer :: mm,m 
  double precision :: direct_int, exchange_int
- double precision :: three_e_double_parrallel_spin
  !! h1,p1 == beta
  !! h2,p2 == beta
  contrib = 0.d0
  do mm = 1, Ne(2) !! beta ==> pure parallele spin contribution
    m = occ(mm,1)
-   contrib += three_e_double_parrallel_spin(m,p2,h2,p1,h1)
+   contrib += three_e_double_parrallel_spin_prov(m,p2,h2,p1,h1)
  enddo
 
  do mm = 1, Ne(1) !! alpha

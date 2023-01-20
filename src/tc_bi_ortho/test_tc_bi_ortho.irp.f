@@ -57,7 +57,7 @@ subroutine test_slater_tc_opt
 !     print*,hthree,hnewthree,dabs(hthree-hnewthree) 
      stop
     endif
-    print*,htot,hnewtot,dabs(htot-hnewtot) 
+!    print*,htot,hnewtot,dabs(htot-hnewtot) 
    endif
   enddo
  enddo
