@@ -50,13 +50,14 @@ subroutine test_slater_tc_opt
      accu += dabs(htot-hnewtot) 
 !    if(dabs(hthree-hnewthree).gt.1.d-8.or.dabs(hthree-hnewthree).gt.dabs(hthree))then
     if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
-     print*,j,i
+     print*,j,i,degree
      call debug_det(psi_det(1,1,i),N_int)
      call debug_det(psi_det(1,1,j),N_int)
      print*,htot,hnewtot,dabs(htot-hnewtot) 
 !     print*,hthree,hnewthree,dabs(hthree-hnewthree) 
      stop
     endif
+    print*,htot,hnewtot,dabs(htot-hnewtot) 
    endif
   enddo
  enddo

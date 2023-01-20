@@ -40,13 +40,15 @@ subroutine test
      call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
      hthree *= phase
 !    !normal = normal_two_body_bi_orth_ab(p2,h2,p1,h1)
-     normal = eff_2_e_from_3_e_ab(p2,p1,h2,h1)
+     call three_comp_two_e_elem(det_i,h1,h2,p1,p2,s1,s2,normal)
+!     normal = eff_2_e_from_3_e_ab(p2,p1,h2,h1)
      accu += dabs(hthree-normal)
     enddo
    enddo
   enddo
  enddo
 print*,'accu opposite spin = ',accu
+stop
 
 !    p2=6
 !    p1=5

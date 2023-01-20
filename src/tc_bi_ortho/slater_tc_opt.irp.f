@@ -28,19 +28,13 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   if(degree.gt.2) return
 
   if(degree == 0)then
-    call diag_htilde_mu_mat_fock_bi_ortho(Nint, key_i, hmono, htwoe, hthree, htot)
+    call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
   else if (degree == 1)then
-    call single_htilde_mu_mat_fock_bi_ortho (Nint,key_j, key_i , hmono, htwoe, hthree, htot)
+    call single_htilde_mu_mat_fock_bi_ortho(Nint,key_j, key_i , hmono, htwoe, hthree, htot)
   else if(degree == 2)then
-    call double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
-    if(three_body_h_tc) then
-     if(.not.double_normal_ord) then
-       call double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
-     endif
-    endif
+    call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   endif
 
-  htot = hmono + htwoe + hthree
   if(degree==0) then
     htot += nuclear_repulsion
   endif
