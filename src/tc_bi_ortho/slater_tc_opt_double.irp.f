@@ -32,19 +32,23 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   if(degree.ne.2)then
    return
   endif
-
-  call bitstring_to_list_ab(key_i, occ, Ne, Nint)
+  integer :: degree_i,degree_j
+  call get_excitation_degree(ref_bitmask,key_i,degree_i,N_int)
+  call get_excitation_degree(ref_bitmask,key_j,degree_j,N_int)
   call get_double_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
 
   if(s1.ne.s2)then
    ! opposite spin two-body 
-!   key_j, key_i
     htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1) 
     if(three_body_h_tc)then
      if(.not.double_normal_ord)then
-      call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
-     elseif(double_normal_ord.and.+Ne(1).gt.2)then
+      if(degree_i>degree_j)then
+       call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
+      else
+       call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+      endif
+     elseif(double_normal_ord.and.elec_num+elec_num.gt.2)then
       htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)!!! WTF ???
      endif
     endif
@@ -56,8 +60,12 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
    htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1) 
    if(three_body_h_tc)then
     if(.not.double_normal_ord)then
-     call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
-    elseif(double_normal_ord.and.+Ne(1).gt.2)then
+     if(degree_i>degree_j)then
+      call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
+     else
+      call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+     endif
+    elseif(double_normal_ord.and.elec_num+elec_num.gt.2)then
       htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)!!! WTF ???
       htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)!!! WTF ???
     endif
