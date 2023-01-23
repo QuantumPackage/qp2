@@ -49,8 +49,6 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
 
   if(Ne(1)+Ne(2).ge.3)then
 !!  ! alpha/alpha/beta three-body
-  double precision :: accu 
-  accu = 0.d0
    do i = 1, Ne(1)
     ii = occ(i,1) 
     do j = i+1, Ne(1)
@@ -62,14 +60,11 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
       direct_int = three_e_3_idx_direct_bi_ort(mm,jj,ii) ! USES 3-IDX TENSOR 
       exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii) ! USES 3-IDX TENSOR 
       hthree += direct_int - exchange_int
-      accu += direct_int - exchange_int
      enddo
     enddo
    enddo
-   !print*,'aab = ',accu
   
    ! beta/beta/alpha three-body
-  accu = 0.d0
    do i = 1, Ne(2)
     ii = occ(i,2) 
     do j = i+1, Ne(2)
@@ -79,14 +74,11 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
       direct_int = three_e_3_idx_direct_bi_ort(mm,jj,ii) 
       exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)
       hthree += direct_int - exchange_int
-      accu += direct_int - exchange_int
      enddo
     enddo
    enddo
-   !print*,'abb = ',accu
 
    ! alpha/alpha/alpha three-body
-   accu = 0.d0
    do i = 1, Ne(1)
     ii = occ(i,1) ! 1
     do j = i+1, Ne(1)
@@ -95,14 +87,11 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
       mm = occ(m,1) ! 3 
 !      ref =  sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) USES THE 6 IDX TENSOR 
       hthree += three_e_diag_parrallel_spin(mm,jj,ii) ! USES ONLY 3-IDX TENSORS
-      accu += three_e_diag_parrallel_spin(mm,jj,ii) 
      enddo
     enddo
    enddo
-   !print*,'aaa = ',accu
 
    ! beta/beta/beta three-body
-   accu = 0.d0
    do i = 1, Ne(2)
     ii = occ(i,2) ! 1
     do j = i+1, Ne(2)
@@ -111,11 +100,9 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
       mm = occ(m,2) ! 3
 !      ref =  sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) USES THE 6 IDX TENSOR 
       hthree += three_e_diag_parrallel_spin(mm,jj,ii) ! USES ONLY 3-IDX TENSORS
-      accu += three_e_diag_parrallel_spin(mm,jj,ii) 
      enddo
     enddo
    enddo
-   !print*,'bbb = ',accu
   endif
 
 end
@@ -269,20 +256,16 @@ subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
     if(Ne(1)+Ne(2).ge.3)then
      if(s1==s2)then ! same spin excitation 
       ispin = other_spin(s1)
-!      print*,'htilde ij'
-     do m = 1, Ne(ispin) ! direct(other_spin) - exchange(s1)
-      mm = occ(m,ispin)
-!!    direct_int = three_body_ints_bi_ort(mm,p2,p1,mm,h2,h1)
-!!    exchange_int = three_body_ints_bi_ort(mm,p2,p1,mm,h1,h2)
-      direct_int = three_e_5_idx_direct_bi_ort(mm,p2,h2,p1,h1) 
-      exchange_int = three_e_5_idx_exch12_bi_ort(mm,p2,h2,p1,h1)
-!      print*,direct_int,exchange_int
-      hthree += direct_int - exchange_int
-     enddo
-     do m = 1, Ne(s1) ! pure contribution from s1 
-      mm = occ(m,s1)
-      hthree += three_e_double_parrallel_spin(mm,p2,h2,p1,h1)
-     enddo 
+      do m = 1, Ne(ispin) ! direct(other_spin) - exchange(s1)
+       mm = occ(m,ispin)
+       direct_int = three_e_5_idx_direct_bi_ort(mm,p2,h2,p1,h1) 
+       exchange_int = three_e_5_idx_exch12_bi_ort(mm,p2,h2,p1,h1)
+       hthree += direct_int - exchange_int
+      enddo
+      do m = 1, Ne(s1) ! pure contribution from s1 
+       mm = occ(m,s1)
+       hthree += three_e_double_parrallel_spin(mm,p2,h2,p1,h1)
+      enddo 
      else ! different spin excitation 
        do m = 1, Ne(s1)
         mm = occ(m,s1) ! 
