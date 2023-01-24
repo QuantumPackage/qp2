@@ -89,6 +89,7 @@ subroutine run_stochastic_cipsi
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
     call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
+    stop
 
     N_iter += 1
 
