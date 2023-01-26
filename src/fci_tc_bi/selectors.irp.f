@@ -32,6 +32,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer(bit_kind), psi_selectors, (N_int,2,psi_selectors_size) ]
 &BEGIN_PROVIDER [ double precision, psi_selectors_coef, (psi_selectors_size,N_states) ]
+&BEGIN_PROVIDER [ double precision, psi_selectors_coef_tc, (psi_selectors_size,2,N_states) ]
   implicit none
   BEGIN_DOC
   ! Determinants on which we apply <i|H|psi> for perturbation.
@@ -47,12 +48,17 @@ END_PROVIDER
   do k=1,N_states
     do i=1,N_det_selectors
       psi_selectors_coef(i,k) = psi_coef_sorted_tc_gen(i,k)
+!      psi_selectors_coef_tc(i,1,k) = psi_r_coef_sorted_bi_ortho(i,k)
+!      psi_selectors_coef_tc(i,2,k) = psi_l_coef_sorted_bi_ortho(i,k)
+      psi_selectors_coef_tc(i,1,k) = 1.d0
+      psi_selectors_coef_tc(i,2,k) = 1.d0
     enddo
   enddo
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_selectors_size) ]
+ BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_selectors_size) ]
+&BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp_tc, (N_states,2,psi_selectors_size) ]
   implicit none
   BEGIN_DOC
   ! Transposed psi_selectors
@@ -62,6 +68,8 @@ BEGIN_PROVIDER [ double precision, psi_selectors_coef_transp, (N_states,psi_sele
   do i=1,N_det_selectors
     do k=1,N_states
       psi_selectors_coef_transp(k,i) = psi_selectors_coef(i,k)
+      psi_selectors_coef_transp_tc(k,1,i) = psi_selectors_coef_tc(i,1,k)
+      psi_selectors_coef_transp_tc(k,2,i) = psi_selectors_coef_tc(i,2,k)
     enddo
   enddo
 END_PROVIDER

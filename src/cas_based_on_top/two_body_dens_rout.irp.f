@@ -132,7 +132,7 @@ end
 subroutine give_n2_cas(r1,r2,istate,n2_psi)
  implicit none
  BEGIN_DOC
-! returns mu(r), f_psi, n2_psi for a general cas wave function
+! returns n2_psi for a general cas wave function
  END_DOC
  integer, intent(in) :: istate
  double precision, intent(in)  :: r1(3),r2(3)

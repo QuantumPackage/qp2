@@ -13,11 +13,11 @@ def zip_in_ezfio(ezfio,tmp):
   cmdzip="gzip -c "+tmp+" > "+tmpzip
   os.system(cmdzip)
   os.system("rm "+tmp)
-  cmdmv="mv "+tmpzip+" "+EZFIO+"/ao_one_e_ints/"+tmpzip
+  cmdmv="mv "+tmpzip+" "+EZFIO+"/nuclei/"+tmpzip
   os.system(cmdmv)
 
 def mv_in_ezfio(ezfio,tmp):
-  cmdmv="mv "+tmp+" "+EZFIO+"/ao_one_e_ints/"+tmp
+  cmdmv="mv "+tmp+" "+EZFIO+"/nuclei/"+tmp
   os.system(cmdmv)
 
 
