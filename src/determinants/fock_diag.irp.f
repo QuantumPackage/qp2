@@ -33,59 +33,59 @@ subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
   ! Occupied MOs
   do ii=1,elec_alpha_num
     i = occ(ii,1)
-    fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_one_e_integrals(i,i)
-    E0 = E0 + mo_one_e_integrals(i,i)
+    fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_one_e(i,i)
+    E0 = E0 + mo_bi_ortho_tc_one_e(i,i)
     do jj=1,elec_alpha_num
       j = occ(jj,1)
       if (i==j) cycle
-      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj_anti(i,j)
-      E0 = E0 + 0.5d0*mo_two_e_integrals_jj_anti(i,j)
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_two_e_jj_anti(i,j)
+      E0 = E0 + 0.5d0*mo_bi_ortho_tc_two_e_jj_anti(i,j)
     enddo
     do jj=1,elec_beta_num
       j = occ(jj,2)
-      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj(i,j)
-      E0 = E0 + mo_two_e_integrals_jj(i,j)
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_two_e_jj(i,j)
+      E0 = E0 + mo_bi_ortho_tc_two_e_jj(i,j)
     enddo
   enddo
   do ii=1,elec_beta_num
     i = occ(ii,2)
-    fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_one_e_integrals(i,i)
-    E0 = E0 + mo_one_e_integrals(i,i)
+    fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_one_e(i,i)
+    E0 = E0 + mo_bi_ortho_tc_one_e(i,i)
     do jj=1,elec_beta_num
       j = occ(jj,2)
       if (i==j) cycle
-      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj_anti(i,j)
-      E0 = E0 + 0.5d0*mo_two_e_integrals_jj_anti(i,j)
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_two_e_jj_anti(i,j)
+      E0 = E0 + 0.5d0*mo_bi_ortho_tc_two_e_jj_anti(i,j)
     enddo
     do jj=1,elec_alpha_num
       j = occ(jj,1)
-      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj(i,j)
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_two_e_jj(i,j)
     enddo
   enddo
 
   ! Virtual MOs
   do i=1,mo_num
     if (fock_diag_tmp(1,i) /= 0.d0) cycle
-    fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_one_e_integrals(i,i)
+    fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_one_e(i,i)
     do jj=1,elec_alpha_num
       j = occ(jj,1)
-      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj_anti(i,j)
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_two_e_jj_anti(i,j)
     enddo
     do jj=1,elec_beta_num
       j = occ(jj,2)
-      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_two_e_integrals_jj(i,j)
+      fock_diag_tmp(1,i) = fock_diag_tmp(1,i) + mo_bi_ortho_tc_two_e_jj(i,j)
     enddo
   enddo
   do i=1,mo_num
     if (fock_diag_tmp(2,i) /= 0.d0) cycle
-    fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_one_e_integrals(i,i)
+    fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_one_e(i,i)
     do jj=1,elec_beta_num
       j = occ(jj,2)
-      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj_anti(i,j)
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_two_e_jj_anti(i,j)
     enddo
     do jj=1,elec_alpha_num
       j = occ(jj,1)
-      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_two_e_integrals_jj(i,j)
+      fock_diag_tmp(2,i) = fock_diag_tmp(2,i) + mo_bi_ortho_tc_two_e_jj(i,j)
     enddo
   enddo
 

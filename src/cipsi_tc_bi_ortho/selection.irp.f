@@ -81,7 +81,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_tc_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-  PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp
+  PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp_tc
   PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
   PROVIDE banned_excitation
@@ -511,7 +511,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
   integer(bit_kind)               :: phasemask(N_int,2)
 
 
-  PROVIDE psi_selectors_coef_transp psi_det_sorted_tc
+  PROVIDE psi_selectors_coef_transp_tc psi_det_sorted_tc
   PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
 
@@ -564,29 +564,30 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
         call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
 
-        call get_d3_h  ( det(1,1,i), bannedOrb, banned, mat         , mask, p, sp, psi_selectors_coef_transp (1, interesting(i)) )
-        call get_d3_htc( det(1,1,i), bannedOrb, banned, mat_m, mat_p, mask, p, sp, psi_selectors_rcoef_bi_orth_transp(1, interesting(i)) &
-                       , psi_selectors_lcoef_bi_orth_transp(1, interesting(i)) )
+        perMask(1,1) = iand(mask(1,1), not(det(1,1,i)))
+        perMask(1,2) = iand(mask(1,2), not(det(1,2,i)))
+        do j=2,N_int
+          perMask(j,1) = iand(mask(j,1), not(det(j,1,i)))
+          perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
+        end do
+!        call get_d3_h  ( det(1,1,i), bannedOrb, banned, mat         , mask, p, sp, psi_selectors_coef_transp_tc (1, interesting(i)) )
+!        call get_d3_htc( det(1,1,i), bannedOrb, banned, mat_m, mat_p, mask, p, sp, psi_selectors_rcoef_bi_orth_transp(1, interesting(i)) &
+!                       , psi_selectors_lcoef_bi_orth_transp(1, interesting(i)) )
 
-        !perMask(1,1) = iand(mask(1,1), not(det(1,1,i)))
-        !perMask(1,2) = iand(mask(1,2), not(det(1,2,i)))
-        !do j=2,N_int
-        !  perMask(j,1) = iand(mask(j,1), not(det(j,1,i)))
-        !  perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
-        !end do
-        !call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
-        !call bitstring_to_list_in_selection(perMask(1,2), h(1,2), h(0,2), N_int)
-        !call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
-        !if(nt == 4) then
-        !  call get_d2 (det(1,1,i), phasemask, bannedOrb, banned, mat,          mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !  call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !elseif(nt == 3) then
-        !  call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat         , mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !  call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !else
-        !  call get_d0 (det(1,1,i), phasemask, bannedOrb, banned, mat         , mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !  call get_pm0(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
-        !endif
+        call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
+        call bitstring_to_list_in_selection(perMask(1,2), h(1,2), h(0,2), N_int)
+
+        call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
+        if(nt == 4) then
+          call get_d2  (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+        elseif(nt == 3) then
+          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+        else
+          call get_d0 (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm0(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+        endif
     elseif(nt == 4) then
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
         call bitstring_to_list_in_selection(mobMask(1,2), p(1,2), p(0,2), N_int)
@@ -775,17 +776,63 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
 !        call get_excitation_degree( HF_bitmask, det, degree, N_int)
 
-!        psi_h_alpha = mat_m(istate, p1, p2)
-!        alpha_h_psi = mat_p(istate, p1, p2)
+        double precision :: alpha_h_psi_tmp, psi_h_alpha_tmp
+        psi_h_alpha_tmp = mat_m(istate, p1, p2)
+        alpha_h_psi_tmp = mat_p(istate, p1, p2)
 !
         psi_h_alpha = 0.d0
         alpha_h_psi = 0.d0
         do iii = 1, N_det
           call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
           call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
-          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
+!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
+!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
+          psi_h_alpha += i_h_alpha * 1.d0
+          alpha_h_psi += alpha_h_i * 1.d0
         enddo
+!          print*,'---',p1,p2
+!          call debug_det(det,N_int)
+!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
+!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
+!         if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-10 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-10)then
+!        if(dabs(psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d+10)then
+        if(dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d-10)then
+!          print*,'---'
+!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
+!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
+         call debug_det(det,N_int)
+          print*,dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp),psi_h_alpha    *alpha_h_psi,psi_h_alpha_tmp*alpha_h_psi_tmp
+          print*,'-- Good '
+          print*,   psi_h_alpha,    alpha_h_psi  
+          print*,'-- bad '
+          print*,psi_h_alpha_tmp,alpha_h_psi_tmp  
+          print*,'-- details good'
+        double precision :: accu_1, accu_2
+        accu_1 = 0.d0
+        accu_2 = 0.d0
+        do iii = 1, N_det
+          call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
+          call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
+          call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
+          print*,iii,degree,i_h_alpha,alpha_h_i
+          accu_1 += i_h_alpha
+          accu_2 += alpha_h_i
+          print*,accu_1,accu_2
+          
+        enddo
+!          if(dabs(psi_h_alpha*alpha_h_psi).gt.1.d-10)then
+!          print*,p1,p2
+!          print*,det(1,1), det(1,2)
+!          call debug_det(det,N_int)
+!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
+!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
+!          print*, dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp),& 
+!                   psi_h_alpha    *alpha_h_psi,psi_h_alpha_tmp*alpha_h_psi_tmp
+        stop
+          endif
+!          endif
+!          stop
+!        endif
 
         !if(alpha_h_psi*psi_h_alpha/delta_E.gt.1.d-10)then
         !  print*, 'E0,Hii,E_shift'
