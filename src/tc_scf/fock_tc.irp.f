@@ -41,6 +41,15 @@
           !!                                         rho_b(l,j) *      < l k| T | i j>
           !two_e_tc_non_hermit_integral_seq_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
 
+          !!                                         rho(l,j)   *      < k l| T | i j>
+          !two_e_tc_non_hermit_integral_alpha(k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
+          !!                                         rho(l,j)   *      < k l| T | i j>
+          !two_e_tc_non_hermit_integral_beta (k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
+          !!                                         rho_a(l,j) *      < l k| T | i j>
+          !two_e_tc_non_hermit_integral_alpha(k,i) -= density_a * ao_two_e_tc_tot(k,j,l,i)
+          !!                                         rho_b(l,j) *      < l k| T | i j>
+          !two_e_tc_non_hermit_integral_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
+
           !                                         rho(l,j)   *      < k l| T | i j>
           two_e_tc_non_hermit_integral_seq_alpha(k,i) += density   * ao_two_e_tc_tot(k,i,l,j)
           !                                         rho(l,j)   *      < k l| T | i j>

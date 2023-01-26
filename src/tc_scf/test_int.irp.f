@@ -62,12 +62,6 @@ subroutine test_tc_scf
  integer :: i
 ! provide int2_u_grad1u_x_j1b2_test
  provide x_v_ij_erf_rk_cst_mu_j1b_test
-! do i = 1, ng_fit_jast
-!  print*,expo_gauss_1_erf_x_2(i),coef_gauss_1_erf_x_2(i)
-! enddo
-! provide tc_grad_square_ao_test
-!  provide tc_grad_and_lapl_ao_test
-! provide int2_u_grad1u_x_j1b2_test
 ! provide x_v_ij_erf_rk_cst_mu_j1b_test
 ! print*,'TC_HF_energy = ',TC_HF_energy
 ! print*,'grad_non_hermit = ',grad_non_hermit
@@ -1006,3 +1000,4 @@ end
 
 ! ---
 
+>>>>>>> 92a4e33f8a21717cab0c0e4f8412ed6903afb04a

@@ -340,6 +340,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
       do i = 1, ao_num
         do k = 1, ao_num
           tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
+          !tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j)
         enddo
       enddo
     enddo

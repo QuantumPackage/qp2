@@ -60,7 +60,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
   !
   ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS for the first cyclic permutation 
   !
-  ! three_e_3_idx_direct_bi_ort(m,j,i) = <mji|-L|jim>
+  ! three_e_3_idx_cycle_1_bi_ort(m,j,i) = <mji|-L|jim>
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !

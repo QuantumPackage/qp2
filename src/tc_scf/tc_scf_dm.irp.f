@@ -10,7 +10,6 @@ BEGIN_PROVIDER [ double precision, TCSCF_density_matrix_ao_beta, (ao_num, ao_num
   else
     TCSCF_density_matrix_ao_beta = SCF_density_matrix_ao_beta
   endif
-
 END_PROVIDER 
 
 ! ---
@@ -25,7 +24,6 @@ BEGIN_PROVIDER [ double precision, TCSCF_density_matrix_ao_alpha, (ao_num, ao_nu
   else
     TCSCF_density_matrix_ao_alpha = SCF_density_matrix_ao_alpha
   endif
-
 END_PROVIDER 
 
 
