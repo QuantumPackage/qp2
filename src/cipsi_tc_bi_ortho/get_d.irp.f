@@ -523,10 +523,10 @@ subroutine get_d1(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
 !    call get_mo_bi_ortho_tc_two_es(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map)
 !    call get_mo_bi_ortho_tc_two_es(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map)
     do mm = 1, mo_num
-     hji_cache(mm,1) = mo_bi_ortho_tc_two_e(pfix,p1,mm,hfix)
-     hji_cache(mm,2) = mo_bi_ortho_tc_two_e(pfix,p2,mm,hfix)
      hij_cache(mm,1) = mo_bi_ortho_tc_two_e(mm,hfix,pfix,p1)
      hij_cache(mm,2) = mo_bi_ortho_tc_two_e(mm,hfix,pfix,p2)
+     hji_cache(mm,1) = mo_bi_ortho_tc_two_e(pfix,p1,mm,hfix)
+     hji_cache(mm,2) = mo_bi_ortho_tc_two_e(pfix,p2,mm,hfix)
     enddo
     putj = p1
     do puti = 1, mo_num !HOT
@@ -800,7 +800,7 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
       if(bannedOrb(p1, 1)) cycle
 !      call get_mo_bi_ortho_tc_two_es(p1,h2,h1,mo_num,hij_cache1,mo_integrals_map)
       do mm =1, mo_num
-       hij_cache1(mm) = mo_bi_ortho_tc_two_e(mm,p1,h2,h1)
+       hji_cache1(mm) = mo_bi_ortho_tc_two_e(mm,p1,h2,h1)
        hji_cache1(mm) = mo_bi_ortho_tc_two_e(h2,h1,mm,p1)
       enddo
       do p2=1, mo_num
@@ -811,8 +811,8 @@ subroutine get_d0(gen, phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, s
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
 !          call i_h_j(gen, det, N_int, hij)
            !!! GUESS ON THE ORDER 
-          call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hij)
-          call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hji)
+          call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hji)
+          call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hij)
         else
 !          print*,'ELSE '
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)

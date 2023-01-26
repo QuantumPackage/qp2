@@ -807,11 +807,17 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           print*,'-- bad '
           print*,psi_h_alpha_tmp,alpha_h_psi_tmp  
           print*,'-- details good'
+        double precision :: accu_1, accu_2
+        accu_1 = 0.d0
+        accu_2 = 0.d0
         do iii = 1, N_det
           call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
           call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
           call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
           print*,iii,degree,i_h_alpha,alpha_h_i
+          accu_1 += i_h_alpha
+          accu_2 += alpha_h_i
+          print*,accu_1,accu_2
           
         enddo
 !          if(dabs(psi_h_alpha*alpha_h_psi).gt.1.d-10)then
