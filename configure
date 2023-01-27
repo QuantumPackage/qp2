@@ -99,7 +99,7 @@ PACKAGES=$(echo $PACKAGES | xargs)
 
 echo "export QP_ROOT=\"$QP_ROOT\"" > ${QP_ROOT}/etc/00.qp_root.rc
 
-source quantum_package.rc
+source ${QP_ROOT}/quantum_package.rc
 
 
 
@@ -293,7 +293,7 @@ EOF
 
 done
 
-source quantum_package.rc
+source ${QP_ROOT}/quantum_package.rc
 
 NINJA=$(find_exe ninja)
 if [[ ${NINJA} = $(not_found) ]] ; then

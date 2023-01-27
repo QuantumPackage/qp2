@@ -155,7 +155,7 @@ BEGIN_PROVIDER [ double precision, pts_charge_coord, (n_pts_charge,3) ]
   endif
  print*,'Coordinates for the point charges '
  do i = 1, n_pts_charge
-  write(*,'(I3,X,3(F16.8,X))'),i,pts_charge_coord(i,1:3)
+  write(*,'(I3,X,3(F16.8,X))') i,pts_charge_coord(i,1:3)
  enddo
 
 END_PROVIDER
