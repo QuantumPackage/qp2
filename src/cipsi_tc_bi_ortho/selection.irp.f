@@ -75,7 +75,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   integer(bit_kind), allocatable        :: minilist(:, :, :), fullminilist(:, :, :)
   logical, allocatable                  :: banned(:,:,:), bannedOrb(:,:)
   double precision, allocatable         :: coef_fullminilist_rev(:,:)
-  double precision, allocatable         :: mat(:,:,:), mat_p(:,:,:), mat_m(:,:,:)
+  double precision, allocatable         :: mat(:,:,:), mat_l(:,:,:), mat_r(:,:,:)
 
 
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
@@ -208,7 +208,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
 
   allocate( banned(mo_num, mo_num,2), bannedOrb(mo_num, 2) )
   allocate( mat(N_states, mo_num, mo_num) )
-  allocate( mat_p(N_states, mo_num, mo_num), mat_m(N_states, mo_num, mo_num) )
+  allocate( mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num) )
   maskInd = -1
 
   do s1 = 1, 2
@@ -411,9 +411,9 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
             call spot_isinwf(mask, fullminilist, i_generator, fullinteresting(0), banned, fullMatch, fullinteresting)
             if(fullMatch) cycle
 
-            call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting, mat_p, mat_m)
+            call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting, mat_l, mat_r)
 
-            call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, mat_p, mat_m)
+            call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, mat_l, mat_r)
           endif
 
         enddo
@@ -428,7 +428,7 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
 
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
   deallocate(banned, bannedOrb,mat)
-  deallocate(mat_p, mat_m)
+  deallocate(mat_l, mat_r)
 
 end subroutine select_singles_and_doubles
 
@@ -488,7 +488,7 @@ end subroutine spot_isinwf
 
 ! ---
 
-subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting, mat_p, mat_m)
+subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, interesting, mat_l, mat_r)
 
   BEGIN_DOC
   ! Computes the contributions A(r,s) by
@@ -504,7 +504,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
   integer(bit_kind),intent(in)    :: mask(N_int, 2), det(N_int, 2, N_sel)
   logical, intent(inout)          :: bannedOrb(mo_num, 2), banned(mo_num, mo_num, 2)
   double precision, intent(inout) :: mat(N_states, mo_num, mo_num)
-  double precision, intent(inout) :: mat_p(N_states, mo_num, mo_num), mat_m(N_states, mo_num, mo_num)
+  double precision, intent(inout) :: mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num)
 
   integer                         :: i, ii, j, k, l, h(0:2,2), p(0:4,2), nt
   integer(bit_kind)               :: perMask(N_int, 2), mobMask(N_int, 2), negMask(N_int, 2)
@@ -516,8 +516,8 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
 
   mat   = 0d0
-  mat_p = 0d0
-  mat_m = 0d0
+  mat_l = 0d0
+  mat_r = 0d0
 
   do i = 1, N_int
     negMask(i,1) = not(mask(i,1))
@@ -571,7 +571,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
           perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
         end do
 !        call get_d3_h  ( det(1,1,i), bannedOrb, banned, mat         , mask, p, sp, psi_selectors_coef_transp_tc (1, interesting(i)) )
-!        call get_d3_htc( det(1,1,i), bannedOrb, banned, mat_m, mat_p, mask, p, sp, psi_selectors_rcoef_bi_orth_transp(1, interesting(i)) &
+!        call get_d3_htc( det(1,1,i), bannedOrb, banned, mat_r, mat_l, mask, p, sp, psi_selectors_rcoef_bi_orth_transp(1, interesting(i)) &
 !                       , psi_selectors_lcoef_bi_orth_transp(1, interesting(i)) )
 
         call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
@@ -579,14 +579,15 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
         call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
         if(nt == 4) then
-          call get_d2  (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+          call get_d2    (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         elseif(nt == 3) then
-          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         else
-          call get_d0 (det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm0(det(1,1,i), phasemask, bannedOrb, banned, mat_p, mat_m, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
+          call get_d0_new (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_pm0(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         endif
     elseif(nt == 4) then
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
@@ -603,7 +604,7 @@ end subroutine splash_pq
 
 ! ---
 
-subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, mat_p, mat_m)
+subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf, mat_l, mat_r)
 
   use bitmasks
   use selection_types
@@ -611,7 +612,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
   integer,          intent(in)          :: i_generator, sp, h1, h2
   double precision, intent(in)          :: mat(N_states, mo_num, mo_num)
-  double precision, intent(in)          :: mat_p(N_states, mo_num, mo_num), mat_m(N_states, mo_num, mo_num)
+  double precision, intent(in)          :: mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num)
   logical,          intent(in)          :: bannedOrb(mo_num, 2), banned(mo_num, mo_num)
   double precision, intent(in)          :: fock_diag_tmp(mo_num)
   double precision, intent(in)          :: E0(N_states)
@@ -774,63 +775,38 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         delta_E = E0(istate) - Hii + E_shift
         !delta_E = 1.d0
 
-!        call get_excitation_degree( HF_bitmask, det, degree, N_int)
+        call get_excitation_degree( HF_bitmask, det, degree, N_int)
 
         double precision :: alpha_h_psi_tmp, psi_h_alpha_tmp
-        psi_h_alpha_tmp = mat_m(istate, p1, p2)
-        alpha_h_psi_tmp = mat_p(istate, p1, p2)
+        psi_h_alpha_tmp = mat_l(istate, p1, p2)
+        alpha_h_psi_tmp = mat_r(istate, p1, p2)
 !
         psi_h_alpha = 0.d0
         alpha_h_psi = 0.d0
-        do iii = 1, N_det
-          call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
-          call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
-!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
-          psi_h_alpha += i_h_alpha * 1.d0
-          alpha_h_psi += alpha_h_i * 1.d0
-        enddo
-!          print*,'---',p1,p2
-!          call debug_det(det,N_int)
-!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
-!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
-!         if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-10 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-10)then
-!        if(dabs(psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d+10)then
-        if(dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d-10)then
-!          print*,'---'
-!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
-!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
-         call debug_det(det,N_int)
-          print*,dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp),psi_h_alpha    *alpha_h_psi,psi_h_alpha_tmp*alpha_h_psi_tmp
-          print*,'-- Good '
-          print*,   psi_h_alpha,    alpha_h_psi  
-          print*,'-- bad '
-          print*,psi_h_alpha_tmp,alpha_h_psi_tmp  
-          print*,'-- details good'
-        double precision :: accu_1, accu_2
-        accu_1 = 0.d0
-        accu_2 = 0.d0
-        do iii = 1, N_det
-          call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
-          call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
-          call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-          print*,iii,degree,i_h_alpha,alpha_h_i
-          accu_1 += i_h_alpha
-          accu_2 += alpha_h_i
-          print*,accu_1,accu_2
-          
-        enddo
-!          if(dabs(psi_h_alpha*alpha_h_psi).gt.1.d-10)then
-!          print*,p1,p2
-!          print*,det(1,1), det(1,2)
-!          call debug_det(det,N_int)
-!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
-!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
-!          print*, dabs(psi_h_alpha*alpha_h_psi - psi_h_alpha_tmp*alpha_h_psi_tmp),& 
-!                   psi_h_alpha    *alpha_h_psi,psi_h_alpha_tmp*alpha_h_psi_tmp
-        stop
+          do iii = 1, N_det
+            call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
+            call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
+!!!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
+!!!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
+            psi_h_alpha += i_h_alpha * 1.d0
+            alpha_h_psi += alpha_h_i * 1.d0
+          enddo
+!!!          print*,'---',p1,p2
+!!!          call debug_det(det,N_int)
+!!!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
+!!!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
+!!!         if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-10 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-10)then
+!!!        if(dabs(psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d+10)then
+          if(dabs(psi_h_alpha).gt.1.d-10.or.dabs(alpha_h_psi).gt.1.d-10)then
+!           if(dabs(psi_h_alpha_tmp).gt.1.d-10.or.dabs(alpha_h_psi_tmp).gt.1.d-10)then
+           if(dabs(alpha_h_psi_tmp).gt.1.d-10)then
+            if(degree==2)then
+             print*,'psi_h_alpha,alpha_h_psi'
+             print*,psi_h_alpha,alpha_h_psi
+             print*,psi_h_alpha_tmp, alpha_h_psi_tmp
+            endif
+           endif
           endif
-!          endif
 !          stop
 !        endif
 
