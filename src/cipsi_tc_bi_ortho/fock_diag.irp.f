@@ -1,4 +1,4 @@
-subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
+subroutine build_fock_tmp_tc(fock_diag_tmp,det_ref,Nint)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -20,12 +20,12 @@ subroutine build_fock_tmp(fock_diag_tmp,det_ref,Nint)
   E0 = 0.d0
 
   if (Ne(1) /= elec_alpha_num) then
-    print *,  'Error in build_fock_tmp (alpha)', Ne(1), Ne(2)
+    print *,  'Error in build_fock_tmp_tc (alpha)', Ne(1), Ne(2)
     call debug_det(det_ref,N_int)
     stop -1
   endif
   if (Ne(2) /= elec_beta_num) then
-    print *, 'Error in build_fock_tmp (beta)', Ne(1), Ne(2)
+    print *, 'Error in build_fock_tmp_tc (beta)', Ne(1), Ne(2)
     call debug_det(det_ref,N_int)
     stop -1
   endif

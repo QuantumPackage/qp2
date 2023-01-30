@@ -19,7 +19,7 @@ subroutine select_connected(i_generator, E0, pt2_data, b, subset, csubset)
 
   allocate(fock_diag_tmp(2,mo_num+1))
 
-  call build_fock_tmp(fock_diag_tmp, psi_det_generators(1,1,i_generator), N_int)
+  call build_fock_tmp_tc(fock_diag_tmp, psi_det_generators(1,1,i_generator), N_int)
 
   do k = 1, N_int
       hole_mask(k,1)     = iand(generators_bitmask(k,1,s_hole), psi_det_generators(k,1,i_generator))
