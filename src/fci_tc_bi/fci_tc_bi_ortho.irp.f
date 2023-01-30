@@ -38,8 +38,8 @@ program fci
 
 
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  my_n_pt_r_grid = 10
+  my_n_pt_a_grid = 14
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid 
   pruning = -1.d0
   touch pruning

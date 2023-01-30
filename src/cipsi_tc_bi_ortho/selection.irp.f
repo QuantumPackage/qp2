@@ -579,11 +579,12 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
         call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
         if(nt == 4) then
-          call get_d2    (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_d2    (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
 !          call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         elseif(nt == 3) then
-          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+!          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          call get_d1_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
 !          call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         else
           call get_d0_new (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
@@ -786,8 +787,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           do iii = 1, N_det
             call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
             call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-!!!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
-!!!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
+!!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
+!!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
             psi_h_alpha += i_h_alpha * 1.d0
             alpha_h_psi += alpha_h_i * 1.d0
           enddo
@@ -795,20 +796,25 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 !!!          call debug_det(det,N_int)
 !!!          print*,psi_h_alpha    *alpha_h_psi,    psi_h_alpha,    alpha_h_psi  
 !!!          print*,psi_h_alpha_tmp*alpha_h_psi_tmp,psi_h_alpha_tmp,alpha_h_psi_tmp  
-!!!         if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-10 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-10)then
 !!!        if(dabs(psi_h_alpha_tmp*alpha_h_psi_tmp).gt.1.d+10)then
           if(dabs(psi_h_alpha).gt.1.d-10.or.dabs(alpha_h_psi).gt.1.d-10)then
+         if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-10 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-10)then
 !           if(dabs(psi_h_alpha_tmp).gt.1.d-10.or.dabs(alpha_h_psi_tmp).gt.1.d-10)then
-           if(dabs(alpha_h_psi_tmp).gt.1.d-10)then
-            if(degree==2)then
+!            if(degree==2)then
+             call debug_det(det,N_int)
              print*,'psi_h_alpha,alpha_h_psi'
              print*,psi_h_alpha,alpha_h_psi
-             print*,psi_h_alpha_tmp, alpha_h_psi_tmp
-            endif
-           endif
+             print*,psi_h_alpha_tmp,alpha_h_psi_tmp
+             print*,dabs(psi_h_alpha - psi_h_alpha_tmp),dabs(alpha_h_psi - alpha_h_psi_tmp)
+             do iii = 1, N_det
+               call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
+               call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
+               call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
+               print*,iii,degree,i_h_alpha,alpha_h_i
+             enddo
+             stop
           endif
-!          stop
-!        endif
+          endif
 
         !if(alpha_h_psi*psi_h_alpha/delta_E.gt.1.d-10)then
         !  print*, 'E0,Hii,E_shift'

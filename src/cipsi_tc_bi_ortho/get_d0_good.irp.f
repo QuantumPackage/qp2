@@ -40,13 +40,13 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(bannedOrb(p2,2)) cycle
         if(banned(p1, p2, bant)) cycle ! rentable?
         if(p1 == h1 .or. p2 == h2) then
-          print*,'in hij 1'
+!          print*,'in hij 1'
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
           ! call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
 !          call i_h_j_complex(det, gen, N_int, hij)
           call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hij)
         else
-          print*,'in chelou 1 !!!!!!!!!!!!!!!!!!!!!!!'
+!          print*,'in chelou 1 !!!!!!!!!!!!!!!!!!!!!!!'
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
           hij = hij_cache1(p2) * phase
         end if
@@ -61,13 +61,13 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(bannedOrb(p2,2)) cycle
         if(banned(p1, p2, bant)) cycle ! rentable?
         if(p1 == h1 .or. p2 == h2) then
-          print*,'in hji 1'
+!          print*,'in hji 1'
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
           ! call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
 !          call i_h_j_complex(det, gen, N_int, hij)
           call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hji)
         else
-          print*,'in chelou 1 ji !!!!!!!!!!!!!!!!!!!!!!!'
+!          print*,'in chelou 1 ji !!!!!!!!!!!!!!!!!!!!!!!'
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
           hji = hji_cache1(p2) * phase
         end if
@@ -97,14 +97,14 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(bannedOrb(putj, sp)) cycle
         if(banned(puti, putj, bant)) cycle ! rentable?
         if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
-          print*,'in hij 2'
+!          print*,'in hij 2'
           call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
           !call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
 !          call i_h_j_complex(det, gen, N_int, hij)
           call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hij)
           if (hij == (0.d0,0.d0)) cycle
         else
-          print*,'in chelou 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+!          print*,'in chelou 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 !          hij = (mo_two_e_integral_complex(p1, p2, puti, putj) -  mo_two_e_integral_complex(p2, p1, puti, putj))
 !          hij = (mo_bi_ortho_tc_two_e(p1, p2, puti, putj) -  mo_bi_ortho_tc_two_e(p2, p1, puti, putj))
           hij = (mo_bi_ortho_tc_two_e(puti, putj, p1, p2) -  mo_bi_ortho_tc_two_e(puti, putj, p2, p1))
@@ -122,12 +122,12 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(bannedOrb(putj, sp)) cycle
         if(banned(puti, putj, bant)) cycle ! rentable?
         if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
-          print*,'in hji 2'
-          call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
+!          print*,'in hji 2'
+!          call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
           call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hji)
           if (hji == (0.d0,0.d0)) cycle
         else
-          print*,'in chelou 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+!          print*,'in chelou 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
           hji = (mo_bi_ortho_tc_two_e( p1, p2, puti, putj) -  mo_bi_ortho_tc_two_e( p2, p1, puti, putj))
           if (hji == (0.d0,0.d0)) cycle
           hji = (hji) * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
