@@ -785,12 +785,14 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         psi_h_alpha = 0.d0
         alpha_h_psi = 0.d0
           do iii = 1, N_det
-            call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
-            call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-!!          psi_h_alpha += i_h_alpha * leigvec_tc_bi_orth(iii,1)
-!!          alpha_h_psi += alpha_h_i * reigvec_tc_bi_orth(iii,1) 
-            psi_h_alpha += i_h_alpha * 1.d0
-            alpha_h_psi += alpha_h_i * 1.d0
+!            call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
+!            call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
+            call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+            call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+            psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function 
+            alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
+!            psi_h_alpha += i_h_alpha * 1.d0
+!            alpha_h_psi += alpha_h_i * 1.d0
           enddo
 !!!          print*,'---',p1,p2
 !!!          call debug_det(det,N_int)
@@ -807,10 +809,15 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
              print*,psi_h_alpha_tmp,alpha_h_psi_tmp
              print*,dabs(psi_h_alpha - psi_h_alpha_tmp),dabs(alpha_h_psi - alpha_h_psi_tmp)
              do iii = 1, N_det
+               
                call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
                call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
                call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-               print*,iii,degree,i_h_alpha,alpha_h_i
+               if(dabs(i_h_alpha).gt.1.d-10.or.dabs(alpha_h_i).gt.1.d-10)then
+                call debug_det(psi_det(1,1,iii),N_int)
+                print*,iii,degree,i_h_alpha,alpha_h_i
+                print*,leigvec_tc_bi_orth(iii,1),reigvec_tc_bi_orth(iii,1)
+               endif
              enddo
              stop
           endif

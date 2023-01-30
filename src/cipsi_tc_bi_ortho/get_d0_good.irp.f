@@ -23,7 +23,9 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
   allocate (hij_cache1(mo_num),hij_cache2(mo_num))
   double precision, allocatable :: hji_cache1(:), hji_cache2(:)
   allocate (hji_cache1(mo_num),hji_cache2(mo_num))
-  print*,'in get_d0_new'
+!  print*,'in get_d0_new'
+!  call debug_det(gen,N_int)
+!  print*,'coefs',coefs(1,:)
 
   if(sp == 3) then ! AB
     h1 = p(1,1)
