@@ -377,7 +377,7 @@ subroutine non_hrmt_diag_split_degen_s_inv_half(n, A, leigvec, reigvec, n_real_e
       print*,'New vectors not bi-orthonormals at ', accu_nd
       call get_inv_half_nonsymmat_diago(S, n, S_nh_inv_half, complex_root)
       if(complex_root)then 
-       call impose_biorthog_qr(n, n, leigvec_tmp, reigvec_tmp) ! bi-orthonormalization using QR
+       call impose_biorthog_qr(n, n, leigvec_tmp, reigvec_tmp, S) ! bi-orthonormalization using QR
       else
        print*,'S^{-1/2} exists !!'
        call bi_ortho_s_inv_half(n,leigvec_tmp,reigvec_tmp,S_nh_inv_half) ! use of S^{-1/2} bi-orthonormalization 
