@@ -1,4 +1,39 @@
+ BEGIN_PROVIDER [ double precision, expo_j_xmu_1gauss ]
+&BEGIN_PROVIDER [ double precision, coef_j_xmu_1gauss ]
+ implicit none
+ BEGIN_DOC
+ ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+ !
+ ! with a single gaussian. 
+ !
+ ! Such a function can be used to screen integrals with F(x). 
+ END_DOC
+ expo_j_xmu_1gauss  = 0.5d0
+ coef_j_xmu_1gauss  = 1.d0
+END_PROVIDER 
 ! ---
+
+BEGIN_PROVIDER [ double precision, expo_erfc_gauss ]
+ implicit none 
+ expo_erfc_gauss = 1.41211d0
+END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, expo_erfc_mu_gauss ]
+ implicit none 
+ expo_erfc_mu_gauss = expo_erfc_gauss * mu_erf * mu_erf
+END_PROVIDER 
+
+ BEGIN_PROVIDER [ double precision, expo_good_j_mu_1gauss ]
+&BEGIN_PROVIDER [ double precision, coef_good_j_mu_1gauss ]
+ implicit none
+ BEGIN_DOC
+ ! exponent of Gaussian in order to obtain an upper bound of J(r12,mu)
+ !
+ ! Can be used to scree integrals with J(r12,mu)
+ END_DOC
+ expo_good_j_mu_1gauss = 2.D0 * mu_erf * expo_j_xmu_1gauss
+ coef_good_j_mu_1gauss = 0.5d0/mu_erf * coef_j_xmu_1gauss
+ END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, expo_j_xmu, (n_fit_1_erf_x) ]
  implicit none
@@ -87,6 +122,36 @@ END_PROVIDER
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x(i) = tmp * expo_gauss_j_mu_x(i)
     enddo
+
+  elseif(ng_fit_jast .eq. 7) then
+
+    coef_gauss_j_mu_x = (/ -0.01756495d0 , -0.01023623d0  , -0.06548959d0  , -0.03539446d0  , -0.17150646d0  , -0.15071096d0  , -0.11326834d0   /)
+    expo_gauss_j_mu_x = (/ 9.88572565d+02,  1.21363371d+04,  3.69794870d+01,  1.67364529d+02,  3.03962934d+00,  1.27854005d+00,  9.76383343d+00 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_x(i) = tmp * expo_gauss_j_mu_x(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 8) then
+
+    coef_gauss_j_mu_x = (/ -0.11489205d0 , -0.16008968d0 , -0.12892456d0 , -0.04250838d0 , -0.0718451d0  , -0.02394051d0 , -0.00913353d0 , -0.01285182d0  /)
+    expo_gauss_j_mu_x = (/ 6.97632442d+00, 2.56010878d+00, 1.22760977d+00, 7.47697124d+01, 2.16104215d+01, 2.96549728d+02, 1.40773328d+04, 1.43335159d+03 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_x(i) = tmp * expo_gauss_j_mu_x(i)
+    enddo
+
+  !elseif(ng_fit_jast .eq. 9) then
+
+  !  coef_gauss_j_mu_x = (/ /)
+  !  expo_gauss_j_mu_x = (/ /)
+
+  !  tmp = mu_erf * mu_erf
+  !  do i = 1, ng_fit_jast
+  !    expo_gauss_j_mu_x(i) = tmp * expo_gauss_j_mu_x(i)
+  !  enddo
 
   elseif(ng_fit_jast .eq. 20) then
 
@@ -188,6 +253,36 @@ END_PROVIDER
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
     enddo
+
+  elseif(ng_fit_jast .eq. 7) then
+
+    coef_gauss_j_mu_x_2 = (/ 0.05202849d0  , 0.01031081d0  , 0.04699157d0  , 0.01451002d0  , 0.07442576d0  , 0.02692033d0  , 0.09311842d0   /)
+    expo_gauss_j_mu_x_2 = (/ 3.04469415d+00, 1.40682034d+04, 7.45960945d+01, 1.43067466d+03, 2.16815661d+01, 2.95750306d+02, 7.23471236d+00 /)
+    
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 8) then
+
+    coef_gauss_j_mu_x_2 = (/ 0.00942115d0  , 0.07332421d0  , 0.0508308d0   , 0.08204949d0  , 0.0404099d0   , 0.03201288d0  , 0.01911313d0  , 0.01114732d0   /)
+    expo_gauss_j_mu_x_2 = (/ 1.56957321d+04, 1.52867810d+01, 4.36016903d+01, 5.96818956d+00, 2.85535269d+00, 1.36064008d+02, 4.71968910d+02, 1.92022350d+03 /)
+    
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
+    enddo
+
+  !elseif(ng_fit_jast .eq. 9) then
+
+  !  coef_gauss_j_mu_x_2 = (/  /)
+  !  expo_gauss_j_mu_x_2 = (/  /)
+  !  
+  !  tmp = mu_erf * mu_erf
+  !  do i = 1, ng_fit_jast
+  !    expo_gauss_j_mu_x_2(i) = tmp * expo_gauss_j_mu_x_2(i)
+  !  enddo
 
   elseif(ng_fit_jast .eq. 20) then
 
@@ -292,6 +387,36 @@ END_PROVIDER
     do i = 1, ng_fit_jast
       expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
     enddo
+
+  elseif(ng_fit_jast .eq. 7) then
+
+    coef_gauss_j_mu_1_erf = (/ -0.11853067d0 , -0.01522824d0  , -0.07419098d0  , -0.022202d0    , -0.12242283d0  , -0.04177571d0  , -0.16983107d0  /)
+    expo_gauss_j_mu_1_erf = (/ 2.74057056d+00,  1.37626591d+04,  6.65578663d+01,  1.34693031d+03,  1.90547699d+01,  2.69445390d+02,  6.31845879d+00/)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
+    enddo
+
+  elseif(ng_fit_jast .eq. 8) then
+
+    coef_gauss_j_mu_1_erf = (/ -0.12263328d0 , -0.04965255d0 , -0.15463564d0 , -0.09675781d0 , -0.0807023d0  , -0.02923298d0 , -0.01381381d0 , -0.01675923d0  /)
+    expo_gauss_j_mu_1_erf = (/ 1.36101994d+01, 1.24908367d+02, 5.29061388d+00, 2.60692516d+00, 3.93396935d+01, 4.43071610d+02, 1.54902240d+04, 1.85170446d+03 /)
+
+    tmp = mu_erf * mu_erf
+    do i = 1, ng_fit_jast
+      expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
+    enddo
+
+  !elseif(ng_fit_jast .eq. 9) then
+
+  !  coef_gauss_j_mu_1_erf = (/  /)
+  !  expo_gauss_j_mu_1_erf = (/  /)
+
+  !  tmp = mu_erf * mu_erf
+  !  do i = 1, ng_fit_jast
+  !    expo_gauss_j_mu_1_erf(i) = tmp * expo_gauss_j_mu_1_erf(i)
+  !  enddo
 
   elseif(ng_fit_jast .eq. 20) then
 

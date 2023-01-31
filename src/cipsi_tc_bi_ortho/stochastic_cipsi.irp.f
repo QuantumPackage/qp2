@@ -44,9 +44,10 @@ subroutine run_stochastic_cipsi
   pt2_data % overlap= 0.d0
   pt2_data % variance = huge(1.e0)
 
-  if (s2_eig) then
-    call make_s2_eigenfunction
-  endif
+  !!!! WARNING  !!!! SEEMS TO BE PROBLEM WTH make_s2_eigenfunction !!!! THE DETERMINANTS CAN APPEAR TWICE IN THE WFT DURING SELECTION
+!  if (s2_eig) then
+!    call make_s2_eigenfunction
+!  endif
   print_pt2 = .False.
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
 !  call routine_save_right
@@ -89,6 +90,7 @@ subroutine run_stochastic_cipsi
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
     call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
+    stop
 
     N_iter += 1
 

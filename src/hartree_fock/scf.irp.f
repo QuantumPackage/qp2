@@ -68,20 +68,29 @@ subroutine create_guess
   endif
 end
 
-subroutine run
+! ---
+
+subroutine run()
 
   BEGIN_DOC
-!   Run SCF calculation
+  ! Run SCF calculation
   END_DOC
 
   use bitmasks
   implicit none
 
-  integer                        :: i_it, i, j, k
-
   mo_label = 'Orthonormalized'
 
-  call Roothaan_Hall_SCF
+  PROVIDE scf_algorithm
+
+  if(scf_algorithm .eq. "DIIS") then
+    call Roothaan_Hall_SCF()
+  elseif(scf_algorithm .eq. "Simple") then
+    call Roothaan_Hall_SCF_Simple()
+  else
+    print *, scf_algorithm, ' not implemented yet'
+  endif
+
   call ezfio_set_hartree_fock_energy(SCF_energy)
 
 end

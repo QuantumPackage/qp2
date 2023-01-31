@@ -70,9 +70,9 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_poi
 
           gradu_squared_u_ij_mu(i,j,ipoint) = tmp1 * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)            &
                                             + tmp2 * int2_u2_j1b2             (i,j,ipoint)            &
-                                            + tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2(1,i,j,ipoint) &
-                                            + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2(2,i,j,ipoint) &
-                                            + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2(3,i,j,ipoint)
+                                            + tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2(i,j,ipoint,1) &
+                                            + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2(i,j,ipoint,2) &
+                                            + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2(i,j,ipoint,3)
         enddo
       enddo
     enddo
@@ -104,11 +104,11 @@ END_PROVIDER
 
 ! ---
 
-!BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
+!BEGIN_PROVIDER [double precision, tc_grad_square_ao_loop, (ao_num, ao_num, ao_num, ao_num)]
 !
 !  BEGIN_DOC
 !  !
-!  ! tc_grad_square_ao(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_1 u(r1,r2)|^2 | ij>
+!  ! tc_grad_square_ao_loop(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_1 u(r1,r2)|^2 | ij>
 !  !
 !  END_DOC
 !
@@ -142,8 +142,8 @@ END_PROVIDER
 !    do l = 1, ao_num
 !      do i = 1, ao_num
 !        do k = 1, ao_num
-!          tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
-!          !write(11,*) tc_grad_square_ao(k,i,l,j)
+!          tc_grad_square_ao_loop(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
+!          !write(11,*) tc_grad_square_ao_loop(k,i,l,j)
 !        enddo
 !      enddo
 !    enddo
@@ -155,18 +155,22 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, tc_grad_square_ao_loop, (ao_num, ao_num, ao_num, ao_num)]
 
   BEGIN_DOC
   !
-  ! tc_grad_square_ao(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_1 u(r1,r2)|^2 | ij>
+  ! tc_grad_square_ao_loop(k,i,l,j) = 1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
   !
   END_DOC
 
   implicit none
   integer                       :: ipoint, i, j, k, l
   double precision              :: weight1, ao_ik_r, ao_i_r
+  double precision              :: time0, time1
   double precision, allocatable :: ac_mat(:,:,:,:), bc_mat(:,:,:,:)
+
+  print*, ' providing tc_grad_square_ao_loop ...'
+  call wall_time(time0)
 
   allocate(ac_mat(ao_num,ao_num,ao_num,ao_num))
   ac_mat = 0.d0
@@ -177,10 +181,12 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
     weight1 = final_weight_at_r_vector(ipoint)
 
     do i = 1, ao_num
-      ao_i_r = weight1 * aos_in_r_array_transp(ipoint,i)
+      !ao_i_r = weight1 * aos_in_r_array_transp(ipoint,i)
+      ao_i_r = weight1 * aos_in_r_array(i,ipoint)
 
       do k = 1, ao_num
-        ao_ik_r = ao_i_r * aos_in_r_array_transp(ipoint,k)
+        !ao_ik_r = ao_i_r * aos_in_r_array_transp(ipoint,k)
+        ao_ik_r = ao_i_r * aos_in_r_array(k,ipoint)
 
         do j = 1, ao_num
           do l = 1, ao_num
@@ -196,7 +202,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
     do l = 1, ao_num
       do i = 1, ao_num
         do k = 1, ao_num
-          tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) + bc_mat(k,i,l,j)
+          tc_grad_square_ao_loop(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) + bc_mat(k,i,l,j)
         enddo
       enddo
     enddo
@@ -204,6 +210,9 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   deallocate(ac_mat)
   deallocate(bc_mat)
+
+  call wall_time(time1)
+  print*, ' Wall time for tc_grad_square_ao_loop = ', time1 - time0
 
 END_PROVIDER 
 
@@ -291,6 +300,7 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
 END_PROVIDER 
 
 ! ---
+! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num, n_points_final_grid) ]
  
@@ -328,9 +338,9 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
 
         tmp9 = int2_u_grad1u_j1b2(i,j,ipoint)
 
-        u12_grad1_u12_j1b_grad1_j1b(i,j,ipoint) = tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2(1,i,j,ipoint) &
-                                                + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2(2,i,j,ipoint) &
-                                                + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2(3,i,j,ipoint)
+        u12_grad1_u12_j1b_grad1_j1b(i,j,ipoint) = tmp6 * tmp9 + tmp3 * int2_u_grad1u_x_j1b2(i,j,ipoint,1) &
+                                                + tmp7 * tmp9 + tmp4 * int2_u_grad1u_x_j1b2(i,j,ipoint,2) &
+                                                + tmp8 * tmp9 + tmp5 * int2_u_grad1u_x_j1b2(i,j,ipoint,3)
       enddo
     enddo
   enddo
@@ -342,3 +352,86 @@ END_PROVIDER
 
 ! ---
 
+BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
+
+  BEGIN_DOC
+  !
+  ! tc_grad_square_ao(k,i,l,j) = 1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
+  !
+  END_DOC
+
+  implicit none
+  integer                       :: ipoint, i, j, k, l
+  double precision              :: weight1, ao_ik_r, ao_i_r
+  double precision              :: time0, time1
+  double precision, allocatable :: ac_mat(:,:,:,:), b_mat(:,:,:), tmp(:,:,:)
+
+  print*, ' providing tc_grad_square_ao ...'
+  call wall_time(time0)
+
+  allocate(ac_mat(ao_num,ao_num,ao_num,ao_num), b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+
+  b_mat = 0.d0
+ !$OMP PARALLEL               &
+ !$OMP DEFAULT (NONE)         &
+ !$OMP PRIVATE (i, k, ipoint) & 
+ !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+ !$OMP DO SCHEDULE (static)
+  do i = 1, ao_num
+    do k = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+        b_mat(ipoint,k,i) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,k)
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  tmp = 0.d0
+ !$OMP PARALLEL               &
+ !$OMP DEFAULT (NONE)         &
+ !$OMP PRIVATE (j, l, ipoint) & 
+ !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
+ !$OMP DO SCHEDULE (static)
+  do ipoint = 1, n_points_final_grid
+    do j = 1, ao_num
+      do l = 1, ao_num
+        tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+
+  ac_mat = 0.d0
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+            , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+            , 1.d0, ac_mat, ao_num*ao_num)
+  deallocate(tmp, b_mat)
+
+ !$OMP PARALLEL             &
+ !$OMP DEFAULT (NONE)       &
+ !$OMP PRIVATE (i, j, k, l) & 
+ !$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
+ !$OMP DO SCHEDULE (static)
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do i = 1, ao_num
+        do k = 1, ao_num
+          tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) 
+        enddo
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  deallocate(ac_mat)
+
+  call wall_time(time1)
+  print*, ' Wall time for tc_grad_square_ao = ', time1 - time0
+
+END_PROVIDER 
+
+! ---

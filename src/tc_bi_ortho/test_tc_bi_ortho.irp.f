@@ -11,121 +11,210 @@ program tc_bi_ortho
   touch read_wf
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
- ! call routine_2
-  call test_rout
+! call test_slater_tc_opt
+ call timing_tot
+! call timing_diag
+! call timing_single
+! call timing_double
 end
 
-subroutine test_rout
+subroutine test_slater_tc_opt
  implicit none
- integer :: i,j,ii,jj
-  use bitmasks ! you need to include the bitmasks_module.f90 features
-  integer(bit_kind), allocatable :: det_i(:,:)
-  allocate(det_i(N_int,2))
-  det_i(:,:)= psi_det(:,:,1)
-  call debug_det(det_i,N_int)
-  integer, allocatable           :: occ(:,:)
-  integer                        :: n_occ_ab(2)
-  allocate(occ(N_int*bit_kind_size,2))
-  call bitstring_to_list_ab(det_i, occ, n_occ_ab, N_int)
-  double precision :: hmono, htwoe, htot
-  call diag_htilde_mu_mat_bi_ortho(N_int, det_i, hmono, htwoe, htot)
-  print*,'hmono, htwoe, htot'
-  print*, hmono, htwoe, htot 
-  print*,'alpha electrons orbital occupancy'
-  do i = 1, n_occ_ab(1) ! browsing the alpha electrons
-    j = occ(i,1)
-    print*,j,mo_bi_ortho_tc_one_e(j,j)
-  enddo
-  print*,'beta  electrons orbital occupancy'
-  do i = 1, n_occ_ab(2) ! browsing the beta  electrons
-    j = occ(i,2)
-    print*,j,mo_bi_ortho_tc_one_e(j,j)
-  enddo
-  print*,'alpha beta'
-  do i = 1, n_occ_ab(1)
-   ii = occ(i,1)
-   do j = 1, n_occ_ab(2)
-    jj = occ(j,2)
-    print*,ii,jj,mo_bi_ortho_tc_two_e(jj,ii,jj,ii) 
-   enddo
-  enddo
-  print*,'alpha alpha'
-  do i = 1, n_occ_ab(1)
-   ii = occ(i,1)
-   do j = 1, n_occ_ab(1)
-    jj = occ(j,1)
-    print*,ii,jj,mo_bi_ortho_tc_two_e(jj,ii,jj,ii), mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
-   enddo
-  enddo
-
-  print*,'beta beta'
-  do i = 1, n_occ_ab(2)
-   ii = occ(i,2)
-   do j = 1, n_occ_ab(2)
-    jj = occ(j,2)
-    print*,ii,jj,mo_bi_ortho_tc_two_e(jj,ii,jj,ii), mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
-   enddo
-  enddo
- 
-
-end
-
-subroutine routine_2
- implicit none
- integer :: i
- double precision :: bi_ortho_mo_ints
- print*,'H matrix'
+ integer :: i,j,degree
+ double precision :: hmono, htwoe, htot, hthree 
+ double precision :: hnewmono, hnewtwoe, hnewthree, hnewtot
+ double precision :: accu_d ,i_count, accu
+ accu = 0.d0
+ accu_d = 0.d0
+ i_count = 0.d0
  do i = 1, N_det
-  write(*,'(1000(F16.5,X))')htilde_matrix_elmt_bi_ortho(:,i)
+  do j = 1,N_det
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hnewmono, hnewtwoe, hnewthree, hnewtot)
+   if(dabs(htot).gt.1.d-15)then
+     i_count += 1.D0
+     accu += dabs(htot-hnewtot) 
+     if(dabs(htot-hnewtot).gt.1.d-8.or.dabs(htot-hnewtot).gt.dabs(htot))then
+      call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+      print*,j,i,degree
+      call debug_det(psi_det(1,1,i),N_int)
+      call debug_det(psi_det(1,1,j),N_int)
+      print*,htot,hnewtot,dabs(htot-hnewtot)
+      print*,hthree,hnewthree,dabs(hthree-hnewthree)
+      stop
+     endif
+   endif
+  enddo
  enddo
- i = 1
- double precision :: phase
- integer :: degree,h1, p1, h2, p2, s1, s2, exc(0:2,2,2)
- call get_excitation_degree(ref_bitmask, psi_det(1,1,i), degree, N_int)
- if(degree==2)then
-  call get_double_excitation(ref_bitmask, psi_det(1,1,i), exc, phase, N_int)
-  call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
-  print*,'h1,h2,p1,p2'
-  print*, h1,h2,p1,p2 
-  print*,mo_bi_ortho_tc_two_e(p1,p2,h1,h2),mo_bi_ortho_tc_two_e(h1,h2,p1,p2)
- endif
-
- 
- print*,'coef'
- do i = 1, ao_num
-  print*,i,mo_l_coef(i,8),mo_r_coef(i,8)
- enddo
-! print*,'mdlqfmlqgmqglj'
-! print*,'mo_bi_ortho_tc_two_e()',mo_bi_ortho_tc_two_e(2,2,3,3)
-! print*,'bi_ortho_mo_ints      ',bi_ortho_mo_ints(2,2,3,3)
- print*,'Overlap'
- do i = 1, mo_num
-  write(*,'(100(F16.10,X))')overlap_bi_ortho(:,i)
- enddo
+ print*,'accu   = ',accu/i_count
 
 end
 
-subroutine routine
+subroutine timing_tot
  implicit none
- double precision :: hmono,htwoe,hthree,htot
- integer(bit_kind), allocatable  :: key1(:,:)
- integer(bit_kind), allocatable  :: key2(:,:)
- allocate(key1(N_int,2),key2(N_int,2))
- use bitmasks
- key1 = ref_bitmask
- call htilde_mu_mat_bi_ortho(key1,key1, N_int, hmono,htwoe,hthree,htot)
- key2 = key1
- integer :: h,p,i_ok
- h = 1
- p = 8
- call do_single_excitation(key2,h,p,1,i_ok) 
- call debug_det(key2,N_int)
- call htilde_mu_mat_bi_ortho(key2,key1, N_int, hmono,htwoe,hthree,htot)
-! print*,'fock_matrix_tc_mo_alpha(p,h) =  ',fock_matrix_tc_mo_alpha(p,h)
- print*,'htot                         =  ',htot
- print*,'hmono                        =  ',hmono 
- print*,'htwoe                        =  ',htwoe
- double precision :: bi_ortho_mo_ints
- print*,'bi_ortho_mo_ints(1,p,1,h)',bi_ortho_mo_ints(1,p,1,h)
+ integer :: i,j
+ double precision :: wall0, wall1
+ double precision, allocatable :: mat_old(:,:),mat_new(:,:)
+ double precision :: hmono, htwoe, hthree, htot, i_count
+ integer :: degree 
+ call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,2), N_int, hmono, htwoe, hthree, htot)
+ call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,2), N_int, hmono, htwoe, hthree, htot)
+ call wall_time(wall0)
+ i_count = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+!   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   i_count += 1.d0
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for old hij for total   = ',wall1 - wall0
+
+ call wall_time(wall0)
+ i_count = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+!   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   i_count += 1.d0
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for new hij for total   = ',wall1 - wall0
+ call i_H_j(psi_det(1,1,1), psi_det(1,1,2),N_int,htot)
+ call wall_time(wall0)
+ i_count = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+   call i_H_j(psi_det(1,1,j), psi_det(1,1,i),N_int,htot)
+   i_count += 1.d0
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for new hij STANDARD    = ',wall1 - wall0
 
 end
+
+subroutine timing_diag
+ implicit none
+ integer :: i,j
+ double precision :: wall0, wall1
+ double precision, allocatable :: mat_old(:,:),mat_new(:,:)
+ double precision :: hmono, htwoe, hthree, htot, i_count
+ integer :: degree 
+ call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
+ call wall_time(wall0)
+ i_count = 0.d0
+ do i = 1, N_det
+  do j = i,i 
+   i_count += 1.d0
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for old hij for diagonal= ',wall1 - wall0
+
+ call wall_time(wall0)
+ i_count = 0.d0
+ do i = 1, N_det
+  do j = i,i
+   i_count += 1.d0
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for new hij for diagonal= ',wall1 - wall0
+
+end
+
+subroutine timing_single
+ implicit none
+ integer :: i,j
+ double precision :: wall0, wall1,accu
+ double precision, allocatable :: mat_old(:,:),mat_new(:,:)
+ double precision :: hmono, htwoe, hthree, htot, i_count
+ integer :: degree 
+ call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
+ i_count = 0.d0
+ accu = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   if(degree.ne.1)cycle
+   i_count += 1.d0
+   call wall_time(wall0)
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call wall_time(wall1)
+   accu += wall1 - wall0
+  enddo
+ enddo
+ print*,'i_count = ',i_count
+ print*,'time for old hij for singles = ',accu
+
+ i_count = 0.d0
+ accu = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   if(degree.ne.1)cycle
+   i_count += 1.d0
+   call wall_time(wall0)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call wall_time(wall1)
+   accu += wall1 - wall0
+  enddo
+ enddo
+ print*,'i_count = ',i_count
+ print*,'time for new hij for singles = ',accu
+
+end
+
+subroutine timing_double
+ implicit none
+ integer :: i,j
+ double precision :: wall0, wall1,accu
+ double precision, allocatable :: mat_old(:,:),mat_new(:,:)
+ double precision :: hmono, htwoe, hthree, htot, i_count
+ integer :: degree 
+ call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
+ i_count = 0.d0
+ accu = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   if(degree.ne.2)cycle
+   i_count += 1.d0
+   call wall_time(wall0)
+   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call wall_time(wall1)
+   accu += wall1 - wall0
+  enddo
+ enddo
+ print*,'i_count = ',i_count
+ print*,'time for old hij for doubles = ',accu
+
+ i_count = 0.d0
+ accu = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
+   if(degree.ne.2)cycle
+   i_count += 1.d0
+   call wall_time(wall0)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call wall_time(wall1)
+   accu += wall1 - wall0
+  enddo
+ enddo
+ call wall_time(wall1)
+ print*,'i_count = ',i_count
+ print*,'time for new hij for doubles = ',accu
+
+end
+

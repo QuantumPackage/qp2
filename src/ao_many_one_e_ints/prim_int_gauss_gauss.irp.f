@@ -1,10 +1,80 @@
-double precision function overlap_gauss_r12(D_center,delta,A_center,B_center,power_A,power_B,alpha,beta)
+! ---
+
+double precision function overlap_gauss_r12(D_center, delta, A_center, B_center, power_A, power_B, alpha, beta)
+
   BEGIN_DOC
+  !
   ! Computes the following integral :
   !
   ! .. math                      ::
   !
   !   \int dr exp(-delta (r - D)^2 ) (x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )
+  !
+  END_DOC
+
+  include 'constants.include.F'
+
+  implicit none
+  double precision, intent(in) :: D_center(3), delta  ! pure gaussian "D"
+  double precision, intent(in) :: A_center(3),B_center(3),alpha,beta ! gaussian/polynoms "A" and "B"
+  integer, intent(in)          :: power_A(3),power_B(3)
+
+  double precision             :: overlap_x,overlap_y,overlap_z,overlap
+  ! First you multiply the usual gaussian "A" with the gaussian exp(-delta (r - D)^2 )
+  double precision             :: A_new(0:max_dim,3)! new polynom
+  double precision             :: A_center_new(3)   ! new center
+  integer                      :: iorder_a_new(3)   ! i_order(i) = order of the new polynom ==> should be equal to power_A
+  double precision             :: alpha_new         ! new exponent
+  double precision             :: fact_a_new        ! constant factor
+  double precision             :: accu, coefx, coefy, coefz, coefxy, coefxyz, thr
+  integer                      :: d(3), i, lx, ly, lz, iorder_tmp(3), dim1
+
+  dim1 = 100
+  thr  = 1.d-10
+  d(:) = 0 ! order of the polynom for the gaussian exp(-delta (r - D)^2 )  == 0
+  overlap_gauss_r12 = 0.d0
+
+  ! New gaussian/polynom defined by :: new pol new center new expo   cst fact new order
+  call give_explicit_poly_and_gaussian(A_new , A_center_new , alpha_new, fact_a_new , iorder_a_new ,&
+      delta,alpha,d,power_A,D_center,A_center,n_pt_max_integrals)
+  if(fact_a_new.lt.thr)return
+  ! The new gaussian exp(-delta (r - D)^2 ) (x-A_x)^a \exp(-\alpha (x-A_x)^2
+  accu = 0.d0
+  do lx = 0, iorder_a_new(1)
+    coefx = A_new(lx,1)*fact_a_new
+    if(dabs(coefx).lt.thr)cycle
+    iorder_tmp(1) = lx
+
+    do ly = 0, iorder_a_new(2)
+      coefy  = A_new(ly,2)
+      coefxy = coefx * coefy
+      if(dabs(coefxy) .lt. thr) cycle
+      iorder_tmp(2) = ly
+
+      do lz = 0, iorder_a_new(3)
+        coefz   = A_new(lz,3)
+        coefxyz = coefxy * coefz
+        if(dabs(coefxyz) .lt. thr) cycle
+        iorder_tmp(3) = lz
+
+        call overlap_gaussian_xyz( A_center_new, B_center, alpha_new, beta, iorder_tmp, power_B &
+                                 , overlap_x, overlap_y, overlap_z, overlap, dim1)
+
+        accu += coefxyz * overlap
+      enddo
+    enddo
+  enddo
+  overlap_gauss_r12 = accu
+end
+
+!---
+double precision function overlap_abs_gauss_r12(D_center,delta,A_center,B_center,power_A,power_B,alpha,beta)
+  BEGIN_DOC
+  ! Computes the following integral :
+  !
+  ! .. math                      ::
+  !
+  !   \int dr exp(-delta (r - D)^2 ) |(x-A_x)^a (x-B_x)^b \exp(-\alpha (x-A_x)^2 - \beta (x-B_x)^2 )|
   !
   END_DOC
 
@@ -21,20 +91,23 @@ double precision function overlap_gauss_r12(D_center,delta,A_center,B_center,pow
   integer                        :: iorder_a_new(3)   ! i_order(i) = order of the new polynom ==> should be equal to power_A
   double precision               :: alpha_new         ! new exponent
   double precision               :: fact_a_new        ! constant factor
-  double precision               :: accu,coefx,coefy,coefz,coefxy,coefxyz,thr
+  double precision               :: accu,coefx,coefy,coefz,coefxy,coefxyz,thr,dx,lower_exp_val
   integer                        :: d(3),i,lx,ly,lz,iorder_tmp(3),dim1
-  dim1=100
-  thr = 1.d-10
+  dim1=50
+  lower_exp_val = 40.d0
+  thr = 1.d-12
   d(:) = 0 ! order of the polynom for the gaussian exp(-delta (r - D)^2 )  == 0
+  overlap_abs_gauss_r12 = 0.d0
 
   ! New gaussian/polynom defined by :: new pol new center new expo   cst fact new order
   call give_explicit_poly_and_gaussian(A_new , A_center_new , alpha_new, fact_a_new , iorder_a_new ,&
       delta,alpha,d,power_A,D_center,A_center,n_pt_max_integrals)
+  if(fact_a_new.lt.thr)return
   ! The new gaussian exp(-delta (r - D)^2 ) (x-A_x)^a \exp(-\alpha (x-A_x)^2
   accu = 0.d0
   do lx = 0, iorder_a_new(1)
-    coefx = A_new(lx,1)
-    if(dabs(coefx).lt.thr)cycle
+    coefx = A_new(lx,1)*fact_a_new
+!    if(dabs(coefx).lt.thr)cycle
     iorder_tmp(1) = lx
     do ly = 0, iorder_a_new(2)
       coefy = A_new(ly,2)
@@ -46,12 +119,14 @@ double precision function overlap_gauss_r12(D_center,delta,A_center,B_center,pow
         coefxyz = coefxy * coefz
         if(dabs(coefxyz).lt.thr)cycle
         iorder_tmp(3) = lz
-        call overlap_gaussian_xyz(A_center_new,B_center,alpha_new,beta,iorder_tmp,power_B,overlap_x,overlap_y,overlap_z,overlap,dim1)
-        accu += coefxyz * overlap
+        call overlap_x_abs(A_center_new(1),B_center(1),alpha_new,beta,iorder_tmp(1),power_B(1),overlap_x,lower_exp_val,dx,dim1)
+        call overlap_x_abs(A_center_new(2),B_center(2),alpha_new,beta,iorder_tmp(2),power_B(2),overlap_y,lower_exp_val,dx,dim1)
+        call overlap_x_abs(A_center_new(3),B_center(3),alpha_new,beta,iorder_tmp(3),power_B(3),overlap_z,lower_exp_val,dx,dim1)
+        accu += dabs(coefxyz * overlap_x * overlap_y * overlap_z)
       enddo
     enddo
   enddo
-  overlap_gauss_r12 = fact_a_new * accu
+  overlap_abs_gauss_r12= accu
 end
 
 !---
@@ -95,11 +170,9 @@ subroutine overlap_gauss_r12_v(D_center, LD_D, delta, A_center, B_center, power_
 
   maxab = maxval(power_A(1:3))
 
-  allocate(A_new(n_points, 0:maxab, 3), A_center_new(n_points, 3), fact_a_new(n_points), iorder_a_new(3), overlap(n_points))
+  allocate(A_new(n_points,0:maxab,3), A_center_new(n_points,3), fact_a_new(n_points), iorder_a_new(3), overlap(n_points))
 
-  call give_explicit_poly_and_gaussian_v(A_new, maxab, A_center_new,   &
-        alpha_new, fact_a_new, iorder_a_new, delta, alpha, d, power_A, &
-        D_center, LD_D, A_center, n_points)
+  call give_explicit_poly_and_gaussian_v(A_new, maxab, A_center_new, alpha_new, fact_a_new, iorder_a_new, delta, alpha, d, power_A, D_center, LD_D, A_center, n_points)
 
   rvec(:) = 0.d0
 

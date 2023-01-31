@@ -1,3 +1,5 @@
+! ---
+
 BEGIN_PROVIDER [ double precision, threshold_DIIS_nonzero ]
  implicit none
  BEGIN_DOC
@@ -11,6 +13,8 @@ BEGIN_PROVIDER [ double precision, threshold_DIIS_nonzero ]
  ASSERT (threshold_DIIS_nonzero >= 0.d0)
 
 END_PROVIDER
+
+! ---
 
 BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO, (AO_num, AO_num)]
   implicit none
@@ -60,6 +64,8 @@ BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO, (AO_num, AO_num)]
 
 END_PROVIDER
 
+! ---
+
 BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO, (mo_num, mo_num)]
   implicit none
   begin_doc
@@ -69,6 +75,7 @@ BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO, (mo_num, mo_num)]
      FPS_SPF_Matrix_MO, size(FPS_SPF_Matrix_MO,1))
 END_PROVIDER
 
+! ---
 
  BEGIN_PROVIDER [ double precision, eigenvalues_Fock_matrix_AO, (AO_num) ]
 &BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_AO, (AO_num,AO_num) ]
@@ -136,4 +143,176 @@ END_PROVIDER
        eigenvectors_Fock_matrix_AO,size(eigenvectors_Fock_matrix_AO,1))
 
 END_PROVIDER
+
+! ---
+
+!BEGIN_PROVIDER [double precision, error_diis_Fmo, (ao_num, ao_num)]
+!
+!  BEGIN_DOC
+!  !
+!  ! error_diis_Fmo = (S x C) x [F_mo x \eta_occ - \eta_occ x F_mo] x (S x C).T
+!  !
+!  ! \eta_occ is the matrix of occupation : \eta_occ = \eta_occ(alpha) + \eta_occ(beta)
+!  !
+!  END_DOC
+!
+!  implicit none
+!  integer                       :: i, j
+!  double precision, allocatable :: tmp(:,:)
+!
+!  provide Fock_matrix_mo
+!
+!  allocate(tmp(mo_num,mo_num))
+!  tmp = 0.d0
+!
+!  ! F_mo x \eta_occ(alpha) - \eta_occ x F_mo(alpha)
+!  do j = 1, elec_alpha_num
+!    do i = elec_alpha_num + 1, mo_num
+!      tmp(i,j) = Fock_matrix_mo(i,j)
+!    enddo
+!  enddo
+!  do j = elec_alpha_num + 1, mo_num
+!    do i = 1, elec_alpha_num
+!      tmp(i,j) = -Fock_matrix_mo(i,j)
+!    enddo
+!  enddo
+!
+!  ! F_mo x \eta_occ(beta) - \eta_occ x F_mo(beta)
+!  do j = 1, elec_beta_num
+!    do i = elec_beta_num + 1, mo_num
+!      tmp(i,j) += Fock_matrix_mo(i,j)
+!    enddo
+!  enddo
+!  do j = elec_beta_num + 1, mo_num
+!    do i = 1, elec_beta_num
+!      tmp(i,j) -= Fock_matrix_mo(i,j)
+!    enddo
+!  enddo
+!
+!  call mo_to_ao(tmp, size(tmp, 1), error_diis_Fmo, size(error_diis_Fmo, 1))
+!  
+!  deallocate(tmp)
+!
+!END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, error_diis_Fmo, (mo_num, mo_num)]
+
+  BEGIN_DOC
+  !
+  ! error_diis_Fmo = [F_mo x \eta_occ - \eta_occ x F_mo]
+  !
+  ! \eta_occ is the matrix of occupation : \eta_occ = \eta_occ(alpha) + \eta_occ(beta)
+  !
+  END_DOC
+
+  implicit none
+  integer                       :: i, j
+  double precision, allocatable :: tmp(:,:)
+
+  provide Fock_matrix_mo
+
+  error_diis_Fmo = 0.d0
+
+  ! F_mo x \eta_occ(alpha) - \eta_occ x F_mo(alpha)
+  do j = 1, elec_alpha_num
+    do i = elec_alpha_num + 1, mo_num
+      error_diis_Fmo(i,j) += Fock_matrix_mo(i,j)
+    enddo
+  enddo
+  do j = elec_alpha_num + 1, mo_num
+    do i = 1, elec_alpha_num
+      error_diis_Fmo(i,j) -= Fock_matrix_mo(i,j)
+    enddo
+  enddo
+
+  ! F_mo x \eta_occ(beta) - \eta_occ x F_mo(beta)
+  do j = 1, elec_beta_num
+    do i = elec_beta_num + 1, mo_num
+      error_diis_Fmo(i,j) += Fock_matrix_mo(i,j)
+    enddo
+  enddo
+  do j = elec_beta_num + 1, mo_num
+    do i = 1, elec_beta_num
+      error_diis_Fmo(i,j) -= Fock_matrix_mo(i,j)
+    enddo
+  enddo
+
+  !allocate(tmp(ao_num,ao_num))
+  !call mo_to_ao(error_diis_Fmo, size(error_diis_Fmo, 1), tmp, size(tmp, 1))
+  !call ao_to_mo(tmp, size(tmp, 1), error_diis_Fmo, size(error_diis_Fmo, 1))
+  !deallocate(tmp)
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO_a, (AO_num, AO_num)]
+
+  implicit none
+  double precision, allocatable  :: scratch(:,:)
+
+  allocate(scratch(AO_num, AO_num))
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                                                 &
+            , Fock_Matrix_AO_alpha, size(Fock_Matrix_AO_alpha, 1), SCF_density_matrix_ao_alpha, size(SCF_Density_Matrix_AO_alpha, 1) &
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                     &
+            , scratch, size(scratch, 1), AO_Overlap, size(AO_Overlap, 1) &
+            , 0.d0, FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                             &
+            , AO_Overlap, size(AO_Overlap, 1), SCF_density_matrix_ao_alpha, size(SCF_density_matrix_ao_alpha, 1) & 
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, -1.d0                                        &
+            , scratch, size(scratch, 1), Fock_Matrix_AO_alpha, size(Fock_Matrix_AO_alpha, 1) &
+            , 1.d0, FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1) )
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_AO_b, (AO_num, AO_num)]
+
+  implicit none
+  double precision, allocatable  :: scratch(:,:)
+
+  allocate(scratch(AO_num, AO_num))
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                                             &
+            , Fock_Matrix_AO_beta, size(Fock_Matrix_AO_beta, 1), SCF_density_matrix_ao_beta, size(SCF_Density_Matrix_AO_beta, 1) &
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                     &
+            , scratch, size(scratch, 1), AO_Overlap, size(AO_Overlap, 1) &
+            , 0.d0, FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, 1.d0                                                           &
+            , AO_Overlap, size(AO_Overlap, 1), SCF_density_matrix_ao_beta, size(SCF_density_matrix_ao_beta, 1) & 
+            , 0.d0, scratch, size(scratch, 1) )
+
+  call dgemm( 'N', 'N', AO_num, AO_num, AO_num, -1.d0                                      &
+            , scratch, size(scratch, 1), Fock_Matrix_AO_beta, size(Fock_Matrix_AO_beta, 1) &
+            , 1.d0, FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1) )
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO_a, (mo_num, mo_num)]
+  implicit none
+  call ao_to_mo(FPS_SPF_Matrix_AO_a, size(FPS_SPF_Matrix_AO_a, 1), FPS_SPF_Matrix_MO_a, size(FPS_SPF_Matrix_MO_a, 1))
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, FPS_SPF_Matrix_MO_b, (mo_num, mo_num)]
+  implicit none
+  call ao_to_mo(FPS_SPF_Matrix_AO_b, size(FPS_SPF_Matrix_AO_b, 1), FPS_SPF_Matrix_MO_b, size(FPS_SPF_Matrix_MO_b, 1))
+END_PROVIDER
+
+! ---
 

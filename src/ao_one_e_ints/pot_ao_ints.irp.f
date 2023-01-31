@@ -18,6 +18,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
   double precision :: A_center(3),B_center(3),C_center(3)
   double precision :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
 
+  ao_integrals_n_e = 0.d0
+
   if (read_ao_integrals_n_e) then
 
     call ezfio_get_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
@@ -35,8 +37,6 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
       enddo
 
     else
-
-      ao_integrals_n_e = 0.d0
 
       !$OMP PARALLEL                                                   &
           !$OMP DEFAULT (NONE)                                         &
@@ -104,6 +104,9 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     IF(do_pseudo) THEN
        ao_integrals_n_e += ao_pseudo_integrals
     ENDIF
+    IF(point_charges) THEN
+       ao_integrals_n_e += ao_integrals_pt_chrg
+    ENDIF 
 
   endif
 

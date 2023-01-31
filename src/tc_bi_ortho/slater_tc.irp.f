@@ -324,6 +324,9 @@ subroutine single_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
 
   call get_single_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc,1,h1,p1,h2,p2,s1,s2)
+!  if(h1==14.and.p1==2)then
+!   print*,'h1,p1 old = ',h1,p1
+!  endif
 
   hmono = mo_bi_ortho_tc_one_e(p1,h1) * phase
 

@@ -3,8 +3,27 @@ subroutine get_excitation_degree(key1,key2,degree,Nint)
   include 'utils/constants.include.F'
   implicit none
   BEGIN_DOC
-  ! Returns the excitation degree between two determinants.
+  ! This function calculates the excitation degree between two
+  ! determinants, which is half the number of bits that are different between the two
+  ! determinants. The function takes four arguments: 
+  !
+  !  * key1: An integer array of length Nint*2, representing the first determinant.
+  !
+  !  * key2: An integer array of length Nint*2, representing the second determinant.
+  !
+  !  * degree: An integer, passed by reference, that will store the calculated excitation degree.
+  !
+  !  * Nint: An integer representing the number of integers in each of the key1 and key2 arrays.
+  ! 
+  ! It starts a select case block that depends on the value of Nint. 
+  ! In each case, the function first calculates the bitwise XOR of each
+  ! corresponding pair of elements in key1 and key2, storing the results in the
+  ! xorvec array. It then calculates the number of bits set (using the popcnt
+  ! function) for each element in xorvec, and sums these counts up. This sum is
+  ! stored in the degree variable.  
+  ! Finally, the degree variable is right-shifted by 1 bit to divide the result by 2.
   END_DOC
+
   integer, intent(in)            :: Nint
   integer(bit_kind), intent(in)  :: key1(Nint*2)
   integer(bit_kind), intent(in)  :: key2(Nint*2)
@@ -107,6 +126,8 @@ subroutine get_excitation(det1,det2,exc,degree,phase,Nint)
       return
 
     case(0)
+      ! Avoid uninitialized phase
+      phase = 1d0 
       return
 
   end select
@@ -1790,12 +1811,12 @@ double precision function diag_H_mat_elem(det_in,Nint)
   integer                        :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
-  ASSERT (tmp(1) == nexc(1))
-  ASSERT (tmp(2) == nexc(2))
+  ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of particle beta 
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(hole, occ_hole, tmp, Nint)
-  ASSERT (tmp(1) == nexc(1))
-  ASSERT (tmp(2) == nexc(2))
+  ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
+  ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
 
   det_tmp = ref_bitmask
   do ispin=1,2

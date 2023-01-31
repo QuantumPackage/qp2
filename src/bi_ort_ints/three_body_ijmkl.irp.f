@@ -7,7 +7,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_direct_bi_ort, (mo_num, mo_num,
   !
   ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF DOUBLE EXCITATIONS AND BI ORTHO MOs
   !
-  ! three_e_5_idx_direct_bi_ort(m,l,j,k,i) = <mjk|-L|mji> ::: notice that i is the RIGHT MO and k is the LEFT MO
+  ! three_e_5_idx_direct_bi_ort(m,l,j,k,i) = <mlk|-L|mji> ::: notice that i is the RIGHT MO and k is the LEFT MO
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   END_DOC
@@ -202,7 +202,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch13_bi_ort, (mo_num, mo_num,
   !
   ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF DOUBLE EXCITATIONS AND BI ORTHO MOs
   !
-  ! three_e_5_idx_exch13_bi_ort(m,l,j,k,i) = <mlk|-L|jmi> ::: notice that i is the RIGHT MO and k is the LEFT MO
+  ! three_e_5_idx_exch13_bi_ort(m,l,j,k,i) = <mlk|-L|ijm> ::: notice that i is the RIGHT MO and k is the LEFT MO
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
@@ -251,7 +251,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort, (mo_num, mo_num,
   !
   ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF DOUBLE EXCITATIONS AND BI ORTHO MOs
   !
-  ! three_e_5_idx_exch12_bi_ort(m,l,j,k,i) = <mlk|-L|jmi> ::: notice that i is the RIGHT MO and k is the LEFT MO
+  ! three_e_5_idx_exch12_bi_ort(m,l,j,k,i) = <mlk|-L|mij> ::: notice that i is the RIGHT MO and k is the LEFT MO
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !

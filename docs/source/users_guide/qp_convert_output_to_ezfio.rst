@@ -25,7 +25,7 @@ Usage
 
 .. note::
 
-   All the parameters of the wave functgion need to be presente in the
+   All the parameters of the wave function need to be present in the
    output file : complete description of the |AO| basis set, full set of
    molecular orbitals, etc.
 

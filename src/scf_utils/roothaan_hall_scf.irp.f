@@ -29,11 +29,11 @@ END_DOC
 
   call write_time(6)
 
-  print*,'Energy of the guess = ',SCF_energy
+  print*,'energy of the guess = ',SCF_energy
   write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
     '====','================','================','================','================'
   write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
-    '  N ', 'Energy  ', 'Energy diff  ',  'DIIS error  ', 'Level shift   '
+    '  N ', 'energy  ', 'energy diff  ',  'DIIS error  ', 'Level shift   '
   write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
     '====','================','================','================','================'
 
@@ -66,7 +66,8 @@ END_DOC
 
     dim_DIIS = min(dim_DIIS+1,max_dim_DIIS)
 
-    if ( (scf_algorithm == 'DIIS').and.(dabs(Delta_energy_SCF) > 1.d-6) )  then
+    if( (scf_algorithm == 'DIIS') .and. (dabs(Delta_energy_SCF) > 1.d-6))  then
+    !if(scf_algorithm == 'DIIS') then
 
       ! Store Fock and error matrices at each iteration
       index_dim_DIIS = mod(dim_DIIS-1,max_dim_DIIS)+1
@@ -85,10 +86,9 @@ END_DOC
           iteration_SCF,dim_DIIS                                       &
           )
 
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+      Fock_matrix_AO_alpha = Fock_matrix_AO!*0.5d0
+      Fock_matrix_AO_beta  = Fock_matrix_AO!*0.5d0
       TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
-
     endif
 
     MO_coef = eigenvectors_Fock_matrix_MO
@@ -99,18 +99,14 @@ END_DOC
 
     TOUCH MO_coef
 
-!   Calculate error vectors
-
-    max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
-
 !   SCF energy
 
     energy_SCF = SCF_energy
-    Delta_Energy_SCF = energy_SCF - energy_SCF_previous
-    if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0) ) then
+    Delta_energy_SCF = energy_SCF - energy_SCF_previous
+    if ( (SCF_algorithm == 'DIIS').and.(Delta_energy_SCF > 0.d0) ) then
       Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
-      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+      Fock_matrix_AO_alpha = Fock_matrix_AO!*0.5d0
+      Fock_matrix_AO_beta  = Fock_matrix_AO!*0.5d0
       TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
     endif
 
@@ -131,18 +127,23 @@ END_DOC
         call initialize_mo_coef_begin_iteration
       endif
       TOUCH mo_coef
-      Delta_Energy_SCF = SCF_energy - energy_SCF_previous
+      Delta_energy_SCF = SCF_energy - energy_SCF_previous
       energy_SCF = SCF_energy
       if (level_shift-level_shift_save > 40.d0) then
         level_shift = level_shift_save * 4.d0
         SOFT_TOUCH level_shift
         exit
       endif
+
       dim_DIIS=0
     enddo
+
     level_shift = level_shift * 0.5d0
     SOFT_TOUCH level_shift
     energy_SCF_previous = energy_SCF
+
+!   Calculate error vectors
+    max_error_DIIS = maxval(Abs(FPS_SPF_Matrix_MO))
 
 !   Print results at the end of each iteration
 
@@ -175,7 +176,7 @@ END_DOC
    call save_mos
   endif
 
-  call write_double(6, Energy_SCF, 'SCF energy')
+  call write_double(6, energy_SCF, 'SCF energy')
 
   call write_time(6)
 

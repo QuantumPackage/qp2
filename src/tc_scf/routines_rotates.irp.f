@@ -116,7 +116,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
     print *, ' ------------------------------------'
     call orthog_functions(ao_num, n_degen, mo_l_coef_tmp, ao_overlap)
 
-    print *, ' Overlap lef-right '
+    print *, ' Overlap left-right '
     call build_s_matrix(ao_num, n_degen, mo_r_coef_tmp, mo_l_coef_tmp, ao_overlap, stmp)
     do j = 1, n_degen
      write(*,'(100(F8.4,X))') stmp(:,j)
@@ -259,7 +259,7 @@ subroutine orthog_functions(m, n, coef, overlap)
   double precision, intent(in)    :: overlap(m,m)
   double precision, intent(inout) :: coef(m,n)
   double precision, allocatable   :: stmp(:,:)
-  integer                         :: j
+  integer                         :: j, k
 
   allocate(stmp(n,n))
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
@@ -270,7 +270,13 @@ subroutine orthog_functions(m, n, coef, overlap)
   call impose_orthog_svd_overlap(m, n, coef, overlap)
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
   do j = 1, n
-    coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
+    ! ---
+    ! TODO: MANU check ici
+    !coef(1,:m) *= 1.d0/dsqrt(stmp(j,j))
+    do k = 1, m
+      coef(k,j) *= 1.d0/dsqrt(stmp(j,j))
+    enddo
+    ! ---
   enddo
   call build_s_matrix(m, n, coef, coef, overlap, stmp)
 
