@@ -262,11 +262,11 @@ subroutine set_natural_mos
      iorb = list_virt(i)
      do j = 1, n_core_inact_act_orb
       jorb = list_core_inact_act(j)
-      if(one_e_dm_mo(iorb,jorb).ne. 0.d0)then
-        print*,'AHAHAH'
-        print*,iorb,jorb,one_e_dm_mo(iorb,jorb)
-        stop
-      endif
+!      if(one_e_dm_mo(iorb,jorb).ne. 0.d0)then
+!        print*,'AHAHAH'
+!        print*,iorb,jorb,one_e_dm_mo(iorb,jorb)
+!        stop
+!      endif
      enddo
     enddo
    call mo_as_svd_vectors_of_mo_matrix_eig(one_e_dm_mo,size(one_e_dm_mo,1),mo_num,mo_num,mo_occ,label)

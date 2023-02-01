@@ -250,12 +250,12 @@ compute_singles=.True.
   ASSERT (istep  > 0)
 
   !$OMP DO SCHEDULE(guided,64)
-  do k_a=istart+ishift,iend,istep
+  do k_a=istart+ishift,iend,istep    ! Loop over all determinants (/!\ not in psidet order)
 
-    krow = psi_bilinear_matrix_rows(k_a)
+    krow = psi_bilinear_matrix_rows(k_a)       ! Index of alpha part of determinant k_a
     ASSERT (krow <= N_det_alpha_unique)
 
-    kcol = psi_bilinear_matrix_columns(k_a)
+    kcol = psi_bilinear_matrix_columns(k_a)    ! Index of beta part of determinant k_a
     ASSERT (kcol <= N_det_beta_unique)
 
     tmp_det(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, krow)
@@ -278,6 +278,8 @@ compute_singles=.True.
     endif
     kcol_prev = kcol
 
+    ! -> Here, tmp_det is determinant k_a
+
     ! Loop over singly excited beta columns
     ! -------------------------------------
 
@@ -287,11 +289,23 @@ compute_singles=.True.
 
       tmp_det2(1:$N_int,2) = psi_det_beta_unique(1:$N_int, lcol)
 
+      ! tmp_det2 is a single excitation of tmp_det in the beta spin
+      ! the alpha part is not defined yet
+
 !---
 !      if (compute_singles) then
 
         l_a = psi_bilinear_matrix_columns_loc(lcol)
         ASSERT (l_a <= N_det)
+        ! rows  : | 1 2 3 4 | 1 3 4 6 | .... |  1  2  4  5 |
+        ! cols  : | 1 1 1 1 | 2 2 2 2 | .... |  8  8  8  8 |
+        ! index : | 1 2 3 4 | 5 6 7 8 | .... | 58 59 60 61 |
+        !                     ^                          ^
+        !                     |                          |
+        !                     l_a                       N_det
+        ! l_a is the index in the big vector os size Ndet of the position of the first element of column lcol
+
+        ! Below we identify all the determinants with the same beta part
 
         !DIR$ UNROLL(8)
         !DIR$ LOOP COUNT avg(50000)
@@ -306,6 +320,8 @@ compute_singles=.True.
           l_a = l_a+1
         enddo
         j = j-1
+
+        ! Get all single excitations from tmp_det(1,1) to buffer(1,?)
 
         call get_all_spin_singles_$N_int(                              &
             buffer, idx, tmp_det(1,1), j,                              &
@@ -413,6 +429,7 @@ compute_singles=.True.
           ASSERT (lrow <= N_det_alpha_unique)
 
           tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+!        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
           call i_H_j_double_alpha_beta(tmp_det,tmp_det2,$N_int,hij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
@@ -558,7 +575,10 @@ compute_singles=.True.
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
 
+!        tmp_det2(1:N_int,1) = psi_det_alpha_unique(1:N_int, lrow) 
+!        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
         call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
+
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -650,7 +670,7 @@ compute_singles=.True.
         ASSERT (lcol <= N_det_beta_unique)
 
         tmp_det2(1:$N_int,2) = psi_det_beta_unique (1:$N_int, lcol)
-        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
+        call i_H_j_single_spin( tmp_det, tmp_det2, $N_int, 2, hij)
         !DIR$ LOOP COUNT AVG(4)
         do l=1,N_st
           v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
@@ -696,6 +716,8 @@ compute_singles=.True.
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
+!        tmp_det2(1:N_int,2) = psi_det_beta_unique(1:N_int, lcol) 
+!        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
         call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
 
         !DIR$ LOOP COUNT AVG(4)
