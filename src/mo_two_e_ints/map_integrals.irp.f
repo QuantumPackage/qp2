@@ -309,6 +309,7 @@ end
     !DIR$ FORCEINLINE
     call map_get(mo_integrals_map,idx,tmp)
     banned_excitation(i,j) = dabs(tmp) < 1.d-14
+!    banned_excitation(i,j) = .False.
     banned_excitation(j,i) = banned_excitation(i,j)
     if (banned_excitation(i,j)) icount = icount+2
   enddo
