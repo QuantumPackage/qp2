@@ -1,5 +1,24 @@
-subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
+ implicit none
+  BEGIN_DOC
+  !
+  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  !!
+  ! Returns the total matrix element 
+  !! WARNING !!
+  ! 
+  ! Non hermitian !!
+  !
+  END_DOC
 
+  use bitmasks
+ integer,           intent(in) :: Nint
+ integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
+ double precision, intent(out) :: htot
+ double precision :: hmono, htwoe, hthree
+ call htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+end
+subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
   BEGIN_DOC
   !
   ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis

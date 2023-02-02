@@ -11,11 +11,45 @@ program tc_bi_ortho
   touch read_wf
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
+ call test_h_u0
 ! call test_slater_tc_opt
- call timing_tot
+! call timing_tot
 ! call timing_diag
 ! call timing_single
 ! call timing_double
+end
+
+subroutine test_h_u0
+ implicit none
+ double precision, allocatable :: v_0_ref(:),v_0_new(:),u_0(:), v_0_ref_dagger(:)
+ double precision :: accu 
+ logical :: do_right
+ integer :: i
+ allocate(v_0_new(N_det),v_0_ref(N_det),u_0(N_det),v_0_ref_dagger(N_det))
+ do_right = .True.
+ do i = 1, N_det
+  u_0(i) = psi_r_coef_bi_ortho(i,1)
+ enddo
+ call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
+ call htc_bi_ortho_calc_tdav (v_0_ref,u_0,N_states,N_det)
+ print*,'difference right '
+ accu = 0.d0
+ do i = 1, N_det
+  print*,dabs(v_0_new(i) - v_0_ref(i)),v_0_new(i) , v_0_ref(i)
+  accu += dabs(v_0_new(i) - v_0_ref(i))
+ enddo
+ print*,'accu = ',accu
+ do_right = .False.
+ v_0_new = 0.d0
+ call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
+ call htcdag_bi_ortho_calc_tdav(v_0_ref_dagger,u_0,N_states,N_det, do_right)
+ print*,'difference left'
+ accu = 0.d0
+ do i = 1, N_det
+  print*,dabs(v_0_new(i) - v_0_ref_dagger(i)),v_0_new(i) , v_0_ref_dagger(i)
+  accu += dabs(v_0_new(i) - v_0_ref_dagger(i))
+ enddo
+ print*,'accu = ',accu
 end
 
 subroutine test_slater_tc_opt
