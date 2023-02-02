@@ -16,6 +16,25 @@ export CC=gcc
 git submodule init
 git submodule update
 
+# Update ARM or x86 dependencies
+ARCHITECTURE=$(uname -m)
+cd ${QP_ROOT}/external/qp2-dependencies
+echo "Architecture: $ARCHITECTURE"
+case $ARCHITECTURE in
+  aarch64)
+    git checkout arm64
+    ;;
+  x86_64) 
+    git checkout x86
+    ;;
+  *)
+    echo "Unknown architecture. Using x86_64."
+    git checkout x86
+    ;;
+esac
+cd ${QP_ROOT}
+
+
 function help()
 {
     cat <<EOF
@@ -235,10 +254,9 @@ EOF
          execute <<EOF
             source "${QP_ROOT}"/quantum_package.rc
             cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/ocaml-bundle_x86.tar.gz
-            echo "" | ./ocaml-bundle/bootstrap.sh "${QP_ROOT}"
-            ./ocaml-bundle/configure.sh "${QP_ROOT}"
-            echo "" | ./ocaml-bundle/compile.sh "${QP_ROOT}"
+            tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            cd "${QP_ROOT}"/external/opampack
+            ./install.sh
 EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then

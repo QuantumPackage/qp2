@@ -54,12 +54,27 @@ END_PROVIDER
 
 
 
+subroutine print_dipole_moments
+  implicit none
+  BEGIN_DOC
+! Print dipole moments nicely
+  END_DOC
+  integer :: i
+  print*, ''
+  print*, ''
+  print*,  '****************************************'
+  write(*,'(A10)',advance='no') ' State :  '
+  do i = 1,N_states
+    write(*,'(i16)',advance='no') i
+  end do
+  write(*,*) ''
+  write(*,'(A23,100(1pE16.8))') 'x_dipole_moment (au) = ',x_dipole_moment
+  write(*,'(A23,100(1pE16.8))') 'y_dipole_moment (au) = ',y_dipole_moment
+  write(*,'(A23,100(1pE16.8))') 'z_dipole_moment (au) = ',z_dipole_moment
+  write(*,*) ''
+  write(*,'(A23,100(1pE16.8))') 'x_dipole_moment (D) = ',x_dipole_moment * au_to_D
+  write(*,'(A23,100(1pE16.8))') 'y_dipole_moment (D) = ',y_dipole_moment * au_to_D
+  write(*,'(A23,100(1pE16.8))') 'z_dipole_moment (D) = ',z_dipole_moment * au_to_D
+  print*,  '****************************************'
+end
 
- subroutine print_z_dipole_moment_only
- implicit none
-  print*, ''
-  print*, ''
-  print*,  '****************************************'
-  print*, 'z_dipole_moment                  = ',z_dipole_moment
-  print*,  '****************************************'
- end
