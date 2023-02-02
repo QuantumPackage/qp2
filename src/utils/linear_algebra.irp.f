@@ -1736,7 +1736,7 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
 
   ! Symmetrize
   i = 1
-  do while( (i < sze).and.(-copy(i) > thresh) )
+  do while (i < sze)
     pi = i
     pf = i
     val = 1d0/copy(i)
@@ -1760,6 +1760,10 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
       ! Update i
       i = pf
     endif
+
+    ! Exit if the remaining elements are below thresh
+    if (-copy(i) <= thresh) exit
+
     ! Update i
     i = i + 1
   enddo
