@@ -8,8 +8,8 @@
  thr = 1.d-11
  print*,' expo_good_j_mu_1gauss = ',expo_good_j_mu_1gauss
  !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, r, overlap, thr,fact_gauss, alpha, center,dist,sigma,center_ij) &
- !$OMP SHARED  (n_points_final_grid, ao_num, ao_overlap_abs_grid,n_pts_grid_ao_prod,expo_good_j_mu_1gauss,&
+ !$OMP PRIVATE (ipoint, i, j, r, overlap, fact_gauss, alpha, center,dist,sigma,center_ij) &
+ !$OMP SHARED  (n_points_final_grid, ao_num, thr, ao_overlap_abs_grid,n_pts_grid_ao_prod,expo_good_j_mu_1gauss,&
  !$OMP          final_grid_points,ao_prod_center,ao_prod_sigma,ao_nucl)
  !$OMP DO
  do i = 1, ao_num
@@ -55,5 +55,5 @@
  do i = 1, ao_num
   list(i) = maxval(n_pts_grid_ao_prod(:,i))
  enddo
- max_n_pts_grid_ao_prod = maxval(list) 
-END_PROVIDER 
+ max_n_pts_grid_ao_prod = maxval(list)
+END_PROVIDER
