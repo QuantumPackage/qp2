@@ -212,10 +212,9 @@ subroutine routine_save_right_bi_ortho
  implicit none
  double precision, allocatable :: coef_tmp(:,:)
  integer :: i
- N_states = 1
  allocate(coef_tmp(N_det, N_states))
  do i = 1, N_det
-  coef_tmp(i,1) = psi_r_coef_bi_ortho(i,1)
+  coef_tmp(i,1:N_states) = psi_r_coef_bi_ortho(i,1:N_states)
  enddo
  call save_wavefunction_general_unormalized(N_det,N_states,psi_det,size(coef_tmp,1),coef_tmp(1,1))
 end                     
