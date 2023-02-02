@@ -236,7 +236,7 @@ end subroutine get_phase_qp_to_cfg
   ! initialization
   psi_coef_config = 0.d0
   DetToCSFTransformationMatrix(0,:,:) = 1.d0
-  do i = 2-iand(MS,1_8), NSOMOMax,2
+  do i = 2-int(iand(MS,1_8),4), NSOMOMax,2
     Isomo = IBSET(0_8, i) - 1_8
     ! rows = Ncsfs
     ! cols = Ndets

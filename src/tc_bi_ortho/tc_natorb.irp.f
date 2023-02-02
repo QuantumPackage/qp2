@@ -14,7 +14,7 @@
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, n_real
+  integer                       :: i, j, k
   double precision              :: thr_d, thr_nd, thr_deg, accu
   double precision              :: accu_d, accu_nd
   double precision, allocatable :: dm_tmp(:,:), fock_diag(:)
@@ -36,17 +36,17 @@
                               , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
 !   call non_hrmt_bieig( mo_num, dm_tmp&
 !                      , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo& 
-!                      , n_real, natorb_tc_eigval )
+!                      , mo_num, natorb_tc_eigval )
 
   accu = 0.d0
-  do i = 1, n_real
+  do i = 1, mo_num
     print*,'natorb_tc_eigval(i) = ',-natorb_tc_eigval(i)
     accu += -natorb_tc_eigval(i)
   enddo
   print *, ' accu = ', accu
 
   dm_tmp = 0.d0
-  do i = 1, n_real
+  do i = 1, mo_num
     accu = 0.d0
     do k = 1, mo_num
       accu += natorb_tc_reigvec_mo(k,i) * natorb_tc_leigvec_mo(k,i)
@@ -54,7 +54,7 @@
     accu = 1.d0/dsqrt(dabs(accu))
     natorb_tc_reigvec_mo(:,i) *= accu
     natorb_tc_leigvec_mo(:,i) *= accu
-    do j = 1, n_real
+    do j = 1, mo_num
       do k = 1, mo_num
         dm_tmp(j,i) += natorb_tc_reigvec_mo(k,i) * natorb_tc_leigvec_mo(k,j)
       enddo
