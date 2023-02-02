@@ -100,7 +100,7 @@ subroutine copy_H_apply_buffer_to_wf_tc
 
   logical :: found_duplicates
   call remove_duplicates_in_psi_det_tc(found_duplicates)
-  call bi_normalize(psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,size(psi_l_coef_bi_ortho,1),N_det,N_states)
+  call bi_normalize(psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,N_det,size(psi_l_coef_bi_ortho,1),N_states)
   SOFT_TOUCH N_det psi_det psi_r_coef_bi_ortho psi_l_coef_bi_ortho
 
 end

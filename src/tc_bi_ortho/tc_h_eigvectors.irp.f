@@ -102,7 +102,7 @@
     print*,'Computing the left-eigenvector '
     vec_tmp = 0.d0
     do istate = 1, N_states
-     vec_tmp(:,istate) = psi_l_coef_bi_ortho(:,istate)
+     vec_tmp(1:N_det,istate) = psi_l_coef_bi_ortho(1:N_det,istate)
     enddo
     do istate = N_states+1, n_states_diag
      vec_tmp(istate,istate) = 1.d0
@@ -110,14 +110,14 @@
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, htcdag_bi_ortho_calc_tdav)
     call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_dagger_u_0_opt)
     do istate = 1, N_states
-     leigvec_tc_bi_orth(:,istate) = vec_tmp(:,istate)
+     leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
     enddo
 
     print*,'Computing the right-eigenvector '
  !!!! Preparing the right-eigenvector
     vec_tmp = 0.d0
     do istate = 1, N_states
-     vec_tmp(:,istate) = psi_r_coef_bi_ortho(:,istate)
+     vec_tmp(1:N_det,istate) = psi_r_coef_bi_ortho(1:N_det,istate)
     enddo
     do istate = N_states+1, n_states_diag
      vec_tmp(istate,istate) = 1.d0
@@ -125,12 +125,12 @@
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
     call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
     do istate = 1, N_states
-     reigvec_tc_bi_orth(:,istate) = vec_tmp(:,istate)
+     reigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
     enddo
 
     deallocate(H_jj)
    endif
-  call bi_normalize(leigvec_tc_bi_orth,reigvec_tc_bi_orth,N_det,N_det,N_states)
+  call bi_normalize(leigvec_tc_bi_orth,reigvec_tc_bi_orth,size(reigvec_tc_bi_orth,1),N_det,N_states)
    print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ',leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1)
    norm_ground_left_right_bi_orth = 0.d0
    do j = 1, N_det

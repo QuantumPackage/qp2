@@ -681,7 +681,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       !  endif
       !endif
 
-      ! MANU: ERREUR dans les calculs puisque < I | H | J > = 0 
+      ! MANU: ERREUR dans les calculs puisque < I | H | J > = 0
       ! n'implique pas < I | H_TC | J > = 0 ??
       !val = maxval(abs(mat(1:N_states, p1, p2)))
       !if( val == 0d0) cycle
@@ -764,118 +764,69 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
       ! <alpha|H|psi_0> = \sum_i c_i <alpha|H|i>
 
         ! -------------------------------------------
-        ! Non hermitian 
+        ! Non hermitian
         ! c_alpha = <alpha|H(j)|psi_0>/delta_E(alpha)
         ! e_alpha = c_alpha * <psi_0|H(j)|alpha>
         ! <alpha|H|psi_0> and <psi_0|H|alpha>
-        ! <det|H(j)|psi_0> and transpose 
+        ! <det|H(j)|psi_0> and transpose
         ! -------------------------------------------
 
-        istate = 1
 !        call htilde_mu_mat_bi_ortho_tot(det, det, N_int, Hii)
-        double precision :: hmono, htwoe, hthree
+        double precision               :: hmono, htwoe, hthree
         call diag_htilde_mu_mat_fock_bi_ortho(N_int, det, hmono, htwoe, hthree, hii)
-        delta_E = E0(istate) - Hii + E_shift
-
-        double precision :: alpha_h_psi_tmp, psi_h_alpha_tmp, error
-        if(debug_tc_pt2 == 1)then !! Using the old version 
-          psi_h_alpha = 0.d0
-          alpha_h_psi = 0.d0
-          do iii = 1, N_det
-            call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-            call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-            psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function 
-            alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
-          enddo
-         else if(debug_tc_pt2 == 2)then !! debugging the new version 
-          psi_h_alpha_tmp = mat_l(istate, p1, p2) ! new version 
-          alpha_h_psi_tmp = mat_r(istate, p1, p2) ! new version 
-          psi_h_alpha = 0.d0
-          alpha_h_psi = 0.d0
-          do iii = 1, N_det ! old version 
-            call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha) 
-            call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-            psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function 
-            alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
-!            psi_h_alpha += i_h_alpha * 1.d0 ! left function 
-!            alpha_h_psi += alpha_h_i * 1.d0 ! right function
-          enddo
-          if(dabs(psi_h_alpha*alpha_h_psi/delta_E).gt.1.d-10)then
-           error = dabs(psi_h_alpha * alpha_h_psi - psi_h_alpha_tmp * alpha_h_psi_tmp)/dabs(psi_h_alpha * alpha_h_psi)
-           if(error.gt.1.d-2)then
-           print*,'error =',error,psi_h_alpha * alpha_h_psi/delta_E,psi_h_alpha_tmp * alpha_h_psi_tmp/delta_E
-           endif
-!           if(dabs(psi_h_alpha - psi_h_alpha_tmp).gt.1.d-08 .or. dabs(alpha_h_psi - alpha_h_psi_tmp).gt.1.d-08)then
-!               call debug_det(det,N_int)
-!               print*,'psi_h_alpha,alpha_h_psi'
-!               print*,psi_h_alpha,alpha_h_psi
-!               print*,psi_h_alpha_tmp,alpha_h_psi_tmp
-!               print*,dabs(psi_h_alpha - psi_h_alpha_tmp),dabs(alpha_h_psi - alpha_h_psi_tmp)
-!               alpha_h_psi = 0.d0
-!               psi_h_alpha = 0.d0
-!               do iii = 1, N_det
-!                 
-!                 call get_excitation_degree( psi_det(1,1,iii), det, degree, N_int)
-!                 call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,iii), det, N_int, i_h_alpha)
-!                 call htilde_mu_mat_bi_ortho_tot(det, psi_det(1,1,iii), N_int, alpha_h_i)
-!                 alpha_h_psi += alpha_h_i
-!                 psi_h_alpha += i_h_alpha
-!                 if(dabs(i_h_alpha).gt.1.d-10.or.dabs(alpha_h_i).gt.1.d-10)then
-!                  call debug_det(psi_det(1,1,iii),N_int)
-!                  print*,iii,degree,i_h_alpha,alpha_h_i
-!                  print*,psi_h_alpha,alpha_h_psi
-!                  print*,leigvec_tc_bi_orth(iii,1),reigvec_tc_bi_orth(iii,1)
-!                 endif
-!               enddo
-!               stop
-!            endif
-           endif
-         else
-          psi_h_alpha = mat_l(istate, p1, p2)
-          alpha_h_psi = mat_r(istate, p1, p2)
-         endif
-
-        !if(alpha_h_psi*psi_h_alpha/delta_E.gt.1.d-10)then
-        !  print*, 'E0,Hii,E_shift'
-        !  print*, E0(istate), Hii, E_shift
-        !  print*, psi_h_alpha, alpha_h_psi, delta_E
-        !  print*, psi_h_alpha * alpha_h_psi / delta_E
-        !  !if(Hii .lt. E0(istate)) then
-        !  !  call debug_det(det, N_int)
-        !  !  print*, ' |E0| < |Hii| !!!'
-        !  !  print*, ' E0  = ', E0(istate)
-        !  !  print*, ' Hii = ', Hii
-        !  !endif
-        !endif
-
-        coef(istate)   = alpha_h_psi / delta_E 
-        e_pert(istate) = coef(istate) * psi_h_alpha
-        if(selection_tc     ==  1 )then
-         if(e_pert(istate).lt.0.d0)then
-          e_pert(istate) = 0.d0
-         endif
-        else if(selection_tc == -1)then
-         if(e_pert(istate).gt.0.d0)then
-          e_pert(istate) = 0.d0
-         endif
-        endif
-         
-
-        !if(e_pert(istate) .gt. 1.d-15) then
-        !  print*, 'E0,Hii,E_shift'
-        !  print*, E0(istate), Hii, E_shift
-        !  print*, psi_h_alpha, alpha_h_psi, delta_E
-        !  print*, psi_h_alpha*alpha_h_psi/delta_E
-        !endif
-
-!      elseif(cipsi_tc == "h_tc_2x2") then
+        do istate = 1,N_states
+          delta_E = E0(istate) - Hii + E_shift
+          double precision               :: alpha_h_psi_tmp, psi_h_alpha_tmp, error
+          if(debug_tc_pt2 == 1)then !! Using the old version
+            psi_h_alpha = 0.d0
+            alpha_h_psi = 0.d0
+            do iii = 1, N_det
+              call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+              call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+              psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
+              alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
+            enddo
+          else if(debug_tc_pt2 == 2)then !! debugging the new version
+            psi_h_alpha_tmp = mat_l(istate, p1, p2) ! new version
+            alpha_h_psi_tmp = mat_r(istate, p1, p2) ! new version
+            psi_h_alpha = 0.d0
+            alpha_h_psi = 0.d0
+            do iii = 1, N_det ! old version
+              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+              psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
+              alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
+            enddo
+            if(dabs(psi_h_alpha*alpha_h_psi/delta_E).gt.1.d-10)then
+              error = dabs(psi_h_alpha * alpha_h_psi - psi_h_alpha_tmp * alpha_h_psi_tmp)/dabs(psi_h_alpha * alpha_h_psi)
+              if(error.gt.1.d-2)then
+                print*,'error =',error,psi_h_alpha * alpha_h_psi/delta_E,psi_h_alpha_tmp * alpha_h_psi_tmp/delta_E
+              endif
+            endif
+          else
+           psi_h_alpha = mat_l(istate, p1, p2)
+           alpha_h_psi = mat_r(istate, p1, p2)
+          endif
+          coef(istate)   = alpha_h_psi / delta_E 
+          e_pert(istate) = coef(istate) * psi_h_alpha
+!         if(selection_tc     ==  1 )then
+!          if(e_pert(istate).lt.0.d0)then
+!           e_pert(istate) = 0.d0
+!          endif
+!         else if(selection_tc == -1)then
+!          if(e_pert(istate).gt.0.d0)then
+!           e_pert(istate) = 0.d0
+!          endif
+!         endif
+        enddo
 
 
       do_diag = sum(dabs(coef)) > 0.001d0 .and. N_states > 1
 
       do istate = 1, N_states
 
-        alpha_h_psi = mat(istate, p1, p2)
+        alpha_h_psi = mat_r(istate, p1, p2)
+        psi_h_alpha = mat_l(istate, p1, p2)
 
         pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
         pt2_data % variance(istate)  = pt2_data % variance(istate) + dabs(e_pert(istate))
@@ -885,10 +836,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           case(5)
             ! Variance selection
             if (h0_type == 'CFG') then
-              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate)) & 
+              w = min(w, - psi_h_alpha * alpha_h_psi * s_weight(istate,istate)) &
                 / c0_weight(istate)
             else
-              w = min(w, - alpha_h_psi * alpha_h_psi * s_weight(istate,istate))
+              w = min(w, - psi_h_alpha * alpha_h_psi * s_weight(istate,istate))
             endif
           case(6)
             if (h0_type == 'CFG') then
