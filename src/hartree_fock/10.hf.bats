@@ -114,7 +114,7 @@ function run() {
 
 @test "SiH3" { # 20.316100 54.0861s
   [[ -n $TRAVIS ]] && skip
-  run sih3.ezfio -5.455400439077580
+  run sih3.ezfio -5.455417770259740
 }
 
 @test "OH" { # 32.042200 1.36478m
@@ -131,6 +131,6 @@ function run() {
 
 @test "SO2" { # 71.894900  3.22567m
   [[ -n $TRAVIS ]] && skip
-  run so2.ezfio -41.55800401346361
+  run so2.ezfio -41.55806023244631
 }
 
