@@ -300,8 +300,8 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar -zxf qp2-dependencies/bats-v1.1.0.tar.gz
-              ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
+              tar -zxf qp2-dependencies/bats-v1.7.0.tar.gz
+              ( cd bats-core-1.7.0/ ; ./install.sh \${QP_ROOT})
 EOF
 
     else
