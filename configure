@@ -199,7 +199,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats bse"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats"
 fi
 
 
@@ -209,7 +209,8 @@ for PACKAGE in ${PACKAGES} ; do
 
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja-linux.zip -d "\${QP_ROOT}"/bin
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/ninja.tar.gz 
+              mv ninja "\${QP_ROOT}"/bin/
 EOF
 
 
@@ -299,8 +300,8 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar -zxf qp2-dependencies/bats-v1.7.0.tar.gz
-              ( cd bats-core-1.7.0/ ; ./install.sh \${QP_ROOT})
+              tar -zxf qp2-dependencies/bats-v1.1.0.tar.gz
+              ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
 EOF
 
     else
