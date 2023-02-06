@@ -63,11 +63,11 @@ end
 
 module Connect_msg : sig
   type t = Tcp | Inproc | Ipc
-  val create : typ:string -> t
+  val create : string -> t
   val to_string : t -> string
 end = struct
   type t = Tcp | Inproc | Ipc
-  let create ~typ =
+  let create typ =
     match typ with
     | "tcp" -> Tcp
     | "inproc" -> Inproc
@@ -515,9 +515,9 @@ let of_string s =
     | Connect_ socket ->
         Connect (Connect_msg.create socket)
     | NewJob_ { state ; push_address_tcp ; push_address_inproc } ->
-        Newjob (Newjob_msg.create push_address_tcp push_address_inproc state)
+        Newjob (Newjob_msg.create ~address_tcp:push_address_tcp ~address_inproc:push_address_inproc ~state)
     | EndJob_ state  ->
-        Endjob (Endjob_msg.create state)
+        Endjob (Endjob_msg.create ~state)
     | GetData_ { state ; client_id ; key } ->
         GetData (GetData_msg.create ~client_id ~state ~key)
     | PutData_ { state ; client_id ; key } ->

@@ -155,7 +155,7 @@ let new_job msg program_state rep_socket pair_socket =
           ~start_value:0.
           ~end_value:1.
           ~bar_length:20
-          ~title:(Message.State.to_string state)
+          (Message.State.to_string state)
     in
 
     let result =
@@ -776,7 +776,7 @@ let run ~port =
       Zmq.Socket.create zmq_context Zmq.Socket.rep
     in
     Zmq.Socket.set_linger_period rep_socket 1_000_000;
-    bind_socket "REP" rep_socket port;
+    bind_socket ~socket_type:"REP" ~socket:rep_socket ~port;
 
     let initial_program_state =
     {   queue = Queuing_system.create () ;
