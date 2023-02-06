@@ -254,10 +254,13 @@ EOF
 
          execute <<EOF
             source "${QP_ROOT}"/quantum_package.rc
+            rm -rf "${QP_ROOT}"/external/opampack
             cd "${QP_ROOT}"/external/
             tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
             cd "${QP_ROOT}"/external/opampack
             ./install.sh
+            export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot
+            eval \$("${QP_ROOT}"/external/opampack/opam env)
 EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then
@@ -357,7 +360,7 @@ if [[ ${ZLIB} = $(not_found) ]] ; then
         fail
 fi
 
-OCAML=$(find_exe ocaml)
+OCAML=$(find_exe ocamlc)
 if [[ ${OCAML} = $(not_found) ]] ; then
         error "OCaml (ocaml) compiler is not installed."
         fail
