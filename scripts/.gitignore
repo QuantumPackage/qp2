@@ -2,3 +2,6 @@
 *.pyo
 docopt.py
 resultsFile/
+verif_omp/a.out
+src/*/Makefile
+src/*/*/
