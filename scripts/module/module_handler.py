@@ -213,6 +213,14 @@ if __name__ == '__main__':
     if arguments['--all']:
         l_module = [f for f in os.listdir(QP_SRC)
                     if os.path.isdir(os.path.join(QP_SRC, f))]
+        l_non_module = [f for f in l_module if not is_module(f) ]
+        if l_non_module:
+            print("Ignoring invalid modules:")
+            print(" ".join(l_non_module))
+
+        # Filter out all non-modules
+        l_module = [f for f in l_module if is_module(f) ]
+
         # Remove all produced ezfio_config files
         for filename in os.listdir( os.path.join(QP_EZFIO, "config") ):
             os.remove( os.path.join(QP_EZFIO, "config", filename) )
