@@ -6,7 +6,7 @@ open Qputils
 
 *)
 
-  
+
 let print_list () =
   Lazy.force Qpackage.executables
   |> List.iter (fun (x,_) -> Printf.printf " * %s\n" x)
@@ -110,7 +110,7 @@ let run slave ?prefix exe ezfio_file =
   let task_thread =
      let thread =
       Thread.create ( fun () ->
-         TaskServer.run port_number )
+         TaskServer.run ~port:port_number )
      in
      thread ();
   in
@@ -151,10 +151,11 @@ let run slave ?prefix exe ezfio_file =
   let duration = Unix.time () -. time_start |> Unix.gmtime in
   let open Unix in
   let d, h, m, s =
-    duration.tm_yday, duration.tm_hour, duration.tm_min, duration.tm_sec 
+    duration.tm_yday, duration.tm_hour, duration.tm_min, duration.tm_sec
   in
   Printf.printf "Wall time: %d:%2.2d:%2.2d" (d*24+h) m s ;
   Printf.printf "\n\n";
+  Unix.sleep 1;
   if (exit_code <> 0) then
     exit exit_code
 
@@ -187,7 +188,7 @@ let () =
   end;
 
   (*  Handle options *)
-  let slave  = Command_line.get_bool "slave" 
+  let slave  = Command_line.get_bool "slave"
   and prefix = Command_line.get "prefix"
   in
 
