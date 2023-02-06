@@ -16,6 +16,25 @@ export CC=gcc
 git submodule init
 git submodule update
 
+# Update ARM or x86 dependencies
+ARCHITECTURE=$(uname -m)
+cd ${QP_ROOT}/external/qp2-dependencies
+echo "Architecture: $ARCHITECTURE"
+case $ARCHITECTURE in
+  aarch64)
+    git checkout arm64
+    ;;
+  x86_64) 
+    git checkout x86
+    ;;
+  *)
+    echo "Unknown architecture. Using x86_64."
+    git checkout x86
+    ;;
+esac
+cd ${QP_ROOT}
+
+
 function help()
 {
     cat <<EOF
@@ -190,7 +209,8 @@ for PACKAGE in ${PACKAGES} ; do
 
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              unzip "\${QP_ROOT}"/external/qp2-dependencies/ninja-linux.zip -d "\${QP_ROOT}"/bin
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/ninja.tar.gz 
+              mv ninja "\${QP_ROOT}"/bin/
 EOF
 
 
@@ -235,10 +255,9 @@ EOF
          execute <<EOF
             source "${QP_ROOT}"/quantum_package.rc
             cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/ocaml-bundle_x86.tar.gz
-            echo "" | ./ocaml-bundle/bootstrap.sh "${QP_ROOT}"
-            ./ocaml-bundle/configure.sh "${QP_ROOT}"
-            echo "" | ./ocaml-bundle/compile.sh "${QP_ROOT}"
+            tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            cd "${QP_ROOT}"/external/opampack
+            ./install.sh
 EOF
 
     elif [[ ${PACKAGE} = bse ]] ; then
@@ -303,6 +322,25 @@ fi
 
 ZEROMQ=$(find_lib -lzmq)
 if [[ ${ZEROMQ} = $(not_found) ]] ; then
+
+        MAKE=$(find_exe make)
+        if [[ ${MAKE} = $(not_found) ]] ; then
+                error "make is not installed."
+                fail
+        fi
+
+        M4=$(find_exe autoreconf)
+        if [[ ${M4} = $(not_found) ]] ; then
+                error "autoreconf is not installed."
+                fail
+        fi
+
+        M4=$(find_exe m4)
+        if [[ ${M4} = $(not_found) ]] ; then
+                error "m4 preprocesssor is not installed."
+                fail
+        fi
+
         error "ZeroMQ (zeromq) is not installed."
         fail
 fi
