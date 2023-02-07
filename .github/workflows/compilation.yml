@@ -41,6 +41,7 @@ jobs:
              lib/
              lib64/
              libexec/
+           restore-keys: qp2-
        - name: Configuration
          run: |
               ./configure -i ninja docopt resultsFile bats
