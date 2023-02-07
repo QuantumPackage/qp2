@@ -3,6 +3,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_num
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1 )/(2|r - R|) on the MO basis
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  integer :: i,j,k,l,ipoint
  do ipoint = 1, n_points_final_grid
@@ -23,6 +25,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,n_poi
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/(2|r - R|) on the MO basis
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  integer :: ipoint
  !$OMP PARALLEL                  &
@@ -42,6 +46,8 @@ BEGIN_PROVIDER [ double precision, mo_v_ij_erf_rk_cst_mu_transp, ( n_points_fina
  implicit none
  BEGIN_DOC
 ! int dr phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/(2|r - R|) on the MO basis
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  integer :: ipoint,i,j
  do i = 1, mo_num
@@ -59,6 +65,8 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu_naive, ( mo_num, mo_n
  implicit none
  BEGIN_DOC
 ! int dr  x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1 )/|r - R| on the MO basis
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  integer :: i,j,k,l,ipoint,m
  do ipoint = 1, n_points_final_grid
@@ -81,6 +89,8 @@ BEGIN_PROVIDER [ double precision, mo_x_v_ij_erf_rk_cst_mu, ( mo_num, mo_num,3,n
  implicit none
  BEGIN_DOC
 ! int dr x * phi_i(r) phi_j(r) (erf(mu(R) |r - R|) - 1)/2|r - R| on the MO basis
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  integer :: ipoint,m
  !$OMP PARALLEL                  &
@@ -119,6 +129,8 @@ BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num
  implicit none
  BEGIN_DOC
 ! W_mn^X(R) = \int dr phi_m(r) phi_n(r) (1 - erf(mu |r-R|)) (x-X)
+!
+! WARNING: not on the BI-ORTHO MOs
  END_DOC
  include 'constants.include.F'
  integer :: ipoint,m,i,j
@@ -160,48 +172,3 @@ BEGIN_PROVIDER [ double precision, sqrt_weight_at_r, (n_points_final_grid)]
  enddo
 END_PROVIDER 
 
-!BEGIN_PROVIDER [ double precision, mos_in_r_array_transp_sq_weight, (n_points_final_grid,mo_num)]
-
-
-!BEGIN_PROVIDER [ double precision, gauss_ij_rk_transp, (ao_num, ao_num, n_points_final_grid) ]
-! implicit none
-! integer :: i,j,ipoint
-! do ipoint = 1, n_points_final_grid
-!  do j = 1, ao_num
-!   do i = 1, ao_num
-!    gauss_ij_rk_transp(i,j,ipoint) = gauss_ij_rk(ipoint,i,j)
-!   enddo
-!  enddo
-! enddo
-!END_PROVIDER 
-!
-!
-!BEGIN_PROVIDER [ double precision, mo_gauss_ij_rk, ( mo_num, mo_num,n_points_final_grid)]
-! implicit none
-! integer :: ipoint
-! !$OMP PARALLEL                  &
-! !$OMP DEFAULT (NONE)            &
-! !$OMP PRIVATE (ipoint) & 
-! !$OMP SHARED (n_points_final_grid,gauss_ij_rk_transp,mo_gauss_ij_rk)
-! !$OMP DO SCHEDULE (dynamic)
-! do ipoint = 1, n_points_final_grid
-!  call ao_to_mo(gauss_ij_rk_transp(1,1,ipoint),size(gauss_ij_rk_transp,1),mo_gauss_ij_rk(1,1,ipoint),size(mo_gauss_ij_rk,1))
-! enddo
-! !$OMP END DO
-! !$OMP END PARALLEL
-!
-!END_PROVIDER 
-!
-!BEGIN_PROVIDER [ double precision, mo_gauss_ij_rk_transp, (n_points_final_grid, mo_num, mo_num)]
-! implicit none
-! integer :: i,j,ipoint
-! do ipoint = 1, n_points_final_grid
-!  do j = 1, mo_num
-!   do i = 1, mo_num
-!    mo_gauss_ij_rk_transp(ipoint,i,j) = mo_gauss_ij_rk(i,j,ipoint)
-!   enddo
-!  enddo
-! enddo
-!
-!END_PROVIDER 
-!
