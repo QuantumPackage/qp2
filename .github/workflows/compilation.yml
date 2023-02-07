@@ -18,7 +18,6 @@ jobs:
     name: Dependencies
 
     steps:
-       - uses: actions/checkout@v2
        - name: install dependencies
          run: |
            sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
@@ -28,23 +27,25 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-       - uses: actions/checkout@v2
+       - uses: actions/checkout@v3
        - name: Restore configuration
          id: restore
          uses: actions/cache@v3
          continue-on-error: false
          with:
            key: qp2-config
+           fail-on-cache-miss: true
            path: |
-             external
-             include
-             lib
-             lib64
-             libexec
-       - name: configuration
+             external/opampack/
+             include/
+             lib/
+             lib64/
+             libexec/
+       - name: Configuration
          run: |
+              ./configure -i ninja docopt resultsFile bats
               ./configure -c ./config/gfortran_debug.cfg
-       - name: compile
+       - name: Compilation
          run: |
               bash -c "source quantum_package.rc ; exec ninja"
 

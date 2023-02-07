@@ -4,12 +4,10 @@ on:
   push:
     branches:
     - master
-    - dev-stable
+    - ci
   pull_request:
     branches:
-    - dev-stable
     - master
-
   schedule:
   - cron: "23 22 * * 6"
 
@@ -21,22 +19,45 @@ jobs:
     name: Dependencies
 
     steps:
-       - uses: actions/checkout@v2
-       - name: install dependencies
+       - uses: actions/checkout@v3
+       - name: Install dependencies
          run: |
            sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
-       - uses: actions/checkout@v2
-       - name: configure
+       - name: zlib
          run: |
-              ./configure -i all -c ./config/gfortran_debug.cfg
-       - name: Configuration
+              ./configure -i zlib
+       - name: ninja
+         run: |
+              ./configure -i ninja
+       - name: zeromq
+         run: |
+              ./configure -i zeromq
+       - name: f77zmq
+         run: |
+              ./configure -i f77zmq
+       - name: gmp
+         run: |
+              ./configure -i gmp
+       - name: ocaml
+         run: |
+              ./configure -i ocaml
+       - name: docopt
+         run: |
+              ./configure -i docopt
+       - name: resultsFile
+         run: |
+              ./configure -i resultsFile
+       - name: bats
+         run: |
+              ./configure -i bats
+       - name: Cache
          uses: actions/cache@v3
          with:
            key: qp2-config
            path: |
-             external
-             include
-             lib
-             lib64
-             libexec
+             external/opampack/
+             include/
+             lib/
+             lib64/
+             libexec/
 
