@@ -6,10 +6,11 @@
 
   BEGIN_DOC
   !
-  ! two_e_tc_non_hermit_integral_seq_alpha(k,i) = <k| F^tc_alpha |i> 
+  ! two_e_tc_non_hermit_integral_seq_alpha(k,i) = <k| F^tc_alpha |i> ON THE AO BASIS 
   !
-  ! where F^tc is the two-body part of the TC Fock matrix and k,i are AO basis functions
+  ! where F^tc is the TWO-BODY part of the TC Fock matrix and k,i are AO basis functions
   !
+  ! works in SEQUENTIAL 
   END_DOC
 
   implicit none
@@ -17,8 +18,6 @@
   double precision :: density, density_a, density_b
   double precision :: t0, t1
 
-  !print*, ' providing two_e_tc_non_hermit_integral_seq ...'
-  !call wall_time(t0)
 
   two_e_tc_non_hermit_integral_seq_alpha = 0.d0
   two_e_tc_non_hermit_integral_seq_beta  = 0.d0
@@ -31,24 +30,6 @@
           density_a = TCSCF_density_matrix_ao_alpha(l,j)
           density_b = TCSCF_density_matrix_ao_beta (l,j)
           density   = density_a + density_b
-
-          !!                                         rho(l,j)   *      < k l| T | i j>
-          !two_e_tc_non_hermit_integral_seq_alpha(k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
-          !!                                         rho(l,j)   *      < k l| T | i j>
-          !two_e_tc_non_hermit_integral_seq_beta (k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
-          !!                                         rho_a(l,j) *      < l k| T | i j>
-          !two_e_tc_non_hermit_integral_seq_alpha(k,i) -= density_a * ao_two_e_tc_tot(k,j,l,i)
-          !!                                         rho_b(l,j) *      < l k| T | i j>
-          !two_e_tc_non_hermit_integral_seq_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
-
-          !!                                         rho(l,j)   *      < k l| T | i j>
-          !two_e_tc_non_hermit_integral_alpha(k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
-          !!                                         rho(l,j)   *      < k l| T | i j>
-          !two_e_tc_non_hermit_integral_beta (k,i) += density   * ao_two_e_tc_tot(l,j,k,i)
-          !!                                         rho_a(l,j) *      < l k| T | i j>
-          !two_e_tc_non_hermit_integral_alpha(k,i) -= density_a * ao_two_e_tc_tot(k,j,l,i)
-          !!                                         rho_b(l,j) *      < l k| T | i j>
-          !two_e_tc_non_hermit_integral_beta (k,i) -= density_b * ao_two_e_tc_tot(k,j,l,i)
 
           !                                         rho(l,j)   *      < k l| T | i j>
           two_e_tc_non_hermit_integral_seq_alpha(k,i) += density   * ao_two_e_tc_tot(k,i,l,j)
@@ -64,8 +45,6 @@
     enddo
   enddo
 
-  !call wall_time(t1)
-  !print*, ' wall time for two_e_tc_non_hermit_integral_seq after = ', t1 - t0
 
 END_PROVIDER 
 
@@ -76,9 +55,9 @@ END_PROVIDER
 
   BEGIN_DOC
   !
-  ! two_e_tc_non_hermit_integral_alpha(k,i) = <k| F^tc_alpha |i> 
+  ! two_e_tc_non_hermit_integral_alpha(k,i) = <k| F^tc_alpha |i> ON THE AO BASIS 
   !
-  ! where F^tc is the two-body part of the TC Fock matrix and k,i are AO basis functions
+  ! where F^tc is the TWO-BODY part of the TC Fock matrix and k,i are AO basis functions
   !
   END_DOC
 
@@ -88,8 +67,6 @@ END_PROVIDER
   double precision              :: t0, t1
   double precision, allocatable :: tmp_a(:,:), tmp_b(:,:)
 
-  !print*, ' providing two_e_tc_non_hermit_integral ...'
-  !call wall_time(t0)
 
   two_e_tc_non_hermit_integral_alpha = 0.d0
   two_e_tc_non_hermit_integral_beta  = 0.d0
@@ -135,8 +112,6 @@ END_PROVIDER
   deallocate(tmp_a, tmp_b)
  !$OMP END PARALLEL
 
-  !call wall_time(t1)
-  !print*, ' wall time for two_e_tc_non_hermit_integral after = ', t1 - t0
 
 END_PROVIDER 
 
@@ -181,14 +156,6 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
 
   if(bi_ortho) then
 
-    !allocate(tmp(ao_num,ao_num))
-    !tmp = Fock_matrix_tc_ao_alpha
-    !if(three_body_h_tc) then
-    !  tmp += fock_3e_uhf_ao_a
-    !endif
-    !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1))
-    !deallocate(tmp)
-
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                           , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
     if(three_body_h_tc) then
@@ -216,14 +183,6 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   double precision, allocatable :: tmp(:,:)
 
   if(bi_ortho) then
-
-    !allocate(tmp(ao_num,ao_num))
-    !tmp = Fock_matrix_tc_ao_beta
-    !if(three_body_h_tc) then
-    !  tmp += fock_3e_uhf_ao_b
-    !endif
-    !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1))
-    !deallocate(tmp)
 
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                           , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )

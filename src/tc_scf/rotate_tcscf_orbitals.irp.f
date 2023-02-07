@@ -4,7 +4,7 @@
 program rotate_tcscf_orbitals
 
   BEGIN_DOC
-  ! TODO : Put the documentation of the program here
+  ! TODO : Rotate the bi-orthonormal orbitals in order to minimize left-right angles when degenerate
   END_DOC
 
   implicit none

@@ -49,6 +49,11 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
 
+  BEGIN_DOC
+! ALPHA part of the Fock matrix from three-electron terms 
+!
+! WARNING :: non hermitian if bi-ortho MOS used 
+  END_DOC
   implicit none
   integer          :: a, b, i, j, o
   double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
@@ -145,6 +150,11 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
+  BEGIN_DOC
+! BETA part of the Fock matrix from three-electron terms 
+!
+! WARNING :: non hermitian if bi-ortho MOS used 
+  END_DOC
 
   implicit none
   integer          :: a, b, i, j, o
