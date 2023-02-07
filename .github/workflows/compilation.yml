@@ -9,7 +9,6 @@ on:
     branches:
     - dev-stable
     - master
-  workflow_dispatch:
 
 
 jobs:
@@ -42,6 +41,7 @@ jobs:
              lib64
              libexec
        - if: ${{ steps.restore.outputs.cache-hit != 'true' }}
+         name: Stop on error
          continue-on-error: false
        - name: configuration
          run: |

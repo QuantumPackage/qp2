@@ -1,9 +1,17 @@
 name: QP Configuration
 
 on:
+  push:
+    branches:
+    - master
+    - dev-stable
+  pull_request:
+    branches:
+    - dev-stable
+    - master
+
   schedule:
   - cron: "23 22 * * 6"
-  workflow_dispatch:
 
 
 jobs:
