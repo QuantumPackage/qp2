@@ -3,13 +3,17 @@ name: QP CI
 on:
   push:
     branches:
-      - master
-    tags:
-      # After vMajor.Minor.Patch _anything_ is allowed (without "/") !
-      - v[0-9]+.[0-9]+.[0-9]+*
+    - master
+    - dev-stable
   pull_request:
-    branches: [ dev-stable, master ]
+    branches: 
+    - dev-stable
+    - master
+  schedule:
+  - cron: "0 2 1 * *"
+  workflow_dispatch:
 
+      
 jobs:
 
 #  configuration:
@@ -23,6 +27,8 @@ jobs:
 #           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
 #
 #
+
+    
   compilation:
     runs-on: scemama666/qp2_env
     name: Compilation
