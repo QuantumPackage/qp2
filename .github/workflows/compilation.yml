@@ -6,14 +6,12 @@ on:
     - master
     - dev-stable
   pull_request:
-    branches: 
+    branches:
     - dev-stable
     - master
-  schedule:
-  - cron: "23 22 * * 6"
   workflow_dispatch:
 
-      
+
 jobs:
 
   configuration:
@@ -25,17 +23,29 @@ jobs:
        - name: install dependencies
          run: |
            sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
-    
+
   compilation:
     name: Compilation
     runs-on: ubuntu-20.04
-    needs: configuration
-    
+
     steps:
        - uses: actions/checkout@v2
-       - name: configure
+       - name: Restore configuration
+         id: restore
+         uses: actions/cache@v3
+         with:
+           key: qp2-config
+           path: |
+             external
+             include
+             lib
+             lib64
+             libexec
+       - if: ${{ steps.restore.outputs.cache-hit != 'true' }}
+         continue-on-error: false
+       - name: configuration
          run: |
-              ./configure -i all -c ./config/gfortran_debug.cfg
+              ./configure -c ./config/gfortran_debug.cfg
        - name: compile
          run: |
               bash -c "source quantum_package.rc ; exec ninja"

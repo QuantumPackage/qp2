@@ -254,9 +254,10 @@ EOF
 
          execute <<EOF
             source "${QP_ROOT}"/quantum_package.rc
-            rm -rf "${QP_ROOT}"/external/opampack
-            cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            if [[ ! -d "${QP_ROOT}"/external/opampack ]] ; then
+                cd "${QP_ROOT}"/external/
+                tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            fi
             cd "${QP_ROOT}"/external/opampack
             ./install.sh
             export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot
