@@ -80,6 +80,10 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     IF (DO_PSEUDO) THEN
        ao_integrals_n_e += ao_pseudo_integrals
     ENDIF
+    IF(point_charges) THEN
+       ao_integrals_n_e += ao_integrals_pt_chrg
+    ENDIF
+
 
   endif
 
