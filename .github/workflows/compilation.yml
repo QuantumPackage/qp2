@@ -1,4 +1,4 @@
-name: QP CI
+name: QP Compilation
 
 on:
   push:
