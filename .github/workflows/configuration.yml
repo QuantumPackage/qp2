@@ -1,0 +1,66 @@
+name: QP Configuration
+
+on:
+  push:
+    branches:
+    - master
+#   - ci
+  pull_request:
+    branches:
+    - master
+  schedule:
+  - cron: "23 22 * * 6"
+
+
+jobs:
+
+  configuration:
+    runs-on: ubuntu-20.04
+    name: Dependencies
+
+    steps:
+       - uses: actions/checkout@v3
+       - name: Install dependencies
+         run: |
+           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+       - name: zlib
+         run: |
+              ./configure -i zlib || echo OK
+       - name: ninja
+         run: |
+              ./configure -i ninja || echo OK
+       - name: zeromq
+         run: |
+              ./configure -i zeromq || echo OK
+       - name: f77zmq
+         run: |
+              ./configure -i f77zmq || echo OK
+       - name: gmp
+         run: |
+              ./configure -i gmp || echo OK
+       - name: ocaml
+         run: |
+              ./configure -i ocaml || echo OK
+       - name: docopt
+         run: |
+              ./configure -i docopt || echo OK
+       - name: resultsFile
+         run: |
+              ./configure -i resultsFile || echo OK
+       - name: bats
+         run: |
+              ./configure -i bats || echo OK
+       - name: Final check
+         run: |
+              ./configure -c config/gfortran_debug.cfg
+       - name: Cache
+         uses: actions/cache@v3
+         with:
+           key: qp2-config
+           path: |
+             external/opampack/
+             include/
+             lib/
+             lib64/
+             libexec/
+
