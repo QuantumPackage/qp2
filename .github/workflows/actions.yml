@@ -16,22 +16,20 @@ on:
       
 jobs:
 
-#  configuration:
-#    runs-on: ubuntu-20.04
-#    name: x86 Ubuntu 20.04
-#
-#    steps:
-#       - uses: actions/checkout@v2
-#       - name: install dependencies
-#         run: |
-#           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
-#
-#
+  configuration:
+    runs-on: ubuntu-20.04
+    name: x86 Ubuntu 20.04
 
+    steps:
+       - uses: actions/checkout@v2
+       - name: install dependencies
+         run: |
+           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
     
   compilation:
-    runs-on: scemama666/qp2_env
     name: Compilation
+    needs: configuration
+    
     steps:
        - uses: actions/checkout@v2
        - name: configure
