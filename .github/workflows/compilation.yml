@@ -32,6 +32,7 @@ jobs:
        - name: Restore configuration
          id: restore
          uses: actions/cache@v3
+         continue-on-error: false
          with:
            key: qp2-config
            path: |
@@ -40,9 +41,6 @@ jobs:
              lib
              lib64
              libexec
-       - if: ${{ steps.restore.outputs.cache-hit != 'true' }}
-         name: Stop on error
-         continue-on-error: false
        - name: configuration
          run: |
               ./configure -c ./config/gfortran_debug.cfg
