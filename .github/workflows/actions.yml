@@ -10,7 +10,7 @@ on:
     - dev-stable
     - master
   schedule:
-  - cron: "0 2 1 * *"
+  - cron: "23 22 * * 6"
   workflow_dispatch:
 
       
@@ -18,7 +18,7 @@ jobs:
 
   configuration:
     runs-on: ubuntu-20.04
-    name: x86 Ubuntu 20.04
+    name: Dependencies
 
     steps:
        - uses: actions/checkout@v2
