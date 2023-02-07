@@ -205,6 +205,9 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
        enddo
      enddo
      nuclear_repulsion *= 0.5d0
+     if(point_charges)then
+      nuclear_repulsion += pt_chrg_nuclei_interaction + pt_chrg_interaction
+     endif
    end if
 
    call write_time(6)
