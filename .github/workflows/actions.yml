@@ -28,6 +28,7 @@ jobs:
     
   compilation:
     name: Compilation
+    runs-on: ubuntu-20.04
     needs: configuration
     
     steps:
