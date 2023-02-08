@@ -16,7 +16,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index, (mo_num, mo_num, mo_num, 
  call wall_time(wall0)
 
  name_file = 'three_body_4_index'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index from disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index,name_file)
  else
@@ -44,10 +44,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index, (mo_num, mo_num, mo_num, 
  endif
  call wall_time(wall1)
  print*,'wall time for three_body_4_index',wall1 - wall0
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
@@ -69,7 +69,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12, (mo_num, mo_num, 
  call wall_time(wall0)
 
  name_file = 'three_body_4_index_exch_12'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index_exch_12 from disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index_exch_12,name_file)
  else
@@ -98,10 +98,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12, (mo_num, mo_num, 
  call wall_time(wall1)
  print*,'wall time for three_body_4_index_exch_12',wall1 - wall0
 
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index_exch_12 on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index_exch_12,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
@@ -123,7 +123,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12_part, (mo_num, mo_
  call wall_time(wall0)
 
  name_file = 'three_body_4_index_exch_12_part'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index_exch_12_part from disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index_exch_12_part,name_file)
  else
@@ -150,10 +150,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12_part, (mo_num, mo_
   call wall_time(wall1)
  endif
  print*,'wall time for three_body_4_index_exch_12_part',wall1 - wall0
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index_exch_12_part on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index_exch_12_part,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
@@ -175,7 +175,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12_part_bis, (mo_num,
  call wall_time(wall0)
 
  name_file = 'three_body_4_index_exch_12_part_bis'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index_exch_12_part_bisfrom disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index_exch_12_part_bis,name_file)
  else
@@ -204,10 +204,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_12_part_bis, (mo_num,
  endif
  call wall_time(wall1)
  print*,'wall time for three_body_4_index_exch_12_part_bis',wall1 - wall0
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index_exch_12_part_bis on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index_exch_12_part_bis,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
@@ -229,7 +229,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_231, (mo_num, mo_num,
  print*,'Providing the three_body_4_index_exch_231 ...'
  call wall_time(wall0)
  name_file = 'three_body_4_index_exch_231'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index_exch_231 from disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index_exch_231,name_file)
  else
@@ -257,10 +257,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_231, (mo_num, mo_num,
  endif
  call wall_time(wall1)
  print*,'wall time for three_body_4_index_exch_231',wall1 - wall0
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index_exch_231 on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index_exch_231,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
@@ -281,7 +281,7 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_312, (mo_num, mo_num,
  print*,'Providing the three_body_4_index_exch_312 ...'
  call wall_time(wall0)
  name_file = 'three_body_4_index_exch_312'
- if(read_three_body_ints)then
+ if(read_ortho_three_e_ints)then
   print*,'Reading three_body_4_index_exch_312 from disk ...'
   call read_array_4_index_tensor(mo_num,three_body_4_index_exch_312,name_file)
  else
@@ -309,10 +309,10 @@ BEGIN_PROVIDER [ double precision, three_body_4_index_exch_312, (mo_num, mo_num,
  endif
  call wall_time(wall1)
  print*,'wall time for three_body_4_index_exch_312',wall1 - wall0
- if(write_three_body_ints)then
+ if(write_ortho_three_e_ints)then
   print*,'Writing three_body_4_index_exch_312 on disk ...' 
   call write_array_4_index_tensor(mo_num,three_body_4_index_exch_312,name_file)
-  call ezfio_set_three_body_ints_io_three_body_ints("Read")
+  call ezfio_set_ortho_three_e_ints_io_ortho_three_e_ints("Read")
  endif
 
 END_PROVIDER 
