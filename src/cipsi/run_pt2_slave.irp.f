@@ -83,6 +83,7 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
   buffer_ready = .False.
   n_tasks = 1
 
+!  sending = .False.
   done = .False.
   do while (.not.done)
 
@@ -116,13 +117,14 @@ subroutine run_pt2_slave_small(thread,iproc,energy)
     do k=1,n_tasks
       call pt2_alloc(pt2_data(k),N_states)
       b%cur = 0
-!      double precision :: time2
-!      call wall_time(time2)
+!double precision :: time2
+!call wall_time(time2)
       call select_connected(i_generator(k),energy,pt2_data(k),b,subset(k),pt2_F(i_generator(k)))
-!      call wall_time(time1)
-!      print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
+!call wall_time(time1)
+!print *,  i_generator(1), time1-time2, n_tasks, pt2_F(i_generator(1))
     enddo
     call wall_time(time1)
+!print *,  '-->', i_generator(1), time1-time0, n_tasks
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then

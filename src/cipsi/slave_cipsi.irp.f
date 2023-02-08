@@ -311,7 +311,7 @@ subroutine run_slave_main
           if (mpi_master) then
             print *,  'Running PT2'
           endif
-          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target)
+          !$OMP PARALLEL PRIVATE(i) NUM_THREADS(nproc_target+1)
           i = omp_get_thread_num()
           call run_pt2_slave(0,i,pt2_e0_denominator)
           !$OMP END PARALLEL
