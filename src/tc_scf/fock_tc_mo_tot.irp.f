@@ -3,7 +3,7 @@
 &BEGIN_PROVIDER [ double precision, Fock_matrix_tc_diag_mo_tot, (mo_num)]
    implicit none
    BEGIN_DOC
-   ! Fock matrix on the MO basis.
+   ! TC-Fock matrix on the MO basis. WARNING !!! NON HERMITIAN !!!
    ! For open shells, the ROHF Fock Matrix is ::
    !
    !       |   F-K    |  F + K/2  |    F     |

@@ -1649,3 +1649,185 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
   enddo
 
 end
+
+subroutine diag_nonsym_right(n, A, A_ldim, V, V_ldim, energy, E_ldim)
+
+  implicit none
+
+  integer,          intent(in)  :: n, A_ldim, V_ldim, E_ldim
+  double precision, intent(in)  :: A(A_ldim,n)
+  double precision, intent(out) :: energy(E_ldim), V(V_ldim,n)
+
+  character*1                   :: JOBVL, JOBVR, BALANC, SENSE
+  integer                       :: i, j
+  integer                       :: ILO, IHI, lda, ldvl, ldvr, LWORK, INFO
+  double precision              :: ABNRM
+  integer,          allocatable :: iorder(:), IWORK(:)
+  double precision, allocatable :: WORK(:), SCALE_array(:), RCONDE(:), RCONDV(:)
+  double precision, allocatable :: Atmp(:,:), WR(:), WI(:), VL(:,:), VR(:,:), Vtmp(:)
+  double precision, allocatable :: energy_loc(:), V_loc(:,:)
+
+  allocate( Atmp(n,n), WR(n), WI(n), VL(1,1), VR(n,n) )
+  do i = 1, n
+    do j = 1, n
+      Atmp(j,i) = A(j,i)
+    enddo
+  enddo
+
+  JOBVL  = "N" ! computes the left  eigenvectors
+  JOBVR  = "V" ! computes the right eigenvectors
+  BALANC = "B" ! Diagonal scaling and Permutation for optimization
+  SENSE  = "V" ! Determines which reciprocal condition numbers are computed
+  lda  = n
+  ldvr = n
+  ldvl = 1
+
+  allocate( WORK(1), SCALE_array(n), RCONDE(n), RCONDV(n), IWORK(2*n-2) )
+
+  LWORK = -1 ! to ask for the optimal size of WORK
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  & ! CHARACTERS
+             , n, Atmp, lda                                 & ! MATRIX TO DIAGONALIZE
+             , WR, WI                                       & ! REAL AND IMAGINARY PART OF EIGENVALUES
+             , VL, ldvl, VR, ldvr                           & ! LEFT AND RIGHT EIGENVECTORS
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV & ! OUTPUTS OF OPTIMIZATION
+             , WORK, LWORK, IWORK, INFO )
+
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  LWORK = max(int(work(1)), 1) ! this is the optimal size of WORK
+  deallocate(WORK)
+  allocate(WORK(LWORK))
+  call dgeevx( BALANC, JOBVL, JOBVR, SENSE                  &
+             , n, Atmp, lda                                 &
+             , WR, WI                                       &
+             , VL, ldvl, VR, ldvr                           &
+             , ILO, IHI, SCALE_array, ABNRM, RCONDE, RCONDV &
+             , WORK, LWORK, IWORK, INFO )
+  if(INFO .ne. 0) then
+    print*, 'dgeevx failed !!', INFO
+    stop
+  endif
+
+  deallocate( WORK, SCALE_array, RCONDE, RCONDV, IWORK )
+  deallocate( VL, Atmp )
+
+
+  allocate( energy_loc(n), V_loc(n,n) )
+  energy_loc = 0.d0
+  V_loc = 0.d0
+
+  i = 1
+  do while(i .le. n)
+
+!    print*, i, WR(i), WI(i)
+
+    if( dabs(WI(i)) .gt. 1e-7 ) then
+
+      print*, ' Found an imaginary component to eigenvalue'
+      print*, ' Re(i) + Im(i)', i, WR(i), WI(i)
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = WR(i) * VR(j,i) - WI(i) * VR(j,i+1)
+      enddo
+      energy_loc(i+1) = WI(i)
+      do j = 1, n
+        V_loc(j,i+1) = WR(i) * VR(j,i+1) + WI(i) * VR(j,i)
+      enddo
+      i = i + 2
+
+    else
+
+      energy_loc(i) = WR(i)
+      do j = 1, n
+        V_loc(j,i) = VR(j,i)
+      enddo
+      i = i + 1
+
+    endif
+
+  enddo
+
+  deallocate(WR, WI, VR)
+
+
+  ! ordering
+!  do j = 1, n
+!    write(444, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  allocate( iorder(n) )
+  do i = 1, n
+    iorder(i) = i
+  enddo
+  call dsort(energy_loc, iorder, n)
+  do i = 1, n
+    energy(i) = energy_loc(i)
+    do j = 1, n
+      V(j,i) = V_loc(j,iorder(i))
+    enddo
+  enddo
+  deallocate(iorder)
+!  do j = 1, n
+!    write(445, '(100(1X, F16.10))') (V_loc(j,i), i=1,5)
+!  enddo
+  deallocate(V_loc, energy_loc)
+
+end subroutine diag_nonsym_right
+
+! ---
+
+! Taken from GammCor thanks to Michal Hapka :-)
+
+
+subroutine pivoted_cholesky( A, rank, tol, ndim, U)
+!
+! A = U**T * U
+!
+! matrix A is destroyed inside this subroutine
+! Cholesky vectors are stored in U
+! dimension of U: U(1:rank, 1:n)
+! U is allocated inside this subroutine
+! rank is the number of Cholesky vectors depending on tol
+!
+integer :: ndim
+integer, intent(inout)                                        :: rank
+double precision, dimension(ndim, ndim), intent(inout)        :: A
+double precision, dimension(ndim, rank), intent(out)          :: U
+double precision, intent(in)                                  :: tol
+
+integer, dimension(:), allocatable          :: piv
+double precision, dimension(:), allocatable :: work
+character, parameter :: uplo = "U"
+integer :: N, LDA
+integer :: info
+integer :: k, l, rank0
+external :: dpstrf
+
+rank0 = rank
+N = size(A, dim=1)
+LDA = N
+allocate(piv(N))
+allocate(work(2*N))
+call dpstrf(uplo, N, A, LDA, piv, rank, tol, work, info)
+
+if (rank > rank0) then
+  print *, 'Bug: rank > rank0 in pivoted cholesky. Increase rank before calling'
+  stop
+end if
+
+do k = 1, N
+  A(k+1:, k) = 0.00D+0
+end do
+! TODO: It should be possible to use only one vector of size (1:rank) as a buffer
+! to do the swapping in-place
+U = 0.00D+0
+do k = 1, N
+  l = piv(k)
+  U(l, :) = A(1:rank, k)
+end do
+
+end subroutine pivoted_cholesky
+
