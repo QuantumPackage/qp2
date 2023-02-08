@@ -20,18 +20,6 @@ git submodule update
 ARCHITECTURE=$(uname -m)
 cd ${QP_ROOT}/external/qp2-dependencies
 echo "Architecture: $ARCHITECTURE"
-case $ARCHITECTURE in
-  aarch64)
-    git checkout arm64
-    ;;
-  x86_64) 
-    git checkout x86
-    ;;
-  *)
-    echo "Unknown architecture. Using x86_64."
-    git checkout x86
-    ;;
-esac
 cd ${QP_ROOT}
 
 
@@ -209,7 +197,7 @@ for PACKAGE in ${PACKAGES} ; do
 
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/ninja.tar.gz 
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
               mv ninja "\${QP_ROOT}"/bin/
 EOF
 
@@ -256,7 +244,7 @@ EOF
             source "${QP_ROOT}"/quantum_package.rc
             rm -rf "${QP_ROOT}"/external/opampack
             cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            tar --gunzip --extract --file qp2-dependencies/${ARCHITECTURE}/opampack.tar.gz
             cd "${QP_ROOT}"/external/opampack
             ./install.sh
             export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot

@@ -84,7 +84,7 @@ end = struct
     Ezfio.get_nuclei_nucl_coord()
     |> Ezfio.flattened_ezfio
     in
-    let zero = Point3d.of_string Units.Bohr "0. 0. 0." in
+    let zero = Point3d.of_string ~units:Units.Bohr "0. 0. 0." in
     let result = Array.make nucl_num zero in
     for i=0 to (nucl_num-1)
     do
@@ -218,7 +218,7 @@ Nuclear coordinates in xyz format (Angstroms) ::
           and lines = Array.of_list lines
           in
           List.init (Nucl_number.to_int nucl_num) (fun i ->
-            Atom.of_string Units.Angstrom lines.(i))
+            Atom.of_string ~units:Units.Angstrom lines.(i))
         end
       | _ -> failwith "Error in xyz format"
     in
