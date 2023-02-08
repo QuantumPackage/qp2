@@ -38,33 +38,9 @@
                      , fock_tc_leigvec_mo, fock_tc_reigvec_mo                       & 
                      , n_real_tc, eigval_right_tmp )
 
-  !if(max_ov_tc_scf)then
-  ! call non_hrmt_fock_mat( mo_num, F_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag &
-  !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo                          & 
-  !                    , n_real_tc, eigval_right_tmp )
-  !else 
-  ! call non_hrmt_diag_split_degen_bi_orthog( mo_num, F_tmp     &
-  !                    , fock_tc_leigvec_mo, fock_tc_reigvec_mo & 
-  !                    , n_real_tc, eigval_right_tmp )
-  !endif
-
   deallocate(F_tmp)
 
-
-!  if(n_real_tc .ne. mo_num)then
-!   print*,'n_real_tc ne mo_num ! ',n_real_tc
-!   stop
-!  endif
-
   eigval_fock_tc_mo = eigval_right_tmp
-!  print*,'Eigenvalues of Fock_matrix_tc_mo_tot'
-!  do i = 1, elec_alpha_num
-!    print*, i, eigval_fock_tc_mo(i)
-!  enddo
-!  do i = elec_alpha_num+1, mo_num 
-!    print*, i, eigval_fock_tc_mo(i) - level_shift_tcscf
-!  enddo
-!  deallocate( eigval_right_tmp )
 
   ! L.T x R 
   call dgemm( "T", "N", mo_num, mo_num, mo_num, 1.d0          &
