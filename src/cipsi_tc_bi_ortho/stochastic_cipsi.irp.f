@@ -53,18 +53,18 @@ subroutine run_stochastic_cipsi
 !  call routine_save_right
 
 
-  if (N_det > N_det_max) then
-    psi_det(1:N_int,1:2,1:N_det) = psi_det_sorted_tc_gen(1:N_int,1:2,1:N_det)
-    psi_coef(1:N_det,1:N_states) = psi_coef_sorted_tc_gen(1:N_det,1:N_states)
-    N_det = N_det_max
-    soft_touch N_det psi_det psi_coef
-    if (s2_eig) then
-      call make_s2_eigenfunction
-    endif
-    print_pt2 = .False.
-    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+!  if (N_det > N_det_max) then
+!    psi_det(1:N_int,1:2,1:N_det) = psi_det_sorted_tc_gen(1:N_int,1:2,1:N_det)
+!    psi_coef(1:N_det,1:N_states) = psi_coef_sorted_tc_gen(1:N_det,1:N_states)
+!    N_det = N_det_max
+!    soft_touch N_det psi_det psi_coef
+!   if (s2_eig) then
+!     call make_s2_eigenfunction
+!   endif
+!    print_pt2 = .False.
+!    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
 !    call routine_save_right
-  endif
+!  endif
 
   allocate(ept2(1000),pt1(1000),extrap_energy(100))
 

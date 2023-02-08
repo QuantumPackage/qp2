@@ -1,49 +1,148 @@
 use bitmasks
 
-! ---
+subroutine get_mask_phase(det1, pm, Nint)
+  use bitmasks
+  implicit none
+  integer, intent(in) :: Nint
+  integer(bit_kind), intent(in) :: det1(Nint,2)
+  integer(bit_kind), intent(out) :: pm(Nint,2)
+  integer(bit_kind) :: tmp1, tmp2
+  integer :: i
+  tmp1 = 0_8
+  tmp2 = 0_8
+  select case (Nint)
 
-subroutine select_connected(i_generator, E0, pt2_data, b, subset, csubset)
+BEGIN_TEMPLATE
+    case ($Nint)
+      do i=1,$Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+SUBST [ Nint ]
+1;;
+2;;
+3;;
+4;;
+END_TEMPLATE
+    case default
+      do i=1,Nint
+        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
+        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
+        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
+        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
+        pm(i,1) = ieor(pm(i,1), tmp1)
+        pm(i,2) = ieor(pm(i,2), tmp2)
+        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
+        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
+      end do
+  end select
 
+end subroutine
+
+
+subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
   use bitmasks
   use selection_types
-
   implicit none
-  integer,                intent(in)    :: i_generator, subset, csubset
-  double precision,       intent(in)    :: E0(N_states)
+  integer, intent(in)    :: i_generator, subset, csubset
   type(selection_buffer), intent(inout) :: b
-  type(pt2_type),         intent(inout) :: pt2_data
+  type(pt2_type), intent(inout) :: pt2_data
+  integer :: k,l
+  double precision, intent(in)   :: E0(N_states)
 
-  integer                               :: k, l
-  integer(bit_kind)                     :: hole_mask(N_int,2), particle_mask(N_int,2)
-  double precision, allocatable         :: fock_diag_tmp(:,:)
+  integer(bit_kind)              :: hole_mask(N_int,2), particle_mask(N_int,2)
+
+  double precision, allocatable  :: fock_diag_tmp(:,:)
 
   allocate(fock_diag_tmp(2,mo_num+1))
 
   call build_fock_tmp_tc(fock_diag_tmp, psi_det_generators(1,1,i_generator), N_int)
 
-  do k = 1, N_int
-      hole_mask(k,1)     = iand(generators_bitmask(k,1,s_hole), psi_det_generators(k,1,i_generator))
-      hole_mask(k,2)     = iand(generators_bitmask(k,2,s_hole), psi_det_generators(k,2,i_generator))
+  do k=1,N_int
+      hole_mask(k,1) = iand(generators_bitmask(k,1,s_hole), psi_det_generators(k,1,i_generator))
+      hole_mask(k,2) = iand(generators_bitmask(k,2,s_hole), psi_det_generators(k,2,i_generator))
       particle_mask(k,1) = iand(generators_bitmask(k,1,s_part), not(psi_det_generators(k,1,i_generator)) )
       particle_mask(k,2) = iand(generators_bitmask(k,2,s_part), not(psi_det_generators(k,2,i_generator)) )
   enddo
-  call select_singles_and_doubles(i_generator, hole_mask, particle_mask, fock_diag_tmp, E0, pt2_data, b, subset, csubset)
-
+  call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,b,subset,csubset)
   deallocate(fock_diag_tmp)
-
 end subroutine select_connected
 
-! ---
+
+
+double precision function get_phase_bi(phasemask, s1, s2, h1, p1, h2, p2, Nint)
+  use bitmasks
+  implicit none
+
+  integer, intent(in) :: Nint
+  integer(bit_kind), intent(in) :: phasemask(Nint,2)
+  integer, intent(in) :: s1, s2, h1, h2, p1, p2
+  logical :: change
+  integer :: np
+  double precision, save :: res(0:1) = (/1d0, -1d0/)
+
+  integer :: h1_int, h2_int
+  integer :: p1_int, p2_int
+  integer :: h1_bit, h2_bit
+  integer :: p1_bit, p2_bit
+  h1_int = shiftr(h1-1,bit_kind_shift)+1
+  h1_bit = h1 - shiftl(h1_int-1,bit_kind_shift)-1
+
+  h2_int = shiftr(h2-1,bit_kind_shift)+1
+  h2_bit = h2 - shiftl(h2_int-1,bit_kind_shift)-1
+
+  p1_int = shiftr(p1-1,bit_kind_shift)+1
+  p1_bit = p1 - shiftl(p1_int-1,bit_kind_shift)-1
+
+  p2_int = shiftr(p2-1,bit_kind_shift)+1
+  p2_bit = p2 - shiftl(p2_int-1,bit_kind_shift)-1
+
+
+  ! Put the phasemask bits at position 0, and add them all
+  h1_bit = int(shiftr(phasemask(h1_int,s1),h1_bit))
+  p1_bit = int(shiftr(phasemask(p1_int,s1),p1_bit))
+  h2_bit = int(shiftr(phasemask(h2_int,s2),h2_bit))
+  p2_bit = int(shiftr(phasemask(p2_int,s2),p2_bit))
+
+  np = h1_bit + p1_bit + h2_bit + p2_bit
+
+  if(p1 < h1) np = np + 1
+  if(p2 < h2) np = np + 1
+
+  if(s1 == s2 .and. max(h1, p1) > min(h2, p2)) np = np + 1
+  get_phase_bi = res(iand(np,1))
+end
+
 
 subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock_diag_tmp, E0, pt2_data, buf, subset, csubset)
-
-  BEGIN_DOC
-  !  WARNING /!\ : It is assumed that the generators and selectors are psi_det_sorted_tc
-  END_DOC
-
   use bitmasks
   use selection_types
   implicit none
+  BEGIN_DOC
+  !  WARNING /!\ : It is assumed that the generators and selectors are psi_det_sorted_tc
+  END_DOC
 
   integer,           intent(in)         :: i_generator, subset, csubset
   integer(bit_kind), intent(in)         :: hole_mask(N_int,2), particle_mask(N_int,2)
@@ -89,7 +188,8 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   monoAdo = .true.
   monoBdo = .true.
 
-  do k = 1, N_int
+
+  do k=1,N_int
     hole    (k,1) = iand(psi_det_generators(k,1,i_generator), hole_mask(k,1))
     hole    (k,2) = iand(psi_det_generators(k,2,i_generator), hole_mask(k,2))
     particle(k,1) = iand(not(psi_det_generators(k,1,i_generator)), particle_mask(k,1))
@@ -102,35 +202,37 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   allocate( indices(N_det), exc_degree( max(N_det_alpha_unique, N_det_beta_unique) ) )
 
   ! Pre-compute excitation degrees wrt alpha determinants
-  k = 1
-  do i = 1, N_det_alpha_unique
-    call get_excitation_degree_spin(psi_det_alpha_unique(1,i), psi_det_generators(1,1,i_generator), exc_degree(i), N_int)
+  k=1
+  do i=1,N_det_alpha_unique
+    call get_excitation_degree_spin(psi_det_alpha_unique(1,i),       &
+        psi_det_generators(1,1,i_generator), exc_degree(i), N_int)
   enddo
 
   ! Iterate on 0SD beta, and find alphas 0SDTQ such that exc_degree <= 4
-  do j = 1, N_det_beta_unique
-    call get_excitation_degree_spin(psi_det_beta_unique(1,j), psi_det_generators(1,2,i_generator), nt, N_int)
+  do j=1,N_det_beta_unique
+    call get_excitation_degree_spin(psi_det_beta_unique(1,j),        &
+        psi_det_generators(1,2,i_generator), nt, N_int)
     if (nt > 2) cycle
-    do l_a = psi_bilinear_matrix_columns_loc(j), psi_bilinear_matrix_columns_loc(j+1)-1
+    do l_a=psi_bilinear_matrix_columns_loc(j), psi_bilinear_matrix_columns_loc(j+1)-1
       i = psi_bilinear_matrix_rows(l_a)
       if(nt + exc_degree(i) <= 4) then
         idx = psi_det_sorted_tc_order(psi_bilinear_matrix_order(l_a))
-        if (psi_average_norm_contrib_sorted_tc(idx) > norm_thr) then
+!       if (psi_average_norm_contrib_sorted_tc(idx) > norm_thr) then
           indices(k) = idx
           k = k + 1
-        endif
+!       endif
       endif
     enddo
   enddo
 
   ! Pre-compute excitation degrees wrt beta determinants
-  do i = 1, N_det_beta_unique
+  do i=1,N_det_beta_unique
     call get_excitation_degree_spin(psi_det_beta_unique(1,i), psi_det_generators(1,2,i_generator), exc_degree(i), N_int)
   enddo
 
   ! Iterate on 0S alpha, and find betas TQ such that exc_degree <= 4
   ! Remove also contributions < 1.d-20)
-  do j = 1, N_det_alpha_unique
+  do j=1,N_det_alpha_unique
     call get_excitation_degree_spin(psi_det_alpha_unique(1,j), psi_det_generators(1,1,i_generator), nt, N_int)
     if (nt > 1) cycle
     do l_a = psi_bilinear_matrix_transp_rows_loc(j), psi_bilinear_matrix_transp_rows_loc(j+1)-1
@@ -140,10 +242,10 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
         idx = psi_det_sorted_tc_order(                                  &
             psi_bilinear_matrix_order(                               &
             psi_bilinear_matrix_transp_order(l_a)))
-        if(psi_average_norm_contrib_sorted_tc(idx) > norm_thr) then
+!       if(psi_average_norm_contrib_sorted_tc(idx) > norm_thr) then
           indices(k) = idx
           k = k + 1
-        endif
+!       endif
       endif
     enddo
   enddo
@@ -210,6 +312,9 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   allocate( mat(N_states, mo_num, mo_num) )
   allocate( mat_l(N_states, mo_num, mo_num), mat_r(N_states, mo_num, mo_num) )
   maskInd = -1
+
+
+
 
   do s1 = 1, 2
     do i1 = N_holes(s1), 1, -1   ! Generate low excitations first
@@ -354,7 +459,6 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
           fullinteresting(sze+1) = i
         endif
       enddo
-
       allocate( fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0))  )
 
@@ -579,16 +683,11 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
         call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
         if(nt == 4) then
-!          call get_d2    (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm2(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         elseif(nt == 3) then
-!          call get_d1 (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           call get_d1_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm1(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         else
           call get_d0_new (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
-!          call get_pm0(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, interesting(i)))
         endif
     elseif(nt == 4) then
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
@@ -780,9 +879,19 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
           if(debug_tc_pt2 == 1)then !! Using the old version
             psi_h_alpha = 0.d0
             alpha_h_psi = 0.d0
-            do iii = 1, N_det
+            do iii = 1, N_det_selectors
               call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
               call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+              call get_excitation_degree(psi_selectors(1,1,iii), det,degree,N_int)
+              if(degree == 0)then
+               print*,'problem !!!'
+               print*,'a determinant is already in the wave function !!'
+               print*,'it corresponds to the selector number ',iii
+               call debug_det(det,N_int)
+               stop
+              endif
+!              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+!              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
               psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
               alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
             enddo
@@ -791,7 +900,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             alpha_h_psi_tmp = mat_r(istate, p1, p2) ! new version
             psi_h_alpha = 0.d0
             alpha_h_psi = 0.d0
-            do iii = 1, N_det ! old version
+            do iii = 1, N_det_selectors ! old version
               call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
               call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
               psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
@@ -881,70 +990,6 @@ end subroutine fill_buffer_double
 
 ! ---
 
-subroutine get_mask_phase(det1, pm, Nint)
-
-  use bitmasks
-  implicit none
-
-  integer, intent(in) :: Nint
-  integer(bit_kind), intent(in) :: det1(Nint,2)
-  integer(bit_kind), intent(out) :: pm(Nint,2)
-  integer(bit_kind) :: tmp1, tmp2
-  integer :: i
-  tmp1 = 0_8
-  tmp2 = 0_8
-  select case (Nint)
-
-BEGIN_TEMPLATE
-    case ($Nint)
-      do i=1,$Nint
-        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
-        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
-        pm(i,1) = ieor(pm(i,1), tmp1)
-        pm(i,2) = ieor(pm(i,2), tmp2)
-        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
-        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
-      end do
-SUBST [ Nint ]
-1;;
-2;;
-3;;
-4;;
-END_TEMPLATE
-    case default
-      do i=1,Nint
-        pm(i,1) = ieor(det1(i,1), shiftl(det1(i,1), 1))
-        pm(i,2) = ieor(det1(i,2), shiftl(det1(i,2), 1))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 2))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 2))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 4))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 4))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 8))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 8))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 16))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 16))
-        pm(i,1) = ieor(pm(i,1), shiftl(pm(i,1), 32))
-        pm(i,2) = ieor(pm(i,2), shiftl(pm(i,2), 32))
-        pm(i,1) = ieor(pm(i,1), tmp1)
-        pm(i,2) = ieor(pm(i,2), tmp2)
-        if(iand(popcnt(det1(i,1)), 1) == 1) tmp1 = not(tmp1)
-        if(iand(popcnt(det1(i,2)), 1) == 1) tmp2 = not(tmp2)
-      end do
-  end select
-
-end subroutine get_mask_phase
-
-! ---
 
 subroutine past_d1(bannedOrb, p)
 
