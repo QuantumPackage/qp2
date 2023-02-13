@@ -45,6 +45,8 @@
    call density_and_grad_alpha_beta_and_all_aos_and_grad_aos_at_r(r,dm_a,dm_b,  dm_a_grad, dm_b_grad, aos_array, grad_aos_array)
 
    ! alpha/beta density 
+   dm_a(istate) = max(dm_a(istate),1.d-12)
+   dm_b(istate) = max(dm_b(istate),1.d-12)
    one_e_dm_and_grad_alpha_in_r(4,i,istate)  =  dm_a(istate)
    one_e_dm_and_grad_beta_in_r(4,i,istate)   =  dm_b(istate)
 
@@ -80,6 +82,7 @@
   enddo
  enddo
  !$OMP END PARALLEL DO
+ print*,'density and gradients provided'
 
 END_PROVIDER
 
