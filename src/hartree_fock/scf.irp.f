@@ -49,7 +49,6 @@ subroutine create_guess
   if (.not.exists) then
     mo_label = 'Guess'
     if (mo_guess_type == "HCore") then
-      mo_coef = ao_ortho_lowdin_coef
       call restore_symmetry(ao_num,mo_num,mo_coef,size(mo_coef,1),1.d-10)
       TOUCH mo_coef
       call mo_as_eigvectors_of_mo_matrix(mo_one_e_integrals,     &
