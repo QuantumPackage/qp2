@@ -8,6 +8,7 @@
   - Use OpamPack for OCaml
   - Configure adapted for ARM
   - Added many types of integrals
+  - Accelerated four-index transformation
 
 *** TODO: take from dev
   - [ ] Added GTOs with complex exponent
