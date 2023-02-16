@@ -66,10 +66,27 @@ subroutine v_rho_oc_to_v_rho_ab(v_rho_o,v_rho_c,v_rho_a,v_rho_b)
  END_DOC
  double precision, intent(in)  :: v_rho_o,v_rho_c
  double precision, intent(out) :: v_rho_a,v_rho_b
+! print*,'in v_rho_oc_to_v_rho_ab'
+! print*, v_rho_c , v_rho_o
  v_rho_a = v_rho_c + v_rho_o
  v_rho_b = v_rho_c - v_rho_o
 end
 
+subroutine v_grad_rho_ab_to_v_grad_rho_oc(v_grad_rho_a_2,v_grad_rho_b_2,v_grad_rho_a_b,v_grad_rho_o_2,v_grad_rho_c_2,v_grad_rho_o_c)
+ implicit none
+ double precision, intent(in) :: v_grad_rho_a_2,v_grad_rho_b_2,v_grad_rho_a_b
+ double precision, intent(out)  :: v_grad_rho_o_2,v_grad_rho_c_2,v_grad_rho_o_c
+ BEGIN_DOC
+! convert  (v_grad_rho_a_2, v_grad_rho_b_2, v_grad_rho_a.grad_rho_b) 
+!
+! to       (v_grad_rho_c_2, v_grad_rho_o_2, v_grad_rho_o.grad_rho_c) 
+!
+! rho_c = total density, rho_o spin density
+ END_DOC
+ v_grad_rho_c_2 = 0.25d0 * (v_grad_rho_a_2 + v_grad_rho_b_2 + v_grad_rho_a_b)
+ v_grad_rho_o_2 = 0.25d0 * (v_grad_rho_a_2 + v_grad_rho_b_2 - v_grad_rho_a_b)
+ v_grad_rho_o_c = 0.25d0 * (2d0 * v_grad_rho_a_2 - 2d0 * v_grad_rho_b_2    )
+end
 
 
 subroutine v_grad_rho_oc_to_v_grad_rho_ab(v_grad_rho_o_2,v_grad_rho_c_2,v_grad_rho_o_c,v_grad_rho_a_2,v_grad_rho_b_2,v_grad_rho_a_b)
@@ -87,22 +104,4 @@ subroutine v_grad_rho_oc_to_v_grad_rho_ab(v_grad_rho_o_2,v_grad_rho_c_2,v_grad_r
  v_grad_rho_b_2 = v_grad_rho_o_2 + v_grad_rho_c_2 - v_grad_rho_o_c
  v_grad_rho_a_b = -2d0 * v_grad_rho_o_2 + 2d0 * v_grad_rho_c_2
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
