@@ -17,6 +17,7 @@ subroutine routine_active_only
  double precision :: wee_ab_st_av, rdm_ab_st_av
  double precision :: wee_tot_st_av, rdm_tot_st_av,spin_trace
  double precision :: wee_aa_st_av_2,wee_ab_st_av_2,wee_bb_st_av_2,wee_tot_st_av_2,wee_tot_st_av_3
+ double precision :: accu_aa, accu_bb, accu_ab, accu_tot
 
  wee_ab  = 0.d0
  wee_bb  = 0.d0
@@ -64,14 +65,23 @@ subroutine routine_active_only
  do istate = 1, N_states
    !! PURE ACTIVE PART 
    !! 
+   accu_aa  = 0.d0
+   accu_bb  = 0.d0
+   accu_ab  = 0.d0
+   accu_tot = 0.d0
    do i = 1, n_act_orb
     iorb = list_act(i)
     do j = 1, n_act_orb
      jorb = list_act(j)
+     accu_bb += act_2_rdm_bb_mo(j,i,j,i,1)
+     accu_aa += act_2_rdm_aa_mo(j,i,j,i,1)
+     accu_ab += act_2_rdm_ab_mo(j,i,j,i,1)
+     accu_tot += act_2_rdm_spin_trace_mo(j,i,j,i,1)
      do k = 1, n_act_orb
       korb = list_act(k)
       do l = 1, n_act_orb
        lorb = list_act(l)
+       !                               1 2 1 2                                   2 1 2 1
        if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate)).gt.1.d-10)then
         print*,'Error in act_2_rdm_spin_trace_mo'
         print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l) - act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10"
@@ -79,6 +89,7 @@ subroutine routine_active_only
         print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(j,i,l,k,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate))
        endif
 
+      !                                1 2 1 2                                   1 2 1 2 
        if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate)).gt.1.d-10)then
         print*,'Error in act_2_rdm_spin_trace_mo'
         print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate),istate).gt.1.d-10"
@@ -131,6 +142,15 @@ subroutine routine_active_only
    print*,'wee_tot                 = ',wee_tot(istate)
    print*,'Full energy '
    print*,'psi_energy_two_e(istate)= ',psi_energy_two_e(istate)
+   print*,'--------------------------'
+   print*,'accu_aa       = ',accu_aa
+   print*,'N_a (N_a-1)/2 = ', elec_alpha_num*(elec_alpha_num-1)*0.5
+   print*,'accu_bb       = ',accu_bb
+   print*,'N_b (N_b-1)/2 = ', elec_beta_num*(elec_beta_num-1)*0.5
+   print*,'accu_ab       = ',accu_ab
+   print*,'N_a N_b       = ', elec_beta_num*elec_alpha_num
+   print*,'accu_tot      = ',accu_tot
+   print*,'Ne(Ne-1)/2    = ',(elec_num-1)*elec_num * 0.5
   enddo
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0

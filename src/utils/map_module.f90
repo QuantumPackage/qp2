@@ -238,11 +238,11 @@ subroutine cache_map_sort(map)
       iorder(i) = i
     enddo
     if (cache_key_kind == 2) then
-      call i2radix_sort(map%key,iorder,map%n_elements,-1)
+      call i2sort(map%key,iorder,map%n_elements,-1)
     else if (cache_key_kind == 4) then
-      call iradix_sort(map%key,iorder,map%n_elements,-1)
+      call isort(map%key,iorder,map%n_elements,-1)
     else if (cache_key_kind == 8) then
-      call i8radix_sort(map%key,iorder,map%n_elements,-1)
+      call i8sort(map%key,iorder,map%n_elements,-1)
     endif
     if (integral_kind == 4) then
       call set_order(map%value,iorder,map%n_elements)

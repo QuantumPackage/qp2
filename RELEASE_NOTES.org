@@ -4,20 +4,20 @@
 
 ** Changes
 
+  - Introduced DFT-based basis set correction
+  - Use OpamPack for OCaml
+  - Configure adapted for ARM
+  - Added many types of integrals
+  - Accelerated four-index transformation
+
 *** TODO: take from dev
   - [ ] Added GTOs with complex exponent
-  - [ ] Added many types of integrals
   - Updated version of f77-zmq
   - Added transcorrelated SCF
   - Added transcorrelated CIPSI
   - Started to introduce shells in AOs
   - Added ECMD UEG functional
-  - Introduced DFT-based basis set correction
-  - General davidson algorithm
-  - Use OpamPack for OCaml
-  - Configure adapted for ARM
-
-*** Done
+  - General Davidson algorithm
 
 * Version 2.2
 

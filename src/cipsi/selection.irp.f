@@ -571,7 +571,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
   double precision, external :: diag_H_mat_elem_fock
   double precision :: E_shift
   double precision :: s_weight(N_states,N_states)
-  logical, external :: is_in_wavefunction
   PROVIDE dominant_dets_of_cfgs N_dominant_dets_of_cfgs
   do jstate=1,N_states
     do istate=1,N_states
@@ -751,7 +750,10 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         if (delta_E < 0.d0) then
             tmp = -tmp
         endif
+
+        !e_pert(istate) = alpha_h_psi * alpha_h_psi / (E0(istate) - Hii)
         e_pert(istate) = 0.5d0 * (tmp - delta_E)
+
         if (dabs(alpha_h_psi) > 1.d-4) then
           coef(istate) = e_pert(istate) / alpha_h_psi
         else
@@ -864,6 +866,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 !!!BEGIN_DEBUG
 !      ! To check if the pt2 is taking determinants already in the wf
 !      if (is_in_wavefunction(det(N_int,1),N_int)) then
+!        logical, external :: is_in_wavefunction
 !        print*, 'A determinant contributing to the pt2 is already in'
 !        print*, 'the wave function:'
 !        call  print_det(det(N_int,1),N_int)

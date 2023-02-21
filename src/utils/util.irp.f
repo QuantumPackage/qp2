@@ -37,6 +37,10 @@ double precision function binom_func(i,j)
   else
     binom_func = dexp( logfact(i)-logfact(j)-logfact(i-j) )
   endif
+
+  ! To avoid .999999 numbers
+  binom_func = floor(binom_func + 0.5d0)
+
 end
 
 
@@ -132,7 +136,7 @@ double precision function logfact(n)
   enddo
 end function
 
-
+! ---
 
 BEGIN_PROVIDER [ double precision, fact_inv, (128) ]
   implicit none
@@ -146,6 +150,29 @@ BEGIN_PROVIDER [ double precision, fact_inv, (128) ]
   enddo
 END_PROVIDER
 
+! ---
+
+BEGIN_PROVIDER [ double precision, shiftfact_op5_inv, (128) ]
+
+  BEGIN_DOC
+  !
+  ! 1 / Gamma(n + 0.5)
+  !
+  END_DOC
+
+  implicit none
+  integer          :: i
+  double precision :: tmp
+
+  do i = 1, size(shiftfact_op5_inv)
+    !tmp = dgamma(dble(i) + 0.5d0)
+    tmp = gamma(dble(i) + 0.5d0)
+    shiftfact_op5_inv(i) = 1.d0 / tmp
+  enddo
+
+END_PROVIDER
+
+! ---
 
 double precision function dble_fact(n)
   implicit none
@@ -300,12 +327,12 @@ subroutine wall_time(t)
 end
 
 BEGIN_PROVIDER [ integer, nproc ]
-  use omp_lib
   implicit none
   BEGIN_DOC
   ! Number of current OpenMP threads
   END_DOC
 
+  integer, external              :: omp_get_num_threads
   nproc = 1
   !$OMP PARALLEL
   !$OMP MASTER
@@ -407,3 +434,28 @@ subroutine lowercase(txt,n)
   enddo
 end
 
+subroutine v2_over_x(v,x,res)
+
+  !BEGIN_DOC
+  ! Two by two diagonalization to avoid the divergence in v^2/x when x goes to 0
+  !END_DOC
+
+  implicit none
+
+  double precision, intent(in)  :: v, x
+  double precision, intent(out) :: res
+
+  double precision :: delta_E, tmp, val
+
+  res = 0d0
+  delta_E = x
+  if (v == 0.d0) return
+
+  val = 2d0 * v
+  tmp = dsqrt(delta_E * delta_E + val * val)
+  if (delta_E < 0.d0) then
+      tmp = -tmp
+  endif
+  res = 0.5d0 * (tmp - delta_E)
+
+end

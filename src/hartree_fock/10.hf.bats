@@ -18,6 +18,39 @@ function run() {
 }
 
 
+function run_pt_charges() {
+  thresh=1.e-5
+  cp ${QP_ROOT}/src/nuclei/write_pt_charges.py . 
+  cat > hcn.xyz << EOF
+3
+HCN molecule
+C    0.0    0.0    0.0
+H    0.0    0.0    1.064
+N    0.0    0.0    -1.156
+EOF
+
+cat > hcn_charges.xyz << EOF
+0.5    2.0   0.0   0.0
+0.5   -2.0   0.0   0.0
+EOF
+
+rm -rf hcn.ezfio
+qp create_ezfio -b def2-svp hcn.xyz
+qp run scf
+mv hcn_charges.xyz hcn.ezfio_point_charges.xyz
+python write_pt_charges.py hcn.ezfio
+qp set nuclei point_charges True
+qp run scf | tee hcn.ezfio.pt_charges.out
+  energy="$(ezfio get hartree_fock energy)"
+rm -rf hcn.ezfio
+good=-92.76613324421798
+  eq $energy $good $thresh
+}
+
+@test "point charges" { 
+ run_pt_charges
+}
+
 @test "B-B" { # 3s
   run b2_stretched.ezfio -48.9950585434279
 }
