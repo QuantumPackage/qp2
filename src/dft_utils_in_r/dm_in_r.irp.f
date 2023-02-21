@@ -82,7 +82,7 @@
   enddo
  enddo
  !$OMP END PARALLEL DO
- print*,'density and gradients provided'
+! print*,'density and gradients provided'
 
 END_PROVIDER
 
