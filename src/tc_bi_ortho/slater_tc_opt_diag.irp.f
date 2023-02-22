@@ -88,7 +88,7 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
       call a_tc_operator ( occ_hole    (i,ispin), ispin, det_tmp, hmono,htwoe,hthree, Nint,na,nb)
     enddo
   enddo
-  htot = hmono+htwoe+hthree
+  htot = hmono+htwoe+hthree+nuclear_repulsion
 end
 
 subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
