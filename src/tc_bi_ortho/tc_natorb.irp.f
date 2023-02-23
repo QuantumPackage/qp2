@@ -21,7 +21,7 @@
 
   allocate(dm_tmp(mo_num,mo_num), fock_diag(mo_num))
 
-  dm_tmp(:,:) = -tc_transition_matrix(:,:,1,1)
+  dm_tmp(1:mo_num,1:mo_num) = -tc_transition_matrix_mo(1:mo_num,1:mo_num,1,1)
 
   print *, ' dm_tmp'
   do i = 1, mo_num
