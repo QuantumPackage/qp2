@@ -34,21 +34,26 @@ cat > hcn_charges.xyz << EOF
 0.5   -2.0   0.0   0.0
 EOF
 
-rm -rf hcn.ezfio
-qp create_ezfio -b def2-svp hcn.xyz
+EZFIO=hcn_pt_charges
+rm -rf $EZFIO
+qp create_ezfio -b def2-svp hcn.xyz -o $EZFIO
 qp run scf
-mv hcn_charges.xyz hcn.ezfio_point_charges.xyz
-python write_pt_charges.py hcn.ezfio
+mv hcn_charges.xyz ${EZFIO}_point_charges.xyz
+python write_pt_charges.py ${EZFIO}
 qp set nuclei point_charges True
-qp run scf | tee hcn.ezfio.pt_charges.out
+qp run scf | tee ${EZFIO}.pt_charges.out
   energy="$(ezfio get hartree_fock energy)"
-rm -rf hcn.ezfio
 good=-92.76613324421798
   eq $energy $good $thresh
+rm -rf $EZFIO
 }
 
 @test "point charges" { 
  run_pt_charges
+}
+
+@test "HCN" { # 7.792500 8.51926s
+  run hcn.ezfio -92.88717500035233
 }
 
 @test "B-B" { # 3s
@@ -124,9 +129,6 @@ good=-92.76613324421798
   run ch4.ezfio -40.19961807784367
 }
 
-@test "HCN" { # 7.792500 8.51926s
-  run hcn.ezfio -92.88717500035233
-}
 
 @test "N2" { # 8.648100 13.754s
   run n2.ezfio  -108.9834897852979
