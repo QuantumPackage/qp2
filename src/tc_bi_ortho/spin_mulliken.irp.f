@@ -7,13 +7,21 @@ BEGIN_PROVIDER [double precision, tc_spin_population, (ao_num,ao_num,N_states)]
 ! tc_spin_population(i,j) = rho_AO(alpha)(i,j) - rho_AO(beta)(i,j) * <AO_i|AO_j>
  END_DOC
  tc_spin_population = 0.d0
- do istate = 1, N_states
+ if(only_spin_tc_right)then
   do i = 1, ao_num
    do j = 1, ao_num
-    tc_spin_population(j,i,istate) = tc_spin_transition_matrix_ao(j,i,istate,istate) * ao_overlap(j,i)
+    tc_spin_population(j,i,1) = tc_spin_dens_right_only(j,i) * ao_overlap(j,i)
    enddo
   enddo
- enddo
+ else
+  do istate = 1, N_states
+   do i = 1, ao_num
+    do j = 1, ao_num
+     tc_spin_population(j,i,istate) = tc_spin_transition_matrix_ao(j,i,istate,istate) * ao_overlap(j,i)
+    enddo
+   enddo
+  enddo
+ endif
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, tc_spin_population_angular_momentum, (0:ao_l_max,N_states)]
