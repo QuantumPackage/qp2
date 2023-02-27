@@ -34,6 +34,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_ab_mo',wall_2 - wall_1
+! state_av_act_2_rdm_ab_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -48,7 +49,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * (N_{\alpha}^{act} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * (N_{\alpha}^{act} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC 
@@ -63,6 +64,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_aa_mo',wall_2 - wall_1
+! state_av_act_2_rdm_aa_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -76,7 +78,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta}^{act} * (N_{\beta}^{act} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta}^{act} * (N_{\beta}^{act} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC 
@@ -91,6 +93,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_bb_mo',wall_2 - wall_1
+! state_av_act_2_rdm_bb_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -104,7 +107,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC

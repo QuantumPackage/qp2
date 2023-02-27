@@ -44,6 +44,7 @@
  endif
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_ab_mo',wall_2 - wall_1
+ act_2_rdm_ab_mo *= 2.d0
  END_PROVIDER 
 
 
@@ -84,6 +85,7 @@
 
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_aa_mo',wall_2 - wall_1
+ act_2_rdm_aa_mo *= 2.d0
  END_PROVIDER 
  
 
@@ -124,6 +126,7 @@
 
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_bb_mo',wall_2 - wall_1
+ act_2_rdm_bb_mo *= 2.d0
  END_PROVIDER 
 
  BEGIN_PROVIDER [double precision, act_2_rdm_spin_trace_mo, (n_act_orb,n_act_orb,n_act_orb,n_act_orb,N_states)]
@@ -161,6 +164,7 @@
   call ezfio_set_two_body_rdm_io_two_body_rdm_spin_trace("Read")
  endif
 
+ act_2_rdm_spin_trace_mo *= 2.d0
  call wall_time(wall_2)
  print*,'Wall time to provide act_2_rdm_spin_trace_mo',wall_2 - wall_1
  END_PROVIDER 

@@ -117,10 +117,10 @@ subroutine routine_active_only
        endif
  
 
-       wee_ab(istate)    += vijkl * rdmab
-       wee_aa(istate)    += vijkl * rdmaa
-       wee_bb(istate)    += vijkl * rdmbb
-       wee_tot(istate)   += vijkl * rdmtot
+       wee_ab(istate)    += 0.5d0 * vijkl * rdmab
+       wee_aa(istate)    += 0.5d0 * vijkl * rdmaa
+       wee_bb(istate)    += 0.5d0 * vijkl * rdmbb
+       wee_tot(istate)   += 0.5d0 * vijkl * rdmtot
 
       enddo
      enddo
@@ -144,13 +144,13 @@ subroutine routine_active_only
    print*,'psi_energy_two_e(istate)= ',psi_energy_two_e(istate)
    print*,'--------------------------'
    print*,'accu_aa       = ',accu_aa
-   print*,'N_a (N_a-1)/2 = ', elec_alpha_num*(elec_alpha_num-1)*0.5
+   print*,'N_a (N_a-1)   = ', elec_alpha_num*(elec_alpha_num-1)
    print*,'accu_bb       = ',accu_bb
-   print*,'N_b (N_b-1)/2 = ', elec_beta_num*(elec_beta_num-1)*0.5
+   print*,'2 N_b (N_b-1) = ', elec_beta_num*(elec_beta_num-1)*2
    print*,'accu_ab       = ',accu_ab
    print*,'N_a N_b       = ', elec_beta_num*elec_alpha_num
    print*,'accu_tot      = ',accu_tot
-   print*,'Ne(Ne-1)/2    = ',(elec_num-1)*elec_num * 0.5
+   print*,'Ne(Ne-1)/2    = ',(elec_num-1)*elec_num 
   enddo
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
@@ -192,10 +192,10 @@ subroutine routine_active_only
       print*,spin_trace,rdm_tot_st_av,dabs(spin_trace - rdm_tot_st_av)
      endif
 
-     wee_aa_st_av += vijkl * rdm_aa_st_av
-     wee_bb_st_av += vijkl * rdm_bb_st_av
-     wee_ab_st_av += vijkl * rdm_ab_st_av
-     wee_tot_st_av += vijkl * rdm_tot_st_av
+     wee_aa_st_av  += 0.5d0 * vijkl * rdm_aa_st_av
+     wee_bb_st_av  += 0.5d0 * vijkl * rdm_bb_st_av
+     wee_ab_st_av  += 0.5d0 * vijkl * rdm_ab_st_av
+     wee_tot_st_av += 0.5d0 * vijkl * rdm_tot_st_av
     enddo
    enddo
   enddo
@@ -279,10 +279,10 @@ subroutine routine_full_mos
        rdmbb  =  full_occ_2_rdm_bb_mo(l,k,j,i,istate)
        rdmtot =  full_occ_2_rdm_spin_trace_mo(l,k,j,i,istate)
 
-       wee_ab(istate) += vijkl * rdmab
-       wee_aa(istate) += vijkl * rdmaa
-       wee_bb(istate) += vijkl * rdmbb
-       wee_tot(istate)+= vijkl * rdmtot
+       wee_ab(istate) += 0.5d0 * vijkl * rdmab
+       wee_aa(istate) += 0.5d0 * vijkl * rdmaa
+       wee_bb(istate) += 0.5d0 * vijkl * rdmbb
+       wee_tot(istate)+= 0.5d0 * vijkl * rdmtot
       enddo
      enddo
      aa_norm(istate) += full_occ_2_rdm_aa_mo(j,i,j,i,istate)
@@ -310,18 +310,19 @@ subroutine routine_full_mos
    print*,'Normalization of two-rdms '
    print*,''
    print*,'aa_norm(istate)         = ',aa_norm(istate)
-   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(1) * (elec_num_tab(1) - 1)/2
+   print*,'N_alpha(N_alpha-1)      = ',elec_num_tab(1) * (elec_num_tab(1) - 1)
    print*,''
    print*,'bb_norm(istate)         = ',bb_norm(istate)
-   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(2) * (elec_num_tab(2) - 1)/2
+   print*,'N_alpha(N_alpha-1)      = ',elec_num_tab(2) * (elec_num_tab(2) - 1)
    print*,''
    print*,'ab_norm(istate)         = ',ab_norm(istate)
-   print*,'N_alpha * N_beta        = ',elec_num_tab(1) * elec_num_tab(2)
+   print*,'N_alpha * N_beta *2     = ',elec_num_tab(1) * elec_num_tab(2) * 2
    print*,''
    print*,'tot_norm(istate)        = ',tot_norm(istate)
-   print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)/2
+   print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)
   enddo
 
+ return 
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
  wee_ab_st_av  = 0.d0
@@ -341,10 +342,10 @@ subroutine routine_full_mos
      rdm_ab_st_av  = state_av_full_occ_2_rdm_ab_mo(l,k,j,i)
      rdm_tot_st_av = state_av_full_occ_2_rdm_spin_trace_mo(l,k,j,i)
 
-     wee_aa_st_av  += vijkl * rdm_aa_st_av
-     wee_bb_st_av  += vijkl * rdm_bb_st_av
-     wee_ab_st_av  += vijkl * rdm_ab_st_av
-     wee_tot_st_av += vijkl * rdm_tot_st_av
+     wee_aa_st_av  += 0.5d0 * vijkl * rdm_aa_st_av
+     wee_bb_st_av  += 0.5d0 * vijkl * rdm_bb_st_av
+     wee_ab_st_av  += 0.5d0 * vijkl * rdm_ab_st_av
+     wee_tot_st_av += 0.5d0 * vijkl * rdm_tot_st_av
     enddo
    enddo
   enddo
