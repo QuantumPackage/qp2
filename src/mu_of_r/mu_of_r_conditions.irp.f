@@ -110,7 +110,7 @@
  do istate = 1, N_states
   do ipoint = 1, n_points_final_grid
    f_psi  = f_psi_cas_ab(ipoint,istate) 
-   on_top = on_top_cas_mu_r(ipoint,istate)
+   on_top = on_top_cas_mu_r(ipoint,istate) 
    if(on_top.le.1.d-12.or.f_psi.le.0.d0.or.f_psi * on_top.lt.0.d0)then
      w_psi   = 1.d+10
    else 

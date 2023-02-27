@@ -194,7 +194,7 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
   do b = 1, n_act_orb  ! 2
    do c = 1, n_act_orb  ! 1
     do d = 1, n_act_orb  ! 2
-     rho = mos_array_act_r1(c) * mos_array_act_r2(d) * act_2_rdm_ab_mo(d,c,b,a,istate)
+     rho = mos_array_act_r1(c) * mos_array_act_r2(d) * 0.5d0 * act_2_rdm_ab_mo(d,c,b,a,istate)
      rho_tilde(b,a) += rho 
      two_bod_dens += rho * mos_array_act_r1(a) * mos_array_act_r2(b) 
     enddo
