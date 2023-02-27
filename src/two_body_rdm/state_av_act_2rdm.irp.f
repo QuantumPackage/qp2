@@ -34,7 +34,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_ab_mo',wall_2 - wall_1
-! state_av_act_2_rdm_ab_mo *= 2.d0
+ state_av_act_2_rdm_ab_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -64,7 +64,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_aa_mo',wall_2 - wall_1
-! state_av_act_2_rdm_aa_mo *= 2.d0
+ state_av_act_2_rdm_aa_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -93,7 +93,7 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_bb_mo',wall_2 - wall_1
-! state_av_act_2_rdm_bb_mo *= 2.d0
+ state_av_act_2_rdm_bb_mo *= 2.d0
 
  END_PROVIDER 
 

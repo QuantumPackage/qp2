@@ -47,7 +47,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb) = one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb) = 2.d0 * one_e_dm_mo_beta_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -61,7 +61,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb) = one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb) = 2.d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -73,7 +73,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb) = 1.D0
+      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb) = 2.D0
      enddo
     enddo
 
@@ -90,7 +90,7 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb) = one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb) = 2.d0 * one_e_dm_mo_beta_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -104,7 +104,7 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb) = one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb) = 2.d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -116,7 +116,7 @@
      do k = 1, n_core_orb
       korb = list_core(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb) = 1.D0
+      state_av_full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb) = 2.D0
      enddo
     enddo
    endif
@@ -167,11 +167,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      state_av_full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -181,8 +181,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb) +=  0.5d0 
-     state_av_full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb) -=  0.5d0 
+     state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb) +=  1.0d0 
+     state_av_full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb) -=  1.0d0 
     enddo
    enddo
 
@@ -198,11 +198,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       state_av_full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -212,8 +212,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb) +=  0.5d0 
-      state_av_full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb) -=  0.5d0 
+      state_av_full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb) +=  1.0d0 
+      state_av_full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb) -=  1.0d0 
      enddo
     enddo
    endif
@@ -263,11 +263,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      state_av_full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -277,8 +277,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb) +=  0.5d0 
-     state_av_full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb) -=  0.5d0 
+     state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb) +=  1.0d0 
+     state_av_full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb) -=  1.0d0 
     enddo
    enddo
 
@@ -294,11 +294,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       state_av_full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -308,8 +308,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb) +=  0.5d0 
-      state_av_full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb) -=  0.5d0 
+      state_av_full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb) +=  1.0d0 
+      state_av_full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb) -=  1.0d0 
      enddo
     enddo
    endif
@@ -364,11 +364,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -377,8 +377,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  0.5d0 
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  0.5d0 
+     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0 
+     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0 
     enddo
    enddo
    if (.not.no_core_density)then
@@ -390,11 +390,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -403,8 +403,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  0.5d0 
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  0.5d0 
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0 
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0 
      enddo
     enddo
    endif
@@ -420,11 +420,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -433,8 +433,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  0.5d0 
-     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  0.5d0 
+     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0 
+     state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0 
     enddo
    enddo
    if (.not.no_core_density)then
@@ -446,11 +446,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) +=  1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb) += -1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -459,8 +459,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  0.5d0 
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  0.5d0 
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) +=  1.0d0 
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb) -=  1.0d0 
      enddo
     enddo
    endif
@@ -476,14 +476,14 @@
       korb = list_inact(k)
       ! ALPHA INACTIVE - BETA ACTIVE
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       !                                     beta alph beta alph
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 0.5d0 * one_e_dm_mo_beta_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_beta_average(jorb,iorb)
       ! BETA INACTIVE - ALPHA ACTIVE
       !                                     beta alph beta alpha 
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
       !                                     alph beta alph beta 
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 0.5d0 * one_e_dm_mo_alpha_average(jorb,iorb)
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0d0 * one_e_dm_mo_alpha_average(jorb,iorb)
      enddo
     enddo
    enddo
@@ -493,8 +493,8 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 0.5D0
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 0.5D0
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0d0
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0d0
      enddo
     enddo
 
@@ -510,14 +510,14 @@
        korb = list_core(k)
        !! BETA ACTIVE - ALPHA CORE 
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 0.5D0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
        !                                     beta alph beta alph 
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 0.5D0 * one_e_dm_mo_beta_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_beta_average(jorb,iorb)
        !! ALPHA ACTIVE - BETA CORE 
        !                                     alph beta alph beta
-       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 0.5D0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
        !                                     beta alph beta alph 
-       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 0.5D0 * one_e_dm_mo_alpha_average(jorb,iorb)
+       state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb) += 1.0D0 * one_e_dm_mo_alpha_average(jorb,iorb)
       enddo
      enddo
     enddo
@@ -527,8 +527,8 @@
      do k = 1, n_core_orb
       korb = list_core(k)
       !                                     alph beta alph beta
-      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 0.5D0
-      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 0.5D0
+      state_av_full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb) += 1.0D0
+      state_av_full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb) += 1.0D0
      enddo
     enddo
 

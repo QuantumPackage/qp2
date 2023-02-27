@@ -322,7 +322,7 @@ subroutine routine_full_mos
    print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)
   enddo
 
- return 
+! return 
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
  wee_ab_st_av  = 0.d0
@@ -355,17 +355,12 @@ subroutine routine_full_mos
  print*,''
  print*,'STATE AVERAGE ENERGY '
    print*,'wee_aa_st_av            = ',wee_aa_st_av
-   print*,'wee_aa_st_av_2          = ',wee_aa_st_av_2
    print*,'wee_bb_st_av            = ',wee_bb_st_av
-   print*,'wee_bb_st_av_2          = ',wee_bb_st_av_2
    print*,'wee_ab_st_av            = ',wee_ab_st_av
-   print*,'wee_ab_st_av_2          = ',wee_ab_st_av_2
    print*,'Sum of components       = ',wee_aa_st_av   + wee_bb_st_av   + wee_ab_st_av
-   print*,'Sum of components_2     = ',wee_aa_st_av_2 + wee_bb_st_av_2 + wee_ab_st_av_2
    print*,''
    print*,'Full energy '
    print*,'wee_tot_st_av           = ',wee_tot_st_av
-   print*,'wee_tot_st_av_2         = ',wee_tot_st_av_2
    print*,'wee_tot_st_av_3         = ',wee_tot_st_av_3
 
 end
