@@ -150,7 +150,7 @@ subroutine routine_active_only
    print*,'accu_ab       = ',accu_ab
    print*,'N_a N_b       = ', elec_beta_num*elec_alpha_num
    print*,'accu_tot      = ',accu_tot
-   print*,'Ne(Ne-1)/2    = ',(elec_num-1)*elec_num 
+   print*,'Ne(Ne-1)      = ',(elec_num-1)*elec_num 
   enddo
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
@@ -319,7 +319,7 @@ subroutine routine_full_mos
    print*,'N_alpha * N_beta *2     = ',elec_num_tab(1) * elec_num_tab(2) * 2
    print*,''
    print*,'tot_norm(istate)        = ',tot_norm(istate)
-   print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)
+   print*,'N(N-1)                  = ',elec_num*(elec_num - 1)
   enddo
 
 ! return 
