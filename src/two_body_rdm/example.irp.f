@@ -120,7 +120,7 @@ subroutine routine_active_only
        wee_ab(istate)    += vijkl * rdmab
        wee_aa(istate)    += vijkl * rdmaa
        wee_bb(istate)    += vijkl * rdmbb
-       wee_tot(istate)    += vijkl * rdmtot
+       wee_tot(istate)   += vijkl * rdmtot
 
       enddo
      enddo

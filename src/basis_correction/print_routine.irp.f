@@ -18,7 +18,7 @@ subroutine print_basis_correction
  print*, ''
  print*, 'For more details look at Journal of Chemical Physics 149, 194301 1-15 (2018)        '
  print*, '                         Journal of Physical Chemistry Letters 10, 2931-2937 (2019) '
- print*, '                         ???REF SC?'
+ print*, '                         Journal of Chemical Physics 152, 174104 (2020)             '
  print*, '****************************************'
  print*, '****************************************'
  print*, 'mu_of_r_potential = ',mu_of_r_potential
@@ -56,14 +56,14 @@ subroutine print_basis_correction
    print*,''
    print*,'********************************************'
    print*,'********************************************'
-   print*,'+) PBE-on-top Ecmd functional : (??????? REF-SCF ??????????)' 
+   print*,'+) PBE-on-top Ecmd functional : JCP, 152, 174104 (2020) ' 
    print*,'PBE at mu=0, extrapolated ontop pair density at large mu, usual spin-polarization'
    do istate = 1, N_states
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-OT        , state ',istate,' = ',ecmd_pbe_on_top_mu_of_r(istate)
    enddo
    print*,''
    print*,'********************************************'
-   print*,'+) PBE-on-top no spin polarization Ecmd functional : (??????? REF-SCF ??????????)' 
+   print*,'+) PBE-on-top no spin polarization Ecmd functional : JCP, 152, 174104 (2020)' 
    print*,'PBE at mu=0, extrapolated ontop pair density at large mu, and ZERO SPIN POLARIZATION'
    do istate = 1, N_states
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD SU-PBE-OT     , state ',istate,' = ',ecmd_pbe_on_top_su_mu_of_r(istate)
