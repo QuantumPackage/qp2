@@ -4,8 +4,8 @@ subroutine orb_range_2_rdm_openmp(big_array,dim1,norb,list_orb,ispin,u_0,N_st,sz
    BEGIN_DOC
    ! if ispin == 1 :: alpha/alpha 2rdm 
    !          == 2 :: beta /beta  2rdm 
-   !          == 3 :: alpha/beta  2rdm 
-   !          == 4 :: spin traced 2rdm :: aa + bb + 0.5 (ab + ba))
+   !          == 3 :: alpha/beta + beta/alpha  2rdm 
+   !          == 4 :: spin traced 2rdm :: aa + bb + ab + ba
    !
    ! Assumes that the determinants are in psi_det
    !

@@ -4,21 +4,17 @@
  full_occ_2_rdm_ab_mo = 0.d0
  integer :: i,j,k,l,iorb,jorb,korb,lorb,istate
  BEGIN_DOC
-! full_occ_2_rdm_ab_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of alpha/beta electrons 
+! full_occ_2_rdm_ab_mo(i,j,k,l,istate) =  STATE SPECIFIC physicist notation for 2RDM of alpha/beta + beta/alpha electrons 
 !
-! <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi>
+!   <Psi| a^{\dagger}_{i \alpha} a^{\dagger}_{j \beta} a_{l \beta} a_{k \alpha} |Psi>
+!
+! + <Psi| a^{\dagger}_{i \beta} a^{\dagger}_{j \alpha} a_{l \alpha} a_{k \beta} |Psi>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * N_{\beta}
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * N_{\beta} * 2
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
-!
-! !!!!! WARNING !!!!! For efficiency reasons, electron 1 is ALPHA, electron 2 is BETA 
-!
-!  full_occ_2_rdm_ab_mo(i,j,k,l,istate) = i:alpha, j:beta, j:alpha, l:beta
-!                      
-!                      Therefore you don't necessary have symmetry between electron 1 and 2 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO ARE SET TO ZERO 
  END_DOC 
@@ -50,7 +46,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb,istate) = one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb,istate) = 2.d0 * one_e_dm_mo_beta(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -64,7 +60,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb,istate) = one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb,istate) = 2.d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -76,7 +72,7 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb,istate) = 1.D0
+      full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb,istate) = 2.D0
      enddo
     enddo
 
@@ -93,7 +89,7 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                     alph beta alph beta
-       full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb,istate) = one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_ab_mo(korb,jorb,korb,iorb,istate) = 2.d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -107,7 +103,7 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                     alph beta alph beta
-       full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb,istate) = one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_ab_mo(jorb,korb,iorb,korb,istate) = 2.d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -119,7 +115,7 @@
      do k = 1, n_core_orb
       korb = list_core(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb,istate) = 1.D0
+      full_occ_2_rdm_ab_mo(korb,jorb,korb,jorb,istate) = 2.D0
      enddo
     enddo
    endif
@@ -139,7 +135,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * (N_{\alpha} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * (N_{\alpha} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
@@ -172,11 +168,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-      full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-      full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -186,8 +182,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-     full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+     full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+     full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
     enddo
    enddo
 
@@ -203,11 +199,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-       full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_aa_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_aa_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-       full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_aa_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_aa_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -217,8 +213,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-      full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+      full_occ_2_rdm_aa_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+      full_occ_2_rdm_aa_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
      enddo
     enddo
    endif
@@ -237,7 +233,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta} * (N_{\beta} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta} * (N_{\beta} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
@@ -270,11 +266,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-      full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-      full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -284,8 +280,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-     full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+     full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+     full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
     enddo
    enddo
 
@@ -301,11 +297,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-       full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_bb_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_bb_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-       full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_bb_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_bb_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -315,8 +311,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-      full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+      full_occ_2_rdm_bb_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+      full_occ_2_rdm_bb_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
      enddo
     enddo
    endif
@@ -335,14 +331,14 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)
 !
 !  !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
 !  !!!!! WARNING !!!!! IF "no_core_density" then all elements involving at least one CORE MO is set to zero 
 ! The two-electron energy of each state can be computed as:
 !
-!   \sum_{i,j,k,l = 1, n_core_inact_act_orb} full_occ_2_rdm_spin_trace_mo(i,j,k,l,istate) * < ii jj | kk ll > 
+!   \sum_{i,j,k,l = 1, n_core_inact_act_orb} full_occ_2_rdm_spin_trace_mo(i,j,k,l,istate) * 1/2 * < ii jj | kk ll > 
 !
 !   with ii = list_core_inact_act(i), jj = list_core_inact_act(j), kk = list_core_inact_act(k), ll = list_core_inact_act(l)
  END_DOC 
@@ -377,11 +373,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -390,8 +386,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-     full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+     full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+     full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
     enddo
    enddo
    if (.not.no_core_density)then
@@ -403,11 +399,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -416,8 +412,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
      enddo
     enddo
    endif
@@ -433,11 +429,11 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                       1     2   1    2    : DIRECT TERM 
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       !                                       1     2   1    2    : EXCHANGE TERM 
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -446,8 +442,8 @@
     jorb = list_inact(j)
     do k = 1, n_inact_orb
      korb = list_inact(k)
-     full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-     full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+     full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+     full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
     enddo
    enddo
    if (.not.no_core_density)then
@@ -459,11 +455,11 @@
       do k = 1, n_core_orb
        korb = list_core(k)
        !                                       1     2   1    2    : DIRECT TERM 
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) +=  1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
        !                                       1     2   1    2    : EXCHANGE TERM 
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,korb,iorb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,iorb,korb,istate) += -1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -472,8 +468,8 @@
      jorb = list_core(j)
      do k = 1, n_core_orb
       korb = list_core(k)
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  0.5d0 
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  0.5d0 
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) +=  1.0d0 
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,jorb,korb,istate) -=  1.0d0 
      enddo
     enddo
    endif
@@ -489,14 +485,14 @@
       korb = list_inact(k)
       ! ALPHA INACTIVE - BETA ACTIVE
       !                                     alph beta alph beta
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       !                                     beta alph beta alph
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 0.5d0 * one_e_dm_mo_beta(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 1.0d0 * one_e_dm_mo_beta(jorb,iorb,istate)
       ! BETA INACTIVE - ALPHA ACTIVE
       !                                     beta alph beta alpha 
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       !                                     alph beta alph beta 
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 0.5d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 1.0d0 * one_e_dm_mo_alpha(jorb,iorb,istate)
      enddo
     enddo
    enddo
@@ -506,8 +502,8 @@
      do k = 1, n_inact_orb
       korb = list_inact(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) += 0.5D0
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb,istate) += 0.5D0
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) += 1.0D0
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb,istate) += 1.0D0
      enddo
     enddo
 
@@ -523,14 +519,14 @@
        korb = list_core(k)
        !! BETA ACTIVE - ALPHA CORE 
        !                                     alph beta alph beta
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 0.5D0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 1.0D0 * one_e_dm_mo_beta(jorb,iorb,istate)
        !                                     beta alph beta alph 
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 0.5D0 * one_e_dm_mo_beta(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 1.0D0 * one_e_dm_mo_beta(jorb,iorb,istate)
        !! ALPHA ACTIVE - BETA CORE 
        !                                     alph beta alph beta
-       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 0.5D0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(jorb,korb,iorb,korb,istate) += 1.0D0 * one_e_dm_mo_alpha(jorb,iorb,istate)
        !                                     beta alph beta alph 
-       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 0.5D0 * one_e_dm_mo_alpha(jorb,iorb,istate)
+       full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,iorb,istate) += 1.0D0 * one_e_dm_mo_alpha(jorb,iorb,istate)
       enddo
      enddo
     enddo
@@ -540,8 +536,8 @@
      do k = 1, n_core_orb
       korb = list_core(k)
       !                                     alph beta alph beta
-      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) += 0.5D0
-      full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb,istate) += 0.5D0
+      full_occ_2_rdm_spin_trace_mo(korb,jorb,korb,jorb,istate) += 1.0D0
+      full_occ_2_rdm_spin_trace_mo(jorb,korb,jorb,korb,istate) += 1.0D0
      enddo
     enddo
 
