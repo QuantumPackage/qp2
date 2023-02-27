@@ -46,9 +46,9 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_y , (mo_num,mo_num)]
 &BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_z , (mo_num,mo_num)]
  BEGIN_DOC
- ! array of the integrals of MO_i * x MO_j
- ! array of the integrals of MO_i * y MO_j
- ! array of the integrals of MO_i * z MO_j
+ ! array of the integrals of Left MO_i * x Right MO_j
+ ! array of the integrals of Left MO_i * y Right MO_j
+ ! array of the integrals of Left MO_i * z Right MO_j
  END_DOC
  implicit none
 
