@@ -41,11 +41,9 @@
    
    if(mu_of_r_potential == "cas_ful")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
-    ! factor 2 because convention  N(N-1)/ 2 in provider on_top_cas_mu_r
-    on_top = 2.d0 * on_top_cas_mu_r(ipoint,istate)
+    on_top =  on_top_cas_mu_r(ipoint,istate)
    else
     ! You take the on-top of the CAS wave function computed separately
-    ! No factor 2 because convention  N(N-1) in provider total_cas_on_top_density
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
 !  We take the extrapolated on-top pair density 
@@ -105,11 +103,9 @@
    
    if(mu_of_r_potential == "cas_ful")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
-    ! factor 2 because convention  N(N-1)/ 2 in provider on_top_cas_mu_r
-    on_top = 2.d0 * on_top_cas_mu_r(ipoint,istate)
+    on_top = on_top_cas_mu_r(ipoint,istate)
    else
     ! You take the on-top of the CAS wave function computed separately
-    ! No factor 2 because convention  N(N-1) in provider total_cas_on_top_density
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
 !  We take the extrapolated on-top pair density 
@@ -169,11 +165,9 @@
    
    if(mu_of_r_potential == "cas_ful")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
-    ! factor 2 because convention  N(N-1)/ 2 in provider on_top_cas_mu_r
-    on_top = 1.d0 * on_top_cas_mu_r(ipoint,istate)
+    on_top = on_top_cas_mu_r(ipoint,istate)
    else
     ! You take the on-top of the CAS wave function computed separately
-    ! No factor 2 because convention  N(N-1) in provider total_cas_on_top_density
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
 !  We DO NOT take the extrapolated on-top pair density
