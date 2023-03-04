@@ -1,4 +1,25 @@
 
+
+! ---
+
+BEGIN_PROVIDER [double precision, ao_two_e_vartc_tot, (ao_num, ao_num, ao_num, ao_num) ]
+
+  integer :: i, j, k, l
+
+  provide j1b_type
+  provide mo_r_coef mo_l_coef
+
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do i = 1, ao_num
+        do k = 1, ao_num
+          ao_two_e_vartc_tot(k,i,l,j) = ao_vartc_int_chemist(k,i,l,j)
+        enddo
+      enddo
+    enddo
+  enddo
+
+END_PROVIDER 
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_num) ]

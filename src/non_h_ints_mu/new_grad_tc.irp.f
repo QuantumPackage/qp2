@@ -25,7 +25,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_
   END_DOC
 
   implicit none
-  integer          :: ipoint, i, j
+  integer          :: ipoint, i, j, m
   double precision :: time0, time1
   double precision :: x, y, z, tmp_x, tmp_y, tmp_z, tmp0, tmp1, tmp2
 
@@ -33,52 +33,74 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_
   call wall_time(time0)
 
   PROVIDE j1b_type
-  
-  if(j1b_type .eq. 3) then
 
-    do ipoint = 1, n_points_final_grid
-      x = final_grid_points(1,ipoint)
-      y = final_grid_points(2,ipoint)
-      z = final_grid_points(3,ipoint)
+  if(read_tc_integ) then
 
-      tmp0  = 0.5d0 * v_1b(ipoint)
-      tmp_x =  v_1b_grad(1,ipoint)
-      tmp_y =  v_1b_grad(2,ipoint)
-      tmp_z =  v_1b_grad(3,ipoint)
-  
-      do j = 1, ao_num
-        do i = 1, ao_num
-
-          tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
-          tmp2 = v_ij_u_cst_mu_j1b(i,j,ipoint)
-
-          int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) - tmp2 * tmp_x
-          int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) - tmp2 * tmp_y
-          int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) - tmp2 * tmp_z
+    open(unit=11, form="unformatted", file='int2_grad1_u12_ao', action="read")
+      do m = 1, 3
+        do ipoint = 1, n_points_final_grid
+          do j = 1, ao_num
+            do i = 1, ao_num
+              read(11) int2_grad1_u12_ao(i,j,ipoint,m) 
+            enddo
+          enddo
         enddo
       enddo
-    enddo
+    close(11)
 
   else
 
-    do ipoint = 1, n_points_final_grid
-      x = final_grid_points(1,ipoint)
-      y = final_grid_points(2,ipoint)
-      z = final_grid_points(3,ipoint)
-
-      do j = 1, ao_num
-        do i = 1, ao_num
-          tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
-
-          int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,1)
-          int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,2)
-          int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,3)
+    if(j1b_type .eq. 3) then
+      do ipoint = 1, n_points_final_grid
+        x = final_grid_points(1,ipoint)
+        y = final_grid_points(2,ipoint)
+        z = final_grid_points(3,ipoint)
+        tmp0  = 0.5d0 * v_1b(ipoint)
+        tmp_x =  v_1b_grad(1,ipoint)
+        tmp_y =  v_1b_grad(2,ipoint)
+        tmp_z =  v_1b_grad(3,ipoint)
+        do j = 1, ao_num
+          do i = 1, ao_num
+            tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
+            tmp2 = v_ij_u_cst_mu_j1b(i,j,ipoint)
+            int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) - tmp2 * tmp_x
+            int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) - tmp2 * tmp_y
+            int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) - tmp2 * tmp_z
+          enddo
         enddo
       enddo
-    enddo
+    else
+      do ipoint = 1, n_points_final_grid
+        x = final_grid_points(1,ipoint)
+        y = final_grid_points(2,ipoint)
+        z = final_grid_points(3,ipoint)
+        do j = 1, ao_num
+          do i = 1, ao_num
+            tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
 
-    int2_grad1_u12_ao *= 0.5d0
+            int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,1)
+            int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,2)
+            int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - x_v_ij_erf_rk_cst_mu_transp_bis(ipoint,i,j,3)
+          enddo
+        enddo
+      enddo
+      int2_grad1_u12_ao *= 0.5d0
+    endif
 
+  endif
+
+  if(write_tc_integ) then
+    open(unit=11, form="unformatted", file='int2_grad1_u12_ao', action="write")
+      do m = 1, 3
+        do ipoint = 1, n_points_final_grid
+          do j = 1, ao_num
+            do i = 1, ao_num
+              write(11) int2_grad1_u12_ao(i,j,ipoint,m) 
+            enddo
+          enddo
+        enddo
+      enddo
+    close(11)
   endif
 
   call wall_time(time1)
@@ -290,65 +312,95 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
   integer                       :: ipoint, i, j, k, l, m
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: time0, time1
-  double precision, allocatable :: ac_mat(:,:,:,:), b_mat(:,:,:,:)
+  double precision, allocatable :: b_mat(:,:,:,:)
 
   print*, ' providing tc_grad_and_lapl_ao ...'
   call wall_time(time0)
 
-  allocate(b_mat(n_points_final_grid,ao_num,ao_num,3), ac_mat(ao_num,ao_num,ao_num,ao_num))
+  if(read_tc_integ) then
 
-  b_mat = 0.d0
- !$OMP PARALLEL                                                              &
- !$OMP DEFAULT (NONE)                                                        &
- !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
- !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
- !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
- !$OMP DO SCHEDULE (static)
-  do i = 1, ao_num
-    do k = 1, ao_num
-      do ipoint = 1, n_points_final_grid
-
-        weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
-        ao_i_r  = aos_in_r_array_transp(ipoint,i)
-        ao_k_r  = aos_in_r_array_transp(ipoint,k)
-
-        b_mat(ipoint,k,i,1) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) 
-        b_mat(ipoint,k,i,2) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) 
-        b_mat(ipoint,k,i,3) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3)) 
-      enddo
-    enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
-  ac_mat = 0.d0
-  do m = 1, 3
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0              &
-              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-              , 1.d0, ac_mat, ao_num*ao_num) 
-
-  enddo
-  deallocate(b_mat)
-
- !$OMP PARALLEL             &
- !$OMP DEFAULT (NONE)       &
- !$OMP PRIVATE (i, j, k, l) & 
- !$OMP SHARED (ac_mat, tc_grad_and_lapl_ao, ao_num)
- !$OMP DO SCHEDULE (static)
-  do j = 1, ao_num
-    do l = 1, ao_num
+    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao', action="read")
       do i = 1, ao_num
-        do k = 1, ao_num
-          tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
-          !tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j)
+        do j = 1, ao_num
+          do k = 1, ao_num
+            do l = 1, ao_num
+              read(11) tc_grad_and_lapl_ao(l,k,j,i)
+            enddo
+          enddo
+        enddo
+      enddo
+    close(11)
+
+  else
+
+    allocate(b_mat(n_points_final_grid,ao_num,ao_num,3))
+  
+    b_mat = 0.d0
+   !$OMP PARALLEL                                                              &
+   !$OMP DEFAULT (NONE)                                                        &
+   !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
+   !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
+   !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
+   !$OMP DO SCHEDULE (static)
+    do i = 1, ao_num
+      do k = 1, ao_num
+        do ipoint = 1, n_points_final_grid
+  
+          weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
+          ao_i_r  = aos_in_r_array_transp(ipoint,i)
+          ao_k_r  = aos_in_r_array_transp(ipoint,k)
+  
+          b_mat(ipoint,k,i,1) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) 
+          b_mat(ipoint,k,i,2) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) 
+          b_mat(ipoint,k,i,3) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3)) 
         enddo
       enddo
     enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
+   !$OMP END DO
+   !$OMP END PARALLEL
+  
+    tc_grad_and_lapl_ao = 0.d0
+    do m = 1, 3
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0              &
+                , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
+                , 1.d0, tc_grad_and_lapl_ao, ao_num*ao_num) 
+  
+    enddo
+    deallocate(b_mat)
+  
+    call sum_A_At(tc_grad_and_lapl_ao(1,1,1,1), ao_num*ao_num)
+  ! !$OMP PARALLEL             &
+  ! !$OMP DEFAULT (NONE)       &
+  ! !$OMP PRIVATE (i, j, k, l) & 
+  ! !$OMP SHARED (ac_mat, tc_grad_and_lapl_ao, ao_num)
+  ! !$OMP DO SCHEDULE (static)
+  !  do j = 1, ao_num
+  !    do l = 1, ao_num
+  !      do i = 1, ao_num
+  !        do k = 1, ao_num
+  !          tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
+  !        enddo
+  !      enddo
+  !    enddo
+  !  enddo
+  ! !$OMP END DO
+  ! !$OMP END PARALLEL
 
-  deallocate(ac_mat)
+  endif
+
+  if(write_tc_integ) then
+    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao', action="write")
+      do i = 1, ao_num
+        do j = 1, ao_num
+          do k = 1, ao_num
+            do l = 1, ao_num
+              write(11) tc_grad_and_lapl_ao(l,k,j,i)
+            enddo
+          enddo
+        enddo
+      enddo
+    close(11)
+  endif
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_and_lapl_ao = ', time1 - time0

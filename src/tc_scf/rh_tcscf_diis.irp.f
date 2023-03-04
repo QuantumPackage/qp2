@@ -21,7 +21,7 @@ subroutine rh_tcscf_diis()
   dim_DIIS    = 0
   g_delta_th  = 1d0
   er_delta_th = 1d0
-  rate_th     = 100.d0 !0.01d0 !0.2d0
+  rate_th     = 0.1d0 
 
   allocate(mo_r_coef_save(ao_num,mo_num), mo_l_coef_save(ao_num,mo_num))
   mo_l_coef_save = 0.d0
@@ -38,17 +38,25 @@ subroutine rh_tcscf_diis()
   PROVIDE level_shift_TCSCF
   PROVIDE mo_l_coef mo_r_coef
 
-  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
-    '====', '================', '================', '================', '================', '================' &
-          , '================', '================', '================', '====', '========'
+  !write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
+  !  '====', '================', '================', '================', '================', '================' &
+  !        , '================', '================', '================', '====', '========'
+  !write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
+  !  ' it ', '  SCF TC Energy ', '      E(1e)     ', '      E(2e)     ', '      E(3e)     ', '   energy diff  ' &
+  !        , '    gradient    ', '    DIIS error  ', '  level shift   ', 'DIIS', '  WT (m)'
+  !write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
+  !  '====', '================', '================', '================', '================', '================' &
+  !        , '================', '================', '================', '====', '========'
 
-  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
+  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')                      &
+    '====', '================', '================', '================', '================', '================' &
+          , '================', '================', '====', '========'
+  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')                      &
     ' it ', '  SCF TC Energy ', '      E(1e)     ', '      E(2e)     ', '      E(3e)     ', '   energy diff  ' &
-          , '    gradient    ', '    DIIS error  ', '  level shift   ', 'DIIS', '  WT (m)'
-
-  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')              &
+          , '    DIIS error  ', '  level shift   ', 'DIIS', '  WT (m)'
+  write(6, '(A4,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A16,1X, A4, 1X, A8)')                      &
     '====', '================', '================', '================', '================', '================' &
-          , '================', '================', '================', '====', '========'
+          , '================', '================', '====', '========'
 
 
   ! first iteration (HF orbitals)
@@ -61,23 +69,26 @@ subroutine rh_tcscf_diis()
   if(three_body_h_tc) then
     etc_3e = diag_three_elem_hf
   endif
-  tc_grad = grad_non_hermit
+  !tc_grad = grad_non_hermit
   er_DIIS = maxval(abs(FQS_SQF_mo))
   e_delta = dabs(etc_tot - e_save)
 
   e_save  = etc_tot
-  g_save  = tc_grad
+  !g_save  = tc_grad
   er_save = er_DIIS
 
   call wall_time(t1)
-  write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
-    it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, tc_grad, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
+  !write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
+  !  it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, tc_grad, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
+  write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
+    it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
 
   ! ---
 
   PROVIDE FQS_SQF_ao Fock_matrix_tc_ao_tot
 
-  do while((tc_grad .gt. dsqrt(thresh_tcscf)) .and. (er_DIIS .gt. threshold_DIIS_nonzero_TCSCF))
+  !do while((tc_grad .gt. dsqrt(thresh_tcscf)) .and. (er_DIIS .gt. dsqrt(thresh_tcscf)))
+  do while(er_DIIS .gt. dsqrt(thresh_tcscf))
 
     call wall_time(t0)
 
@@ -118,12 +129,10 @@ subroutine rh_tcscf_diis()
 
     ! ---
 
-    g_delta  = grad_non_hermit         -  g_save
+    !g_delta  = grad_non_hermit         -  g_save
     er_delta = maxval(abs(FQS_SQF_mo)) - er_save
 
-    !if((g_delta > rate_th * g_delta_th) .and. (er_delta > rate_th * er_delta_th) .and. (it > 1)) then
-    if((g_delta > rate_th * g_delta_th) .and. (it > 1)) then
-    !if((g_delta > 0.d0) .and. (it > 1)) then
+    if((er_delta > rate_th * er_save) .and. (it > 1)) then
 
       Fock_matrix_tc_ao_tot(1:ao_num,1:ao_num) = F_DIIS(1:ao_num,1:ao_num,index_dim_DIIS)
       call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) &
@@ -140,15 +149,16 @@ subroutine rh_tcscf_diis()
 
     ! ---
 
-    g_delta  = grad_non_hermit         -  g_save
+    !g_delta  = grad_non_hermit         -  g_save
     er_delta = maxval(abs(FQS_SQF_mo)) - er_save
 
     mo_l_coef_save(1:ao_num,1:mo_num) = mo_l_coef(1:ao_num,1:mo_num)
     mo_r_coef_save(1:ao_num,1:mo_num) = mo_r_coef(1:ao_num,1:mo_num)
 
-    !do while((g_delta > rate_th * g_delta_th) .and. (er_delta > rate_th * er_delta_th) .and. (it > 1))
-    do while((g_delta > rate_th * g_delta_th) .and. (it > 1))
-      print *, ' big or bad step : ', g_delta, rate_th * g_delta_th
+    do while((er_delta > rate_th * er_save) .and. (it > 1))
+      print *, ' big or bad step '
+      !print *, g_delta , rate_th *  g_save
+      print *, er_delta, rate_th * er_save
 
       mo_l_coef(1:ao_num,1:mo_num) = mo_l_coef_save(1:ao_num,1:mo_num) 
       mo_r_coef(1:ao_num,1:mo_num) = mo_r_coef_save(1:ao_num,1:mo_num) 
@@ -165,7 +175,7 @@ subroutine rh_tcscf_diis()
       !call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
       TOUCH mo_l_coef mo_r_coef
 
-      g_delta  = grad_non_hermit         -  g_save
+      !g_delta  = grad_non_hermit         -  g_save
       er_delta = maxval(abs(FQS_SQF_mo)) - er_save
 
       if(level_shift_TCSCF - level_shift_save > 40.d0) then
@@ -189,25 +199,27 @@ subroutine rh_tcscf_diis()
     if(three_body_h_tc) then
       etc_3e = diag_three_elem_hf
     endif
-    tc_grad  = grad_non_hermit
+    !tc_grad  = grad_non_hermit
     er_DIIS  = maxval(abs(FQS_SQF_mo))
     e_delta  = dabs(etc_tot - e_save)
-    g_delta  = tc_grad - g_save
+    !g_delta  = tc_grad - g_save
     er_delta = er_DIIS - er_save
     
     e_save           = etc_tot
-    g_save           = tc_grad
+    !g_save           = tc_grad
     level_shift_save = level_shift_TCSCF
     er_save          = er_DIIS
 
-    g_delta_th  = dabs(tc_grad) ! g_delta)
+    !g_delta_th  = dabs(tc_grad) ! g_delta)
     er_delta_th = dabs(er_DIIS) !er_delta)
 
     call wall_time(t1)
-    write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
-      it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, tc_grad, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
+    !write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
+    !  it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, tc_grad, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
+    write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
+      it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
 
-    if(g_delta .lt. 0.d0) then
+    if(er_delta .lt. 0.d0) then
       call ezfio_set_tc_scf_bitc_energy(etc_tot)
       call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
