@@ -1,1 +1,4 @@
 change all correlation functionals with the pbe_on_top general
+factor 2 in two-rdm involved in: 
+  on-top, mu(r), pbe-on-top, sc_basis_corr and so on 
+  casscf : state_av_act_2_rdm_spin_trace_mo

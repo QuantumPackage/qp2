@@ -74,7 +74,7 @@ BEGIN_PROVIDER [double precision, full_occ_2_rdm_cntrctd_trans, (n_points_final_
      do j = 1, n_core_inact_act_orb
       do i = 1, n_core_inact_act_orb
                                              !                                 1 2 1 2 
-       full_occ_2_rdm_cntrctd_trans(ipoint,k,l,istate) += full_occ_2_rdm_ab_mo(i,j,k,l,istate) * core_inact_act_mos_in_r_array(j,ipoint) * core_inact_act_mos_in_r_array(i,ipoint)
+       full_occ_2_rdm_cntrctd_trans(ipoint,k,l,istate) += 0.5d0 * full_occ_2_rdm_ab_mo(i,j,k,l,istate) * core_inact_act_mos_in_r_array(j,ipoint) * core_inact_act_mos_in_r_array(i,ipoint)
       enddo
      enddo
     enddo
