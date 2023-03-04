@@ -86,6 +86,9 @@ subroutine f_HF_valence_ab(r1,r2,f_HF_val_ab,two_bod_dens)
    enddo
   enddo
  enddo
+ ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
+ f_HF_val_ab *= 2.d0 
+ two_bod_dens *= 2.d0
 end
 
 
@@ -136,4 +139,6 @@ subroutine integral_f_HF_valence_ab(r1,int_f_HF_val_ab)
    enddo
   enddo
  enddo
+ ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
+ int_f_HF_val_ab *= 2.d0
 end

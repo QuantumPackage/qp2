@@ -2,21 +2,16 @@
  implicit none
  double precision, allocatable :: state_weights(:) 
  BEGIN_DOC
-! state_av_act_2_rdm_ab_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha-beta electron pairs
+! state_av_act_2_rdm_ab_mo(i,j,k,l) = state average physicist two-body rdm restricted to the ACTIVE indices for alpha/beta+beta/alpha electron pairs
 !
 !                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * N_{\beta}^{act}
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * N_{\beta}^{act} * 2
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! !!!!! WARNING !!!!! For efficiency reasons, electron 1 is alpha, electron 2 is beta
-!
-!  state_av_act_2_rdm_ab_mo(i,j,k,l) = i:alpha, j:beta, j:alpha, l:beta
-!                      
-!                      Therefore you don't necessary have symmetry between electron 1 and 2 
  END_DOC 
  allocate(state_weights(N_states))
  state_weights = state_average_weight
@@ -34,6 +29,8 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_ab_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_ab_mo',wall_2 - wall_1
+ ! factor 2 to have the correct normalization factor 
+ state_av_act_2_rdm_ab_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -48,7 +45,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * (N_{\alpha}^{act} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha}^{act} * (N_{\alpha}^{act} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC 
@@ -63,6 +60,8 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_aa_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_aa_mo',wall_2 - wall_1
+ ! factor 2 to have the correct normalization factor 
+ state_av_act_2_rdm_aa_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -76,7 +75,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta}^{act} * (N_{\beta}^{act} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta}^{act} * (N_{\beta}^{act} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC 
@@ -91,6 +90,8 @@
  call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_bb_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
  call wall_time(wall_2)
  print*,'Wall time to provide state_av_act_2_rdm_bb_mo',wall_2 - wall_1
+ ! factor 2 to have the correct normalization factor 
+ state_av_act_2_rdm_bb_mo *= 2.d0
 
  END_PROVIDER 
 
@@ -104,7 +105,7 @@
 !
 ! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO AN ACTIVE SPACE DEFINED BY "list_act" 
 !
-! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)/2
+! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)
 !
 ! !!!!! WARNING !!!!! ALL SLATER DETERMINANTS IN PSI_DET MUST BELONG TO AN ACTIVE SPACE DEFINED BY "list_act" 
  END_DOC

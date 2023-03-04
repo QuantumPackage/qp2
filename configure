@@ -19,6 +19,8 @@ git submodule update
 # Update ARM or x86 dependencies
 ARCHITECTURE=$(uname -m)
 cd ${QP_ROOT}/external/qp2-dependencies
+git checkout master
+git pull
 echo "Architecture: $ARCHITECTURE"
 cd ${QP_ROOT}
 

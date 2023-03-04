@@ -49,6 +49,9 @@ subroutine give_f_ii_val_ab(r1,r2,f_ii_val_ab,two_bod_dens)
    enddo
   enddo
  enddo
+ ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
+ f_ii_val_ab  *= 2.d0 
+ two_bod_dens *= 2.d0
 end
 
 
@@ -142,6 +145,9 @@ subroutine give_f_ia_val_ab(r1,r2,f_ia_val_ab,two_bod_dens,istate)
    f_ia_val_ab += v_tilde(i,a) * rho_tilde(i,a)
   enddo
  enddo
+ ! multiply by two to adapt to the N(N-1) normalization condition of the active two-rdm
+ f_ia_val_ab *= 2.d0 
+ two_bod_dens *= 2.d0
 end
 
 
@@ -222,6 +228,8 @@ subroutine give_f_aa_val_ab(r1,r2,f_aa_val_ab,two_bod_dens,istate)
    f_aa_val_ab += v_tilde(b,a) * rho_tilde(b,a)
   enddo
  enddo
+
+ ! DO NOT multiply by two as in give_f_ii_val_ab and give_f_ia_val_ab because the N(N-1) normalization condition of the active two-rdm
 end
 
 BEGIN_PROVIDER [double precision, two_e_int_aa_f, (n_basis_orb,n_basis_orb,n_act_orb,n_act_orb)]

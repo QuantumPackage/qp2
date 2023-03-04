@@ -41,13 +41,13 @@
    
    if(mu_of_r_potential == "cas_ful")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
-    on_top = on_top_cas_mu_r(ipoint,istate)
+    on_top =  on_top_cas_mu_r(ipoint,istate)
    else
     ! You take the on-top of the CAS wave function computed separately
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
-!  We take the extrapolated on-top pair density * 2 because of normalization
-   on_top_extrap = 2.d0 * mu_correction_of_on_top(mu,on_top)
+!  We take the extrapolated on-top pair density 
+   on_top_extrap = mu_correction_of_on_top(mu,on_top)
 
    call ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top_extrap,eps_c_md_on_top_PBE)
  
@@ -108,8 +108,8 @@
     ! You take the on-top of the CAS wave function computed separately
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
-!  We take the extrapolated on-top pair density * 2 because of normalization
-   on_top_extrap = 2.d0 * mu_correction_of_on_top(mu,on_top)
+!  We take the extrapolated on-top pair density 
+   on_top_extrap = mu_correction_of_on_top(mu,on_top)
 
    call ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top_extrap,eps_c_md_on_top_PBE)
  
@@ -170,8 +170,8 @@
     ! You take the on-top of the CAS wave function computed separately
     on_top = total_cas_on_top_density(ipoint,istate)
    endif
-!  We DO NOT take the extrapolated on-top pair density, but there is  * 2 because of normalization
-   on_top_extrap = 2.d0 * on_top
+!  We DO NOT take the extrapolated on-top pair density
+   on_top_extrap =  on_top
 
    call ec_md_pbe_on_top_general(mu,rho_a,rho_b,grad_rho_a,grad_rho_b,on_top_extrap,eps_c_md_on_top_PBE)
  
