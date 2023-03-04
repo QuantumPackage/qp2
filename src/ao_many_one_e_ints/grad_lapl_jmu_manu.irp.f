@@ -192,9 +192,11 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp
   double precision           :: wall0, wall1
+  double precision           :: beta_ij_u, factor_ij_1s_u, center_ij_1s_u(3), coeftot
+  double precision           :: sigma_ij, dist_ij_ipoint, dsqpi_3_2, int_j1b
 
+  double precision, external :: overlap_gauss_r12_ao
   double precision, external :: overlap_gauss_r12_ao_with1s
-  double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b
 
   print*, ' providing v_ij_u_cst_mu_j1b_test ...'
 
@@ -208,15 +210,14 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
  !$OMP PARALLEL DEFAULT (NONE)                                      &
  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
  !$OMP          beta_ij_u, factor_ij_1s_u, center_ij_1s_u,          &
- !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_j1b)                   & 
- !$OMP SHARED  (n_points_final_grid, ao_num,  & 
- !$OMP          final_grid_points, ng_fit_jast,                  &
+ !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_j1b)   & 
+ !$OMP SHARED  (n_points_final_grid, ao_num,                        & 
+ !$OMP          final_grid_points, ng_fit_jast,                     &
  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
- !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,       & 
- !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_test,ao_abs_comb_b2_j1b,      &
+ !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size, & 
+ !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_test,ao_abs_comb_b2_j1b,   &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
  !$OMP DO
-  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -227,8 +228,26 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
         if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
-        do i_1s = 1, List_comb_thr_b2_size(j,i)
 
+        ! --- --- ---
+        ! i_1s = 1
+        ! --- --- ---
+
+        int_j1b = ao_abs_comb_b2_j1b(1,j,i)
+        if(dabs(int_j1b).lt.1.d-10) cycle
+        do i_fit = 1, ng_fit_jast
+          expo_fit = expo_gauss_j_mu_x(i_fit)
+          coef_fit = coef_gauss_j_mu_x(i_fit)
+          if(ao_overlap_abs_grid(j,i).lt.1.d-15) cycle
+          int_fit = overlap_gauss_r12_ao(r, expo_fit, i, j)
+          tmp += coef_fit * int_fit
+        enddo
+
+        ! --- --- ---
+        ! i_1s > 1
+        ! --- --- ---
+
+        do i_1s = 2, List_comb_thr_b2_size(j,i)
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
@@ -236,18 +255,14 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_test, (ao_num, ao_num, n_po
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
-
           do i_fit = 1, ng_fit_jast
-
             expo_fit = expo_gauss_j_mu_x(i_fit)
             coef_fit = coef_gauss_j_mu_x(i_fit)
             coeftot = coef * coef_fit
             if(dabs(coeftot).lt.1.d-15)cycle
-            double precision :: beta_ij_u, factor_ij_1s_u, center_ij_1s_u(3),coeftot
             call gaussian_product(beta,B_center,expo_fit,r,factor_ij_1s_u,beta_ij_u,center_ij_1s_u)
             if(factor_ij_1s_u*ao_overlap_abs_grid(j,i).lt.1.d-15)cycle
             int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
-
             tmp += coef * coef_fit * int_fit
           enddo
         enddo
@@ -288,9 +303,12 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
   double precision           :: coef, beta, B_center(3)
   double precision           :: tmp
   double precision           :: wall0, wall1
+  double precision           :: beta_ij_u, factor_ij_1s_u, center_ij_1s_u(3), coeftot
+  double precision           :: sigma_ij, dist_ij_ipoint, dsqpi_3_2, int_j1b
 
+  double precision, external :: overlap_gauss_r12_ao
   double precision, external :: overlap_gauss_r12_ao_with1s
-  double precision :: sigma_ij,dist_ij_ipoint,dsqpi_3_2,int_j1b
+
   dsqpi_3_2 = (dacos(-1.d0))**(1.5d0)
 
   provide mu_erf final_grid_points j1b_pen
@@ -299,17 +317,16 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
   v_ij_u_cst_mu_j1b_ng_1_test = 0.d0
 
  !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s,  r, coef, beta, B_center, &
+ !$OMP PRIVATE (ipoint, i, j, i_1s,  r, coef, beta, B_center,       &
  !$OMP          beta_ij_u, factor_ij_1s_u, center_ij_1s_u,          &
- !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_j1b)                   & 
- !$OMP SHARED  (n_points_final_grid, ao_num,  & 
- !$OMP          final_grid_points, expo_good_j_mu_1gauss,coef_good_j_mu_1gauss,                  &
- !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
- !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,       & 
- !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_ng_1_test,ao_abs_comb_b2_j1b,      &
+ !$OMP          coef_fit, expo_fit, int_fit, tmp,coeftot,int_j1b)   & 
+ !$OMP SHARED  (n_points_final_grid, ao_num,                        & 
+ !$OMP          final_grid_points, expo_good_j_mu_1gauss,coef_good_j_mu_1gauss,        &
+ !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,                                  &
+ !$OMP          List_comb_thr_b2_coef, List_comb_thr_b2_expo,List_comb_thr_b2_size,    & 
+ !$OMP          List_comb_thr_b2_cent, v_ij_u_cst_mu_j1b_ng_1_test,ao_abs_comb_b2_j1b, &
  !$OMP          ao_overlap_abs_grid,ao_prod_center,ao_prod_sigma,dsqpi_3_2)
  !$OMP DO
-  !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -320,8 +337,22 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
         if(dabs(ao_overlap_abs_grid(j,i)).lt.1.d-20)cycle
 
         tmp = 0.d0
-        do i_1s = 1, List_comb_thr_b2_size(j,i)
 
+        ! --- --- ---
+        ! i_1s = 1
+        ! --- --- ---
+
+        int_j1b = ao_abs_comb_b2_j1b(1,j,i)
+        if(dabs(int_j1b).lt.1.d-10) cycle
+        expo_fit = expo_good_j_mu_1gauss
+        int_fit  = overlap_gauss_r12_ao(r, expo_fit, i, j)
+        tmp += int_fit
+
+        ! --- --- ---
+        ! i_1s > 1
+        ! --- --- ---
+
+        do i_1s = 2, List_comb_thr_b2_size(j,i)
           coef        = List_comb_thr_b2_coef  (i_1s,j,i)
           beta        = List_comb_thr_b2_expo  (i_1s,j,i)
           int_j1b = ao_abs_comb_b2_j1b(i_1s,j,i)
@@ -329,18 +360,14 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_ng_1_test, (ao_num, ao_num,
           B_center(1) = List_comb_thr_b2_cent(1,i_1s,j,i)
           B_center(2) = List_comb_thr_b2_cent(2,i_1s,j,i)
           B_center(3) = List_comb_thr_b2_cent(3,i_1s,j,i)
-
 !          do i_fit = 1, ng_fit_jast
-
             expo_fit = expo_good_j_mu_1gauss
             coef_fit = 1.d0
             coeftot = coef * coef_fit
             if(dabs(coeftot).lt.1.d-15)cycle
-            double precision :: beta_ij_u, factor_ij_1s_u, center_ij_1s_u(3),coeftot
             call gaussian_product(beta,B_center,expo_fit,r,factor_ij_1s_u,beta_ij_u,center_ij_1s_u)
             if(factor_ij_1s_u*ao_overlap_abs_grid(j,i).lt.1.d-15)cycle
             int_fit  = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
-
             tmp += coef * coef_fit * int_fit
 !          enddo
         enddo

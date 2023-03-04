@@ -300,7 +300,6 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
 END_PROVIDER 
 
 ! ---
-! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num, n_points_final_grid) ]
  
@@ -364,70 +363,100 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
   integer                       :: ipoint, i, j, k, l
   double precision              :: weight1, ao_ik_r, ao_i_r
   double precision              :: time0, time1
-  double precision, allocatable :: ac_mat(:,:,:,:), b_mat(:,:,:), tmp(:,:,:)
+  double precision, allocatable :: b_mat(:,:,:), tmp(:,:,:)
 
   print*, ' providing tc_grad_square_ao ...'
   call wall_time(time0)
 
-  allocate(ac_mat(ao_num,ao_num,ao_num,ao_num), b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+  if(read_tc_integ) then
 
-  b_mat = 0.d0
- !$OMP PARALLEL               &
- !$OMP DEFAULT (NONE)         &
- !$OMP PRIVATE (i, k, ipoint) & 
- !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
- !$OMP DO SCHEDULE (static)
-  do i = 1, ao_num
-    do k = 1, ao_num
-      do ipoint = 1, n_points_final_grid
-        b_mat(ipoint,k,i) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,k)
-      enddo
-    enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
-  tmp = 0.d0
- !$OMP PARALLEL               &
- !$OMP DEFAULT (NONE)         &
- !$OMP PRIVATE (j, l, ipoint) & 
- !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
- !$OMP DO SCHEDULE (static)
-  do ipoint = 1, n_points_final_grid
-    do j = 1, ao_num
-      do l = 1, ao_num
-        tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
-      enddo
-    enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
-
-  ac_mat = 0.d0
-  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
-            , 1.d0, ac_mat, ao_num*ao_num)
-  deallocate(tmp, b_mat)
-
- !$OMP PARALLEL             &
- !$OMP DEFAULT (NONE)       &
- !$OMP PRIVATE (i, j, k, l) & 
- !$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
- !$OMP DO SCHEDULE (static)
-  do j = 1, ao_num
-    do l = 1, ao_num
+    open(unit=11, form="unformatted", file='tc_grad_square_ao', action="read")
       do i = 1, ao_num
-        do k = 1, ao_num
-          tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) 
+        do j = 1, ao_num
+          do k = 1, ao_num
+            do l = 1, ao_num
+              read(11) tc_grad_square_ao(l,k,j,i)
+            enddo
+          enddo
+        enddo
+      enddo
+    close(11)
+
+  else
+
+    allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+  
+    b_mat = 0.d0
+   !$OMP PARALLEL               &
+   !$OMP DEFAULT (NONE)         &
+   !$OMP PRIVATE (i, k, ipoint) & 
+   !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+   !$OMP DO SCHEDULE (static)
+    do i = 1, ao_num
+      do k = 1, ao_num
+        do ipoint = 1, n_points_final_grid
+          b_mat(ipoint,k,i) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,k)
         enddo
       enddo
     enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
+   !$OMP END DO
+   !$OMP END PARALLEL
+  
+    tmp = 0.d0
+   !$OMP PARALLEL               &
+   !$OMP DEFAULT (NONE)         &
+   !$OMP PRIVATE (j, l, ipoint) & 
+   !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
+   !$OMP DO SCHEDULE (static)
+    do ipoint = 1, n_points_final_grid
+      do j = 1, ao_num
+        do l = 1, ao_num
+          tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
+        enddo
+      enddo
+    enddo
+   !$OMP END DO
+   !$OMP END PARALLEL
+  
+    tc_grad_square_ao = 0.d0
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+              , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+              , 1.d0, tc_grad_square_ao, ao_num*ao_num)
+    deallocate(tmp, b_mat)
+  
+    call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
+  
+   !!$OMP PARALLEL             &
+   !!$OMP DEFAULT (NONE)       &
+   !!$OMP PRIVATE (i, j, k, l) & 
+   !!$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
+   !!$OMP DO SCHEDULE (static)
+   ! do j = 1, ao_num
+   !   do l = 1, ao_num
+   !     do i = 1, ao_num
+   !       do k = 1, ao_num
+   !         tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) 
+   !       enddo
+   !     enddo
+   !   enddo
+   ! enddo
+   !!$OMP END DO
+   !!$OMP END PARALLEL
+  endif
 
-  deallocate(ac_mat)
+  if(write_tc_integ) then
+    open(unit=11, form="unformatted", file='tc_grad_square_ao', action="write")
+      do i = 1, ao_num
+        do j = 1, ao_num
+          do k = 1, ao_num
+            do l = 1, ao_num
+              write(11) tc_grad_square_ao(l,k,j,i)
+            enddo
+          enddo
+        enddo
+      enddo
+    close(11)
+  endif
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao = ', time1 - time0

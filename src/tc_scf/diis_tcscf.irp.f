@@ -1,17 +1,3 @@
-! ---
-
-BEGIN_PROVIDER [ double precision, threshold_DIIS_nonzero_TCSCF ]
- 
-  implicit none
- 
-  if(threshold_DIIS_TCSCF == 0.d0) then
-    threshold_DIIS_nonzero_TCSCF = dsqrt(thresh_tcscf)
-  else
-    threshold_DIIS_nonzero_TCSCF = threshold_DIIS_TCSCF
-  endif
-  ASSERT(threshold_DIIS_nonzero_TCSCF >= 0.d0)
-
-END_PROVIDER
 
 ! ---
 
@@ -100,13 +86,30 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
 
   implicit none
+  integer                       :: i, j
   double precision, allocatable :: tmp(:,:)
+  double precision, allocatable :: F(:,:)
+
+  allocate(F(ao_num,ao_num))
+  if(var_tc) then
+    do i = 1, ao_num
+      do j = 1, ao_num
+        F(j,i) = Fock_matrix_vartc_ao_tot(j,i)
+      enddo
+    enddo
+  else
+    do i = 1, ao_num
+      do j = 1, ao_num
+        F(j,i) = Fock_matrix_tc_ao_tot(j,i)
+      enddo
+    enddo
+  endif
 
   allocate(tmp(ao_num,ao_num))
 
   ! F x Q
-  call dgemm( 'N', 'N', ao_num, ao_num, ao_num, 1.d0                                             &
-            , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1), Q_matrix, size(Q_matrix, 1) &
+  call dgemm( 'N', 'N', ao_num, ao_num, ao_num, 1.d0     &
+            , F, size(F, 1), Q_matrix, size(Q_matrix, 1) &
             , 0.d0, tmp, size(tmp, 1) )
 
   ! F x Q x S
@@ -121,11 +124,12 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
             , 0.d0, tmp, size(tmp, 1) )
 
   ! F x Q x S - S x Q x F
-  call dgemm( 'N', 'N', ao_num, ao_num, ao_num, -1.d0                                  &
-            , tmp, size(tmp, 1), Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) &
+  call dgemm( 'N', 'N', ao_num, ao_num, ao_num, -1.d0 &
+            , tmp, size(tmp, 1), F, size(F, 1)        &
             , 1.d0, FQS_SQF_ao, size(FQS_SQF_ao, 1) )
 
   deallocate(tmp)
+  deallocate(F)
 
 END_PROVIDER
 
