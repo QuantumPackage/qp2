@@ -10,6 +10,8 @@ function run() {
   qp set determinants n_states  2
   qp set davidson threshold_davidson 1.e-12
   qp set davidson n_states_diag 24
+  qp run cis
+  qp set_frozen_core
   qp run cisd 
   energy1="$(qp get cisd energy | tr '[]' ' ' | cut -d ',' -f 1)"
   energy2="$(qp get cisd energy | tr '[]' ' ' | cut -d ',' -f 2)"
