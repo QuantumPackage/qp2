@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [double precision, tr_one_e_dm_mo, (mo_num, mo_num, N_states, N_states)]
+BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_states)]
 
   implicit none
 
@@ -18,13 +18,13 @@ BEGIN_PROVIDER [double precision, tr_one_e_dm_mo, (mo_num, mo_num, N_states, N_s
 
   PROVIDE psi_det
 
-  tr_one_e_dm_mo = 0d0
+  one_e_tr_dm_mo = 0d0
  
   !$OMP PARALLEL DEFAULT(NONE)                                      &
       !$OMP PRIVATE(j,k,k_a,k_b,l,m,occ,ck, cl, ckl,phase,h1,h2,p1,p2,s1,s2, degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)&
       !$OMP SHARED(psi_det,psi_coef,N_int,N_states,elec_alpha_num,  &
-      !$OMP  elec_beta_num,tr_one_e_dm_mo,N_det,&
+      !$OMP  elec_beta_num,one_e_tr_dm_mo,N_det,&
       !$OMP  mo_num,psi_bilinear_matrix_rows,psi_bilinear_matrix_columns,&
       !$OMP  psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns,&
       !$OMP  psi_bilinear_matrix_order_reverse, psi_det_alpha_unique, psi_det_beta_unique,&
@@ -88,7 +88,7 @@ BEGIN_PROVIDER [double precision, tr_one_e_dm_mo, (mo_num, mo_num, N_states, N_s
   !$OMP END DO NOWAIT
 
   !$OMP CRITICAL
-  tr_one_e_dm_mo(:,:,:,:) = tr_one_e_dm_mo(:,:,:,:) + tmp_a(:,:,:,:)
+  one_e_tr_dm_mo(:,:,:,:) = one_e_tr_dm_mo(:,:,:,:) + tmp_a(:,:,:,:)
   !$OMP END CRITICAL
   deallocate(tmp_a)
   !$OMP BARRIER
@@ -149,15 +149,15 @@ BEGIN_PROVIDER [double precision, tr_one_e_dm_mo, (mo_num, mo_num, N_states, N_s
   enddo
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
-  tr_one_e_dm_mo(:,:,:,:)  = tr_one_e_dm_mo(:,:,:,:)  + tmp_b(:,:,:,:)
+  one_e_tr_dm_mo(:,:,:,:)  = one_e_tr_dm_mo(:,:,:,:)  + tmp_b(:,:,:,:)
   !$OMP END CRITICAL
 
   deallocate(tmp_b)
   !$OMP END PARALLEL
 
 END_PROVIDER
- BEGIN_PROVIDER [ double precision, tr_one_e_dm_mo_alpha, (mo_num,mo_num,N_states,N_states) ]
-&BEGIN_PROVIDER [ double precision, tr_one_e_dm_mo_beta, (mo_num,mo_num,N_states,N_states) ]
+ BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_alpha, (mo_num,mo_num,N_states,N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_tr_dm_mo_beta, (mo_num,mo_num,N_states,N_states) ]
   implicit none
   BEGIN_DOC
   ! $\alpha$ and $\beta$ one-body transition density matrices for all pairs of states
@@ -175,13 +175,13 @@ END_PROVIDER
 
   PROVIDE psi_det
 
-  tr_one_e_dm_mo_alpha = 0.d0
-  tr_one_e_dm_mo_beta  = 0.d0
+  one_e_tr_dm_mo_alpha = 0.d0
+  one_e_tr_dm_mo_beta  = 0.d0
   !$OMP PARALLEL DEFAULT(NONE)                                      &
       !$OMP PRIVATE(j,k,k_a,k_b,l,m,n,occ,ck, cl, ckl,phase,h1,h2,p1,p2,s1,s2, degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)&
       !$OMP SHARED(psi_det,psi_coef,N_int,N_states,elec_alpha_num,  &
-      !$OMP  elec_beta_num,tr_one_e_dm_mo_alpha,tr_one_e_dm_mo_beta,N_det,&
+      !$OMP  elec_beta_num,one_e_tr_dm_mo_alpha,one_e_tr_dm_mo_beta,N_det,&
       !$OMP  mo_num,psi_bilinear_matrix_rows,psi_bilinear_matrix_columns,&
       !$OMP  psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns,&
       !$OMP  psi_bilinear_matrix_order_reverse, psi_det_alpha_unique, psi_det_beta_unique,&
@@ -244,7 +244,7 @@ END_PROVIDER
   !$OMP END DO NOWAIT
 
   !$OMP CRITICAL
-  tr_one_e_dm_mo_alpha(:,:,:,:) = tr_one_e_dm_mo_alpha(:,:,:,:) + tmp_a(:,:,:,:)
+  one_e_tr_dm_mo_alpha(:,:,:,:) = one_e_tr_dm_mo_alpha(:,:,:,:) + tmp_a(:,:,:,:)
   !$OMP END CRITICAL
   deallocate(tmp_a)
 
@@ -303,7 +303,7 @@ END_PROVIDER
   enddo
   !$OMP END DO NOWAIT
   !$OMP CRITICAL
-  tr_one_e_dm_mo_beta(:,:,:,:)  = tr_one_e_dm_mo_beta(:,:,:,:)  + tmp_b(:,:,:,:)
+  one_e_tr_dm_mo_beta(:,:,:,:)  = one_e_tr_dm_mo_beta(:,:,:,:)  + tmp_b(:,:,:,:)
   !$OMP END CRITICAL
 
   deallocate(tmp_b)
