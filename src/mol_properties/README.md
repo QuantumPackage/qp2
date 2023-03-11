@@ -15,3 +15,11 @@ If you are interested in transitions between two excited states:
 ```
 qp set mol_properties print_all_transitions true
 ```
+They can be obtained by running
+```
+qp run properties
+```
+or at each step of a cipsi calculation with
+```
+qp run fci
+```
