@@ -27,16 +27,7 @@
     do istate = 1, N_states
  
       do i = 1, mo_num  
-        ! Diag part
-        multi_s_x_deriv_1(istate,jstate) -= one_e_tr_dm_mo(i,i,istate,jstate) * mo_deriv_1_x(i,i)
-        multi_s_y_deriv_1(istate,jstate) -= one_e_tr_dm_mo(i,i,istate,jstate) * mo_deriv_1_y(i,i)
-        multi_s_z_deriv_1(istate,jstate) -= one_e_tr_dm_mo(i,i,istate,jstate) * mo_deriv_1_z(i,i)
- 
         do j = 1, mo_num  
-          if (i == j) then
-           cycle
-          endif
-          ! Extra diag part
           multi_s_x_deriv_1(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_deriv_1_x(j,i)  
           multi_s_y_deriv_1(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_deriv_1_y(j,i) 
           multi_s_z_deriv_1(istate,jstate) -= one_e_tr_dm_mo(j,i,istate,jstate) * mo_deriv_1_z(j,i) 

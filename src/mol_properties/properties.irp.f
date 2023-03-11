@@ -3,7 +3,7 @@ program mol_properties
   implicit none
 
   BEGIN_DOC
-  ! Run the propertie calculations
+  ! Calculation of the properties
   END_DOC
 
   read_wf = .True.
