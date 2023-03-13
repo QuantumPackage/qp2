@@ -317,6 +317,7 @@ END_PROVIDER
 #+BEGIN_SRC f90 :comments org :tangle occupancy.irp.f
  BEGIN_PROVIDER [integer, cc_list_occ_spin, (cc_nO_m,2)]
 &BEGIN_PROVIDER [integer, cc_list_vir_spin, (cc_nV_m,2)]
+&BEGIN_PROVIDER [logical, cc_ref_is_open_shell]
 
   implicit none
 
@@ -324,7 +325,17 @@ END_PROVIDER
   ! List of occupied and virtual spin orbitals without core and deleted ones
   END_DOC
 
+  integer :: i
+
   call extract_list_orb_spin(psi_det(1,1,cc_ref),cc_nO_m,cc_nV_m,cc_list_occ_spin,cc_list_vir_spin)
+
+  cc_ref_is_open_shell = .False.
+  do i = 1, cc_nO_m
+    if (cc_list_occ_spin(i,1) /= cc_list_occ_spin(i,2)) then
+       cc_ref_is_open_shell = .True.
+    endif
+  enddo
+
 
 END_PROVIDER
 #+end_src
