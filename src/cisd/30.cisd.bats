@@ -11,7 +11,6 @@ function run() {
   qp set davidson threshold_davidson 1.e-12
   qp set davidson n_states_diag 24
   qp run cis
-  qp set_frozen_core
   qp run cisd 
   energy1="$(qp get cisd energy | tr '[]' ' ' | cut -d ',' -f 1)"
   energy2="$(qp get cisd energy | tr '[]' ' ' | cut -d ',' -f 2)"
@@ -22,26 +21,31 @@ function run() {
 
 @test "B-B" { # 
   qp set_file b2_stretched.ezfio
+  qp set_frozen_core
   run  -49.120607088648597 -49.055152453388231
 }
 
 @test "SiH2_3B1" { # 1.53842s 3.53856s
   qp set_file sih2_3b1.ezfio
+  qp set_frozen_core
   run -290.015949171697 -289.805036176618
 }
 
 @test "HBO" { # 4.42968s  19.6099s
   qp set_file hbo.ezfio
+  qp set_frozen_core
   run -100.2019254455993 -99.79484127741013 
 }
 
 @test "HCO" { # 6.6077s 28.6801s
   qp set_file hco.ezfio
+  qp set_frozen_core
   run -113.39088802205114 -113.22204293108558
 }
 
 @test "H2O" { # 7.0651s 30.6642s
   qp set_file h2o.ezfio
+  qp set_frozen_core
   run -76.22975602077072 -75.80609108747208 
 }
 
@@ -52,6 +56,7 @@ function run() {
 @test "H2S" { # 7.42152s 32.5461s
   [[ -n $TRAVIS ]] && skip
   qp set_file h2s.ezfio
+  qp set_frozen_core
   run -398.853701416768 -398.519020035337
 }
 
@@ -72,6 +77,7 @@ function run() {
 @test "OH" { # 18.2159s 1.28453m
   [[ -n $TRAVIS ]] && skip
   qp set_file oh.ezfio
+  qp set_frozen_core
   run -75.6087472926588 -75.5370393736601
 }
 
@@ -85,6 +91,7 @@ function run() {
 @test "SiH3" { # 20.2202s 1.38648m
   [[ -n $TRAVIS ]] && skip
   qp set_file sih3.ezfio
+  qp set_frozen_core
   run -5.57096611856522  -5.30950347928823
 }
 
@@ -105,6 +112,7 @@ function run() {
 @test "H3COH" { # 24.7248s 1.85043m
   [[ -n $TRAVIS ]] && skip
   qp set_file h3coh.ezfio
+  qp set_frozen_core
   run -115.204958752377 -114.755913828245
 }
 
@@ -119,6 +127,7 @@ function run() {
 @test "ClF" { # 30.3225s
   [[ -n $TRAVIS ]] && skip
   qp set_file clf.ezfio
+  qp set_frozen_core
   run -559.162476603880  -558.792395927088
 }
 
@@ -132,6 +141,7 @@ function run() {
 @test "ClO" { # 37.6949s
   [[ -n $TRAVIS ]] && skip
   qp set_file clo.ezfio
+  qp set_frozen_core
   run -534.5404021326773 -534.3818725793897 
 }
 
@@ -152,6 +162,7 @@ function run() {
 @test "SO" { # 51.2476s
   [[ -n $TRAVIS ]] && skip
   qp set_file so.ezfio
+  qp set_frozen_core
   run -26.0131812819785 -25.7053111980226
 }
 
