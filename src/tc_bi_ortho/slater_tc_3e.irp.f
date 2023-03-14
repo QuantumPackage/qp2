@@ -232,6 +232,7 @@ subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
   other_spin(1) = 2
   other_spin(2) = 1
 
+
   call get_excitation_degree(key_i, key_j, degree, Nint)
 
   hthree = 0.d0

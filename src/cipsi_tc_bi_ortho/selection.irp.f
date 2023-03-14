@@ -916,8 +916,18 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
            psi_h_alpha = mat_l(istate, p1, p2)
            alpha_h_psi = mat_r(istate, p1, p2)
           endif
-          coef(istate)   = alpha_h_psi / delta_E 
-          e_pert(istate) = coef(istate) * psi_h_alpha
+          val = 4.d0 * psi_h_alpha * alpha_h_psi 
+          tmp = dsqrt(delta_E * delta_E + val)
+          if (delta_E < 0.d0) then
+              tmp = -tmp
+          endif
+          e_pert(istate) = 0.5d0 * (tmp - delta_E)
+          if(dsqrt(dabs(tmp)).gt.1.d-4.and.dabs(alpha_h_psi).gt.1.d-4)then
+           coef(istate)   = e_pert(istate) / alpha_h_psi
+          else
+           coef(istate)   = alpha_h_psi / delta_E 
+          endif
+          
 !         if(selection_tc     ==  1 )then
 !          if(e_pert(istate).lt.0.d0)then
 !           e_pert(istate) = 0.d0
