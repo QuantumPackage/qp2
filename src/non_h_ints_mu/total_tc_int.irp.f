@@ -56,6 +56,7 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
         do i = 1, ao_num
           do k = 1, ao_num
             ao_tc_int_chemist(k,i,l,j) = tc_grad_square_ao(k,i,l,j) + tc_grad_and_lapl_ao(k,i,l,j) + ao_two_e_coul(k,i,l,j)
+!            ao_tc_int_chemist(k,i,l,j) = ao_two_e_coul(k,i,l,j)
           enddo
         enddo
       enddo
@@ -83,6 +84,7 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist_test, (ao_num, ao_num, ao_nu
        do i = 1, ao_num
          do k = 1, ao_num
            ao_tc_int_chemist_test(k,i,l,j) = tc_grad_square_ao_test(k,i,l,j) + tc_grad_and_lapl_ao_test(k,i,l,j) + ao_two_e_coul(k,i,l,j)
+!           ao_tc_int_chemist_test(k,i,l,j) =  ao_two_e_coul(k,i,l,j)
          enddo
        enddo
      enddo

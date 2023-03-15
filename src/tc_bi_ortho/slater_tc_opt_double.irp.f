@@ -94,6 +94,7 @@ subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
  integer :: ipart, ihole
  double precision :: direct_int, exchange_int
 
+
   nexc(1) = 0
   nexc(2) = 0
   !! Get all the holes and particles of key_i with respect to the ROHF determinant

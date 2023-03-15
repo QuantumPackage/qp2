@@ -78,6 +78,8 @@ subroutine run_stochastic_cipsi
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max)          &
         )
+      print*,'maxval(abs(pt2_data % pt2(1:N_states)))',maxval(abs(pt2_data % pt2(1:N_states)))
+      print*,pt2_max
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 

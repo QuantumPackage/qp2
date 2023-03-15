@@ -39,7 +39,7 @@ END_PROVIDER
      psi_average_norm_contrib_sorted_tc(i) = -psi_average_norm_contrib_tc(i)
      iorder(i) = i
    enddo
-   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
+!   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
    do i=1,N_det
      do j=1,N_int
        psi_det_sorted_tc(j,1,i) = psi_det(j,1,iorder(i))
