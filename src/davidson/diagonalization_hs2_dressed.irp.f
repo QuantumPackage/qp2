@@ -14,15 +14,6 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
- implicit none
- BEGIN_DOC
- ! Threshold of Davidson's algorithm, using PT2 as a guide
- END_DOC
- threshold_davidson_pt2 = threshold_davidson
-
-END_PROVIDER
-
 
 
 BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
@@ -66,7 +57,7 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k
+  integer                        :: i,k,l
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -87,9 +78,14 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
 
   if (dressing_state > 0) then
     do k=1,N_st
+
       do i=1,sze
-        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
+
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+
     enddo
   endif
 
