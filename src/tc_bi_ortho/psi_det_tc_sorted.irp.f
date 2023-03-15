@@ -10,7 +10,10 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
     
   psi_average_norm_contrib_tc(:) = 0.d0
   do k=1,N_states
+    print*,'in psi_average_norm_contrib_tc'
     do i=1,N_det
+      print*,i,dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k))
+      call debug_det(psi_det(1,1,i),N_int)
       psi_average_norm_contrib_tc(i) = psi_average_norm_contrib_tc(i) +    &
           dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k))*state_average_weight(k)
     enddo
@@ -26,11 +29,18 @@ END_PROVIDER
 &BEGIN_PROVIDER [ double precision, psi_coef_sorted_tc, (psi_det_size,N_states) ]
 &BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_sorted_tc, (psi_det_size) ]
 &BEGIN_PROVIDER [ integer, psi_det_sorted_tc_order, (psi_det_size) ]
+&BEGIN_PROVIDER [double precision, psi_r_coef_sorted_bi_ortho, (psi_det_size, N_states)]
+&BEGIN_PROVIDER [double precision, psi_l_coef_sorted_bi_ortho, (psi_det_size, N_states)]
    implicit none
    BEGIN_DOC
    ! Wave function sorted by determinants contribution to the norm (state-averaged)
    !
    ! psi_det_sorted_tc_order(i) -> k : index in psi_det
+   !
+   ! psi_r_coef_sorted_bi_ortho : right coefficients corresponding to psi_det_sorted_tc
+   !
+   ! psi_l_coef_sorted_bi_ortho : left  coefficients corresponding to psi_det_sorted_tc
+ END_DOC
    END_DOC
    integer                        :: i,j,k
    integer, allocatable           :: iorder(:)
@@ -39,7 +49,7 @@ END_PROVIDER
      psi_average_norm_contrib_sorted_tc(i) = -psi_average_norm_contrib_tc(i)
      iorder(i) = i
    enddo
-!   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
+   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
    do i=1,N_det
      do j=1,N_int
        psi_det_sorted_tc(j,1,i) = psi_det(j,1,iorder(i))
@@ -66,24 +76,13 @@ END_PROVIDER
    psi_average_norm_contrib_sorted_tc(N_det+1:psi_det_size) = 0.d0
    psi_det_sorted_tc_order(N_det+1:psi_det_size) = 0
 
-   deallocate(iorder)
-
-END_PROVIDER
-
- BEGIN_PROVIDER [double precision, psi_r_coef_sorted_bi_ortho, (psi_det_size, N_states)]
-&BEGIN_PROVIDER [double precision, psi_l_coef_sorted_bi_ortho, (psi_det_size, N_states)]
- BEGIN_DOC
- ! psi_r_coef_sorted_bi_ortho : right coefficients corresponding to psi_det_sorted_tc
- ! psi_l_coef_sorted_bi_ortho : left  coefficients corresponding to psi_det_sorted_tc
- END_DOC
-   implicit none
-   integer                       :: i, j, k
    psi_r_coef_sorted_bi_ortho = 0.d0
    psi_l_coef_sorted_bi_ortho = 0.d0
    do i = 1, N_det
-    psi_r_coef_sorted_bi_ortho(i,1) = psi_r_coef_bi_ortho(psi_det_sorted_tc_order(i),1)
-    psi_l_coef_sorted_bi_ortho(i,1) = psi_l_coef_bi_ortho(psi_det_sorted_tc_order(i),1)
+    psi_r_coef_sorted_bi_ortho(i,1:N_states) = psi_r_coef_bi_ortho(psi_det_sorted_tc_order(i),1:N_states)
+    psi_l_coef_sorted_bi_ortho(i,1:N_states) = psi_l_coef_bi_ortho(psi_det_sorted_tc_order(i),1:N_states)
    enddo
+   deallocate(iorder)
 
 END_PROVIDER
 

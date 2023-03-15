@@ -47,12 +47,19 @@ END_PROVIDER
   enddo
   do k=1,N_states
     do i=1,N_det_selectors
-      psi_selectors_coef(i,k) = psi_coef_sorted_tc_gen(i,k)
+      psi_selectors_coef(i,k) =  dsqrt(dabs(psi_l_coef_sorted_bi_ortho(i,k) * psi_r_coef_sorted_bi_ortho(i,k)))
       psi_selectors_coef_tc(i,1,k) = psi_l_coef_sorted_bi_ortho(i,k)
       psi_selectors_coef_tc(i,2,k) = psi_r_coef_sorted_bi_ortho(i,k)
+!      psi_selectors_coef_tc(i,1,k) = psi_l_coef_bi_ortho(i,k)
+!      psi_selectors_coef_tc(i,2,k) = psi_r_coef_bi_ortho(i,k)
 !      psi_selectors_coef_tc(i,1,k) = 1.d0
 !      psi_selectors_coef_tc(i,2,k) = 1.d0
     enddo
+  enddo
+  print*,'selectors '
+  do i = 1, N_det_selectors
+   print*,i,dabs(psi_selectors_coef_tc(i,1,1)*psi_selectors_coef_tc(i,2,1))
+   call debug_det(psi_selectors(1,1,i),N_int)
   enddo
 
 END_PROVIDER
