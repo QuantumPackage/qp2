@@ -464,15 +464,15 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
 
       do i = 1, fullinteresting(0)
         do k = 1, N_int
-          fullminilist(k,1,i) = psi_det_sorted_tc(k,1,fullinteresting(i))
-          fullminilist(k,2,i) = psi_det_sorted_tc(k,2,fullinteresting(i))
+          fullminilist(k,1,i) = psi_selectors(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_selectors(k,2,fullinteresting(i))
         enddo
       enddo
 
       do i = 1, interesting(0)
         do k = 1, N_int
-          minilist(k,1,i) = psi_det_sorted_tc(k,1,interesting(i))
-          minilist(k,2,i) = psi_det_sorted_tc(k,2,interesting(i))
+          minilist(k,1,i) = psi_selectors(k,1,interesting(i))
+          minilist(k,2,i) = psi_selectors(k,2,interesting(i))
         enddo
       enddo
 
@@ -628,7 +628,10 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
     negMask(i,2) = not(mask(i,2))
   end do
 
+  print*,'in selection '
   do i = 1, N_sel
+!    call debug_det(det(1,1,i),N_int)
+!    print*,i,dabs(psi_selectors_coef_transp_tc(1,2,i) * psi_selectors_coef_transp_tc(1,1,i))
     if(interesting(i) < 0) then
       stop 'prefetch interesting(i) and det(i)'
     endif

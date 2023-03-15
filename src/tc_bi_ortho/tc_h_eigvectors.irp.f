@@ -133,7 +133,10 @@
   call bi_normalize(leigvec_tc_bi_orth,reigvec_tc_bi_orth,size(reigvec_tc_bi_orth,1),N_det,N_states)
    print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ',leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1)
    norm_ground_left_right_bi_orth = 0.d0
+   print*,'after diago'
    do j = 1, N_det
+    call debug_det(psi_det(1,1,j),N_int)
+    print*,j,dabs(leigvec_tc_bi_orth(j,1) * reigvec_tc_bi_orth(j,1))
     norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,1) * reigvec_tc_bi_orth(j,1)
    enddo
    print*,'norm l/r = ',norm_ground_left_right_bi_orth

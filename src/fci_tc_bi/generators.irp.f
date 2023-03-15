@@ -31,6 +31,14 @@ END_PROVIDER
  END_DOC
  psi_det_generators(1:N_int,1:2,1:N_det) = psi_det_sorted_tc(1:N_int,1:2,1:N_det)
  psi_coef_generators(1:N_det,1:N_states) = psi_coef_sorted_tc(1:N_det,1:N_states)
+ integer :: i
+! print*,'generators '
+ do i = 1, N_det
+      if(N_det.ne.1)then
+      print*,'writing generators'
+      write(33,*) psi_det_generators(1,1,i), psi_det_generators(1,2,i)
+      endif
+ enddo
 
 END_PROVIDER
 

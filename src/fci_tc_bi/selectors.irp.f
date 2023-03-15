@@ -43,15 +43,27 @@ END_PROVIDER
     do k=1,N_int
       psi_selectors(k,1,i) = psi_det_sorted_tc(k,1,i)
       psi_selectors(k,2,i) = psi_det_sorted_tc(k,2,i)
+!      psi_selectors(k,2,i) = psi_det(k,2,i)
+!      psi_selectors(k,2,i) = psi_det(k,2,i)
     enddo
   enddo
+ print*,'selectors '
   do k=1,N_states
     do i=1,N_det_selectors
       psi_selectors_coef(i,k) = psi_coef_sorted_tc_gen(i,k)
+!      psi_selectors_coef_tc(i,1,k) = psi_l_coef_bi_ortho(i,k)
+!      psi_selectors_coef_tc(i,2,k) = psi_r_coef_bi_ortho(i,k)
       psi_selectors_coef_tc(i,1,k) = psi_l_coef_sorted_bi_ortho(i,k)
       psi_selectors_coef_tc(i,2,k) = psi_r_coef_sorted_bi_ortho(i,k)
+!      call debug_det(psi_selectors(1,1,i),N_int)
+      if(N_det.ne.1)then
+       print*,'writing selectors'
+       write(34,*)psi_selectors(1,1,i),psi_selectors(1,2,i)
+       write(40,'(F10.7)')dabs(psi_selectors_coef_tc(i,1,1) * psi_selectors_coef_tc(i,2,1))
+      endif
 !      psi_selectors_coef_tc(i,1,k) = 1.d0
 !      psi_selectors_coef_tc(i,2,k) = 1.d0
+       
     enddo
   enddo
 
@@ -71,6 +83,9 @@ END_PROVIDER
       psi_selectors_coef_transp_tc(k,1,i) = psi_selectors_coef_tc(i,1,k)
       psi_selectors_coef_transp_tc(k,2,i) = psi_selectors_coef_tc(i,2,k)
     enddo
+    if(N_det.ne.1)then
+    write(41,'(F10.7)')dabs(psi_selectors_coef_transp_tc(1,1,i)*psi_selectors_coef_transp_tc(1,2,i))
+    endif
   enddo
 END_PROVIDER
 

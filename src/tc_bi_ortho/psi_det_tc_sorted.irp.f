@@ -34,13 +34,19 @@ END_PROVIDER
    END_DOC
    integer                        :: i,j,k
    integer, allocatable           :: iorder(:)
+   print *, 'providing psi_det_sorted_tc'
    allocate ( iorder(N_det) )
+   print*,'before '
    do i=1,N_det
      psi_average_norm_contrib_sorted_tc(i) = -psi_average_norm_contrib_tc(i)
      iorder(i) = i
+     print*,i,iorder(i),psi_average_norm_contrib_sorted_tc(i)
    enddo
-!   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
+   call dsort(psi_average_norm_contrib_sorted_tc,iorder,N_det)
+   print*,'after '
    do i=1,N_det
+!     iorder(i) = i
+     print*,i,iorder(i),psi_average_norm_contrib_sorted_tc(i)
      do j=1,N_int
        psi_det_sorted_tc(j,1,i) = psi_det(j,1,iorder(i))
        psi_det_sorted_tc(j,2,i) = psi_det(j,2,iorder(i))
@@ -67,6 +73,23 @@ END_PROVIDER
    psi_det_sorted_tc_order(N_det+1:psi_det_size) = 0
 
    deallocate(iorder)
+  logical :: pouet
+ pouet  = .true.
+ do i = 1, N_det
+  if(psi_average_norm_contrib_sorted_tc(i) == 0.d0)then
+   pouet = .False.
+   exit
+  endif
+ enddo
+ 
+ if(pouet.and.N_det.ne.1)then
+ print*,'writing sorted'
+ do i = 1, N_det
+!   call debug_det(psi_det_sorted_tc(1,1,i),N_int)
+   print*,i,psi_average_norm_contrib_sorted_tc(i)
+   write(35,*)psi_det_sorted_tc(1,1,i),psi_det_sorted_tc(1,2,i)
+ enddo
+ endif
 
 END_PROVIDER
 
@@ -84,6 +107,21 @@ END_PROVIDER
     psi_r_coef_sorted_bi_ortho(i,1) = psi_r_coef_bi_ortho(psi_det_sorted_tc_order(i),1)
     psi_l_coef_sorted_bi_ortho(i,1) = psi_l_coef_bi_ortho(psi_det_sorted_tc_order(i),1)
    enddo
+   logical :: pouet
+   pouet  = .true.
+   do i = 1, N_det
+    if(psi_l_coef_sorted_bi_ortho(i,1) == 0.d0)then
+     pouet = .False.
+     exit
+    endif
+   enddo
+   if(pouet.and.N_det.ne.1)then
+   print*,'psi_r_coef_sorted_bi_ortho'
+    do i = 1, N_det
+     print*,psi_r_coef_bi_ortho(psi_det_sorted_tc_order(i),1)
+     write(42,'(F10.7)')dabs(psi_r_coef_sorted_bi_ortho(i,1)*psi_l_coef_sorted_bi_ortho(i,1))
+    enddo
+   endif
 
 END_PROVIDER
 
