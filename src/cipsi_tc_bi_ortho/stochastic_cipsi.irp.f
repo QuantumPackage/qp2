@@ -108,6 +108,7 @@ subroutine run_stochastic_cipsi
     ept2(N_iter-1) = E_tc + nuclear_repulsion + (pt2_data % pt2(1))/norm
     pt1(N_iter-1) = dsqrt(pt2_data % overlap(1,1))
     call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+!    stop
     if (qp_stop()) exit
   enddo
 !  print*,'data to extrapolate '

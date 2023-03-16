@@ -136,15 +136,15 @@ BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) 
 END_PROVIDER
 
 
-subroutine save_tc_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psilcoef,psircoef)
+subroutine save_tc_wavefunction_general(ndet,nstates,psidet,sze,dim_psicoef,psilcoef,psircoef)
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
   END_DOC
   use bitmasks
   include 'constants.include.F'
-  integer, intent(in)            :: ndet,nstates,dim_psicoef
-  integer(bit_kind), intent(in)  :: psidet(N_int,2,ndet)
+  integer, intent(in)            :: ndet,nstates,dim_psicoef,sze
+  integer(bit_kind), intent(in)  :: psidet(N_int,2,sze)
   double precision, intent(in)   :: psilcoef(dim_psicoef,nstates)
   double precision, intent(in)   :: psircoef(dim_psicoef,nstates)
   integer*8, allocatable         :: psi_det_save(:,:,:)
@@ -188,23 +188,17 @@ subroutine save_tc_wavefunction_general(ndet,nstates,psidet,dim_psicoef,psilcoef
     call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(psir_coef_save)
     deallocate (psil_coef_save,psir_coef_save)
 
-!    allocate (psi_coef_save(ndet_qp_edit,nstates))
-!    do k=1,nstates
-!      do i=1,ndet_qp_edit
-!        psi_coef_save(i,k) = psicoef(i,k)
-!      enddo
-!    enddo
-!
-!    call ezfio_set_determinants_psi_coef_qp_edit(psi_coef_save)
-!    deallocate (psi_coef_save)
-
     call write_int(6,ndet,'Saved determinantsi and psi_r/psi_l coef')
   endif
 end
 
 subroutine save_tc_bi_ortho_wavefunction
  implicit none
- call save_tc_wavefunction_general(N_det,N_states,psi_det,size(psi_l_coef_bi_ortho, 1),psi_l_coef_bi_ortho,psi_r_coef_bi_ortho)
+ if(save_sorted_tc_wf)then
+  call save_tc_wavefunction_general(N_det,N_states,psi_det_sorted_tc,size(psi_det_sorted_tc, 3),size(psi_l_coef_sorted_bi_ortho, 1),psi_l_coef_sorted_bi_ortho,psi_r_coef_sorted_bi_ortho)
+ else
+  call save_tc_wavefunction_general(N_det,N_states,psi_det,size(psi_det, 3), size(psi_l_coef_bi_ortho, 1),psi_l_coef_bi_ortho,psi_r_coef_bi_ortho)
+ endif
  call routine_save_right_bi_ortho
 end
 
@@ -214,9 +208,9 @@ subroutine routine_save_right_bi_ortho
  integer :: i
  allocate(coef_tmp(N_det, N_states))
  do i = 1, N_det
-  coef_tmp(i,1:N_states) = psi_r_coef_bi_ortho(i,1:N_states)
+  coef_tmp(i,1:N_states) = psi_r_coef_sorted_bi_ortho(i,1:N_states)
  enddo
- call save_wavefunction_general_unormalized(N_det,N_states,psi_det,size(coef_tmp,1),coef_tmp(1,1))
+ call save_wavefunction_general_unormalized(N_det,N_states,psi_det_sorted_tc,size(coef_tmp,1),coef_tmp(1,1))
 end                     
 
 subroutine routine_save_left_right_bi_ortho

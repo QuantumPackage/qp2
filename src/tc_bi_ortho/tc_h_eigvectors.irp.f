@@ -12,6 +12,25 @@
  enddo
  END_PROVIDER
 
+subroutine diagonalize_CI_tc
+  implicit none
+  BEGIN_DOC
+!  Replace the coefficients of the |CI| states by the coefficients of the
+!  eigenstates of the |CI| matrix.
+  END_DOC
+  integer                        :: i,j
+  do j=1,N_states
+    do i=1,N_det
+      psi_l_coef_bi_ortho(i,j) = leigvec_tc_bi_orth(i,j)
+      psi_r_coef_bi_ortho(i,j) = reigvec_tc_bi_orth(i,j)
+    enddo
+  enddo
+!  psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
+!  psi_s2(1:N_states) = CI_s2(1:N_states)
+
+  SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho
+end
+
 
 
  BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)]
@@ -133,10 +152,7 @@
   call bi_normalize(leigvec_tc_bi_orth,reigvec_tc_bi_orth,size(reigvec_tc_bi_orth,1),N_det,N_states)
    print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ',leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1)
    norm_ground_left_right_bi_orth = 0.d0
-   print*,'In diago'
    do j = 1, N_det
-    print*,j,dabs(leigvec_tc_bi_orth(j,1) * reigvec_tc_bi_orth(j,1))
-    call debug_det(psi_det(1,1,j),N_int)
     norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,1) * reigvec_tc_bi_orth(j,1)
    enddo
    print*,'norm l/r = ',norm_ground_left_right_bi_orth

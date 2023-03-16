@@ -125,7 +125,11 @@ subroutine merge_selection_buffers(b1, b2)
   enddo
   b2%det => detmp
   b2%val => val
-  b2%mini = min(b2%mini,b2%val(b2%N))
+!  if(selection_tc == 1)then
+!   b2%mini = max(b2%mini,b2%val(b2%N))
+!  else
+   b2%mini = min(b2%mini,b2%val(b2%N))
+!  endif
   b2%cur = nmwen
 end
 
@@ -157,7 +161,11 @@ subroutine sort_selection_buffer(b)
   end do
   deallocate(b%det,iorder)
   b%det => detmp
-  b%mini = min(b%mini,b%val(b%N))
+!  if(selection_tc == 1)then
+!   b%mini = max(b%mini,b%val(b%N))
+!  else
+   b%mini = min(b%mini,b%val(b%N))
+!  endif
   b%cur = nmwen
 end subroutine
 
