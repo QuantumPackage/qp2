@@ -134,7 +134,6 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   PROVIDE psi_det_hii selection_weight pseudo_sym
   PROVIDE n_act_orb n_inact_orb n_core_orb n_virt_orb n_del_orb seniority_max
   PROVIDE excitation_beta_max  excitation_alpha_max excitation_max
-  PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
   if (h0_type == 'CFG') then
     PROVIDE psi_configuration_hii det_to_configuration

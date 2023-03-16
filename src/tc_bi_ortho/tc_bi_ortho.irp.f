@@ -11,7 +11,7 @@ program tc_bi_ortho
   touch read_wf
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
   call routine_diag
-! call test
+  call save_tc_bi_ortho_wavefunction
 end
 
 subroutine test
@@ -19,18 +19,19 @@ subroutine test
  integer :: i,j 
  double precision :: hmono,htwoe,hthree,htot
  use bitmasks
-
- print*,'test'
-! call htilde_mu_mat_bi_ortho(psi_det(1,1,1), psi_det(1,1,2), N_int, hmono, htwoe, hthree, htot)
- call double_htilde_mu_mat_bi_ortho(N_int,psi_det(1,1,1), psi_det(1,1,2), hmono, htwoe, htot)
- print*,hmono, htwoe,  htot
+ print*,'reading the wave function '
+ do i = 1, N_det
+  call debug_det(psi_det(1,1,i),N_int)
+  print*,i,psi_l_coef_bi_ortho(i,1)*psi_r_coef_bi_ortho(i,1)
+  print*,i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
+ enddo
 
 end
 
 subroutine routine_diag
  implicit none
 ! provide eigval_right_tc_bi_orth
-  provide overlap_bi_ortho
+!  provide overlap_bi_ortho
 !  provide htilde_matrix_elmt_bi_ortho
  integer ::i,j
  print*,'eigval_right_tc_bi_orth = ',eigval_right_tc_bi_orth(1)
@@ -46,16 +47,7 @@ subroutine routine_diag
  print*,'e_corr_double_bi_orth   = ',e_corr_double_bi_orth
  print*,'Left/right eigenvectors'
  do i = 1,N_det
-  write(*,'(I5,X,(100(F12.7,X)))')i,leigvec_tc_bi_orth(i,1),reigvec_tc_bi_orth(i,1)
+  write(*,'(I5,X,(100(F12.7,X)))')i,leigvec_tc_bi_orth(i,1),reigvec_tc_bi_orth(i,1),leigvec_tc_bi_orth(i,1)*reigvec_tc_bi_orth(i,1)
  enddo
- do j=1,N_states
-   do i=1,N_det
-     psi_l_coef_bi_ortho(i,j) = leigvec_tc_bi_orth(i,j)
-     psi_r_coef_bi_ortho(i,j) = reigvec_tc_bi_orth(i,j)
-   enddo
- enddo
- SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho
- call save_tc_bi_ortho_wavefunction
-! call routine_save_left_right_bi_ortho
 end
 
