@@ -12,6 +12,25 @@
  enddo
  END_PROVIDER
 
+subroutine diagonalize_CI_tc
+  implicit none
+  BEGIN_DOC
+!  Replace the coefficients of the |CI| states by the coefficients of the
+!  eigenstates of the |CI| matrix.
+  END_DOC
+  integer                        :: i,j
+  do j=1,N_states
+    do i=1,N_det
+      psi_l_coef_bi_ortho(i,j) = leigvec_tc_bi_orth(i,j)
+      psi_r_coef_bi_ortho(i,j) = reigvec_tc_bi_orth(i,j)
+    enddo
+  enddo
+!  psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
+!  psi_s2(1:N_states) = CI_s2(1:N_states)
+
+  SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho
+end
+
 
 
  BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)]

@@ -52,7 +52,7 @@ subroutine pt2_tc_bi_ortho
 !  call routine_save_right
 
   if (N_det > N_det_max) then
-    psi_det(1:N_int,1:2,1:N_det) = psi_det_sorted_tc_gen(1:N_int,1:2,1:N_det)
+    psi_det(1:N_int,1:2,1:N_det) = psi_det_generators(1:N_int,1:2,1:N_det)
     psi_coef(1:N_det,1:N_states) = psi_coef_sorted_tc_gen(1:N_det,1:N_states)
     N_det = N_det_max
     soft_touch N_det psi_det psi_coef
