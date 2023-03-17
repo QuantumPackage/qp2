@@ -181,7 +181,6 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_tc_order psi_bilinear_matrix_order
   PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
   PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp_tc
-  PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
   PROVIDE banned_excitation
 
@@ -464,15 +463,15 @@ subroutine select_singles_and_doubles(i_generator, hole_mask,particle_mask, fock
 
       do i = 1, fullinteresting(0)
         do k = 1, N_int
-          fullminilist(k,1,i) = psi_det_sorted_tc(k,1,fullinteresting(i))
-          fullminilist(k,2,i) = psi_det_sorted_tc(k,2,fullinteresting(i))
+          fullminilist(k,1,i) = psi_selectors(k,1,fullinteresting(i))
+          fullminilist(k,2,i) = psi_selectors(k,2,fullinteresting(i))
         enddo
       enddo
 
       do i = 1, interesting(0)
         do k = 1, N_int
-          minilist(k,1,i) = psi_det_sorted_tc(k,1,interesting(i))
-          minilist(k,2,i) = psi_det_sorted_tc(k,2,interesting(i))
+          minilist(k,1,i) = psi_selectors(k,1,interesting(i))
+          minilist(k,2,i) = psi_selectors(k,2,interesting(i))
         enddo
       enddo
 
@@ -616,7 +615,6 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
 
   PROVIDE psi_selectors_coef_transp_tc psi_det_sorted_tc
-  PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
 
   mat   = 0d0
@@ -628,7 +626,10 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
     negMask(i,2) = not(mask(i,2))
   end do
 
+!  print*,'in selection '
   do i = 1, N_sel
+!    call debug_det(det(1,1,i),N_int)
+!    print*,i,dabs(psi_selectors_coef_transp_tc(1,2,i) * psi_selectors_coef_transp_tc(1,1,i))
     if(interesting(i) < 0) then
       stop 'prefetch interesting(i) and det(i)'
     endif
@@ -674,9 +675,6 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
           perMask(j,1) = iand(mask(j,1), not(det(j,1,i)))
           perMask(j,2) = iand(mask(j,2), not(det(j,2,i)))
         end do
-!        call get_d3_h  ( det(1,1,i), bannedOrb, banned, mat         , mask, p, sp, psi_selectors_coef_transp_tc (1, interesting(i)) )
-!        call get_d3_htc( det(1,1,i), bannedOrb, banned, mat_r, mat_l, mask, p, sp, psi_selectors_rcoef_bi_orth_transp(1, interesting(i)) &
-!                       , psi_selectors_lcoef_bi_orth_transp(1, interesting(i)) )
 
         call bitstring_to_list_in_selection(perMask(1,1), h(1,1), h(0,1), N_int)
         call bitstring_to_list_in_selection(perMask(1,2), h(1,2), h(0,2), N_int)
@@ -916,8 +914,29 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
            psi_h_alpha = mat_l(istate, p1, p2)
            alpha_h_psi = mat_r(istate, p1, p2)
           endif
-          coef(istate)   = alpha_h_psi / delta_E 
-          e_pert(istate) = coef(istate) * psi_h_alpha
+          val = 4.d0 * psi_h_alpha * alpha_h_psi 
+          tmp = dsqrt(delta_E * delta_E + val)
+!          if (delta_E < 0.d0) then
+!              tmp = -tmp
+!          endif
+          e_pert(istate) = 0.25 * val / delta_E
+!          e_pert(istate) = 0.5d0 * (tmp - delta_E)
+          if(dsqrt(dabs(tmp)).gt.1.d-4.and.dabs(alpha_h_psi).gt.1.d-4)then
+           coef(istate)   = e_pert(istate) / psi_h_alpha 
+          else
+           coef(istate)   = alpha_h_psi / delta_E 
+          endif
+
+          if(selection_tc == 1)then
+           if(e_pert(istate).lt.0.d0)then 
+            e_pert(istate)=0.d0
+           else 
+            e_pert(istate)=-e_pert(istate)
+           endif
+          else if(selection_tc == -1)then
+           if(e_pert(istate).gt.0.d0)e_pert(istate)=0.d0
+          endif
+          
 !         if(selection_tc     ==  1 )then
 !          if(e_pert(istate).lt.0.d0)then
 !           e_pert(istate) = 0.d0
@@ -930,7 +949,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         enddo
 
 
-      do_diag = sum(dabs(coef)) > 0.001d0 .and. N_states > 1
 
       do istate = 1, N_states
 

@@ -93,9 +93,9 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
   double precision, allocatable  :: u_t(:,:), v_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
   allocate(u_t(N_st,N_det),v_t(N_st,N_det))
-  provide mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e 
-  provide ref_tc_energy_tot fock_op_2_e_tc_closed_shell 
-  provide eff_2_e_from_3_e_ab eff_2_e_from_3_e_aa eff_2_e_from_3_e_bb
+!  provide mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e 
+!  provide ref_tc_energy_tot fock_op_2_e_tc_closed_shell 
+!  provide eff_2_e_from_3_e_ab eff_2_e_from_3_e_aa eff_2_e_from_3_e_bb
   do k=1,N_st
     call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
