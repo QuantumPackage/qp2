@@ -52,7 +52,7 @@ BEGIN_PROVIDER [ %(type)s, %(name)s %(size)s ]
     %(test_null_size)s
     call ezfio_has_%(ezfio_dir)s_%(ezfio_name)s(has)
     if (has) then
-      write(6,'(A)') '.. >>>>> [ IO READ: %(name)s ] <<<<< ..'
+!      write(6,'(A)') '.. >>>>> [ IO READ: %(name)s ] <<<<< ..'
       call ezfio_get_%(ezfio_dir)s_%(ezfio_name)s(%(name)s)
     else
       print *, '%(ezfio_dir)s/%(ezfio_name)s not found in EZFIO file'
@@ -117,7 +117,7 @@ END_PROVIDER
         output = self.output
         name = self.name
         l_write = ["",
-                   "  call write_time(%(output)s)",
+                   "!  call write_time(%(output)s)",
                    ""]
 
         self.write = "\n".join(l_write) % locals()
@@ -129,7 +129,7 @@ END_PROVIDER
                 write = self.write_correspondance[self.type]
 
                 l_write = ["",
-                          "  call write_time(%(output)s)",
+                          "!  call write_time(%(output)s)",
                           "  call %(write)s(%(output)s, %(name)s, &",
                           "     '%(name)s')",
                           ""]
