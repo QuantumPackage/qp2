@@ -70,8 +70,8 @@ subroutine run_cipsi
 
   do while (                                                         &
         (N_det < N_det_max) .and.                                    &
-        (sum(abs(pt2_data % pt2(1:N_states)) * state_average_weight(1:N_states)) > pt2_max) .and.               &
-        (sum(abs(pt2_data % variance(1:N_states)) * state_average_weight(1:N_states)) > variance_max) .and.     &
+        (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max) .and.               &
+        (maxval(abs(pt2_data % variance(1:N_states))) > variance_max) .and.     &
         (correlation_energy_ratio <= correlation_energy_ratio_max)   &
         )
       write(*,'(A)')  '--------------------------------------------------------------------------------'
@@ -108,6 +108,7 @@ subroutine run_cipsi
 
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
+    call print_mol_properties()
     N_iter += 1
 
     if (qp_stop()) exit
@@ -156,6 +157,7 @@ subroutine run_cipsi
       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
     call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
     call print_extrapolated_energy()
+    call print_mol_properties()
   endif
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)

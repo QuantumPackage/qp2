@@ -1,0 +1,66 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/AGPL-3.0",
+    "codeRepository": "https://github.com/QuantumPackage/qp2",
+    "dateCreated": "2014-04-01",
+    "datePublished": "2019-06-11",
+    "dateModified": "2020-02-21",
+    "downloadUrl": "https://github.com/QuantumPackage/qp2/releases/tag/2.1.2",
+    "issueTracker": "https://github.com/QuantumPackage/qp2/issues",
+    "name": "Quantum Package",
+    "version": "2.1.2",
+    "identifier": "https://doi.org/10.5281/zenodo.3677565",
+    "description": "Programming environment for wave function methods",
+    "applicationCategory": "Quantum Chemistry",
+    "funding": "ERC_863481, CoE_952165",
+    "developmentStatus": "active",
+    "referencePublication": "https://doi.org/10.1021/acs.jctc.9b00176",
+    "funder": {
+        "@type": "Organization",
+        "name": "CNRS"
+    },
+    "keywords": [
+        "selected configuration interaction",
+        "CIPSI"
+    ],
+    "programmingLanguage": [
+        "Fortran",
+        "IRPF90",
+        "OCaml",
+        "Python",
+        "C"
+    ],
+    "operatingSystem": [
+        "Linux"
+    ],
+    "softwareRequirements": [
+        "ZeroMQ"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0003-4955-7136",
+            "givenName": "Scemama",
+            "familyName": "Anthony",
+            "email": "scemama@irsamc.ups-tlse.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Laboratoire de chimie et physique quantiques, Toulouse, CNRS"
+            }
+        }
+    ],
+    "contributor": [
+        {
+            "@type": "Person",
+            "givenName": "Emmanuel",
+            "familyName": "Giner",
+            "email": "eginer@lct.jussieu.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Laboratoire de Chimie Theorique, Paris, CNRS"
+            }
+        }
+    ]
+}
+

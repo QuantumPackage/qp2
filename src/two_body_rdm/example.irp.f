@@ -17,6 +17,7 @@ subroutine routine_active_only
  double precision :: wee_ab_st_av, rdm_ab_st_av
  double precision :: wee_tot_st_av, rdm_tot_st_av,spin_trace
  double precision :: wee_aa_st_av_2,wee_ab_st_av_2,wee_bb_st_av_2,wee_tot_st_av_2,wee_tot_st_av_3
+ double precision :: accu_aa, accu_bb, accu_ab, accu_tot
 
  wee_ab  = 0.d0
  wee_bb  = 0.d0
@@ -64,14 +65,23 @@ subroutine routine_active_only
  do istate = 1, N_states
    !! PURE ACTIVE PART 
    !! 
+   accu_aa  = 0.d0
+   accu_bb  = 0.d0
+   accu_ab  = 0.d0
+   accu_tot = 0.d0
    do i = 1, n_act_orb
     iorb = list_act(i)
     do j = 1, n_act_orb
      jorb = list_act(j)
+     accu_bb += act_2_rdm_bb_mo(j,i,j,i,1)
+     accu_aa += act_2_rdm_aa_mo(j,i,j,i,1)
+     accu_ab += act_2_rdm_ab_mo(j,i,j,i,1)
+     accu_tot += act_2_rdm_spin_trace_mo(j,i,j,i,1)
      do k = 1, n_act_orb
       korb = list_act(k)
       do l = 1, n_act_orb
        lorb = list_act(l)
+       !                               1 2 1 2                                   2 1 2 1
        if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate)).gt.1.d-10)then
         print*,'Error in act_2_rdm_spin_trace_mo'
         print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l) - act_2_rdm_spin_trace_mo(j,i,l,k)).gt.1.d-10"
@@ -79,6 +89,7 @@ subroutine routine_active_only
         print*,act_2_rdm_spin_trace_mo(i,j,k,l,istate),act_2_rdm_spin_trace_mo(j,i,l,k,istate),dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(j,i,l,k,istate))
        endif
 
+      !                                1 2 1 2                                   1 2 1 2 
        if(dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate)).gt.1.d-10)then
         print*,'Error in act_2_rdm_spin_trace_mo'
         print*,"dabs(act_2_rdm_spin_trace_mo(i,j,k,l,istate) - act_2_rdm_spin_trace_mo(k,l,i,j,istate),istate).gt.1.d-10"
@@ -106,10 +117,10 @@ subroutine routine_active_only
        endif
  
 
-       wee_ab(istate)    += vijkl * rdmab
-       wee_aa(istate)    += vijkl * rdmaa
-       wee_bb(istate)    += vijkl * rdmbb
-       wee_tot(istate)    += vijkl * rdmtot
+       wee_ab(istate)    += 0.5d0 * vijkl * rdmab
+       wee_aa(istate)    += 0.5d0 * vijkl * rdmaa
+       wee_bb(istate)    += 0.5d0 * vijkl * rdmbb
+       wee_tot(istate)   += 0.5d0 * vijkl * rdmtot
 
       enddo
      enddo
@@ -131,6 +142,15 @@ subroutine routine_active_only
    print*,'wee_tot                 = ',wee_tot(istate)
    print*,'Full energy '
    print*,'psi_energy_two_e(istate)= ',psi_energy_two_e(istate)
+   print*,'--------------------------'
+   print*,'accu_aa       = ',accu_aa
+   print*,'N_a (N_a-1)   = ', elec_alpha_num*(elec_alpha_num-1)
+   print*,'accu_bb       = ',accu_bb
+   print*,'2 N_b (N_b-1) = ', elec_beta_num*(elec_beta_num-1)*2
+   print*,'accu_ab       = ',accu_ab
+   print*,'N_a N_b       = ', elec_beta_num*elec_alpha_num
+   print*,'accu_tot      = ',accu_tot
+   print*,'Ne(Ne-1)      = ',(elec_num-1)*elec_num 
   enddo
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
@@ -172,10 +192,10 @@ subroutine routine_active_only
       print*,spin_trace,rdm_tot_st_av,dabs(spin_trace - rdm_tot_st_av)
      endif
 
-     wee_aa_st_av += vijkl * rdm_aa_st_av
-     wee_bb_st_av += vijkl * rdm_bb_st_av
-     wee_ab_st_av += vijkl * rdm_ab_st_av
-     wee_tot_st_av += vijkl * rdm_tot_st_av
+     wee_aa_st_av  += 0.5d0 * vijkl * rdm_aa_st_av
+     wee_bb_st_av  += 0.5d0 * vijkl * rdm_bb_st_av
+     wee_ab_st_av  += 0.5d0 * vijkl * rdm_ab_st_av
+     wee_tot_st_av += 0.5d0 * vijkl * rdm_tot_st_av
     enddo
    enddo
   enddo
@@ -259,10 +279,10 @@ subroutine routine_full_mos
        rdmbb  =  full_occ_2_rdm_bb_mo(l,k,j,i,istate)
        rdmtot =  full_occ_2_rdm_spin_trace_mo(l,k,j,i,istate)
 
-       wee_ab(istate) += vijkl * rdmab
-       wee_aa(istate) += vijkl * rdmaa
-       wee_bb(istate) += vijkl * rdmbb
-       wee_tot(istate)+= vijkl * rdmtot
+       wee_ab(istate) += 0.5d0 * vijkl * rdmab
+       wee_aa(istate) += 0.5d0 * vijkl * rdmaa
+       wee_bb(istate) += 0.5d0 * vijkl * rdmbb
+       wee_tot(istate)+= 0.5d0 * vijkl * rdmtot
       enddo
      enddo
      aa_norm(istate) += full_occ_2_rdm_aa_mo(j,i,j,i,istate)
@@ -290,18 +310,19 @@ subroutine routine_full_mos
    print*,'Normalization of two-rdms '
    print*,''
    print*,'aa_norm(istate)         = ',aa_norm(istate)
-   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(1) * (elec_num_tab(1) - 1)/2
+   print*,'N_alpha(N_alpha-1)      = ',elec_num_tab(1) * (elec_num_tab(1) - 1)
    print*,''
    print*,'bb_norm(istate)         = ',bb_norm(istate)
-   print*,'N_alpha(N_alpha-1)/2    = ',elec_num_tab(2) * (elec_num_tab(2) - 1)/2
+   print*,'N_alpha(N_alpha-1)      = ',elec_num_tab(2) * (elec_num_tab(2) - 1)
    print*,''
    print*,'ab_norm(istate)         = ',ab_norm(istate)
-   print*,'N_alpha * N_beta        = ',elec_num_tab(1) * elec_num_tab(2)
+   print*,'N_alpha * N_beta *2     = ',elec_num_tab(1) * elec_num_tab(2) * 2
    print*,''
    print*,'tot_norm(istate)        = ',tot_norm(istate)
-   print*,'N(N-1)/2                = ',elec_num*(elec_num - 1)/2
+   print*,'N(N-1)                  = ',elec_num*(elec_num - 1)
   enddo
 
+! return 
  wee_aa_st_av  = 0.d0
  wee_bb_st_av  = 0.d0
  wee_ab_st_av  = 0.d0
@@ -321,10 +342,10 @@ subroutine routine_full_mos
      rdm_ab_st_av  = state_av_full_occ_2_rdm_ab_mo(l,k,j,i)
      rdm_tot_st_av = state_av_full_occ_2_rdm_spin_trace_mo(l,k,j,i)
 
-     wee_aa_st_av  += vijkl * rdm_aa_st_av
-     wee_bb_st_av  += vijkl * rdm_bb_st_av
-     wee_ab_st_av  += vijkl * rdm_ab_st_av
-     wee_tot_st_av += vijkl * rdm_tot_st_av
+     wee_aa_st_av  += 0.5d0 * vijkl * rdm_aa_st_av
+     wee_bb_st_av  += 0.5d0 * vijkl * rdm_bb_st_av
+     wee_ab_st_av  += 0.5d0 * vijkl * rdm_ab_st_av
+     wee_tot_st_av += 0.5d0 * vijkl * rdm_tot_st_av
     enddo
    enddo
   enddo
@@ -334,17 +355,12 @@ subroutine routine_full_mos
  print*,''
  print*,'STATE AVERAGE ENERGY '
    print*,'wee_aa_st_av            = ',wee_aa_st_av
-   print*,'wee_aa_st_av_2          = ',wee_aa_st_av_2
    print*,'wee_bb_st_av            = ',wee_bb_st_av
-   print*,'wee_bb_st_av_2          = ',wee_bb_st_av_2
    print*,'wee_ab_st_av            = ',wee_ab_st_av
-   print*,'wee_ab_st_av_2          = ',wee_ab_st_av_2
    print*,'Sum of components       = ',wee_aa_st_av   + wee_bb_st_av   + wee_ab_st_av
-   print*,'Sum of components_2     = ',wee_aa_st_av_2 + wee_bb_st_av_2 + wee_ab_st_av_2
    print*,''
    print*,'Full energy '
    print*,'wee_tot_st_av           = ',wee_tot_st_av
-   print*,'wee_tot_st_av_2         = ',wee_tot_st_av_2
    print*,'wee_tot_st_av_3         = ',wee_tot_st_av_3
 
 end

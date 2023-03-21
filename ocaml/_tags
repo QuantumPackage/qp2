@@ -1,4 +1,4 @@
-true: package(cryptokit,zarith,zmq,str,sexplib,ppx_sexp_conv,ppx_deriving,getopt)
+true: package(zarith,zmq,str,sexplib,ppx_sexp_conv,ppx_deriving,getopt)
 true: thread
 false: profile
 <*byte>   : linkdep(c_bindings.o), custom

@@ -142,7 +142,7 @@ subroutine ao_idx2_sq(i,j,ij)
     ij=i*i
   endif
 end
-  
+
 subroutine idx2_tri_int(i,j,ij)
   implicit none
   integer, intent(in)  :: i,j
@@ -152,7 +152,7 @@ subroutine idx2_tri_int(i,j,ij)
   q = min(i,j)
   ij = q+ishft(p*p-p,-1)
 end
-  
+
 subroutine ao_idx2_tri_key(i,j,ij)
   use map_module
   implicit none
@@ -163,8 +163,8 @@ subroutine ao_idx2_tri_key(i,j,ij)
   q = min(i,j)
   ij = q+ishft(p*p-p,-1)
 end
-  
-subroutine two_e_integrals_index_2fold(i,j,k,l,i1)                                           
+
+subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
   use map_module
   implicit none
   integer, intent(in)            :: i,j,k,l
@@ -176,7 +176,7 @@ subroutine two_e_integrals_index_2fold(i,j,k,l,i1)
   call ao_idx2_tri_key(ik,jl,i1)
 end
 
-subroutine ao_idx2_sq_rev(i,k,ik)                                                                
+subroutine ao_idx2_sq_rev(i,k,ik)
   BEGIN_DOC
   ! reverse square compound index
   END_DOC
@@ -321,14 +321,15 @@ BEGIN_PROVIDER [ double precision, ao_integrals_cache, (0:64*64*64*64) ]
   !$OMP END PARALLEL DO
 END_PROVIDER
 
+! ---
 
-double precision function get_ao_two_e_integral(i,j,k,l,map) result(result)
+double precision function get_ao_two_e_integral(i, j, k, l, map) result(result)
   use map_module
   implicit none
   BEGIN_DOC
-  ! Gets one AO bi-electronic integral from the AO map
+  ! Gets one AO bi-electronic integral from the AO map in PHYSICIST NOTATION
   !
-  ! i,j,k,l in physicist notation <ij|kl>
+  ! <1:k, 2:l |1:i, 2:j> 
   END_DOC
   integer, intent(in)            :: i,j,k,l
   integer(key_kind)              :: idx
@@ -398,7 +399,7 @@ BEGIN_PROVIDER [ complex*16, ao_integrals_cache_periodic, (0:64*64*64*64) ]
            tmp_im = 0.d0
            integral = dcmplx(tmp_re,tmp_im)
          endif
-         
+
          ii = l-ao_integrals_cache_min
          ii = ior( shiftl(ii,6), k-ao_integrals_cache_min)
          ii = ior( shiftl(ii,6), j-ao_integrals_cache_min)
@@ -473,7 +474,7 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
-  ! physicist convention : <ij|kl> 
+  ! physicist convention : <ij|kl>
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze
@@ -502,7 +503,7 @@ subroutine get_ao_two_e_integrals_periodic(j,k,l,sze,out_val)
   BEGIN_DOC
   ! Gets multiple AO bi-electronic integral from the AO map .
   ! All i are retrieved for j,k,l fixed.
-  ! physicist convention : <ij|kl> 
+  ! physicist convention : <ij|kl>
   END_DOC
   implicit none
   integer, intent(in)            :: j,k,l, sze

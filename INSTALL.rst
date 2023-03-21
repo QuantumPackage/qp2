@@ -316,7 +316,7 @@ OCaml
 
   .. code:: bash
 
-      opam install ocamlbuild cryptokit zmq sexplib ppx_sexp_conv ppx_deriving getopt
+      opam install ocamlbuild zmq sexplib ppx_sexp_conv ppx_deriving getopt
 
 
 Docopt

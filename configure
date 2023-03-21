@@ -19,19 +19,9 @@ git submodule update
 # Update ARM or x86 dependencies
 ARCHITECTURE=$(uname -m)
 cd ${QP_ROOT}/external/qp2-dependencies
+git checkout master
+git pull
 echo "Architecture: $ARCHITECTURE"
-case $ARCHITECTURE in
-  aarch64)
-    git checkout arm64
-    ;;
-  x86_64) 
-    git checkout x86
-    ;;
-  *)
-    echo "Unknown architecture. Using x86_64."
-    git checkout x86
-    ;;
-esac
 cd ${QP_ROOT}
 
 
@@ -118,7 +108,7 @@ PACKAGES=$(echo $PACKAGES | xargs)
 
 echo "export QP_ROOT=\"$QP_ROOT\"" > ${QP_ROOT}/etc/00.qp_root.rc
 
-source quantum_package.rc
+source ${QP_ROOT}/quantum_package.rc
 
 
 
@@ -209,7 +199,7 @@ for PACKAGE in ${PACKAGES} ; do
 
             execute << EOF
               rm -f "\${QP_ROOT}"/bin/ninja
-              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/ninja.tar.gz 
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
               mv ninja "\${QP_ROOT}"/bin/
 EOF
 
@@ -256,7 +246,7 @@ EOF
             source "${QP_ROOT}"/quantum_package.rc
             rm -rf "${QP_ROOT}"/external/opampack
             cd "${QP_ROOT}"/external/
-            tar --gunzip --extract --file qp2-dependencies/opampack.tar.gz
+            tar --gunzip --extract --file qp2-dependencies/${ARCHITECTURE}/opampack.tar.gz
             cd "${QP_ROOT}"/external/opampack
             ./install.sh
             export OPAMROOT="${QP_ROOT}"/external/opampack/opamroot
@@ -268,7 +258,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file qp2-dependencies/bse-v0.8.11.tar.gz
-              pip install -e basis_set_exchange-*
+              python3 -m pip install -e basis_set_exchange-*
 EOF
 
     elif [[ ${PACKAGE} = zlib ]] ; then
@@ -303,8 +293,8 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar -zxf qp2-dependencies/bats-v1.1.0.tar.gz
-              ( cd bats-core-1.1.0/ ; ./install.sh \${QP_ROOT})
+              tar -zxf qp2-dependencies/bats-v1.7.0.tar.gz
+              ( cd bats-core-1.7.0/ ; ./install.sh \${QP_ROOT})
 EOF
 
     else
@@ -315,7 +305,7 @@ EOF
 
 done
 
-source quantum_package.rc
+source ${QP_ROOT}/quantum_package.rc
 
 NINJA=$(find_exe ninja)
 if [[ ${NINJA} = $(not_found) ]] ; then
@@ -416,7 +406,7 @@ else
       echo ""
       echo "${QP_ROOT}/build.ninja does not exist,"
       echo "you need to specify the COMPILATION configuration file."
-      echo "See  ./configure --help  for more details."
+      echo "See  ./configure -h  for more details."
       echo ""
 fi
 
