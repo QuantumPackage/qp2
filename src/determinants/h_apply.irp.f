@@ -69,9 +69,12 @@ subroutine resize_H_apply_buffer(new_size,iproc)
   END_DOC
   PROVIDE H_apply_buffer_allocated
 
-  ASSERT (new_size > 0)
-  ASSERT (iproc >= 0)
-  ASSERT (iproc < nproc)
+
+  if (N_det < 0) call abort(irp_here//': N_det < 0')
+  if (N_int <= 0) call abort(irp_here//': N_int <= 0')
+  if (new_size <= 0) call abort(irp_here//': new_size <= 0')
+  if (iproc < 0) call abort(irp_here//': iproc < 0')
+  if (iproc >= nproc) call abort(irp_here//': iproc >= nproc')
 
   allocate ( buffer_det(N_int,2,new_size),                           &
       buffer_coef(new_size,N_states),                                &
@@ -126,31 +129,34 @@ subroutine copy_H_apply_buffer_to_wf
 
 
   ASSERT (N_int > 0)
-  ASSERT (N_det > 0)
+  ASSERT (N_det >= 0)
 
-  allocate ( buffer_det(N_int,2,N_det), buffer_coef(N_det,N_states) )
+  N_det_old = N_det
+  if (N_det > 0) then
+     allocate ( buffer_det(N_int,2,N_det), buffer_coef(N_det,N_states) )
 
-  ! Backup determinants
-  j=0
-  do i=1,N_det
-    if (pruned(i)) cycle  ! Pruned determinants
-    j+=1
-    ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
-    ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num)
-    buffer_det(:,:,j) = psi_det(:,:,i)
-  enddo
-  N_det_old = j
+     ! Backup determinants
+     j=0
+     do i=1,N_det
+       if (pruned(i)) cycle  ! Pruned determinants
+       j+=1
+       ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
+       ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num)
+       buffer_det(:,:,j) = psi_det(:,:,i)
+     enddo
+     N_det_old = j
 
-  ! Backup coefficients
-  do k=1,N_states
-    j=0
-    do i=1,N_det
-      if (pruned(i)) cycle  ! Pruned determinants
-      j += 1
-      buffer_coef(j,k) = psi_coef(i,k)
-    enddo
-    ASSERT ( j == N_det_old )
-  enddo
+     ! Backup coefficients
+     do k=1,N_states
+       j=0
+       do i=1,N_det
+         if (pruned(i)) cycle  ! Pruned determinants
+         j += 1
+         buffer_coef(j,k) = psi_coef(i,k)
+       enddo
+       ASSERT ( j == N_det_old )
+     enddo
+  endif
 
   ! Update N_det
   N_det = N_det_old
@@ -164,17 +170,19 @@ subroutine copy_H_apply_buffer_to_wf
     TOUCH psi_det_size
   endif
 
-  ! Restore backup in resized array
-  do i=1,N_det_old
-    psi_det(:,:,i) = buffer_det(:,:,i)
-    ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
-    ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num )
-  enddo
-  do k=1,N_states
+  if (N_det_old > 0) then
+    ! Restore backup in resized array
     do i=1,N_det_old
-      psi_coef(i,k) = buffer_coef(i,k)
+      psi_det(:,:,i) = buffer_det(:,:,i)
+      ASSERT (sum(popcnt(psi_det(:,1,i))) == elec_alpha_num)
+      ASSERT (sum(popcnt(psi_det(:,2,i))) == elec_beta_num )
     enddo
-  enddo
+    do k=1,N_states
+      do i=1,N_det_old
+        psi_coef(i,k) = buffer_coef(i,k)
+      enddo
+    enddo
+  endif
 
   ! Copy new buffers
 
@@ -339,3 +347,33 @@ subroutine fill_H_apply_buffer_no_selection(n_selected,det_buffer,Nint,iproc)
   call omp_unset_lock(H_apply_buffer_lock(1,iproc))
 end
 
+
+subroutine replace_wf(N_det_new, LDA, psi_coef_new, psi_det_new)
+  use omp_lib
+  implicit none
+  BEGIN_DOC
+! Replaces the wave function.
+! After calling this subroutine, N_det, psi_det and psi_coef need to be touched
+  END_DOC
+  integer, intent(in)            :: N_det_new, LDA
+  double precision, intent(in)   :: psi_coef_new(LDA,N_states)
+  integer(bit_kind), intent(in)  :: psi_det_new(N_int,2,N_det_new)
+
+  integer                        :: i,j
+
+  PROVIDE H_apply_buffer_allocated
+
+  if (N_det_new <= 0) call abort(irp_here//': N_det_new <= 0')
+  if (N_int <= 0) call abort(irp_here//': N_int <= 0')
+  if (LDA < N_det_new) call abort(irp_here//': LDA < N_det_new')
+
+  do j=0,nproc-1
+    H_apply_buffer(j)%N_det = 0
+  enddo
+  N_det = 0
+  SOFT_TOUCH N_det
+  call fill_H_apply_buffer_no_selection(N_det_new,psi_det_new,N_int,0)
+  call copy_h_apply_buffer_to_wf
+  psi_coef(1:N_det_new,1:N_states) = psi_coef_new(1:N_det_new,1:N_states)
+
+end
