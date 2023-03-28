@@ -5,7 +5,7 @@ arg = sys.argv
 #f = open('data_dft','r')
 n = int(sys.argv[1])
 r = float(sys.argv[2])
-f = open('H'+str(n)+'_'+str(r),'w')
+f = open('H'+str(n)+'_'+str(r)+'.xyz','w')
 string=str(n)+"\n"
 f.write(string)
 string="\n"
