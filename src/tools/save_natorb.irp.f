@@ -12,6 +12,7 @@ program save_natorb
 ! matrices of each state with the corresponding
 ! :option:`determinants state_average_weight`
   END_DOC
+  PROVIDE nucl_coord
   read_wf = .True.
   touch read_wf
   call save_natural_mos
