@@ -57,6 +57,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
     PROVIDE ao_tc_sym_two_e_pot_in_map
 
+    !!! TODO :: OPENMP
     do j = 1, ao_num
       do l = 1, ao_num
         do i = 1, ao_num
