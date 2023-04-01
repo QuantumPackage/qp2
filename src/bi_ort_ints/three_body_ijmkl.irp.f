@@ -26,7 +26,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_direct_bi_ort, (mo_num, mo_num,
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_direct_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -75,7 +75,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_cycle_1_bi_ort, (mo_num, mo_num
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_cycle_1_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -124,7 +124,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_cycle_2_bi_ort, (mo_num, mo_num
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_cycle_2_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -173,7 +173,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch23_bi_ort, (mo_num, mo_num,
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_exch23_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -222,7 +222,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch13_bi_ort, (mo_num, mo_num,
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_exch13_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -271,7 +271,7 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort, (mo_num, mo_num,
  !$OMP DEFAULT (NONE)               &
  !$OMP PRIVATE (i,j,k,m,l,integral) & 
  !$OMP SHARED (mo_num,three_e_5_idx_exch12_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+ !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
   do i = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num

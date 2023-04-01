@@ -21,25 +21,22 @@ program test_ints
   touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
 
 !! OK 
-!call routine_int2_u_grad1u_j1b2 
-!! OK
-!call routine_v_ij_erf_rk_cst_mu_j1b
-!! OK 
+! call routine_int2_u_grad1u_j1b2 
+! OK
+! call routine_v_ij_erf_rk_cst_mu_j1b
+! OK 
 ! call routine_x_v_ij_erf_rk_cst_mu_j1b
-!! OK
-! call routine_v_ij_u_cst_mu_j1b
-
-!! OK
-!call routine_int2_u2_j1b2
-
-!! OK
-!call routine_int2_u_grad1u_x_j1b2
-
-!! OK 
+! OK
+! call routine_int2_u2_j1b2
+! OK
+! call routine_int2_u_grad1u_x_j1b2
+! OK 
 ! call routine_int2_grad1u2_grad2u2_j1b2
 ! call routine_int2_u_grad1u_j1b2
 ! call test_total_grad_lapl
 ! call test_total_grad_square
+! call test_int2_grad1_u12_ao_test
+! call routine_v_ij_u_cst_mu_j1b_test
 ! call test_ao_tc_int_chemist
 ! call test_grid_points_ao
 ! call test_tc_scf
@@ -53,12 +50,12 @@ program test_ints
 
   !call test_two_e_tc_non_hermit_integral()
 
-  call test_tc_grad_square_ao_test()
+!  call test_tc_grad_square_ao_test()
 
-  PROVIDE TC_HF_energy VARTC_HF_energy
-  print *, '    TC_HF_energy = ',    TC_HF_energy
-  print *, ' VARTC_HF_energy = ', VARTC_HF_energy
-
+!!PROVIDE TC_HF_energy VARTC_HF_energy
+!!print *, '    TC_HF_energy = ',    TC_HF_energy
+!!print *, ' VARTC_HF_energy = ', VARTC_HF_energy
+ call test_old_ints
 end
 
 ! ---
@@ -157,6 +154,9 @@ subroutine routine_int2_u_grad1u_j1b2
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_int2_u_grad1u_j1b2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -169,20 +169,6 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
-! print*,'ao_overlap_abs = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_overlap_abs(i,:)
-! enddo
-! print*,'center = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_center(2,i,:)
-! enddo
-! print*,'sigma = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_sigma(i,:)
-! enddo
-
-
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
  allocate(array_ref(ao_num, ao_num, ao_num, ao_num))
@@ -215,6 +201,9 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_v_ij_erf_rk_cst_mu_j1b'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -228,20 +217,6 @@ subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
  integer :: i,j,ipoint,k,l,m
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
-! print*,'ao_overlap_abs = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_overlap_abs(i,:)
-! enddo
-! print*,'center = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_center(2,i,:)
-! enddo
-! print*,'sigma = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_sigma(i,:)
-! enddo
-
-
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
  allocate(array_ref(ao_num, ao_num, ao_num, ao_num))
@@ -276,6 +251,10 @@ subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
     enddo
    enddo
   enddo
+
+ print*,'******'
+ print*,'******'
+ print*,'routine_x_v_ij_erf_rk_cst_mu_j1b'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -290,20 +269,6 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
-! print*,'ao_overlap_abs = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_overlap_abs(i,:)
-! enddo
-! print*,'center = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_center(2,i,:)
-! enddo
-! print*,'sigma = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_sigma(i,:)
-! enddo
-
-
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
  allocate(array_ref(ao_num, ao_num, ao_num, ao_num))
@@ -336,6 +301,9 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_v_ij_u_cst_mu_j1b_test'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -427,19 +395,6 @@ subroutine routine_int2_u2_j1b2
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
-! print*,'ao_overlap_abs = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_overlap_abs(i,:)
-! enddo
-! print*,'center = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_center(2,i,:)
-! enddo
-! print*,'sigma = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_sigma(i,:)
-! enddo
-
 
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
@@ -473,6 +428,9 @@ subroutine routine_int2_u2_j1b2
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_int2_u2_j1b2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -486,19 +444,6 @@ subroutine routine_int2_u_grad1u_x_j1b2
  integer :: i,j,ipoint,k,l,m
  double precision :: weight,accu_relat, accu_abs, contrib
  double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
-! print*,'ao_overlap_abs = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_overlap_abs(i,:)
-! enddo
-! print*,'center = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_center(2,i,:)
-! enddo
-! print*,'sigma = '
-! do i = 1, ao_num
-!   write(*,'(100(F10.5,X))')ao_prod_sigma(i,:)
-! enddo
-
 
  allocate(array(ao_num, ao_num, ao_num, ao_num))
  array = 0.d0
@@ -534,6 +479,9 @@ subroutine routine_int2_u_grad1u_x_j1b2
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_int2_u_grad1u_x_j1b2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -579,6 +527,9 @@ subroutine routine_v_ij_u_cst_mu_j1b
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'routine_v_ij_u_cst_mu_j1b'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -742,6 +693,9 @@ subroutine test_total_grad_lapl
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,' test_total_grad_lapl'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -767,6 +721,9 @@ subroutine test_total_grad_square
     enddo
    enddo
   enddo
+ print*,'******'
+ print*,'******'
+ print*,'test_total_grad_square'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -1057,3 +1014,86 @@ end
 ! ---
 
 
+
+subroutine test_old_ints
+ implicit none
+ integer :: i,j,k,l
+ double precision :: old, new, contrib, get_ao_tc_sym_two_e_pot
+ double precision :: integral_sym , integral_nsym,accu
+    PROVIDE ao_tc_sym_two_e_pot_in_map
+ accu = 0.d0
+ do j = 1, ao_num
+  do l= 1, ao_num
+   do i = 1, ao_num
+    do k = 1, ao_num
+!      integral_sym  = get_ao_tc_sym_two_e_pot(i, j, k, l, ao_tc_sym_two_e_pot_map)
+      ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
+!      integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
+!      old = integral_sym + integral_nsym 
+!      old = tc_grad_square_ao(k,i,l,j) + tc_grad_and_lapl_ao(k,i,l,j) + ao_two_e_coul(k,i,l,j)
+      new = ao_tc_int_chemist_test(k,i,l,j)
+      old = ao_tc_int_chemist_no_cycle(k,i,l,j)
+      contrib = dabs(old - new)
+      if(contrib.gt.1.d-6)then
+       print*,'problem !!'
+       print*,i,j,k,l
+       print*,old, new, contrib
+      endif
+       accu += contrib
+    enddo
+   enddo
+  enddo
+ enddo
+ print*,'******'
+ print*,'******'
+ print*,'in test_old_ints'
+ print*,'accu = ',accu/dble(ao_num**4)
+
+end
+
+subroutine test_int2_grad1_u12_ao_test
+ implicit none
+ integer :: i,j,ipoint,m,k,l
+ double precision :: weight,accu_relat, accu_abs, contrib
+ double precision, allocatable :: array(:,:,:,:), array_ref(:,:,:,:)
+ allocate(array(ao_num, ao_num, ao_num, ao_num))
+ array = 0.d0
+ allocate(array_ref(ao_num, ao_num, ao_num, ao_num))
+ array_ref = 0.d0
+ do m = 1, 3
+  do ipoint = 1, n_points_final_grid
+   weight = final_weight_at_r_vector(ipoint)
+   do k = 1, ao_num
+    do l = 1, ao_num
+     do i = 1, ao_num
+      do j = 1, ao_num
+       array(j,i,l,k)     += int2_grad1_u12_ao_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array_ref(j,i,l,k) += int2_grad1_u12_ao(j,i,ipoint,m)      * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+ enddo
+
+ accu_relat = 0.d0
+ accu_abs   = 0.d0
+  do k = 1, ao_num
+   do l = 1, ao_num
+    do i = 1, ao_num
+     do j = 1, ao_num
+      contrib = dabs(array(j,i,l,k) - array_ref(j,i,l,k))
+      accu_abs += contrib
+      if(dabs(array_ref(j,i,l,k)).gt.1.d-10)then
+       accu_relat += contrib/dabs(array_ref(j,i,l,k))
+      endif
+     enddo
+    enddo
+   enddo
+  enddo
+ print*,'******'
+ print*,'******'
+ print*,'test_int2_grad1_u12_ao_test'
+ print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
+ print*,'accu_relat = ',accu_relat/dble(ao_num)**4
+end
