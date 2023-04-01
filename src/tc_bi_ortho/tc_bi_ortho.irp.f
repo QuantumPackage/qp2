@@ -69,7 +69,7 @@ subroutine routine_diag()
 
     print*,''
     print*,'******************************************************'
-    print*,'Excitation energies (au)                     (eV)'
+    print*,'TC Excitation energies (au)                     (eV)'
     do i = 2, N_states
       dE = eigval_right_tc_bi_orth(i) - eigval_right_tc_bi_orth(1)
       print*, i, dE, dE/0.0367502d0
