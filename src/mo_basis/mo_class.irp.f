@@ -1,8 +1,3 @@
-! DO NOT MODIFY BY HAND
-! Created by $QP_ROOT/scripts/ezfio_interface/ei_handler.py
-! from file /home/eginer/programs/qp2/src/mo_basis/EZFIO.cfg
-
-
 BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
   implicit none
   BEGIN_DOC
@@ -34,7 +29,5 @@ BEGIN_PROVIDER [ character*(32), mo_class , (mo_num) ]
       stop 'Unable to read mo_class with MPI'
     endif
   IRP_ENDIF
-
-  call write_time(6)
 
 END_PROVIDER

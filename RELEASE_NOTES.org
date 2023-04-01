@@ -9,15 +9,23 @@
   - Configure adapted for ARM
   - Added many types of integrals
   - Accelerated four-index transformation
-
-*** TODO: take from dev
-  - [ ] Added GTOs with complex exponent
-  - Updated version of f77-zmq
   - Added transcorrelated SCF
   - Added transcorrelated CIPSI
+  - Added CCSD and CCSD(T)
+  - Added MO localization
+  - Changed coupling parameters for ROHF
+  - General Davidson algorithm
+  - Accelerated restore_symmetry
+  - Point charges in the Hamiltonian
+  - Removed cryptokit dependency in OCaml
+  - Using now standard convention in RDM
+  - Added molecular properties
+  - [ ] Added GTOs with complex exponent
+
+*** TODO: take from dev
+  - Updated version of f77-zmq
   - Started to introduce shells in AOs
   - Added ECMD UEG functional
-  - General Davidson algorithm
 
 * Version 2.2
 
