@@ -44,7 +44,7 @@ end
   END_DOC
 
   implicit none
-  integer                       :: i, idx_dress, j, istate
+  integer                       :: i, idx_dress, j, istate, k
   logical                       :: converged, dagger
   integer                       :: n_real_tc_bi_orth_eigval_right,igood_r,igood_l
   integer,          allocatable :: iorder(:)
@@ -168,13 +168,39 @@ end
 
     deallocate(H_jj)
    endif
+
   call bi_normalize(leigvec_tc_bi_orth,reigvec_tc_bi_orth,size(reigvec_tc_bi_orth,1),N_det,N_states)
-   print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ',leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1)
-   norm_ground_left_right_bi_orth = 0.d0
-   do j = 1, N_det
-    norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,1) * reigvec_tc_bi_orth(j,1)
-   enddo
-   print*,'norm l/r = ',norm_ground_left_right_bi_orth
+  print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ',leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1)
+  do i = 1, N_states
+    norm_ground_left_right_bi_orth = 0.d0
+    do j = 1, N_det
+      norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,i) * reigvec_tc_bi_orth(j,i)
+    enddo
+    print*,'norm l/r = ',norm_ground_left_right_bi_orth
+  enddo
+
+  ! ---
+
+  double precision, allocatable :: buffer(:,:)
+  allocate(buffer(N_det,N_states))
+
+  do k = 1, N_states
+    do i = 1, N_det
+      buffer(i,k) = leigvec_tc_bi_orth(i,k)
+    enddo
+  enddo
+  call ezfio_set_tc_bi_ortho_psi_l_coef_bi_ortho(buffer)
+
+  do k = 1, N_states
+    do i = 1, N_det
+      buffer(i,k) = reigvec_tc_bi_orth(i,k)
+    enddo
+  enddo
+  call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
+
+  deallocate(buffer)
+
+  ! ---
 
 END_PROVIDER 
 

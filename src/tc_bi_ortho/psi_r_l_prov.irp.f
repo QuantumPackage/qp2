@@ -136,7 +136,7 @@ BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) 
 END_PROVIDER
 
 
-subroutine save_tc_wavefunction_general(ndet,nstates,psidet,sze,dim_psicoef,psilcoef,psircoef)
+subroutine save_tc_wavefunction_general(ndet, nstates, psidet, sze, dim_psicoef, psilcoef, psircoef)
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
@@ -195,9 +195,16 @@ end
 subroutine save_tc_bi_ortho_wavefunction
  implicit none
  if(save_sorted_tc_wf)then
-  call save_tc_wavefunction_general(N_det,N_states,psi_det_sorted_tc,size(psi_det_sorted_tc, 3),size(psi_l_coef_sorted_bi_ortho, 1),psi_l_coef_sorted_bi_ortho,psi_r_coef_sorted_bi_ortho)
+  call save_tc_wavefunction_general( N_det, N_states, psi_det_sorted_tc, N_det &
+                                   , size(psi_l_coef_sorted_bi_ortho, 1), psi_l_coef_sorted_bi_ortho &
+                                   , psi_r_coef_sorted_bi_ortho )
+  !call save_tc_wavefunction_general( N_det, N_states, psi_det_sorted_tc, size(psi_det_sorted_tc, 3) &
+  !                                 , size(psi_l_coef_sorted_bi_ortho, 1), psi_l_coef_sorted_bi_ortho &
+  !                                 , psi_r_coef_sorted_bi_ortho )
  else
-  call save_tc_wavefunction_general(N_det,N_states,psi_det,size(psi_det, 3), size(psi_l_coef_bi_ortho, 1),psi_l_coef_bi_ortho,psi_r_coef_bi_ortho)
+  call save_tc_wavefunction_general( N_det, N_states, psi_det, size(psi_det, 3) &
+                                   , size(psi_l_coef_bi_ortho, 1), psi_l_coef_bi_ortho &
+                                   , psi_r_coef_bi_ortho )
  endif
  call routine_save_right_bi_ortho
 end
