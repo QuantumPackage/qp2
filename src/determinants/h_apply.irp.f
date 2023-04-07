@@ -70,11 +70,14 @@ subroutine resize_H_apply_buffer(new_size,iproc)
   PROVIDE H_apply_buffer_allocated
 
 
-  if (N_det < 0) call abort(irp_here//': N_det < 0')
-  if (N_int <= 0) call abort(irp_here//': N_int <= 0')
-  if (new_size <= 0) call abort(irp_here//': new_size <= 0')
-  if (iproc < 0) call abort(irp_here//': iproc < 0')
-  if (iproc >= nproc) call abort(irp_here//': iproc >= nproc')
+  ASSERT (new_size > 0)
+  ASSERT (iproc >= 0)
+  ASSERT (iproc < nproc)
+  if (N_det < 0) call abort() !irp_here//': N_det < 0')
+  if (N_int <= 0) call abort() !irp_here//': N_int <= 0')
+  if (new_size <= 0) call abort() !irp_here//': new_size <= 0')
+  if (iproc < 0) call abort() !irp_here//': iproc < 0')
+  if (iproc >= nproc) call abort() !irp_here//': iproc >= nproc')
 
   allocate ( buffer_det(N_int,2,new_size),                           &
       buffer_coef(new_size,N_states),                                &
@@ -363,9 +366,9 @@ subroutine replace_wf(N_det_new, LDA, psi_coef_new, psi_det_new)
 
   PROVIDE H_apply_buffer_allocated
 
-  if (N_det_new <= 0) call abort(irp_here//': N_det_new <= 0')
-  if (N_int <= 0) call abort(irp_here//': N_int <= 0')
-  if (LDA < N_det_new) call abort(irp_here//': LDA < N_det_new')
+  if (N_det_new <= 0) call abort() !irp_here//': N_det_new <= 0')
+  if (N_int <= 0) call abort() !irp_here//': N_int <= 0')
+  if (LDA < N_det_new) call abort() !irp_here//': LDA < N_det_new')
 
   do j=0,nproc-1
     H_apply_buffer(j)%N_det = 0
