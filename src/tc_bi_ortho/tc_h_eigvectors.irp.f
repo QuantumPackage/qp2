@@ -185,9 +185,7 @@ end
         do j = 1, N_det
           leigvec_tc_bi_orth(j,1) = leigvec_tc_bi_orth_tmp(j,i)
         enddo
-
        else 
-
         do i = 1, N_states
           eigval_right_tc_bi_orth(i) = eigval_right_tmp(i)
           eigval_left_tc_bi_orth(i)  = eigval_right_tmp(i)
