@@ -84,12 +84,12 @@ end
 
 subroutine routine_test_s2_davidson
  implicit none
- double precision, allocatable :: H_jj(:),vec_tmp(:,:), energies(:) 
+ double precision, allocatable :: H_jj(:),vec_tmp(:,:), energies(:) , s2(:)
  integer :: i,istate
  logical :: converged 
  external H_tc_s2_dagger_u_0_opt
  external H_tc_s2_u_0_opt
- allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),energies(n_states_diag))
+ allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),energies(n_states_diag), s2(n_states_diag))
  do i = 1, N_det
    call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
  enddo
@@ -105,8 +105,7 @@ subroutine routine_test_s2_davidson
  do istate = 1, N_states
   leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
  enddo
- call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_dagger_u_0_opt)
- print*,'energies = ',energies
+ call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_dagger_u_0_opt)
  double precision, allocatable :: v_0_new(:,:),s_0_new(:,:)
  integer :: sze,N_st
  logical           :: do_right 
@@ -122,6 +121,8 @@ subroutine routine_test_s2_davidson
   accu_e_0 += v_0_new(i,1) * vec_tmp(i,1)
   accu_s_0 += s_0_new(i,1) * vec_tmp(i,1)
  enddo
+ print*,'energies = ',energies
+ print*,'s2       = ',s2
  print*,'accu_e_0',accu_e_0
  print*,'accu_s_0',accu_s_0
 
@@ -137,8 +138,7 @@ subroutine routine_test_s2_davidson
  do istate = 1, N_states
   leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
  enddo
- call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_u_0_opt)
- print*,'energies = ',energies
+ call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_u_0_opt)
  sze = N_det
  N_st = 1
  do_right = .True.
@@ -151,6 +151,8 @@ subroutine routine_test_s2_davidson
   accu_e_0 += v_0_new(i,1) * vec_tmp(i,1)
   accu_s_0 += s_0_new(i,1) * vec_tmp(i,1)
  enddo
+ print*,'energies = ',energies
+ print*,'s2       = ',s2
  print*,'accu_e_0',accu_e_0
  print*,'accu_s_0',accu_s_0
 

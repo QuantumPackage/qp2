@@ -1,7 +1,7 @@
 
 ! ---
 
-subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, energies, sze, N_st, N_st_diag_in, converged, hcalc)
+subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N_st_diag_in, converged, hcalc)
 
   use mmap_module
 
@@ -30,6 +30,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, energies, sze, N_st, N_st_dia
   logical,          intent(inout) :: converged
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
   double precision, intent(out)   :: energies(N_st)
+  double precision,  intent(inout) :: s2_out(N_st)
   external                           hcalc
 
   character*(16384)               :: write_buffer
@@ -528,6 +529,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, energies, sze, N_st, N_st_dia
 
   do k = 1, N_st
     energies(k) = lambda(k)
+    s2_out(k) = s2(k)
   enddo
   write_buffer = '====='
   do i = 1, N_st

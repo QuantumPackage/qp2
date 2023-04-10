@@ -1,3 +1,33 @@
+
+subroutine get_H_tc_s2_l0_r0(l_0,r_0,N_st,sze,energies, s2)
+  use bitmasks
+  implicit none
+  BEGIN_DOC
+  ! Computes $e_0 = \langle l_0 | H | r_0\rangle$.
+  !
+  ! Computes $s_0 = \langle l_0 | S^2 | r_0\rangle$.
+  !
+  ! Assumes that the determinants are in psi_det
+  !
+  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  END_DOC
+  integer, intent(in)              :: N_st,sze
+  double precision, intent(in)     :: l_0(sze,N_st), r_0(sze,N_st)
+  double precision, intent(out)    :: energies(N_st), s2(N_st)
+  logical           :: do_right 
+  integer :: istate
+  double precision, allocatable :: s_0(:,:), v_0(:,:)
+  double precision :: u_dot_v, norm
+  allocate(s_0(sze,N_st), v_0(sze,N_st))
+  do_right = .True.
+  call H_tc_s2_u_0_opt(v_0,s_0,r_0,N_st,sze)
+  do istate = 1, N_st
+   norm = u_dot_v(l_0(1,istate),r_0(1,istate),sze)
+   energies(istate) = u_dot_v(l_0(1,istate),v_0(1,istate),sze)/norm
+   s2(istate) = u_dot_v(l_0(1,istate),s_0(1,istate),sze)/norm
+  enddo
+end
+
 subroutine H_tc_s2_u_0_opt(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
