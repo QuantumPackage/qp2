@@ -25,8 +25,6 @@ subroutine diagonalize_CI_tc
       psi_r_coef_bi_ortho(i,j) = reigvec_tc_bi_orth(i,j)
     enddo
   enddo
-!  psi_energy(1:N_states) = CI_electronic_energy(1:N_states)
-!  psi_s2(1:N_states) = CI_s2(1:N_states)
 
   SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho
 end
