@@ -1,7 +1,7 @@
 
 ! ---
 
-subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N_st_diag_in, converged, hcalc)
+subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N_st_diag_in, n_it_max_dav, converged, hcalc)
 
   use mmap_module
 
@@ -21,11 +21,17 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
   ! Initial guess vectors are not necessarily orthonormal
   !
   ! hcalc subroutine to compute W = H U (see routine hcalc_template for template of input/output)
+  ! 
+  ! !!! WARNING !!! IT SEEMS THAT IF THE NUMBER OF MACRO ITERATIONS EXCEEDS n_it_max_dav, 
+  ! 
+  !                 THE RECONTRACTION IS WRONG. YOU SHOULD CONSIDER CALLING MULTIPLE TIME THE ROUTINE
+  !
+  !                 SEE FOR INSTANCE IN tc_bi_ortho/tc_h_eigvectors.irp.f
   END_DOC
 
   implicit none
 
-  integer,           intent(in)   :: sze, N_st, N_st_diag_in
+  integer,           intent(in)   :: sze, N_st, N_st_diag_in, n_it_max_dav
   double precision,  intent(in)   :: H_jj(sze)
   logical,          intent(inout) :: converged
   double precision, intent(inout) :: u_in(sze,N_st_diag_in)
@@ -246,7 +252,9 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
 
   itertot = 0
 
-  do while (.not.converged)
+!  do while (.not.converged.or.itertot.le.n_it_max_dav)
+  integer :: iiii
+  do iiii = 1, n_it_max_dav
 
     itertot = itertot + 1
     if(itertot == 8) then
@@ -522,7 +530,7 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
         enddo
       endif
     enddo
-
+   if(converged)exit
   enddo ! loop over while
 
   ! ---

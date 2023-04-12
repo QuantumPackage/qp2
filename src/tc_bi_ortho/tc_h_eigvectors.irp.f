@@ -208,7 +208,11 @@ end
       call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
     enddo
  !!!! Preparing the left-eigenvector
+    print*,'---------------------------------'
+    print*,'---------------------------------'
     print*,'Computing the left-eigenvector '
+    print*,'---------------------------------'
+    print*,'---------------------------------'
     vec_tmp = 0.d0
     do istate = 1, N_states
      vec_tmp(1:N_det,istate) = psi_l_coef_bi_ortho(1:N_det,istate)
@@ -218,12 +222,21 @@ end
     enddo
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, htcdag_bi_ortho_calc_tdav)
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_dagger_u_0_opt)
-    call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_s2_dagger_u_0_opt)
+    integer :: n_it_max
+    n_it_max = 1
+    converged = .False.
+    do while (.not.converged)
+     call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+    enddo
     do istate = 1, N_states
      leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
     enddo
 
+    print*,'---------------------------------'
+    print*,'---------------------------------'
     print*,'Computing the right-eigenvector '
+    print*,'---------------------------------'
+    print*,'---------------------------------'
  !!!! Preparing the right-eigenvector
     vec_tmp = 0.d0
     do istate = 1, N_states
@@ -234,7 +247,10 @@ end
     enddo
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
-    call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_s2_dagger_u_0_opt)
+    converged = .False.
+    do while (.not.converged)
+     call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+    enddo
     do istate = 1, N_states
      reigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
     enddo
