@@ -461,6 +461,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        integer :: lwork, info
        double precision, allocatable :: work(:)
 
+
 !       y = h
        y = h_p
        lwork = -1

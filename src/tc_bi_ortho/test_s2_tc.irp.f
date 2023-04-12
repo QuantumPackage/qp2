@@ -105,7 +105,9 @@ subroutine routine_test_s2_davidson
  do istate = 1, N_states
   leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
  enddo
- call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_dagger_u_0_opt)
+ integer :: n_it_max
+ n_it_max = 1
+ call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
  double precision, allocatable :: v_0_new(:,:),s_0_new(:,:)
  integer :: sze,N_st
  logical           :: do_right 
@@ -138,7 +140,8 @@ subroutine routine_test_s2_davidson
  do istate = 1, N_states
   leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
  enddo
- call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, converged, H_tc_s2_u_0_opt)
+ n_it_max = 1
+ call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2, energies, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_opt)
  sze = N_det
  N_st = 1
  do_right = .True.
