@@ -3,7 +3,6 @@ program tc_bi_ortho
   BEGIN_DOC
 ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together with the energy. Saves the left-right wave functions at the end. 
   END_DOC
-  print *, 'Hello world'
   my_grid_becke = .True.
   my_n_pt_r_grid = 30
   my_n_pt_a_grid = 50
