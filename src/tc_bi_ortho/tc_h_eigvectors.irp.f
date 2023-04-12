@@ -237,11 +237,14 @@ end
     enddo
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, htcdag_bi_ortho_calc_tdav)
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_dagger_u_0_opt)
-    integer :: n_it_max
+    integer :: n_it_max,i_it
     n_it_max = 1
     converged = .False.
+    i_it = 0
     do while (.not.converged)
      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+     i_it += 1
+     if(i_it .gt. 5)exit
     enddo
     do istate = 1, N_states
      leigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
@@ -263,8 +266,11 @@ end
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
 !    call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
     converged = .False.
+    i_it = 0
     do while (.not.converged)
      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+     i_it += 1
+     if(i_it .gt. 5)exit
     enddo
     do istate = 1, N_states
      reigvec_tc_bi_orth(1:N_det,istate) = vec_tmp(1:N_det,istate)
