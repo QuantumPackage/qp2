@@ -23,6 +23,9 @@ def extract_data(output):
 
     reading = False
     for iline, line in enumerate(lines):
+        if line.startswith("Summary at N_det"):
+            reading = False
+
         if not reading and line.startswith(" N_det "):
             n_det = int(re.search(r"N_det\s+=\s+(\d+)", line).group(1))
             reading = True
