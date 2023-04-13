@@ -82,26 +82,6 @@ subroutine routine_diag()
 
   endif
 
-  double precision, allocatable :: buffer(:,:)
-  allocate(buffer(N_det,N_states))
-  do k = 1, N_states
-    do i = 1, N_det
-      psi_l_coef_bi_ortho(i,k) = leigvec_tc_bi_orth(i,k)
-      buffer(i,k) = leigvec_tc_bi_orth(i,k)
-    enddo
-  enddo
-  TOUCH psi_l_coef_bi_ortho
-  call ezfio_set_tc_bi_ortho_psi_l_coef_bi_ortho(buffer)
-  do k = 1, N_states
-    do i = 1, N_det
-      psi_r_coef_bi_ortho(i,k) = reigvec_tc_bi_orth(i,k)
-      buffer(i,k) = reigvec_tc_bi_orth(i,k)
-    enddo
-  enddo
-  TOUCH psi_r_coef_bi_ortho
-  call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
-  deallocate(buffer)
-
 end
 
 
