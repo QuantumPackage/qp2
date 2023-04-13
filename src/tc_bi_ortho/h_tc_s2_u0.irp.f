@@ -1,45 +1,34 @@
-subroutine u_0_H_tc_u_0(e_0,u_0,n,keys_tmp,Nint,N_st,sze, do_right)
+
+subroutine get_H_tc_s2_l0_r0(l_0,r_0,N_st,sze,energies, s2)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $E_0 = \frac{\langle u_0 | H_TC | u_0 \rangle}{\langle u_0 | u_0 \rangle}$
+  ! Computes $e_0 = \langle l_0 | H | r_0\rangle$.
   !
-  ! n : number of determinants
+  ! Computes $s_0 = \langle l_0 | S^2 | r_0\rangle$.
   !
-  ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
+  ! Assumes that the determinants are in psi_det
+  !
+  ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
-  integer, intent(in)             :: n,Nint, N_st, sze
-  logical, intent(in)             :: do_right 
-  double precision, intent(out)   :: e_0(N_st)
-  double precision, intent(inout) :: u_0(sze,N_st)
-  integer(bit_kind),intent(in)    :: keys_tmp(Nint,2,n)
-
-  double precision, allocatable   :: v_0(:,:), u_1(:,:)
-  double precision                :: u_dot_u,u_dot_v,diag_H_mat_elem
-  integer                         :: i,j, istate
-
-  allocate (v_0(n,N_st),u_1(n,N_st))
-  u_1(:,:) = 0.d0
-  u_1(1:n,1:N_st) = u_0(1:n,1:N_st)
-  call H_tc_u_0_nstates_openmp(v_0,u_1,N_st,n, do_right)
-  u_0(1:n,1:N_st) = u_1(1:n,1:N_st)
-  deallocate(u_1)
-  double precision :: norm
-  !$OMP PARALLEL DO PRIVATE(i,norm) DEFAULT(SHARED)
-  do i=1,N_st
-    norm = u_dot_u(u_0(1,i),n)
-    if (norm /= 0.d0) then
-      e_0(i) = u_dot_v(v_0(1,i),u_0(1,i),n) / dsqrt(norm)
-    else
-      e_0(i) = 0.d0
-    endif
+  integer, intent(in)              :: N_st,sze
+  double precision, intent(in)     :: l_0(sze,N_st), r_0(sze,N_st)
+  double precision, intent(out)    :: energies(N_st), s2(N_st)
+  logical           :: do_right 
+  integer :: istate
+  double precision, allocatable :: s_0(:,:), v_0(:,:)
+  double precision :: u_dot_v, norm
+  allocate(s_0(sze,N_st), v_0(sze,N_st))
+  do_right = .True.
+  call H_tc_s2_u_0_opt(v_0,s_0,r_0,N_st,sze)
+  do istate = 1, N_st
+   norm = u_dot_v(l_0(1,istate),r_0(1,istate),sze)
+   energies(istate) = u_dot_v(l_0(1,istate),v_0(1,istate),sze)/norm
+   s2(istate) = u_dot_v(l_0(1,istate),s_0(1,istate),sze)/norm
   enddo
-  !$OMP END PARALLEL DO
-  deallocate (v_0)
 end
 
-
-subroutine H_tc_u_0_opt(v_0,u_0,N_st,sze)
+subroutine H_tc_s2_u_0_opt(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -49,14 +38,14 @@ subroutine H_tc_u_0_opt(v_0,u_0,N_st,sze)
   !
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
-  integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
+  integer, intent(in)              :: N_st,sze
+  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
   logical           :: do_right 
   do_right = .True.
-  call H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
+  call H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
 end
 
-subroutine H_tc_dagger_u_0_opt(v_0,u_0,N_st,sze)
+subroutine H_tc_s2_dagger_u_0_opt(v_0,s_0,u_0,N_st,sze)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -67,14 +56,14 @@ subroutine H_tc_dagger_u_0_opt(v_0,u_0,N_st,sze)
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
   integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
+  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
   logical           :: do_right 
   do_right = .False.
-  call H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
+  call H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
 end
 
 
-subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
+subroutine H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -87,19 +76,17 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC
   integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st)
+  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
   logical, intent(in)             :: do_right 
   integer :: k
-  double precision, allocatable  :: u_t(:,:), v_t(:,:)
+  double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
-  allocate(u_t(N_st,N_det),v_t(N_st,N_det))
-!  provide mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e 
-!  provide ref_tc_energy_tot fock_op_2_e_tc_closed_shell 
-!  provide eff_2_e_from_3_e_ab eff_2_e_from_3_e_aa eff_2_e_from_3_e_bb
+  allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
   do k=1,N_st
     call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
   enddo
   v_t = 0.d0
+  s_t = 0.d0
   call dtranspose(                                                   &
       u_0,                                                           &
       size(u_0, 1),                                                  &
@@ -107,7 +94,7 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
       size(u_t, 1),                                                  &
       N_det, N_st)
 
-  call H_tc_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,1,N_det,0,1, do_right)
+  call H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,1,N_det,0,1, do_right)
   deallocate(u_t)
 
   call dtranspose(                                                   &
@@ -116,17 +103,24 @@ subroutine H_tc_u_0_nstates_openmp(v_0,u_0,N_st,sze, do_right)
       v_0,                                                           &
       size(v_0, 1),                                                  &
       N_st, N_det)
-  deallocate(v_t)
+  call dtranspose(                                                   &
+      s_t,                                                           &
+      size(s_t, 1),                                                  &
+      s_0,                                                           &
+      size(s_0, 1),                                                  &
+      N_st, N_det)
+  deallocate(v_t,s_t)
 
   do k=1,N_st
     call dset_order(v_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
+    call dset_order(s_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
     call dset_order(u_0(1,k),psi_bilinear_matrix_order_reverse,N_det)
   enddo
 
 end
 
 
-subroutine H_tc_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,istep, do_right)
+subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep, do_right)
   use bitmasks
   implicit none
   BEGIN_DOC
@@ -139,31 +133,31 @@ subroutine H_tc_u_0_nstates_openmp_work(v_t,u_t,N_st,sze,istart,iend,ishift,iste
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
   logical, intent(in)             :: do_right 
-  double precision, intent(out)  :: v_t(N_st,sze)
+  double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
 
   PROVIDE ref_bitmask_energy N_int
 
   select case (N_int)
     case (1)
-      call H_tc_u_0_nstates_openmp_work_1(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+      call H_tc_s2_u_0_nstates_openmp_work_1(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
     case (2)
-      call H_tc_u_0_nstates_openmp_work_2(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+      call H_tc_s2_u_0_nstates_openmp_work_2(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
     case (3)
-      call H_tc_u_0_nstates_openmp_work_3(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+      call H_tc_s2_u_0_nstates_openmp_work_3(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
     case (4)
-      call H_tc_u_0_nstates_openmp_work_4(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+      call H_tc_s2_u_0_nstates_openmp_work_4(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
     case default
-      call H_tc_u_0_nstates_openmp_work_N_int(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+      call H_tc_s2_u_0_nstates_openmp_work_N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
   end select
 end
 BEGIN_TEMPLATE
 
-subroutine H_tc_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
+subroutine H_tc_s2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep,do_right)
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t \\rangle$ 
+  ! Computes $v_t = H | u_t \\rangle$ and $s_t = S^2 | u_t\\rangle$
   !
   ! Default should be 1,N_det,0,1
   !
@@ -171,10 +165,10 @@ subroutine H_tc_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishi
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  logical, intent(in)             :: do_right 
-  double precision, intent(out)  :: v_t(N_st,sze)
+  logical, intent(in)            :: do_right 
+  double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
-  double precision               :: hij
+  double precision               :: hij, sij
   integer                        :: i,j,k,l,kk
   integer                        :: k_a, k_b, l_a, l_b, m_a, m_b
   integer                        :: istate
@@ -222,7 +216,7 @@ compute_singles=.True.
   ! -------------------------------------------------
 
   PROVIDE N_int nthreads_davidson
-  !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nthreads_davidson)        &
+  !$OMP PARALLEL DEFAULT(SHARED) NUM_THREADS(nthreads_davidson)      &
       !$OMP   SHARED(psi_bilinear_matrix_rows, N_det,                &
       !$OMP          psi_bilinear_matrix_columns,                    &
       !$OMP          psi_det_alpha_unique, psi_det_beta_unique,      &
@@ -233,14 +227,14 @@ compute_singles=.True.
       !$OMP          psi_bilinear_matrix_order_transp_reverse,       &
       !$OMP          psi_bilinear_matrix_columns_loc,                &
       !$OMP          psi_bilinear_matrix_transp_rows_loc,            &
-      !$OMP          istart, iend, istep, irp_here, v_t,             &
+      !$OMP          istart, iend, istep, irp_here, v_t, s_t,        &
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
-      !$OMP          tmp_det2, hij, idx, l, kcol_prev,hmono, htwoe, hthree,          &
+      !$OMP          tmp_det2, hij, sij, idx, l, kcol_prev,hmono, htwoe, hthree,          &
       !$OMP          singles_a, n_singles_a, singles_b, ratio,       &
       !$OMP          n_singles_b, k8, last_found,left,right,right_max)
 
@@ -397,9 +391,11 @@ compute_singles=.True.
           else
            call htilde_mu_mat_opt_bi_ortho_tot(tmp_det2,tmp_det,$N_int,hij)
           endif
+          call get_s2(tmp_det,tmp_det2,$N_int,sij)
           !DIR$ LOOP COUNT AVG(4)
           do l=1,N_st
             v_t(l,k_a) = v_t(l,k_a) + hij * utl(l,kk+1)
+            s_t(l,k_a) = s_t(l,k_a) + sij * utl(l,kk+1)
           enddo
         enddo
       enddo
@@ -745,9 +741,12 @@ compute_singles=.True.
 
 !    hij = diag_H_mat_elem(tmp_det,$N_int)
     call diag_htilde_mu_mat_fock_bi_ortho  ($N_int, tmp_det, hmono, htwoe, hthree, hij)
+    call get_s2(tmp_det,tmp_det,$N_int,sij)
+
     !DIR$ LOOP COUNT AVG(4)
     do l=1,N_st
       v_t(l,k_a) = v_t(l,k_a) + hij * u_t(l,k_a)
+      s_t(l,k_a) = s_t(l,k_a) + sij * u_t(l,k_a)
     enddo
 
   end do

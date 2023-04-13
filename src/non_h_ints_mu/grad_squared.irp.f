@@ -2,7 +2,7 @@
 ! ---
 
 !       TODO : strong optmization : write the loops in a different way
-!            : for each couple of AO, the gaussian product are done once for all 
+!            : for each couple of AO, the gaussian product are done once for all
 
 BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_points_final_grid) ]
 
@@ -20,14 +20,14 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_poi
   ! gradu_squared_u_ij_mu = -0.50 x \int r2 \phi_i(2) \phi_j(2) [ v1^2  v2^2 ((grad_1 u12)^2 + (grad_2 u12^2)]) + u12^2  v2^2 (grad_1 v1)^2 + 2 u12 v1 v2^2 (grad_1 u12) . (grad_1 v1) ]
   !                       = -0.25 x        v1^2      \int r2 \phi_i(2) \phi_j(2) [1 - erf(mu r12)]^2 v2^2
   !                       + -0.50 x    (grad_1 v1)^2 \int r2 \phi_i(2) \phi_j(2)      u12^2          v2^2
-  !                       + -1.00 x v1 (grad_1 v1)   \int r2 \phi_i(2) \phi_j(2)   (grad_1 u12)      v2^2 
+  !                       + -1.00 x v1 (grad_1 v1)   \int r2 \phi_i(2) \phi_j(2)   (grad_1 u12)      v2^2
   !                       =                 v1^2        x   int2_grad1u2_grad2u2_j1b2
   !                       + -0.5 x      (grad_1 v1)^2   x   int2_u2_j1b2
   !                       + -1.0 X V1 x (grad_1 v1)   \cdot [ int2_u_grad1u_j1b2 x r - int2_u_grad1u_x_j1b ]
   !
   !
   END_DOC
- 
+
   implicit none
   integer                    :: ipoint, i, j, m, igauss
   double precision           :: x, y, z, r(3), delta, coef
@@ -100,7 +100,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_poi
   call wall_time(time1)
   print*, ' Wall time for gradu_squared_u_ij_mu = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -151,7 +151,7 @@ END_PROVIDER
 !
 !  deallocate(ac_mat)
 !
-!END_PROVIDER 
+!END_PROVIDER
 
 ! ---
 
@@ -214,12 +214,12 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_loop, (ao_num, ao_num, ao_nu
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao_loop = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_grid) ]
- 
+
   implicit none
   integer                    :: ipoint, i, j, m, igauss
   double precision           :: r(3), delta, coef
@@ -267,7 +267,7 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
   call wall_time(time1)
   print*, ' Wall time for grad12_j12 = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -297,12 +297,12 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
   call wall_time(time1)
   print*, ' Wall time for u12sq_j1bsq = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num, n_points_final_grid) ]
- 
+
   implicit none
   integer                    :: ipoint, i, j, m, igauss
   double precision           :: x, y, z
@@ -347,7 +347,7 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
   call wall_time(time1)
   print*, ' Wall time for u12_grad1_u12_j1b_grad1_j1b = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -370,26 +370,18 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   if(read_tc_integ) then
 
-    open(unit=11, form="unformatted", file='tc_grad_square_ao', action="read")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              read(11) tc_grad_square_ao(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_square_ao', action="read")
+    read(11) tc_grad_square_ao
     close(11)
 
   else
 
     allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
-  
+
     b_mat = 0.d0
    !$OMP PARALLEL               &
    !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (i, k, ipoint) & 
+   !$OMP PRIVATE (i, k, ipoint) &
    !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
    !$OMP DO SCHEDULE (static)
     do i = 1, ao_num
@@ -401,11 +393,11 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     tmp = 0.d0
    !$OMP PARALLEL               &
    !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (j, l, ipoint) & 
+   !$OMP PRIVATE (j, l, ipoint) &
    !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
    !$OMP DO SCHEDULE (static)
     do ipoint = 1, n_points_final_grid
@@ -417,25 +409,25 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     tc_grad_square_ao = 0.d0
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
               , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
               , 1.d0, tc_grad_square_ao, ao_num*ao_num)
     deallocate(tmp, b_mat)
-  
+
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
-  
+
    !!$OMP PARALLEL             &
    !!$OMP DEFAULT (NONE)       &
-   !!$OMP PRIVATE (i, j, k, l) & 
+   !!$OMP PRIVATE (i, j, k, l) &
    !!$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
    !!$OMP DO SCHEDULE (static)
    ! do j = 1, ao_num
    !   do l = 1, ao_num
    !     do i = 1, ao_num
    !       do k = 1, ao_num
-   !         tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i) 
+   !         tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
    !       enddo
    !     enddo
    !   enddo
@@ -444,23 +436,17 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
    !!$OMP END PARALLEL
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='tc_grad_square_ao', action="write")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              write(11) tc_grad_square_ao(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_square_ao', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) tc_grad_square_ao
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
