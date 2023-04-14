@@ -266,7 +266,7 @@ end
     converged = .False.
     i_it = 0
     do while (.not. converged)
-      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_opt)
       i_it += 1
       if(i_it .gt. 5) exit
     enddo
@@ -324,42 +324,54 @@ END_PROVIDER
 
 
 
-subroutine bi_normalize(u_l,u_r,n,ld,nstates)
+subroutine bi_normalize(u_l, u_r, n, ld, nstates)
+
+  BEGIN_DOC
   !!!! Normalization of the scalar product of the left/right eigenvectors
+  END_DOC
+
+  implicit none
+  integer,          intent(in)    :: n, ld, nstates
   double precision, intent(inout) :: u_l(ld,nstates), u_r(ld,nstates)
-  integer, intent(in) :: n,ld,nstates
-  integer :: i
-  double precision  :: accu, tmp 
+  integer                         :: i, j
+  double precision                :: accu, tmp
+
   do i = 1, nstates
-   !!!! Normalization of right eigenvectors |Phi>
-   accu = 0.d0
-   do j = 1, n
-    accu += u_r(j,i) * u_r(j,i)
-   enddo
-   accu = 1.d0/dsqrt(accu)
-   print*,'accu_r = ',accu
-   do j = 1, n
-    u_r(j,i) *= accu 
-   enddo
-   tmp = u_r(1,i) / dabs(u_r(1,i))
-   do j = 1, n
-    u_r(j,i) *= tmp
-   enddo
-   !!!! Adaptation of the norm of the left eigenvector such that <chi|Phi> = 1
-   accu = 0.d0
-   do j = 1, n
-    accu += u_l(j,i) * u_r(j,i)
-!    print*,j, u_l(j,i) , u_r(j,i)
-   enddo
-   if(accu.gt.0.d0)then
+
+    !!!! Normalization of right eigenvectors |Phi>
+    accu = 0.d0
+    do j = 1, n
+      accu += u_r(j,i) * u_r(j,i)
+    enddo
     accu = 1.d0/dsqrt(accu)
-   else
-    accu = 1.d0/dsqrt(-accu)
-   endif
-   tmp = (u_l(1,i) * u_r(1,i) )/dabs(u_l(1,i) * u_r(1,i))
-   do j = 1, n
-    u_l(j,i) *= accu * tmp
-    u_r(j,i) *= accu 
-   enddo
+    print*,'accu_r = ',accu
+    do j = 1, n
+      u_r(j,i) *= accu
+    enddo
+    tmp = u_r(1,i) / dabs(u_r(1,i))
+    do j = 1, n
+      u_r(j,i) *= tmp
+    enddo
+
+    !!!! Adaptation of the norm of the left eigenvector such that <chi|Phi> = 1
+    accu = 0.d0
+    do j = 1, n
+      accu += u_l(j,i) * u_r(j,i)
+      !print*,j, u_l(j,i) , u_r(j,i)
+    enddo
+    print*,'accu_lr = ', accu
+    if(accu.gt.0.d0)then
+      accu = 1.d0/dsqrt(accu)
+    else
+      accu = 1.d0/dsqrt(-accu)
+    endif
+    tmp = (u_l(1,i) * u_r(1,i) )/dabs(u_l(1,i) * u_r(1,i))
+    do j = 1, n
+      u_l(j,i) *= accu * tmp
+      u_r(j,i) *= accu
+    enddo
+
   enddo
+
 end
+
