@@ -12,6 +12,11 @@
   double precision :: hmono,htwoe,hthree,htot
 
   PROVIDE N_int
+
+  i = 1
+  j = 1
+  call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+
  !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j,hmono, htwoe, hthree, htot) &
  !$OMP SHARED (N_det, psi_det, N_int,htilde_matrix_elmt_bi_ortho)
     do i = 1, N_det

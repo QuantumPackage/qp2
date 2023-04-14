@@ -17,6 +17,8 @@ BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det,
   implicit none
   integer :: k, l
 
+  !print *, ' providing psi_bitcleft_bilinear_matrix_values'
+
   if(N_det .eq. 1) then
 
     do l = 1, N_states
@@ -37,6 +39,8 @@ BEGIN_PROVIDER  [ double precision, psi_bitcleft_bilinear_matrix_values, (N_det,
     enddo
 
   endif
+
+  !print *, ' psi_bitcleft_bilinear_matrix_values OK'
 
 END_PROVIDER
 
