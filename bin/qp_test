@@ -46,7 +46,7 @@ def main(arguments):
                 append_bats(dirname, filenames)
     else:
         for (dirname, _, filenames) in os.walk(os.getcwd(), followlinks=False):
-            if "IRPF90_temp" not in dirname:
+            if "IRPF90_temp" not in dirname and "external" not in dirname:
                 append_bats(dirname, filenames)
     l_bats = [y for _, y in sorted(l_bats)]
 
@@ -67,6 +67,7 @@ def main(arguments):
             os.system(test+" python3 bats_to_sh.py "+bats_file+
                                     "| bash")
         else:
+#           print(" ".join(["bats", "--verbose-run", "--trace", bats_file]))
             subprocess.check_call(["bats", "--verbose-run", "--trace", bats_file], env=os.environ)
 
 
