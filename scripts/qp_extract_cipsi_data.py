@@ -43,6 +43,7 @@ def extract_data(output):
                 e_ex_line = lines[iline+2]
                 e_ex = float(e_ex_line.split()[1])
                 reading = False
+
                 new_data = " {:8d}  {:16.8f}  {:e}  {:e}  {:e}  {:e}  {:16.8f}".format(n_det, e, pt2, err_pt2, rpt2, err_rpt2, e_ex)
                 data.append(new_data)
                 n_det = e = pt2 = err_pt2 = rpt2 = err_rpt2 = e_ex = None
@@ -53,3 +54,4 @@ data = extract_data(output)
 
 for item in data:
     print(item)
+
