@@ -1,7 +1,6 @@
 
-subroutine get_H_tc_s2_l0_r0(l_0,r_0,N_st,sze,energies, s2)
-  use bitmasks
-  implicit none
+subroutine get_H_tc_s2_l0_r0(l_0, r_0, N_st, sze, energies, s2)
+
   BEGIN_DOC
   ! Computes $e_0 = \langle l_0 | H | r_0\rangle$.
   !
@@ -11,26 +10,34 @@ subroutine get_H_tc_s2_l0_r0(l_0,r_0,N_st,sze,energies, s2)
   !
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
-  integer, intent(in)              :: N_st,sze
-  double precision, intent(in)     :: l_0(sze,N_st), r_0(sze,N_st)
-  double precision, intent(out)    :: energies(N_st), s2(N_st)
-  logical           :: do_right 
-  integer :: istate
+
+  use bitmasks
+  implicit none
+
+  integer,          intent(in)  :: N_st,sze
+  double precision, intent(in)  :: l_0(sze,N_st), r_0(sze,N_st)
+  double precision, intent(out) :: energies(N_st), s2(N_st)
+  logical                       :: do_right 
+  integer                       :: istate
   double precision, allocatable :: s_0(:,:), v_0(:,:)
-  double precision :: u_dot_v, norm
+  double precision              :: u_dot_v, norm
+
   allocate(s_0(sze,N_st), v_0(sze,N_st))
   do_right = .True.
-  call H_tc_s2_u_0_opt(v_0,s_0,r_0,N_st,sze)
+  call H_tc_s2_u_0_opt(v_0, s_0, r_0, N_st, sze)
+
   do istate = 1, N_st
-   norm = u_dot_v(l_0(1,istate),r_0(1,istate),sze)
-   energies(istate) = u_dot_v(l_0(1,istate),v_0(1,istate),sze)/norm
-   s2(istate) = u_dot_v(l_0(1,istate),s_0(1,istate),sze)/norm
+    norm = u_dot_v(l_0(1,istate),r_0(1,istate),sze)
+    energies(istate) = u_dot_v(l_0(1,istate),v_0(1,istate),sze)/norm
+    s2(istate) = u_dot_v(l_0(1,istate),s_0(1,istate),sze)/norm
   enddo
+
 end
 
-subroutine H_tc_s2_u_0_opt(v_0,s_0,u_0,N_st,sze)
-  use bitmasks
-  implicit none
+! ---
+
+subroutine H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
+
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
   !
@@ -38,16 +45,24 @@ subroutine H_tc_s2_u_0_opt(v_0,s_0,u_0,N_st,sze)
   !
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
-  integer, intent(in)              :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
-  logical           :: do_right 
+
+  use bitmasks
+  implicit none
+
+  integer,          intent(in)  :: N_st,sze
+  double precision, intent(in)  :: u_0(sze,N_st)
+  double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
+  logical                       :: do_right 
+
   do_right = .True.
-  call H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
+  call H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
+
 end
 
-subroutine H_tc_s2_dagger_u_0_opt(v_0,s_0,u_0,N_st,sze)
-  use bitmasks
-  implicit none
+! ---
+
+subroutine H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
+
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
   !
@@ -55,17 +70,23 @@ subroutine H_tc_s2_dagger_u_0_opt(v_0,s_0,u_0,N_st,sze)
   !
   ! istart, iend, ishift, istep are used in ZMQ parallelization.
   END_DOC
-  integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
-  logical           :: do_right 
-  do_right = .False.
-  call H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
-end
 
-
-subroutine H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
   use bitmasks
   implicit none
+  integer,          intent(in)  :: N_st,sze
+  double precision, intent(in)  :: u_0(sze,N_st)
+  double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
+  logical                       :: do_right 
+
+  do_right = .False.
+  call H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
+
+end
+
+! ---
+
+subroutine H_tc_s2_u_0_nstates_openmp(v_0, s_0, u_0, N_st, sze, do_right)
+
   BEGIN_DOC
   ! Computes $v_0 = H | u_0\rangle$.
   !
@@ -75,12 +96,18 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
   !
   ! if do_right == True then you compute H_TC |Psi>, else H_TC^T |Psi>
   END_DOC
-  integer, intent(in)            :: N_st,sze
-  double precision, intent(inout)  :: v_0(sze,N_st), u_0(sze,N_st), s_0(sze,N_st)
-  logical, intent(in)             :: do_right 
-  integer :: k
-  double precision, allocatable  :: u_t(:,:), v_t(:,:), s_t(:,:)
+
+  use bitmasks
+  implicit none
+
+  integer,          intent(in)  :: N_st,sze
+  logical,          intent(in)  :: do_right 
+  double precision, intent(in)  :: u_0(sze,N_st)
+  double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
+  integer                       :: k
+  double precision, allocatable :: u_t(:,:), v_t(:,:), s_t(:,:)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: u_t
+
   allocate(u_t(N_st,N_det),v_t(N_st,N_det),s_t(N_st,N_det))
   do k=1,N_st
     call dset_order(u_0(1,k),psi_bilinear_matrix_order,N_det)
@@ -119,6 +146,7 @@ subroutine H_tc_s2_u_0_nstates_openmp(v_0,s_0,u_0,N_st,sze, do_right)
 
 end
 
+! ---
 
 subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishift,istep, do_right)
   use bitmasks
