@@ -36,16 +36,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_
 
   if(read_tc_integ) then
 
-    open(unit=11, form="unformatted", file='int2_grad1_u12_ao', action="read")
-      do m = 1, 3
-        do ipoint = 1, n_points_final_grid
-          do j = 1, ao_num
-            do i = 1, ao_num
-              read(11) int2_grad1_u12_ao(i,j,ipoint,m) 
-            enddo
-          enddo
-        enddo
-      enddo
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="read")
+    read(11) int2_grad1_u12_ao
     close(11)
 
   else
@@ -89,18 +81,12 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_
 
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='int2_grad1_u12_ao', action="write")
-      do m = 1, 3
-        do ipoint = 1, n_points_final_grid
-          do j = 1, ao_num
-            do i = 1, ao_num
-              write(11) int2_grad1_u12_ao(i,j,ipoint,m) 
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) int2_grad1_u12_ao
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)
@@ -319,16 +305,8 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
 
   if(read_tc_integ) then
 
-    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao', action="read")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              read(11) tc_grad_and_lapl_ao(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_and_lapl_ao', action="read")
+    read(11) tc_grad_and_lapl_ao
     close(11)
 
   else
@@ -388,18 +366,12 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
 
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao', action="write")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              write(11) tc_grad_and_lapl_ao(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_and_lapl_ao', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) tc_grad_and_lapl_ao
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)

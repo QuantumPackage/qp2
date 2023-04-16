@@ -17,29 +17,21 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
   call wall_time(time0)
 
   if(read_tc_integ) then
-  
-    open(unit=11, form="unformatted", file='tc_grad_square_ao_test', action="read")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              read(11) tc_grad_square_ao_test(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_square_ao_test', action="read")
+    read(11) tc_grad_square_ao_test
     close(11)
 
   else
 
     provide u12sq_j1bsq_test u12_grad1_u12_j1b_grad1_j1b_test grad12_j12_test
-  
+
     allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
-  
+
     b_mat = 0.d0
    !$OMP PARALLEL               &
    !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (i, k, ipoint) & 
+   !$OMP PRIVATE (i, k, ipoint) &
    !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
    !$OMP DO SCHEDULE (static)
     do i = 1, ao_num
@@ -51,11 +43,11 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     tmp = 0.d0
    !$OMP PARALLEL               &
    !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (j, l, ipoint) & 
+   !$OMP PRIVATE (j, l, ipoint) &
    !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq_test, u12_grad1_u12_j1b_grad1_j1b_test, grad12_j12_test)
    !$OMP DO SCHEDULE (static)
     do ipoint = 1, n_points_final_grid
@@ -67,23 +59,23 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     tc_grad_square_ao_test = 0.d0
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
               , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
               , 1.d0, tc_grad_square_ao_test, ao_num*ao_num)
     deallocate(tmp, b_mat)
-  
+
     call sum_A_At(tc_grad_square_ao_test(1,1,1,1), ao_num*ao_num)
     !do i = 1, ao_num
     !  do j = 1, ao_num
     !    do k = i, ao_num
-  
+
     !      do l = max(j,k), ao_num
     !        tc_grad_square_ao_test(i,j,k,l) = 0.5d0 * (tc_grad_square_ao_test(i,j,k,l) + tc_grad_square_ao_test(k,l,i,j))
     !        tc_grad_square_ao_test(k,l,i,j) = tc_grad_square_ao_test(i,j,k,l)
     !      end do
-  
+
     !      !if (j.eq.k) then
     !      !  do l = j+1, ao_num
     !      !    tc_grad_square_ao_test(i,j,k,l) = 0.5d0 * (tc_grad_square_ao_test(i,j,k,l) + tc_grad_square_ao_test(k,l,i,j))
@@ -95,14 +87,14 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
     !      !    tc_grad_square_ao_test(k,l,i,j) = tc_grad_square_ao_test(i,j,k,l)
     !      !  enddo
     !      !endif
-  
+
     !    enddo
     !  enddo
     !enddo
     !tc_grad_square_ao_test = 2.d0 * tc_grad_square_ao_test
   ! !$OMP PARALLEL             &
   ! !$OMP DEFAULT (NONE)       &
-  ! !$OMP PRIVATE (i, j, k, l) & 
+  ! !$OMP PRIVATE (i, j, k, l) &
   ! !$OMP SHARED (tc_grad_square_ao_test, ao_num)
   ! !$OMP DO SCHEDULE (static)
   !  integer :: ii
@@ -121,10 +113,10 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
   !  print *, ' ii =', ii
   ! !$OMP END DO
   ! !$OMP END PARALLEL
-  
+
   ! !$OMP PARALLEL             &
   ! !$OMP DEFAULT (NONE)       &
-  ! !$OMP PRIVATE (i, j, k, l) & 
+  ! !$OMP PRIVATE (i, j, k, l) &
   ! !$OMP SHARED (tc_grad_square_ao_test, ao_num)
   ! !$OMP DO SCHEDULE (static)
   !  do j = 1, ao_num
@@ -144,24 +136,18 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test, (ao_num, ao_num, ao_nu
 
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='tc_grad_square_ao_test', action="write")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              write(11) tc_grad_square_ao_test(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_square_ao_test', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) tc_grad_square_ao_test
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -189,7 +175,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
   b_mat = 0.d0
  !$OMP PARALLEL               &
  !$OMP DEFAULT (NONE)         &
- !$OMP PRIVATE (i, k, ipoint) & 
+ !$OMP PRIVATE (i, k, ipoint) &
  !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
  !$OMP DO SCHEDULE (static)
   do i = 1, ao_num
@@ -205,7 +191,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
   tmp = 0.d0
  !$OMP PARALLEL               &
  !$OMP DEFAULT (NONE)         &
- !$OMP PRIVATE (j, l, ipoint) & 
+ !$OMP PRIVATE (j, l, ipoint) &
  !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq_test, u12_grad1_u12_j1b_grad1_j1b_test, grad12_j12_test)
  !$OMP DO SCHEDULE (static)
   do ipoint = 1, n_points_final_grid
@@ -226,7 +212,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
 
  !$OMP PARALLEL             &
  !$OMP DEFAULT (NONE)       &
- !$OMP PRIVATE (i, j, k, l) & 
+ !$OMP PRIVATE (i, j, k, l) &
  !$OMP SHARED (ac_mat, tc_grad_square_ao_test_ref, ao_num)
  !$OMP DO SCHEDULE (static)
   do j = 1, ao_num
@@ -246,7 +232,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao_test_ref, (ao_num, ao_num, a
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao_test_ref = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -276,12 +262,12 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq_test, (ao_num, ao_num, n_points_f
   call wall_time(time1)
   print*, ' Wall time for u12sq_j1bsq_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao_num, n_points_final_grid) ]
- 
+
   implicit none
   integer                    :: ipoint, i, j, m, igauss
   double precision           :: x, y, z
@@ -328,12 +314,12 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b_test, (ao_num, ao
   call wall_time(time1)
   print*, ' Wall time for u12_grad1_u12_j1b_grad1_j1b_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [ double precision, grad12_j12_test, (ao_num, ao_num, n_points_final_grid) ]
- 
+
   implicit none
   integer                    :: ipoint, i, j, m, igauss
   double precision           :: r(3), delta, coef
@@ -381,7 +367,7 @@ BEGIN_PROVIDER [ double precision, grad12_j12_test, (ao_num, ao_num, n_points_fi
   call wall_time(time1)
   print*, ' Wall time for grad12_j12_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
