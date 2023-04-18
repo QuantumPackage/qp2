@@ -25,7 +25,7 @@ except ImportError:
                                       "quantum_package.rc"))
 
     print("\n".join(["", "Error:", "source %s" % f, ""]))
-    sys.exit(1)
+    raise
 
 # Compress path
 def comp_path(path):
