@@ -17,6 +17,6 @@ EOF
    fi
 else
    command=$(which -a zcat | grep -v 'qp2/bin/' | head -1)
-   exec command
+   exec $command $@
 fi
 
