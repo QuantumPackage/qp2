@@ -1,0 +1,127 @@
+* First gradient
+#+BEGIN_SRC f90 :comments org :tangle first_gradient_list_opt.irp.f
+subroutine first_gradient_list_opt(tmp_n,m,list,v_grad)
+
+  include 'constants.h'
+
+  implicit none
+
+  !===================================================================
+  ! Compute the gradient of energy with respects to orbital rotations
+  !===================================================================
+
+  ! Check if read_wf = true, else :
+  ! qp set determinant read_wf true
+
+  ! in
+  integer, intent(in) :: tmp_n,m,list(m)
+  ! n : integer, n = m*(m-1)/2
+  ! m = list_size
+  
+  ! out
+  double precision, intent(out) :: v_grad(tmp_n)
+  ! v_grad : double precision vector of length n containeing the gradient
+
+  ! internal
+  double precision, allocatable :: grad(:,:),A(:,:)
+  double precision :: norm
+  integer :: i,p,q,r,s,t,tmp_i,tmp_p,tmp_q,tmp_r,tmp_s,tmp_t
+  ! grad : double precision matrix containing the gradient before the permutation
+  ! A : double precision matrix containing the gradient after the permutation
+  ! norm : double precision number, the norm of the vector gradient
+  ! i,p,q,r,s,t : integer, indexes 
+  ! istate : integer, the electronic state
+
+  ! Function
+  double precision :: get_two_e_integral, norm2
+  ! get_two_e_integral :  double precision function that gives the two e integrals
+  ! norm2 : double precision function that gives the norm of a vector
+ 
+  ! Provided :
+  ! mo_one_e_integrals : mono e- integrals
+  ! get_two_e_integral : two e- integrals
+  ! one_e_dm_mo : one body density matrix (state average)
+  ! two_e_dm_mo : two body density matrix (state average)
+
+   print*,'---first_gradient_list---'
+
+  !============
+  ! Allocation
+  !============
+
+  allocate(grad(m,m),A(m,m))
+
+  !=============
+  ! Calculation
+  !=============
+
+  v_grad = 0d0
+  grad = 0d0
+
+  do tmp_p = 1, m
+    p = list(tmp_p)
+    do tmp_q = 1, m
+      q = list(tmp_q)
+      !grad(tmp_p,tmp_q) = 0d0
+      do r = 1, mo_num
+        grad(tmp_p,tmp_q) = grad(tmp_p,tmp_q) + mo_one_e_integrals(p,r) * one_e_dm_mo(r,q) &
+                               - mo_one_e_integrals(r,q) * one_e_dm_mo(p,r)
+
+      enddo
+
+      do r = 1, mo_num
+        do s = 1, mo_num
+          do t = 1, mo_num
+
+            grad(tmp_p,tmp_q) = grad(tmp_p,tmp_q) &
+                + get_two_e_integral(p,t,r,s,mo_integrals_map) * two_e_dm_mo(r,s,q,t) &
+                - get_two_e_integral(r,s,q,t,mo_integrals_map) * two_e_dm_mo(p,t,r,s)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+
+  ! Conversion mo_num*mo_num matrix to mo_num(mo_num-1)/2 vector
+  do tmp_i = 1, tmp_n
+    call vec_to_mat_index(tmp_i,tmp_p,tmp_q)
+    v_grad(tmp_i)=(grad(tmp_p,tmp_q) - grad(tmp_q,tmp_p))
+  enddo  
+
+  ! Display, vector containing the gradient elements 
+  if (debug) then  
+    print*,'Vector containing the gradient :'
+    write(*,'(100(F10.5))') v_grad(1:tmp_n)
+  endif  
+
+  ! Norm of the vector
+  norm = norm2(v_grad)
+  print*, 'Norm : ', norm
+
+  ! Matrix gradient
+  A = 0d0
+  do tmp_q = 1, m
+    do tmp_p = 1, m
+      A(tmp_p,tmp_q) = grad(tmp_p,tmp_q) - grad(tmp_q,tmp_p)
+    enddo
+  enddo
+
+  ! Display, matrix containting the gradient elements
+  if (debug) then
+    print*,'Matrix containing the gradient :'
+    do tmp_i = 1, m
+      write(*,'(100(E12.5))') A(tmp_i,1:m)
+    enddo
+  endif
+
+  !==============
+  ! Deallocation
+  !==============
+
+  deallocate(grad,A)
+
+  print*,'---End first_gradient_list---'
+
+end subroutine
+
+#+END_SRC
