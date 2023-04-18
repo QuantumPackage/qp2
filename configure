@@ -226,7 +226,7 @@ EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file qp2-dependencies/zeromq-4.2.5.tar.gz
               cd zeromq-*
-              [[ ${SYSTEM} = Darwin ]] && ./autogen.sh
+              [[ "${SYSTEM}" = "Darwin" ]] && ./autogen.sh
               ./configure --prefix="\$QP_ROOT" --without-libsodium --enable-libunwind=no
               make -j 8
               make install
