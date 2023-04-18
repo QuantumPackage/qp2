@@ -17,7 +17,11 @@ git submodule init
 git submodule update
 
 # Update ARM or x86 dependencies
-ARCHITECTURE=$(uname -m)
+SYSTEM=$(uname -s)
+if [[ $SYSTEM = "Linux" ]] ; then
+  SYSTEM=""
+fi
+ARCHITECTURE=$(uname -m)$SYSTEM
 cd ${QP_ROOT}/external/qp2-dependencies
 git checkout master
 git pull
@@ -232,7 +236,7 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.2.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.?.tar.gz
               cd f77-zmq-*
               ./configure --prefix=\$QP_ROOT
               export ZMQ_H="\$QP_ROOT"/include/zmq.h
