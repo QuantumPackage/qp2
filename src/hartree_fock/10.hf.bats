@@ -39,7 +39,7 @@ rm -rf $EZFIO
 qp create_ezfio -b def2-svp hcn.xyz -o $EZFIO
 qp run scf
 mv hcn_charges.xyz ${EZFIO}_point_charges.xyz
-python write_pt_charges.py ${EZFIO}
+python3 write_pt_charges.py ${EZFIO}
 qp set nuclei point_charges True
 qp run scf | tee ${EZFIO}.pt_charges.out
   energy="$(ezfio get hartree_fock energy)"
