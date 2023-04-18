@@ -22,7 +22,11 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
             perror("Error opening mmap file for reading");
             exit(EXIT_FAILURE);
         }
+#ifdef _GNU_SOURCE
         map = mmap(NULL, bytes, PROT_READ, MAP_SHARED | MAP_HUGETLB, fd, 0);
+#else
+        map = mmap(NULL, bytes, PROT_READ, MAP_SHARED, fd, 0);
+#endif
         if (map == MAP_FAILED) {
           /* try again without huge pages */
           map = mmap(NULL, bytes, PROT_READ, MAP_SHARED, fd, 0);
@@ -53,7 +57,11 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
             exit(EXIT_FAILURE);
         }
 
+#ifdef _GNU_SOURCE
         map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_HUGETLB, fd, 0);
+#else
+        map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+#endif
         if (map == MAP_FAILED) {
           /* try again without huge pages */
           map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
