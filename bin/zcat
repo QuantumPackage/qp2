@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+import sys
+import gzip
+
+# Check if a file path has been provided
+if len(sys.argv) < 2:
+    print("Usage: zcat <filename>")
+    sys.exit(1)
+
+# Open the gzip file
+with gzip.open(sys.argv[1], "rt") as f:
+    # Read the contents of the file and print to standard output
+    print(f.read())
+
