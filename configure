@@ -232,7 +232,7 @@ EOF
 
             execute << EOF
               cd "\${QP_ROOT}"/external
-              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.2.tar.gz
+              tar --gunzip --extract --file qp2-dependencies/f77-zmq-4.3.?.tar.gz
               cd f77-zmq-*
               ./configure --prefix=\$QP_ROOT
               export ZMQ_H="\$QP_ROOT"/include/zmq.h
