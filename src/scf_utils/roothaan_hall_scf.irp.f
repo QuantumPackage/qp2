@@ -153,6 +153,7 @@ END_DOC
 
 !   Write data in JSON file
 
+    call lock_io
     if (iteration_SCF == 1) then
       write(json_unit, *) '{'
     else
@@ -164,6 +165,7 @@ END_DOC
     write(json_unit, json_real_fmt) 'max_error_DIIS', max_error_DIIS
     write(json_unit, json_real_fmt) 'level_shift', level_shift
     write(json_unit, json_int_fmt) 'dim_DIIS', dim_DIIS
+    call unlock_io
 
     if (Delta_energy_SCF < 0.d0) then
       call save_mos
@@ -172,11 +174,13 @@ END_DOC
       write(json_unit, json_false_fmt) 'saved'
     endif
 
+    call lock_io
     if (converged) then
       write(json_unit, json_true_fmtx) 'converged'
     else
       write(json_unit, json_false_fmtx) 'converged'
     endif
+    call unlock_io
 
     if (qp_stop()) exit
 
