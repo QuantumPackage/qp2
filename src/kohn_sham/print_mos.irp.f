@@ -21,10 +21,3 @@ program print_mos
 
 end
 
-double precision function f_mu(x)
- implicit none
- double precision, intent(in) :: x
- 
-
-
-end
