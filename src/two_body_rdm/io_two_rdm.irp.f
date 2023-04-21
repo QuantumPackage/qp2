@@ -9,7 +9,9 @@ subroutine write_array_two_rdm(n_orb,nstates,array_tmp,name_file)
  PROVIDE ezfio_filename
  output=trim(ezfio_filename)//'/work/'//trim(name_file)
  i_unit_output = getUnitAndOpen(output,'W')
+ call lock_io()
  write(i_unit_output)array_tmp
+ call unlock_io()
  close(unit=i_unit_output)
 end
 
@@ -23,7 +25,9 @@ subroutine read_array_two_rdm(n_orb,nstates,array_tmp,name_file)
  PROVIDE ezfio_filename
  output=trim(ezfio_filename)//'/work/'//trim(name_file)
  i_unit_output = getUnitAndOpen(output,'R')
+ call lock_io()
  read(i_unit_output)array_tmp
+ call unlock_io()
  close(unit=i_unit_output)
 end
 
