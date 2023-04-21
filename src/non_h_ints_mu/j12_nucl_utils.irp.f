@@ -204,39 +204,6 @@ END_PROVIDER
 
 ! ---
 
-double precision function jmu_modif(r1, r2)
-
-  implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision, external   :: j12_mu, j12_nucl
-
-  jmu_modif = j12_mu(r1, r2) * j12_nucl(r1, r2)
-
-  return
-end function jmu_modif
-
-! ---
-
-double precision function j12_mu(r1, r2)
-
-  include 'constants.include.F'
-
-  implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: mu_r12, r12
-
-  r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-             + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-             + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
-  mu_r12 = mu_erf * r12
-
-  j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu_r12)) - inv_sq_pi_2 * dexp(-mu_r12*mu_r12) / mu_erf
-
-  return
-end function j12_mu
-
-! ---
-
 double precision function j12_mu_r12(r12)
 
   include 'constants.include.F'
@@ -251,6 +218,19 @@ double precision function j12_mu_r12(r12)
 
   return
 end function j12_mu_r12
+
+! ---
+
+double precision function jmu_modif(r1, r2)
+
+  implicit none
+  double precision, intent(in) :: r1(3), r2(3)
+  double precision, external   :: j12_mu, j12_nucl
+
+  jmu_modif = j12_mu(r1, r2) * j12_nucl(r1, r2)
+
+  return
+end function jmu_modif
 
 ! ---
 
@@ -278,30 +258,6 @@ end function j12_mu_gauss
 
 ! ---
 
-double precision function j1b_nucl(r)
-
-  implicit none
-  double precision, intent(in) :: r(3)
-  integer                      :: i
-  double precision             :: a, d, e
-
-  j1b_nucl = 1.d0
-
-  do i = 1, nucl_num
-    a = j1b_pen(i)
-    d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
-        + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
-        + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-    e = 1.d0 - exp(-a*d)
-
-    j1b_nucl = j1b_nucl * e
-  enddo
-
-  return
-end function j1b_nucl
-
-! ---
-
 double precision function j12_nucl(r1, r2)
 
   implicit none
@@ -317,7 +273,7 @@ end function j12_nucl
 
 ! ---------------------------------------------------------------------------------------
 
-double precision function grad_x_j1b_nucl(r)
+double precision function grad_x_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -333,12 +289,12 @@ double precision function grad_x_j1b_nucl(r)
   r_eps(1) = r_eps(1) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_x_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_x_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_x_j1b_nucl
+end function grad_x_j1b_nucl_num
 
-double precision function grad_y_j1b_nucl(r)
+double precision function grad_y_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -354,12 +310,12 @@ double precision function grad_y_j1b_nucl(r)
   r_eps(2) = r_eps(2) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_y_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_y_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_y_j1b_nucl
+end function grad_y_j1b_nucl_num
 
-double precision function grad_z_j1b_nucl(r)
+double precision function grad_z_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -375,10 +331,10 @@ double precision function grad_z_j1b_nucl(r)
   r_eps(3) = r_eps(3) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_z_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_z_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_z_j1b_nucl
+end function grad_z_j1b_nucl_num
 
 ! ---------------------------------------------------------------------------------------
 
@@ -389,9 +345,9 @@ double precision function lapl_j1b_nucl(r)
   implicit none
   double precision, intent(in) :: r(3)
   double precision             :: r_eps(3), eps, fp, fm, delta
-  double precision, external   :: grad_x_j1b_nucl
-  double precision, external   :: grad_y_j1b_nucl
-  double precision, external   :: grad_z_j1b_nucl
+  double precision, external   :: grad_x_j1b_nucl_num
+  double precision, external   :: grad_y_j1b_nucl_num
+  double precision, external   :: grad_z_j1b_nucl_num
 
   eps   = 1d-5
   r_eps = r
@@ -402,9 +358,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(1)))
   r_eps(1) = r_eps(1) + delta
-  fp       = grad_x_j1b_nucl(r_eps)
+  fp       = grad_x_j1b_nucl_num(r_eps)
   r_eps(1) = r_eps(1) - 2.d0 * delta
-  fm       = grad_x_j1b_nucl(r_eps)
+  fm       = grad_x_j1b_nucl_num(r_eps)
   r_eps(1) = r_eps(1) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -413,9 +369,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(2)))
   r_eps(2) = r_eps(2) + delta
-  fp       = grad_y_j1b_nucl(r_eps)
+  fp       = grad_y_j1b_nucl_num(r_eps)
   r_eps(2) = r_eps(2) - 2.d0 * delta
-  fm       = grad_y_j1b_nucl(r_eps)
+  fm       = grad_y_j1b_nucl_num(r_eps)
   r_eps(2) = r_eps(2) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -424,9 +380,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(3)))
   r_eps(3) = r_eps(3) + delta
-  fp       = grad_z_j1b_nucl(r_eps)
+  fp       = grad_z_j1b_nucl_num(r_eps)
   r_eps(3) = r_eps(3) - 2.d0 * delta
-  fm       = grad_z_j1b_nucl(r_eps)
+  fm       = grad_z_j1b_nucl_num(r_eps)
   r_eps(3) = r_eps(3) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -574,35 +530,6 @@ end function grad1_z_j12_mu_num
 
 ! ---------------------------------------------------------------------------------------
 
-! ---
-
-subroutine grad1_j12_mu_exc(r1, r2, grad)
-
-  implicit none
-  double precision, intent(in)  :: r1(3), r2(3)
-  double precision, intent(out) :: grad(3)
-  double precision              :: dx, dy, dz, r12, tmp
-
-  grad = 0.d0
-
-  dx = r1(1) - r2(1)
-  dy = r1(2) - r2(2)
-  dz = r1(3) - r2(3)
-
-  r12 = dsqrt( dx * dx + dy * dy + dz * dz )
-  if(r12 .lt. 1d-10) return
-
-  tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
-
-  grad(1) = tmp * dx 
-  grad(2) = tmp * dy 
-  grad(3) = tmp * dz 
-
-  return
-end subroutine grad1_j12_mu_exc
-
-! ---
-
 subroutine grad1_jmu_modif_num(r1, r2, grad)
 
   implicit none
@@ -614,11 +541,11 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
 
   double precision, external    :: j12_mu
   double precision, external    :: j1b_nucl
-  double precision, external    :: grad_x_j1b_nucl
-  double precision, external    :: grad_y_j1b_nucl
-  double precision, external    :: grad_z_j1b_nucl
+  double precision, external    :: grad_x_j1b_nucl_num
+  double precision, external    :: grad_y_j1b_nucl_num
+  double precision, external    :: grad_z_j1b_nucl_num
 
-  call grad1_j12_mu_exc(r1, r2, grad_u12)
+  call grad1_j12_mu(r1, r2, grad_u12)
 
   tmp0 = j1b_nucl(r1) 
   tmp1 = j1b_nucl(r2)
@@ -626,9 +553,9 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
   tmp3 = tmp0 * tmp1
   tmp4 = tmp2 * tmp1
 
-  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl(r1)
-  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl(r1)
-  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl(r1)
+  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl_num(r1)
+  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl_num(r1)
+  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl_num(r1)
 
   return
 end subroutine grad1_jmu_modif_num

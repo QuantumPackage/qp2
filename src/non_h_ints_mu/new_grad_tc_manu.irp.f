@@ -39,7 +39,6 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
     read(11) int2_grad1_u12_ao_test
     close(11)
 
-
   else
 
     if(j1b_type .eq. 3) then

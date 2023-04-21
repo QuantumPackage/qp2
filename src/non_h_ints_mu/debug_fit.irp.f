@@ -82,9 +82,9 @@ subroutine test_grad_j1b_nucl()
   integer                    :: ipoint
   double precision           :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
   double precision           :: r(3)
-  double precision, external :: grad_x_j1b_nucl
-  double precision, external :: grad_y_j1b_nucl
-  double precision, external :: grad_z_j1b_nucl
+  double precision, external :: grad_x_j1b_nucl_num
+  double precision, external :: grad_y_j1b_nucl_num
+  double precision, external :: grad_z_j1b_nucl_num
 
   print*, ' test_grad_j1b_nucl ...'
 
@@ -101,7 +101,7 @@ subroutine test_grad_j1b_nucl()
     r(3) = final_grid_points(3,ipoint)
 
     i_exc  = v_1b_grad(1,ipoint) 
-    i_num  = grad_x_j1b_nucl(r)
+    i_num  = grad_x_j1b_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
       print *, ' problem in x of v_1b_grad on', ipoint
@@ -111,7 +111,7 @@ subroutine test_grad_j1b_nucl()
     endif
 
     i_exc  = v_1b_grad(2,ipoint) 
-    i_num  = grad_y_j1b_nucl(r)
+    i_num  = grad_y_j1b_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
       print *, ' problem in y of v_1b_grad on', ipoint
@@ -121,7 +121,7 @@ subroutine test_grad_j1b_nucl()
     endif
 
     i_exc  = v_1b_grad(3,ipoint) 
-    i_num  = grad_z_j1b_nucl(r)
+    i_num  = grad_z_j1b_nucl_num(r)
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
       print *, ' problem in z of v_1b_grad on', ipoint
@@ -317,7 +317,7 @@ subroutine test_fit_ugradu()
       i_fit = i_fit / dsqrt(x2)
   
       tmp = j12_mu(r1, r2) 
-      call grad1_j12_mu_exc(r1, r2, grad)
+      call grad1_j12_mu(r1, r2, grad)
   
       ! ---
   

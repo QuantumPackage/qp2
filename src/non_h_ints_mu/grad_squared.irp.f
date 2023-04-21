@@ -351,6 +351,7 @@ END_PROVIDER
 
 ! ---
 
+
 BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
 
   BEGIN_DOC
@@ -376,7 +377,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   else
 
-    allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+    allocate(b_mat(n_points_final_grid,ao_num,ao_num))
 
     b_mat = 0.d0
    !$OMP PARALLEL               &
@@ -394,27 +395,11 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
    !$OMP END DO
    !$OMP END PARALLEL
 
-    tmp = 0.d0
-   !$OMP PARALLEL               &
-   !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (j, l, ipoint) &
-   !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
-   !$OMP DO SCHEDULE (static)
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do l = 1, ao_num
-          tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
-        enddo
-      enddo
-    enddo
-   !$OMP END DO
-   !$OMP END PARALLEL
-
     tc_grad_square_ao = 0.d0
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-              , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                  &
+              , int2_grad1_u12_squared_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
               , 1.d0, tc_grad_square_ao, ao_num*ao_num)
-    deallocate(tmp, b_mat)
+    deallocate(b_mat)
 
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
 
@@ -450,3 +435,4 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 END_PROVIDER
 
 ! ---
+

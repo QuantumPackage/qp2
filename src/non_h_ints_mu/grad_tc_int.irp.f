@@ -16,9 +16,11 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
   double precision              :: wall1, wall0
   double precision, allocatable :: b_mat(:,:,:,:), ac_mat(:,:,:,:)
 
+  print*, ' providing ao_non_hermit_term_chemist ...'
+  call wall_time(wall0)
+
   provide v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
 
-  call wall_time(wall0)
   allocate(b_mat(n_points_final_grid,ao_num,ao_num,3), ac_mat(ao_num,ao_num,ao_num,ao_num))
 
  !$OMP PARALLEL                         &
@@ -102,7 +104,7 @@ BEGIN_PROVIDER [double precision, ao_non_hermit_term_chemist, (ao_num, ao_num, a
  !$OMP END PARALLEL
 
   call wall_time(wall1)
-  print *, ' wall time dgemm ', wall1 - wall0
+  print *, ' wall time for ao_non_hermit_term_chemist ', wall1 - wall0
 
 END_PROVIDER 
 
