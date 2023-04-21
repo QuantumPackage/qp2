@@ -232,37 +232,33 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
 
   PROVIDE j1b_type
 
-  if(j1b_type .eq. 3) then
-
-    do ipoint = 1, n_points_final_grid
-      tmp1 = v_1b(ipoint)
-      tmp1 = tmp1 * tmp1
-      do j = 1, ao_num
-        do i = 1, ao_num
-          grad12_j12(i,j,ipoint) = tmp1 * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)
-        enddo
+  do ipoint = 1, n_points_final_grid
+    tmp1 = v_1b(ipoint)
+    tmp1 = tmp1 * tmp1
+    do j = 1, ao_num
+      do i = 1, ao_num
+        grad12_j12(i,j,ipoint) = tmp1 * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)
       enddo
     enddo
+  enddo
 
-  else
-
-    grad12_j12 = 0.d0
-    do ipoint = 1, n_points_final_grid
-      r(1) = final_grid_points(1,ipoint)
-      r(2) = final_grid_points(2,ipoint)
-      r(3) = final_grid_points(3,ipoint)
-      do j = 1, ao_num
-        do i = 1, ao_num
-          do igauss = 1, n_max_fit_slat
-            delta = expo_gauss_1_erf_x_2(igauss)
-            coef  = coef_gauss_1_erf_x_2(igauss)
-            grad12_j12(i,j,ipoint) += -0.25d0 * coef * overlap_gauss_r12_ao(r, delta, i, j)
-          enddo
-        enddo
-      enddo
-    enddo
-
-  endif
+  !if(j1b_type .eq. 0) then 
+  !  grad12_j12 = 0.d0
+  !  do ipoint = 1, n_points_final_grid
+  !    r(1) = final_grid_points(1,ipoint)
+  !    r(2) = final_grid_points(2,ipoint)
+  !    r(3) = final_grid_points(3,ipoint)
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        do igauss = 1, n_max_fit_slat
+  !          delta = expo_gauss_1_erf_x_2(igauss)
+  !          coef  = coef_gauss_1_erf_x_2(igauss)
+  !          grad12_j12(i,j,ipoint) += -0.25d0 * coef * overlap_gauss_r12_ao(r, delta, i, j)
+  !        enddo
+  !      enddo
+  !    enddo
+  !  enddo
+  !endif
 
   call wall_time(time1)
   print*, ' Wall time for grad12_j12 = ', time1 - time0
@@ -351,6 +347,7 @@ END_PROVIDER
 
 ! ---
 
+
 BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
 
   BEGIN_DOC
@@ -376,7 +373,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   else
 
-    allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+    allocate(b_mat(n_points_final_grid,ao_num,ao_num))
 
     b_mat = 0.d0
    !$OMP PARALLEL               &
@@ -394,27 +391,11 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
    !$OMP END DO
    !$OMP END PARALLEL
 
-    tmp = 0.d0
-   !$OMP PARALLEL               &
-   !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (j, l, ipoint) &
-   !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
-   !$OMP DO SCHEDULE (static)
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do l = 1, ao_num
-          tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
-        enddo
-      enddo
-    enddo
-   !$OMP END DO
-   !$OMP END PARALLEL
-
     tc_grad_square_ao = 0.d0
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-              , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
-              , 1.d0, tc_grad_square_ao, ao_num*ao_num)
-    deallocate(tmp, b_mat)
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                  &
+              , int2_grad1_u12_squared_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+              , 0.d0, tc_grad_square_ao, ao_num*ao_num)
+    deallocate(b_mat)
 
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
 
@@ -450,3 +431,4 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 END_PROVIDER
 
 ! ---
+
