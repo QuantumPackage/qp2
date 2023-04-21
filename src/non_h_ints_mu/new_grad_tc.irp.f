@@ -247,8 +247,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
     do m = 1, 3
       call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0              &
                 , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
-                , 1.d0, tc_grad_and_lapl_ao, ao_num*ao_num) 
-  
+                , 0.d0, tc_grad_and_lapl_ao, ao_num*ao_num) 
     enddo
     deallocate(b_mat)
   

@@ -1,7 +1,7 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, grad1_u12_num, (n_points_extra_final_grid, n_points_final_grid, 3)]
+ BEGIN_PROVIDER [ double precision, grad1_u12_num,         (n_points_extra_final_grid, n_points_final_grid, 3)]
 &BEGIN_PROVIDER [ double precision, grad1_u12_squared_num, (n_points_extra_final_grid, n_points_final_grid)]
 
   BEGIN_DOC
@@ -32,8 +32,15 @@
 
     double precision           :: v1b_r1, v1b_r2, u2b_r12
     double precision           :: grad1_v1b(3), grad1_u2b(3)
+    double precision           :: dx, dy, dz
     double precision, external :: j12_mu, j1b_nucl
 
+    !$OMP PARALLEL                                                                                    &
+    !$OMP DEFAULT (NONE)                                                                              &
+    !$OMP PRIVATE (ipoint, jpoint, r1, r2, v1b_r1, v1b_r2, u2b_r12, grad1_v1b, grad1_u2b, dx, dy, dz) &
+    !$OMP SHARED (n_points_final_grid, n_points_extra_final_grid, final_grid_points,                  &
+    !$OMP         final_grid_points_extra, grad1_u12_num, grad1_u12_squared_num)
+    !$OMP DO SCHEDULE (static)
     do ipoint = 1, n_points_final_grid  ! r1
 
       r1(1) = final_grid_points(1,ipoint)
@@ -41,7 +48,7 @@
       r1(3) = final_grid_points(3,ipoint)
 
       v1b_r1 = j1b_nucl(r1)
-      call grad1_j1b_nuc(r1, grad1_v1b)
+      call grad1_j1b_nucl(r1, grad1_v1b)
 
       do jpoint = 1, n_points_extra_final_grid ! r2 
 
@@ -53,15 +60,19 @@
         u2b_r12 = j12_mu(r1, r2)
         call grad1_j12_mu(r1, r2, grad1_u2b)
 
-        grad1_u12_num(jpoint,ipoint,1) = (grad1_u2b(1) * v1b_r1 + u2b_r12 * grad1_v1b(1)) * v1b_r2
-        grad1_u12_num(jpoint,ipoint,2) = (grad1_u2b(2) * v1b_r1 + u2b_r12 * grad1_v1b(2)) * v1b_r2
-        grad1_u12_num(jpoint,ipoint,3) = (grad1_u2b(3) * v1b_r1 + u2b_r12 * grad1_v1b(3)) * v1b_r2
+        dx = (grad1_u2b(1) * v1b_r1 + u2b_r12 * grad1_v1b(1)) * v1b_r2
+        dy = (grad1_u2b(2) * v1b_r1 + u2b_r12 * grad1_v1b(2)) * v1b_r2
+        dz = (grad1_u2b(3) * v1b_r1 + u2b_r12 * grad1_v1b(3)) * v1b_r2
 
-        grad1_u12_squared_num(jpoint,ipoint) = ( grad1_u12_num(jpoint,ipoint,1) * grad1_u12_num(jpoint,ipoint,1) &
-                                               + grad1_u12_num(jpoint,ipoint,2) * grad1_u12_num(jpoint,ipoint,2) &
-                                               + grad1_u12_num(jpoint,ipoint,3) * grad1_u12_num(jpoint,ipoint,3) )
+        grad1_u12_num(jpoint,ipoint,1) = dx 
+        grad1_u12_num(jpoint,ipoint,2) = dy 
+        grad1_u12_num(jpoint,ipoint,3) = dz 
+
+        grad1_u12_squared_num(jpoint,ipoint) = dx*dx + dy*dy + dz*dz
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
   else
 
@@ -170,7 +181,7 @@ end function j1b_nucl
 
 ! ---
 
-subroutine grad1_j1b_nuc(r, grad)
+subroutine grad1_j1b_nucl(r, grad)
 
   implicit none
   double precision, intent(in)  :: r(3)
@@ -228,7 +239,7 @@ subroutine grad1_j1b_nuc(r, grad)
   endif
 
   return
-end subroutine grad1_j1b_nuc
+end subroutine grad1_j1b_nucl
 
 ! ---
 

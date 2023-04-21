@@ -50,10 +50,9 @@
 
     ! ---
 
-    PROVIDE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
-
     if(.not.read_tc_integ) then
       call wall_time(time0)
+      PROVIDE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
       int2_grad1_u12_ao = 0.d0
       ! TODO OPENMP
       do ipoint = 1, n_points_final_grid
@@ -133,15 +132,38 @@
       do m = 1, 3
         call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, 1.d0          &
                   , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_num(1,1,m), n_points_extra_final_grid &
-                  , 1.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num) 
+                  , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num) 
       enddo
+
+      !! DEBUG
+      !PROVIDE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
+      !int2_grad1_u12_ao = 0.d0
+      !do ipoint = 1, n_points_final_grid
+      !  x = final_grid_points(1,ipoint)
+      !  y = final_grid_points(2,ipoint)
+      !  z = final_grid_points(3,ipoint)
+      !  tmp0  = 0.5d0 * v_1b(ipoint)
+      !  tmp_x =  v_1b_grad(1,ipoint)
+      !  tmp_y =  v_1b_grad(2,ipoint)
+      !  tmp_z =  v_1b_grad(3,ipoint)
+      !  do j = 1, ao_num
+      !    do i = 1, ao_num
+      !      tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
+      !      tmp2 = v_ij_u_cst_mu_j1b(i,j,ipoint)
+      !      int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) - tmp2 * tmp_x
+      !      int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) - tmp2 * tmp_y
+      !      int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) - tmp2 * tmp_z
+      !    enddo
+      !  enddo
+      !enddo
+
       ! these dgemm are equivalen to
       !!$OMP PARALLEL                                                           &
       !!$OMP DEFAULT (NONE)                                                     &
       !!$OMP PRIVATE (j, i, ipoint, jpoint, w)                                  &
       !!$OMP SHARED (int2_grad1_u12_ao, ao_num, n_points_final_grid,            &
       !!$OMP         n_points_extra_final_grid, final_weight_at_r_vector_extra, &
-      !!$OMP         aos_in_r_array_extra_transp, grad1_u12_num,tmp)
+      !!$OMP         aos_in_r_array_extra_transp, grad1_u12_num, tmp)
       !!$OMP DO SCHEDULE (static)
       !do ipoint = 1, n_points_final_grid
       !  do j = 1, ao_num
@@ -165,22 +187,42 @@
 
     call wall_time(time0)
     int2_grad1_u12_squared_ao = 0.d0
-    call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, 1.d0                &
+    call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, -0.5d0              &
               , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_squared_num(1,1), n_points_extra_final_grid &
-              , 1.d0, int2_grad1_u12_squared_ao(1,1,1), ao_num*ao_num) 
+              , 0.d0, int2_grad1_u12_squared_ao(1,1,1), ao_num*ao_num) 
+
+    !! DEBUG
+    !PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
+    !int2_grad1_u12_squared_ao = 0.d0
+    !!$OMP PARALLEL               &
+    !!$OMP DEFAULT (NONE)         &
+    !!$OMP PRIVATE (i, j, ipoint) &
+    !!$OMP SHARED (int2_grad1_u12_squared_ao, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
+    !!$OMP DO SCHEDULE (static)
+    !do ipoint = 1, n_points_final_grid
+    !  do j = 1, ao_num
+    !    do i = 1, ao_num
+    !      int2_grad1_u12_squared_ao(i,j,ipoint) = u12sq_j1bsq(i,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(i,j,ipoint) + 0.5d0 * grad12_j12(i,j,ipoint)
+    !    enddo
+    !  enddo
+    !enddo
+    !!$OMP END DO
+    !!$OMP END PARALLEL
+    !call wall_time(time1)
+
     !! this dgemm is equivalen to
     !!$OMP PARALLEL                                                           &
     !!$OMP DEFAULT (NONE)                                                     &
     !!$OMP PRIVATE (i, j, ipoint, jpoint, w)                                  &
     !!$OMP SHARED (int2_grad1_u12_squared_ao, ao_num, n_points_final_grid,    &
     !!$OMP         n_points_extra_final_grid, final_weight_at_r_vector_extra, &
-    !!$OMP         aos_in_r_array_extra_transp, grad1_u12_squared_num,tmp)
+    !!$OMP         aos_in_r_array_extra_transp, grad1_u12_squared_num, tmp)
     !!$OMP DO SCHEDULE (static)
     !do ipoint = 1, n_points_final_grid
     !  do j = 1, ao_num
     !    do i = 1, ao_num
     !      do jpoint = 1, n_points_extra_final_grid
-    !        w = tmp(jpoint,i,j)
+    !        w = 0.5d0 * tmp(jpoint,i,j)
     !        int2_grad1_u12_squared_ao(i,j,ipoint) += w * grad1_u12_squared_num(jpoint,ipoint)
     !      enddo
     !    enddo
@@ -207,9 +249,6 @@
     close(11)
     call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
-
-  call wall_time(time1)
-  print*, ' wall time for int2_grad1_u12_ao & int2_grad1_u12_squared_ao = ', time1 - time0 
 
 END_PROVIDER
 
