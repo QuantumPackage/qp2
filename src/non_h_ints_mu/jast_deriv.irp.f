@@ -155,7 +155,7 @@ double precision function j1b_nucl(r)
   implicit none
   double precision, intent(in) :: r(3)
   integer                      :: i
-  double precision             :: a, d, e
+  double precision             :: a, d, e, x, y, z
 
   if(j1b_type .eq. 103) then
 
@@ -167,6 +167,29 @@ double precision function j1b_nucl(r)
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
       e = 1.d0 - dexp(-a*d)
       j1b_nucl = j1b_nucl * e
+    enddo
+
+  elseif(j1b_type .eq. 104) then
+
+    j1b_nucl = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
+          + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
+          + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
+      j1b_nucl = j1b_nucl - dexp(-a*d)
+    enddo
+
+  elseif(j1b_type .eq. 105) then
+
+    j1b_nucl = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      x = r(1) - nucl_coord(i,1)
+      y = r(2) - nucl_coord(i,2)
+      z = r(3) - nucl_coord(i,3)
+      d = x*x + y*y + z*z
+      j1b_nucl = j1b_nucl - dexp(-a*d*d)
     enddo
 
   else
@@ -230,6 +253,50 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(1) = fact_x
     grad(2) = fact_y
     grad(3) = fact_z
+
+  else if(j1b_type .eq. 104) then
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      x = r(1) - nucl_coord(i,1)
+      y = r(2) - nucl_coord(i,2)
+      z = r(3) - nucl_coord(i,3)
+      d = x*x + y*y + z*z
+      e = a * dexp(-a*d)
+
+      fact_x += e * x
+      fact_y += e * y
+      fact_z += e * z
+    enddo
+
+    grad(1) = -2.d0 * fact_x
+    grad(2) = -2.d0 * fact_y
+    grad(3) = -2.d0 * fact_z
+
+  else if(j1b_type .eq. 105) then
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      x = r(1) - nucl_coord(i,1)
+      y = r(2) - nucl_coord(i,2)
+      z = r(3) - nucl_coord(i,3)
+      d = x*x + y*y + z*z
+      e = a * d * dexp(-a*d*d)
+
+      fact_x += e * x
+      fact_y += e * y
+      fact_z += e * z
+    enddo
+
+    grad(1) = -4.d0 * fact_x
+    grad(2) = -4.d0 * fact_y
+    grad(3) = -4.d0 * fact_z
 
   else
 
