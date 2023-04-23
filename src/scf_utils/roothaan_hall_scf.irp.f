@@ -155,9 +155,9 @@ END_DOC
 
     call lock_io
     if (iteration_SCF == 1) then
-      write(json_unit, *) '{'
+      write(json_unit, json_dict_uopen_fmt)
     else
-      write(json_unit, *) '}, {'
+      write(json_unit, json_dict_close_uopen_fmt)
     endif
     write(json_unit, json_int_fmt) 'iteration', iteration_SCF
     write(json_unit, json_real_fmt) 'energy', energy_SCF
@@ -185,7 +185,7 @@ END_DOC
     if (qp_stop()) exit
 
   enddo
-  write(json_unit, *) '}'
+  write(json_unit, json_dict_close_fmtx)
 
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'
