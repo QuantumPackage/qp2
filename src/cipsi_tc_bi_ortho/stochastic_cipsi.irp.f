@@ -101,7 +101,7 @@ subroutine run_stochastic_cipsi
 
     call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
-    call print_mol_properties()
+!    call print_mol_properties()
     call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit
