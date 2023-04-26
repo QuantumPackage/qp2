@@ -20,6 +20,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_vartc_tot, (ao_num, ao_num, ao_num, a
   enddo
 
 END_PROVIDER 
+
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_num) ]
@@ -65,6 +66,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     enddo
 
   else
+
+    PROVIDE ao_tc_int_chemist
 
     do j = 1, ao_num
       do l = 1, ao_num

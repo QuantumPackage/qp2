@@ -11,6 +11,7 @@
   integer :: i, j
 
   PROVIDE mo_l_coef mo_r_coef
+  PROVIDE two_e_tc_non_hermit_integral_alpha two_e_tc_non_hermit_integral_beta
 
   TC_HF_energy = nuclear_repulsion
   TC_HF_one_e_energy = 0.d0
