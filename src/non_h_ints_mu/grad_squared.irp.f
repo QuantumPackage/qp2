@@ -352,7 +352,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   BEGIN_DOC
   !
-  ! tc_grad_square_ao(k,i,l,j) = 1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
+  ! tc_grad_square_ao(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
   !
   END_DOC
 
@@ -373,6 +373,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   else
 
+    PROVIDE int2_grad1_u12_square_ao
+
     allocate(b_mat(n_points_final_grid,ao_num,ao_num))
 
     b_mat = 0.d0
@@ -392,8 +394,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
    !$OMP END PARALLEL
 
     tc_grad_square_ao = 0.d0
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                  &
-              , int2_grad1_u12_squared_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
+              , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
               , 0.d0, tc_grad_square_ao, ao_num*ao_num)
     deallocate(b_mat)
 

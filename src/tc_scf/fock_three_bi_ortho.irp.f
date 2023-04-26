@@ -4,14 +4,16 @@
 BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
 
   BEGIN_DOC
-! Alpha part of the Fock matrix from three-electron terms 
-!
-! WARNING :: non hermitian if bi-ortho MOS used 
+  ! Alpha part of the Fock matrix from three-electron terms 
+  !
+  ! WARNING :: non hermitian if bi-ortho MOS used 
   END_DOC
+
   implicit none
   integer :: i, a
 
   PROVIDE mo_l_coef mo_r_coef
+  PROVIDE fock_cs_3e_bi_orth fock_a_tmp1_bi_ortho fock_a_tmp2_bi_ortho
 
   fock_a_tot_3e_bi_orth = 0.d0
 

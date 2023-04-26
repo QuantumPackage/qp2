@@ -50,19 +50,23 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
 
   BEGIN_DOC
-! ALPHA part of the Fock matrix from three-electron terms 
-!
-! WARNING :: non hermitian if bi-ortho MOS used 
+  !
+  ! ALPHA part of the Fock matrix from three-electron terms 
+  !
+  ! WARNING :: non hermitian if bi-ortho MOS used 
+  !
   END_DOC
+
   implicit none
   integer          :: a, b, i, j, o
   double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
   double precision :: ti, tf
 
   PROVIDE mo_l_coef mo_r_coef
+  PROVIDE fock_3e_uhf_mo_cs
 
   !print *, ' PROVIDING fock_3e_uhf_mo_a ...'
-  call wall_time(ti)
+  !call wall_time(ti)
 
   o = elec_beta_num + 1
 
@@ -142,7 +146,7 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
     enddo
   enddo
 
-  call wall_time(tf)
+  !call wall_time(tf)
   !print *, ' total Wall time for fock_3e_uhf_mo_a =', tf - ti
 
 END_PROVIDER 

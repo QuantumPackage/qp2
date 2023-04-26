@@ -11,14 +11,17 @@ BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
   provide j1b_type
 
   if( (j1b_type .eq. 1) .or. (j1b_type .eq. 2) ) then
+  
+    print *, ' do things properly !'
+    stop
 
-    do i = 1, ao_num
-      do j = 1, ao_num
-        ao_one_e_integrals_tc_tot(j,i) += ( j1b_gauss_hermI  (j,i) &
-                                          + j1b_gauss_hermII (j,i) &
-                                          + j1b_gauss_nonherm(j,i) )
-      enddo
-    enddo
+    !do i = 1, ao_num
+    !  do j = 1, ao_num
+    !    ao_one_e_integrals_tc_tot(j,i) += ( j1b_gauss_hermI  (j,i) &
+    !                                      + j1b_gauss_hermII (j,i) &
+    !                                      + j1b_gauss_nonherm(j,i) )
+    !  enddo
+    !enddo
 
   endif
 

@@ -18,6 +18,8 @@
   double precision :: density, density_a, density_b
   double precision :: t0, t1
 
+  PROVIDE ao_two_e_tc_tot
+
   !print*, ' providing two_e_tc_non_hermit_integral_seq ...'
   !call wall_time(t0)
 
@@ -79,6 +81,10 @@ END_PROVIDER
   double precision              :: density, density_a, density_b, I_coul, I_kjli
   double precision              :: t0, t1
   double precision, allocatable :: tmp_a(:,:), tmp_b(:,:)
+
+  PROVIDE ao_two_e_tc_tot
+  PROVIDE mo_l_coef mo_r_coef
+  PROVIDE TCSCF_density_matrix_ao_alpha TCSCF_density_matrix_ao_beta
 
   !print*, ' providing two_e_tc_non_hermit_integral ...'
   !call wall_time(t0)
@@ -142,7 +148,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_alpha, (ao_num, ao_num)]
 
   implicit none
 
-  Fock_matrix_tc_ao_alpha =  ao_one_e_integrals_tc_tot + two_e_tc_non_hermit_integral_alpha 
+  Fock_matrix_tc_ao_alpha = ao_one_e_integrals_tc_tot + two_e_tc_non_hermit_integral_alpha 
 
 END_PROVIDER 
 
@@ -181,14 +187,17 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
     !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1))
     !deallocate(tmp)
 
+    PROVIDE mo_l_coef mo_r_coef
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                           , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
     if(three_body_h_tc) then
       !Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+      PROVIDE fock_3e_uhf_mo_a
       Fock_matrix_tc_mo_alpha += fock_3e_uhf_mo_a
     endif
 
   else
+
     call ao_to_mo( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                  , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
 
@@ -275,6 +284,9 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
 
   implicit none
+
+  PROVIDE mo_l_coef mo_r_coef
+  PROVIDE Fock_matrix_tc_mo_tot
 
   call mo_to_ao_bi_ortho( Fock_matrix_tc_mo_tot, size(Fock_matrix_tc_mo_tot, 1) &
                         , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) )

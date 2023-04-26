@@ -92,17 +92,22 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
 
   allocate(F(ao_num,ao_num))
   if(var_tc) then
+
     do i = 1, ao_num
       do j = 1, ao_num
         F(j,i) = Fock_matrix_vartc_ao_tot(j,i)
       enddo
     enddo
+
   else
+
+    PROVIDE Fock_matrix_tc_ao_tot
     do i = 1, ao_num
       do j = 1, ao_num
         F(j,i) = Fock_matrix_tc_ao_tot(j,i)
       enddo
     enddo
+
   endif
 
   allocate(tmp(ao_num,ao_num))
@@ -138,6 +143,9 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
 
   implicit none
+
+  PROVIDE mo_r_coef mo_l_coef
+  PROVIDE FQS_SQF_ao
 
   call ao_to_mo_bi_ortho( FQS_SQF_ao, size(FQS_SQF_ao, 1) &
                         , FQS_SQF_mo, size(FQS_SQF_mo, 1) )
