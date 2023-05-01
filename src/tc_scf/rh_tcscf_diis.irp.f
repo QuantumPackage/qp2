@@ -231,8 +231,7 @@ subroutine rh_tcscf_diis()
   ! ---
 
   print *, ' TCSCF DIIS converged !'
-  call print_energy_and_mos()
-
+  !call print_energy_and_mos()
   call write_time(6)
 
   deallocate(mo_r_coef_save, mo_l_coef_save, F_DIIS, E_DIIS)

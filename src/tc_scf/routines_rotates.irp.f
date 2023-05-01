@@ -46,6 +46,7 @@ end subroutine LTxR
 ! ---
 
 subroutine minimize_tc_orb_angles()
+
   BEGIN_DOC
   ! routine that minimizes the angle between left- and right-orbitals when degeneracies are found
   END_DOC
@@ -362,7 +363,7 @@ subroutine print_energy_and_mos()
   integer :: i
 
   print *, ' '
-  print *, ' TC energy = ', TC_HF_energy
+  print *, ' TC energy              = ', TC_HF_energy
   print *, ' TC SCF energy gradient = ', grad_non_hermit
   print *, ' Max angle Left/right   = ', max_angle_left_right
 
