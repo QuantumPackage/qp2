@@ -127,7 +127,7 @@ BEGIN_PROVIDER [double precision, fock_cs_3e_bi_orth, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do i = 1, mo_num
-    do j = 1, mo_num
+    do a = 1, mo_num
       fock_cs_3e_bi_orth(a,i) += tmp(a,i)
     enddo
   enddo
@@ -195,7 +195,7 @@ BEGIN_PROVIDER [double precision, fock_a_tmp1_bi_ortho, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do i = 1, mo_num
-    do j = 1, mo_num
+    do a = 1, mo_num
       fock_a_tmp1_bi_ortho(a,i) += tmp(a,i)
     enddo
   enddo
@@ -255,7 +255,7 @@ BEGIN_PROVIDER [double precision, fock_a_tmp2_bi_ortho, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do i = 1, mo_num
-    do j = 1, mo_num
+    do a = 1, mo_num
       fock_a_tmp2_bi_ortho(a,i) += tmp(a,i)
     enddo
   enddo
@@ -315,7 +315,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp1_bi_ortho, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do i = 1, mo_num
-    do j = 1, mo_num
+    do a = 1, mo_num
       fock_b_tmp1_bi_ortho(a,i) += tmp(a,i)
     enddo
   enddo
@@ -375,7 +375,7 @@ BEGIN_PROVIDER [double precision, fock_b_tmp2_bi_ortho, (mo_num, mo_num)]
 
   !$OMP CRITICAL
   do i = 1, mo_num
-    do j = 1, mo_num
+    do a = 1, mo_num
       fock_b_tmp2_bi_ortho(a,i) += tmp(a,i)
     enddo
   enddo
