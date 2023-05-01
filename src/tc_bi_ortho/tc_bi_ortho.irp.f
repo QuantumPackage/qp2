@@ -48,17 +48,20 @@ subroutine routine_diag()
 
   if(N_states .eq. 1) then
 
-    print*,'eigval_right_tc_bi_orth = ',eigval_right_tc_bi_orth(1)
-    print*,'e_tc_left_right         = ',e_tc_left_right
-    print*,'e_tilde_bi_orth_00      = ',e_tilde_bi_orth_00
-    print*,'e_pt2_tc_bi_orth        = ',e_pt2_tc_bi_orth
-    print*,'e_pt2_tc_bi_orth_single = ',e_pt2_tc_bi_orth_single
-    print*,'e_pt2_tc_bi_orth_double = ',e_pt2_tc_bi_orth_double
-    print*,'***'
-    print*,'e_corr_bi_orth          = ',e_corr_bi_orth
-    print*,'e_corr_bi_orth_proj     = ',e_corr_bi_orth_proj
-    print*,'e_corr_single_bi_orth   = ',e_corr_single_bi_orth
-    print*,'e_corr_double_bi_orth   = ',e_corr_double_bi_orth
+    print*,'eigval_right_tc_bi_orth   = ',eigval_right_tc_bi_orth(1)
+    print*,'e_tc_left_right           = ',e_tc_left_right
+    print*,'e_tilde_bi_orth_00        = ',e_tilde_bi_orth_00
+    print*,'e_pt2_tc_bi_orth          = ',e_pt2_tc_bi_orth
+    print*,'e_pt2_tc_bi_orth_single   = ',e_pt2_tc_bi_orth_single
+    print*,'e_pt2_tc_bi_orth_double   = ',e_pt2_tc_bi_orth_double
+    print*,'***'                      
+    print*,'e_corr_bi_orth            = ',e_corr_bi_orth
+    print*,'e_corr_bi_orth_proj       = ',e_corr_bi_orth_proj
+    print*,'e_corr_bi_orth_proj_abs   = ',e_corr_bi_orth_proj_abs
+    print*,'e_corr_single_bi_orth     = ',e_corr_single_bi_orth
+    print*,'e_corr_double_bi_orth     = ',e_corr_double_bi_orth
+    print*,'e_corr_single_bi_orth_abs = ',e_corr_single_bi_orth_abs
+    print*,'e_corr_double_bi_orth_abs = ',e_corr_double_bi_orth_abs
     print*,'Left/right eigenvectors'
     do i = 1,N_det
       write(*,'(I5,X,(100(F12.7,X)))')i,leigvec_tc_bi_orth(i,1),reigvec_tc_bi_orth(i,1),leigvec_tc_bi_orth(i,1)*reigvec_tc_bi_orth(i,1)

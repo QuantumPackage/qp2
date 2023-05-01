@@ -45,6 +45,9 @@
 &BEGIN_PROVIDER [ double precision, e_corr_bi_orth_proj ]
 &BEGIN_PROVIDER [ double precision, e_corr_single_bi_orth ]
 &BEGIN_PROVIDER [ double precision, e_corr_double_bi_orth ]
+&BEGIN_PROVIDER [ double precision, e_corr_bi_orth_proj_abs ]
+&BEGIN_PROVIDER [ double precision, e_corr_single_bi_orth_abs ]
+&BEGIN_PROVIDER [ double precision, e_corr_double_bi_orth_abs ]
  implicit none 
  integer :: i,degree
  double precision :: hmono,htwoe,hthree,htilde_ij
@@ -57,13 +60,15 @@
   call htilde_mu_mat_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
   if(degree == 1)then
    e_corr_single_bi_orth += reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1)
+   e_corr_single_bi_orth_abs += dabs(reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1))
   else if(degree == 2)then
    e_corr_double_bi_orth += reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1)
-!   print*,'coef_wf , e_cor',reigvec_tc_bi_orth(i,1)/reigvec_tc_bi_orth(1,1), reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1)
+   e_corr_double_bi_orth_abs += dabs(reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1))
   endif
  enddo
  e_corr_bi_orth_proj = e_corr_single_bi_orth + e_corr_double_bi_orth
  e_corr_bi_orth = eigval_right_tc_bi_orth(1) - e_tilde_bi_orth_00
+ e_corr_bi_orth_proj_abs = e_corr_single_bi_orth_abs + e_corr_double_bi_orth_abs
  END_PROVIDER 
 
  BEGIN_PROVIDER [ double precision, e_tc_left_right ]
