@@ -46,15 +46,20 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
 
       int2_grad1_u12_ao = 0.d0
-      ! TODO OPENMP
+      !$OMP PARALLEL                                                                 &
+      !$OMP DEFAULT (NONE)                                                           &
+      !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp0, tmp1, tmp2, tmp_x, tmp_y, tmp_z)   &
+      !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points, v_1b, v_1b_grad &
+      !$OMP        , v_ij_erf_rk_cst_mu_j1b, v_ij_u_cst_mu_j1b, x_v_ij_erf_rk_cst_mu_j1b, int2_grad1_u12_ao)
+      !$OMP DO SCHEDULE (static)
       do ipoint = 1, n_points_final_grid
-        x = final_grid_points(1,ipoint)
-        y = final_grid_points(2,ipoint)
-        z = final_grid_points(3,ipoint)
-        tmp0  = 0.5d0 * v_1b(ipoint)
-        tmp_x =  v_1b_grad(1,ipoint)
-        tmp_y =  v_1b_grad(2,ipoint)
-        tmp_z =  v_1b_grad(3,ipoint)
+        x     = final_grid_points(1,ipoint)
+        y     = final_grid_points(2,ipoint)
+        z     = final_grid_points(3,ipoint)
+        tmp0  =        0.5d0 * v_1b(ipoint)
+        tmp_x =         v_1b_grad(1,ipoint)
+        tmp_y =         v_1b_grad(2,ipoint)
+        tmp_z =         v_1b_grad(3,ipoint)
         do j = 1, ao_num
           do i = 1, ao_num
             tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
@@ -65,6 +70,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           enddo
         enddo
       enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
 
     endif
 

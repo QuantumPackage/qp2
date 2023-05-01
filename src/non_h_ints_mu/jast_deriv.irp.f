@@ -272,9 +272,9 @@ subroutine grad1_j1b_nucl(r, grad)
       fact_z += e * z
     enddo
 
-    grad(1) = -2.d0 * fact_x
-    grad(2) = -2.d0 * fact_y
-    grad(3) = -2.d0 * fact_z
+    grad(1) = 2.d0 * fact_x
+    grad(2) = 2.d0 * fact_y
+    grad(3) = 2.d0 * fact_z
 
   else if(j1b_type .eq. 105) then
 
@@ -294,9 +294,9 @@ subroutine grad1_j1b_nucl(r, grad)
       fact_z += e * z
     enddo
 
-    grad(1) = -4.d0 * fact_x
-    grad(2) = -4.d0 * fact_y
-    grad(3) = -4.d0 * fact_z
+    grad(1) = 4.d0 * fact_x
+    grad(2) = 4.d0 * fact_y
+    grad(3) = 4.d0 * fact_z
 
   else
 

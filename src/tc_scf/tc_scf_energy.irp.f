@@ -8,7 +8,11 @@
   END_DOC
 
   implicit none
-  integer :: i, j
+  integer          :: i, j
+  double precision :: t0, t1
+
+  !print*, ' Providing TC energy ...'
+  !call wall_time(t0)
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE two_e_tc_non_hermit_integral_alpha two_e_tc_non_hermit_integral_beta
@@ -28,6 +32,9 @@
 
   TC_HF_energy += TC_HF_one_e_energy + TC_HF_two_e_energy
   TC_HF_energy += diag_three_elem_hf
+
+  !call wall_time(t1)
+  !print*, ' Wall time for TC energy=', t1-t0
 
 END_PROVIDER
 
