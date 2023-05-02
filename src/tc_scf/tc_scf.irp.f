@@ -54,7 +54,6 @@ program tc_scf
     endif
 
     call minimize_tc_orb_angles()
-    call print_energy_and_mos()
 
   endif
 
