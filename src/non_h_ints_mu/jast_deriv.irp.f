@@ -157,7 +157,18 @@ double precision function j1b_nucl(r)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if(j1b_type .eq. 103) then
+  if(j1b_type .eq. 102) then
+
+    j1b_nucl = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
+          + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
+          + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
+      j1b_nucl = j1b_nucl - dexp(-a*dsqrt(d))
+    enddo
+
+  elseif(j1b_type .eq. 103) then
 
     j1b_nucl = 1.d0
     do i = 1, nucl_num
@@ -215,7 +226,29 @@ subroutine grad1_j1b_nucl(r, grad)
   double precision              :: fact_x, fact_y, fact_z
   double precision              :: ax_der, ay_der, az_der, a_expo
 
-  if(j1b_type .eq. 103) then
+  if(j1b_type .eq. 102) then
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      x = r(1) - nucl_coord(i,1)
+      y = r(2) - nucl_coord(i,2)
+      z = r(3) - nucl_coord(i,3)
+      d = dsqrt(x*x + y*y + z*z)
+      e = a * dexp(-a*d) / d
+
+      fact_x += e * x
+      fact_y += e * y
+      fact_z += e * z
+    enddo
+
+    grad(1) = fact_x
+    grad(2) = fact_y
+    grad(3) = fact_z
+
+  elseif(j1b_type .eq. 103) then
 
     x = r(1)
     y = r(2)
@@ -254,7 +287,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  else if(j1b_type .eq. 104) then
+  elseif(j1b_type .eq. 104) then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -276,7 +309,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = 2.d0 * fact_y
     grad(3) = 2.d0 * fact_z
 
-  else if(j1b_type .eq. 105) then
+  elseif(j1b_type .eq. 105) then
 
     fact_x = 0.d0
     fact_y = 0.d0
