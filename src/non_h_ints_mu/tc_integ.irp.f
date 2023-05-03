@@ -35,13 +35,13 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
   PROVIDE j1b_type
 
   if(read_tc_integ) then
+
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="read")
     read(11) int2_grad1_u12_ao
-  endif
 
-  if(j1b_type .eq. 3) then
+  else
 
-    if(.not.read_tc_integ) then
+    if(j1b_type .eq. 3) then
 
       PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
 
@@ -73,32 +73,29 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       !$OMP END DO
       !$OMP END PARALLEL
 
-    endif
+    elseif(j1b_type .ge. 100) then
 
-  elseif(j1b_type .ge. 100) then
+      PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
+      PROVIDE grad1_u12_num
 
-    PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
-    PROVIDE grad1_u12_num
-
-    double precision, allocatable :: tmp(:,:,:)
-    allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
-    tmp = 0.d0
-    !$OMP PARALLEL               &
-    !$OMP DEFAULT (NONE)         &
-    !$OMP PRIVATE (j, i, jpoint) &
-    !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
-    !$OMP DO SCHEDULE (static)
-    do j = 1, ao_num
-      do i = 1, ao_num
-        do jpoint = 1, n_points_extra_final_grid
-          tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+      double precision, allocatable :: tmp(:,:,:)
+      allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
+      tmp = 0.d0
+      !$OMP PARALLEL               &
+      !$OMP DEFAULT (NONE)         &
+      !$OMP PRIVATE (j, i, jpoint) &
+      !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
+      !$OMP DO SCHEDULE (static)
+      do j = 1, ao_num
+        do i = 1, ao_num
+          do jpoint = 1, n_points_extra_final_grid
+            tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+          enddo
         enddo
       enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+      !$OMP END DO
+      !$OMP END PARALLEL
 
-    if(.not.read_tc_integ) then
       int2_grad1_u12_ao = 0.d0
       do m = 1, 3
         !call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, +1.d0         &
@@ -108,7 +105,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
                   , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num) 
       enddo
 
-      !! these dgemm are equivalen to
+      !! these dgemm are equivalent to
       !!$OMP PARALLEL                                                           &
       !!$OMP DEFAULT (NONE)                                                     &
       !!$OMP PRIVATE (j, i, ipoint, jpoint, w)                                  &
@@ -132,15 +129,14 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       !enddo
       !!$OMP END DO
       !!$OMP END PARALLEL
+
+      deallocate(tmp)
+    else
+
+      print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+      stop
+
     endif
-
-    deallocate(tmp)
-  
-  else
-
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
-    stop
-
   endif
 
   if(write_tc_integ.and.mpi_master) then

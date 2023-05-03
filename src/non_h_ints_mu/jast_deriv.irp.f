@@ -74,6 +74,42 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
+  elseif((j1b_type .ge. 200) .and. (j1b_type .lt. 300)) then
+
+    !$OMP PARALLEL                                                                   &
+    !$OMP DEFAULT (NONE)                                                             &
+    !$OMP PRIVATE (ipoint, jpoint, r1, r2, grad1_u2b, dx, dy, dz)                    &
+    !$OMP SHARED (n_points_final_grid, n_points_extra_final_grid, final_grid_points, &
+    !$OMP         final_grid_points_extra, grad1_u12_num, grad1_u12_squared_num)
+    !$OMP DO SCHEDULE (static)
+    do ipoint = 1, n_points_final_grid  ! r1
+
+      r1(1) = final_grid_points(1,ipoint)
+      r1(2) = final_grid_points(2,ipoint)
+      r1(3) = final_grid_points(3,ipoint)
+
+      do jpoint = 1, n_points_extra_final_grid ! r2 
+
+        r2(1) = final_grid_points_extra(1,jpoint)
+        r2(2) = final_grid_points_extra(2,jpoint)
+        r2(3) = final_grid_points_extra(3,jpoint)
+
+        call grad1_j12_mu(r1, r2, grad1_u2b)
+
+        dx = grad1_u2b(1)
+        dy = grad1_u2b(2)
+        dz = grad1_u2b(3)
+
+        grad1_u12_num(jpoint,ipoint,1) = dx 
+        grad1_u12_num(jpoint,ipoint,2) = dy 
+        grad1_u12_num(jpoint,ipoint,3) = dz 
+
+        grad1_u12_squared_num(jpoint,ipoint) = dx*dx + dy*dy + dz*dz
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
   else
 
     print *, ' j1b_type = ', j1b_type, 'not implemented yet'
@@ -91,16 +127,16 @@ double precision function j12_mu(r1, r2)
 
   implicit none
   double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: mu_r12, r12
+  double precision             :: mu_tmp, r12
 
   if((j1b_type .ge. 100) .and. (j1b_type .lt. 200)) then
 
     r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
                + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
                + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
-    mu_r12 = mu_erf * r12
+    mu_tmp = mu_erf * r12
 
-    j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu_r12)) - inv_sq_pi_2 * dexp(-mu_r12*mu_r12) / mu_erf
+    j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu_tmp)) - inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / mu_erf
 
   else
 
@@ -116,6 +152,8 @@ end function j12_mu
 
 subroutine grad1_j12_mu(r1, r2, grad)
 
+  include 'constants.include.F'
+
   implicit none
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: grad(3)
@@ -129,7 +167,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
     dy = r1(2) - r2(2)
     dz = r1(3) - r2(3)
 
-    r12 = dsqrt( dx * dx + dy * dy + dz * dz )
+    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
     if(r12 .lt. 1d-10) return
 
     tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
@@ -137,6 +175,28 @@ subroutine grad1_j12_mu(r1, r2, grad)
     grad(1) = tmp * dx
     grad(2) = tmp * dy
     grad(3) = tmp * dz
+
+  elseif((j1b_type .ge. 200) .and. (j1b_type .lt. 300)) then
+
+    double precision :: mu_val, mu_tmp, mu_der(3)
+
+    dx  = r1(1) - r2(1)
+    dy  = r1(2) - r2(2)
+    dz  = r1(3) - r2(3)
+    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+
+    call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
+    mu_tmp  = mu_val * r12
+    tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
+    grad(1) = tmp * mu_der(1)
+    grad(2) = tmp * mu_der(2)
+    grad(3) = tmp * mu_der(3)
+
+    if(r12 .lt. 1d-10) return
+    tmp     = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
+    grad(1) = grad(1) + tmp * dx
+    grad(2) = grad(2) + tmp * dy
+    grad(3) = grad(3) + tmp * dz
 
   else
 
@@ -343,3 +403,38 @@ end subroutine grad1_j1b_nucl
 
 ! ---
 
+subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
+
+  implicit none
+  double precision, intent(in)  :: r1(3), r2(3)
+  double precision, intent(out) :: mu_val, mu_der(3)
+
+  if(j1b_type .eq. 200) then
+
+    double precision :: r(3), dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
+    double precision :: dm_tot, tmp
+
+    PROVIDE mu_r_ct
+    r(1) = 0.5d0 * (r1(1) + r2(1))
+    r(2) = 0.5d0 * (r1(2) + r2(2))
+    r(3) = 0.5d0 * (r1(3) + r2(3))
+
+    call density_and_grad_alpha_beta(r, dm_a, dm_b, grad_dm_a, grad_dm_b)
+    dm_tot    = dm_a(1) + dm_b(1)
+    mu_val    = mu_r_ct * dsqrt(dm_tot)
+    tmp       = 0.25d0 * mu_r_ct / dm_tot
+    mu_der(1) = tmp * (grad_dm_a(1,1) + grad_dm_b(1,1))
+    mu_der(2) = tmp * (grad_dm_a(2,1) + grad_dm_b(2,1))
+    mu_der(3) = tmp * (grad_dm_a(3,1) + grad_dm_b(3,1))
+
+  else
+
+    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+    stop
+
+  endif
+
+  return
+end subroutine mu_r_val_and_grad
+
+! ---
