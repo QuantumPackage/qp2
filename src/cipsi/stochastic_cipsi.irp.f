@@ -119,7 +119,13 @@ subroutine run_stochastic_cipsi
     if (qp_stop()) exit
   enddo
 
-  if ((.not.qp_stop()).and.(N_det > N_det_max)) then
+  ! If stopped because N_det > N_det_max, do an extra iteration to compute the PT2
+  if ((.not.qp_stop()).and.                                          &
+        (N_det > N_det_max) .and.                                    &
+        (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max) .and.    &
+        (maxval(abs(pt2_data % variance(1:N_states))) > variance_max) .and.&
+        (correlation_energy_ratio <= correlation_energy_ratio_max)   &
+        ) then
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
