@@ -15,7 +15,7 @@
  double precision, allocatable  :: ao_two_e_integral_alpha_tmp(:,:)
  double precision, allocatable  :: ao_two_e_integral_beta_tmp(:,:)
 
- if (.True.) then   ! Use Cholesky-decomposed integrals
+ if (do_ao_cholesky) then   ! Use Cholesky-decomposed integrals
    ao_two_e_integral_alpha(:,:) = ao_two_e_integral_alpha_chol(:,:)
    ao_two_e_integral_beta (:,:) = ao_two_e_integral_beta_chol (:,:)
 
