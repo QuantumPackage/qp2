@@ -128,13 +128,7 @@ subroutine run_cipsi
     if (qp_stop()) exit
   enddo
 
-  if (.not.qp_stop()) then
-    if (N_det < N_det_max) then
-        call diagonalize_CI
-        call save_wavefunction
-        call save_energy(psi_energy_with_nucl_rep, zeros)
-    endif
-
+  if ((.not.qp_stop()).and.(N_det > N_det_max)) then
     if (do_pt2) then
       call pt2_dealloc(pt2_data)
       call pt2_dealloc(pt2_data_err)
