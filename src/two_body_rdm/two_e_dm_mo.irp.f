@@ -16,13 +16,13 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    two_e_dm_mo = 0.d0
    integer                        :: i,j,k,l,iorb,jorb,korb,lorb,istate
 
-   do l=1,mo_num
+   do l=1,n_core_inact_act_orb
     lorb = list_core_inact_act(l)
-    do k=1,mo_num
+    do k=1,n_core_inact_act_orb
      korb = list_core_inact_act(k)
-     do j=1,mo_num
+     do j=1,n_core_inact_act_orb
       jorb = list_core_inact_act(j)
-      do i=1,mo_num
+      do i=1,n_core_inact_act_orb
         iorb = list_core_inact_act(i)
         two_e_dm_mo(iorb,jorb,korb,lorb) = state_av_full_occ_2_rdm_spin_trace_mo(i,j,k,l)
       enddo
