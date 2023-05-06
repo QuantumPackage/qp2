@@ -156,7 +156,7 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     htwoe = htwoe + mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
-  if(three_body_h_tc)then
+  if(three_body_h_tc.and.elec_num.gt.2)then
    !!!!! 3-e part 
    !! same-spin/same-spin
    do j = 1, na
@@ -243,7 +243,7 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     htwoe= htwoe- mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
-  if(three_body_h_tc)then
+  if(three_body_h_tc.and.elec_num.gt.2)then
    !!!!! 3-e part 
    !! same-spin/same-spin
    do j = 1, na

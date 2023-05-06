@@ -1,4 +1,4 @@
-program tc_bi_ortho
+program pt2_tc_cisd
 
   BEGIN_DOC
   !
@@ -16,23 +16,57 @@ program tc_bi_ortho
 
   print*, ' nb of states = ', N_states
   print*, ' nb of det    = ', N_det
-
   call routine_diag()
-  call write_tc_energy()
-  call save_tc_bi_ortho_wavefunction()
+
+  call routine
 end
 
-subroutine test
+subroutine routine
  implicit none
- integer :: i,j 
- double precision :: hmono,htwoe,hthree,htot
- use bitmasks
- print*,'reading the wave function '
- do i = 1, N_det
-  call debug_det(psi_det(1,1,i),N_int)
-  print*,i,psi_l_coef_bi_ortho(i,1)*psi_r_coef_bi_ortho(i,1)
-  print*,i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
+ integer :: i,h1,p1,h2,p2,s1,s2,degree
+ double precision :: h0i,hi0,e00,ei,delta_e
+ double precision :: norm,e_corr,coef,e_corr_pos,e_corr_neg,e_corr_abs
+
+ integer                        :: exc(0:2,2,2)
+ double precision               :: phase
+ double precision :: eh1,ep1,eh2,ep2
+
+ norm = 0.d0 
+ e_corr = 0.d0
+ e_corr_abs = 0.d0
+ e_corr_pos = 0.d0
+ e_corr_neg = 0.d0
+ call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,1), psi_det(1,1,1), N_int, e00) 
+ do i = 2, N_det
+  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,1), N_int, hi0) 
+  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,1), psi_det(1,1,i), N_int, h0i) 
+  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, ei) 
+  call get_excitation_degree(psi_det(1,1,1), psi_det(1,1,i),degree,N_int)
+  call get_excitation(psi_det(1,1,1), psi_det(1,1,i),exc,degree,phase,N_int)
+  call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
+  eh1 = Fock_matrix_tc_diag_mo_tot(h1)
+  ep1 = Fock_matrix_tc_diag_mo_tot(p1)
+  delta_e = eh1 - ep1
+  if (degree==2)then
+   eh2 = Fock_matrix_tc_diag_mo_tot(h2)
+   ep2 = Fock_matrix_tc_diag_mo_tot(p2)
+   delta_e +=  eh2 - ep2
+  endif
+!  delta_e = e00 - ei
+  coef = hi0/delta_e
+  norm += coef*coef
+  e_corr = coef* h0i
+  if(e_corr.lt.0.d0)then
+   e_corr_neg += e_corr
+  elseif(e_corr.gt.0.d0)then
+   e_corr_pos += e_corr
+  endif
+  e_corr_abs += dabs(e_corr)
  enddo
+ print*,'e_corr_abs = ',e_corr_abs
+ print*,'e_corr_pos = ',e_corr_pos
+ print*,'e_corr_neg = ',e_corr_neg
+ print*,'norm       = ',dsqrt(norm)
 
 end
 
