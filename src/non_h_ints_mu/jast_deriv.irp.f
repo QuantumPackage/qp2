@@ -408,24 +408,71 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
   implicit none
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: mu_val, mu_der(3)
+  double precision              :: r(3)
+  double precision              :: dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
+  double precision              :: dm_tot, tmp1, tmp2, tmp3
 
   if(j1b_type .eq. 200) then
 
-    double precision :: r(3), dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
-    double precision :: dm_tot, tmp
+    !
+    ! r = 0.5 (r1 + r2)
+    !
+    ! mu[rho(r)] = alpha sqrt(rho) + mu0 exp(-rho)
+    !
+    ! d mu[rho(r)] / dx1 = 0.5 d mu[rho(r)] / dx
+    ! d mu[rho(r)] / dx  = [0.5 alpha / sqrt(rho) - mu0 exp(-rho)] (d rho(r) / dx)
+    !
 
-    PROVIDE mu_r_ct
+    PROVIDE mu_r_ct mu_erf
+
     r(1) = 0.5d0 * (r1(1) + r2(1))
     r(2) = 0.5d0 * (r1(2) + r2(2))
     r(3) = 0.5d0 * (r1(3) + r2(3))
 
     call density_and_grad_alpha_beta(r, dm_a, dm_b, grad_dm_a, grad_dm_b)
-    dm_tot    = dm_a(1) + dm_b(1)
-    mu_val    = mu_r_ct * dsqrt(dm_tot)
-    tmp       = 0.25d0 * mu_r_ct / dm_tot
-    mu_der(1) = tmp * (grad_dm_a(1,1) + grad_dm_b(1,1))
-    mu_der(2) = tmp * (grad_dm_a(2,1) + grad_dm_b(2,1))
-    mu_der(3) = tmp * (grad_dm_a(3,1) + grad_dm_b(3,1))
+
+    dm_tot = dm_a(1) + dm_b(1)
+    tmp1   = dsqrt(dm_tot)
+    tmp2   = mu_erf * dexp(-dm_tot)
+
+    mu_val = mu_r_ct * tmp1 + tmp2
+
+    mu_der = 0.d0
+    if(dm_tot .lt. 1d-7) return
+
+    tmp3      = 0.25d0 * mu_r_ct / tmp1 - 0.5d0 * tmp2
+    mu_der(1) = tmp3 * (grad_dm_a(1,1) + grad_dm_b(1,1))
+    mu_der(2) = tmp3 * (grad_dm_a(2,1) + grad_dm_b(2,1))
+    mu_der(3) = tmp3 * (grad_dm_a(3,1) + grad_dm_b(3,1))
+
+  elseif(j1b_type .eq. 201) then
+
+    !
+    ! r = 0.5 (r1 + r2)
+    !
+    ! mu[rho(r)] = alpha rho + mu0 exp(-rho)
+    !
+    ! d mu[rho(r)] / dx1 = 0.5 d mu[rho(r)] / dx
+    ! d mu[rho(r)] / dx  = [0.5 alpha / sqrt(rho) - mu0 exp(-rho)] (d rho(r) / dx)
+    !
+
+    PROVIDE mu_r_ct mu_erf
+
+    r(1) = 0.5d0 * (r1(1) + r2(1))
+    r(2) = 0.5d0 * (r1(2) + r2(2))
+    r(3) = 0.5d0 * (r1(3) + r2(3))
+
+    call density_and_grad_alpha_beta(r, dm_a, dm_b, grad_dm_a, grad_dm_b)
+
+    dm_tot = dm_a(1) + dm_b(1)
+    tmp2   = mu_erf * dexp(-dm_tot)
+
+    mu_val = mu_r_ct * dm_tot + tmp2
+
+    tmp3      = 0.5d0 * (mu_r_ct - tmp2)
+    mu_der(1) = tmp3 * (grad_dm_a(1,1) + grad_dm_b(1,1))
+    mu_der(2) = tmp3 * (grad_dm_a(2,1) + grad_dm_b(2,1))
+    mu_der(3) = tmp3 * (grad_dm_a(3,1) + grad_dm_b(3,1))
 
   else
 
