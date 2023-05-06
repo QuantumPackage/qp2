@@ -15,7 +15,6 @@ subroutine run_stochastic_cipsi
   double precision, external :: memory_of_double
   PROVIDE H_apply_buffer_allocated distributed_davidson mo_two_e_integrals_in_map
 
-  N_iter = 1
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
@@ -96,10 +95,10 @@ subroutine run_stochastic_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
+    call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
-    N_iter += 1
+    call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit
 
@@ -119,13 +118,13 @@ subroutine run_stochastic_cipsi
     if (qp_stop()) exit
   enddo
 
-  if (.not.qp_stop()) then
-    if (N_det < N_det_max) then
-        call diagonalize_CI
-        call save_wavefunction
-        call save_energy(psi_energy_with_nucl_rep, zeros)
-    endif
-
+  ! If stopped because N_det > N_det_max, do an extra iteration to compute the PT2
+  if ((.not.qp_stop()).and.                                          &
+        (N_det > N_det_max) .and.                                    &
+        (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max) .and.    &
+        (maxval(abs(pt2_data % variance(1:N_states))) > variance_max) .and.&
+        (correlation_energy_ratio <= correlation_energy_ratio_max)   &
+        ) then
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
@@ -135,9 +134,10 @@ subroutine run_stochastic_cipsi
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep, &
        pt2_data , pt2_data_err, N_det, N_configuration, N_states, psi_s2)
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
+    call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
+    call write_cipsi_json(pt2_data,pt2_data_err)
   endif
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)

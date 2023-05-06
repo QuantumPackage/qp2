@@ -486,7 +486,7 @@ subroutine get_ao_two_e_integrals(j,k,l,sze,out_val)
   PROVIDE ao_two_e_integrals_in_map ao_integrals_map
 
   if (ao_one_e_integral_zero(j,l)) then
-    out_val = 0.d0
+    out_val(1:sze) = 0.d0
     return
   endif
 
