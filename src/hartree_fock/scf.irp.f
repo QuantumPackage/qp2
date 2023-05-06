@@ -80,9 +80,14 @@ subroutine run
 
   mo_label = 'Orthonormalized'
 
-  call Roothaan_Hall_SCF
-  call ezfio_set_hartree_fock_energy(SCF_energy)
+  write(json_unit,json_array_open_fmt) 'scf'
 
+  call Roothaan_Hall_SCF
+
+  write(json_unit,json_array_close_fmtx)
+  call json_close
+
+  call ezfio_set_hartree_fock_energy(SCF_energy)
 end
 
 

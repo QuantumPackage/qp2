@@ -93,7 +93,10 @@ subroutine run
 
   level_shift += 1.d0
   touch level_shift
+  write(json_unit,*) '"scf" : ['
   call Roothaan_Hall_SCF
+  write(json_unit,*) ']'
+  call json_close
   call ezfio_set_kohn_sham_rs_energy(SCF_energy)
 
  write(*, '(A22,X,F16.10)') 'one_e_energy = ',one_e_energy

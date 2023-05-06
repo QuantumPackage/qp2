@@ -1,42 +1,65 @@
-BEGIN_PROVIDER [ double precision, extrapolated_energy, (N_iter,N_states) ]
- implicit none
- BEGIN_DOC
- ! Extrapolated energy, using E_var = f(PT2) where PT2=0
- END_DOC
- integer :: i
- do i=1,min(N_states,N_det)
-   call extrapolate_data(N_iter,                               &
-       energy_iterations(i,1:N_iter),                          &
-          pt2_iterations(i,1:N_iter),                          &
-       extrapolated_energy(1:N_iter,i))
- enddo
-END_PROVIDER
-
-
-subroutine save_iterations(e_, pt2_,n_)
+BEGIN_PROVIDER [ integer, N_iter  ]
   implicit none
   BEGIN_DOC
-! Update the energy in the EZFIO file.
+! Number of CIPSI iterations
   END_DOC
-  integer, intent(in) :: n_
-  double precision, intent(in) :: e_(N_states), pt2_(N_states)
-  integer :: i
 
-  if (N_iter == 101) then
-    do i=2,N_iter-1
-      energy_iterations(1:N_states,N_iter-1) = energy_iterations(1:N_states,N_iter)
-      pt2_iterations(1:N_states,N_iter-1) = pt2_iterations(1:N_states,N_iter) 
+  N_iter = 0
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, N_iter_max ]
+ implicit none
+ BEGIN_DOC
+ ! Max number of iterations for extrapolations
+ END_DOC
+ N_iter_max = 8
+END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, energy_iterations , (n_states,N_iter_max) ]
+&BEGIN_PROVIDER [ double precision, pt2_iterations , (n_states,N_iter_max) ]
+&BEGIN_PROVIDER [ double precision, extrapolated_energy, (N_iter_max,N_states) ]
+  implicit none
+  BEGIN_DOC
+! The energy at each iteration for the extrapolations
+  END_DOC
+
+   energy_iterations = 0.d0
+   pt2_iterations = 0.d0
+   extrapolated_energy = 0.d0
+END_PROVIDER
+
+subroutine increment_n_iter(e, pt2_data)
+  use selection_types
+  implicit none
+  BEGIN_DOC
+! Does what is necessary to increment n_iter
+  END_DOC
+  double precision, intent(in) :: e(*)
+  type(pt2_type), intent(in)   :: pt2_data
+  integer :: k, i
+
+  if (N_det < N_states) return
+
+  if (N_iter < N_iter_max) then
+    N_iter += 1
+  else
+    do k=2,N_iter
+      energy_iterations(1:N_states,k-1) = energy_iterations(1:N_states,k)
+      pt2_iterations(1:N_states,k-1) = pt2_iterations(1:N_states,k)
     enddo
-    N_iter = N_iter-1
-    TOUCH N_iter
   endif
+  energy_iterations(1:N_states,N_iter) = e(1:N_states)
+  pt2_iterations(1:N_states,N_iter) = pt2_data % rpt2(1:N_states)
 
-  energy_iterations(1:N_states,N_iter) = e_(1:N_states)
-     pt2_iterations(1:N_states,N_iter) = pt2_(1:N_states)
-  n_det_iterations(N_iter) = n_
-  call ezfio_set_iterations_N_iter(N_iter)
-  call ezfio_set_iterations_energy_iterations(energy_iterations)
-  call ezfio_set_iterations_pt2_iterations(pt2_iterations)
-  call ezfio_set_iterations_n_det_iterations(n_det_iterations)
+  if (N_iter < 2) then
+    extrapolated_energy(1,:) = energy_iterations(:,1) + pt2_iterations(:,1)
+    extrapolated_energy(2,:) = energy_iterations(:,2) + pt2_iterations(:,2)
+  else
+    do i=1,N_states
+      call extrapolate_data(N_iter,                               &
+          energy_iterations(i,1:N_iter),                          &
+             pt2_iterations(i,1:N_iter),                          &
+          extrapolated_energy(1:N_iter,i))
+    enddo
+  endif
 end
-
