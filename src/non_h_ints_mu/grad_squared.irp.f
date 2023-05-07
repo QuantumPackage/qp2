@@ -267,7 +267,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_grid) ]
+BEGIN_PROVIDER [double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
   integer                    :: ipoint, i, j

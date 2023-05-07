@@ -68,7 +68,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       !$OMP END DO
       !$OMP END PARALLEL
 
-    elseif(j1b_type .eq. 3) then
+    elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
 
       PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
 
@@ -219,7 +219,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
     !$OMP END DO
     !$OMP END PARALLEL
 
-  elseif(j1b_type .eq. 3) then
+  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
 
     PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
 
