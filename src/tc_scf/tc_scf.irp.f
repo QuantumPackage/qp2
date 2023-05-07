@@ -53,7 +53,7 @@ program tc_scf
       stop
     endif
 
-    call minimize_tc_orb_angles()
+    !call minimize_tc_orb_angles()
 
   endif
 

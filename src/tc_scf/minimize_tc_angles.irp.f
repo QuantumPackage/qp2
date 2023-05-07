@@ -8,6 +8,10 @@ program print_angles
   my_n_pt_a_grid = 50
   touch my_n_pt_r_grid my_n_pt_a_grid
 !  call sort_by_tc_fock
+
+  ! TODO
+  ! check if rotations of orbitals affect the TC energy
+  ! and refuse the step
   call minimize_tc_orb_angles
 end
 
