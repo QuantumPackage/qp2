@@ -11,6 +11,13 @@ BEGIN_PROVIDER [double precision, ao_vartc_int_chemist, (ao_num, ao_num, ao_num,
   call wall_time(wall0)
   
   if(test_cycle_tc) then
+
+    PROVIDE j1b_type
+    if(j1b_type .ne. 3) then
+      print*, ' TC integrals with cycle can not be used for j1b_type =', j1b_type
+      stop
+    endif
+
     do j = 1, ao_num
       do l = 1, ao_num
         do i = 1, ao_num
@@ -20,7 +27,9 @@ BEGIN_PROVIDER [double precision, ao_vartc_int_chemist, (ao_num, ao_num, ao_num,
         enddo
       enddo
     enddo
+
   else
+
     do j = 1, ao_num
       do l = 1, ao_num
         do i = 1, ao_num
@@ -30,6 +39,7 @@ BEGIN_PROVIDER [double precision, ao_vartc_int_chemist, (ao_num, ao_num, ao_num,
         enddo
       enddo
     enddo
+
   endif
 
   call wall_time(wall1)
@@ -49,6 +59,12 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
   call wall_time(wall0)
   
   if(test_cycle_tc) then
+
+    PROVIDE j1b_type
+    if(j1b_type .ne. 3) then
+      print*, ' TC integrals with cycle can not be used for j1b_type =', j1b_type
+      stop
+    endif
 
     ao_tc_int_chemist = ao_tc_int_chemist_test
 

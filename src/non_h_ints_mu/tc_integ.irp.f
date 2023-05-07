@@ -41,7 +41,34 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
   else
 
-    if(j1b_type .eq. 3) then
+    if(j1b_type .eq. 0) then
+
+      PROVIDE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
+
+      int2_grad1_u12_ao = 0.d0
+      !$OMP PARALLEL                                                &
+      !$OMP DEFAULT (NONE)                                          &
+      !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp1)                   &
+      !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points &
+      !$OMP        , v_ij_erf_rk_cst_mu, x_v_ij_erf_rk_cst_mu, int2_grad1_u12_ao)
+      !$OMP DO SCHEDULE (static)
+      do ipoint = 1, n_points_final_grid
+        x = final_grid_points(1,ipoint)
+        y = final_grid_points(2,ipoint)
+        z = final_grid_points(3,ipoint)
+        do j = 1, ao_num
+          do i = 1, ao_num
+            tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
+            int2_grad1_u12_ao(i,j,ipoint,1) = 0.5d0 * (tmp1 * x - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1))
+            int2_grad1_u12_ao(i,j,ipoint,2) = 0.5d0 * (tmp1 * y - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2))
+            int2_grad1_u12_ao(i,j,ipoint,3) = 0.5d0 * (tmp1 * z - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3))
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+
+    elseif(j1b_type .eq. 3) then
 
       PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
 
@@ -172,7 +199,27 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
   PROVIDE j1b_type
 
-  if(j1b_type .eq. 3) then
+  if(j1b_type .eq. 0) then
+
+    PROVIDE int2_grad1u2_grad2u2
+
+    int2_grad1_u12_square_ao = 0.d0
+    !$OMP PARALLEL               &
+    !$OMP DEFAULT (NONE)         &
+    !$OMP PRIVATE (i, j, ipoint) &
+    !$OMP SHARED (int2_grad1_u12_square_ao, ao_num, n_points_final_grid, int2_grad1u2_grad2u2)
+    !$OMP DO SCHEDULE (static)
+    do ipoint = 1, n_points_final_grid
+      do j = 1, ao_num
+        do i = 1, ao_num
+          int2_grad1_u12_square_ao(i,j,ipoint) = int2_grad1u2_grad2u2(i,j,ipoint)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+  elseif(j1b_type .eq. 3) then
 
     PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
 
