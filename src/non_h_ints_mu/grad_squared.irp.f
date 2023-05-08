@@ -17,7 +17,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_poi
   !
   ! if J(r1,r2) = u12 x v1 x v2
   !
-  ! gradu_squared_u_ij_mu = -0.50 x \int r2 \phi_i(2) \phi_j(2) [ v1^2  v2^2 ((grad_1 u12)^2 + (grad_2 u12^2)]) + u12^2  v2^2 (grad_1 v1)^2 + 2 u12 v1 v2^2 (grad_1 u12) . (grad_1 v1) ]
+  ! gradu_squared_u_ij_mu = -0.50 x \int r2 \phi_i(2) \phi_j(2) [ v1^2  v2^2 ((grad_1 u12)^2 + (grad_2 u12^2)) + u12^2  v2^2 (grad_1 v1)^2 + 2 u12 v1 v2^2 (grad_1 u12) . (grad_1 v1) ]
   !                       = -0.25 x        v1^2      \int r2 \phi_i(2) \phi_j(2) [1 - erf(mu r12)]^2 v2^2
   !                       + -0.50 x    (grad_1 v1)^2 \int r2 \phi_i(2) \phi_j(2)      u12^2          v2^2
   !                       + -1.00 x v1 (grad_1 v1)   \int r2 \phi_i(2) \phi_j(2)   (grad_1 u12)      v2^2
@@ -358,7 +358,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   implicit none
   integer                       :: ipoint, i, j, k, l
-  double precision              :: weight1, ao_ik_r, ao_i_r
+  double precision              :: weight1, ao_k_r, ao_i_r
+  double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
   double precision, allocatable :: b_mat(:,:,:), tmp(:,:,:)
 
@@ -373,16 +374,18 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   else
 
+    ! ---
+
     PROVIDE int2_grad1_u12_square_ao
 
     allocate(b_mat(n_points_final_grid,ao_num,ao_num))
 
     b_mat = 0.d0
-   !$OMP PARALLEL               &
-   !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (i, k, ipoint) &
-   !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
-   !$OMP DO SCHEDULE (static)
+    !$OMP PARALLEL               &
+    !$OMP DEFAULT (NONE)         &
+    !$OMP PRIVATE (i, k, ipoint) &
+    !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+    !$OMP DO SCHEDULE (static)
     do i = 1, ao_num
       do k = 1, ao_num
         do ipoint = 1, n_points_final_grid
@@ -390,13 +393,57 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
         enddo
       enddo
     enddo
-   !$OMP END DO
-   !$OMP END PARALLEL
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     tc_grad_square_ao = 0.d0
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
               , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
               , 0.d0, tc_grad_square_ao, ao_num*ao_num)
+
+    ! ---
+
+    if((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
+
+      ! an additional term is added here directly instead of 
+      ! being added in int2_grad1_u12_square_ao for performance
+      ! note that the factor
+
+      PROVIDE int2_u2_j1b2
+
+      b_mat = 0.d0
+      !$OMP PARALLEL                                                                                     &
+      !$OMP DEFAULT (NONE)                                                                               &
+      !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                                              &
+      !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector, &
+      !$OMP         v_1b_square_grad, v_1b_square_lapl, aos_grad_in_r_array_transp_bis)
+      !$OMP DO SCHEDULE (static)
+      do i = 1, ao_num
+        do k = 1, ao_num
+          do ipoint = 1, n_points_final_grid
+
+            weight1 = 0.25d0 * final_weight_at_r_vector(ipoint)
+
+            ao_i_r = aos_in_r_array_transp(ipoint,i)
+            ao_k_r = aos_in_r_array_transp(ipoint,k)
+
+            b_mat(ipoint,k,i) = weight1 * ( ao_k_r * ao_i_r * v_1b_square_lapl(ipoint)                                                                                   &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) * v_1b_square_grad(ipoint,1) &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) * v_1b_square_grad(ipoint,2) &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3)) * v_1b_square_grad(ipoint,3) )
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
+                , int2_u2_j1b2(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+                , 1.d0, tc_grad_square_ao, ao_num*ao_num)
+    endif
+
+    ! ---
+
     deallocate(b_mat)
 
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)

@@ -1,5 +1,5 @@
 
- BEGIN_PROVIDER [ double precision, TC_HF_energy]
+ BEGIN_PROVIDER [ double precision, TC_HF_energy      ]
 &BEGIN_PROVIDER [ double precision, TC_HF_one_e_energy]
 &BEGIN_PROVIDER [ double precision, TC_HF_two_e_energy]
 

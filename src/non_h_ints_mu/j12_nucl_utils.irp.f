@@ -59,7 +59,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
 
   else
 
-    print*, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print*, 'j1b_type = ', j1b_pen, 'is not implemented for v_1b'
     stop
 
   endif
@@ -172,7 +172,7 @@ BEGIN_PROVIDER [ double precision, v_1b_lapl, (n_points_final_grid)]
   implicit none
   integer          :: ipoint, i, j, phase
   double precision :: x, y, z, dx, dy, dz
-  double precision :: a, d, e, b
+  double precision :: a, e, b
   double precision :: fact_r
   double precision :: ax_der, ay_der, az_der, a_expo
 
@@ -279,6 +279,56 @@ BEGIN_PROVIDER [ double precision, v_1b_list_b3, (n_points_final_grid)]
     enddo
 
     v_1b_list_b3(ipoint) = fact_r
+  enddo
+
+END_PROVIDER
+
+! ---
+
+ BEGIN_PROVIDER [double precision, v_1b_square_grad, (n_points_final_grid,3)]
+&BEGIN_PROVIDER [double precision, v_1b_square_lapl, (n_points_final_grid)  ]
+
+  implicit none
+  integer          :: ipoint, i
+  double precision :: x, y, z, dx, dy, dz, r2
+  double precision :: coef, expo, a_expo, tmp
+  double precision :: fact_x, fact_y, fact_z, fact_r
+
+  PROVIDE List_all_comb_b3_coef List_all_comb_b3_expo List_all_comb_b3_cent
+
+  do ipoint = 1, n_points_final_grid
+
+    x = final_grid_points(1,ipoint)
+    y = final_grid_points(2,ipoint)
+    z = final_grid_points(3,ipoint)
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    fact_r = 0.d0
+    do i = 1, List_all_comb_b3_size
+
+      coef = List_all_comb_b3_coef(i)
+      expo = List_all_comb_b3_expo(i)
+
+      dx = x - List_all_comb_b3_cent(1,i)
+      dy = y - List_all_comb_b3_cent(2,i)
+      dz = z - List_all_comb_b3_cent(3,i)
+      r2 = dx * dx + dy * dy + dz * dz
+
+      a_expo = expo * r2
+      tmp    = coef * expo * dexp(-a_expo)
+
+      fact_x += tmp * dx
+      fact_y += tmp * dy
+      fact_z += tmp * dz
+      fact_r += tmp * (3.d0 - 2.d0 * a_expo)
+    enddo
+
+    v_1b_square_grad(ipoint,1) = -2.d0 * fact_x
+    v_1b_square_grad(ipoint,2) = -2.d0 * fact_y
+    v_1b_square_grad(ipoint,3) = -2.d0 * fact_z
+    v_1b_square_lapl(ipoint)   = -2.d0 * fact_r
   enddo
 
 END_PROVIDER

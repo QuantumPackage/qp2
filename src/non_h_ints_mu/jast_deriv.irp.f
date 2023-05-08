@@ -164,7 +164,7 @@ double precision function j12_mu(r1, r2)
   double precision, intent(in) :: r1(3), r2(3)
   double precision             :: mu_tmp, r12
 
-  if((j1b_type .ge. 100) .and. (j1b_type .lt. 200)) then
+  if((j1b_type .ge. 0) .and. (j1b_type .lt. 200)) then
 
     r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
                + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
@@ -175,7 +175,7 @@ double precision function j12_mu(r1, r2)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+    print *, ' j1b_type = ', j1b_type, 'not implemented for j12_mu'
     stop
 
   endif
@@ -196,7 +196,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
 
   grad = 0.d0
 
-  if((j1b_type .ge. 100) .and. (j1b_type .lt. 200)) then
+  if((j1b_type .ge. 0) .and. (j1b_type .lt. 200)) then
 
     dx = r1(1) - r2(1)
     dy = r1(2) - r2(2)
@@ -252,7 +252,7 @@ double precision function j1b_nucl(r)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if(j1b_type .eq. 102) then
+  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
 
     j1b_nucl = 1.d0
     do i = 1, nucl_num
@@ -263,7 +263,7 @@ double precision function j1b_nucl(r)
       j1b_nucl = j1b_nucl - dexp(-a*dsqrt(d))
     enddo
 
-  elseif(j1b_type .eq. 103) then
+  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     j1b_nucl = 1.d0
     do i = 1, nucl_num
@@ -275,7 +275,7 @@ double precision function j1b_nucl(r)
       j1b_nucl = j1b_nucl * e
     enddo
 
-  elseif(j1b_type .eq. 104) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     j1b_nucl = 1.d0
     do i = 1, nucl_num
@@ -286,7 +286,7 @@ double precision function j1b_nucl(r)
       j1b_nucl = j1b_nucl - dexp(-a*d)
     enddo
 
-  elseif(j1b_type .eq. 105) then
+  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
 
     j1b_nucl = 1.d0
     do i = 1, nucl_num
@@ -300,13 +300,82 @@ double precision function j1b_nucl(r)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+    print *, ' j1b_type = ', j1b_type, 'not implemented for j1b_nucl'
     stop
 
   endif
 
   return
 end function j1b_nucl
+
+! ---
+
+double precision function j1b_nucl_square(r)
+
+  implicit none
+  double precision, intent(in) :: r(3)
+  integer                      :: i
+  double precision             :: a, d, e, x, y, z
+
+  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
+
+    j1b_nucl_square = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
+          + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
+          + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
+      j1b_nucl_square = j1b_nucl_square - dexp(-a*dsqrt(d))
+    enddo
+    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+
+  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
+
+    j1b_nucl_square = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
+          + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
+          + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
+      e = 1.d0 - dexp(-a*d)
+      j1b_nucl_square = j1b_nucl_square * e
+    enddo
+    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
+
+    j1b_nucl_square = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
+          + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
+          + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
+      j1b_nucl_square = j1b_nucl_square - dexp(-a*d)
+    enddo
+    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+
+  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
+
+    j1b_nucl_square = 1.d0
+    do i = 1, nucl_num
+      a = j1b_pen(i)
+      x = r(1) - nucl_coord(i,1)
+      y = r(2) - nucl_coord(i,2)
+      z = r(3) - nucl_coord(i,3)
+      d = x*x + y*y + z*z
+      j1b_nucl_square = j1b_nucl_square - dexp(-a*d*d)
+    enddo
+    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+
+  else
+
+    print *, ' j1b_type = ', j1b_type, 'not implemented for j1b_nucl_square'
+    stop
+
+  endif
+
+  return
+end function j1b_nucl_square
 
 ! ---
 
@@ -321,7 +390,7 @@ subroutine grad1_j1b_nucl(r, grad)
   double precision              :: fact_x, fact_y, fact_z
   double precision              :: ax_der, ay_der, az_der, a_expo
 
-  if(j1b_type .eq. 102) then
+  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -343,7 +412,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif(j1b_type .eq. 103) then
+  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     x = r(1)
     y = r(2)
@@ -382,7 +451,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif(j1b_type .eq. 104) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -404,7 +473,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = 2.d0 * fact_y
     grad(3) = 2.d0 * fact_z
 
-  elseif(j1b_type .eq. 105) then
+  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -428,7 +497,7 @@ subroutine grad1_j1b_nucl(r, grad)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+    print *, ' j1b_type = ', j1b_type, 'not implemented for grad1_j1b_nucl'
     stop
 
   endif
@@ -520,3 +589,98 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
 end subroutine mu_r_val_and_grad
 
 ! ---
+
+subroutine grad1_j1b_nucl_square_num(r1, grad)
+
+  implicit none
+  double precision, intent(in)  :: r1(3)
+  double precision, intent(out) :: grad(3)
+  double precision              :: r(3), eps, tmp_eps, vp, vm
+  double precision, external    :: j1b_nucl_square
+
+  eps     = 1d-5
+  tmp_eps = 0.5d0 / eps
+
+  r(1:3) = r1(1:3)
+
+  r(1) = r(1) + eps
+  vp   = j1b_nucl_square(r)
+  r(1) = r(1) - 2.d0 * eps
+  vm   = j1b_nucl_square(r)
+  r(1) = r(1) + eps
+  grad(1) = tmp_eps * (vp - vm)
+
+  r(2) = r(2) + eps
+  vp   = j1b_nucl_square(r)
+  r(2) = r(2) - 2.d0 * eps
+  vm   = j1b_nucl_square(r)
+  r(2) = r(2) + eps
+  grad(2) = tmp_eps * (vp - vm)
+
+  r(3) = r(3) + eps
+  vp   = j1b_nucl_square(r)
+  r(3) = r(3) - 2.d0 * eps
+  vm   = j1b_nucl_square(r)
+  r(3) = r(3) + eps
+  grad(3) = tmp_eps * (vp - vm)
+  
+  return
+end subroutine grad1_j1b_nucl_square_num
+
+! ---
+
+subroutine grad1_j12_mu_square_num(r1, r2, grad)
+
+  include 'constants.include.F'
+
+  implicit none
+  double precision, intent(in)  :: r1(3), r2(3)
+  double precision, intent(out) :: grad(3)
+  double precision              :: r(3)
+  double precision              :: eps, tmp_eps, vp, vm
+  double precision, external    :: j12_mu_square
+
+  eps     = 1d-5
+  tmp_eps = 0.5d0 / eps
+
+  r(1:3) = r1(1:3)
+
+  r(1)    = r(1) + eps
+  vp      = j12_mu_square(r, r2)
+  r(1)    = r(1) - 2.d0 * eps
+  vm      = j12_mu_square(r, r2)
+  r(1)    = r(1) + eps
+  grad(1) = tmp_eps * (vp - vm)
+
+  r(2)    = r(2) + eps
+  vp      = j12_mu_square(r, r2)
+  r(2)    = r(2) - 2.d0 * eps
+  vm      = j12_mu_square(r, r2)
+  r(2)    = r(2) + eps
+  grad(2) = tmp_eps * (vp - vm)
+
+  r(3)    = r(3) + eps
+  vp      = j12_mu_square(r, r2)
+  r(3)    = r(3) - 2.d0 * eps
+  vm      = j12_mu_square(r, r2)
+  r(3)    = r(3) + eps
+  grad(3) = tmp_eps * (vp - vm)
+
+  return
+end subroutine grad1_j12_mu_square_num
+
+! ---
+
+double precision function j12_mu_square(r1, r2)
+
+  implicit none
+  double precision, intent(in) :: r1(3), r2(3)
+  double precision, external   :: j12_mu
+
+  j12_mu_square = j12_mu(r1, r2) * j12_mu(r1, r2)
+
+  return
+end function j12_mu_square
+
+! ---
+

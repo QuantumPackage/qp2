@@ -164,7 +164,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
