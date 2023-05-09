@@ -219,28 +219,50 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
     !$OMP END DO
     !$OMP END PARALLEL
 
-  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
+  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4))  then
 
-    ! the term u12_grad1_u12_j1b_grad1_j1b is added directly for performance
-    !PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
-    PROVIDE u12sq_j1bsq grad12_j12
+    if(use_ipp) then
 
-    int2_grad1_u12_square_ao = 0.d0
-    !$OMP PARALLEL               &
-    !$OMP DEFAULT (NONE)         &
-    !$OMP PRIVATE (i, j, ipoint) &
-    !$OMP SHARED (int2_grad1_u12_square_ao, ao_num, n_points_final_grid, u12sq_j1bsq, grad12_j12)
-    !$OMP DO SCHEDULE (static)
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do i = 1, ao_num
-          !int2_grad1_u12_square_ao(i,j,ipoint) = u12sq_j1bsq(i,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(i,j,ipoint) + 0.5d0 * grad12_j12(i,j,ipoint)
-          int2_grad1_u12_square_ao(i,j,ipoint) = u12sq_j1bsq(i,j,ipoint) + 0.5d0 * grad12_j12(i,j,ipoint)
+      ! the term u12_grad1_u12_j1b_grad1_j1b is added directly for performance
+      PROVIDE u12sq_j1bsq grad12_j12
+
+      int2_grad1_u12_square_ao = 0.d0
+      !$OMP PARALLEL               &
+      !$OMP DEFAULT (NONE)         &
+      !$OMP PRIVATE (i, j, ipoint) &
+      !$OMP SHARED (int2_grad1_u12_square_ao, ao_num, n_points_final_grid, u12sq_j1bsq, grad12_j12)
+      !$OMP DO SCHEDULE (static)
+      do ipoint = 1, n_points_final_grid
+        do j = 1, ao_num
+          do i = 1, ao_num
+            int2_grad1_u12_square_ao(i,j,ipoint) = u12sq_j1bsq(i,j,ipoint) + 0.5d0 * grad12_j12(i,j,ipoint)
+          enddo
         enddo
       enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+      !$OMP END DO
+      !$OMP END PARALLEL
+
+    else
+
+      PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
+
+      int2_grad1_u12_square_ao = 0.d0
+      !$OMP PARALLEL               &
+      !$OMP DEFAULT (NONE)         &
+      !$OMP PRIVATE (i, j, ipoint) &
+      !$OMP SHARED (int2_grad1_u12_square_ao, ao_num, n_points_final_grid, u12sq_j1bsq, grad12_j12, u12_grad1_u12_j1b_grad1_j1b)
+      !$OMP DO SCHEDULE (static)
+      do ipoint = 1, n_points_final_grid
+        do j = 1, ao_num
+          do i = 1, ao_num
+            int2_grad1_u12_square_ao(i,j,ipoint) = u12sq_j1bsq(i,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(i,j,ipoint) + 0.5d0 * grad12_j12(i,j,ipoint)
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+
+    endif
 
   elseif(j1b_type .ge. 100) then
 
