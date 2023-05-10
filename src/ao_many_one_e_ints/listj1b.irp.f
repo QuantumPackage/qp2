@@ -336,7 +336,8 @@ END_PROVIDER
         r2 = dx*dx + dy*dy + dz*dz
         
         ii = ii + 1
-        List_all_comb_b3_coef(  ii) = dexp(-tmp1*tmp2*tmp4*r2)
+        ! x 2 to avoid doing integrals twice
+        List_all_comb_b3_coef(  ii) = 2.d0 * dexp(-tmp1*tmp2*tmp4*r2)
         List_all_comb_b3_expo(  ii) = tmp3
         List_all_comb_b3_cent(1,ii) = tmp4 * (tmp1 * xi + tmp2 * xj)
         List_all_comb_b3_cent(2,ii) = tmp4 * (tmp1 * yi + tmp2 * yj)
