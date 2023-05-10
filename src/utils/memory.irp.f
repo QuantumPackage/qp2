@@ -8,7 +8,9 @@ BEGIN_PROVIDER [ integer, qp_max_mem ]
  qp_max_mem = 2000
  call getenv('QP_MAXMEM',env)
  if (trim(env) /= '') then
+    call lock_io()
     read(env,*) qp_max_mem
+    call unlock_io()
  endif
  call write_int(6,qp_max_mem,'Target maximum memory (GB)')
 
@@ -25,7 +27,7 @@ subroutine resident_memory(value)
   character*(32) :: key
   double precision, intent(out) :: value
 
-  call omp_set_lock(file_lock)
+  call lock_io()
   call usleep(10)
 
   value = 0.d0
@@ -40,7 +42,7 @@ subroutine resident_memory(value)
   20 continue
   close(iunit)
   value = value / (1024.d0*1024.d0)
-  call omp_unset_lock(file_lock)
+  call unlock_io()
 end function
 
 subroutine total_memory(value)
@@ -53,6 +55,7 @@ subroutine total_memory(value)
   character*(32) :: key
   double precision, intent(out) :: value
 
+  call lock_io()
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
     read(iunit,*,err=10,end=20) key, value
@@ -64,6 +67,7 @@ subroutine total_memory(value)
   20 continue
   close(iunit)
   value = value / (1024.d0*1024.d0)
+  call unlock_io()
 end function
 
 double precision function memory_of_double(n)

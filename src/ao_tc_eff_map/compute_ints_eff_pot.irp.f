@@ -53,13 +53,13 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
       integral_erf = ao_two_e_integral_erf(i, k, j, l)
       integral     = integral_erf + integral_pot
 
-      if( j1b_type .eq. 1 ) then
-        !print *, ' j1b type 1 is added'
-        integral = integral + j1b_gauss_2e_j1(i, k, j, l)
-      elseif( j1b_type .eq. 2 ) then
-        !print *, ' j1b type 2 is added'
-        integral = integral + j1b_gauss_2e_j2(i, k, j, l)
-      endif
+      !if( j1b_type .eq. 1 ) then
+      !  !print *, ' j1b type 1 is added'
+      !  integral = integral + j1b_gauss_2e_j1(i, k, j, l)
+      !elseif( j1b_type .eq. 2 ) then
+      !  !print *, ' j1b type 2 is added'
+      !  integral = integral + j1b_gauss_2e_j2(i, k, j, l)
+      !endif
 
       if(abs(integral) < thr) then
         cycle

@@ -50,13 +50,16 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call cpu_time(cpu_1)
 
   if(no_vvvv_integrals)then
-!    call four_idx_novvvv
     call four_idx_novvvv_old
   else
-    if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
-      call four_idx_dgemm
+    if (do_ao_cholesky) then
+      call add_integrals_to_map_cholesky
     else
-      call add_integrals_to_map(full_ijkl_bitmask_4)
+      if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
+        call four_idx_dgemm
+      else
+        call add_integrals_to_map(full_ijkl_bitmask_4)
+      endif
     endif
   endif
 
@@ -175,7 +178,7 @@ subroutine add_integrals_to_map(mask_ijkl)
   implicit none
 
   BEGIN_DOC
-  ! Adds integrals to tha MO map according to some bitmask
+  ! Adds integrals to the MO map according to some bitmask
   END_DOC
 
   integer(bit_kind), intent(in)  :: mask_ijkl(N_int,4)
@@ -450,13 +453,72 @@ subroutine add_integrals_to_map(mask_ijkl)
 
 end
 
+subroutine add_integrals_to_map_cholesky
+  use bitmasks
+  implicit none
+
+  BEGIN_DOC
+  ! Adds integrals to the MO map using Cholesky vectors
+  END_DOC
+
+  integer :: i,j,k,l,m
+  integer :: size_buffer, n_integrals
+  size_buffer = min(mo_num*mo_num*mo_num,16000000)
+
+  double precision, allocatable :: Vtmp(:,:,:,:)
+  integer(key_kind)  , allocatable :: buffer_i(:)
+  real(integral_kind), allocatable :: buffer_value(:)
+
+  if (.True.) then
+    ! In-memory transformation
+
+    allocate (Vtmp(mo_num,mo_num,mo_num,mo_num))
+
+    call dgemm('N','T',mo_num*mo_num,mo_num*mo_num,cholesky_ao_num,1.d0, &
+       cholesky_mo, mo_num*mo_num, &
+       cholesky_mo, mo_num*mo_num, 0.d0, &
+       Vtmp, mo_num*mo_num)
+
+    !$OMP PARALLEL PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i)
+    allocate (buffer_i(size_buffer), buffer_value(size_buffer))
+    n_integrals = 0
+    !$OMP DO
+    do l=1,mo_num
+      do k=1,l
+        do j=1,mo_num
+          do i=1,j
+            if (abs(Vtmp(i,j,k,l)) > mo_integrals_threshold) then
+              n_integrals += 1
+              buffer_value(n_integrals) = Vtmp(i,j,k,l)
+              !DIR$ FORCEINLINE
+              call mo_two_e_integrals_index(i,k,j,l,buffer_i(n_integrals))
+              if (n_integrals == size_buffer) then
+                call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+                n_integrals = 0
+              endif
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+    deallocate(buffer_i, buffer_value)
+    !$OMP END PARALLEL
+
+    deallocate(Vtmp)
+    call map_unique(mo_integrals_map)
+
+  endif
+
+end
 
 subroutine add_integrals_to_map_three_indices(mask_ijk)
   use bitmasks
   implicit none
 
   BEGIN_DOC
-  ! Adds integrals to tha MO map according to some bitmask
+  ! Adds integrals to the MO map according to some bitmask
   END_DOC
 
   integer(bit_kind), intent(in)  :: mask_ijk(N_int,3)

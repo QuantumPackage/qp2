@@ -1854,7 +1854,7 @@ do k = 1, N
 end do
 ! TODO: It should be possible to use only one vector of size (1:rank) as a buffer
 ! to do the swapping in-place
-U = 0.00D+0
+U(:,:) = 0.00D+0
 do k = 1, N
   l = piv(k)
   U(l, :) = A(1:rank, k)

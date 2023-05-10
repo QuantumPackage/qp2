@@ -152,7 +152,7 @@ subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishi
   use bitmasks
   implicit none
   BEGIN_DOC
-  ! Computes $v_t = H | u_t\rangle$ 
+  ! Computes $v_t = H | u_t\rangle$
   !
   ! Default should be 1,N_det,0,1
   !
@@ -160,7 +160,7 @@ subroutine H_tc_s2_u_0_nstates_openmp_work(v_t,s_t,u_t,N_st,sze,istart,iend,ishi
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  logical, intent(in)             :: do_right 
+  logical, intent(in)             :: do_right
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
 
@@ -193,7 +193,7 @@ subroutine H_tc_s2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,ie
   END_DOC
   integer, intent(in)            :: N_st,sze,istart,iend,ishift,istep
   double precision, intent(in)   :: u_t(N_st,N_det)
-  logical, intent(in)            :: do_right 
+  logical, intent(in)            :: do_right
   double precision, intent(out)  :: v_t(N_st,sze), s_t(N_st,sze)
 
   double precision               :: hij, sij
@@ -570,7 +570,7 @@ compute_singles=.True.
         lrow = psi_bilinear_matrix_rows(l_a)
         ASSERT (lrow <= N_det_alpha_unique)
 
-        tmp_det2(1:N_int,1) = psi_det_alpha_unique(1:N_int, lrow) 
+        tmp_det2(1:N_int,1) = psi_det_alpha_unique(1:N_int, lrow)
 !        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
 !        call i_H_j_double_spin( tmp_det(1,1), psi_det_alpha_unique(1, lrow), $N_int, hij)
         if(do_right)then
@@ -721,7 +721,7 @@ compute_singles=.True.
         lcol = psi_bilinear_matrix_transp_columns(l_b)
         ASSERT (lcol <= N_det_beta_unique)
 
-        tmp_det2(1:N_int,2) = psi_det_beta_unique(1:N_int, lcol) 
+        tmp_det2(1:N_int,2) = psi_det_beta_unique(1:N_int, lcol)
 !        call i_H_j( tmp_det, tmp_det2, $N_int, hij)
 !        call i_H_j_double_spin( tmp_det(1,2), psi_det_beta_unique(1, lcol), $N_int, hij)
         if(do_right)then

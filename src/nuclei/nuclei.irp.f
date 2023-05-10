@@ -241,13 +241,13 @@ END_PROVIDER
      enddo
      character*(80)                 :: buffer, dummy
      do
-     read(iunit,'(A80)',end=10) buffer
-     read(buffer,*) i ! First read i
-     read(buffer,*) i, element_name(i), dummy, element_mass(i)
-   enddo
-   10 continue
-   close(10)
- endif
+       read(iunit,'(A80)',end=10) buffer
+       read(buffer,*) i ! First read i
+       read(buffer,*) i, element_name(i), dummy, element_mass(i)
+     enddo
+     10 continue
+     close(10)
+   endif
 
  IRP_IF MPI_DEBUG
    print *,  irp_here, mpi_rank

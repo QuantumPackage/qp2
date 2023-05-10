@@ -8,79 +8,160 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
   double precision :: x, y, z, dx, dy, dz
   double precision :: a, d, e, fact_r
 
-  do ipoint = 1, n_points_final_grid
+  if(j1b_type .eq. 3) then
 
-    x = final_grid_points(1,ipoint)
-    y = final_grid_points(2,ipoint)
-    z = final_grid_points(3,ipoint)
+    ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
-    fact_r = 1.d0
-    do j = 1, nucl_num
-      a  = j1b_pen(j)
-      dx = x - nucl_coord(j,1)
-      dy = y - nucl_coord(j,2)
-      dz = z - nucl_coord(j,3)
-      d  = dx*dx + dy*dy + dz*dz
-      e  = 1.d0 - dexp(-a*d)
+    do ipoint = 1, n_points_final_grid
 
-      fact_r = fact_r * e
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_r = 1.d0
+      do j = 1, nucl_num
+        a  = j1b_pen(j)
+        dx = x - nucl_coord(j,1)
+        dy = y - nucl_coord(j,2)
+        dz = z - nucl_coord(j,3)
+        d  = dx*dx + dy*dy + dz*dz
+        e  = 1.d0 - dexp(-a*d)
+
+        fact_r = fact_r * e
+      enddo
+
+      v_1b(ipoint) = fact_r
     enddo
 
-    v_1b(ipoint) = fact_r
-  enddo
+  elseif(j1b_type .eq. 4) then
+
+    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_r = 1.d0
+      do j = 1, nucl_num
+        a  = j1b_pen(j)
+        dx = x - nucl_coord(j,1)
+        dy = y - nucl_coord(j,2)
+        dz = z - nucl_coord(j,3)
+        d  = dx*dx + dy*dy + dz*dz
+
+        fact_r = fact_r - dexp(-a*d)
+      enddo
+
+      v_1b(ipoint) = fact_r
+    enddo
+
+  else
+
+    print*, 'j1b_type = ', j1b_pen, 'is not implemented for v_1b'
+    stop
+
+  endif
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, v_1b_grad, (3, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
 
   implicit none
   integer          :: ipoint, i, j, phase
-  double precision :: x, y, z, dx, dy, dz
+  double precision :: x, y, z, dx, dy, dz, r2
   double precision :: a, d, e
   double precision :: fact_x, fact_y, fact_z
   double precision :: ax_der, ay_der, az_der, a_expo
 
-  do ipoint = 1, n_points_final_grid
+  PROVIDE j1b_type
 
-    x = final_grid_points(1,ipoint)
-    y = final_grid_points(2,ipoint)
-    z = final_grid_points(3,ipoint)
+  if(j1b_type .eq. 3) then
 
-    fact_x = 0.d0
-    fact_y = 0.d0
-    fact_z = 0.d0
-    do i = 1, List_all_comb_b2_size
+    ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
-      phase  = 0
-      a_expo = 0.d0
-      ax_der = 0.d0
-      ay_der = 0.d0
-      az_der = 0.d0
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_x = 0.d0
+      fact_y = 0.d0
+      fact_z = 0.d0
+      do i = 1, List_all_comb_b2_size
+
+        phase  = 0
+        a_expo = 0.d0
+        ax_der = 0.d0
+        ay_der = 0.d0
+        az_der = 0.d0
+        do j = 1, nucl_num
+          a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+          dx = x - nucl_coord(j,1)
+          dy = y - nucl_coord(j,2)
+          dz = z - nucl_coord(j,3)
+        
+          phase  += List_all_comb_b2(j,i)
+          a_expo += a * (dx*dx + dy*dy + dz*dz)
+          ax_der += a * dx
+          ay_der += a * dy
+          az_der += a * dz
+        enddo
+        e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
+
+        fact_x += e * ax_der 
+        fact_y += e * ay_der 
+        fact_z += e * az_der 
+      enddo
+
+      v_1b_grad(1,ipoint) = fact_x
+      v_1b_grad(2,ipoint) = fact_y
+      v_1b_grad(3,ipoint) = fact_z
+    enddo
+
+  elseif(j1b_type .eq. 4) then
+
+    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      ax_der = 0.d0 
+      ay_der = 0.d0 
+      az_der = 0.d0 
       do j = 1, nucl_num
-        a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+
         dx = x - nucl_coord(j,1)
         dy = y - nucl_coord(j,2)
         dz = z - nucl_coord(j,3)
-      
-        phase  += List_all_comb_b2(j,i)
-        a_expo += a * (dx*dx + dy*dy + dz*dz)
-        ax_der += a * dx
-        ay_der += a * dy
-        az_der += a * dz
-      enddo
-      e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
+        r2 = dx*dx + dy*dy + dz*dz
 
-      fact_x += e * ax_der 
-      fact_y += e * ay_der 
-      fact_z += e * az_der 
+        a = j1b_pen(j)
+        e = a * dexp(-a * r2)
+
+        ax_der += e * dx
+        ay_der += e * dy
+        az_der += e * dz
+      enddo
+
+      v_1b_grad(1,ipoint) = 2.d0 * ax_der
+      v_1b_grad(2,ipoint) = 2.d0 * ay_der
+      v_1b_grad(3,ipoint) = 2.d0 * az_der
     enddo
 
-    v_1b_grad(1,ipoint) = fact_x
-    v_1b_grad(2,ipoint) = fact_y
-    v_1b_grad(3,ipoint) = fact_z
-  enddo
+  else
+
+    print*, 'j1b_type = ', j1b_pen, 'is not implemented'
+    stop
+
+  endif
 
 END_PROVIDER
 
@@ -91,7 +172,7 @@ BEGIN_PROVIDER [ double precision, v_1b_lapl, (n_points_final_grid)]
   implicit none
   integer          :: ipoint, i, j, phase
   double precision :: x, y, z, dx, dy, dz
-  double precision :: a, d, e, b
+  double precision :: a, e, b
   double precision :: fact_r
   double precision :: ax_der, ay_der, az_der, a_expo
 
@@ -198,6 +279,56 @@ BEGIN_PROVIDER [ double precision, v_1b_list_b3, (n_points_final_grid)]
     enddo
 
     v_1b_list_b3(ipoint) = fact_r
+  enddo
+
+END_PROVIDER
+
+! ---
+
+ BEGIN_PROVIDER [double precision, v_1b_square_grad, (n_points_final_grid,3)]
+&BEGIN_PROVIDER [double precision, v_1b_square_lapl, (n_points_final_grid)  ]
+
+  implicit none
+  integer          :: ipoint, i
+  double precision :: x, y, z, dx, dy, dz, r2
+  double precision :: coef, expo, a_expo, tmp
+  double precision :: fact_x, fact_y, fact_z, fact_r
+
+  PROVIDE List_all_comb_b3_coef List_all_comb_b3_expo List_all_comb_b3_cent
+
+  do ipoint = 1, n_points_final_grid
+
+    x = final_grid_points(1,ipoint)
+    y = final_grid_points(2,ipoint)
+    z = final_grid_points(3,ipoint)
+
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    fact_r = 0.d0
+    do i = 1, List_all_comb_b3_size
+
+      coef = List_all_comb_b3_coef(i)
+      expo = List_all_comb_b3_expo(i)
+
+      dx = x - List_all_comb_b3_cent(1,i)
+      dy = y - List_all_comb_b3_cent(2,i)
+      dz = z - List_all_comb_b3_cent(3,i)
+      r2 = dx * dx + dy * dy + dz * dz
+
+      a_expo = expo * r2
+      tmp    = coef * expo * dexp(-a_expo)
+
+      fact_x += tmp * dx
+      fact_y += tmp * dy
+      fact_z += tmp * dz
+      fact_r += tmp * (3.d0 - 2.d0 * a_expo)
+    enddo
+
+    v_1b_square_grad(ipoint,1) = -2.d0 * fact_x
+    v_1b_square_grad(ipoint,2) = -2.d0 * fact_y
+    v_1b_square_grad(ipoint,3) = -2.d0 * fact_z
+    v_1b_square_lapl(ipoint)   = -2.d0 * fact_r
   enddo
 
 END_PROVIDER

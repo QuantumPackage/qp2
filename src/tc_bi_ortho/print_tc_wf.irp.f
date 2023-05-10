@@ -26,7 +26,8 @@ subroutine write_l_r_wf
  integer :: i
  print*,'Writing the left-right wf'
  do i = 1, N_det
-  write(i_unit_output,*)i,psi_l_coef_sorted_bi_ortho_left(i),psi_r_coef_sorted_bi_ortho_right(i)
+  write(i_unit_output,*)i, psi_l_coef_sorted_bi_ortho_left(i)/psi_l_coef_sorted_bi_ortho_left(1) &
+                         , psi_r_coef_sorted_bi_ortho_right(i)/psi_r_coef_sorted_bi_ortho_right(1)
  enddo
 
 

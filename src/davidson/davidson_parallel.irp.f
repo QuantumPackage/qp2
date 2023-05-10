@@ -150,7 +150,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
       exit
     endif
     if(task_id == 0) exit
+    call lock_io()
     read (msg,*) imin, imax, ishift, istep
+    call unlock_io()
     integer :: k
     do k=imin,imax
       v_t(:,k) = 0.d0
@@ -540,6 +542,8 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 !  N_states_diag = N_states_diag_save
 !  SOFT_TOUCH N_states_diag
 end
+
+
 
 
 
