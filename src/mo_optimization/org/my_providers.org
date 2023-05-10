@@ -1,0 +1,308 @@
+* Providers
+** Dimensions of MOs
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ integer, n_mo_dim ]
+  implicit none
+  BEGIN_DOC
+  ! Number of different pairs (i,j) of MOs we can build,
+  ! with i>j
+  END_DOC
+
+  n_mo_dim = mo_num*(mo_num-1)/2
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ integer, n_mo_dim_core ]
+  implicit none 
+  BEGIN_DOC
+  ! Number of different pairs (i,j) of core MOs we can build,
+  ! with i>j
+  END_DOC
+
+  n_mo_dim_core = dim_list_core_orb*(dim_list_core_orb-1)/2
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ integer, n_mo_dim_act ]
+  implicit none
+  BEGIN_DOC
+  ! Number of different pairs (i,j) of active MOs we can build,
+  ! with i>j
+  END_DOC
+
+  n_mo_dim_act = dim_list_act_orb*(dim_list_act_orb-1)/2
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ integer, n_mo_dim_inact ]
+  implicit none 
+  BEGIN_DOC
+  ! Number of different pairs (i,j) of inactive MOs we can build,
+  ! with i>j
+  END_DOC
+
+  n_mo_dim_inact = dim_list_inact_orb*(dim_list_inact_orb-1)/2
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ integer, n_mo_dim_virt ]
+  implicit none 
+  BEGIN_DOC
+  ! Number of different pairs (i,j) of virtual MOs we can build,
+  ! with i>j
+  END_DOC
+
+  n_mo_dim_virt = dim_list_virt_orb*(dim_list_virt_orb-1)/2
+
+END_PROVIDER
+#+END_SRC
+
+** Energies/criterions
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_st_av_energy ]
+  implicit none
+  BEGIN_DOC
+  ! State average CI energy
+  END_DOC
+
+  !call update_st_av_ci_energy(my_st_av_energy)
+  call state_average_energy(my_st_av_energy)
+
+END_PROVIDER
+#+END_SRC
+
+** Gradient/hessian
+*** Orbital optimization
+**** With all the MOs
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_opt, (n_mo_dim) ]
+&BEGIN_PROVIDER [ double precision, my_CC1_opt ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the energy with respect to the MO rotations, for all the MOs.
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  PROVIDE mo_two_e_integrals_in_map
+
+  call gradient_opt(n_mo_dim, my_gradient_opt, my_CC1_opt, norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_opt, (n_mo_dim, n_mo_dim) ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the energy with respect to the MO rotations, for all the MOs.
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision, allocatable :: h_f(:,:,:,:)
+
+  PROVIDE mo_two_e_integrals_in_map
+
+  allocate(h_f(mo_num, mo_num, mo_num, mo_num))
+
+  call hessian_list_opt(n_mo_dim, my_hessian_opt, h_f)
+
+END_PROVIDER
+#+END_SRC
+
+**** With the list of active MOs
+Can be generalized to any mo_class by changing the list/dimension
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_list_opt, (n_mo_dim_act) ]
+&BEGIN_PROVIDER [ double precision, my_CC2_opt ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the energy with respect to the MO rotations, only for the active MOs !
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  PROVIDE mo_two_e_integrals_in_map !one_e_dm_mo two_e_dm_mo mo_one_e_integrals 
+
+  call gradient_list_opt(n_mo_dim_act, dim_list_act_orb, list_act, my_gradient_list_opt, my_CC2_opt, norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+#+BEGIN_SRC f90 :comments org :tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_list_opt, (n_mo_dim_act, n_mo_dim_act) ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the energy with respect to the MO rotations, only for the active MOs !
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision, allocatable :: h_f(:,:,:,:)
+
+  PROVIDE mo_two_e_integrals_in_map
+
+  allocate(h_f(dim_list_act_orb, dim_list_act_orb, dim_list_act_orb, dim_list_act_orb))
+
+  call hessian_list_opt(n_mo_dim_act, dim_list_act_orb, list_act, my_hessian_list_opt, h_f)
+
+END_PROVIDER
+#+END_SRC
+
+*** Orbital localization
+**** Gradient
+***** Core MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_loc_core, (n_mo_dim_core) ]
+&BEGIN_PROVIDER [ double precision, my_CC_loc_core ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the MO localization with respect to the MO rotations for the core MOs
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  !PROVIDE something ?
+
+  call gradient_localization(n_mo_dim_core, dim_list_core_orb, list_core, my_gradient_loc_core, my_CC_loc_core , norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+***** Active MOs 
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_loc_act, (n_mo_dim_act) ]
+&BEGIN_PROVIDER [ double precision, my_CC_loc_act ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the MO localization with respect to the MO rotations for the active MOs
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  !PROVIDE something ?
+
+  call gradient_localization(n_mo_dim_act, dim_list_act_orb, list_act, my_gradient_loc_act, my_CC_loc_act , norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+***** Inactive MOs
+#+BEGIN_SRC f90 :comments org !
+:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_loc_inact, (n_mo_dim_inact) ]
+&BEGIN_PROVIDER [ double precision, my_CC_loc_inact ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the MO localization with respect to the MO rotations for the inactive MOs
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  !PROVIDE something ?
+
+  call gradient_localization(n_mo_dim_inact, dim_list_inact_orb, list_inact, my_gradient_loc_inact, my_CC_loc_inact , norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+***** Virtual MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_gradient_loc_virt, (n_mo_dim_virt) ]
+&BEGIN_PROVIDER [ double precision, my_CC_loc_virt ]
+  implicit none
+  BEGIN_DOC
+  ! - Gradient of the MO localization with respect to the MO rotations for the virtual MOs
+  ! - Maximal element of the gradient in absolute value 
+  END_DOC
+
+  double precision :: norm_grad
+
+  !PROVIDE something ?
+
+  call gradient_localization(n_mo_dim_virt, dim_list_virt_orb, list_virt, my_gradient_loc_virt, my_CC_loc_virt , norm_grad)
+
+END_PROVIDER
+#+END_SRC
+
+**** Hessian
+***** Core MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_loc_core, (n_mo_dim_core) ]
+  implicit none
+  BEGIN_DOC
+  ! - Hessian of the MO localization with respect to the MO rotations for the core MOs
+  END_DOC
+
+  !PROVIDE something ?
+
+  call hessian_localization(n_mo_dim_core, dim_list_core_orb, list_core, my_hessian_loc_core)
+
+END_PROVIDER
+#+END_SRC
+
+***** Active MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_loc_act, (n_mo_dim_act) ]
+  implicit none
+  BEGIN_DOC
+  ! - Hessian of the MO localization with respect to the MO rotations for the active MOs
+  END_DOC
+
+  !PROVIDE something ?
+
+  call hessian_localization(n_mo_dim_act, dim_list_act_orb, list_act, my_hessian_loc_act)
+
+END_PROVIDER
+#+END_SRC
+
+***** Inactive MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_loc_inact, (n_mo_dim_inact) ]
+  implicit none
+  BEGIN_DOC
+  ! - Hessian of the MO localization with respect to the MO rotations for the inactive MOs
+  END_DOC
+
+  !PROVIDE something ?
+
+  call hessian_localization(n_mo_dim_inact, dim_list_inact_orb, list_inact, my_hessian_loc_inact)
+
+END_PROVIDER
+#+END_SRC
+
+***** Virtual MOs
+#+BEGIN_SRC f90 :comments org 
+!:tangle my_providers.irp.f
+BEGIN_PROVIDER [ double precision, my_hessian_loc_virt, (n_mo_dim_virt) ]
+  implicit none
+  BEGIN_DOC
+  ! - Hessian of the MO localization with respect to the MO rotations for the virtual MOs
+  END_DOC
+
+  !PROVIDE something ?
+
+  call hessian_localization(n_mo_dim_virt, dim_list_virt_orb, list_virt, my_hessian_loc_virt)
+
+END_PROVIDER
+#+END_SRC
+
