@@ -405,6 +405,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
     if(((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) .and. use_ipp) then
 
+      print*, " going through Manu's IPP"
+
       ! an additional term is added here directly instead of 
       ! being added in int2_grad1_u12_square_ao for performance
       ! note that the factor

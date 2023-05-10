@@ -266,6 +266,8 @@ subroutine test_list_b3()
     acc_ij = dabs(i_exc - i_num)
     if(acc_ij .gt. eps_ij) then
       print *, ' problem in list_b3 on', ipoint
+      print *, ' r      = ', r
+      print *, ' r2     = ', r(1)*r(1) + r(2)*r(2) + r(3)*r(3)
       print *, ' analyt = ', i_exc
       print *, ' numeri = ', i_num
       print *, ' diff   = ', acc_ij
