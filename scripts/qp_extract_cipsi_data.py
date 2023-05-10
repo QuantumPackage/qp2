@@ -1,55 +1,37 @@
 #!/usr/bin/env python3
 
-import re
+import qp_json
 import sys
 
-# Read output file
-with open(sys.argv[1], 'r') as file:
-  output = file.read()
+if len(sys.argv) == 1:
+  print(f"syntax: {sys.argv[0]} EZFIO_FILE")
+
+d = qp_json.load_all(sys.argv[1])
+
+k = [ x for x in d.keys() ]
+k.sort()
+
+print("# Energy  PT2   PT2_err  rPT2  rPT2_err  exFCI\n")
+for f in k:
+  try:
+    j = d[f]["fci"]
+  except:
+     continue
+
+  print(f"# {f}")
+  for e in j:
+
+       out = f" {e['n_det']:8d}"
+
+       nstates = len(e["states"])
+       for ee in e["states"]:
+         try:
+            exc_energy = ee['ex_energy'][0]
+         except:
+            exc_energy = 0.
+         out += f" {ee['energy']:16.8f}  {ee['pt2']:e}  {ee['pt2_err']:e}  {ee['rpt2']:e}  {ee['rpt2_err']:e}  {exc_energy:16.8f}"
+       print(out)
+
+  print("\n")
 
 
-def extract_data(output):
-    lines = output.split("\n")
-    data = []
-
-    n_det = None
-    e = None
-    pt2 = None
-    err_pt2 = None
-    rpt2 = None
-    err_rpt2 = None
-    e_ex = None
-
-
-    reading = False
-    for iline, line in enumerate(lines):
-        if line.startswith("Summary at N_det"):
-            reading = False
-
-        if not reading and line.startswith(" N_det "):
-            n_det = int(re.search(r"N_det\s+=\s+(\d+)", line).group(1))
-            reading = True
-
-        if reading:
-            if line.startswith(" E "):
-                e = float(re.search(r"E\s+=\s+(-?\d+\.\d+)", line).group(1))
-            elif line.startswith(" PT2 "):
-                pt2 = float(re.search(r"PT2\s+=\s+(-?\d+\.\d+E?.\d*)", line).group(1))
-                err_pt2 = float(re.search(r"\+/-\s+(-?\d+\.\d+E?.\d*)", line).group(1))
-            elif line.startswith(" rPT2 "):
-                rpt2 = float(re.search(r"rPT2\s+=\s+(-?\d+\.\d+E?.\d*)", line).group(1))
-                err_rpt2 = float(re.search(r"\+/-\s+(-?\d+\.\d+E?.\d*)", line).group(1))
-            elif "minimum PT2 Extrapolated energy" in line:
-                e_ex_line = lines[iline+2]
-                e_ex = float(e_ex_line.split()[1])
-                reading = False
-                new_data = " {:8d}  {:16.8f}  {:e}  {:e}  {:e}  {:e}  {:16.8f}".format(n_det, e, pt2, err_pt2, rpt2, err_rpt2, e_ex)
-                data.append(new_data)
-                n_det = e = pt2 = err_pt2 = rpt2 = err_rpt2 = e_ex = None
-
-    return data
-
-data = extract_data(output)
-
-for item in data:
-    print(item)
