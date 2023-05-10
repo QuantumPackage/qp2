@@ -150,7 +150,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
       exit
     endif
     if(task_id == 0) exit
+    call lock_io()
     read (msg,*) imin, imax, ishift, istep
+    call unlock_io()
     integer :: k
     do k=imin,imax
       v_t(:,k) = 0.d0
@@ -555,7 +557,9 @@ BEGIN_PROVIDER [ integer, nthreads_davidson ]
  character*(32) :: env
  call getenv('QP_NTHREADS_DAVIDSON',env)
  if (trim(env) /= '') then
+   call lock_io()
    read(env,*) nthreads_davidson
+   call unlock_io()
    call write_int(6,nthreads_davidson,'Target number of threads for <Psi|H|Psi>')
  endif
 END_PROVIDER
