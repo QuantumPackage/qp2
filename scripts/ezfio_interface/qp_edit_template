@@ -172,25 +172,23 @@ let run check_only ?ndet ?state ezfio_filename =
 
   (* Reorder basis set *)
   begin
-    let aos =
-      match Input.Ao_basis.read() with
-      | Some x -> x
-      | _ -> assert false
-    in
-    let ordering = Input.Ao_basis.ordering aos in
-    let test = Array.copy ordering in
-    Array.sort compare test ;
-    if test <> ordering then
-    begin
-      Printf.eprintf "Warning: Basis set is not properly ordered. Redordering.\n";
-      let new_aos = Input.Ao_basis.reorder aos in
-      Input.Ao_basis.write new_aos;
-      match Input.Mo_basis.read() with
-      | None -> ()
-      | Some mos -> 
-          let new_mos = Input.Mo_basis.reorder mos ordering in
-          Input.Mo_basis.write new_mos
-    end
+    match Input.Ao_basis.read() with
+    | Some aos -> 
+        let ordering = Input.Ao_basis.ordering aos in
+        let test = Array.copy ordering in
+        Array.sort compare test ;
+        if test <> ordering then
+        begin
+          Printf.eprintf "Warning: Basis set is not properly ordered. Redordering.\n";
+          let new_aos = Input.Ao_basis.reorder aos in
+          Input.Ao_basis.write new_aos;
+          match Input.Mo_basis.read() with
+          | None -> ()
+          | Some mos -> 
+              let new_mos = Input.Mo_basis.reorder mos ordering in
+              Input.Mo_basis.write new_mos
+        end
+    | _ -> ()
   end;
 
   begin

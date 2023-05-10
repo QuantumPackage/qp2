@@ -247,8 +247,7 @@ end = struct
 
 
   let read () =
-    if (Ezfio.has_ao_basis_ao_basis ()) then
-      begin
+      try
         let result =
           { ao_basis        = read_ao_basis ();
             ao_num          = read_ao_num () ;
@@ -267,9 +266,8 @@ end = struct
         |> MD5.to_string
         |> Ezfio.set_ao_basis_ao_md5 ;
         Some result
-      end
-    else
-      None
+      with
+      | _ -> (Ezfio.set_ao_basis_ao_md5 "None" ; None)
   ;;
 
 
