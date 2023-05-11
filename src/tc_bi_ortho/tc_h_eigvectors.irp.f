@@ -233,8 +233,6 @@ end
     do istate = N_states+1, n_states_diag
       vec_tmp(istate,istate) = 1.d0
     enddo
-    !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, htcdag_bi_ortho_calc_tdav)
-    !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_dagger_u_0_opt)
     integer :: n_it_max,i_it
     n_it_max = 1
     converged = .False.
@@ -299,26 +297,6 @@ end
     print*,' norm l/r = ', norm_ground_left_right_bi_orth
     print*,' <S2>     = ', s2_eigvec_tc_bi_orth(i)
   enddo
-
-  double precision, allocatable :: buffer(:,:)
-  allocate(buffer(N_det,N_states))
-  do k = 1, N_states
-    do i = 1, N_det
-      psi_l_coef_bi_ortho(i,k) = leigvec_tc_bi_orth(i,k)
-      buffer(i,k) = leigvec_tc_bi_orth(i,k)
-    enddo
-  enddo
-  TOUCH psi_l_coef_bi_ortho
-  call ezfio_set_tc_bi_ortho_psi_l_coef_bi_ortho(buffer)
-  do k = 1, N_states
-    do i = 1, N_det
-      psi_r_coef_bi_ortho(i,k) = reigvec_tc_bi_orth(i,k)
-      buffer(i,k) = reigvec_tc_bi_orth(i,k)
-    enddo
-  enddo
-  TOUCH psi_r_coef_bi_ortho
-  call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
-  deallocate(buffer)
 
 END_PROVIDER 
 

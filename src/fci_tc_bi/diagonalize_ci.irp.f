@@ -39,6 +39,9 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
    write(*,'(A28,X,I10,X,100(F16.8,X))')'Ndet,E,E+PT2,E+RPT2,|PT2|=',ndet,E_tc ,E_tc  + pt2_tmp/norm,E_tc  + rpt2_tmp/norm,abs_pt2
    print*,'*****'
   endif
+  psi_energy(1:N_states) = eigval_right_tc_bi_orth(1:N_states)
+  psi_s2(1:N_states) = s2_eigvec_tc_bi_orth(1:N_states)
+
   E_tc  = eigval_right_tc_bi_orth(1)
   norm  = norm_ground_left_right_bi_orth
   ndet  = N_det
@@ -50,7 +53,7 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
     enddo
   enddo
   SOFT_TOUCH eigval_left_tc_bi_orth  eigval_right_tc_bi_orth leigvec_tc_bi_orth reigvec_tc_bi_orth norm_ground_left_right_bi_orth 
-  SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho psi_coef  
+  SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho psi_coef psi_energy psi_s2
 
   call save_tc_bi_ortho_wavefunction
 end
