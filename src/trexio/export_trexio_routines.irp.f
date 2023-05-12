@@ -5,24 +5,35 @@ subroutine export_trexio
   !     Exports the wave function in TREXIO format
   END_DOC
 
-  integer(trexio_t)              :: f ! TREXIO file handle
+  integer(trexio_t)              :: f(N_states) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
+  integer                        :: k
   double precision, allocatable  :: factor(:)
+  character*(256)  :: filenames(N_states)
 
-  print *, 'TREXIO file : '//trim(trexio_filename)
+  filenames(1) = trexio_filename
+  do k=2,N_states
+    write(filenames(k),'(A,I3.3)') trim(trexio_filename)//'.', k-1
+  enddo
+
+  do k=1,N_states
+    print *, 'TREXIO file : ', trim(filenames(k))
+    call system('test -f '//trim(filenames(k))//' && mv '//trim(filenames(k))//' '//trim(filenames(k))//'.bak')
+  enddo
   print *, ''
 
-  call system('cp '//trim(trexio_filename)//' '//trim(trexio_filename)//'.bak')
-  if (backend == 0) then
-    f = trexio_open(trexio_filename, 'u', TREXIO_HDF5, rc)
-  else if (backend == 1) then
-    f = trexio_open(trexio_filename, 'u', TREXIO_TEXT, rc)
-  endif
-  if (f == 0_8) then
-    print *, 'Unable to open TREXIO file for writing'
-    print *, 'rc = ', rc
-    stop -1
-  endif
+  do k=1,N_states
+    if (backend == 0) then
+      f(k) = trexio_open(filenames(k), 'u', TREXIO_HDF5, rc)
+    else if (backend == 1) then
+      f(k) = trexio_open(filenames(k), 'u', TREXIO_TEXT, rc)
+    endif
+    if (f(k) == 0_8) then
+      print *, 'Unable to open TREXIO file for writing'
+      print *, 'rc = ', rc
+      stop -1
+    endif
+  enddo
   call ezfio_set_trexio_trexio_file(trexio_filename)
 
 ! ------------------------------------------------------------------------------
@@ -32,10 +43,10 @@ subroutine export_trexio
 
   print *, 'Electrons'
 
-  rc = trexio_write_electron_up_num(f, elec_alpha_num)
+  rc = trexio_write_electron_up_num(f(1), elec_alpha_num)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_electron_dn_num(f, elec_beta_num)
+  rc = trexio_write_electron_dn_num(f(1), elec_beta_num)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
 
@@ -44,19 +55,19 @@ subroutine export_trexio
 
   print *, 'Nuclei'
 
-  rc = trexio_write_nucleus_num(f, nucl_num)
+  rc = trexio_write_nucleus_num(f(1), nucl_num)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_nucleus_charge(f, nucl_charge)
+  rc = trexio_write_nucleus_charge(f(1), nucl_charge)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_nucleus_coord(f, nucl_coord_transp)
+  rc = trexio_write_nucleus_coord(f(1), nucl_coord_transp)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_nucleus_label(f, nucl_label, 32)
+  rc = trexio_write_nucleus_label(f(1), nucl_label, 32)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_nucleus_repulsion(f, nuclear_repulsion)
+  rc = trexio_write_nucleus_repulsion(f(1), nuclear_repulsion)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
 
@@ -133,28 +144,28 @@ subroutine export_trexio
 
 
     lmax(:) = lmax(:)+1
-    rc = trexio_write_ecp_max_ang_mom_plus_1(f, lmax)
+    rc = trexio_write_ecp_max_ang_mom_plus_1(f(1), lmax)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_z_core(f, int(nucl_charge_remove))
+    rc = trexio_write_ecp_z_core(f(1), int(nucl_charge_remove))
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_num(f, num)
+    rc = trexio_write_ecp_num(f(1), num)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_ang_mom(f, ang_mom)
+    rc = trexio_write_ecp_ang_mom(f(1), ang_mom)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_nucleus_index(f, nucleus_index)
+    rc = trexio_write_ecp_nucleus_index(f(1), nucleus_index)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_exponent(f, exponent)
+    rc = trexio_write_ecp_exponent(f(1), exponent)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_coefficient(f, coefficient)
+    rc = trexio_write_ecp_coefficient(f(1), coefficient)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ecp_power(f, power)
+    rc = trexio_write_ecp_power(f(1), power)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
   endif
@@ -166,19 +177,19 @@ subroutine export_trexio
   print *, 'Basis'
 
 
-  rc = trexio_write_basis_type(f, 'Gaussian', len('Gaussian'))
+  rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_prim_num(f, prim_num)
+  rc = trexio_write_basis_prim_num(f(1), prim_num)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_shell_num(f, shell_num)
+   rc = trexio_write_basis_shell_num(f(1), shell_num)
    call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_nucleus_index(f, basis_nucleus_index)
+   rc = trexio_write_basis_nucleus_index(f(1), basis_nucleus_index)
    call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_shell_ang_mom(f, shell_ang_mom)
+   rc = trexio_write_basis_shell_ang_mom(f(1), shell_ang_mom)
    call trexio_assert(rc, TREXIO_SUCCESS)
 
    allocate(factor(shell_num))
@@ -187,18 +198,18 @@ subroutine export_trexio
    else
      factor(1:shell_num) = 1.d0
    endif
-   rc = trexio_write_basis_shell_factor(f, factor)
+   rc = trexio_write_basis_shell_factor(f(1), factor)
    call trexio_assert(rc, TREXIO_SUCCESS)
 
    deallocate(factor)
 
-  rc = trexio_write_basis_shell_index(f, shell_index)
+  rc = trexio_write_basis_shell_index(f(1), shell_index)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_exponent(f, prim_expo)
+  rc = trexio_write_basis_exponent(f(1), prim_expo)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_coefficient(f, prim_coef)
+  rc = trexio_write_basis_coefficient(f(1), prim_coef)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
   allocate(factor(prim_num))
@@ -207,7 +218,7 @@ subroutine export_trexio
   else
     factor(1:prim_num) = 1.d0
   endif
-  rc = trexio_write_basis_prim_factor(f, factor)
+  rc = trexio_write_basis_prim_factor(f(1), factor)
   call trexio_assert(rc, TREXIO_SUCCESS)
   deallocate(factor)
 
@@ -217,16 +228,16 @@ subroutine export_trexio
 
   print *, 'AOs'
 
-  rc = trexio_write_ao_num(f, ao_num)
+  rc = trexio_write_ao_num(f(1), ao_num)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_ao_cartesian(f, 1)
+  rc = trexio_write_ao_cartesian(f(1), 1)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_ao_shell(f, ao_shell)
+  rc = trexio_write_ao_shell(f(1), ao_shell)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  integer :: i, pow0(3), powA(3), j, k, l, nz
+  integer :: i, pow0(3), powA(3), j, l, nz
   double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
   nz=100
 
@@ -243,7 +254,7 @@ subroutine export_trexio
   else
     factor(:) = 1.d0
   endif
-  rc = trexio_write_ao_normalization(f, factor)
+  rc = trexio_write_ao_normalization(f(1), factor)
   call trexio_assert(rc, TREXIO_SUCCESS)
   deallocate(factor)
 
@@ -253,21 +264,21 @@ subroutine export_trexio
   if (export_ao_one_e_ints) then
     print *, 'AO one-e integrals'
 
-    rc = trexio_write_ao_1e_int_overlap(f,ao_overlap)
+    rc = trexio_write_ao_1e_int_overlap(f(1),ao_overlap)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ao_1e_int_kinetic(f,ao_kinetic_integrals)
+    rc = trexio_write_ao_1e_int_kinetic(f(1),ao_kinetic_integrals)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_ao_1e_int_potential_n_e(f,ao_integrals_n_e)
+    rc = trexio_write_ao_1e_int_potential_n_e(f(1),ao_integrals_n_e)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     if (do_pseudo) then
-      rc = trexio_write_ao_1e_int_ecp(f, ao_pseudo_integrals_local + ao_pseudo_integrals_non_local)
+      rc = trexio_write_ao_1e_int_ecp(f(1), ao_pseudo_integrals_local + ao_pseudo_integrals_non_local)
       call trexio_assert(rc, TREXIO_SUCCESS)
     endif
 
-    rc = trexio_write_ao_1e_int_core_hamiltonian(f,ao_one_e_integrals)
+    rc = trexio_write_ao_1e_int_core_hamiltonian(f(1),ao_one_e_integrals)
     call trexio_assert(rc, TREXIO_SUCCESS)
   end if
 
@@ -303,7 +314,7 @@ subroutine export_trexio
             eri_index(3,icount) = k
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
-              rc = trexio_write_ao_2e_int_eri(f, offset, icount, eri_index, eri_buffer)
+              rc = trexio_write_ao_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
               call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
@@ -314,7 +325,7 @@ subroutine export_trexio
     end do
 
     if (icount >= 0_8) then
-      rc = trexio_write_ao_2e_int_eri(f, offset, icount, eri_index, eri_buffer)
+      rc = trexio_write_ao_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
       call trexio_assert(rc, TREXIO_SUCCESS)
     end if
   end if
@@ -328,7 +339,7 @@ subroutine export_trexio
   if (export_ao_two_e_ints_cholesky) then
     print *, 'AO two-e integrals Cholesky'
 
-    rc = trexio_write_ao_2e_int_eri_cholesky_num(f, cholesky_ao_num)
+    rc = trexio_write_ao_2e_int_eri_cholesky_num(f(1), cholesky_ao_num)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     icount = 0_8
@@ -344,7 +355,7 @@ subroutine export_trexio
          chol_index(2,icount) = j
          chol_index(3,icount) = k
          if (icount == BUFSIZE) then
-           rc = trexio_write_ao_2e_int_eri_cholesky(f, offset, icount, chol_index, chol_buffer)
+           rc = trexio_write_ao_2e_int_eri_cholesky(f(1), offset, icount, chol_index, chol_buffer)
            call trexio_assert(rc, TREXIO_SUCCESS)
            offset += icount
            icount = 0_8
@@ -354,7 +365,7 @@ subroutine export_trexio
     end do
 
     if (icount > 0_8) then
-      rc = trexio_write_ao_2e_int_eri_cholesky(f, offset, icount, chol_index, chol_buffer)
+      rc = trexio_write_ao_2e_int_eri_cholesky(f(1), offset, icount, chol_index, chol_buffer)
       call trexio_assert(rc, TREXIO_SUCCESS)
     end if
   end if
@@ -366,22 +377,24 @@ subroutine export_trexio
 
   print *, 'MOs'
 
-  rc = trexio_write_mo_type(f, mo_label, len(trim(mo_label)))
+  rc = trexio_write_mo_type(f(1), mo_label, len(trim(mo_label)))
   call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_mo_num(f, mo_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  do k=1,N_states
+    rc = trexio_write_mo_num(f(k), mo_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
 
-  rc = trexio_write_mo_coefficient(f, mo_coef)
+  rc = trexio_write_mo_coefficient(f(1), mo_coef)
   call trexio_assert(rc, TREXIO_SUCCESS)
 
   if ( (trim(mo_label) == 'Canonical').and. &
        (export_mo_two_e_ints_cholesky.or.export_mo_two_e_ints) ) then
-    rc = trexio_write_mo_energy(f, fock_matrix_diag_mo)
+    rc = trexio_write_mo_energy(f(1), fock_matrix_diag_mo)
     call trexio_assert(rc, TREXIO_SUCCESS)
   endif
 
-  rc = trexio_write_mo_class(f, mo_class, len(mo_class(1)))
+  rc = trexio_write_mo_class(f(1), mo_class, len(mo_class(1)))
   call trexio_assert(rc, TREXIO_SUCCESS)
 
 ! One-e MO integrals
@@ -390,18 +403,18 @@ subroutine export_trexio
   if (export_mo_one_e_ints) then
     print *, 'MO one-e integrals'
 
-    rc = trexio_write_mo_1e_int_kinetic(f,mo_kinetic_integrals)
+    rc = trexio_write_mo_1e_int_kinetic(f(1),mo_kinetic_integrals)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_write_mo_1e_int_potential_n_e(f,mo_integrals_n_e)
+    rc = trexio_write_mo_1e_int_potential_n_e(f(1),mo_integrals_n_e)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     if (do_pseudo) then
-      rc = trexio_write_mo_1e_int_ecp(f,mo_pseudo_integrals_local)
+      rc = trexio_write_mo_1e_int_ecp(f(1),mo_pseudo_integrals_local)
       call trexio_assert(rc, TREXIO_SUCCESS)
     endif
 
-    rc = trexio_write_mo_1e_int_core_hamiltonian(f,mo_one_e_integrals)
+    rc = trexio_write_mo_1e_int_core_hamiltonian(f(1),mo_one_e_integrals)
     call trexio_assert(rc, TREXIO_SUCCESS)
   end if
 
@@ -432,7 +445,7 @@ subroutine export_trexio
             eri_index(3,icount) = k
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
-              rc = trexio_write_mo_2e_int_eri(f, offset, icount, eri_index, eri_buffer)
+              rc = trexio_write_mo_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
               call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
@@ -443,7 +456,7 @@ subroutine export_trexio
     end do
 
     if (icount > 0_8) then
-      rc = trexio_write_mo_2e_int_eri(f, offset, icount, eri_index, eri_buffer)
+      rc = trexio_write_mo_2e_int_eri(f(1), offset, icount, eri_index, eri_buffer)
       call trexio_assert(rc, TREXIO_SUCCESS)
     end if
   end if
@@ -454,7 +467,7 @@ subroutine export_trexio
   if (export_mo_two_e_ints_cholesky) then
     print *, 'MO two-e integrals Cholesky'
 
-    rc = trexio_write_mo_2e_int_eri_cholesky_num(f, cholesky_ao_num)
+    rc = trexio_write_mo_2e_int_eri_cholesky_num(f(1), cholesky_ao_num)
     call trexio_assert(rc, TREXIO_SUCCESS)
 
     icount = 0_8
@@ -470,7 +483,7 @@ subroutine export_trexio
          chol_index(2,icount) = j
          chol_index(3,icount) = k
          if (icount == BUFSIZE) then
-           rc = trexio_write_mo_2e_int_eri_cholesky(f, offset, icount, chol_index, chol_buffer)
+           rc = trexio_write_mo_2e_int_eri_cholesky(f(1), offset, icount, chol_index, chol_buffer)
            call trexio_assert(rc, TREXIO_SUCCESS)
            offset += icount
            icount = 0_8
@@ -480,7 +493,7 @@ subroutine export_trexio
     end do
 
     if (icount > 0_8) then
-      rc = trexio_write_mo_2e_int_eri_cholesky(f, offset, icount, chol_index, chol_buffer)
+      rc = trexio_write_mo_2e_int_eri_cholesky(f(1), offset, icount, chol_index, chol_buffer)
       call trexio_assert(rc, TREXIO_SUCCESS)
     end if
   end if
@@ -489,14 +502,16 @@ subroutine export_trexio
 ! One-e RDM
 ! ---------
 
-  rc = trexio_write_rdm_1e(f,one_e_dm_mo)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  do k=1,N_states
+    rc = trexio_write_rdm_1e(f(k),one_e_dm_mo_alpha(:,:,k) + one_e_dm_mo_beta(:,:,k))
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_rdm_1e_up(f,one_e_dm_mo_alpha_average)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_rdm_1e_up(f(k),one_e_dm_mo_alpha(:,:,k))
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_rdm_1e_dn(f,one_e_dm_mo_beta_average)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_rdm_1e_dn(f(k),one_e_dm_mo_beta(:,:,k))
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
 
 
 ! Two-e RDM
@@ -521,7 +536,7 @@ subroutine export_trexio
             eri_index(3,icount) = k
             eri_index(4,icount) = l
             if (icount == BUFSIZE) then
-              rc = trexio_write_rdm_2e(f, offset, icount, eri_index, eri_buffer)
+              rc = trexio_write_rdm_2e(f(1), offset, icount, eri_index, eri_buffer)
               call trexio_assert(rc, TREXIO_SUCCESS)
               offset += icount
               icount = 0_8
@@ -532,7 +547,7 @@ subroutine export_trexio
     end do
 
     if (icount >= 0_8) then
-      rc = trexio_write_rdm_2e(f, offset, icount, eri_index, eri_buffer)
+      rc = trexio_write_rdm_2e(f(1), offset, icount, eri_index, eri_buffer)
       call trexio_assert(rc, TREXIO_SUCCESS)
     end if
   end if
@@ -547,56 +562,60 @@ subroutine export_trexio
     double precision, allocatable :: coef_buffer(:,:)
     integer :: nint
 
-!    rc = trexio_read_determinant_int64_num(f, nint)
-!    call trexio_assert(rc, TREXIO_SUCCESS)
-    nint = N_int
+    rc = trexio_get_int64_num(f(1), nint)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+!    nint = N_int
     if (nint /= N_int) then
        stop 'Problem with N_int'
     endif
     allocate ( det_buffer(nint, 2, BUFSIZE), coef_buffer(BUFSIZE, n_states) )
 
-    icount = 0_8
-    offset = 0_8
-    rc = trexio_write_state_num(f, n_states)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+    do k=1, N_states
+      icount = 0_8
+      offset = 0_8
+      rc = trexio_write_state_num(f(k), n_states)
+      call trexio_assert(rc, TREXIO_SUCCESS)
 
-    rc = trexio_set_state (f, 0)
-    call trexio_assert(rc, TREXIO_SUCCESS)
+! Will need to be updated with TREXIO 2.4
+!      rc = trexio_write_state_id(f(k), k-1)
+      rc = trexio_write_state_id(f(k), k)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+
+      rc = trexio_write_state_file_name(f(k), filenames, len(filenames(1)))
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    enddo
+
     do k=1,n_det
        icount += 1_8
        det_buffer(1:nint, 1:2, icount) = psi_det(1:N_int, 1:2, k)
        coef_buffer(icount,1:N_states) = psi_coef(k,1:N_states)
        if (icount == BUFSIZE) then
-         call trexio_assert(rc, TREXIO_SUCCESS)
-         rc = trexio_write_determinant_list(f, offset, icount, det_buffer)
-         call trexio_assert(rc, TREXIO_SUCCESS)
          do i=1,N_states
-           rc = trexio_set_state (f, i-1)
+           rc = trexio_write_determinant_list(f(i), offset, icount, det_buffer)
            call trexio_assert(rc, TREXIO_SUCCESS)
-           rc = trexio_write_determinant_coefficient(f, offset, icount, coef_buffer(1,i))
+           rc = trexio_write_determinant_coefficient(f(i), offset, icount, coef_buffer(1,i))
+           call trexio_assert(rc, TREXIO_SUCCESS)
          end do
-         rc = trexio_set_state (f, 0)
          offset += icount
          icount = 0_8
        end if
     end do
 
   if (icount >= 0_8) then
-       call trexio_assert(rc, TREXIO_SUCCESS)
-       rc = trexio_write_determinant_list(f, offset, icount, det_buffer)
-       call trexio_assert(rc, TREXIO_SUCCESS)
-       do i=1,N_states
-         rc = trexio_set_state (f, i-1)
-         call trexio_assert(rc, TREXIO_SUCCESS)
-         rc = trexio_write_determinant_coefficient(f, offset, icount, coef_buffer(1,i))
-       end do
-       rc = trexio_set_state (f, 0)
+    do i=1,N_states
+      rc = trexio_write_determinant_list(f(i), offset, icount, det_buffer)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_determinant_coefficient(f(i), offset, icount, coef_buffer(1,i))
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    end do
   end if
 
   deallocate ( det_buffer, coef_buffer )
 
-  rc = trexio_close(f)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+  do k=1,N_states
+    rc = trexio_close(f(k))
+    call trexio_assert(rc, TREXIO_SUCCESS)
+  enddo
 
 end
 

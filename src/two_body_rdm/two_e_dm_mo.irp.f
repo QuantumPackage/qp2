@@ -30,7 +30,6 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
     enddo
    enddo
    two_e_dm_mo(:,:,:,:) = two_e_dm_mo(:,:,:,:) 
-!   * 2.d0
 
  END_PROVIDER
 

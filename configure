@@ -9,7 +9,7 @@ echo "QP_ROOT="$QP_ROOT
 unset CC
 unset CCXX
 
-TREXIO_VERSION=2.3.1
+TREXIO_VERSION=2.3.2
 
 # Force GCC instead of ICC for dependencies
 export CC=gcc
