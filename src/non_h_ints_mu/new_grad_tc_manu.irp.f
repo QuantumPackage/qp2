@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao_test(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao_test(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2)
   !
   ! where r1 = r(ipoint)
   !
@@ -15,9 +15,9 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
   ! if J(r1,r2) = u12 x v1 x v2
   !
   ! int2_grad1_u12_ao_test(i,j,ipoint,:) =      v1    x [ 0.5 x \int dr2 [(r1 - r2) (erf(mu * r12)-1)r_12] v2 \phi_i(r2) \phi_j(r2) ]
-  !                                 - \grad_1 v1 x [       \int dr2                  u12              v2 \phi_i(r2) \phi_j(r2) ] 
-  !                                 =    0.5 v_1b(ipoint) * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint) * r(:) 
-  !                                 -    0.5 v_1b(ipoint) * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,:) 
+  !                                 - \grad_1 v1 x [       \int dr2                  u12              v2 \phi_i(r2) \phi_j(r2) ]
+  !                                 =    0.5 v_1b(ipoint) * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint) * r(:)
+  !                                 -    0.5 v_1b(ipoint) * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,:)
   !                                 - v_1b_grad[:,ipoint] * v_ij_u_cst_mu_j1b(i,j,ipoint)
   !
   !
@@ -35,25 +35,18 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   if(read_tc_integ) then
 
-    open(unit=11, form="unformatted", file='int2_grad1_u12_ao_test', action="read")
-      do m = 1, 3
-        do ipoint = 1, n_points_final_grid
-          do j = 1, ao_num
-            do i = 1, ao_num
-              read(11) int2_grad1_u12_ao_test(i,j,ipoint,m)
-            enddo
-          enddo
-        enddo
-      enddo
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao_test', action="read")
+    read(11) int2_grad1_u12_ao_test
     close(11)
 
+
   else
-  
+
     if(j1b_type .eq. 3) then
       do ipoint = 1, n_points_final_grid
         x = final_grid_points(1,ipoint)
         y = final_grid_points(2,ipoint)
-        z = final_grid_points(3,ipoint) 
+        z = final_grid_points(3,ipoint)
         tmp0  = 0.5d0 * v_1b(ipoint)
         tmp_x =  v_1b_grad(1,ipoint)
         tmp_y =  v_1b_grad(2,ipoint)
@@ -87,24 +80,18 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='int2_grad1_u12_ao_test', action="write")
-      do m = 1, 3
-        do ipoint = 1, n_points_final_grid
-          do j = 1, ao_num
-            do i = 1, ao_num
-              write(11) int2_grad1_u12_ao_test(i,j,ipoint,m)
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao_test', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) int2_grad1_u12_ao_test
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)
   print*, ' Wall time for int2_grad1_u12_ao_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -114,9 +101,9 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
   !
   ! tc_grad_and_lapl_ao_test(k,i,l,j) = < k l | -1/2 \Delta_1 u(r1,r2) - \grad_1 u(r1,r2) | ij >
   !
-  ! = 1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2 \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2) 
+  ! = 1/2 \int dr1 (phi_k(r1) \grad_r1 phi_i(r1) - phi_i(r1) \grad_r1 phi_k(r1)) . \int dr2 \grad_r1 u(r1,r2) \phi_l(r2) \phi_j(r2)
   !
-  ! This is obtained by integration by parts. 
+  ! This is obtained by integration by parts.
   !
   END_DOC
 
@@ -131,40 +118,32 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
   call wall_time(time0)
 
   if(read_tc_integ) then
-  
-    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao_test', action="read")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              read(11) tc_grad_and_lapl_ao_test(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_and_lapl_ao_test', action="read")
+    read(11) tc_grad_and_lapl_ao_test
     close(11)
 
   else
 
-    provide int2_grad1_u12_ao_test 
-   
+    provide int2_grad1_u12_ao_test
+
     allocate(b_mat(n_points_final_grid,ao_num,ao_num,3), ac_mat(ao_num,ao_num,ao_num,ao_num))
-  
+
     b_mat = 0.d0
    !$OMP PARALLEL                                                              &
    !$OMP DEFAULT (NONE)                                                        &
-   !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
-   !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
+   !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       &
+   !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, &
    !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
    !$OMP DO SCHEDULE (static)
     do i = 1, ao_num
       do k = 1, ao_num
         do ipoint = 1, n_points_final_grid
-  
+
           weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
           ao_i_r  = aos_in_r_array_transp(ipoint,i)
           ao_k_r  = aos_in_r_array_transp(ipoint,k)
-  
+
           b_mat(ipoint,k,i,1) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1))
           b_mat(ipoint,k,i,2) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2))
           b_mat(ipoint,k,i,3) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3))
@@ -173,19 +152,19 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     ac_mat = 0.d0
     do m = 1, 3
       call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                   &
                 , int2_grad1_u12_ao_test(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
                 , 1.d0, ac_mat, ao_num*ao_num)
-  
+
     enddo
     deallocate(b_mat)
-  
+
    !$OMP PARALLEL             &
    !$OMP DEFAULT (NONE)       &
-   !$OMP PRIVATE (i, j, k, l) & 
+   !$OMP PRIVATE (i, j, k, l) &
    !$OMP SHARED (ac_mat, tc_grad_and_lapl_ao_test, ao_num)
    !$OMP DO SCHEDULE (static)
     do j = 1, ao_num
@@ -199,29 +178,23 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
     enddo
    !$OMP END DO
    !$OMP END PARALLEL
-  
+
     deallocate(ac_mat)
 
   endif
 
-  if(write_tc_integ) then
-    open(unit=11, form="unformatted", file='tc_grad_and_lapl_ao_test', action="write")
-      do i = 1, ao_num
-        do j = 1, ao_num
-          do k = 1, ao_num
-            do l = 1, ao_num
-              write(11) tc_grad_and_lapl_ao_test(l,k,j,i)
-            enddo
-          enddo
-        enddo
-      enddo
+  if(write_tc_integ.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_and_lapl_ao_test', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) tc_grad_and_lapl_ao_test
     close(11)
+    call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_and_lapl_ao_test = ', time1 - time0
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 

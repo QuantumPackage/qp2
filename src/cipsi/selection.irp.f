@@ -312,9 +312,6 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   end do
   deallocate(indices)
 
-!  !$OMP CRITICAL
-!  print *,  'Step1: ', i_generator, preinteresting(0)
-!  !$OMP END CRITICAL
 
   allocate(banned(mo_num, mo_num,2), bannedOrb(mo_num, 2))
   allocate (mat(N_states, mo_num, mo_num))
@@ -466,17 +463,8 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
           fullinteresting(sze+1) = i
         end if
       end do
-
       allocate (fullminilist (N_int, 2, fullinteresting(0)), &
                     minilist (N_int, 2,     interesting(0)) )
-!      if(pert_2rdm)then
-!        allocate(coef_fullminilist_rev(N_states,fullinteresting(0)))
-!        do i=1,fullinteresting(0)
-!          do j = 1, N_states
-!            coef_fullminilist_rev(j,i) = psi_coef_sorted(fullinteresting(i),j)
-!          enddo
-!        enddo
-!      endif
 
       do i=1,fullinteresting(0)
         fullminilist(:,:,i) = psi_det_sorted(:,:,fullinteresting(i))
@@ -524,33 +512,19 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
 
             call spot_isinwf(mask, fullminilist, i_generator, fullinteresting(0), banned, fullMatch, fullinteresting)
             if(fullMatch) cycle
-! !$OMP CRITICAL
-!  print *,  'Step3: ', i_generator, h1, interesting(0)
-! !$OMP END CRITICAL
 
             call splash_pq(mask, sp, minilist, i_generator, interesting(0), bannedOrb, banned, mat, interesting)
-
-!            if(.not.pert_2rdm)then
-             call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
-!            else
-!             call fill_buffer_double_rdm(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf,fullminilist, coef_fullminilist_rev, fullinteresting(0))
-!            endif
+            call fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
           end if
         enddo
         if(s1 /= s2) monoBdo = .false.
       enddo
       deallocate(fullminilist,minilist)
-!      if(pert_2rdm)then
-!        deallocate(coef_fullminilist_rev)
-!      endif
     enddo
   enddo
   deallocate(preinteresting, prefullinteresting, interesting, fullinteresting)
   deallocate(banned, bannedOrb,mat)
 end subroutine
-
-
-
 subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_diag_tmp, E0, pt2_data, mat, buf)
   use bitmasks
   use selection_types
@@ -606,18 +580,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 ! to a determinant of the future. In that case, the determinant will be
 ! detected as already generated when generating in the future with a
 ! double excitation.
-!
-!      if (.not.do_singles) then
-!        if ((h1 == p1) .or. (h2 == p2)) then
-!          cycle
-!        endif
-!      endif
-!
-!      if (.not.do_doubles) then
-!        if ((h1 /= p1).and.(h2 /= p2)) then
-!          cycle
-!        endif
-!      endif
 ! -----
 
       if(bannedOrb(p2, s2)) cycle
@@ -974,13 +936,10 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
         call get_mask_phase(psi_det_sorted(1,1,interesting(i)), phasemask,N_int)
         if(nt == 4) then
-!          call get_d2_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
           call get_d2(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         else if(nt == 3) then
-!          call get_d1_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
           call get_d1(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         else
-!          call get_d0_reference(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
           call get_d0(det(1,1,i), phasemask, bannedOrb, banned, mat, mask, h, p, sp, psi_selectors_coef_transp(1, interesting(i)))
         end if
     else if(nt == 4) then
@@ -1539,8 +1498,6 @@ subroutine past_d2(banned, p, sp)
     end do
   end if
 end
-
-
 
 subroutine spot_isinwf(mask, det, i_gen, N, banned, fullMatch, interesting)
   use bitmasks

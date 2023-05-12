@@ -1,0 +1,16 @@
+program kick_the_mos
+
+  !BEGIN_DOC
+  ! To do a small rotation of the MOs
+  !END_DOC
+
+  implicit none
+
+  kick_in_mos = .True.
+  TOUCH kick_in_mos
+
+  call set_classes_loc
+  call apply_pre_rotation
+  call unset_classes_loc
+  
+end

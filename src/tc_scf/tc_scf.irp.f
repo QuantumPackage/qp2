@@ -8,7 +8,7 @@ program tc_scf
 
   implicit none
 
-  print *, 'starting ...'
+  print *, ' starting ...'
 
   my_grid_becke  = .True.
   my_n_pt_r_grid = 30
@@ -27,17 +27,37 @@ program tc_scf
   !call orthonormalize_mos()
 
   PROVIDE tcscf_algorithm
-  if(tcscf_algorithm == 'DIIS') then
-    call rh_tcscf_diis()
-  elseif(tcscf_algorithm == 'Simple') then
-    call rh_tcscf_simple()
+  PROVIDE var_tc
+
+  if(var_tc) then
+
+    print *, ' VAR-TC'
+
+    if(tcscf_algorithm == 'DIIS') then
+      print*, ' NOT implemented yet'
+    elseif(tcscf_algorithm == 'Simple') then
+      call rh_vartcscf_simple()
+    else
+      print *, ' not implemented yet', tcscf_algorithm
+      stop
+    endif
+
   else
-    print *, ' not implemented yet', tcscf_algorithm
-    stop
+
+    if(tcscf_algorithm == 'DIIS') then
+      call rh_tcscf_diis()
+    elseif(tcscf_algorithm == 'Simple') then
+      call rh_tcscf_simple()
+    else
+      print *, ' not implemented yet', tcscf_algorithm
+      stop
+    endif
+
+    call minimize_tc_orb_angles()
+    call print_energy_and_mos()
+
   endif
 
-  call minimize_tc_orb_angles()
-  call print_energy_and_mos()
 
 end
 

@@ -30,10 +30,5 @@ BEGIN_PROVIDER [ integer, n_states_diag  ]
     endif
   IRP_ENDIF
 
-  call write_time(6)
-  if (mpi_master) then
-    write(6, *) 'Read  n_states_diag'
-  endif
-
 END_PROVIDER
 

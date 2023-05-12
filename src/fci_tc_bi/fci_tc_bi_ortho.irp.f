@@ -62,12 +62,18 @@ subroutine run_cipsi_tc
       endif
     endif
     ! ---
+    write(json_unit,json_array_open_fmt) 'fci_tc'
 
     if (do_pt2) then
       call run_stochastic_cipsi
     else
       call run_cipsi
     endif
+
+    write(json_unit,json_dict_uopen_fmt)
+    write(json_unit,json_dict_close_fmtx)
+    write(json_unit,json_array_close_fmtx)
+    call json_close
 
   else
     PROVIDE mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e pt2_min_parallel_tasks

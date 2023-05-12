@@ -466,6 +466,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        double precision, allocatable :: work(:)
 
        y = h
+!       y = h_p   ! Doesn't work for non-singlets
        lwork = -1
        allocate(work(1))
        call dsygv(1,'V','U',shift2,y,size(y,1), &

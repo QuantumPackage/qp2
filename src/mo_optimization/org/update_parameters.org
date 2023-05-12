@@ -1,0 +1,16 @@
+Subroutine toupdate the parameters.
+Ex: TOUCH mo_coef ...
+
+#+BEGIN_SRC f90 :comments org :tangle update_parameters.irp.f
+subroutine update_parameters()
+
+  implicit none
+
+  !### TODO
+  ! Touch yours parameters
+  call clear_mo_map
+  TOUCH mo_coef psi_det psi_coef
+  call diagonalize_ci
+  call save_wavefunction_unsorted
+end
+#+END_SRC

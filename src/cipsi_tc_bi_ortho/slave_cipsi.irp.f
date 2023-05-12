@@ -17,7 +17,6 @@ end
 
 subroutine provide_everything
   PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
-  PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
   PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
   PROVIDE psi_det psi_coef threshold_generators state_average_weight
@@ -312,7 +311,6 @@ subroutine run_slave_main
           PROVIDE psi_bilinear_matrix_rows psi_det_sorted_tc_order psi_bilinear_matrix_order
           PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
           PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted_tc
-          PROVIDE psi_selectors_rcoef_bi_orth_transp psi_selectors_lcoef_bi_orth_transp
 
           PROVIDE psi_det_hii selection_weight pseudo_sym pt2_min_parallel_tasks
 

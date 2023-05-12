@@ -43,9 +43,14 @@ END_PROVIDER
  ! For Single reference wave functions, the generator is the
  ! Hartree-Fock determinant
  END_DOC
- psi_det_sorted_tc_gen = psi_det_sorted_tc
+ psi_det_sorted_tc_gen =  psi_det_sorted_tc
  psi_coef_sorted_tc_gen = psi_coef_sorted_tc
  psi_det_sorted_tc_gen_order = psi_det_sorted_tc_order
+ integer :: i
+! do i = 1,N_det
+!  print*,'i = ',i
+!  call debug_det(psi_det_sorted_tc(1,1,i),N_int)
+! enddo
 END_PROVIDER
 
 

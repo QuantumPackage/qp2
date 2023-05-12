@@ -54,7 +54,7 @@ subroutine run_stochastic_cipsi
 
 
 !  if (N_det > N_det_max) then
-!    psi_det(1:N_int,1:2,1:N_det) = psi_det_sorted_tc_gen(1:N_int,1:2,1:N_det)
+!    psi_det(1:N_int,1:2,1:N_det) = psi_det_generators(1:N_int,1:2,1:N_det)
 !    psi_coef(1:N_det,1:N_states) = psi_coef_sorted_tc_gen(1:N_det,1:N_states)
 !    N_det = N_det_max
 !    soft_touch N_det psi_det psi_coef
@@ -78,6 +78,8 @@ subroutine run_stochastic_cipsi
         (N_det < N_det_max) .and.                                    &
         (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max)          &
         )
+      print*,'maxval(abs(pt2_data % pt2(1:N_states)))',maxval(abs(pt2_data % pt2(1:N_states)))
+      print*,pt2_max
       write(*,'(A)')  '--------------------------------------------------------------------------------'
 
 
@@ -92,7 +94,15 @@ subroutine run_stochastic_cipsi
     call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 
-    N_iter += 1
+    call print_summary(psi_energy_with_nucl_rep, &
+       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
+
+    call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
+
+    call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
+    call print_extrapolated_energy()
+!    call print_mol_properties()
+    call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit
 
@@ -106,6 +116,7 @@ subroutine run_stochastic_cipsi
     ept2(N_iter-1) = E_tc + nuclear_repulsion + (pt2_data % pt2(1))/norm
     pt1(N_iter-1) = dsqrt(pt2_data % overlap(1,1))
     call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+!    stop
     if (qp_stop()) exit
   enddo
 !  print*,'data to extrapolate '
