@@ -13,11 +13,16 @@ Options:
 
 import sys
 import os
-import trexio
 import numpy as np
 from functools import reduce
 from ezfio import ezfio
 from docopt import docopt
+
+try:
+  import trexio
+except ImportError:
+    print("Error: trexio python module is not found. Try python3 -m pip install trexio")
+    sys.exit(1)
 
 
 try:
