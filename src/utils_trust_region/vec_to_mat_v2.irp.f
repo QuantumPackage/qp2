@@ -8,9 +8,9 @@
 
 subroutine vec_to_mat_v2(n,m,v_x,m_x)
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Vector to antisymmetric matrix
-  END_DOC
+  !END_DOC
   
   implicit none
   

@@ -10,11 +10,12 @@
 ! \end{align*}
 
 ! Input:
-! | n           | integer          | m*(m-1)/2                |
-! | v_grad(n)   | double precision | gradient                 |
-! | H(n,n)      | double precision | hessian                  |
-! | x(n)        | double precision | Step in the trust region |
-! | prev_energy | double precision | previous energy          |
+! | n           | integer          | m*(m-1)/2                                 |
+! | n2          | integer          | m*(m-1)/2 or 1 if the hessian is diagonal |
+! | v_grad(n)   | double precision | gradient                                  |
+! | H(n,n)      | double precision | hessian                                   |
+! | x(n)        | double precision | Step in the trust region                  |
+! | prev_energy | double precision | previous energy                           |
 
 ! Output:
 ! | e_model | double precision | predicted energy after the rotation of the MOs |
@@ -29,21 +30,21 @@
 ! | ddot | double precision | dot product (Lapack) |
 
 
-subroutine trust_region_expected_e(n,v_grad,H,x,prev_energy,e_model)
+subroutine trust_region_expected_e(n,n2,v_grad,H,x,prev_energy,e_model)
    
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the expected criterion/energy after the application of the step x
-  END_DOC
+  !END_DOC
 
   implicit none
 
   ! Variables
 
   ! in
-  integer, intent(in)           :: n
-  double precision, intent(in)  :: v_grad(n),H(n,n),x(n)
+  integer, intent(in)           :: n,n2
+  double precision, intent(in)  :: v_grad(n),H(n,n2),x(n)
   double precision, intent(in)  :: prev_energy
 
   ! out
@@ -79,27 +80,34 @@ subroutine trust_region_expected_e(n,v_grad,H,x,prev_energy,e_model)
   part_1 = ddot(n,v_grad,1,x,1)
  
   !if (debug) then
-    print*,'g.x : ', part_1
-  !endif  
-
+  !  print*,'g.x : ', part_1
+  !endif
+    
   ! Product H.x
-  call dgemv('N',n,n,1d0,H,size(H,1),x,1,0d0,part_2a,1)
+  if (n == n2) then
+    call dgemv('N',n,n,1d0,H,size(H,1),x,1,0d0,part_2a,1)
+  else
+    ! If the hessian is diagonal
+    do i = 1, n
+      part_2a(i) = H(i,1) * x(i)
+    enddo
+  endif
 
   ! Product 1/2 . x^T.H.x
   part_2 = 0.5d0 * ddot(n,x,1,part_2a,1)
 
   !if (debug) then
-    print*,'1/2*x^T.H.x : ', part_2 
+  !  print*,'1/2*x^T.H.x : ', part_2 
   !endif
 
-  print*,'prev_energy', prev_energy
 
   ! Sum
   e_model = prev_energy + part_1 + part_2
 
   ! Writing the predicted energy
-  print*, 'Predicted energy after the rotation : ', e_model
-  print*, 'Previous energy - predicted energy:', prev_energy - e_model
+  print*, 'prev_energy:                        ', prev_energy
+  print*, 'Predicted energy after the rotation:', e_model
+  print*, 'Previous energy - predicted energy: ', prev_energy - e_model
   
   ! Can be deleted, already in another subroutine
   if (DABS(prev_energy - e_model) < 1d-12 ) then 
@@ -114,6 +122,5 @@ subroutine trust_region_expected_e(n,v_grad,H,x,prev_energy,e_model)
   print*,'Time in trust e model:', t3
 
   print*,'---End trust_e_model---'
-  print*,''
  
 end subroutine

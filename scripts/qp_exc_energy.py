@@ -42,13 +42,15 @@ import sys, os
 import scipy
 import scipy.stats
 from math import sqrt, gamma, exp
-import json
+import qp_json
 
 
-def read_data(filename,state):
+def read_data(ezfio_filename,state):
   """ Read energies and PT2 from input file """
-  with open(filename,'r') as f:
-      lines = json.load(f)['fci']
+  data = qp_json.load_last(ezfio_filename)
+  for method in data.keys():
+    x = data[method]
+  lines = x
 
   print(f"State: {state}")
 
@@ -138,15 +140,15 @@ def compute(data):
 
     return mu, err, bias, p
 
-filename = sys.argv[1]
-print(filename)
+ezfio_filename = sys.argv[1]
+print(ezfio_filename)
 if len(sys.argv) > 2:
     state = int(sys.argv[2])
 else:
     state = 1
-data = read_data(filename,state)
+data = read_data(ezfio_filename,state)
 mu, err, bias, _ = compute(data)
-print(" %s: %8.3f +/- %5.3f eV\n"%(filename, mu, err))
+print(" %s: %8.3f +/- %5.3f eV\n"%(ezfio_filename, mu, err))
 
 import numpy as np
 A = np.array( [ [ data[-1][1], 1. ],
