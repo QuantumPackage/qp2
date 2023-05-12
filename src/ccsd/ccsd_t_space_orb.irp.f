@@ -257,7 +257,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
             enddo
           enddo
         enddo
-        !$OMP END DO
+        !$OMP END DO NOWAIT
         !$OMP CRITICAL
         energy = energy + e
         !$OMP END CRITICAL
@@ -426,7 +426,7 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
 !    enddo
 !  enddo
 !  !$OMP END DO nowait
-! 
+!
 !  !$OMP DO collapse(2)
 !  do c = 1, nV
 !    do b = 1, nV
@@ -510,3 +510,4 @@ implicit none
   !enddo
 
 end
+
