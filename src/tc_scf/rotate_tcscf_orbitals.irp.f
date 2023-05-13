@@ -17,7 +17,8 @@ program rotate_tcscf_orbitals
   bi_ortho = .True.
   touch bi_ortho
 
-  call maximize_overlap()
+  call minimize_tc_orb_angles()
+  !call maximize_overlap()
 
 end
 
