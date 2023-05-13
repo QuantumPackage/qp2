@@ -93,13 +93,21 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
   integer                       :: i, j, k, n_degen_list, m, n, n_degen, ilast, ifirst
   double precision              :: max_angle, norm
+  double precision              :: E_old, E_new, E_thr
   integer,          allocatable :: list_degen(:,:)
   double precision, allocatable :: new_angles(:)
+  double precision, allocatable :: mo_r_coef_old(:,:), mo_l_coef_old(:,:)
   double precision, allocatable :: mo_r_coef_good(:,:), mo_l_coef_good(:,:)
   double precision, allocatable :: mo_r_coef_new(:,:)
-  double precision, allocatable :: fock_diag(:),s_mat(:,:)
+  double precision, allocatable :: fock_diag(:), s_mat(:,:)
   double precision, allocatable :: stmp(:,:), T(:,:), Snew(:,:), smat2(:,:)
   double precision, allocatable :: mo_l_coef_tmp(:,:), mo_r_coef_tmp(:,:), mo_l_coef_new(:,:)
+
+  E_thr = 1d-8
+  E_old = TC_HF_energy
+  allocate(mo_l_coef_old(ao_num,mo_num), mo_r_coef_old(ao_num,mo_num))
+  mo_r_coef_old = mo_r_coef
+  mo_l_coef_old = mo_l_coef
 
   good_angles = .False.
 
@@ -253,11 +261,32 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
   TOUCH mo_l_coef mo_r_coef
 
+  ! check if TC energy has changed
+  E_new = TC_HF_energy
+  if(dabs(E_new - E_old) .gt. E_thr) then
+    mo_r_coef = mo_r_coef_old
+    mo_l_coef = mo_l_coef_old
+    deallocate(mo_l_coef_old, mo_r_coef_old)
+    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
+    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
+    TOUCH mo_l_coef mo_r_coef
+    print*, ' TC energy bef rotation = ', E_old
+    print*, ' TC energy aft rotation = ', E_new
+    print*, ' the rotation is refused'
+    stop
+  endif
+
   allocate(new_angles(mo_num))
   new_angles(1:mo_num) = dabs(angle_left_right(1:mo_num))
   max_angle = maxval(new_angles)
   good_angles = max_angle.lt.45.d0
   print *, ' max_angle = ', max_angle
+  deallocate(new_angles)
+
+
+  deallocate(mo_l_coef_old, mo_r_coef_old)
+  deallocate(mo_l_coef_good, mo_r_coef_good)
+  deallocate(mo_r_coef_new)
   
 end
 
