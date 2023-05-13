@@ -169,7 +169,7 @@ subroutine run_ccsd_space_orb
     ! New
     print*,'Computing (T) correction...'
     call wall_time(ta)
-    call ccsd_par_t_space_v2(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
+    call ccsd_par_t_space_v3(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
          ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
     call wall_time(tb)
     print*,'Time: ',tb-ta, ' s'

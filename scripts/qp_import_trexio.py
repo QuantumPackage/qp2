@@ -95,14 +95,15 @@ def write_ezfio(trexio_filename, filename):
         p = re.compile(r'(\d*)$')
         label = [p.sub("", x).capitalize() for x in label]
         ezfio.set_nuclei_nucl_label(label)
+        print("OK")
 
     else:
         ezfio.set_nuclei_nucl_num(1)
         ezfio.set_nuclei_nucl_charge([0.])
         ezfio.set_nuclei_nucl_coord([0.,0.,0.])
         ezfio.set_nuclei_nucl_label(["X"])
+        print("None")
 
-    print("OK")
 
 
     print("Electrons\t...\t", end=' ')
@@ -110,12 +111,12 @@ def write_ezfio(trexio_filename, filename):
     try:
         num_beta = trexio.read_electron_dn_num(trexio_file)
     except:
-        num_beta = sum(charge)//2
+        num_beta = int(sum(charge))//2
 
     try:
         num_alpha = trexio.read_electron_up_num(trexio_file)
     except:
-        num_alpha = sum(charge) - num_beta
+        num_alpha = int(sum(charge)) - num_beta
 
     if num_alpha == 0:
         print("\n\nError: There are zero electrons in the TREXIO file.\n\n")
@@ -123,7 +124,7 @@ def write_ezfio(trexio_filename, filename):
     ezfio.set_electrons_elec_alpha_num(num_alpha)
     ezfio.set_electrons_elec_beta_num(num_beta)
 
-    print("OK")
+    print(f"{num_alpha} {num_beta}")
 
     print("Basis\t\t...\t", end=' ')
 
@@ -263,7 +264,10 @@ def write_ezfio(trexio_filename, filename):
         ezfio.set_ao_basis_ao_expo(expo)
         ezfio.set_ao_basis_ao_basis("Read from TREXIO")
 
-    print("OK")
+        print("OK")
+
+    else:
+        print("None")
 
 
     #                _
@@ -308,10 +312,10 @@ def write_ezfio(trexio_filename, filename):
       for i in range(num_beta):
          mo_occ[i] += 1.
       ezfio.set_mo_basis_mo_occ(mo_occ)
+      print("OK")
     except:
-      pass
+      print("None")
 
-    print("OK")
 
 
     print("Pseudos\t\t...\t", end=' ')
@@ -391,9 +395,10 @@ def write_ezfio(trexio_filename, filename):
         ezfio.set_pseudo_pseudo_n_kl(pseudo_n_kl)
         ezfio.set_pseudo_pseudo_v_kl(pseudo_v_kl)
         ezfio.set_pseudo_pseudo_dz_kl(pseudo_dz_kl)
+        print("OK")
 
-
-    print("OK")
+    else:
+        print("None")
 
 
 
