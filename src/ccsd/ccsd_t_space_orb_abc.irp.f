@@ -162,7 +162,86 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc)
   double precision, intent(out) :: W_abc(nO,nO,nO)
 
   integer :: l,i,j,k,d
+  double precision, allocatable, dimension(:,:,:) :: W_ikj, X
 
+  allocate(W_ikj(nO,nO,nO))
+  allocate(X(nV,nO,nO))
+
+  W_abc = 0.d0
+  W_ikj = 0.d0
+
+!   X_vovv(d,i,c,a) * T_voov(d,j,k,b) : i jk
+  call dgemm('T','N', nO, nO*nO, nV, 1.d0, &
+       X_vovv(1,1,c,a), nV, T_voov(1,1,1,b), nV, 0.d0, W_abc, nO)
+
+!   T_voov(d,i,j,a) * X_vovv(d,k,b,c) : ij k
+  call dgemm('T','N', nO*nO, nO, nV, 1.d0, &
+       T_voov(1,1,1,a), nV, X_vovv(1,1,b,c), nV, 1.d0, W_abc, nO*nO)
+
+!  T_voov(d,k,i,c) * X_vovv(d,j,a,b) : ki j
+  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,k,d)
+  do k=1,nO
+    do i=1,nO
+      do d=1,nV
+        X(d,i,k) = T_voov(d,k,i,c)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N', nO*nO, nO, nV, 1.d0, &
+       X(1,1,1), nV, X_vovv(1,1,a,b), nV, 0.d0, W_ikj, nO*nO)
+
+!   X_vovv(d,k,a,c) * T_voov(d,j,i,b) : k ji
+  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,k,d)
+  do j=1,nO
+    do i=1,nO
+      do d=1,nV
+        X(d,i,j) = T_voov(d,j,i,b)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N', nO*nO, nO, nV, 1.d0, &
+       X(1,1,1), nV, X_vovv(1,1,a,c), nV, 1.d0, W_abc, nO*nO)
+
+!   T_voov(d,i,k,a) * X_vovv(d,j,c,b) : ik j
+  call dgemm('T','N', nO*nO, nO, nV, 1.d0, &
+       T_voov(1,1,1,a), nV, X_vovv(1,1,c,b), nV, 1.d0, W_ikj, nO*nO)
+
+!   X_vovv(d,i,b,a) * T_voov(d,k,j,c) : i kj
+  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,k,d)
+  do k=1,nO
+    do j=1,nO
+      do d=1,nV
+        X(d,j,k) = T_voov(d,k,j,c)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N', nO, nO*nO, nV, 1.d0, &
+       X_vovv(1,1,b,a), nV, X(1,1,1), nV, 1.d0, W_abc, nO)
+
+
+
+!   - T_oovv(l,i,a,b) * X_ooov(l,j,k,c) : i jk
+!   - T_oovv(l,i,a,c) * X_ooov(l,k,j,b) : i kj
+!   - T_oovv(l,k,c,a) * X_ooov(l,i,j,b) : k ij
+!   - T_oovv(l,k,c,b) * X_ooov(l,j,i,a) : k ji
+!   - T_oovv(l,j,b,c) * X_ooov(l,k,i,a) : j ki
+!   - T_oovv(l,j,b,a) * X_ooov(l,i,k,c) : j ik
+
+  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,j,k)
+  do k=1,nO
+    do j=1,nO
+      do i=1,nO
+        W_abc(i,j,k) = W_abc(i,j,k) + W_ikj(i,k,j)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 
   !$OMP PARALLEL &
   !$OMP SHARED(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc) &
@@ -173,18 +252,6 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc)
   do k = 1, nO
     do j = 1, nO
       do i = 1, nO
-        W_abc(i,j,k) = 0.d0
-
-        do d = 1, nV
-          W_abc(i,j,k) = W_abc(i,j,k) &
-                 + X_vovv(d,i,b,a) * T_voov(d,k,j,c) &
-                 + X_vovv(d,i,c,a) * T_voov(d,j,k,b) &
-                 + X_vovv(d,k,a,c) * T_voov(d,j,i,b) &
-                 + X_vovv(d,k,b,c) * T_voov(d,i,j,a) &
-                 + X_vovv(d,j,c,b) * T_voov(d,i,k,a) &
-                 + X_vovv(d,j,a,b) * T_voov(d,k,i,c)
-
-        enddo
 
         do l = 1, nO
           W_abc(i,j,k) = W_abc(i,j,k) &
@@ -201,7 +268,6 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-
 
 end
 
