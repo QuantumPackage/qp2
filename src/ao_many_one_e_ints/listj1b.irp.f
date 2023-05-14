@@ -7,17 +7,17 @@ BEGIN_PROVIDER [integer, List_all_comb_b2_size]
 
   PROVIDE j1b_type
 
-  if(j1b_type .eq. 3) then
+  if((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     List_all_comb_b2_size = 2**nucl_num
 
-  elseif(j1b_type .eq. 4) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     List_all_comb_b2_size = nucl_num + 1
 
   else 
 
-    print *, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print *, 'j1b_type = ', j1b_type, 'is not implemented'
     stop
 
   endif
@@ -67,7 +67,7 @@ END_PROVIDER
   List_all_comb_b2_expo = 0.d0
   List_all_comb_b2_cent = 0.d0
 
-  if(j1b_type .eq. 3) then
+  if((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     do i = 1, List_all_comb_b2_size
 
@@ -121,7 +121,7 @@ END_PROVIDER
       List_all_comb_b2_coef(i) = (-1.d0)**dble(phase) * dexp(-List_all_comb_b2_coef(i))
     enddo
 
-  elseif(j1b_type .eq. 4) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     List_all_comb_b2_coef(    1) = 1.d0
     List_all_comb_b2_expo(    1) = 0.d0
@@ -136,7 +136,7 @@ END_PROVIDER
 
   else
 
-    print *, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print *, 'j1b_type = ', j1b_type, 'is not implemented'
     stop
 
   endif
@@ -156,18 +156,18 @@ BEGIN_PROVIDER [ integer, List_all_comb_b3_size]
   implicit none
   double precision :: tmp
 
-  if(j1b_type .eq. 3) then
+  if((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     List_all_comb_b3_size = 3**nucl_num
 
-  elseif(j1b_type .eq. 4) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     tmp                   = 0.5d0 * dble(nucl_num) * (dble(nucl_num) + 3.d0)
     List_all_comb_b3_size = int(tmp) + 1
 
   else
 
-    print *, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print *, 'j1b_type = ', j1b_type, 'is not implemented'
     stop
 
   endif
@@ -230,7 +230,7 @@ END_PROVIDER
   List_all_comb_b3_expo = 0.d0
   List_all_comb_b3_cent = 0.d0
 
-  if(j1b_type .eq. 3) then
+  if((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
 
     do i = 1, List_all_comb_b3_size
 
@@ -287,7 +287,7 @@ END_PROVIDER
       List_all_comb_b3_coef(i) = (-1.d0)**dble(phase) * facto * dexp(-List_all_comb_b3_coef(i))
     enddo
 
-  elseif(j1b_type .eq. 4) then
+  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
 
     ii = 1
     List_all_comb_b3_coef(    ii) = 1.d0
@@ -347,7 +347,7 @@ END_PROVIDER
 
   else
 
-    print *, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print *, 'j1b_type = ', j1b_type, 'is not implemented'
     stop
 
   endif

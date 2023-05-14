@@ -59,7 +59,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
 
   else
 
-    print*, 'j1b_type = ', j1b_pen, 'is not implemented for v_1b'
+    print*, 'j1b_type = ', j1b_type, 'is not implemented for v_1b'
     stop
 
   endif
@@ -158,7 +158,7 @@ BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
 
   else
 
-    print*, 'j1b_type = ', j1b_pen, 'is not implemented'
+    print*, 'j1b_type = ', j1b_type, 'is not implemented'
     stop
 
   endif
