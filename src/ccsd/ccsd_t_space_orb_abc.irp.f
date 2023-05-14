@@ -115,7 +115,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
             V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
             V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
   e = 0d0
-  !$OMP DO
+  !$OMP DO SCHEDULE(dynamic)
   do a = 1, nV
     do b = 1, a-1
       do c = 1, b-1
@@ -142,6 +142,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
     c = a
     do b = 1, nV
+      if (b == c) cycle
       delta_abc = f_v(a) + f_v(b) + f_v(c)
       call form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
       call form_v_abc(nO,nV,a,b,c,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
@@ -159,7 +160,8 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
       enddo
     enddo
   enddo
-  !$OMP END DO
+  !$OMP END DO NOWAIT
+
   !$OMP CRITICAL
   energy = energy + e
   !$OMP END CRITICAL
