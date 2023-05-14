@@ -19,7 +19,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
   integer                       :: i,j,k,l,a,b,c,d
-  double precision              :: e,ta,tb, delta, delta_abc
+  double precision              :: e,ta,tb, delta, delta_abc, x1, x2, x3
 
   allocate(X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV), X_oovv(nO,nO,nV,nV))
   allocate(T_voov(nV,nO,nO,nV),T_oovv(nO,nO,nV,nV))
@@ -105,7 +105,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   energy = 0d0
   !$OMP PARALLEL                                                     &
-      !$OMP PRIVATE(a,b,c)                                           &
+      !$OMP PRIVATE(a,b,c,x1)                                           &
       !$OMP PRIVATE(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb,        &
       !$OMP         V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )       &
       !$OMP PRIVATE(i,j,k,e,delta,delta_abc)                         &
@@ -114,30 +114,55 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
             W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
             V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
             V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
+  e = 0d0
   !$OMP DO
-  do c = 1, nV
-    do b = 1, nV
-      do a = 1, nV
-        e = 0d0
+  do a = 1, nV
+    do b = 1, a-1
+      do c = 1, b-1
         delta_abc = f_v(a) + f_v(b) + f_v(c)
         call form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
         call form_v_abc(nO,nV,a,b,c,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
         do i = 1, nO
           do j = 1, nO
             do k = 1, nO
-              delta = 1d0 / (f_o(i) + f_o(j) + f_o(k) - delta_abc)
-              e = e + (4d0 * W_abc(i,j,k) + W_bca(i,j,k) + W_cab(i,j,k))&
-                  * (V_abc(i,j,k) - V_cba(i,j,k)) * delta
+              delta = 1.d0 / (f_o(i) + f_o(j) + f_o(k) - delta_abc)
+              e = e + delta * ( &
+                 (4d0 * W_abc(i,j,k) + W_bca(i,j,k) + W_cab(i,j,k)) * (V_abc(i,j,k) - V_cba(i,j,k)) + &
+                 (4d0 * W_acb(i,j,k) + W_cba(i,j,k) + W_bac(i,j,k)) * (V_acb(i,j,k) - V_bca(i,j,k)) + &
+                 (4d0 * W_bac(i,j,k) + W_acb(i,j,k) + W_cba(i,j,k)) * (V_bac(i,j,k) - V_cab(i,j,k)) + &
+                 (4d0 * W_bca(i,j,k) + W_cab(i,j,k) + W_abc(i,j,k)) * (V_bca(i,j,k) - V_acb(i,j,k)) + &
+                 (4d0 * W_cba(i,j,k) + W_bac(i,j,k) + W_acb(i,j,k)) * (V_cba(i,j,k) - V_abc(i,j,k)) + &
+                 (4d0 * W_cab(i,j,k) + W_abc(i,j,k) + W_bca(i,j,k)) * (V_cab(i,j,k) - V_bac(i,j,k)) + &
+                  0.d0)
             enddo
           enddo
         enddo
-        !$OMP CRITICAL
-        energy = energy + e
-        !$OMP END CRITICAL
+      enddo
+    enddo
+
+    c = a
+    do b = 1, nV
+      delta_abc = f_v(a) + f_v(b) + f_v(c)
+      call form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
+      call form_v_abc(nO,nV,a,b,c,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
+      do i = 1, nO
+        do j = 1, nO
+          do k = 1, nO
+            delta = 1.d0 / (f_o(i) + f_o(j) + f_o(k) - delta_abc)
+            e = e + delta * ( &
+               (4d0 * W_abc(i,j,k) + W_bca(i,j,k) + W_cab(i,j,k)) * (V_abc(i,j,k) - V_cba(i,j,k)) + &
+               (4d0 * W_acb(i,j,k) + W_cba(i,j,k) + W_bac(i,j,k)) * (V_acb(i,j,k) - V_bca(i,j,k)) + &
+               (4d0 * W_bac(i,j,k) + W_acb(i,j,k) + W_cba(i,j,k)) * (V_bac(i,j,k) - V_cab(i,j,k)) + &
+                0.d0)
+          enddo
+        enddo
       enddo
     enddo
   enddo
   !$OMP END DO
+  !$OMP CRITICAL
+  energy = energy + e
+  !$OMP END CRITICAL
 
   deallocate(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb, &
              V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )
@@ -184,7 +209,7 @@ subroutine form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,
 !   X_vovv(d,i,c,a) * T_voov(d,j,k,b) : i jk
 
   call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,a), nV, T_voov(1,1,1,b), nV, 0.d0, W_abc, nO)
-  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,a), nV, T_voov(1,1,1,a), nV, 0.d0, W_bac, nO)
+  call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,c,b), nV, T_voov(1,1,1,a), nV, 0.d0, W_bac, nO)
   call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,c), nV, T_voov(1,1,1,b), nV, 0.d0, W_cba, nO)
   call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,a,b), nV, T_voov(1,1,1,c), nV, 0.d0, W_bca, nO)
   call dgemm('T','N', nO, nO*nO, nV, 1.d0, X_vovv(1,1,b,c), nV, T_voov(1,1,1,a), nV, 0.d0, W_cab, nO)
