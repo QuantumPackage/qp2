@@ -36,10 +36,10 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   !v_vvvo(b,a,d,i) * t2(k,j,c,d) &
   !X_vovv(d,i,b,a,i) * T_voov(d,j,c,k)
 
-  !$OMP DO collapse(3)
-  do i = 1, nO
-    do a = 1, nV
-      do b = 1, nV
+  !$OMP DO 
+  do a = 1, nV
+    do b = 1, nV
+      do i = 1, nO
         do d = 1, nV
           X_vovv(d,i,b,a) = v_vvvo(b,a,d,i)
         enddo
@@ -48,10 +48,10 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   enddo
   !$OMP END DO nowait
 
-  !$OMP DO collapse(3)
-  do j = 1, nO
-    do k = 1, nO
-      do c = 1, nV
+  !$OMP DO 
+  do c = 1, nV
+    do j = 1, nO
+      do k = 1, nO
         do d = 1, nV
           T_voov(d,k,j,c) = t2(k,j,c,d)
         enddo
@@ -63,7 +63,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   !v_vooo(c,j,k,l) * t2(i,l,a,b) &
   !X_ooov(l,j,k,c) * T_oovv(l,i,a,b) &
 
-  !$OMP DO collapse(3)
+  !$OMP DO 
   do c = 1, nV
     do k = 1, nO
       do j = 1, nO
@@ -75,10 +75,10 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   enddo
   !$OMP END DO nowait
 
-  !$OMP DO collapse(3)
-  do i = 1, nO
-    do b = 1, nV
-      do a = 1, nV
+  !$OMP DO
+  do b = 1, nV
+    do a = 1, nV
+      do i = 1, nO
         do l = 1, nO
           T_oovv(l,i,a,b) = t2(i,l,a,b)
         enddo
@@ -89,11 +89,11 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   !X_oovv(j,k,b,c) * T1_vo(a,i) &
 
-  !$OMP DO collapse(3)
+  !$OMP DO
   do c = 1, nV
     do b = 1, nV
-      do j = 1, nO
-        do k = 1, nO
+      do k = 1, nO
+        do j = 1, nO
           X_oovv(j,k,b,c) = v_vvoo(b,c,j,k)
         enddo
       enddo
@@ -117,8 +117,8 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   e = 0d0
   !$OMP DO SCHEDULE(dynamic)
   do a = 1, nV
-    do b = 1, a-1
-      do c = 1, b-1
+    do b = a+1, nV
+      do c = b+1, nV
         delta_abc = f_v(a) + f_v(b) + f_v(c)
         call form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
         call form_v_abc(nO,nV,a,b,c,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
