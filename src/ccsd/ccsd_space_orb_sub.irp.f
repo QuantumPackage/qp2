@@ -1,5 +1,5 @@
 subroutine run_ccsd_space_orb
-  
+
   implicit none
 
   integer :: i,j,k,l,a,b,c,d,tmp_a,tmp_b,tmp_c,tmp_d
@@ -12,12 +12,12 @@ subroutine run_ccsd_space_orb
   double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:)
   double precision, allocatable :: t1(:,:), r1(:,:)
   double precision, allocatable :: H_oo(:,:), H_vv(:,:), H_vo(:,:)
-  
+
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nOb, nVa, nVb, n_spin(4)
-  
+
   PROVIDE mo_two_e_integrals_in_map
 
   det = psi_det(:,:,cc_ref)
@@ -35,11 +35,11 @@ subroutine run_ccsd_space_orb
   if (cc_ref_is_open_shell) then
     call abort
   endif
-  
+
   ! Number of occ/vir spatial orb
   nO = nOa
   nV = nVa
-  
+
   allocate(list_occ(nO),list_vir(nV))
   list_occ = cc_list_occ
   list_vir = cc_list_vir
@@ -47,7 +47,7 @@ subroutine run_ccsd_space_orb
   !call extract_list_orb_space(det,nO,nV,list_occ,list_vir)
   !print*,'occ',list_occ
   !print*,'vir',list_vir
-  
+
   allocate(t2(nO,nO,nV,nV), r2(nO,nO,nV,nV))
   allocate(tau(nO,nO,nV,nV))
   allocate(t1(nO,nV), r1(nO,nV))
@@ -76,7 +76,7 @@ subroutine run_ccsd_space_orb
   print*,'Det energy', uncorr_energy
   call ccsd_energy_space(nO,nV,tau,t1,energy)
   print*,'Guess energy', uncorr_energy+energy, energy
-  
+
   nb_iter = 0
   not_converged = .True.
   max_r1 = 0d0
@@ -86,9 +86,9 @@ subroutine run_ccsd_space_orb
   write(*,'(A77)') ' |   It.  |       E(CCSD) (Ha) | Correlation (Ha) |  Conv. T1  |  Conv. T2  |'
   write(*,'(A77)') ' -----------------------------------------------------------------------------'
   call wall_time(ta)
-  
+
   do while (not_converged)
-    
+
     call compute_H_oo(nO,nV,t1,t2,tau,H_oo)
     call compute_H_vv(nO,nV,t1,t2,tau,H_vv)
     call compute_H_vo(nO,nV,t1,t2,H_vo)
@@ -97,7 +97,7 @@ subroutine run_ccsd_space_orb
     call compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
     call compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     max_r = max(max_r1,max_r2)
-    
+
     ! Update
     if (cc_update_method == 'diis') then
       !call update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
@@ -122,7 +122,7 @@ subroutine run_ccsd_space_orb
     if (max_r < cc_thresh_conv .or. nb_iter > cc_max_iter) then
       not_converged = .False.
     endif
-    
+
   enddo
   write(*,'(A77)') ' -----------------------------------------------------------------------------'
   call wall_time(tb)
@@ -141,18 +141,18 @@ subroutine run_ccsd_space_orb
 
   call write_t1(nO,nV,t1)
   call write_t2(nO,nV,t2)
-  
+
   ! Deallocation
   if (cc_update_method == 'diis') then
     deallocate(all_err,all_t)
   endif
 
   deallocate(H_vv,H_oo,H_vo,r1,r2,tau)
-  
+
   ! CCSD(T)
   double precision :: e_t
 
-  if (cc_par_t .and. elec_alpha_num + elec_beta_num > 2) then 
+  if (cc_par_t .and. elec_alpha_num + elec_beta_num > 2) then
 
     ! Dumb way
     !call wall_time(ta)
@@ -171,8 +171,11 @@ subroutine run_ccsd_space_orb
     call wall_time(ta)
 !    call ccsd_par_t_space_v3(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
 !         ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
+
+    e_t = uncorr_energy + energy ! For print in next call
     call ccsd_par_t_space_stoch(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
          ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
+
     call wall_time(tb)
     print*,'Time: ',tb-ta, ' s'
 
@@ -182,7 +185,7 @@ subroutine run_ccsd_space_orb
     write(*,'(A15,F18.12,A3)') ' Correlation = ', energy + e_t, ' Ha'
     print*,''
   endif
-  
+
   print*,'Reference determinant:'
   call print_det(det,N_int)
 
@@ -234,7 +237,7 @@ subroutine ccsd_energy_space(nO,nV,tau,t1,energy)
   energy = energy + e
   !$omp end critical
   !$omp end parallel
-  
+
 end
 
 ! Tau
@@ -252,12 +255,12 @@ subroutine update_tau_space(nO,nV,t1,t2,tau)
 
   ! internal
   integer                       :: i,j,a,b
-  
+
   !$OMP PARALLEL &
   !$OMP SHARED(nO,nV,tau,t2,t1) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO 
+  !$OMP DO
   do b = 1, nV
     do a = 1, nV
       do j = 1, nO
@@ -269,7 +272,7 @@ subroutine update_tau_space(nO,nV,t1,t2,tau)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-    
+
 end
 
 ! R1
@@ -285,7 +288,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
 
   ! out
   double precision, intent(out) :: r1(nO,nV), max_r1
-  
+
   ! internal
   integer                       :: u,i,j,beta,a,b
 
@@ -306,7 +309,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   ! cc_space_f_vo(a,i) * t1(i,beta) -> X1(nV,nV), O(nV*nV*nO)
   ! X1(a,beta) * t1(u,a) -> O(nO*nV*nV)
   ! cc_space_f_vo(a,i) * t1(u,a)    -> X1(nO,nO), O(nO*nO*nV)
-  ! X1(i,u) * t1(i,beta) -> O(nO*nO*nV)  
+  ! X1(i,u) * t1(i,beta) -> O(nO*nO*nV)
   !do beta = 1, nV
   !  do u = 1, nO
   !    do i = 1, nO
@@ -326,7 +329,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   call dgemm('T','N', nO, nV, nO, &
              1d0, X_oo, size(X_oo,2), &
                   t1  , size(t1,1), &
-             1d0, r1  , size(r1,1)) 
+             1d0, r1  , size(r1,1))
   deallocate(X_oo)
 
   ! r1(u,beta) = r1(u,beta) + H_vv(a,beta) * t1(u,a)
@@ -375,7 +378,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,X_voov,t2,t1) &
   !$omp private(u,beta,i,a) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do u = 1, nO
       do i = 1, nO
@@ -387,16 +390,16 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   call dgemv('T', nV*nO, nO*nV, &
              1d0, X_voov, size(X_voov,1) * size(X_voov,2), &
                   H_vo  , 1, &
              1d0, r1    , 1)
-  
+
   deallocate(X_voov)
 
   ! r1(u,beta) = r1(u,beta) + (2d0 * cc_space_v_voov(a,u,i,beta) - cc_space_v_ovov(u,a,i,beta)) * t1(i,a)
-  ! <=> 
+  ! <=>
   ! r1(u,beta) = r1(u,beta) + X(i,a,u,beta)
   !do beta = 1, nV
   !  do u = 1, nO
@@ -414,7 +417,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,cc_space_v_ovov,cc_space_v_voov,X_ovov) &
   !$omp private(u,beta,i,a) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do u = 1, nO
       do a = 1, nv
@@ -431,17 +434,17 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   t1     , 1, &
              1d0, r1     , 1)
-  
+
   deallocate(X_ovov)
 
-  ! r1(u,beta) = r1(u,beta) + (2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)) * tau(i,u,a,b)  
-  ! r1(u,beta) = r1(u,beta) + W(a,b,i,beta) * T(u,a,b,i) 
+  ! r1(u,beta) = r1(u,beta) + (2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)) * tau(i,u,a,b)
+  ! r1(u,beta) = r1(u,beta) + W(a,b,i,beta) * T(u,a,b,i)
   !do beta = 1, nV
   !  do u = 1, nO
   !    do i = 1, nO
   !      do a = 1, nV
   !        do b = 1, nV
-  !          r1(u,beta) = r1(u,beta) + (2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)) * tau(i,u,a,b)  
+  !          r1(u,beta) = r1(u,beta) + (2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)) * tau(i,u,a,b)
   !        enddo
   !      enddo
   !    enddo
@@ -454,24 +457,24 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau) &
   !$omp private(b,beta,i,a) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do i = 1, nO
       do b = 1, nV
         do a = 1, nV
-          W_vvov(a,b,i,beta) = 2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)  
+          W_vvov(a,b,i,beta) = 2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)
         enddo
       enddo
     enddo
   enddo
   !$omp end do nowait
 
-  !$omp do 
+  !$omp do
   do u = 1, nO
     do i = 1, nO
       do b = 1, nV
         do a = 1, nV
-          T_vvoo(a,b,i,u) = tau(i,u,a,b)  
+          T_vvoo(a,b,i,u) = tau(i,u,a,b)
         enddo
       enddo
     enddo
@@ -483,17 +486,17 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
              1d0, T_vvoo, size(T_vvoo,1) * size(T_vvoo,2) * size(T_vvoo,3), &
                   W_vvov, size(W_vvov,1) * size(W_vvov,2) * size(W_vvov,3), &
              1d0, r1    , size(r1,1))
-  
+
   deallocate(W_vvov,T_vvoo)
 
-  ! r1(u,beta) = r1(u,beta) - (2d0 * cc_space_v_vooo(a,u,i,j) - cc_space_v_vooo(a,u,j,i)) * tau(i,j,a,beta) 
-  ! r1(u,beta) = r1(u,beta) - W(i,j,a,u) * tau(i,j,a,beta) 
+  ! r1(u,beta) = r1(u,beta) - (2d0 * cc_space_v_vooo(a,u,i,j) - cc_space_v_vooo(a,u,j,i)) * tau(i,j,a,beta)
+  ! r1(u,beta) = r1(u,beta) - W(i,j,a,u) * tau(i,j,a,beta)
   !do beta = 1, nV
   !  do u = 1, nO
   !    do i = 1, nO
   !      do j = 1, nO
   !        do a = 1, nV
-  !          r1(u,beta) = r1(u,beta) - (2d0 * cc_space_v_vooo(a,u,i,j) - cc_space_v_vooo(a,u,j,i)) * tau(i,j,a,beta) 
+  !          r1(u,beta) = r1(u,beta) - (2d0 * cc_space_v_vooo(a,u,i,j) - cc_space_v_vooo(a,u,j,i)) * tau(i,j,a,beta)
   !        enddo
   !      enddo
   !    enddo
@@ -507,7 +510,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp private(u,a,i,j) &
   !$omp default(none)
   do u = 1, nO
-    !$omp do 
+    !$omp do
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
@@ -523,7 +526,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
              -1d0, W_oovo, size(W_oovo,1) * size(W_oovo,2) * size(W_oovo,3), &
                    tau   , size(tau,1) * size(tau,2) * size(tau,3), &
               1d0, r1    , size(r1,1))
-  
+
   deallocate(W_oovo)
 
   max_r1 = 0d0
@@ -538,7 +541,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,r1) &
   !$omp private(a,i) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do a = 1, nV
     do i = 1, nO
       r1(i,a) = -r1(i,a)
@@ -546,7 +549,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
 end
 
 ! H_oo
@@ -578,7 +581,7 @@ subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
   !        enddo
   !      enddo
   !    enddo
-  !    
+  !
   !  enddo
   !enddo
 
@@ -601,8 +604,8 @@ subroutine compute_H_oo(nO,nV,t1,t2,tau,H_oo)
   call dgemm('N','T', nO, nO, nO*nV*nV,       &
              1d0, tau     , size(tau,1),      &
                   cc_space_w_oovv, size(cc_space_w_oovv,1), &
-             1d0, H_oo    , size(H_oo,1))     
-  
+             1d0, H_oo    , size(H_oo,1))
+
 end
 
 ! H_vv
@@ -633,7 +636,7 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
   !        enddo
   !      enddo
   !    enddo
-  !    
+  !
   !  enddo
   !enddo
 
@@ -656,13 +659,13 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
 
   ! H_vv(a,beta) = H_vv(a,beta) - cc_space_w_vvoo(a,b,i,j) * tau(i,j,beta,b)
   ! H_vv(a,beta) = H_vv(a,beta) - cc_space_w_vvoo(a,b,i,j) * tmp_tau(b,i,j,beta)
-  
-  !$omp do 
+
+  !$omp do
   do beta = 1, nV
     do j = 1, nO
       do i = 1, nO
         do b = 1, nV
-          tmp_tau(b,i,j,beta) = tau(i,j,beta,b) 
+          tmp_tau(b,i,j,beta) = tau(i,j,beta,b)
         enddo
       enddo
     enddo
@@ -676,7 +679,7 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
               1d0, H_vv    , size(H_vv,1))
 
   deallocate(tmp_tau)
-  
+
 end
 
 ! H_vo
@@ -704,7 +707,7 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
   !        H_vo(a,i) = H_vo(a,i) + cc_space_w_vvoo(a,b,i,j) * t1(j,b)
   !      enddo
   !    enddo
-  !    
+  !
   !  enddo
   !enddo
 
@@ -727,7 +730,7 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
   ! H_vo(a,i) = H_vo(a,i) + cc_space_w_vvoo(a,b,i,j) * t1(j,b)
   ! H_vo(a,i) = H_vo(a,i) + w(a,i,j,b) * t1(j,b)
 
-  !$omp do 
+  !$omp do
   do b = 1, nV
     do j = 1, nO
       do i = 1, nO
@@ -746,7 +749,7 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
              1d0, H_vo, 1)
 
   deallocate(w)
-  
+
 end
 
 ! R2
@@ -771,7 +774,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   allocate(g_occ(nO,nO), g_vir(nV,nV))
   allocate(J1(nO,nV,nV,nO), K1(nO,nV,nO,nV))
   allocate(A1(nO,nO,nO,nO))
-  
+
   call compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   call compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   call compute_A1(nO,nV,t1,t2,tau,A1)
@@ -787,7 +790,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,cc_space_v_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -863,7 +866,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,t2,X_oovv) &
   !$omp private(u,v,gam,a) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do a = 1, nV
     do gam = 1, nV
       do v = 1, nO
@@ -875,7 +878,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   call dgemm('N','N',nO*nO*nV,nV,nV, &
              1d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3), &
                   g_vir, size(g_vir,1), &
@@ -885,7 +888,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Y_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -921,7 +924,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -957,7 +960,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,X_vovv,cc_space_v_ovvv) &
   !$omp private(u,a,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do u = 1, nO
@@ -979,7 +982,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Y_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -991,7 +994,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   !do gam = 1, nV
   !  do beta = 1, nV
   !    do v = 1, nO
@@ -1009,13 +1012,13 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !enddo
   double precision, allocatable :: X_vovo(:,:,:,:), Y_vovv(:,:,:,:)
   allocate(X_vovo(nV,nO,nV,nO), Y_vovv(nV,nO,nV,nV),X_oovv(nO,nO,nV,nV))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,X_vovo,cc_space_v_ovov) &
   !$omp private(u,v,gam,i) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do gam = 1, nV
       do u = 1, nO
         do a = 1, nV
@@ -1036,12 +1039,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
              1d0, t1, size(t1,1), &
                   Y_vovv, size(Y_vovv,1), &
              0d0, X_oovv, size(X_oovv,1))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1055,7 +1058,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end parallel
 
   deallocate(X_vovo,Y_vovv)
-  
+
   !do gam = 1, nV
   !  do beta = 1, nV
   !    do v = 1, nO
@@ -1079,7 +1082,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1092,7 +1095,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end do
   !$omp end parallel
 
-  
+
   !do gam = 1, nV
   !  do beta = 1, nV
   !    do v = 1, nO
@@ -1111,13 +1114,13 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
 
   double precision, allocatable :: Y_oovo(:,:,:,:)
   allocate(X_vovo(nV,nO,nV,nO), Y_oovo(nO,nO,nV,nO))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,X_vovo,cc_space_v_ovvo) &
   !$omp private(a,v,gam,i) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do gam = 1, nV
       do v = 1, nO
         do a = 1, nV
@@ -1138,12 +1141,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
              1d0, Y_oovo, size(Y_oovo,1) * size(Y_oovo,2) * size(Y_oovo,3), &
                   t1    , size(t1,1), &
              0d0, X_oovv, size(X_oovv,1) * size(X_oovv,2) * size(X_oovv,3))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1155,7 +1158,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   deallocate(X_vovo,Y_oovo)
 
   !do gam = 1, nV
@@ -1183,7 +1186,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp private(u,v,gam,beta,i,a) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do a = 1, nV
       do beta = 1, nV
         do u = 1, nO
@@ -1194,7 +1197,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     !$omp end do nowait
   enddo
 
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do v = 1, nO
       do i = 1, nO
@@ -1206,17 +1209,17 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   call dgemm('N','N', nO*nV,nO*nV,nV*nO, &
              1d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2), &
                   Y_voov, size(Y_voov,1) * size(Y_voov,2), &
              0d0, Z_ovov, size(Z_ovov,1) * size(Z_ovov,2))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1228,9 +1231,9 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   deallocate(X_ovvo,Y_voov)
-  
+
   !do gam = 1, nV
   !  do beta = 1, nV
   !    do v = 1, nO
@@ -1252,7 +1255,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,a,i,beta,gam) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do u = 1, nO
       do a = 1, nV
@@ -1264,7 +1267,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do nowait
 
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do v = 1, nO
       do a = 1, nV
@@ -1281,12 +1284,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
              0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1298,7 +1301,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   !do gam = 1, nV
   !  do beta = 1, nV
   !    do v = 1, nO
@@ -1343,12 +1346,12 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   call dgemm('N','N',nO*nV,nO*nV,nO*nV, &
              1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
                   Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
              0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
@@ -1367,7 +1370,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp end parallel
 
   deallocate(X_ovov,Y_ovov,Z_ovov)
-  
+
   ! Change the sign for consistency with the code in spin orbitals
   !$omp parallel &
   !$omp shared(nO,nV,r2) &
@@ -1385,7 +1388,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   max_r2 = 0d0
   do b = 1, nV
     do a = 1, nV
@@ -1398,7 +1401,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
 
   deallocate(g_occ,g_vir,J1,K1,A1)
-  
+
 end
 
 ! A1
@@ -1427,12 +1430,12 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   !          A1(u,v,i,j) = A1(u,v,i,j) &
   !          + cc_space_v_ovoo(u,a,i,j) * t1(v,a) &
   !          + cc_space_v_vooo(a,v,i,j) * t1(u,a)
-  !          
+  !
   !          do b = 1, nV
   !            A1(u,v,i,j) = A1(u,v,i,j) + cc_space_v_vvoo(a,b,i,j) * tau(u,v,a,b)
-  !          enddo  
+  !          enddo
   !        enddo
-  !        
+  !
   !      enddo
   !    enddo
   !  enddo
@@ -1440,7 +1443,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
 
   double precision, allocatable :: X_vooo(:,:,:,:), Y_oooo(:,:,:,:)
   allocate(X_vooo(nV,nO,nO,nO), Y_oooo(nO,nO,nO,nO))
-  
+
   ! A1(u,v,i,j) = cc_space_v_oooo(u,v,i,j)
   !$omp parallel &
   !$omp shared(nO,nV,A1,cc_space_v_oooo,cc_space_v_ovoo,X_vooo) &
@@ -1494,7 +1497,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   deallocate(X_vooo,Y_oooo)
 
   ! A1(u,v,i,j) += cc_space_v_vooo(a,v,i,j) * t1(u,a)
@@ -1508,7 +1511,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
              1d0, tau     , size(tau,1) * size(tau,2), &
                   cc_space_v_vvoo, size(cc_space_v_vvoo,1) * size(cc_space_v_vvoo,2), &
              1d0, A1      , size(A1,1) * size(A1,2))
-   
+
 end
 
 ! B1
@@ -1530,28 +1533,28 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   !  do beta = 1, nV
   !    do b = 1, nV
   !      do a = 1, nV
-  !        B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam) 
+  !        B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
 
   !        do i = 1, nO
   !          B1(a,b,beta,gam) = B1(a,b,beta,gam) &
   !          - cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
   !          - cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
   !        enddo
-  !        
+  !
   !      enddo
   !    enddo
   !  enddo
   !enddo
-  
+
   double precision, allocatable :: X_vvvo(:,:,:,:), Y_vvvv(:,:,:,:)
   allocate(X_vvvo(nV,nV,nV,nO), Y_vvvv(nV,nV,nV,nV))
 
-  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam) 
+  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
   !$omp parallel &
   !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo) &
   !$omp private(a,b,beta,gam) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do b = 1, nV
@@ -1563,7 +1566,7 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   enddo
   !$omp end do nowait
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do gam = 1, nV
       do b = 1, nV
         do a = 1, nV
@@ -1574,14 +1577,14 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
     !$omp end do nowait
   enddo
   !$omp end parallel
-  
+
   ! B1(a,b,beta,gam) -= cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
   call dgemm('N','N', nV*nV*nV, nV, nO, &
              -1d0, cc_space_v_vvvo, size(cc_space_v_vvvo,1) * size(cc_space_v_vvvo,2) * size(cc_space_v_vvvo,3), &
                    t1      , size(t1,1), &
               1d0, B1      , size(B1,1) * size(B1,2) * size(B1,3))
 
-  
+
   ! B1(a,b,beta,gam) -= cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
   call dgemm('N','N', nV*nV*nV, nV, nO, &
              -1d0, X_vvvo, size(X_vvvo,1) * size(X_vvvo,2) * size(X_vvvo,3), &
@@ -1592,7 +1595,7 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   !$omp shared(nV,B1,Y_vvvv) &
   !$omp private(a,b,beta,gam) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do b = 1, nV
@@ -1604,9 +1607,9 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   deallocate(X_vvvo,Y_vvvv)
-  
+
 end
 
 ! g_occ
@@ -1627,14 +1630,14 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   !do i = 1, nO
   !  do u = 1, nO
   !    g_occ(u,i) = H_oo(u,i)
-  !    
+  !
   !    do a = 1, nV
   !      g_occ(u,i) = g_occ(u,i) + cc_space_f_vo(a,i) * t1(u,a)
-  !      
+  !
   !      do j = 1, nO
   !        g_occ(u,i) = g_occ(u,i) + (2d0 * cc_space_v_ovoo(u,a,i,j) - cc_space_v_ovoo(u,a,j,i)) * t1(j,a)
   !      enddo
-  !         
+  !
   !    enddo
   !  enddo
   !enddo
@@ -1655,8 +1658,8 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
     enddo
   enddo
   !$omp end do
-  
-  !$omp do 
+
+  !$omp do
   do i = 1, nO
     do j = 1, nO
       do a = 1, nV
@@ -1668,7 +1671,7 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
 end
 
 ! g_vir
@@ -1689,23 +1692,23 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   !do beta = 1, nV
   !  do a = 1, nV
   !    g_vir(a,beta) = H_vv(a,beta)
-  !    
+  !
   !    do i = 1, nO
   !      g_vir(a,beta) = g_vir(a,beta) - cc_space_f_vo(a,i) * t1(i,beta)
-  !      
+  !
   !      do b = 1, nV
   !        g_vir(a,beta) = g_vir(a,beta) + (2d0 * cc_space_v_vvvo(a,b,beta,i) - cc_space_v_vvvo(b,a,beta,i)) * t1(i,b)
   !      enddo
-  !         
+  !
   !    enddo
   !  enddo
   !enddo
-  
+
   call dgemm('N','N',nV,nV,nO, &
              -1d0, cc_space_f_vo , size(cc_space_f_vo,1), &
                    t1   , size(t1,1), &
               0d0, g_vir, size(g_vir,1))
-      
+
   !$omp parallel &
   !$omp shared(nO,nV,g_vir,H_vv, cc_space_v_vvvo,t1) &
   !$omp private(i,b,a,beta) &
@@ -1718,7 +1721,7 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   enddo
   !$omp end do
 
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do i = 1, nO
       do b = 1, nV
@@ -1730,7 +1733,7 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
 end
 
 ! J1
@@ -1763,7 +1766,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
 
   !        do b = 1, nV
   !          J1(u,a,beta,i) = J1(u,a,beta,i) &
-  !          + cc_space_v_vvvo(b,a,beta,i) * t1(u,b)    
+  !          + cc_space_v_vvvo(b,a,beta,i) * t1(u,b)
   !        enddo
 
   !        do j = 1, nO
@@ -1773,7 +1776,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !           + 0.5d0 * (2d0 * cc_space_v_vvoo(a,b,i,j) - cc_space_v_vvoo(b,a,i,j)) * t2(u,j,beta,b)
   !          enddo
   !        enddo
-  !        
+  !
   !      enddo
   !    enddo
   !  enddo
@@ -1781,13 +1784,13 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
 
   double precision, allocatable :: X_ovoo(:,:,:,:), Y_ovov(:,:,:,:)
   allocate(X_ovoo(nO,nV,nO,nO),Y_ovov(nO,nV,nO,nV))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,J1,v_ovvo,v_ovoo,X_ovoo) &
   !$omp private(i,j,a,u,beta) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1810,7 +1813,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   enddo
   !$omp end do
   !$omp end parallel
-  
+
   call dgemm('N','N',nO*nV*nO,nV,nO, &
             -1d0, X_ovoo, size(X_ovoo,1) * size(X_ovoo,2) * size(X_ovoo,3), &
                   t1    , size(t1,1), &
@@ -1821,7 +1824,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp private(i,beta,a,u) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1847,7 +1850,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,t2,t1,Y_ovov,X_voov,v_vvoo) &
   !$omp private(i,beta,a,u,b,j) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do b = 1, nV
     do j = 1, nO
       do beta = 1, nV
@@ -1859,7 +1862,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   enddo
   !$omp end do nowait
 
-  !$omp do 
+  !$omp do
   do b = 1, nV
     do j = 1, nO
       do i = 1, nO
@@ -1885,7 +1888,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp private(i,beta,a,u,j,b) &
   !$omp default(none)
   do i = 1, nO
-    !$omp do 
+    !$omp do
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1895,10 +1898,10 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
     enddo
     !$omp end do nowait
   enddo
-  
+
   !+ 0.5d0 * (2d0 * cc_space_v_vvoo(a,b,i,j) - cc_space_v_vvoo(b,a,i,j)) * t2(u,j,beta,b)
   do j = 1, nO
-    !$omp do 
+    !$omp do
     do b = 1, nV
       do i = 1, nO
         do a = 1, nV
@@ -1908,9 +1911,9 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
     enddo
     !$omp end do nowait
   enddo
-  
+
   do j = 1, nO
-    !$omp do 
+    !$omp do
     do b = 1, nV
       do beta = 1, nV
         do u = 1, nO
@@ -1921,7 +1924,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
     !$omp end do nowait
   enddo
   !$omp end parallel
-  
+
   call dgemm('N','T',nO*nV,nV*nO,nV*nO, &
              1d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2), &
                   Y_vovo, size(Y_vovo,1) * size(Y_vovo,2), &
@@ -1944,8 +1947,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   enddo
   !$omp end parallel
 
-  deallocate(X_ovvo,Z_ovvo,Y_ovov)  
-  
+  deallocate(X_ovvo,Z_ovvo,Y_ovov)
+
 end
 
 ! K1
@@ -1980,7 +1983,7 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
 
   !        do b = 1, nV
   !          K1(u,a,i,beta) = K1(u,a,i,beta) &
-  !          + cc_space_v_vvov(b,a,i,beta) * t1(u,b)    
+  !          + cc_space_v_vvov(b,a,i,beta) * t1(u,b)
   !        enddo
 
   !        do j = 1, nO
@@ -1989,19 +1992,19 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   !           - cc_space_v_vvoo(b,a,i,j) * (0.5d0 * t2(u,j,b,beta) + t1(u,b) * t1(j,beta))
   !          enddo
   !        enddo
-  !        
+  !
   !      enddo
   !    enddo
   !  enddo
   !enddo
 
   allocate(X(nV,nO,nV,nO),Y(nO,nV,nV,nO),Z(nO,nV,nV,nO))
-  
+
   !$omp parallel &
   !$omp shared(nO,nV,K1,X,Y,v_vvoo,v_ovov,t1,t2) &
   !$omp private(i,beta,a,u,j,b) &
   !$omp default(none)
-  !$omp do 
+  !$omp do
   do beta = 1, nV
     do i = 1, nO
       do a = 1, nV
@@ -2072,5 +2075,5 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   !$omp end parallel
 
   deallocate(X,Y,Z)
-  
+
 end

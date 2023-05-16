@@ -7,13 +7,14 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)  :: t2(nO,nO,nV,nV)
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO), v_vooo(nV,nO,nO,nO)
-  double precision, intent(out) :: energy
+  double precision, intent(inout) :: energy
 
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
   integer                       :: i,j,k,l,a,b,c,d
-  double precision              :: e,ta,tb
+  double precision              :: e,ta,tb,eccsd
 
+  eccsd = energy
   call set_multiple_levels_omp(.False.)
 
   allocate(X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV), X_oovv(nO,nO,nV,nV))
@@ -206,6 +207,12 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
   Pabc(:) = 1.d0/Pabc(:)
 
+  print '(A)', ''
+  print '(A)', ' +----------------------+--------------+----------+'
+  print '(A)', ' |      E(CCSD(T))      |   Error      |     %    |'
+  print '(A)', ' +----------------------+--------------+----------+'
+
+
   call wall_time(t00)
   imin = 1_8
   !$OMP PARALLEL                                                     &
@@ -309,13 +316,15 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
       energy = energy_det + energy_stoch
 
-      print *, real(energy), ' +/- ', real(sqrt(variance/(norm-1.d0))), isample, real(Ncomputed)/real(Nabc)
+      print '('' | '',F20.8, '' | '', E12.4,'' | '', F8.2,'' |'')', eccsd+energy, dsqrt(variance/(norm-1.d0)), 100.*real(Ncomputed)/real(Nabc)
     endif
     !$OMP END MASTER
     if (imin >= Nabc) exit
   enddo
 
   !$OMP END PARALLEL
+  print '(A)', ' +----------------------+--------------+----------+'
+  print '(A)', ''
 
   deallocate(X_vovv,X_ooov,T_voov,T_oovv)
 end
