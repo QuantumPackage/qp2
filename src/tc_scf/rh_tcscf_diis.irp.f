@@ -1,5 +1,10 @@
 ! ---
 
+! TODO
+! level shift of SCF is well adapted
+! for 0.5 x F
+! 
+
 subroutine rh_tcscf_diis()
 
   implicit none
