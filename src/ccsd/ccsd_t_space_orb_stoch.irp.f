@@ -1,5 +1,4 @@
 ! Main
-
 subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   implicit none
@@ -10,12 +9,6 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO), v_vooo(nV,nO,nO,nO)
   double precision, intent(out) :: energy
 
-  double precision, allocatable :: W(:,:,:,:,:,:)
-  double precision, allocatable :: V(:,:,:,:,:,:)
-  double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
-  double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
-  double precision, allocatable :: V_abc(:,:,:), V_cab(:,:,:), V_bca(:,:,:)
-  double precision, allocatable :: V_bac(:,:,:), V_cba(:,:,:), V_acb(:,:,:)
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
   integer                       :: i,j,k,l,a,b,c,d
@@ -104,33 +97,32 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
   double precision, external :: ccsd_t_task_aba
   double precision, external :: ccsd_t_task_abc
+!  logical, external :: omp_test_lock
 
   double precision, allocatable :: memo(:), Pabc(:), waccu(:)
-  logical         , allocatable :: computed(:)
+  integer*8, allocatable :: sampled(:)
+!  integer(omp_lock_kind), allocatable :: lock(:)
   integer*2       , allocatable :: abc(:,:)
   integer*8                     :: Nabc, i8
   integer*8, allocatable :: iorder(:)
   double precision :: eocc
-  double precision :: Pabc_norm, sum_w
+  double precision :: norm
+  integer :: kiter, isample
 
 
   ! Prepare table of triplets (a,b,c)
 
   Nabc = (int(nV,8) * int(nV+1,8) * int(nV+2,8))/6_8 - nV
-  allocate (memo(Nabc), computed(Nabc), Pabc(Nabc), waccu(0:Nabc))
-  allocate (abc(4,Nabc), iorder(Nabc))
+  allocate (memo(Nabc), sampled(Nabc), Pabc(Nabc), waccu(Nabc))
+  allocate (abc(4,Nabc), iorder(Nabc)) !, lock(Nabc))
 
 !  eocc = 3.d0/dble(nO) * sum(f_o(1:nO))
-  memo(:) = 0.d0
-  computed(:) = .False.
   Nabc = 0_8
   do a = 1, nV
     do b = a+1, nV
       do c = b+1, nV
         Nabc = Nabc + 1_8
-!        Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(c))*(f_v(a)*f_v(b)*f_v(c))**(1.d0/2.d0))
-!        Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(c))**2)
-        Pabc(Nabc) = 1.d0/(f_v(a) + f_v(b) + f_v(c))
+        Pabc(Nabc) = -1.d0/(f_v(a) + f_v(b) + f_v(c))
         abc(1,Nabc) = a
         abc(2,Nabc) = b
         abc(3,Nabc) = c
@@ -140,17 +132,13 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       abc(1,Nabc) = a
       abc(2,Nabc) = b
       abc(3,Nabc) = a
-!      Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(a))*(f_v(a)*f_v(b)*f_v(a))**(1.d0/2.d0))
-!      Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(a))**2)
-      Pabc(Nabc) = 1.d0/(2.d0*f_v(a) + f_v(b))
+      Pabc(Nabc) = -1.d0/(2.d0*f_v(a) + f_v(b))
 
       Nabc = Nabc + 1_8
       abc(1,Nabc) = b
       abc(2,Nabc) = a
       abc(3,Nabc) = b
-!      Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(b))*(f_v(b)*f_v(a)*f_v(b))**(1.d0/2.d0))
-!      Pabc(Nabc) = 1.d0/((f_v(a) + f_v(b) + f_v(b))**2)
-      Pabc(Nabc) = 1.d0/(f_v(a) + 2.d0*f_v(b))
+      Pabc(Nabc) = -1.d0/(f_v(a) + 2.d0*f_v(b))
     enddo
   enddo
 
@@ -162,13 +150,13 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   call dsort_big(Pabc, iorder, Nabc)
 
   ! Normalize
-  Pabc_norm = 0.d0
+  norm = 0.d0
   do i8=Nabc,1,-1
-    Pabc_norm = Pabc_norm + Pabc(i8)
+    norm = norm + Pabc(i8)
   enddo
-  Pabc_norm = 1.d0/Pabc_norm
-  do i8=Nabc,1,-1
-    Pabc(i8) = Pabc(i8) * Pabc_norm
+  norm = 1.d0/norm
+  do i8=1,Nabc
+    Pabc(i8) = Pabc(i8) * norm
   enddo
 
   call i8set_order_big(abc, iorder, Nabc)
@@ -176,145 +164,191 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
   ! Cumulative distribution for sampling
   waccu(Nabc) = 0.d0
-  sum_w = 0.d0
   do i8=Nabc-1,1,-1
-   waccu(i8) = waccu(i8+1) - Pabc(i8)
+   waccu(i8) = waccu(i8+1) - Pabc(i8+1)
   enddo
   waccu(:) = waccu(:) + 1.d0
-  waccu(0) = 0.d0
 
-  Pabc(:) = 1.d0/Pabc(:) * (1.d0/3.d0)
+  logical :: converged, do_comp
+  double precision :: eta, variance, error, sample
+  double precision :: t00, t01
+  integer*8 :: ieta, Ncomputed
+  integer*8, external :: binary_search
 
-  logical :: converged
-  double precision :: ET, ET2, eta, variance, average, error, sample
-  integer*8 :: isample, ieta, Ncomputed
-  integer*8, external :: find_sample
+  integer :: nbuckets
+  nbuckets = 100
 
-  allocate( W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO), &
-            W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
-            V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
-            V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
+  double precision, allocatable :: wsum(:)
+  allocate(wsum(nbuckets))
 
   converged = .False.
-  ET = 0.d0
-  ET2 = 0.d0
   Ncomputed = 0_8
-  isample = 0_8
 
-  average = 0.d0
+  energy = 0.d0
   variance = 0.d0
-  double precision :: t00, t01
-  call wall_time(t00)
-!  do ieta=1,Nabc
-  do while (.not.converged)
-    call random_number(eta)
-!    eta = eta/dble(1000)
-!    do k=0,1000-1
-!    ieta = find_sample(eta+dble(k)/dble(1000),waccu,Nabc)
-    ieta = find_sample(eta,waccu,Nabc)
-    isample = isample+1_8
+  memo(:) = 0.d0
+  sampled(:) = -1_8
 
-    if (.not.computed(ieta)) then
+  integer*8 :: ileft, iright, imin
+  ileft = 1_8
+  iright = Nabc
+  integer*8, allocatable :: bounds(:,:)
+
+  allocate (bounds(2,nbuckets))
+  do isample=1,nbuckets
+    eta = 1.d0/dble(nbuckets) * dble(isample)
+    ieta = binary_search(waccu,eta,Nabc,ileft,iright)
+    bounds(1,isample) = ileft
+    bounds(2,isample) = ieta
+    ileft = ieta+1
+    wsum(isample) = sum( Pabc(bounds(1,isample):bounds(2,isample) ) )
+  enddo
+
+  Pabc(:) = 1.d0/Pabc(:)
+
+  call wall_time(t00)
+  imin = 1_8
+  !$OMP PARALLEL                                                     &
+      !$OMP PRIVATE(ieta,eta,a,b,c,kiter,isample)                    &
+      !$OMP DEFAULT(SHARED)
+
+  do kiter=1,Nabc
+
+    !$OMP MASTER
+    do while ((imin <= Nabc).and.(sampled(imin)>-1_8))
+      imin = imin+1
+    enddo
+
+    ! Deterministic part
+    if (imin < Nabc) then
+      ieta=imin
+      sampled(ieta) = 0_8
       a = abc(1,ieta)
       b = abc(2,ieta)
       c = abc(3,ieta)
-      if (a/=c) then
-         memo(ieta) = ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,V_abc, &
-                         V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-                         W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
-      else
-         memo(ieta) =  ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,V_abc, &
-                       V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-                       W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
-      endif
-      computed(ieta) = .True.
       Ncomputed += 1_8
-      call wall_time(t01)
-      if (t01-t00 > 1.d0) then
-        t00 = t01
-        print *, average, dsqrt(variance/dble(isample)), real(Ncomputed)/real(Nabc), real(isample)/real(Nabc)
+      !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(a,b,c,ieta)
+      if (a/=c) then
+        memo(ieta) = ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov, &
+            X_ooov,X_oovv,X_vovv,f_o,f_v) / 3.d0
+      else
+        memo(ieta) =  ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,  &
+            X_ooov,X_oovv,X_vovv,f_o,f_v) / 3.d0
       endif
-!       print *, memo(ieta), Pabc(ieta), memo(ieta) * Pabc(ieta)
+      !$OMP END TASK
     endif
-    sample = memo(ieta) * Pabc(ieta)
-    ET = ET + sample
-    ET2 = ET2 + sample*sample
-    average  = ET/dble(isample)
-    variance = ET2/dble(isample) - average*average
-    converged = (Ncomputed >= (Nabc*90_8)/100_8) .or. (isample>=1000*Nabc)
-!    enddo
-  enddo
-        print *, average, dsqrt(variance/dble(isample)), real(Ncomputed)/real(Nabc), real(isample)/real(Nabc)
-  energy = average
 
-!  !$OMP PARALLEL                                                     &
-!      !$OMP PRIVATE(a,b,c,e)                                         &
-!      !$OMP PRIVATE(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb,        &
-!      !$OMP         V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )       &
-!      !$OMP DEFAULT(SHARED)
-!  allocate( W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO), &
-!            W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
-!            V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
-!            V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
-!  e = 0d0
-!  !$OMP DO SCHEDULE(dynamic)
-!  do a = 1, nV
-!    do b = a+1, nV
-!      do c = b+1, nV
-!        e = e + ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,V_abc, &
-!                        V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-!                        W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
-!      enddo
-!    enddo
-!
-!    do b = 1, nV
-!      if (b == a) cycle
-!      e = e + ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,V_abc, &
-!                      V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-!                      W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
-!    enddo
-!  enddo
-!  !$OMP END DO NOWAIT
-!
-!  !$OMP CRITICAL
-!  energy = energy + e
-!  !$OMP END CRITICAL
-!
-!  deallocate(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb, &
-!             V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )
-!
-!  !$OMP END PARALLEL
+    ! Stochastic part
+    call random_number(eta)
+    do isample=1,nbuckets
+      if (imin >= bounds(2,isample)) then
+        cycle
+      endif
+      ieta = binary_search(waccu,(eta + dble(isample-1))/dble(nbuckets),Nabc)
+
+      if (sampled(ieta) == -1_8) then
+        sampled(ieta) = 0_8
+        a = abc(1,ieta)
+        b = abc(2,ieta)
+        c = abc(3,ieta)
+        Ncomputed += 1_8
+        !$OMP TASK DEFAULT(SHARED) FIRSTPRIVATE(a,b,c,ieta)
+        if (a/=c) then
+          memo(ieta) = ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov, &
+              X_ooov,X_oovv,X_vovv,f_o,f_v) / 3.d0
+        else
+          memo(ieta) =  ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,  &
+              X_ooov,X_oovv,X_vovv,f_o,f_v) / 3.d0
+        endif
+        !$OMP END TASK
+      endif
+      sampled(ieta) = sampled(ieta)+1_8
+
+    enddo
+
+    call wall_time(t01)
+    if (t01-t00 > 1.0d0) then
+      t00 = t01
+
+      !$OMP TASKWAIT
+
+      double precision :: ET, ET2
+      double precision :: energy_stoch, energy_det
+      double precision :: scale
+      double precision :: w
+      double precision :: tmp
+      energy_stoch = 0.d0
+      energy_det   = 0.d0
+      norm = 0.d0
+      scale = 1.d0
+      ET = 0.d0
+      ET2 = 0.d0
+
+
+      do isample=1,nbuckets
+        if (imin >= bounds(2,isample)) then
+          energy_det = energy_det + sum(memo(bounds(1,isample):bounds(2,isample)))
+          scale = scale - wsum(isample)
+        else
+          exit
+        endif
+      enddo
+
+      do ieta=bounds(1,isample), Nabc
+          w = dble(max(sampled(ieta),0_8))
+          tmp = w * memo(ieta) * Pabc(ieta)
+          ET = ET + tmp
+          ET2 = ET2 + tmp * memo(ieta) * Pabc(ieta)
+          norm = norm + w
+      enddo
+      norm = norm/scale
+      if (norm > 0.d0) then
+        energy_stoch = ET / norm
+        variance = ET2 / norm - energy_stoch*energy_stoch
+      endif
+
+      energy = energy_det + energy_stoch
+
+      print *, real(energy), ' +/- ', real(sqrt(variance/(norm-1.d0))), isample, real(Ncomputed)/real(Nabc)
+    endif
+    !$OMP END MASTER
+    if (imin >= Nabc) exit
+  enddo
+
+  !$OMP END PARALLEL
 
   deallocate(X_vovv,X_ooov,T_voov,T_oovv)
 end
 
 
-integer*8 function find_sample(v, w, n)
-  implicit none
-  BEGIN_DOC
-! Finds sample v in weights w
-  END_DOC
-  integer*8, intent(in) :: n
-  double precision, intent(in) :: v, w(0:n)
-  integer*8 :: i,l,r
 
-  l=0
-  r=n
+integer*8 function binary_search(arr, key, size)
+    implicit none
+    BEGIN_DOC
+! Searches the key in array arr(1:size) between l_in and r_in, and returns its index
+    END_DOC
+    integer*8 :: size, i, j, mid, l_in, r_in
+    double precision, dimension(size) :: arr(1:size)
+    double precision :: key
 
-  do while(r-l > 1)
-    i = shiftr(r+l,1)
-    if(w(i) < v) then
-      l = i
-    else
-      r = i
-    end if
-  end do
-  i = r
-  do r=i+1,n
-    if (w(r) /= w(i)) then
-      exit
-    endif
-  enddo
-  find_sample = r-1
-end function
+    i = 1_8
+    j = size
+
+    do while (j >= i)
+        mid = i + (j - i) / 2
+        if (arr(mid) >= key) then
+            if (mid > 1 .and. arr(mid - 1) < key) then
+                binary_search = mid
+                return
+            end if
+            j = mid - 1
+        else if (arr(mid) < key) then
+            i = mid + 1
+        else
+            binary_search = mid + 1
+            return
+        end if
+    end do
+    binary_search = i
+end function binary_search
 

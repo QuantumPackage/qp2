@@ -10,12 +10,6 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO), v_vooo(nV,nO,nO,nO)
   double precision, intent(out) :: energy
 
-  double precision, allocatable :: W(:,:,:,:,:,:)
-  double precision, allocatable :: V(:,:,:,:,:,:)
-  double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
-  double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
-  double precision, allocatable :: V_abc(:,:,:), V_cab(:,:,:), V_bca(:,:,:)
-  double precision, allocatable :: V_bac(:,:,:), V_cba(:,:,:), V_acb(:,:,:)
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
   integer                       :: i,j,k,l,a,b,c,d
@@ -105,32 +99,22 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, external :: ccsd_t_task_aba
   double precision, external :: ccsd_t_task_abc
 
-  !$OMP PARALLEL                                                     &
-      !$OMP PRIVATE(a,b,c,e)                                         &
-      !$OMP PRIVATE(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb,        &
-      !$OMP         V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )       &
-      !$OMP DEFAULT(SHARED)
-  allocate( W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO), &
-            W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
-            V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
-            V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
+  !$OMP PARALLEL PRIVATE(a,b,c,e) DEFAULT(SHARED)
   e = 0d0
   !$OMP DO SCHEDULE(dynamic)
   do a = 1, nV
     do b = a+1, nV
       do c = b+1, nV
-        e = e + ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,V_abc, &
-                        V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-                        W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
+        e = e + ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov, &
+                        X_ooov,X_oovv,X_vovv,f_o,f_v)
       enddo
 
-      e = e + ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,V_abc, &
-                      V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-                      W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
+      e = e + ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov, &
+                      X_ooov,X_oovv,X_vovv,f_o,f_v)
 
-      e = e + ccsd_t_task_aba(b,a,nO,nV,t1,T_oovv,T_voov,V_abc, &
-                      V_acb,V_bac,V_bca,V_cab,V_cba,W_abc,W_acb,W_bac, &
-                      W_bca,W_cab,W_cba,X_ooov,X_oovv,X_vovv,f_o,f_v)
+      e = e + ccsd_t_task_aba(b,a,nO,nV,t1,T_oovv,T_voov, &
+                      X_ooov,X_oovv,X_vovv,f_o,f_v)
+
     enddo
   enddo
   !$OMP END DO NOWAIT
@@ -138,9 +122,6 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   !$OMP CRITICAL
   energy = energy + e
   !$OMP END CRITICAL
-
-  deallocate(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb, &
-             V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )
 
   !$OMP END PARALLEL
 
@@ -151,29 +132,33 @@ end
 
 
 double precision function ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,&
-      V_abc,V_acb,V_bac,V_bca,V_cab,V_cba,                           &
-      W_abc,W_acb,W_bac,W_bca,W_cab,W_cba,                           &
       X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
   implicit none
-  integer, intent(in)           :: nO,nV,a,b,c
-  double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
-  double precision, intent(in)  :: X_oovv(nO,nO,nV,nV)
-  double precision, intent(in)  :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
-  double precision, intent(in)  :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
-  double precision, intent(in)  :: W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO)
-  double precision, intent(in)  :: W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO)
-  double precision, intent(in)  :: V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO)
-  double precision, intent(in)  :: V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO)
+  integer, intent(in)              :: nO,nV,a,b,c
+  double precision, intent(in)     :: t1(nO,nV), f_o(nO), f_v(nV)
+  double precision, intent(in)     :: X_oovv(nO,nO,nV,nV)
+  double precision, intent(in)     :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
+  double precision, intent(in)     :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
 
   double precision :: delta, delta_abc
   integer  :: i,j,k
 
-  delta_abc = f_v(a) + f_v(b) + f_v(c)
-  e = 0.d0
+  double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
+  double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
+  double precision, allocatable :: V_abc(:,:,:), V_cab(:,:,:), V_bca(:,:,:)
+  double precision, allocatable :: V_bac(:,:,:), V_cba(:,:,:), V_acb(:,:,:)
+
+  allocate( W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO), &
+            W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
+            V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
+            V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
 
   call form_w_abc(nO,nV,a,b,c,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
 
   call form_v_abc(nO,nV,a,b,c,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
+
+  delta_abc = f_v(a) + f_v(b) + f_v(c)
+  e = 0.d0
 
   do k = 1, nO
     do j = 1, nO
@@ -193,32 +178,39 @@ double precision function ccsd_t_task_abc(a,b,c,nO,nV,t1,T_oovv,T_voov,&
     enddo
   enddo
 
+  deallocate(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb, &
+             V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )
+
 end
 
 double precision function ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,&
-      V_abc,V_acb,V_bac,V_bca,V_cab,V_cba,                           &
-      W_abc,W_acb,W_bac,W_bca,W_cab,W_cba,                           &
       X_ooov,X_oovv,X_vovv,f_o,f_v) result(e)
   implicit none
-  integer, intent(in)           :: nO,nV,a,b
-  double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
-  double precision, intent(in)  :: X_oovv(nO,nO,nV,nV)
-  double precision, intent(in)  :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
-  double precision, intent(in)  :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
-  double precision, intent(in)  :: W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO)
-  double precision, intent(in)  :: W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO)
-  double precision, intent(in)  :: V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO)
-  double precision, intent(in)  :: V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO)
+  integer, intent(in)              :: nO,nV,a,b
+  double precision, intent(in)     :: t1(nO,nV), f_o(nO), f_v(nV)
+  double precision, intent(in)     :: X_oovv(nO,nO,nV,nV)
+  double precision, intent(in)     :: T_voov(nV,nO,nO,nV), T_oovv(nO,nO,nV,nV)
+  double precision, intent(in)     :: X_vovv(nV,nO,nV,nV), X_ooov(nO,nO,nO,nV)
 
   double precision :: delta, delta_abc
   integer  :: i,j,k
 
-  delta_abc = f_v(a) + f_v(b) + f_v(a)
-  e = 0.d0
+  double precision, allocatable :: W_abc(:,:,:), W_cab(:,:,:), W_bca(:,:,:)
+  double precision, allocatable :: W_bac(:,:,:), W_cba(:,:,:), W_acb(:,:,:)
+  double precision, allocatable :: V_abc(:,:,:), V_cab(:,:,:), V_bca(:,:,:)
+  double precision, allocatable :: V_bac(:,:,:), V_cba(:,:,:), V_acb(:,:,:)
+
+  allocate( W_abc(nO,nO,nO), W_cab(nO,nO,nO), W_bca(nO,nO,nO), &
+            W_bac(nO,nO,nO), W_cba(nO,nO,nO), W_acb(nO,nO,nO), &
+            V_abc(nO,nO,nO), V_cab(nO,nO,nO), V_bca(nO,nO,nO), &
+            V_bac(nO,nO,nO), V_cba(nO,nO,nO), V_acb(nO,nO,nO) )
 
   call form_w_abc(nO,nV,a,b,a,T_voov,T_oovv,X_vovv,X_ooov,W_abc,W_cba,W_bca,W_cab,W_bac,W_acb)
 
   call form_v_abc(nO,nV,a,b,a,t1,X_oovv,W_abc,V_abc,W_cba,V_cba,W_bca,V_bca,W_cab,V_cab,W_bac,V_bac,W_acb,V_acb)
+
+  delta_abc = f_v(a) + f_v(b) + f_v(a)
+  e = 0.d0
 
   do k = 1, nO
     do j = 1, nO
@@ -232,6 +224,9 @@ double precision function ccsd_t_task_aba(a,b,nO,nV,t1,T_oovv,T_voov,&
       enddo
     enddo
   enddo
+
+  deallocate(W_abc, W_cab, W_bca, W_bac, W_cba, W_acb, &
+             V_abc, V_cab, V_bca, V_bac, V_cba, V_acb )
 
 end
 
