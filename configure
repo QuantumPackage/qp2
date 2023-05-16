@@ -9,6 +9,8 @@ echo "QP_ROOT="$QP_ROOT
 unset CC
 unset CCXX
 
+TREXIO_VERSION=2.3.2
+
 # Force GCC instead of ICC for dependencies
 export CC=gcc
 
@@ -189,7 +191,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
 fi
 
 
@@ -203,6 +205,31 @@ for PACKAGE in ${PACKAGES} ; do
               mv ninja "\${QP_ROOT}"/bin/
 EOF
 
+    elif [[ ${PACKAGE} = trexio-nohdf5 ]] ; then
+
+            VERSION=$TREXIO_VERSION
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              tar -zxf trexio-${VERSION}.tar.gz
+              cd trexio-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --without-hdf5
+              make -j 8 && make -j 8 check && make -j 8 install
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
+              mv ninja "\${QP_ROOT}"/bin/
+EOF
+    elif [[ ${PACKAGE} = trexio ]] ; then
+
+            VERSION=$TREXIO_VERSION
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              tar -zxf trexio-${VERSION}.tar.gz
+              cd trexio-${VERSION}
+              ./configure --prefix=\${QP_ROOT}
+              make -j 8 && make -j 8 check && make -j 8 install
+EOF
+ 
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
@@ -335,6 +362,12 @@ if [[ ${ZEROMQ} = $(not_found) ]] ; then
         fi
 
         error "ZeroMQ (zeromq) is not installed."
+        fail
+fi
+
+TREXIO=$(find_lib -ltrexio)
+if [[ ${TREXIO} = $(not_found) ]] ; then
+        error "TREXIO (trexio,trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
         fail
 fi
 

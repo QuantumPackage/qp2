@@ -25,7 +25,7 @@ subroutine print_extrapolated_energy
   write(*,*)  'minimum PT2 ', 'Extrapolated energy'
   write(*,*)  '=========== ', '==================='
   do k=2,N_iter_p
-    write(*,'(F11.4,2X,F18.8)') pt2_iterations(1,k), extrapolated_energy(k,1)
+    write(*,'(F11.4,2X,F18.8)') pt2_iterations(1,N_iter_p+1-k), extrapolated_energy(k,1)
   enddo
   write(*,*)  '=========== ', '==================='
 

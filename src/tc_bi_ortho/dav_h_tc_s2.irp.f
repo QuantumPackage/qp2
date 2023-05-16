@@ -304,22 +304,23 @@ subroutine davidson_hs2_nonsym_b1space(u_in, H_jj, s2_out,energies, sze, N_st, N
       ! Penalty method
       ! --------------
 
-      if (s2_eig) then
-        h_p = s_
-        do k=1,shift2
-          h_p(k,k) = h_p(k,k) - expected_s2
-        enddo
-        if (only_expected_s2) then
-          alpha = 0.1d0
-          h_p = h + alpha*h_p
-        else
-          alpha = 0.0001d0
-          h_p = h + alpha*h_p
-        endif
-      else
+!      if (s2_eig) then
+!        h_p = s_
+!        do k=1,shift2
+!          h_p(k,k) = h_p(k,k) - expected_s2
+!        enddo
+!        if (only_expected_s2) then
+!          alpha = 0.1d0
+!          h_p = h + alpha*h_p
+!        else
+!          alpha = 0.0001d0
+!          h_p = h + alpha*h_p
+!        endif
+!      else
         h_p = h
         alpha = 0.d0
-      endif
+!      endif
+
 
       ! Diagonalize h y = lambda y
       ! ---------------------------

@@ -8,15 +8,15 @@ subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: energy
-  
+
   double precision, allocatable :: W(:,:,:,:,:,:)
   double precision, allocatable :: V(:,:,:,:,:,:)
   integer :: i,j,k,a,b,c
-  
+
   allocate(W(nO,nO,nO,nV,nV,nV))
   allocate(V(nO,nO,nO,nV,nV,nV))
 
-  call form_w(nO,nV,t2,W)   
+  call form_w(nO,nV,t2,W)
   call form_v(nO,nV,t1,W,V)
 
   energy = 0d0
@@ -33,9 +33,9 @@ subroutine ccsd_par_t_space(nO,nV,t1,t2,energy)
       enddo
     enddo
   enddo
-  
+
   energy = energy / 3d0
-  
+
   deallocate(V,W)
 end
 
@@ -46,7 +46,7 @@ subroutine form_w(nO,nV,t2,W)
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: W(nO, nO, nO, nV, nV, nV)
-  
+
   integer :: i,j,k,l,a,b,c,d
 
   W = 0d0
@@ -133,7 +133,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, intent(in)  :: t2(nO,nO,nV,nV)
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO), v_vooo(nV,nO,nO,nO)
   double precision, intent(out) :: energy
-  
+
   double precision, allocatable :: W(:,:,:,:,:,:)
   double precision, allocatable :: V(:,:,:,:,:,:)
   double precision, allocatable :: W_ijk(:,:,:), V_ijk(:,:,:)
@@ -141,7 +141,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   double precision, allocatable :: T_vvoo(:,:,:,:), T_ovvo(:,:,:,:), T_vo(:,:)
   integer                       :: i,j,k,l,a,b,c,d
   double precision              :: e,ta,tb, delta, delta_ijk
- 
+
   !allocate(W(nV,nV,nV,nO,nO,nO))
   !allocate(V(nV,nV,nV,nO,nO,nO))
   allocate(W_ijk(nV,nV,nV), V_ijk(nV,nV,nV))
@@ -154,10 +154,10 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
   !$OMP t1,t2,v_vvvo,v_vooo,v_vvoo) &
   !$OMP PRIVATE(a,b,c,d,i,j,k,l) &
   !$OMP DEFAULT(NONE)
-  
+
   !v_vvvo(b,a,d,i) * t2(k,j,c,d) &
   !X_vvvo(d,b,a,i) * T_vvoo(d,c,k,j)
-  
+
   !$OMP DO collapse(3)
   do i = 1, nO
     do a = 1, nV
@@ -181,7 +181,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
     enddo
   enddo
   !$OMP END DO nowait
- 
+
   !v_vooo(c,j,k,l) * t2(i,l,a,b) &
   !X_ovoo(l,c,j,k) * T_ovvo(l,a,b,i) &
 
@@ -208,10 +208,10 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
     enddo
   enddo
   !$OMP END DO nowait
-                     
+
   !v_vvoo(b,c,j,k) * t1(i,a) &
   !X_vvoo(b,c,k,j) * T1_vo(a,i) &
-  
+
   !$OMP DO collapse(3)
   do j = 1, nO
     do k = 1, nO
@@ -257,7 +257,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
             enddo
           enddo
         enddo
-        !$OMP END DO
+        !$OMP END DO NOWAIT
         !$OMP CRITICAL
         energy = energy + e
         !$OMP END CRITICAL
@@ -267,7 +267,7 @@ subroutine ccsd_par_t_space_v2(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
     call wall_time(tb)
     write(*,'(F12.2,A5,F12.2,A2)') dble(i)/dble(nO)*100d0, '% in ', tb - ta, ' s'
   enddo
-  
+
   energy = energy / 3d0
 
   deallocate(W_ijk,V_ijk,X_vvvo,X_ovoo,T_vvoo,T_ovvo,T_vo)
@@ -285,78 +285,178 @@ subroutine form_w_ijk(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W)
   double precision, intent(in)  :: T_vvoo(nV,nV,nO,nO), T_ovvo(nO,nV,nV,nO)
   double precision, intent(in)  :: X_vvvo(nV,nV,nV,nO), X_ovoo(nO,nV,nO,nO)
   double precision, intent(out) :: W(nV,nV,nV)!,nO,nO,nO)
-  
+
   integer :: l,a,b,c,d
+  double precision, allocatable, dimension(:,:,:) :: X, Y, Z
 
   !W = 0d0
   !do i = 1, nO
   !  do j = 1, nO
   !    do k = 1, nO
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W) &
-  !$OMP PRIVATE(a,b,c,d,l) &
-  !$OMP DEFAULT(NONE)
-  !$OMP DO collapse(2)
-  do c = 1, nV
-    do b = 1, nV
-      do a = 1, nV
-        W(a,b,c) = 0d0
+  allocate(X(nV,nV,nV))
+  allocate(Y(nV,nV,nV))
+  allocate(Z(nV,nV,nV))
 
-        do d = 1, nV
-          !W(i,j,k,a,b,c) = W(i,j,k,a,b,c) &
-          W(a,b,c) = W(a,b,c) &
-          ! chem (bd|ai)
-          ! phys <ba|di>
-          !+ cc_space_v_vvvo(b,a,d,i) * t2(k,j,c,d) &
-          !+ cc_space_v_vvvo(c,a,d,i) * t2(j,k,b,d) & ! bc kj
-          !+ cc_space_v_vvvo(a,c,d,k) * t2(j,i,b,d) & ! prev ac ik
-          !+ cc_space_v_vvvo(b,c,d,k) * t2(i,j,a,d) & ! prev ab ij
-          !+ cc_space_v_vvvo(c,b,d,j) * t2(i,k,a,d) & ! prev bc kj
-          !+ cc_space_v_vvvo(a,b,d,j) * t2(k,i,c,d) ! prev ac ik
-          + X_vvvo(d,b,a,i) * T_vvoo(d,c,k,j) &
-          + X_vvvo(d,c,a,i) * T_vvoo(d,b,j,k) & ! bc kj
-          + X_vvvo(d,a,c,k) * T_vvoo(d,b,j,i) & ! prev ac ik
-          + X_vvvo(d,b,c,k) * T_vvoo(d,a,i,j) & ! prev ab ij
-          + X_vvvo(d,c,b,j) * T_vvoo(d,a,i,k) & ! prev bc kj
-          + X_vvvo(d,a,b,j) * T_vvoo(d,c,k,i) ! prev ac ik
-        enddo
-        
+  !$OMP PARALLEL DO
+  do b = 1, nV
+    do a = 1, nV
+      do d = 1, nV
+        Z(d,a,b) = X_vvvo(d,b,a,i)
       enddo
     enddo
   enddo
-  !$OMP END DO nowait
+  !$OMP END PARALLEL DO
 
-  !$OMP DO collapse(2)
+  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
+     Z, nV, T_vvoo(1,1,k,j), nV, 0.d0, W, nV*nV)
+
+  !$OMP PARALLEL DO
   do c = 1, nV
-    do b = 1, nV
-      do a = 1, nV
-         
-        do l = 1, nO
-          !W(i,j,k,a,b,c) = W(i,j,k,a,b,c) &
-          W(a,b,c) = W(a,b,c) &
-          ! chem (ck|jl)
-          ! phys <cj|kl>
-          !- cc_space_v_vooo(c,j,k,l) * t2(i,l,a,b) &
-          !- cc_space_v_vooo(b,k,j,l) * t2(i,l,a,c) & ! bc kj
-          !- cc_space_v_vooo(b,i,j,l) * t2(k,l,c,a) & ! prev ac ik
-          !- cc_space_v_vooo(a,j,i,l) * t2(k,l,c,b) & ! prev ab ij
-          !- cc_space_v_vooo(a,k,i,l) * t2(j,l,b,c) & ! prev bc kj
-          !- cc_space_v_vooo(c,i,k,l) * t2(j,l,b,a) ! prev ac ik
-          - X_ovoo(l,c,j,k) * T_ovvo(l,a,b,i) &
-          - X_ovoo(l,b,k,j) * T_ovvo(l,a,c,i) & ! bc kj
-          - X_ovoo(l,b,i,j) * T_ovvo(l,c,a,k) & ! prev ac ik
-          - X_ovoo(l,a,j,i) * T_ovvo(l,c,b,k) & ! prev ab ij
-          - X_ovoo(l,a,k,i) * T_ovvo(l,b,c,j) & ! prev bc kj
-          - X_ovoo(l,c,i,k) * T_ovvo(l,b,a,j) ! prev ac ik
-        enddo
-
+    do a = 1, nV
+      do d = 1, nV
+        Z(d,a,c) = X_vvvo(d,c,a,i)
       enddo
     enddo
   enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
-  
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
+     Z, nV, T_vvoo(1,1,j,k), nV, 0.d0, Y, nV*nV)
+
+  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
+     X_vvvo(1,1,1,k), nV, T_vvoo(1,1,j,i), nV, 1.d0, Y, nV*nV)
+
+  call dgemm('T','N',nV,nV*nV,nV, 1.d0, &
+     T_vvoo(1,1,i,j), nV, X_vvvo(1,1,1,k), nV, 1.d0, W, nV)
+
+  call dgemm('T','N',nV,nV*nV,nV, 1.d0, &
+     T_vvoo(1,1,i,k), nV, X_vvvo(1,1,1,j), nV, 1.d0, Y, nV)
+
+  call dgemm('T','N',nV*nV,nV,nV, 1.d0, &
+     X_vvvo(1,1,1,j), nV, T_vvoo(1,1,k,i), nV, 1.d0, W, nV*nV)
+
+  deallocate(Z)
+
+
+  allocate(Z(nO,nV,nV))
+
+  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
+     T_ovvo(1,1,1,i), nO, X_ovoo(1,1,j,k), nO, 1.d0, W, nV*nV)
+
+  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
+     T_ovvo(1,1,1,i), nO, X_ovoo(1,1,k,j), nO, 1.d0, Y, nV*nV)
+
+  !$OMP PARALLEL DO
+  do c = 1, nV
+    do a = 1, nV
+      do l = 1, nO
+        Z(l,a,c) = T_ovvo(l,c,a,k)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
+     Z, nO, X_ovoo(1,1,i,j), nO, 1.d0, Y, nV*nV)
+
+  call dgemm('T','N',nV,nV*nV,nO, -1.d0, &
+     X_ovoo(1,1,j,i), nO, T_ovvo(1,1,1,k), nO, 1.d0, Y, nV)
+
+  call dgemm('T','N',nV,nV*nV,nO, -1.d0, &
+     X_ovoo(1,1,k,i), nO, T_ovvo(1,1,1,j), nO, 1.d0, W, nV)
+
+  !$OMP PARALLEL DO
+  do b = 1, nV
+    do a = 1, nV
+      do l = 1, nO
+        Z(l,a,b) = T_ovvo(l,b,a,j)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call dgemm('T','N',nV*nV,nV,nO, -1.d0, &
+     Z, nO, X_ovoo(1,1,i,k), nO, 1.d0, W, nV*nV)
+
+  !$OMP PARALLEL DO
+  do c = 1, nV
+    do b = 1, nV
+      do a = 1, nV
+        W(a,b,c) = W(a,b,c) + Y(a,c,b)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  deallocate(X,Y,Z)
+
+
+!  !$OMP PARALLEL &
+!  !$OMP SHARED(nO,nV,i,j,k,T_vvoo,T_ovvo,X_vvvo,X_ovoo,W) &
+!  !$OMP PRIVATE(a,b,c,d,l) &
+!  !$OMP DEFAULT(NONE)
+!
+!  !$OMP DO collapse(2)
+!  do c = 1, nV
+!    do b = 1, nV
+!      do a = 1, nV
+!        W(a,b,c) = 0.d0
+!
+!        do d = 1, nV
+!          !W(i,j,k,a,b,c) = W(i,j,k,a,b,c) &
+!          W(a,b,c) = W(a,b,c) &
+!          ! chem (bd|ai)
+!          ! phys <ba|di>
+!          !+ cc_space_v_vvvo(b,a,d,i) * t2(k,j,c,d) &
+!          !+ cc_space_v_vvvo(c,a,d,i) * t2(j,k,b,d) & ! bc kj
+!          !+ cc_space_v_vvvo(a,c,d,k) * t2(j,i,b,d) & ! prev ac ik
+!          !+ cc_space_v_vvvo(b,c,d,k) * t2(i,j,a,d) & ! prev ab ij
+!          !+ cc_space_v_vvvo(c,b,d,j) * t2(i,k,a,d) & ! prev bc kj
+!          !+ cc_space_v_vvvo(a,b,d,j) * t2(k,i,c,d) ! prev ac ik
+!         + X_vvvo(d,b,a,i) * T_vvoo(d,c,k,j) &
+!         + X_vvvo(d,c,a,i) * T_vvoo(d,b,j,k) & ! bc kj
+!         + X_vvvo(d,a,c,k) * T_vvoo(d,b,j,i) & ! prev ac ik
+!          + X_vvvo(d,b,c,k) * T_vvoo(d,a,i,j) & ! prev ab ij
+!          + X_vvvo(d,c,b,j) * T_vvoo(d,a,i,k) & ! prev bc kj
+!          + X_vvvo(d,a,b,j) * T_vvoo(d,c,k,i) ! prev ac ik
+!        enddo
+!
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END DO nowait
+!
+!  !$OMP DO collapse(2)
+!  do c = 1, nV
+!    do b = 1, nV
+!      do a = 1, nV
+!
+!        do l = 1, nO
+!          !W(i,j,k,a,b,c) = W(i,j,k,a,b,c) &
+!          W(a,b,c) = W(a,b,c) &
+!          ! chem (ck|jl)
+!          ! phys <cj|kl>
+!          !- cc_space_v_vooo(c,j,k,l) * t2(i,l,a,b) &
+!          !- cc_space_v_vooo(b,k,j,l) * t2(i,l,a,c) & ! bc kj
+!          !- cc_space_v_vooo(b,i,j,l) * t2(k,l,c,a) & ! prev ac ik
+!          !- cc_space_v_vooo(a,j,i,l) * t2(k,l,c,b) & ! prev ab ij
+!          !- cc_space_v_vooo(a,k,i,l) * t2(j,l,b,c) & ! prev bc kj
+!          !- cc_space_v_vooo(c,i,k,l) * t2(j,l,b,a) ! prev ac ik
+!          - T_ovvo(l,a,b,i) * X_ovoo(l,c,j,k) &
+!          - T_ovvo(l,a,c,i) * X_ovoo(l,b,k,j) & ! bc kj
+!          - T_ovvo(l,c,a,k) * X_ovoo(l,b,i,j) & ! prev ac ik
+!          - T_ovvo(l,c,b,k) * X_ovoo(l,a,j,i) & ! prev ab ij
+!          - T_ovvo(l,b,c,j) * X_ovoo(l,a,k,i) & ! prev bc kj
+!          - T_ovvo(l,b,a,j) * X_ovoo(l,c,i,k) ! prev ac ik
+!        enddo
+!
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+
   !    enddo
   !  enddo
   !enddo
@@ -382,7 +482,7 @@ implicit none
   !do i = 1, nO
   !  do j = 1, nO
   !    do k = 1, nO
-  
+
   !$OMP PARALLEL &
   !$OMP SHARED(nO,nV,i,j,k,T_vo,X_vvoo,W,V) &
   !$OMP PRIVATE(a,b,c) &
@@ -404,9 +504,10 @@ implicit none
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-  
+
   !    enddo
   !  enddo
   !enddo
 
 end
+

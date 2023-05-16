@@ -109,7 +109,7 @@ subroutine run_ccsd_space_orb
       call update_t1(nO,nV,cc_space_f_o,cc_space_f_v,r1,t1)
       call update_t2(nO,nV,cc_space_f_o,cc_space_f_v,r2,t2)
     else
-      print*,'Unkonw cc_method_method: '//cc_update_method
+      print*,'Unkown cc_method_method: '//cc_update_method
     endif
 
     call update_tau_space(nO,nV,t1,t2,tau)
@@ -169,7 +169,7 @@ subroutine run_ccsd_space_orb
     ! New
     print*,'Computing (T) correction...'
     call wall_time(ta)
-    call ccsd_par_t_space_v2(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
+    call ccsd_par_t_space_v3(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
          ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
     call wall_time(tb)
     print*,'Time: ',tb-ta, ' s'
@@ -211,8 +211,8 @@ subroutine ccsd_energy_space(nO,nV,tau,t1,energy)
   !$omp default(none)
   e = 0d0
   !$omp do
-  do i = 1, nO
-    do a = 1, nV
+  do a = 1, nV
+    do i = 1, nO
       e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
     enddo
   enddo
@@ -255,7 +255,7 @@ subroutine update_tau_space(nO,nV,t1,t2,tau)
   !$OMP SHARED(nO,nV,tau,t2,t1) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO collapse(3)
+  !$OMP DO 
   do b = 1, nV
     do a = 1, nV
       do j = 1, nO
@@ -373,7 +373,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,X_voov,t2,t1) &
   !$omp private(u,beta,i,a) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do u = 1, nO
       do i = 1, nO
@@ -412,7 +412,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,cc_space_v_ovov,cc_space_v_voov,X_ovov) &
   !$omp private(u,beta,i,a) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do u = 1, nO
       do a = 1, nv
@@ -452,7 +452,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau) &
   !$omp private(b,beta,i,a) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do i = 1, nO
       do b = 1, nV
@@ -464,11 +464,11 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
   !$omp end do nowait
 
-  !$omp do collapse(3)
-  do i = 1, nO
-    do b = 1, nV
-      do a = 1, nV
-        do u = 1, nO
+  !$omp do 
+  do u = 1, nO
+    do i = 1, nO
+      do b = 1, nV
+        do a = 1, nV
           T_vvoo(a,b,i,u) = tau(i,u,a,b)  
         enddo
       enddo
@@ -504,8 +504,8 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp shared(nO,nV,cc_space_v_vooo,W_oovo) &
   !$omp private(u,a,i,j) &
   !$omp default(none)
-  !$omp do collapse(3)
   do u = 1, nO
+    !$omp do 
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
@@ -513,8 +513,8 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
 
   call dgemm('T','N', nO, nV, nO*nO*nV, &
@@ -527,9 +527,7 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   max_r1 = 0d0
   do a = 1, nV
     do i = 1, nO
-      if (dabs(r1(i,a)) > max_r1) then
-        max_r1 = dabs(r1(i,a))
-      endif
+      max_r1 = max(dabs(r1(i,a)), max_r1)
     enddo
   enddo
 
@@ -657,7 +655,7 @@ subroutine compute_H_vv(nO,nV,t1,t2,tau,H_vv)
   ! H_vv(a,beta) = H_vv(a,beta) - cc_space_w_vvoo(a,b,i,j) * tau(i,j,beta,b)
   ! H_vv(a,beta) = H_vv(a,beta) - cc_space_w_vvoo(a,b,i,j) * tmp_tau(b,i,j,beta)
   
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do j = 1, nO
       do i = 1, nO
@@ -727,7 +725,7 @@ subroutine compute_H_vo(nO,nV,t1,t2,H_vo)
   ! H_vo(a,i) = H_vo(a,i) + cc_space_w_vvoo(a,b,i,j) * t1(j,b)
   ! H_vo(a,i) = H_vo(a,i) + w(a,i,j,b) * t1(j,b)
 
-  !$omp do collapse(3)
+  !$omp do 
   do b = 1, nV
     do j = 1, nO
       do i = 1, nO
@@ -787,7 +785,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,cc_space_v_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -863,7 +861,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,t2,X_oovv) &
   !$omp private(u,v,gam,a) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do a = 1, nV
     do gam = 1, nV
       do v = 1, nO
@@ -885,7 +883,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Y_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -921,7 +919,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -957,7 +955,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,X_vovv,cc_space_v_ovvv) &
   !$omp private(u,a,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do u = 1, nO
@@ -979,7 +977,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Y_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1014,8 +1012,8 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,X_vovo,cc_space_v_ovov) &
   !$omp private(u,v,gam,i) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do gam = 1, nV
       do u = 1, nO
         do a = 1, nV
@@ -1023,8 +1021,8 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
 
   call dgemm('N','N',nV*nO*nV,nV,nO, &
@@ -1041,7 +1039,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1079,7 +1077,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1116,8 +1114,8 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,X_vovo,cc_space_v_ovvo) &
   !$omp private(a,v,gam,i) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do gam = 1, nV
       do v = 1, nO
         do a = 1, nV
@@ -1125,8 +1123,8 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
 
   call dgemm('N','N',nO,nO*nV*nO,nV, &
@@ -1143,7 +1141,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,X_oovv) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1182,19 +1180,19 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,X_ovvo,Y_voov,K1,J1,t2) &
   !$omp private(u,v,gam,beta,i,a) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do a = 1, nV
       do beta = 1, nV
         do u = 1, nO
-          X_ovvo(u,beta,a,i) = 0.5d0 * (2d0 * J1(u,a,beta,i) - K1(u,a,i,beta))
+          X_ovvo(u,beta,a,i) = (J1(u,a,beta,i) - 0.5d0 * K1(u,a,i,beta))
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do nowait
 
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do v = 1, nO
       do i = 1, nO
@@ -1216,7 +1214,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1252,7 +1250,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,a,i,beta,gam) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do u = 1, nO
       do a = 1, nV
@@ -1264,7 +1262,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do nowait
 
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do v = 1, nO
       do a = 1, nV
@@ -1286,7 +1284,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1319,7 +1317,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,K1,X_ovov,Z_ovov,t2) &
   !$omp private(u,v,gam,beta,i,a) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do
   do a = 1, nV
     do i = 1, nO
       do gam = 1, nV
@@ -1331,7 +1329,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   enddo
   !$omp end do nowait
 
-  !$omp do collapse(3)
+  !$omp do
   do beta = 1, nV
     do v = 1, nO
       do a = 1, nV
@@ -1353,7 +1351,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do
   do gam = 1, nV
     do beta = 1, nV
       do v = 1, nO
@@ -1373,7 +1371,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !$omp shared(nO,nV,r2) &
   !$omp private(i,j,a,b) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do
   do b = 1, nV
     do a = 1, nV
       do j = 1, nO
@@ -1391,9 +1389,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
-          if (dabs(r2(i,j,a,b)) > max_r2) then
-            max_r2 = dabs(r2(i,j,a,b))
-          endif
+          max_r2 = max(r2(i,j,a,b), max_r2)
         enddo
       enddo
     enddo
@@ -1448,7 +1444,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   !$omp shared(nO,nV,A1,cc_space_v_oooo,cc_space_v_ovoo,X_vooo) &
   !$omp private(u,v,i,j) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do collapse(2)
   do j = 1, nO
     do i = 1, nO
       do v = 1, nO
@@ -1462,7 +1458,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
 
   ! A1(u,v,i,j) += cc_space_v_ovoo(u,a,i,j) * t1(v,a) &
 
-  !$omp do collapse(3)
+  !$omp do collapse(2)
   do j = 1, nO
     do i = 1, nO
       do u = 1, nO
@@ -1484,7 +1480,7 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
   !$omp shared(nO,nV,A1,Y_oooo) &
   !$omp private(u,v,i,j) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do collapse(2)
   do j = 1, nO
     do i = 1, nO
       do v = 1, nO
@@ -1553,7 +1549,7 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo) &
   !$omp private(a,b,beta,gam) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do b = 1, nV
@@ -1564,8 +1560,8 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
     enddo
   enddo
   !$omp end do nowait
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do gam = 1, nV
       do b = 1, nV
         do a = 1, nV
@@ -1573,8 +1569,8 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
   
   ! B1(a,b,beta,gam) -= cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
@@ -1594,7 +1590,7 @@ subroutine compute_B1(nO,nV,t1,t2,B1)
   !$omp shared(nV,B1,Y_vvvv) &
   !$omp private(a,b,beta,gam) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do gam = 1, nV
     do beta = 1, nV
       do b = 1, nV
@@ -1658,7 +1654,7 @@ subroutine compute_g_occ(nO,nV,t1,t2,H_oo,g_occ)
   enddo
   !$omp end do
   
-  !$omp do collapse(1)
+  !$omp do 
   do i = 1, nO
     do j = 1, nO
       do a = 1, nV
@@ -1720,7 +1716,7 @@ subroutine compute_g_vir(nO,nV,t1,t2,H_vv,g_vir)
   enddo
   !$omp end do
 
-  !$omp do collapse(1)
+  !$omp do 
   do beta = 1, nV
     do i = 1, nO
       do b = 1, nV
@@ -1788,8 +1784,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,J1,v_ovvo,v_ovoo,X_ovoo) &
   !$omp private(i,j,a,u,beta) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1797,10 +1793,10 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do nowait
 
-  !$omp do collapse(3)
+  !$omp do collapse(2)
   do j = 1, nO
     do i = 1, nO
       do a = 1, nV
@@ -1822,8 +1818,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,J1,Y_ovov) &
   !$omp private(i,beta,a,u) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1831,8 +1827,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
   deallocate(X_ovoo)
 
@@ -1849,7 +1845,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,t2,t1,Y_ovov,X_voov,v_vvoo) &
   !$omp private(i,beta,a,u,b,j) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do b = 1, nV
     do j = 1, nO
       do beta = 1, nV
@@ -1861,7 +1857,7 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   enddo
   !$omp end do nowait
 
-  !$omp do collapse(3)
+  !$omp do 
   do b = 1, nV
     do j = 1, nO
       do i = 1, nO
@@ -1886,8 +1882,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,J1,Z_ovvo,t2,Y_vovo,v_vvoo,X_ovvo) &
   !$omp private(i,beta,a,u,j,b) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do 
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1895,12 +1891,12 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do nowait
   
   !+ 0.5d0 * (2d0 * cc_space_v_vvoo(a,b,i,j) - cc_space_v_vvoo(b,a,i,j)) * t2(u,j,beta,b)
-  !$omp do collapse(3)
   do j = 1, nO
+    !$omp do 
     do b = 1, nV
       do i = 1, nO
         do a = 1, nV
@@ -1908,11 +1904,11 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do nowait
   
-  !$omp do collapse(3)
   do j = 1, nO
+    !$omp do 
     do b = 1, nV
       do beta = 1, nV
         do u = 1, nO
@@ -1920,8 +1916,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
   
   call dgemm('N','T',nO*nV,nV*nO,nV*nO, &
@@ -1933,8 +1929,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
   !$omp shared(nO,nV,J1,Z_ovvo) &
   !$omp private(i,beta,a,u) &
   !$omp default(none)
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do
     do beta = 1, nV
       do a = 1, nV
         do u = 1, nO
@@ -1942,8 +1938,8 @@ subroutine compute_J1(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvvo,v_vvoo,J1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do
   !$omp end parallel
 
   deallocate(X_ovvo,Z_ovvo,Y_ovov)  
@@ -2003,7 +1999,7 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   !$omp shared(nO,nV,K1,X,Y,v_vvoo,v_ovov,t1,t2) &
   !$omp private(i,beta,a,u,j,b) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do 
   do beta = 1, nV
     do i = 1, nO
       do a = 1, nV
@@ -2015,8 +2011,8 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   enddo
   !$omp end do nowait
 
-  !$omp do collapse(3)
   do i = 1, nO
+    !$omp do
     do a = 1, nV
       do j = 1, nO
         do b = 1, nV
@@ -2024,11 +2020,11 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
         enddo
       enddo
     enddo
+    !$omp end do nowait
   enddo
-  !$omp end do nowait
 
-  !$omp do collapse(3)
   do j = 1, nO
+    !$omp do
     do b = 1, nV
       do beta = 1, nV
         do u = 1, nO
@@ -2036,8 +2032,8 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
         enddo
       enddo
     enddo
+    !$omp end do
   enddo
-  !$omp end do
   !$omp end parallel
 
   call dgemm('N','N',nO*nV*nO,nV,nO, &
@@ -2060,7 +2056,7 @@ subroutine compute_K1(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   !$omp shared(nO,nV,K1,Z) &
   !$omp private(i,beta,a,u) &
   !$omp default(none)
-  !$omp do collapse(3)
+  !$omp do
    do beta = 1, nV
     do i = 1, nO
       do a = 1, nV

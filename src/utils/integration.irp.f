@@ -428,6 +428,112 @@ end subroutine
 
 
 
+subroutine multiply_poly_0c(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:0), c(0:nc)
+  double precision, intent(inout) :: d(0:0+nc)
+
+  integer                        :: ic
+
+  do ic = 0,nc
+    d(ic) = d(ic) + c(ic) * b(0)
+  enddo
+
+  do nd = nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+subroutine multiply_poly_1c(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:1), c(0:nc)
+  double precision, intent(inout) :: d(0:1+nc)
+
+  integer                        :: ic, id
+  if(nc < 0) return
+
+  do ic = 0,nc
+    d(  ic) = d(  ic) + c(ic) * b(0)
+    d(1+ic) = d(1+ic) + c(ic) * b(1)
+  enddo
+
+  do nd = nc+1,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_2c(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:2), c(0:nc)
+  double precision, intent(inout) :: d(0:2+nc)
+
+  integer                        :: ic, id, k
+  if (nc <0) return
+
+  do ic = 0,nc
+    d(  ic) = d(  ic) + c(ic) * b(0)
+    d(1+ic) = d(1+ic) + c(ic) * b(1)
+    d(2+ic) = d(2+ic) + c(ic) * b(2)
+  enddo
+
+  do nd = nc+2,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+subroutine multiply_poly_3c(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:3), c(0:nc)
+  double precision, intent(inout) :: d(0:3+nc)
+
+  integer                        :: ic, id
+  if (nc <0) return
+
+  do ic = 1,nc
+    d(  ic) = d(1+ic) + c(ic) * b(0)
+    d(1+ic) = d(1+ic) + c(ic) * b(1)
+    d(2+ic) = d(1+ic) + c(ic) * b(2)
+    d(3+ic) = d(1+ic) + c(ic) * b(3)
+  enddo
+
+  do nd = nc+3,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
 
 
 subroutine multiply_poly(b,nb,c,nc,d,nd)
@@ -444,29 +550,16 @@ subroutine multiply_poly(b,nb,c,nc,d,nd)
 
   integer                        :: ndtmp
   integer                        :: ib, ic, id, k
-  if(ior(nc,nb) >= 0) then ! True if nc>=0 and nb>=0
-    continue
-  else
-    return
-  endif
-  ndtmp = nb+nc
+  if(ior(nc,nb) < 0) return !False if nc>=0 and nb>=0
 
-  do ic = 0,nc
-    d(ic) = d(ic) + c(ic) * b(0)
-  enddo
-
-  do ib=1,nb
-    d(ib) = d(ib) + c(0) * b(ib)
-    do ic = 1,nc
+  do ib=0,nb
+    do ic = 0,nc
       d(ib+ic) = d(ib+ic) + c(ic) * b(ib)
     enddo
   enddo
 
-  do nd = ndtmp,0,-1
-    if (d(nd) == 0.d0) then
-      cycle
-    endif
-    exit
+  do nd = nb+nc,0,-1
+    if (d(nd) /= 0.d0) exit
   enddo
 
 end

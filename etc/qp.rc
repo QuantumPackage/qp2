@@ -188,7 +188,7 @@ _qp_Complete()
             ;;
         esac;;
       set_file)
-        COMPREPLY=( $(compgen -W "$(for i in $(find . -name ezfio | sed 's/ezfio$/.version/') ; do [[ -f $i ]] && echo ${i%/.version} ; done)" -- ${cur} ) )
+        COMPREPLY=( $(compgen -W "$(for i in */ $(find . -name ezfio | sed 's/ezfio$/.version/') ; do [[ -f $i ]] && echo ${i%/.version} ; done)" -- ${cur} ) )
         return 0
         ;;
       plugins)

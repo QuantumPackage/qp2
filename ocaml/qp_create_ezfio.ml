@@ -478,6 +478,7 @@ let run ?o b au c d m p cart xyz_file =
         let nmax =
           Nucl_number.get_max ()
         in
+
         let rec do_work (accu:(Atom.t*Nucl_number.t) list) (n:int) = function
         | [] -> accu
         | e::tail ->
@@ -520,141 +521,144 @@ let run ?o b au c d m p cart xyz_file =
       in
       let long_basis = Long_basis.of_basis basis in
       let ao_num = List.length long_basis in
-      Ezfio.set_ao_basis_ao_num ao_num;
-      Ezfio.set_ao_basis_ao_basis b;
-      Ezfio.set_basis_basis b;
-      let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis
-      and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis
-      and ao_power=
-        let l = list_map (fun (x,_,_) -> x) long_basis in
-        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.x)) l)@
-        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.y)) l)@
-        (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.z)) l)
-      in
-      let ao_prim_num_max = List.fold_left (fun s x ->
-        if x > s then x
-        else s) 0 ao_prim_num
-      in
-      let gtos =
-        list_map (fun (_,x,_) -> x) long_basis
-      in
-
-      let create_expo_coef ec =
-          let coefs =
-            begin match ec with
-            | `Coefs -> list_map (fun x->
-              list_map (fun (_,coef) ->
-                AO_coef.to_float coef) x.Gto.lc) gtos
-            | `Expos -> list_map (fun x->
-              list_map (fun (prim,_) -> AO_expo.to_float
-              prim.GaussianPrimitive.expo) x.Gto.lc) gtos
-            end
+      if ao_num > 0 then
+        begin
+          Ezfio.set_ao_basis_ao_num ao_num;
+          Ezfio.set_ao_basis_ao_basis b;
+          Ezfio.set_basis_basis b;
+          let ao_prim_num = list_map (fun (_,g,_) -> List.length g.Gto.lc) long_basis
+          and ao_nucl = list_map (fun (_,_,n) -> Nucl_number.to_int n) long_basis
+          and ao_power=
+            let l = list_map (fun (x,_,_) -> x) long_basis in
+            (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.x)) l)@
+            (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.y)) l)@
+            (list_map (fun t -> Positive_int.to_int Angmom.Xyz.(t.z)) l)
           in
-          let rec get_n n accu = function
-            | [] -> List.rev accu
-            | h::tail ->
-                let y =
-                begin match List.nth_opt h n with
-                | Some x -> x
-                | None -> 0.
+          let ao_prim_num_max = List.fold_left (fun s x ->
+            if x > s then x
+            else s) 0 ao_prim_num
+          in
+          let gtos =
+            list_map (fun (_,x,_) -> x) long_basis
+          in
+
+          let create_expo_coef ec =
+              let coefs =
+                begin match ec with
+                | `Coefs -> list_map (fun x->
+                  list_map (fun (_,coef) ->
+                    AO_coef.to_float coef) x.Gto.lc) gtos
+                | `Expos -> list_map (fun x->
+                  list_map (fun (prim,_) -> AO_expo.to_float
+                  prim.GaussianPrimitive.expo) x.Gto.lc) gtos
                 end
-                in
-                get_n n (y::accu) tail
+              in
+              let rec get_n n accu = function
+                | [] -> List.rev accu
+                | h::tail ->
+                    let y =
+                    begin match List.nth_opt h n with
+                    | Some x -> x
+                    | None -> 0.
+                    end
+                    in
+                    get_n n (y::accu) tail
+              in
+              let rec build accu = function
+                | n when n=ao_prim_num_max -> accu
+                | n -> build ( accu @ (get_n n [] coefs) ) (n+1)
+              in
+              build [] 0
           in
-          let rec build accu = function
-            | n when n=ao_prim_num_max -> accu
-            | n -> build ( accu @ (get_n n [] coefs) ) (n+1)
-          in
-          build [] 0
-      in
 
-      let ao_coef = create_expo_coef `Coefs
-      and ao_expo = create_expo_coef `Expos
-      in
-      let () =
-        let shell_num = List.length basis in
-        let lc : (GaussianPrimitive.t * Qptypes.AO_coef.t) list list =
-             list_map ( fun (g,_) -> g.Gto.lc ) basis
-        in
-        let ang_mom =
-          list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  ->
-            let x, _ = List.hd l in
-            Angmom.to_l x.GaussianPrimitive.sym |> Qptypes.Positive_int.to_int
-             ) lc
-        in
-        let expo =
-          list_map (fun l -> list_map (fun (x,_) -> Qptypes.AO_expo.to_float x.GaussianPrimitive.expo) l ) lc
-          |> List.concat
-        in
-        let coef =
-          list_map (fun l ->
-            list_map (fun (_,x) -> Qptypes.AO_coef.to_float x) l
-             ) lc
-          |> List.concat
-        in
-        let shell_prim_num =
-          list_map List.length  lc
-        in
-        let shell_idx =
-          let rec make_list n accu = function
-          | 0 -> accu
-          | i -> make_list n (n :: accu) (i-1)
+          let ao_coef = create_expo_coef `Coefs
+          and ao_expo = create_expo_coef `Expos
           in
-          let rec aux count accu = function
-          | [] -> List.rev accu
-          | l::rest ->
-            let new_l = make_list count accu (List.length l) in
-            aux (count+1) new_l rest
-          in
-          aux 1 [] lc
-        in
-        let prim_num = List.length coef in
-        Ezfio.set_basis_typ "Gaussian";
-        Ezfio.set_basis_shell_num shell_num;
-        Ezfio.set_basis_prim_num prim_num ;
-        Ezfio.set_basis_shell_prim_num  (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
-        Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
-        Ezfio.set_basis_shell_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| prim_num |] ~data:shell_idx) ;
-        Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| shell_num |]
-          ~data:( list_map (fun (_,n) -> Nucl_number.to_int n) basis)
-          ) ;
-        Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| nucl_num |]
-          ~data:(
-          list_map (fun (_,n) -> Nucl_number.to_int n) basis
-          |> List.fold_left (fun accu i ->
-            match accu with
-            | [] -> [(1,i)]
-            | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((1,i)::(h,j)::rest)
-          ) []
-          |> List.rev
-          |> List.map fst
-          )) ;
-        Ezfio.set_basis_prim_coef (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
-        Ezfio.set_basis_prim_expo (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
+          let () =
+            let shell_num = List.length basis in
+            let lc : (GaussianPrimitive.t * Qptypes.AO_coef.t) list list =
+                 list_map ( fun (g,_) -> g.Gto.lc ) basis
+            in
+            let ang_mom =
+              list_map (fun (l : (GaussianPrimitive.t * Qptypes.AO_coef.t) list)  ->
+                let x, _ = List.hd l in
+                Angmom.to_l x.GaussianPrimitive.sym |> Qptypes.Positive_int.to_int
+                 ) lc
+            in
+            let expo =
+              list_map (fun l -> list_map (fun (x,_) -> Qptypes.AO_expo.to_float x.GaussianPrimitive.expo) l ) lc
+              |> List.concat
+            in
+            let coef =
+              list_map (fun l ->
+                list_map (fun (_,x) -> Qptypes.AO_coef.to_float x) l
+                 ) lc
+              |> List.concat
+            in
+            let shell_prim_num =
+              list_map List.length  lc
+            in
+            let shell_idx =
+              let rec make_list n accu = function
+              | 0 -> accu
+              | i -> make_list n (n :: accu) (i-1)
+              in
+              let rec aux count accu = function
+              | [] -> List.rev accu
+              | l::rest ->
+                let new_l = make_list count accu (List.length l) in
+                aux (count+1) new_l rest
+              in
+              aux 1 [] lc
+            in
+            let prim_num = List.length coef in
+            Ezfio.set_basis_typ "Gaussian";
+            Ezfio.set_basis_shell_num shell_num;
+            Ezfio.set_basis_prim_num prim_num ;
+            Ezfio.set_basis_shell_prim_num  (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| shell_num |] ~data:shell_prim_num);
+            Ezfio.set_basis_shell_ang_mom (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| shell_num |] ~data:ang_mom ) ;
+            Ezfio.set_basis_shell_index (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| prim_num |] ~data:shell_idx) ;
+            Ezfio.set_basis_basis_nucleus_index (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| shell_num |]
+              ~data:( list_map (fun (_,n) -> Nucl_number.to_int n) basis)
+              ) ;
+            Ezfio.set_basis_nucleus_shell_num(Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| nucl_num |]
+              ~data:(
+              list_map (fun (_,n) -> Nucl_number.to_int n) basis
+              |> List.fold_left (fun accu i ->
+                match accu with
+                | [] -> [(1,i)]
+                | (h,j) :: rest -> if j == i then ((h+1,j)::rest) else ((1,i)::(h,j)::rest)
+              ) []
+              |> List.rev
+              |> List.map fst
+              )) ;
+            Ezfio.set_basis_prim_coef (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| prim_num |] ~data:coef) ;
+            Ezfio.set_basis_prim_expo (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| prim_num |] ~data:expo) ;
 
 
-        Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
-        Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
-          ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
-        Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
-        ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
-        Ezfio.set_ao_basis_ao_coef(Ezfio.ezfio_array_of_list
-        ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_coef) ;
-        Ezfio.set_ao_basis_ao_expo(Ezfio.ezfio_array_of_list
-        ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_expo) ;
-        Ezfio.set_ao_basis_ao_cartesian(cart);
-      in
-      match Input.Ao_basis.read () with
-      | None -> failwith "Error in basis"
-      | Some x -> Input.Ao_basis.write x
+            Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
+            Ezfio.set_ao_basis_ao_nucl(Ezfio.ezfio_array_of_list
+              ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
+            Ezfio.set_ao_basis_ao_power(Ezfio.ezfio_array_of_list
+            ~rank:2 ~dim:[| ao_num ; 3 |] ~data:ao_power) ;
+            Ezfio.set_ao_basis_ao_coef(Ezfio.ezfio_array_of_list
+            ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_coef) ;
+            Ezfio.set_ao_basis_ao_expo(Ezfio.ezfio_array_of_list
+            ~rank:2 ~dim:[| ao_num ; ao_prim_num_max |] ~data:ao_expo) ;
+            Ezfio.set_ao_basis_ao_cartesian(cart);
+          in
+          match Input.Ao_basis.read () with
+          | None -> failwith "Error in basis"
+          | Some x -> Input.Ao_basis.write x
+     end
   in
   let () =
     try write_file () with
@@ -781,7 +785,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
   run ?o:output basis au charge dummy multiplicity pseudo cart xyz_filename
   )
   with
-  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt
+(*  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt *)
   | Command_line.Error txt  -> Printf.eprintf "Command line error: %s\n%!" txt
 
 
