@@ -16,7 +16,7 @@ subroutine run_ccsd_space_orb
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
   integer(bit_kind)             :: det(N_int,2)
-  integer                       :: nO, nV, nOa, nOb, nVa, nVb, n_spin(4)
+  integer                       :: nO, nV, nOa, nVa
 
   PROVIDE mo_two_e_integrals_in_map
 
@@ -24,12 +24,8 @@ subroutine run_ccsd_space_orb
   print*,'Reference determinant:'
   call print_det(det,N_int)
 
-  ! Extract number of occ/vir alpha/beta spin orbitals
-  !call extract_n_spin(det,n_spin)
-  nOa = cc_nOa !n_spin(1)
-  nOb = cc_nOb !n_spin(2)
-  nVa = cc_nVa !n_spin(3)
-  nVb = cc_nVb !n_spin(4)
+  nOa = cc_nOa
+  nVa = cc_nVa
 
   ! Check that the reference is a closed shell determinant
   if (cc_ref_is_open_shell) then
