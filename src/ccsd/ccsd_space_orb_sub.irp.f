@@ -764,7 +764,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
 
   ! internal
   double precision, allocatable :: g_occ(:,:), g_vir(:,:), J1(:,:,:,:), K1(:,:,:,:)
-  double precision, allocatable :: A1(:,:,:,:), B1(:,:,:,:)
+  double precision, allocatable :: A1(:,:,:,:), B1_gam(:,:,:)
   integer                       :: u,v,i,j,beta,gam,a,b
 
   allocate(g_occ(nO,nO), g_vir(nV,nV))
@@ -834,13 +834,18 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !  enddo
   !enddo
 
-  allocate(B1(nV,nV,nV,nV))
-  call compute_B1(nO,nV,t1,t2,B1)
-  call dgemm('N','N',nO*nO,nV*nV,nV*nV, &
-             1d0, tau, size(tau,1) * size(tau,2), &
-                  B1 , size(B1,1) * size(B1,2), &
-             1d0, r2, size(r2,1) * size(r2,2))
-  deallocate(B1)
+!  allocate(B1(nV,nV,nV,nV))
+!  call compute_B1(nO,nV,t1,t2,B1)
+  allocate(B1_gam(nV,nV,nV))
+  do gam=1,nV
+    call compute_B1_gam(nO,nV,t1,t2,B1_gam,gam)
+    call dgemm('N','N',nO*nO,nV,nV*nV, &
+                1d0, tau, size(tau,1) * size(tau,2), &
+                     B1_gam        , size(B1_gam,1) * size(B1_gam,2), &
+                1d0, r2(1,1,1,gam), size(r2,1) * size(r2,2))
+  enddo
+  deallocate(B1_gam)
+
 
   !do gam = 1, nV
   !  do beta = 1, nV
@@ -1511,6 +1516,90 @@ subroutine compute_A1(nO,nV,t1,t2,tau,A1)
 end
 
 ! B1
+
+subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
+
+  implicit none
+
+  integer, intent(in)           :: nO,nV,gam
+  double precision, intent(in)  :: t1(nO, nV)
+  double precision, intent(in)  :: t2(nO, nO, nV, nV)
+  double precision, intent(out) :: B1(nV, nV, nV)
+
+  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta
+
+!  do beta = 1, nV
+!    do b = 1, nV
+!      do a = 1, nV
+!        B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
+!
+!        do i = 1, nO
+!          B1(a,b,beta) = B1(a,b,beta) &
+!          - cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
+!          - cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
+!        enddo
+!
+!      enddo
+!    enddo
+!  enddo
+
+  double precision, allocatable :: X_vvvo(:,:,:), Y_vvvv(:,:,:)
+  allocate(X_vvvo(nV,nV,nO), Y_vvvv(nV,nV,nV))
+!  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
+  !$omp parallel &
+  !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo,gam) &
+  !$omp private(a,b,beta) &
+  !$omp default(none)
+  !$omp do
+    do beta = 1, nV
+      do b = 1, nV
+        do a = 1, nV
+          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
+        enddo
+      enddo
+    enddo
+  !$omp end do nowait
+  do i = 1, nO
+    !$omp do
+      do b = 1, nV
+        do a = 1, nV
+          X_vvvo(a,b,i) = cc_space_v_vvov(a,b,i,gam)
+        enddo
+      enddo
+    !$omp end do nowait
+  enddo
+  !$omp end parallel
+
+!  ! B1(a,b,beta) -= cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
+  call dgemm('N','N', nV*nV*nV, 1, nO, &
+             -1d0, cc_space_v_vvvo, size(cc_space_v_vvvo,1) * size(cc_space_v_vvvo,2) * size(cc_space_v_vvvo,3), &
+                   t1(1,gam), size(t1,1), &
+              1d0, B1      , size(B1,1) * size(B1,2) * size(B1,3))
+
+  ! B1(a,b,beta,gam) -= cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
+  call dgemm('N','N', nV*nV, nV, nO, &
+             -1d0, X_vvvo, size(X_vvvo,1) * size(X_vvvo,2), &
+                   t1    , size(t1,1), &
+              0d0, Y_vvvv, size(Y_vvvv,1) * size(Y_vvvv,2))
+
+  !$omp parallel &
+  !$omp shared(nV,B1,Y_vvvv,gam) &
+  !$omp private(a,b,beta) &
+  !$omp default(none)
+  !$omp do
+  do beta = 1, nV
+    do b = 1, nV
+      do a = 1, nV
+        B1(a,b,beta) = B1(a,b,beta) + Y_vvvv(a,b,beta)
+      enddo
+    enddo
+  enddo
+  !$omp end do
+  !$omp end parallel
+
+  deallocate(X_vvvo,Y_vvvv)
+
+end
 
 subroutine compute_B1(nO,nV,t1,t2,B1)
 
