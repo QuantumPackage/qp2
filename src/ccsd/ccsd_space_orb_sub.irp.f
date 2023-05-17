@@ -18,7 +18,7 @@ subroutine run_ccsd_space_orb
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
-  PROVIDE mo_two_e_integrals_in_map
+!  PROVIDE mo_two_e_integrals_in_map
 
   det = psi_det(:,:,cc_ref)
   print*,'Reference determinant:'
