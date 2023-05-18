@@ -59,7 +59,7 @@ subroutine minimize_tc_orb_angles()
   good_angles = .False.
   thr_deg = thr_degen_tc
 
-  call print_energy_and_mos()
+  call print_energy_and_mos(good_angles)
 
   print *, ' Minimizing the angles between the TC orbitals'
   i = 1
@@ -78,7 +78,7 @@ subroutine minimize_tc_orb_angles()
   print *, ' Converged ANGLES MINIMIZATION !!'
 
   call print_angles_tc()
-  call print_energy_and_mos()
+  call print_energy_and_mos(good_angles)
 
 end
 
@@ -386,10 +386,11 @@ end
 
 ! ---
 
-subroutine print_energy_and_mos()
+subroutine print_energy_and_mos(good_angles)
 
   implicit none
-  integer :: i
+  logical, intent(out) :: good_angles
+  integer              :: i
 
   print *, ' '
   print *, ' TC energy              = ', TC_HF_energy
@@ -398,10 +399,13 @@ subroutine print_energy_and_mos()
 
   if(max_angle_left_right .lt. 45.d0) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
+    good_angles = .true.
   else if(max_angle_left_right .gt. 45.d0 .and. max_angle_left_right .lt. 75.d0) then
     print *, ' Maximum angle between 45 and 75 degrees, this is not the best for TC-CI calculations ...'
+    good_angles = .false.
   else if(max_angle_left_right .gt. 75.d0) then
     print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
+    good_angles = .false.
   endif
 
   print *, ' Diag Fock elem, product of left/right norm, angle left/right '
