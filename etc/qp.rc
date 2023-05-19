@@ -110,6 +110,11 @@ function qp()
       unset COMMAND
       ;;
 
+    "test")
+      shift
+      qp_test $@
+      ;;
+
     *)
       which "qp_$1" &> /dev/null
       if [[ $? -eq 0 ]] ; then
@@ -183,7 +188,7 @@ _qp_Complete()
             ;;
         esac;;
       set_file)
-        COMPREPLY=( $(compgen -W "$(for i in * ; do [[ -f ${i}/ezfio/.version ]] && echo $i ; done)" -- ${cur} ) )
+        COMPREPLY=( $(compgen -W "$(for i in */ $(find . -name ezfio | sed 's/ezfio$/.version/') ; do [[ -f $i ]] && echo ${i%/.version} ; done)" -- ${cur} ) )
         return 0
         ;;
       plugins)
@@ -215,10 +220,15 @@ _qp_Complete()
             return 0
             ;;
         esac;;
+      test)
+        COMPREPLY=( $(compgen -W "-v -a " -- $cur ) )
+        return 0
+        ;;
       *)
         COMPREPLY=( $(compgen -W 'plugins set_file \
                                    unset_file man \
                                    create_ezfio \
+                                   test \
                                    convert_output_to_ezfio \
                                    -h update' -- $cur ) )
 

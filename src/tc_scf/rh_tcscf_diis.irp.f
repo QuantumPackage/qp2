@@ -1,5 +1,10 @@
 ! ---
 
+! TODO
+! level shift of SCF is well adapted
+! for 0.5 x F
+! 
+
 subroutine rh_tcscf_diis()
 
   implicit none
@@ -231,7 +236,7 @@ subroutine rh_tcscf_diis()
   ! ---
 
   print *, ' TCSCF DIIS converged !'
-  !call print_energy_and_mos()
+  !call print_energy_and_mos(good_angles)
   call write_time(6)
 
   deallocate(mo_r_coef_save, mo_l_coef_save, F_DIIS, E_DIIS)
