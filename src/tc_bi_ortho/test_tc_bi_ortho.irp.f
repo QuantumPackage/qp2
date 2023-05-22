@@ -31,7 +31,7 @@ subroutine test_h_u0
   u_0(i) = psi_r_coef_bi_ortho(i,1)
  enddo
  call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
- call htc_bi_ortho_calc_tdav (v_0_ref,u_0,N_states,N_det)
+ call htc_bi_ortho_calc_tdav_slow (v_0_ref,u_0,N_states,N_det)
  print*,'difference right '
  accu = 0.d0
  do i = 1, N_det
@@ -42,7 +42,7 @@ subroutine test_h_u0
  do_right = .False.
  v_0_new = 0.d0
  call H_tc_u_0_nstates_openmp(v_0_new,u_0,N_states,N_det, do_right)
- call htcdag_bi_ortho_calc_tdav(v_0_ref_dagger,u_0,N_states,N_det, do_right)
+ call htcdag_bi_ortho_calc_tdav_slow(v_0_ref_dagger,u_0,N_states,N_det, do_right)
  print*,'difference left'
  accu = 0.d0
  do i = 1, N_det
@@ -63,7 +63,7 @@ subroutine test_slater_tc_opt
  i_count = 0.d0
  do i = 1, N_det
   do j = 1,N_det
-   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
    call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hnewmono, hnewtwoe, hnewthree, hnewtot)
    if(dabs(htot).gt.1.d-15)then
      i_count += 1.D0
@@ -99,7 +99,7 @@ subroutine timing_tot
   do j = 1, N_det
 !   call get_excitation_degree(psi_det(1,1,j), psi_det(1,1,i),degree,N_int)
    i_count += 1.d0
-   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
   enddo
  enddo
  call wall_time(wall1)
@@ -146,7 +146,7 @@ subroutine timing_diag
  do i = 1, N_det
   do j = i,i 
    i_count += 1.d0
-   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
   enddo
  enddo
  call wall_time(wall1)
@@ -183,7 +183,7 @@ subroutine timing_single
    if(degree.ne.1)cycle
    i_count += 1.d0
    call wall_time(wall0)
-   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
    call wall_time(wall1)
    accu += wall1 - wall0
   enddo
@@ -225,7 +225,7 @@ subroutine timing_double
    if(degree.ne.2)cycle
    i_count += 1.d0
    call wall_time(wall0)
-   call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
    call wall_time(wall1)
    accu += wall1 - wall0
   enddo

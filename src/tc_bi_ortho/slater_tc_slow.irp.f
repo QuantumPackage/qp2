@@ -1,7 +1,7 @@
 
 ! ---
 
-subroutine htilde_mu_mat_bi_ortho_tot(key_j, key_i, Nint, htot)
+subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
 
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
@@ -24,14 +24,14 @@ subroutine htilde_mu_mat_bi_ortho_tot(key_j, key_i, Nint, htot)
   if(degree.gt.2)then
     htot = 0.d0
   else
-    call htilde_mu_mat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+    call htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
   endif
 
-end subroutine htilde_mu_mat_bi_ortho_tot
+end subroutine htilde_mu_mat_bi_ortho_tot_slow
 
 ! --
 
-subroutine htilde_mu_mat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
 
   BEGIN_DOC
   !
@@ -61,22 +61,22 @@ subroutine htilde_mu_mat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot
   if(degree.gt.2) return
 
   if(degree == 0)then
-    call diag_htilde_mu_mat_bi_ortho(Nint, key_i, hmono, htwoe, htot)
+    call diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
   else if (degree == 1)then
-    call single_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
+    call single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
   else if(degree == 2)then
-    call double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
+    call double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
   endif
 
   if(three_body_h_tc) then
     if(degree == 2) then
-      if(.not.double_normal_ord) then
-        call double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
+      if(.not.double_normal_ord.and.elec_num.gt.2.and.three_e_5_idx_term) then
+        call double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
       endif
-    else if(degree == 1) then
-      call single_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
-    else if(degree == 0) then
-      call diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
+    else if(degree == 1.and.elec_num.gt.2.and.three_e_4_idx_term) then
+      call single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
+    else if(degree == 0.and.elec_num.gt.2.and.three_e_3_idx_term) then
+      call diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
     endif
   endif
 
@@ -89,7 +89,7 @@ end
 
 ! ---
 
-subroutine diag_htilde_mu_mat_bi_ortho(Nint, key_i, hmono, htwoe, htot)
+subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
   !  diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS 
@@ -188,7 +188,7 @@ end
 
 
 
-subroutine double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
+subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS 
@@ -227,18 +227,7 @@ subroutine double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
    return
   endif
 
-!  if(core_tc_op)then
-!   print*,'core_tc_op not already taken into account for bi ortho'
-!   print*,'stopping ...'
-!   stop
-!   do i = 1, Nint
-!    key_i_core(i,1) = xor(key_i(i,1),core_bitmask(i,1))
-!    key_i_core(i,2) = xor(key_i(i,2),core_bitmask(i,2))
-!   enddo
-!   call bitstring_to_list_ab(key_i_core, occ, Ne, Nint)
-!  else
    call bitstring_to_list_ab(key_i, occ, Ne, Nint)
-!  endif
   call get_double_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
 
@@ -246,7 +235,7 @@ subroutine double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
    ! opposite spin two-body 
 !   key_j, key_i
     htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1) 
-    if(double_normal_ord.and.+Ne(1).gt.2)then
+    if(three_body_h_tc.and.double_normal_ord.and.+Ne(1).gt.2)then
      htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)!!! WTF ???
     endif
   else
@@ -255,7 +244,7 @@ subroutine double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
    htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)  
    ! exchange terms 
    htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1) 
-   if(double_normal_ord.and.+Ne(1).gt.2)then
+   if(three_body_h_tc.and.double_normal_ord.and.+Ne(1).gt.2)then
     htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)!!! WTF ???
     htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)!!! WTF ???
    endif
@@ -266,7 +255,7 @@ subroutine double_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
 end
 
 
-subroutine single_htilde_mu_mat_bi_ortho(Nint, key_j, key_i, hmono, htwoe, htot)
+subroutine single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 

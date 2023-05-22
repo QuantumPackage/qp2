@@ -11,10 +11,10 @@
  allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),eigval_tmp(N_states))
  dressing_dets = 0.d0
  do i = 1, N_det
-  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
+  call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
   if(degree == 1 .or. degree == 2)then
-   call htilde_mu_mat_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,h0j(i))
+   call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,h0j(i))
   endif
  enddo
  reigvec_tc_bi_orth_tmp = 0.d0
@@ -29,7 +29,7 @@
   vec_tmp(istate,istate) = 1.d0
  enddo
  print*,'Diagonalizing the TC CISD '
- call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
+ call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav_slow)
  do i = 1, N_det 
   e_corr_dets(i) = reigvec_tc_bi_orth_tmp(i,1) * h0j(i)/reigvec_tc_bi_orth_tmp(1,1)
  enddo
@@ -41,8 +41,8 @@
  it = 0
  dressing_dets = 0.d0
   double precision, allocatable :: H_jj(:),vec_tmp(:,:),eigval_tmp(:)
-  external                         htc_bi_ortho_calc_tdav
-  external                         htcdag_bi_ortho_calc_tdav
+  external                         htc_bi_ortho_calc_tdav_slow
+  external                         htcdag_bi_ortho_calc_tdav_slow
   logical                       :: converged
  do while (dabs(E_before-E_current).gt.thr)
   it += 1
@@ -66,7 +66,7 @@
   do istate = N_states+1, n_states_diag
    vec_tmp(istate,istate) = 1.d0
   enddo
-  call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
+  call davidson_general_diag_dressed_ext_rout_nonsym_b1space(vec_tmp, H_jj, dressing_dets,eigval_tmp, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav_slow)
   print*,'outside Davidson'
   print*,'eigval_tmp(1) = ',eigval_tmp(1)
   do i = 1, N_det 

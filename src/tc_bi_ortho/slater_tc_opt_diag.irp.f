@@ -7,11 +7,11 @@
 ! Various component of the TC energy for the reference "HF" Slater determinant
  END_DOC 
  double precision :: hmono, htwoe, htot, hthree
- call diag_htilde_mu_mat_bi_ortho(N_int,HF_bitmask , hmono, htwoe, htot)
+ call diag_htilde_mu_mat_bi_ortho_slow(N_int,HF_bitmask , hmono, htwoe, htot)
  ref_tc_energy_1e = hmono
  ref_tc_energy_2e = htwoe 
  if(three_body_h_tc)then
-  call diag_htilde_three_body_ints_bi_ort(N_int, HF_bitmask, hthree)
+  call diag_htilde_three_body_ints_bi_ort_slow(N_int, HF_bitmask, hthree)
   ref_tc_energy_3e = hthree
  else
   ref_tc_energy_3e = 0.d0
