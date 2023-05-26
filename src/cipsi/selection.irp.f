@@ -76,6 +76,8 @@ subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
 
   double precision, allocatable  :: fock_diag_tmp(:,:)
 
+  if (csubset == 0) return
+
   allocate(fock_diag_tmp(2,mo_num+1))
 
   call build_fock_tmp(fock_diag_tmp,psi_det_generators(1,1,i_generator),N_int)
@@ -177,6 +179,7 @@ subroutine select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_d
   monoAdo = .true.
   monoBdo = .true.
 
+  if (csubset == 0) return
 
   do k=1,N_int
     hole    (k,1) = iand(psi_det_generators(k,1,i_generator), hole_mask(k,1))

@@ -51,8 +51,9 @@ END_PROVIDER
 
  double precision :: integral
  logical, external :: ao_two_e_integral_zero
- !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k,l, integral) SCHEDULE(dynamic)
+ !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l, integral)
  do l=1,ao_num
+  !$OMP DO SCHEDULE(dynamic)
   do j=1,l
    do k=1,ao_num
     do i=1,k
@@ -65,8 +66,28 @@ END_PROVIDER
     enddo
    enddo
   enddo
+  !$OMP END DO NOWAIT
  enddo
- !$OMP END PARALLEL DO
+ !$OMP END PARALLEL
+
+ !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l, integral)
+ do l=1,ao_num
+  !$OMP DO SCHEDULE(dynamic)
+  do j=1,l
+   do k=1,ao_num
+    do i=1,k
+     if (ao_two_e_integral_zero(i,j,k,l)) cycle
+     integral = ao_two_e_integral(i,k,j,l)
+     ao_integrals(i,k,j,l) = integral
+     ao_integrals(k,i,j,l) = integral
+     ao_integrals(i,k,l,j) = integral
+     ao_integrals(k,i,l,j) = integral
+    enddo
+   enddo
+  enddo
+  !$OMP END DO NOWAIT
+ enddo
+ !$OMP END PARALLEL
 
  ! Call Lapack
  cholesky_ao_num = cholesky_ao_num_guess

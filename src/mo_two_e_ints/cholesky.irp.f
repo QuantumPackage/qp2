@@ -6,6 +6,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_ao_num
 
  integer :: k
 
+ call set_multiple_levels_omp(.False.)
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_ao_num
   call ao_to_mo(cholesky_ao(1,1,k),ao_num,cholesky_mo(1,1,k),mo_num)
