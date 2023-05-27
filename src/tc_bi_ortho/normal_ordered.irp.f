@@ -24,78 +24,96 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
  
   PROVIDE N_int
 
-  allocate( occ(N_int*bit_kind_size,2) )
-  allocate( key_i_core(N_int,2) )
+  print*,' Providing normal_two_body_bi_orth ...'
+  call wall_time(wall0)
 
-  if(core_tc_op) then
-    do i = 1, N_int
-      key_i_core(i,1) = xor(ref_bitmask(i,1), core_bitmask(i,1))
-      key_i_core(i,2) = xor(ref_bitmask(i,2), core_bitmask(i,2))
-    enddo
-    call bitstring_to_list_ab(key_i_core, occ, Ne, N_int)
+  if(read_tc_norm_ord) then
+
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="read")
+      read(11) normal_two_body_bi_orth
+    close(11)
+
   else
-    call bitstring_to_list_ab(ref_bitmask, occ, Ne, N_int)
-  endif
 
-  normal_two_body_bi_orth(1:mo_num,1:mo_num,1:mo_num,1:mo_num) = 0.d0
+    PROVIDE N_int
 
-  !$OMP PARALLEL                                                                         &
-  !$OMP DEFAULT (NONE)                                                                   &
-  !$OMP PRIVATE (hh1, h1, hh2, h2, pp1, p1, pp2, p2, hthree_aba, hthree_aab, hthree_aaa) & 
-  !$OMP SHARED  (N_int, n_act_orb, list_act, Ne, occ, normal_two_body_bi_orth)
-  !$OMP DO SCHEDULE (static) 
-  do hh1 = 1, n_act_orb
-    h1 = list_act(hh1) 
-    do pp1 = 1, n_act_orb
-      p1 = list_act(pp1)
-      do hh2 = 1, n_act_orb
-        h2 = list_act(hh2) 
-        do pp2 = 1, n_act_orb
-          p2 = list_act(pp2)
+    allocate( occ(N_int*bit_kind_size,2) )
+    allocate( key_i_core(N_int,2) )
 
-          ! all contributions from the 3-e terms to the double excitations 
-          ! s1:(h1-->p1), s2:(h2-->p2) from the HF reference determinant 
-    
-          ! opposite spin double excitations : s1 /= s2
-          call give_aba_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aba)
+    if(core_tc_op) then
+      do i = 1, N_int
+        key_i_core(i,1) = xor(ref_bitmask(i,1),core_bitmask(i,1))
+        key_i_core(i,2) = xor(ref_bitmask(i,2),core_bitmask(i,2))
+      enddo
+      call bitstring_to_list_ab(key_i_core,occ,Ne,N_int)
+    else
+      call bitstring_to_list_ab(ref_bitmask,occ,Ne,N_int)
+    endif
 
-          ! same spin double excitations : s1 == s2 
-          if((h1 .lt. h2) .and. (p1 .gt. p2)) then
+    normal_two_body_bi_orth = 0.d0
 
-            ! with opposite spin contributions 
-            call give_aab_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aab) ! exchange h1<->h2
+    !$OMP PARALLEL                                                                         &
+    !$OMP DEFAULT (NONE)                                                                   &
+    !$OMP PRIVATE (hh1, h1, hh2, h2, pp1, p1, pp2, p2, hthree_aba, hthree_aab, hthree_aaa) & 
+    !$OMP SHARED (N_int, n_act_orb, list_act, Ne, occ, normal_two_body_bi_orth)
+    !$OMP DO SCHEDULE (static) 
+    do hh1 = 1, n_act_orb
+      h1 = list_act(hh1) 
+      do pp1 = 1, n_act_orb
+        p1 = list_act(pp1)
+        do hh2 = 1, n_act_orb
+          h2 = list_act(hh2) 
+          do pp2 = 1, n_act_orb
+            p2 = list_act(pp2)
+            ! all contributions from the 3-e terms to the double excitations 
+            ! s1:(h1-->p1), s2:(h2-->p2) from the HF reference determinant 
+      
 
-            ! same spin double excitations with same spin contributions 
-            if(Ne(2) .ge. 3) then
-              call give_aaa_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aaa) ! exchange h1<->h2
+            ! opposite spin double excitations : s1 /= s2
+            call give_aba_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aba)
+
+            ! same spin double excitations : s1 == s2 
+            if(h1<h2.and.p1.gt.p2)then
+             ! with opposite spin contributions 
+             call give_aab_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aab) ! exchange h1<->h2
+             ! same spin double excitations with same spin contributions 
+             if(Ne(2).ge.3)then
+               call give_aaa_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aaa) ! exchange h1<->h2
+             else
+               hthree_aaa = 0.d0
+             endif
             else
-              hthree_aaa = 0.d0
-            endif
-
-          else
-
-            ! with opposite spin contributions 
-            call give_aab_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aab)
-
-            if(Ne(2) .ge. 3) then
+             ! with opposite spin contributions 
+             call give_aab_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aab)
+             if(Ne(2).ge.3)then
               ! same spin double excitations with same spin contributions 
-              call give_aaa_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aaa)
-            else
-              hthree_aaa = 0.d0
+               call give_aaa_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aaa)
+             else
+               hthree_aaa = 0.d0
+             endif
             endif
-
-          endif
-
-          normal_two_body_bi_orth(p2,h2,p1,h1) = 0.5d0 * (hthree_aba + hthree_aab + hthree_aaa)
+            normal_two_body_bi_orth(p2,h2,p1,h1) = 0.5d0*(hthree_aba + hthree_aab + hthree_aaa)
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
+    !$OMP END DO
+    !$OMP END PARALLEL
 
-  deallocate( occ )
-  deallocate( key_i_core )
+    deallocate( occ )
+    deallocate( key_i_core )
+  endif
+
+  if(write_tc_norm_ord.and.mpi_master) then
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="write")
+      call ezfio_set_work_empty(.False.)
+      write(11) normal_two_body_bi_orth
+      close(11)
+      call ezfio_set_tc_keywords_io_tc_integ('Read')
+  endif
+
+  call wall_time(wall1)
+  print*,' Wall time for normal_two_body_bi_orth ', wall1-wall0
 
   call wall_time(wall1)
   print*,' Wall time for normal_two_body_bi_orth ', wall1-wall0
