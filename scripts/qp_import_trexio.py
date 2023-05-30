@@ -132,60 +132,113 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
-        if basis_type.lower() not in ["gaussian", "slater"]:
-            raise TypeError
+        if basis_type.lower() in ["gaussian", "slater"]:
+            shell_num   = trexio.read_basis_shell_num(trexio_file)
+            prim_num    = trexio.read_basis_prim_num(trexio_file)
+            ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
+            nucl_index  = trexio.read_basis_nucleus_index(trexio_file)
+            exponent    = trexio.read_basis_exponent(trexio_file)
+            coefficient = trexio.read_basis_coefficient(trexio_file)
+            shell_index = trexio.read_basis_shell_index(trexio_file)
+            ao_shell    = trexio.read_ao_shell(trexio_file)
 
-        shell_num   = trexio.read_basis_shell_num(trexio_file)
-        prim_num    = trexio.read_basis_prim_num(trexio_file)
-        ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
-        nucl_index  = trexio.read_basis_nucleus_index(trexio_file)
-        exponent    = trexio.read_basis_exponent(trexio_file)
-        coefficient = trexio.read_basis_coefficient(trexio_file)
-        shell_index = trexio.read_basis_shell_index(trexio_file)
-        ao_shell    = trexio.read_ao_shell(trexio_file)
+            ezfio.set_basis_basis("Read from TREXIO")
+            ezfio.set_ao_basis_ao_basis("Read from TREXIO")
+            ezfio.set_basis_shell_num(shell_num)
+            ezfio.set_basis_prim_num(prim_num)
+            ezfio.set_basis_shell_ang_mom(ang_mom)
+            ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
+            ezfio.set_basis_prim_expo(exponent)
+            ezfio.set_basis_prim_coef(coefficient)
 
-        ezfio.set_basis_basis("Read from TREXIO")
-        ezfio.set_basis_shell_num(shell_num)
-        ezfio.set_basis_prim_num(prim_num)
-        ezfio.set_basis_shell_ang_mom(ang_mom)
-        ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
-        ezfio.set_basis_prim_expo(exponent)
-        ezfio.set_basis_prim_coef(coefficient)
+            nucl_shell_num = []
+            prev = None
+            m = 0
+            for i in ao_shell:
+                if i != prev:
+                   m += 1
+                   if prev is None or nucl_index[i] != nucl_index[prev]:
+                        nucl_shell_num.append(m)
+                        m = 0
+                prev = i
+            assert (len(nucl_shell_num) == nucl_num)
 
-        nucl_shell_num = []
-        prev = None
-        m = 0
-        for i in ao_shell:
-            if i != prev:
-               m += 1
-               if prev is None or nucl_index[i] != nucl_index[prev]:
-                    nucl_shell_num.append(m)
-                    m = 0
-            prev = i
-        assert (len(nucl_shell_num) == nucl_num)
+            shell_prim_num = []
+            prev = shell_index[0]
+            count = 0
+            for i in shell_index:
+                if i != prev:
+                   shell_prim_num.append(count)
+                   count = 0
+                count += 1
+                prev = i
+            shell_prim_num.append(count)
 
-        shell_prim_num = []
-        prev = shell_index[0]
-        count = 0
-        for i in shell_index:
-            if i != prev:
-               shell_prim_num.append(count)
-               count = 0
-            count += 1
-            prev = i
-        shell_prim_num.append(count)
+            assert (len(shell_prim_num) == shell_num)
 
-        assert (len(shell_prim_num) == shell_num)
-
-        ezfio.set_basis_shell_prim_num(shell_prim_num)
-        ezfio.set_basis_shell_index([x+1 for x in shell_index])
-        ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
+            ezfio.set_basis_shell_prim_num(shell_prim_num)
+            ezfio.set_basis_shell_index([x+1 for x in shell_index])
+            ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
 
 
-        shell_factor = trexio.read_basis_shell_factor(trexio_file)
-        prim_factor  = trexio.read_basis_prim_factor(trexio_file)
+            shell_factor = trexio.read_basis_shell_factor(trexio_file)
+            prim_factor  = trexio.read_basis_prim_factor(trexio_file)
 
-        print("OK")
+        elif basis_type.lower() == "numerical":
+
+            shell_num   = trexio.read_basis_shell_num(trexio_file)
+            prim_num    = shell_num
+            ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
+            nucl_index  = trexio.read_basis_nucleus_index(trexio_file)
+            exponent    = [1.]*prim_num
+            coefficient = [1.]*prim_num
+            shell_index = [i for i in range(shell_num)]
+            ao_shell    = trexio.read_ao_shell(trexio_file)
+
+            ezfio.set_basis_basis("None")
+            ezfio.set_ao_basis_ao_basis("None")
+            ezfio.set_basis_shell_num(shell_num)
+            ezfio.set_basis_prim_num(prim_num)
+            ezfio.set_basis_shell_ang_mom(ang_mom)
+            ezfio.set_basis_basis_nucleus_index([ x+1 for x in nucl_index ])
+            ezfio.set_basis_prim_expo(exponent)
+            ezfio.set_basis_prim_coef(coefficient)
+
+            nucl_shell_num = []
+            prev = None
+            m = 0
+            for i in ao_shell:
+                if i != prev:
+                   m += 1
+                   if prev is None or nucl_index[i] != nucl_index[prev]:
+                        nucl_shell_num.append(m)
+                        m = 0
+                prev = i
+            assert (len(nucl_shell_num) == nucl_num)
+
+            shell_prim_num = []
+            prev = shell_index[0]
+            count = 0
+            for i in shell_index:
+                if i != prev:
+                   shell_prim_num.append(count)
+                   count = 0
+                count += 1
+                prev = i
+            shell_prim_num.append(count)
+
+            assert (len(shell_prim_num) == shell_num)
+
+            ezfio.set_basis_shell_prim_num(shell_prim_num)
+            ezfio.set_basis_shell_index([x+1 for x in shell_index])
+            ezfio.set_basis_nucleus_shell_num(nucl_shell_num)
+
+            shell_factor = trexio.read_basis_shell_factor(trexio_file)
+            prim_factor  = [1.]*prim_num
+        else:
+           raise TypeError
+
+        print(basis_type)
     except:
         print("None")
         ezfio.set_ao_basis_ao_cartesian(True)
@@ -262,7 +315,6 @@ def write_ezfio(trexio_filename, filename):
 #        ezfio.set_ao_basis_ao_prim_num_max(prim_num_max)
         ezfio.set_ao_basis_ao_coef(coef)
         ezfio.set_ao_basis_ao_expo(expo)
-        ezfio.set_ao_basis_ao_basis("Read from TREXIO")
 
         print("OK")
 

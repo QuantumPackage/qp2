@@ -56,7 +56,10 @@ end = struct
   let read_ao_md5 () =
     let ao_md5 =
       match (Input_ao_basis.Ao_basis.read ()) with
-      | None -> failwith "Unable to read AO basis"
+      | None -> ("None"
+                 |> Digest.string
+                 |> Digest.to_hex
+                 |> MD5.of_string)
       | Some result -> Input_ao_basis.Ao_basis.to_md5 result
     in
     let result =
