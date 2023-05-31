@@ -340,6 +340,7 @@ def write_ezfio(trexio_filename, filename):
     except:
       label = "None"
     ezfio.set_mo_basis_mo_label(label)
+    ezfio.set_determinants_mo_label(label)
 
     try:
       clss = trexio.read_mo_class(trexio_file)
