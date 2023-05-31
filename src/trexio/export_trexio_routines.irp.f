@@ -1,15 +1,17 @@
-subroutine export_trexio
+subroutine export_trexio(update)
   use trexio
   implicit none
   BEGIN_DOC
   !     Exports the wave function in TREXIO format
   END_DOC
 
+  logical, intent(in)            :: update
   integer(trexio_t)              :: f(N_states) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
   integer                        :: k
   double precision, allocatable  :: factor(:)
   character*(256)  :: filenames(N_states)
+  character :: rw
 
   filenames(1) = trexio_filename
   do k=2,N_states
@@ -18,15 +20,26 @@ subroutine export_trexio
 
   do k=1,N_states
     print *, 'TREXIO file : ', trim(filenames(k))
-    call system('test -f '//trim(filenames(k))//' && mv '//trim(filenames(k))//' '//trim(filenames(k))//'.bak')
+    if (update) then
+      call system('test -f '//trim(filenames(k))//' && cp -r '//trim(filenames(k))//' '//trim(filenames(k))//'.bak')
+    else
+      call system('test -f '//trim(filenames(k))//' && mv '//trim(filenames(k))//' '//trim(filenames(k))//'.bak')
+    endif
   enddo
   print *, ''
 
+  if (update) then
+     rw = 'u'
+  else
+     rw = 'w'
+  endif
+
+
   do k=1,N_states
     if (backend == 0) then
-      f(k) = trexio_open(filenames(k), 'u', TREXIO_HDF5, rc)
+      f(k) = trexio_open(filenames(k), rw, TREXIO_HDF5, rc)
     else if (backend == 1) then
-      f(k) = trexio_open(filenames(k), 'u', TREXIO_TEXT, rc)
+      f(k) = trexio_open(filenames(k), rw, TREXIO_TEXT, rc)
     endif
     if (f(k) == 0_8) then
       print *, 'Unable to open TREXIO file for writing'
@@ -171,92 +184,95 @@ subroutine export_trexio
   endif
 
 
+  if (export_basis) then
+
 ! Basis
 ! -----
 
-  print *, 'Basis'
+    print *, 'Basis'
 
+    rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_type(f(1), 'Gaussian', len('Gaussian'))
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_basis_prim_num(f(1), prim_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_prim_num(f(1), prim_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+     rc = trexio_write_basis_shell_num(f(1), shell_num)
+     call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_shell_num(f(1), shell_num)
-   call trexio_assert(rc, TREXIO_SUCCESS)
+     rc = trexio_write_basis_nucleus_index(f(1), basis_nucleus_index)
+     call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_nucleus_index(f(1), basis_nucleus_index)
-   call trexio_assert(rc, TREXIO_SUCCESS)
+     rc = trexio_write_basis_shell_ang_mom(f(1), shell_ang_mom)
+     call trexio_assert(rc, TREXIO_SUCCESS)
 
-   rc = trexio_write_basis_shell_ang_mom(f(1), shell_ang_mom)
-   call trexio_assert(rc, TREXIO_SUCCESS)
+     allocate(factor(shell_num))
+!     if (ao_normalized) then
+!       factor(1:shell_num) = shell_normalization_factor(1:shell_num)
+!     else
+       factor(1:shell_num) = 1.d0
+!     endif
+     rc = trexio_write_basis_shell_factor(f(1), factor)
+     call trexio_assert(rc, TREXIO_SUCCESS)
 
-   allocate(factor(shell_num))
-   if (ao_normalized) then
-     factor(1:shell_num) = shell_normalization_factor(1:shell_num)
-   else
-     factor(1:shell_num) = 1.d0
-   endif
-   rc = trexio_write_basis_shell_factor(f(1), factor)
-   call trexio_assert(rc, TREXIO_SUCCESS)
+     deallocate(factor)
 
-   deallocate(factor)
+    rc = trexio_write_basis_shell_index(f(1), shell_index)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_shell_index(f(1), shell_index)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_basis_exponent(f(1), prim_expo)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_exponent(f(1), prim_expo)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_basis_coefficient(f(1), prim_coef)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_basis_coefficient(f(1), prim_coef)
-  call trexio_assert(rc, TREXIO_SUCCESS)
-
-  allocate(factor(prim_num))
-  if (primitives_normalized) then
-    factor(1:prim_num) = prim_normalization_factor(1:prim_num)
-  else
-    factor(1:prim_num) = 1.d0
-  endif
-  rc = trexio_write_basis_prim_factor(f(1), factor)
-  call trexio_assert(rc, TREXIO_SUCCESS)
-  deallocate(factor)
+    allocate(factor(prim_num))
+    if (primitives_normalized) then
+      factor(1:prim_num) = prim_normalization_factor(1:prim_num)
+    else
+      factor(1:prim_num) = 1.d0
+    endif
+    rc = trexio_write_basis_prim_factor(f(1), factor)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    deallocate(factor)
 
 
 ! Atomic orbitals
 ! ---------------
 
-  print *, 'AOs'
+    print *, 'AOs'
 
-  rc = trexio_write_ao_num(f(1), ao_num)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_ao_num(f(1), ao_num)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_ao_cartesian(f(1), 1)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_ao_cartesian(f(1), 1)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  rc = trexio_write_ao_shell(f(1), ao_shell)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    rc = trexio_write_ao_shell(f(1), ao_shell)
+    call trexio_assert(rc, TREXIO_SUCCESS)
 
-  integer :: i, pow0(3), powA(3), j, l, nz
-  double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
-  nz=100
+    integer :: i, pow0(3), powA(3), j, l, nz
+    double precision :: normA, norm0, C_A(3), overlap_x, overlap_z, overlap_y, c
+    nz=100
 
-  C_A(1) = 0.d0
-  C_A(2) = 0.d0
-  C_A(3) = 0.d0
+    C_A(1) = 0.d0
+    C_A(2) = 0.d0
+    C_A(3) = 0.d0
 
-  allocate(factor(ao_num))
-  if (ao_normalized) then
-    do i=1,ao_num
-      l = ao_first_of_shell(ao_shell(i))
-      factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
-    enddo
-  else
-    factor(:) = 1.d0
+    allocate(factor(ao_num))
+    if (ao_normalized) then
+      do i=1,ao_num
+        l = ao_first_of_shell(ao_shell(i))
+        factor(i) = (ao_coef_normalized(i,1)+tiny(1.d0))/(ao_coef_normalized(l,1)+tiny(1.d0))
+      enddo
+    else
+      factor(:) = 1.d0
+    endif
+    rc = trexio_write_ao_normalization(f(1), factor)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+    deallocate(factor)
+
   endif
-  rc = trexio_write_ao_normalization(f(1), factor)
-  call trexio_assert(rc, TREXIO_SUCCESS)
-  deallocate(factor)
 
 ! One-e AO integrals
 ! ------------------
@@ -375,27 +391,29 @@ subroutine export_trexio
 ! Molecular orbitals
 ! ------------------
 
-  print *, 'MOs'
+  if (export_mos) then
+    print *, 'MOs'
 
-  rc = trexio_write_mo_type(f(1), mo_label, len(trim(mo_label)))
-  call trexio_assert(rc, TREXIO_SUCCESS)
-
-  do k=1,N_states
-    rc = trexio_write_mo_num(f(k), mo_num)
+    rc = trexio_write_mo_type(f(1), mo_label, len(trim(mo_label)))
     call trexio_assert(rc, TREXIO_SUCCESS)
-  enddo
 
-  rc = trexio_write_mo_coefficient(f(1), mo_coef)
-  call trexio_assert(rc, TREXIO_SUCCESS)
+    do k=1,N_states
+      rc = trexio_write_mo_num(f(k), mo_num)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    enddo
 
-  if ( (trim(mo_label) == 'Canonical').and. &
-       (export_mo_two_e_ints_cholesky.or.export_mo_two_e_ints) ) then
-    rc = trexio_write_mo_energy(f(1), fock_matrix_diag_mo)
+    rc = trexio_write_mo_coefficient(f(1), mo_coef)
+    call trexio_assert(rc, TREXIO_SUCCESS)
+
+    if ( (trim(mo_label) == 'Canonical').and. &
+         (export_mo_two_e_ints_cholesky.or.export_mo_two_e_ints) ) then
+      rc = trexio_write_mo_energy(f(1), fock_matrix_diag_mo)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
+    rc = trexio_write_mo_class(f(1), mo_class, len(mo_class(1)))
     call trexio_assert(rc, TREXIO_SUCCESS)
   endif
-
-  rc = trexio_write_mo_class(f(1), mo_class, len(mo_class(1)))
-  call trexio_assert(rc, TREXIO_SUCCESS)
 
 ! One-e MO integrals
 ! ------------------
