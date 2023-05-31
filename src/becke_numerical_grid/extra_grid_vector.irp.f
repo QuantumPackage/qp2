@@ -1,25 +1,34 @@
 
+! ---
+
 BEGIN_PROVIDER [integer, n_points_extra_final_grid]
-  implicit none
+
   BEGIN_DOC
   ! Number of points_extra which are non zero
   END_DOC
-  integer                        :: i,j,k,l
+
+  implicit none
+  integer :: i, j, k, l
+
   n_points_extra_final_grid = 0
+
   do j = 1, nucl_num
     do i = 1, n_points_extra_radial_grid -1
       do k = 1, n_points_extra_integration_angular
-        if(dabs(final_weight_at_r_extra(k,i,j)) < thresh_extra_grid)then
+        if(dabs(final_weight_at_r_extra(k,i,j)) < thresh_extra_grid) then
           cycle
         endif
         n_points_extra_final_grid += 1
       enddo
     enddo
   enddo
+
   print*,'n_points_extra_final_grid = ',n_points_extra_final_grid
   print*,'n max point         = ',n_points_extra_integration_angular*(n_points_extra_radial_grid*nucl_num - 1)
 !  call ezfio_set_becke_numerical_grid_n_points_extra_final_grid(n_points_extra_final_grid)
 END_PROVIDER
+
+! ---
 
  BEGIN_PROVIDER [double precision, final_grid_points_extra, (3,n_points_extra_final_grid)]
 &BEGIN_PROVIDER [double precision, final_weight_at_r_vector_extra, (n_points_extra_final_grid) ]

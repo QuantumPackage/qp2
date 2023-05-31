@@ -119,7 +119,7 @@ subroutine rh_tcscf_simple()
   endif
 
   print *, ' TCSCF Simple converged !'
-  call print_energy_and_mos()
+  !call print_energy_and_mos(good_angles)
 
   deallocate(rho_old, rho_new)
 

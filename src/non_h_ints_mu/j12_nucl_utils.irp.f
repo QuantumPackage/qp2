@@ -8,79 +8,160 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
   double precision :: x, y, z, dx, dy, dz
   double precision :: a, d, e, fact_r
 
-  do ipoint = 1, n_points_final_grid
+  if(j1b_type .eq. 3) then
 
-    x = final_grid_points(1,ipoint)
-    y = final_grid_points(2,ipoint)
-    z = final_grid_points(3,ipoint)
+    ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
-    fact_r = 1.d0
-    do j = 1, nucl_num
-      a  = j1b_pen(j)
-      dx = x - nucl_coord(j,1)
-      dy = y - nucl_coord(j,2)
-      dz = z - nucl_coord(j,3)
-      d  = dx*dx + dy*dy + dz*dz
-      e  = 1.d0 - dexp(-a*d)
+    do ipoint = 1, n_points_final_grid
 
-      fact_r = fact_r * e
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_r = 1.d0
+      do j = 1, nucl_num
+        a  = j1b_pen(j)
+        dx = x - nucl_coord(j,1)
+        dy = y - nucl_coord(j,2)
+        dz = z - nucl_coord(j,3)
+        d  = dx*dx + dy*dy + dz*dz
+        e  = 1.d0 - dexp(-a*d)
+
+        fact_r = fact_r * e
+      enddo
+
+      v_1b(ipoint) = fact_r
     enddo
 
-    v_1b(ipoint) = fact_r
-  enddo
+  elseif(j1b_type .eq. 4) then
+
+    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_r = 1.d0
+      do j = 1, nucl_num
+        a  = j1b_pen(j)
+        dx = x - nucl_coord(j,1)
+        dy = y - nucl_coord(j,2)
+        dz = z - nucl_coord(j,3)
+        d  = dx*dx + dy*dy + dz*dz
+
+        fact_r = fact_r - dexp(-a*d)
+      enddo
+
+      v_1b(ipoint) = fact_r
+    enddo
+
+  else
+
+    print*, 'j1b_type = ', j1b_type, 'is not implemented for v_1b'
+    stop
+
+  endif
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, v_1b_grad, (3, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
 
   implicit none
   integer          :: ipoint, i, j, phase
-  double precision :: x, y, z, dx, dy, dz
+  double precision :: x, y, z, dx, dy, dz, r2
   double precision :: a, d, e
   double precision :: fact_x, fact_y, fact_z
   double precision :: ax_der, ay_der, az_der, a_expo
 
-  do ipoint = 1, n_points_final_grid
+  PROVIDE j1b_type
 
-    x = final_grid_points(1,ipoint)
-    y = final_grid_points(2,ipoint)
-    z = final_grid_points(3,ipoint)
+  if(j1b_type .eq. 3) then
 
-    fact_x = 0.d0
-    fact_y = 0.d0
-    fact_z = 0.d0
-    do i = 1, List_all_comb_b2_size
+    ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
-      phase  = 0
-      a_expo = 0.d0
-      ax_der = 0.d0
-      ay_der = 0.d0
-      az_der = 0.d0
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      fact_x = 0.d0
+      fact_y = 0.d0
+      fact_z = 0.d0
+      do i = 1, List_all_comb_b2_size
+
+        phase  = 0
+        a_expo = 0.d0
+        ax_der = 0.d0
+        ay_der = 0.d0
+        az_der = 0.d0
+        do j = 1, nucl_num
+          a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+          dx = x - nucl_coord(j,1)
+          dy = y - nucl_coord(j,2)
+          dz = z - nucl_coord(j,3)
+        
+          phase  += List_all_comb_b2(j,i)
+          a_expo += a * (dx*dx + dy*dy + dz*dz)
+          ax_der += a * dx
+          ay_der += a * dy
+          az_der += a * dz
+        enddo
+        e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
+
+        fact_x += e * ax_der 
+        fact_y += e * ay_der 
+        fact_z += e * az_der 
+      enddo
+
+      v_1b_grad(1,ipoint) = fact_x
+      v_1b_grad(2,ipoint) = fact_y
+      v_1b_grad(3,ipoint) = fact_z
+    enddo
+
+  elseif(j1b_type .eq. 4) then
+
+    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+
+    do ipoint = 1, n_points_final_grid
+
+      x = final_grid_points(1,ipoint)
+      y = final_grid_points(2,ipoint)
+      z = final_grid_points(3,ipoint)
+
+      ax_der = 0.d0 
+      ay_der = 0.d0 
+      az_der = 0.d0 
       do j = 1, nucl_num
-        a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+
         dx = x - nucl_coord(j,1)
         dy = y - nucl_coord(j,2)
         dz = z - nucl_coord(j,3)
-      
-        phase  += List_all_comb_b2(j,i)
-        a_expo += a * (dx*dx + dy*dy + dz*dz)
-        ax_der += a * dx
-        ay_der += a * dy
-        az_der += a * dz
-      enddo
-      e = -2.d0 * (-1.d0)**dble(phase) * dexp(-a_expo)
+        r2 = dx*dx + dy*dy + dz*dz
 
-      fact_x += e * ax_der 
-      fact_y += e * ay_der 
-      fact_z += e * az_der 
+        a = j1b_pen(j)
+        e = a * dexp(-a * r2)
+
+        ax_der += e * dx
+        ay_der += e * dy
+        az_der += e * dz
+      enddo
+
+      v_1b_grad(1,ipoint) = 2.d0 * ax_der
+      v_1b_grad(2,ipoint) = 2.d0 * ay_der
+      v_1b_grad(3,ipoint) = 2.d0 * az_der
     enddo
 
-    v_1b_grad(1,ipoint) = fact_x
-    v_1b_grad(2,ipoint) = fact_y
-    v_1b_grad(3,ipoint) = fact_z
-  enddo
+  else
+
+    print*, 'j1b_type = ', j1b_type, 'is not implemented'
+    stop
+
+  endif
 
 END_PROVIDER
 
@@ -91,7 +172,7 @@ BEGIN_PROVIDER [ double precision, v_1b_lapl, (n_points_final_grid)]
   implicit none
   integer          :: ipoint, i, j, phase
   double precision :: x, y, z, dx, dy, dz
-  double precision :: a, d, e, b
+  double precision :: a, e, b
   double precision :: fact_r
   double precision :: ax_der, ay_der, az_der, a_expo
 
@@ -204,36 +285,53 @@ END_PROVIDER
 
 ! ---
 
-double precision function jmu_modif(r1, r2)
+ BEGIN_PROVIDER [double precision, v_1b_square_grad, (n_points_final_grid,3)]
+&BEGIN_PROVIDER [double precision, v_1b_square_lapl, (n_points_final_grid)  ]
 
   implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision, external   :: j12_mu, j12_nucl
+  integer          :: ipoint, i
+  double precision :: x, y, z, dx, dy, dz, r2
+  double precision :: coef, expo, a_expo, tmp
+  double precision :: fact_x, fact_y, fact_z, fact_r
 
-  jmu_modif = j12_mu(r1, r2) * j12_nucl(r1, r2)
+  PROVIDE List_all_comb_b3_coef List_all_comb_b3_expo List_all_comb_b3_cent
 
-  return
-end function jmu_modif
+  do ipoint = 1, n_points_final_grid
 
-! ---
+    x = final_grid_points(1,ipoint)
+    y = final_grid_points(2,ipoint)
+    z = final_grid_points(3,ipoint)
 
-double precision function j12_mu(r1, r2)
+    fact_x = 0.d0
+    fact_y = 0.d0
+    fact_z = 0.d0
+    fact_r = 0.d0
+    do i = 1, List_all_comb_b3_size
 
-  include 'constants.include.F'
+      coef = List_all_comb_b3_coef(i)
+      expo = List_all_comb_b3_expo(i)
 
-  implicit none
-  double precision, intent(in) :: r1(3), r2(3)
-  double precision             :: mu_r12, r12
+      dx = x - List_all_comb_b3_cent(1,i)
+      dy = y - List_all_comb_b3_cent(2,i)
+      dz = z - List_all_comb_b3_cent(3,i)
+      r2 = dx * dx + dy * dy + dz * dz
 
-  r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-             + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-             + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
-  mu_r12 = mu_erf * r12
+      a_expo = expo * r2
+      tmp    = coef * expo * dexp(-a_expo)
 
-  j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu_r12)) - inv_sq_pi_2 * dexp(-mu_r12*mu_r12) / mu_erf
+      fact_x += tmp * dx
+      fact_y += tmp * dy
+      fact_z += tmp * dz
+      fact_r += tmp * (3.d0 - 2.d0 * a_expo)
+    enddo
 
-  return
-end function j12_mu
+    v_1b_square_grad(ipoint,1) = -2.d0 * fact_x
+    v_1b_square_grad(ipoint,2) = -2.d0 * fact_y
+    v_1b_square_grad(ipoint,3) = -2.d0 * fact_z
+    v_1b_square_lapl(ipoint)   = -2.d0 * fact_r
+  enddo
+
+END_PROVIDER
 
 ! ---
 
@@ -251,6 +349,19 @@ double precision function j12_mu_r12(r12)
 
   return
 end function j12_mu_r12
+
+! ---
+
+double precision function jmu_modif(r1, r2)
+
+  implicit none
+  double precision, intent(in) :: r1(3), r2(3)
+  double precision, external   :: j12_mu, j12_nucl
+
+  jmu_modif = j12_mu(r1, r2) * j12_nucl(r1, r2)
+
+  return
+end function jmu_modif
 
 ! ---
 
@@ -278,30 +389,6 @@ end function j12_mu_gauss
 
 ! ---
 
-double precision function j1b_nucl(r)
-
-  implicit none
-  double precision, intent(in) :: r(3)
-  integer                      :: i
-  double precision             :: a, d, e
-
-  j1b_nucl = 1.d0
-
-  do i = 1, nucl_num
-    a = j1b_pen(i)
-    d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
-        + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
-        + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-    e = 1.d0 - exp(-a*d)
-
-    j1b_nucl = j1b_nucl * e
-  enddo
-
-  return
-end function j1b_nucl
-
-! ---
-
 double precision function j12_nucl(r1, r2)
 
   implicit none
@@ -317,7 +404,7 @@ end function j12_nucl
 
 ! ---------------------------------------------------------------------------------------
 
-double precision function grad_x_j1b_nucl(r)
+double precision function grad_x_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -333,12 +420,12 @@ double precision function grad_x_j1b_nucl(r)
   r_eps(1) = r_eps(1) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_x_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_x_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_x_j1b_nucl
+end function grad_x_j1b_nucl_num
 
-double precision function grad_y_j1b_nucl(r)
+double precision function grad_y_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -354,12 +441,12 @@ double precision function grad_y_j1b_nucl(r)
   r_eps(2) = r_eps(2) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_y_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_y_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_y_j1b_nucl
+end function grad_y_j1b_nucl_num
 
-double precision function grad_z_j1b_nucl(r)
+double precision function grad_z_j1b_nucl_num(r)
 
   implicit none
   double precision, intent(in) :: r(3)
@@ -375,10 +462,10 @@ double precision function grad_z_j1b_nucl(r)
   r_eps(3) = r_eps(3) - 2.d0 * delta
   fm       = j1b_nucl(r_eps)
 
-  grad_z_j1b_nucl = 0.5d0 * (fp - fm) / delta
+  grad_z_j1b_nucl_num = 0.5d0 * (fp - fm) / delta
 
   return
-end function grad_z_j1b_nucl
+end function grad_z_j1b_nucl_num
 
 ! ---------------------------------------------------------------------------------------
 
@@ -389,9 +476,9 @@ double precision function lapl_j1b_nucl(r)
   implicit none
   double precision, intent(in) :: r(3)
   double precision             :: r_eps(3), eps, fp, fm, delta
-  double precision, external   :: grad_x_j1b_nucl
-  double precision, external   :: grad_y_j1b_nucl
-  double precision, external   :: grad_z_j1b_nucl
+  double precision, external   :: grad_x_j1b_nucl_num
+  double precision, external   :: grad_y_j1b_nucl_num
+  double precision, external   :: grad_z_j1b_nucl_num
 
   eps   = 1d-5
   r_eps = r
@@ -402,9 +489,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(1)))
   r_eps(1) = r_eps(1) + delta
-  fp       = grad_x_j1b_nucl(r_eps)
+  fp       = grad_x_j1b_nucl_num(r_eps)
   r_eps(1) = r_eps(1) - 2.d0 * delta
-  fm       = grad_x_j1b_nucl(r_eps)
+  fm       = grad_x_j1b_nucl_num(r_eps)
   r_eps(1) = r_eps(1) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -413,9 +500,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(2)))
   r_eps(2) = r_eps(2) + delta
-  fp       = grad_y_j1b_nucl(r_eps)
+  fp       = grad_y_j1b_nucl_num(r_eps)
   r_eps(2) = r_eps(2) - 2.d0 * delta
-  fm       = grad_y_j1b_nucl(r_eps)
+  fm       = grad_y_j1b_nucl_num(r_eps)
   r_eps(2) = r_eps(2) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -424,9 +511,9 @@ double precision function lapl_j1b_nucl(r)
 
   delta    = max(eps, dabs(eps*r(3)))
   r_eps(3) = r_eps(3) + delta
-  fp       = grad_z_j1b_nucl(r_eps)
+  fp       = grad_z_j1b_nucl_num(r_eps)
   r_eps(3) = r_eps(3) - 2.d0 * delta
-  fm       = grad_z_j1b_nucl(r_eps)
+  fm       = grad_z_j1b_nucl_num(r_eps)
   r_eps(3) = r_eps(3) + delta
 
   lapl_j1b_nucl += 0.5d0 * (fp - fm) / delta
@@ -574,35 +661,6 @@ end function grad1_z_j12_mu_num
 
 ! ---------------------------------------------------------------------------------------
 
-! ---
-
-subroutine grad1_j12_mu_exc(r1, r2, grad)
-
-  implicit none
-  double precision, intent(in)  :: r1(3), r2(3)
-  double precision, intent(out) :: grad(3)
-  double precision              :: dx, dy, dz, r12, tmp
-
-  grad = 0.d0
-
-  dx = r1(1) - r2(1)
-  dy = r1(2) - r2(2)
-  dz = r1(3) - r2(3)
-
-  r12 = dsqrt( dx * dx + dy * dy + dz * dz )
-  if(r12 .lt. 1d-10) return
-
-  tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
-
-  grad(1) = tmp * dx 
-  grad(2) = tmp * dy 
-  grad(3) = tmp * dz 
-
-  return
-end subroutine grad1_j12_mu_exc
-
-! ---
-
 subroutine grad1_jmu_modif_num(r1, r2, grad)
 
   implicit none
@@ -614,11 +672,11 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
 
   double precision, external    :: j12_mu
   double precision, external    :: j1b_nucl
-  double precision, external    :: grad_x_j1b_nucl
-  double precision, external    :: grad_y_j1b_nucl
-  double precision, external    :: grad_z_j1b_nucl
+  double precision, external    :: grad_x_j1b_nucl_num
+  double precision, external    :: grad_y_j1b_nucl_num
+  double precision, external    :: grad_z_j1b_nucl_num
 
-  call grad1_j12_mu_exc(r1, r2, grad_u12)
+  call grad1_j12_mu(r1, r2, grad_u12)
 
   tmp0 = j1b_nucl(r1) 
   tmp1 = j1b_nucl(r2)
@@ -626,9 +684,9 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
   tmp3 = tmp0 * tmp1
   tmp4 = tmp2 * tmp1
 
-  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl(r1)
-  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl(r1)
-  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl(r1)
+  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl_num(r1)
+  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl_num(r1)
+  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl_num(r1)
 
   return
 end subroutine grad1_jmu_modif_num

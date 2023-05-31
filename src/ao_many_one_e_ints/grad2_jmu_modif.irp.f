@@ -1,4 +1,72 @@
 
+
+! ---
+
+BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_points_final_grid)]
+
+  BEGIN_DOC
+  !
+  ! -\frac{1}{4} x int dr2 phi_i(r2) phi_j(r2) [1 - erf(mu r12)]^2
+  !
+  END_DOC
+
+  implicit none
+  integer                       :: i, j, ipoint, i_fit
+  double precision              :: r(3), expo_fit, coef_fit
+  double precision              :: tmp
+  double precision              :: wall0, wall1
+
+  double precision, external    :: overlap_gauss_r12_ao
+
+  print*, ' providing int2_grad1u2_grad2u2 ...'
+  call wall_time(wall0)
+
+  provide mu_erf final_grid_points j1b_pen
+
+  int2_grad1u2_grad2u2 = 0.d0
+
+  !$OMP PARALLEL DEFAULT (NONE)                                               &
+  !$OMP PRIVATE (ipoint, i, j, i_fit, r, coef_fit, expo_fit, tmp)             & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, ng_fit_jast, &
+  !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,int2_grad1u2_grad2u2)
+  !$OMP DO
+  do ipoint = 1, n_points_final_grid
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+
+    do i = 1, ao_num
+      do j = i, ao_num
+
+        tmp = 0.d0
+        do i_fit = 1, ng_fit_jast
+
+          expo_fit = expo_gauss_1_erf_x_2(i_fit)
+          coef_fit = coef_gauss_1_erf_x_2(i_fit)
+
+          tmp += -0.25d0 * coef_fit * overlap_gauss_r12_ao(r, expo_fit, i, j)
+        enddo
+
+        int2_grad1u2_grad2u2(j,i,ipoint) = tmp
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  do ipoint = 1, n_points_final_grid
+    do i = 2, ao_num
+      do j = 1, i-1
+        int2_grad1u2_grad2u2(j,i,ipoint) = int2_grad1u2_grad2u2(i,j,ipoint)
+      enddo
+    enddo
+  enddo
+
+  call wall_time(wall1)
+  print*, ' wall time for int2_grad1u2_grad2u2 =', wall1 - wall0
+
+END_PROVIDER 
+
 ! ---
 
 BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
@@ -26,15 +94,15 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
 
   int2_grad1u2_grad2u2_j1b2 = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, ng_fit_jast,                     &
- !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,         &
- !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
- !$OMP          List_all_comb_b3_cent, int2_grad1u2_grad2u2_j1b2)
- !$OMP DO
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
+  !$OMP          final_grid_points, ng_fit_jast,                     &
+  !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,         &
+  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
+  !$OMP          List_all_comb_b3_cent, int2_grad1u2_grad2u2_j1b2)
+  !$OMP DO
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -53,7 +121,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
 
           int_fit = overlap_gauss_r12_ao(r, expo_fit, i, j)
           tmp += -0.25d0 * coef_fit * int_fit
-!          if(dabs(coef_fit*int_fit) .lt. 1d-12) cycle
+!         if(dabs(coef_fit*int_fit) .lt. 1d-12) cycle
 
           ! ---
 
@@ -78,8 +146,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
@@ -96,7 +164,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
@@ -120,15 +188,15 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
 
   int2_u2_j1b2 = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
- !$OMP          final_grid_points, ng_fit_jast,                     &
- !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
- !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
- !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
- !$OMP DO
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b3_size, & 
+  !$OMP          final_grid_points, ng_fit_jast,                     &
+  !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
+  !$OMP          List_all_comb_b3_coef, List_all_comb_b3_expo,       & 
+  !$OMP          List_all_comb_b3_cent, int2_u2_j1b2)
+  !$OMP DO
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -147,7 +215,7 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
 
           int_fit = overlap_gauss_r12_ao(r, expo_fit, i, j)
           tmp += coef_fit * int_fit
-!          if(dabs(coef_fit*int_fit) .lt. 1d-12) cycle
+!         if(dabs(coef_fit*int_fit) .lt. 1d-12) cycle
 
           ! ---
 
@@ -172,8 +240,8 @@ BEGIN_PROVIDER [ double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num

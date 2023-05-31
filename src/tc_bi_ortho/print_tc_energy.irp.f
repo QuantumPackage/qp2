@@ -1,4 +1,4 @@
-program tc_bi_ortho
+program print_tc_energy
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
@@ -9,7 +9,11 @@ program tc_bi_ortho
   my_n_pt_a_grid = 50
   read_wf = .True.
   touch read_wf
+
+  PROVIDE j1b_type
+  print*, 'j1b_type = ', j1b_type
+
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
-  call routine_save_left_right_bi_ortho
-! call test
+ call write_tc_energy
 end
+

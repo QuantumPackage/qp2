@@ -460,6 +460,33 @@ subroutine v2_over_x(v,x,res)
 
 end
 
+! ---
+
+subroutine check_sym(A, n)
+
+  implicit none
+  integer,          intent(in)  :: n
+  double precision, intent(in)  :: A(n,n)
+  integer                       :: i, j
+  double precision              :: dev_sym, norm, tmp
+
+  dev_sym = 0.d0
+  norm    = 0.d0
+  do i = 1, n
+    do j = i+1, n
+      tmp      = A(j,i) - A(i,j)
+      dev_sym += tmp * tmp
+      norm    += A(j,i) * A(j,i)
+    enddo
+  enddo
+  
+  print*, ' deviation from sym = ', dev_sym
+  print*, ' norm               = ', norm
+
+end subroutine check_sym
+
+! ---
+
 subroutine sum_A_At(A, N)
 
   !BEGIN_DOC

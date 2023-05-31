@@ -87,22 +87,31 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
 
   implicit none
   integer                       :: i, j
+  double precision              :: t0, t1
   double precision, allocatable :: tmp(:,:)
   double precision, allocatable :: F(:,:)
 
+  !print *, ' Providing FQS_SQF_ao ...'
+  !call wall_time(t0)
+
   allocate(F(ao_num,ao_num))
   if(var_tc) then
+
     do i = 1, ao_num
       do j = 1, ao_num
         F(j,i) = Fock_matrix_vartc_ao_tot(j,i)
       enddo
     enddo
+
   else
+
+    PROVIDE Fock_matrix_tc_ao_tot
     do i = 1, ao_num
       do j = 1, ao_num
         F(j,i) = Fock_matrix_tc_ao_tot(j,i)
       enddo
     enddo
+
   endif
 
   allocate(tmp(ao_num,ao_num))
@@ -131,6 +140,9 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
   deallocate(tmp)
   deallocate(F)
 
+  !call wall_time(t1)
+  !print *, ' Wall time for FQS_SQF_ao =', t1-t0
+
 END_PROVIDER
 
 ! ---
@@ -138,9 +150,19 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
 
   implicit none
+  double precision :: t0, t1
+
+  !print*, ' Providing FQS_SQF_mo ...'
+  !call wall_time(t0)
+
+  PROVIDE mo_r_coef mo_l_coef
+  PROVIDE FQS_SQF_ao
 
   call ao_to_mo_bi_ortho( FQS_SQF_ao, size(FQS_SQF_ao, 1) &
                         , FQS_SQF_mo, size(FQS_SQF_mo, 1) )
+
+  !call wall_time(t1)
+  !print*, ' Wall time for FQS_SQF_mo =', t1-t0 
 
 END_PROVIDER
 

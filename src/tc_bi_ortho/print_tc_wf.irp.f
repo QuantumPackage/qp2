@@ -26,7 +26,8 @@ subroutine write_l_r_wf
  integer :: i
  print*,'Writing the left-right wf'
  do i = 1, N_det
-  write(i_unit_output,*)i,psi_l_coef_sorted_bi_ortho_left(i),psi_r_coef_sorted_bi_ortho_right(i)
+  write(i_unit_output,*)i, psi_l_coef_sorted_bi_ortho_left(i)/psi_l_coef_sorted_bi_ortho_left(1) &
+                         , psi_r_coef_sorted_bi_ortho_right(i)/psi_r_coef_sorted_bi_ortho_right(1)
  enddo
 
 
@@ -48,12 +49,12 @@ subroutine routine
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
    if(degree == 1 .or. degree == 2)then
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
     delta_e = e_tilde_00 - e_i0
     coef_pt1 = htilde_ij / delta_e
  
-    call htilde_mu_mat_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
     contrib_pt = coef_pt1 * htilde_ij
     e_pt2 += contrib_pt
  

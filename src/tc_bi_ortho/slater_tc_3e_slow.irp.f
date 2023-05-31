@@ -1,23 +1,5 @@
-subroutine provide_all_three_ints_bi_ortho
- implicit none
- BEGIN_DOC
-! routine that provides all necessary three-electron integrals 
- END_DOC
- if(three_body_h_tc)then
-  PROVIDE three_e_3_idx_direct_bi_ort three_e_3_idx_cycle_1_bi_ort three_e_3_idx_cycle_2_bi_ort
-  PROVIDE three_e_3_idx_exch23_bi_ort three_e_3_idx_exch13_bi_ort three_e_3_idx_exch12_bi_ort
-  PROVIDE three_e_4_idx_direct_bi_ort three_e_4_idx_cycle_1_bi_ort three_e_4_idx_cycle_2_bi_ort
-  PROVIDE three_e_4_idx_exch23_bi_ort three_e_4_idx_exch13_bi_ort three_e_4_idx_exch12_bi_ort
- endif
-if(.not.double_normal_ord)then
-  PROVIDE three_e_5_idx_direct_bi_ort three_e_5_idx_cycle_1_bi_ort three_e_5_idx_cycle_2_bi_ort
-  PROVIDE three_e_5_idx_exch23_bi_ort three_e_5_idx_exch13_bi_ort three_e_5_idx_exch12_bi_ort
-else
- PROVIDE normal_two_body_bi_orth
-endif
-end
 
-subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
+subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
 
   BEGIN_DOC
   !  diagonal element of htilde ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
@@ -108,7 +90,7 @@ subroutine diag_htilde_three_body_ints_bi_ort(Nint, key_i, hthree)
 end
 
 
-subroutine single_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
+subroutine single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> for single excitation ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
@@ -203,7 +185,7 @@ end
 
 ! ---
 
-subroutine double_htilde_three_body_ints_bi_ort(Nint, key_j, key_i, hthree)
+subroutine double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
   ! <key_j | H_tilde | key_i> for double excitation ONLY FOR THREE-BODY TERMS  WITH BI ORTHONORMAL ORBITALS
