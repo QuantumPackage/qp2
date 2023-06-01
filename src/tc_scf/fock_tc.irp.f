@@ -18,6 +18,8 @@
   double precision :: density, density_a, density_b
   double precision :: t0, t1
 
+  PROVIDE ao_two_e_tc_tot
+
   !print*, ' providing two_e_tc_non_hermit_integral_seq ...'
   !call wall_time(t0)
 
@@ -80,22 +82,26 @@ END_PROVIDER
   double precision              :: t0, t1
   double precision, allocatable :: tmp_a(:,:), tmp_b(:,:)
 
-  !print*, ' providing two_e_tc_non_hermit_integral ...'
+  PROVIDE ao_two_e_tc_tot
+  PROVIDE mo_l_coef mo_r_coef
+  PROVIDE TCSCF_density_matrix_ao_alpha TCSCF_density_matrix_ao_beta
+
+  !print*, ' Providing two_e_tc_non_hermit_integral ...'
   !call wall_time(t0)
 
   two_e_tc_non_hermit_integral_alpha = 0.d0
   two_e_tc_non_hermit_integral_beta  = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                                        &
- !$OMP PRIVATE (i, j, k, l, density_a, density_b, density, tmp_a, tmp_b, I_coul, I_kjli)              &
- !$OMP SHARED  (ao_num, TCSCF_density_matrix_ao_alpha, TCSCF_density_matrix_ao_beta, ao_two_e_tc_tot, &
- !$OMP         two_e_tc_non_hermit_integral_alpha, two_e_tc_non_hermit_integral_beta)
+  !$OMP PARALLEL DEFAULT (NONE)                                                                        &
+  !$OMP PRIVATE (i, j, k, l, density_a, density_b, density, tmp_a, tmp_b, I_coul, I_kjli)              &
+  !$OMP SHARED  (ao_num, TCSCF_density_matrix_ao_alpha, TCSCF_density_matrix_ao_beta, ao_two_e_tc_tot, &
+  !$OMP         two_e_tc_non_hermit_integral_alpha, two_e_tc_non_hermit_integral_beta)
 
   allocate(tmp_a(ao_num,ao_num), tmp_b(ao_num,ao_num))
   tmp_a = 0.d0
   tmp_b = 0.d0
 
- !$OMP DO
+  !$OMP DO
   do j = 1, ao_num
     do l = 1, ao_num
       density_a = TCSCF_density_matrix_ao_alpha(l,j)
@@ -113,22 +119,22 @@ END_PROVIDER
       enddo
     enddo
   enddo
- !$OMP END DO NOWAIT
+  !$OMP END DO NOWAIT
 
- !$OMP CRITICAL
+  !$OMP CRITICAL
   do i = 1, ao_num
     do j = 1, ao_num
       two_e_tc_non_hermit_integral_alpha(j,i) += tmp_a(j,i)
       two_e_tc_non_hermit_integral_beta (j,i) += tmp_b(j,i)
     enddo
   enddo
- !$OMP END CRITICAL
+  !$OMP END CRITICAL
 
   deallocate(tmp_a, tmp_b)
- !$OMP END PARALLEL
+  !$OMP END PARALLEL
 
   !call wall_time(t1)
-  !print*, ' wall time for two_e_tc_non_hermit_integral after = ', t1 - t0
+  !print*, ' Wall time for two_e_tc_non_hermit_integral = ', t1 - t0
 
 END_PROVIDER 
 
@@ -141,8 +147,15 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_alpha, (ao_num, ao_num)]
   END_DOC
 
   implicit none
+  double precision :: t0, t1
 
-  Fock_matrix_tc_ao_alpha =  ao_one_e_integrals_tc_tot + two_e_tc_non_hermit_integral_alpha 
+  !print*, ' Providing Fock_matrix_tc_ao_alpha ...'
+  !call wall_time(t0)
+
+  Fock_matrix_tc_ao_alpha = ao_one_e_integrals_tc_tot + two_e_tc_non_hermit_integral_alpha
+
+  !call wall_time(t1)
+  !print*, ' Wall time for Fock_matrix_tc_ao_alpha =', t1-t0
 
 END_PROVIDER 
 
@@ -169,7 +182,11 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
   END_DOC
 
   implicit none
+  double precision              :: t0, t1, tt0, tt1
   double precision, allocatable :: tmp(:,:)
+
+  !print*, ' Providing Fock_matrix_tc_mo_alpha ...'
+  !call wall_time(t0)
 
   if(bi_ortho) then
 
@@ -181,18 +198,33 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
     !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1))
     !deallocate(tmp)
 
+    PROVIDE mo_l_coef mo_r_coef
+
+    !call wall_time(tt0)
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                           , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
+    !call wall_time(tt1)
+    !print*, ' 2-e term:', tt1-tt0
+
     if(three_body_h_tc) then
+      !call wall_time(tt0)
+      !PROVIDE fock_a_tot_3e_bi_orth
       !Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+      PROVIDE fock_3e_uhf_mo_a
       Fock_matrix_tc_mo_alpha += fock_3e_uhf_mo_a
+      !call wall_time(tt1)
+      !print*, ' 3-e term:', tt1-tt0
     endif
 
   else
+
     call ao_to_mo( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
                  , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
 
   endif
+
+  !call wall_time(t1)
+  !print*, ' Wall time for Fock_matrix_tc_mo_alpha =', t1-t0
 
 END_PROVIDER
 
@@ -220,7 +252,9 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                           , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
     if(three_body_h_tc) then
+      !PROVIDE fock_b_tot_3e_bi_orth
       !Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
+      PROVIDE fock_3e_uhf_mo_b
       Fock_matrix_tc_mo_beta += fock_3e_uhf_mo_b
     endif
 
@@ -275,9 +309,19 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, Fock_matrix_tc_ao_tot, (ao_num, ao_num) ]
 
   implicit none
+  double precision :: t0, t1
+
+  !print*, ' Providing Fock_matrix_tc_ao_tot ...'
+  !call wall_time(t0)
+
+  PROVIDE mo_l_coef mo_r_coef
+  PROVIDE Fock_matrix_tc_mo_tot
 
   call mo_to_ao_bi_ortho( Fock_matrix_tc_mo_tot, size(Fock_matrix_tc_mo_tot, 1) &
                         , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1) )
+
+  !call wall_time(t1)
+  !print*, ' Wall time for Fock_matrix_tc_ao_tot =', t1-t0
 
 END_PROVIDER
 

@@ -20,6 +20,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_vartc_tot, (ao_num, ao_num, ao_num, a
   enddo
 
 END_PROVIDER 
+
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_num) ]
@@ -40,20 +41,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
   provide j1b_type
 
-  if(j1b_type .eq. 3) then
-
-    do j = 1, ao_num
-      do l = 1, ao_num
-        do i = 1, ao_num
-          do k = 1, ao_num
-            ao_two_e_tc_tot(k,i,l,j) = ao_tc_int_chemist(k,i,l,j)
-            !write(222,*) ao_two_e_tc_tot(k,i,l,j) 
-          enddo
-        enddo
-      enddo
-    enddo
-
-  else
+  if(j1b_type .eq. 0) then
 
     PROVIDE ao_tc_sym_two_e_pot_in_map
 
@@ -72,6 +60,21 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
             ao_two_e_tc_tot(k,i,l,j) = integral_sym + integral_nsym 
             !write(111,*) ao_two_e_tc_tot(k,i,l,j) 
+          enddo
+        enddo
+      enddo
+    enddo
+
+  else
+
+    PROVIDE ao_tc_int_chemist
+
+    do j = 1, ao_num
+      do l = 1, ao_num
+        do i = 1, ao_num
+          do k = 1, ao_num
+            ao_two_e_tc_tot(k,i,l,j) = ao_tc_int_chemist(k,i,l,j)
+            !write(222,*) ao_two_e_tc_tot(k,i,l,j) 
           enddo
         enddo
       enddo

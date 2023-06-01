@@ -4,17 +4,27 @@
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
 
   implicit none
-  integer          :: a, b, i, j
-  double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
-  double precision :: ti, tf
+  integer                       :: a, b, i, j
+  double precision              :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
+  double precision              :: ti, tf
+  double precision, allocatable :: tmp(:,:)
 
   PROVIDE mo_l_coef mo_r_coef
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, I_bij_aij)
 
   !print *, ' PROVIDING fock_3e_uhf_mo_cs ...'
-  call wall_time(ti)
+  !call wall_time(ti)
 
   fock_3e_uhf_mo_cs = 0.d0
 
+  !$OMP PARALLEL DEFAULT (NONE)                                                                     &
+  !$OMP PRIVATE (a, b, i, j, I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia, tmp) &
+  !$OMP SHARED  (mo_num, elec_beta_num, fock_3e_uhf_mo_cs)
+
+  allocate(tmp(mo_num,mo_num))
+  tmp = 0.d0
+
+  !$OMP DO
   do a = 1, mo_num
     do b = 1, mo_num
    
@@ -28,19 +38,31 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_cs(b,a) -= 0.5d0 * ( 4.d0 * I_bij_aij &
-                                            +        I_bij_ija &
-                                            +        I_bij_jai &
-                                            - 2.d0 * I_bij_aji &
-                                            - 2.d0 * I_bij_iaj &
-                                            - 2.d0 * I_bij_jia )
+          tmp(b,a) -= 0.5d0 * ( 4.d0 * I_bij_aij &
+                              +        I_bij_ija &
+                              +        I_bij_jai &
+                              - 2.d0 * I_bij_aji &
+                              - 2.d0 * I_bij_iaj &
+                              - 2.d0 * I_bij_jia )
 
         enddo
       enddo
     enddo
   enddo
+  !$OMP END DO NOWAIT
 
-  call wall_time(tf)
+  !$OMP CRITICAL
+  do a = 1, mo_num
+    do b = 1, mo_num
+      fock_3e_uhf_mo_cs(b,a) += tmp(b,a)
+    enddo
+  enddo
+  !$OMP END CRITICAL
+
+  deallocate(tmp)
+  !$OMP END PARALLEL
+
+  !call wall_time(tf)
   !print *, ' total Wall time for fock_3e_uhf_mo_cs =', tf - ti
 
 END_PROVIDER 
@@ -50,24 +72,38 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
 
   BEGIN_DOC
-! ALPHA part of the Fock matrix from three-electron terms 
-!
-! WARNING :: non hermitian if bi-ortho MOS used 
+  !
+  ! ALPHA part of the Fock matrix from three-electron terms 
+  !
+  ! WARNING :: non hermitian if bi-ortho MOS used 
+  !
   END_DOC
+
   implicit none
-  integer          :: a, b, i, j, o
-  double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
-  double precision :: ti, tf
+  integer                       :: a, b, i, j, o
+  double precision              :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
+  double precision              :: ti, tf
+  double precision, allocatable :: tmp(:,:)
 
   PROVIDE mo_l_coef mo_r_coef
+  PROVIDE fock_3e_uhf_mo_cs
 
-  !print *, ' PROVIDING fock_3e_uhf_mo_a ...'
-  call wall_time(ti)
+  !print *, ' Providing fock_3e_uhf_mo_a ...'
+  !call wall_time(ti)
 
   o = elec_beta_num + 1
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, I_bij_aij)
 
   fock_3e_uhf_mo_a = fock_3e_uhf_mo_cs
 
+  !$OMP PARALLEL DEFAULT (NONE)                                                                     &
+  !$OMP PRIVATE (a, b, i, j, I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia, tmp) &
+  !$OMP SHARED  (mo_num, o, elec_alpha_num, elec_beta_num, fock_3e_uhf_mo_a)
+
+  allocate(tmp(mo_num,mo_num))
+  tmp = 0.d0
+
+  !$OMP DO
   do a = 1, mo_num
     do b = 1, mo_num
 
@@ -83,12 +119,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_a(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
-                                           +        I_bij_ija &
-                                           +        I_bij_jai &
-                                           -        I_bij_aji &
-                                           -        I_bij_iaj &
-                                           - 2.d0 * I_bij_jia )
+          tmp(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
+                              +        I_bij_ija &
+                              +        I_bij_jai &
+                              -        I_bij_aji &
+                              -        I_bij_iaj &
+                              - 2.d0 * I_bij_jia )
 
         enddo
       enddo
@@ -105,12 +141,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_a(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
-                                           +        I_bij_ija &
-                                           +        I_bij_jai &
-                                           -        I_bij_aji &
-                                           - 2.d0 * I_bij_iaj &
-                                           -        I_bij_jia )
+          tmp(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
+                              +        I_bij_ija &
+                              +        I_bij_jai &
+                              -        I_bij_aji &
+                              - 2.d0 * I_bij_iaj &
+                              -        I_bij_jia )
 
         enddo
       enddo
@@ -127,12 +163,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_a(b,a) -= 0.5d0 * ( I_bij_aij &
-                                           + I_bij_ija &
-                                           + I_bij_jai &
-                                           - I_bij_aji &
-                                           - I_bij_iaj &
-                                           - I_bij_jia )
+          tmp(b,a) -= 0.5d0 * ( I_bij_aij &
+                              + I_bij_ija &
+                              + I_bij_jai &
+                              - I_bij_aji &
+                              - I_bij_iaj &
+                              - I_bij_jia )
 
         enddo
       enddo
@@ -141,35 +177,58 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
 
     enddo
   enddo
+  !$OMP END DO NOWAIT
 
-  call wall_time(tf)
-  !print *, ' total Wall time for fock_3e_uhf_mo_a =', tf - ti
+  !$OMP CRITICAL
+  do a = 1, mo_num
+    do b = 1, mo_num
+      fock_3e_uhf_mo_a(b,a) += tmp(b,a)
+    enddo
+  enddo
+  !$OMP END CRITICAL
+
+  deallocate(tmp)
+  !$OMP END PARALLEL
+
+  !call wall_time(tf)
+  !print *, ' Wall time for fock_3e_uhf_mo_a =', tf - ti
 
 END_PROVIDER 
 
 ! ---
 
 BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
+
   BEGIN_DOC
-! BETA part of the Fock matrix from three-electron terms 
-!
-! WARNING :: non hermitian if bi-ortho MOS used 
+  ! BETA part of the Fock matrix from three-electron terms 
+  !
+  ! WARNING :: non hermitian if bi-ortho MOS used 
   END_DOC
 
   implicit none
-  integer          :: a, b, i, j, o
-  double precision :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
-  double precision :: ti, tf
+  integer                       :: a, b, i, j, o
+  double precision              :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
+  double precision              :: ti, tf
+  double precision, allocatable :: tmp(:,:)
 
   PROVIDE mo_l_coef mo_r_coef
 
   !print *, ' PROVIDING fock_3e_uhf_mo_b ...'
-  call wall_time(ti)
+  !call wall_time(ti)
 
   o = elec_beta_num + 1
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, I_bij_aij)
 
   fock_3e_uhf_mo_b = fock_3e_uhf_mo_cs
 
+  !$OMP PARALLEL DEFAULT (NONE)                                                                     &
+  !$OMP PRIVATE (a, b, i, j, I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia, tmp) &
+  !$OMP SHARED  (mo_num, o, elec_alpha_num, elec_beta_num, fock_3e_uhf_mo_b)
+
+  allocate(tmp(mo_num,mo_num))
+  tmp = 0.d0
+
+  !$OMP DO
   do a = 1, mo_num
     do b = 1, mo_num
 
@@ -185,9 +244,9 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_b(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
-                                           -        I_bij_aji &
-                                           -        I_bij_iaj )
+          tmp(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
+                              -        I_bij_aji &
+                              -        I_bij_iaj )
 
         enddo
       enddo
@@ -204,9 +263,9 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_b(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
-                                           -        I_bij_aji &
-                                           -        I_bij_jia )
+          tmp(b,a) -= 0.5d0 * ( 2.d0 * I_bij_aij &
+                              -        I_bij_aji &
+                              -        I_bij_jia )
 
         enddo
       enddo
@@ -223,8 +282,8 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
           call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
           call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
 
-          fock_3e_uhf_mo_b(b,a) -= 0.5d0 * ( I_bij_aij &
-                                           - I_bij_aji )
+          tmp(b,a) -= 0.5d0 * ( I_bij_aij &
+                              - I_bij_aji )
 
         enddo
       enddo
@@ -233,8 +292,20 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_b, (mo_num, mo_num)]
 
     enddo
   enddo
+  !$OMP END DO NOWAIT
 
-  call wall_time(tf)
+  !$OMP CRITICAL
+  do a = 1, mo_num
+    do b = 1, mo_num
+      fock_3e_uhf_mo_b(b,a) += tmp(b,a)
+    enddo
+  enddo
+  !$OMP END CRITICAL
+
+  deallocate(tmp)
+  !$OMP END PARALLEL
+
+  !call wall_time(tf)
   !print *, ' total Wall time for fock_3e_uhf_mo_b =', tf - ti
 
 END_PROVIDER 
@@ -267,15 +338,15 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_a, (ao_num, ao_num)]
 
   fock_3e_uhf_ao_a = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                                &
- !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
- !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
- !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_a)
+  !$OMP PARALLEL DEFAULT (NONE)                                                                &
+  !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
+  !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
+  !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_a)
 
   allocate(f_tmp(ao_num,ao_num))
   f_tmp = 0.d0
 
- !$OMP DO
+  !$OMP DO
   do g = 1, ao_num
     do e = 1, ao_num
       dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
@@ -307,18 +378,18 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_a, (ao_num, ao_num)]
       enddo
     enddo
   enddo
- !$OMP END DO NOWAIT
+  !$OMP END DO NOWAIT
 
- !$OMP CRITICAL
+  !$OMP CRITICAL
   do mu = 1, ao_num
     do nu = 1, ao_num
       fock_3e_uhf_ao_a(mu,nu) += f_tmp(mu,nu)
     enddo
   enddo
- !$OMP END CRITICAL
+  !$OMP END CRITICAL
 
   deallocate(f_tmp)
- !$OMP END PARALLEL
+  !$OMP END PARALLEL
 
   call wall_time(tf)
   print *, ' total Wall time for fock_3e_uhf_ao_a =', tf - ti
@@ -353,15 +424,15 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_b, (ao_num, ao_num)]
 
   fock_3e_uhf_ao_b = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                                &
- !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
- !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
- !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_b)
+  !$OMP PARALLEL DEFAULT (NONE)                                                                &
+  !$OMP PRIVATE (g, e, d, k, mu, nu, dm_ge_a, dm_ge_b, dm_ge, dm_dk_a, dm_dk_b, dm_dk, f_tmp,  &
+  !$OMP          i_mugd_nuek, i_mugd_eknu, i_mugd_knue, i_mugd_nuke, i_mugd_enuk, i_mugd_kenu) &
+  !$OMP SHARED  (ao_num, TCSCF_bi_ort_dm_ao_alpha, TCSCF_bi_ort_dm_ao_beta, fock_3e_uhf_ao_b)
 
   allocate(f_tmp(ao_num,ao_num))
   f_tmp = 0.d0
 
- !$OMP DO
+  !$OMP DO
   do g = 1, ao_num
     do e = 1, ao_num
       dm_ge_a = TCSCF_bi_ort_dm_ao_alpha(g,e)
@@ -393,18 +464,18 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_ao_b, (ao_num, ao_num)]
       enddo
     enddo
   enddo
- !$OMP END DO NOWAIT
+  !$OMP END DO NOWAIT
 
- !$OMP CRITICAL
+  !$OMP CRITICAL
   do mu = 1, ao_num
     do nu = 1, ao_num
       fock_3e_uhf_ao_b(mu,nu) += f_tmp(mu,nu)
     enddo
   enddo
- !$OMP END CRITICAL
+  !$OMP END CRITICAL
 
   deallocate(f_tmp)
- !$OMP END PARALLEL
+  !$OMP END PARALLEL
 
   call wall_time(tf)
   print *, ' total Wall time for fock_3e_uhf_ao_b =', tf - ti

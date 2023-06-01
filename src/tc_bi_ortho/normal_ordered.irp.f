@@ -48,10 +48,16 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
         h2 = list_act(hh2) 
         do pp2 = 1, n_act_orb
           p2 = list_act(pp2)
-          ! opposite spin double excitations 
+          ! all contributions from the 3-e terms to the double excitations 
+          ! s1:(h1-->p1), s2:(h2-->p2) from the HF reference determinant 
+    
+
+          ! opposite spin double excitations : s1 /= s2
           call give_aba_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aba)
-          ! same spin double excitations with opposite spin contributions 
+
+          ! same spin double excitations : s1 == s2 
           if(h1<h2.and.p1.gt.p2)then
+           ! with opposite spin contributions 
            call give_aab_contraction(N_int, h2, h1, p1, p2, Ne, occ, hthree_aab) ! exchange h1<->h2
            ! same spin double excitations with same spin contributions 
            if(Ne(2).ge.3)then
@@ -60,8 +66,10 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
              hthree_aaa = 0.d0
            endif
           else
+           ! with opposite spin contributions 
            call give_aab_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aab)
            if(Ne(2).ge.3)then
+            ! same spin double excitations with same spin contributions 
              call give_aaa_contraction(N_int, h1, h2, p1, p2, Ne, occ, hthree_aaa)
            else
              hthree_aaa = 0.d0
@@ -246,6 +254,9 @@ END_PROVIDER
 
 subroutine give_aaa_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
 
+  BEGIN_DOC
+! pure same spin contribution to same spin double excitation s1=h1,p1, s2=h2,p2, with s1==s2
+  END_DOC
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
   implicit none

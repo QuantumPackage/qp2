@@ -1,5 +1,18 @@
 program save_bitcpsileft_for_qmcchem
 
+  implicit none
+
+  read_wf = .True.
+  TOUCH read_wf
+
+  call main()
+
+end
+
+
+subroutine main()
+
+  implicit none
   integer          :: iunit
   logical          :: exists
   double precision :: e_ref
@@ -46,7 +59,7 @@ program save_bitcpsileft_for_qmcchem
 
   close(iunit)
 
-end
+end subroutine main
 
 ! --
 
@@ -61,12 +74,18 @@ subroutine write_lr_spindeterminants()
 
   PROVIDE psi_bitcleft_bilinear_matrix_values
 
+  print *, ' saving left determinants'
+  print *, ' assuming save_for_qmc called before to save right determinants'
+  print *, ' N_det    = ', N_det
+  print *, ' N_states = ', N_states
+
   allocate(buffer(N_det,N_states))
   do l = 1, N_states
     do k = 1, N_det
       buffer(k,l) = psi_bitcleft_bilinear_matrix_values(k,l)
     enddo
   enddo
+
   call ezfio_set_spindeterminants_psi_left_coef_matrix_values(buffer)
   deallocate(buffer)
 
