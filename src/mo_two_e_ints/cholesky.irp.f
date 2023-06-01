@@ -6,6 +6,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_ao_num
 
  integer :: k
 
+ call set_multiple_levels_omp(.False.)
  print *, 'AO->MO Transformation of Cholesky vectors'
  !$OMP PARALLEL DO PRIVATE(k)
  do k=1,cholesky_ao_num
