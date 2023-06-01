@@ -8,6 +8,8 @@ program tc_scf
 
   implicit none
 
+  write(json_unit,json_array_open_fmt) 'tc-scf'
+
   print *, ' starting ...'
 
   my_grid_becke  = .True.
@@ -57,6 +59,8 @@ program tc_scf
 
   endif
 
+  write(json_unit,json_array_close_fmtx)
+  call json_close
 
 end
 

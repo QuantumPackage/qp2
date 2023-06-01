@@ -79,7 +79,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
   integer                       :: ipoint
-  double precision              :: weight
+  double precision              :: weight, tmp
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE int2_grad1_u12_bimo_t

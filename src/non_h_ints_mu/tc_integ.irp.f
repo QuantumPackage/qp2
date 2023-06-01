@@ -176,6 +176,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
   call wall_time(time1)
   print*, ' wall time for int2_grad1_u12_ao =', time1-time0 
+  call print_memory_usage()
 
 END_PROVIDER
 
@@ -242,6 +243,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       !$OMP END DO
       !$OMP END PARALLEL
 
+      FREE u12sq_j1bsq grad12_j12
+
     else
 
       PROVIDE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
@@ -261,6 +264,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
+
+      FREE u12sq_j1bsq u12_grad1_u12_j1b_grad1_j1b grad12_j12
 
     endif
 
@@ -324,6 +329,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
   call wall_time(time1)
   print*, ' wall time for int2_grad1_u12_square_ao =', time1-time0 
+  call print_memory_usage()
 
 END_PROVIDER
 
