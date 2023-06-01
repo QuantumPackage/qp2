@@ -484,6 +484,30 @@ subroutine multiply_poly(b,nb,c,nc,d,nd)
   integer                        :: ib, ic, id, k
   if(ior(nc,nb) < 0) return !False if nc>=0 and nb>=0
 
+  select case (nb)
+    case (0)
+      call multiply_poly_b0(b,c,nc,d,nd)
+      return
+    case (1)
+      call multiply_poly_b1(b,c,nc,d,nd)
+      return
+    case (2)
+      call multiply_poly_b2(b,c,nc,d,nd)
+      return
+  end select
+
+  select case (nc)
+    case (0)
+      call multiply_poly_c0(b,nb,c,d,nd)
+      return
+    case (1)
+      call multiply_poly_c1(b,nb,c,d,nd)
+      return
+    case (2)
+      call multiply_poly_c2(b,nb,c,d,nd)
+      return
+  end select
+
   do ib=0,nb
     do ic = 0,nc
       d(ib+ic) = d(ib+ic) + c(ic) * b(ib)

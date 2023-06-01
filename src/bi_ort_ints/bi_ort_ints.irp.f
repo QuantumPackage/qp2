@@ -16,23 +16,27 @@ subroutine test_3e
  double precision :: accu, contrib,new,ref
  i = 1
  k = 1
+ n = 0
  accu = 0.d0
  do i = 1, mo_num
   do k = 1, mo_num 
    do j = 1, mo_num
     do l = 1, mo_num 
      do m = 1, mo_num
-      do n = 1, mo_num
-        call give_integrals_3_body_bi_ort(n, l, k, m, j, i, new)
-        call give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, ref)
+      new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
+      ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
+!      do n = 1, mo_num
+!        call give_integrals_3_body_bi_ort(n, l, k, m, j, i, new)
+!        call give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, ref)
         contrib = dabs(new - ref)
         accu += contrib
         if(contrib .gt. 1.d-10)then
          print*,'pb !!'
          print*,i,k,j,l,m,n
          print*,ref,new,contrib
+         stop
         endif
-      enddo
+!      enddo
      enddo
     enddo
    enddo
