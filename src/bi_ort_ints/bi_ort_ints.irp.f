@@ -7,7 +7,8 @@ program bi_ort_ints
   my_n_pt_r_grid = 10
   my_n_pt_a_grid = 14
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
- call test_3e
+! call test_3e
+ call test_5idx
 end
 
 subroutine test_3e
@@ -19,15 +20,13 @@ subroutine test_3e
  n = 0
  accu = 0.d0
  do i = 1, mo_num
-  do k = 1, mo_num 
+  do k = 1, mo_num
    do j = 1, mo_num
-    do l = 1, mo_num 
+    do l = 1, mo_num
      do m = 1, mo_num
-      new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
-!      do n = 1, mo_num
-!        call give_integrals_3_body_bi_ort(n, l, k, m, j, i, new)
-!        call give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, ref)
+      do n = 1, mo_num
+        call give_integrals_3_body_bi_ort(n, l, k, m, j, i, new)
+        call give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, ref)
         contrib = dabs(new - ref)
         accu += contrib
         if(contrib .gt. 1.d-10)then
@@ -36,13 +35,58 @@ subroutine test_3e
          print*,ref,new,contrib
          stop
         endif
-!      enddo
+      enddo
      enddo
     enddo
    enddo
   enddo
  enddo
  print*,'accu = ',accu/dble(mo_num)**6
+
+
+end
+
+subroutine test_5idx
+ implicit none
+ integer :: i,k,j,l,m,n,ipoint
+ double precision :: accu, contrib,new,ref
+ i = 1
+ k = 1
+ n = 0
+ accu = 0.d0
+ do i = 1, mo_num
+  do k = 1, mo_num
+   do j = 1, mo_num
+    do l = 1, mo_num
+     do m = 1, mo_num
+      new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
+      ref = three_e_5_idx_direct_bi_ort_old(m,l,j,k,i)
+      contrib = dabs(new - ref)
+      accu += contrib
+      if(contrib .gt. 1.d-10)then
+       print*,'direct'
+       print*,i,k,j,l,m
+       print*,ref,new,contrib
+       stop
+      endif
+
+!      new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'exch12'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+
+     enddo
+    enddo
+   enddo
+  enddo
+ enddo
+ print*,'accu = ',accu/dble(mo_num)**5
 
 
 end
