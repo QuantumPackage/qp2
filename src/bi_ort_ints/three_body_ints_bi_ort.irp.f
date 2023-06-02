@@ -57,6 +57,7 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
 
   call wall_time(wall1)
   print *, ' wall time for three_body_ints_bi_ort', wall1 - wall0
+  call print_memory_usage()
 ! if(write_three_body_ints_bi_ort)then
 !  print*,'Writing three_body_ints_bi_ort on disk ...'
 !  call write_array_6_index_tensor(mo_num,three_body_ints_bi_ort,name_file)
