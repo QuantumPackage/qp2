@@ -245,56 +245,6 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort_old, (mo_num, mo_num, mo_num, mo_num, mo_num)]
-
-  BEGIN_DOC
-  !
-  ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF DOUBLE EXCITATIONS AND BI ORTHO MOs
-  !
-  ! three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i) = <mlk|-L|mij> ::: notice that i is the RIGHT MO and k is the LEFT MO
-  !
-  ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
-  !
-  END_DOC
-
-  implicit none
-  integer          :: i, j, k, m, l
-  double precision :: integral, wall1, wall0
-
-  provide mos_r_in_r_array_transp mos_l_in_r_array_transp
-  PROVIDE mo_l_coef mo_r_coef int2_grad1_u12_bimo_t
-
-  three_e_5_idx_exch12_bi_ort_old = 0.d0
-  print *, ' Providing the three_e_5_idx_exch12_bi_ort_old ...'
-  call wall_time(wall0)
-
- !$OMP PARALLEL                     &
- !$OMP DEFAULT (NONE)               &
- !$OMP PRIVATE (i,j,k,m,l,integral) &
- !$OMP SHARED (mo_num,three_e_5_idx_exch12_bi_ort_old)
- !$OMP DO SCHEDULE (dynamic) COLLAPSE(2)
-  do i = 1, mo_num
-    do k = 1, mo_num
-      do j = 1, mo_num
-        do l = 1, mo_num
-          do m = 1, mo_num
-            call give_integrals_3_body_bi_ort(m, l, k, m, i, j, integral)
-            three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i) = -1.d0 * integral
-          enddo
-        enddo
-      enddo
-    enddo
-  enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
-  call wall_time(wall1)
-  print *, ' wall time for three_e_5_idx_exch12_bi_ort_old', wall1 - wall0
-
-END_PROVIDER
-
-! ---
-
 BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort, (mo_num, mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
@@ -305,6 +255,12 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort, (mo_num, mo_num,
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
+  ! Equivalent to:
+  !
+  !    call give_integrals_3_body_bi_ort(m, l, k, m, i, j, integral)
+  !
+  !    three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i) = -1.d0 * integral
+  !
   END_DOC
 
   implicit none
@@ -314,10 +270,10 @@ BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort, (mo_num, mo_num,
   double precision :: weight
   double precision, allocatable :: grad_mli(:,:,:), m2grad_r(:,:,:,:), m2grad_l(:,:,:,:)
   double precision, allocatable :: tmp_mat(:,:,:,:), orb_mat(:,:,:)
-  allocate(grad_mli(n_points_final_grid,mo_num,mo_num))
   allocate(m2grad_r(n_points_final_grid,3,mo_num,mo_num))
   allocate(m2grad_l(n_points_final_grid,3,mo_num,mo_num))
   allocate(tmp_mat(mo_num,mo_num,mo_num,mo_num))
+  allocate(grad_mli(n_points_final_grid,mo_num,mo_num))
   allocate(orb_mat(n_points_final_grid,mo_num,mo_num))
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
