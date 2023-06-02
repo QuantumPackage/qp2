@@ -138,10 +138,13 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
       enddo
     enddo
 
+    FREE int2_grad1_u12_ao
+
   endif
 
   call wall_time(wall1)
   print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -199,6 +202,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 
       enddo                                  
     enddo
   enddo
+
+  FREE int2_grad1_u12_bimo_transp
 
 END_PROVIDER 
 

@@ -57,6 +57,7 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
 
   call wall_time(wall1)
   print *, ' wall time for three_body_ints_bi_ort', wall1 - wall0
+  call print_memory_usage()
 ! if(write_three_body_ints_bi_ort)then
 !  print*,'Writing three_body_ints_bi_ort on disk ...'
 !  call write_array_6_index_tensor(mo_num,three_body_ints_bi_ort,name_file)
@@ -79,7 +80,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
   integer,          intent(in)  :: n, l, k, m, j, i
   double precision, intent(out) :: integral
   integer                       :: ipoint
-  double precision              :: weight
+  double precision              :: weight, tmp
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE int2_grad1_u12_bimo_t

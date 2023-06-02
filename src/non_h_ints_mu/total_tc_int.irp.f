@@ -84,8 +84,11 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
     enddo
   endif
 
+  FREE tc_grad_square_ao tc_grad_and_lapl_ao ao_two_e_coul
+
   call wall_time(wall1)
   print *, ' wall time for ao_tc_int_chemist ', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
