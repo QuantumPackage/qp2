@@ -9,6 +9,11 @@ program bi_ort_ints
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 ! call test_3e
  call test_5idx
+!  call test_5idx2
+end
+
+subroutine test_5idx2
+  PROVIDE three_e_5_idx_cycle_2_bi_ort
 end
 
 subroutine test_3e
