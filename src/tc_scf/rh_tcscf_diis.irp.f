@@ -11,6 +11,7 @@ subroutine rh_tcscf_diis()
 
   integer                       :: i, j, it
   integer                       :: dim_DIIS, index_dim_DIIS
+  logical                       :: converged
   double precision              :: etc_tot, etc_1e, etc_2e, etc_3e, e_save, e_delta
   double precision              :: tc_grad, g_save, g_delta, g_delta_th
   double precision              :: level_shift_save, rate_th
@@ -92,8 +93,9 @@ subroutine rh_tcscf_diis()
 
   PROVIDE FQS_SQF_ao Fock_matrix_tc_ao_tot
 
+  converged = .false.
   !do while((tc_grad .gt. dsqrt(thresh_tcscf)) .and. (er_DIIS .gt. dsqrt(thresh_tcscf)))
-  do while(er_DIIS .gt. dsqrt(thresh_tcscf))
+  do while(.not. converged)
 
     call wall_time(t0)
 
@@ -218,20 +220,55 @@ subroutine rh_tcscf_diis()
     !g_delta_th  = dabs(tc_grad) ! g_delta)
     er_delta_th = dabs(er_DIIS) !er_delta)
 
+    converged = er_DIIS .lt. dsqrt(thresh_tcscf)
+
     call wall_time(t1)
     !write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
     !  it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, tc_grad, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
     write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &
       it, etc_tot, etc_1e, etc_2e, etc_3e, e_delta, er_DIIS, level_shift_tcscf, dim_DIIS, (t1-t0)/60.d0
 
+
+!   Write data in JSON file
+
+    call lock_io
+    if (it == 1) then
+      write(json_unit, json_dict_uopen_fmt)
+    else
+      write(json_unit, json_dict_close_uopen_fmt)
+    endif
+    write(json_unit, json_int_fmt)  ' iteration      ', it
+    write(json_unit, json_real_fmt) ' SCF TC Energy  ', etc_tot
+    write(json_unit, json_real_fmt) ' E(1e)          ', etc_1e
+    write(json_unit, json_real_fmt) ' E(2e)          ', etc_2e
+    write(json_unit, json_real_fmt) ' E(3e)          ', etc_3e
+    write(json_unit, json_real_fmt) ' delta Energy   ', e_delta
+    write(json_unit, json_real_fmt) ' DIIS error     ', er_DIIS
+    write(json_unit, json_real_fmt) ' level_shift    ', level_shift_tcscf
+    write(json_unit, json_real_fmt) ' DIIS           ', dim_DIIS
+    write(json_unit, json_real_fmt) ' Wall time (min)', (t1-t0)/60.d0
+    call unlock_io
+
     if(er_delta .lt. 0.d0) then
       call ezfio_set_tc_scf_bitc_energy(etc_tot)
       call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
+      write(json_unit, json_true_fmt) 'saved'
+    else
+      write(json_unit, json_false_fmt) 'saved'
     endif
+    call lock_io
 
+    if (converged) then
+      write(json_unit, json_true_fmtx) 'converged'
+    else
+      write(json_unit, json_false_fmtx) 'converged'
+    endif
+    call unlock_io
     if(qp_stop()) exit
   enddo
+
+  write(json_unit, json_dict_close_fmtx)
 
   ! ---
 

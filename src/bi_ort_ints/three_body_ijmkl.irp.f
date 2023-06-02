@@ -58,8 +58,10 @@
        enddo
     enddo
   enddo
+
   !$OMP END DO
   !$OMP END PARALLEL
+
 
   call dgemm('T','N', mo_num*mo_num, mo_num*mo_num, n_points_final_grid, 1.d0, &
       orb_mat, n_points_final_grid,  &
@@ -80,6 +82,7 @@
   !$OMP END PARALLEL DO
 
   deallocate(orb_mat,grad_mli)
+
 
   allocate(lm_grad_ik(n_points_final_grid,3,mo_num,mo_num))
   allocate(rm_grad_ik(n_points_final_grid,3,mo_num,mo_num))
@@ -132,6 +135,7 @@
   enddo
   !$OMP END PARALLEL DO
 
+
   call dgemm('T','N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0, &
       lm_grad_ik, 3*n_points_final_grid,  &
       rk_grad_im, 3*n_points_final_grid,  0.d0, &
@@ -151,6 +155,7 @@
     enddo
   enddo
   !$OMP END PARALLEL DO
+
 
   deallocate(lm_grad_ik)
 
@@ -198,6 +203,7 @@
   enddo
   !$OMP END PARALLEL DO
 
+
   call dgemm('T','N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0, &
       lk_grad_mi, 3*n_points_final_grid,  &
       rk_grad_im, 3*n_points_final_grid,  0.d0, &
@@ -223,8 +229,10 @@
   deallocate(rk_grad_im)
   enddo
 
+
   call wall_time(wall1)
   print *, ' wall time for three_e_5_idx_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER
 
