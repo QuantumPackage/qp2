@@ -198,7 +198,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   allocate (bounds(2,nbuckets))
   do isample=1,nbuckets
     eta = 1.d0/dble(nbuckets) * dble(isample)
-    ieta = binary_search(waccu,eta,Nabc,ileft,iright)
+    ieta = binary_search(waccu,eta,Nabc)
     bounds(1,isample) = ileft
     bounds(2,isample) = ieta
     ileft = ieta+1

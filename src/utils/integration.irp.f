@@ -56,7 +56,7 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
   !               * [ sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z ] exp (- p (z-P_center(3))^2 )
   !
-  ! WARNING ::: IF fact_k is too smal then: 
+  ! WARNING ::: IF fact_k is too smal then:
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
   END_DOC
@@ -86,7 +86,7 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !DIR$ FORCEINLINE
   call gaussian_product(alpha,A_center,beta,B_center,fact_k,p,P_center)
   if (fact_k < thresh) then
-    ! IF fact_k is too smal then: 
+    ! IF fact_k is too smal then:
     ! returns a "s" function centered in zero
     ! with an inifinite exponent and a zero polynom coef
     P_center = 0.d0
@@ -468,114 +468,6 @@ end subroutine
 
 
 
-subroutine multiply_poly_0c(b,c,nc,d,nd)
-  implicit none
-  BEGIN_DOC
-  ! Multiply two polynomials
-  ! D(t) += B(t)*C(t)
-  END_DOC
-
-  integer, intent(in)            :: nc
-  integer, intent(out)           :: nd
-  double precision, intent(in)   :: b(0:0), c(0:nc)
-  double precision, intent(inout) :: d(0:0+nc)
-
-  integer                        :: ic
-
-  do ic = 0,nc
-    d(ic) = d(ic) + c(ic) * b(0)
-  enddo
-
-  do nd = nc,0,-1
-    if (d(nd) /= 0.d0) exit
-  enddo
-
-end
-
-subroutine multiply_poly_1c(b,c,nc,d,nd)
-  implicit none
-  BEGIN_DOC
-  ! Multiply two polynomials
-  ! D(t) += B(t)*C(t)
-  END_DOC
-
-  integer, intent(in)            :: nc
-  integer, intent(out)           :: nd
-  double precision, intent(in)   :: b(0:1), c(0:nc)
-  double precision, intent(inout) :: d(0:1+nc)
-
-  integer                        :: ic, id
-  if(nc < 0) return
-
-  do ic = 0,nc
-    d(  ic) = d(  ic) + c(ic) * b(0)
-    d(1+ic) = d(1+ic) + c(ic) * b(1)
-  enddo
-
-  do nd = nc+1,0,-1
-    if (d(nd) /= 0.d0) exit
-  enddo
-
-end
-
-
-subroutine multiply_poly_2c(b,c,nc,d,nd)
-  implicit none
-  BEGIN_DOC
-  ! Multiply two polynomials
-  ! D(t) += B(t)*C(t)
-  END_DOC
-
-  integer, intent(in)            :: nc
-  integer, intent(out)           :: nd
-  double precision, intent(in)   :: b(0:2), c(0:nc)
-  double precision, intent(inout) :: d(0:2+nc)
-
-  integer                        :: ic, id, k
-  if (nc <0) return
-
-  do ic = 0,nc
-    d(  ic) = d(  ic) + c(ic) * b(0)
-    d(1+ic) = d(1+ic) + c(ic) * b(1)
-    d(2+ic) = d(2+ic) + c(ic) * b(2)
-  enddo
-
-  do nd = nc+2,0,-1
-    if (d(nd) /= 0.d0) exit
-  enddo
-
-end
-
-subroutine multiply_poly_3c(b,c,nc,d,nd)
-  implicit none
-  BEGIN_DOC
-  ! Multiply two polynomials
-  ! D(t) += B(t)*C(t)
-  END_DOC
-
-  integer, intent(in)            :: nc
-  integer, intent(out)           :: nd
-  double precision, intent(in)   :: b(0:3), c(0:nc)
-  double precision, intent(inout) :: d(0:3+nc)
-
-  integer                        :: ic, id
-  if (nc <0) return
-
-  do ic = 1,nc
-    d(  ic) = d(1+ic) + c(ic) * b(0)
-    d(1+ic) = d(1+ic) + c(ic) * b(1)
-    d(2+ic) = d(1+ic) + c(ic) * b(2)
-    d(3+ic) = d(1+ic) + c(ic) * b(3)
-  enddo
-
-  do nd = nc+3,0,-1
-    if (d(nd) /= 0.d0) exit
-  enddo
-
-end
-
-
-
 subroutine multiply_poly(b,nb,c,nc,d,nd)
   implicit none
   BEGIN_DOC
@@ -592,6 +484,30 @@ subroutine multiply_poly(b,nb,c,nc,d,nd)
   integer                        :: ib, ic, id, k
   if(ior(nc,nb) < 0) return !False if nc>=0 and nb>=0
 
+  select case (nb)
+    case (0)
+      call multiply_poly_b0(b,c,nc,d,nd)
+      return
+    case (1)
+      call multiply_poly_b1(b,c,nc,d,nd)
+      return
+    case (2)
+      call multiply_poly_b2(b,c,nc,d,nd)
+      return
+  end select
+
+  select case (nc)
+    case (0)
+      call multiply_poly_c0(b,nb,c,d,nd)
+      return
+    case (1)
+      call multiply_poly_c1(b,nb,c,d,nd)
+      return
+    case (2)
+      call multiply_poly_c2(b,nb,c,d,nd)
+      return
+  end select
+
   do ib=0,nb
     do ic = 0,nc
       d(ib+ic) = d(ib+ic) + c(ic) * b(ib)
@@ -603,6 +519,254 @@ subroutine multiply_poly(b,nb,c,nc,d,nd)
   enddo
 
 end
+
+
+subroutine multiply_poly_b0(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:0), c(0:nc)
+  double precision, intent(inout) :: d(0:nc)
+
+  integer                        :: ndtmp
+  integer                        :: ic, id, k
+  if(nc < 0) return !False if nc>=0
+
+  do ic = 0,nc
+    d(ic) = d(ic) + c(ic) * b(0)
+  enddo
+
+  do nd = nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+subroutine multiply_poly_b1(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:1), c(0:nc)
+  double precision, intent(inout) :: d(0:1+nc)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nc < 0) return !False if nc>=0
+
+
+  select case (nc)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      do ic = 1,nc
+        d(ic) = d(ic) + c(ic) * b(0) + c(ic-1) * b(1)
+      enddo
+      d(nc+1) = d(nc+1) + c(nc) * b(1)
+
+  end select
+
+  do nd = 1+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_b2(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:2), c(0:nc)
+  double precision, intent(inout) :: d(0:2+nc)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nc < 0) return !False if nc>=0
+
+  select case (nc)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1)
+      d(2) = d(2) + c(0) * b(2)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1)
+      d(3) = d(3) + c(1) * b(2)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1) + c(1) * b(2)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ic = 2,nc
+        d(ic) = d(ic) + c(ic) * b(0) + c(ic-1) * b(1) + c(ic-2) * b(2)
+      enddo
+      d(nc+1) = d(nc+1) + c(nc) * b(1) + c(nc-1) * b(2)
+      d(nc+2) = d(nc+2) + c(nc) * b(2)
+
+  end select
+
+  do nd = 2+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c0(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:0)
+  double precision, intent(inout) :: d(0:nb)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  do ib=0,nb
+      d(ib) = d(ib) + c(0) * b(ib)
+  enddo
+
+  do nd = nb,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c1(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:1)
+  double precision, intent(inout) :: d(0:nb+1)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      do ib=1,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb)
+
+  end select
+
+  do nd = nb+1,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c2(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:2)
+  double precision, intent(inout) :: d(0:nb+2)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+      d(2) = d(2) + c(2) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(1) * b(2) + c(2) * b(1)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ib=2,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1) + c(2) * b(ib-2)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb) + c(2) * b(nb-1)
+      d(nb+2) = d(nb+2) + c(2) * b(nb)
+
+  end select
+
+  do nd = nb+2,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+
 
 subroutine multiply_poly_v(b,nb,c,nc,d,nd,n_points)
   implicit none
@@ -778,11 +942,11 @@ end subroutine recentered_poly2_v
 subroutine recentered_poly2_v0(P_new, lda, x_A, LD_xA, x_P, a, n_points)
 
   BEGIN_DOC
-  ! 
+  !
   ! Recenter two polynomials. Special case for b=(0,0,0)
-  ! 
+  !
   ! (x - A)^a (x - B)^0 = (x - P + P - A)^a  (x - Q + Q - B)^0
-  !                     = (x - P + P - A)^a 
+  !                     = (x - P + P - A)^a
   !
   END_DOC
 
