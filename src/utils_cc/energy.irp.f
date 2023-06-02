@@ -5,9 +5,8 @@ subroutine det_energy(det,energy)
   integer(bit_kind), intent(in) :: det
 
   double precision, intent(out) :: energy
+  double precision, external :: diag_H_mat_elem
 
-  call i_H_j(det,det,N_int,energy)
+  energy = diag_H_mat_elem(det,N_int) + nuclear_repulsion
 
-  energy = energy + nuclear_repulsion
-  
 end

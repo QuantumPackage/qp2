@@ -7,11 +7,11 @@
 ! Various component of the TC energy for the reference "HF" Slater determinant
  END_DOC 
  double precision :: hmono, htwoe, htot, hthree
- call diag_htilde_mu_mat_bi_ortho(N_int,HF_bitmask , hmono, htwoe, htot)
+ call diag_htilde_mu_mat_bi_ortho_slow(N_int,HF_bitmask , hmono, htwoe, htot)
  ref_tc_energy_1e = hmono
  ref_tc_energy_2e = htwoe 
  if(three_body_h_tc)then
-  call diag_htilde_three_body_ints_bi_ort(N_int, HF_bitmask, hthree)
+  call diag_htilde_three_body_ints_bi_ort_slow(N_int, HF_bitmask, hthree)
   ref_tc_energy_3e = hthree
  else
   ref_tc_energy_3e = 0.d0
@@ -156,7 +156,7 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     htwoe = htwoe + mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
-  if(three_body_h_tc.and.elec_num.gt.2)then
+  if(three_body_h_tc.and.elec_num.gt.2.and.three_e_3_idx_term)then
    !!!!! 3-e part 
    !! same-spin/same-spin
    do j = 1, na
@@ -243,7 +243,7 @@ subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
     htwoe= htwoe- mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
-  if(three_body_h_tc.and.elec_num.gt.2)then
+  if(three_body_h_tc.and.elec_num.gt.2.and.three_e_3_idx_term)then
    !!!!! 3-e part 
    !! same-spin/same-spin
    do j = 1, na

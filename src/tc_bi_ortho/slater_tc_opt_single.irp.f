@@ -106,7 +106,7 @@ subroutine get_single_excitation_from_fock_tc(key_i,key_j,h,p,spin,phase,hmono,h
   htwoe -= buffer_x(i)
  enddo
  hthree = 0.d0
- if (three_body_h_tc.and.elec_num.gt.2)then
+ if (three_body_h_tc.and.elec_num.gt.2.and.three_e_4_idx_term)then
   call three_comp_fock_elem(key_i,h,p,spin,hthree)
  endif
 

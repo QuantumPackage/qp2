@@ -1353,15 +1353,30 @@ END_PROVIDER
   integer                        :: i,j
   double precision               :: get_two_e_integral
 
-  PROVIDE mo_two_e_integrals_in_map
-  mo_two_e_integrals_jj = 0.d0
-  mo_two_e_integrals_jj_exchange = 0.d0
+
+  if (do_ao_cholesky) then
+    do j=1,mo_num
+      do i=1,mo_num
+        !TODO: use dgemm
+        mo_two_e_integrals_jj(i,j) = sum(cholesky_mo_transp(:,i,i)*cholesky_mo_transp(:,j,j))
+        mo_two_e_integrals_jj_exchange(i,j) = sum(cholesky_mo_transp(:,i,j)*cholesky_mo_transp(:,j,i))
+      enddo
+    enddo
+
+  else
+
+    do j=1,mo_num
+      do i=1,mo_num
+        mo_two_e_integrals_jj(i,j) = get_two_e_integral(i,j,i,j,mo_integrals_map)
+        mo_two_e_integrals_jj_exchange(i,j) = get_two_e_integral(i,j,j,i,mo_integrals_map)
+      enddo
+    enddo
+
+  endif
 
   do j=1,mo_num
     do i=1,mo_num
-      mo_two_e_integrals_jj(i,j) = get_two_e_integral(i,j,i,j,mo_integrals_map)
-      mo_two_e_integrals_jj_exchange(i,j) = get_two_e_integral(i,j,j,i,mo_integrals_map)
-      mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
+        mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
     enddo
   enddo
 

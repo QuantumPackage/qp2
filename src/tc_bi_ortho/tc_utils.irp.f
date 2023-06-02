@@ -12,7 +12,7 @@ subroutine write_tc_energy()
     do i = 1, N_det
       do j = 1, N_det
         !htot = htilde_matrix_elmt_bi_ortho(i,j)
-        call htilde_mu_mat_bi_ortho(psi_det(1,1,i), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot)
+        call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot)
         E_TC = E_TC + psi_l_coef_bi_ortho(i,k) * psi_r_coef_bi_ortho(j,k) * htot
         !E_TC = E_TC + leigvec_tc_bi_orth(i,k) * reigvec_tc_bi_orth(j,k) * htot
       enddo

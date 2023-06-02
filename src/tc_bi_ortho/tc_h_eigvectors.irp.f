@@ -207,8 +207,6 @@ end
   else ! n_det > N_det_max_full
 
     double precision, allocatable :: H_jj(:),vec_tmp(:,:)
-    external                         htc_bi_ortho_calc_tdav
-    external                         htcdag_bi_ortho_calc_tdav
     external                         H_tc_u_0_opt
     external                         H_tc_dagger_u_0_opt
     external                         H_tc_s2_dagger_u_0_opt
@@ -217,7 +215,7 @@ end
     allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag))
 
     do i = 1, N_det
-      call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
+      call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
     enddo
 
     print*,'---------------------------------'
@@ -259,7 +257,6 @@ end
     do istate = N_states+1, n_states_diag
       vec_tmp(istate,istate) = 1.d0
     enddo
-    !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, htc_bi_ortho_calc_tdav)
     !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
     converged = .False.
     i_it = 0

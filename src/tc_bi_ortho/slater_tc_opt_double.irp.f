@@ -42,13 +42,13 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
    ! opposite spin two-body 
     htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1) 
     if(three_body_h_tc.and.elec_num.gt.2)then
-     if(.not.double_normal_ord)then
+     if(.not.double_normal_ord.and.three_e_5_idx_term)then
       if(degree_i>degree_j)then
        call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
       else
        call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
       endif
-     elseif(double_normal_ord.and.elec_num.gt.2)then
+     elseif(double_normal_ord)then
       htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)
      endif
     endif
@@ -59,13 +59,13 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
    ! exchange terms 
    htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1) 
    if(three_body_h_tc.and.elec_num.gt.2)then
-    if(.not.double_normal_ord)then
+    if(.not.double_normal_ord.and.three_e_5_idx_term)then
      if(degree_i>degree_j)then
       call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
      else
       call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
      endif
-    elseif(double_normal_ord.and.elec_num.gt.2)then
+    elseif(double_normal_ord)then
       htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)
       htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)
     endif
