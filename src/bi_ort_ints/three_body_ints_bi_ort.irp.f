@@ -85,6 +85,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
   PROVIDE int2_grad1_u12_bimo_t
 
   integral = 0.d0
+  ! (n, l, k, m, j, i)
   do ipoint = 1, n_points_final_grid
 
     tmp =     mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) &
