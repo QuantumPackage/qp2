@@ -9,33 +9,25 @@
  
   implicit none
   integer          :: i, j
-  double precision :: hmono,htwoe,hthree,htot
+  double precision :: htot
 
   PROVIDE N_int
 
   i = 1
   j = 1
-  call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+  call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,j), psi_det(1,1,i), N_int, htot)
 
- !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j,hmono, htwoe, hthree, htot) &
+ !$OMP PARALLEL DO SCHEDULE(GUIDED) DEFAULT(NONE) PRIVATE(i,j, htot) &
  !$OMP SHARED (N_det, psi_det, N_int,htilde_matrix_elmt_bi_ortho)
     do i = 1, N_det
       do j = 1, N_det
         ! < J | Htilde | I >
-        call htilde_mu_mat_bi_ortho(psi_det(1,1,j), psi_det(1,1,i), N_int, hmono, htwoe, hthree, htot)
+        call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,j), psi_det(1,1,i), N_int, htot)
 
-        !print *, ' hmono  = ', hmono
-        !print *, ' htwoe  = ', htwoe
-        !print *, ' hthree = ', hthree
         htilde_matrix_elmt_bi_ortho(j,i) = htot
       enddo
     enddo
  !$OMP END PARALLEL DO
-! print*,'htilde_matrix_elmt_bi_ortho = '
-! do i = 1, min(100,N_det)
-!  write(*,'(100(F16.10,X))')htilde_matrix_elmt_bi_ortho(1:min(100,N_det),i)
-! enddo
-
 
 END_PROVIDER 
 

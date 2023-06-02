@@ -56,8 +56,8 @@ subroutine main()
   U_SOM = 0.d0 
   do i = 1, N_det
     if(i == i_HF) cycle
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i_HF), psi_det(1,1,i), N_int, hmono_1, htwoe_1, hthree_1, htot_1)
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i), psi_det(1,1,i_HF), N_int, hmono_2, htwoe_2, hthree_2, htot_2)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i_HF), psi_det(1,1,i), N_int, hmono_1, htwoe_1, hthree_1, htot_1)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i), psi_det(1,1,i_HF), N_int, hmono_2, htwoe_2, hthree_2, htot_2)
     U_SOM += htot_1 * htot_2
   enddo
   U_SOM = 0.5d0 * U_SOM

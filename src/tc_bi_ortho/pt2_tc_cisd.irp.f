@@ -36,11 +36,11 @@ subroutine routine
  e_corr_abs = 0.d0
  e_corr_pos = 0.d0
  e_corr_neg = 0.d0
- call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,1), psi_det(1,1,1), N_int, e00) 
+ call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,1), psi_det(1,1,1), N_int, e00) 
  do i = 2, N_det
-  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,1), N_int, hi0) 
-  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,1), psi_det(1,1,i), N_int, h0i) 
-  call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, ei) 
+  call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,1), N_int, hi0) 
+  call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,1), psi_det(1,1,i), N_int, h0i) 
+  call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,i), N_int, ei) 
   call get_excitation_degree(psi_det(1,1,1), psi_det(1,1,i),degree,N_int)
   call get_excitation(psi_det(1,1,1), psi_det(1,1,i),exc,degree,phase,N_int)
   call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)

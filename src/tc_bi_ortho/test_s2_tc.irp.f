@@ -91,7 +91,7 @@ subroutine routine_test_s2_davidson
  external H_tc_s2_u_0_opt
  allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag),energies(n_states_diag), s2(n_states_diag))
  do i = 1, N_det
-   call htilde_mu_mat_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
+   call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
  enddo
  ! Preparing the left-eigenvector
  print*,'Computing the left-eigenvector '
