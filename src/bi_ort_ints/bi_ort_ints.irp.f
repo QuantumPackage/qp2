@@ -55,6 +55,7 @@ subroutine test_5idx
  implicit none
  integer :: i,k,j,l,m,n,ipoint
  double precision :: accu, contrib,new,ref
+ double precision, external :: three_e_5_idx_exch12_bi_ort
  i = 1
  k = 1
  n = 0
@@ -64,18 +65,21 @@ subroutine test_5idx
    do j = 1, mo_num
     do l = 1, mo_num
      do m = 1, mo_num
+!      if (dabs(three_e_5_idx_direct_bi_ort(m,l,j,k,i) - three_e_5_idx_exch12_bi_ort(m,l,i,k,j)) > 1.d-10) then 
+!         stop
+!      endif
 
-      new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_direct_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'direct'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
+!      new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_direct_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'direct'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+!
       new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
       ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
       contrib = dabs(new - ref)
@@ -86,51 +90,52 @@ subroutine test_5idx
        print*,ref,new,contrib
        stop
       endif
+
 !
-      new = three_e_5_idx_cycle_1_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_cycle_1_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'cycle1'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
-      new = three_e_5_idx_cycle_2_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_cycle_2_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'cycle2'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
-      new = three_e_5_idx_exch23_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_exch23_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'exch23'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
-      new = three_e_5_idx_exch13_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_exch13_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'exch13'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
+!      new = three_e_5_idx_cycle_1_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_cycle_1_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'cycle1'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+!
+!      new = three_e_5_idx_cycle_2_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_cycle_2_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'cycle2'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+!
+!      new = three_e_5_idx_exch23_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_exch23_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'exch23'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+!
+!      new = three_e_5_idx_exch13_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_exch13_bi_ort_old(m,l,j,k,i)
+!      contrib = dabs(new - ref)
+!      accu += contrib
+!      if(contrib .gt. 1.d-10)then
+!       print*,'exch13'
+!       print*,i,k,j,l,m
+!       print*,ref,new,contrib
+!       stop
+!      endif
+!
      enddo
     enddo
    enddo

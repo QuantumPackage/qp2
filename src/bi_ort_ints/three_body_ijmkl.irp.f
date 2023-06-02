@@ -1,7 +1,11 @@
 ! ---
+double precision function three_e_5_idx_exch12_bi_ort(m,l,i,k,j) result(integral)
+  implicit none
+  integer, intent(in) :: m,l,j,k,i
+  integral = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
+end
 
  BEGIN_PROVIDER [ double precision, three_e_5_idx_direct_bi_ort , (mo_num, mo_num, mo_num, mo_num, mo_num)]
-&BEGIN_PROVIDER [ double precision, three_e_5_idx_exch12_bi_ort , (mo_num, mo_num, mo_num, mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, three_e_5_idx_exch23_bi_ort , (mo_num, mo_num, mo_num, mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, three_e_5_idx_exch13_bi_ort , (mo_num, mo_num, mo_num, mo_num, mo_num)]
 &BEGIN_PROVIDER [ double precision, three_e_5_idx_cycle_1_bi_ort, (mo_num, mo_num, mo_num, mo_num, mo_num)]
@@ -14,6 +18,8 @@
   ! three_e_5_idx_direct_bi_ort(m,l,j,k,i) = <mlk|-L|mji> ::: notice that i is the RIGHT MO and k is the LEFT MO
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
+  !
+
   END_DOC
 
   implicit none
@@ -74,7 +80,6 @@
       do j = 1, mo_num
         do l = 1, mo_num
             three_e_5_idx_direct_bi_ort(m,l,j,k,i) = - tmp_mat(l,j,k,i) - tmp_mat(k,i,l,j)
-            three_e_5_idx_exch12_bi_ort(m,l,j,k,i) = - tmp_mat(l,i,k,j) - tmp_mat(k,j,l,i)
         enddo
       enddo
     enddo
@@ -128,7 +133,6 @@
       do j = 1, mo_num
         do l = 1, mo_num
             three_e_5_idx_direct_bi_ort(m,l,j,k,i) = three_e_5_idx_direct_bi_ort(m,l,j,k,i) - tmp_mat(l,j,k,i)
-            three_e_5_idx_exch12_bi_ort(m,l,j,k,i) = three_e_5_idx_exch12_bi_ort(m,l,j,k,i) - tmp_mat(l,i,k,j)
         enddo
       enddo
     enddo
