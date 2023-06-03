@@ -243,7 +243,9 @@ subroutine fock_ac_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,
    do j = 1, nb
     jj = occ(j,other_spin) 
     direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
-    exchange_int = three_e_4_idx_exch12_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    ! TODO
+    ! use transpose
+    exchange_int = three_e_4_idx_exch13_bi_ort(iorb,jj,p_fock,h_fock) ! USES 4-IDX TENSOR 
     hthree += direct_int - exchange_int
    enddo
   else !! ispin NE to ispin_fock
@@ -322,7 +324,8 @@ subroutine fock_a_tc_operator(iorb,ispin,key, h_fock,p_fock, ispin_fock,hthree,N
    do j = 1, nb
     jj = occ(j,other_spin) 
     direct_int = three_e_4_idx_direct_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
-    exchange_int = three_e_4_idx_exch12_bi_ort(jj,iorb,p_fock,h_fock) ! USES 4-IDX TENSOR 
+    ! TODO use transpose 
+    exchange_int = three_e_4_idx_exch13_bi_ort(iorb,jj,p_fock,h_fock) ! USES 4-IDX TENSOR 
     hthree -= direct_int - exchange_int
    enddo
   else !! ispin NE to ispin_fock

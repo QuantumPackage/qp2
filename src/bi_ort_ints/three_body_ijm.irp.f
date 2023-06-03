@@ -23,11 +23,11 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
- !$OMP PARALLEL                 &
- !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
- !$OMP SHARED (mo_num,three_e_3_idx_direct_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+  !$OMP PARALLEL                 &
+  !$OMP DEFAULT (NONE)           &
+  !$OMP PRIVATE (i,j,m,integral) & 
+  !$OMP SHARED (mo_num,three_e_3_idx_direct_bi_ort)
+  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
@@ -36,8 +36,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do i = 1, mo_num
     do j = 1, mo_num
