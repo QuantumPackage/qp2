@@ -27,7 +27,8 @@ subroutine test_5idx2
 end
 
 subroutine test_4idx2()
-  PROVIDE three_e_4_idx_direct_bi_ort 
+  !PROVIDE three_e_4_idx_direct_bi_ort 
+  PROVIDE three_e_4_idx_exch23_bi_ort
 end
 
 subroutine test_3e
