@@ -8,8 +8,8 @@ program bi_ort_ints
   my_n_pt_a_grid = 14
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 ! call test_3e
+  call test_5idx2
  call test_5idx
-!  call test_5idx2
 end
 
 subroutine test_5idx2
@@ -60,6 +60,8 @@ subroutine test_5idx
  k = 1
  n = 0
  accu = 0.d0
+ PROVIDE three_e_5_idx_direct_bi_ort_old
+
  do i = 1, mo_num
   do k = 1, mo_num
    do j = 1, mo_num
@@ -69,28 +71,28 @@ subroutine test_5idx
 !         stop
 !      endif
 
-!      new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
-!      ref = three_e_5_idx_direct_bi_ort_old(m,l,j,k,i)
+      new = three_e_5_idx_direct_bi_ort(m,l,j,k,i)
+      ref = three_e_5_idx_direct_bi_ort_old(m,l,j,k,i)
+      contrib = dabs(new - ref)
+      accu += contrib
+      if(contrib .gt. 1.d-10)then
+       print*,'direct'
+       print*,i,k,j,l,m
+       print*,ref,new,contrib
+       stop
+      endif
+!
+!      new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
+!      ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
 !      contrib = dabs(new - ref)
 !      accu += contrib
 !      if(contrib .gt. 1.d-10)then
-!       print*,'direct'
+!       print*,'exch12'
 !       print*,i,k,j,l,m
 !       print*,ref,new,contrib
 !       stop
 !      endif
 !
-      new = three_e_5_idx_exch12_bi_ort(m,l,j,k,i)
-      ref = three_e_5_idx_exch12_bi_ort_old(m,l,j,k,i)
-      contrib = dabs(new - ref)
-      accu += contrib
-      if(contrib .gt. 1.d-10)then
-       print*,'exch12'
-       print*,i,k,j,l,m
-       print*,ref,new,contrib
-       stop
-      endif
-
 !
 !      new = three_e_5_idx_cycle_1_bi_ort(m,l,j,k,i)
 !      ref = three_e_5_idx_cycle_1_bi_ort_old(m,l,j,k,i)
@@ -135,7 +137,7 @@ subroutine test_5idx
 !       print*,ref,new,contrib
 !       stop
 !      endif
-!
+
      enddo
     enddo
    enddo
