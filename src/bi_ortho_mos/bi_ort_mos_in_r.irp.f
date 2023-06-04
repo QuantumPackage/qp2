@@ -47,8 +47,6 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp, (n_points_final_grid, 
     enddo
   enddo
 
-  FREE mos_r_in_r_array
- 
 END_PROVIDER
 
 ! ---
@@ -133,8 +131,6 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp, (n_points_final_grid,m
     enddo
   enddo
 
-  FREE mos_l_in_r_array
- 
 END_PROVIDER
 
 ! ---
