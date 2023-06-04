@@ -54,11 +54,13 @@ subroutine run_cipsi_tc
 
   implicit none
 
-  if (.not.is_zmq_slave) then
+  if (.not. is_zmq_slave) then
+
     PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e
-    if(elec_alpha_num+elec_beta_num.ge.3)then
+
+    if(elec_alpha_num+elec_beta_num .ge. 3) then
       if(three_body_h_tc)then
-        call provide_all_three_ints_bi_ortho
+        call provide_all_three_ints_bi_ortho()
       endif
     endif
     ! ---

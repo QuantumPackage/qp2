@@ -62,20 +62,30 @@ END_PROVIDER
     enddo
   enddo
 
+  FREE grid_points_per_atom
+  FREE final_weight_at_r
+
 END_PROVIDER
 
 ! ---
 
 BEGIN_PROVIDER [double precision, final_grid_points_transp, (n_points_final_grid,3)]
-  implicit none
+
   BEGIN_DOC
-! Transposed final_grid_points
+  ! Transposed final_grid_points
   END_DOC
 
+  implicit none
   integer :: i,j
-  do j=1,3
-    do i=1,n_points_final_grid
+
+  do j = 1, 3
+    do i = 1, n_points_final_grid
       final_grid_points_transp(i,j) = final_grid_points(j,i)
     enddo
   enddo
+
 END_PROVIDER
+
+! ---
+
+

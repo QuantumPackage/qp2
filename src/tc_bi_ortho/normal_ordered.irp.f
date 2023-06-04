@@ -24,9 +24,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
  
   PROVIDE N_int
 
-  print*,' Providing normal_two_body_bi_orth ...'
-  call wall_time(wall0)
-
   if(read_tc_norm_ord) then
 
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="read")
@@ -111,9 +108,6 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth, (mo_num, mo_num, mo_
       close(11)
       call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif
-
-  call wall_time(wall1)
-  print*,' Wall time for normal_two_body_bi_orth ', wall1-wall0
 
   call wall_time(wall1)
   print*,' Wall time for normal_two_body_bi_orth ', wall1-wall0
