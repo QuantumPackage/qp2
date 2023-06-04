@@ -17,6 +17,7 @@ import numpy as np
 from functools import reduce
 from ezfio import ezfio
 from docopt import docopt
+import qp_bitmasks
 
 try:
   import trexio
@@ -452,6 +453,20 @@ def write_ezfio(trexio_filename, filename):
 
     else:
         print("None")
+
+    print("Determinant\t\t...\t", end=' ')
+    alpha = [ i for i in range(num_alpha) ]
+    beta  = [ i for i in range(num_beta) ]
+    if trexio.has_mo_spin(trexio_file):
+       spin = trexio.read_mo_spin(trexio_file)
+       beta  = [ i for i in range(mo_num) if spin[i] == 1 ]
+       beta  = [ beta[i] for i in range(num_beta) ]
+
+    alpha = qp_bitmasks.BitMask(alpha)
+    beta  = qp_bitmasks.BitMask(beta )
+    print(alpha)
+    print(beta)
+    print("OK")
 
 
 

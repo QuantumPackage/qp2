@@ -22,7 +22,7 @@ def int_to_string(s):
         assert s>=0
     AssertionError
     """
-    assert type(s) in (int, long)
+    assert type(s) == int
     assert s>=0
     return '{s:0b}'.format(s=s)
 
@@ -62,7 +62,7 @@ def int_to_bitmask(s,bit_kind_size=BIT_KIND_SIZE):
     ['1111111111111111111111111111111111111111111111111111111111110110']
     >>>
     """
-    assert type(s) in (int, long)
+    assert type(s) == int
     if s < 0:
         s = s + (1 << bit_kind_size)
     return ['{s:0{width}b}'.format(s=s,width=bit_kind_size)]
@@ -104,7 +104,7 @@ class BitMask(object):
     return self._data_int[i]
 
   def __setitem__(self,i,value):
-    if type(value) in (int,long):
+    if type(value) == int :
         self._data_int[i] = value
     elif type(value) == str:
         s = string_to_bitmask(value,bit_kind_size=self.bit_kind_size)[0]

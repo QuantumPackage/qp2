@@ -6,13 +6,14 @@ BEGIN_PROVIDER [ logical, use_cosgtos  ]
 
   logical                        :: has
   PROVIDE ezfio_filename
+  use_cosgtos = .False.
   if (mpi_master) then
     call ezfio_has_ao_basis_use_cosgtos(has)
     if (has) then
 !      write(6,'(A)') '.. >>>>> [ IO READ: use_cosgtos ] <<<<< ..'
       call ezfio_get_ao_basis_use_cosgtos(use_cosgtos)
     else
-      use_cosgtos = .False.
+      call ezfio_set_ao_basis_use_cosgtos(use_cosgtos)
     endif
   endif
   IRP_IF MPI_DEBUG
