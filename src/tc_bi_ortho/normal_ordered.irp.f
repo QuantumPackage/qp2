@@ -230,11 +230,11 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
       do p1 = 1, mo_num
 
         ! to minimize the number of operations
-        !$OMP PARALLEL                                                  &
-        !$OMP DEFAULT (NONE)                                            &
-        !$OMP PRIVATE (ipoint)                                          &
-        !$OMP SHARED (n_points_final_grid, i, h1, p1,                   &
-        !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+        !$OMP PARALLEL                                                 &
+        !$OMP DEFAULT (NONE)                                           &
+        !$OMP PRIVATE (ipoint)                                         &
+        !$OMP SHARED (n_points_final_grid, i, h1, p1,                  &
+        !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector, &
         !$OMP         tmpval_1)
         !$OMP DO
         do ipoint = 1, n_points_final_grid
@@ -398,7 +398,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
     enddo !i
   endif
 
-  deallocate(tmp_3d)
+  deallocate(tmp_2d, tmp_3d)
   deallocate(tmp1, tmp2)
   deallocate(tmpval_1, tmpval_2)
   deallocate(tmpvec_1, tmpvec_2)
@@ -446,12 +446,12 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
     call bitstring_to_list_ab(ref_bitmask, occ, Ne, N_int)
   endif
 
+  allocate(tmp_2d(mo_num,mo_num))
   allocate(tmp_3d(mo_num,mo_num,mo_num))
   allocate(tmp1(n_points_final_grid,3,mo_num))
   allocate(tmp2(n_points_final_grid,mo_num))
   allocate(tmpval_1(n_points_final_grid))
   allocate(tmpvec_1(n_points_final_grid,3))
-  allocate(tmp_2d(mo_num,mo_num))
 
 
   ! purely closed shell part 
@@ -471,10 +471,10 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
       !$OMP         tmpval_1, tmpvec_1)
       !$OMP DO
       do ipoint = 1, n_points_final_grid
-        tmpval_1(ipoint)   = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint, i)
-        tmpvec_1(ipoint,1) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,i, i) * mos_r_in_r_array_transp(ipoint,h1)
-        tmpvec_1(ipoint,2) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,i, i) * mos_r_in_r_array_transp(ipoint,h1)
-        tmpvec_1(ipoint,3) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i, i) * mos_r_in_r_array_transp(ipoint,h1)
+        tmpval_1(ipoint)   = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint,i)
+        tmpvec_1(ipoint,1) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,i,i) * mos_r_in_r_array_transp(ipoint,h1)
+        tmpvec_1(ipoint,2) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,i,i) * mos_r_in_r_array_transp(ipoint,h1)
+        tmpvec_1(ipoint,3) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i,i) * mos_r_in_r_array_transp(ipoint,h1)
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
@@ -515,17 +515,17 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
       do p1 = 1, mo_num
 
         ! to minimize the number of operations
-        !$OMP PARALLEL                                                  &
-        !$OMP DEFAULT (NONE)                                            &
-        !$OMP PRIVATE (ipoint)                                          &
-        !$OMP SHARED (n_points_final_grid, i, h1, p1,                   &
-        !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+        !$OMP PARALLEL                                                 &
+        !$OMP DEFAULT (NONE)                                           &
+        !$OMP PRIVATE (ipoint)                                         &
+        !$OMP SHARED (n_points_final_grid, i, h1, p1,                  &
+        !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector, &
         !$OMP         tmpval_1)
         !$OMP DO
         do ipoint = 1, n_points_final_grid
-          tmpval_1(ipoint) = final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1, i,i) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1) &
-                                                                + int2_grad1_u12_bimo_t(ipoint,2, i,i) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1) &
-                                                                + int2_grad1_u12_bimo_t(ipoint,3, i,i) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) )
+          tmpval_1(ipoint) = final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,i,i) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1) &
+                                                                + int2_grad1_u12_bimo_t(ipoint,2,i,i) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1) &
+                                                                + int2_grad1_u12_bimo_t(ipoint,3,i,i) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) )
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
@@ -567,9 +567,38 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
   deallocate(tmpval_1)
   deallocate(tmpvec_1)
 
-  no_aab_contraction = 0.5d0 * no_aab_contraction
-  call sub_A_At(no_aab_contraction(1,1,1,1), mo_num*mo_num)
+  no_aab_contraction = -0.5d0 * no_aab_contraction
 
+  !$OMP PARALLEL                 &
+  !$OMP DEFAULT (NONE)           &
+  !$OMP PRIVATE (h1, h2, p1, p2) & 
+  !$OMP SHARED (no_aab_contraction, mo_num)
+
+  !$OMP DO 
+  do h1 = 1, mo_num
+    do h2 = 1, mo_num
+      do p1 = 1, mo_num
+        do p2 = p1, mo_num
+          no_aab_contraction(p2,h2,p1,h1) -= no_aab_contraction(p1,h2,p2,h1)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  !$OMP DO 
+  do h1 = 1, mo_num
+    do h2 = 1, mo_num
+      do p1 = 2, mo_num
+        do p2 = 1, p1-1
+          no_aab_contraction(p2,h2,p1,h1) = -no_aab_contraction(p1,h2,p2,h1)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  !$OMP DO 
   do h1 = 1, mo_num-1
     do h2 = h1+1, mo_num
       do p1 = 2, mo_num
@@ -579,10 +608,10 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
       enddo
     enddo
   enddo
+  !$OMP END PARALLEL
 
   call wall_time(wall1)
   print*,' Wall time for no_aab_contraction', wall1-wall0
-
 
 END_PROVIDER
 
