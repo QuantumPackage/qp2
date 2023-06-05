@@ -89,6 +89,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_old, (mo_num, mo_num,
                hthree_aaa = 0.d0
              endif
             endif
+
             normal_two_body_bi_orth_old(p2,h2,p1,h1) = 0.5d0*(hthree_aba + hthree_aab + hthree_aaa)
           enddo
         enddo
@@ -350,7 +351,8 @@ subroutine give_aaa_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
     call give_integrals_3_body_bi_ort(i, p1, p2, i, h2, h1, integral)
     int_exc_23 = -1.d0 * integral
 
-    hthree +=  1.d0 * int_direct + 0.5d0 * (int_exc_l + int_exc_ll - (int_exc_12 + int_exc_13 + int_exc_23))
+    !hthree +=  1.d0 * int_direct + 0.5d0 * (int_exc_l + int_exc_ll - (int_exc_12 + int_exc_13 + int_exc_23))
+    hthree +=  0.5d0 * int_direct + 0.5d0 * (int_exc_l + int_exc_ll - (int_exc_12 + int_exc_13 + int_exc_23))
   enddo
 
   return
