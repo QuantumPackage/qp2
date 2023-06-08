@@ -23,11 +23,11 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
- !$OMP PARALLEL                 &
- !$OMP DEFAULT (NONE)           &
- !$OMP PRIVATE (i,j,m,integral) & 
- !$OMP SHARED (mo_num,three_e_3_idx_direct_bi_ort)
- !$OMP DO SCHEDULE (dynamic)
+  !$OMP PARALLEL                 &
+  !$OMP DEFAULT (NONE)           &
+  !$OMP PRIVATE (i,j,m,integral) & 
+  !$OMP SHARED (mo_num,three_e_3_idx_direct_bi_ort)
+  !$OMP DO SCHEDULE (dynamic)
   do i = 1, mo_num
     do j = 1, mo_num
       do m = j, mo_num
@@ -36,8 +36,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do i = 1, mo_num
     do j = 1, mo_num
@@ -49,6 +49,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_direct_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -102,6 +103,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_cycle_1_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -155,6 +157,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_cycle_2_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -208,6 +211,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_exch23_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -261,6 +265,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_exch13_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -306,6 +311,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_exch12_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -359,6 +365,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort_new, (mo_num, mo_
 
   call wall_time(wall1)
   print *, ' wall time for three_e_3_idx_exch12_bi_ort_new', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 

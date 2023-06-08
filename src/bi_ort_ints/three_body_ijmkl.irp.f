@@ -19,10 +19,10 @@ end
   !
   ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
-
   END_DOC
 
   implicit none
+
   integer                        :: i, j, k, m, l
   double precision               :: wall1, wall0
   integer                        :: ipoint
@@ -134,7 +134,6 @@ end
     enddo
     !$OMP END PARALLEL DO
 
-
     allocate(rm_grad_ik(n_points_final_grid,3,mo_num))
     allocate(rk_grad_im(n_points_final_grid,3,mo_num))
 
@@ -226,6 +225,7 @@ end
       !$OMP END PARALLEL DO
 
     enddo
+
     deallocate(rm_grad_ik)
     deallocate(rk_grad_im)
     deallocate(lk_grad_mi)
@@ -233,10 +233,13 @@ end
 
   enddo
 
+  deallocate(tmp_mat)
+
   deallocate(orb_mat)
 
   call wall_time(wall1)
   print *, ' wall time for three_e_5_idx_bi_ort', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER
 

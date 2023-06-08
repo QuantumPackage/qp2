@@ -231,6 +231,7 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
   call wall_time(time0)
 
   PROVIDE j1b_type
+  PROVIDE int2_grad1u2_grad2u2_j1b2
 
   do ipoint = 1, n_points_final_grid
     tmp1 = v_1b(ipoint)
@@ -241,6 +242,8 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
       enddo
     enddo
   enddo
+
+  FREE int2_grad1u2_grad2u2_j1b2
 
   !if(j1b_type .eq. 0) then 
   !  grad12_j12 = 0.d0
@@ -262,6 +265,7 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
 
   call wall_time(time1)
   print*, ' Wall time for grad12_j12 = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
@@ -278,6 +282,9 @@ BEGIN_PROVIDER [double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_g
   print*, ' providing u12sq_j1bsq ...'
   call wall_time(time0)
 
+  ! do not free here
+  PROVIDE int2_u2_j1b2
+
   do ipoint = 1, n_points_final_grid
     tmp_x = v_1b_grad(1,ipoint)
     tmp_y = v_1b_grad(2,ipoint)
@@ -292,6 +299,7 @@ BEGIN_PROVIDER [double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_g
 
   call wall_time(time1)
   print*, ' Wall time for u12sq_j1bsq = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
@@ -309,6 +317,9 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
 
   print*, ' providing u12_grad1_u12_j1b_grad1_j1b ...'
   call wall_time(time0)
+
+  PROVIDE int2_u_grad1u_j1b2
+  PROVIDE int2_u_grad1u_x_j1b2
 
   do ipoint = 1, n_points_final_grid
 
@@ -340,13 +351,16 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
     enddo
   enddo
 
+  FREE int2_u_grad1u_j1b2
+  FREE int2_u_grad1u_x_j1b2
+
   call wall_time(time1)
   print*, ' Wall time for u12_grad1_u12_j1b_grad1_j1b = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
 ! ---
-
 
 BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao_num)]
 
@@ -401,6 +415,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
               , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
               , 0.d0, tc_grad_square_ao, ao_num*ao_num)
 
+    FREE int2_grad1_u12_square_ao
+
     ! ---
 
     if(((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) .and. use_ipp) then
@@ -442,6 +458,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
       call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
                 , int2_u2_j1b2(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
                 , 1.d0, tc_grad_square_ao, ao_num*ao_num)
+
+      FREE int2_u2_j1b2
     endif
 
     ! ---
@@ -478,6 +496,7 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 

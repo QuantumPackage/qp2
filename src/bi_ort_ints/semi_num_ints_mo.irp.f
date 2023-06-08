@@ -54,7 +54,7 @@ BEGIN_PROVIDER [ double precision, mo_v_ki_bi_ortho_erf_rk_cst_mu_transp, (n_poi
     enddo
   enddo
 
-! FREE mo_v_ki_bi_ortho_erf_rk_cst_mu
+  !FREE mo_v_ki_bi_ortho_erf_rk_cst_mu
 
 END_PROVIDER 
 
@@ -124,6 +124,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
       enddo
     enddo
 
+    FREE int2_grad1_u12_ao_test
+
   else
 
     PROVIDE int2_grad1_u12_ao
@@ -138,10 +140,13 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
       enddo
     enddo
 
+    FREE int2_grad1_u12_ao
+
   endif
 
   call wall_time(wall1)
   print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER 
 
@@ -150,7 +155,7 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
 
   implicit none
-  integer :: ipoint
+  integer          :: ipoint
   double precision :: wall0, wall1
 
   PROVIDE mo_l_coef mo_r_coef
@@ -177,6 +182,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 
 
   !call wall_time(wall1)
   !print *, ' Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
+  !call print_memory_usage()
 
 END_PROVIDER 
 
@@ -185,7 +191,11 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
 
   implicit none
-  integer :: i, j, ipoint
+  integer          :: i, j, ipoint
+  double precision :: wall0, wall1
+
+  !call wall_time(wall0)
+  !print *, ' Providing int2_grad1_u12_bimo_t ...'
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE int2_grad1_u12_bimo_transp
@@ -199,6 +209,12 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 
       enddo                                  
     enddo
   enddo
+
+  FREE int2_grad1_u12_bimo_transp
+
+  !call wall_time(wall1)
+  !print *, ' wall time for int2_grad1_u12_bimo_t,', wall1 - wall0
+  !call print_memory_usage()
 
 END_PROVIDER 
 

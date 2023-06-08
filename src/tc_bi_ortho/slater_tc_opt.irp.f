@@ -1,24 +1,37 @@
-subroutine provide_all_three_ints_bi_ortho
- implicit none
- BEGIN_DOC
-! routine that provides all necessary three-electron integrals 
- END_DOC
- if(three_body_h_tc)then
-  if(three_e_3_idx_term)then
-   PROVIDE three_e_3_idx_direct_bi_ort three_e_3_idx_cycle_1_bi_ort three_e_3_idx_cycle_2_bi_ort
-   PROVIDE three_e_3_idx_exch23_bi_ort three_e_3_idx_exch13_bi_ort three_e_3_idx_exch12_bi_ort
-  endif
-  if(three_e_4_idx_term)then
-   PROVIDE three_e_4_idx_direct_bi_ort three_e_4_idx_cycle_1_bi_ort three_e_4_idx_cycle_2_bi_ort
-   PROVIDE three_e_4_idx_exch23_bi_ort three_e_4_idx_exch13_bi_ort three_e_4_idx_exch12_bi_ort
-  endif
-  if(.not.double_normal_ord.and.three_e_5_idx_term)then
-   PROVIDE three_e_5_idx_direct_bi_ort 
-  elseif (double_normal_ord .and. (.not. three_e_5_idx_term))then
-   PROVIDE normal_two_body_bi_orth
-  endif
+
+! ---
+
+subroutine provide_all_three_ints_bi_ortho()
+
+  BEGIN_DOC
+  ! routine that provides all necessary three-electron integrals 
+  END_DOC
+
+  implicit none
+
+  if(three_body_h_tc) then
+
+    if(three_e_3_idx_term) then
+      PROVIDE three_e_3_idx_direct_bi_ort three_e_3_idx_cycle_1_bi_ort three_e_3_idx_cycle_2_bi_ort
+      PROVIDE three_e_3_idx_exch23_bi_ort three_e_3_idx_exch13_bi_ort three_e_3_idx_exch12_bi_ort
+    endif
+
+    if(three_e_4_idx_term) then
+      PROVIDE three_e_4_idx_direct_bi_ort three_e_4_idx_cycle_1_bi_ort three_e_4_idx_exch23_bi_ort three_e_4_idx_exch13_bi_ort 
+    endif
+
+    if(.not. double_normal_ord .and. three_e_5_idx_term) then
+      PROVIDE three_e_5_idx_direct_bi_ort 
+    elseif(double_normal_ord .and. (.not. three_e_5_idx_term)) then
+      PROVIDE normal_two_body_bi_orth
+    endif
+
  endif
+
+ return
 end
+
+! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
  implicit none
