@@ -194,7 +194,7 @@
           tmp2(ipoint,1,n) = int2_grad1_u12_bimo_t(ipoint,1,k,n)
           tmp2(ipoint,2,n) = int2_grad1_u12_bimo_t(ipoint,2,k,n)
           tmp2(ipoint,3,n) = int2_grad1_u12_bimo_t(ipoint,3,k,n)
-          tmp2(ipoint,4,n) = mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,n)
+          tmp2(ipoint,4,n) = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,n)
         enddo
       enddo
       !$OMP END DO

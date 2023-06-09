@@ -1,11 +1,11 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_n4 , (mo_num, mo_num, mo_num, mo_num)]
-&BEGIN_PROVIDER [ double precision, three_e_4_idx_exch13_bi_ort_n4 , (mo_num, mo_num, mo_num, mo_num)]
-&BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_1_bi_ort_n4, (mo_num, mo_num, mo_num, mo_num)]
-!&BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort , (mo_num, mo_num, mo_num, mo_num)]
-!&BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_2_bi_ort, (mo_num, mo_num, mo_num, mo_num)]
+ BEGIN_PROVIDER [ double precision, three_e_4_idx_direct_bi_ort_n4 ,  (mo_num, mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, three_e_4_idx_exch13_bi_ort_n4 ,  (mo_num, mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_1_bi_ort_n4,  (mo_num, mo_num, mo_num, mo_num)]
+!&BEGIN_PROVIDER [ double precision, three_e_4_idx_exch12_bi_ort_n4,  (mo_num, mo_num, mo_num, mo_num)]
+!&BEGIN_PROVIDER [ double precision, three_e_4_idx_cycle_2_bi_ort_n4, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -13,11 +13,11 @@
   !
   ! three_e_4_idx_direct_bi_ort_n4 (m,j,k,i) = < m j k | -L | m j i > ::: notice that i is the RIGHT MO and k is the LEFT MO
   ! three_e_4_idx_exch13_bi_ort_n4 (m,j,k,i) = < m j k | -L | i j m > ::: notice that i is the RIGHT MO and k is the LEFT MO
-  ! three_e_4_idx_exch12_bi_ort (m,j,k,i) = < m j k | -L | m i j > ::: notice that i is the RIGHT MO and k is the LEFT MO
-  !                                       = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i) 
+  ! three_e_4_idx_exch12_bi_ort_n4 (m,j,k,i) = < m j k | -L | m i j > ::: notice that i is the RIGHT MO and k is the LEFT MO
+  !                                          = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i) 
   ! three_e_4_idx_cycle_1_bi_ort_n4(m,j,k,i) = < m j k | -L | j i m > ::: notice that i is the RIGHT MO and k is the LEFT MO
-  ! three_e_4_idx_cycle_2_bi_ort(m,j,k,i) = < m j k | -L | i m j > ::: notice that i is the RIGHT MO and k is the LEFT MO
-  !                                       = three_e_4_idx_cycle_1_bi_ort_n4(j,m,k,i)
+  ! three_e_4_idx_cycle_2_bi_ort_n4(m,j,k,i) = < m j k | -L | i m j > ::: notice that i is the RIGHT MO and k is the LEFT MO
+  !                                          = three_e_4_idx_cycle_1_bi_ort_n4(j,m,k,i)
   !
   ! notice the -1 sign: in this way three_e_4_idx_direct_bi_ort_n4 can be directly used to compute Slater rules with a + sign
   !
@@ -77,6 +77,7 @@
   !$OMP END DO
   !$OMP END PARALLEL
 
+
   call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
             , tmp1(1,1,1,1), 3*n_points_final_grid, tmp2(1,1,1,1), 3*n_points_final_grid &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
@@ -97,7 +98,6 @@
             , tmp3(1,1,1,1), 3*n_points_final_grid, tmp1(1,1,1,1), 3*n_points_final_grid &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
 
-  deallocate(tmp1)
 
   !$OMP PARALLEL DO PRIVATE(i,j,k,m)
   do i = 1, mo_num
@@ -133,9 +133,11 @@
   !$OMP END DO
   !$OMP END PARALLEL
 
+
   call dgemm( 'T', 'N', mo_num*mo_num, mo_num*mo_num, 3*n_points_final_grid, 1.d0        &
             , tmp1(1,1,1,1), 3*n_points_final_grid, tmp2(1,1,1,1), 3*n_points_final_grid &
             , 0.d0, tmp_4d(1,1,1,1), mo_num*mo_num)
+
 
   deallocate(tmp2)
 
@@ -202,7 +204,7 @@
     do k = 1, mo_num
       do j = 1, mo_num
         do m = 1, mo_num
-          three_e_4_idx_direct_bi_ort_n4(m,j,k,i) = three_e_4_idx_direct_bi_ort(m,j,k,i) - tmp_4d(m,j,k,i) - tmp_4d(j,m,k,i)
+          three_e_4_idx_direct_bi_ort_n4(m,j,k,i) = three_e_4_idx_direct_bi_ort_n4(m,j,k,i) - tmp_4d(m,j,k,i) - tmp_4d(j,m,k,i)
         enddo
       enddo
     enddo
@@ -294,9 +296,9 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, 1.d0              &
-              , tmp4, n_points_final_grid, mos_r_in_r_array_transp, n_points_final_grid &
-              , 0.d0, tmp_3d, mo_num*mo_num)
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, 1.d0                          &
+              , tmp4(1,1,1), n_points_final_grid, mos_r_in_r_array_transp(1,1), n_points_final_grid &
+              , 0.d0, tmp_3d(1,1,1), mo_num*mo_num)
 
     !$OMP PARALLEL DO PRIVATE(i,j,k)
     do i = 1, mo_num
@@ -339,8 +341,8 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, -1.d0             &
-              , tmp4, n_points_final_grid, mos_l_in_r_array_transp, n_points_final_grid &
+    call dgemm( 'T', 'N', mo_num*mo_num, mo_num, n_points_final_grid, -1.d0                         &
+              , tmp4(1,1,1), n_points_final_grid, mos_l_in_r_array_transp(1,1), n_points_final_grid &
               , 1.d0, three_e_4_idx_cycle_1_bi_ort_n4(1,1,1,i), mo_num*mo_num)
 
   enddo
@@ -353,8 +355,8 @@
 !    do k = 1, mo_num
 !      do j = 1, mo_num
 !        do m = 1, mo_num
-!          three_e_4_idx_exch12_bi_ort (m,j,k,i) = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i)
-!          three_e_4_idx_cycle_2_bi_ort(m,j,k,i) = three_e_4_idx_cycle_1_bi_ort_n4(j,m,k,i)
+!          three_e_4_idx_exch12_bi_ort_n4 (m,j,k,i) = three_e_4_idx_exch13_bi_ort_n4 (j,m,k,i)
+!          three_e_4_idx_cycle_2_bi_ort_n4(m,j,k,i) = three_e_4_idx_cycle_1_bi_ort_n4(j,m,k,i)
 !        enddo
 !      enddo
 !    enddo
