@@ -1104,11 +1104,19 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
   !$OMP         no_aba_contraction)
 
-
   allocate(tmp_3d(mo_num,mo_num,mo_num), tmp_2d(mo_num,mo_num))
   allocate(tmp1(n_points_final_grid,3,mo_num), tmp2(n_points_final_grid,mo_num))
   allocate(tmpval_1(n_points_final_grid), tmpval_2(n_points_final_grid))
   allocate(tmpvec_1(n_points_final_grid,3), tmpvec_2(n_points_final_grid,3))
+
+  tmp_3d   = 0.d0
+  tmp_2d   = 0.d0
+  tmp1     = 0.d0
+  tmp2     = 0.d0
+  tmpval_1 = 0.d0
+  tmpval_2 = 0.d0
+  tmpvec_1 = 0.d0
+  tmpvec_2 = 0.d0 
 
   !$OMP DO
 
@@ -1147,7 +1155,9 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
       do p1 = 1, mo_num
         do h2 = 1, mo_num
           do p2 = 1, mo_num
+            !$OMP CRITICAL
             no_aba_contraction(p2,h2,p1,h1) = no_aba_contraction(p2,h2,p1,h1) + tmp_3d(p2,h2,p1)
+            !$OMP END CRITICAL
           enddo
         enddo
       enddo
@@ -1177,7 +1187,9 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
 
         do h2 = 1, mo_num
           do p2 = 1, mo_num
+            !$OMP CRITICAL
             no_aba_contraction(p2,h2,p1,h1) = no_aba_contraction(p2,h2,p1,h1) + tmp_2d(p2,h2)
+            !$OMP END CRITICAL
           enddo
         enddo
 
@@ -1195,28 +1207,40 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   !$OMP END PARALLEL
 
 
-  allocate(tmp_3d(mo_num,mo_num,mo_num), tmp_2d(mo_num,mo_num))
-  allocate(tmp1(n_points_final_grid,3,mo_num), tmp2(n_points_final_grid,mo_num))
-  allocate(tmpval_1(n_points_final_grid), tmpval_2(n_points_final_grid))
-  allocate(tmpvec_1(n_points_final_grid,3), tmpvec_2(n_points_final_grid,3))
-
-
   ! purely open-shell part 
   if(Ne(2) < Ne(1)) then
+
+    !$OMP PARALLEL                                                  &
+    !$OMP DEFAULT (NONE)                                            &
+    !$OMP PRIVATE (ipoint, h1, p1, h2, p2, i, ii,                   &
+    !$OMP          tmp_3d, tmp_2d, tmp1, tmp2,                      &
+    !$OMP          tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)          & 
+    !$OMP SHARED (n_points_final_grid, Ne, occ, mo_num,             &
+    !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
+    !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+    !$OMP         no_aba_contraction)
+
+    Allocate(tmp_3d(mo_num,mo_num,mo_num), tmp_2d(mo_num,mo_num))
+    Allocate(tmp1(n_points_final_grid,3,mo_num), tmp2(n_points_final_grid,mo_num))
+    Allocate(tmpval_1(n_points_final_grid), tmpval_2(n_points_final_grid))
+    Allocate(tmpvec_1(n_points_final_grid,3), tmpvec_2(n_points_final_grid,3))
+
+    Tmp_3d   = 0.d0
+    Tmp_2d   = 0.d0
+    Tmp1     = 0.d0
+    Tmp2     = 0.d0
+    Tmpval_1 = 0.d0
+    Tmpval_2 = 0.d0
+    Tmpvec_1 = 0.d0
+    Tmpvec_2 = 0.d0 
+
+    !$OMP DO
 
     do ii = Ne(2) + 1, Ne(1)
       i = occ(ii,1)
 
       do h1 = 1, mo_num
 
-        !$OMP PARALLEL                                                  &
-        !$OMP DEFAULT (NONE)                                            &
-        !$OMP PRIVATE (ipoint)                                          &
-        !$OMP SHARED (n_points_final_grid, i, h1,                       &
-        !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-        !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
-        !$OMP         tmpval_1, tmpval_2, tmpvec_1, tmpvec_2)
-        !$OMP DO
         do ipoint = 1, n_points_final_grid
           tmpval_1(ipoint)   = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint, i)
           tmpval_2(ipoint)   = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint,h1)
@@ -1227,16 +1251,7 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
           tmpvec_2(ipoint,2) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,i,h1) * mos_r_in_r_array_transp(ipoint, i)
           tmpvec_2(ipoint,3) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i,h1) * mos_r_in_r_array_transp(ipoint, i)
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
 
-        !$OMP PARALLEL                                                &
-        !$OMP DEFAULT (NONE)                                          &
-        !$OMP PRIVATE (p1, ipoint)                                    &
-        !$OMP SHARED (mo_num, n_points_final_grid, h1, i,             &
-        !$OMP         mos_l_in_r_array_transp, int2_grad1_u12_bimo_t, &
-        !$OMP         tmpval_1, tmpval_2, tmpvec_1, tmpvec_2, tmp1)
-        !$OMP DO 
         do p1 = 1, mo_num
           do ipoint = 1, n_points_final_grid
             tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * (tmpvec_1(ipoint,1) - tmpvec_2(ipoint,1)) &
@@ -1247,82 +1262,65 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
                               + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) - tmpval_2(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,p1,i)
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
 
         call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 0.5d0 &
                   , int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points_final_grid         &
                   , tmp1(1,1,1), 3*n_points_final_grid                            &
                   , 0.d0, tmp_3d(1,1,1), mo_num*mo_num)
 
-        !$OMP PARALLEL DO PRIVATE(p1,h2,p2)
         do p1 = 1, mo_num
           do h2 = 1, mo_num
             do p2 = 1, mo_num
+              !$OMP CRITICAL
               no_aba_contraction(p2,h2,p1,h1) = no_aba_contraction(p2,h2,p1,h1) + tmp_3d(p2,h2,p1)
+              !$OMP END CRITICAL
             enddo
           enddo
         enddo
-        !$OMP END PARALLEL DO
 
         do p1 = 1, mo_num
 
-          ! to minimize the number of operations
-          !$OMP PARALLEL                                                  &
-          !$OMP DEFAULT (NONE)                                            &
-          !$OMP PRIVATE (ipoint)                                          &
-          !$OMP SHARED (n_points_final_grid, i, h1, p1,                   &
-          !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
-          !$OMP         tmpval_1)
-          !$OMP DO
           do ipoint = 1, n_points_final_grid
-            tmpval_1(ipoint) = final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1, i,i) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1) &
-                                                                  + int2_grad1_u12_bimo_t(ipoint,2, i,i) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1) &
-                                                                  + int2_grad1_u12_bimo_t(ipoint,3, i,i) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) &
-                                                                  - int2_grad1_u12_bimo_t(ipoint,1,p1,i) * int2_grad1_u12_bimo_t(ipoint,1, i,h1) &
-                                                                  - int2_grad1_u12_bimo_t(ipoint,2,p1,i) * int2_grad1_u12_bimo_t(ipoint,2, i,h1) &
-                                                                  - int2_grad1_u12_bimo_t(ipoint,3,p1,i) * int2_grad1_u12_bimo_t(ipoint,3, i,h1) )
+            tmpval_1(ipoint) = final_weight_at_r_vector(ipoint) *                                           &
+                             ( int2_grad1_u12_bimo_t(ipoint,1, i,i) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1) &
+                             + int2_grad1_u12_bimo_t(ipoint,2, i,i) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1) &
+                             + int2_grad1_u12_bimo_t(ipoint,3, i,i) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) &
+                             - int2_grad1_u12_bimo_t(ipoint,1,p1,i) * int2_grad1_u12_bimo_t(ipoint,1, i,h1) &
+                             - int2_grad1_u12_bimo_t(ipoint,2,p1,i) * int2_grad1_u12_bimo_t(ipoint,2, i,h1) &
+                             - int2_grad1_u12_bimo_t(ipoint,3,p1,i) * int2_grad1_u12_bimo_t(ipoint,3, i,h1) )
           enddo
-          !$OMP END DO
-          !$OMP END PARALLEL
 
-          !$OMP PARALLEL                             &
-          !$OMP DEFAULT (NONE)                       &
-          !$OMP PRIVATE (h2, ipoint)                 &
-          !$OMP SHARED (mo_num, n_points_final_grid, &
-          !$OMP         mos_r_in_r_array_transp,     &
-          !$OMP         tmpval_1, tmp2)
-          !$OMP DO 
           do h2 = 1, mo_num
             do ipoint = 1, n_points_final_grid
               tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
             enddo
           enddo
-          !$OMP END DO
-          !$OMP END PARALLEL
 
           call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 0.5d0 &
                     , mos_l_in_r_array_transp(1,1), n_points_final_grid    &
                     , tmp2(1,1), n_points_final_grid                       &
                     , 0.d0, tmp_2d(1,1), mo_num)
 
-          !$OMP PARALLEL DO PRIVATE(h2,p2)
           do h2 = 1, mo_num
             do p2 = 1, mo_num
+              !$OMP CRITICAL
               no_aba_contraction(p2,h2,p1,h1) = no_aba_contraction(p2,h2,p1,h1) + tmp_2d(p2,h2)
+              !$OMP END CRITICAL
             enddo
           enddo
-          !$OMP END PARALLEL DO
 
         enddo ! p1
       enddo ! h1
     enddo !i
-  endif
+    !$OMP END DO
 
-  deallocate(tmp_2d, tmp_3d)
-  deallocate(tmp1, tmp2)
-  deallocate(tmpval_1, tmpval_2)
-  deallocate(tmpvec_1, tmpvec_2)
+    deallocate(tmp_3d, tmp_2d)
+    deallocate(tmp1, tmp2)
+    deallocate(tmpval_1, tmpval_2)
+    deallocate(tmpvec_1, tmpvec_2)
+
+    !$OMP END PARALLEL
+  endif
 
   no_aba_contraction = -0.5d0 * no_aba_contraction
   call sum_A_At(no_aba_contraction(1,1,1,1), mo_num*mo_num)
