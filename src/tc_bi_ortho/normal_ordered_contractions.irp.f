@@ -295,7 +295,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_num)]
+BEGIN_PROVIDER [ double precision, no_aab_contraction_v0, (mo_num,mo_num,mo_num,mo_num)]
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
 
@@ -310,7 +310,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
   double precision,  allocatable :: tmpval_1(:), tmpvec_1(:,:)
   double precision,  allocatable :: tmp_2d(:,:)
 
-  print*,' Providing no_aab_contraction ...'
+  print*,' Providing no_aab_contraction_v0 ...'
   call wall_time(wall0)
 
   PROVIDE N_int
@@ -387,7 +387,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
       do p1 = 1, mo_num
         do h2 = 1, mo_num
           do p2 = 1, mo_num
-            no_aab_contraction(p2,h2,p1,h1) = no_aab_contraction(p2,h2,p1,h1) + tmp_3d(p2,h2,p1)
+            no_aab_contraction_v0(p2,h2,p1,h1) = no_aab_contraction_v0(p2,h2,p1,h1) + tmp_3d(p2,h2,p1)
           enddo
         enddo
       enddo
@@ -435,7 +435,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
         !$OMP PARALLEL DO PRIVATE(h2,p2)
         do h2 = 1, mo_num
           do p2 = 1, mo_num
-            no_aab_contraction(p2,h2,p1,h1) = no_aab_contraction(p2,h2,p1,h1) + tmp_2d(p2,h2)
+            no_aab_contraction_v0(p2,h2,p1,h1) = no_aab_contraction_v0(p2,h2,p1,h1) + tmp_2d(p2,h2)
           enddo
         enddo
         !$OMP END PARALLEL DO
@@ -449,19 +449,19 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
   deallocate(tmpval_1)
   deallocate(tmpvec_1)
 
-  no_aab_contraction = -0.5d0 * no_aab_contraction
+  no_aab_contraction_v0 = -0.5d0 * no_aab_contraction_v0
 
   !$OMP PARALLEL                 &
   !$OMP DEFAULT (NONE)           &
   !$OMP PRIVATE (h1, h2, p1, p2) & 
-  !$OMP SHARED (no_aab_contraction, mo_num)
+  !$OMP SHARED (no_aab_contraction_v0, mo_num)
 
   !$OMP DO 
   do h1 = 1, mo_num
     do h2 = 1, mo_num
       do p1 = 1, mo_num
         do p2 = p1, mo_num
-          no_aab_contraction(p2,h2,p1,h1) -= no_aab_contraction(p1,h2,p2,h1)
+          no_aab_contraction_v0(p2,h2,p1,h1) -= no_aab_contraction_v0(p1,h2,p2,h1)
         enddo
       enddo
     enddo
@@ -473,7 +473,7 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
     do h2 = 1, mo_num
       do p1 = 2, mo_num
         do p2 = 1, p1-1
-          no_aab_contraction(p2,h2,p1,h1) = -no_aab_contraction(p1,h2,p2,h1)
+          no_aab_contraction_v0(p2,h2,p1,h1) = -no_aab_contraction_v0(p1,h2,p2,h1)
         enddo
       enddo
     enddo
@@ -485,15 +485,16 @@ BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_
     do h2 = h1+1, mo_num
       do p1 = 2, mo_num
         do p2 = 1, p1-1
-          no_aab_contraction(p2,h2,p1,h1) *= -1.d0
+          no_aab_contraction_v0(p2,h2,p1,h1) *= -1.d0
         enddo
       enddo
     enddo
   enddo
+  !$OMP END DO
   !$OMP END PARALLEL
 
   call wall_time(wall1)
-  print*,' Wall time for no_aab_contraction', wall1-wall0
+  print*,' Wall time for no_aab_contraction_v0', wall1-wall0
 
 END_PROVIDER
 
@@ -1329,3 +1330,192 @@ BEGIN_PROVIDER [ double precision, no_aba_contraction, (mo_num,mo_num,mo_num,mo_
   print*,' Wall time for no_aba_contraction', wall1-wall0
 
 END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [ double precision, no_aab_contraction, (mo_num,mo_num,mo_num,mo_num)]
+
+  use bitmasks ! you need to include the bitmasks_module.f90 features
+
+  implicit none
+  integer                        :: i, ii, h1, p1, h2, p2, ipoint
+  integer                        :: Ne(2)
+  double precision               :: wall0, wall1
+  integer,           allocatable :: occ(:,:)
+  integer(bit_kind), allocatable :: key_i_core(:,:)
+  double precision,  allocatable :: tmp_3d(:,:,:)
+  double precision,  allocatable :: tmp1(:,:,:), tmp2(:,:)
+  double precision,  allocatable :: tmpval_1(:), tmpvec_1(:,:)
+  double precision,  allocatable :: tmp_2d(:,:)
+
+  print*,' Providing no_aab_contraction ...'
+  call wall_time(wall0)
+
+  PROVIDE N_int
+
+  allocate(occ(N_int*bit_kind_size,2))
+  allocate(key_i_core(N_int,2))
+
+  if(core_tc_op) then
+    do i = 1, N_int
+      key_i_core(i,1) = xor(ref_bitmask(i,1), core_bitmask(i,1))
+      key_i_core(i,2) = xor(ref_bitmask(i,2), core_bitmask(i,2))
+    enddo
+    call bitstring_to_list_ab(key_i_core, occ, Ne, N_int)
+  else
+    call bitstring_to_list_ab(ref_bitmask, occ, Ne, N_int)
+  endif
+
+
+  !$OMP PARALLEL                                                  &
+  !$OMP DEFAULT (NONE)                                            &
+  !$OMP PRIVATE (ipoint, ii, i, h1, p1, h2, p2,                   &
+  !$OMP          tmp_2d, tmp_3d, tmp1, tmp2,                      &
+  !$OMP          tmpval_1, tmpvec_1)                              &
+  !$OMP SHARED (n_points_final_grid, mo_num, Ne, occ,             &
+  !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
+  !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+  !$OMP         no_aab_contraction)
+
+
+  allocate(tmp_2d(mo_num,mo_num))
+  allocate(tmp_3d(mo_num,mo_num,mo_num))
+  allocate(tmp1(n_points_final_grid,3,mo_num))
+  allocate(tmp2(n_points_final_grid,mo_num))
+  allocate(tmpval_1(n_points_final_grid))
+  allocate(tmpvec_1(n_points_final_grid,3))
+
+  tmp_2d   = 0.d0
+  tmp_3d   = 0.d0
+  tmp1     = 0.d0
+  tmp2     = 0.d0
+  tmpval_1 = 0.d0
+  tmpvec_1 = 0.d0
+
+  !$OMP DO
+
+  do ii = 1, Ne(2)
+    i = occ(ii,2)
+
+    do h1 = 1, mo_num
+
+      do ipoint = 1, n_points_final_grid
+        tmpval_1(ipoint)   = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,i) * mos_r_in_r_array_transp(ipoint,i)
+        tmpvec_1(ipoint,1) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,i,i) * mos_r_in_r_array_transp(ipoint,h1)
+        tmpvec_1(ipoint,2) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,i,i) * mos_r_in_r_array_transp(ipoint,h1)
+        tmpvec_1(ipoint,3) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i,i) * mos_r_in_r_array_transp(ipoint,h1)
+      enddo
+
+      do p1 = 1, mo_num
+        do ipoint = 1, n_points_final_grid
+          tmp1(ipoint,1,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,1) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1)
+          tmp1(ipoint,2,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,2) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1)
+          tmp1(ipoint,3,p1) = mos_l_in_r_array_transp(ipoint,p1) * tmpvec_1(ipoint,3) + tmpval_1(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1)
+        enddo
+      enddo
+
+      call dgemm( 'T', 'N', mo_num*mo_num, mo_num, 3*n_points_final_grid, 1.d0 &
+                , int2_grad1_u12_bimo_t(1,1,1,1), 3*n_points_final_grid        &
+                , tmp1(1,1,1), 3*n_points_final_grid                           &
+                , 0.d0, tmp_3d(1,1,1), mo_num*mo_num)
+
+      do p1 = 1, mo_num
+        do h2 = 1, mo_num
+          do p2 = 1, mo_num
+            !$OMP CRITICAL
+            no_aab_contraction(p2,h2,p1,h1) = no_aab_contraction(p2,h2,p1,h1) + tmp_3d(p2,h2,p1)
+            !$OMP END CRITICAL
+          enddo
+        enddo
+      enddo
+
+      do p1 = 1, mo_num
+
+        do ipoint = 1, n_points_final_grid
+          tmpval_1(ipoint) = final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,i,i) * int2_grad1_u12_bimo_t(ipoint,1,p1,h1) &
+                                                                + int2_grad1_u12_bimo_t(ipoint,2,i,i) * int2_grad1_u12_bimo_t(ipoint,2,p1,h1) &
+                                                                + int2_grad1_u12_bimo_t(ipoint,3,i,i) * int2_grad1_u12_bimo_t(ipoint,3,p1,h1) )
+        enddo
+
+        do h2 = 1, mo_num
+          do ipoint = 1, n_points_final_grid
+            tmp2(ipoint,h2) = mos_r_in_r_array_transp(ipoint,h2) * tmpval_1(ipoint) 
+          enddo
+        enddo
+
+        call dgemm( 'T', 'N', mo_num, mo_num, n_points_final_grid, 1.d0 &
+                  , mos_l_in_r_array_transp(1,1), n_points_final_grid   &
+                  , tmp2(1,1), n_points_final_grid                      &
+                  , 0.d0, tmp_2d(1,1), mo_num)
+
+        do h2 = 1, mo_num
+          do p2 = 1, mo_num
+            !$OMP CRITICAL
+            no_aab_contraction(p2,h2,p1,h1) = no_aab_contraction(p2,h2,p1,h1) + tmp_2d(p2,h2)
+            !$OMP END CRITICAL
+          enddo
+        enddo
+
+      enddo ! p1
+    enddo ! h1
+  enddo ! i
+
+  !$OMP END DO
+
+  deallocate(tmp_3d)
+  deallocate(tmp1, tmp2)
+  deallocate(tmpval_1)
+  deallocate(tmpvec_1)
+
+  !$OMP END PARALLEL
+
+  no_aab_contraction = -0.5d0 * no_aab_contraction
+
+  !$OMP PARALLEL                 &
+  !$OMP DEFAULT (NONE)           &
+  !$OMP PRIVATE (h1, h2, p1, p2) & 
+  !$OMP SHARED (no_aab_contraction, mo_num)
+
+  !$OMP DO 
+  do h1 = 1, mo_num
+    do h2 = 1, mo_num
+      do p1 = 1, mo_num
+        do p2 = p1, mo_num
+          no_aab_contraction(p2,h2,p1,h1) -= no_aab_contraction(p1,h2,p2,h1)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  !$OMP DO 
+  do h1 = 1, mo_num
+    do h2 = 1, mo_num
+      do p1 = 2, mo_num
+        do p2 = 1, p1-1
+          no_aab_contraction(p2,h2,p1,h1) = -no_aab_contraction(p1,h2,p2,h1)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  !$OMP DO 
+  do h1 = 1, mo_num-1
+    do h2 = h1+1, mo_num
+      do p1 = 2, mo_num
+        do p2 = 1, p1-1
+          no_aab_contraction(p2,h2,p1,h1) *= -1.d0
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(wall1)
+  print*,' Wall time for no_aab_contraction', wall1-wall0
+
+END_PROVIDER
+
+! ---
