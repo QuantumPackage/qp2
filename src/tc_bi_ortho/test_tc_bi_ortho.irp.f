@@ -18,10 +18,10 @@ program tc_bi_ortho
 ! call timing_single
 ! call timing_double
 
-  !call test_no()
-  call test_no_aba()
-  call test_no_aab()
-  call test_no_aaa()
+  call test_no()
+  !call test_no_aba()
+  !call test_no_aab()
+  !call test_no_aaa()
 end
 
 subroutine test_h_u0
