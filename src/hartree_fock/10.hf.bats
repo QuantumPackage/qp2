@@ -48,6 +48,35 @@ good=-92.76613324421798
 rm -rf $EZFIO
 }
 
+
+@test "H2_1" { # 1s
+  run h2_1.ezfio -1.005924963288527
+}
+
+@test "H2_3" { # 1s
+  run h2_3.ezfio -0.9591011604845440
+}
+
+@test "H3_2" { # 1s
+  run h3_2.ezfio -1.558273529860488
+}
+
+@test "H3_4" { # 1s
+  run h3_4.ezfio -1.0158684760025190
+}
+
+@test "H4_1" { # 1s
+  run h4_1.ezfio -1.932022805374405
+}
+
+@test "H4_3" { # 1s
+  run h4_3.ezfio -1.8948449927787350
+}
+
+@test "H4_5" { # 1s
+  run h4_5.ezfio -1.2408338805496990
+}
+
 @test "point charges" { 
  run_pt_charges
 }

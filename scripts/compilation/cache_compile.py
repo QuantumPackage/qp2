@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Save the .o from a .f90
-and is the .o is asked a second time, retur it
+and is the .o is asked a second time, return it
 Take in argv command like:
      ifort -g  -openmp -I IRPF90_temp/Ezfio_files/ -c IRPF90_temp/Integrals_Monoelec/kin_ao_ints.irp.module.F90 -o IRPF90_temp/Integrals_Monoelec/kin_ao_ints.irp.module.o
 """
