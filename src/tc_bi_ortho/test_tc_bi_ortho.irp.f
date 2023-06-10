@@ -21,6 +21,7 @@ program tc_bi_ortho
   !call test_no()
   call test_no_aba()
   call test_no_aab()
+  call test_no_aaa()
 end
 
 subroutine test_h_u0
@@ -382,4 +383,43 @@ end
 
 ! ---
 
+subroutine test_no_aaa()
 
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr
+
+  print*, ' testing no_aaa_contraction ...'
+
+  thr = 1d-8
+
+  PROVIDE no_aaa_contraction_v0
+  PROVIDE no_aaa_contraction
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = no_aaa_contraction   (l,k,j,i)
+          ref = no_aaa_contraction_v0(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem on no_aaa_contraction'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on no_aaa_contraction = ', accu / dble(mo_num)**4
+
+ return
+end
+
+! ---
