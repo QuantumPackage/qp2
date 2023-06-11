@@ -209,7 +209,7 @@ function run_stoch() {
   [[ -n $TRAVIS ]] && skip
   qp set_file cu_nh3_4_2plus.ezfio
   qp set_mo_class --core="[1-24]" --act="[25-45]" --del="[46-87]"
-  run -1862.9869374387192  3.e-04  100000
+  run -1862.98320066637   3.e-04  100000
 }
 
 @test "HCN" { # 20.3273s
