@@ -1831,7 +1831,7 @@ double precision, intent(in)     :: tol
 
 integer, dimension(:), allocatable          :: piv
 double precision, dimension(:), allocatable :: work
-character, parameter :: uplo = "U"
+character, parameter :: uplo = 'L'
 integer :: LDA
 integer :: info
 integer :: k, l, rank0
@@ -1848,14 +1848,14 @@ if (rank > rank0) then
 end if
 
 do k = 1, ndim
-  A(k+1:ndim, k) = 0.00D+0
+  A(k,k+1:ndim) = 0.00D+0
 end do
 ! TODO: It should be possible to use only one vector of size (1:rank) as a buffer
 ! to do the swapping in-place
 U(:,:) = 0.00D+0
 do k = 1, ndim
   l = piv(k)
-  U(l, 1:rank) = A(1:rank, k)
+  U(l, 1:rank) = A(k,1:rank)
 end do
 
 end subroutine pivoted_cholesky
