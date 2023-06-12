@@ -4,7 +4,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num_guess ]
  ! Number of Cholesky vectors in AO basis
  END_DOC
 
- cholesky_ao_num_guess = ao_num*ao_num / 2
+ cholesky_ao_num_guess = ao_num*ao_num 
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer, cholesky_ao_num ]
@@ -44,19 +44,12 @@ END_PROVIDER
    do m=0,9
      do l=1+m,ao_num,10
        !$OMP DO SCHEDULE(dynamic)
-       do j=1,l
+       do j=1,ao_num
          do k=1,ao_num
-           do i=1,min(k,j)
+           do i=1,ao_num
              if (ao_two_e_integral_zero(i,j,k,l)) cycle
              integral = get_ao_two_e_integral(i,j,k,l, ao_integrals_map)
              ao_integrals(i,k,j,l) = integral
-             ao_integrals(k,i,j,l) = integral
-             ao_integrals(i,k,l,j) = integral
-             ao_integrals(k,i,l,j) = integral
-             ao_integrals(j,l,i,k) = integral
-             ao_integrals(j,l,k,i) = integral
-             ao_integrals(l,j,i,k) = integral
-             ao_integrals(l,j,k,i) = integral
            enddo
          enddo
        enddo
