@@ -91,16 +91,17 @@ subroutine write_t1(nO,nV,t1)
   double precision, intent(in) :: t1(nO, nV)
 
   ! internal
-  integer                      :: i,a
+  integer                      :: i,a, iunit
+  integer, external :: getunitandopen
 
-  if (cc_write_t1) then
-    open(unit=11, file=trim(ezfio_filename)//'/cc_utils/T1')
+  if (write_amplitudes) then
+    iunit = getUnitAndOpen(trim(ezfio_filename)//'/work/T1','w')
     do a = 1, nV
       do i = 1, nO
-         write(11,'(F20.12)') t1(i,a)
+         write(iunit,'(F20.12)') t1(i,a)
       enddo
     enddo
-    close(11)
+    close(iunit)
   endif
   
 end
@@ -120,20 +121,21 @@ subroutine write_t2(nO,nV,t2)
   double precision, intent(in) :: t2(nO, nO, nV, nV)
 
   ! internal
-  integer                      :: i,j,a,b
+  integer                      :: i,j,a,b, iunit
+  integer, external :: getunitandopen
 
-  if (cc_write_t2) then
-    open(unit=11, file=trim(ezfio_filename)//'/cc_utils/T2')
+  if (write_amplitudes) then
+    iunit = getUnitAndOpen(trim(ezfio_filename)//'/work/T2','w')
     do b = 1, nV
       do a = 1, nV
         do j = 1, nO
           do i = 1, nO
-             write(11,'(F20.12)') t2(i,j,a,b)
+             write(iunit,'(F20.12)') t2(i,j,a,b)
           enddo
         enddo
       enddo
     enddo
-    close(11)
+    close(iunit)
   endif
   
 end
@@ -153,23 +155,19 @@ subroutine read_t1(nO,nV,t1)
   double precision, intent(out) :: t1(nO, nV)
 
   ! internal
-  integer                       :: i,a
+  integer                       :: i,a, iunit
   logical                       :: ok
+  integer, external :: getunitandopen
 
-  inquire(file=trim(ezfio_filename)//'/cc_utils/T1', exist=ok)
-  if (.not. ok) then
-     print*, 'There is no file'// trim(ezfio_filename)//'/cc_utils/T1'
-     print*, 'Do a first calculation with cc_write_t1 = True'
-     print*, 'and cc_guess_t1 /= read before setting cc_guess_t1 = read'
-     call abort
-  endif
-  open(unit=11, file=trim(ezfio_filename)//'/cc_utils/T1')
-  do a = 1, nV
-    do i = 1, nO
-       read(11,'(F20.12)') t1(i,a)
+  if (read_amplitudes) then
+    iunit = getUnitAndOpen(trim(ezfio_filename)//'/work/T1','r')
+    do a = 1, nV
+      do i = 1, nO
+         read(iunit,'(F20.12)') t1(i,a)
+      enddo
     enddo
-  enddo
-  close(11)
+    close(iunit)
+  endif
   
 end
 
@@ -188,26 +186,23 @@ subroutine read_t2(nO,nV,t2)
   double precision, intent(out) :: t2(nO, nO, nV, nV)
 
   ! internal
-  integer                       :: i,j,a,b
+  integer                       :: i,j,a,b, iunit
   logical                       :: ok
 
-  inquire(file=trim(ezfio_filename)//'/cc_utils/T1', exist=ok)
-  if (.not. ok) then
-     print*, 'There is no file'// trim(ezfio_filename)//'/cc_utils/T1'
-     print*, 'Do a first calculation with cc_write_t2 = True'
-     print*, 'and cc_guess_t2 /= read before setting cc_guess_t2 = read'
-     call abort
-  endif
-  open(unit=11, file=trim(ezfio_filename)//'/cc_utils/T2')
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-           read(11,'(F20.12)') t2(i,j,a,b)
+  integer, external :: getunitandopen
+
+  if (read_amplitudes) then
+    iunit = getUnitAndOpen(trim(ezfio_filename)//'/work/T2','r')
+    do b = 1, nV
+      do a = 1, nV
+        do j = 1, nO
+          do i = 1, nO
+             read(iunit,'(F20.12)') t2(i,j,a,b)
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  close(11)
+    close(iunit)
+  endif
   
 end

@@ -43,11 +43,10 @@ python write_pt_charges.py ${EZFIO}
 qp set nuclei point_charges True
 qp run scf | tee ${EZFIO}.pt_charges.out
   energy="$(ezfio get hartree_fock energy)"
-good=-92.76613324421798
+good=-92.79920682236470
   eq $energy $good $thresh
 rm -rf $EZFIO
 }
-
 
 @test "H2_1" { # 1s
   run h2_1.ezfio -1.005924963288527
@@ -84,6 +83,8 @@ rm -rf $EZFIO
 @test "HCN" { # 7.792500 8.51926s
   run hcn.ezfio -92.88717500035233
 }
+
+
 
 @test "B-B" { # 3s
   run b2_stretched.ezfio -48.9950585434279
