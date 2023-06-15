@@ -27,6 +27,8 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_ao_num, mo_num,
  double precision, allocatable :: buffer(:,:)
 
  print *, 'AO->MO Transformation of Cholesky vectors  .'
+
+ call set_multiple_levels_omp(.False.)
  !$OMP PARALLEL PRIVATE(i,j,k,buffer)
  allocate(buffer(mo_num,mo_num))
  !$OMP DO SCHEDULE(static)

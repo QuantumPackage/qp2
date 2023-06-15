@@ -135,8 +135,11 @@ subroutine run_ccsd_space_orb
   write(*,'(A15,1pE10.2,A3)')' Conv        = ', max_r
   print*,''
 
-  call write_t1(nO,nV,t1)
-  call write_t2(nO,nV,t2)
+  if (write_amplitudes) then
+    call write_t1(nO,nV,t1)
+    call write_t2(nO,nV,t2)
+    call ezfio_set_utils_cc_io_amplitudes('Read')
+  endif
 
   ! Deallocation
   if (cc_update_method == 'diis') then
@@ -147,6 +150,7 @@ subroutine run_ccsd_space_orb
 
   ! CCSD(T)
   double precision :: e_t
+  e_t = 0.d0
 
   if (cc_par_t .and. elec_alpha_num + elec_beta_num > 2) then
 
@@ -182,8 +186,7 @@ subroutine run_ccsd_space_orb
     print*,''
   endif
 
-  print*,'Reference determinant:'
-  call print_det(det,N_int)
+  call save_energy(uncorr_energy + energy, e_t)
 
   deallocate(t1,t2)
 

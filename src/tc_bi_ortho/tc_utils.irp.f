@@ -38,15 +38,16 @@ subroutine write_tc_var()
 
   implicit none
   integer          :: i, j, k
-  double precision :: hmono, htwoe, hthree, htot
+  double precision :: hmono, htwoe, hthree, htot_1j, htot_j1
   double precision :: SIGMA_TC
 
   do k = 1, n_states
 
     SIGMA_TC = 0.d0
     do j = 2, N_det
-      call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,1), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot)
-      SIGMA_TC = SIGMA_TC + htot * htot
+      call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,1), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot_1j)
+      call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot_j1)
+      SIGMA_TC = SIGMA_TC + htot_1j * htot_j1
     enddo
 
     print *, " state    : ", k

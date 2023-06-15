@@ -11,12 +11,14 @@ program tc_bi_ortho
   touch read_wf
   touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
- call test_h_u0
+! call test_h_u0
 ! call test_slater_tc_opt
 ! call timing_tot
 ! call timing_diag
 ! call timing_single
 ! call timing_double
+
+  call test_no()
 end
 
 subroutine test_h_u0
@@ -251,4 +253,48 @@ subroutine timing_double
  print*,'time for new hij for doubles = ',accu
 
 end
+
+! ---
+
+subroutine test_no()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr
+
+  print*, ' testing normal_two_body_bi_orth ...'
+
+  thr = 1d-8
+
+  PROVIDE normal_two_body_bi_orth_old
+  PROVIDE normal_two_body_bi_orth
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = normal_two_body_bi_orth    (l,k,j,i)
+          ref = normal_two_body_bi_orth_old(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem on normal_two_body_bi_orth'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on normal_two_body_bi_orth = ', accu / dble(mo_num)**4
+
+ return
+end
+
+! ---
+
 
