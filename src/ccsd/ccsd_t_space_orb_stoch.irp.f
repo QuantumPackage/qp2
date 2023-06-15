@@ -104,17 +104,17 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   integer*8, allocatable :: sampled(:)
 !  integer(omp_lock_kind), allocatable :: lock(:)
   integer*2       , allocatable :: abc(:,:)
-  integer*8                     :: Nabc, i8
+  integer*8                     :: Nabc, i8,kiter
   integer*8, allocatable :: iorder(:)
   double precision :: eocc
   double precision :: norm
-  integer :: kiter, isample
+  integer :: isample
 
 
   ! Prepare table of triplets (a,b,c)
 
   Nabc = (int(nV,8) * int(nV+1,8) * int(nV+2,8))/6_8 - nV
-  allocate (memo(Nabc), sampled(Nabc), Pabc(Nabc), waccu(Nabc))
+  allocate (memo(Nabc), sampled(Nabc), Pabc(Nabc), waccu(0:Nabc))
   allocate (abc(4,Nabc), iorder(Nabc)) !, lock(Nabc))
 
 !  eocc = 3.d0/dble(nO) * sum(f_o(1:nO))
@@ -124,21 +124,21 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       do c = b+1, nV
         Nabc = Nabc + 1_8
         Pabc(Nabc) = -1.d0/(f_v(a) + f_v(b) + f_v(c))
-        abc(1,Nabc) = a
-        abc(2,Nabc) = b
-        abc(3,Nabc) = c
+        abc(1,Nabc) = int(a,2)
+        abc(2,Nabc) = int(b,2)
+        abc(3,Nabc) = int(c,2)
       enddo
 
       Nabc = Nabc + 1_8
-      abc(1,Nabc) = a
-      abc(2,Nabc) = b
-      abc(3,Nabc) = a
+      abc(1,Nabc) = int(a,2)
+      abc(2,Nabc) = int(b,2)
+      abc(3,Nabc) = int(a,2)
       Pabc(Nabc) = -1.d0/(2.d0*f_v(a) + f_v(b))
 
       Nabc = Nabc + 1_8
-      abc(1,Nabc) = b
-      abc(2,Nabc) = a
-      abc(3,Nabc) = b
+      abc(1,Nabc) = int(b,2)
+      abc(2,Nabc) = int(a,2)
+      abc(3,Nabc) = int(b,2)
       Pabc(Nabc) = -1.d0/(f_v(a) + 2.d0*f_v(b))
     enddo
   enddo
@@ -169,6 +169,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
    waccu(i8) = waccu(i8+1) - Pabc(i8+1)
   enddo
   waccu(:) = waccu(:) + 1.d0
+  waccu(0) = 0.d0
 
   logical :: converged, do_comp
   double precision :: eta, variance, error, sample
@@ -222,8 +223,12 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   do kiter=1,Nabc
 
     !$OMP MASTER
-    do while ((imin <= Nabc).and.(sampled(imin)>-1_8))
-      imin = imin+1
+    do while (imin <= Nabc)
+      if (sampled(imin)>-1_8) then
+        imin = imin+1
+      else
+        exit
+      endif
     enddo
 
     ! Deterministic part
@@ -301,6 +306,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
         endif
       enddo
 
+      isample = min(isample,nbuckets)
       do ieta=bounds(1,isample), Nabc
           w = dble(max(sampled(ieta),0_8))
           tmp = w * memo(ieta) * Pabc(ieta)
@@ -331,33 +337,39 @@ end
 
 
 
-integer*8 function binary_search(arr, key, size)
+integer*8 function binary_search(arr, key, sze)
     implicit none
     BEGIN_DOC
-! Searches the key in array arr(1:size) between l_in and r_in, and returns its index
+! Searches the key in array arr(1:sze) between l_in and r_in, and returns its index
     END_DOC
-    integer*8 :: size, i, j, mid, l_in, r_in
-    double precision, dimension(size) :: arr(1:size)
+    integer*8 :: sze, i, j, mid
+    double precision :: arr(0:sze)
     double precision :: key
 
-    i = 1_8
-    j = size
+    if ( key < arr(1) ) then
+      binary_search = 0_8
+      return 
+    end if
 
-    do while (j >= i)
-        mid = i + (j - i) / 2
-        if (arr(mid) >= key) then
-            if (mid > 1 .and. arr(mid - 1) < key) then
-                binary_search = mid
-                return
-            end if
-            j = mid - 1
-        else if (arr(mid) < key) then
-            i = mid + 1
-        else
-            binary_search = mid + 1
-            return
-        end if
+    if ( key >= arr(sze) ) then
+      binary_search = sze
+      return 
+    end if
+
+    i = 0_8
+    j = sze + 1_8
+
+    do while (.True.)
+      mid = (i + j) / 2_8
+      if ( key >= arr(mid) ) then
+        i = mid
+      else
+        j = mid
+      end if
+      if (j-i <= 1_8) then
+        binary_search = i
+        return
+      endif
     end do
-    binary_search = i
 end function binary_search
 
