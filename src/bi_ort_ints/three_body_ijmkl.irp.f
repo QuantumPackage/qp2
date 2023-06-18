@@ -65,7 +65,7 @@ end
 
   tmp_mat = 0.d0
   call print_memory_usage
-!
+
   do m = 1, mo_num
 
     allocate(grad_mli(n_points_final_grid,mo_num))

@@ -137,6 +137,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   do j = 1, 2
     k = 1
     do i = 1, n1(j)
+       if (k > n_anni(j)) exit
        if (l1(i,j) /= list_anni(k,j)) cycle
        pos_anni(k,j) = i
        k = k + 1
@@ -147,6 +148,7 @@ subroutine get_excitation_general(det1,det2,degree,n,list_anni,list_crea,phase,N
   do j = 1, 2
     k = 1
     do i = 1, n2(j)
+       if (k > n_crea(j)) exit
        if (l2(i,j) /= list_crea(k,j)) cycle
        pos_crea(k,j) = i
        k = k + 1
