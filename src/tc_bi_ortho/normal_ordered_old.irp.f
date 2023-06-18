@@ -120,6 +120,13 @@ END_PROVIDER
 subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
 
   use bitmasks ! you need to include the bitmasks_module.f90 features
+  BEGIN_DOC
+!  give the contribution for a double excitation of opposite spin BUT averaged over spin
+!
+! it is the average of <p1_down p2_up |h1_down h2_up> and <p1_up p2_down |h1_up h2_down> 
+!
+! because the orbitals h1,h2,p1,p2 are spatial orbitals and therefore can be of different spins
+  END_DOC
 
   implicit none
   integer, intent(in)           :: Nint, h1, h2, p1, p2
@@ -158,7 +165,8 @@ subroutine give_aba_contraction(Nint, h1, h2, p1, p2, Ne, occ, hthree)
     call give_integrals_3_body_bi_ort(p2, i, p1, i, h2, h1, integral)
     int_exc_12 = -1.d0 * integral
 
-    hthree += 1.d0 * int_direct - 0.5d0 * (int_exc_13 + int_exc_12)
+    hthree += 1.d0 * int_direct - 0.5d0 * (int_exc_13 + int_exc_12) ! spin average
+!    hthree += 1.d0 * int_direct - 1.0d0 * (int_exc_13 + int_exc_12)
   enddo
 
   return
