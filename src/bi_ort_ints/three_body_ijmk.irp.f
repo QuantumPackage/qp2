@@ -97,7 +97,7 @@
             , tmp3, 3*n_points_final_grid, tmp1, 3*n_points_final_grid            &
             , 0.d0, tmp_4d, mo_num*mo_num)
 
-  deallocate(tmp1)
+!  deallocate(tmp1)
 
   !$OMP PARALLEL DO PRIVATE(i,j,k,m)
   do i = 1, mo_num
@@ -112,7 +112,7 @@
   !$OMP END PARALLEL DO
 
 
-
+!  allocate(tmp1(n_points_final_grid, 2, mo_num, mo_num))
   !$OMP PARALLEL                                                  &
   !$OMP DEFAULT (NONE)                                            &
   !$OMP PRIVATE (i, l, ipoint)                                    &
@@ -195,7 +195,7 @@
             , tmp1, 3*n_points_final_grid, int2_grad1_u12_bimo_t, 3*n_points_final_grid &
             , 0.d0, tmp_4d, mo_num*mo_num)
 
-  deallocate(tmp1)
+!  deallocate(tmp1)
 
   !$OMP PARALLEL DO PRIVATE(i,j,k,m)
   do i = 1, mo_num
