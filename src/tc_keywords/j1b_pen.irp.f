@@ -63,7 +63,6 @@
   IRP_ENDIF
 
   IRP_IF MPI
-    include 'mpif.h'
     call MPI_BCAST(j1b_pen_coef, (nucl_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) then
       stop 'Unable to read j1b_pen_coef with MPI'
