@@ -296,7 +296,7 @@ double precision function j1b_nucl(r)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl = j1b_nucl - dexp(-a*d)
+      j1b_nucl = j1b_nucl - j1b_pen_coef(i) * dexp(-a*d)
     enddo
 
   elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
@@ -363,7 +363,7 @@ double precision function j1b_nucl_square(r)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl_square = j1b_nucl_square - dexp(-a*d)
+      j1b_nucl_square = j1b_nucl_square - j1b_pen_coef(i) * dexp(-a*d)
     enddo
     j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
 
@@ -475,7 +475,7 @@ subroutine grad1_j1b_nucl(r, grad)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      e = a * dexp(-a*d)
+      e = a * j1b_pen_coef(i) * dexp(-a*d)
 
       fact_x += e * x
       fact_y += e * y

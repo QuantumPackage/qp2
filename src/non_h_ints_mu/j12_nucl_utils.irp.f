@@ -35,7 +35,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
 
   elseif(j1b_type .eq. 4) then
 
-    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+    ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
     do ipoint = 1, n_points_final_grid
 
@@ -51,7 +51,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
         dz = z - nucl_coord(j,3)
         d  = dx*dx + dy*dy + dz*dz
 
-        fact_r = fact_r - dexp(-a*d)
+        fact_r = fact_r - j1b_pen_coef(j) * dexp(-a*d)
       enddo
 
       v_1b(ipoint) = fact_r
@@ -125,7 +125,7 @@ BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
 
   elseif(j1b_type .eq. 4) then
 
-    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+    ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
     do ipoint = 1, n_points_final_grid
 
@@ -144,7 +144,7 @@ BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
         r2 = dx*dx + dy*dy + dz*dz
 
         a = j1b_pen(j)
-        e = a * dexp(-a * r2)
+        e = a * j1b_pen_coef(j) * dexp(-a * r2)
 
         ax_der += e * dx
         ay_der += e * dy
