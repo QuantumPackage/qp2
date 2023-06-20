@@ -1,4 +1,3 @@
-
 ! ---
 
 subroutine provide_all_three_ints_bi_ortho()
