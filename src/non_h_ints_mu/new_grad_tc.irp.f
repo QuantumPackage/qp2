@@ -284,6 +284,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_and_lapl_ao = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER 
 

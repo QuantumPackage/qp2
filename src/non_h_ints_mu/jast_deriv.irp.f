@@ -187,6 +187,19 @@ end function j12_mu
 
 subroutine grad1_j12_mu(r1, r2, grad)
 
+  BEGIN_DOC
+!  gradient of j(mu(r1,r2),r12) form of jastrow. 
+!
+! if mu(r1,r2) = cst ---> j1b_type < 200 and 
+!
+!  d/dx1 j(mu,r12) = 0.5 * (1 - erf(mu *r12))/r12 * (x1 - x2)
+!
+! if mu(r1,r2) /= cst ---> 200 < j1b_type < 300 and 
+!
+! d/dx1 j(mu(r1,r2),r12) = exp(-(mu(r1,r2)*r12)**2) /(2 *sqrt(pi) * mu(r1,r2)**2 )   d/dx1 mu(r1,r2) 
+!
+!                          + 0.5 * (1 - erf(mu(r1,r2) *r12))/r12 * (x1 - x2)
+  END_DOC
   include 'constants.include.F'
 
   implicit none
@@ -283,7 +296,7 @@ double precision function j1b_nucl(r)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl = j1b_nucl - dexp(-a*d)
+      j1b_nucl = j1b_nucl - j1b_pen_coef(i) * dexp(-a*d)
     enddo
 
   elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
@@ -350,7 +363,7 @@ double precision function j1b_nucl_square(r)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl_square = j1b_nucl_square - dexp(-a*d)
+      j1b_nucl_square = j1b_nucl_square - j1b_pen_coef(i) * dexp(-a*d)
     enddo
     j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
 
@@ -462,7 +475,7 @@ subroutine grad1_j1b_nucl(r, grad)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      e = a * dexp(-a*d)
+      e = a * j1b_pen_coef(i) * dexp(-a*d)
 
       fact_x += e * x
       fact_y += e * y
@@ -515,6 +528,9 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
   double precision              :: r(3)
   double precision              :: dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
   double precision              :: dm_tot, tmp1, tmp2, tmp3
+  double precision :: rho1, grad_rho1(3),rho2,rho_tot,inv_rho_tot
+  double precision :: f_rho1, f_rho2, d_drho_f_rho1
+  double precision :: d_dx1_f_rho1(3),d_dx_rho_f_rho(3),nume
 
   if(j1b_type .eq. 200) then
 
@@ -578,8 +594,84 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     mu_der(2) = tmp3 * (grad_dm_a(2,1) + grad_dm_b(2,1))
     mu_der(3) = tmp3 * (grad_dm_a(3,1) + grad_dm_b(3,1))
 
-  else
+  elseif(j1b_type .eq. 202) then
 
+    ! mu(r1,r2) = {rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]} / RHO
+    !
+    ! RHO = rho(r1) + rho(r2)
+    !
+    ! f[rho] = alpha rho^beta + mu0 exp(-rho)
+    !
+    ! d/dx1 mu(r1,r2) = 1/RHO^2 * {RHO * d/dx1 (rho(r1) f[rho(r1)]) 
+    !                              - d/dx1 rho(r1) * [rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]] }
+    !
+    ! d/dx1 f[rho(r1)] = [0.5 alpha / sqrt(rho(r1)) - mu0 exp(-rho(r1))] (d rho(r1) / dx1)
+    !
+    ! d/dx1 (rho(r1) f[rho(r1)] = rho(r1) * d/dx1 f[rho(r1)] + f[rho(r1)] * d/dx1 rho(r1)
+     
+    !!!!!!!!! rho1,rho2,rho1+rho2
+    call get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
+    rho_tot = rho1 + rho2
+    if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
+    inv_rho_tot = 1.d0/rho_tot
+    ! f(rho) = mu_r_ct * rho**beta_rho_power + mu_erf * exp(-rho)
+    call get_all_f_rho(rho1,rho2,mu_r_ct,mu_erf,beta_rho_power,f_rho1,d_drho_f_rho1,f_rho2)
+    d_dx1_f_rho1(1:3)   = d_drho_f_rho1 * grad_rho1(1:3)
+    d_dx_rho_f_rho(1:3) = rho1 * d_dx1_f_rho1(1:3) + f_rho1 * grad_rho1(1:3)
+    nume   = rho1 * f_rho1 + rho2 * f_rho2
+    mu_val = nume * inv_rho_tot
+    mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
+  elseif(j1b_type .eq. 203) then
+
+    ! mu(r1,r2) = {rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]} / RHO
+    !
+    ! RHO = rho(r1) + rho(r2)
+    !
+    ! f[rho] = alpha rho^beta + mu0 
+    !
+    ! d/dx1 mu(r1,r2) = 1/RHO^2 * {RHO * d/dx1 (rho(r1) f[rho(r1)]) 
+    !                              - d/dx1 rho(r1) * [rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]] }
+    !
+    ! d/dx1 f[rho(r1)] = [0.5 alpha / sqrt(rho(r1)) ] (d rho(r1) / dx1)
+    !
+    ! d/dx1 (rho(r1) f[rho(r1)] = rho(r1) * d/dx1 f[rho(r1)] + f[rho(r1)] * d/dx1 rho(r1)
+     
+    !!!!!!!!! rho1,rho2,rho1+rho2
+    call get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
+    rho_tot = rho1 + rho2
+    if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
+    inv_rho_tot = 1.d0/rho_tot
+    ! f(rho) = mu_r_ct * rho**beta_rho_power + mu_erf 
+    call get_all_f_rho_simple(rho1,rho2,mu_r_ct,mu_erf,beta_rho_power,f_rho1,d_drho_f_rho1,f_rho2)
+    d_dx1_f_rho1(1:3)   = d_drho_f_rho1 * grad_rho1(1:3)
+    d_dx_rho_f_rho(1:3) = rho1 * d_dx1_f_rho1(1:3) + f_rho1 * grad_rho1(1:3)
+    nume   = rho1 * f_rho1 + rho2 * f_rho2
+    mu_val = nume * inv_rho_tot
+    mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
+  elseif(j1b_type .eq. 204) then
+
+    ! mu(r1,r2) = 1/2 * (f[rho(r1)] + f[rho(r2)]} 
+    !
+    ! f[rho] = alpha rho^beta + mu0 
+    !
+    ! d/dx1 mu(r1,r2) = 1/2 * d/dx1 (rho(r1) f[rho(r1)])
+    !                   
+    ! d/dx1 f[rho(r1)] = [0.5 alpha / sqrt(rho(r1)) ] (d rho(r1) / dx1)
+    !
+    ! d/dx1 (rho(r1) f[rho(r1)] = rho(r1) * d/dx1 f[rho(r1)] + f[rho(r1)] * d/dx1 rho(r1)
+     
+    !!!!!!!!! rho1,rho2,rho1+rho2
+    call get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
+    rho_tot = rho1 + rho2
+    if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
+    inv_rho_tot = 1.d0/rho_tot
+    ! f(rho) = mu_r_ct * rho**beta_rho_power + mu_erf 
+    call get_all_f_rho_simple(rho1,rho2,mu_r_ct,mu_erf,beta_rho_power,f_rho1,d_drho_f_rho1,f_rho2)
+    d_dx1_f_rho1(1:3)   = d_drho_f_rho1 * grad_rho1(1:3)
+    d_dx_rho_f_rho(1:3) = rho1 * d_dx1_f_rho1(1:3) + f_rho1 * grad_rho1(1:3)
+    mu_val = 0.5d0 * ( f_rho1 + f_rho2)
+    mu_der(1:3) = d_dx_rho_f_rho(1:3) 
+  else
     print *, ' j1b_type = ', j1b_type, 'not implemented yet'
     stop
 
@@ -683,4 +775,77 @@ double precision function j12_mu_square(r1, r2)
 end function j12_mu_square
 
 ! ---
+
+subroutine f_mu_and_deriv_mu(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
+ implicit none
+ BEGIN_DOC
+! function giving mu as a function of rho
+!
+! f_mu = alpha * rho**beta + mu0 * exp(-rho)
+!
+! and its derivative with respect to rho d_drho_f_mu
+ END_DOC
+ double precision, intent(in)  :: rho,alpha,mu0,beta
+ double precision, intent(out) :: f_mu,d_drho_f_mu
+ f_mu = alpha * (rho)**beta + mu0 * dexp(-rho)
+ d_drho_f_mu = alpha * beta * rho**(beta-1.d0) - mu0 * dexp(-rho)
+
+end
+
+
+subroutine get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
+ implicit none
+ BEGIN_DOC
+! returns the density in r1,r2 and grad_rho at r1
+ END_DOC
+ double precision, intent(in) :: r1(3),r2(3)
+ double precision, intent(out):: grad_rho1(3),rho1,rho2
+ double precision              :: dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
+ call density_and_grad_alpha_beta(r1, dm_a, dm_b, grad_dm_a, grad_dm_b)
+ rho1 = dm_a(1) + dm_b(1)
+ grad_rho1(1:3) = grad_dm_a(1:3,1) + grad_dm_b(1:3,1)
+ call density_and_grad_alpha_beta(r2, dm_a, dm_b, grad_dm_a, grad_dm_b)
+ rho2 = dm_a(1) + dm_b(1)
+end
+
+subroutine get_all_f_rho(rho1,rho2,alpha,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
+ implicit none
+ BEGIN_DOC
+! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+ END_DOC
+ double precision, intent(in) :: rho1,rho2,alpha,mu0,beta
+ double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
+ double precision :: tmp
+ call f_mu_and_deriv_mu(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
+ call f_mu_and_deriv_mu(rho2,alpha,mu0,beta,f_rho2,tmp)
+end
+
+
+subroutine get_all_f_rho_simple(rho1,rho2,alpha,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
+ implicit none
+ BEGIN_DOC
+! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+ END_DOC
+ double precision, intent(in) :: rho1,rho2,alpha,mu0,beta
+ double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
+ double precision :: tmp
+ call f_mu_and_deriv_mu_simple(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
+ call f_mu_and_deriv_mu_simple(rho2,alpha,mu0,beta,f_rho2,tmp)
+end
+
+subroutine f_mu_and_deriv_mu_simple(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
+ implicit none
+ BEGIN_DOC
+! function giving mu as a function of rho
+!
+! f_mu = alpha * rho**beta + mu0 
+!
+! and its derivative with respect to rho d_drho_f_mu
+ END_DOC
+ double precision, intent(in)  :: rho,alpha,mu0,beta
+ double precision, intent(out) :: f_mu,d_drho_f_mu
+ f_mu = alpha * (rho)**beta + mu0 
+ d_drho_f_mu = alpha * beta * rho**(beta-1.d0) 
+
+end
 

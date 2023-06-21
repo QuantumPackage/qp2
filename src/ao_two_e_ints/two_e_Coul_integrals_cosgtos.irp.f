@@ -29,14 +29,14 @@ double precision function ao_two_e_integral_cosgtos(i, j, k, l)
   complex*16          :: integral5, integral6, integral7, integral8
   complex*16          :: integral_tot
 
-  double precision    :: ao_two_e_integral_cosgtos_schwartz_accel
+  double precision    :: ao_2e_cosgtos_schwartz_accel
   complex*16          :: ERI_cosgtos
   complex*16          :: general_primitive_integral_cosgtos
 
   if(ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024) then
 
     !print *, ' with shwartz acc '
-    ao_two_e_integral_cosgtos = ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
+    ao_two_e_integral_cosgtos = ao_2e_cosgtos_schwartz_accel(i, j, k, l)
 
   else
     !print *, ' without shwartz acc '
@@ -294,7 +294,7 @@ end function ao_two_e_integral_cosgtos
 
 ! ---
 
-double precision function ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
+double precision function ao_2e_cosgtos_schwartz_accel(i, j, k, l)
 
   BEGIN_DOC
   !  integral of the AO basis <ik|jl> or (ij|kl)
@@ -329,7 +329,7 @@ double precision function ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
   complex*16                    :: ERI_cosgtos
   complex*16                    :: general_primitive_integral_cosgtos
 
-  ao_two_e_integral_cosgtos_schwartz_accel = 0.d0
+  ao_2e_cosgtos_schwartz_accel = 0.d0
 
   dim1 = n_pt_max_integrals
 
@@ -519,8 +519,7 @@ double precision function ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
 
             integral_tot = integral1 + integral2 + integral3 + integral4 + integral5 + integral6 + integral7 + integral8
 
-            ao_two_e_integral_cosgtos_schwartz_accel = ao_two_e_integral_cosgtos_schwartz_accel &
-                                                     + coef4 * 2.d0 * real(integral_tot)
+            ao_2e_cosgtos_schwartz_accel = ao_2e_cosgtos_schwartz_accel + coef4 * 2.d0 * real(integral_tot)
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -698,8 +697,7 @@ double precision function ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
 
             integral_tot = integral1 + integral2 + integral3 + integral4 + integral5 + integral6 + integral7 + integral8
 
-            ao_two_e_integral_cosgtos_schwartz_accel = ao_two_e_integral_cosgtos_schwartz_accel &
-                                      + coef4 * 2.d0 * real(integral_tot)
+            ao_2e_cosgtos_schwartz_accel = ao_2e_cosgtos_schwartz_accel + coef4 * 2.d0 * real(integral_tot)
           enddo ! s
         enddo  ! r
       enddo   ! q
@@ -709,11 +707,11 @@ double precision function ao_two_e_integral_cosgtos_schwartz_accel(i, j, k, l)
 
   deallocate(schwartz_kl)
 
-end function ao_two_e_integral_cosgtos_schwartz_accel
+end function ao_2e_cosgtos_schwartz_accel
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, ao_two_e_integral_cosgtos_schwartz, (ao_num,ao_num)  ]
+BEGIN_PROVIDER [ double precision, ao_2e_cosgtos_schwartz, (ao_num,ao_num)]
 
   BEGIN_DOC
   !  Needed to compute Schwartz inequalities
@@ -723,16 +721,16 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_cosgtos_schwartz, (ao_num,a
   integer          :: i, k
   double precision :: ao_two_e_integral_cosgtos
 
-  ao_two_e_integral_cosgtos_schwartz(1,1) = ao_two_e_integral_cosgtos(1, 1, 1, 1)
+  ao_2e_cosgtos_schwartz(1,1) = ao_two_e_integral_cosgtos(1, 1, 1, 1)
 
- !$OMP PARALLEL DO PRIVATE(i,k)                                       &
- !$OMP             DEFAULT(NONE)                                      &
- !$OMP             SHARED(ao_num, ao_two_e_integral_cosgtos_schwartz) &
+ !$OMP PARALLEL DO PRIVATE(i,k)                           &
+ !$OMP             DEFAULT(NONE)                          &
+ !$OMP             SHARED(ao_num, ao_2e_cosgtos_schwartz) &
  !$OMP             SCHEDULE(dynamic)
   do i = 1, ao_num
     do k = 1, i
-      ao_two_e_integral_cosgtos_schwartz(i,k) = dsqrt(ao_two_e_integral_cosgtos(i, i, k, k))
-      ao_two_e_integral_cosgtos_schwartz(k,i) = ao_two_e_integral_cosgtos_schwartz(i,k)
+      ao_2e_cosgtos_schwartz(i,k) = dsqrt(ao_two_e_integral_cosgtos(i, i, k, k))
+      ao_2e_cosgtos_schwartz(k,i) = ao_2e_cosgtos_schwartz(i,k)
     enddo
   enddo
  !$OMP END PARALLEL DO

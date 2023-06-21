@@ -868,7 +868,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         ! <det|H(j)|psi_0> and transpose
         ! -------------------------------------------
 
-!        call htilde_mu_mat_bi_ortho_tot(det, det, N_int, Hii)
         double precision               :: hmono, htwoe, hthree
         call diag_htilde_mu_mat_fock_bi_ortho(N_int, det, hmono, htwoe, hthree, hii)
         do istate = 1,N_states
@@ -878,8 +877,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             psi_h_alpha = 0.d0
             alpha_h_psi = 0.d0
             do iii = 1, N_det_selectors
-              call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-              call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+              call htilde_mu_mat_bi_ortho_tot_slow(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+              call htilde_mu_mat_bi_ortho_tot_slow(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
               call get_excitation_degree(psi_selectors(1,1,iii), det,degree,N_int)
               if(degree == 0)then
                print*,'problem !!!'
