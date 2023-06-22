@@ -1,4 +1,7 @@
 
+! TODO
+! remove ao_two_e_coul and use map directly
+
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_vartc_int_chemist, (ao_num, ao_num, ao_num, ao_num)]

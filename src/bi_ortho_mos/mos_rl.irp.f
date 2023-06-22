@@ -136,6 +136,7 @@ BEGIN_PROVIDER [ double precision, mo_r_coef, (ao_num, mo_num) ]
         mo_r_coef(j,i) = mo_coef(j,i)
       enddo
     enddo
+    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
   endif
 
 END_PROVIDER
@@ -191,6 +192,7 @@ BEGIN_PROVIDER [ double precision, mo_l_coef, (ao_num, mo_num) ]
         mo_l_coef(j,i) = mo_coef(j,i)
       enddo
     enddo
+    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
   endif
 
 END_PROVIDER
