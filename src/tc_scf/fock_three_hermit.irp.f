@@ -1,30 +1,36 @@
+
+! ---
+
 BEGIN_PROVIDER [ double precision, fock_3_mat, (mo_num, mo_num)] 
- implicit none
+
+  implicit none
   integer :: i,j
   double precision :: contrib
+
   fock_3_mat = 0.d0
-  if(.not.bi_ortho.and.three_body_h_tc)then
-   call give_fock_ia_three_e_total(1,1,contrib)
-!!  !$OMP PARALLEL                  &
-!!  !$OMP DEFAULT (NONE)            &
-!!  !$OMP PRIVATE (i,j,m,integral) & 
-!!  !$OMP SHARED (mo_num,three_body_3_index)
-!!  !$OMP DO SCHEDULE (guided) COLLAPSE(3)
-   do i = 1, mo_num
-    do j = 1, mo_num
-     call give_fock_ia_three_e_total(j,i,contrib)
-     fock_3_mat(j,i) = -contrib
-    enddo
-   enddo
-  else if(bi_ortho.and.three_body_h_tc)then
-!!  !$OMP END DO
-!!  !$OMP END PARALLEL
-!!  do i = 1, mo_num
-!!   do j = 1, i-1
-!!    mat_three(j,i) = mat_three(i,j)
-!!   enddo
-!!  enddo
- endif
+  if(.not.bi_ortho .and. three_body_h_tc) then
+
+    call give_fock_ia_three_e_total(1, 1, contrib)
+    !!  !$OMP PARALLEL                  &
+    !!  !$OMP DEFAULT (NONE)            &
+    !!  !$OMP PRIVATE (i,j,m,integral) & 
+    !!  !$OMP SHARED (mo_num,three_body_3_index)
+    !!  !$OMP DO SCHEDULE (guided) COLLAPSE(3)
+    do i = 1, mo_num
+      do j = 1, mo_num
+        call give_fock_ia_three_e_total(j,i,contrib)
+        fock_3_mat(j,i) = -contrib
+       enddo
+     enddo
+    !else if(bi_ortho.and.three_body_h_tc) then
+    !!  !$OMP END DO
+    !!  !$OMP END PARALLEL
+    !!  do i = 1, mo_num
+    !!   do j = 1, i-1
+    !!    mat_three(j,i) = mat_three(i,j)
+    !!   enddo
+    !!  enddo
+  endif
 
 END_PROVIDER 
 
