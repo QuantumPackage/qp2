@@ -1565,7 +1565,7 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
   ! Remove tiny elements
   do j=1,n
     do i=1,m
-      if ( dabs(A(i,j) * amax) < thresh ) then
+      if ( (dabs(A(i,j) * amax) < thresh).or.(dabs(A(i,j)) < 1.d-99) ) then
          A(i,j) = 0.d0
       endif
     enddo
