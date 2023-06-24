@@ -78,6 +78,7 @@ end
 
 ! ---
 
+! TODO DGEMM
 BEGIN_PROVIDER [double precision, diag_three_elem_hf]
 
   implicit none
@@ -106,7 +107,7 @@ BEGIN_PROVIDER [double precision, diag_three_elem_hf]
       do i = 1, elec_beta_num
         do j = 1, elec_beta_num
           do k = 1, elec_beta_num
-            call give_integrals_3_body(k, j, i, j, i, k,exchange_int_231)   
+            call give_integrals_3_body(k, j, i, j, i, k, exchange_int_231)   
             diag_three_elem_hf += two_third * exchange_int_231
           enddo
         enddo
