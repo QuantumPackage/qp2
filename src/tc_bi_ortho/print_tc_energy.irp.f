@@ -8,11 +8,12 @@ program print_tc_energy
 
   print *, 'Hello world'
   my_grid_becke = .True.
-  !my_n_pt_r_grid = 30
-  !my_n_pt_a_grid = 50
 
-  my_n_pt_r_grid = 100
-  my_n_pt_a_grid = 170
+  my_n_pt_r_grid = 30
+  my_n_pt_a_grid = 50
+
+  !my_n_pt_r_grid = 100
+  !my_n_pt_a_grid = 170
 
   !my_n_pt_r_grid = 100
   !my_n_pt_a_grid = 266

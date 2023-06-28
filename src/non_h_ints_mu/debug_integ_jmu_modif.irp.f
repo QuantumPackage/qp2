@@ -27,12 +27,13 @@ program debug_integ_jmu_modif
 !  call test_int2_grad1_u12_ao()
 !
 !  call test_grad12_j12()
+  call test_tchint_rsdft()
 !  call test_u12sq_j1bsq()
 !  call test_u12_grad1_u12_j1b_grad1_j1b()
 !  !call test_gradu_squared_u_ij_mu()
 
   !call test_vect_overlap_gauss_r12_ao()
-  call test_vect_overlap_gauss_r12_ao_with1s()
+  !call test_vect_overlap_gauss_r12_ao_with1s()
 
 end
 
@@ -473,6 +474,65 @@ end subroutine test_gradu_squared_u_ij_mu
 
 ! ---
 
+subroutine test_tchint_rsdft()
+
+  implicit none
+  integer          :: i, j, m, ipoint, jpoint
+  double precision :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
+  double precision :: x(3), y(3), dj_1(3), dj_2(3), dj_3(3)
+
+  print*, ' test rsdft_jastrow ...'
+
+  PROVIDE grad1_u12_num
+
+  eps_ij  = 1d-4
+  acc_tot = 0.d0
+  normalz = 0.d0
+
+  do ipoint = 1, n_points_final_grid
+    x(1) = final_grid_points(1,ipoint)
+    x(2) = final_grid_points(2,ipoint)
+    x(3) = final_grid_points(3,ipoint)
+
+    do jpoint = 1, n_points_extra_final_grid
+      y(1) = final_grid_points_extra(1,jpoint)
+      y(2) = final_grid_points_extra(2,jpoint)
+      y(3) = final_grid_points_extra(3,jpoint)
+
+      dj_1(1) = grad1_u12_num(jpoint,ipoint,1)
+      dj_1(2) = grad1_u12_num(jpoint,ipoint,2)
+      dj_1(3) = grad1_u12_num(jpoint,ipoint,3)
+
+      call get_tchint_rsdft_jastrow(x, y, dj_2)
+
+      do m = 1, 3
+        i_exc = dj_1(m)
+        i_num = dj_2(m)
+        acc_ij = dabs(i_exc - i_num)
+        if(acc_ij .gt. eps_ij) then
+          print *, ' problem on', ipoint, jpoint, m
+          print *, ' x = ', x
+          print *, ' y = ', y
+          print *, ' exc, num, diff = ', i_exc, i_num, acc_ij
+          call grad1_jmu_modif_num(x, y, dj_3)
+          print *, ' check = ', dj_3(m)
+          stop
+        endif
+
+        acc_tot += acc_ij
+        normalz += dabs(i_exc)
+      enddo
+    enddo
+  enddo
+
+  print*, ' acc_tot = ', acc_tot
+  print*, ' normalz = ', normalz
+
+  return
+end subroutine test_tchint_rsdft
+
+! ---
+
 subroutine test_grad12_j12()
 
   implicit none
@@ -484,7 +544,7 @@ subroutine test_grad12_j12()
 
   PROVIDE grad12_j12
 
-  eps_ij  = 1d-3
+  eps_ij  = 1d-6
   acc_tot = 0.d0
   normalz = 0.d0
 

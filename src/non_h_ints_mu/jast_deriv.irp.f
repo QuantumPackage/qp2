@@ -70,6 +70,8 @@
 
   elseif((j1b_type .gt. 100) .and. (j1b_type .lt. 200)) then
 
+    PROVIDE final_grid_points
+
     !$OMP PARALLEL                                                                                    &
     !$OMP DEFAULT (NONE)                                                                              &
     !$OMP PRIVATE (ipoint, jpoint, r1, r2, v1b_r1, v1b_r2, u2b_r12, grad1_v1b, grad1_u2b, dx, dy, dz) &

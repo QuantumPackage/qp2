@@ -8,6 +8,8 @@ program tc_bi_ortho
   my_grid_becke = .True.
   my_n_pt_r_grid = 30
   my_n_pt_a_grid = 50
+  !my_n_pt_r_grid = 100
+  !my_n_pt_a_grid = 170
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   call ERI_dump()
@@ -21,25 +23,65 @@ end
 subroutine KMat_tilde_dump()
 
   implicit none
-  integer :: i, j, k, l
+  integer              :: i, j, k, l
+  integer              :: isym, ms2, st, iii
+  character(16)        :: corb
+  double precision     :: t1, t2
+  integer, allocatable :: orbsym(:)
+
+  print *, ' generating FCIDUMP'
+  call wall_time(t1)
 
   PROVIDE mo_bi_ortho_tc_two_e_chemist
+  PROVIDE mo_bi_ortho_tc_one_e
 
-  print *, ' Kmat_tilde in chem notation'
+  isym = 1
+  ms2  = elec_alpha_num - elec_beta_num
+  st   = 0
+  iii  = 0
 
-  open(33, file='Kmat_tilde.dat', action='write')  
+  allocate(orbsym(mo_num))
+  orbsym(1:mo_num) = 1
+
+  open(33, file='FCIDUMP', action='write')  
+
+    write(33,'("&",a)') 'FCI'
+    write(33,'(1x,a,"=",i0,",")') 'NORB', mo_num
+    write(33,'(1x,a,"=",i0,",")') 'NELEC', elec_num
+    write(33,'(1x,a,"=",i0,",")') 'MS2', ms2
+    write(33,'(1x,a,"=",i0,",")') 'ISYM', isym
+    write(corb,'(i0)') mo_num
+    write(33,'(1x,a,"=",'//corb//'(i0,","))') 'ORBSYM', orbsym
+    write(33,'(1x,a,"=",i0,",")') 'ST', st
+    write(33,'(1x,a,"=",i0,",")') 'III', iii
+    write(33,'(1x,a,"=",i0,",")') 'OCC', (elec_num-ms2)/2+ms2
+    write(33,'(1x,a,"=",i0,",")') 'CLOSED', 2*elec_alpha_num
+    write(33,'(1x,"/")')
+
     do l = 1, mo_num
       do k = 1, mo_num
         do j = 1, mo_num
           do i = 1, mo_num
-            write(33, '(4(I4, 2X), 4X, E15.7)') i, j, k, l, mo_bi_ortho_tc_two_e_chemist(i,j,k,l)
             ! TCHint convention
-            !write(33, '(4(I4, 2X), 4X, E15.7)') i, j, k, l, mo_bi_ortho_tc_two_e_chemist(j,i,l,k)
+            write(33, '(E15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_two_e_chemist(j,i,l,k), i, j, k, l
           enddo
         enddo
       enddo
     enddo
+
+    do j = 1, mo_num
+      do i = 1, mo_num
+        ! TCHint convention
+        write(33, '(E15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_one_e(i,j), i, j, 0, 0
+      enddo
+    enddo
+
   close(33)
+
+  deallocate(orbsym)
+
+  call wall_time(t2)
+  print *, ' end after (min)', (t2-t1)/60.d0
 
   return
 end subroutine KMat_tilde_dump
@@ -106,12 +148,15 @@ subroutine LMat_tilde_dump()
   implicit none
   integer          :: i, j, k, l, m, n
   double precision :: integral
+  double precision :: t1, t2
 
-  PROVIDE mo_bi_ortho_tc_two_e_chemist
+  print *, ' generating TCDUMP'
+  call wall_time(t1)
 
-  print *, ' Lmat_tilde in phys notation'
+  PROVIDE mo_l_coef mo_r_coef
 
-  open(33, file='Lmat_tilde.dat', action='write')  
+  open(33, file='TCDUMP', action='write')  
+    write(33, '(4X, I4)') mo_num
     do n = 1, mo_num
       do m = 1, mo_num
         do l = 1, mo_num
@@ -120,7 +165,12 @@ subroutine LMat_tilde_dump()
               do i = 1, mo_num
                 ! < i j k | -L | l m n > with a BI-ORTHONORMAL MOLECULAR ORBITALS
                 call give_integrals_3_body_bi_ort(i, j, k, l, m, n, integral)
-                write(33, '(6(I4, 2X), 4X, E15.7)') i, j, k, l, m, n, integral
+                !write(33, '(6(I4, 2X), 4X, E15.7)') i, j, k, l, m, n, integral
+                ! TCHint convention
+                if(dabs(integral).gt.1d-10) then
+                  write(33, '(E15.7, 4X, 6(I4, 2X))') -integral/3.d0, i, j, k, l, m, n
+                  !write(33, '(E15.7, 4X, 6(I4, 2X))') -integral/3.d0, l, m, n, i, j, k
+                endif
               enddo
             enddo
           enddo
@@ -128,6 +178,9 @@ subroutine LMat_tilde_dump()
       enddo
     enddo
   close(33)
+
+  call wall_time(t2)
+  print *, ' end after (min)', (t2-t1)/60.d0
 
   return
 end subroutine LMat_tilde_dump
