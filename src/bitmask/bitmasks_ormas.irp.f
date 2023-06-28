@@ -2,8 +2,6 @@ use bitmasks
 
 BEGIN_PROVIDER [integer, ormas_mstart, (ormas_n_space) ]
   implicit none
-  call 
-  implicit none
   BEGIN_DOC
 ! first orbital idx in each active space
   END_DOC
@@ -44,8 +42,6 @@ END_PROVIDER
 
 BEGIN_PROVIDER [integer, ormas_min_e, (ormas_n_space) ]
   implicit none
-  call 
-  implicit none
   BEGIN_DOC
 ! min nelec in each active space
   END_DOC
@@ -83,8 +79,6 @@ BEGIN_PROVIDER [integer, ormas_min_e, (ormas_n_space) ]
 END_PROVIDER
 
 BEGIN_PROVIDER [integer, ormas_max_e, (ormas_n_space) ]
-  implicit none
-  call 
   implicit none
   BEGIN_DOC
 ! max nelec in each active space
@@ -128,13 +122,14 @@ END_PROVIDER
   BEGIN_DOC
   ! number of orbitals in each ormas space
   END_DOC
+  integer :: i
   ormas_n_orb = 0
   ormas_n_orb(ormas_n_space) = mo_num + 1 - ormas_mstart(ormas_n_space) 
   do i = ormas_n_space-1, 1, -1
     ormas_n_orb(i) = ormas_mstart(i+1) - ormas_mstart(i)
     ASSERT (ormas_n_orb(i).ge.1)
   enddo
-  ormas_max_n_orb = max(ormas_n_orb)
+  ormas_max_n_orb = maxval(ormas_n_orb)
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, ormas_list_orb, (ormas_max_n_orb, ormas_n_space) ]
@@ -142,6 +137,7 @@ BEGIN_PROVIDER [ integer, ormas_list_orb, (ormas_max_n_orb, ormas_n_space) ]
   BEGIN_DOC
   ! list of orbitals in each ormas space
   END_DOC
+  integer :: i,j,k
   ormas_list_orb = 0
   i = 1
   do j = 1, ormas_n_space
@@ -157,6 +153,7 @@ BEGIN_PROVIDER [ integer(bit_kind), ormas_bitmask, (N_int, ormas_n_space) ]
   BEGIN_DOC
   ! bitmask for each ormas space
   END_DOC
+  integer :: j
   ormas_bitmask = 0_bit_kind
   do j = 1, ormas_n_space
     call list_to_bitstring(ormas_bitmask(1,j), ormas_list_orb(:,j), ormas_n_orb(j), N_int)
@@ -202,7 +199,7 @@ logical function det_allowed_ormas(key_in)
         occ += popcnt(iand(ormas_bitmask(i,ispace),key_in(i,ispin)))
       enddo
     enddo
-    if ((occ.lt.ormas_min_e(ispace)).or.(occ.gt.ormas_max_e(ispace)) return
+    if ((occ.lt.ormas_min_e(ispace)).or.(occ.gt.ormas_max_e(ispace))) return
   enddo
   det_allowed_ormas = .True.
 end
