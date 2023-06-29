@@ -47,33 +47,61 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
 
   integer                       :: i1,i2,i3,i4,idx1,idx2,idx3,idx4,k
 
-  double precision, allocatable :: buffer(:,:,:)
-  !$OMP PARALLEL &
-  !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,mo_num,cholesky_mo_transp,cholesky_ao_num) &
-  !$OMP PRIVATE(i1,i2,i3,i4,idx1,idx2,idx3,idx4,k,buffer)&
-  !$OMP DEFAULT(NONE)
-  allocate(buffer(mo_num,mo_num,mo_num))
-  !$OMP DO
-  do i4 = 1, n4
-    idx4 = list4(i4)
-    call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_ao_num, 1.d0, &
-       cholesky_mo_transp, cholesky_ao_num, &
-       cholesky_mo_transp(1,1,idx4), cholesky_ao_num, 0.d0, buffer, mo_num*mo_num)
-    do i2 = 1, n2
-      idx2 = list2(i2)
-      do i3 = 1, n3
-        idx3 = list3(i3)
-        do i1 = 1, n1
-          idx1 = list1(i1)
-          v(i1,i2,i3,i4) = buffer(idx1,idx3,idx2)
+  if (do_ao_cholesky) then
+    double precision, allocatable :: buffer(:,:,:)
+    !$OMP PARALLEL &
+    !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,mo_num,cholesky_mo_transp,cholesky_ao_num) &
+    !$OMP PRIVATE(i1,i2,i3,i4,idx1,idx2,idx3,idx4,k,buffer)&
+    !$OMP DEFAULT(NONE)
+    allocate(buffer(mo_num,mo_num,mo_num))
+    !$OMP DO
+    do i4 = 1, n4
+      idx4 = list4(i4)
+      call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_ao_num, 1.d0, &
+         cholesky_mo_transp, cholesky_ao_num, &
+         cholesky_mo_transp(1,1,idx4), cholesky_ao_num, 0.d0, buffer, mo_num*mo_num)
+      do i2 = 1, n2
+        idx2 = list2(i2)
+        do i3 = 1, n3
+          idx3 = list3(i3)
+          do i1 = 1, n1
+            idx1 = list1(i1)
+            v(i1,i2,i3,i4) = buffer(idx1,idx3,idx2)
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  !$OMP END DO
-  deallocate(buffer)
-  !$OMP END PARALLEL
+    !$OMP END DO
+    deallocate(buffer)
+    !$OMP END PARALLEL
 
+  else
+    double precision              :: get_two_e_integral
+
+    PROVIDE mo_two_e_integrals_in_map
+
+    !$OMP PARALLEL &
+    !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,mo_integrals_map) &
+    !$OMP PRIVATE(i1,i2,i3,i4,idx1,idx2,idx3,idx4)&
+    !$OMP DEFAULT(NONE)
+    !$OMP DO collapse(3)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            idx4 = list4(i4)
+            idx3 = list3(i3)
+            idx2 = list2(i2)
+            idx1 = list1(i1)
+            v(i1,i2,i3,i4) = get_two_e_integral(idx1,idx2,idx3,idx4,mo_integrals_map)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+  endif
 
 end
 
@@ -81,29 +109,54 @@ end
 
 BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
   implicit none
-  integer                       :: i1,i2,i3,i4,k
-  double precision, allocatable :: buffer(:,:,:)
-  !$OMP PARALLEL &
-  !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_ao_num) &
-  !$OMP PRIVATE(i1,i2,i3,i4,k,buffer)&
-  !$OMP DEFAULT(NONE)
-  allocate(buffer(mo_num,mo_num,mo_num))
-  !$OMP DO
-  do i4 = 1, mo_num
-    call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_ao_num, 1.d0, &
-         cholesky_mo_transp, cholesky_ao_num, &
-         cholesky_mo_transp(1,1,i4), cholesky_ao_num, 0.d0, buffer, mo_num*mo_num)
-    do i2 = 1, mo_num
-      do i3 = 1, mo_num
-        do i1 = 1, mo_num
-          cc_space_v(i1,i2,i3,i4) = buffer(i1,i3,i2)
+  if (do_ao_cholesky) then
+    integer                       :: i1,i2,i3,i4
+    double precision, allocatable :: buffer(:,:,:)
+    !$OMP PARALLEL &
+    !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_ao_num) &
+    !$OMP PRIVATE(i1,i2,i3,i4,k,buffer)&
+    !$OMP DEFAULT(NONE)
+    allocate(buffer(mo_num,mo_num,mo_num))
+    !$OMP DO
+    do i4 = 1, mo_num
+      call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_ao_num, 1.d0, &
+           cholesky_mo_transp, cholesky_ao_num, &
+           cholesky_mo_transp(1,1,i4), cholesky_ao_num, 0.d0, buffer, mo_num*mo_num)
+      do i2 = 1, mo_num
+        do i3 = 1, mo_num
+          do i1 = 1, mo_num
+            cc_space_v(i1,i2,i3,i4) = buffer(i1,i3,i2)
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  !$OMP END DO
-  deallocate(buffer)
-  !$OMP END PARALLEL
+    !$OMP END DO
+    deallocate(buffer)
+    !$OMP END PARALLEL
+  else
+    integer          :: i,j,k,l
+    double precision :: get_two_e_integral
+
+    PROVIDE mo_two_e_integrals_in_map
+
+    !$OMP PARALLEL &
+    !$OMP SHARED(cc_space_v,mo_num,mo_integrals_map) &
+    !$OMP PRIVATE(i,j,k,l) &
+    !$OMP DEFAULT(NONE)
+
+    !$OMP DO collapse(3)
+    do l = 1, mo_num
+      do k = 1, mo_num
+        do j = 1, mo_num
+          do i = 1, mo_num
+            cc_space_v(i,j,k,l) = get_two_e_integral(i,j,k,l,mo_integrals_map)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+  endif
 
 END_PROVIDER
 
