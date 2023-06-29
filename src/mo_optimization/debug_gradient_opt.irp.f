@@ -34,14 +34,14 @@ program debug_gradient
   ! Definition of n  
   n = mo_num*(mo_num-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map ! Vérifier pour suppression
+  PROVIDE mo_two_e_integrals_in_map ! Check for suppression
 
   ! Allocation
   allocate(v_grad(n), v_grad2(n))
 
   ! Calculation
 
-  call diagonalize_ci ! Vérifier pour suppression
+  call diagonalize_ci 
 
   ! Gradient  
   call first_gradient_opt(n,v_grad)

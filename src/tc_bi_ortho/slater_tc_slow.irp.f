@@ -4,7 +4,7 @@
 subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   !! WARNING !!
   ! 
@@ -35,7 +35,7 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
 
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the detail of the matrix element in terms of single, two and three electron contribution. 
   !! WARNING !!
@@ -191,7 +191,7 @@ end
 subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS 
   !!
   !! WARNING !!
   ! 
@@ -258,7 +258,7 @@ end
 subroutine single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
   !!
   !! WARNING !!
   ! 
