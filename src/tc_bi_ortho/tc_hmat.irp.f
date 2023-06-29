@@ -21,7 +21,7 @@
  !$OMP SHARED (N_det, psi_det, N_int,htilde_matrix_elmt_bi_ortho)
     do i = 1, N_det
       do j = 1, N_det
-        ! < J | Htilde | I >
+        ! < J |Htilde | I >
         call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,j), psi_det(1,1,i), N_int, htot)
 
         htilde_matrix_elmt_bi_ortho(j,i) = htot

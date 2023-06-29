@@ -36,7 +36,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
  implicit none
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the total matrix element 
   !! WARNING !!
@@ -55,7 +55,7 @@ end
 subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the detail of the matrix element in terms of single, two and three electron contribution. 
   !! WARNING !!
@@ -100,7 +100,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
 
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the detail of the matrix element WITHOUT ANY CONTRIBUTION FROM THE THREE ELECTRON TERMS 
   !! WARNING !!

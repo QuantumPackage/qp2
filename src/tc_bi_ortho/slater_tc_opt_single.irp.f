@@ -2,7 +2,7 @@
 
 subroutine  single_htilde_mu_mat_fock_bi_ortho (Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
   !!
   !! WARNING !!
   ! 
@@ -464,7 +464,7 @@ END_PROVIDER
 
 subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
   !!
   !! WARNING !!
   ! 
