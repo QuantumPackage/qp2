@@ -35,7 +35,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
 
   elseif(j1b_type .eq. 4) then
 
-    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+    ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
     do ipoint = 1, n_points_final_grid
 
@@ -51,7 +51,7 @@ BEGIN_PROVIDER [ double precision, v_1b, (n_points_final_grid)]
         dz = z - nucl_coord(j,3)
         d  = dx*dx + dy*dy + dz*dz
 
-        fact_r = fact_r - dexp(-a*d)
+        fact_r = fact_r - j1b_pen_coef(j) * dexp(-a*d)
       enddo
 
       v_1b(ipoint) = fact_r
@@ -125,7 +125,7 @@ BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
 
   elseif(j1b_type .eq. 4) then
 
-    ! v(r) = 1 - \sum_{a} \exp(-\alpha_a (r - r_a)^2)
+    ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
     do ipoint = 1, n_points_final_grid
 
@@ -144,7 +144,7 @@ BEGIN_PROVIDER [double precision, v_1b_grad, (3, n_points_final_grid)]
         r2 = dx*dx + dy*dy + dz*dz
 
         a = j1b_pen(j)
-        e = a * dexp(-a * r2)
+        e = a * j1b_pen_coef(j) * dexp(-a * r2)
 
         ax_der += e * dx
         ay_der += e * dy
@@ -668,7 +668,7 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: grad(3)
 
-  double precision              :: tmp0, tmp1, tmp2, tmp3, tmp4, grad_u12(3)
+  double precision              :: tmp0, tmp1, tmp2, grad_u12(3)
 
   double precision, external    :: j12_mu
   double precision, external    :: j1b_nucl
@@ -681,18 +681,93 @@ subroutine grad1_jmu_modif_num(r1, r2, grad)
   tmp0 = j1b_nucl(r1) 
   tmp1 = j1b_nucl(r2)
   tmp2 = j12_mu(r1, r2)
-  tmp3 = tmp0 * tmp1
-  tmp4 = tmp2 * tmp1
 
-  grad(1) = tmp3 * grad_u12(1) + tmp4 * grad_x_j1b_nucl_num(r1)
-  grad(2) = tmp3 * grad_u12(2) + tmp4 * grad_y_j1b_nucl_num(r1)
-  grad(3) = tmp3 * grad_u12(3) + tmp4 * grad_z_j1b_nucl_num(r1)
+  grad(1) = (tmp0 * grad_u12(1) + tmp2 * grad_x_j1b_nucl_num(r1)) * tmp1
+  grad(2) = (tmp0 * grad_u12(2) + tmp2 * grad_y_j1b_nucl_num(r1)) * tmp1
+  grad(3) = (tmp0 * grad_u12(3) + tmp2 * grad_z_j1b_nucl_num(r1)) * tmp1
 
   return
 end subroutine grad1_jmu_modif_num
 
 ! ---
 
+subroutine get_tchint_rsdft_jastrow(x, y, dj)
 
+  implicit none
+  double precision, intent(in)  :: x(3), y(3)
+  double precision, intent(out) :: dj(3)
+  integer                       :: at
+  double precision              :: a, mu_tmp, inv_sq_pi_2
+  double precision              :: tmp_x, tmp_y, tmp_z, tmp
+  double precision              :: dx2, dy2, pos(3), dxy, dxy2
+  double precision              :: v1b_x, v1b_y
+  double precision              :: u2b, grad1_u2b(3), grad1_v1b(3)
+
+  PROVIDE mu_erf
+
+  inv_sq_pi_2 = 0.5d0 / dsqrt(dacos(-1.d0))
+
+  dj = 0.d0
+
+!  double precision, external :: j12_mu, j1b_nucl
+!  v1b_x = j1b_nucl(x)
+!  v1b_y = j1b_nucl(y)
+!  call grad1_j1b_nucl(x, grad1_v1b)
+!  u2b = j12_mu(x, y)
+!  call grad1_j12_mu(x, y, grad1_u2b)
+
+  ! 1b terms
+  v1b_x = 1.d0
+  v1b_y = 1.d0
+  tmp_x = 0.d0
+  tmp_y = 0.d0
+  tmp_z = 0.d0
+  do at = 1, nucl_num
+
+    a = j1b_pen(at)
+    pos(1) = nucl_coord(at,1)
+    pos(2) = nucl_coord(at,2)
+    pos(3) = nucl_coord(at,3)
+
+    dx2 = sum((x-pos)**2)
+    dy2 = sum((y-pos)**2)
+    tmp = dexp(-a*dx2) * a
+
+    v1b_x = v1b_x - dexp(-a*dx2)
+    v1b_y = v1b_y - dexp(-a*dy2)
+
+    tmp_x = tmp_x + tmp * (x(1) - pos(1))
+    tmp_y = tmp_y + tmp * (x(2) - pos(2))
+    tmp_z = tmp_z + tmp * (x(3) - pos(3))
+  end do
+  grad1_v1b(1) = 2.d0 * tmp_x
+  grad1_v1b(2) = 2.d0 * tmp_y
+  grad1_v1b(3) = 2.d0 * tmp_z
+
+  ! 2b terms
+  dxy2   = sum((x-y)**2)
+  dxy    = dsqrt(dxy2)
+  mu_tmp = mu_erf * dxy
+  u2b    = 0.5d0 * dxy * (1.d0 - derf(mu_tmp)) - inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / mu_erf
+
+  if(dxy .lt. 1d-8) then
+    grad1_u2b(1) = 0.d0
+    grad1_u2b(2) = 0.d0
+    grad1_u2b(3) = 0.d0
+  else
+    tmp = 0.5d0 * (1.d0 - derf(mu_tmp)) / dxy
+    grad1_u2b(1) = tmp * (x(1) - y(1))
+    grad1_u2b(2) = tmp * (x(2) - y(2))
+    grad1_u2b(3) = tmp * (x(3) - y(3))
+  endif
+
+  dj(1) = (grad1_u2b(1) * v1b_x + u2b * grad1_v1b(1)) * v1b_y
+  dj(2) = (grad1_u2b(2) * v1b_x + u2b * grad1_v1b(2)) * v1b_y
+  dj(3) = (grad1_u2b(3) * v1b_x + u2b * grad1_v1b(3)) * v1b_y
+
+  return
+end subroutine get_tchint_rsdft_jastrow
+
+! ---
 
 
