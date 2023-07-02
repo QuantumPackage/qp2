@@ -35,14 +35,14 @@ program debug_gradient_list
   ! Definition of n  
   n = m*(m-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map ! Vérifier pour suppression
+  PROVIDE mo_two_e_integrals_in_map ! Verifier pour suppression
 
   ! Allocation
   allocate(v_grad(n), v_grad2(n))
 
   ! Calculation
 
-  call diagonalize_ci ! Vérifier pour suppression
+  call diagonalize_ci ! Verifier pour suppression
 
   ! Gradient  
   call gradient_list_opt(n,m,list_act,v_grad,max_elem,norm)

@@ -49,7 +49,7 @@ program debug_hessian_list_opt
   ! Definition of n  
   n = m*(m-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map ! Vérifier pour suppression
+  PROVIDE mo_two_e_integrals_in_map 
 
   ! Hessian 
   if (optimization_method == 'full') then

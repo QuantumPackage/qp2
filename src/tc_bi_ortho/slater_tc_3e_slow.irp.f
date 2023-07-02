@@ -103,7 +103,7 @@ end
 subroutine single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for single excitation ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
   !!
   !! WARNING !!
   !
@@ -198,7 +198,7 @@ end
 subroutine double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for double excitation ONLY FOR THREE-BODY TERMS  WITH BI ORTHONORMAL ORBITALS
+  ! <key_j |H_tilde | key_i> for double excitation ONLY FOR THREE-BODY TERMS  WITH BI ORTHONORMAL ORBITALS
   !!
   !! WARNING !!
   !
