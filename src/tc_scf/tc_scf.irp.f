@@ -14,14 +14,10 @@ program tc_scf
 
   my_grid_becke  = .True.
 
-  !my_n_pt_r_grid = 30
-  !my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
 
-  my_n_pt_r_grid = 100
-  my_n_pt_a_grid = 170
-
-!  my_n_pt_r_grid = 10 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   PROVIDE mu_erf 

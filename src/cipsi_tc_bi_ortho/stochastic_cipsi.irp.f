@@ -1,47 +1,54 @@
+
+! ---
+
 subroutine run_stochastic_cipsi
+
+  BEGIN_DOC
+  ! Selected Full Configuration Interaction with Stochastic selection and PT2.
+  END_DOC
+
   use selection_types
   implicit none
-  BEGIN_DOC
-! Selected Full Configuration Interaction with Stochastic selection and PT2.
-  END_DOC
-  integer                        :: i,j,k,ndet
-  double precision, allocatable  :: zeros(:)
-  integer                        :: to_select
-  type(pt2_type)                 :: pt2_data, pt2_data_err
-  logical, external              :: qp_stop
-  logical                        :: print_pt2
+  integer                       :: i, j, k, ndet
+  integer                       :: to_select
+  logical                       :: print_pt2
+  logical                       :: has
+  type(pt2_type)                :: pt2_data, pt2_data_err
+  double precision              :: rss
+  double precision              :: correlation_energy_ratio, E_denom, E_tc, norm
+  double precision              :: hf_energy_ref
+  double precision              :: relative_error
+  double precision, allocatable :: ept2(:), pt1(:), extrap_energy(:)
+  double precision, allocatable :: zeros(:)
 
-  double precision :: rss
-  double precision, external :: memory_of_double
-  double precision :: correlation_energy_ratio,E_denom,E_tc,norm
-  double precision, allocatable :: ept2(:), pt1(:),extrap_energy(:)
+  logical,          external    :: qp_stop
+  double precision, external    :: memory_of_double
+
+  PROVIDE mo_l_coef mo_r_coef
   PROVIDE H_apply_buffer_allocated distributed_davidson 
 
-  print*,'Diagonal elements of the Fock matrix '
+  print*, ' Diagonal elements of the Fock matrix '
   do i = 1, mo_num
-   write(*,*)i,Fock_matrix_tc_mo_tot(i,i)
+    write(*,*) i, Fock_matrix_tc_mo_tot(i,i)
   enddo
+
   N_iter = 1
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
   rss = memory_of_double(N_states)*4.d0
-  call check_mem(rss,irp_here)
+  call check_mem(rss, irp_here)
 
-  allocate (zeros(N_states))
+  allocate(zeros(N_states))
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
 
-  double precision               :: hf_energy_ref
-  logical                        :: has
-  double precision               :: relative_error
+  relative_error = PT2_relative_error
 
-  relative_error=PT2_relative_error
-
-  zeros = 0.d0
-  pt2_data % pt2   = -huge(1.e0)
-  pt2_data % rpt2  = -huge(1.e0)
-  pt2_data % overlap= 0.d0
+  zeros               = 0.d0
+  pt2_data % pt2      = -huge(1.e0)
+  pt2_data % rpt2     = -huge(1.e0)
+  pt2_data % overlap  = 0.d0
   pt2_data % variance = huge(1.e0)
 
   !!!! WARNING  !!!! SEEMS TO BE PROBLEM WTH make_s2_eigenfunction !!!! THE DETERMINANTS CAN APPEAR TWICE IN THE WFT DURING SELECTION
@@ -49,7 +56,7 @@ subroutine run_stochastic_cipsi
 !    call make_s2_eigenfunction
 !  endif
   print_pt2 = .False.
-  call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+  call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
 !  call routine_save_right
 
 
@@ -74,14 +81,12 @@ subroutine run_stochastic_cipsi
 ! soft_touch thresh_it_dav
 
   print_pt2 = .True.
-  do while (                                                         &
-        (N_det < N_det_max) .and.                                    &
-        (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max)          &
-        )
-      print*,'maxval(abs(pt2_data % pt2(1:N_states)))',maxval(abs(pt2_data % pt2(1:N_states)))
-      print*,pt2_max
-      write(*,'(A)')  '--------------------------------------------------------------------------------'
+  do while( (N_det < N_det_max) .and. &
+            (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max))
 
+    print*,'maxval(abs(pt2_data % pt2(1:N_states)))',maxval(abs(pt2_data % pt2(1:N_states)))
+    print*,pt2_max
+    write(*,'(A)')  '--------------------------------------------------------------------------------'
 
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
@@ -94,8 +99,7 @@ subroutine run_stochastic_cipsi
     call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 
-    call print_summary(psi_energy_with_nucl_rep, &
-       pt2_data, pt2_data_err, N_det,N_configuration,N_states,psi_s2)
+    call print_summary(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
@@ -109,13 +113,13 @@ subroutine run_stochastic_cipsi
     ! Add selected determinants
     call copy_H_apply_buffer_to_wf_tc()
 
-    PROVIDE  psi_l_coef_bi_ortho psi_r_coef_bi_ortho
-    PROVIDE  psi_det
-    PROVIDE  psi_det_sorted_tc
+    PROVIDE psi_l_coef_bi_ortho psi_r_coef_bi_ortho
+    PROVIDE psi_det
+    PROVIDE psi_det_sorted_tc
 
     ept2(N_iter-1) = E_tc + nuclear_repulsion + (pt2_data % pt2(1))/norm
-    pt1(N_iter-1) = dsqrt(pt2_data % overlap(1,1))
-    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+    pt1(N_iter-1)  = dsqrt(pt2_data % overlap(1,1))
+    call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
 !    stop
     if (qp_stop()) exit
   enddo
