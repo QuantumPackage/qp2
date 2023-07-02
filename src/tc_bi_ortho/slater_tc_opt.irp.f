@@ -1,3 +1,4 @@
+
 ! ---
 
 subroutine provide_all_three_ints_bi_ortho()
@@ -25,9 +26,9 @@ subroutine provide_all_three_ints_bi_ortho()
       PROVIDE normal_two_body_bi_orth
     endif
 
- endif
+  endif
 
- return
+  return
 end
 
 ! ---

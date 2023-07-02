@@ -70,7 +70,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
     elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
 
-      PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b_an x_v_ij_erf_rk_cst_mu_j1b
+      PROVIDE v_1b_grad
+      PROVIDE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b_an x_v_ij_erf_rk_cst_mu_j1b
 
       int2_grad1_u12_ao = 0.d0
       !$OMP PARALLEL                                                                 &

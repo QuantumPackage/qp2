@@ -106,6 +106,8 @@ subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
   double precision               :: get_mo_two_e_integral_tc_int
   integer(bit_kind)              :: key_i_core(Nint,2)
 
+  PROVIDE mo_bi_ortho_tc_two_e
+
 !  PROVIDE mo_two_e_integrals_tc_int_in_map mo_bi_ortho_tc_two_e
 !
 !  PROVIDE mo_integrals_erf_map core_energy nuclear_repulsion core_bitmask
@@ -134,15 +136,6 @@ subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
    do i = 1, Ne(ispin) ! 
     ii = occ(i,ispin) 
     hmono += mo_bi_ortho_tc_one_e(ii,ii)
-
-!    if(j1b_gauss .eq. 1) then
-!      print*,'j1b not implemented for bi ortho TC'
-!      print*,'stopping  ....'
-!      stop
-!      !hmono += mo_j1b_gauss_hermI  (ii,ii) &
-!      !       + mo_j1b_gauss_hermII (ii,ii) &
-!      !       + mo_j1b_gauss_nonherm(ii,ii)
-!    endif
 
 !    if(core_tc_op)then
 !   print*,'core_tc_op not already taken into account for bi ortho'
