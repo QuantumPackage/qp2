@@ -1,20 +1,32 @@
-program tc_bi_ortho
-  implicit none
+
+! ---
+
+program tc_cisd_sc2
+
   BEGIN_DOC
-! TODO : Put the documentation of the program here
+  ! TODO : Put the documentation of the program here
   END_DOC
+
+  implicit none
+
   print *, 'Hello world'
+
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   call test
+
 end
 
-subroutine test
+! ---
+
+subroutine test()
  implicit none
 ! double precision, allocatable :: dressing_dets(:),e_corr_dets(:)
 ! allocate(dressing_dets(N_det),e_corr_dets(N_det))

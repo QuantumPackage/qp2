@@ -17,6 +17,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
   integer          :: i, j, m
   double precision :: integral, wall1, wall0
 
+  PROVIDE mo_l_coef mo_r_coef
+
   three_e_3_idx_direct_bi_ort = 0.d0
   print *, ' Providing the three_e_3_idx_direct_bi_ort ...'
   call wall_time(wall0)
@@ -125,6 +127,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
   integer          :: i, j, m
   double precision :: integral, wall1, wall0
 
+  PROVIDE mo_l_coef mo_r_coef
+
   three_e_3_idx_cycle_2_bi_ort = 0.d0
   print *, ' Providing the three_e_3_idx_cycle_2_bi_ort ...'
   call wall_time(wall0)
@@ -178,6 +182,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
   implicit none
   integer          :: i, j, m
   double precision :: integral, wall1, wall0
+
+  PROVIDE mo_l_coef mo_r_coef
 
   three_e_3_idx_exch23_bi_ort = 0.d0
   print*,'Providing the three_e_3_idx_exch23_bi_ort ...'
@@ -233,6 +239,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
   integer :: i,j,m
   double precision :: integral, wall1, wall0
 
+  PROVIDE mo_l_coef mo_r_coef
+
   three_e_3_idx_exch13_bi_ort = 0.d0
   print *, ' Providing the three_e_3_idx_exch13_bi_ort ...'
   call wall_time(wall0)
@@ -286,6 +294,8 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
   implicit none
   integer          :: i, j, m
   double precision :: integral, wall1, wall0
+
+  PROVIDE mo_l_coef mo_r_coef
 
   three_e_3_idx_exch12_bi_ort = 0.d0
   print *, ' Providing the three_e_3_idx_exch12_bi_ort ...'

@@ -9,19 +9,19 @@ program bi_ort_ints
   implicit none
 
   my_grid_becke = .True.
-  !my_n_pt_r_grid = 10
-  !my_n_pt_a_grid = 14
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
 ! call test_3e
 ! call test_5idx
 ! call test_5idx2
- !call test_4idx
-  call test_4idx2()
-  call test_5idx2
- call test_5idx
+  call test_4idx()
+  call test_4idx_n4()
+  !call test_4idx2()
+  !call test_5idx2
+  !call test_5idx
 end
 
 subroutine test_5idx2
@@ -211,13 +211,138 @@ end
 
 ! ---
 
+subroutine test_4idx_n4()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr
+
+  thr = 1d-10
+
+  PROVIDE three_e_4_idx_direct_bi_ort_old
+  PROVIDE three_e_4_idx_direct_bi_ort_n4
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = three_e_4_idx_direct_bi_ort_n4 (l,k,j,i)
+          ref = three_e_4_idx_direct_bi_ort_old(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem in three_e_4_idx_direct_bi_ort_n4'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on three_e_4_idx_direct_bi_ort_n4 = ', accu / dble(mo_num)**4
+
+  ! ---
+
+  PROVIDE three_e_4_idx_exch13_bi_ort_old
+  PROVIDE three_e_4_idx_exch13_bi_ort_n4
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = three_e_4_idx_exch13_bi_ort_n4 (l,k,j,i)
+          ref = three_e_4_idx_exch13_bi_ort_old(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem in three_e_4_idx_exch13_bi_ort_n4'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on three_e_4_idx_exch13_bi_ort_n4 = ', accu / dble(mo_num)**4
+
+  ! ---
+
+  PROVIDE three_e_4_idx_cycle_1_bi_ort_old
+  PROVIDE three_e_4_idx_cycle_1_bi_ort_n4
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = three_e_4_idx_cycle_1_bi_ort_n4 (l,k,j,i)
+          ref = three_e_4_idx_cycle_1_bi_ort_old(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem in three_e_4_idx_cycle_1_bi_ort_n4'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on three_e_4_idx_cycle_1_bi_ort_n4 = ', accu / dble(mo_num)**4
+
+  ! ---
+
+  PROVIDE three_e_4_idx_exch23_bi_ort_old
+  PROVIDE three_e_4_idx_exch23_bi_ort_n4
+
+  accu = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = three_e_4_idx_exch23_bi_ort_n4  (l,k,j,i)
+          ref = three_e_4_idx_exch23_bi_ort_old(l,k,j,i)
+          contrib = dabs(new - ref)
+          accu += contrib
+          if(contrib .gt. thr) then
+            print*, ' problem in three_e_4_idx_exch23_bi_ort_n4'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+        enddo
+      enddo
+    enddo
+  enddo
+  print*, ' accu on three_e_4_idx_exch23_bi_ort_n4 = ', accu / dble(mo_num)**4
+
+  ! ---
+
+  return
+end
+
+! ---
+
 subroutine test_4idx()
 
   implicit none
   integer          :: i, j, k, l
   double precision :: accu, contrib, new, ref, thr
 
-  thr = 1d-5
+  thr = 1d-10
 
   PROVIDE three_e_4_idx_direct_bi_ort_old
   PROVIDE three_e_4_idx_direct_bi_ort 
@@ -275,34 +400,6 @@ subroutine test_4idx()
 
   ! ---
 
-!  PROVIDE three_e_4_idx_exch12_bi_ort_old
-!  PROVIDE three_e_4_idx_exch12_bi_ort 
-!
-!  accu = 0.d0
-!  do i = 1, mo_num
-!    do j = 1, mo_num
-!      do k = 1, mo_num
-!        do l = 1, mo_num
-!
-!          new = three_e_4_idx_exch12_bi_ort    (l,k,j,i)
-!          ref = three_e_4_idx_exch12_bi_ort_old(l,k,j,i)
-!          contrib = dabs(new - ref)
-!          accu += contrib
-!          if(contrib .gt. thr) then
-!            print*, ' problem in three_e_4_idx_exch12_bi_ort'
-!            print*, l, k, j, i
-!            print*, ref, new, contrib
-!            stop
-!          endif
-!
-!        enddo
-!      enddo
-!    enddo
-!  enddo
-!  print*, ' accu on three_e_4_idx_exch12_bi_ort = ', accu / dble(mo_num)**4
-
-  ! ---
-
   PROVIDE three_e_4_idx_cycle_1_bi_ort_old
   PROVIDE three_e_4_idx_cycle_1_bi_ort
 
@@ -328,34 +425,6 @@ subroutine test_4idx()
     enddo
   enddo
   print*, ' accu on three_e_4_idx_cycle_1_bi_ort = ', accu / dble(mo_num)**4
-
-  ! ---
-
-!  PROVIDE three_e_4_idx_cycle_2_bi_ort_old
-!  PROVIDE three_e_4_idx_cycle_2_bi_ort
-!
-!  accu = 0.d0
-!  do i = 1, mo_num
-!    do j = 1, mo_num
-!      do k = 1, mo_num
-!        do l = 1, mo_num
-!
-!          new = three_e_4_idx_cycle_2_bi_ort    (l,k,j,i)
-!          ref = three_e_4_idx_cycle_2_bi_ort_old(l,k,j,i)
-!          contrib = dabs(new - ref)
-!          accu += contrib
-!          if(contrib .gt. thr) then
-!            print*, ' problem in three_e_4_idx_cycle_2_bi_ort'
-!            print*, l, k, j, i
-!            print*, ref, new, contrib
-!            stop
-!          endif
-!
-!        enddo
-!      enddo
-!    enddo
-!  enddo
-!  print*, ' accu on three_e_4_idx_cycle_2_bi_ort = ', accu / dble(mo_num)**4
 
   ! ---
 

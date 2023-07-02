@@ -1,20 +1,31 @@
+
+! ---
+
 program print_tc_bi_ortho
-  implicit none
+
   BEGIN_DOC
-! TODO : Put the documentation of the program here
+  ! TODO : Put the documentation of the program here
   END_DOC
+
+  implicit none
+
   print *, 'Hello world'
+
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
 !  if(three_body_h_tc)then
 !   call provide_all_three_ints_bi_ortho
 !  endif
 !  call routine
- call write_l_r_wf
+  call write_l_r_wf
+
 end
 
 subroutine write_l_r_wf

@@ -70,14 +70,15 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
     elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) then
 
-      PROVIDE v_1b_grad v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
+      PROVIDE v_1b_grad
+      PROVIDE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b_an x_v_ij_erf_rk_cst_mu_j1b
 
       int2_grad1_u12_ao = 0.d0
       !$OMP PARALLEL                                                                 &
       !$OMP DEFAULT (NONE)                                                           &
       !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp0, tmp1, tmp2, tmp_x, tmp_y, tmp_z)   &
       !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points, v_1b, v_1b_grad &
-      !$OMP        , v_ij_erf_rk_cst_mu_j1b, v_ij_u_cst_mu_j1b, x_v_ij_erf_rk_cst_mu_j1b, int2_grad1_u12_ao)
+      !$OMP        , v_ij_erf_rk_cst_mu_j1b, v_ij_u_cst_mu_j1b_an, x_v_ij_erf_rk_cst_mu_j1b, int2_grad1_u12_ao)
       !$OMP DO SCHEDULE (static)
       do ipoint = 1, n_points_final_grid
         x     = final_grid_points(1,ipoint)
@@ -90,7 +91,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         do j = 1, ao_num
           do i = 1, ao_num
             tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint)
-            tmp2 = v_ij_u_cst_mu_j1b(i,j,ipoint)
+            tmp2 = v_ij_u_cst_mu_j1b_an(i,j,ipoint)
             int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,1) - tmp2 * tmp_x
             int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,2) - tmp2 * tmp_y
             int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,3) - tmp2 * tmp_z
@@ -100,7 +101,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       !$OMP END DO
       !$OMP END PARALLEL
 
-      FREE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b x_v_ij_erf_rk_cst_mu_j1b
+      FREE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b_an x_v_ij_erf_rk_cst_mu_j1b
 
     elseif(j1b_type .ge. 100) then
 

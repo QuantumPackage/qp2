@@ -1,42 +1,56 @@
+
+! ---
+
   use bitmasks
 
- BEGIN_PROVIDER [ integer, index_HF_psi_det]                                                                                                            
- implicit none
- integer :: i,degree
- do i = 1, N_det
-   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
-   if(degree == 0)then
-    index_HF_psi_det = i
-    exit
-   endif
- enddo
- END_PROVIDER
+! ---
 
-subroutine diagonalize_CI_tc
+BEGIN_PROVIDER [integer, index_HF_psi_det]                                                                                                            
+
   implicit none
+  integer :: i, degree
+
+  do i = 1, N_det
+    call get_excitation_degree(HF_bitmask, psi_det(1,1,i), degree, N_int)
+    if(degree == 0) then
+      index_HF_psi_det = i
+      exit
+    endif
+  enddo
+
+END_PROVIDER
+
+! ---
+
+subroutine diagonalize_CI_tc()
+
   BEGIN_DOC
-!  Replace the coefficients of the |CI| states by the coefficients of the
-!  eigenstates of the |CI| matrix.
+  !  Replace the coefficients of the |CI| states by the coefficients of the
+  !  eigenstates of the |CI| matrix.
   END_DOC
-  integer                        :: i,j
-  do j=1,N_states
-    do i=1,N_det
+
+  implicit none
+  integer :: i, j
+
+  do j = 1, N_states
+    do i = 1, N_det
       psi_l_coef_bi_ortho(i,j) = leigvec_tc_bi_orth(i,j)
       psi_r_coef_bi_ortho(i,j) = reigvec_tc_bi_orth(i,j)
     enddo
   enddo
 
   SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho
+
 end
 
+! ---
 
-
- BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)]
-&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth, (N_states)]
-&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth, (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth, (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth, (N_states)]
-&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth ]
+ BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)      ]
+&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth , (N_states)      ]
+&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth     , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth     , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth   , (N_states)      ]
+&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth           ]
 
   BEGIN_DOC
   ! eigenvalues, right and left eigenvectors of the transcorrelated Hamiltonian on the BI-ORTHO basis 
@@ -44,29 +58,29 @@ end
 
   implicit none
   integer                       :: i, idx_dress, j, istate, k
+  integer                       :: i_good_state, i_other_state, i_state
+  integer                       :: n_real_tc_bi_orth_eigval_right, igood_r, igood_l
   logical                       :: converged, dagger
-  integer                       :: n_real_tc_bi_orth_eigval_right,igood_r,igood_l
-  double precision, allocatable :: reigvec_tc_bi_orth_tmp(:,:),leigvec_tc_bi_orth_tmp(:,:),eigval_right_tmp(:)
+  double precision, parameter   :: alpha = 0.1d0
+  integer,          allocatable :: index_good_state_array(:)
+  integer,          allocatable :: iorder(:)
+  logical,          allocatable :: good_state_array(:)
+  double precision, allocatable :: reigvec_tc_bi_orth_tmp(:,:), leigvec_tc_bi_orth_tmp(:,:),eigval_right_tmp(:)
   double precision, allocatable :: s2_values_tmp(:), H_prime(:,:), expect_e(:)
-  double precision, parameter :: alpha = 0.1d0
-  integer                        :: i_good_state,i_other_state, i_state
-  integer, allocatable           :: index_good_state_array(:)
-  logical, allocatable           :: good_state_array(:)
-  double precision, allocatable  :: coef_hf_r(:),coef_hf_l(:)
-  double precision, allocatable  :: Stmp(:,:)
-  integer, allocatable :: iorder(:)
+  double precision, allocatable :: coef_hf_r(:),coef_hf_l(:)
+  double precision, allocatable :: Stmp(:,:)
 
   PROVIDE N_det N_int
 
-  if(n_det .le. N_det_max_full) then
+  if(N_det .le. N_det_max_full) then
 
-    allocate(reigvec_tc_bi_orth_tmp(N_det,N_det),leigvec_tc_bi_orth_tmp(N_det,N_det),eigval_right_tmp(N_det),expect_e(N_det))
-    allocate (H_prime(N_det,N_det),s2_values_tmp(N_det))
+    allocate(reigvec_tc_bi_orth_tmp(N_det,N_det), leigvec_tc_bi_orth_tmp(N_det,N_det), eigval_right_tmp(N_det), expect_e(N_det))
+    allocate(H_prime(N_det,N_det), s2_values_tmp(N_det))
 
     H_prime(1:N_det,1:N_det) = htilde_matrix_elmt_bi_ortho(1:N_det,1:N_det)
     if(s2_eig) then
       H_prime(1:N_det,1:N_det) += alpha * S2_matrix_all_dets(1:N_det,1:N_det)
-      do j=1,N_det
+      do j = 1, N_det
         H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
       enddo
     endif

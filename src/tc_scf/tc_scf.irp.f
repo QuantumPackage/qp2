@@ -13,10 +13,11 @@ program tc_scf
   print *, ' starting ...'
 
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
-!  my_n_pt_r_grid = 10 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
+
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   PROVIDE mu_erf 

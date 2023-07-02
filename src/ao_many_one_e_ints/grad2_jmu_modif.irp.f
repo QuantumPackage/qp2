@@ -128,6 +128,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2_j1b2, (ao_num, ao_num, n
           do i_1s = 2, List_all_comb_b3_size
 
             coef        = List_all_comb_b3_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b3_expo  (i_1s)
             B_center(1) = List_all_comb_b3_cent(1,i_1s)
             B_center(2) = List_all_comb_b3_cent(2,i_1s)
@@ -222,6 +223,7 @@ BEGIN_PROVIDER [double precision, int2_u2_j1b2, (ao_num, ao_num, n_points_final_
           do i_1s = 2, List_all_comb_b3_size
          
             coef        = List_all_comb_b3_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b3_expo  (i_1s)
             B_center(1) = List_all_comb_b3_cent(1,i_1s)
             B_center(2) = List_all_comb_b3_cent(2,i_1s)
@@ -322,6 +324,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_x_j1b2, (ao_num, ao_num, n_poin
           do i_1s = 2, List_all_comb_b3_size
           
             coef        = List_all_comb_b3_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b3_expo  (i_1s)
             B_center(1) = List_all_comb_b3_cent(1,i_1s)
             B_center(2) = List_all_comb_b3_cent(2,i_1s)
@@ -436,6 +439,7 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_j1b2, (ao_num, ao_num, n_points
           do i_1s = 2, List_all_comb_b3_size
 
             coef        = List_all_comb_b3_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b3_expo  (i_1s)
             B_center(1) = List_all_comb_b3_cent(1,i_1s)
             B_center(2) = List_all_comb_b3_cent(2,i_1s)

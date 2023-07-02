@@ -1,4 +1,7 @@
 
+! TODO
+! remove ao_two_e_coul and use map directly
+
 ! ---
 
 BEGIN_PROVIDER [double precision, ao_vartc_int_chemist, (ao_num, ao_num, ao_num, ao_num)]
@@ -116,6 +119,7 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist_no_cycle, (ao_num, ao_num, a
 
   call wall_time(wall1)
   print *, ' wall time for ao_tc_int_chemist_no_cycle ', wall1 - wall0
+
 END_PROVIDER 
 
 ! ---

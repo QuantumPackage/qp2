@@ -1,32 +1,48 @@
+
+! ---
+
  BEGIN_PROVIDER [ double precision, ref_tc_energy_tot]
 &BEGIN_PROVIDER [ double precision, ref_tc_energy_1e]
 &BEGIN_PROVIDER [ double precision, ref_tc_energy_2e]
 &BEGIN_PROVIDER [ double precision, ref_tc_energy_3e]
- implicit none
- BEGIN_DOC
-! Various component of the TC energy for the reference "HF" Slater determinant
- END_DOC 
- double precision :: hmono, htwoe, htot, hthree
- call diag_htilde_mu_mat_bi_ortho_slow(N_int,HF_bitmask , hmono, htwoe, htot)
- ref_tc_energy_1e = hmono
- ref_tc_energy_2e = htwoe 
- if(three_body_h_tc)then
-  call diag_htilde_three_body_ints_bi_ort_slow(N_int, HF_bitmask, hthree)
-  ref_tc_energy_3e = hthree
- else
-  ref_tc_energy_3e = 0.d0
- endif
- ref_tc_energy_tot = ref_tc_energy_1e + ref_tc_energy_2e + ref_tc_energy_3e + nuclear_repulsion
- END_PROVIDER 
+
+  BEGIN_DOC
+  ! Various component of the TC energy for the reference "HF" Slater determinant
+  END_DOC 
+
+  implicit none
+  double precision :: hmono, htwoe, htot, hthree
+
+  PROVIDE mo_l_coef mo_r_coef
+
+  call diag_htilde_mu_mat_bi_ortho_slow(N_int, HF_bitmask, hmono, htwoe, htot)
+
+  ref_tc_energy_1e = hmono
+  ref_tc_energy_2e = htwoe 
+
+  if(three_body_h_tc) then
+    call diag_htilde_three_body_ints_bi_ort_slow(N_int, HF_bitmask, hthree)
+    ref_tc_energy_3e = hthree
+  else
+    ref_tc_energy_3e = 0.d0
+  endif
+
+  ref_tc_energy_tot = ref_tc_energy_1e + ref_tc_energy_2e + ref_tc_energy_3e + nuclear_repulsion
+
+END_PROVIDER 
+
+! ---
 
 subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, htot)
-  implicit none
+
   BEGIN_DOC
   ! Computes $\langle i|H|i \rangle$.
   END_DOC
-  integer,intent(in)             :: Nint
-  integer(bit_kind),intent(in)   :: det_in(Nint,2)
-  double precision, intent(out)  :: hmono,htwoe,htot,hthree
+
+  implicit none
+  integer,           intent(in)  :: Nint
+  integer(bit_kind), intent(in)  :: det_in(Nint,2)
+  double precision,  intent(out) :: hmono, htwoe, htot, hthree
 
   integer(bit_kind)              :: hole(Nint,2)
   integer(bit_kind)              :: particle(Nint,2)
@@ -39,7 +55,6 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   ASSERT (Nint > 0)
   ASSERT (sum(popcnt(det_in(:,1))) == elec_alpha_num)
   ASSERT (sum(popcnt(det_in(:,2))) == elec_beta_num)
-
 
   nexc(1) = 0
   nexc(2) = 0
@@ -55,15 +70,15 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   enddo
 
   if (nexc(1)+nexc(2) == 0) then
-    hmono = ref_tc_energy_1e
-    htwoe = ref_tc_energy_2e
-    hthree= ref_tc_energy_3e
-    htot = ref_tc_energy_tot
+    hmono  = ref_tc_energy_1e
+    htwoe  = ref_tc_energy_2e
+    hthree = ref_tc_energy_3e
+    htot   = ref_tc_energy_tot
     return
   endif
 
   !call debug_det(det_in,Nint)
-  integer                        :: tmp(2)
+  integer  :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(particle, occ_particle, tmp, Nint)
   ASSERT (tmp(1) == nexc(1)) ! Number of particles alpha
@@ -73,27 +88,31 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   ASSERT (tmp(1) == nexc(1)) ! Number of holes alpha
   ASSERT (tmp(2) == nexc(2)) ! Number of holes beta 
 
-  
+  hmono  = ref_tc_energy_1e
+  htwoe  = ref_tc_energy_2e 
+  hthree = ref_tc_energy_3e
+
   det_tmp = ref_bitmask
-  hmono = ref_tc_energy_1e
-  htwoe = ref_tc_energy_2e 
-  hthree= ref_tc_energy_3e
-  do ispin=1,2
+
+  do ispin = 1, 2
     na = elec_num_tab(ispin)
     nb = elec_num_tab(iand(ispin,1)+1)
-    do i=1,nexc(ispin)
+    do i = 1, nexc(ispin)
       !DIR$ FORCEINLINE
-      call ac_tc_operator( occ_particle(i,ispin), ispin, det_tmp, hmono,htwoe,hthree, Nint,na,nb)
+      call ac_tc_operator(occ_particle(i,ispin), ispin, det_tmp, hmono, htwoe, hthree, Nint, na, nb)
       !DIR$ FORCEINLINE
-      call a_tc_operator ( occ_hole    (i,ispin), ispin, det_tmp, hmono,htwoe,hthree, Nint,na,nb)
+      call a_tc_operator (occ_hole    (i,ispin), ispin, det_tmp, hmono, htwoe, hthree, Nint, na, nb)
     enddo
   enddo
-  htot = hmono+htwoe+hthree+nuclear_repulsion
+
+  htot = hmono + htwoe + hthree + nuclear_repulsion
+
 end
 
-subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
-  use bitmasks
-  implicit none
+! ---
+
+subroutine ac_tc_operator(iorb, ispin, key, hmono, htwoe, hthree, Nint, na, nb)
+
   BEGIN_DOC
   ! Routine that computes one- and two-body energy corresponding 
   ! 
@@ -105,17 +124,20 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   !
   ! and the quantities hmono,htwoe,hthree are INCREMENTED 
   END_DOC
-  integer, intent(in)            :: iorb, ispin, Nint
-  integer, intent(inout)         :: na, nb
+
+  use bitmasks
+  implicit none
+  integer,           intent(in)    :: iorb, ispin, Nint
+  integer,           intent(inout) :: na, nb
   integer(bit_kind), intent(inout) :: key(Nint,2)
-  double precision, intent(inout) :: hmono,htwoe,hthree
+  double precision,  intent(inout) :: hmono, htwoe, hthree
 
-  integer                        :: occ(Nint*bit_kind_size,2)
-  integer                        :: other_spin
-  integer                        :: k,l,i,jj,mm,j,m
-  double precision ::  direct_int, exchange_int
+  integer                          :: occ(Nint*bit_kind_size,2)
+  integer                          :: other_spin
+  integer                          :: k, l, i, jj, mm, j, m
+  integer                          :: tmp(2)
+  double precision                 :: direct_int, exchange_int
   
-
   if (iorb < 1) then
     print *,  irp_here, ': iorb < 1'
     print *,  iorb, mo_num
@@ -131,7 +153,6 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   ASSERT (ispin < 3)
   ASSERT (Nint > 0)
 
-  integer                        :: tmp(2)
   !DIR$ FORCEINLINE
   call bitstring_to_list_ab(key, occ, tmp, Nint)
   ASSERT (tmp(1) == elec_alpha_num)
@@ -147,49 +168,53 @@ subroutine ac_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   hmono = hmono + mo_bi_ortho_tc_one_e(iorb,iorb)
 
   ! Same spin
-  do i=1,na
+  do i = 1, na
     htwoe = htwoe + mo_bi_ortho_tc_two_e_jj_anti(occ(i,ispin),iorb)
   enddo
 
   ! Opposite spin
-  do i=1,nb
+  do i = 1, nb
     htwoe = htwoe + mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
-  if(three_body_h_tc.and.elec_num.gt.2.and.three_e_3_idx_term)then
-   !!!!! 3-e part 
-   !! same-spin/same-spin
-   do j = 1, na
-    jj = occ(j,ispin)
-    do m = j+1, na
-     mm = occ(m,ispin)
-     hthree += three_e_diag_parrallel_spin_prov(mm,jj,iorb)
+  if(three_body_h_tc .and. (elec_num.gt.2) .and. three_e_3_idx_term) then
+
+    !!!!! 3-e part 
+    !! same-spin/same-spin
+    do j = 1, na
+      jj = occ(j,ispin)
+      do m = j+1, na
+        mm = occ(m,ispin)
+        hthree += three_e_diag_parrallel_spin_prov(mm,jj,iorb)
+      enddo
     enddo
-   enddo
-   !! same-spin/oposite-spin
-   do j = 1, na
-    jj = occ(j,ispin)
-    do m = 1, nb
-     mm = occ(m,other_spin)
-     direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-     exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-     hthree += direct_int - exchange_int
+    !! same-spin/oposite-spin
+    do j = 1, na
+      jj = occ(j,ispin)
+      do m = 1, nb
+        mm = occ(m,other_spin)
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        hthree += direct_int - exchange_int
+      enddo
     enddo
-   enddo
-   !! oposite-spin/opposite-spin
+    !! oposite-spin/opposite-spin
     do j = 1, nb
-     jj = occ(j,other_spin) 
-     do m = j+1, nb 
-      mm = occ(m,other_spin) 
-      direct_int = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-      exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
-      hthree += direct_int - exchange_int
-     enddo
+      jj = occ(j,other_spin) 
+      do m = j+1, nb 
+        mm = occ(m,other_spin) 
+        direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        exchange_int = three_e_3_idx_exch23_bi_ort(mm,jj,iorb) ! USES 3-IDX TENSOR 
+        hthree += direct_int - exchange_int
+      enddo
     enddo
   endif
 
   na = na+1
+
 end
+
+! ---
 
 subroutine a_tc_operator(iorb,ispin,key,hmono,htwoe,hthree,Nint,na,nb)
   use bitmasks
@@ -460,14 +485,16 @@ subroutine a_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
   hmono = hmono - mo_bi_ortho_tc_one_e(iorb,iorb)
 
   ! Same spin
-  do i=1,na
-    htwoe= htwoe- mo_bi_ortho_tc_two_e_jj_anti(occ(i,ispin),iorb)
+  do i = 1, na
+    htwoe = htwoe- mo_bi_ortho_tc_two_e_jj_anti(occ(i,ispin),iorb)
   enddo
 
   ! Opposite spin
-  do i=1,nb
-    htwoe= htwoe- mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
+  do i = 1, nb
+    htwoe = htwoe- mo_bi_ortho_tc_two_e_jj(occ(i,other_spin),iorb)
   enddo
 
 end
+
+! ---
 
