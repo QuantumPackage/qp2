@@ -17,6 +17,8 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
   integer                         :: i, j
   double precision                :: pt2_tmp, pt1_norm, rpt2_tmp, abs_pt2
 
+  PROVIDE mo_l_coef mo_r_coef
+
   pt2_tmp  = pt2_data % pt2(1)
   abs_pt2  = pt2_data % variance(1)
   pt1_norm = pt2_data % overlap(1,1)
@@ -60,7 +62,7 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
       psi_coef(i,j)            = dabs(psi_l_coef_bi_ortho(i,j) * psi_r_coef_bi_ortho(i,j))   
     enddo
   enddo
-  SOFT_TOUCH eigval_left_tc_bi_orth  eigval_right_tc_bi_orth leigvec_tc_bi_orth reigvec_tc_bi_orth norm_ground_left_right_bi_orth 
+  SOFT_TOUCH eigval_left_tc_bi_orth eigval_right_tc_bi_orth leigvec_tc_bi_orth reigvec_tc_bi_orth norm_ground_left_right_bi_orth 
   SOFT_TOUCH psi_l_coef_bi_ortho psi_r_coef_bi_ortho psi_coef psi_energy psi_s2
 
   call save_tc_bi_ortho_wavefunction()

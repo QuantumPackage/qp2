@@ -195,7 +195,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_fit, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
@@ -212,14 +212,14 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 
   double precision, external :: overlap_gauss_r12_ao_with1s
 
-  print*, ' providing v_ij_u_cst_mu_j1b ...'
+  print*, ' providing v_ij_u_cst_mu_j1b_fit ...'
   call wall_time(wall0)
 
   provide mu_erf final_grid_points j1b_pen
   PROVIDE ng_fit_jast expo_gauss_j_mu_x coef_gauss_j_mu_x
   PROVIDE List_all_comb_b2_size List_all_comb_b2_coef List_all_comb_b2_expo List_all_comb_b2_cent
 
-  v_ij_u_cst_mu_j1b = 0.d0
+  v_ij_u_cst_mu_j1b_fit = 0.d0
 
   !$OMP PARALLEL DEFAULT (NONE)                                      &
   !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
@@ -228,7 +228,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
   !$OMP          final_grid_points, ng_fit_jast,                     &
   !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
   !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
-  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b)
+  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b_fit)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
@@ -278,7 +278,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 
         enddo
 
-        v_ij_u_cst_mu_j1b(j,i,ipoint) = tmp
+        v_ij_u_cst_mu_j1b_fit(j,i,ipoint) = tmp
       enddo
     enddo
   enddo
@@ -288,13 +288,13 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        v_ij_u_cst_mu_j1b(j,i,ipoint) = v_ij_u_cst_mu_j1b(i,j,ipoint)
+        v_ij_u_cst_mu_j1b_fit(j,i,ipoint) = v_ij_u_cst_mu_j1b_fit(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for v_ij_u_cst_mu_j1b', wall1 - wall0
+  print*, ' wall time for v_ij_u_cst_mu_j1b_fit', wall1 - wall0
 
 END_PROVIDER 
 
@@ -327,7 +327,6 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_an, (ao_num, ao_num, n_poin
   call wall_time(wall0)
 
   provide mu_erf final_grid_points j1b_pen
-  PROVIDE ng_fit_jast expo_gauss_j_mu_x coef_gauss_j_mu_x
   PROVIDE List_all_comb_b2_size List_all_comb_b2_coef List_all_comb_b2_expo List_all_comb_b2_cent
 
   ct = inv_sq_pi_2 / mu_erf
@@ -340,7 +339,6 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_an, (ao_num, ao_num, n_poin
   !$OMP          int_e2, int_c3, int_e3)                             &
   !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
   !$OMP          final_grid_points, mu_erf, ct,                      &
-  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
   !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
   !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b_an)
   !$OMP DO

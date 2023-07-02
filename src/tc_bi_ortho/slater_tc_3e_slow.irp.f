@@ -1,4 +1,6 @@
 
+! ---
+
 subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
 
   BEGIN_DOC
@@ -22,12 +24,12 @@ subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
 
   if(core_tc_op) then
     do i = 1, Nint
-      key_i_core(i,1) = xor(key_i(i,1),core_bitmask(i,1))
-      key_i_core(i,2) = xor(key_i(i,2),core_bitmask(i,2))
+      key_i_core(i,1) = xor(key_i(i,1), core_bitmask(i,1))
+      key_i_core(i,2) = xor(key_i(i,2), core_bitmask(i,2))
     enddo
-    call bitstring_to_list_ab(key_i_core,occ,Ne,Nint)
+    call bitstring_to_list_ab(key_i_core, occ, Ne, Nint)
   else
-    call bitstring_to_list_ab(key_i,occ,Ne,Nint)
+    call bitstring_to_list_ab(key_i, occ, Ne, Nint)
   endif
 
   hthree = 0.d0

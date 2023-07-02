@@ -21,7 +21,7 @@ subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
   integer :: degree
 
   call get_excitation_degree(key_j, key_i, degree, Nint)
-  if(degree.gt.2)then
+  if(degree.gt.2) then
     htot = 0.d0
   else
     call htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
@@ -60,22 +60,22 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.gt.2) return
 
-  if(degree == 0)then
+  if(degree == 0) then
     call diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
-  else if (degree == 1)then
+  else if (degree == 1) then
     call single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
-  else if(degree == 2)then
+  else if(degree == 2) then
     call double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
   endif
 
   if(three_body_h_tc) then
     if(degree == 2) then
-      if(.not.double_normal_ord.and.elec_num.gt.2.and.three_e_5_idx_term) then
+      if((.not.double_normal_ord) .and. (elec_num .gt. 2) .and. three_e_5_idx_term) then
         call double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
       endif
-    else if(degree == 1.and.elec_num.gt.2.and.three_e_4_idx_term) then
+    else if((degree == 1) .and. (elec_num .gt. 2) .and. three_e_4_idx_term) then
       call single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
-    else if(degree == 0.and.elec_num.gt.2.and.three_e_3_idx_term) then
+    else if((degree == 0) .and. (elec_num .gt. 2) .and. three_e_3_idx_term) then
       call diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
     endif
   endif
