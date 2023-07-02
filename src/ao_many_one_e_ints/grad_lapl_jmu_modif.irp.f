@@ -60,6 +60,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
         do i_1s = 2, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
           beta        = List_all_comb_b2_expo  (i_1s)
           B_center(1) = List_all_comb_b2_cent(1,i_1s)
           B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -154,6 +155,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_
         do i_1s = 2, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
           beta        = List_all_comb_b2_expo  (i_1s)
           B_center(1) = List_all_comb_b2_cent(1,i_1s)
           B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -243,10 +245,6 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_fit, (ao_num, ao_num, n_poi
           expo_fit = expo_gauss_j_mu_x(i_fit)
           coef_fit = coef_gauss_j_mu_x(i_fit)
 
-!        do i_fit = ng_fit_jast, ng_fit_jast
-!          expo_fit = 5.0d0
-!          coef_fit = 1.0d0
-
           ! ---
 
           coef        = List_all_comb_b2_coef  (1)
@@ -264,6 +262,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_fit, (ao_num, ao_num, n_poi
           do i_1s = 2, List_all_comb_b2_size
 
             coef        = List_all_comb_b2_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b2_expo  (i_1s)
             B_center(1) = List_all_comb_b2_cent(1,i_1s)
             B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -305,6 +304,9 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_an, (ao_num, ao_num, n_poin
   BEGIN_DOC
   !
   ! int dr2 phi_i(r2) phi_j(r2) 1s_j1b(r2) u(mu, r12)
+  !
+  ! TODO
+  ! one subroutine for all integrals
   !
   END_DOC
 
@@ -383,6 +385,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_an, (ao_num, ao_num, n_poin
         do i_1s = 2, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
           beta        = List_all_comb_b2_expo  (i_1s)
           B_center(1) = List_all_comb_b2_cent(1,i_1s)
           B_center(2) = List_all_comb_b2_cent(2,i_1s)
