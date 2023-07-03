@@ -9,10 +9,9 @@ program test_ints
   print *, ' starting test_ints ...'
 
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
-!  my_n_pt_r_grid = 15 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   my_extra_grid_becke = .True.
@@ -280,7 +279,7 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
     do i = 1, ao_num
      do j = 1, ao_num
       array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -506,7 +505,7 @@ subroutine routine_v_ij_u_cst_mu_j1b
     do i = 1, ao_num
      do j = 1, ao_num
       array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo

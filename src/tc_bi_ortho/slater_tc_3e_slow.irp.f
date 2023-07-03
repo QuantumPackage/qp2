@@ -1,4 +1,6 @@
 
+! ---
+
 subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
 
   BEGIN_DOC
@@ -14,86 +16,94 @@ subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
   integer                       :: occ(Nint*bit_kind_size,2)
   integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,m,mm
   integer(bit_kind)             :: key_i_core(Nint,2)
-  double precision              :: direct_int, exchange_int
-  double precision              :: sym_3_e_int_from_6_idx_tensor
-  double precision              :: three_e_diag_parrallel_spin
+  double precision              :: direct_int, exchange_int, ref
+  double precision, external    :: sym_3_e_int_from_6_idx_tensor
+  double precision, external    :: three_e_diag_parrallel_spin
 
-  if(core_tc_op)then
-   do i = 1, Nint
-    key_i_core(i,1) = xor(key_i(i,1),core_bitmask(i,1))
-    key_i_core(i,2) = xor(key_i(i,2),core_bitmask(i,2))
-   enddo
-   call bitstring_to_list_ab(key_i_core,occ,Ne,Nint)
+  PROVIDE mo_l_coef mo_r_coef
+
+  if(core_tc_op) then
+    do i = 1, Nint
+      key_i_core(i,1) = xor(key_i(i,1), core_bitmask(i,1))
+      key_i_core(i,2) = xor(key_i(i,2), core_bitmask(i,2))
+    enddo
+    call bitstring_to_list_ab(key_i_core, occ, Ne, Nint)
   else
-   call bitstring_to_list_ab(key_i,occ,Ne,Nint)
+    call bitstring_to_list_ab(key_i, occ, Ne, Nint)
   endif
+
   hthree = 0.d0
 
-  if(Ne(1)+Ne(2).ge.3)then
-!!  ! alpha/alpha/beta three-body
-   do i = 1, Ne(1)
-    ii = occ(i,1)
-    do j = i+1, Ne(1)
-     jj = occ(j,1)
-     do m = 1, Ne(2)
-      mm = occ(m,2)
-!      direct_int = three_body_ints_bi_ort(mm,jj,ii,mm,jj,ii) USES THE 6-IDX TENSOR
-!      exchange_int = three_body_ints_bi_ort(mm,jj,ii,mm,ii,jj) USES THE 6-IDX TENSOR
-      direct_int = three_e_3_idx_direct_bi_ort(mm,jj,ii) ! USES 3-IDX TENSOR
-      exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii) ! USES 3-IDX TENSOR
-      hthree += direct_int - exchange_int
-     enddo
-    enddo
-   enddo
+  if((Ne(1)+Ne(2)) .ge. 3) then
 
-   ! beta/beta/alpha three-body
-   do i = 1, Ne(2)
-    ii = occ(i,2)
-    do j = i+1, Ne(2)
-     jj = occ(j,2)
-     do m = 1, Ne(1)
-      mm = occ(m,1)
-      direct_int = three_e_3_idx_direct_bi_ort(mm,jj,ii)
-      exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)
-      hthree += direct_int - exchange_int
-     enddo
+    ! alpha/alpha/beta three-body
+    do i = 1, Ne(1)
+      ii = occ(i,1)
+      do j = i+1, Ne(1)
+        jj = occ(j,1)
+        do m = 1, Ne(2)
+          mm = occ(m,2)
+          !direct_int   = three_body_ints_bi_ort(mm,jj,ii,mm,jj,ii) !uses the 6-idx tensor
+          !exchange_int = three_body_ints_bi_ort(mm,jj,ii,mm,ii,jj) !uses the 6-idx tensor
+          direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,ii)      !uses 3-idx tensor
+          exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)      !uses 3-idx tensor
+          hthree      += direct_int - exchange_int
+        enddo
+      enddo
     enddo
-   enddo
 
-   ! alpha/alpha/alpha three-body
-   do i = 1, Ne(1)
-    ii = occ(i,1) ! 1
-    do j = i+1, Ne(1)
-     jj = occ(j,1) ! 2
-     do m = j+1, Ne(1)
-      mm = occ(m,1) ! 3
-!      ref =  sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) USES THE 6 IDX TENSOR
-      hthree += three_e_diag_parrallel_spin(mm,jj,ii) ! USES ONLY 3-IDX TENSORS
-     enddo
+    ! beta/beta/alpha three-body
+    do i = 1, Ne(2)
+      ii = occ(i,2)
+      do j = i+1, Ne(2)
+        jj = occ(j,2)
+        do m = 1, Ne(1)
+          mm = occ(m,1)
+          !direct_int   = three_body_ints_bi_ort(mm,jj,ii,mm,jj,ii) !uses the 6-idx tensor
+          !exchange_int = three_body_ints_bi_ort(mm,jj,ii,mm,ii,jj) !uses the 6-idx tensor
+          direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,ii)
+          exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)
+          hthree      += direct_int - exchange_int
+        enddo
+      enddo
     enddo
-   enddo
 
-   ! beta/beta/beta three-body
-   do i = 1, Ne(2)
-    ii = occ(i,2) ! 1
-    do j = i+1, Ne(2)
-     jj = occ(j,2) ! 2
-     do m = j+1, Ne(2)
-      mm = occ(m,2) ! 3
-!      ref =  sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) USES THE 6 IDX TENSOR
-      hthree += three_e_diag_parrallel_spin(mm,jj,ii) ! USES ONLY 3-IDX TENSORS
-     enddo
+    ! alpha/alpha/alpha three-body
+    do i = 1, Ne(1)
+      ii = occ(i,1) ! 1
+      do j = i+1, Ne(1)
+        jj = occ(j,1) ! 2
+        do m = j+1, Ne(1)
+          mm = occ(m,1) ! 3
+          !hthree += sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) !uses the 6 idx tensor
+          hthree += three_e_diag_parrallel_spin(mm,jj,ii)             !uses only 3-idx tensors
+        enddo
+      enddo
     enddo
-   enddo
+
+    ! beta/beta/beta three-body
+    do i = 1, Ne(2)
+      ii = occ(i,2) ! 1
+      do j = i+1, Ne(2)
+        jj = occ(j,2) ! 2
+        do m = j+1, Ne(2)
+          mm = occ(m,2) ! 3
+          !hthree += sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) !uses the 6 idx tensor
+          hthree += three_e_diag_parrallel_spin(mm,jj,ii)             !uses only 3-idx tensors
+        enddo
+      enddo
+    enddo
+
   endif
 
 end
 
+! ---
 
 subroutine single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for single excitation ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
+  ! <key_j |H_tilde | key_i> for single excitation ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
   !!
   !! WARNING !!
   !
@@ -188,7 +198,7 @@ end
 subroutine double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
 
   BEGIN_DOC
-  ! <key_j | H_tilde | key_i> for double excitation ONLY FOR THREE-BODY TERMS  WITH BI ORTHONORMAL ORBITALS
+  ! <key_j |H_tilde | key_i> for double excitation ONLY FOR THREE-BODY TERMS  WITH BI ORTHONORMAL ORBITALS
   !!
   !! WARNING !!
   !

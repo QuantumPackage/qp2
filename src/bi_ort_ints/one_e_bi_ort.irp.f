@@ -6,7 +6,7 @@ BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
   implicit none
   integer :: i, j
 
-  ao_one_e_integrals_tc_tot = ao_one_e_integrals      
+  ao_one_e_integrals_tc_tot = ao_one_e_integrals
 
   !provide j1b_type
 

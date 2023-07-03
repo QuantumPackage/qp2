@@ -418,7 +418,7 @@ subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
   xab = xa-xb
   ab = ab*p_inv
   k = ab*xab*xab
-  if (k > 40.d0) then
+  if (k > 400.d0) then
     k=0.d0
     return
   endif

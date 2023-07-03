@@ -1,3 +1,4 @@
+
 ! ---
 
 subroutine provide_all_three_ints_bi_ortho()
@@ -25,9 +26,9 @@ subroutine provide_all_three_ints_bi_ortho()
       PROVIDE normal_two_body_bi_orth
     endif
 
- endif
+  endif
 
- return
+  return
 end
 
 ! ---
@@ -36,7 +37,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
  implicit none
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the total matrix element 
   !! WARNING !!
@@ -46,16 +47,22 @@ subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
   END_DOC
 
   use bitmasks
- integer,           intent(in) :: Nint
- integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
- double precision, intent(out) :: htot
- double precision :: hmono, htwoe, hthree
- call htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
+  double precision, intent(out) :: htot
+  double precision :: hmono, htwoe, hthree
+
+  call htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+
 end
+
+! ---
+
 subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
+
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the detail of the matrix element in terms of single, two and three electron contribution. 
   !! WARNING !!
@@ -80,11 +87,11 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.gt.2) return
 
-  if(degree == 0)then
+  if(degree == 0) then
     call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
-  else if (degree == 1)then
-    call single_htilde_mu_mat_fock_bi_ortho(Nint,key_j, key_i , hmono, htwoe, hthree, htot)
-  else if(degree == 2)then
+  else if (degree == 1) then
+    call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+  else if(degree == 2) then
     call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   endif
 
@@ -100,7 +107,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
 
   BEGIN_DOC
   !
-  ! <key_j | H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
   !!
   ! Returns the detail of the matrix element WITHOUT ANY CONTRIBUTION FROM THE THREE ELECTRON TERMS 
   !! WARNING !!

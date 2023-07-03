@@ -5,7 +5,7 @@ subroutine hmat_bi_ortho(key_j, key_i, Nint, hmono, htwoe, htot)
 
   BEGIN_DOC
   !
-  ! < key_j | H | key_i > where | key_j > is developed on the LEFT basis and | key_i > is developed on the RIGHT basis
+  ! < key_j |H | key_i > where | key_j > is developed on the LEFT basis and | key_i > is developed on the RIGHT basis
   ! 
   END_DOC
 
@@ -111,7 +111,7 @@ subroutine single_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
 
   BEGIN_DOC
   !
-  ! < key_j | H | key_i > for single excitation 
+  ! < key_j |H | key_i > for single excitation 
   ! 
   END_DOC
 
@@ -185,7 +185,7 @@ subroutine double_hmat_bi_ortho(Nint, key_j, key_i, hmono, htwoe)
 
   BEGIN_DOC
   !
-  ! < key_j | H | key_i> for double excitation
+  ! < key_j |H | key_i> for double excitation
   ! 
   END_DOC
 

@@ -8,11 +8,13 @@ program tc_bi_ortho
   END_DOC
 
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   print*, ' nb of states = ', N_states
   print*, ' nb of det    = ', N_det
@@ -20,21 +22,28 @@ program tc_bi_ortho
   call routine_diag()
   call write_tc_energy()
   call save_tc_bi_ortho_wavefunction()
-end
-
-subroutine test
- implicit none
- integer :: i,j 
- double precision :: hmono,htwoe,hthree,htot
- use bitmasks
- print*,'reading the wave function '
- do i = 1, N_det
-  call debug_det(psi_det(1,1,i),N_int)
-  print*,i,psi_l_coef_bi_ortho(i,1)*psi_r_coef_bi_ortho(i,1)
-  print*,i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
- enddo
 
 end
+
+! ---
+
+subroutine test()
+
+  use bitmasks
+  implicit none
+  integer          :: i, j 
+  double precision :: hmono, htwoe, hthree, htot
+
+  print*, 'reading the wave function '
+  do i = 1, N_det
+    call debug_det(psi_det(1,1,i), N_int)
+    print*, i, psi_l_coef_bi_ortho(i,1)*psi_r_coef_bi_ortho(i,1)
+    print*, i, psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
+  enddo
+
+end
+
+! ---
 
 subroutine routine_diag()
 

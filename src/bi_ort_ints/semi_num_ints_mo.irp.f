@@ -140,8 +140,6 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
       enddo
     enddo
 
-    FREE int2_grad1_u12_ao
-
   endif
 
   call wall_time(wall1)
@@ -224,6 +222,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3,
 
   implicit none
   integer :: i, j, ipoint
+
+  PROVIDE int2_grad1_u12_ao
 
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num

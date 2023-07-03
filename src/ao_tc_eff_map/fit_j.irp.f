@@ -36,16 +36,25 @@ END_PROVIDER
  END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, expo_j_xmu, (n_fit_1_erf_x) ]
- implicit none
- BEGIN_DOC
- ! F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) is fitted with a gaussian and a Slater
- !
- !      \approx - 1/sqrt(pi) * exp(-alpha * x ) exp(-beta * x**2)
- !
- ! where alpha = expo_j_xmu(1) and beta = expo_j_xmu(2)
- END_DOC
- expo_j_xmu(1) = 1.7477d0
- expo_j_xmu(2) = 0.668662d0
+
+  BEGIN_DOC
+  ! F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) is fitted with a gaussian and a Slater
+  !
+  !      \approx - 1/sqrt(pi) * exp(-alpha * x ) exp(-beta * x**2)
+  !
+  ! where alpha = expo_j_xmu(1) and beta = expo_j_xmu(2)
+  END_DOC
+
+  implicit none
+
+  !expo_j_xmu(1) = 1.7477d0
+  !expo_j_xmu(2) = 0.668662d0
+
+  !expo_j_xmu(1) = 1.74766377595541d0 
+  !expo_j_xmu(2) = 0.668719925486403d0
+
+  expo_j_xmu(1) = 1.74770446934522d0 
+  expo_j_xmu(2) = 0.668659706559979d0
 
 END_PROVIDER 
 

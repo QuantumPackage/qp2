@@ -77,7 +77,7 @@
 !      ! Criterion -> step accepted or rejected 
 !      call trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, criterion_model,rho,cancel_step)
 !
-!      ! ### TODO ###
+!      !### TODO ###
 !      !if (cancel_step) then
 !      ! Cancel the previous step (mo_coef = prev_mos if you keep them...)
 !      !endif
