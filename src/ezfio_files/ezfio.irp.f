@@ -7,6 +7,8 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
 
   PROVIDE mpi_initialized
 
+  integer :: i
+
   ! Get the QPACKAGE_INPUT environment variable
   call getenv('QPACKAGE_INPUT',ezfio_filename)
   if (ezfio_filename == '') then
@@ -44,11 +46,14 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
 END_PROVIDER
 
 BEGIN_PROVIDER [ character*(1024), ezfio_work_dir ]
+ use c_functions
  implicit none
  BEGIN_DOC
  ! EZFIO/work/
  END_DOC
- call ezfio_set_work_empty(.False.)
+ logical :: b
+ b = mkl_serv_intel_cpu_true() /= 1
+ call ezfio_set_work_empty(b)
  ezfio_work_dir = trim(ezfio_filename)//'/work/'
 END_PROVIDER
 

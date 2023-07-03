@@ -57,6 +57,12 @@ module c_functions
      end subroutine sscanf_sd_c
   end interface
 
+  interface
+    integer(kind=c_int) function mkl_serv_intel_cpu_true() bind(C)
+      use iso_c_binding
+    end function
+  end interface
+
 contains
 
   integer function atoi(a)
@@ -130,5 +136,4 @@ subroutine usleep(us)
   u = us
   call usleep_c(u)
 end subroutine usleep
-
 
