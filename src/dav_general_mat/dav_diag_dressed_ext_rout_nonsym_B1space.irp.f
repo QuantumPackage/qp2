@@ -343,7 +343,7 @@ subroutine davidson_general_diag_dressed_ext_rout_nonsym_b1space(u_in, H_jj, Dre
         if(lambda_tmp .lt. 0.7d0) then
           print *, ' very small overlap ...', l, i_omax(l)
           print *, ' max overlap = ', lambda_tmp
-          stop
+          !stop
         endif
 
         if(i_omax(l) .ne. l) then

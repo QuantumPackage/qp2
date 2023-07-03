@@ -31,7 +31,9 @@
 
 END_PROVIDER 
 
- BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho_tranp, (N_det,N_det)]
+! ---
+
+BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho_tranp, (N_det,N_det)]
  implicit none
  integer ::i,j
   do i = 1, N_det

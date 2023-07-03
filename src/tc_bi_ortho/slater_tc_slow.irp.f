@@ -21,7 +21,7 @@ subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
   integer :: degree
 
   call get_excitation_degree(key_j, key_i, degree, Nint)
-  if(degree.gt.2)then
+  if(degree.gt.2) then
     htot = 0.d0
   else
     call htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
@@ -55,27 +55,27 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   hmono  = 0.d0
   htwoe  = 0.d0
   htot   = 0.d0
-  hthree = 0.D0
+  hthree = 0.d0
 
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.gt.2) return
 
-  if(degree == 0)then
+  if(degree == 0) then
     call diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
-  else if (degree == 1)then
+  else if (degree == 1) then
     call single_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
-  else if(degree == 2)then
+  else if(degree == 2) then
     call double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
   endif
 
   if(three_body_h_tc) then
     if(degree == 2) then
-      if(.not.double_normal_ord.and.elec_num.gt.2.and.three_e_5_idx_term) then
+      if((.not.double_normal_ord) .and. (elec_num .gt. 2) .and. three_e_5_idx_term) then
         call double_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
       endif
-    else if(degree == 1.and.elec_num.gt.2.and.three_e_4_idx_term) then
+    else if((degree == 1) .and. (elec_num .gt. 2) .and. three_e_4_idx_term) then
       call single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
-    else if(degree == 0.and.elec_num.gt.2.and.three_e_3_idx_term) then
+    else if((degree == 0) .and. (elec_num .gt. 2) .and. three_e_3_idx_term) then
       call diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
     endif
   endif
@@ -106,6 +106,8 @@ subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
   double precision               :: get_mo_two_e_integral_tc_int
   integer(bit_kind)              :: key_i_core(Nint,2)
 
+  PROVIDE mo_bi_ortho_tc_two_e
+
 !  PROVIDE mo_two_e_integrals_tc_int_in_map mo_bi_ortho_tc_two_e
 !
 !  PROVIDE mo_integrals_erf_map core_energy nuclear_repulsion core_bitmask
@@ -134,15 +136,6 @@ subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
    do i = 1, Ne(ispin) ! 
     ii = occ(i,ispin) 
     hmono += mo_bi_ortho_tc_one_e(ii,ii)
-
-!    if(j1b_gauss .eq. 1) then
-!      print*,'j1b not implemented for bi ortho TC'
-!      print*,'stopping  ....'
-!      stop
-!      !hmono += mo_j1b_gauss_hermI  (ii,ii) &
-!      !       + mo_j1b_gauss_hermII (ii,ii) &
-!      !       + mo_j1b_gauss_nonherm(ii,ii)
-!    endif
 
 !    if(core_tc_op)then
 !   print*,'core_tc_op not already taken into account for bi ortho'

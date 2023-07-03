@@ -1,19 +1,18 @@
+
+! ---
+
 program test_non_h
 
   implicit none
 
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 50
-  my_n_pt_a_grid = 74
-  !my_n_pt_r_grid = 400
-  !my_n_pt_a_grid = 974
-
-!  my_n_pt_r_grid = 10 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
-  !call routine_grad_squared
-  !call routine_fit
+  !call routine_grad_squared()
+  !call routine_fit()
   
   call test_ipp()
 end

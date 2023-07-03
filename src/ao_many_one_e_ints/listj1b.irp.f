@@ -62,6 +62,7 @@ END_PROVIDER
   double precision :: tmp_cent_x, tmp_cent_y, tmp_cent_z
 
   provide j1b_pen
+  provide j1b_pen_coef
 
   List_all_comb_b2_coef = 0.d0
   List_all_comb_b2_expo = 0.d0
@@ -127,8 +128,8 @@ END_PROVIDER
     List_all_comb_b2_expo(    1) = 0.d0
     List_all_comb_b2_cent(1:3,1) = 0.d0
     do i = 1, nucl_num
-      List_all_comb_b2_coef(  i+1) = -1.d0
-      List_all_comb_b2_expo(  i+1) = j1b_pen(   i)
+      List_all_comb_b2_coef(  i+1) = -1.d0 * j1b_pen_coef(i)
+      List_all_comb_b2_expo(  i+1) = j1b_pen(i)
       List_all_comb_b2_cent(1,i+1) = nucl_coord(i,1)
       List_all_comb_b2_cent(2,i+1) = nucl_coord(i,2)
       List_all_comb_b2_cent(3,i+1) = nucl_coord(i,3)
@@ -225,6 +226,7 @@ END_PROVIDER
   double precision :: dx, dy, dz, r2
 
   provide j1b_pen
+  provide j1b_pen_coef
 
   List_all_comb_b3_coef = 0.d0
   List_all_comb_b3_expo = 0.d0
@@ -296,8 +298,8 @@ END_PROVIDER
 
     do i = 1, nucl_num
       ii = ii + 1
-      List_all_comb_b3_coef(  ii) = -2.d0
-      List_all_comb_b3_expo(  ii) = j1b_pen(   i)
+      List_all_comb_b3_coef(  ii) = -2.d0 * j1b_pen_coef(i)
+      List_all_comb_b3_expo(  ii) = j1b_pen(i)
       List_all_comb_b3_cent(1,ii) = nucl_coord(i,1)
       List_all_comb_b3_cent(2,ii) = nucl_coord(i,2)
       List_all_comb_b3_cent(3,ii) = nucl_coord(i,3)
@@ -305,7 +307,7 @@ END_PROVIDER
 
     do i = 1, nucl_num
       ii = ii + 1
-      List_all_comb_b3_coef(  ii) = 1.d0
+      List_all_comb_b3_coef(  ii) = 1.d0 * j1b_pen_coef(i) * j1b_pen_coef(i)
       List_all_comb_b3_expo(  ii) = 2.d0 * j1b_pen(i)
       List_all_comb_b3_cent(1,ii) = nucl_coord(i,1)
       List_all_comb_b3_cent(2,ii) = nucl_coord(i,2)
@@ -337,7 +339,7 @@ END_PROVIDER
         
         ii = ii + 1
         ! x 2 to avoid doing integrals twice
-        List_all_comb_b3_coef(  ii) = 2.d0 * dexp(-tmp1*tmp2*tmp4*r2)
+        List_all_comb_b3_coef(  ii) = 2.d0 * dexp(-tmp1*tmp2*tmp4*r2) * j1b_pen_coef(i) * j1b_pen_coef(j)
         List_all_comb_b3_expo(  ii) = tmp3
         List_all_comb_b3_cent(1,ii) = tmp4 * (tmp1 * xi + tmp2 * xj)
         List_all_comb_b3_cent(2,ii) = tmp4 * (tmp1 * yi + tmp2 * yj)
