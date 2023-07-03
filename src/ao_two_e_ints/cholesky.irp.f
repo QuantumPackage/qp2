@@ -74,27 +74,31 @@ subroutine direct_cholesky(L, ndim, rank, tau)
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
-  integer, allocatable :: Lset(:), Dset(:), addr(:,:)
+  integer*8, allocatable :: Lset(:), Dset(:), addr(:,:), LDmap(:), DLmap(:)
+  integer*8, allocatable :: Lset_rev(:), Dset_rev(:)
 
-  integer :: i,j,k,m,p,q, qj, dj
-  integer :: N, np, nq
+  integer*8 :: i,j,k,m,p,q, qj, dj, p2, q2
+  integer*8 :: N, np, nq
 
   double precision :: Dmax, Dmin, Qmax, f
   double precision, external :: get_ao_two_e_integral
   logical, external :: ao_two_e_integral_zero
 
   print *,  'Entering Cholesky'
+  rank = 0
 
-  allocate( D(ndim), Lset(ndim), Dset(ndim) )
-  allocate( addr(2,ndim) )
+  allocate( D(ndim), Lset(ndim), LDmap(ndim), DLmap(ndim), Dset(ndim) )
+  allocate( Lset_rev(ndim), Dset_rev(ndim) )
+  allocate( addr(3,ndim) )
 
   ! 1.
   k=0
-  do i=1,ao_num
-    do j=1,ao_num
+  do j=1,ao_num
+    do i=1,ao_num
       k = k+1
       addr(1,k) = i
       addr(2,k) = j
+      addr(3,k) = (i-1)*ao_num + j
     enddo
   enddo
 
@@ -110,10 +114,12 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
   ! 2.
   np=0
+  Lset_rev = 0
   do p=1,ndim
     if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
       np = np+1
       Lset(np) = p
+      Lset_rev(p) = np
     endif
   enddo
 
@@ -133,15 +139,21 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
     ! c.
     nq=0
-    do q=1,np
-      if ( D(Lset(q)) > Dmin ) then
+    LDmap = 0
+    DLmap = 0
+    do p=1,np
+      if ( D(Lset(p)) > Dmin ) then
         nq = nq+1
-        Dset(nq) = Lset(q)
+        Dset(nq) = Lset(p)
+        Dset_rev(Dset(nq)) = nq
+        LDmap(p) = nq
+        DLmap(nq) = p
       endif
     enddo
 
     ! d., e.
     allocate(Delta(np,nq), Ltmp_p(max(np,1),max(N,1)), Ltmp_q(max(nq,1),max(N,1)))
+
     !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q)
 
     !$OMP DO 
@@ -153,38 +165,47 @@ subroutine direct_cholesky(L, ndim, rank, tau)
         Ltmp_q(q,k) = L(Dset(q),k)
       enddo
     enddo
-    !$OMP END DO NOWAIT
+    !$OMP END DO
 
-    !$OMP DO 
+    !$OMP DO  SCHEDULE(dynamic,8)
     do m=1,nq
-      do k=1,np
-        Delta(k,m) = 0.d0
+
+      do k=1, nq
+        ! Apply only to (k,m) pairs both in Dset
+        p = DLmap(k)
+        q = Lset_rev(addr(3,Dset(k)))
+        if ((0 < q).and.(q < p)) cycle
+        if (ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
+                                    addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
+          Delta(p,m) = 0.d0
+        else
+          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
+                             addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
+        endif
+        Delta(q,m) = Delta(p,m)
       enddo
-    enddo
-    !$OMP END DO 
 
-    !$OMP DO 
-    do m=1,nq
       do k=1,np
-        if (ao_two_e_integral_zero( &
-           addr(1,Lset(k)), &
-           addr(1,Dset(m)), &
-           addr(2,Lset(k)), &
-           addr(2,Dset(m)) ) ) cycle
-        Delta(k,m) = get_ao_two_e_integral( &
-           addr(1,Lset(k)), &
-           addr(1,Dset(m)), &
-           addr(2,Lset(k)), &
-           addr(2,Dset(m)), &
-           ao_integrals_map)
+        ! Apply only to (k,m) pairs where k is not in Dset
+        if (LDmap(k) /= 0) cycle
+        q = Lset_rev(addr(3,Lset(k)))
+        if ((0 < q).and.(q < k)) cycle
+        if (ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)), &
+                                    addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
+           Delta(k,m) = 0.d0
+        else
+           Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
+                           addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+        endif
+        Delta(q,m) = Delta(k,m)
       enddo
     enddo
     !$OMP END DO
 
     !$OMP END PARALLEL
 
-    call dgemm('N','T',np,nq,N,-1.d0, &
-      Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+    call dgemm('N','T', int(np,4), int(nq,4), int(N,4), -1.d0, &
+      Ltmp_p, int(np,4), Ltmp_q, int(nq,4), 1.d0, Delta, int(np,4))
 
   ! f.
     Qmax = D(Dset(1))
@@ -193,11 +214,11 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     enddo
 
     ! g.
-    j = 0
 
-    do while ( (j <= nq).and.(Qmax > Dmin) )
+    do j=1,nq
+
+      if ( (Qmax <= Dmin).or.(N+j > ndim) ) exit
       ! i.
-      j = j+1
       rank = N+j
 
       ! ii.
@@ -208,13 +229,17 @@ subroutine direct_cholesky(L, ndim, rank, tau)
         endif
       enddo
 
+      L(:, rank) = 0.d0
+
       ! iii.
       f = 1.d0/dsqrt(Qmax)
-      !$OMP PARALLEL PRIVATE(m,k)
+
+      !$OMP PARALLEL PRIVATE(m,p,q,k) DEFAULT(shared)
       !$OMP DO
       do p=1,np
         Ltmp_p(p,1) = Delta(p,dj) * f
         L(Lset(p), rank) = Ltmp_p(p,1)
+        D(Lset(p)) = D(Lset(p)) - Ltmp_p(p,1) * Ltmp_p(p,1)
       enddo
       !$OMP END DO
 
@@ -223,22 +248,17 @@ subroutine direct_cholesky(L, ndim, rank, tau)
         Ltmp_q(q,1) = L(Dset(q), rank)
       enddo
       !$OMP END DO
-
+      
       ! iv.
-      !$OMP DO 
+
+      !$OMP DO SCHEDULE(static)
       do m=1, nq
         do k=1, np
           Delta(k,m) = Delta(k,m) - Ltmp_p(k,1) * Ltmp_q(m,1)
         enddo
       enddo
-      !$OMP END DO NOWAIT
-!      call dger(np, nq, -1.d0, Ltmp_p, 1, Ltmp_q, 1, Delta, np)
-
-      !$OMP DO
-      do k=1, np
-        D(Lset(k)) = D(Lset(k)) - Ltmp_p(k,1) * Ltmp_p(k,1)
-      enddo
       !$OMP END DO
+
       !$OMP END PARALLEL
 
       Qmax = D(Dset(1))
@@ -247,6 +267,7 @@ subroutine direct_cholesky(L, ndim, rank, tau)
       enddo
 
     enddo
+    print *,  Qmax
 
     deallocate(Delta, Ltmp_p, Ltmp_q)
 
@@ -260,10 +281,12 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     enddo
 
     np=0
+    Lset_rev = 0
     do p=1,ndim
       if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
         np = np+1
         Lset(np) = p
+        Lset_rev(p) = np
       endif
     enddo
 
