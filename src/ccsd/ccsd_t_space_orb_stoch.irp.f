@@ -332,7 +332,10 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   print '(A)', ' +----------------------+--------------+----------+'
   print '(A)', ''
 
-  deallocate(X_vovv,X_ooov,T_voov,T_oovv)
+  deallocate(X_vovv)
+  deallocate(X_ooov)
+  deallocate(T_voov)
+  deallocate(T_oovv)
 end
 
 
