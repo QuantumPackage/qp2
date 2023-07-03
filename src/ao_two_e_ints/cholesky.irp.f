@@ -34,105 +34,10 @@ END_PROVIDER
  ! <ij|kl> = (ik|jl) = sum_a (ik|a).(a|jl)
  END_DOC
 
- type(c_ptr) :: ptr
- integer :: fd, i,j,k,l,m,rank
- double precision, pointer :: ao_integrals(:,:,:,:)
- double precision, external :: ao_two_e_integral
-
- ! Store AO integrals in a memory mapped file
- call mmap(trim(ezfio_work_dir)//'ao_integrals', &
-   (/ int(ao_num,8), int(ao_num,8), int(ao_num,8), int(ao_num,8) /), &
-   8, fd, .False., ptr)
- call c_f_pointer(ptr, ao_integrals, (/ao_num, ao_num, ao_num, ao_num/))
-
- print*, 'Providing the AO integrals (Cholesky)'
- call wall_time(wall_1)
- call cpu_time(cpu_1)
-
- ao_integrals = 0.d0
-
- double precision :: integral, cpu_1, cpu_2, wall_1, wall_2
- logical, external :: ao_two_e_integral_zero
-  double precision, external :: get_ao_two_e_integral
-
- if (read_ao_two_e_integrals) then
-   PROVIDE ao_two_e_integrals_in_map
-
-   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l, integral, wall_2)
-   do m=0,9
-     do l=1+m,ao_num,10
-       !$OMP DO SCHEDULE(dynamic)
-       do j=1,ao_num
-         do k=1,ao_num
-           do i=1,ao_num
-             if (ao_two_e_integral_zero(i,j,k,l)) cycle
-             integral = get_ao_two_e_integral(i,j,k,l, ao_integrals_map)
-             ao_integrals(i,k,j,l) = integral
-           enddo
-         enddo
-       enddo
-       !$OMP END DO NOWAIT
-     enddo
-     !$OMP MASTER
-     call wall_time(wall_2)
-     print '(I10,'' %  in'', 4X, F10.2, '' s.'')', (m+1) * 10, wall_2-wall_1
-     !$OMP END MASTER
-   enddo
-   !$OMP END PARALLEL
-
- else
-
-   !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l, integral, wall_2)
-   do m=0,9
-     do l=1+m,ao_num,10
-       !$OMP DO SCHEDULE(dynamic)
-       do j=1,l
-         do k=1,ao_num
-           do i=1,min(k,j)
-             if (ao_two_e_integral_zero(i,j,k,l)) cycle
-             integral = ao_two_e_integral(i,k,j,l)
-             ao_integrals(i,k,j,l) = integral
-             ao_integrals(k,i,j,l) = integral
-             ao_integrals(i,k,l,j) = integral
-             ao_integrals(k,i,l,j) = integral
-             ao_integrals(j,l,i,k) = integral
-             ao_integrals(j,l,k,i) = integral
-             ao_integrals(l,j,i,k) = integral
-             ao_integrals(l,j,k,i) = integral
-           enddo
-         enddo
-       enddo
-       !$OMP END DO NOWAIT
-     enddo
-     !$OMP MASTER
-     call wall_time(wall_2)
-     print '(I10,'' %  in'', 4X, F10.2, '' s.'')', (m+1) * 10, wall_2-wall_1
-     !$OMP END MASTER
-   enddo
-   !$OMP END PARALLEL
-
-   call wall_time(wall_2)
-   call cpu_time(cpu_2)
-   print*, 'AO integrals provided:'
-   print*, ' cpu  time :',cpu_2 - cpu_1, 's'
-   print*, ' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1+tiny(1.d0)), ' )'
-
- endif
-
- ! Call Lapack
  cholesky_ao_num = cholesky_ao_num_guess
-! call pivoted_cholesky(ao_integrals, cholesky_ao_num, ao_cholesky_threshold, ao_num*ao_num, cholesky_ao)
 
- call direct_cholesky(ao_integrals, cholesky_ao_num, ao_cholesky_threshold, ao_num*ao_num, cholesky_ao)
+ call direct_cholesky(cholesky_ao, ao_num*ao_num, cholesky_ao_num, ao_cholesky_threshold)
  print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
-
- ! Remove mmap
- double precision, external :: getUnitAndOpen
- call munmap( &
-   (/ int(ao_num,8), int(ao_num,8), int(ao_num,8), int(ao_num,8) /), &
-   8, fd, ptr)
- open(unit=99,file=trim(ezfio_work_dir)//'ao_integrals')
- close(99, status='delete')
 
 END_PROVIDER
 
@@ -152,35 +57,53 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
 END_PROVIDER
 
 
-subroutine direct_cholesky( A, rank, tau, ndim, L)
+subroutine direct_cholesky(L, ndim, rank, tau)
   implicit none
+  BEGIN_DOC
+! Cholesky-decomposed AOs.
+!
+! https://www.diva-portal.org/smash/get/diva2:396223/FULLTEXT01.pdf :
+! Page 32, section 13.5
+  END_DOC
   integer                          :: ndim
-  integer, intent(inout)           :: rank
-  double precision, intent(inout)  :: A(ndim, ndim)
-  double precision, intent(out)    :: L(ndim, rank)
+  integer, intent(out)             :: rank
+  double precision, intent(out)    :: L(ndim, ndim)
   double precision, intent(in)     :: tau
 
   double precision, parameter :: s = 1.d-2
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:)
-  integer, allocatable :: Lset(:), Dset(:)
+  integer, allocatable :: Lset(:), Dset(:), addr(:,:)
 
   integer :: i,j,k,m,p,q, qj, dj
   integer :: N, np, nq
 
   double precision :: Dmax, Dmin, Qmax, f
-  allocate( D(ndim), Lset(ndim), Dset(ndim) )
+  double precision, external :: get_ao_two_e_integral
 
-  L = 0.d0
+  allocate( D(ndim), Lset(ndim), Dset(ndim) )
+  allocate( addr(2,ndim) )
 
   ! 1.
-  do i=1,ndim
-    D(i) = A(i,i)
+  k=0
+  do i=1,ao_num
+    do j=1,ao_num
+      k = k+1
+      addr(1,k) = i
+      addr(2,k) = j
+    enddo
   enddo
+
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+  do i=1,ndim
+     D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
+                                  addr(2,i), addr(2,i), &
+                                  ao_integrals_map)
+  enddo
+  !$OMP END PARALLEL DO
+
   Dmax = maxval(D)
-!  print *, '# 1. ', D
-!  print *, '# 1. ', Dmax
 
   ! 2.
   np=0
@@ -190,25 +113,20 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
       Lset(np) = p
     endif
   enddo
-!  print *, '# 2. ', Lset(:np)
 
   ! 3.
   N = 0
-!  print *, '# 3. ', N
 
-  ! 4. 
+  ! 4.
   i = 0
-!  print *, '# 4. ', i
 
-  ! 5. 
+  ! 5.
   do while (Dmax > tau)
     ! a.
     i = i+1
-!    print *, '# 5.a ', i
 
     ! b.
     Dmin = max(s*Dmax, tau)
-!    print *, '# 5.b ', Dmin
 
     ! c.
     nq=0
@@ -218,43 +136,42 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
         Dset(nq) = Lset(q)
       endif
     enddo
-!    print *, '# 5.c ', Dset(:nq)
 
-    ! d.
+    ! d., e.
     allocate(Delta(np,nq))
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(m,k)
     do m=1,nq
       do k=1,np
-        Delta(k,m) = A(Lset(k), Dset(m))
+        Delta(k,m) = get_ao_two_e_integral( &
+           addr(1,Lset(k)), &
+           addr(1,Dset(m)), &
+           addr(2,Lset(k)), &
+           addr(2,Dset(m)), &
+           ao_integrals_map)
       enddo
-    enddo
-!    print *, '# 5.d ', Delta
 
-    ! e.
-    do m=1,nq
-      do k=1,np
-        do p=1,N
-          Delta(k,m) = Delta(k,m) - L(Lset(k),p) * L(Dset(m),p)
+      do p=1,N
+        f = L(Dset(m),p)
+        do k=1,np
+          Delta(k,m) = Delta(k,m) - L(Lset(k),p) * f
         enddo
       enddo
     enddo
-!    print *, '# 5.e ', Delta
+    !$OMP END PARALLEL DO
 
     ! f.
     Qmax = D(Dset(1))
     do q=1,nq
       Qmax = max(Qmax, D(Dset(q)))
     enddo
-!    print *, '# 5.f ', Qmax
 
     ! g.
     j = 0
-!    print *, '# 5.g ', j
 
     do while ( (j <= nq).and.(Qmax > Dmin) )
       ! i.
       j = j+1
       rank = N+j
-!      print *, '# 5.h.i ', j, rank
 
       ! ii.
       do dj=1,nq
@@ -263,22 +180,18 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
           exit
         endif
       enddo
-!      print *, ' # 5.h.ii ', qj, dj
 
       ! iii.
       f = 1.d0/dsqrt(Qmax)
       do p=1,np
         L(Lset(p), rank) = Delta(p,dj) * f
       enddo
-!      print *, ' # 5.h.iii '
-!      do k=1,20
-!        print *, L(k,1:rank)
-!      enddo
 
       ! iv.
       do m=1, nq
+        f = L(Dset(m),rank)
         do k=1, np
-          Delta(k,m) = Delta(k,m) - L(Lset(k),rank) * L(Dset(m),rank)
+          Delta(k,m) = Delta(k,m) - L(Lset(k),rank) * f
         enddo
       enddo
 
@@ -290,9 +203,6 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
       do q=1,np
         Qmax = max(Qmax, D(Lset(q)))
       enddo
-!      print *, '# 5.h.iv ', Delta
-!      print *, '# 5.h.iv ', D
-!      print *, '# 5.h.iv ', Qmax
 
     enddo
 
@@ -300,14 +210,12 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
 
     ! i.
     N = N+j
-!    print *, '# 5.i ', N
 
     ! j.
     Dmax = D(Lset(1))
     do p=1,np
       Dmax = max(Dmax, D(Lset(p)))
     enddo
-!    print *, '# 5.j ', Dmax
 
     np=0
     do p=1,ndim
@@ -316,7 +224,7 @@ subroutine direct_cholesky( A, rank, tau, ndim, L)
         Lset(np) = p
       endif
     enddo
-!    print *, '# k. ', Lset(:np)
+
   enddo
 
 end
