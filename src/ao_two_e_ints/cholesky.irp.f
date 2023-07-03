@@ -81,6 +81,9 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
   double precision :: Dmax, Dmin, Qmax, f
   double precision, external :: get_ao_two_e_integral
+  logical, external :: ao_two_e_integral_zero
+
+  print *,  'Entering Cholesky'
 
   allocate( D(ndim), Lset(ndim), Dset(ndim) )
   allocate( addr(2,ndim) )
@@ -139,6 +142,9 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
     ! d., e.
     allocate(Delta(np,nq), Ltmp_p(max(np,1),max(N,1)), Ltmp_q(max(nq,1),max(N,1)))
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q)
+
+    !$OMP DO 
     do k=1,N
       do p=1,np
         Ltmp_p(p,k) = L(Lset(p),k)
@@ -147,10 +153,24 @@ subroutine direct_cholesky(L, ndim, rank, tau)
         Ltmp_q(q,k) = L(Dset(q),k)
       enddo
     enddo
+    !$OMP END DO NOWAIT
 
-    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(m,k)
+    !$OMP DO 
     do m=1,nq
       do k=1,np
+        Delta(k,m) = 0.d0
+      enddo
+    enddo
+    !$OMP END DO 
+
+    !$OMP DO 
+    do m=1,nq
+      do k=1,np
+        if (ao_two_e_integral_zero( &
+           addr(1,Lset(k)), &
+           addr(1,Dset(m)), &
+           addr(2,Lset(k)), &
+           addr(2,Dset(m)) ) ) cycle
         Delta(k,m) = get_ao_two_e_integral( &
            addr(1,Lset(k)), &
            addr(1,Dset(m)), &
@@ -159,7 +179,9 @@ subroutine direct_cholesky(L, ndim, rank, tau)
            ao_integrals_map)
       enddo
     enddo
-    !$OMP END PARALLEL DO
+    !$OMP END DO
+
+    !$OMP END PARALLEL
 
     call dgemm('N','T',np,nq,N,-1.d0, &
       Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
@@ -188,28 +210,36 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
       ! iii.
       f = 1.d0/dsqrt(Qmax)
+      !$OMP PARALLEL PRIVATE(m,k)
+      !$OMP DO
       do p=1,np
         Ltmp_p(p,1) = Delta(p,dj) * f
         L(Lset(p), rank) = Ltmp_p(p,1)
       enddo
+      !$OMP END DO
 
+      !$OMP DO
       do q=1,nq
         Ltmp_q(q,1) = L(Dset(q), rank)
       enddo
+      !$OMP END DO
 
       ! iv.
-!      call dger(np, nq, -1.d0, Ltmp_p, 1, Ltmp_q, 1, Delta, np)
-      !$OMP PARALLEL DO PRIVATE(f,m,k)
+      !$OMP DO 
       do m=1, nq
         do k=1, np
           Delta(k,m) = Delta(k,m) - Ltmp_p(k,1) * Ltmp_q(m,1)
         enddo
       enddo
-      !$OMP END PARALLEL DO
+      !$OMP END DO NOWAIT
+!      call dger(np, nq, -1.d0, Ltmp_p, 1, Ltmp_q, 1, Delta, np)
 
+      !$OMP DO
       do k=1, np
         D(Lset(k)) = D(Lset(k)) - Ltmp_p(k,1) * Ltmp_p(k,1)
       enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
 
       Qmax = D(Dset(1))
       do q=1,np
