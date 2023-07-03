@@ -73,7 +73,7 @@ subroutine direct_cholesky(L, ndim, rank, tau)
   double precision, parameter :: s = 1.d-2
   double precision, parameter :: dscale = 1.d0
 
-  double precision, allocatable :: D(:), Delta(:,:)
+  double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
   integer, allocatable :: Lset(:), Dset(:), addr(:,:)
 
   integer :: i,j,k,m,p,q, qj, dj
@@ -138,7 +138,16 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     enddo
 
     ! d., e.
-    allocate(Delta(np,nq))
+    allocate(Delta(np,nq), Ltmp_p(max(np,1),max(N,1)), Ltmp_q(max(nq,1),max(N,1)))
+    do k=1,N
+      do p=1,np
+        Ltmp_p(p,k) = L(Lset(p),k)
+      enddo
+      do q=1,nq
+        Ltmp_q(q,k) = L(Dset(q),k)
+      enddo
+    enddo
+
     !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(m,k)
     do m=1,nq
       do k=1,np
@@ -149,17 +158,13 @@ subroutine direct_cholesky(L, ndim, rank, tau)
            addr(2,Dset(m)), &
            ao_integrals_map)
       enddo
-
-      do p=1,N
-        f = L(Dset(m),p)
-        do k=1,np
-          Delta(k,m) = Delta(k,m) - L(Lset(k),p) * f
-        enddo
-      enddo
     enddo
     !$OMP END PARALLEL DO
 
-    ! f.
+    call dgemm('N','T',np,nq,N,-1.d0, &
+      Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+
+  ! f.
     Qmax = D(Dset(1))
     do q=1,nq
       Qmax = max(Qmax, D(Dset(q)))
@@ -184,19 +189,26 @@ subroutine direct_cholesky(L, ndim, rank, tau)
       ! iii.
       f = 1.d0/dsqrt(Qmax)
       do p=1,np
-        L(Lset(p), rank) = Delta(p,dj) * f
+        Ltmp_p(p,1) = Delta(p,dj) * f
+        L(Lset(p), rank) = Ltmp_p(p,1)
+      enddo
+
+      do q=1,nq
+        Ltmp_q(q,1) = L(Dset(q), rank)
       enddo
 
       ! iv.
+!      call dger(np, nq, -1.d0, Ltmp_p, 1, Ltmp_q, 1, Delta, np)
+      !$OMP PARALLEL DO PRIVATE(f,m,k)
       do m=1, nq
-        f = L(Dset(m),rank)
         do k=1, np
-          Delta(k,m) = Delta(k,m) - L(Lset(k),rank) * f
+          Delta(k,m) = Delta(k,m) - Ltmp_p(k,1) * Ltmp_q(m,1)
         enddo
       enddo
+      !$OMP END PARALLEL DO
 
       do k=1, np
-        D(Lset(k)) = D(Lset(k)) - L(Lset(k),rank) * L(Lset(k),rank)
+        D(Lset(k)) = D(Lset(k)) - Ltmp_p(k,1) * Ltmp_p(k,1)
       enddo
 
       Qmax = D(Dset(1))
@@ -206,7 +218,7 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
     enddo
 
-    deallocate(Delta)
+    deallocate(Delta, Ltmp_p, Ltmp_q)
 
     ! i.
     N = N+j
