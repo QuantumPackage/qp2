@@ -99,36 +99,6 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
     enddo
     !$OMP END PARALLEL DO
 
-!    !$OMP PARALLEL &
-!    !$OMP SHARED(n1,n2,n3,n4,list1,list2,list3,list4,v,cholesky_mo_transp,cholesky_ao_num,v1) &
-!    !$OMP PRIVATE(i1,i2,i3,i4,idx1,idx2,idx3,idx4,k,buffer,v2)&
-!    !$OMP DEFAULT(NONE)
-!    allocate(buffer(n1,n3,n2), v2(cholesky_ao_num,n2))
-!    !$OMP DO
-!    do i4 = 1, n4
-!      idx4 = list4(i4)
-!      do i2=1,n2
-!        idx2 = list2(i2)
-!        do k=1,cholesky_ao_num
-!          v2(k,i2) = cholesky_mo_transp(k,idx2,idx4)
-!        enddo
-!      enddo
-!      call dgemm('T','N', n1*n3, n2, cholesky_ao_num, 1.d0, &
-!         v1, cholesky_ao_num, &
-!         v2, cholesky_ao_num, 0.d0, buffer, n1*n3)
-!      do i3 = 1, n3
-!        do i2 = 1, n2
-!          do i1 = 1, n1
-!            v(i1,i2,i3,i4) = buffer(i1,i3,i2)
-!          enddo
-!        enddo
-!      enddo
-!    enddo
-!    !$OMP END DO
-!    deallocate(buffer, v2)
-!    !$OMP END PARALLEL
-!    deallocate(v1)
-
   else
     double precision              :: get_two_e_integral
 

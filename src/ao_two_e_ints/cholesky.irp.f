@@ -29,7 +29,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, pointer        :: L(:,:), L_old(:,:)
 
 
-  double precision, parameter :: s = 1.d-2
+  double precision, parameter :: s = 3.d-2
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
@@ -135,7 +135,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     L_old => L
     allocate(L(ndim,rank+nq), stat=ierr)
     if (ierr /= 0) then
-      print *,  irp_here, ': allocation failed : (Delta(np,nq))'
+      print *,  irp_here, ': allocation failed : (L(ndim,rank+nq))'
       stop -1
     endif
 

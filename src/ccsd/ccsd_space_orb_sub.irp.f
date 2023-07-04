@@ -1549,12 +1549,26 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
   double precision, allocatable :: X_vvvo(:,:,:), Y_vvvv(:,:,:)
   allocate(X_vvvo(nV,nV,nO), Y_vvvv(nV,nV,nV))
 !  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
-  call gen_v_space(cc_nVa,cc_nVa,cc_nVa,1, cc_list_vir,cc_list_vir,cc_list_vir,(/ gam /), B1)
+
+  call gen_v_space(cc_nVa,cc_nVa,cc_nVa,1, &
+     cc_list_vir,cc_list_vir,cc_list_vir,(/ cc_list_vir(gam) /), B1)
+
 
   !$omp parallel &
   !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo,gam) &
   !$omp private(a,b,beta) &
   !$omp default(none)
+
+!  !$omp do
+!    do beta = 1, nV
+!      do b = 1, nV
+!        do a = 1, nV
+!          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
+!        enddo
+!      enddo
+!    enddo
+!  !$omp end do nowait
+
   do i = 1, nO
     !$omp do
       do b = 1, nV
