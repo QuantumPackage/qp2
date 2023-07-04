@@ -66,9 +66,9 @@ END_PROVIDER
     write(*,'(i16)',advance='no') i
   end do
   write(*,*) ''
-  write(*,'(A17,100(1pE16.8))') 'x_dipole_moment = ',x_dipole_moment
-  write(*,'(A17,100(1pE16.8))') 'y_dipole_moment = ',y_dipole_moment
-  write(*,'(A17,100(1pE16.8))') 'z_dipole_moment = ',z_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'x_dipole_moment = ',x_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'y_dipole_moment = ',y_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'z_dipole_moment = ',z_dipole_moment
   !print*, 'x_dipole_moment                  = ',x_dipole_moment
   !print*, 'y_dipole_moment                  = ',y_dipole_moment
   !print*, 'z_dipole_moment                  = ',z_dipole_moment

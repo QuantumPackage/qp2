@@ -28,7 +28,7 @@ subroutine routine
  do i = 1, N_det
   print *, 'Determinant ', i
   call debug_det(psi_det(1,1,i),N_int)
-  print '(4E20.12,X)', (psi_coef(i,k), k=1,N_states)
+  print '(4ES20.12,X)', (psi_coef(i,k), k=1,N_states)
   print *, ''
   print *, ''
  enddo

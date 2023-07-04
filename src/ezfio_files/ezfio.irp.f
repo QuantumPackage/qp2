@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
   ! variable if it is set, or as the 1st argument of the command line.
   END_DOC
 
-  PROVIDE mpi_initialized
+  PROVIDE mpi_initialized output_wall_time_0 
 
   integer :: i
 

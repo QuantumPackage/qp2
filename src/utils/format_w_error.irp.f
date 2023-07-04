@@ -39,7 +39,7 @@ subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_err
   write(str_size,'(I3)') size_nb
 
   ! Error
-  write(str_exp,'(1pE20.0)') error
+  write(str_exp,'(ES20.0)') error
   str_error = trim(adjustl(str_exp))
 
   ! Number of digit: Y (FX.Y) from the exponent

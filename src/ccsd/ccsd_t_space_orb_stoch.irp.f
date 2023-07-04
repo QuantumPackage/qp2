@@ -210,9 +210,9 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   Pabc(:) = 1.d0/Pabc(:)
 
   print '(A)', ''
-  print '(A)', ' +----------------------+--------------+----------+'
-  print '(A)', ' |      E(CCSD(T))      |   Error      |     %    |'
-  print '(A)', ' +----------------------+--------------+----------+'
+  print '(A)', ' ======================= ============== =========='
+  print '(A)', '        E(CCSD(T))          Error            %    '
+  print '(A)', ' ======================= ============== =========='
 
 
   call wall_time(t00)
@@ -257,7 +257,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       if (imin >= bounds(2,isample)) then
         cycle
       endif
-      ieta = binary_search(waccu,(eta + dble(isample-1))/dble(nbuckets),Nabc)
+      ieta = binary_search(waccu,(eta + dble(isample-1))/dble(nbuckets),Nabc)+1
 
       if (sampled(ieta) == -1_8) then
         sampled(ieta) = 0_8
@@ -324,14 +324,14 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
       energy = energy_det + energy_stoch
 
-      print '('' | '',F20.8, '' | '', E12.4,'' | '', F8.2,'' |'')', eccsd+energy, dsqrt(variance/(norm-1.d0)), 100.*real(Ncomputed)/real(Nabc)
+      print '(''   '',F20.8, ''   '', ES12.4,''   '', F8.2,''  '')', eccsd+energy, dsqrt(variance/(norm-1.d0)), 100.*real(Ncomputed)/real(Nabc)
     endif
     !$OMP END MASTER
     if (imin >= Nabc) exit
   enddo
 
   !$OMP END PARALLEL
-  print '(A)', ' +----------------------+--------------+----------+'
+  print '(A)', ' ======================= ============== ========== '
   print '(A)', ''
 
   deallocate(X_vovv)
