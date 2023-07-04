@@ -22,7 +22,8 @@ END_PROVIDER
  ! Number of Cholesky vectors in AO basis
  END_DOC
 
- cholesky_ao_num_guess = ao_num*ao_num !sum(mini_basis_size(int(nucl_charge(:))))
+ cholesky_ao_num_guess = ao_num*ao_num
+ cholesky_ao_num_guess = 2* ao_num * sum(mini_basis_size(int(nucl_charge(:))))
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer, cholesky_ao_num ]
@@ -83,6 +84,8 @@ subroutine direct_cholesky(L, ndim, rank, tau)
   double precision :: Dmax, Dmin, Qmax, f
   double precision, external :: get_ao_two_e_integral
   logical, external :: ao_two_e_integral_zero
+
+  integer :: block_size, iblock
 
   print *,  'Entering Cholesky'
   rank = 0
@@ -152,7 +155,10 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     enddo
 
     ! d., e.
-    allocate(Delta(np,nq), Ltmp_p(max(np,1),max(N,1)), Ltmp_q(max(nq,1),max(N,1)))
+    block_size = max(N,32)
+    allocate(Delta(np,nq), &
+      Ltmp_p(max(np,1),block_size), &
+      Ltmp_q(max(nq,1),block_size) )
 
     !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q)
 
@@ -215,11 +221,18 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
     ! g.
 
+    iblock = 0
     do j=1,nq
 
       if ( (Qmax <= Dmin).or.(N+j > ndim) ) exit
       ! i.
       rank = N+j
+
+      if (iblock == block_size) then
+        call dgemm('N','T',np,nq,block_size,-1.d0, &
+          Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+        iblock = 0
+      endif
 
       ! ii.
       do dj=1,nq
@@ -231,33 +244,40 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
       L(:, rank) = 0.d0
 
+      iblock = iblock+1
+      do p=1,np
+        Ltmp_p(p,iblock) = Delta(p,dj)
+      enddo
+      call dgemv('N', np, iblock-1, -1.d0, Ltmp_p, np, Ltmp_q(dj,1), nq, 1.d0, &
+          Ltmp_p(1,iblock), 1)
+
       ! iii.
       f = 1.d0/dsqrt(Qmax)
 
       !$OMP PARALLEL PRIVATE(m,p,q,k) DEFAULT(shared)
       !$OMP DO
       do p=1,np
-        Ltmp_p(p,1) = Delta(p,dj) * f
-        L(Lset(p), rank) = Ltmp_p(p,1)
-        D(Lset(p)) = D(Lset(p)) - Ltmp_p(p,1) * Ltmp_p(p,1)
+        Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
+        L(Lset(p), rank) = Ltmp_p(p,iblock)
+        D(Lset(p)) = D(Lset(p)) - Ltmp_p(p,iblock) * Ltmp_p(p,iblock)
       enddo
       !$OMP END DO
 
       !$OMP DO
       do q=1,nq
-        Ltmp_q(q,1) = L(Dset(q), rank)
+        Ltmp_q(q,iblock) = L(Dset(q), rank)
       enddo
       !$OMP END DO
       
       ! iv.
 
-      !$OMP DO SCHEDULE(static)
-      do m=1, nq
-        do k=1, np
-          Delta(k,m) = Delta(k,m) - Ltmp_p(k,1) * Ltmp_q(m,1)
-        enddo
-      enddo
-      !$OMP END DO
+!      !$OMP DO SCHEDULE(static)
+!      do m=1, nq
+!        do k=1, np
+!          Delta(k,m) = Delta(k,m) - Ltmp_p(k,iblock) * Ltmp_q(m,iblock)
+!        enddo
+!      enddo
+!      !$OMP END DO
 
       !$OMP END PARALLEL
 

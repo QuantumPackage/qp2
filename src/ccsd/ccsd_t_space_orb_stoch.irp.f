@@ -94,6 +94,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   enddo
   !$OMP END DO nowait
 
+  !$OMP BARRIER
   !$OMP END PARALLEL
 
   double precision, external :: ccsd_t_task_aba
@@ -280,9 +281,10 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
     call wall_time(t01)
     if ((t01-t00 > 1.0d0).or.(imin >= Nabc)) then
-      t00 = t01
 
       !$OMP TASKWAIT
+      call wall_time(t01)
+      t00 = t01
 
       double precision :: ET, ET2
       double precision :: energy_stoch, energy_det
