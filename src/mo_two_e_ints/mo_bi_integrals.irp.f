@@ -465,31 +465,34 @@ subroutine add_integrals_to_map_cholesky
   integer :: size_buffer, n_integrals
   size_buffer = min(mo_num*mo_num*mo_num,16000000)
 
-  double precision, allocatable :: Vtmp(:,:,:,:)
+  double precision, allocatable :: Vtmp(:,:,:)
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
 
   if (.True.) then
     ! In-memory transformation
 
-    allocate (Vtmp(mo_num,mo_num,mo_num,mo_num))
+    call set_multiple_levels_omp(.False.)
 
-    call dgemm('N','T',mo_num*mo_num,mo_num*mo_num,cholesky_ao_num,1.d0, &
-       cholesky_mo, mo_num*mo_num, &
-       cholesky_mo, mo_num*mo_num, 0.d0, &
-       Vtmp, mo_num*mo_num)
-
-    !$OMP PARALLEL PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i)
+    !$OMP PARALLEL PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp)
     allocate (buffer_i(size_buffer), buffer_value(size_buffer))
     n_integrals = 0
+
+    allocate (Vtmp(mo_num,mo_num,mo_num))
+
     !$OMP DO
     do l=1,mo_num
+
+      call dgemm('T','N',mo_num*mo_num,mo_num,cholesky_ao_num,1.d0, &
+         cholesky_mo_transp, cholesky_ao_num, &
+         cholesky_mo_transp(1,1,l), cholesky_ao_num, 0.d0, &
+         Vtmp, mo_num*mo_num)
       do k=1,l
         do j=1,mo_num
           do i=1,j
-            if (abs(Vtmp(i,j,k,l)) > mo_integrals_threshold) then
+            if (abs(Vtmp(i,j,k)) > mo_integrals_threshold) then
               n_integrals += 1
-              buffer_value(n_integrals) = Vtmp(i,j,k,l)
+              buffer_value(n_integrals) = Vtmp(i,j,k)
               !DIR$ FORCEINLINE
               call mo_two_e_integrals_index(i,k,j,l,buffer_i(n_integrals))
               if (n_integrals == size_buffer) then
@@ -503,10 +506,9 @@ subroutine add_integrals_to_map_cholesky
     enddo
     !$OMP END DO
     call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
-    deallocate(buffer_i, buffer_value)
+    deallocate(buffer_i, buffer_value, Vtmp)
     !$OMP END PARALLEL
 
-    deallocate(Vtmp)
     call map_unique(mo_integrals_map)
 
   endif
@@ -1350,16 +1352,29 @@ END_PROVIDER
   ! mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij
   END_DOC
 
-  integer                        :: i,j
+  integer                        :: i,j,k
   double precision               :: get_two_e_integral
 
 
   if (do_ao_cholesky) then
+    double precision, allocatable :: buffer(:,:)
+    allocate (buffer(cholesky_ao_num,mo_num))
+    do k=1,cholesky_ao_num
+      do i=1,mo_num
+        buffer(k,i) = cholesky_mo_transp(k,i,i)
+      enddo
+    enddo
+    call dgemm('T','N',mo_num,mo_num,cholesky_ao_num,1.d0, &
+      buffer, cholesky_ao_num, buffer, cholesky_ao_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+    deallocate(buffer)
+
     do j=1,mo_num
       do i=1,mo_num
-        !TODO: use dgemm
-        mo_two_e_integrals_jj(i,j) = sum(cholesky_mo_transp(:,i,i)*cholesky_mo_transp(:,j,j))
-        mo_two_e_integrals_jj_exchange(i,j) = sum(cholesky_mo_transp(:,i,j)*cholesky_mo_transp(:,j,i))
+          mo_two_e_integrals_jj_exchange(i,j) = 0.d0
+          do k=1,cholesky_ao_num
+            mo_two_e_integrals_jj_exchange(i,j) = mo_two_e_integrals_jj_exchange(i,j) + &
+                          cholesky_mo_transp(k,i,j)*cholesky_mo_transp(k,j,i)
+          enddo
       enddo
     enddo
 
