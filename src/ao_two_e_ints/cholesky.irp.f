@@ -29,7 +29,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, pointer        :: L(:,:), L_old(:,:)
 
 
-  double precision, parameter :: s = 3.d-2
+  double precision, parameter :: s = 1.d-1
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
@@ -44,6 +44,8 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   logical, external :: ao_two_e_integral_zero
 
   integer :: block_size, iblock, ierr
+
+  integer(omp_lock_kind), allocatable :: lock(:)
 
   PROVIDE ao_two_e_integrals_in_map
   deallocate(cholesky_ao)
@@ -66,8 +68,11 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   rank = 0
 
   allocate( D(ndim), Lset(ndim), LDmap(ndim), DLmap(ndim), Dset(ndim) )
-  allocate( Lset_rev(ndim), Dset_rev(ndim) )
+  allocate( Lset_rev(ndim), Dset_rev(ndim), lock(ndim) )
   allocate( addr(3,ndim) )
+  do k=1,ndim
+    call omp_init_lock(lock(k))
+  enddo
 
   ! 1.
   k=0
@@ -113,7 +118,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     i = i+1
 
     ! b.
-    Dmin = max(s*Dmax, tau)
+     Dmin = max(s*Dmax,tau)
 
     ! c.
     nq=0
@@ -165,7 +170,9 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
       stop -1
     endif
 
-    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q)
+    Delta(:,:) = 0.d0
+
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
 
     !$OMP DO 
     do k=1,N
@@ -181,20 +188,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     !$OMP DO  SCHEDULE(dynamic,8)
     do m=1,nq
 
-      Delta(:,m) = 0.d0
-      do k=1, nq
-        ! Apply only to (k,m) pairs both in Dset
-        p = DLmap(k)
-        q = Lset_rev(addr(3,Dset(k)))
-        if ((0 < q).and.(q < p)) cycle
-        if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
-                                    addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
-          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
-                             addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
-          Delta(q,m) = Delta(p,m)
-        endif
-      enddo
-
+      call omp_set_lock(lock(m))
       do k=1,np
         ! Apply only to (k,m) pairs where k is not in Dset
         if (LDmap(k) /= 0) cycle
@@ -204,9 +198,37 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
                                     addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
            Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
                            addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
-           Delta(q,m) = Delta(k,m)
+           if (q /= 0) Delta(q,m) = Delta(k,m)
         endif
       enddo
+
+      j = Dset_rev(addr(3,Dset(m)))
+      if ((0 < j).and.(j < m)) then
+        call omp_unset_lock(lock(m))
+        cycle
+      endif
+
+      if ((j /= m).and.(j /= 0)) then
+        call omp_set_lock(lock(j))
+      endif
+      do k=1,nq
+        ! Apply only to (k,m) pairs both in Dset
+        p = DLmap(k)
+        q = Lset_rev(addr(3,Dset(k)))
+        if ((0 < q).and.(q < p)) cycle
+        if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
+                                    addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
+          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
+                             addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
+          if (q   /= 0) Delta(q,m) = Delta(p,m)
+          if (j   /= 0) Delta(p,j) = Delta(p,m)
+          if (q*j /= 0) Delta(q,j) = Delta(p,m)
+        endif
+      enddo
+      call omp_unset_lock(lock(m))
+      if ((j /= m).and.(j /= 0)) then
+        call omp_unset_lock(lock(j))
+      endif
     enddo
     !$OMP END DO
 
@@ -311,6 +333,10 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
       endif
     enddo
 
+  enddo
+
+  do k=1,ndim
+    call omp_destroy_lock(lock(k))
   enddo
 
   allocate(cholesky_ao(ao_num,ao_num,rank))
