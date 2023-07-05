@@ -1,46 +1,3 @@
-BEGIN_PROVIDER [ integer, mini_basis_size, (128) ]
- implicit none
- BEGIN_DOC
- ! Size of the minimal basis set per element
- END_DOC
-
- mini_basis_size(1:2) = 1
- mini_basis_size(3:4) = 2
- mini_basis_size(5:10) = 5
- mini_basis_size(11:12) = 6
- mini_basis_size(13:18) = 9
- mini_basis_size(19:20) = 13
- mini_basis_size(21:36) = 18
- mini_basis_size(37:38) = 22
- mini_basis_size(39:54) = 27
- mini_basis_size(55:) = 36
-END_PROVIDER
-
- BEGIN_PROVIDER [ integer, cholesky_ao_num_guess ]
- implicit none
- BEGIN_DOC
- ! Number of Cholesky vectors in AO basis
- END_DOC
-
- cholesky_ao_num_guess = ao_num*ao_num !sum(mini_basis_size(int(nucl_charge(:))))
-END_PROVIDER
-
- BEGIN_PROVIDER [ integer, cholesky_ao_num ]
-&BEGIN_PROVIDER [ double precision, cholesky_ao, (ao_num, ao_num, cholesky_ao_num_guess) ]
- use mmap_module
- implicit none
- BEGIN_DOC
- ! Cholesky vectors in AO basis: (ik|a):
- ! <ij|kl> = (ik|jl) = sum_a (ik|a).(a|jl)
- END_DOC
-
- cholesky_ao_num = cholesky_ao_num_guess
-
- call direct_cholesky(cholesky_ao, ao_num*ao_num, cholesky_ao_num, ao_cholesky_threshold)
- print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
-
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
@@ -57,41 +14,74 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
 END_PROVIDER
 
 
-subroutine direct_cholesky(L, ndim, rank, tau)
+BEGIN_PROVIDER [ integer, cholesky_ao_num ]
+&BEGIN_PROVIDER [ double precision, cholesky_ao, (ao_num, ao_num, 1) ]
   implicit none
   BEGIN_DOC
-! Cholesky-decomposed AOs.
-!
-! https://www.diva-portal.org/smash/get/diva2:396223/FULLTEXT01.pdf :
-! Page 32, section 13.5
+  ! Cholesky vectors in AO basis: (ik|a):
+  ! <ij|kl> = (ik|jl) = sum_a (ik|a).(a|jl)
+  !
+  ! Last dimension of cholesky_ao is cholesky_ao_num
   END_DOC
-  integer                          :: ndim
-  integer, intent(out)             :: rank
-  double precision, intent(out)    :: L(ndim, ndim)
-  double precision, intent(in)     :: tau
 
-  double precision, parameter :: s = 1.d-2
+  integer                          :: rank, ndim
+  double precision                 :: tau
+  double precision, pointer        :: L(:,:), L_old(:,:)
+
+
+  double precision, parameter :: s = 1.d-1
   double precision, parameter :: dscale = 1.d0
 
-  double precision, allocatable :: D(:), Delta(:,:)
-  integer, allocatable :: Lset(:), Dset(:), addr(:,:)
+  double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
+  integer, allocatable :: Lset(:), Dset(:), addr(:,:), LDmap(:), DLmap(:)
+  integer, allocatable :: Lset_rev(:), Dset_rev(:)
 
-  integer :: i,j,k,m,p,q, qj, dj
+  integer :: i,j,k,m,p,q, qj, dj, p2, q2
   integer :: N, np, nq
 
   double precision :: Dmax, Dmin, Qmax, f
   double precision, external :: get_ao_two_e_integral
+  logical, external :: ao_two_e_integral_zero
 
-  allocate( D(ndim), Lset(ndim), Dset(ndim) )
-  allocate( addr(2,ndim) )
+  integer :: block_size, iblock, ierr
+
+  integer(omp_lock_kind), allocatable :: lock(:)
+
+  PROVIDE ao_two_e_integrals_in_map
+  deallocate(cholesky_ao)
+
+  ndim = ao_num*ao_num
+  tau = ao_cholesky_threshold
+
+
+  allocate(L(ndim,1))
+
+  print *,  ''
+  print *,  'Cholesky decomposition of AO integrals'
+  print *,  '======================================'
+  print *,  ''
+  print *,  '============ ============='
+  print *,  '    Rank      Threshold'
+  print *,  '============ ============='
+
+
+  rank = 0
+
+  allocate( D(ndim), Lset(ndim), LDmap(ndim), DLmap(ndim), Dset(ndim) )
+  allocate( Lset_rev(ndim), Dset_rev(ndim), lock(ndim) )
+  allocate( addr(3,ndim) )
+  do k=1,ndim
+    call omp_init_lock(lock(k))
+  enddo
 
   ! 1.
   k=0
-  do i=1,ao_num
-    do j=1,ao_num
+  do j=1,ao_num
+    do i=1,ao_num
       k = k+1
       addr(1,k) = i
       addr(2,k) = j
+      addr(3,k) = (i-1)*ao_num + j
     enddo
   enddo
 
@@ -107,10 +97,12 @@ subroutine direct_cholesky(L, ndim, rank, tau)
 
   ! 2.
   np=0
+  Lset_rev = 0
   do p=1,ndim
     if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
       np = np+1
       Lset(np) = p
+      Lset_rev(p) = np
     endif
   enddo
 
@@ -126,52 +118,147 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     i = i+1
 
     ! b.
-    Dmin = max(s*Dmax, tau)
+     Dmin = max(s*Dmax,tau)
 
     ! c.
     nq=0
-    do q=1,np
-      if ( D(Lset(q)) > Dmin ) then
+    LDmap = 0
+    DLmap = 0
+    do p=1,np
+      if ( D(Lset(p)) > Dmin ) then
         nq = nq+1
-        Dset(nq) = Lset(q)
+        Dset(nq) = Lset(p)
+        Dset_rev(Dset(nq)) = nq
+        LDmap(p) = nq
+        DLmap(nq) = p
       endif
     enddo
 
     ! d., e.
-    allocate(Delta(np,nq))
-    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(m,k)
-    do m=1,nq
-      do k=1,np
-        Delta(k,m) = get_ao_two_e_integral( &
-           addr(1,Lset(k)), &
-           addr(1,Dset(m)), &
-           addr(2,Lset(k)), &
-           addr(2,Dset(m)), &
-           ao_integrals_map)
-      enddo
+    block_size = max(N,24)
 
-      do p=1,N
-        f = L(Dset(m),p)
-        do k=1,np
-          Delta(k,m) = Delta(k,m) - L(Lset(k),p) * f
-        enddo
+    L_old => L
+    allocate(L(ndim,rank+nq), stat=ierr)
+    if (ierr /= 0) then
+      print *,  irp_here, ': allocation failed : (L(ndim,rank+nq))'
+      stop -1
+    endif
+
+    !$OMP PARALLEL DO PRIVATE(k)
+    do k=1,rank
+      L(:,k) = L_old(:,k)
+    enddo
+    !$OMP END PARALLEL DO 
+
+    deallocate(L_old)
+
+    allocate(Delta(np,nq), stat=ierr) 
+    if (ierr /= 0) then
+      print *,  irp_here, ': allocation failed : (Delta(np,nq))'
+      stop -1
+    endif
+
+    allocate(Ltmp_p(np,block_size), stat=ierr)
+    if (ierr /= 0) then
+      print *,  irp_here, ': allocation failed : (Ltmp_p(np,block_size))'
+      stop -1
+    endif
+
+    allocate(Ltmp_q(nq,block_size), stat=ierr)
+    if (ierr /= 0) then
+      print *,  irp_here, ': allocation failed : (Ltmp_q(nq,block_size))'
+      stop -1
+    endif
+
+    Delta(:,:) = 0.d0
+
+    !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
+
+    !$OMP DO 
+    do k=1,N
+      do p=1,np
+        Ltmp_p(p,k) = L(Lset(p),k)
+      enddo
+      do q=1,nq
+        Ltmp_q(q,k) = L(Dset(q),k)
       enddo
     enddo
-    !$OMP END PARALLEL DO
+    !$OMP END DO
 
-    ! f.
+    !$OMP DO  SCHEDULE(dynamic,8)
+    do m=1,nq
+
+      call omp_set_lock(lock(m))
+      do k=1,np
+        ! Apply only to (k,m) pairs where k is not in Dset
+        if (LDmap(k) /= 0) cycle
+        q = Lset_rev(addr(3,Lset(k)))
+        if ((0 < q).and.(q < k)) cycle
+        if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)), &
+                                    addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
+           Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
+                           addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+           if (q /= 0) Delta(q,m) = Delta(k,m)
+        endif
+      enddo
+
+      j = Dset_rev(addr(3,Dset(m)))
+      if ((0 < j).and.(j < m)) then
+        call omp_unset_lock(lock(m))
+        cycle
+      endif
+
+      if ((j /= m).and.(j /= 0)) then
+        call omp_set_lock(lock(j))
+      endif
+      do k=1,nq
+        ! Apply only to (k,m) pairs both in Dset
+        p = DLmap(k)
+        q = Lset_rev(addr(3,Dset(k)))
+        if ((0 < q).and.(q < p)) cycle
+        if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
+                                    addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
+          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
+                             addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
+          if (q   /= 0) Delta(q,m) = Delta(p,m)
+          if (j   /= 0) Delta(p,j) = Delta(p,m)
+          if (q*j /= 0) Delta(q,j) = Delta(p,m)
+        endif
+      enddo
+      call omp_unset_lock(lock(m))
+      if ((j /= m).and.(j /= 0)) then
+        call omp_unset_lock(lock(j))
+      endif
+    enddo
+    !$OMP END DO
+
+    !$OMP END PARALLEL
+
+    if (N>0) then
+      call dgemm('N','T', np, nq, N, -1.d0, &
+        Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+    endif
+
+  ! f.
     Qmax = D(Dset(1))
     do q=1,nq
       Qmax = max(Qmax, D(Dset(q)))
     enddo
 
     ! g.
-    j = 0
 
-    do while ( (j <= nq).and.(Qmax > Dmin) )
+    iblock = 0
+    do j=1,nq
+
+      if ( (Qmax <= Dmin).or.(N+j > ndim) ) exit
       ! i.
-      j = j+1
       rank = N+j
+
+      if (iblock == block_size) then
+        call dgemm('N','T',np,nq,block_size,-1.d0, &
+          Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+        iblock = 0
+      endif
 
       ! ii.
       do dj=1,nq
@@ -181,32 +268,51 @@ subroutine direct_cholesky(L, ndim, rank, tau)
         endif
       enddo
 
-      ! iii.
-      f = 1.d0/dsqrt(Qmax)
+      L(1:ndim, rank) = 0.d0
+
+      iblock = iblock+1
       do p=1,np
-        L(Lset(p), rank) = Delta(p,dj) * f
+        Ltmp_p(p,iblock) = Delta(p,dj)
       enddo
 
       ! iv.
-      do m=1, nq
-        f = L(Dset(m),rank)
-        do k=1, np
-          Delta(k,m) = Delta(k,m) - L(Lset(k),rank) * f
-        enddo
-      enddo
+      if (iblock > 1) then
+        call dgemv('N', np, iblock-1, -1.d0, Ltmp_p, np, Ltmp_q(dj,1), nq, 1.d0, &
+          Ltmp_p(1,iblock), 1)
+      endif
 
-      do k=1, np
-        D(Lset(k)) = D(Lset(k)) - L(Lset(k),rank) * L(Lset(k),rank)
+      ! iii.
+      f = 1.d0/dsqrt(Qmax)
+
+      !$OMP PARALLEL PRIVATE(m,p,q,k) DEFAULT(shared)
+      !$OMP DO
+      do p=1,np
+        Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
+        L(Lset(p), rank) = Ltmp_p(p,iblock)
+        D(Lset(p)) = D(Lset(p)) - Ltmp_p(p,iblock) * Ltmp_p(p,iblock)
       enddo
+      !$OMP END DO
+
+      !$OMP DO
+      do q=1,nq
+        Ltmp_q(q,iblock) = L(Dset(q), rank)
+      enddo
+      !$OMP END DO
+      
+      !$OMP END PARALLEL
 
       Qmax = D(Dset(1))
-      do q=1,np
-        Qmax = max(Qmax, D(Lset(q)))
+      do q=1,nq
+        Qmax = max(Qmax, D(Dset(q)))
       enddo
 
     enddo
 
-    deallocate(Delta)
+    print '(I10, 4X, ES12.3)', rank, Qmax
+
+    deallocate(Delta, stat=ierr)
+    deallocate(Ltmp_p, stat=ierr)
+    deallocate(Ltmp_q, stat=ierr)
 
     ! i.
     N = N+j
@@ -218,13 +324,30 @@ subroutine direct_cholesky(L, ndim, rank, tau)
     enddo
 
     np=0
+    Lset_rev = 0
     do p=1,ndim
       if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
         np = np+1
         Lset(np) = p
+        Lset_rev(p) = np
       endif
     enddo
 
   enddo
 
-end
+  do k=1,ndim
+    call omp_destroy_lock(lock(k))
+  enddo
+
+  allocate(cholesky_ao(ao_num,ao_num,rank))
+  call dcopy(ndim*rank, L, 1, cholesky_ao, 1)
+  deallocate(L)
+  cholesky_ao_num = rank
+
+  print *,  '============ ============='
+  print *,  ''
+  print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
+  print *,  ''
+
+END_PROVIDER
+

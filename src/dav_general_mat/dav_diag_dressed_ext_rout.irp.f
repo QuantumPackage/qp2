@@ -331,7 +331,7 @@ subroutine davidson_general_ext_rout_diag_dressed(u_in,H_jj,Dress_jj,energies,sz
         !don't print 
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:2,1:N_st)
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
       ! Check convergence

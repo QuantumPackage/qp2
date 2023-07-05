@@ -241,7 +241,7 @@ subroutine run_ccsd_spin_orb
     call ccsd_energy_spin(nO,nV,t1,t2,F_ov,v_oovv,energy)
     call wall_time(tfi)
     
-    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,1pE10.2,A3,1pE10.2,A2)') ' | ',nb_iter,' | ', &
+    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', &
          uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
     if (cc_dev) then
       print*,'Total:',tfi-tbi,'s'
@@ -266,7 +266,7 @@ subroutine run_ccsd_spin_orb
   print*,''
   write(*,'(A15,F18.12,A3)') ' E(CCSD)     = ', uncorr_energy+energy, ' Ha'
   write(*,'(A15,F18.12,A3)') ' Correlation = ', energy, ' Ha'
-  write(*,'(A15,1pE10.2,A3)')' Conv        = ', max_r
+  write(*,'(A15,ES10.2,A3)')' Conv        = ', max_r
   print*,''
 
   if (write_amplitudes) then

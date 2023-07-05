@@ -72,7 +72,7 @@ subroutine molden_lr
       write(i_unit_output,*) character_shell, ao_prim_num(i_ao), '1.00'
       do k = 1, ao_prim_num(i_ao)
         i_prim +=1
-        write(i_unit_output,'(E20.10,2X,E20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
+        write(i_unit_output,'(ES20.10,2X,ES20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
       enddo
       l = i_ao
       do while ( ao_l(l) == ao_l(i_ao) )
@@ -170,7 +170,7 @@ subroutine molden_lr
     write (i_unit_output,*) 'Spin= Alpha'
     write (i_unit_output,*) 'Occup=', mo_occ(i)
     do j=1,ao_num
-      write(i_unit_output, '(I6,2X,E20.10)') j, mo_r_coef(iorder(j),i)
+      write(i_unit_output, '(I6,2X,ES20.10)') j, mo_r_coef(iorder(j),i)
     enddo
 
     write (i_unit_output,*) 'Sym= 1'
@@ -178,7 +178,7 @@ subroutine molden_lr
     write (i_unit_output,*) 'Spin= Alpha'
     write (i_unit_output,*) 'Occup=', mo_occ(i)
     do j=1,ao_num
-      write(i_unit_output, '(I6,2X,E20.10)') j, mo_l_coef(iorder(j),i)
+      write(i_unit_output, '(I6,2X,ES20.10)') j, mo_l_coef(iorder(j),i)
     enddo
   enddo
   close(i_unit_output)
@@ -235,7 +235,7 @@ subroutine molden_l()
       write(i_unit_output,*) character_shell, ao_prim_num(i_ao), '1.00'
       do k = 1, ao_prim_num(i_ao)
         i_prim +=1
-        write(i_unit_output,'(E20.10,2X,E20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
+        write(i_unit_output,'(ES20.10,2X,ES20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
       enddo
       l = i_ao
       do while ( ao_l(l) == ao_l(i_ao) )
@@ -333,7 +333,7 @@ subroutine molden_l()
     write (i_unit_output,*) 'Spin= Alpha'
     write (i_unit_output,*) 'Occup=', mo_occ(i)
     do j=1,ao_num
-      write(i_unit_output, '(I6,2X,E20.10)') j, mo_l_coef(iorder(j),i)
+      write(i_unit_output, '(I6,2X,ES20.10)') j, mo_l_coef(iorder(j),i)
     enddo
   enddo
   close(i_unit_output)
@@ -390,7 +390,7 @@ subroutine molden_r()
       write(i_unit_output,*) character_shell, ao_prim_num(i_ao), '1.00'
       do k = 1, ao_prim_num(i_ao)
         i_prim +=1
-        write(i_unit_output,'(E20.10,2X,E20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
+        write(i_unit_output,'(ES20.10,2X,ES20.10)') ao_expo(i_ao,k), ao_coef(i_ao,k)
       enddo
       l = i_ao
       do while ( ao_l(l) == ao_l(i_ao) )
@@ -488,7 +488,7 @@ subroutine molden_r()
     write (i_unit_output,*) 'Spin= Alpha'
     write (i_unit_output,*) 'Occup=', mo_occ(i)
     do j=1,ao_num
-      write(i_unit_output, '(I6,2X,E20.10)') j, mo_r_coef(iorder(j),i)
+      write(i_unit_output, '(I6,2X,ES20.10)') j, mo_r_coef(iorder(j),i)
     enddo
   enddo
   close(i_unit_output)

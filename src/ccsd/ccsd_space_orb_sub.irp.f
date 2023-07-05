@@ -112,7 +112,7 @@ subroutine run_ccsd_space_orb
 
     ! Energy
     call ccsd_energy_space(nO,nV,tau,t1,energy)
-    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,1pE10.2,A3,1pE10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
+    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
 
     nb_iter = nb_iter + 1
     if (max_r < cc_thresh_conv .or. nb_iter > cc_max_iter) then
@@ -132,7 +132,7 @@ subroutine run_ccsd_space_orb
   print*,''
   write(*,'(A15,F18.12,A3)') ' E(CCSD)     = ', uncorr_energy+energy, ' Ha'
   write(*,'(A15,F18.12,A3)') ' Correlation = ', energy, ' Ha'
-  write(*,'(A15,1pE10.2,A3)')' Conv        = ', max_r
+  write(*,'(A15,ES10.2,A3)')' Conv        = ', max_r
   print*,''
 
   if (write_amplitudes) then
@@ -1549,19 +1549,26 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
   double precision, allocatable :: X_vvvo(:,:,:), Y_vvvv(:,:,:)
   allocate(X_vvvo(nV,nV,nO), Y_vvvv(nV,nV,nV))
 !  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
+
+  call gen_v_space(cc_nVa,cc_nVa,cc_nVa,1, &
+     cc_list_vir,cc_list_vir,cc_list_vir,(/ cc_list_vir(gam) /), B1)
+
+
   !$omp parallel &
   !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo,gam) &
   !$omp private(a,b,beta) &
   !$omp default(none)
-  !$omp do
-    do beta = 1, nV
-      do b = 1, nV
-        do a = 1, nV
-          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
-        enddo
-      enddo
-    enddo
-  !$omp end do nowait
+
+!  !$omp do
+!    do beta = 1, nV
+!      do b = 1, nV
+!        do a = 1, nV
+!          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
+!        enddo
+!      enddo
+!    enddo
+!  !$omp end do nowait
+
   do i = 1, nO
     !$omp do
       do b = 1, nV
@@ -1569,7 +1576,7 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
           X_vvvo(a,b,i) = cc_space_v_vvov(a,b,i,gam)
         enddo
       enddo
-    !$omp end do nowait
+    !$omp end do
   enddo
   !$omp end parallel
 
