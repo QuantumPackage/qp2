@@ -37,7 +37,9 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
     print*, 'MO integrals provided'
     return
-  else
+  endif
+
+  if (.not. do_direct_integrals) then
     PROVIDE ao_two_e_integrals_in_map
   endif
 

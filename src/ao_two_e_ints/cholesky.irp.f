@@ -43,11 +43,15 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, external :: get_ao_two_e_integral
   logical, external :: ao_two_e_integral_zero
 
+  double precision, external      :: ao_two_e_integral
   integer :: block_size, iblock, ierr
 
   integer(omp_lock_kind), allocatable :: lock(:)
+  PROVIDE nucl_coord
 
-  PROVIDE ao_two_e_integrals_in_map
+  if (.not.do_direct_integrals) then
+    PROVIDE ao_two_e_integrals_in_map
+  endif
   deallocate(cholesky_ao)
 
   ndim = ao_num*ao_num
@@ -85,13 +89,22 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     enddo
   enddo
 
-  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
-  do i=1,ndim
-     D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
-                                  addr(2,i), addr(2,i), &
-                                  ao_integrals_map)
-  enddo
-  !$OMP END PARALLEL DO
+  if (do_direct_integrals) then
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+    do i=1,ndim
+       D(i) = ao_two_e_integral(addr(1,i), addr(2,i), &
+                                addr(1,i), addr(2,i))
+    enddo
+    !$OMP END PARALLEL DO
+  else
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+    do i=1,ndim
+       D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
+                                    addr(2,i), addr(2,i), &
+                                    ao_integrals_map)
+    enddo
+    !$OMP END PARALLEL DO
+  endif
 
   Dmax = maxval(D)
 
@@ -196,8 +209,13 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         if ((0 < q).and.(q < k)) cycle
         if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)), &
                                     addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
-           Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
+           if (do_direct_integrals) then
+             Delta(k,m) = ao_two_e_integral(addr(1,Lset(k)), addr(2,Lset(k)), &
+                                            addr(1,Dset(m)), addr(2,Dset(m)))
+           else
+             Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
                            addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+           endif
            if (q /= 0) Delta(q,m) = Delta(k,m)
         endif
       enddo
@@ -218,8 +236,13 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         if ((0 < q).and.(q < p)) cycle
         if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
                                     addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
-          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
+          if (do_direct_integrals) then
+            Delta(p,m) = ao_two_e_integral(addr(1,Dset(k)), addr(2,Dset(k)), &
+                                           addr(1,Dset(m)), addr(2,Dset(m)))
+          else
+            Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
                              addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
+          endif
           if (q   /= 0) Delta(q,m) = Delta(p,m)
           if (j   /= 0) Delta(p,j) = Delta(p,m)
           if (q*j /= 0) Delta(q,j) = Delta(p,m)

@@ -1232,7 +1232,8 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
   logical, external               :: ao_two_e_integral_zero
 
   integer                         :: i,k
-  double precision                :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
+  double precision, external      :: ao_two_e_integral
+  double precision                :: cpu_1,cpu_2, wall_1, wall_2
   double precision                :: integral, wall_0
   double precision                :: thr
   integer                         :: kk, m, j1, i1
