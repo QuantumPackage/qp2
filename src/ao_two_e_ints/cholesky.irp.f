@@ -339,8 +339,16 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     call omp_destroy_lock(lock(k))
   enddo
 
-  allocate(cholesky_ao(ao_num,ao_num,rank))
-  call dcopy(ndim*rank, L, 1, cholesky_ao, 1)
+  allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
+  if (ierr /= 0) then
+    print *,  irp_here, ': Allocation failed'
+    stop -1
+  endif
+  !$OMP PARALLEL DO PRIVATE(k)
+  do k=1,rank
+    call dcopy(ndim, L(1,k), 1, cholesky_ao(1,1,k), 1)
+  enddo
+  !$OMP END PARALLEL DO
   deallocate(L)
   cholesky_ao_num = rank
 

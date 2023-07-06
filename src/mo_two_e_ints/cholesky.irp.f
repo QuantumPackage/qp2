@@ -26,9 +26,13 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_ao_num, mo_num,
  END_DOC
 
  double precision, allocatable :: X(:,:,:)
+ integer :: ierr
  print *, 'AO->MO Transformation of Cholesky vectors'
 
- allocate(X(mo_num,cholesky_ao_num,ao_num))
+ allocate(X(mo_num,cholesky_ao_num,ao_num), stat=ierr)
+ if (ierr /= 0) then
+   print *, irp_here, ': Allocation failed'
+ endif
  call dgemm('T','N', ao_num*cholesky_ao_num, mo_num, ao_num, 1.d0, &
      cholesky_ao, ao_num, mo_coef, ao_num, 0.d0, X, ao_num*cholesky_ao_num)
  call dgemm('T','N', cholesky_ao_num*mo_num, mo_num, ao_num, 1.d0, &

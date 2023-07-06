@@ -90,6 +90,10 @@ subroutine four_idx_dgemm
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
+
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
 
   print *, 'Getting AOs'
@@ -102,6 +106,7 @@ subroutine four_idx_dgemm
     enddo
   enddo
   !$OMP END PARALLEL DO
+
 
   print *, '1st transformation'
   ! 1st transformation
@@ -456,7 +461,7 @@ subroutine add_integrals_to_map_cholesky
 
   integer :: i,j,k,l,m
   integer :: size_buffer, n_integrals
-  size_buffer = min(mo_num*mo_num,16000000)
+  size_buffer = min(mo_num*mo_num*mo_num,16000000)
 
   double precision, allocatable :: Vtmp(:,:,:)
   integer(key_kind)  , allocatable :: buffer_i(:)
@@ -575,6 +580,9 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
     return
   endif
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
   print*, 'Providing the molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
@@ -850,6 +858,9 @@ subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
   call bitstring_to_list( mask_ijkl(1,3), list_ijkl(1,3), n_k, N_int )
   call bitstring_to_list( mask_ijkl(1,4), list_ijkl(1,4), n_l, N_int )
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
   print*, 'Providing the molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
