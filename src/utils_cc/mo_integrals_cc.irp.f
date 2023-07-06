@@ -53,33 +53,8 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
     allocate(v1(cholesky_ao_num,n1,n3), v2(cholesky_ao_num,n2,n4))
     allocate(buffer(n1,n3,n2,n4))
 
-    !$OMP PARALLEL PRIVATE(i1,i2,i3,i4,idx1,idx2,idx3,idx4,k)
-    !$OMP DO
-    do i3=1,n3
-      idx3 = list3(i3)
-      do i1=1,n1
-        idx1 = list1(i1)
-        do k=1,cholesky_ao_num
-          v1(k,i1,i3) = cholesky_mo_transp(k,idx1,idx3)
-        enddo
-      enddo
-    enddo
-    !$OMP END DO NOWAIT
-
-    !$OMP DO
-    do i4=1,n4
-      idx4 = list4(i4)
-      do i2=1,n2
-        idx2 = list2(i2)
-        do k=1,cholesky_ao_num
-          v2(k,i2,i4) = cholesky_mo_transp(k,idx2,idx4)
-        enddo
-      enddo
-    enddo
-    !$OMP END DO NOWAIT
-
-    !$OMP BARRIER
-    !$OMP END PARALLEL
+    call gen_v_space_chol(n1,n3,list1,list3,v1,cholesky_ao_num)
+    call gen_v_space_chol(n2,n4,list2,list4,v2,cholesky_ao_num)
 
     call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
          v1, cholesky_ao_num, &
@@ -126,6 +101,30 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
     !$OMP END PARALLEL
 
   endif
+
+end
+
+subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
+
+  implicit none
+
+  integer, intent(in)           :: n1,n3,ldv
+  integer, intent(in)           :: list1(n1),list3(n3)
+  double precision, intent(out) :: v(ldv,n1,n3)
+
+  integer                       :: i1,i3,idx1,idx3,k
+
+  !$OMP PARALLEL DO PRIVATE(i1,i3,idx1,idx3,k)
+  do i3=1,n3
+    idx3 = list3(i3)
+    do i1=1,n1
+      idx1 = list1(i1)
+      do k=1,cholesky_ao_num
+        v(k,i1,i3) = cholesky_mo_transp(k,idx1,idx3)
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
 
 end
 
@@ -342,6 +341,38 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvvv, (cc_nVa, cc_nVa, cc_nVa, cc_n
   implicit none
 
   call gen_v_space(cc_nVa,cc_nVa,cc_nVa,cc_nVa, cc_list_vir,cc_list_vir,cc_list_vir,cc_list_vir, cc_space_v_vvvv)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_space_v_vv_chol, (cholesky_ao_num, cc_nVa, cc_nVa)]
+
+  implicit none
+
+  call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, cc_space_v_vv_chol, cholesky_ao_num)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_space_v_vo_chol, (cholesky_ao_num, cc_nVa, cc_nOa)]
+
+  implicit none
+
+  call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, cc_space_v_vo_chol, cholesky_ao_num)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_space_v_ov_chol, (cholesky_ao_num, cc_nOa, cc_nVa)]
+
+  implicit none
+
+  call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, cc_space_v_ov_chol, cholesky_ao_num)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_ao_num, cc_nOa, cc_nOa)]
+
+  implicit none
+
+  call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_ao_num)
 
 END_PROVIDER
 

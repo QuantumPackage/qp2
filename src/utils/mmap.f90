@@ -46,7 +46,14 @@ module mmap_module
       integer(c_size_t)              :: length
       integer(c_int)                 :: fd_
 
-      length = PRODUCT( shape(:) ) * bytes
+      integer :: i
+
+      length = int(bytes,8)
+      do i=1,size(shape)
+        length = length * shape(i)
+      enddo
+print *,  'map_length: ', length
+
       if (read_only) then
           map = c_mmap_fortran( trim(filename)//char(0), length, fd_, 1)
       else
@@ -66,7 +73,13 @@ module mmap_module
       integer(c_size_t)              :: length
       integer(c_int)                 :: fd_
 
-      length = PRODUCT( shape(:) ) * bytes
+      integer :: i
+
+      length = int(bytes,8)
+      do i=1,size(shape)
+        length = length * shape(i)
+      enddo
+print *,  'map_length: ', length
       fd_ = fd
       call c_munmap_fortran( length, fd_, map)
   end subroutine
@@ -82,7 +95,13 @@ module mmap_module
       integer(c_size_t)              :: length
       integer(c_int)                 :: fd_
 
-      length = PRODUCT( shape(:) ) * bytes
+      integer :: i
+
+      length = int(bytes,8)
+      do i=1,size(shape)
+        length = length * shape(i)
+      enddo
+print *,  'map_length: ', length
       fd_ = fd
       call c_msync_fortran( length, fd_, map)
   end subroutine
