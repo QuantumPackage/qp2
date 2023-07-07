@@ -4,8 +4,10 @@ BEGIN_PROVIDER [ integer, qp_max_mem ]
  ! Maximum memory in Gb
  END_DOC
  character*(128) :: env
+ integer, external :: get_total_available_memory
 
- qp_max_mem = 500
+ qp_max_mem = get_total_available_memory()
+ call write_int(6,qp_max_mem,'Total available memory (GB)')
  call getenv('QP_MAXMEM',env)
  if (trim(env) /= '') then
     call lock_io()
@@ -122,3 +124,35 @@ subroutine print_memory_usage()
     '.. >>>>> [ RES  MEM : ', rss , &
         ' GB ] [ VIRT MEM : ', mem, ' GB ] <<<<< ..'
 end
+
+integer function get_total_available_memory() result(res)
+  implicit none
+  BEGIN_DOC
+! Returns the total available memory on the current machine
+  END_DOC
+
+  character(len=128) :: line
+  integer :: status
+  integer :: iunit
+  integer*8, parameter :: KB = 1024
+  integer*8, parameter :: GiB = 1024**3
+  integer, external :: getUnitAndOpen
+
+  iunit = getUnitAndOpen('/proc/meminfo','r')
+
+  res = 512
+  do
+      read(iunit, '(A)', END=10) line
+      if (line(1:10) == "MemTotal: ") then
+        read(line(11:), *, ERR=20) res
+        res = int((res*KB) / GiB,4)
+        exit
+ 20     continue
+      end if
+  end do
+ 10 continue
+  close(iunit)
+
+end function get_total_available_memory
+
+

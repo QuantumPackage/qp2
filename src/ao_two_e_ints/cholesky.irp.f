@@ -141,7 +141,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     logical :: memory_ok
     memory_ok = .False.
 
-    s = 1.d-2
+    s = 0.1d0
 
     ! Inrease s until the arrays fit in memory
     do 
@@ -176,7 +176,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         exit
       endif
 
-      if (nq == 0) then
+      if ((s > 1.d0).or.(nq == 0)) then
         print *,  'Not enough memory. Reduce cholesky threshold'
         stop -1
       endif
@@ -219,9 +219,14 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
       stop -1
     endif
 
-    Delta(:,:) = 0.d0
 
     !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
+
+    !$OMP DO
+    do q=1,nq
+      Delta(:,q) = 0.d0
+    enddo
+    !$OMP ENDDO NOWAIT
 
     !$OMP DO 
     do k=1,N
@@ -232,7 +237,9 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         Ltmp_q(q,k) = L(Dset(q),k)
       enddo
     enddo
-    !$OMP END DO
+    !$OMP END DO NOWAIT
+
+    !$OMP BARRIER
 
     !$OMP DO  SCHEDULE(guided)
     do m=1,nq
