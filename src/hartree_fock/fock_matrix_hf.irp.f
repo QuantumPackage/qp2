@@ -190,47 +190,75 @@ END_PROVIDER
 
  deallocate(X)
 
- ao_two_e_integral_beta_chol = ao_two_e_integral_alpha_chol
+ if (elec_alpha_num > elec_beta_num) then
+   ao_two_e_integral_beta_chol = ao_two_e_integral_alpha_chol
+ endif
 
 
- allocate(X2(ao_num,ao_num,cholesky_ao_num,2))
+ double precision :: rss
+ double precision :: memory_of_double
 
+ integer :: iblock
+ integer, parameter :: block_size = 32
+
+ rss = memory_of_double(ao_num*ao_num)
+ call check_mem(2.d0*block_size*rss, irp_here)
+ allocate(X2(ao_num,ao_num,block_size,2))
+ allocate(X3(ao_num,block_size,ao_num,2))
+    
 ! ao_two_e_integral_alpha_chol (l,s) -= cholesky_ao(l,m,j) * SCF_density_matrix_ao_beta (m,n) * cholesky_ao(n,s,j)
 
- call dgemm('N','N',ao_num,ao_num*cholesky_ao_num,ao_num, 1.d0,      &
-     SCF_density_matrix_ao_alpha, ao_num,                            &
-     cholesky_ao, ao_num, 0.d0,                                      &
-     X2(1,1,1,1), ao_num)
+ do iblock=1,cholesky_ao_num,block_size
 
- call dgemm('N','N',ao_num,ao_num*cholesky_ao_num,ao_num, 1.d0,      &
-     SCF_density_matrix_ao_beta, ao_num,                             &
-     cholesky_ao, ao_num, 0.d0,                                      &
-     X2(1,1,1,2), ao_num)
+   call dgemm('N','N',ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size),ao_num, 1.d0,      &
+       SCF_density_matrix_ao_alpha, ao_num,    &
+       cholesky_ao(1,1,iblock), ao_num, 0.d0,  &
+       X2(1,1,1,1), ao_num)
 
- allocate(X3(ao_num,cholesky_ao_num,ao_num,2))
+   if (elec_alpha_num > elec_beta_num) then
+     call dgemm('N','N',ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size),ao_num, 1.d0,      &
+       SCF_density_matrix_ao_beta, ao_num,     &
+       cholesky_ao(1,1,iblock), ao_num, 0.d0,  &
+       X2(1,1,1,2), ao_num)
 
- do s=1,ao_num
-  do j=1,cholesky_ao_num
-   do m=1,ao_num
-    X3(m,j,s,1) = X2(m,s,j,1)
-    X3(m,j,s,2) = X2(m,s,j,2)
-   enddo
-  enddo
+     do s=1,ao_num
+      do j=1,min(cholesky_ao_num-iblock+1,block_size)
+       do m=1,ao_num
+        X3(m,j,s,1) = X2(m,s,j,1)
+        X3(m,j,s,2) = X2(m,s,j,2)
+       enddo
+      enddo
+     enddo
+
+   else
+
+     do s=1,ao_num
+      do j=1,min(cholesky_ao_num-iblock+1,block_size)
+       do m=1,ao_num
+        X3(m,j,s,1) = X2(m,s,j,1)
+       enddo
+      enddo
+     enddo
+   endif
+
+   call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
+       cholesky_ao(1,1,iblock), ao_num,       &
+       X3(1,1,1,1), ao_num*block_size, 1.d0,  &
+       ao_two_e_integral_alpha_chol, ao_num)
+
+   if (elec_alpha_num > elec_beta_num) then
+     call dgemm('N','N',ao_num,ao_num,ao_num*min(cholesky_ao_num-iblock+1,block_size), -1.d0,     &
+       cholesky_ao(1,1,iblock), ao_num,        &
+       X3(1,1,1,2), ao_num*block_size, 1.d0,   &
+       ao_two_e_integral_beta_chol, ao_num)
+   endif
+
  enddo
 
- deallocate(X2)
-
- call dgemm('N','N',ao_num,ao_num,ao_num*cholesky_ao_num, -1.d0,     &
-     cholesky_ao, ao_num,                                            &
-     X3(1,1,1,1), ao_num*cholesky_ao_num, 1.d0,                      &
-     ao_two_e_integral_alpha_chol, ao_num)
-
- call dgemm('N','N',ao_num,ao_num,ao_num*cholesky_ao_num, -1.d0,     &
-     cholesky_ao, ao_num,                                            &
-     X3(1,1,1,2), ao_num*cholesky_ao_num, 1.d0,                      &
-     ao_two_e_integral_beta_chol, ao_num)
-
- deallocate(X3)
+ if (elec_alpha_num == elec_beta_num) then
+   ao_two_e_integral_beta_chol = ao_two_e_integral_alpha_chol
+ endif
+ deallocate(X2,X3)
 
 END_PROVIDER
 

@@ -317,7 +317,7 @@ subroutine get_uJ_s2_uI(psi_keys_tmp,psi_coefs_tmp,n,nmax_coefs,nmax_keys,s2,nst
           !$OMP SHARED (ll,jj,psi_keys_tmp,psi_coefs_tmp,N_int,n,nstates)&
           !$OMP REDUCTION(+:accu)
       allocate(idx(0:n))
-      !$OMP DO SCHEDULE(dynamic)
+      !$OMP DO SCHEDULE(guided)
       do i = n,1,-1   ! Better OMP scheduling
         call get_s2(psi_keys_tmp(1,1,i),psi_keys_tmp(1,1,i),N_int,s2_tmp)
         accu += psi_coefs_tmp(i,ll) * s2_tmp * psi_coefs_tmp(i,jj)

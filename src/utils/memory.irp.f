@@ -5,7 +5,7 @@ BEGIN_PROVIDER [ integer, qp_max_mem ]
  END_DOC
  character*(128) :: env
 
- qp_max_mem = 2000
+ qp_max_mem = 500
  call getenv('QP_MAXMEM',env)
  if (trim(env) /= '') then
     call lock_io()

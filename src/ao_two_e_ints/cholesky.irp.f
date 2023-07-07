@@ -29,7 +29,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, pointer        :: L(:,:), L_old(:,:)
 
 
-  double precision, parameter :: s = 1.d-1
+  double precision :: s
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
@@ -47,6 +47,11 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   integer :: block_size, iblock, ierr
 
   integer(omp_lock_kind), allocatable :: lock(:)
+
+  double precision :: rss
+  double precision, external :: memory_of_double, memory_of_int
+
+
   PROVIDE nucl_coord
 
   if (.not.do_direct_integrals) then
@@ -57,6 +62,9 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   ndim = ao_num*ao_num
   tau = ao_cholesky_threshold
 
+  rss = 6.d0 * memory_of_double(ndim) + &
+        6.d0 * memory_of_int(ndim)
+  call check_mem(rss, irp_here)
 
   allocate(L(ndim,1))
 
@@ -97,7 +105,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     enddo
     !$OMP END PARALLEL DO
   else
-    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i) SCHEDULE(guided)
     do i=1,ndim
        D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
                                     addr(2,i), addr(2,i), &
@@ -130,21 +138,49 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     ! a.
     i = i+1
 
-    ! b.
-     Dmin = max(s*Dmax,tau)
+    logical :: memory_ok
+    memory_ok = .False.
 
-    ! c.
-    nq=0
-    LDmap = 0
-    DLmap = 0
-    do p=1,np
-      if ( D(Lset(p)) > Dmin ) then
-        nq = nq+1
-        Dset(nq) = Lset(p)
-        Dset_rev(Dset(nq)) = nq
-        LDmap(p) = nq
-        DLmap(nq) = p
+    s = 1.d-2
+
+    ! Inrease s until the arrays fit in memory
+    do 
+
+      ! b.
+      Dmin = max(s*Dmax,tau)
+
+      ! c.
+      nq=0
+      LDmap = 0
+      DLmap = 0
+      do p=1,np
+        if ( D(Lset(p)) > Dmin ) then
+          nq = nq+1
+          Dset(nq) = Lset(p)
+          Dset_rev(Dset(nq)) = nq
+          LDmap(p) = nq
+          DLmap(nq) = p
+        endif
+      enddo
+
+      call resident_memory(rss)
+      rss = rss &
+            + np*memory_of_double(nq)               & ! Delta(np,nq)
+            + (rank+nq)* memory_of_double(ndim)     & ! L(ndim,rank+nq)
+            + (np+nq)*memory_of_double(block_size)    ! Ltmp_p(np,block_size)
+                                                      ! Ltmp_q(nq,block_size)
+
+      if (rss > qp_max_mem) then
+        s = s*2.d0
+      else
+        exit
       endif
+
+      if (nq == 0) then
+        print *,  'Not enough memory. Reduce cholesky threshold'
+        stop -1
+      endif
+     
     enddo
 
     ! d., e.
@@ -198,7 +234,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     enddo
     !$OMP END DO
 
-    !$OMP DO  SCHEDULE(dynamic,8)
+    !$OMP DO  SCHEDULE(guided)
     do m=1,nq
 
       call omp_set_lock(lock(m))
