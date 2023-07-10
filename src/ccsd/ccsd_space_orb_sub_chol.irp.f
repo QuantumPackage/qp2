@@ -1409,11 +1409,23 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
                   t1    , size(t1,1), &
             1d0, K1    , size(K1,1) * size(K1,2) * size(K1,3))
 
-  call dgemm('N','N',nO,nV*nO*nV,nV, &
-             1d0, t1    , size(t1,1), &
-                  v_vvov, size(v_vvov,1), &
-             1d0, K1    , size(K1,1))
+  double precision, allocatable :: K1tmp(:,:,:,:), t1v(:,:,:)
+  allocate(K1tmp(nO,nO,nV,nV), t1v(cholesky_ao_num,nO,nO))
 
+!  call dgemm('N','N',nO,nV*nO*nV,nV, &
+!             1d0, t1    , size(t1,1), &
+!                  v_vvov, size(v_vvov,1), &
+!             1d0, K1    , size(K1,1))
+
+  call dgemm('N','T', cholesky_ao_num*nO, nO, nV, 1.d0, &
+    cc_space_v_ov_chol, cholesky_ao_num*nO, t1, nO, 0.d0, &
+    t1v, cholesky_ao_num*nO)
+
+  call dgemm('T','N', nO*nO, nV*nV, cholesky_ao_num, 1.d0, &
+    t1v, cholesky_ao_num, cc_space_v_vv_chol, cholesky_ao_num, 0.d0, &
+    K1tmp, nO*nO)
+
+  deallocate(t1v)
   ! Y(u,beta,b,j) * X(b,j,a,i) = Z(u,beta,a,i)
   call dgemm('N','N',nV*nO,nO*nV,nV*nO, &
              1d0, Y, size(Y,1) * size(Y,2), &
@@ -1421,7 +1433,7 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
              0d0, Z, size(Z,1) * size(Z,2))
 
   !$omp parallel &
-  !$omp shared(nO,nV,K1,Z) &
+  !$omp shared(nO,nV,K1,Z,K1tmp) &
   !$omp private(i,beta,a,u) &
   !$omp default(none)
   !$omp do
@@ -1429,7 +1441,7 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
     do i = 1, nO
       do a = 1, nV
         do u = 1, nO
-          K1(u,a,i,beta) = K1(u,a,i,beta) + Z(u,beta,a,i)
+          K1(u,a,i,beta) = K1(u,a,i,beta) + K1tmp(u,i,a,beta) + Z(u,beta,a,i)
         enddo
       enddo
     enddo
@@ -1437,6 +1449,6 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   !$omp end do
   !$omp end parallel
 
-  deallocate(X,Y,Z)
+  deallocate(K1tmp,X,Y,Z)
 
 end
