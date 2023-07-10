@@ -29,7 +29,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, pointer        :: L(:,:), L_old(:,:)
 
 
-  double precision, parameter :: s = 1.d-1
+  double precision :: s
   double precision, parameter :: dscale = 1.d0
 
   double precision, allocatable :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
@@ -43,16 +43,28 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   double precision, external :: get_ao_two_e_integral
   logical, external :: ao_two_e_integral_zero
 
+  double precision, external      :: ao_two_e_integral
   integer :: block_size, iblock, ierr
 
   integer(omp_lock_kind), allocatable :: lock(:)
 
-  PROVIDE ao_two_e_integrals_in_map
+  double precision :: rss
+  double precision, external :: memory_of_double, memory_of_int
+
+
+  PROVIDE nucl_coord
+
+  if (.not.do_direct_integrals) then
+    PROVIDE ao_two_e_integrals_in_map
+  endif
   deallocate(cholesky_ao)
 
   ndim = ao_num*ao_num
   tau = ao_cholesky_threshold
 
+  rss = 6.d0 * memory_of_double(ndim) + &
+        6.d0 * memory_of_int(ndim)
+  call check_mem(rss, irp_here)
 
   allocate(L(ndim,1))
 
@@ -85,13 +97,22 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     enddo
   enddo
 
-  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
-  do i=1,ndim
-     D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
-                                  addr(2,i), addr(2,i), &
-                                  ao_integrals_map)
-  enddo
-  !$OMP END PARALLEL DO
+  if (do_direct_integrals) then
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+    do i=1,ndim
+       D(i) = ao_two_e_integral(addr(1,i), addr(2,i), &
+                                addr(1,i), addr(2,i))
+    enddo
+    !$OMP END PARALLEL DO
+  else
+    !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i) SCHEDULE(guided)
+    do i=1,ndim
+       D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i), &
+                                    addr(2,i), addr(2,i), &
+                                    ao_integrals_map)
+    enddo
+    !$OMP END PARALLEL DO
+  endif
 
   Dmax = maxval(D)
 
@@ -117,21 +138,49 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     ! a.
     i = i+1
 
-    ! b.
-     Dmin = max(s*Dmax,tau)
+    logical :: memory_ok
+    memory_ok = .False.
 
-    ! c.
-    nq=0
-    LDmap = 0
-    DLmap = 0
-    do p=1,np
-      if ( D(Lset(p)) > Dmin ) then
-        nq = nq+1
-        Dset(nq) = Lset(p)
-        Dset_rev(Dset(nq)) = nq
-        LDmap(p) = nq
-        DLmap(nq) = p
+    s = 0.1d0
+
+    ! Inrease s until the arrays fit in memory
+    do 
+
+      ! b.
+      Dmin = max(s*Dmax,tau)
+
+      ! c.
+      nq=0
+      LDmap = 0
+      DLmap = 0
+      do p=1,np
+        if ( D(Lset(p)) > Dmin ) then
+          nq = nq+1
+          Dset(nq) = Lset(p)
+          Dset_rev(Dset(nq)) = nq
+          LDmap(p) = nq
+          DLmap(nq) = p
+        endif
+      enddo
+
+      call resident_memory(rss)
+      rss = rss &
+            + np*memory_of_double(nq)               & ! Delta(np,nq)
+            + (rank+nq)* memory_of_double(ndim)     & ! L(ndim,rank+nq)
+            + (np+nq)*memory_of_double(block_size)    ! Ltmp_p(np,block_size)
+                                                      ! Ltmp_q(nq,block_size)
+
+      if (rss > qp_max_mem) then
+        s = s*2.d0
+      else
+        exit
       endif
+
+      if ((s > 1.d0).or.(nq == 0)) then
+        print *,  'Not enough memory. Reduce cholesky threshold'
+        stop -1
+      endif
+     
     enddo
 
     ! d., e.
@@ -170,9 +219,14 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
       stop -1
     endif
 
-    Delta(:,:) = 0.d0
 
     !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
+
+    !$OMP DO
+    do q=1,nq
+      Delta(:,q) = 0.d0
+    enddo
+    !$OMP ENDDO NOWAIT
 
     !$OMP DO 
     do k=1,N
@@ -183,9 +237,11 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         Ltmp_q(q,k) = L(Dset(q),k)
       enddo
     enddo
-    !$OMP END DO
+    !$OMP END DO NOWAIT
 
-    !$OMP DO  SCHEDULE(dynamic,8)
+    !$OMP BARRIER
+
+    !$OMP DO  SCHEDULE(guided)
     do m=1,nq
 
       call omp_set_lock(lock(m))
@@ -196,8 +252,13 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         if ((0 < q).and.(q < k)) cycle
         if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)), &
                                     addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
-           Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
+           if (do_direct_integrals) then
+             Delta(k,m) = ao_two_e_integral(addr(1,Lset(k)), addr(2,Lset(k)), &
+                                            addr(1,Dset(m)), addr(2,Dset(m)))
+           else
+             Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)), &
                            addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+           endif
            if (q /= 0) Delta(q,m) = Delta(k,m)
         endif
       enddo
@@ -218,8 +279,13 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         if ((0 < q).and.(q < p)) cycle
         if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)), &
                                     addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
-          Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
+          if (do_direct_integrals) then
+            Delta(p,m) = ao_two_e_integral(addr(1,Dset(k)), addr(2,Dset(k)), &
+                                           addr(1,Dset(m)), addr(2,Dset(m)))
+          else
+            Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)), &
                              addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
+          endif
           if (q   /= 0) Delta(q,m) = Delta(p,m)
           if (j   /= 0) Delta(p,j) = Delta(p,m)
           if (q*j /= 0) Delta(q,j) = Delta(p,m)
@@ -339,8 +405,16 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     call omp_destroy_lock(lock(k))
   enddo
 
-  allocate(cholesky_ao(ao_num,ao_num,rank))
-  call dcopy(ndim*rank, L, 1, cholesky_ao, 1)
+  allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
+  if (ierr /= 0) then
+    print *,  irp_here, ': Allocation failed'
+    stop -1
+  endif
+  !$OMP PARALLEL DO PRIVATE(k)
+  do k=1,rank
+    call dcopy(ndim, L(1,k), 1, cholesky_ao(1,1,k), 1)
+  enddo
+  !$OMP END PARALLEL DO
   deallocate(L)
   cholesky_ao_num = rank
 

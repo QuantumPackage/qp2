@@ -460,7 +460,7 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_schwartz)              &
-      !$OMP SCHEDULE(dynamic)
+      !$OMP SCHEDULE(guided)
   do i=1,ao_num
     do k=1,i
       ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,i,k,k))
@@ -975,7 +975,8 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(X,nx,B_10,2,d,nd)
-  call multiply_poly_c2(X,nx,B_10,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(X,nx,B_10,d,nd)
 
   nx = nd
   !DIR$ LOOP COUNT(8)
@@ -998,7 +999,8 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
     endif
 !    !DIR$ FORCEINLINE
 !    call multiply_poly(X,nx,B_00,2,d,nd)
-    call multiply_poly_c2(X,nx,B_00,d,nd)
+      !DIR$ FORCEINLINE
+    call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
   endif
 
   ny=0
@@ -1017,7 +1019,8 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(Y,ny,C_00,2,d,nd)
-  call multiply_poly_c2(Y,ny,C_00,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
 end
 
 recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
@@ -1057,7 +1060,8 @@ recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(X,nx,B_00,2,d,nd)
-  call multiply_poly_c2(X,nx,B_00,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
 
   ny=0
 
@@ -1069,7 +1073,8 @@ recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(Y,ny,C_00,2,d,nd)
-  call multiply_poly_c2(Y,ny,C_00,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
 
 end
 
@@ -1098,7 +1103,8 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(X,nx,B_10,2,d,nd)
-  call multiply_poly_c2(X,nx,B_10,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(X,nx,B_10,d,nd)
 
   nx = nd
   !DIR$ LOOP COUNT(8)
@@ -1118,7 +1124,8 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(X,nx,B_00,2,d,nd)
-  call multiply_poly_c2(X,nx,B_00,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
 
   ny=0
   !DIR$ LOOP COUNT(8)
@@ -1130,7 +1137,8 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
 
 !  !DIR$ FORCEINLINE
 !  call multiply_poly(Y,ny,C_00,2,d,nd)
-  call multiply_poly_c2(Y,ny,C_00,d,nd)
+      !DIR$ FORCEINLINE
+  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
 end
 
 recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
@@ -1177,9 +1185,9 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
       Y(1) = D_00(1)
       Y(2) = D_00(2)
 
-!      !DIR$ FORCEINLINE
 !      call multiply_poly(Y,ny,D_00,2,d,nd)
-      call multiply_poly_c2(Y,ny,D_00,d,nd)
+      !DIR$ FORCEINLINE
+      call multiply_poly_c2_inline_2e(Y,ny,D_00,d,nd)
 
       return
 
@@ -1199,7 +1207,8 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
 
 !      !DIR$ FORCEINLINE
 !      call multiply_poly(X,nx,B_01,2,d,nd)
-      call multiply_poly_c2(X,nx,B_01,d,nd)
+      !DIR$ FORCEINLINE
+      call multiply_poly_c2_inline_2e(X,nx,B_01,d,nd)
 
       ny = 0
       !DIR$ LOOP COUNT(6)
@@ -1208,9 +1217,9 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
       enddo
       call I_x2_pol_mult(c-1,B_10,B_01,B_00,C_00,D_00,Y,ny,dim)
 
-!      !DIR$ FORCEINLINE
 !      call multiply_poly(Y,ny,D_00,2,d,nd)
-      call multiply_poly_c2(Y,ny,D_00,d,nd)
+      !DIR$ FORCEINLINE
+      call multiply_poly_c2_inline_2e(Y,ny,D_00,d,nd)
 
   end select
 end
@@ -1232,7 +1241,8 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
   logical, external               :: ao_two_e_integral_zero
 
   integer                         :: i,k
-  double precision                :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
+  double precision, external      :: ao_two_e_integral
+  double precision                :: cpu_1,cpu_2, wall_1, wall_2
   double precision                :: integral, wall_0
   double precision                :: thr
   integer                         :: kk, m, j1, i1
@@ -1298,4 +1308,57 @@ subroutine multiply_poly_local(b,nb,c,nc,d,nd)
 
 end
 
+
+!DIR$ FORCEINLINE
+subroutine multiply_poly_c2_inline_2e(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:2)
+  double precision, intent(inout) :: d(0:nb+2)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+      d(2) = d(2) + c(2) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(1) * b(2) + c(2) * b(1)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ib=2,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1) + c(2) * b(ib-2)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb) + c(2) * b(nb-1)
+      d(nb+2) = d(nb+2) + c(2) * b(nb)
+
+  end select
+
+  do nd = nb+2,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
 
