@@ -276,64 +276,88 @@ end
 
 ! H_oo
 
-subroutine compute_H_oo_chol(nO,nV,t1,t2,tau,H_oo)
+subroutine compute_H_oo_chol(nO,nV,tau_x,H_oo)
 
   implicit none
 
   integer, intent(in)           :: nO,nV
-  double precision, intent(in)  :: t1(nO, nV)
-  double precision, intent(in)  :: t2(nO, nO, nV, nV)
-  double precision, intent(in)  :: tau(nO, nO, nV, nV)
+  double precision, intent(in)  :: tau_x(nO, nO, nV, nV)
   double precision, intent(out) :: H_oo(nO, nO)
 
-  integer :: a,tmp_a,k,b,l,c,d,tmp_c,tmp_d,i,j,u
+  integer :: a,b,i,j,u,k
 
-  ! H_oo(u,i) = cc_space_f_oo(u,i)
+  double precision, allocatable :: tau_kau(:,:,:), tmp_vov(:,:,:)
+
+  allocate(tau_kau(cholesky_ao_num,nV,nO))
   !$omp parallel &
-  !$omp shared(nO,H_oo,cc_space_f_oo) &
-  !$omp private(i,u) &
-  !$omp default(none)
+  !$omp default(shared) &
+  !$omp private(i,u,j,k,a,b,tmp_vov)
+  allocate(tmp_vov(nV,nO,nV) )
+  !$omp do
+  do u = 1, nO
+    do b=1,nV
+      do j=1,nO
+        do a=1,nV
+          tmp_vov(a,j,b) = tau_x(u,j,a,b)
+        enddo
+      enddo
+    enddo
+    call dgemm('N','T',cholesky_ao_num,nV,nO*nV,1.d0, &
+      cc_space_v_ov_chol, cholesky_ao_num, tmp_vov, nV, &
+      0.d0, tau_kau(1,1,u), cholesky_ao_num)
+  enddo
+  !$omp end do nowait
+  deallocate(tmp_vov)
   !$omp do
   do i = 1, nO
     do u = 1, nO
       H_oo(u,i) = cc_space_f_oo(u,i)
     enddo
   enddo
-  !$omp end do
-  !$omp end parallel
-
-  ! H_oo(u,i) += cc_space_w_oovv(i,j,a,b) * tau(u,j,a,b)
-  ! H_oo(u,i) += tau(u,j,a,b) * cc_space_w_oovv(i,j,a,b)
-  call dgemm('N','T', nO, nO, nO*nV*nV,       &
-             1d0, tau     , size(tau,1),      &
-                  cc_space_w_oovv, size(cc_space_w_oovv,1), &
-             1d0, H_oo    , size(H_oo,1))
+  !$omp end do nowait
+  !$omp barrier
+  !$omp end  parallel
+  call dgemm('T', 'N', nO, nO, cholesky_ao_num*nV, 1.d0, &
+    tau_kau, cholesky_ao_num*nV,  cc_space_v_vo_chol, cholesky_ao_num*nV, &
+    1.d0, H_oo, nO)
 
 end
 
 ! H_vv
 
-subroutine compute_H_vv_chol(nO,nV,t1,t2,tau,H_vv)
+subroutine compute_H_vv_chol(nO,nV,tau_x,H_vv)
 
   implicit none
 
   integer, intent(in)           :: nO,nV
-  double precision, intent(in)  :: t1(nO, nV)
-  double precision, intent(in)  :: t2(nO, nO, nV, nV)
-  double precision, intent(in)  :: tau(nO, nO, nV, nV)
+  double precision, intent(in)  :: tau_x(nO, nO, nV, nV)
   double precision, intent(out) :: H_vv(nV, nV)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u, beta
+  integer :: a,b,i,j,u,k, beta
 
-  double precision, allocatable :: tmp_tau(:,:,:,:)
+  double precision, allocatable :: tau_kia(:,:,:), tmp_oov(:,:,:)
 
-  allocate(tmp_tau(nV,nO,nO,nV))
-
-  ! H_vv(a,beta) = cc_space_f_vv(a,beta)
+  allocate(tau_kia(cholesky_ao_num,nO,nV))
   !$omp parallel &
-  !$omp shared(nV,nO,H_vv,cc_space_f_vv,tmp_tau,tau) &
-  !$omp private(a,beta,i,j,b) &
-  !$omp default(none)
+  !$omp default(shared) &
+  !$omp private(i,beta,j,k,a,b,tmp_oov)
+  allocate(tmp_oov(nO,nO,nV) )
+  !$omp do
+  do a = 1, nV
+    do b=1,nV
+      do j=1,nO
+        do i=1,nO
+          tmp_oov(i,j,b) = tau_x(i,j,a,b)
+        enddo
+      enddo
+    enddo
+    call dgemm('N','T',cholesky_ao_num,nO,nO*nV,1.d0, &
+      cc_space_v_ov_chol, cholesky_ao_num, tmp_oov, nO, &
+      0.d0, tau_kia(1,1,a), cholesky_ao_num)
+  enddo
+  !$omp end do nowait
+  deallocate(tmp_oov)
+
   !$omp do
   do beta = 1, nV
     do a = 1, nV
@@ -341,82 +365,63 @@ subroutine compute_H_vv_chol(nO,nV,t1,t2,tau,H_vv)
     enddo
   enddo
   !$omp end do nowait
-
-  !$omp do
-  do beta = 1, nV
-    do j = 1, nO
-      do i = 1, nO
-        do b = 1, nV
-          tmp_tau(b,i,j,beta) = tau(i,j,beta,b)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
-
-  call dgemm('N','N',nV,nV,nO*nO*nV,           &
-             -1d0, cc_space_w_vvoo, size(cc_space_w_vvoo,1), &
-                   tmp_tau , size(tmp_tau,1) * size(tmp_tau,2) * size(tmp_tau,3), &
-              1d0, H_vv    , size(H_vv,1))
-
-  deallocate(tmp_tau)
+  !$omp barrier
+  !$omp end  parallel
+  call dgemm('T', 'N', nV, nV, cholesky_ao_num*nO, -1.d0, &
+    tau_kia, cholesky_ao_num*nO,  cc_space_v_ov_chol, cholesky_ao_num*nO, &
+    1.d0, H_vv, nV)
 
 end
 
 ! H_vo
-
-subroutine compute_H_vo_chol(nO,nV,t1,t2,H_vo)
+subroutine compute_H_vo_chol(nO,nV,t1,H_vo)
 
   implicit none
 
   integer, intent(in)           :: nO,nV
   double precision, intent(in)  :: t1(nO, nV)
-  double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(out) :: H_vo(nV, nO)
 
-  integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u, beta
+  integer :: a,b,i,j,u,k
 
-  double precision, allocatable :: w(:,:,:,:)
-
-  allocate(w(nV,nO,nO,nV))
-
-  !$omp parallel &
-  !$omp shared(nV,nO,H_vo,cc_space_f_vo,w,cc_space_w_vvoo,t1) &
-  !$omp private(a,beta,i,j,b) &
-  !$omp default(none)
-  !$omp do
-  do i = 1, nO
-    do a = 1, nV
+  double precision, allocatable :: tmp_k(:), tmp(:,:,:), tmp2(:,:,:)
+  do i=1,nO
+    do a=1,nV
       H_vo(a,i) = cc_space_f_vo(a,i)
     enddo
   enddo
-  !$omp end do nowait
 
-  ! H_vo(a,i) = H_vo(a,i) + cc_space_w_vvoo(a,b,i,j) * t1(j,b)
-  ! H_vo(a,i) = H_vo(a,i) + w(a,i,j,b) * t1(j,b)
+  allocate(tmp_k(cholesky_ao_num))
+  call dgemm('N', 'N', cholesky_ao_num, 1, nO*nV, 2.d0, &
+     cc_space_v_ov_chol, cholesky_ao_num, &
+     t1, nO*nV, 0.d0, tmp_k, cholesky_ao_num)
 
-  !$omp do
-  do b = 1, nV
-    do j = 1, nO
-      do i = 1, nO
-        do a = 1, nV
-          w(a,i,j,b) = cc_space_w_vvoo(a,b,i,j)
-        enddo
+  call dgemm('T','N',nV*nO,1,cholesky_ao_num,1.d0, &
+      cc_space_v_vo_chol, cholesky_ao_num, tmp_k, cholesky_ao_num, 1.d0, &
+      H_vo, nV*nO)
+  deallocate(tmp_k)
+
+  allocate(tmp(cholesky_ao_num,nO,nO))
+  allocate(tmp2(cholesky_ao_num,nO,nO))
+
+  call dgemm('N','T', cholesky_ao_num*nO, nO, nV, 1.d0, &
+    cc_space_v_ov_chol, cholesky_ao_num*nO, t1, nO, 0.d0, tmp, cholesky_ao_num*nO)
+
+  do i=1,nO
+    do j=1,nO
+      do k=1,cholesky_ao_num
+        tmp2(k,j,i) = tmp(k,i,j)
       enddo
     enddo
   enddo
-  !$omp end do
-  !$omp end parallel
+  deallocate(tmp)
 
-  call dgemv('N',nV*nO, nO*nV, &
-             1d0, w   , size(w,1) * size(w,2), &
-                  t1  , 1, &
-             1d0, H_vo, 1)
-
-  deallocate(w)
+  call dgemm('T','N', nV, nO, cholesky_ao_num*nO, -1.d0, &
+    cc_space_v_ov_chol, cholesky_ao_num*nO, tmp2, cholesky_ao_num*nO, &
+    1.d0, H_vo, nV)
 
 end
+
 
 ! R2
 
@@ -1015,7 +1020,7 @@ subroutine compute_B1_chol(nO,nV,t1,B1,ldb)
             - cc_space_v_vvvo(a,b,beta,i) * t1(i,gam) &
             - cc_space_v_vvov(a,b,i,gam) * t1(i,beta)
           enddo
-  
+
         enddo
       enddo
     enddo

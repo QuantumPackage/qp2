@@ -9,7 +9,7 @@ subroutine run_ccsd_space_orb
   double precision :: uncorr_energy,energy, max_elem, max_r, max_r1, max_r2,ta,tb
   logical :: not_converged
 
-  double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:)
+  double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:), tau_x(:,:,:,:)
   double precision, allocatable :: t1(:,:), r1(:,:)
   double precision, allocatable :: H_oo(:,:), H_vv(:,:), H_vo(:,:)
 
@@ -17,8 +17,6 @@ subroutine run_ccsd_space_orb
   integer, allocatable          :: list_occ(:), list_vir(:)
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
-
-!  PROVIDE mo_two_e_integrals_in_map
 
   det = psi_det(:,:,cc_ref)
   print*,'Reference determinant:'
@@ -46,6 +44,7 @@ subroutine run_ccsd_space_orb
 
   allocate(t2(nO,nO,nV,nV), r2(nO,nO,nV,nV))
   allocate(tau(nO,nO,nV,nV))
+  allocate(tau_x(nO,nO,nV,nV))
   allocate(t1(nO,nV), r1(nO,nV))
   allocate(H_oo(nO,nO), H_vv(nV,nV), H_vo(nV,nO))
 
@@ -67,10 +66,11 @@ subroutine run_ccsd_space_orb
   call guess_t1(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_f_ov,t1)
   call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,t2)
   call update_tau_space(nO,nV,t1,t2,tau)
+  call update_tau_x_space(nO,nV,tau,tau_x)
   !print*,'hf_energy', hf_energy
   call det_energy(det,uncorr_energy)
   print*,'Det energy', uncorr_energy
-  call ccsd_energy_space(nO,nV,tau,t1,energy)
+  call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
   print*,'Guess energy', uncorr_energy+energy, energy
 
   nb_iter = 0
@@ -86,11 +86,11 @@ subroutine run_ccsd_space_orb
   do while (not_converged)
 
     ! Residue
-!    if (do_ao_cholesky) then
-    if (.False.) then
-      call compute_H_oo_chol(nO,nV,t1,t2,tau,H_oo)
-      call compute_H_vv_chol(nO,nV,t1,t2,tau,H_vv)
-      call compute_H_vo_chol(nO,nV,t1,t2,H_vo)
+    if (do_ao_cholesky) then
+!    if (.False.) then
+      call compute_H_oo_chol(nO,nV,tau_x,H_oo)
+      call compute_H_vv_chol(nO,nV,tau_x,H_vv)
+      call compute_H_vo_chol(nO,nV,t1,H_vo)
 
       call compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
       call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
@@ -119,9 +119,10 @@ subroutine run_ccsd_space_orb
     endif
 
     call update_tau_space(nO,nV,t1,t2,tau)
+    call update_tau_x_space(nO,nV,tau,tau_x)
 
     ! Energy
-    call ccsd_energy_space(nO,nV,tau,t1,energy)
+    call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
 
     nb_iter = nb_iter + 1
@@ -249,6 +250,51 @@ subroutine ccsd_energy_space(nO,nV,tau,t1,energy)
 
 end
 
+subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
+
+  implicit none
+
+  integer, intent(in)           :: nO, nV
+  double precision, intent(in)  :: tau_x(nO,nO,nV,nV)
+  double precision, intent(in)  :: t1(nO,nV)
+  double precision, intent(out) :: energy
+
+  ! internal
+  integer :: i,j,a,b
+  double precision :: e
+
+  energy = 0d0
+  !$omp parallel &
+  !$omp shared(nO,nV,energy,tau_x,t1,&
+  !$omp cc_space_f_vo,cc_space_v_oovv) &
+  !$omp private(i,j,a,b,e) &
+  !$omp default(none)
+  e = 0d0
+  !$omp do
+  do a = 1, nV
+    do i = 1, nO
+      e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
+    enddo
+  enddo
+  !$omp end do nowait
+  !$omp do
+  do b = 1, nV
+    do a = 1, nV
+      do j = 1, nO
+        do i = 1, nO
+          e = e + tau_x(i,j,a,b) * cc_space_v_oovv(i,j,a,b)
+       enddo
+      enddo
+    enddo
+  enddo
+  !$omp end do nowait
+  !$omp critical
+  energy = energy + e
+  !$omp end critical
+  !$omp end parallel
+
+end
+
 ! Tau
 
 subroutine update_tau_space(nO,nV,t1,t2,tau)
@@ -275,6 +321,39 @@ subroutine update_tau_space(nO,nV,t1,t2,tau)
       do j = 1, nO
         do i = 1, nO
           tau(i,j,a,b) = t2(i,j,a,b) + t1(i,a) * t1(j,b)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+end
+
+subroutine update_tau_x_space(nO,nV,tau,tau_x)
+
+  implicit none
+
+  ! in
+  integer, intent(in)           :: nO, nV
+  double precision, intent(in)  :: tau(nO,nO,nV,nV)
+
+  ! out
+  double precision, intent(out) :: tau_x(nO,nO,nV,nV)
+
+  ! internal
+  integer                       :: i,j,a,b
+
+  !$OMP PARALLEL &
+  !$OMP SHARED(nO,nV,tau,tau_x) &
+  !$OMP PRIVATE(i,j,a,b) &
+  !$OMP DEFAULT(NONE)
+  !$OMP DO
+  do b = 1, nV
+    do a = 1, nV
+      do j = 1, nO
+        do i = 1, nO
+          tau_x(i,j,a,b) = 2.d0*tau(i,j,a,b) - tau(i,j,b,a)
         enddo
       enddo
     enddo
