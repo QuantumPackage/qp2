@@ -11,8 +11,7 @@
     do t=1,n_act_orb
       tt=list_act(t)
       indx = mat_idx_c_a(i,t) 
-      call gradvec_tc_it(ii,tt,res_l)
-      call gradvec_tc_it(tt,ii,res_r)
+      call gradvec_tc_it(ii,tt,res_l,res_r)
       do fff = 0,3
        gradvec_tc_l(fff,indx)=res_l(fff)
        gradvec_tc_r(fff,indx)=res_r(fff)
@@ -56,23 +55,28 @@ subroutine gradvec_tc_ia(i,a,res)
  
 end
 
-subroutine gradvec_tc_it(i,t,res)
+subroutine gradvec_tc_it(i,t,res_l, res_r)
  implicit none
  BEGIN_DOC
 ! doubly occupied --> active TC gradient 
 !
-! Corresponds to <X0|H E_i^t|Phi_0>
+! Corresponds to res_r = <X0|H E_i^t|Phi_0>
+!
+!                res_l = <X0|E_i^t H |Phi_0>
  END_DOC
  integer, intent(in) :: i,t
- double precision, intent(out) :: res(0:3)
- integer :: rr,r,ss,s
+ double precision, intent(out) :: res_l(0:3),res_r(0:3)
+ integer :: rr,r,ss,s,m
  double precision :: dm
- res = 0.d0
- res(1) = -2 * mo_bi_ortho_tc_one_e(i,t)
- do rr = 1, n_act_orb
-  r = list_act(rr)
-  dm = tc_transition_matrix_mo(t,r,1,1)
-  res(1) += mo_bi_ortho_tc_one_e(i,r) * dm
+ res_r = 0.d0
+ do m = 1, mo_num
+  res_r(1) += mo_bi_ortho_tc_one_e(i,m) * tc_transition_matrix_mo(t,m,1,1) & 
+             -mo_bi_ortho_tc_one_e(m,t) * tc_transition_matrix_mo(m,i,1,1)
+ enddo
+ res_l = 0.d0
+ do m = 1, mo_num
+  res_l(1) += mo_bi_ortho_tc_one_e(t,m) * tc_transition_matrix_mo(i,m,1,1) & 
+             -mo_bi_ortho_tc_one_e(m,i) * tc_transition_matrix_mo(m,t,1,1)
  enddo
  
 end

@@ -25,6 +25,19 @@
    enddo
   enddo
  enddo
+
+ do ii = 1, n_core_inact_orb
+  ihole = list_core_inact(ii)
+  do tt = 1, n_act_orb
+   ipart = list_act(tt)
+   indx = mat_idx_c_a(ii,tt) 
+   call calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
+   do ll = 0, 3
+    gradvec_detail_left_old (ll,indx)=res_l(ll)
+    gradvec_detail_right_old(ll,indx)=res_r(ll)
+   enddo
+  enddo
+ enddo
 !  do indx=1,nMonoEx
 !    ihole=excit(1,indx)
 !    ipart=excit(2,indx)
@@ -57,7 +70,7 @@ END_PROVIDER
 subroutine calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
   BEGIN_DOC
   ! eq 18 of Siegbahn et al, Physica Scripta 1980
-  ! we calculate res_l  = <Phi| H^tc E_pq | Psi>, and res_r = <Phi| E_qp H^tc | Psi>
+  ! we calculate res_r  = <Phi| H^tc E_pq | Psi>, and res_r = <Phi| E_qp H^tc | Psi>
   ! q=hole, p=particle
   ! res_l(0) =   total matrix element
   ! res_l(1) =   one-electron part 
@@ -89,12 +102,12 @@ subroutine calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
       if (ierr.eq.1) then
 
         call i_H_tc_psi_phi(det_mu_ex,psi_det,psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,N_int & 
-            ,N_det,N_det,N_states,i_H_chi_array,i_H_phi_array)
+            ,N_det,psi_det_size,N_states,i_H_chi_array,i_H_phi_array)
 !        print*,i_H_chi_array(1,1),i_H_phi_array(1,1)
         do istate=1,N_states
          do ll = 0,3
-          res_l(ll)+=i_H_chi_array(ll,istate)*psi_r_coef_bi_ortho(mu,istate)*phase
-          res_r(ll)+=i_H_phi_array(ll,istate)*psi_l_coef_bi_ortho(mu,istate)*phase
+          res_l(ll)+=i_H_phi_array(ll,istate)*psi_l_coef_bi_ortho(mu,istate)*phase
+          res_r(ll)+=i_H_chi_array(ll,istate)*psi_r_coef_bi_ortho(mu,istate)*phase
          enddo
         end do
       end if
