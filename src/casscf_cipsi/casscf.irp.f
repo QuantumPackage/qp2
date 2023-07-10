@@ -17,14 +17,14 @@ end
 subroutine run
   implicit none
   double precision               :: energy_old, energy, pt2_max_before, ept2_before,delta_E
-  logical                        :: converged,state_following_casscf_save
+  logical                        :: converged,state_following_casscf_cipsi_save
   integer                        :: iteration
   converged = .False.
 
   energy = 0.d0
   mo_label = "MCSCF"
   iteration = 1
-  state_following_casscf_save = state_following_casscf
+  state_following_casscf_cipsi_save = state_following_casscf
   state_following_casscf = .True.
   touch state_following_casscf
   ept2_before = 0.d0
@@ -44,8 +44,8 @@ subroutine run
     call write_double(6,energy,'CAS-SCF energy = ')
     if(n_states == 1)then
      double precision :: E_PT2, PT2
-     call ezfio_get_casscf_energy_pt2(E_PT2)
-     call ezfio_get_casscf_energy(PT2)
+     call ezfio_get_casscf_cipsi_energy_pt2(E_PT2)
+     call ezfio_get_casscf_cipsi_energy(PT2)
      PT2 -= E_PT2
      call write_double(6,E_PT2,'E + PT2 energy = ')
      call write_double(6,PT2,'  PT2          = ')
@@ -98,7 +98,7 @@ subroutine run
        SOFT_TOUCH pt2_max  
      endif
      if(iteration .gt. 3)then
-      state_following_casscf = state_following_casscf_save
+      state_following_casscf = state_following_casscf_cipsi_save
       soft_touch state_following_casscf
      endif
     endif
