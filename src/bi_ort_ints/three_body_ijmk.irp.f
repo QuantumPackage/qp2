@@ -86,6 +86,13 @@
         tmp_loc_1 = mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i)
         tmp_loc_2 = tmp_aux_2(ipoint,n)
 
+        tmp1(ipoint,1,n) = int2_grad1_u12_bimo_t(ipoint,1,n,n) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,1,k,i) * tmp_loc_2
+        tmp1(ipoint,2,n) = int2_grad1_u12_bimo_t(ipoint,2,n,n) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,2,k,i) * tmp_loc_2
+        tmp1(ipoint,3,n) = int2_grad1_u12_bimo_t(ipoint,3,n,n) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,3,k,i) * tmp_loc_2
+        tmp1(ipoint,4,n) = int2_grad1_u12_bimo_t(ipoint,1,n,n) * int2_grad1_u12_bimo_t(ipoint,1,k,i) &
+                         + int2_grad1_u12_bimo_t(ipoint,2,n,n) * int2_grad1_u12_bimo_t(ipoint,2,k,i) &
+                         + int2_grad1_u12_bimo_t(ipoint,3,n,n) * int2_grad1_u12_bimo_t(ipoint,3,k,i)
+
       enddo
     enddo
     !$OMP END DO

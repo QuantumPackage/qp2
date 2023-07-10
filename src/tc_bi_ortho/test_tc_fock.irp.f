@@ -152,9 +152,7 @@ subroutine routine_tot()
 !   do i = 1, elec_num_tab(s1)
 !     do a = elec_num_tab(s1)+1, mo_num ! virtual 
    do i = 1, elec_beta_num
-     do a = elec_beta_num+1, elec_alpha_num! virtual 
-!   do i = elec_beta_num+1, elec_alpha_num
-!     do a = elec_alpha_num+1, mo_num! virtual 
+     do a = elec_beta_num+1, mo_num! virtual 
        print*,i,a 
  
        det_i = ref_bitmask
@@ -167,7 +165,7 @@ subroutine routine_tot()
  
        call htilde_mu_mat_bi_ortho_slow(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
        print*,htilde_ij
-       if(dabs(htilde_ij).lt.1.d-10)cycle
+!       if(dabs(htilde_ij).lt.1.d-10)cycle
        print*, ' excited det'
        call debug_det(det_i, N_int)
 
@@ -184,9 +182,12 @@ subroutine routine_tot()
 !       endif
        err_ai = dabs(dabs(ref) - dabs(new))
        if(err_ai .gt. 1d-7) then
+         print*,'---------'
          print*,'s1 = ',s1
          print*, ' warning on', i, a
          print*, ref,new,err_ai
+         print*,hmono, htwoe, hthree
+         print*,'---------'
        endif
        print*, ref,new,err_ai
        err_tot += err_ai

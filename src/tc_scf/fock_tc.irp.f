@@ -208,10 +208,10 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
 
     if(three_body_h_tc) then
       !call wall_time(tt0)
-      !PROVIDE fock_a_tot_3e_bi_orth
-      !Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
-      PROVIDE fock_3e_uhf_mo_a
-      Fock_matrix_tc_mo_alpha += fock_3e_uhf_mo_a
+      PROVIDE fock_a_tot_3e_bi_orth
+      Fock_matrix_tc_mo_alpha += fock_a_tot_3e_bi_orth
+!      PROVIDE fock_3e_uhf_mo_a
+!      Fock_matrix_tc_mo_alpha += fock_3e_uhf_mo_a
       !call wall_time(tt1)
       !print*, ' 3-e term:', tt1-tt0
     endif
@@ -241,21 +241,13 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
 
   if(bi_ortho) then
 
-    !allocate(tmp(ao_num,ao_num))
-    !tmp = Fock_matrix_tc_ao_beta
-    !if(three_body_h_tc) then
-    !  tmp += fock_3e_uhf_ao_b
-    !endif
-    !call ao_to_mo_bi_ortho(tmp, size(tmp, 1), Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1))
-    !deallocate(tmp)
-
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                           , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
     if(three_body_h_tc) then
-      !PROVIDE fock_b_tot_3e_bi_orth
-      !Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
-      PROVIDE fock_3e_uhf_mo_b
-      Fock_matrix_tc_mo_beta += fock_3e_uhf_mo_b
+       PROVIDE fock_b_tot_3e_bi_orth
+       Fock_matrix_tc_mo_beta += fock_b_tot_3e_bi_orth
+!      PROVIDE fock_3e_uhf_mo_b
+!      Fock_matrix_tc_mo_beta += fock_3e_uhf_mo_b
     endif
 
   else

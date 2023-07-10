@@ -184,7 +184,7 @@ subroutine single_htilde_three_body_ints_bi_ort_slow(Nint, key_j, key_i, hthree)
       ii = occ(i,s1)
       do j = i+1, Ne(s1)
        jj = occ(j,s1)
-!       ref = sym_3_e_int_from_6_idx_tensor(jj,ii,p1,jj,ii,h1)
+!      !ref = sym_3_e_int_from_6_idx_tensor(jj,ii,p1,jj,ii,h1)
        hthree += three_e_single_parrallel_spin(jj,ii,p1,h1) ! USES THE 4-IDX TENSOR
       enddo
      enddo
