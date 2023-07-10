@@ -134,17 +134,14 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
   i = 0
 
   ! 5.
-  do while (Dmax > tau)
+  do while ( (Dmax > tau).and.(rank < ndim) )
     ! a.
     i = i+1
-
-    logical :: memory_ok
-    memory_ok = .False.
 
     s = 0.1d0
 
     ! Inrease s until the arrays fit in memory
-    do 
+    do
 
       ! b.
       Dmin = max(s*Dmax,tau)
@@ -153,6 +150,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
       nq=0
       LDmap = 0
       DLmap = 0
+      Dset_rev = 0
       do p=1,np
         if ( D(Lset(p)) > Dmin ) then
           nq = nq+1
@@ -180,7 +178,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         print *,  'Not enough memory. Reduce cholesky threshold'
         stop -1
       endif
-     
+
     enddo
 
     ! d., e.
@@ -197,11 +195,11 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     do k=1,rank
       L(:,k) = L_old(:,k)
     enddo
-    !$OMP END PARALLEL DO 
+    !$OMP END PARALLEL DO
 
     deallocate(L_old)
 
-    allocate(Delta(np,nq), stat=ierr) 
+    allocate(Delta(np,nq), stat=ierr)
     if (ierr /= 0) then
       print *,  irp_here, ': allocation failed : (Delta(np,nq))'
       stop -1
@@ -228,7 +226,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     enddo
     !$OMP ENDDO NOWAIT
 
-    !$OMP DO 
+    !$OMP DO
     do k=1,N
       do p=1,np
         Ltmp_p(p,k) = L(Lset(p),k)
@@ -364,7 +362,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
         Ltmp_q(q,iblock) = L(Dset(q), rank)
       enddo
       !$OMP END DO
-      
+
       !$OMP END PARALLEL
 
       Qmax = D(Dset(1))
@@ -381,7 +379,7 @@ BEGIN_PROVIDER [ integer, cholesky_ao_num ]
     deallocate(Ltmp_q, stat=ierr)
 
     ! i.
-    N = N+j
+    N = rank
 
     ! j.
     Dmax = D(Lset(1))
