@@ -49,9 +49,34 @@ subroutine run_ccsd_space_orb
   allocate(H_oo(nO,nO), H_vv(nV,nV), H_vo(nV,nO))
 
   if (cc_update_method == 'diis') then
-    allocate(all_err(nO*nV+nO*nO*nV*nV,cc_diis_depth), all_t(nO*nV+nO*nO*nV*nV,cc_diis_depth))
-    all_err = 0d0
-    all_t   = 0d0
+    double precision :: rss, diis_mem, extra_mem
+    double precision, external :: memory_of_double
+    diis_mem = 2.d0*memory_of_double(nO*nV)*(1.d0+nO*nV)
+    call resident_memory(rss)
+    do while (cc_diis_depth > 1)
+      if (rss + diis_mem * cc_diis_depth > qp_max_mem) then
+        cc_diis_depth = cc_diis_depth - 1
+      else
+        exit
+      endif
+    end do
+    if (cc_diis_depth <= 1) then
+      print *,  'Not enough memory for DIIS'
+      stop -1
+    endif
+    print *,  'DIIS size  ', cc_diis_depth
+
+    allocate(all_err(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth), all_t(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth))
+    !$OMP PARALLEL PRIVATE(i,j) DEFAULT(SHARED)
+    do j=1,cc_diis_depth
+      !$OMP DO
+      do i=1, size(all_err,1)
+        all_err(i,j) = 0d0
+        all_t(i,j)   = 0d0
+      enddo
+      !$OMP END DO NOWAIT
+    enddo
+    !$OMP END PARALLEL
   endif
 
   if (elec_alpha_num /= elec_beta_num) then
@@ -1427,7 +1452,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !enddo
 
   !$omp parallel &
-  !$omp shared(nO,nV,K1,X_ovov,Z_ovov,t2) &
+  !$omp shared(nO,nV,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,v,gam,beta,i,a) &
   !$omp default(none)
   !$omp do
@@ -1447,7 +1472,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     do v = 1, nO
       do a = 1, nV
         do i = 1, nO
-          Z_ovov(i,a,v,beta) = t2(i,v,beta,a)
+          Y_ovov(i,a,v,beta) = t2(i,v,beta,a)
         enddo
       enddo
     enddo
