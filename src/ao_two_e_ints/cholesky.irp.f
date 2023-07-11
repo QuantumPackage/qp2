@@ -35,6 +35,7 @@ END_PROVIDER
    double precision, allocatable  :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
    integer, allocatable           :: Lset(:), Dset(:), addr(:,:), LDmap(:), DLmap(:)
    integer, allocatable           :: Lset_rev(:), Dset_rev(:)
+   logical, allocatable           :: computed(:)
    
    integer                        :: i,j,k,m,p,q, qj, dj, p2, q2
    integer                        :: N, np, nq
@@ -158,7 +159,7 @@ END_PROVIDER
        ! a.
        i = i+1
        
-       s = 0.1d0
+       s = 0.01d0
        
        ! Inrease s until the arrays fit in memory
        do while (.True.)
@@ -242,11 +243,14 @@ END_PROVIDER
        endif
        
        
+       allocate(computed(nq))
+       
        !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
        
        !$OMP DO
        do q=1,nq
          Delta(:,q) = 0.d0
+         computed(q) = .False.
        enddo
        !$OMP ENDDO NOWAIT
        
@@ -262,64 +266,6 @@ END_PROVIDER
        !$OMP END DO NOWAIT
        
        !$OMP BARRIER
-       
-       !$OMP DO  SCHEDULE(dynamic)
-       do m=1,nq
-         
-         call omp_set_lock(lock(m))
-         do k=1,np
-           ! Apply only to (k,m) pairs where k is not in Dset
-           if (LDmap(k) /= 0) cycle
-           q = Lset_rev(addr(3,Lset(k)))
-           if ((0 < q).and.(q < k)) cycle
-           if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)),&
-                 addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
-             if (do_direct_integrals) then
-               Delta(k,m) = ao_two_e_integral(addr(1,Lset(k)), addr(2,Lset(k)),&
-                   addr(1,Dset(m)), addr(2,Dset(m)))
-             else
-               Delta(k,m) = get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)),&
-                   addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
-             endif
-             if (q /= 0) Delta(q,m) = Delta(k,m)
-           endif
-         enddo
-         
-         j = Dset_rev(addr(3,Dset(m)))
-         if ((0 < j).and.(j < m)) then
-           call omp_unset_lock(lock(m))
-           cycle
-         endif
-         
-         if ((j /= m).and.(j /= 0)) then
-           call omp_set_lock(lock(j))
-         endif
-         do k=1,nq
-           ! Apply only to (k,m) pairs both in Dset
-           p = DLmap(k)
-           q = Lset_rev(addr(3,Dset(k)))
-           if ((0 < q).and.(q < p)) cycle
-           if (.not.ao_two_e_integral_zero( addr(1,Dset(k)), addr(1,Dset(m)),&
-                 addr(2,Dset(k)), addr(2,Dset(m)) ) ) then
-             if (do_direct_integrals) then
-               Delta(p,m) = ao_two_e_integral(addr(1,Dset(k)), addr(2,Dset(k)),&
-                   addr(1,Dset(m)), addr(2,Dset(m)))
-             else
-               Delta(p,m) = get_ao_two_e_integral( addr(1,Dset(k)), addr(1,Dset(m)),&
-                   addr(2,Dset(k)), addr(2,Dset(m)), ao_integrals_map)
-             endif
-             if (q   /= 0) Delta(q,m) = Delta(p,m)
-             if (j   /= 0) Delta(p,j) = Delta(p,m)
-             if (q*j /= 0) Delta(q,j) = Delta(p,m)
-           endif
-         enddo
-         call omp_unset_lock(lock(m))
-         if ((j /= m).and.(j /= 0)) then
-           call omp_unset_lock(lock(j))
-         endif
-       enddo
-       !$OMP END DO
-       
        !$OMP END PARALLEL
        
        if (N>0) then
@@ -358,6 +304,27 @@ END_PROVIDER
          
          L(1:ndim, rank) = 0.d0
          
+         if (.not.computed(dj)) then
+           m = dj
+           !$OMP PARALLEL DO PRIVATE(k) SCHEDULE(guided)
+           do k=np,1,-1
+             if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)),&
+                   addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
+               if (do_direct_integrals) then
+                 Delta(k,m) = Delta(k,m) + &
+                     ao_two_e_integral(addr(1,Lset(k)), addr(2,Lset(k)),&
+                     addr(1,Dset(m)), addr(2,Dset(m)))
+               else
+                 Delta(k,m) = Delta(k,m) + &
+                     get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)),&
+                     addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+               endif
+             endif
+           enddo
+           !$OMP END PARALLEL DO
+           computed(dj) = .True.
+         endif
+
          iblock = iblock+1
          do p=1,np
            Ltmp_p(p,iblock) = Delta(p,dj)
@@ -398,9 +365,10 @@ END_PROVIDER
        
        print '(I10, 4X, ES12.3)', rank, Qmax
        
-       deallocate(Delta, stat=ierr)
-       deallocate(Ltmp_p, stat=ierr)
-       deallocate(Ltmp_q, stat=ierr)
+       deallocate(computed)
+       deallocate(Delta)
+       deallocate(Ltmp_p)
+       deallocate(Ltmp_q)
        
        ! i.
        N = rank
