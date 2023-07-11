@@ -190,7 +190,40 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nOa,cc_nOa,cc_nOa, cc_list_occ,cc_list_occ,cc_list_occ,cc_list_occ, cc_space_v_oooo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_oooo,1)
+    n2 = size(cc_space_v_oooo,2)
+    n3 = size(cc_space_v_oooo,3)
+    n4 = size(cc_space_v_oooo,4)
+
+    double precision, allocatable :: buffer(:,:,:,:)
+    allocate(buffer(n1,n3,n2,n4))
+
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
+         cc_space_v_oo_chol, cholesky_ao_num, &
+         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_oooo(i1,i2,i3,i4) = buffer(i1,i3,i2,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+    deallocate(buffer)
+
+  else
+    call gen_v_space(cc_nOa,cc_nOa,cc_nOa,cc_nOa, cc_list_occ,cc_list_occ,cc_list_occ,cc_list_occ, cc_space_v_oooo)
+  endif
 
 END_PROVIDER
 
@@ -200,7 +233,40 @@ BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nVa,cc_nOa,cc_nOa,cc_nOa, cc_list_vir,cc_list_occ,cc_list_occ,cc_list_occ, cc_space_v_vooo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_vooo,1)
+    n2 = size(cc_space_v_vooo,2)
+    n3 = size(cc_space_v_vooo,3)
+    n4 = size(cc_space_v_vooo,4)
+
+    double precision, allocatable :: buffer(:,:,:,:)
+    allocate(buffer(n1,n3,n2,n4))
+
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
+         cc_space_v_vo_chol, cholesky_ao_num, &
+         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_vooo(i1,i2,i3,i4) = buffer(i1,i3,i2,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+    deallocate(buffer)
+
+  else
+    call gen_v_space(cc_nVa,cc_nOa,cc_nOa,cc_nOa, cc_list_vir,cc_list_occ,cc_list_occ,cc_list_occ, cc_space_v_vooo)
+  endif
 
 END_PROVIDER
 
@@ -210,7 +276,32 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovoo, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nVa,cc_nOa,cc_nOa, cc_list_occ,cc_list_vir,cc_list_occ,cc_list_occ, cc_space_v_ovoo)
+
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_ovoo,1)
+    n2 = size(cc_space_v_ovoo,2)
+    n3 = size(cc_space_v_ovoo,3)
+    n4 = size(cc_space_v_ovoo,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_ovoo(i1,i2,i3,i4) = cc_space_v_vooo(i2,i1,i4,i3)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nVa,cc_nOa,cc_nOa, cc_list_occ,cc_list_vir,cc_list_occ,cc_list_occ, cc_space_v_ovoo)
+  endif
 
 END_PROVIDER
 
@@ -220,7 +311,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovo, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nOa,cc_nVa,cc_nOa, cc_list_occ,cc_list_occ,cc_list_vir,cc_list_occ, cc_space_v_oovo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_oovo,1)
+    n2 = size(cc_space_v_oovo,2)
+    n3 = size(cc_space_v_oovo,3)
+    n4 = size(cc_space_v_oovo,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_oovo(i1,i2,i3,i4) = cc_space_v_vooo(i3,i2,i1,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nOa,cc_nVa,cc_nOa, cc_list_occ,cc_list_occ,cc_list_vir,cc_list_occ, cc_space_v_oovo)
+  endif
 
 END_PROVIDER
 
@@ -230,7 +345,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_ooov, (cc_nOa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nOa,cc_nOa,cc_nVa, cc_list_occ,cc_list_occ,cc_list_occ,cc_list_vir, cc_space_v_ooov)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_oovo,1)
+    n2 = size(cc_space_v_oovo,2)
+    n3 = size(cc_space_v_oovo,3)
+    n4 = size(cc_space_v_oovo,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_ooov(i1,i2,i3,i4) = cc_space_v_ovoo(i1,i4,i3,i2)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nOa,cc_nOa,cc_nVa, cc_list_occ,cc_list_occ,cc_list_occ,cc_list_vir, cc_space_v_ooov)
+  endif
 
 END_PROVIDER
 
@@ -240,7 +379,40 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nVa,cc_nVa,cc_nOa,cc_nOa, cc_list_vir,cc_list_vir,cc_list_occ,cc_list_occ, cc_space_v_vvoo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_vvoo,1)
+    n2 = size(cc_space_v_vvoo,2)
+    n3 = size(cc_space_v_vvoo,3)
+    n4 = size(cc_space_v_vvoo,4)
+
+    double precision, allocatable :: buffer(:,:,:,:)
+    allocate(buffer(n1,n3,n2,n4))
+
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
+         cc_space_v_vo_chol, cholesky_ao_num, &
+         cc_space_v_vo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_vvoo(i1,i2,i3,i4) = buffer(i1,i3,i2,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+    deallocate(buffer)
+
+  else
+    call gen_v_space(cc_nVa,cc_nVa,cc_nOa,cc_nOa, cc_list_vir,cc_list_vir,cc_list_occ,cc_list_occ, cc_space_v_vvoo)
+  endif
 
 END_PROVIDER
 
@@ -250,7 +422,40 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nVa,cc_nOa,cc_nVa,cc_nOa, cc_list_vir,cc_list_occ,cc_list_vir,cc_list_occ, cc_space_v_vovo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_vovo,1)
+    n2 = size(cc_space_v_vovo,2)
+    n3 = size(cc_space_v_vovo,3)
+    n4 = size(cc_space_v_vovo,4)
+
+    double precision, allocatable :: buffer(:,:,:,:)
+    allocate(buffer(n1,n3,n2,n4))
+
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
+         cc_space_v_vv_chol, cholesky_ao_num, &
+         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_vovo(i1,i2,i3,i4) = buffer(i1,i3,i2,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+    deallocate(buffer)
+
+  else
+    call gen_v_space(cc_nVa,cc_nOa,cc_nVa,cc_nOa, cc_list_vir,cc_list_occ,cc_list_vir,cc_list_occ, cc_space_v_vovo)
+  endif
 
 END_PROVIDER
 
@@ -260,7 +465,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_voov, (cc_nVa, cc_nOa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nVa,cc_nOa,cc_nOa,cc_nVa, cc_list_vir,cc_list_occ,cc_list_occ,cc_list_vir, cc_space_v_voov)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_voov,1)
+    n2 = size(cc_space_v_voov,2)
+    n3 = size(cc_space_v_voov,3)
+    n4 = size(cc_space_v_voov,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_voov(i1,i2,i3,i4) = cc_space_v_vvoo(i1,i4,i3,i2)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nVa,cc_nOa,cc_nOa,cc_nVa, cc_list_vir,cc_list_occ,cc_list_occ,cc_list_vir, cc_space_v_voov)
+  endif
 
 END_PROVIDER
 
@@ -270,7 +499,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovvo, (cc_nOa, cc_nVa, cc_nVa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nVa,cc_nVa,cc_nOa, cc_list_occ,cc_list_vir,cc_list_vir,cc_list_occ, cc_space_v_ovvo)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_ovvo,1)
+    n2 = size(cc_space_v_ovvo,2)
+    n3 = size(cc_space_v_ovvo,3)
+    n4 = size(cc_space_v_ovvo,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_ovvo(i1,i2,i3,i4) = cc_space_v_vvoo(i3,i2,i1,i4)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nVa,cc_nVa,cc_nOa, cc_list_occ,cc_list_vir,cc_list_vir,cc_list_occ, cc_space_v_ovvo)
+  endif
 
 END_PROVIDER
 
@@ -280,7 +533,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_ovov, (cc_nOa, cc_nVa, cc_nOa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nVa,cc_nOa,cc_nVa, cc_list_occ,cc_list_vir,cc_list_occ,cc_list_vir, cc_space_v_ovov)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_ovov,1)
+    n2 = size(cc_space_v_ovov,2)
+    n3 = size(cc_space_v_ovov,3)
+    n4 = size(cc_space_v_ovov,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_ovov(i1,i2,i3,i4) = cc_space_v_vovo(i2,i1,i4,i3)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nVa,cc_nOa,cc_nVa, cc_list_occ,cc_list_vir,cc_list_occ,cc_list_vir, cc_space_v_ovov)
+  endif
 
 END_PROVIDER
 
@@ -290,7 +567,31 @@ BEGIN_PROVIDER [double precision, cc_space_v_oovv, (cc_nOa, cc_nOa, cc_nVa, cc_n
 
   implicit none
 
-  call gen_v_space(cc_nOa,cc_nOa,cc_nVa,cc_nVa, cc_list_occ,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_oovv)
+  if (do_ao_cholesky) then
+
+    integer :: i1, i2, i3, i4
+    integer :: n1, n2, n3, n4
+    
+    n1 = size(cc_space_v_oovv,1)
+    n2 = size(cc_space_v_oovv,2)
+    n3 = size(cc_space_v_oovv,3)
+    n4 = size(cc_space_v_oovv,4)
+
+    !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
+    do i4 = 1, n4
+      do i3 = 1, n3
+        do i2 = 1, n2
+          do i1 = 1, n1
+            cc_space_v_oovv(i1,i2,i3,i4) = cc_space_v_vvoo(i3,i4,i1,i2)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$OMP END PARALLEL DO
+
+  else
+    call gen_v_space(cc_nOa,cc_nOa,cc_nVa,cc_nVa, cc_list_occ,cc_list_occ,cc_list_vir,cc_list_vir, cc_space_v_oovv)
+  endif
 
 END_PROVIDER
 

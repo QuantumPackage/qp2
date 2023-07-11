@@ -186,14 +186,13 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   deallocate(X_ovov)
 
   integer :: iblock, block_size, nVmax
-  double precision, allocatable :: W_vvov(:,:,:,:), T_vvoo(:,:,:,:)
-  block_size = 8
-  allocate(W_vvov(nV,nV,nO,block_size), T_vvoo(nV,nV,nO,nO))
+  double precision, allocatable :: W_vvov(:,:,:,:), W_vvov_tmp(:,:,:,:), T_vvoo(:,:,:,:)
+  block_size = 16
+  allocate(W_vvov(nV,nV,nO,block_size), W_vvov_tmp(nV,nO,nV,block_size), T_vvoo(nV,nV,nO,nO))
 
   !$omp parallel &
-  !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau) &
-  !$omp private(b,beta,i,a) &
-  !$omp default(none)
+  !$omp private(u,i,b,a) &
+  !$omp default(shared)
   !$omp do
   do u = 1, nO
     do i = 1, nO
@@ -204,26 +203,32 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
       enddo
     enddo
   enddo
-  !$omp end do nowait
+  !$omp end do
   !$omp end parallel
 
   do iblock = 1, nV, block_size
     nVmax = min(block_size,nV-iblock+1)
+
+    call dgemm('T','N', nV*nO, nV*nVmax, cholesky_ao_num, 1.d0, &
+      cc_space_v_vo_chol            , cholesky_ao_num, &
+      cc_space_v_vv_chol(1,1,iblock), cholesky_ao_num, &
+      0.d0, W_vvov_tmp, nV*nO)
+
     !$omp parallel &
-    !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau,nVmax,iblock) &
     !$omp private(b,i,a,beta) &
-    !$omp default(none)
-    !$omp do collapse(2)
-    do beta = iblock, iblock + nVmax - 1
+    !$omp default(shared)
+    do beta = 1,  nVmax
       do i = 1, nO
+        !$omp do
         do b = 1, nV
           do a = 1, nV
-            W_vvov(a,b,i,beta-iblock+1) = 2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)
+            W_vvov(a,b,i,beta) = 2d0 * W_vvov_tmp(a,i,b,beta) - W_vvov_tmp(b,i,a,beta)
           enddo
         enddo
+        !$omp end do nowait
       enddo
     enddo
-    !$omp end do nowait
+    !$omp barrier
     !$omp end parallel
 
     call dgemm('T','N',nO,nVmax,nO*nV*nV, &
@@ -233,6 +238,7 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
 
   deallocate(W_vvov,T_vvoo)
+
 
   double precision, allocatable :: W_oovo(:,:,:,:)
   allocate(W_oovo(nO,nO,nV,nO))
@@ -462,7 +468,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   call compute_J1_chol(nO,nV,t1,t2,cc_space_v_ovvo,cc_space_v_ovoo, &
        cc_space_v_vvoo,J1)
   call compute_K1_chol(nO,nV,t1,t2,cc_space_v_ovoo,cc_space_v_vvoo, &
-       cc_space_v_ovov,cc_space_v_vvov,K1)
+       cc_space_v_ovov,K1)
 
   ! Residual
   !r2 = 0d0
@@ -1346,7 +1352,7 @@ end
 
 ! K1
 
-subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
+subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,K1)
 
   implicit none
 
@@ -1354,7 +1360,7 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
   double precision, intent(in)  :: t1(nO, nV)
   double precision, intent(in)  :: t2(nO, nO, nV, nV)
   double precision, intent(in)  :: v_vvoo(nV,nV,nO,nO), v_ovov(nO,nV,nO,nV)
-  double precision, intent(in)  :: v_vvov(nV,nV,nO,nV), v_ovoo(nO,nV,nO,nO)
+  double precision, intent(in)  :: v_ovoo(nO,nV,nO,nO)
   double precision, intent(out) :: K1(nO, nV, nO, nV)
 
   double precision, allocatable :: X(:,:,:,:), Y(:,:,:,:), Z(:,:,:,:)
@@ -1411,11 +1417,6 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov,v_vvov,K1)
 
   double precision, allocatable :: K1tmp(:,:,:,:), t1v(:,:,:)
   allocate(K1tmp(nO,nO,nV,nV), t1v(cholesky_ao_num,nO,nO))
-
-!  call dgemm('N','N',nO,nV*nO*nV,nV, &
-!             1d0, t1    , size(t1,1), &
-!                  v_vvov, size(v_vvov,1), &
-!             1d0, K1    , size(K1,1))
 
   call dgemm('N','T', cholesky_ao_num*nO, nO, nV, 1.d0, &
     cc_space_v_ov_chol, cholesky_ao_num*nO, t1, nO, 0.d0, &

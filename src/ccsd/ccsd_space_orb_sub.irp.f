@@ -92,7 +92,7 @@ subroutine run_ccsd_space_orb
       call compute_H_vv_chol(nO,nV,tau_x,H_vv)
       call compute_H_vo_chol(nO,nV,t1,H_vo)
 
-      call compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
+      call compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
       call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     else
       call compute_H_oo(nO,nV,t1,t2,tau,H_oo)
@@ -587,8 +587,6 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
 
   deallocate(W_vvov,T_vvoo)
-
-
 
   ! r1(u,beta) = r1(u,beta) - (2d0 * cc_space_v_vooo(a,u,i,j) - cc_space_v_vooo(a,u,j,i)) * tau(i,j,a,beta)
   ! r1(u,beta) = r1(u,beta) - W(i,j,a,u) * tau(i,j,a,beta)
