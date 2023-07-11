@@ -99,16 +99,15 @@ subroutine check_mem(rss_in,routine)
   END_DOC
   double precision, intent(in) :: rss_in
   character*(*) :: routine
-  double precision :: rss
-  !$OMP CRITICAL
-  call resident_memory(rss)
-  rss += rss_in
-  if (int(rss)+1 > qp_max_mem) then
+  double precision :: mem
+  call total_memory(mem)
+  mem += rss_in
+  if (mem > qp_max_mem) then
+    call print_memory_usage()
     print *,  'Not enough memory: aborting in ', routine
-    print *,  int(rss)+1, ' GB required'
+    print *,  mem, ' GB required'
     stop -1
   endif
-  !$OMP END CRITICAL
 end
 
 subroutine print_memory_usage()

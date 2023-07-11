@@ -48,7 +48,7 @@ END_PROVIDER
    
    integer(omp_lock_kind), allocatable :: lock(:)
    
-   double precision               :: rss
+   double precision               :: mem
    double precision, external     :: memory_of_double, memory_of_int
    
    integer, external              :: getUnitAndOpen
@@ -70,16 +70,22 @@ END_PROVIDER
      
      PROVIDE nucl_coord
      
-     if (.not.do_direct_integrals) then
+     if (do_direct_integrals) then
+       if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then
+         ! Trigger providers inside ao_two_e_integral
+         continue
+       endif
+     else
        PROVIDE ao_two_e_integrals_in_map
      endif
      
      tau = ao_cholesky_threshold
      
-     rss = 6.d0 * memory_of_double(ndim) +                           &
-         6.d0 * memory_of_int(ndim)
-     call check_mem(rss, irp_here)
+     mem = 6.d0 * memory_of_double(ndim) + 6.d0 * memory_of_int(ndim)
+     call check_mem(mem, irp_here)
      
+     call print_memory_usage()
+
      allocate(L(ndim,1))
      
      print *,  ''
@@ -112,7 +118,7 @@ END_PROVIDER
      enddo
      
      if (do_direct_integrals) then
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i)
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i) SCHEDULE(guided)
        do i=1,ndim
          D(i) = ao_two_e_integral(addr(1,i), addr(2,i),              &
              addr(1,i), addr(2,i))
@@ -175,20 +181,20 @@ END_PROVIDER
            endif
          enddo
          
-         call resident_memory(rss)
-         rss = rss                                                   &
+         call total_memory(mem)
+         mem = mem                                                   &
              + np*memory_of_double(nq)                               &! Delta(np,nq)
              + (rank+nq)* memory_of_double(ndim)                     &! L(ndim,rank+nq)
-             + (np+nq)*memory_of_double(block_size)    ! Ltmp_p(np,block_size)
-         ! Ltmp_q(nq,block_size)
+             + (np+nq)*memory_of_double(block_size)    ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
          
-         if (rss > qp_max_mem) then
+         if (mem > qp_max_mem) then
            s = s*2.d0
          else
            exit
          endif
          
          if ((s > 1.d0).or.(nq == 0)) then
+           call print_memory_usage()
            print *,  'Not enough memory. Reduce cholesky threshold'
            stop -1
          endif
@@ -201,6 +207,7 @@ END_PROVIDER
        L_old => L
        allocate(L(ndim,rank+nq), stat=ierr)
        if (ierr /= 0) then
+         call print_memory_usage()
          print *,  irp_here, ': allocation failed : (L(ndim,rank+nq))'
          stop -1
        endif
@@ -215,18 +222,21 @@ END_PROVIDER
        
        allocate(Delta(np,nq), stat=ierr)
        if (ierr /= 0) then
+         call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Delta(np,nq))'
          stop -1
        endif
        
        allocate(Ltmp_p(np,block_size), stat=ierr)
        if (ierr /= 0) then
+         call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Ltmp_p(np,block_size))'
          stop -1
        endif
        
        allocate(Ltmp_q(nq,block_size), stat=ierr)
        if (ierr /= 0) then
+         call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Ltmp_q(nq,block_size))'
          stop -1
        endif
@@ -253,7 +263,7 @@ END_PROVIDER
        
        !$OMP BARRIER
        
-       !$OMP DO  SCHEDULE(guided)
+       !$OMP DO  SCHEDULE(dynamic)
        do m=1,nq
          
          call omp_set_lock(lock(m))
@@ -419,6 +429,7 @@ END_PROVIDER
      
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
      if (ierr /= 0) then
+       call print_memory_usage()
        print *,  irp_here, ': Allocation failed'
        stop -1
      endif
