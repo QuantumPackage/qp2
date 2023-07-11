@@ -33,8 +33,7 @@ END_PROVIDER
    double precision, parameter    :: dscale = 1.d0
    
    double precision, allocatable  :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
-   integer, allocatable           :: Lset(:), Dset(:), addr(:,:), LDmap(:), DLmap(:)
-   integer, allocatable           :: Lset_rev(:), Dset_rev(:)
+   integer, allocatable           :: Lset(:), Dset(:), addr(:,:)
    logical, allocatable           :: computed(:)
    
    integer                        :: i,j,k,m,p,q, qj, dj, p2, q2
@@ -46,8 +45,6 @@ END_PROVIDER
    
    double precision, external     :: ao_two_e_integral
    integer                        :: block_size, iblock, ierr
-   
-   integer(omp_lock_kind), allocatable :: lock(:)
    
    double precision               :: mem
    double precision, external     :: memory_of_double, memory_of_int
@@ -100,12 +97,8 @@ END_PROVIDER
      
      rank = 0
      
-     allocate( D(ndim), Lset(ndim), LDmap(ndim), DLmap(ndim), Dset(ndim) )
-     allocate( Lset_rev(ndim), Dset_rev(ndim), lock(ndim) )
+     allocate( D(ndim), Lset(ndim), Dset(ndim) )
      allocate( addr(3,ndim) )
-     do k=1,ndim
-       call omp_init_lock(lock(k))
-     enddo
      
      ! 1.
      k=0
@@ -139,12 +132,10 @@ END_PROVIDER
      
      ! 2.
      np=0
-     Lset_rev = 0
      do p=1,ndim
        if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
          np = np+1
          Lset(np) = p
-         Lset_rev(p) = np
        endif
      enddo
      
@@ -169,16 +160,10 @@ END_PROVIDER
          
          ! c.
          nq=0
-         LDmap = 0
-         DLmap = 0
-         Dset_rev = 0
          do p=1,np
            if ( D(Lset(p)) > Dmin ) then
              nq = nq+1
              Dset(nq) = Lset(p)
-             Dset_rev(Dset(nq)) = nq
-             LDmap(p) = nq
-             DLmap(nq) = p
            endif
          enddo
          
@@ -380,19 +365,13 @@ END_PROVIDER
        enddo
        
        np=0
-       Lset_rev = 0
        do p=1,ndim
          if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
            np = np+1
            Lset(np) = p
-           Lset_rev(p) = np
          endif
        enddo
        
-     enddo
-     
-     do k=1,ndim
-       call omp_destroy_lock(lock(k))
      enddo
      
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)

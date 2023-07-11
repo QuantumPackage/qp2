@@ -18,6 +18,13 @@ subroutine run_ccsd_space_orb
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
+  if (do_ao_cholesky) then
+    PROVIDE cholesky_mo_transp
+    FREE cholesky_ao
+  else
+    PROVIDE mo_two_e_integrals_in_map
+  endif
+
   det = psi_det(:,:,cc_ref)
   print*,'Reference determinant:'
   call print_det(det,N_int)
