@@ -501,18 +501,19 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   allocate(B1(nV,nV,block_size), tmpB1(nV,block_size,nV), tmp_cc2(cholesky_mo_num,nV))
   !$OMP DO
   do gam = 1, nV
+
+    do a=1,nV
+      do k=1,cholesky_mo_num
+        tmp_cc2(k,a) = cc_space_v_vv_chol(k,a,gam) - tmp_cc(k,a,gam)
+      enddo
+    enddo
+
     do iblock = 1, nV, block_size
 
         call dgemm('T', 'N', nV*min(block_size, nV-iblock+1), nV, cholesky_mo_num, &
                 -1.d0, tmp_cc(1,1,iblock), cholesky_mo_num, &
                 cc_space_v_vv_chol(1,1,gam), cholesky_mo_num, &
                 0.d0, tmpB1, nV*block_size)
-
-        do a=1,nV
-          do k=1,cholesky_mo_num
-            tmp_cc2(k,a) = cc_space_v_vv_chol(k,a,gam) - tmp_cc(k,a,gam)
-          enddo
-        enddo
 
         call dgemm('T','N', nV*min(block_size, nV-iblock+1), nV, cholesky_mo_num, 1.d0, &
           cc_space_v_vv_chol(1,1,iblock), cholesky_mo_num, &
