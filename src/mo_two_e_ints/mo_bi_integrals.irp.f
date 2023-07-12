@@ -479,9 +479,9 @@ subroutine add_integrals_to_map_cholesky
 
   !$OMP DO SCHEDULE(dynamic)
   do l=1,mo_num
-    call dgemm('T','N',mo_num*mo_num,mo_num,cholesky_ao_num,1.d0, &
-       cholesky_mo_transp, cholesky_ao_num, &
-       cholesky_mo_transp(1,1,l), cholesky_ao_num, 0.d0, &
+    call dgemm('T','N',mo_num*mo_num,mo_num,cholesky_mo_num,1.d0, &
+       cholesky_mo_transp, cholesky_mo_num, &
+       cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
        Vtmp, mo_num*mo_num)
 
     do k=1,l
@@ -1364,20 +1364,20 @@ END_PROVIDER
 
   if (do_ao_cholesky) then
     double precision, allocatable :: buffer(:,:)
-    allocate (buffer(cholesky_ao_num,mo_num))
-    do k=1,cholesky_ao_num
+    allocate (buffer(cholesky_mo_num,mo_num))
+    do k=1,cholesky_mo_num
       do i=1,mo_num
         buffer(k,i) = cholesky_mo_transp(k,i,i)
       enddo
     enddo
-    call dgemm('T','N',mo_num,mo_num,cholesky_ao_num,1.d0, &
-      buffer, cholesky_ao_num, buffer, cholesky_ao_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
     deallocate(buffer)
 
     do j=1,mo_num
       do i=1,mo_num
           mo_two_e_integrals_jj_exchange(i,j) = 0.d0
-          do k=1,cholesky_ao_num
+          do k=1,cholesky_mo_num
             mo_two_e_integrals_jj_exchange(i,j) = mo_two_e_integrals_jj_exchange(i,j) + &
                           cholesky_mo_transp(k,i,j)*cholesky_mo_transp(k,j,i)
           enddo

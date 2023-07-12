@@ -50,15 +50,15 @@ subroutine gen_v_space(n1,n2,n3,n4,list1,list2,list3,list4,v)
   if (do_ao_cholesky) then
     double precision, allocatable :: buffer(:,:,:,:)
     double precision, allocatable :: v1(:,:,:), v2(:,:,:)
-    allocate(v1(cholesky_ao_num,n1,n3), v2(cholesky_ao_num,n2,n4))
+    allocate(v1(cholesky_mo_num,n1,n3), v2(cholesky_mo_num,n2,n4))
     allocate(buffer(n1,n3,n2,n4))
 
-    call gen_v_space_chol(n1,n3,list1,list3,v1,cholesky_ao_num)
-    call gen_v_space_chol(n2,n4,list2,list4,v2,cholesky_ao_num)
+    call gen_v_space_chol(n1,n3,list1,list3,v1,cholesky_mo_num)
+    call gen_v_space_chol(n2,n4,list2,list4,v2,cholesky_mo_num)
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
-         v1, cholesky_ao_num, &
-         v2, cholesky_ao_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
+         v1, cholesky_mo_num, &
+         v2, cholesky_mo_num, 0.d0, buffer, n1*n3)
 
     deallocate(v1,v2)
 
@@ -119,7 +119,7 @@ subroutine gen_v_space_chol(n1,n3,list1,list3,v,ldv)
     idx3 = list3(i3)
     do i1=1,n1
       idx1 = list1(i1)
-      do k=1,cholesky_ao_num
+      do k=1,cholesky_mo_num
         v(k,i1,i3) = cholesky_mo_transp(k,idx1,idx3)
       enddo
     enddo
@@ -137,15 +137,15 @@ BEGIN_PROVIDER [double precision, cc_space_v, (mo_num,mo_num,mo_num,mo_num)]
     double precision, allocatable :: buffer(:,:,:)
     call set_multiple_levels_omp(.False.)
     !$OMP PARALLEL &
-    !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_ao_num) &
+    !$OMP SHARED(cc_space_v,mo_num,cholesky_mo_transp,cholesky_mo_num) &
     !$OMP PRIVATE(i1,i2,i3,i4,k,buffer)&
     !$OMP DEFAULT(NONE)
     allocate(buffer(mo_num,mo_num,mo_num))
     !$OMP DO
     do i4 = 1, mo_num
-      call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_ao_num, 1.d0, &
-           cholesky_mo_transp, cholesky_ao_num, &
-           cholesky_mo_transp(1,1,i4), cholesky_ao_num, 0.d0, buffer, mo_num*mo_num)
+      call dgemm('T','N', mo_num*mo_num, mo_num, cholesky_mo_num, 1.d0, &
+           cholesky_mo_transp, cholesky_mo_num, &
+           cholesky_mo_transp(1,1,i4), cholesky_mo_num, 0.d0, buffer, mo_num*mo_num)
       do i2 = 1, mo_num
         do i3 = 1, mo_num
           do i1 = 1, mo_num
@@ -203,9 +203,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_oooo, (cc_nOa, cc_nOa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
-         cc_space_v_oo_chol, cholesky_ao_num, &
-         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
+         cc_space_v_oo_chol, cholesky_mo_num, &
+         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -246,9 +246,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vooo, (cc_nVa, cc_nOa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
-         cc_space_v_vo_chol, cholesky_ao_num, &
-         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
+         cc_space_v_vo_chol, cholesky_mo_num, &
+         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -392,9 +392,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvoo, (cc_nVa, cc_nVa, cc_nOa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
-         cc_space_v_vo_chol, cholesky_ao_num, &
-         cc_space_v_vo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
+         cc_space_v_vo_chol, cholesky_mo_num, &
+         cc_space_v_vo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -435,9 +435,9 @@ BEGIN_PROVIDER [double precision, cc_space_v_vovo, (cc_nVa, cc_nOa, cc_nVa, cc_n
     double precision, allocatable :: buffer(:,:,:,:)
     allocate(buffer(n1,n3,n2,n4))
 
-    call dgemm('T','N', n1*n3, n2*n4, cholesky_ao_num, 1.d0, &
-         cc_space_v_vv_chol, cholesky_ao_num, &
-         cc_space_v_oo_chol, cholesky_ao_num, 0.d0, buffer, n1*n3)
+    call dgemm('T','N', n1*n3, n2*n4, cholesky_mo_num, 1.d0, &
+         cc_space_v_vv_chol, cholesky_mo_num, &
+         cc_space_v_oo_chol, cholesky_mo_num, 0.d0, buffer, n1*n3)
 
     !$OMP PARALLEL DO PRIVATE(i1,i2,i3,i4) COLLAPSE(2)
     do i4 = 1, n4
@@ -645,35 +645,35 @@ BEGIN_PROVIDER [double precision, cc_space_v_vvvv, (cc_nVa, cc_nVa, cc_nVa, cc_n
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, cc_space_v_vv_chol, (cholesky_ao_num, cc_nVa, cc_nVa)]
+BEGIN_PROVIDER [double precision, cc_space_v_vv_chol, (cholesky_mo_num, cc_nVa, cc_nVa)]
 
   implicit none
 
-  call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, cc_space_v_vv_chol, cholesky_ao_num)
+  call gen_v_space_chol(cc_nVa, cc_nVa, cc_list_vir, cc_list_vir, cc_space_v_vv_chol, cholesky_mo_num)
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, cc_space_v_vo_chol, (cholesky_ao_num, cc_nVa, cc_nOa)]
+BEGIN_PROVIDER [double precision, cc_space_v_vo_chol, (cholesky_mo_num, cc_nVa, cc_nOa)]
 
   implicit none
 
-  call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, cc_space_v_vo_chol, cholesky_ao_num)
+  call gen_v_space_chol(cc_nVa, cc_nOa, cc_list_vir, cc_list_occ, cc_space_v_vo_chol, cholesky_mo_num)
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, cc_space_v_ov_chol, (cholesky_ao_num, cc_nOa, cc_nVa)]
+BEGIN_PROVIDER [double precision, cc_space_v_ov_chol, (cholesky_mo_num, cc_nOa, cc_nVa)]
 
   implicit none
 
-  call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, cc_space_v_ov_chol, cholesky_ao_num)
+  call gen_v_space_chol(cc_nOa, cc_nVa, cc_list_occ, cc_list_vir, cc_space_v_ov_chol, cholesky_mo_num)
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_ao_num, cc_nOa, cc_nOa)]
+BEGIN_PROVIDER [double precision, cc_space_v_oo_chol, (cholesky_mo_num, cc_nOa, cc_nOa)]
 
   implicit none
 
-  call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_ao_num)
+  call gen_v_space_chol(cc_nOa, cc_nOa, cc_list_occ, cc_list_occ, cc_space_v_oo_chol, cholesky_mo_num)
 
 END_PROVIDER
 
