@@ -457,8 +457,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   integer                       :: u,v,i,j,beta,gam,a,b
   double precision              :: max_r2_local
 
-  ! Residual
-  !r2 = 0d0
+  call set_multiple_levels_omp(.False.)
 
   !$omp parallel &
   !$omp shared(nO,nV,r2,cc_space_v_oovv) &
