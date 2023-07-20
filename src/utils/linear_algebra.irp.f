@@ -1661,7 +1661,15 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
     ! Update i
     i = i + 1
   enddo
-  copy(i:) = 0.d0
+
+  ! To nullify the remaining elements that are below the threshold
+  if (i == sze) then
+    if (-copy(i) <= thresh) then
+      copy(i) = 0d0
+    endif
+  else
+    copy(i:) = 0.d0
+  endif
 
   !$OMP PARALLEL if (sze>10000) &
   !$OMP SHARED(m,sze,copy_sign,copy,key,A,ii,jj) &
