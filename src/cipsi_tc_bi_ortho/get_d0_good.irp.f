@@ -53,7 +53,7 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if (hij == (0.d0,0.d0)) cycle
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
-          mat_r(k, p1, p2) = mat_r(k, p1, p2) + coefs(k,1) * hij  ! HOTSPOT
+          mat_r(k, p1, p2) = mat_r(k, p1, p2) + coefs(k,2) * hij  ! HOTSPOT
         enddo
       end do
       !!!!!!!!!! <phi|H|alpha>
@@ -72,7 +72,7 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if (hji == (0.d0,0.d0)) cycle
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
-          mat_l(k, p1, p2) = mat_l(k, p1, p2) + coefs(k,2) * hji  ! HOTSPOT
+          mat_l(k, p1, p2) = mat_l(k, p1, p2) + coefs(k,1) * hji  ! HOTSPOT
         enddo
       end do
     end do
@@ -109,7 +109,7 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         end if
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
-          mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,1) * hij
+          mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
         enddo
       end do
 
@@ -128,7 +128,7 @@ subroutine get_d0_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         end if
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
-          mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,2) * hji
+          mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
         enddo
       end do
     end do
