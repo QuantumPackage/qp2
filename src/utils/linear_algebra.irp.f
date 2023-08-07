@@ -1565,7 +1565,7 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
   ! Remove tiny elements
   do j=1,n
     do i=1,m
-      if ( dabs(A(i,j) * amax) < thresh ) then
+      if ( (dabs(A(i,j) * amax) < thresh).or.(dabs(A(i,j)) < 1.d-99) ) then
          A(i,j) = 0.d0
       endif
     enddo
@@ -1661,7 +1661,15 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
     ! Update i
     i = i + 1
   enddo
-  copy(i:) = 0.d0
+
+  ! To nullify the remaining elements that are below the threshold
+  if (i == sze) then
+    if (-copy(i) <= thresh) then
+      copy(i) = 0d0
+    endif
+  else
+    copy(i:) = 0.d0
+  endif
 
   !$OMP PARALLEL if (sze>10000) &
   !$OMP SHARED(m,sze,copy_sign,copy,key,A,ii,jj) &

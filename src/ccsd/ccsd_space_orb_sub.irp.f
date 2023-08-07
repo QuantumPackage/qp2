@@ -9,7 +9,7 @@ subroutine run_ccsd_space_orb
   double precision :: uncorr_energy,energy, max_elem, max_r, max_r1, max_r2,ta,tb
   logical :: not_converged
 
-  double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:)
+  double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:), tau_x(:,:,:,:)
   double precision, allocatable :: t1(:,:), r1(:,:)
   double precision, allocatable :: H_oo(:,:), H_vv(:,:), H_vo(:,:)
 
@@ -18,7 +18,12 @@ subroutine run_ccsd_space_orb
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
-!  PROVIDE mo_two_e_integrals_in_map
+  if (do_ao_cholesky) then
+    PROVIDE cholesky_mo_transp
+    FREE cholesky_ao
+  else
+    PROVIDE mo_two_e_integrals_in_map
+  endif
 
   det = psi_det(:,:,cc_ref)
   print*,'Reference determinant:'
@@ -46,13 +51,39 @@ subroutine run_ccsd_space_orb
 
   allocate(t2(nO,nO,nV,nV), r2(nO,nO,nV,nV))
   allocate(tau(nO,nO,nV,nV))
+  allocate(tau_x(nO,nO,nV,nV))
   allocate(t1(nO,nV), r1(nO,nV))
   allocate(H_oo(nO,nO), H_vv(nV,nV), H_vo(nV,nO))
 
   if (cc_update_method == 'diis') then
-    allocate(all_err(nO*nV+nO*nO*nV*nV,cc_diis_depth), all_t(nO*nV+nO*nO*nV*nV,cc_diis_depth))
-    all_err = 0d0
-    all_t   = 0d0
+    double precision :: rss, diis_mem, extra_mem
+    double precision, external :: memory_of_double
+    diis_mem = 2.d0*memory_of_double(nO*nV)*(1.d0+nO*nV)
+    call resident_memory(rss)
+    do while (cc_diis_depth > 1)
+      if (rss + diis_mem * cc_diis_depth > qp_max_mem) then
+        cc_diis_depth = cc_diis_depth - 1
+      else
+        exit
+      endif
+    end do
+    if (cc_diis_depth <= 1) then
+      print *,  'Not enough memory for DIIS'
+      stop -1
+    endif
+    print *,  'DIIS size  ', cc_diis_depth
+
+    allocate(all_err(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth), all_t(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth))
+    !$OMP PARALLEL PRIVATE(i,j) DEFAULT(SHARED)
+    do j=1,cc_diis_depth
+      !$OMP DO
+      do i=1, size(all_err,1)
+        all_err(i,j) = 0d0
+        all_t(i,j)   = 0d0
+      enddo
+      !$OMP END DO NOWAIT
+    enddo
+    !$OMP END PARALLEL
   endif
 
   if (elec_alpha_num /= elec_beta_num) then
@@ -67,10 +98,11 @@ subroutine run_ccsd_space_orb
   call guess_t1(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_f_ov,t1)
   call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,t2)
   call update_tau_space(nO,nV,t1,t2,tau)
+  call update_tau_x_space(nO,nV,tau,tau_x)
   !print*,'hf_energy', hf_energy
   call det_energy(det,uncorr_energy)
   print*,'Det energy', uncorr_energy
-  call ccsd_energy_space(nO,nV,tau,t1,energy)
+  call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
   print*,'Guess energy', uncorr_energy+energy, energy
 
   nb_iter = 0
@@ -85,13 +117,23 @@ subroutine run_ccsd_space_orb
 
   do while (not_converged)
 
-    call compute_H_oo(nO,nV,t1,t2,tau,H_oo)
-    call compute_H_vv(nO,nV,t1,t2,tau,H_vv)
-    call compute_H_vo(nO,nV,t1,t2,H_vo)
-
     ! Residue
-    call compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
-    call compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+    if (do_ao_cholesky) then
+!    if (.False.) then
+      call compute_H_oo_chol(nO,nV,tau_x,H_oo)
+      call compute_H_vv_chol(nO,nV,tau_x,H_vv)
+      call compute_H_vo_chol(nO,nV,t1,H_vo)
+
+      call compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
+      call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+    else
+      call compute_H_oo(nO,nV,t1,t2,tau,H_oo)
+      call compute_H_vv(nO,nV,t1,t2,tau,H_vv)
+      call compute_H_vo(nO,nV,t1,t2,H_vo)
+
+      call compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
+      call compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+    endif
     max_r = max(max_r1,max_r2)
 
     ! Update
@@ -109,10 +151,11 @@ subroutine run_ccsd_space_orb
     endif
 
     call update_tau_space(nO,nV,t1,t2,tau)
+    call update_tau_x_space(nO,nV,tau,tau_x)
 
     ! Energy
-    call ccsd_energy_space(nO,nV,tau,t1,energy)
-    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,1pE10.2,A3,1pE10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
+    call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
+    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
 
     nb_iter = nb_iter + 1
     if (max_r < cc_thresh_conv .or. nb_iter > cc_max_iter) then
@@ -132,7 +175,7 @@ subroutine run_ccsd_space_orb
   print*,''
   write(*,'(A15,F18.12,A3)') ' E(CCSD)     = ', uncorr_energy+energy, ' Ha'
   write(*,'(A15,F18.12,A3)') ' Correlation = ', energy, ' Ha'
-  write(*,'(A15,1pE10.2,A3)')' Conv        = ', max_r
+  write(*,'(A15,ES10.2,A3)')' Conv        = ', max_r
   print*,''
 
   if (write_amplitudes) then
@@ -239,6 +282,51 @@ subroutine ccsd_energy_space(nO,nV,tau,t1,energy)
 
 end
 
+subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
+
+  implicit none
+
+  integer, intent(in)           :: nO, nV
+  double precision, intent(in)  :: tau_x(nO,nO,nV,nV)
+  double precision, intent(in)  :: t1(nO,nV)
+  double precision, intent(out) :: energy
+
+  ! internal
+  integer :: i,j,a,b
+  double precision :: e
+
+  energy = 0d0
+  !$omp parallel &
+  !$omp shared(nO,nV,energy,tau_x,t1,&
+  !$omp cc_space_f_vo,cc_space_v_oovv) &
+  !$omp private(i,j,a,b,e) &
+  !$omp default(none)
+  e = 0d0
+  !$omp do
+  do a = 1, nV
+    do i = 1, nO
+      e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
+    enddo
+  enddo
+  !$omp end do nowait
+  !$omp do
+  do b = 1, nV
+    do a = 1, nV
+      do j = 1, nO
+        do i = 1, nO
+          e = e + tau_x(i,j,a,b) * cc_space_v_oovv(i,j,a,b)
+       enddo
+      enddo
+    enddo
+  enddo
+  !$omp end do nowait
+  !$omp critical
+  energy = energy + e
+  !$omp end critical
+  !$omp end parallel
+
+end
+
 ! Tau
 
 subroutine update_tau_space(nO,nV,t1,t2,tau)
@@ -265,6 +353,39 @@ subroutine update_tau_space(nO,nV,t1,t2,tau)
       do j = 1, nO
         do i = 1, nO
           tau(i,j,a,b) = t2(i,j,a,b) + t1(i,a) * t1(j,b)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+end
+
+subroutine update_tau_x_space(nO,nV,tau,tau_x)
+
+  implicit none
+
+  ! in
+  integer, intent(in)           :: nO, nV
+  double precision, intent(in)  :: tau(nO,nO,nV,nV)
+
+  ! out
+  double precision, intent(out) :: tau_x(nO,nO,nV,nV)
+
+  ! internal
+  integer                       :: i,j,a,b
+
+  !$OMP PARALLEL &
+  !$OMP SHARED(nO,nV,tau,tau_x) &
+  !$OMP PRIVATE(i,j,a,b) &
+  !$OMP DEFAULT(NONE)
+  !$OMP DO
+  do b = 1, nV
+    do a = 1, nV
+      do j = 1, nO
+        do i = 1, nO
+          tau_x(i,j,a,b) = 2.d0*tau(i,j,a,b) - tau(i,j,b,a)
         enddo
       enddo
     enddo
@@ -449,25 +570,16 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !    enddo
   !  enddo
   !enddo
+
+  integer :: iblock, block_size, nVmax
   double precision, allocatable :: W_vvov(:,:,:,:), T_vvoo(:,:,:,:)
-  allocate(W_vvov(nV,nV,nO,nV), T_vvoo(nV,nV,nO,nO))
+  block_size = 8
+  allocate(W_vvov(nV,nV,nO,block_size), T_vvoo(nV,nV,nO,nO))
 
   !$omp parallel &
   !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau) &
   !$omp private(b,beta,i,a) &
   !$omp default(none)
-  !$omp do
-  do beta = 1, nV
-    do i = 1, nO
-      do b = 1, nV
-        do a = 1, nV
-          W_vvov(a,b,i,beta) = 2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do nowait
-
   !$omp do
   do u = 1, nO
     do i = 1, nO
@@ -481,10 +593,30 @@ subroutine compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   !$omp end do nowait
   !$omp end parallel
 
-  call dgemm('T','N',nO,nV,nO*nV*nV, &
-             1d0, T_vvoo, size(T_vvoo,1) * size(T_vvoo,2) * size(T_vvoo,3), &
-                  W_vvov, size(W_vvov,1) * size(W_vvov,2) * size(W_vvov,3), &
-             1d0, r1    , size(r1,1))
+  do iblock = 1, nV, block_size
+    nVmax = min(block_size,nV-iblock+1)
+    !$omp parallel &
+    !$omp shared(nO,nV,cc_space_v_vvov,W_vvov,T_vvoo,tau,nVmax,iblock) &
+    !$omp private(b,i,a,beta) &
+    !$omp default(none)
+    !$omp do collapse(2)
+    do beta = iblock, iblock + nVmax - 1
+      do i = 1, nO
+        do b = 1, nV
+          do a = 1, nV
+            W_vvov(a,b,i,beta-iblock+1) = 2d0 * cc_space_v_vvov(a,b,i,beta) - cc_space_v_vvov(b,a,i,beta)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end do nowait
+    !$omp end parallel
+
+    call dgemm('T','N',nO,nVmax,nO*nV*nV, &
+             1d0, T_vvoo, nV*nV*nO, &
+                  W_vvov, nO*nV*nV, &
+             1d0, r1(1,iblock), nO)
+  enddo
 
   deallocate(W_vvov,T_vvoo)
 
@@ -839,6 +971,10 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
 
 !  allocate(B1(nV,nV,nV,nV))
 !  call compute_B1(nO,nV,t1,t2,B1)
+!  call dgemm('N','N',nO*nO,nV*nV,nV*nV, &
+!              1d0, tau, size(tau,1) * size(tau,2), &
+!                   B1 , size(B1_gam,1) * size(B1_gam,2), &
+!              1d0, r2, size(r2,1) * size(r2,2))
   allocate(B1_gam(nV,nV,nV))
   do gam=1,nV
     call compute_B1_gam(nO,nV,t1,t2,B1_gam,gam)
@@ -1323,7 +1459,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
   !enddo
 
   !$omp parallel &
-  !$omp shared(nO,nV,K1,X_ovov,Z_ovov,t2) &
+  !$omp shared(nO,nV,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,v,gam,beta,i,a) &
   !$omp default(none)
   !$omp do
@@ -1343,7 +1479,7 @@ subroutine compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
     do v = 1, nO
       do a = 1, nV
         do i = 1, nO
-          Z_ovov(i,a,v,beta) = t2(i,v,beta,a)
+          Y_ovov(i,a,v,beta) = t2(i,v,beta,a)
         enddo
       enddo
     enddo
@@ -1547,21 +1683,29 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
 !  enddo
 
   double precision, allocatable :: X_vvvo(:,:,:), Y_vvvv(:,:,:)
+
   allocate(X_vvvo(nV,nV,nO), Y_vvvv(nV,nV,nV))
 !  ! B1(a,b,beta,gam) = cc_space_v_vvvv(a,b,beta,gam)
+
+  call gen_v_space(cc_nVa,cc_nVa,cc_nVa,1, &
+     cc_list_vir,cc_list_vir,cc_list_vir,cc_list_vir(gam), B1)
+
+
   !$omp parallel &
   !$omp shared(nO,nV,B1,cc_space_v_vvvv,cc_space_v_vvov,X_vvvo,gam) &
   !$omp private(a,b,beta) &
   !$omp default(none)
-  !$omp do
-    do beta = 1, nV
-      do b = 1, nV
-        do a = 1, nV
-          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
-        enddo
-      enddo
-    enddo
-  !$omp end do nowait
+
+!  !$omp do
+!    do beta = 1, nV
+!      do b = 1, nV
+!        do a = 1, nV
+!          B1(a,b,beta) = cc_space_v_vvvv(a,b,beta,gam)
+!        enddo
+!      enddo
+!    enddo
+!  !$omp end do nowait
+
   do i = 1, nO
     !$omp do
       do b = 1, nV
@@ -1569,7 +1713,7 @@ subroutine compute_B1_gam(nO,nV,t1,t2,B1,gam)
           X_vvvo(a,b,i) = cc_space_v_vvov(a,b,i,gam)
         enddo
       enddo
-    !$omp end do nowait
+    !$omp end do
   enddo
   !$omp end parallel
 

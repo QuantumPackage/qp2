@@ -13,14 +13,14 @@
  if (do_ao_cholesky) then
 
     double precision, allocatable :: buffer_jj(:,:), buffer(:,:,:)
-    allocate(buffer_jj(cholesky_ao_num,mo_num), buffer(mo_num,mo_num,mo_num))
+    allocate(buffer_jj(cholesky_mo_num,mo_num), buffer(mo_num,mo_num,mo_num))
     do j=1,mo_num
       buffer_jj(:,j) = cholesky_mo_transp(:,j,j)
     enddo
 
-    call dgemm('T','N', mo_num*mo_num,mo_num,cholesky_ao_num, 1.d0, &
-        cholesky_mo_transp, cholesky_ao_num, &
-        buffer_jj, cholesky_ao_num, 0.d0, &
+    call dgemm('T','N', mo_num*mo_num,mo_num,cholesky_mo_num, 1.d0, &
+        cholesky_mo_transp, cholesky_mo_num, &
+        buffer_jj, cholesky_mo_num, 0.d0, &
         buffer, mo_num*mo_num)
 
     do k = 1, mo_num
@@ -36,9 +36,9 @@
 
     do j = 1, mo_num
 
-      call dgemm('T','N',mo_num,mo_num,cholesky_ao_num, 1.d0, &
-        cholesky_mo_transp(1,1,j), cholesky_ao_num, &
-        cholesky_mo_transp(1,1,j), cholesky_ao_num, 0.d0, &
+      call dgemm('T','N',mo_num,mo_num,cholesky_mo_num, 1.d0, &
+        cholesky_mo_transp(1,1,j), cholesky_mo_num, &
+        cholesky_mo_transp(1,1,j), cholesky_mo_num, 0.d0, &
         buffer_jj, mo_num)
 
       do k=1,mo_num

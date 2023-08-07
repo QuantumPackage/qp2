@@ -101,7 +101,7 @@ subroutine ccsd_par_t_space_v3(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
 
   !$OMP PARALLEL PRIVATE(a,b,c,e) DEFAULT(SHARED)
   e = 0d0
-  !$OMP DO SCHEDULE(dynamic)
+  !$OMP DO SCHEDULE(guided)
   do a = 1, nV
     do b = a+1, nV
       do c = b+1, nV

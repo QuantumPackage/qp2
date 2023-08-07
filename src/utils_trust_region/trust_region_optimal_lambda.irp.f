@@ -336,7 +336,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
         d_1 = d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! first derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
         d_2 = d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! second derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
       endif
-      !write(*,'(a,E12.5,a,E12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2  
+      !write(*,'(a,ES12.5,a,ES12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2  
 
       ! Newton's step
       y = -(1d0/DABS(d_2))*d_1
@@ -345,7 +345,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       if (DABS(y) > alpha) then
         y = alpha * (y/DABS(y)) ! preservation of the sign of y
       endif
-      !write(*,'(a,E12.5)') ' Step length: ', y
+      !write(*,'(a,ES12.5)') ' Step length: ', y
 
       ! Predicted value of (||x(lambda)||^2 - delta^2)^2, Taylor series
       model = prev_f_R + d_1 * y + 0.5d0 * d_2 * y**2    
@@ -414,7 +414,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       else 
         alpha = 0.25d0 * alpha
       endif
-      !write(*,'(a,E12.5)') ' New trust length alpha: ', alpha
+      !write(*,'(a,ES12.5)') ' New trust length alpha: ', alpha
 
       ! cancellaion of the step if rho < 0.1
       if (rho_2 < thresh_rho_2) then !0.1d0) then

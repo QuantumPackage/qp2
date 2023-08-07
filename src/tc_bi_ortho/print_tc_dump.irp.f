@@ -62,7 +62,7 @@ subroutine KMat_tilde_dump()
         do j = 1, mo_num
           do i = 1, mo_num
             ! TCHint convention
-            write(33, '(E15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_two_e_chemist(j,i,l,k), i, j, k, l
+            write(33, '(ES15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_two_e_chemist(j,i,l,k), i, j, k, l
           enddo
         enddo
       enddo
@@ -71,7 +71,7 @@ subroutine KMat_tilde_dump()
     do j = 1, mo_num
       do i = 1, mo_num
         ! TCHint convention
-        write(33, '(E15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_one_e(i,j), i, j, 0, 0
+        write(33, '(ES15.7, 4X, 4(I4, 2X))') mo_bi_ortho_tc_one_e(i,j), i, j, 0, 0
       enddo
     enddo
 
@@ -128,7 +128,7 @@ subroutine ERI_dump()
       do k = 1, mo_num
         do j = 1, mo_num
           do i = 1, mo_num
-            write(33, '(4(I4, 2X), 4X, E15.7)') i, j, k, l, a1(i,j,k,l)
+            write(33, '(4(I4, 2X), 4X, ES15.7)') i, j, k, l, a1(i,j,k,l)
           enddo
         enddo
       enddo
@@ -167,8 +167,8 @@ subroutine LMat_tilde_dump()
                 !write(33, '(6(I4, 2X), 4X, E15.7)') i, j, k, l, m, n, integral
                 ! TCHint convention
                 if(dabs(integral).gt.1d-10) then
-                  write(33, '(E15.7, 4X, 6(I4, 2X))') -integral/3.d0, i, j, k, l, m, n
-                  !write(33, '(E15.7, 4X, 6(I4, 2X))') -integral/3.d0, l, m, n, i, j, k
+                  write(33, '(ES15.7, 4X, 6(I4, 2X))') -integral/3.d0, i, j, k, l, m, n
+                  !write(33, '(ES15.7, 4X, 6(I4, 2X))') -integral/3.d0, l, m, n, i, j, k
                 endif
               enddo
             enddo

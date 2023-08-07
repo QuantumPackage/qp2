@@ -1,49 +1,51 @@
-BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_ao_num) ]
+BEGIN_PROVIDER [ integer, cholesky_mo_num ]
  implicit none
  BEGIN_DOC
- ! Cholesky vectors in MO basis
+ ! Number of Cholesky vectors in MO basis
  END_DOC
-
- integer :: k
-
- call set_multiple_levels_omp(.False.)
- print *, 'AO->MO Transformation of Cholesky vectors'
- !$OMP PARALLEL DO PRIVATE(k)
- do k=1,cholesky_ao_num
-  call ao_to_mo(cholesky_ao(1,1,k),ao_num,cholesky_mo(1,1,k),mo_num)
- enddo
- !$OMP END PARALLEL DO
- print *, ''
-
+ cholesky_mo_num = cholesky_ao_num
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_ao_num, mo_num, mo_num) ]
+BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num) ]
  implicit none
  BEGIN_DOC
  ! Cholesky vectors in MO basis
  END_DOC
 
- integer :: i,j,k
- double precision, allocatable :: buffer(:,:)
-
- print *, 'AO->MO Transformation of Cholesky vectors  .'
+ integer :: k, i, j
 
  call set_multiple_levels_omp(.False.)
- !$OMP PARALLEL PRIVATE(i,j,k,buffer)
- allocate(buffer(mo_num,mo_num))
- !$OMP DO SCHEDULE(static)
- do k=1,cholesky_ao_num
-  call ao_to_mo(cholesky_ao(1,1,k),ao_num,buffer,mo_num)
+ !$OMP PARALLEL DO PRIVATE(k)
+ do k=1,cholesky_mo_num
   do j=1,mo_num
     do i=1,mo_num
-      cholesky_mo_transp(k,i,j) = buffer(i,j)
+      cholesky_mo(i,j,k) = cholesky_mo_transp(k,i,j)
     enddo
   enddo
  enddo
- !$OMP END DO
- deallocate(buffer)
- !$OMP END PARALLEL
- print *, ''
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis
+ END_DOC
+
+ double precision, allocatable :: X(:,:,:)
+ integer :: ierr
+ print *, 'AO->MO Transformation of Cholesky vectors'
+
+ allocate(X(mo_num,cholesky_mo_num,ao_num), stat=ierr)
+ if (ierr /= 0) then
+   print *, irp_here, ': Allocation failed'
+ endif
+ call dgemm('T','N', ao_num*cholesky_mo_num, mo_num, ao_num, 1.d0, &
+     cholesky_ao, ao_num, mo_coef, ao_num, 0.d0, X, ao_num*cholesky_mo_num)
+ call dgemm('T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
+     X, ao_num, mo_coef, ao_num, 0.d0, cholesky_mo_transp, cholesky_mo_num*mo_num)
+ deallocate(X)
 
 END_PROVIDER
 
