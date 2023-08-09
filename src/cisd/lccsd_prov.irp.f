@@ -31,7 +31,9 @@
   print*,'ecorr = ',ecorr
   Dress_jj(1) = 0.d0
   do i = 2, N_det
-    Dress_jj(i) = ecorr
+    if(ecorr + H_jj(i) .gt. H_jj(1))then
+     Dress_jj(i) = ecorr
+    endif
   enddo
   eafter = lccsd_energies(1)
   converged = (dabs(eafter - ebefore).lt.thresh)
