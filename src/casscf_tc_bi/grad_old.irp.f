@@ -38,15 +38,19 @@
    enddo
   enddo
  enddo
-!  do indx=1,nMonoEx
-!    ihole=excit(1,indx)
-!    ipart=excit(2,indx)
-!    call calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
-!    do ll = 0, 3
-!     gradvec_detail_left_old (ll,indx)=res_l(ll)
-!     gradvec_detail_right_old(ll,indx)=res_r(ll)
-!    enddo
-!  end do
+
+ do tt = 1, n_act_orb
+  ihole = list_act(tt)
+  do aa = 1, n_virt_orb
+   ipart = list_virt(aa)
+   indx = mat_idx_a_v(tt,aa) 
+   call calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
+   do ll = 0, 3
+    gradvec_detail_left_old (ll,indx)=res_l(ll)
+    gradvec_detail_right_old(ll,indx)=res_r(ll)
+   enddo
+  enddo
+ enddo
   
   real*8                         :: norm_grad_left, norm_grad_right
   norm_grad_left=0.d0
