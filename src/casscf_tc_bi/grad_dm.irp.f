@@ -24,8 +24,7 @@
     do a=1,n_virt_orb
       indx = mat_idx_c_v(i,a) 
       aa=list_virt(a)
-      call gradvec_tc_ia(ii,aa,res_l)
-      call gradvec_tc_ia(aa,ii,res_r)
+      call gradvec_tc_ia(ii,aa,res_l,res_r)
       do fff = 0,3
        gradvec_tc_l(fff,indx)=res_l(fff)
        gradvec_tc_r(fff,indx)=res_r(fff)
@@ -41,17 +40,21 @@
   end do
 END_PROVIDER 
 
-subroutine gradvec_tc_ia(i,a,res)
+subroutine gradvec_tc_ia(i,a,res_l, res_r)
  implicit none
  BEGIN_DOC
 ! doubly occupied --> virtual TC gradient 
 !
-! Corresponds to <X0|H E_i^a|Phi_0>
+! Corresponds to res_r = <X0|H E_i^a|Phi_0>, 
+!
+!                res_l = <X0|E_a^i H|Phi_0>
  END_DOC
  integer, intent(in) :: i,a
- double precision, intent(out) :: res(0:3)
- res = 0.d0
- res(1) = -2 * mo_bi_ortho_tc_one_e(i,a)
+ double precision, intent(out) :: res_l(0:3), res_r(0:3)
+ res_l = 0.d0
+ res_r = 0.d0
+ res_l(1) = -2 * mo_bi_ortho_tc_one_e(a,i)
+ res_r(1) = -2 * mo_bi_ortho_tc_one_e(i,a)
  
 end
 

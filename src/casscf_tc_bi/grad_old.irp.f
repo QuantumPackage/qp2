@@ -69,45 +69,51 @@ END_PROVIDER
 
 subroutine calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
   BEGIN_DOC
-  ! eq 18 of Siegbahn et al, Physica Scripta 1980
-  ! we calculate res_r  = <Phi| H^tc E_pq | Psi>, and res_r = <Phi| E_qp H^tc | Psi>
-  ! q=hole, p=particle
-  ! res_l(0) =   total matrix element
-  ! res_l(1) =   one-electron part 
-  ! res_l(2) =   two-electron part 
-  ! res_l(3) = three-electron part 
+  ! Computes the gradient with respect to orbital rotation BRUT FORCE
+  ! 
+  ! res_l = <Chi| E_qp H^tc | Phi>
+  !
+  ! res_r = <Chi| H^tc E_pq | Phi>
+  !
+  ! q=hole, p=particle. NOTE that on res_l it is E_qp and on res_r it is E_pq 
+  ! 
+  ! res_l(0) =   total matrix element, res_l(1) =   one-electron part,
+  ! 
+  ! res_l(2) =   two-electron part,  res_l(3) = three-electron part 
+  ! 
   END_DOC
   implicit none
   integer, intent(in)            :: ihole,ipart
   double precision, intent(out)  :: res_l(0:3), res_r(0:3)
   integer                        :: mu,iii,ispin,ierr,nu,istate,ll
   integer(bit_kind), allocatable :: det_mu(:,:),det_mu_ex(:,:)
-  real*8                         :: i_H_chi_array(0:3,N_states),i_H_phi_array(0:3,N_states),phase
+  real*8                         :: chi_H_mu_ex_array(0:3,N_states),mu_ex_H_phi_array(0:3,N_states),phase
   allocate(det_mu(N_int,2))
   allocate(det_mu_ex(N_int,2))
   
   res_l=0.D0
   res_r=0.D0
   
-!  print*,'in i_h_psi'
-!  print*,ihole,ipart
   do mu=1,n_det
-    ! get the string of the determinant
+    ! get the string of the determinant |mu>
     call det_extract(det_mu,mu,N_int)
     do ispin=1,2
-      ! do the monoexcitation on it
+      ! do the monoexcitation on it: |det_mu_ex> = a^dagger_{p,ispin} a_{q,ispin} |mu> 
       call det_copy(det_mu,det_mu_ex,N_int)
       call do_signed_mono_excitation(det_mu,det_mu_ex,nu             &
           ,ihole,ipart,ispin,phase,ierr)
+      ! |det_mu_ex> = a^dagger_{p,ispin} a_{q,ispin} |mu> 
       if (ierr.eq.1) then
-
         call i_H_tc_psi_phi(det_mu_ex,psi_det,psi_l_coef_bi_ortho,psi_r_coef_bi_ortho,N_int & 
-            ,N_det,psi_det_size,N_states,i_H_chi_array,i_H_phi_array)
-!        print*,i_H_chi_array(1,1),i_H_phi_array(1,1)
+            ,N_det,psi_det_size,N_states,chi_H_mu_ex_array,mu_ex_H_phi_array)
+        ! chi_H_mu_ex_array = <Chi|H E_qp |mu >
+        ! mu_ex_H_phi_array = <mu |E_qp H |Phi>
         do istate=1,N_states
-         do ll = 0,3
-          res_l(ll)+=i_H_phi_array(ll,istate)*psi_l_coef_bi_ortho(mu,istate)*phase
-          res_r(ll)+=i_H_chi_array(ll,istate)*psi_r_coef_bi_ortho(mu,istate)*phase
+         do ll = 0,3 ! loop over the body components (1e,2e,3e)
+          !res_l =  \sum_mu c_mu^l <mu|E_qp H |Phi> = <Chi|E_qp H |Phi>
+          res_l(ll)+= mu_ex_H_phi_array(ll,istate)*psi_l_coef_bi_ortho(mu,istate)*phase 
+          !res_r =  \sum_mu c_mu^r <Chi|H E_qp |mu> = <Chi|H E_qp |Phi>
+          res_r(ll)+= chi_H_mu_ex_array(ll,istate)*psi_r_coef_bi_ortho(mu,istate)*phase
          enddo
         end do
       end if
