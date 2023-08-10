@@ -93,17 +93,17 @@ subroutine gradvec_tc_it(i,t,res_l, res_r)
  END_DOC
  integer, intent(in) :: i,t
  double precision, intent(out) :: res_l(0:3),res_r(0:3)
- integer :: rr,r,ss,s,m
+ integer :: rr,r,ss,s,m,mm
  double precision :: dm
  res_r = 0.d0
- do m = 1, mo_num
-  res_r(1) += mo_bi_ortho_tc_one_e(i,m) * tc_transition_matrix_mo(t,m,1,1) & 
-             -mo_bi_ortho_tc_one_e(m,t) * tc_transition_matrix_mo(m,i,1,1)
- enddo
  res_l = 0.d0
- do m = 1, mo_num
-  res_l(1) += mo_bi_ortho_tc_one_e(t,m) * tc_transition_matrix_mo(i,m,1,1) & 
-             -mo_bi_ortho_tc_one_e(m,i) * tc_transition_matrix_mo(m,t,1,1)
+ res_r(1)  += -2.d0 * mo_bi_ortho_tc_one_e(i,t) 
+ res_l(1)  +=  2.D0 * mo_bi_ortho_tc_one_e(t,i) 
+
+ do rr = 1, n_act_orb
+  r = list_act(rr)
+  res_r(1) +=  mo_bi_ortho_tc_one_e(i,r) * tc_transition_matrix_mo(t,r,1,1)   
+  res_l(1) += -mo_bi_ortho_tc_one_e(r,i) * tc_transition_matrix_mo(r,t,1,1)
  enddo
  
 end
@@ -123,16 +123,10 @@ subroutine gradvec_tc_ta(t,a,res_l, res_r)
  double precision :: dm
  res_r = 0.d0
  res_l = 0.d0
-! do rr = 1, n_act_orb
-!  r = list_act(rr) 
-!  res_l(1) +=  mo_bi_ortho_tc_one_e(a,r) * tc_transition_matrix_mo(t,r,1,1)
-!  res_r(1) += -mo_bi_ortho_tc_one_e(r,a) * tc_transition_matrix_mo(r,t,1,1)
-! enddo
- do m = 1, mo_num
-  res_r(1) += mo_bi_ortho_tc_one_e(t,m) * tc_transition_matrix_mo(a,m,1,1) &
-             -mo_bi_ortho_tc_one_e(m,a) * tc_transition_matrix_mo(m,t,1,1)
-  res_l(1) += mo_bi_ortho_tc_one_e(a,m) * tc_transition_matrix_mo(t,m,1,1) &
-             -mo_bi_ortho_tc_one_e(m,t) * tc_transition_matrix_mo(m,a,1,1)
+ do rr = 1, n_act_orb
+  r = list_act(rr) 
+  res_l(1) +=  mo_bi_ortho_tc_one_e(a,r) * tc_transition_matrix_mo(t,r,1,1)
+  res_r(1) += -mo_bi_ortho_tc_one_e(r,a) * tc_transition_matrix_mo(r,t,1,1)
  enddo
  
 end
