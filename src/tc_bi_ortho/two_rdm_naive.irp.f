@@ -30,7 +30,6 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
     if(degree == 2)then
      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm,mo_num,contrib)
     else if(degree==1)then
-!     cycle
      ! occupation of the determinant psi_det(j)
      call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
  
@@ -48,13 +47,12 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
       m = occ(mm,s2)
       h2 = m 
       p2 = m 
-      if(h2.le.h1)cycle
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm,mo_num,contrib)
      enddo
     endif
    else if(degree == 0)then
+!    cycle
     contrib = psi_l_coef_bi_ortho(i,1) * psi_r_coef_bi_ortho(j,1) *  state_average_weight(1)
-!    print*,'contrib',contrib
     do istate = 2, N_states
      contrib += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) *  state_average_weight(istate)
     enddo
@@ -115,18 +113,12 @@ subroutine update_tc_rdm(h1,p1,h2,p2,s1,s2,array,sze,contrib)
  else ! same spin double excitation 
    array(p1,h1,p2,h2) += contrib
    ! exchange 
-   ! exchanging the holes 
-   array(p2,h1,p1,h2) -= contrib
    ! exchanging the particles 
+   array(p2,h1,p1,h2) -= contrib
+   ! exchanging the 
    array(p1,h2,p2,h1) -= contrib
-
    ! permutation for particle symmetry
    array(p2,h2,p1,h1) += contrib
-   ! exchange 
-   ! exchanging the holes 
-   array(p1,h2,p2,h1) -= contrib
-   ! exchanging the particles 
-   array(p2,h1,p1,h2) -= contrib
  endif
 
 end

@@ -35,6 +35,10 @@ subroutine  test
     do p2 = 1, mo_num
      integral = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
      rdm = tc_two_rdm(p1,h1,p2,h2)
+!     if(dabs(rdm).gt.1.d-10)then
+!      print*,h1,p1,h2,p2
+!      print*,rdm,integral,rdm*integral
+!     endif
      accu += integral * rdm
     enddo
    enddo
@@ -42,19 +46,28 @@ subroutine  test
  enddo
  accu *= 0.5d0
  print*,'accu = ',accu
-! print*,tc_two_rdm(1,1,1,1),mo_bi_ortho_tc_two_e(1,1,1,1)
+! print*,mo_bi_ortho_tc_two_e(2,15,2,1)
+! print*,mo_bi_ortho_tc_two_e(15,2,2,1)
+! print*,mo_bi_ortho_tc_two_e(2,1,2,15)
+! print*,mo_bi_ortho_tc_two_e(2,1,15,2)
  ref = 0.d0
  do i = 1, N_det
   do j = 1, N_det
-!   if(i.ne.j)cycle
+!   if(i.eq.j)cycle
    call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i), psi_det(1,1,j), N_int, hmono, htwoe, hthree, htot)
    do istate = 1,N_states
-!  print*,'i,j',i,j,psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * state_average_weight(istate) * htwoe 
+!  print*,'i,j',i,j
+!  print*,psi_l_coef_bi_ortho(i,istate) , psi_r_coef_bi_ortho(j,istate) , htwoe 
+!  print*,psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * htwoe 
+!   if(i.ne.j)then
 !  print*,psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) ,  htwoe 
+!  print*,psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * htwoe 
+!   endif
     ref += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * state_average_weight(istate) * htwoe 
    enddo
   enddo
  enddo
  print*,' ref = ',ref 
+ print*,'delta= ',ref-accu
 
 end
