@@ -79,12 +79,12 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(ma == 1) then ! if particle spins are (alpha,alpha,alpha,beta), then puti is beta and putj is alpha
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,1) * hij
+            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,2) * hij
           enddo
         else            ! if particle spins are (beta,beta,beta,alpha), then puti is alpha and putj is beta
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,1) * hij
+            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
           enddo
         end if
       end do
@@ -103,12 +103,12 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if(ma == 1) then ! if particle spins are (alpha,alpha,alpha,beta), then puti is beta and putj is alpha
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,2) * hji
+            mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,1) * hji
           enddo
         else            ! if particle spins are (beta,beta,beta,alpha), then puti is alpha and putj is beta
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,2) * hji
+            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         end if
       end do
@@ -135,7 +135,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
             hij = hij * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
             !DIR$ LOOP COUNT AVG(4)
             do k=1,N_states
-              mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,1) * hij
+              mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
             enddo
           endif
         end do
@@ -154,7 +154,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
             hji = hji * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
             !DIR$ LOOP COUNT AVG(4)
             do k=1,N_states
-              mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,2) * hji
+              mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
             enddo
           endif
         end do
@@ -189,7 +189,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
           hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, puti, putj) = mat_r(k, puti, putj) +coefs(k,1) * hij
+            mat_r(k, puti, putj) = mat_r(k, puti, putj) +coefs(k,2) * hij
           enddo
         end do
       end do
@@ -210,7 +210,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
           hji = hji * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, puti, putj) = mat_l(k, puti, putj) +coefs(k,2) * hji
+            mat_l(k, puti, putj) = mat_l(k, puti, putj) +coefs(k,1) * hji
           enddo
         end do
       end do
@@ -239,12 +239,12 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if (puti < putj) then
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,1) * hij
+            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
           enddo
         else
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,1) * hij
+            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,2) * hij
           enddo
         endif
       end do
@@ -262,12 +262,12 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         if (puti < putj) then
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,2) * hji
+            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         else
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,2) * hji
+            mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,1) * hji
           enddo
         endif
       end do
@@ -290,7 +290,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
           hij = hij * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,1) * hij
+            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
           enddo
         end if
       !! <phi|H|alpha>
@@ -299,7 +299,7 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
           hji = hji * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
-            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,2) * hji
+            mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         end if
       end if

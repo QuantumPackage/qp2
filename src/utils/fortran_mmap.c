@@ -9,7 +9,6 @@
 
 void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
 {
-    int i;
     int fd;
     int result;
     void* map;

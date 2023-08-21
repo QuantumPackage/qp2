@@ -140,7 +140,11 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
  ! compute the overlap between the left and rescaled right
   call build_s_matrix(ao_num, mo_num, mo_r_coef_new, mo_r_coef_new, ao_overlap, s_mat)
 ! call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
-  call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+  if(n_core_orb.ne.0)then
+   call give_degen_full_listcore(fock_diag, mo_num, list_core, n_core_orb, thr_deg, list_degen, n_degen_list)
+  else
+   call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+  endif
   print *, ' fock_matrix_mo'
   do i = 1, mo_num
     print *, i, fock_diag(i), angle_left_right(i)
@@ -152,6 +156,8 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 !  n_degen = ilast - ifirst +1
 
     n_degen = list_degen(i,0)
+    if(n_degen .ge. 1000)n_degen = 1 ! convention for core orbitals
+     
     if(n_degen .eq. 1) cycle
 
     allocate(stmp(n_degen,n_degen), smat2(n_degen,n_degen))
@@ -279,7 +285,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   allocate(new_angles(mo_num))
   new_angles(1:mo_num) = dabs(angle_left_right(1:mo_num))
   max_angle = maxval(new_angles)
-  good_angles = max_angle.lt.45.d0
+  good_angles = max_angle.lt.thresh_lr_angle
   print *, ' max_angle = ', max_angle
   deallocate(new_angles)
 
@@ -397,11 +403,11 @@ subroutine print_energy_and_mos(good_angles)
   print *, ' TC SCF energy gradient = ', grad_non_hermit
   print *, ' Max angle Left/right   = ', max_angle_left_right
 
-  if(max_angle_left_right .lt. 45.d0) then
+  if(max_angle_left_right .lt. thresh_lr_angle) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
     good_angles = .true.
-  else if(max_angle_left_right .gt. 45.d0 .and. max_angle_left_right .lt. 75.d0) then
-    print *, ' Maximum angle between 45 and 75 degrees, this is not the best for TC-CI calculations ...'
+  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
+    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
     good_angles = .false.
   else if(max_angle_left_right .gt. 75.d0) then
     print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'

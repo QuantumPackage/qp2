@@ -328,6 +328,11 @@ end
   TOUCH psi_r_coef_bi_ortho
   call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
   deallocate(buffer)
+!  print*,'After diag'
+!  do i = 1, N_det! old version
+!   print*,'i',i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
+!   call debug_det(psi_det(1,1,i),N_int) 
+!  enddo 
 
 END_PROVIDER 
 

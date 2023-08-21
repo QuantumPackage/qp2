@@ -1024,56 +1024,26 @@ subroutine compute_A1_chol(nO,nV,t1,t2,tau,A1)
 
   integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta
 
-  double precision, allocatable :: X_vooo(:,:,:,:), Y_oooo(:,:,:,:)
-  allocate(X_vooo(nV,nO,nO,nO), Y_oooo(nO,nO,nO,nO))
+  double precision, allocatable :: Y_oooo(:,:,:,:)
+  allocate(Y_oooo(nO,nO,nO,nO))
 
   ! A1(u,v,i,j) = cc_space_v_oooo(u,v,i,j)
-  !$omp parallel &
-  !$omp shared(nO,nV,A1,cc_space_v_oooo,cc_space_v_ovoo,X_vooo) &
-  !$omp private(u,v,i,j) &
-  !$omp default(none)
-  !$omp do collapse(2)
-  do j = 1, nO
-    do i = 1, nO
-      do v = 1, nO
-        do u = 1, nO
-          A1(u,v,i,j) = cc_space_v_oooo(u,v,i,j)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do nowait
-
   ! A1(u,v,i,j) += cc_space_v_ovoo(u,a,i,j) * t1(v,a) &
-
-  !$omp do collapse(2)
-  do j = 1, nO
-    do i = 1, nO
-      do u = 1, nO
-        do a = 1, nV
-          X_vooo(a,u,i,j) = cc_space_v_ovoo(u,a,i,j)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
 
   call dgemm('N','N', nO, nO*nO*nO, nV, &
              1d0, t1    , size(t1,1), &
-                  X_vooo, size(X_vooo,1), &
+                  cc_space_v_vooo, size(cc_space_v_vooo,1), &
              0d0, Y_oooo, size(Y_oooo,1))
 
   !$omp parallel &
-  !$omp shared(nO,nV,A1,Y_oooo) &
   !$omp private(u,v,i,j) &
-  !$omp default(none)
+  !$omp default(shared)
   !$omp do collapse(2)
   do j = 1, nO
     do i = 1, nO
       do v = 1, nO
         do u = 1, nO
-          A1(u,v,i,j) = A1(u,v,i,j) + Y_oooo(v,u,i,j)
+          A1(u,v,i,j) = cc_space_v_oooo(u,v,i,j) + Y_oooo(v,u,j,i) + Y_oooo(u,v,i,j)
         enddo
       enddo
     enddo
@@ -1081,13 +1051,7 @@ subroutine compute_A1_chol(nO,nV,t1,t2,tau,A1)
   !$omp end do
   !$omp end parallel
 
-  deallocate(X_vooo,Y_oooo)
-
-  ! A1(u,v,i,j) += cc_space_v_vooo(a,v,i,j) * t1(u,a)
-  call dgemm('N','N', nO, nO*nO*nO, nV, &
-             1d0, t1      , size(t1,1), &
-                  cc_space_v_vooo, size(cc_space_v_vooo,1), &
-             1d0, A1      , size(A1,1))
+  deallocate(Y_oooo)
 
   ! A1(u,v,i,j) += cc_space_v_vvoo(a,b,i,j) * tau(u,v,a,b)
   call dgemm('N','N', nO*nO, nO*nO, nV*nV, &
