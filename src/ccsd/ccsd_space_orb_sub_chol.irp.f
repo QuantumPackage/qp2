@@ -244,7 +244,7 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   allocate(W_oovo(nO,nO,nV,nO))
 
   !$omp parallel &
-  !$omp shared(nO,nV,cc_space_v_vooo,W_oovo) &
+  !$omp shared(nO,nV,cc_space_v_oovo,W_oovo) &
   !$omp private(u,a,i,j) &
   !$omp default(none)
   do u = 1, nO
