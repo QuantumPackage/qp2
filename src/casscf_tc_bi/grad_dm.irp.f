@@ -93,6 +93,10 @@ subroutine gradvec_tc_ia(i,a,res_l, res_r)
    tc_transition_matrix_mo(r,t,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(r,i,t,a) - mo_bi_ortho_tc_two_e(i,r,t,a))  & 
   +tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(t,i,r,a) - mo_bi_ortho_tc_two_e(i,t,r,a))  &
    )
+   res_l(2) += -0.5d0 * (                                                                                    &
+   tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(t,a,r,i) - mo_bi_ortho_tc_two_e(t,a,i,r))  & 
+  +tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(r,a,t,i) - mo_bi_ortho_tc_two_e(r,a,i,t))  &
+   )
   enddo
  enddo
 end
