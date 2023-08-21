@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 # Computes the error on the excitation energy of a CIPSI run.
 
 def student(p,df):
