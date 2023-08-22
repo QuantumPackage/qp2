@@ -79,7 +79,26 @@ subroutine gradvec_tc_ia(i,a,res_l, res_r)
  res_r = 0.d0
  res_l(1) = -2 * mo_bi_ortho_tc_one_e(a,i)
  res_r(1) = -2 * mo_bi_ortho_tc_one_e(i,a)
- 
+ integer :: j,t,r,jj,tt,rr
+ do jj = 1, n_core_inact_orb
+  j = list_core_inact(jj)
+  res_r(2) += -2.d0 * ( 2.d0 * mo_bi_ortho_tc_two_e(j,i,j,a) - mo_bi_ortho_tc_two_e(i,j,j,a))
+  res_l(2) += -2.d0 * ( 2.d0 * mo_bi_ortho_tc_two_e(j,a,j,i) - mo_bi_ortho_tc_two_e(j,a,i,j))
+ enddo
+ do tt = 1, n_act_orb
+  t = list_act(tt)
+  do rr = 1, n_act_orb
+   r = list_act(rr)
+   res_r(2) += -0.5d0 * (                                                                                    &
+   tc_transition_matrix_mo(r,t,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(r,i,t,a) - mo_bi_ortho_tc_two_e(i,r,t,a))  & 
+  +tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(t,i,r,a) - mo_bi_ortho_tc_two_e(i,t,r,a))  &
+   )
+   res_l(2) += -0.5d0 * (                                                                                    &
+   tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(t,a,r,i) - mo_bi_ortho_tc_two_e(t,a,i,r))  & 
+  +tc_transition_matrix_mo(t,r,1,1) *(2.d0 * mo_bi_ortho_tc_two_e(r,a,t,i) - mo_bi_ortho_tc_two_e(r,a,i,t))  &
+   )
+  enddo
+ enddo
 end
 
 subroutine gradvec_tc_it(i,t,res_l, res_r)
@@ -93,8 +112,7 @@ subroutine gradvec_tc_it(i,t,res_l, res_r)
  END_DOC
  integer, intent(in) :: i,t
  double precision, intent(out) :: res_l(0:3),res_r(0:3)
- integer :: rr,r,ss,s,m,mm
- double precision :: dm
+ integer :: rr,r,j,jj,u,uu,v,vv
  res_r = 0.d0
  res_l = 0.d0
  res_r(1)  += -2.d0 * mo_bi_ortho_tc_one_e(i,t) 
@@ -104,6 +122,30 @@ subroutine gradvec_tc_it(i,t,res_l, res_r)
   r = list_act(rr)
   res_r(1) +=  mo_bi_ortho_tc_one_e(i,r) * tc_transition_matrix_mo(t,r,1,1)   
   res_l(1) += -mo_bi_ortho_tc_one_e(r,i) * tc_transition_matrix_mo(r,t,1,1)
+ enddo
+
+ do jj = 1, n_core_inact_orb
+  j = list_core_inact(jj)
+  res_r(2) += 2.d0 * (2d0 * mo_bi_ortho_tc_two_e(i,j,t,j) - mo_bi_ortho_tc_two_e(j,i,t,j)) 
+  do rr = 1, n_act_orb
+   r = list_act(rr)
+   res_r(2) += tc_transition_matrix_mo(t,r,1,1) * (2.d0 * mo_bi_ortho_tc_two_e(i,j,r,j) - mo_bi_ortho_tc_two_e(i,j,j,r)) 
+  enddo
+ enddo
+ do rr = 1, n_act_orb
+  r = list_act(rr)
+  do uu = 1, n_act_orb
+   u = list_act(uu)
+   res_r(2) += -0.5d0 * (  & 
+    tc_transition_matrix_mo(u,r,1,1) * (2.d0 * mo_bi_ortho_tc_two_e(u,i,r,t) - mo_bi_ortho_tc_two_e(u,i,t,r))  &
+  + tc_transition_matrix_mo(r,u,1,1) * (2.d0 * mo_bi_ortho_tc_two_e(i,r,t,u) - mo_bi_ortho_tc_two_e(i,r,u,t))  &
+    )
+   do vv = 1, n_act_orb
+    v = list_act(vv)
+    res_r(2) +=  0.5d0 * (  & 
+    mo_bi_ortho_tc_two_e(i,r,v,u) * tc_two_rdm(t,r,v,u) + mo_bi_ortho_tc_two_e(r,i,v,u) * tc_two_rdm(r,t,v,u) )
+   enddo
+  enddo
  enddo
  
 end
