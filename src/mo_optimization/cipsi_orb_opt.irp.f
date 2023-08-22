@@ -15,7 +15,7 @@ subroutine run_optimization
   logical :: not_converged
   character (len=100) :: filename
 
-  PROVIDE psi_det psi_coef mo_two_e_integrals_in_map
+  PROVIDE psi_det psi_coef mo_two_e_integrals_in_map ao_pseudo_integrals
 
   not_converged = .True.
   nb_iter = 0
