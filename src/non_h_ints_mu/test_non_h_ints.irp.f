@@ -14,7 +14,9 @@ program test_non_h
   !call routine_grad_squared()
   !call routine_fit()
   
-  call test_ipp()
+  !call test_ipp()
+  
+  call test_v_ij_u_cst_mu_j1b_an()
 end
 
 ! ---
@@ -545,9 +547,43 @@ end subroutine grad1_aos_ik_grad1_esquare
 
 ! ---
 
+subroutine test_v_ij_u_cst_mu_j1b_an()
 
+  implicit none
+  integer          :: i, j, ipoint
+  double precision :: I_old, I_new
+  double precision :: norm, accu, thr, diff
 
+  PROVIDE v_ij_u_cst_mu_j1b_an_old v_ij_u_cst_mu_j1b_an
 
+  thr  = 1d-12
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
+
+        I_old = v_ij_u_cst_mu_j1b_an_old(j,i,ipoint)
+        I_new = v_ij_u_cst_mu_j1b_an    (j,i,ipoint)
+
+        diff = dabs(I_new-I_old)
+        if(diff .gt. thr) then
+          print *, ' problem on:', j, i, ipoint
+          print *, ' old value :', I_old
+          print *, ' new value :', I_new
+          stop
+        endif
+
+        accu += diff
+        norm += dabs(I_old)
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy(%) = ', 100.d0 * accu / norm
+
+  return
+end subroutine test_v_ij_u_cst_mu_j1b_an()
 
 
 
