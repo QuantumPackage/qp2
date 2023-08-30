@@ -54,7 +54,10 @@ program test_ints
 !!PROVIDE TC_HF_energy VARTC_HF_energy
 !!print *, '    TC_HF_energy = ',    TC_HF_energy
 !!print *, ' VARTC_HF_energy = ', VARTC_HF_energy
- call test_old_ints
+! call test_old_ints
+
+  call test_fock_3e_uhf_mo_cs()
+
 end
 
 ! ---
@@ -1096,3 +1099,44 @@ subroutine test_int2_grad1_u12_ao_test
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 end
+
+! ---
+
+subroutine test_fock_3e_uhf_mo_cs()
+
+  implicit none
+  integer          :: i, j
+  double precision :: I_old, I_new
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  PROVIDE fock_3e_uhf_mo_cs fock_3e_uhf_mo_cs_old
+
+  thr_ih   = 1d-10
+  norm     = 0.d0
+  diff_tot = 0.d0
+
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      I_old = fock_3e_uhf_mo_cs_old(j,i)
+      I_new = fock_3e_uhf_mo_cs    (j,i)
+
+      diff = dabs(I_old - I_new)
+      if(diff .gt. thr_ih) then
+        print *, ' problem on ', j, i
+        print *, ' old value = ', I_old
+        print *, ' new value = ', I_new
+        stop
+      endif
+
+      norm     += dabs(I_old)
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
+
+  return
+end subroutine test_fock_3e_uhf_mo_cs
+
+
