@@ -39,11 +39,13 @@
   enddo
  enddo
 
+! print*,'old grad'
  do tt = 1, n_act_orb
   ihole = list_act(tt)
   do aa = 1, n_virt_orb
    ipart = list_virt(aa)
    indx = mat_idx_a_v(tt,aa) 
+!   print*,indx,tt,aa
    call calc_grad_elem_h_tc(ihole,ipart,res_l, res_r)
    do ll = 0, 3
     gradvec_detail_left_old (ll,indx)=res_l(ll)
