@@ -777,11 +777,9 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer                       :: a, b, i, j, ipoint, o
-  double precision              :: I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia
+  integer                       :: a, b, i, j, ipoint
   double precision              :: loc_1, loc_2, loc_3, loc_4
   double precision              :: ti, tf
-  double precision, allocatable :: tmp(:,:)
   double precision, allocatable :: Okappa(:), Jkappa(:,:), Obarkappa(:), Jbarkappa(:,:)
   double precision, allocatable :: tmp_omp_d1(:), tmp_omp_d2(:,:)
   double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:)
@@ -792,9 +790,6 @@ END_PROVIDER
 
   print *, ' Providing fock_3e_uhf_mo_a and fock_3e_uhf_mo_b ...'
   call wall_time(ti)
-
-  o = elec_beta_num + 1
-  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, I_bij_aij)
 
   PROVIDE fock_3e_uhf_mo_cs
   fock_3e_uhf_mo_a = fock_3e_uhf_mo_cs
@@ -871,13 +866,14 @@ END_PROVIDER
 
     loc_1 = -2.d0 * Okappa   (ipoint) 
     loc_2 = -2.d0 * Obarkappa(ipoint) 
+    loc_3 =         Obarkappa(ipoint) 
 
-    tmp_1(ipoint,1) = loc_1 * Jbarkappa(ipoint,1) + loc_2 * Jkappa(ipoint,1)
-    tmp_1(ipoint,2) = loc_1 * Jbarkappa(ipoint,2) + loc_2 * Jkappa(ipoint,2)
-    tmp_1(ipoint,3) = loc_1 * Jbarkappa(ipoint,3) + loc_2 * Jkappa(ipoint,3)
+    tmp_1(ipoint,1) = (loc_1 - loc_3) * Jbarkappa(ipoint,1) + loc_2 * Jkappa(ipoint,1)
+    tmp_1(ipoint,2) = (loc_1 - loc_3) * Jbarkappa(ipoint,2) + loc_2 * Jkappa(ipoint,2)
+    tmp_1(ipoint,3) = (loc_1 - loc_3) * Jbarkappa(ipoint,3) + loc_2 * Jkappa(ipoint,3)
 
     tmp_1(ipoint,4) = Obarkappa(ipoint)
-    tmp_1(ipoint,5) = -loc_1
+    tmp_1(ipoint,5) = loc_3 - loc_1
   enddo
 
 
@@ -889,8 +885,8 @@ END_PROVIDER
   !$OMP         int2_grad1_u12_bimo_t, tmp_1)
 
   allocate(tmp_omp_d2(n_points_final_grid,3))
-  tmp_omp_d2 = 0.d0
 
+  tmp_omp_d2 = 0.d0
   !$OMP DO COLLAPSE(2)
   do i = 1, elec_beta_num
     do j = elec_beta_num+1, elec_alpha_num
@@ -906,12 +902,34 @@ END_PROVIDER
     enddo
   enddo
   !$OMP END DO NOWAIT
-
   !$OMP CRITICAL
   do ipoint = 1, n_points_final_grid
-    tmp_1(ipoint,1) +=  tmp_omp_d2(ipoint,1) 
-    tmp_1(ipoint,2) +=  tmp_omp_d2(ipoint,2) 
-    tmp_1(ipoint,3) +=  tmp_omp_d2(ipoint,3) 
+    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1) 
+    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2) 
+    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3) 
+  enddo
+  !$OMP END CRITICAL
+
+  tmp_omp_d2 = 0.d0
+  !$OMP DO COLLAPSE(2)
+  do i = elec_beta_num+1, elec_alpha_num
+    do j = elec_beta_num+1, elec_alpha_num
+      do ipoint = 1, n_points_final_grid
+
+        loc_1 = mos_l_in_r_array_transp(ipoint,j) * mos_r_in_r_array_transp(ipoint,i) 
+
+        tmp_omp_d2(ipoint,1) += loc_1 * int2_grad1_u12_bimo_t(ipoint,1,i,j)
+        tmp_omp_d2(ipoint,2) += loc_1 * int2_grad1_u12_bimo_t(ipoint,2,i,j)
+        tmp_omp_d2(ipoint,3) += loc_1 * int2_grad1_u12_bimo_t(ipoint,3,i,j)
+      enddo
+    enddo
+  enddo
+  !$OMP END DO NOWAIT
+  !$OMP CRITICAL
+  do ipoint = 1, n_points_final_grid
+    tmp_1(ipoint,1) += tmp_omp_d2(ipoint,1) 
+    tmp_1(ipoint,2) += tmp_omp_d2(ipoint,2) 
+    tmp_1(ipoint,3) += tmp_omp_d2(ipoint,3) 
   enddo
   !$OMP END CRITICAL
 
@@ -1001,10 +1019,11 @@ END_PROVIDER
 
       tmp_3(ipoint,1,b) = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,b)
 
-      loc_1 = -2.d0 * mos_r_in_r_array_transp(ipoint,b)
-      tmp_4(ipoint,1,b) = loc_1 * ( Jbarkappa(ipoint,1) * Jkappa(ipoint,1) &
-                                  + Jbarkappa(ipoint,2) * Jkappa(ipoint,2) &
-                                  + Jbarkappa(ipoint,3) * Jkappa(ipoint,3) )
+      loc_1 = -2.0d0 * mos_r_in_r_array_transp(ipoint,b)
+
+      tmp_4(ipoint,1,b) = loc_1 * ( Jbarkappa(ipoint,1) * (Jkappa(ipoint,1) + 0.25d0 * Jbarkappa(ipoint,1)) &
+                                  + Jbarkappa(ipoint,2) * (Jkappa(ipoint,2) + 0.25d0 * Jbarkappa(ipoint,2)) &
+                                  + Jbarkappa(ipoint,3) * (Jkappa(ipoint,3) + 0.25d0 * Jbarkappa(ipoint,3)) )
 
       tmp_4(ipoint,8,b) = mos_r_in_r_array_transp(ipoint,b)
     enddo
@@ -1055,16 +1074,22 @@ END_PROVIDER
         tmp_3(ipoint,5,b) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,1,b,i)
         tmp_3(ipoint,6,b) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,2,b,i)
         tmp_3(ipoint,7,b) -= loc_1 * int2_grad1_u12_bimo_t(ipoint,3,b,i)
-        tmp_3(ipoint,8,b) += loc_3 * ( Jkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
-                                     + Jkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
-                                     + Jkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
+
+        tmp_3(ipoint,8,b) += loc_3 * ( (Jkappa(ipoint,1) + 0.5d0 * Jbarkappa(ipoint,1)) * int2_grad1_u12_bimo_t(ipoint,1,b,i) &
+                                     + (Jkappa(ipoint,2) + 0.5d0 * Jbarkappa(ipoint,2)) * int2_grad1_u12_bimo_t(ipoint,2,b,i) &
+                                     + (Jkappa(ipoint,3) + 0.5d0 * Jbarkappa(ipoint,3)) * int2_grad1_u12_bimo_t(ipoint,3,b,i) )
                                                                                                        
+        tmp_4(ipoint,1,b) += loc_4 * ( (Jkappa(ipoint,1) + 0.5d0 * Jbarkappa(ipoint,1)) * int2_grad1_u12_bimo_t(ipoint,1,i,b) &
+                                     + (Jkappa(ipoint,2) + 0.5d0 * Jbarkappa(ipoint,2)) * int2_grad1_u12_bimo_t(ipoint,2,i,b) &
+                                     + (Jkappa(ipoint,3) + 0.5d0 * Jbarkappa(ipoint,3)) * int2_grad1_u12_bimo_t(ipoint,3,i,b) )
+
         tmp_4(ipoint,2,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,1,i,b)
         tmp_4(ipoint,3,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,2,i,b)
         tmp_4(ipoint,4,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,3,i,b)
-        tmp_4(ipoint,1,b) += loc_4 * ( Jkappa(ipoint,1) * int2_grad1_u12_bimo_t(ipoint,1,i,b) &
-                                     + Jkappa(ipoint,2) * int2_grad1_u12_bimo_t(ipoint,2,i,b) &
-                                     + Jkappa(ipoint,3) * int2_grad1_u12_bimo_t(ipoint,3,i,b) )
+
+        tmp_4(ipoint,5,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,1,i,b)
+        tmp_4(ipoint,6,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,2,i,b)
+        tmp_4(ipoint,7,b) += loc_2 * int2_grad1_u12_bimo_t(ipoint,3,i,b)
       enddo
     enddo
   enddo
@@ -1080,6 +1105,7 @@ END_PROVIDER
   !$OMP         tmp_3, tmp_4)
   !$OMP DO
   do b = 1, mo_num
+
     do i = 1, elec_beta_num
       do j = elec_beta_num+1, elec_alpha_num
         do ipoint = 1, n_points_final_grid
@@ -1095,6 +1121,7 @@ END_PROVIDER
           tmp_4(ipoint,1,b) -= loc_3 * ( int2_grad1_u12_bimo_t(ipoint,1,i,j) * int2_grad1_u12_bimo_t(ipoint,1,j,b) &
                                        + int2_grad1_u12_bimo_t(ipoint,2,i,j) * int2_grad1_u12_bimo_t(ipoint,2,j,b) &
                                        + int2_grad1_u12_bimo_t(ipoint,3,i,j) * int2_grad1_u12_bimo_t(ipoint,3,j,b) )
+
           tmp_4(ipoint,1,b) += loc_2 * ( int2_grad1_u12_bimo_t(ipoint,1,i,j) * int2_grad1_u12_bimo_t(ipoint,1,j,i) &
                                        + int2_grad1_u12_bimo_t(ipoint,2,i,j) * int2_grad1_u12_bimo_t(ipoint,2,j,i) &
                                        + int2_grad1_u12_bimo_t(ipoint,3,i,j) * int2_grad1_u12_bimo_t(ipoint,3,j,i) )
@@ -1112,6 +1139,29 @@ END_PROVIDER
         enddo
       enddo
     enddo
+
+    do i = elec_beta_num+1, elec_alpha_num
+      do j = elec_beta_num+1, elec_alpha_num
+        do ipoint = 1, n_points_final_grid
+
+          loc_1 = final_weight_at_r_vector(ipoint) * mos_l_in_r_array_transp(ipoint,j)
+          loc_2 = 0.5d0 * mos_r_in_r_array_transp(ipoint,b)
+          loc_3 = mos_r_in_r_array_transp(ipoint,i)
+
+          tmp_3(ipoint,8,b) -= loc_1 * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,j) &
+                                       + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,j) &
+                                       + int2_grad1_u12_bimo_t(ipoint,3,b,i) * int2_grad1_u12_bimo_t(ipoint,3,i,j) )
+
+          tmp_4(ipoint,1,b) += loc_2 * ( int2_grad1_u12_bimo_t(ipoint,1,i,j) * int2_grad1_u12_bimo_t(ipoint,1,j,i) &
+                                       + int2_grad1_u12_bimo_t(ipoint,2,i,j) * int2_grad1_u12_bimo_t(ipoint,2,j,i) &
+                                       + int2_grad1_u12_bimo_t(ipoint,3,i,j) * int2_grad1_u12_bimo_t(ipoint,3,j,i) )
+
+          tmp_4(ipoint,1,b) -= loc_3 * ( int2_grad1_u12_bimo_t(ipoint,1,i,j) * int2_grad1_u12_bimo_t(ipoint,1,j,b) &
+                                       + int2_grad1_u12_bimo_t(ipoint,2,i,j) * int2_grad1_u12_bimo_t(ipoint,2,j,b) &
+                                       + int2_grad1_u12_bimo_t(ipoint,3,i,j) * int2_grad1_u12_bimo_t(ipoint,3,j,b) )
+        enddo
+      enddo
+    enddo
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
@@ -1125,54 +1175,6 @@ END_PROVIDER
 
   deallocate(tmp_3, tmp_4)
   deallocate(Jkappa, Okappa)
-
-  ! ---
-
-  !$OMP PARALLEL DEFAULT (NONE)                                                                     &
-  !$OMP PRIVATE (a, b, i, j, I_bij_aij, I_bij_ija, I_bij_jai, I_bij_aji, I_bij_iaj, I_bij_jia, tmp) &
-  !$OMP SHARED  (mo_num, o, elec_alpha_num, elec_beta_num, fock_3e_uhf_mo_a)
-
-  allocate(tmp(mo_num,mo_num))
-  tmp = 0.d0
-
-  !$OMP DO
-  do a = 1, mo_num
-    do b = 1, mo_num
-
-      do j = o, elec_alpha_num
-        do i = o, elec_alpha_num
-
-          call give_integrals_3_body_bi_ort(b, i, j, a, i, j, I_bij_aij)
-          call give_integrals_3_body_bi_ort(b, i, j, i, j, a, I_bij_ija)
-          call give_integrals_3_body_bi_ort(b, i, j, j, a, i, I_bij_jai)
-          call give_integrals_3_body_bi_ort(b, i, j, a, j, i, I_bij_aji)
-          call give_integrals_3_body_bi_ort(b, i, j, i, a, j, I_bij_iaj)
-          call give_integrals_3_body_bi_ort(b, i, j, j, i, a, I_bij_jia)
-
-          tmp(b,a) -= 0.5d0 * ( I_bij_aij &
-                              + I_bij_ija &
-                              + I_bij_jai &
-                              - I_bij_aji &
-                              - I_bij_iaj &
-                              - I_bij_jia )
-
-        enddo
-      enddo
-
-    enddo
-  enddo
-  !$OMP END DO NOWAIT
-
-  !$OMP CRITICAL
-  do a = 1, mo_num
-    do b = 1, mo_num
-      fock_3e_uhf_mo_a(b,a) += tmp(b,a)
-    enddo
-  enddo
-  !$OMP END CRITICAL
-
-  deallocate(tmp)
-  !$OMP END PARALLEL
 
   call wall_time(tf)
   print *, ' Wall time for fock_3e_uhf_mo_a =', tf - ti
