@@ -34,7 +34,7 @@ BEGIN_PROVIDER [double precision, fock_a_tot_3e_bi_orth, (mo_num, mo_num)]
   enddo
 
   !call wall_time(t1)
-  !print*, ' Wall time for fock_a_tot_3e_bi_orth =', t1-t0 
+  !print*, ' Wall time for fock_a_tot_3e_bi_orth =', t1 - t0 
 
 END_PROVIDER 
 
