@@ -227,6 +227,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
 
     call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
                           , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
+
     if(three_body_h_tc) then
       PROVIDE fock_3e_uhf_mo_b
       Fock_matrix_tc_mo_beta += fock_3e_uhf_mo_b

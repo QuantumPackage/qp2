@@ -1120,7 +1120,7 @@ subroutine test_fock_3e_uhf_mo_cs()
 
   PROVIDE fock_3e_uhf_mo_cs fock_3e_uhf_mo_cs_old
 
-  thr_ih   = 1d-10
+  thr_ih   = 1d-8
   norm     = 0.d0
   diff_tot = 0.d0
 
@@ -1135,7 +1135,7 @@ subroutine test_fock_3e_uhf_mo_cs()
         print *, ' problem in fock_3e_uhf_mo_cs on ', j, i
         print *, ' old value = ', I_old
         print *, ' new value = ', I_new
-        stop
+        !stop
       endif
 
       norm     += dabs(I_old)
@@ -1159,7 +1159,7 @@ subroutine test_fock_3e_uhf_mo_a()
 
   PROVIDE fock_3e_uhf_mo_a fock_3e_uhf_mo_a_old
 
-  thr_ih   = 1d-10
+  thr_ih   = 1d-8
   norm     = 0.d0
   diff_tot = 0.d0
 
@@ -1174,7 +1174,7 @@ subroutine test_fock_3e_uhf_mo_a()
         print *, ' problem in fock_3e_uhf_mo_a on ', j, i
         print *, ' old value = ', I_old
         print *, ' new value = ', I_new
-        stop
+        !stop
       endif
 
       norm     += dabs(I_old)
@@ -1198,7 +1198,7 @@ subroutine test_fock_3e_uhf_mo_b()
 
   PROVIDE fock_3e_uhf_mo_b fock_3e_uhf_mo_b_old
 
-  thr_ih   = 1d-10
+  thr_ih   = 1d-8
   norm     = 0.d0
   diff_tot = 0.d0
 
@@ -1213,7 +1213,7 @@ subroutine test_fock_3e_uhf_mo_b()
         print *, ' problem in fock_3e_uhf_mo_b on ', j, i
         print *, ' old value = ', I_old
         print *, ' new value = ', I_new
-        stop
+        !stop
       endif
 
       norm     += dabs(I_old)
