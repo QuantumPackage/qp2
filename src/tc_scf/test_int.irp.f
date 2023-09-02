@@ -58,6 +58,7 @@ program test_ints
 
   call test_fock_3e_uhf_mo_cs()
   call test_fock_3e_uhf_mo_a()
+  call test_fock_3e_uhf_mo_b()
 
 end
 
