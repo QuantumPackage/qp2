@@ -159,25 +159,48 @@ BEGIN_PROVIDER [double precision, ao_two_e_coul, (ao_num, ao_num, ao_num, ao_num
   !
   END_DOC
 
-  integer                    :: i, j, k, l
-  double precision           :: integral
-  double precision, external :: get_ao_two_e_integral
+  integer                       :: i, j, k, l
+  double precision              :: integral
+  double precision, allocatable :: tmp(:)
+  double precision, external    :: get_ao_two_e_integral
 
   PROVIDE ao_integrals_map
 
+  !$OMP PARALLEL DEFAULT(NONE)                          &
+  !$OMP SHARED(ao_num, ao_two_e_coul, ao_integrals_map) &
+  !$OMP PRIVATE(i, j, k, l)
+  !$OMP DO
   do j = 1, ao_num
     do l = 1, ao_num
       do i = 1, ao_num
         do k = 1, ao_num
-
           !  < 1:k, 2:l | 1:i, 2:j > 
-          integral = get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
-
-          ao_two_e_coul(k,i,l,j) = integral
+          ao_two_e_coul(k,i,l,j) = get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
         enddo
       enddo
     enddo
   enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+
+! TODO
+!  allocate(tmp(ao_num))
+!
+!  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,l,j,k,tmp)
+!  do j = 1, ao_num
+!    do l = 1, ao_num
+!      do i = 1, ao_num
+!        call get_ao_two_e_integrals(i, l, l, ao_num, tmp(1))
+!        do k = 1, ao_num
+!          ao_two_e_coul(k,i,l,j) = tmp(k)
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END PARALLEL DO
+!
+!  deallocate(tmp)
 
 END_PROVIDER 
 
