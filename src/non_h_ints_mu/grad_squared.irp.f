@@ -425,7 +425,6 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
       ! an additional term is added here directly instead of 
       ! being added in int2_grad1_u12_square_ao for performance
-      ! note that the factor
 
       PROVIDE int2_u2_j1b2
 
@@ -465,25 +464,8 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
     ! ---
 
     deallocate(b_mat)
-
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
 
-   !!$OMP PARALLEL             &
-   !!$OMP DEFAULT (NONE)       &
-   !!$OMP PRIVATE (i, j, k, l) &
-   !!$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
-   !!$OMP DO SCHEDULE (static)
-   ! do j = 1, ao_num
-   !   do l = 1, ao_num
-   !     do i = 1, ao_num
-   !       do k = 1, ao_num
-   !         tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
-   !       enddo
-   !     enddo
-   !   enddo
-   ! enddo
-   !!$OMP END DO
-   !!$OMP END PARALLEL
   endif
 
   if(write_tc_integ.and.mpi_master) then
