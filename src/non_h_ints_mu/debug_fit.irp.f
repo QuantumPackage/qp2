@@ -13,16 +13,26 @@ program debug_fit
 
   PROVIDE mu_erf j1b_pen
 
+  if(j1b_type .ge. 100) then
+    my_extra_grid_becke  = .True.
+    PROVIDE tc_grid2_a tc_grid2_r
+    my_n_pt_r_extra_grid = tc_grid2_r
+    my_n_pt_a_extra_grid = tc_grid2_a
+    touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
+  endif
+
   !call test_j1b_nucl()
   !call test_grad_j1b_nucl()
   !call test_lapl_j1b_nucl()
 
   !call test_list_b2()
-  call test_list_b3()
+  !call test_list_b3()
 
   !call test_fit_u()
   !call test_fit_u2()
   !call test_fit_ugradu()
+
+  call test_grad1_u12_withsq_num()
 
 end
 
@@ -640,6 +650,71 @@ subroutine test_fit_u2()
 
   return
 end subroutine test_fit_u2
+
+! ---
+
+subroutine test_grad1_u12_withsq_num()
+
+  implicit none
+  integer                       :: ipoint, jpoint, m
+  double precision              :: acc_ij, acc_tot, eps_ij, i_exc, i_num, normalz
+  double precision, allocatable :: tmp_grad1_u12_squared(:,:), tmp_grad1_u12(:,:,:)
+
+  print*, ' test_grad1_u12_withsq_num ...'
+
+  PROVIDE grad1_u12_num grad1_u12_squared_num
+
+  allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_points_final_grid))
+  allocate(tmp_grad1_u12(n_points_extra_final_grid,n_points_final_grid,3))
+
+  eps_ij  = 1d-7
+  acc_tot = 0.d0
+  normalz = 0.d0
+
+  do ipoint = 1, n_points_final_grid
+
+    call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,ipoint,1) &
+                                                                                           , tmp_grad1_u12(1,ipoint,2) &
+                                                                                           , tmp_grad1_u12(1,ipoint,3) &
+                                                                                           , tmp_grad1_u12_squared(1,ipoint))
+    do jpoint = 1, n_points_extra_final_grid
+
+      i_exc  = grad1_u12_squared_num(jpoint,ipoint) 
+      i_num  = tmp_grad1_u12_squared(jpoint,ipoint)
+      acc_ij = dabs(i_exc - i_num)
+      if(acc_ij .gt. eps_ij) then
+        print *, ' problem in grad1_u12_squared_num on', ipoint, jpoint
+        print *, ' analyt = ', i_exc
+        print *, ' numeri = ', i_num
+        print *, ' diff   = ', acc_ij
+        stop
+      endif
+      acc_tot += acc_ij
+      normalz += dabs(i_num)
+
+      do m = 1, 3
+        i_exc  = grad1_u12_num(jpoint,ipoint,m) 
+        i_num  = tmp_grad1_u12(jpoint,ipoint,m)
+        acc_ij = dabs(i_exc - i_num)
+        if(acc_ij .gt. eps_ij) then
+          print *, ' problem in grad1_u12_num on', ipoint, jpoint, m
+          print *, ' analyt = ', i_exc
+          print *, ' numeri = ', i_num
+          print *, ' diff   = ', acc_ij
+          stop
+        endif
+        acc_tot += acc_ij
+        normalz += dabs(i_num)
+      enddo
+    enddo
+  enddo
+
+  !print*, ' acc_tot = ', acc_tot
+  !print*, ' normalz = ', normalz
+  print*, ' accuracy (%) = ', 100.d0 * acc_tot / normalz
+
+  return
+end subroutine test_grad1_u12_withsq_num
 
 ! ---
 

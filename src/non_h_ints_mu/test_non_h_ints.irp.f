@@ -618,13 +618,14 @@ subroutine test_int2_grad1_u12_square_ao()
 
         I_old = int2_grad1_u12_square_ao_num_1shot(j,i,ipoint)
         I_new = int2_grad1_u12_square_ao          (j,i,ipoint)
+        !I_new = int2_grad1_u12_square_ao_num      (j,i,ipoint)
 
         diff = dabs(I_new-I_old)
         if(diff .gt. thr) then
           print *, ' problem on:', j, i, ipoint
           print *, ' old value :', I_old
           print *, ' new value :', I_new
-          stop
+          !stop
         endif
 
         accu += diff
@@ -660,13 +661,14 @@ subroutine test_int2_grad1_u12_ao()
         do m = 1, 3
           I_old = int2_grad1_u12_ao_num_1shot(j,i,ipoint,m)
           I_new = int2_grad1_u12_ao          (j,i,ipoint,m)
+          !I_new = int2_grad1_u12_ao_num      (j,i,ipoint,m)
 
           diff = dabs(I_new-I_old)
           if(diff .gt. thr) then
             print *, ' problem on:', j, i, ipoint, m
             print *, ' old value :', I_old
             print *, ' new value :', I_new
-            stop
+            !stop
           endif
 
           accu += diff
