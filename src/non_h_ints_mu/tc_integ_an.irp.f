@@ -108,7 +108,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
   
       PROVIDE int2_grad1_u12_ao_num
       int2_grad1_u12_ao = int2_grad1_u12_ao_num
-      FREE int2_grad1_u12_ao_num
 
     else
 
@@ -225,7 +224,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
     PROVIDE int2_grad1_u12_square_ao_num
     int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
-    FREE int2_grad1_u12_square_ao_num
 
   else
 

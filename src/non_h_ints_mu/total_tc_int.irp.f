@@ -55,12 +55,13 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
   integer          :: i, j, k, l
   double precision :: wall1, wall0
 
+  PROVIDE j1b_type
+
   print *, ' providing ao_tc_int_chemist ...'
   call wall_time(wall0)
   
   if(test_cycle_tc) then
 
-    PROVIDE j1b_type
     if(j1b_type .ne. 3) then
       print*, ' TC integrals with cycle can not be used for j1b_type =', j1b_type
       stop
@@ -85,6 +86,11 @@ BEGIN_PROVIDER [double precision, ao_tc_int_chemist, (ao_num, ao_num, ao_num, ao
   endif
 
   FREE tc_grad_square_ao tc_grad_and_lapl_ao ao_two_e_coul
+
+  if(j1b_type .ge. 100) then
+    FREE int2_grad1_u12_ao_num int2_grad1_u12_square_ao_num
+  endif
+
 
   call wall_time(wall1)
   print *, ' wall time for ao_tc_int_chemist ', wall1 - wall0

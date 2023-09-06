@@ -37,6 +37,9 @@
     n_points_integration_angular = my_n_pt_a_grid
   endif
 
+  print*, " n_points_radial_grid         = ", n_points_radial_grid
+  print*, " n_points_integration_angular = ", n_points_integration_angular
+
 END_PROVIDER
 
 ! ---

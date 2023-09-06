@@ -26,7 +26,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_old, (mo_num, mo_num,
 
   if(read_tc_norm_ord) then
 
-    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth_old', action="read")
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="read")
       read(11) normal_two_body_bi_orth_old
     close(11)
 
@@ -103,7 +103,7 @@ BEGIN_PROVIDER [ double precision, normal_two_body_bi_orth_old, (mo_num, mo_num,
   endif
 
   if(write_tc_norm_ord.and.mpi_master) then
-    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth_old', action="write")
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/normal_two_body_bi_orth', action="write")
       call ezfio_set_work_empty(.False.)
       write(11) normal_two_body_bi_orth_old
       close(11)

@@ -15,6 +15,7 @@
   integer                       :: n_blocks, n_rest, n_pass
   integer                       :: i_blocks, i_rest, i_pass, ii
   double precision              :: time0, time1
+  double precision              :: mem, n_double
   double precision, allocatable :: tmp(:,:,:)
   double precision, allocatable :: tmp_grad1_u12(:,:,:), tmp_grad1_u12_squared(:,:)
 
@@ -41,31 +42,33 @@
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
-  
+
   ! n_points_final_grid = n_blocks * n_pass + n_rest
-  n_blocks = 4
+  call total_memory(mem)
+  mem      = max(1.d0, qp_max_mem - mem)
+  n_double = mem * 1.d8
+  n_blocks = min(n_double / (n_points_extra_final_grid * 4), 1.d0*n_points_final_grid)
   n_rest   = int(mod(n_points_final_grid, n_blocks))
   n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
-  
-  if(n_pass .le. 1) then
-    print*, ' blocks are to large or grid is very small !'
-    stop
-  endif
+
+  call write_int(6, n_pass, 'Number of passes')
+  call write_int(6, n_blocks, 'Size of the blocks')
+  call write_int(6, n_rest, 'Size of the last block')
+
   
   allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_blocks))
   allocate(tmp_grad1_u12(n_points_extra_final_grid,n_blocks,3))
   
-  !$OMP PARALLEL                                                     &
-  !$OMP DEFAULT (NONE)                                               &
-  !$OMP PRIVATE (i_pass, i_blocks, ipoint, ii, m, tmp_grad1_u12,     &
-  !$OMP          tmp_grad1_u12_squared)                              &
-  !$OMP SHARED (n_pass, n_blocks, n_points_extra_final_grid, ao_num, &
-  !$OMP         final_grid_points, tmp, int2_grad1_u12_ao_num,       &
-  !$OMP         int2_grad1_u12_square_ao_num)
-  !$OMP DO 
   do i_pass = 1, n_pass
     ii = (i_pass-1)*n_blocks + 1
   
+    !$OMP PARALLEL                                         &
+    !$OMP DEFAULT (NONE)                                   &
+    !$OMP PRIVATE (i_blocks, ipoint)                       &
+    !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, &
+    !$OMP         final_grid_points, tmp_grad1_u12,        &
+    !$OMP         tmp_grad1_u12_squared)
+    !$OMP DO 
     do i_blocks = 1, n_blocks
       ipoint = ii - 1 + i_blocks ! r1
       call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1) &
@@ -73,6 +76,8 @@
                                                                                              , tmp_grad1_u12(1,i_blocks,3) &
                                                                                              , tmp_grad1_u12_squared(1,i_blocks))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     do m = 1, 3
       call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                     &
@@ -83,19 +88,23 @@
               , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
               , 0.d0, int2_grad1_u12_square_ao_num(1,1,ii), ao_num*ao_num) 
   enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
   
   deallocate(tmp_grad1_u12, tmp_grad1_u12_squared)
   
-  ! TODO
-  ! OPENMP 
-  if(n_rest .ne. 0) then
+  if(n_rest .gt. 0) then
   
     allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_rest))
     allocate(tmp_grad1_u12(n_points_extra_final_grid,n_rest,3))
   
     ii = n_pass*n_blocks + 1
+
+    !$OMP PARALLEL                                       &
+    !$OMP DEFAULT (NONE)                                 &
+    !$OMP PRIVATE (i_rest, ipoint)                       &
+    !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, &
+    !$OMP         final_grid_points, tmp_grad1_u12,      &
+    !$OMP         tmp_grad1_u12_squared)
+    !$OMP DO 
     do i_rest = 1, n_rest
       ipoint = ii - 1 + i_rest ! r1
       call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1) &
@@ -103,6 +112,8 @@
                                                                                              , tmp_grad1_u12(1,i_rest,3) &
                                                                                              , tmp_grad1_u12_squared(1,i_rest))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
     do m = 1, 3
       call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                       &
