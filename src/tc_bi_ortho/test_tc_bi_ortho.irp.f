@@ -34,7 +34,8 @@ program tc_bi_ortho
   !call test_no_aab()
   !call test_no_aaa()
 
-  call test_no()
+  !call test_no()
+  call test_no_v0()
 
 end
 
@@ -272,6 +273,52 @@ subroutine timing_double
 end
 
 ! ---
+
+subroutine test_no_v0()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' test_no_v0 ...'
+
+  thr = 1d-8
+
+  PROVIDE normal_two_body_bi_orth_v0
+  PROVIDE normal_two_body_bi_orth
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = normal_two_body_bi_orth   (l,k,j,i)
+          ref = normal_two_body_bi_orth_v0(l,k,j,i)
+
+          contrib = dabs(new - ref)
+          if(contrib .gt. thr) then
+            print*, ' problem on normal_two_body_bi_orth'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+          accu += contrib
+          norm += dabs(ref)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end subroutine test_no
+
+! ---
+
 
 subroutine test_no()
 

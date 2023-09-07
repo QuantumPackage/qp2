@@ -20,8 +20,8 @@ BEGIN_PROVIDER [integer, n_points_final_grid]
     enddo
   enddo
 
-  !print*,' n_points_final_grid = ', n_points_final_grid
-  !print*,' n max point         = ', n_points_integration_angular*(n_points_radial_grid*nucl_num - 1)
+  print*,' n_points_final_grid = ', n_points_final_grid
+  print*,' n max point         = ', n_points_integration_angular*(n_points_radial_grid*nucl_num - 1)
   call ezfio_set_becke_numerical_grid_n_points_final_grid(n_points_final_grid)
 
 END_PROVIDER
