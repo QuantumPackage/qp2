@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_0_v0]
+BEGIN_PROVIDER [double precision, noL_0e]
 
   implicit none
   integer                       :: i, j, k
@@ -10,7 +10,7 @@ BEGIN_PROVIDER [double precision, no_0_v0]
   double precision, allocatable :: tmp(:)
 
   call wall_time(t0)
-  print*, " Providing no_0_v0 ..."
+  print*, " Providing noL_0e ..."
 
   if(elec_alpha_num .eq. elec_beta_num) then
 
@@ -40,7 +40,7 @@ BEGIN_PROVIDER [double precision, no_0_v0]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    no_0_v0 = -1.d0 * (-sum(tmp)) / 6.d0
+    noL_0e = -1.d0 * (-sum(tmp)) / 6.d0
 
     deallocate(tmp)
 
@@ -114,22 +114,22 @@ BEGIN_PROVIDER [double precision, no_0_v0]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    no_0_v0 = -1.d0 * (-sum(tmp)) / 6.d0
+    noL_0e = -1.d0 * (-sum(tmp)) / 6.d0
 
     deallocate(tmp)
 
   endif
 
   call wall_time(t1)
-  print*, " Wall time for no_0_v0 (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_0e (min) = ", (t1 - t0)/60.d0
 
-  print*, " no_0_v0 = ", no_0_v0
+  print*, " noL_0e = ", noL_0e
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -143,7 +143,7 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
   double precision :: t0, t1
 
   call wall_time(t0)
-  print*, " Providing no_1_v0 ..."
+  print*, " Providing noL_1e ..."
 
   if(elec_alpha_num .eq. elec_beta_num) then
 
@@ -152,13 +152,13 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
     !$OMP PRIVATE (p, s, i, j,                     &
     !$OMP         I_pij_sij, I_pij_isj, I_pij_ijs, &
     !$OMP         I_pij_sji)                       &
-    !$OMP SHARED (mo_num, elec_beta_num, no_1_v0)
+    !$OMP SHARED (mo_num, elec_beta_num, noL_1e)
 
     !$OMP DO COLLAPSE(2)
     do s = 1, mo_num
       do p = 1, mo_num
   
-        no_1_v0(p,s) = 0.d0
+        noL_1e(p,s) = 0.d0
         do i = 1, elec_beta_num
           do j = 1, elec_beta_num
 
@@ -167,7 +167,7 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            no_1_v0(p,s) = no_1_v0(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo
         enddo
       enddo
@@ -182,13 +182,13 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
     !$OMP PRIVATE (p, s, i, j,                     &
     !$OMP         I_pij_sij, I_pij_isj, I_pij_ijs, &
     !$OMP         I_pij_sji, I_pij_jsi, I_pij_jis) &
-    !$OMP SHARED (mo_num, elec_beta_num, elec_alpha_num, no_1_v0)
+    !$OMP SHARED (mo_num, elec_beta_num, elec_alpha_num, noL_1e)
 
     !$OMP DO COLLAPSE(2)
     do s = 1, mo_num
       do p = 1, mo_num
   
-        no_1_v0(p,s) = 0.d0
+        noL_1e(p,s) = 0.d0
         do i = 1, elec_beta_num
           do j = 1, elec_beta_num
 
@@ -197,7 +197,7 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            no_1_v0(p,s) = no_1_v0(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo ! j
         enddo ! i
 
@@ -211,7 +211,7 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, s, j, I_pij_isj)
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
           
-            no_1_v0(p,s) = no_1_v0(p,s) + 0.5d0 * (2.d0*I_pij_sji - I_pij_jsi + 2.d0*I_pij_jis - 4.d0*I_pij_sij + 2.d0*I_pij_isj - I_pij_ijs)
+            noL_1e(p,s) = noL_1e(p,s) + 0.5d0 * (2.d0*I_pij_sji - I_pij_jsi + 2.d0*I_pij_jis - 4.d0*I_pij_sij + 2.d0*I_pij_isj - I_pij_ijs)
           enddo ! j
 
           do j = elec_beta_num+1, elec_alpha_num
@@ -221,7 +221,7 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            no_1_v0(p,s) = no_1_v0(p,s) - 0.5d0 * (I_pij_sij - I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) - 0.5d0 * (I_pij_sij - I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo ! j
         enddo ! i
 
@@ -233,13 +233,13 @@ BEGIN_PROVIDER [double precision, no_1_v0, (mo_num, mo_num)]
   endif
 
   call wall_time(t1)
-  print*, " Wall time for no_1_v0 (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_1e (min) = ", (t1 - t0)/60.d0
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -253,7 +253,7 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
   double precision :: t0, t1
 
   call wall_time(t0)
-  print*, " Providing no_2_v0 ..."
+  print*, " Providing noL_2e ..."
 
   if(elec_alpha_num .eq. elec_beta_num) then
 
@@ -261,7 +261,7 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
     !$OMP DEFAULT (NONE)                            &
     !$OMP PRIVATE (p, q, s, t, i,                   &
     !$OMP          I_ipq_sit, I_ipq_tsi, I_ipq_ist) &
-    !$OMP SHARED (mo_num, elec_beta_num, no_2_v0)
+    !$OMP SHARED (mo_num, elec_beta_num, noL_2e)
 
     !$OMP DO COLLAPSE(4)
     do t = 1, mo_num
@@ -269,14 +269,14 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
         do q = 1, mo_num
           do p = 1, mo_num
   
-            no_2_v0(p,q,s,t) = 0.d0
+            noL_2e(p,q,s,t) = 0.d0
             do i = 1, elec_beta_num
 
               call give_integrals_3_body_bi_ort(i, p, q, s, i, t, I_ipq_sit)
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
           
-              no_2_v0(p,q,s,t) = no_2_v0(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo
           enddo
         enddo
@@ -291,7 +291,7 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
     !$OMP DEFAULT (NONE)                            &
     !$OMP PRIVATE (p, q, s, t, i,                   &
     !$OMP          I_ipq_sit, I_ipq_tsi, I_ipq_ist) &
-    !$OMP SHARED (mo_num, elec_beta_num, elec_alpha_num, no_2_v0)
+    !$OMP SHARED (mo_num, elec_beta_num, elec_alpha_num, noL_2e)
 
     !$OMP DO COLLAPSE(4)
     do t = 1, mo_num
@@ -299,14 +299,14 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
         do q = 1, mo_num
           do p = 1, mo_num
   
-            no_2_v0(p,q,s,t) = 0.d0
+            noL_2e(p,q,s,t) = 0.d0
             do i = 1, elec_beta_num
 
               call give_integrals_3_body_bi_ort(i, p, q, s, i, t, I_ipq_sit)
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
             
-              no_2_v0(p,q,s,t) = no_2_v0(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo ! i
 
             do i = elec_beta_num+1, elec_alpha_num
@@ -315,7 +315,7 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
             
-              no_2_v0(p,q,s,t) = no_2_v0(p,q,s,t) - 0.25d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.25d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo ! i
 
           enddo ! p
@@ -328,7 +328,7 @@ BEGIN_PROVIDER [double precision, no_2_v0, (mo_num, mo_num, mo_num, mo_num)]
   endif
 
   call wall_time(t1)
-  print*, " Wall time for no_2_v0 (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_2e (min) = ", (t1 - t0)/60.d0
 
 END_PROVIDER
 

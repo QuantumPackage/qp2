@@ -34,7 +34,9 @@ end
 ! ---
 
 subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
- implicit none
+
+  implicit none
+
   BEGIN_DOC
   !
   ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
@@ -82,7 +84,7 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   hmono  = 0.d0
   htwoe  = 0.d0
   htot   = 0.d0
-  hthree = 0.D0
+  hthree = 0.d0
 
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.gt.2) return
