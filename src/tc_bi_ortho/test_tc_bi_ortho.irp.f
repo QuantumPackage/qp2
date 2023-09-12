@@ -38,6 +38,8 @@ program tc_bi_ortho
   !call test_no_v0()
 
   call test_no_0()
+  call test_no_1()
+  call test_no_2()
 
 end
 
@@ -505,7 +507,7 @@ subroutine test_no_0()
   implicit none
   double precision :: accu, norm
 
-  print*, ' testing test_no_0 ...'
+  print*, ' testing no_0 ...'
 
   PROVIDE no_0_naive
   PROVIDE no_0_v0
@@ -519,4 +521,89 @@ subroutine test_no_0()
 end
 
 ! ---
+
+subroutine test_no_1()
+
+  implicit none
+  integer          :: i, j
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' testing no_1 ...'
+
+  PROVIDE no_1_naive
+  PROVIDE no_1_v0
+
+  thr = 1d-8
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      new = no_1_v0   (j,i)
+      ref = no_1_naive(j,i)
+      contrib = dabs(new - ref)
+      if(contrib .gt. thr) then
+        print*, ' problem on no_aaa_contraction'
+        print*, j, i
+        print*, ref, new, contrib
+        stop
+      endif
+
+      accu += contrib
+      norm += dabs(ref)
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+subroutine test_no_2()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' testing no_2 ...'
+
+  PROVIDE no_2_naive
+  PROVIDE no_2_v0
+
+  thr = 1d-8
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = no_2_v0   (l,k,j,i)
+          ref = no_2_naive(l,k,j,i)
+          contrib = dabs(new - ref)
+          if(contrib .gt. thr) then
+            print*, ' problem on no_aaa_contraction'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+          
+          accu += contrib
+          norm += dabs(ref)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
 
