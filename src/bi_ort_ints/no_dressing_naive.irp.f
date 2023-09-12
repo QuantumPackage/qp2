@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_0_naive]
+BEGIN_PROVIDER [double precision, noL_0e_naive]
 
   implicit none
   integer                       :: ii, jj, kk
@@ -11,7 +11,7 @@ BEGIN_PROVIDER [double precision, no_0_naive]
   double precision              :: t0, t1
   double precision, allocatable :: tmp(:)
 
-  print*, " Providing no_0_naive ..."
+  print*, " Providing noL_0e_naive ..."
   call wall_time(t0)
 
   allocate(tmp(elec_num))
@@ -89,24 +89,24 @@ BEGIN_PROVIDER [double precision, no_0_naive]
   !$OMP END DO
   !$OMP END PARALLEL
 
-  no_0_naive = -1.d0 * (-sum(tmp)) / 6.d0
+  noL_0e_naive = -1.d0 * (-sum(tmp)) / 6.d0
 
   deallocate(tmp)
 
   call wall_time(t1)
-  print*, " Wall time for no_0_naive (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_0e_naive (min) = ", (t1 - t0)/60.d0
 
-  print*, " no_0_naive = ", no_0_naive
+  print*, " noL_0e_naive = ", noL_0e_naive
   
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
 
   BEGIN_DOC
   ! 
-  ! < p | H(1) | s > is dressed with no_1_naive(p,s)
+  ! < p | H(1) | s > is dressed with noL_1e_naive(p,s)
   !
   END_DOC
 
@@ -117,7 +117,7 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
   double precision :: I_pij_sji, I_pij_sij, I_pij_jis, I_pij_ijs, I_pij_isj, I_pij_jsi
   double precision :: t0, t1
 
-  print*, " Providing no_1_naive ..."
+  print*, " Providing noL_1e_naive ..."
   call wall_time(t0)
 
   ! ----
@@ -132,14 +132,14 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
   !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  & 
   !$OMP          I_pij_ijs, I_pij_isj, I_pij_jsi ) &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,   &
-  !$OMP         sigma_p, sigma_s, no_1_naive)
+  !$OMP         sigma_p, sigma_s, noL_1e_naive)
 
   !$OMP DO COLLAPSE (2)
 
   do s = 1, mo_num
     do p = 1, mo_num
 
-      no_1_naive(p,s) = 0.d0
+      noL_1e_naive(p,s) = 0.d0
       do ii = 1, elec_num
         if(ii .le. elec_beta_num) then
           i       = ii 
@@ -184,7 +184,7 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
 
           ! x (-1) because integrals are over -L
           ! x 0.5  because we consider 0.5 (up + down)
-          no_1_naive(p,s) = no_1_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
+          noL_1e_naive(p,s) = noL_1e_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
         enddo ! j
       enddo ! i
     enddo ! s
@@ -205,7 +205,7 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
   !$OMP          I_pij_sji, I_pij_sij, I_pij_jis,  & 
   !$OMP          I_pij_ijs, I_pij_isj, I_pij_jsi ) &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,   &
-  !$OMP         sigma_p, sigma_s, no_1_naive)
+  !$OMP         sigma_p, sigma_s, noL_1e_naive)
 
   !$OMP DO COLLAPSE (2)
 
@@ -256,7 +256,7 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
 
           ! x (-1) because integrals are over -L
           ! x 0.5  because we consider 0.5 (up + down)
-          no_1_naive(p,s) = no_1_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
+          noL_1e_naive(p,s) = noL_1e_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
         enddo ! j
       enddo ! i
     enddo ! s
@@ -267,17 +267,17 @@ BEGIN_PROVIDER [double precision, no_1_naive, (mo_num, mo_num)]
   ! ---
 
   call wall_time(t1)
-  print*, " Wall time for no_1_naive (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_1e_naive (min) = ", (t1 - t0)/60.d0
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)]
 
   BEGIN_DOC
   ! 
-  ! < p q | H(2) | s t > is dressed with no_2_naive(p,q,s,t)
+  ! < p q | H(2) | s t > is dressed with noL_2e_naive(p,q,s,t)
   !
   END_DOC
 
@@ -288,7 +288,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   double precision :: I_ipq_ist, I_ipq_sit, I_ipq_tsi
   double precision :: t0, t1
 
-  print*, " Providing no_2_naive ..."
+  print*, " Providing noL_2e_naive ..."
   call wall_time(t0)
 
   ! ----
@@ -305,7 +305,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   !$OMP          I_ipq_ist, I_ipq_sit, I_ipq_tsi)   &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,    &
   !$OMP         sigma_p, sigma_q, sigma_s, sigma_t, &
-  !$OMP         no_2_naive)
+  !$OMP         noL_2e_naive)
 
   !$OMP DO COLLAPSE (4)
   do t = 1, mo_num
@@ -313,7 +313,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
       do q = 1, mo_num
         do p = 1, mo_num
 
-          no_2_naive(p,q,s,t) = 0.d0
+          noL_2e_naive(p,q,s,t) = 0.d0
           do ii = 1, elec_num
             if(ii .le. elec_beta_num) then
               i       = ii 
@@ -337,7 +337,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
 
             ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            no_2_naive(p,q,s,t) = no_2_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -360,7 +360,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   !$OMP          I_ipq_ist, I_ipq_sit, I_ipq_tsi)   &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,    &
   !$OMP         sigma_p, sigma_q, sigma_s, sigma_t, &
-  !$OMP         no_2_naive)
+  !$OMP         noL_2e_naive)
 
   !$OMP DO COLLAPSE (4)
   do t = 1, mo_num
@@ -391,7 +391,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
 
             ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            no_2_naive(p,q,s,t) = no_2_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -414,7 +414,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   !$OMP          I_ipq_ist, I_ipq_sit, I_ipq_tsi)   &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,    &
   !$OMP         sigma_p, sigma_q, sigma_s, sigma_t, &
-  !$OMP         no_2_naive)
+  !$OMP         noL_2e_naive)
 
   !$OMP DO COLLAPSE (4)
   do t = 1, mo_num
@@ -445,7 +445,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
 
             ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            no_2_naive(p,q,s,t) = no_2_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -468,7 +468,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   !$OMP          I_ipq_ist, I_ipq_sit, I_ipq_tsi)   &
   !$OMP SHARED (mo_num, elec_beta_num, elec_num,    &
   !$OMP         sigma_p, sigma_q, sigma_s, sigma_t, &
-  !$OMP         no_2_naive)
+  !$OMP         noL_2e_naive)
 
   !$OMP DO COLLAPSE (4)
   do t = 1, mo_num
@@ -499,7 +499,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
 
             ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            no_2_naive(p,q,s,t) = no_2_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -509,7 +509,7 @@ BEGIN_PROVIDER [double precision, no_2_naive, (mo_num, mo_num, mo_num, mo_num)]
   !$OMP END PARALLEL
 
   call wall_time(t1)
-  print*, " Wall time for no_2_naive (min) = ", (t1 - t0)/60.d0
+  print*, " Wall time for noL_2e_naive (min) = ", (t1 - t0)/60.d0
 
 END_PROVIDER
 

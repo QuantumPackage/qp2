@@ -509,11 +509,11 @@ subroutine test_no_0()
 
   print*, ' testing no_0 ...'
 
-  PROVIDE no_0_naive
-  PROVIDE no_0_v0
+  PROVIDE noL_0e_naive
+  PROVIDE noL_0e
 
-  accu = dabs(no_0_naive - no_0_v0)
-  norm = dabs(no_0_naive)
+  accu = dabs(noL_0e_naive - noL_0e)
+  norm = dabs(noL_0e_naive)
 
   print*, ' accu (%) = ', 100.d0*accu/norm
 
@@ -530,8 +530,8 @@ subroutine test_no_1()
 
   print*, ' testing no_1 ...'
 
-  PROVIDE no_1_naive
-  PROVIDE no_1_v0
+  PROVIDE noL_1e_naive
+  PROVIDE noL_1e
 
   thr = 1d-8
 
@@ -540,8 +540,8 @@ subroutine test_no_1()
   do i = 1, mo_num
     do j = 1, mo_num
 
-      new = no_1_v0   (j,i)
-      ref = no_1_naive(j,i)
+      new = noL_1e      (j,i)
+      ref = noL_1e_naive(j,i)
       contrib = dabs(new - ref)
       if(contrib .gt. thr) then
         print*, ' problem on no_aaa_contraction'
@@ -570,8 +570,8 @@ subroutine test_no_2()
 
   print*, ' testing no_2 ...'
 
-  PROVIDE no_2_naive
-  PROVIDE no_2_v0
+  PROVIDE noL_2e_naive
+  PROVIDE noL_2e
 
   thr = 1d-8
 
@@ -582,8 +582,8 @@ subroutine test_no_2()
       do k = 1, mo_num
         do l = 1, mo_num
 
-          new = no_2_v0   (l,k,j,i)
-          ref = no_2_naive(l,k,j,i)
+          new = noL_2e      (l,k,j,i)
+          ref = noL_2e_naive(l,k,j,i)
           contrib = dabs(new - ref)
           if(contrib .gt. thr) then
             print*, ' problem on no_aaa_contraction'

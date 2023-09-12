@@ -29,7 +29,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -40,6 +40,11 @@ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
   implicit none
  
   call ao_to_mo_bi_ortho(ao_one_e_integrals_tc_tot, ao_num, mo_bi_ortho_tc_one_e, mo_num)
+
+  if(noL_standard) then
+    PROVIDE noL_1e
+    mo_bi_ortho_tc_one_e = mo_bi_ortho_tc_one_e + noL_1e
+  endif
 
 END_PROVIDER 
 
