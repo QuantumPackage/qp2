@@ -66,3 +66,25 @@ end
 
 ! ---
 
+
+logical function is_same_spin(sigma_1, sigma_2)
+
+  BEGIN_DOC
+  !
+  ! true if sgn(sigma_1) = sgn(sigma_2)
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in) :: sigma_1, sigma_2
+
+  if((sigma_1 * sigma_2) .gt. 0.d0) then
+    is_same_spin = .true.
+  else
+    is_same_spin = .false.
+  endif
+
+end function is_same_spin
+
+! ---
+

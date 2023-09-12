@@ -35,7 +35,9 @@ program tc_bi_ortho
   !call test_no_aaa()
 
   !call test_no()
-  call test_no_v0()
+  !call test_no_v0()
+
+  call test_no_0()
 
 end
 
@@ -315,7 +317,7 @@ subroutine test_no_v0()
   print*, ' accu (%) = ', 100.d0*accu/norm
 
   return
-end subroutine test_no
+end subroutine test_no_0
 
 ! ---
 
@@ -490,6 +492,26 @@ subroutine test_no_aaa()
       enddo
     enddo
   enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+subroutine test_no_0()
+
+  implicit none
+  double precision :: accu, norm
+
+  print*, ' testing test_no_0 ...'
+
+  PROVIDE no_0_naive
+  PROVIDE no_0_v0
+
+  accu = dabs(no_0_naive - no_0_v0)
+  norm = dabs(no_0_naive)
 
   print*, ' accu (%) = ', 100.d0*accu/norm
 
