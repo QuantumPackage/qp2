@@ -1,4 +1,5 @@
-BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, mo_num)]
+ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist_s1s2, (mo_num, mo_num, mo_num, mo_num, 2,2)]
  implicit none
  BEGIN_DOC
  ! tc_two_rdm_chemist(p,s,q,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = CHEMIST NOTATION
@@ -14,6 +15,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
  other_spin(2) = 1
  allocate(occ(N_int*bit_kind_size,2))
  tc_two_rdm_chemist = 0.d0
+ tc_two_rdm_chemist_s1s2 = 0.d0
 
  do i = 1, N_det ! psi_left 
   do j = 1, N_det ! psi_right 
@@ -21,14 +23,16 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
    if(degree.gt.2)cycle
    if(degree.gt.0)then
     ! get excitation operators: from psi_det(j) --> psi_det(i)
-    call get_excitation(psi_det(1,1,j),psi_det(1,1,i),exc,degree,phase,N_int)
-    call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
-    contrib = psi_l_coef_bi_ortho(i,1) * psi_r_coef_bi_ortho(j,1) * phase * state_average_weight(1)
-    do istate = 2, N_states
-     contrib += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * phase * state_average_weight(istate)
-    enddo
+    ! T_{j-->i} = a^p1_s1 a_h1_s1 
+     call get_excitation(psi_det(1,1,j),psi_det(1,1,i),exc,degree,phase,N_int)
+     call decode_exc(exc,degree,h1,p1,h2,p2,s1,s2)
+     contrib = psi_l_coef_bi_ortho(i,1) * psi_r_coef_bi_ortho(j,1) * phase * state_average_weight(1)
+     do istate = 2, N_states
+      contrib += psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,istate) * phase * state_average_weight(istate)
+     enddo
     if(degree == 2)then
      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
     else if(degree==1)then
      ! occupation of the determinant psi_det(j)
      call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
@@ -40,6 +44,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
       h2 = m 
       p2 = m 
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
      ! run over the electrons of same spin than the excitation
      s2 = s1
@@ -48,6 +53,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
       h2 = m 
       p2 = m 
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
     endif
    else if(degree == 0)then
@@ -69,6 +75,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
        h2 = m 
        p2 = m 
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
       ! run over the couple of alpha-alpha electrons 
       s2 = s1
@@ -78,6 +85,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
        p2 = m 
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
     enddo
     s1 = 2
@@ -92,6 +100,7 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm_chemist, (mo_num, mo_num, mo_num, 
        p2 = m 
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
+!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
     enddo
    endif
@@ -124,12 +133,13 @@ subroutine update_tc_rdm(h1,p1,h2,p2,s1,s2,array,sze,contrib)
 end
 
 
-BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
+ BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
+&BEGIN_PROVIDER [ double precision, tc_two_rdm_s1s2, (mo_num, mo_num, mo_num, mo_num,2,2)]
  implicit none
  BEGIN_DOC
  ! tc_two_rdm(p,q,s,r) = <Phi| a^dagger_p a^dagger_q q_r a_s |Phi> = PHYSICIST NOTATION
  END_DOC
- integer :: p,q,r,s
+ integer :: p,q,r,s,s1,s2
  do r = 1, mo_num
   do q = 1, mo_num
    do s = 1, mo_num
@@ -139,5 +149,18 @@ BEGIN_PROVIDER [ double precision, tc_two_rdm, (mo_num, mo_num, mo_num, mo_num)]
    enddo
   enddo
  enddo
+ do s2 = 1, 2
+  do s1 = 1, 2
+    do r = 1, mo_num
+     do q = 1, mo_num
+      do s = 1, mo_num
+       do p = 1, mo_num
+        tc_two_rdm_s1s2(p,q,s,r,s1,s2) = tc_two_rdm_chemist_s1s2(p,s,q,r,s1,s2) 
+       enddo
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
 
 END_PROVIDER 
