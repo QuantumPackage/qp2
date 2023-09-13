@@ -267,64 +267,57 @@ subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   integer(bit_kind), intent(in)  :: key_j(N_int,2),key_i(N_int,2)
   integer, intent(in)            :: Nint
   double precision, intent(out)  :: hmono, htwoe, hthree, htot
-  integer                        :: occ(N_int*bit_kind_size,2)
-  integer                        :: Ne(2),i,j,ii,jj,ispin,jspin,k,kk
-  integer                        :: degree,exc_double(0:2,2,2),exc_single(0:2,2,2)
-  integer                        :: degree_alpha,degree_beta
-  integer                        :: h1, p1, h2, p2, s1, s2, h3, p3, s3, h4, p4, s4
-  double precision :: phase_double, phase_single
-  integer(bit_kind)  :: key_j_alpha(N_int,2),key_i_alpha(N_int,2)
-  integer(bit_kind)  :: key_j_beta(N_int,2),key_i_beta(N_int,2)
-  integer :: other_spin(2)
+  integer                        :: degree
+  integer                        :: h1, p1, h2, p2, s1, s2, h3, p3, s3
+  integer                        :: holes_array(100,2),particles_array(100,2),degree_array(2)
+  double precision               :: phase,sym_3_e_int_from_6_idx_tensor
 
   hmono  = 0.d0
   htwoe  = 0.d0
   hthree = 0.d0
   htot   = 0.d0
-  call bitstring_to_list_ab(key_i,occ,Ne,N_int)
-  call get_excitation_degree(key_i,key_j,degree,N_int)
-  if(degree.ne.3)then
-   return
-  endif
-  other_spin(1) = 2
-  other_spin(2) = 1
-  do i = 1, N_int
-   key_j_alpha(i,1) = key_j(i,1)
-   key_j_alpha(i,2) = 0_bit_kind
-   key_i_alpha(i,1) = key_i(i,1)
-   key_i_alpha(i,2) = 0_bit_kind
-
-   key_j_beta(i,2) = key_j(i,2)
-   key_j_beta(i,1) = 0_bit_kind
-   key_i_beta(i,2) = key_i(i,2)
-   key_i_beta(i,1) = 0_bit_kind
-  enddo
-  ! check whether it is a triple excitation of the same spin
-  
-  call get_excitation_degree(key_i_alpha,key_j_alpha,degree_alpha,N_int)
-  call get_excitation_degree(key_i_beta,key_j_beta,degree_beta,N_int)
-  if(degree_alpha==3.or.degree_beta==3)then
-   return
+  call get_excitation_general(key_j, key_i, Nint,degree_array,holes_array, particles_array,phase)
+  degree = degree_array(1) + degree_array(2)
+  if(degree .ne. 3)return
+  if(degree_array(1)==3.or.degree_array(2)==3)then
+   if(degree_array(1) == 3)then
+    h1 = holes_array(1,1) 
+    h2 = holes_array(2,1) 
+    h3 = holes_array(1,1) 
+    p1 = particles_array(1,1) 
+    p2 = particles_array(2,1) 
+    p3 = particles_array(1,1) 
+   else
+    h1 = holes_array(1,2) 
+    h2 = holes_array(2,2) 
+    h3 = holes_array(1,2) 
+    p1 = particles_array(1,2) 
+    p2 = particles_array(2,2) 
+    p3 = particles_array(1,2) 
+   endif
+   hthree = sym_3_e_int_from_6_idx_tensor(p3, p2, p1, h3, h2, h1)
   else 
-   if(degree_alpha == 2.and.degree_beta == 1)then ! double alpha + single beta
-    call get_double_excitation(key_i_alpha,key_j_alpha,exc_double,phase_double,N_int)
-    call decode_exc(exc_double,2,h1,p1,h2,p2,s1,s2)
-    call get_single_excitation(key_i_beta,key_j_beta,exc_single,phase_single,N_int)
-    call decode_exc(exc_single,1,h3,p3,h4,p4,s3,s4)
-   else if(degree_beta == 2 .and. degree_alpha == 1)then ! double beta + single alpha 
-    call get_double_excitation(key_i_beta,key_j_beta,exc_double,phase_double,N_int)
-    call decode_exc(exc_double,2,h1,p1,h2,p2,s1,s2)
-    call get_single_excitation(key_i_alpha,key_j_alpha,exc_single,phase_single,N_int)
-    call decode_exc(exc_single,1,h3,p3,h4,p4,s3,s4)
+   if(degree_array(1) == 2.and.degree_array(2) == 1)then ! double alpha + single beta
+    h1 = holes_array(1,1) 
+    h2 = holes_array(2,1) 
+    h3 = holes_array(1,2) 
+    p1 = particles_array(1,1) 
+    p2 = particles_array(2,1) 
+    p3 = particles_array(1,2) 
+   else if(degree_array(2) == 2 .and. degree_array(1) == 1)then ! double beta + single alpha 
+    h1 = holes_array(1,2) 
+    h2 = holes_array(2,2) 
+    h3 = holes_array(1,1) 
+    p1 = particles_array(1,2) 
+    p2 = particles_array(2,2) 
+    p3 = particles_array(1,1) 
    else 
     print*,'PB !!'
-    print*,'degree_beta, degree_alpha',degree_beta, degree_alpha
-    print*,'degree',degree
     stop
    endif
    hthree = three_body_ints_bi_ort(p3,p2,p1,h3,h2,h1) - three_body_ints_bi_ort(p3,p2,p1,h3,h1,h2)
-   hthree  *= phase_single * phase_double
   endif
+  hthree  *= phase
   htot = hthree
  end
 

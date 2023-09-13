@@ -95,9 +95,6 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
      call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
    endif
   else 
-   if(degree==3)then
-    print*,'degree == 3'
-   endif
    if(degree.gt.3) return
    if(degree == 0) then
      call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
