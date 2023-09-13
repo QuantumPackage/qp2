@@ -35,19 +35,15 @@ subroutine  test
    do h2 = 1, mo_num
     do p2 = 1, mo_num
      integral = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
-     rdm = tc_two_rdm(p1,h1,p2,h2)
+     rdm = tc_two_rdm(p2,p1,h2,h1)
      accu += integral * rdm
      rdm_new = 0.d0
      do s2 = 1, 2
       do s1 = 1, 2
-       rdm_new += tc_two_rdm_chemist_s1s2(p1,h1,p2,h2,s1,s2)
+       rdm_new += tc_two_rdm_s1s2(p2,p1,h2,h1,s1,s2)
       enddo
      enddo
      accu_new += integral * rdm_new
-!     if(dabs(rdm).gt.1.d-10)then
-!      print*,h1,p1,h2,p2
-!      print*,rdm,integral,rdm*integral
-!     endif
     enddo
    enddo
   enddo

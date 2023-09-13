@@ -32,7 +32,7 @@
      enddo
     if(degree == 2)then
      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+     call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
     else if(degree==1)then
      ! occupation of the determinant psi_det(j)
      call bitstring_to_list_ab(psi_det(1,1,j), occ, n_occ_ab, N_int) 
@@ -44,7 +44,7 @@
       h2 = m 
       p2 = m 
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
      ! run over the electrons of same spin than the excitation
      s2 = s1
@@ -53,7 +53,7 @@
       h2 = m 
       p2 = m 
       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+      call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
      enddo
     endif
    else if(degree == 0)then
@@ -75,7 +75,7 @@
        h2 = m 
        p2 = m 
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
       ! run over the couple of alpha-alpha electrons 
       s2 = s1
@@ -85,7 +85,7 @@
        p2 = m 
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
     enddo
     s1 = 2
@@ -100,7 +100,7 @@
        p2 = m 
        if(h2.le.h1)cycle
        call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist,mo_num,contrib)
-!       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
+       call update_tc_rdm(h1,p1,h2,p2,s1,s2,tc_two_rdm_chemist_s1s2(1,1,1,1,s1,s2) ,mo_num,contrib)
       enddo
     enddo
    endif
