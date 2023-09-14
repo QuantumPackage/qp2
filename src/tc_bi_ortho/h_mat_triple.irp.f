@@ -221,6 +221,40 @@ subroutine H_tc_s2_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
   enddo
 end
 
+subroutine H_tc_s2_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
+  BEGIN_DOC
+  ! Computes $v_0 = H^TC | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  !
+  ! Assumes that the determinants are in psi_det
+  !
+  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  END_DOC
+
+  use bitmasks
+  implicit none
+
+  integer,          intent(in)  :: N_st,sze
+  double precision, intent(in)  :: u_0(sze,N_st)
+  double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
+  call H_tc_s2_u_0_opt(v_0, s_0, u_0, N_st, sze)
+  integer :: i,j,degree,ist
+  double precision :: hmono, htwoe, hthree, htot
+  !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(dynamic,8) &
+  !$OMP SHARED(N_st, N_det, N_int, psi_det, u_0, v_0)       &
+  !$OMP PRIVATE(ist, i, j, degree, hmono, htwoe, hthree,htot)
+  do i = 1, N_det
+   do j = 1, N_det
+    call get_excitation_degree(psi_det(1,1,i),psi_det(1,1,j),degree,N_int)
+    if(degree .ne. 3)cycle
+    call triple_htilde_mu_mat_fock_bi_ortho(N_int, psi_det(1,1,i), psi_det(1,1,j), hmono, htwoe, hthree, htot)
+    do ist = 1, N_st
+     v_0(i,ist) += htot * u_0(j,ist)
+    enddo
+   enddo
+  enddo
+ !$OMP END PARALLEL DO
+end
+
 ! ---
 
 subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
@@ -251,6 +285,40 @@ subroutine H_tc_s2_dagger_u_0_with_pure_three(v_0, s_0, u_0, N_st, sze)
     enddo
    enddo
   enddo
+end
+
+subroutine H_tc_s2_dagger_u_0_with_pure_three_omp(v_0, s_0, u_0, N_st, sze)
+  BEGIN_DOC
+  ! Computes $v_0 = (H^TC)^dagger | u_0\rangle$ WITH PURE TRIPLE EXCITATION TERMS 
+  !
+  ! Assumes that the determinants are in psi_det
+  !
+  ! istart, iend, ishift, istep are used in ZMQ parallelization.
+  END_DOC
+
+  use bitmasks
+  implicit none
+
+  integer,          intent(in)  :: N_st,sze
+  double precision, intent(in)  :: u_0(sze,N_st)
+  double precision, intent(out) :: v_0(sze,N_st), s_0(sze,N_st)
+  call H_tc_s2_dagger_u_0_opt(v_0, s_0, u_0, N_st, sze)
+  integer :: i,j,degree,ist
+  double precision :: hmono, htwoe, hthree, htot
+  !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(dynamic,8) &
+  !$OMP SHARED(N_st, N_det, N_int, psi_det, u_0, v_0)       &
+  !$OMP PRIVATE(ist, i, j, degree, hmono, htwoe, hthree,htot)
+  do i = 1, N_det
+   do j = 1, N_det
+    call get_excitation_degree(psi_det(1,1,i),psi_det(1,1,j),degree,N_int)
+    if(degree .ne. 3)cycle
+    call triple_htilde_mu_mat_fock_bi_ortho(N_int, psi_det(1,1,j), psi_det(1,1,i), hmono, htwoe, hthree, htot)
+    do ist = 1, N_st
+     v_0(i,ist) += htot * u_0(j,ist)
+    enddo
+   enddo
+  enddo
+ !$OMP END PARALLEL DO
 end
 
 ! ---

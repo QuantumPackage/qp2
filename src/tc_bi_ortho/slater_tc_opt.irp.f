@@ -19,6 +19,9 @@ subroutine provide_all_three_ints_bi_ortho()
     if(three_e_4_idx_term) then
       PROVIDE three_e_4_idx_direct_bi_ort three_e_4_idx_cycle_1_bi_ort three_e_4_idx_exch23_bi_ort three_e_4_idx_exch13_bi_ort 
     endif
+    if(pure_three_body_h_tc)then
+     provide three_body_ints_bi_ort
+    endif
 
     if(.not. double_normal_ord .and. three_e_5_idx_term) then
       PROVIDE three_e_5_idx_direct_bi_ort 

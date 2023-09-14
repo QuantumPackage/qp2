@@ -225,8 +225,8 @@ end
     external                         H_tc_dagger_u_0_opt
     external                         H_tc_s2_dagger_u_0_opt
     external                         H_tc_s2_u_0_opt
-    external                         H_tc_s2_dagger_u_0_with_pure_three 
-    external                         H_tc_s2_u_0_with_pure_three
+    external                         H_tc_s2_dagger_u_0_with_pure_three_omp
+    external                         H_tc_s2_u_0_with_pure_three_omp
 
     allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag))
 
@@ -255,7 +255,7 @@ end
       if(.not.pure_three_body_h_tc)then
        call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
       else 
-       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_with_pure_three)
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_with_pure_three_omp)
       endif
       i_it += 1
       if(i_it .gt. 5) exit
@@ -284,7 +284,7 @@ end
       if(.not.pure_three_body_h_tc)then
        call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_opt)
       else
-       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_with_pure_three)
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_with_pure_three_omp)
       endif
       i_it += 1
       if(i_it .gt. 5) exit
