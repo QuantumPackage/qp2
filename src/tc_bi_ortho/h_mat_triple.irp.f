@@ -283,17 +283,17 @@ subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
    if(degree_array(1) == 3)then
     h1 = holes_array(1,1) 
     h2 = holes_array(2,1) 
-    h3 = holes_array(1,1) 
+    h3 = holes_array(3,1) 
     p1 = particles_array(1,1) 
     p2 = particles_array(2,1) 
-    p3 = particles_array(1,1) 
+    p3 = particles_array(3,1) 
    else
     h1 = holes_array(1,2) 
     h2 = holes_array(2,2) 
-    h3 = holes_array(1,2) 
+    h3 = holes_array(3,2) 
     p1 = particles_array(1,2) 
     p2 = particles_array(2,2) 
-    p3 = particles_array(1,2) 
+    p3 = particles_array(3,2) 
    endif
    hthree = sym_3_e_int_from_6_idx_tensor(p3, p2, p1, h3, h2, h1)
   else 
