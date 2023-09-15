@@ -21,6 +21,16 @@ def idx2_tri(iijj):
     return ij1+(ij2*(ij2+1))//2
 #    return ij1+(ij2*(ij2-1))//2
 
+def idx2_rev(ij):
+    '''
+    reverse compound index
+    i >= j
+    '''
+    #i=np.floor(0.5*(np.sqrt(8*ij+1)-1))
+    i=int((np.sqrt(8*ij+1)-1)//2)
+    j=ij-(i*(i+1))//2
+    return (i,j)
+
 def pad(arr_in,outshape):
     arr_out = np.zeros(outshape,dtype=np.complex128)
     dataslice = tuple(slice(0,arr_in.shape[dim]) for dim in range(len(outshape)))
@@ -363,6 +373,7 @@ def get_j3ao_old(fname,nao,Nk):
         j3c = intfile.get('j3c')
         j3ckeys = list(j3c.keys())
         j3ckeys.sort(key=lambda strkey:int(strkey))
+        assert(len(j3ckeys) == (Nk*(Nk+1))//2)
     
         # in new(?) version of PySCF, there is an extra layer of groups before the datasets
         # datasets used to be [/j3c/0,   /j3c/1,   /j3c/2,   ...]
@@ -393,6 +404,7 @@ def get_j3ao(fname,nao,Nk):
         j3c = intfile.get('j3c')
         j3ckeys = list(j3c.keys())
         nkpairs = len(j3ckeys)
+        assert(nkpairs == (Nk*(Nk+1))//2)
 
         # get num order instead of lex order
         j3ckeys.sort(key=lambda strkey:int(strkey))
@@ -433,6 +445,7 @@ def get_j3ao_big(fname,nao,Nk):
         j3c = intfile.get('j3c')
         j3ckeys = list(j3c.keys())
         nkpairs = len(j3ckeys)
+        assert(nkpairs == (Nk*(Nk+1))//2)
 
         # get num order instead of lex order
         j3ckeys.sort(key=lambda strkey:int(strkey))
@@ -477,6 +490,7 @@ def get_j3ao_new(fname,nao,Nk):
         j3c = intfile.get('j3c')
         j3ckeys = list(j3c.keys())
         nkpairs = len(j3ckeys)
+        assert(nkpairs == (Nk*(Nk+1))//2)
 
         # get num order instead of lex order
         j3ckeys.sort(key=lambda strkey:int(strkey))
@@ -507,6 +521,68 @@ def get_j3ao_new(fname,nao,Nk):
                 #j3arr[i,:iaux,:,:] = makesq3(tmpdat.conj(),nao) * nkinvsq
 
         return j3arr
+
+
+def get_j3ao_221(fname,nao,Nk):
+    '''
+    for pyscf >= 2.2.1 (probably before this, but somewhere in the range (2.0.1, 2.2.1] )
+    returns padded df AO array
+    fills in zeros when functions are dropped due to linear dependency
+    last AO index corresponds to largest kpt index?
+    (k, mu, j, i) where i.kpt >= j.kpt
+    '''
+    import h5py
+    d0 = {}
+    with h5py.File(fname,'r') as intfile:
+        dkpts = intfile['kpts'][()]
+        daosym = intfile['aosym'][()].decode()
+        print(f'j3c aosym = {daosym}')
+        nkpts = len(dkpts)
+        assert(nkpts == Nk)
+        assert(len(intfile['j3c']) == nkpts**2)
+        ndfv = [intfile[f'j3c/{i}/0'].shape[0] for i in range(nkpts**2)]
+        ndfmax = max(ndfv)
+        for ki in range(nkpts**2):
+            d0[ki] = intfile[f'j3c/{ki}/0'][()]
+    nkinvsq = 1./np.sqrt(nkpts)
+    d1 = {}
+    d2 = {}
+    for kij in range(nkpts**2):
+        ki,kj = divmod(kij,nkpts)
+        d0ij = d0[kij]
+        ndf, nelem = d0ij.shape
+        norb = int((nelem*2)**0.5)
+        assert(norb*(norb+1) == nelem*2)
+        assert(norb == nao)
+        lmask = np.tri(norb,dtype=bool)
+        #tmp = np.zeros((ndf,norb,norb),dtype=d0ij.dtype)
+        tmp = np.zeros((ndfmax,norb,norb),dtype=d0ij.dtype)
+        for i in range(ndf):
+            tmp[i][lmask] = d0ij[i]
+        d1[ki,kj] = tmp
+
+
+    for kij in range(nkpts**2):
+        ki,kj = divmod(kij,nkpts)
+
+        dij = d1[ki,kj]
+        djit = d1[kj,ki].transpose(0,2,1).conj().copy()
+
+        ndf,norb,_ = dij.shape
+        lmask = np.tile(np.tri(norb,dtype=bool),(ndf,1,1))
+        djit[lmask] = 0
+        d2[ki,kj] = dij + djit
+
+    nkpairs = (nkpts*(nkpts+1))//2
+
+    j3arr = np.zeros((nkpairs,ndfmax,norb,norb),dtype=np.complex128)
+    for ij in range(nkpairs):
+        i,j = idx2_rev(ij) # i>=j
+        j3arr[ij] = d2[i,j].transpose(0,2,1)
+
+
+    return j3arr * nkinvsq
+
 
 def print_df(j3arr,fname,thresh):
     with open(fname,'w') as outfile:
@@ -774,13 +850,15 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     ##########################################
 
     #Total energy shift due to Ewald probe charge = -1/2 * Nelec*madelung/cell.vol =
-    shift = tools.pbc.madelung(cell, kpts)*cell.nelectron * -.5 
-    e_nuc = (cell.energy_nuc() + shift)*Nk
+    madelung = tools.pbc.madelung(cell, kpts)
+    shift = madelung*cell.nelectron * -.5
+    e_nuc = (cell.energy_nuc())*Nk
   
     print('nucl_repul', e_nuc)
 
     with h5py.File(qph5path,'a') as qph5:
         qph5['nuclei'].attrs['nuclear_repulsion']=e_nuc
+        qph5['nuclei'].attrs['madelung_pyscf']=madelung
   
     ##########################################
     #                                        #
@@ -869,11 +947,12 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     try:
         j3ao_new = get_j3ao_new(mf.with_df._cderi,nao,Nk)
         print('using old get_j3ao_new')
+    except AssertionError:
+        j3ao_new = get_j3ao_221(mf.with_df._cderi,nao,Nk)
+        print('using new get_j3ao_221')
     except ValueError:
         j3ao_new = get_j3ao_big(mf.with_df._cderi,nao,Nk)
         print('using new get_j3ao_big')
-    except:
-        print('unhandled error in get_j3ao?')
 
     # test? nkpt_pairs should be (Nk*(Nk+1))//2
     nkpt_pairs, naux, _, _ = j3ao_new.shape
