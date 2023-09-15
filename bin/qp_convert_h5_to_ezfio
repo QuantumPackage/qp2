@@ -936,6 +936,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
         nucl_coord=qph5['nuclei/nucl_coord'][()].T.tolist()
         nucl_label=qph5['nuclei/nucl_label'][()].tolist()
         nuclear_repulsion = qph5['nuclei'].attrs['nuclear_repulsion']
+        madconst = qph5['nuclei'].attrs.get('madelung_const',default=0)
 
     ezfio.set_nuclei_nucl_charge(nucl_charge)
     ezfio.set_nuclei_nucl_coord(nucl_coord)
@@ -945,6 +946,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
 
     ezfio.set_nuclei_io_nuclear_repulsion('Read')
     ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
+    ezfio.set_nuclei_madelung_constant(madconst)
 
 
     ##########################################

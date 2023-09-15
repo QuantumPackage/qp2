@@ -858,7 +858,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
 
     with h5py.File(qph5path,'a') as qph5:
         qph5['nuclei'].attrs['nuclear_repulsion']=e_nuc
-        qph5['nuclei'].attrs['madelung_pyscf']=madelung
+        qph5['nuclei'].attrs['madelung_const']=madelung
   
     ##########################################
     #                                        #
