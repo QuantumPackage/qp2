@@ -106,8 +106,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
     elseif(j1b_type .ge. 100) then
   
-      PROVIDE int2_grad1_u12_ao_num
-      int2_grad1_u12_ao = int2_grad1_u12_ao_num
+!     PROVIDE int2_grad1_u12_ao_num
+!     int2_grad1_u12_ao = int2_grad1_u12_ao_num
+
+      PROVIDE int2_grad1_u12_ao_num_1shot
+      int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
 
     else
 
@@ -222,8 +225,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
   elseif(j1b_type .ge. 100) then
 
-    PROVIDE int2_grad1_u12_square_ao_num
-    int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
+ !  PROVIDE int2_grad1_u12_square_ao_num
+ !  int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
+
+    PROVIDE int2_grad1_u12_square_ao_num_1shot
+    int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
 
   else
 

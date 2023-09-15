@@ -24,10 +24,14 @@
   double precision           :: v1b_r1, v1b_r2, u2b_r12
   double precision           :: grad1_v1b(3), grad1_u2b(3)
   double precision           :: dx, dy, dz
+  double precision           :: time0, time1
   double precision, external :: j12_mu, j1b_nucl
 
   PROVIDE j1b_type
   PROVIDE final_grid_points_extra
+
+  print*, ' providing grad1_u12_num & grad1_u12_squared_num ...'
+  call wall_time(time0)
 
   grad1_u12_num         = 0.d0
   grad1_u12_squared_num = 0.d0
@@ -112,12 +116,103 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
+  elseif (j1b_type .eq. 1000) then
+
+    double precision :: f
+    f = 1.d0 / dble(elec_num - 1)
+
+    double precision, allocatable :: rij(:,:,:)
+    allocate( rij(3, 2, n_points_extra_final_grid) )
+
+    use qmckl
+    integer(qmckl_exit_code) :: rc
+
+    integer*8 :: npoints
+    npoints = n_points_extra_final_grid
+
+    double precision, allocatable :: gl(:,:,:)
+    allocate( gl(2,4,n_points_extra_final_grid) )
+
+    do ipoint = 1, n_points_final_grid  ! r1
+
+      do jpoint = 1, n_points_extra_final_grid ! r2 
+        rij(1:3, 1, jpoint) = final_grid_points      (1:3, ipoint)
+        rij(1:3, 2, jpoint) = final_grid_points_extra(1:3, jpoint)
+      enddo
+
+
+      rc = qmckl_set_electron_coord(qmckl_ctx_jastrow, 'N', npoints, rij, npoints*6_8)
+      if (rc /= QMCKL_SUCCESS) then
+        print *, irp_here, 'qmckl error in set_electron_coord'
+        stop -1
+      endif
+
+
+      ! ---
+      ! e-e term
+
+      rc = qmckl_get_jastrow_champ_factor_ee_gl(qmckl_ctx_jastrow, gl, 8_8*npoints)
+      if (rc /= QMCKL_SUCCESS) then
+        print *, irp_here, 'qmckl error in fact_ee_gl'
+        stop -1
+      endif
+
+      do jpoint = 1, n_points_extra_final_grid ! r2 
+        grad1_u12_num(jpoint,ipoint,1) = gl(1,1,jpoint)
+        grad1_u12_num(jpoint,ipoint,2) = gl(1,2,jpoint)
+        grad1_u12_num(jpoint,ipoint,3) = gl(1,3,jpoint)
+      enddo
+
+    ! ---
+    ! e-e-n term
+
+!    rc = qmckl_get_jastrow_champ_factor_een_gl(qmckl_ctx_jastrow, gl, 8_8*npoints)
+!    if (rc /= QMCKL_SUCCESS) then
+!      print *, irp_here, 'qmckl error in fact_een_gl'
+!      stop -1
+!    endif
+!
+!    do jpoint = 1, n_points_extra_final_grid ! r2 
+!        grad1_u12_num(jpoint,ipoint,1) = grad1_u12_num(jpoint,ipoint,1) + gl(1,1,jpoint)
+!        grad1_u12_num(jpoint,ipoint,2) = grad1_u12_num(jpoint,ipoint,2) + gl(1,2,jpoint)
+!        grad1_u12_num(jpoint,ipoint,3) = grad1_u12_num(jpoint,ipoint,3) + gl(1,3,jpoint)
+!    enddo
+
+      ! ---
+      ! e-n term
+
+      rc = qmckl_get_jastrow_champ_factor_en_gl(qmckl_ctx_jastrow, gl, 8_8*npoints)
+      if (rc /= QMCKL_SUCCESS) then
+        print *, irp_here, 'qmckl error in fact_en_gl'
+        stop -1
+      endif
+
+      do jpoint = 1, n_points_extra_final_grid ! r2 
+        grad1_u12_num(jpoint,ipoint,1) = grad1_u12_num(jpoint,ipoint,1) + f * gl(1,1,jpoint)
+        grad1_u12_num(jpoint,ipoint,2) = grad1_u12_num(jpoint,ipoint,2) + f * gl(1,2,jpoint)
+        grad1_u12_num(jpoint,ipoint,3) = grad1_u12_num(jpoint,ipoint,3) + f * gl(1,3,jpoint)
+      enddo
+
+      do jpoint = 1, n_points_extra_final_grid ! r2 
+        dx = grad1_u12_num(jpoint,ipoint,1) 
+        dy = grad1_u12_num(jpoint,ipoint,2) 
+        dz = grad1_u12_num(jpoint,ipoint,3) 
+        grad1_u12_squared_num(jpoint,ipoint) = dx*dx + dy*dy + dz*dz
+      enddo
+
+    enddo
+
+    deallocate(gl, rij)
+
   else
 
     print *, ' j1b_type = ', j1b_type, 'not implemented yet'
     stop
 
   endif
+
+  call wall_time(time1)
+  print*, ' Wall time for grad1_u12_num & grad1_u12_squared_num (min) =', (time1-time0)/60.d0 
 
 END_PROVIDER
 
