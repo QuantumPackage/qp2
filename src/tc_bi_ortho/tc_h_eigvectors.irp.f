@@ -225,6 +225,8 @@ end
     external                         H_tc_dagger_u_0_opt
     external                         H_tc_s2_dagger_u_0_opt
     external                         H_tc_s2_u_0_opt
+    external                         H_tc_s2_dagger_u_0_with_pure_three_omp
+    external                         H_tc_s2_u_0_with_pure_three_omp
 
     allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag))
 
@@ -250,7 +252,11 @@ end
     converged = .False.
     i_it = 0
     do while (.not.converged)
-      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+      if(.not.pure_three_body_h_tc)then
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_opt)
+      else 
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_left_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_dagger_u_0_with_pure_three_omp)
+      endif
       i_it += 1
       if(i_it .gt. 5) exit
     enddo
@@ -275,7 +281,11 @@ end
     converged = .False.
     i_it = 0
     do while (.not. converged)
-      call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_opt)
+      if(.not.pure_three_body_h_tc)then
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_opt)
+      else
+       call davidson_hs2_nonsym_b1space(vec_tmp, H_jj, s2_eigvec_tc_bi_orth, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, n_it_max, converged, H_tc_s2_u_0_with_pure_three_omp)
+      endif
       i_it += 1
       if(i_it .gt. 5) exit
     enddo
@@ -328,6 +338,11 @@ end
   TOUCH psi_r_coef_bi_ortho
   call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
   deallocate(buffer)
+!  print*,'After diag'
+!  do i = 1, N_det! old version
+!   print*,'i',i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
+!   call debug_det(psi_det(1,1,i),N_int) 
+!  enddo 
 
 END_PROVIDER 
 

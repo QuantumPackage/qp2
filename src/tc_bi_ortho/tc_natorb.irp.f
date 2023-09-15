@@ -23,7 +23,7 @@
 
   dm_tmp(1:mo_num,1:mo_num) = -tc_transition_matrix_mo(1:mo_num,1:mo_num,1,1)
 
-  print *, ' dm_tmp'
+  print *, ' Transition density matrix '
   do i = 1, mo_num
     fock_diag(i) = fock_matrix_tc_mo_tot(i,i)
     write(*, '(100(F16.10,X))') -dm_tmp(:,i)
@@ -32,12 +32,17 @@
   thr_d   = 1.d-6
   thr_nd  = 1.d-6
   thr_deg = 1.d-3
-  call diag_mat_per_fock_degen( fock_diag, dm_tmp, mo_num, thr_d, thr_nd, thr_deg & 
-                              , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
-!   call non_hrmt_bieig( mo_num, dm_tmp&
-!                      , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo& 
-!                      , mo_num, natorb_tc_eigval )
+!  if(n_core_orb.ne.0)then
+!   call diag_mat_per_fock_degen_core( fock_diag, dm_tmp, list_core, n_core_orb, mo_num, thr_d, thr_nd, thr_deg & 
+!                                    , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
+!  else
+!   call diag_mat_per_fock_degen( fock_diag, dm_tmp, mo_num, thr_d, thr_nd, thr_deg & 
+!                               , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
+!  endif
 
+  call non_hrmt_bieig(mo_num, dm_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag & 
+                      , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo                  & 
+                      , mo_num, natorb_tc_eigval )
   accu = 0.d0
   do i = 1, mo_num
     print*,'natorb_tc_eigval(i) = ',-natorb_tc_eigval(i)

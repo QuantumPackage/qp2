@@ -27,6 +27,8 @@ END_PROVIDER
   implicit none
   BEGIN_DOC
   ! Determinants on which we apply <i|H|psi> for perturbation.
+  ! psi_selectors_coef_tc(iii,1,istate) = left  coefficient of the iii determinant
+  ! psi_selectors_coef_tc(iii,2,istate) = right coefficient of the iii determinant
   END_DOC
   integer                        :: i,k
 

@@ -11,6 +11,10 @@ subroutine map_save_to_disk(filename,map)
 
   integer*8 :: n_elements
   n_elements = int(map % n_elements,8)
+  if (n_elements <= 0) then
+    print *,  'Unable to write map to disk: n_elements = ', n_elements
+    stop -1
+  endif
 
 
   if (map % consolidated) then

@@ -73,7 +73,7 @@ subroutine rotation_matrix_iterative(m,X,R)
 
     !print*,'R'
     !do i = 1, m
-    !  write(*,'(10(E12.5))') R(i,:)
+    !  write(*,'(10(ES12.5))') R(i,:)
     !enddo
 
     do i = 1, m
@@ -82,7 +82,7 @@ subroutine rotation_matrix_iterative(m,X,R)
 
     !print*,'RRT'
     !do i = 1, m
-    !  write(*,'(10(E12.5))') RRT(i,:)
+    !  write(*,'(10(ES12.5))') RRT(i,:)
     !enddo
 
     max_elem = 0d0

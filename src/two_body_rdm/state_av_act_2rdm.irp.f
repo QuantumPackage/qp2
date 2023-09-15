@@ -17,12 +17,12 @@
  state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
- print*,''
- print*,''
- print*,''
- print*,'providint state_av_act_2_rdm_ab_mo '
+! print*,''
+! print*,''
+! print*,''
+! print*,'Providing state_av_act_2_rdm_ab_mo '
  ispin = 3 
- print*,'ispin = ',ispin
+! print*,'ispin = ',ispin
  state_av_act_2_rdm_ab_mo = 0.d0
  call wall_time(wall_1)
  double precision :: wall_1, wall_2

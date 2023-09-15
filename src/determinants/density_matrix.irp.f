@@ -117,7 +117,7 @@ END_PROVIDER
       !$OMP  N_det_alpha_unique,N_det_beta_unique,irp_here)
   allocate(tmp_a(mo_num,mo_num,N_states), tmp_b(mo_num,mo_num,N_states) )
   tmp_a = 0.d0
-  !$OMP DO SCHEDULE(dynamic,64)
+  !$OMP DO SCHEDULE(guided)
   do k_a=1,N_det
     krow = psi_bilinear_matrix_rows(k_a)
     ASSERT (krow <= N_det_alpha_unique)
@@ -173,7 +173,7 @@ END_PROVIDER
   deallocate(tmp_a)
 
   tmp_b = 0.d0
-  !$OMP DO SCHEDULE(dynamic,64)
+  !$OMP DO SCHEDULE(guided)
   do k_b=1,N_det
     krow = psi_bilinear_matrix_transp_rows(k_b)
     ASSERT (krow <= N_det_alpha_unique)
