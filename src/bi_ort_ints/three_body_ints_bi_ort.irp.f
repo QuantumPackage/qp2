@@ -126,7 +126,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
+  ! < n l k | L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
   !
   END_DOC
 

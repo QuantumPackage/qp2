@@ -89,7 +89,7 @@ BEGIN_PROVIDER [double precision, noL_0e_naive]
   !$OMP END DO
   !$OMP END PARALLEL
 
-  noL_0e_naive = -1.d0 * (-sum(tmp)) / 6.d0
+  noL_0e_naive = -1.d0 * (sum(tmp)) / 6.d0
 
   deallocate(tmp)
 
@@ -182,9 +182,8 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
                                                 , j, sigma_j, s, sigma_s, i, sigma_i &
                                                 , I_pij_jsi)
 
-          ! x (-1) because integrals are over -L
           ! x 0.5  because we consider 0.5 (up + down)
-          noL_1e_naive(p,s) = noL_1e_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
+          noL_1e_naive(p,s) = noL_1e_naive(p,s) - 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
         enddo ! j
       enddo ! i
     enddo ! s
@@ -254,9 +253,8 @@ BEGIN_PROVIDER [double precision, noL_1e_naive, (mo_num, mo_num)]
                                                 , j, sigma_j, s, sigma_s, i, sigma_i &
                                                 , I_pij_jsi)
 
-          ! x (-1) because integrals are over -L
           ! x 0.5  because we consider 0.5 (up + down)
-          noL_1e_naive(p,s) = noL_1e_naive(p,s) + 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
+          noL_1e_naive(p,s) = noL_1e_naive(p,s) - 0.25d0 * (I_pij_sji - I_pij_sij + I_pij_jis - I_pij_ijs + I_pij_isj - I_pij_jsi)
         enddo ! j
       enddo ! i
     enddo ! s
@@ -335,9 +333,8 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
                                                   , t, sigma_t, s, sigma_s, i, sigma_i &
                                                   , I_ipq_tsi)
 
-            ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) - 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -389,9 +386,8 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
                                                   , t, sigma_t, s, sigma_s, i, sigma_i &
                                                   , I_ipq_tsi)
 
-            ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) - 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -443,9 +439,8 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
                                                   , t, sigma_t, s, sigma_s, i, sigma_i &
                                                   , I_ipq_tsi)
 
-            ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) - 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q
@@ -497,9 +492,8 @@ BEGIN_PROVIDER [double precision, noL_2e_naive, (mo_num, mo_num, mo_num, mo_num)
                                                   , t, sigma_t, s, sigma_s, i, sigma_i &
                                                   , I_ipq_tsi)
 
-            ! x (-1) because integrals are over -L
             ! x 0.25  because we consider 0.25 (up-up + up-down + down-up + down-down)
-            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) + 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
+            noL_2e_naive(p,q,s,t) = noL_2e_naive(p,q,s,t) - 0.125d0 * (I_ipq_ist - I_ipq_sit - I_ipq_tsi)
           enddo ! i
         enddo ! p
       enddo ! q

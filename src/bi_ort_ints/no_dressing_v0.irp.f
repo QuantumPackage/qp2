@@ -40,7 +40,7 @@ BEGIN_PROVIDER [double precision, noL_0e]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    noL_0e = -1.d0 * (-sum(tmp)) / 6.d0
+    noL_0e = -1.d0 * (sum(tmp)) / 6.d0
 
     deallocate(tmp)
 
@@ -114,7 +114,7 @@ BEGIN_PROVIDER [double precision, noL_0e]
     !$OMP END DO
     !$OMP END PARALLEL
 
-    noL_0e = -1.d0 * (-sum(tmp)) / 6.d0
+    noL_0e = -1.d0 * (sum(tmp)) / 6.d0
 
     deallocate(tmp)
 
@@ -130,12 +130,6 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
-
-  BEGIN_DOC
-  !
-  ! x (-1) because integrals are over -L
-  !
-  END_DOC
 
   implicit none
   integer          :: p, s, i, j
@@ -167,7 +161,7 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            noL_1e(p,s) = noL_1e(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) + (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo
         enddo
       enddo
@@ -197,7 +191,7 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            noL_1e(p,s) = noL_1e(p,s) - (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) + (2.d0*I_pij_sij - 2.d0*I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo ! j
         enddo ! i
 
@@ -211,7 +205,7 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, s, j, I_pij_isj)
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
           
-            noL_1e(p,s) = noL_1e(p,s) + 0.5d0 * (2.d0*I_pij_sji - I_pij_jsi + 2.d0*I_pij_jis - 4.d0*I_pij_sij + 2.d0*I_pij_isj - I_pij_ijs)
+            noL_1e(p,s) = noL_1e(p,s) - 0.5d0 * (2.d0*I_pij_sji - I_pij_jsi + 2.d0*I_pij_jis - 4.d0*I_pij_sij + 2.d0*I_pij_isj - I_pij_ijs)
           enddo ! j
 
           do j = elec_beta_num+1, elec_alpha_num
@@ -221,7 +215,7 @@ BEGIN_PROVIDER [double precision, noL_1e, (mo_num, mo_num)]
             call give_integrals_3_body_bi_ort(p, i, j, i, j, s, I_pij_ijs)
             call give_integrals_3_body_bi_ort(p, i, j, s, j, i, I_pij_sji)
           
-            noL_1e(p,s) = noL_1e(p,s) - 0.5d0 * (I_pij_sij - I_pij_isj + I_pij_ijs - I_pij_sji)
+            noL_1e(p,s) = noL_1e(p,s) + 0.5d0 * (I_pij_sij - I_pij_isj + I_pij_ijs - I_pij_sji)
           enddo ! j
         enddo ! i
 
@@ -240,12 +234,6 @@ END_PROVIDER
 ! ---
 
 BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
-
-  BEGIN_DOC
-  !
-  ! x (-1) because integrals are over -L
-  !
-  END_DOC
 
   implicit none
   integer          :: p, q, s, t, i
@@ -276,7 +264,7 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
           
-              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) + 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo
           enddo
         enddo
@@ -306,7 +294,7 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
             
-              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) + 0.5d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo ! i
 
             do i = elec_beta_num+1, elec_alpha_num
@@ -315,7 +303,7 @@ BEGIN_PROVIDER [double precision, noL_2e, (mo_num, mo_num, mo_num, mo_num)]
               call give_integrals_3_body_bi_ort(i, p, q, t, s, i, I_ipq_tsi)
               call give_integrals_3_body_bi_ort(i, p, q, i, s, t, I_ipq_ist)
             
-              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) - 0.25d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
+              noL_2e(p,q,s,t) = noL_2e(p,q,s,t) + 0.25d0 * (I_ipq_sit + I_ipq_tsi - 2.d0*I_ipq_ist)
             enddo ! i
 
           enddo ! p

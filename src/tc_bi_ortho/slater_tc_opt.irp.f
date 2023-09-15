@@ -55,7 +55,7 @@ subroutine htilde_mu_mat_opt_bi_ortho_tot(key_j, key_i, Nint, htot)
   integer,           intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: htot
-  double precision :: hmono, htwoe, hthree
+  double precision              :: hmono, htwoe, hthree
 
   call htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
 
@@ -90,26 +90,33 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   hthree = 0.d0
 
   call get_excitation_degree(key_i, key_j, degree, Nint)
-  if(.not.pure_three_body_h_tc)then
-   if(degree.gt.2) return
-   if(degree == 0) then
-     call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
-   else if (degree == 1) then
-     call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
-   else if(degree == 2) then
-     call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
-   endif
+
+  if(.not.pure_three_body_h_tc) then
+
+    if(degree .gt. 2) return
+    
+    if(degree == 0) then
+      call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
+    else if (degree == 1) then
+      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+    else if(degree == 2) then
+      call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+    endif
+
   else 
-   if(degree.gt.3) return
-   if(degree == 0) then
-     call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
-   else if (degree == 1) then
-     call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
-   else if(degree == 2) then
-     call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
-   else
-     call triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
-   endif
+
+    if(degree .gt. 3) return
+
+    if(degree == 0) then
+      call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
+    else if (degree == 1) then
+      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+    else if(degree == 2) then
+      call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+    else
+      call triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+    endif
+
   endif
 
   if(degree==0) then
@@ -161,3 +168,4 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
 end
 
 ! ---
+

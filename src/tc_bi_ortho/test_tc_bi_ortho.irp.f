@@ -557,6 +557,8 @@ subroutine test_no_1()
 
   print*, ' accu (%) = ', 100.d0*accu/norm
 
+  PROVIDE energy_1e_noL_HF
+
   return
 end
 
@@ -572,6 +574,7 @@ subroutine test_no_2()
 
   PROVIDE noL_2e_naive
   PROVIDE noL_2e
+  PROVIDE energy_2e_noL_HF
 
   thr = 1d-8
 
