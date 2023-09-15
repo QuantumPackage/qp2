@@ -14,7 +14,7 @@
  
   implicit none
 
-  if(.not.my_grid_becke)then
+  if(.not. my_grid_becke) then
     select case (grid_type_sgn)
       case(0)
         n_points_radial_grid = 23
@@ -36,6 +36,9 @@
     n_points_radial_grid         = my_n_pt_r_grid
     n_points_integration_angular = my_n_pt_a_grid
   endif
+
+  print*, " n_points_radial_grid         = ", n_points_radial_grid
+  print*, " n_points_integration_angular = ", n_points_integration_angular
 
 END_PROVIDER
 

@@ -256,6 +256,12 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e, (mo_num, mo_num, mo_num,
 
   FREE mo_bi_ortho_tc_two_e_chemist
 
+  if(noL_standard) then
+    PROVIDE noL_2e
+    mo_bi_ortho_tc_two_e = mo_bi_ortho_tc_two_e + noL_2e
+    FREE noL_2e
+  endif
+
 END_PROVIDER 
 
 ! ---

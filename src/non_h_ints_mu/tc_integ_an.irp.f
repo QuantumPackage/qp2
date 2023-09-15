@@ -1,9 +1,10 @@
 
-! ---
-
 BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_final_grid, 3)]
 
   BEGIN_DOC
+  !
+  ! TODO
+  ! combine with int2_grad1_u12_square_ao to avoid repeated calculation ?
   !
   ! int2_grad1_u12_ao(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
   !
@@ -104,63 +105,13 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       FREE v_ij_erf_rk_cst_mu_j1b v_ij_u_cst_mu_j1b_an x_v_ij_erf_rk_cst_mu_j1b
 
     elseif(j1b_type .ge. 100) then
+  
+!     PROVIDE int2_grad1_u12_ao_num
+!     int2_grad1_u12_ao = int2_grad1_u12_ao_num
 
-      PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
-      PROVIDE grad1_u12_num
+      PROVIDE int2_grad1_u12_ao_num_1shot
+      int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
 
-      double precision, allocatable :: tmp(:,:,:)
-      allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
-      tmp = 0.d0
-      !$OMP PARALLEL               &
-      !$OMP DEFAULT (NONE)         &
-      !$OMP PRIVATE (j, i, jpoint) &
-      !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
-      !$OMP DO SCHEDULE (static)
-      do j = 1, ao_num
-        do i = 1, ao_num
-          do jpoint = 1, n_points_extra_final_grid
-            tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
-          enddo
-        enddo
-      enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
-
-      int2_grad1_u12_ao = 0.d0
-      do m = 1, 3
-        !call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, +1.d0         &
-        ! this work also because of the symmetry in K(1,2) and sign compensation in L(1,2,3)
-        call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, -1.d0         &
-                  , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_num(1,1,m), n_points_extra_final_grid &
-                  , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num) 
-      enddo
-
-      !! these dgemm are equivalent to
-      !!$OMP PARALLEL                                                           &
-      !!$OMP DEFAULT (NONE)                                                     &
-      !!$OMP PRIVATE (j, i, ipoint, jpoint, w)                                  &
-      !!$OMP SHARED (int2_grad1_u12_ao, ao_num, n_points_final_grid,            &
-      !!$OMP         n_points_extra_final_grid, final_weight_at_r_vector_extra, &
-      !!$OMP         aos_in_r_array_extra_transp, grad1_u12_num, tmp)
-      !!$OMP DO SCHEDULE (static)
-      !do ipoint = 1, n_points_final_grid
-      !  do j = 1, ao_num
-      !    do i = 1, ao_num
-      !      do jpoint = 1, n_points_extra_final_grid
-      !        w = -tmp(jpoint,i,j)
-      !        !w = tmp(jpoint,i,j) this work also because of the symmetry in K(1,2)
-      !        !                    and sign compensation in L(1,2,3)
-      !        int2_grad1_u12_ao(i,j,ipoint,1) += w * grad1_u12_num(jpoint,ipoint,1)
-      !        int2_grad1_u12_ao(i,j,ipoint,2) += w * grad1_u12_num(jpoint,ipoint,2)
-      !        int2_grad1_u12_ao(i,j,ipoint,3) += w * grad1_u12_num(jpoint,ipoint,3)
-      !      enddo
-      !    enddo
-      !  enddo
-      !enddo
-      !!$OMP END DO
-      !!$OMP END PARALLEL
-
-      deallocate(tmp)
     else
 
       print *, ' j1b_type = ', j1b_type, 'not implemented yet'
@@ -274,55 +225,12 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
   elseif(j1b_type .ge. 100) then
 
-    PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
-    PROVIDE grad1_u12_squared_num
+ !  PROVIDE int2_grad1_u12_square_ao_num
+ !  int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
 
-    double precision, allocatable :: tmp(:,:,:)
-    allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
-    tmp = 0.d0
-    !$OMP PARALLEL               &
-    !$OMP DEFAULT (NONE)         &
-    !$OMP PRIVATE (j, i, jpoint) &
-    !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
-    !$OMP DO SCHEDULE (static)
-    do j = 1, ao_num
-      do i = 1, ao_num
-        do jpoint = 1, n_points_extra_final_grid
-          tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
-        enddo
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    PROVIDE int2_grad1_u12_square_ao_num_1shot
+    int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
 
-    int2_grad1_u12_square_ao = 0.d0
-    call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, -0.5d0              &
-              , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_squared_num(1,1), n_points_extra_final_grid &
-              , 0.d0, int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num) 
-
-    !! this dgemm is equivalen to
-    !!$OMP PARALLEL                                                           &
-    !!$OMP DEFAULT (NONE)                                                     &
-    !!$OMP PRIVATE (i, j, ipoint, jpoint, w)                                  &
-    !!$OMP SHARED (int2_grad1_u12_square_ao, ao_num, n_points_final_grid,     &
-    !!$OMP         n_points_extra_final_grid, final_weight_at_r_vector_extra, &
-    !!$OMP         aos_in_r_array_extra_transp, grad1_u12_squared_num, tmp)
-    !!$OMP DO SCHEDULE (static)
-    !do ipoint = 1, n_points_final_grid
-    !  do j = 1, ao_num
-    !    do i = 1, ao_num
-    !      do jpoint = 1, n_points_extra_final_grid
-    !        w = -0.5d0 * tmp(jpoint,i,j)
-    !        int2_grad1_u12_square_ao(i,j,ipoint) += w * grad1_u12_squared_num(jpoint,ipoint)
-    !      enddo
-    !    enddo
-    !  enddo
-    !enddo
-    !!$OMP END DO
-    !!$OMP END PARALLEL
-
-    deallocate(tmp)
-  
   else
 
     print *, ' j1b_type = ', j1b_type, 'not implemented yet'

@@ -11,10 +11,24 @@ program test_non_h
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
+  if(j1b_type .ge. 100) then
+    my_extra_grid_becke  = .True.
+    PROVIDE tc_grid2_a tc_grid2_r
+    my_n_pt_r_extra_grid = tc_grid2_r
+    my_n_pt_a_extra_grid = tc_grid2_a
+    touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
+  endif
+
+
   !call routine_grad_squared()
   !call routine_fit()
   
-  call test_ipp()
+  !call test_ipp()
+  
+  !call test_v_ij_u_cst_mu_j1b_an()
+
+  call test_int2_grad1_u12_square_ao()
+  call test_int2_grad1_u12_ao()
 end
 
 ! ---
@@ -545,9 +559,129 @@ end subroutine grad1_aos_ik_grad1_esquare
 
 ! ---
 
+subroutine test_v_ij_u_cst_mu_j1b_an()
 
+  implicit none
+  integer          :: i, j, ipoint
+  double precision :: I_old, I_new
+  double precision :: norm, accu, thr, diff
 
+  PROVIDE v_ij_u_cst_mu_j1b_an_old v_ij_u_cst_mu_j1b_an
 
+  thr  = 1d-12
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
 
+        I_old = v_ij_u_cst_mu_j1b_an_old(j,i,ipoint)
+        I_new = v_ij_u_cst_mu_j1b_an    (j,i,ipoint)
 
+        diff = dabs(I_new-I_old)
+        if(diff .gt. thr) then
+          print *, ' problem on:', j, i, ipoint
+          print *, ' old value :', I_old
+          print *, ' new value :', I_new
+          stop
+        endif
+
+        accu += diff
+        norm += dabs(I_old)
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy(%) = ', 100.d0 * accu / norm
+
+  return
+end subroutine test_v_ij_u_cst_mu_j1b_an
+
+! ---
+
+subroutine test_int2_grad1_u12_square_ao()
+
+  implicit none
+  integer          :: i, j, ipoint
+  double precision :: I_old, I_new
+  double precision :: norm, accu, thr, diff
+
+  PROVIDE int2_grad1_u12_square_ao
+  PROVIDE int2_grad1_u12_square_ao_num_1shot
+
+  thr  = 1d-8
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
+
+        I_old = int2_grad1_u12_square_ao_num_1shot(j,i,ipoint)
+        I_new = int2_grad1_u12_square_ao          (j,i,ipoint)
+        !I_new = int2_grad1_u12_square_ao_num      (j,i,ipoint)
+
+        diff = dabs(I_new-I_old)
+        if(diff .gt. thr) then
+          print *, ' problem on:', j, i, ipoint
+          print *, ' old value :', I_old
+          print *, ' new value :', I_new
+          !stop
+        endif
+
+        accu += diff
+        norm += dabs(I_old)
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy(%) = ', 100.d0 * accu / norm
+
+  return
+end subroutine test_int2_grad1_u12_square_ao
+
+! ---
+
+subroutine test_int2_grad1_u12_ao()
+
+  implicit none
+  integer          :: i, j, ipoint, m
+  double precision :: I_old, I_new
+  double precision :: norm, accu, thr, diff
+
+  PROVIDE int2_grad1_u12_ao
+  PROVIDE int2_grad1_u12_ao_num_1shot
+
+  thr  = 1d-8
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+    do i = 1, ao_num
+      do j = 1, ao_num
+
+        do m = 1, 3
+          I_old = int2_grad1_u12_ao_num_1shot(j,i,ipoint,m)
+          I_new = int2_grad1_u12_ao          (j,i,ipoint,m)
+          !I_new = int2_grad1_u12_ao_num      (j,i,ipoint,m)
+
+          diff = dabs(I_new-I_old)
+          if(diff .gt. thr) then
+            print *, ' problem on:', j, i, ipoint, m
+            print *, ' old value :', I_old
+            print *, ' new value :', I_new
+            !stop
+          endif
+
+          accu += diff
+          norm += dabs(I_old)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy(%) = ', 100.d0 * accu / norm
+
+  return
+end subroutine test_int2_grad1_u12_ao
+
+! ---
 

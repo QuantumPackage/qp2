@@ -14,7 +14,7 @@
  
   implicit none
 
-  if(.not.my_extra_grid_becke)then
+  if(.not. my_extra_grid_becke) then
     select case (extra_grid_type_sgn)
       case(0)
         n_points_extra_radial_grid = 23
@@ -33,7 +33,7 @@
         stop
     end select
   else
-    n_points_extra_radial_grid = my_n_pt_r_extra_grid
+    n_points_extra_radial_grid         = my_n_pt_r_extra_grid
     n_points_extra_integration_angular = my_n_pt_a_extra_grid
   endif
 

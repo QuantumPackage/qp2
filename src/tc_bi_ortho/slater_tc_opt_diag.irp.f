@@ -29,6 +29,11 @@
 
   ref_tc_energy_tot = ref_tc_energy_1e + ref_tc_energy_2e + ref_tc_energy_3e + nuclear_repulsion
 
+  if(noL_standard) then
+    PROVIDE noL_0e
+    ref_tc_energy_tot += noL_0e
+  endif
+
 END_PROVIDER 
 
 ! ---
@@ -106,6 +111,11 @@ subroutine diag_htilde_mu_mat_fock_bi_ortho(Nint, det_in, hmono, htwoe, hthree, 
   enddo
 
   htot = hmono + htwoe + hthree + nuclear_repulsion
+
+  if(noL_standard) then
+    PROVIDE noL_0e
+    htot += noL_0e
+  endif
 
 end
 
