@@ -37,8 +37,8 @@ program tc_bi_ortho
   !call test_no()
   !call test_no_v0()
 
-  call test_no_0()
-  call test_no_1()
+  !call test_no_0()
+  !call test_no_1()
   call test_no_2()
 
 end
@@ -544,7 +544,7 @@ subroutine test_no_1()
       ref = noL_1e_naive(j,i)
       contrib = dabs(new - ref)
       if(contrib .gt. thr) then
-        print*, ' problem on no_aaa_contraction'
+        print*, ' problem on noL_1e'
         print*, j, i
         print*, ref, new, contrib
         stop
@@ -574,7 +574,7 @@ subroutine test_no_2()
 
   PROVIDE noL_2e_naive
   PROVIDE noL_2e
-  PROVIDE energy_2e_noL_HF
+  !PROVIDE energy_2e_noL_HF
 
   thr = 1d-8
 
@@ -589,7 +589,7 @@ subroutine test_no_2()
           ref = noL_2e_naive(l,k,j,i)
           contrib = dabs(new - ref)
           if(contrib .gt. thr) then
-            print*, ' problem on no_aaa_contraction'
+            print*, ' problem on noL_2e'
             print*, l, k, j, i
             print*, ref, new, contrib
             stop
