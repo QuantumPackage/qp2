@@ -38,7 +38,7 @@ program tc_bi_ortho
   !call test_no_v0()
 
   !call test_no_0()
-  !call test_no_1()
+  call test_no_1()
   call test_no_2()
 
 end
