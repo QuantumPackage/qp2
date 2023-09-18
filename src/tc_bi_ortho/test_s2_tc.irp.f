@@ -14,12 +14,14 @@ program test_tc
   read_wf = .True.
   touch read_wf
 
-  call routine_test_s2
-  call routine_test_s2_davidson
+  call provide_all_three_ints_bi_ortho()
+  call routine_h_triple_left
+  call routine_h_triple_right
+!  call routine_test_s2_davidson
 
 end
 
-subroutine routine_test_s2
+subroutine routine_h_triple_right
  implicit none
  logical           :: do_right 
  integer :: sze ,i, N_st, j
@@ -29,66 +31,64 @@ subroutine routine_test_s2
  sze = N_det
  N_st = 1
  allocate(v_0_ref(N_det,1),u_0(N_det,1),s_0_ref(N_det,1),s_0_new(N_det,1),v_0_new(N_det,1))
- print*,'Checking first the Left '
- do_right = .False.
- do i = 1, sze
-  u_0(i,1) = psi_l_coef_bi_ortho(i,1)
- enddo
- call H_tc_u_0_nstates_openmp(v_0_ref,u_0,N_st,sze, do_right)
- s_0_ref = 0.d0
- do i = 1, sze
-  do j = 1, sze
-    call get_s2(psi_det(1,1,i),psi_det(1,1,j),N_int,sij)
-    s_0_ref(i,1) += u_0(j,1) * sij
-  enddo
- enddo
- call H_tc_s2_u_0_nstates_openmp(v_0_new,s_0_new,u_0,N_st,sze, do_right)
- accu_e = 0.d0
- accu_s = 0.d0
- accu_e_0 = 0.d0
- accu_s_0 = 0.d0
- do i = 1, sze
-  accu_e_0 += v_0_ref(i,1) * psi_r_coef_bi_ortho(i,1)
-  accu_s_0 += s_0_ref(i,1) * psi_r_coef_bi_ortho(i,1)
-  accu_e += dabs(v_0_ref(i,1) - v_0_new(i,1))
-  accu_s += dabs(s_0_ref(i,1) - s_0_new(i,1))
- enddo
- print*,'accu_e   = ',accu_e
- print*,'accu_s   = ',accu_s
- print*,'accu_e_0 = ',accu_e_0
- print*,'accu_s_0 = ',accu_s_0
-
- print*,'Checking then the right '
- do_right = .True.
+ print*,'Checking first the Right '
  do i = 1, sze
   u_0(i,1) = psi_r_coef_bi_ortho(i,1)
  enddo
- call H_tc_u_0_nstates_openmp(v_0_ref,u_0,N_st,sze, do_right)
- s_0_ref = 0.d0
- do i = 1, sze
-  do j = 1, sze
-    call get_s2(psi_det(1,1,i),psi_det(1,1,j),N_int,sij)
-    s_0_ref(i,1) += u_0(j,1) * sij
-  enddo
- enddo
- call H_tc_s2_u_0_nstates_openmp(v_0_new,s_0_new,u_0,N_st,sze, do_right)
+ double precision :: wall0,wall1
+ call wall_time(wall0)
+ call H_tc_s2_u_0_with_pure_three_omp(v_0_ref,s_0_ref, u_0,N_st,sze)
+ call wall_time(wall1)
+ print*,'time for omp',wall1 - wall0
+ call wall_time(wall0)
+ call H_tc_s2_u_0_with_pure_three(v_0_new, s_0_new, u_0, N_st, sze)
+ call wall_time(wall1)
+ print*,'time serial ',wall1 - wall0
  accu_e = 0.d0
  accu_s = 0.d0
- accu_e_0 = 0.d0
- accu_s_0 = 0.d0
  do i = 1, sze
-  accu_e_0 += v_0_ref(i,1) * psi_l_coef_bi_ortho(i,1)
-  accu_s_0 += s_0_ref(i,1) * psi_l_coef_bi_ortho(i,1)
   accu_e += dabs(v_0_ref(i,1) - v_0_new(i,1))
   accu_s += dabs(s_0_ref(i,1) - s_0_new(i,1))
  enddo
  print*,'accu_e   = ',accu_e
  print*,'accu_s   = ',accu_s
- print*,'accu_e_0 = ',accu_e_0
- print*,'accu_s_0 = ',accu_s_0
-
 
 end
+
+subroutine routine_h_triple_left
+ implicit none
+ logical           :: do_right 
+ integer :: sze ,i, N_st, j
+ double precision :: sij, accu_e, accu_s, accu_e_0, accu_s_0
+ double precision, allocatable :: v_0_ref(:,:),u_0(:,:),s_0_ref(:,:)
+ double precision, allocatable :: v_0_new(:,:),s_0_new(:,:)
+ sze = N_det
+ N_st = 1
+ allocate(v_0_ref(N_det,1),u_0(N_det,1),s_0_ref(N_det,1),s_0_new(N_det,1),v_0_new(N_det,1))
+ print*,'Checking the Left '
+ do i = 1, sze
+  u_0(i,1) = psi_l_coef_bi_ortho(i,1)
+ enddo
+ double precision :: wall0,wall1
+ call wall_time(wall0)
+ call H_tc_s2_dagger_u_0_with_pure_three_omp(v_0_ref,s_0_ref, u_0,N_st,sze)
+ call wall_time(wall1)
+ print*,'time for omp',wall1 - wall0
+ call wall_time(wall0)
+ call H_tc_s2_dagger_u_0_with_pure_three(v_0_new, s_0_new, u_0, N_st, sze)
+ call wall_time(wall1)
+ print*,'time serial ',wall1 - wall0
+ accu_e = 0.d0
+ accu_s = 0.d0
+ do i = 1, sze
+  accu_e += dabs(v_0_ref(i,1) - v_0_new(i,1))
+  accu_s += dabs(s_0_ref(i,1) - s_0_new(i,1))
+ enddo
+ print*,'accu_e   = ',accu_e
+ print*,'accu_s   = ',accu_s
+
+end
+
 
 subroutine routine_test_s2_davidson
  implicit none

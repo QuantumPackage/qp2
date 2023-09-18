@@ -193,7 +193,7 @@ subroutine gradvec_tc_ta(t,a,res_l, res_r)
    r = list_act(rr)
    res_r_inact_test += -tc_transition_matrix_mo(r,t,1,1) * & 
    (2.d0 * mo_bi_ortho_tc_two_e(r,j,a,j) - mo_bi_ortho_tc_two_e(r,j,j,a))
-   res_l_inact_test += -tc_transition_matrix_mo(t,r,1,1) * & 
+   res_l_inact_test -= -tc_transition_matrix_mo(t,r,1,1) * & 
    (2.d0 * mo_bi_ortho_tc_two_e(a,j,r,j) - mo_bi_ortho_tc_two_e(j,a,r,j))
   enddo
  enddo
@@ -207,7 +207,7 @@ subroutine gradvec_tc_ta(t,a,res_l, res_r)
     u = list_act(uu)
     res_r_act_test += - (mo_bi_ortho_tc_two_e(v,r,u,a) * tc_two_rdm(r,v,t,u) & 
                         +mo_bi_ortho_tc_two_e(v,r,a,u) * tc_two_rdm(r,v,u,t))
-    res_l_act_test += - (mo_bi_ortho_tc_two_e(u,a,v,r) * tc_two_rdm(t,u,r,v) & 
+    res_l_act_test -= - (mo_bi_ortho_tc_two_e(u,a,v,r) * tc_two_rdm(t,u,r,v) & 
                         +mo_bi_ortho_tc_two_e(a,u,v,r) * tc_two_rdm(u,t,r,v))
    enddo
   enddo

@@ -19,6 +19,9 @@ subroutine provide_all_three_ints_bi_ortho()
     if(three_e_4_idx_term) then
       PROVIDE three_e_4_idx_direct_bi_ort three_e_4_idx_cycle_1_bi_ort three_e_4_idx_exch23_bi_ort three_e_4_idx_exch13_bi_ort 
     endif
+    if(pure_three_body_h_tc)then
+     provide three_body_ints_bi_ort
+    endif
 
     if(.not. double_normal_ord .and. three_e_5_idx_term) then
       PROVIDE three_e_5_idx_direct_bi_ort 
@@ -85,14 +88,26 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   hthree = 0.D0
 
   call get_excitation_degree(key_i, key_j, degree, Nint)
-  if(degree.gt.2) return
-
-  if(degree == 0) then
-    call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
-  else if (degree == 1) then
-    call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
-  else if(degree == 2) then
-    call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+  if(.not.pure_three_body_h_tc)then
+   if(degree.gt.2) return
+   if(degree == 0) then
+     call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
+   else if (degree == 1) then
+     call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+   else if(degree == 2) then
+     call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+   endif
+  else 
+   if(degree.gt.3) return
+   if(degree == 0) then
+     call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
+   else if (degree == 1) then
+     call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+   else if(degree == 2) then
+     call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+   else
+     call triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
+   endif
   endif
 
   if(degree==0) then

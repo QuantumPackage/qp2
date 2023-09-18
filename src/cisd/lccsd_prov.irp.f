@@ -3,7 +3,7 @@
  implicit none
  double precision, allocatable :: Dress_jj(:), H_jj(:), u_in(:,:)
  double precision :: ebefore, eafter, ecorr, thresh
- integer :: i,it
+ integer :: i,it,degree
  logical :: converged
  external H_u_0_nstates_openmp
  allocate(Dress_jj(N_det),H_jj(N_det),u_in(N_det,N_states_diag))
@@ -31,7 +31,11 @@
   print*,'ecorr = ',ecorr
   Dress_jj(1) = 0.d0
   do i = 2, N_det
-    if(ecorr + H_jj(i) .gt. H_jj(1))then
+    if(ecorr + H_jj(i) .lt. H_jj(1))then
+     print*,'Warning, some dets are not dressed: ' 
+     call get_excitation_degree(ref_bitmask,psi_det(1,1,i),degree,N_int)
+     print*,'degree, Delta E, coef', degree, H_jj(i)-H_jj(1), u_in(i,1)/u_in(1,1)
+    else
      Dress_jj(i) = ecorr
     endif
   enddo
