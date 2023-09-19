@@ -211,7 +211,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
-              tar -zxf trexio-${VERSION}.tar.gz
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT} --without-hdf5
               make -j 8 && make -j 8 check && make -j 8 install
@@ -224,7 +224,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
-              tar -zxf trexio-${VERSION}.tar.gz
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT}
               make -j 8 && make -j 8 check && make -j 8 install
@@ -235,7 +235,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
-              tar -zxf qmckl-${VERSION}.tar.gz
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
               cd qmckl-${VERSION}
               ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc
               make && make -j 4 check && make install
