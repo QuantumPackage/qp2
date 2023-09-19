@@ -149,22 +149,6 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao, (ao_num, ao_num, ao_num, 
     deallocate(b_mat)
 
     call sum_A_At(tc_grad_and_lapl_ao(1,1,1,1), ao_num*ao_num)
-  ! !$OMP PARALLEL             &
-  ! !$OMP DEFAULT (NONE)       &
-  ! !$OMP PRIVATE (i, j, k, l) & 
-  ! !$OMP SHARED (ac_mat, tc_grad_and_lapl_ao, ao_num)
-  ! !$OMP DO SCHEDULE (static)
-  !  do j = 1, ao_num
-  !    do l = 1, ao_num
-  !      do i = 1, ao_num
-  !        do k = 1, ao_num
-  !          tc_grad_and_lapl_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  ! !$OMP END DO
-  ! !$OMP END PARALLEL
 
   endif
 

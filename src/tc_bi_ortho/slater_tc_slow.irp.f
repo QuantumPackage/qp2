@@ -81,8 +81,14 @@ subroutine htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree,
   endif
 
   htot = hmono + htwoe + hthree
+
   if(degree==0) then
     htot += nuclear_repulsion
+
+    if(noL_standard) then
+      PROVIDE noL_0e
+      htot += noL_0e
+    endif
   endif
  
 end
@@ -92,7 +98,9 @@ end
 subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
 
   BEGIN_DOC
-  !  diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS 
+  !
+  ! diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS 
+  !
   END_DOC
 
   use bitmasks
@@ -108,78 +116,53 @@ subroutine diag_htilde_mu_mat_bi_ortho_slow(Nint, key_i, hmono, htwoe, htot)
 
   PROVIDE mo_bi_ortho_tc_two_e
 
-!  PROVIDE mo_two_e_integrals_tc_int_in_map mo_bi_ortho_tc_two_e
-!
-!  PROVIDE mo_integrals_erf_map core_energy nuclear_repulsion core_bitmask
-!  PROVIDE core_fock_operator
-!
-!  PROVIDE j1b_gauss
+  hmono = 0.d0
+  htwoe = 0.d0
+  htot  = 0.d0
 
-!  if(core_tc_op)then
-!   print*,'core_tc_op not already taken into account for bi ortho'
-!   print*,'stopping ...'
-!   stop
-!   do i = 1, Nint
-!    key_i_core(i,1) = xor(key_i(i,1),core_bitmask(i,1))
-!    key_i_core(i,2) = xor(key_i(i,2),core_bitmask(i,2))
-!   enddo
-!   call bitstring_to_list_ab(key_i_core, occ, Ne, Nint)
-!   hmono = core_energy - nuclear_repulsion
-!  else
-   call bitstring_to_list_ab(key_i, occ, Ne, Nint)
-   hmono = 0.d0
-!  endif
-  htwoe= 0.d0
-  htot = 0.d0
+  call bitstring_to_list_ab(key_i, occ, Ne, Nint)
 
   do ispin = 1, 2 
-   do i = 1, Ne(ispin) ! 
-    ii = occ(i,ispin) 
-    hmono += mo_bi_ortho_tc_one_e(ii,ii)
-
-!    if(core_tc_op)then
-!   print*,'core_tc_op not already taken into account for bi ortho'
-!   print*,'stopping ...'
-!   stop
-!     hmono += core_fock_operator(ii,ii) ! add the usual Coulomb - Exchange from the core 
-!    endif
-   enddo
+    do i = 1, Ne(ispin)
+      ii = occ(i,ispin) 
+      hmono += mo_bi_ortho_tc_one_e(ii,ii)
+    enddo
   enddo
 
-
-   ! alpha/beta two-body
-   ispin = 1
-   jspin = 2 
-   do i = 1, Ne(ispin) ! electron 1 (so it can be associated to mu(r1))
+  ! alpha/beta two-body
+  ispin = 1
+  jspin = 2 
+  do i = 1, Ne(ispin) ! electron 1 (so it can be associated to mu(r1))
     ii = occ(i,ispin) 
     do j = 1, Ne(jspin) ! electron 2 
-     jj = occ(j,jspin) 
-     htwoe += mo_bi_ortho_tc_two_e(jj,ii,jj,ii) 
+      jj = occ(j,jspin) 
+      htwoe += mo_bi_ortho_tc_two_e(jj,ii,jj,ii) 
     enddo
-   enddo
+  enddo
  
-   ! alpha/alpha two-body
-   do i = 1, Ne(ispin)
+  ! alpha/alpha two-body
+  do i = 1, Ne(ispin)
     ii = occ(i,ispin) 
     do j = i+1, Ne(ispin)
-     jj = occ(j,ispin) 
-     htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
+      jj = occ(j,ispin) 
+      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
     enddo
-   enddo
+  enddo
  
-   ! beta/beta two-body
-   do i = 1, Ne(jspin)
+  ! beta/beta two-body
+  do i = 1, Ne(jspin)
     ii = occ(i,jspin) 
     do j = i+1, Ne(jspin)
-     jj = occ(j,jspin) 
-     htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
+      jj = occ(j,jspin) 
+      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
     enddo
-   enddo
+  enddo
+
   htot = hmono + htwoe 
 
 end
 
-
+! ---
 
 subroutine double_htilde_mu_mat_bi_ortho_slow(Nint, key_j, key_i, hmono, htwoe, htot)
 

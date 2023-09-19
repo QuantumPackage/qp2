@@ -68,11 +68,69 @@ END_PROVIDER
 
 ! ---
 
+subroutine give_integrals_3_body_bi_ort_spin( n, sigma_n, l, sigma_l, k, sigma_k &
+                                            , m, sigma_m, j, sigma_j, i, sigma_i &
+                                            , integral)
+
+  BEGIN_DOC
+  !
+  ! < n l k | L | m j i > with a BI-ORTHONORMAL SPIN-ORBITALS
+  ! 
+  ! /!\ L is defined without the 1/6 factor
+  !
+  END_DOC
+
+  implicit none
+  integer,          intent(in)  :: n, l, k, m, j, i
+  double precision, intent(in)  :: sigma_n, sigma_l, sigma_k, sigma_m, sigma_j, sigma_i
+  double precision, intent(out) :: integral
+  integer                       :: ipoint
+  double precision              :: weight, tmp
+  logical, external             :: is_same_spin
+
+  integral = 0.d0
+
+  if( is_same_spin(sigma_n, sigma_m) .and. &
+      is_same_spin(sigma_l, sigma_j) .and. &
+      is_same_spin(sigma_k, sigma_i) ) then
+
+    PROVIDE mo_l_coef mo_r_coef
+    PROVIDE int2_grad1_u12_bimo_t
+
+    do ipoint = 1, n_points_final_grid
+
+      tmp =     mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) &
+                * ( int2_grad1_u12_bimo_t(ipoint,1,n,m) * int2_grad1_u12_bimo_t(ipoint,1,l,j)    &
+                  + int2_grad1_u12_bimo_t(ipoint,2,n,m) * int2_grad1_u12_bimo_t(ipoint,2,l,j)    &
+                  + int2_grad1_u12_bimo_t(ipoint,3,n,m) * int2_grad1_u12_bimo_t(ipoint,3,l,j) )
+
+      tmp = tmp + mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) &
+                * ( int2_grad1_u12_bimo_t(ipoint,1,n,m) * int2_grad1_u12_bimo_t(ipoint,1,k,i)    &
+                  + int2_grad1_u12_bimo_t(ipoint,2,n,m) * int2_grad1_u12_bimo_t(ipoint,2,k,i)    &
+                  + int2_grad1_u12_bimo_t(ipoint,3,n,m) * int2_grad1_u12_bimo_t(ipoint,3,k,i) )
+
+      tmp = tmp + mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
+                * ( int2_grad1_u12_bimo_t(ipoint,1,l,j) * int2_grad1_u12_bimo_t(ipoint,1,k,i)    &
+                  + int2_grad1_u12_bimo_t(ipoint,2,l,j) * int2_grad1_u12_bimo_t(ipoint,2,k,i)    &
+                  + int2_grad1_u12_bimo_t(ipoint,3,l,j) * int2_grad1_u12_bimo_t(ipoint,3,k,i) )
+
+      integral = integral + tmp * final_weight_at_r_vector(ipoint)
+    enddo
+
+  endif
+
+  return
+end subroutine give_integrals_3_body_bi_ort_spin
+
+! ---
+
 subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
+  ! < n l k | L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
+  !
+  ! /!\ L is defined without the 1/6 factor
   !
   END_DOC
 
@@ -115,7 +173,9 @@ subroutine give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
+  ! < n l k | L | m j i > with a BI-ORTHONORMAL MOLECULAR ORBITALS
+  !
+  ! /!\ L is defined without the 1/6 factor
   !
   END_DOC
 
@@ -128,35 +188,6 @@ subroutine give_integrals_3_body_bi_ort_old(n, l, k, m, j, i, integral)
   integral = 0.d0
   do ipoint = 1, n_points_final_grid
     weight = final_weight_at_r_vector(ipoint)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) &
-!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,1,l,j)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,2,l,j)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,3,l,j)  )
-!    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) &
-!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,1,k,i)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,2,k,i)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,n,m) * x_W_ki_bi_ortho_erf_rk(ipoint,3,k,i)  )
-!    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
-!              * ( x_W_ki_bi_ortho_erf_rk(ipoint,1,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,1,k,i)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,2,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,2,k,i)  &
-!                + x_W_ki_bi_ortho_erf_rk(ipoint,3,l,j) * x_W_ki_bi_ortho_erf_rk(ipoint,3,k,i)  )
-
-!    integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i) &
-!              * ( int2_grad1_u12_bimo(1,n,m,ipoint) * int2_grad1_u12_bimo(1,l,j,ipoint)        &
-!                + int2_grad1_u12_bimo(2,n,m,ipoint) * int2_grad1_u12_bimo(2,l,j,ipoint)        &
-!                + int2_grad1_u12_bimo(3,n,m,ipoint) * int2_grad1_u12_bimo(3,l,j,ipoint)        )
-!    integral += weight * mos_l_in_r_array_transp(ipoint,l) * mos_r_in_r_array_transp(ipoint,j) &
-!              * ( int2_grad1_u12_bimo(1,n,m,ipoint) * int2_grad1_u12_bimo(1,k,i,ipoint)        &
-!                + int2_grad1_u12_bimo(2,n,m,ipoint) * int2_grad1_u12_bimo(2,k,i,ipoint)        &
-!                + int2_grad1_u12_bimo(3,n,m,ipoint) * int2_grad1_u12_bimo(3,k,i,ipoint)        )
-!    integral += weight * mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,m) &
-!              * ( int2_grad1_u12_bimo(1,l,j,ipoint) * int2_grad1_u12_bimo(1,k,i,ipoint)        &
-!                + int2_grad1_u12_bimo(2,l,j,ipoint) * int2_grad1_u12_bimo(2,k,i,ipoint)        &
-!                + int2_grad1_u12_bimo(3,l,j,ipoint) * int2_grad1_u12_bimo(3,k,i,ipoint)        )
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     integral += weight * mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,i)        &
               * ( int2_grad1_u12_bimo_transp(n,m,1,ipoint) * int2_grad1_u12_bimo_transp(l,j,1,ipoint) &
                 + int2_grad1_u12_bimo_transp(n,m,2,ipoint) * int2_grad1_u12_bimo_transp(l,j,2,ipoint) &
@@ -180,7 +211,9 @@ subroutine give_integrals_3_body_bi_ort_ao(n, l, k, m, j, i, integral)
 
   BEGIN_DOC
   !
-  ! < n l k | -L | m j i > with a BI-ORTHONORMAL ATOMIC ORBITALS
+  ! < n l k | L | m j i > with a BI-ORTHONORMAL ATOMIC ORBITALS
+  !
+  ! /!\ L is defined without the 1/6 factor
   !
   END_DOC
 

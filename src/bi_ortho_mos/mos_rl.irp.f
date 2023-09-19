@@ -32,7 +32,6 @@ subroutine ao_to_mo_bi_ortho(A_ao, LDA_ao, A_mo, LDA_mo)
             , mo_l_coef, size(mo_l_coef, 1), T, size(T, 1) &
             , 0.d0, A_mo, LDA_mo )
 
-!  call restore_symmetry(mo_num,mo_num,A_mo,size(A_mo,1),1.d-12)
   deallocate(T)
 
 end subroutine ao_to_mo_bi_ortho

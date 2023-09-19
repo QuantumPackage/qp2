@@ -1,4 +1,6 @@
 
+! ---
+
 subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
 
   BEGIN_DOC
@@ -29,55 +31,77 @@ subroutine double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, 
   hthree = 0.d0
   htot   = 0.d0
 
-  if(degree.ne.2)then
-   return
+  if(degree .ne. 2) then
+    return
   endif
-  integer :: degree_i,degree_j
-  call get_excitation_degree(ref_bitmask,key_i,degree_i,N_int)
-  call get_excitation_degree(ref_bitmask,key_j,degree_j,N_int)
+
+  integer :: degree_i, degree_j
+  call get_excitation_degree(ref_bitmask, key_i, degree_i, N_int)
+  call get_excitation_degree(ref_bitmask, key_j, degree_j, N_int)
   call get_double_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
 
-  if(s1.ne.s2)then
-   ! opposite spin two-body
-    htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
-    if(three_body_h_tc.and.elec_num.gt.2)then
-     if(.not.double_normal_ord.and.three_e_5_idx_term)then
-      if(degree_i>degree_j)then
-       call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
-      else
-       call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+  if(s1 .ne. s2) then
+    ! opposite spin two-body
+
+    htwoe = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
+
+    if(three_body_h_tc .and. (elec_num .gt. 2)) then
+      ! add 3-e term
+
+      if(.not.double_normal_ord .and. three_e_5_idx_term) then
+        ! 5-idx approx
+
+        if(degree_i > degree_j) then
+          call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
+        else
+          call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+        endif
+
+      elseif(double_normal_ord) then
+        ! noL a la Manu
+
+        htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)
       endif
-     elseif(double_normal_ord)then
-      htwoe += normal_two_body_bi_orth(p2,h2,p1,h1)
-     endif
     endif
+
   else
-   ! same spin two-body
-   ! direct terms
-   htwoe  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
-   ! exchange terms
-   htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1)
-   if(three_body_h_tc.and.elec_num.gt.2)then
-    if(.not.double_normal_ord.and.three_e_5_idx_term)then
-     if(degree_i>degree_j)then
-      call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
-     else
-      call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
-     endif
-    elseif(double_normal_ord)then
-      htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)
-      htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)
+    ! same spin two-body
+
+    ! direct terms
+    htwoe = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
+
+    ! exchange terms
+    htwoe -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1)
+
+    if(three_body_h_tc .and. (elec_num .gt. 2)) then
+      ! add 3-e term
+
+      if(.not.double_normal_ord.and.three_e_5_idx_term)then
+        ! 5-idx approx
+
+        if(degree_i > degree_j) then
+          call three_comp_two_e_elem(key_j,h1,h2,p1,p2,s1,s2,hthree)
+        else
+          call three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
+        endif
+
+      elseif(double_normal_ord) then
+        ! noL a la Manu
+
+        htwoe -= normal_two_body_bi_orth(h2,p1,h1,p2)
+        htwoe += normal_two_body_bi_orth(h1,p1,h2,p2)
+      endif
     endif
-   endif
   endif
+
   hthree *= phase
   htwoe  *= phase
-  htot    =  htwoe + hthree
+  htot    = htwoe + hthree
 
 end
 
-
+! ---
 
 subroutine three_comp_two_e_elem(key_i,h1,h2,p1,p2,s1,s2,hthree)
  implicit none

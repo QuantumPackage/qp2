@@ -11,14 +11,17 @@ program tc_bi_ortho
 
   print *, 'Hello world'
 
-  my_grid_becke = .True.
+  my_grid_becke  = .True.
   PROVIDE tc_grid1_a tc_grid1_r
   my_n_pt_r_grid = tc_grid1_r
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
-  read_wf = .True.
-  touch read_wf
+  call write_int(6, my_n_pt_r_grid, 'radial  external grid over')
+  call write_int(6, my_n_pt_a_grid, 'angular external grid over')
+
+!  read_wf = .True.
+!  touch read_wf
 
 ! call test_h_u0
 ! call test_slater_tc_opt
@@ -27,10 +30,18 @@ program tc_bi_ortho
 ! call timing_single
 ! call timing_double
 
-  call test_no()
   !call test_no_aba()
   !call test_no_aab()
   !call test_no_aaa()
+
+  !call test_no()
+  !call test_no_v0()
+
+  call test_noL_0e()
+  call test_noL_1e()
+  !call test_noL_2e_v0()
+  call test_noL_2e()
+
 end
 
 subroutine test_h_u0
@@ -268,29 +279,30 @@ end
 
 ! ---
 
-subroutine test_no()
+subroutine test_no_v0()
 
   implicit none
   integer          :: i, j, k, l
-  double precision :: accu, contrib, new, ref, thr
+  double precision :: accu, contrib, new, ref, thr, norm
 
-  print*, ' testing normal_two_body_bi_orth ...'
+  print*, ' test_no_v0 ...'
 
   thr = 1d-8
 
-  PROVIDE normal_two_body_bi_orth_old
+  PROVIDE normal_two_body_bi_orth_v0
   PROVIDE normal_two_body_bi_orth
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
         do l = 1, mo_num
 
-          new = normal_two_body_bi_orth    (l,k,j,i)
-          ref = normal_two_body_bi_orth_old(l,k,j,i)
+          new = normal_two_body_bi_orth   (l,k,j,i)
+          ref = normal_two_body_bi_orth_v0(l,k,j,i)
+
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem on normal_two_body_bi_orth'
             print*, l, k, j, i
@@ -298,13 +310,62 @@ subroutine test_no()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on normal_two_body_bi_orth = ', accu / dble(mo_num)**4
 
- return
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+
+subroutine test_no()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' test_no ...'
+
+  thr = 1d-8
+
+  PROVIDE normal_two_body_bi_orth_old
+  PROVIDE normal_two_body_bi_orth
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = normal_two_body_bi_orth    (l,k,j,i)
+          ref = normal_two_body_bi_orth_old(l,k,j,i)
+
+          contrib = dabs(new - ref)
+          if(contrib .gt. thr) then
+            print*, ' problem on normal_two_body_bi_orth'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+
+          accu += contrib
+          norm += dabs(ref)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
 end
 
 ! ---
@@ -313,7 +374,7 @@ subroutine test_no_aba()
 
   implicit none
   integer          :: i, j, k, l
-  double precision :: accu, contrib, new, ref, thr
+  double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aba_contraction ...'
 
@@ -323,6 +384,7 @@ subroutine test_no_aba()
   PROVIDE no_aba_contraction
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -331,7 +393,6 @@ subroutine test_no_aba()
           new = no_aba_contraction   (l,k,j,i)
           ref = no_aba_contraction_v0(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem on no_aba_contraction'
             print*, l, k, j, i
@@ -339,13 +400,16 @@ subroutine test_no_aba()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on no_aba_contraction = ', accu / dble(mo_num)**4
 
- return
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
 end
 
 ! ---
@@ -355,7 +419,7 @@ subroutine test_no_aab()
 
   implicit none
   integer          :: i, j, k, l
-  double precision :: accu, contrib, new, ref, thr
+  double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aab_contraction ...'
 
@@ -365,6 +429,7 @@ subroutine test_no_aab()
   PROVIDE no_aab_contraction
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -373,7 +438,6 @@ subroutine test_no_aab()
           new = no_aab_contraction   (l,k,j,i)
           ref = no_aab_contraction_v0(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem on no_aab_contraction'
             print*, l, k, j, i
@@ -381,13 +445,16 @@ subroutine test_no_aab()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on no_aab_contraction = ', accu / dble(mo_num)**4
 
- return
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
 end
 
 ! ---
@@ -396,7 +463,7 @@ subroutine test_no_aaa()
 
   implicit none
   integer          :: i, j, k, l
-  double precision :: accu, contrib, new, ref, thr
+  double precision :: accu, contrib, new, ref, thr, norm
 
   print*, ' testing no_aaa_contraction ...'
 
@@ -406,6 +473,7 @@ subroutine test_no_aaa()
   PROVIDE no_aaa_contraction
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -414,7 +482,6 @@ subroutine test_no_aaa()
           new = no_aaa_contraction   (l,k,j,i)
           ref = no_aaa_contraction_v0(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem on no_aaa_contraction'
             print*, l, k, j, i
@@ -422,13 +489,179 @@ subroutine test_no_aaa()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on no_aaa_contraction = ', accu / dble(mo_num)**4
 
- return
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
 end
 
 ! ---
+
+subroutine test_noL_0e()
+
+  implicit none
+  double precision :: accu, norm, thr
+
+  thr = 1d-8
+
+  print*, ' testing noL_0e ...'
+
+  PROVIDE noL_0e_naive
+  PROVIDE noL_0e_v0
+  PROVIDE noL_0e
+
+  accu = dabs(noL_0e_naive - noL_0e)
+  norm = dabs(noL_0e_naive)
+
+  if(accu .gt. thr) then
+    print*, ' problem on noL_0e'
+    print*, noL_0e_naive, noL_0e
+    stop
+  endif
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+subroutine test_noL_1e()
+
+  implicit none
+  integer          :: i, j
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' testing noL_1e ...'
+
+  PROVIDE noL_1e_naive
+  PROVIDE noL_1e
+  PROVIDE energy_1e_noL_HF
+
+  thr = 1d-8
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      new = noL_1e      (j,i)
+      ref = noL_1e_naive(j,i)
+      contrib = dabs(new - ref)
+      if(contrib .gt. thr) then
+        print*, ' problem on noL_1e'
+        print*, j, i
+        print*, ref, new, contrib
+        stop
+      endif
+
+      accu += contrib
+      norm += dabs(ref)
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+subroutine test_noL_2e_v0()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' testing noL_2e_v0 ...'
+
+  PROVIDE noL_2e_naive
+  PROVIDE noL_2e_v0
+  PROVIDE energy_2e_noL_HF
+
+  thr = 1d-8
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = noL_2e_v0   (l,k,j,i)
+          ref = noL_2e_naive(l,k,j,i)
+          contrib = dabs(new - ref)
+          if(contrib .gt. thr) then
+            print*, ' problem on noL_2e_v0'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+          
+          accu += contrib
+          norm += dabs(ref)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+
+subroutine test_noL_2e()
+
+  implicit none
+  integer          :: i, j, k, l
+  double precision :: accu, contrib, new, ref, thr, norm
+
+  print*, ' testing noL_2e ...'
+
+  PROVIDE noL_2e_naive
+  PROVIDE noL_2e
+  PROVIDE energy_2e_noL_HF
+
+  thr = 1d-8
+
+  accu = 0.d0
+  norm = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do k = 1, mo_num
+        do l = 1, mo_num
+
+          new = noL_2e      (l,k,j,i)
+          ref = noL_2e_naive(l,k,j,i)
+          contrib = dabs(new - ref)
+          if(contrib .gt. thr) then
+            print*, ' problem on noL_2e'
+            print*, l, k, j, i
+            print*, ref, new, contrib
+            stop
+          endif
+          
+          accu += contrib
+          norm += dabs(ref)
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accu (%) = ', 100.d0*accu/norm
+
+  return
+end
+
+! ---
+
+

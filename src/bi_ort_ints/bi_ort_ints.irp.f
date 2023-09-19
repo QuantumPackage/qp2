@@ -18,10 +18,11 @@ program bi_ort_ints
 ! call test_5idx
 ! call test_5idx2
   call test_4idx()
-  call test_4idx_n4()
+  !call test_4idx_n4()
   !call test_4idx2()
   !call test_5idx2
   !call test_5idx
+
 end
 
 subroutine test_5idx2
@@ -340,7 +341,7 @@ subroutine test_4idx()
 
   implicit none
   integer          :: i, j, k, l
-  double precision :: accu, contrib, new, ref, thr
+  double precision :: accu, contrib, new, ref, thr, norm
 
   thr = 1d-10
 
@@ -348,6 +349,7 @@ subroutine test_4idx()
   PROVIDE three_e_4_idx_direct_bi_ort 
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -356,7 +358,6 @@ subroutine test_4idx()
           new = three_e_4_idx_direct_bi_ort    (l,k,j,i)
           ref = three_e_4_idx_direct_bi_ort_old(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem in three_e_4_idx_direct_bi_ort'
             print*, l, k, j, i
@@ -364,11 +365,14 @@ subroutine test_4idx()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on three_e_4_idx_direct_bi_ort = ', accu / dble(mo_num)**4
+
+  print*, ' accu on three_e_4_idx_direct_bi_ort (%) = ', 100.d0 * accu / norm
 
   ! ---
 
@@ -376,6 +380,7 @@ subroutine test_4idx()
   PROVIDE three_e_4_idx_exch13_bi_ort 
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -384,7 +389,6 @@ subroutine test_4idx()
           new = three_e_4_idx_exch13_bi_ort   (l,k,j,i)
           ref = three_e_4_idx_exch13_bi_ort_old(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem in three_e_4_idx_exch13_bi_ort'
             print*, l, k, j, i
@@ -392,11 +396,14 @@ subroutine test_4idx()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on three_e_4_idx_exch13_bi_ort = ', accu / dble(mo_num)**4
+
+  print*, ' accu on three_e_4_idx_exch13_bi_ort (%) = ', 100.d0 * accu / norm
 
   ! ---
 
@@ -404,6 +411,7 @@ subroutine test_4idx()
   PROVIDE three_e_4_idx_cycle_1_bi_ort
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -412,7 +420,6 @@ subroutine test_4idx()
           new = three_e_4_idx_cycle_1_bi_ort    (l,k,j,i)
           ref = three_e_4_idx_cycle_1_bi_ort_old(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem in three_e_4_idx_cycle_1_bi_ort'
             print*, l, k, j, i
@@ -420,11 +427,14 @@ subroutine test_4idx()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on three_e_4_idx_cycle_1_bi_ort = ', accu / dble(mo_num)**4
+
+  print*, ' accu on three_e_4_idx_cycle_1_bi_ort (%) = ', 100.d0 * accu / norm
 
   ! ---
 
@@ -432,6 +442,7 @@ subroutine test_4idx()
   PROVIDE three_e_4_idx_exch23_bi_ort
 
   accu = 0.d0
+  norm = 0.d0
   do i = 1, mo_num
     do j = 1, mo_num
       do k = 1, mo_num
@@ -440,7 +451,6 @@ subroutine test_4idx()
           new = three_e_4_idx_exch23_bi_ort    (l,k,j,i)
           ref = three_e_4_idx_exch23_bi_ort_old(l,k,j,i)
           contrib = dabs(new - ref)
-          accu += contrib
           if(contrib .gt. thr) then
             print*, ' problem in three_e_4_idx_exch23_bi_ort'
             print*, l, k, j, i
@@ -448,13 +458,18 @@ subroutine test_4idx()
             stop
           endif
 
+          accu += contrib
+          norm += dabs(ref)
         enddo
       enddo
     enddo
   enddo
-  print*, ' accu on three_e_4_idx_exch23_bi_ort = ', accu / dble(mo_num)**4
+
+  print*, ' accu on three_e_4_idx_exch23_bi_ort (%) = ', 100.d0 * accu / norm
 
   ! ---
 
   return
 end
+
+
