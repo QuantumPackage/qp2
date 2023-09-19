@@ -459,8 +459,9 @@ def write_ezfio(trexio_filename, filename):
     beta  = [ i for i in range(num_beta) ]
     if trexio.has_mo_spin(trexio_file):
        spin = trexio.read_mo_spin(trexio_file)
-       beta  = [ i for i in range(mo_num) if spin[i] == 1 ]
-       beta  = [ beta[i] for i in range(num_beta) ]
+       if max(spin) == 1:
+         beta  = [ i for i in range(mo_num) if spin[i] == 1 ]
+         beta  = [ beta[i] for i in range(num_beta) ]
 
     alpha = qp_bitmasks.BitMask(alpha)
     beta  = qp_bitmasks.BitMask(beta )

@@ -56,6 +56,9 @@ jobs:
        - name: trexio
          run: |
               ./configure -i trexio || echo OK
+       - name: qmckl
+         run: |
+              ./configure -i qmckl || echo OK
        - name: Final check
          run: |
               ./configure -c config/gfortran_debug.cfg

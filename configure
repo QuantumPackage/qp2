@@ -191,7 +191,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio qmckl"
 fi
 
 
@@ -228,6 +228,17 @@ EOF
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT}
               make -j 8 && make -j 8 check && make -j 8 install
+EOF
+    elif [[ ${PACKAGE} = qmckl ]] ; then
+
+            VERSION=0.5.2
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              tar -zxf qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc
+              make -j 4 && make -j 4 check && make install
 EOF
  
 
@@ -368,6 +379,12 @@ fi
 TREXIO=$(find_lib -ltrexio)
 if [[ ${TREXIO} = $(not_found) ]] ; then
         error "TREXIO (trexio,trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
+        fail
+fi
+
+QMCKL=$(find_lib -lqmckl)
+if [[ ${QMCKL} = $(not_found) ]] ; then
+        error "QMCkl (qmckl) is not installed."
         fail
 fi
 
