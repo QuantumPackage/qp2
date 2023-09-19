@@ -238,7 +238,7 @@ EOF
               tar -zxf qmckl-${VERSION}.tar.gz
               cd qmckl-${VERSION}
               ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc
-              make -j 4 && make -j 4 check && make install
+              make && make -j 4 check && make install
 EOF
  
 
