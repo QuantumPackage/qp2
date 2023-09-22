@@ -18,12 +18,13 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_direct_bi_ort, (mo_num, mo_num,
   double precision :: integral, wall1, wall0
 
   PROVIDE mo_l_coef mo_r_coef
+  provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
   three_e_3_idx_direct_bi_ort = 0.d0
   print *, ' Providing the three_e_3_idx_direct_bi_ort ...'
   call wall_time(wall0)
 
-  provide mos_r_in_r_array_transp mos_l_in_r_array_transp
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
 
   !$OMP PARALLEL                 &
   !$OMP DEFAULT (NONE)           &
@@ -79,6 +80,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_1_bi_ort, (mo_num, mo_num
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 
@@ -135,6 +137,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_cycle_2_bi_ort, (mo_num, mo_num
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 
@@ -191,6 +194,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch23_bi_ort, (mo_num, mo_num,
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 
@@ -247,6 +251,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch13_bi_ort, (mo_num, mo_num,
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 
@@ -303,6 +308,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort, (mo_num, mo_num,
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 
@@ -349,6 +355,7 @@ BEGIN_PROVIDER [ double precision, three_e_3_idx_exch12_bi_ort_new, (mo_num, mo_
 
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
 
+  call give_integrals_3_body_bi_ort(1, 1, 1, 1, 1, 1, integral)
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
  !$OMP PRIVATE (i,j,m,integral) & 

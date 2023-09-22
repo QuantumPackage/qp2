@@ -59,6 +59,10 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
   if (rc /= QMCKL_SUCCESS) stop -1
 
 
+  rc =  qmckl_set_jastrow_champ_cord_num(qmckl_ctx_jastrow, jast_qmckl_cord_num*1_8)
+  rc = qmckl_check(qmckl_ctx_jastrow, rc)
+  if (rc /= QMCKL_SUCCESS) stop -1
+
   if (jast_qmckl_cord_num > 0) then
     rc =  qmckl_set_jastrow_champ_c_vector(qmckl_ctx_jastrow, jast_qmckl_c_vector, 1_8*jast_qmckl_c_vector_size)
     rc = qmckl_check(qmckl_ctx_jastrow, rc)

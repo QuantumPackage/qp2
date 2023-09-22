@@ -30,9 +30,22 @@ subroutine main()
 
   allocate(Sl(mo_num,mo_num), Sr(mo_num,mo_num), Pf(mo_num,mo_num))
 
-  call dgemm( "T", "N", mo_num, mo_num, ao_num, 1.d0                       &
-            , mo_l_coef, size(mo_l_coef, 1), mo_l_coef, size(mo_l_coef, 1) &
-            , 0.d0, Sl, size(Sl, 1) )
+
+  call LTxSxR(ao_num, mo_num, mo_l_coef, ao_overlap, mo_r_coef, Sl)
+  !call dgemm( "T", "N", mo_num, mo_num, ao_num, 1.d0                       &
+  !          , mo_l_coef, size(mo_l_coef, 1), mo_l_coef, size(mo_l_coef, 1) &
+  !          , 0.d0, Sl, size(Sl, 1) )
+
+  print *, ''
+  print *, ' left-right orthog matrix:'
+  do i = 1, mo_num
+    write(*,'(100(F8.4,X))') Sl(:,i)
+  enddo
+
+  call LTxSxR(ao_num, mo_num, mo_l_coef, ao_overlap, mo_l_coef, Sl)
+  !call dgemm( "T", "N", mo_num, mo_num, ao_num, 1.d0                       &
+  !          , mo_l_coef, size(mo_l_coef, 1), mo_l_coef, size(mo_l_coef, 1) &
+  !          , 0.d0, Sl, size(Sl, 1) )
 
   print *, ''
   print *, ' left-orthog matrix:'
@@ -40,9 +53,10 @@ subroutine main()
     write(*,'(100(F8.4,X))') Sl(:,i)
   enddo
 
-  call dgemm( "T", "N", mo_num, mo_num, ao_num, 1.d0                       &
-            , mo_r_coef, size(mo_r_coef, 1), mo_r_coef, size(mo_r_coef, 1) &
-            , 0.d0, Sr, size(Sr, 1) )
+  call LTxSxR(ao_num, mo_num, mo_r_coef, ao_overlap, mo_r_coef, Sr)
+!  call dgemm( "T", "N", mo_num, mo_num, ao_num, 1.d0                       &
+!            , mo_r_coef, size(mo_r_coef, 1), mo_r_coef, size(mo_r_coef, 1) &
+!            , 0.d0, Sr, size(Sr, 1) )
 
   print *, ''
   print *, ' right-orthog matrix:'
