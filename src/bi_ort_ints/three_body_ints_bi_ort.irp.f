@@ -29,6 +29,9 @@ BEGIN_PROVIDER [ double precision, three_body_ints_bi_ort, (mo_num, mo_num, mo_n
 
   !provide x_W_ki_bi_ortho_erf_rk
   provide mos_r_in_r_array_transp mos_l_in_r_array_transp
+  provide int2_grad1_u12_ao_transp final_grid_points int2_grad1_u12_bimo_t
+  provide mo_l_coef mo_r_coef mos_l_in_r_array_transp mos_r_in_r_array_transp n_points_final_grid
+
 
  !$OMP PARALLEL                       &
  !$OMP DEFAULT (NONE)                 &
