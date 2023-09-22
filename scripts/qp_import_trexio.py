@@ -133,7 +133,7 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
-        if basis_type.lower() in ["gaussian", "slater"]:
+        if basis_type.lower()[0] in ["g", "s"]:
             shell_num   = trexio.read_basis_shell_num(trexio_file)
             prim_num    = trexio.read_basis_prim_num(trexio_file)
             ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
@@ -454,19 +454,33 @@ def write_ezfio(trexio_filename, filename):
     else:
         print("None")
 
-    print("Determinant\t\t...\t", end=' ')
+    print("Determinant\t...\t", end=' ')
     alpha = [ i for i in range(num_alpha) ]
     beta  = [ i for i in range(num_beta) ]
     if trexio.has_mo_spin(trexio_file):
        spin = trexio.read_mo_spin(trexio_file)
        if max(spin) == 1:
-         beta  = [ i for i in range(mo_num) if spin[i] == 1 ]
+         alpha = [ i for i in range(len(spin)) if spin[i] == 0 ]
+         alpha = [ alpha[i] for i in range(num_alpha) ]
+         beta  = [ i for i in range(len(spin)) if spin[i] == 1 ]
          beta  = [ beta[i] for i in range(num_beta) ]
-
-    alpha = qp_bitmasks.BitMask(alpha)
-    beta  = qp_bitmasks.BitMask(beta )
-    print(alpha)
-    print(beta)
+         print("Warning -- UHF orbitals --", end=' ')
+    alpha_s = ['0']*mo_num
+    beta_s  = ['0']*mo_num
+    for i in alpha:
+      alpha_s[i] = '1'
+    for i in beta:
+      beta_s[i] = '1'
+    alpha_s = ''.join(alpha_s)[::-1]
+    beta_s = ''.join(beta_s)[::-1]
+    alpha = [ int(i,2) for i in qp_bitmasks.string_to_bitmask(alpha_s) ][::-1]
+    beta  = [ int(i,2) for i in qp_bitmasks.string_to_bitmask(beta_s ) ][::-1]
+    ezfio.set_determinants_bit_kind(8)
+    ezfio.set_determinants_n_int(1+mo_num//64)
+    ezfio.set_determinants_n_det(1)
+    ezfio.set_determinants_n_states(1)
+    ezfio.set_determinants_psi_det(alpha+beta)
+    ezfio.set_determinants_psi_coef([[1.0]])
     print("OK")
 
 
