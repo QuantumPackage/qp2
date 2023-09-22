@@ -320,24 +320,38 @@ end
   enddo
 
   double precision, allocatable :: buffer(:,:)
-  allocate(buffer(N_det,N_states))
+  allocate(buffer(psi_det_size,N_states))
+  print*,'passed the allocate'
+!  print*,N_det,N_states
+!  print*,size(psi_l_coef_bi_ortho,1),size(psi_l_coef_bi_ortho,2)
+!  print*,size(leigvec_tc_bi_orth,1),size(leigvec_tc_bi_orth,2)
+!  print*,size(reigvec_tc_bi_orth,1),size(reigvec_tc_bi_orth,2)
+!  print*,size(psi_r_coef_bi_ortho,1),size(psi_r_coef_bi_ortho,2)
+  buffer = 0.d0
   do k = 1, N_states
     do i = 1, N_det
       psi_l_coef_bi_ortho(i,k) = leigvec_tc_bi_orth(i,k)
       buffer(i,k) = leigvec_tc_bi_orth(i,k)
     enddo
   enddo
+  print*,'passed the first loop'
   TOUCH psi_l_coef_bi_ortho
+  print*,'passed the TOUCH psi_l_coef_bi_ortho'
   call ezfio_set_tc_bi_ortho_psi_l_coef_bi_ortho(buffer)
+  print*,'passed the ezfio_set_tc_bi_ortho_psi_l_coef_bi_ortho'
   do k = 1, N_states
     do i = 1, N_det
       psi_r_coef_bi_ortho(i,k) = reigvec_tc_bi_orth(i,k)
       buffer(i,k) = reigvec_tc_bi_orth(i,k)
     enddo
   enddo
+  print*,'passed the second loop'
   TOUCH psi_r_coef_bi_ortho
+  print*,'passed the TOUCH psi_r_coef_bi_ortho'
   call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
+  print*,'passed the ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho'
   deallocate(buffer)
+  print*,'passed saving the wf'
 !  print*,'After diag'
 !  do i = 1, N_det! old version
 !   print*,'i',i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
