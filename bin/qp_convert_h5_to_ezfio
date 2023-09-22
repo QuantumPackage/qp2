@@ -150,6 +150,7 @@ def flatten(l):
     return res
 
 def save_array_do(ezfioname,subdir,data,chunksize=16384):
+    print(f'writing {ezfioname}/{subdir}')
     dims = list(reversed(data.shape))
     rank = len(dims)
     flatdata = data.reshape(-1)
@@ -166,7 +167,7 @@ def save_array_do(ezfioname,subdir,data,chunksize=16384):
             #f.write((chunksize*'{:24.15E}\n').format(*flatdata[i*chunksize:(i+1)*chunksize]).encode())
             #f.write(fmtstring.format(*flatdata[i*chunksize:(i+1)*chunksize]).encode())
             f.write((''.join("%24.15E\n" % xi for xi in flatdata[i*chunksize:(i+1)*chunksize])).encode())
-            print(f'{100.*i/(dim_max//chunksize):7.3f}% complete')
+            print(f'{100.*i/(dim_max//chunksize):7.3f}% complete',end='\r')
         rem = dim_max%chunksize
         if rem:
             f.write((rem*'{:24.15E}\n').format(*flatdata[-rem:]).encode())
@@ -1126,6 +1127,7 @@ def convert_kpts(filename,qph5path,qmcpack=True):
     #            dfao_cmplx0 = np.stack((dfao_re0,dfao_im0),axis=-1).tolist()
     #            ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_cmplx0)
                 #dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()].tolist()
+                print('reading ao_two_e_ints/df_ao_integrals')
                 dfao_reim=qph5['ao_two_e_ints/df_ao_integrals'][()]
                 save_array_do(filename,'ao_two_e_ints/df_ao_integrals_complex',dfao_reim)
                 #ezfio.set_ao_two_e_ints_df_ao_integrals_complex(dfao_reim)
