@@ -38,6 +38,15 @@ else:
                 QP_ROOT + "/install",
                 QP_ROOT + "/scripts"] + sys.path
 
+def uint64_to_int64(u):
+    # Check if the most significant bit is set
+    if u & (1 << 63):
+        # Calculate the two's complement
+        result = -int(np.bitwise_not(np.uint64(u))+1)
+    else:
+        # The number is already positive
+        result = u
+    return result
 
 def generate_xyz(l):
 
@@ -133,7 +142,7 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
-        if basis_type.lower()[0] in ["g", "s"]:
+        if basis_type.lower() in ["gaussian", "slater"]:
             shell_num   = trexio.read_basis_shell_num(trexio_file)
             prim_num    = trexio.read_basis_prim_num(trexio_file)
             ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
@@ -473,8 +482,15 @@ def write_ezfio(trexio_filename, filename):
       beta_s[i] = '1'
     alpha_s = ''.join(alpha_s)[::-1]
     beta_s = ''.join(beta_s)[::-1]
-    alpha = [ int(i,2) for i in qp_bitmasks.string_to_bitmask(alpha_s) ][::-1]
-    beta  = [ int(i,2) for i in qp_bitmasks.string_to_bitmask(beta_s ) ][::-1]
+    def conv(i):
+      try:
+        result = np.int64(i)
+      except:
+        result = np.int64(i-2**63-1)
+      return result
+
+    alpha = [ uint64_to_int64(int(i,2)) for i in qp_bitmasks.string_to_bitmask(alpha_s) ][::-1]
+    beta  = [ uint64_to_int64(int(i,2)) for i in qp_bitmasks.string_to_bitmask(beta_s ) ][::-1]
     ezfio.set_determinants_bit_kind(8)
     ezfio.set_determinants_n_int(1+mo_num//64)
     ezfio.set_determinants_n_det(1)
