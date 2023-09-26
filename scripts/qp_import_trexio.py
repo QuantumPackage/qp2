@@ -142,7 +142,7 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
-        if basis_type.lower()[0] in ["g", "s"]:
+        if basis_type.lower() in ["gaussian", "slater"]:
             shell_num   = trexio.read_basis_shell_num(trexio_file)
             prim_num    = trexio.read_basis_prim_num(trexio_file)
             ang_mom     = trexio.read_basis_shell_ang_mom(trexio_file)
