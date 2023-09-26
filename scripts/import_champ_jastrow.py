@@ -49,12 +49,13 @@ if __name__ == '__main__':
   ezfio.set_jastrow_jast_qmckl_type_nucl_num(jastrow['type_num'])
   charges = ezfio.get_nuclei_nucl_charge()
   types = {}
-  k = 0
+  k = 1
   for c in charges:
     if c not in types:
       types[c] = k
       k += 1
   type_nucl_vector = [types[c] for c in charges]
+  print(type_nucl_vector)
   ezfio.set_jastrow_jast_qmckl_type_nucl_vector(type_nucl_vector)
   ezfio.set_jastrow_jast_qmckl_rescale_ee(jastrow['scale_k'])
   ezfio.set_jastrow_jast_qmckl_rescale_en([jastrow['scale_k'] for i in type_nucl_vector])

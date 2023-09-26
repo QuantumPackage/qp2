@@ -17,10 +17,10 @@
   !
   ! notice the -1 sign: in this way three_e_4_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
   !
-  ! three_e_4_idx_direct_bi_ort (m,j,k,i) : Lk Ri Imm Ijj + Lj Rj Imm Iki + Lm Rm Ijj Iki 
-  ! three_e_4_idx_exch13_bi_ort (m,j,k,i) : Lk Rm Imi Ijj + Lj Rj Imi Ikm + Lm Ri Ijj Ikm 
+  ! three_e_4_idx_direct_bi_ort (m,j,k,i) : Lk Ri Imm Ijj + Lj Rj Imm Iki + Lm Rm Ijj Iki
+  ! three_e_4_idx_exch13_bi_ort (m,j,k,i) : Lk Rm Imi Ijj + Lj Rj Imi Ikm + Lm Ri Ijj Ikm
   ! three_e_4_idx_exch23_bi_ort (m,j,k,i) : Lk Ri Imj Ijm + Lj Rm Imj Iki + Lm Rj Ijm Iki
-  ! three_e_4_idx_cycle_1_bi_ort(m,j,k,i) : Lk Rm Imj Iji + Lj Ri Imj Ikm + Lm Rj Iji Ikm 
+  ! three_e_4_idx_cycle_1_bi_ort(m,j,k,i) : Lk Rm Imj Iji + Lj Ri Imj Ikm + Lm Rj Iji Ikm
   !
   END_DOC
 
@@ -74,8 +74,8 @@
 
   !$OMP PARALLEL                                                            &
   !$OMP DEFAULT (NONE)                                                      &
-  !$OMP PRIVATE (n, ipoint, tmp_loc_1, tmp_loc_2, tmp_2d, tmp1, tmp2)       &
-  !$OMP SHARED (mo_num, n_points_final_grid, i, k,                          &
+  !$OMP PRIVATE (k, i, j, m, n, ipoint, tmp_loc_1, tmp_loc_2, tmp_2d, tmp1, tmp2) &
+  !$OMP SHARED (mo_num, n_points_final_grid,                                &
   !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp,           &
   !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,            &
   !$OMP         tmp_aux_1, tmp_aux_2,                                       &
@@ -125,17 +125,17 @@
 
       do n = 1, mo_num
         do ipoint = 1, n_points_final_grid
-      
+
           tmp_loc_1 = mos_l_in_r_array_transp(ipoint,k) * mos_r_in_r_array_transp(ipoint,n)
           tmp_loc_2 = mos_l_in_r_array_transp(ipoint,n) * mos_r_in_r_array_transp(ipoint,i)
-      
+
           tmp1(ipoint,1,n) = int2_grad1_u12_bimo_t(ipoint,1,n,i) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,1,k,n) * tmp_loc_2
           tmp1(ipoint,2,n) = int2_grad1_u12_bimo_t(ipoint,2,n,i) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,2,k,n) * tmp_loc_2
           tmp1(ipoint,3,n) = int2_grad1_u12_bimo_t(ipoint,3,n,i) * tmp_loc_1 + int2_grad1_u12_bimo_t(ipoint,3,k,n) * tmp_loc_2
           tmp1(ipoint,4,n) = int2_grad1_u12_bimo_t(ipoint,1,n,i) * int2_grad1_u12_bimo_t(ipoint,1,k,n) &
                            + int2_grad1_u12_bimo_t(ipoint,2,n,i) * int2_grad1_u12_bimo_t(ipoint,2,k,n) &
                            + int2_grad1_u12_bimo_t(ipoint,3,n,i) * int2_grad1_u12_bimo_t(ipoint,3,k,n)
-      
+
           tmp2(ipoint,1,n) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,i,n)
           tmp2(ipoint,2,n) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,i,n)
           tmp2(ipoint,3,n) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,i,n)
@@ -225,7 +225,7 @@
   print *, ' wall time for three_e_4_idx_bi_ort', wall1 - wall0
   call print_memory_usage()
 
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
