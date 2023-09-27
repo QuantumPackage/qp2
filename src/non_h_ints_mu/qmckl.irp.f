@@ -6,11 +6,10 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
   ! Context for the QMCKL library
   END_DOC
   integer(qmckl_exit_code) :: rc
-  logical(c_bool) :: c_true = .True.
 
   qmckl_ctx_jastrow = qmckl_context_create()
 
-  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, c_true)
+  rc =  qmckl_set_jastrow_champ_spin_independent(qmckl_ctx_jastrow, 1)
   rc = qmckl_check(qmckl_ctx_jastrow, rc)
   if (rc /= QMCKL_SUCCESS) stop -1
 
