@@ -135,7 +135,7 @@ def make_reim_identity_kblocks(nk,nm,na=None):
 
 def make_reim_identity_block_diag(nk,nm,na=None):
     from scipy.linalg import block_diag
-    kblocks = make_reim_identity_kblocks(nk,nm,na).view(dtype=np.complex128).squeeze()
+    kblocks = make_reim_identity_kblocks(nk,nm,na).view(dtype=np.complex128).squeeze(axis=3)
     kblockdiag = block_diag(*kblocks).view(dtype=np.float64).reshape((nk*nm,nk*na,2))
     print(f'kblockdiag.shape = {kblockdiag.shape}')
     return kblockdiag
