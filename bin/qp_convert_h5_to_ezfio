@@ -305,6 +305,7 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
         NMOPerKP = qph5['Hamiltonian/NMOPerKP'][()]
         _, _, kpt_num, orb_num, elec_alpha_num_tot, elec_beta_num_tot, _, nchol_maybe = ham_dims
 
+        nuclear_repulsion = qph5['Hamiltonian/Energies'][0]
         #for now, all kpts must have same number of MOs
         for nmoi in NMOPerKP:
             if nmoi != NMOPerKP[0]:
@@ -334,10 +335,17 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
     ezfio.set_nuclei_kpt_num(kpt_num)
     kpt_pair_num = (kpt_num*kpt_num + kpt_num)//2
     ezfio.set_nuclei_kpt_pair_num(kpt_pair_num)
+
     # don't multiply nuclei by kpt_num
     # work in k-space, not in equivalent supercell
     #nucl_num_per_kpt = nucl_num
     #ezfio.set_nuclei_nucl_num(nucl_num_per_kpt)
+
+
+    ezfio.set_nuclei_io_nuclear_repulsion('Read')
+    ezfio.set_nuclei_nuclear_repulsion(nuclear_repulsion)
+    #ezfio.set_nuclei_madelung_constant(madconst)
+
     # these are totals (kpt_num * num_per_kpt)
     # need to change if we want to truncate orbital space within pyscf
     #if is_ao:
@@ -406,15 +414,15 @@ def convert_kpts_cd(filename,qph5path,qmcpack=True,is_ao=True):
         ovlp_ao_reim = make_reim_identity_kblocks(kpt_num,ao_num_per_kpt,ao_num_per_kpt)
         ne_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
         kin_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
-        try:
-            #TODO: ensure pseudo is included in nuc-elec term?
+        hcore_ao_reim = np.zeros((kpt_num,ao_num_per_kpt,ao_num_per_kpt,2),dtype=np.float64)
+        if 'Hamiltonian/H1_kin_kp0' in qph5:
             for i in range(kpt_num):
-                ne_ao_reim[i] = qph5[f'Hamiltonian/H1_nuc_kp{i}'][()]
-                kin_ao_reim[i] = qph5[f'Hamiltonian/H1_kinetic_kp{i}'][()]
-        except KeyError:
-            # QE/pyscf doesn't have separate kinetic, nuc-elec, pseudo 1e ints, so just combine in nuc-elec and set rest to zero
-            for i in range(kpt_num):
-                ne_ao_reim[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
+                kin_ao_reim[i] = qph5[f'Hamiltonian/H1_kin_kp{i}'][()]
+        #if 'Hamiltonian/H1_kp0' in qph5:
+        for i in range(kpt_num):
+            hcore_ao_reim[i] = qph5[f'Hamiltonian/H1_kp{i}'][()]
+
+        ne_ao_reim = hcore_ao_reim - kin_ao_reim
 
         ezfio.set_ao_one_e_ints_ao_integrals_kinetic_kpts(kin_ao_reim)
         ezfio.set_ao_one_e_ints_ao_integrals_overlap_kpts(ovlp_ao_reim)
