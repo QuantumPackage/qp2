@@ -1,10 +1,11 @@
-subroutine run_stochastic_cipsi
+subroutine run_stochastic_cipsi(Ev,PT2) 
   use selection_types
   implicit none
   BEGIN_DOC
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
   END_DOC
   integer                        :: i,j,k
+  double precision, intent(out)  :: Ev(N_states), PT2(N_states) 
   double precision, allocatable  :: zeros(:)
   integer                        :: to_select
   type(pt2_type)                 :: pt2_data, pt2_data_err
@@ -139,6 +140,8 @@ subroutine run_stochastic_cipsi
     call print_mol_properties()
     call write_cipsi_json(pt2_data,pt2_data_err)
   endif
+  Ev(1:N_states) = psi_energy_with_nucl_rep(1:N_states)
+  PT2(1:N_states) = pt2_data % pt2(1:N_states)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
 

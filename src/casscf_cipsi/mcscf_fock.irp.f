@@ -77,4 +77,15 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
    
 END_PROVIDER
  
- 
+ BEGIN_PROVIDER [ double precision, mcscf_fock_alpha, (ao_num, ao_num)] 
+&BEGIN_PROVIDER [ double precision, mcscf_fock_beta, (ao_num, ao_num)] 
+ implicit none
+ BEGIN_DOC
+  ! mcscf_fock_alpha are set to usual Fock like operator but computed with the MCSCF densities 
+ END_DOC
+ SCF_density_matrix_ao_alpha = D0tu_alpha_ao
+ SCF_density_matrix_ao_beta = D0tu_beta_ao
+ soft_touch SCF_density_matrix_ao_alpha SCF_density_matrix_ao_beta 
+ mcscf_fock_beta = fock_matrix_ao_beta
+ mcscf_fock_alpha = fock_matrix_ao_alpha
+END_PROVIDER 
