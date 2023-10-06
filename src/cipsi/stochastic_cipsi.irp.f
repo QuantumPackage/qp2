@@ -80,12 +80,14 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     to_select = max(N_states_diag, to_select)
 
 
+    Ev(1:N_states) = psi_energy_with_nucl_rep(1:N_states)
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
     call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error,to_select) ! Stochastic PT2 and selection
 
+    PT2(1:N_states) = pt2_data % pt2(1:N_states)
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
                     (psi_energy_with_nucl_rep(1) + pt2_data % rpt2(1) - hf_energy_ref)
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
@@ -140,8 +142,6 @@ subroutine run_stochastic_cipsi(Ev,PT2)
     call print_mol_properties()
     call write_cipsi_json(pt2_data,pt2_data_err)
   endif
-  Ev(1:N_states) = psi_energy_with_nucl_rep(1:N_states)
-  PT2(1:N_states) = pt2_data % pt2(1:N_states)
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
 

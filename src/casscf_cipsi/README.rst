@@ -32,12 +32,16 @@ qp set_mo_class -c "[1-2]" -a "[3-10]" -v "[11-46]"
 qp set casscf_cipsi small_active_space True 
 # RUN THE CASSCF 
 qp run casscf | tee ${EZFIO_FILE}.casscf.out
+# you should find around -149.7243542
 
 
 b) Large active space : Exploit the selected CI in the active space 
 -------------------------------------------------------------------
-Let us start from the small active space calculation orbitals and add another shell of 
+#Let us start from the small active space calculation orbitals and add another 10 virtuals: CASSCF(12e,20orb)
+qp set_mo_class -c "[1-2]" -a "[3-20]" -v "[21-46]"
+# As this active space is larger, you unset the small_active_space feature 
+qp set casscf_cipsi small_active_space False
+# As it is a large active space, the energy convergence thereshold is set to be 0.0001
+qp run casscf | tee ${EZFIO_FILE}.casscf_large.out
+# you should find around -149.9046
 
-
-
-TODO : print FOCK MCSCF NEW in the MO BASIS AT THE END OF THE CASSCF 

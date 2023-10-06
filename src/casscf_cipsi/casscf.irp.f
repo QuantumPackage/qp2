@@ -11,6 +11,7 @@ program casscf
   if(small_active_space)then
    pt2_relative_error = 0.00001
   else
+   thresh_scf = 1.d-4
    pt2_relative_error = 0.04
   endif
   touch pt2_relative_error 
@@ -45,6 +46,7 @@ subroutine run
   do while (.not.converged)
     print*,'pt2_max = ',pt2_max
     call run_stochastic_cipsi(Ev,PT2)
+    print*,'Ev,PT2',Ev(1),PT2(1)
     E_PT2(1:N_states) = Ev(1:N_states) + PT2(1:N_states)
     energy_old = energy
     energy = eone+etwo+ecore
