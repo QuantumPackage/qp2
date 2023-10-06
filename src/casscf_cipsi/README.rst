@@ -39,3 +39,5 @@ b) Large active space : Exploit the selected CI in the active space
 Let us start from the small active space calculation orbitals and add another shell of 
 
 
+
+TODO : print FOCK MCSCF NEW in the MO BASIS AT THE END OF THE CASSCF 

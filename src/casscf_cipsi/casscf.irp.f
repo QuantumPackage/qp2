@@ -121,24 +121,22 @@ subroutine run
 
   enddo
      integer :: i
-!    print*,'Converged CASSCF '
-!    print*,'--------------------------'
-!    write(6,*) ' occupation numbers of orbitals '
-!    do i=1,mo_num
-!      write(6,*) i,occnum(i)
-!    end do
+    print*,'Converged CASSCF '
+    print*,'--------------------------'
+    write(6,*) ' occupation numbers of orbitals '
+    do i=1,mo_num
+      write(6,*) i,occnum(i)
+    end do
+    print*,'--------------'
 !
 !     write(6,*)
 !     write(6,*) ' the diagonal of the inactive effective Fock matrix '
 !     write(6,'(5(i3,F12.5))') (i,Fipq(i,i),i=1,mo_num)
 !     write(6,*)
-  print*,'Fock ROHF '
-  do i = 1, ao_num
-   write(33,*)fock_matrix_ao_alpha(i,1:ao_num)
-  enddo
   print*,'Fock MCSCF'
-  do i = 1, ao_num
-   write(34,*)mcscf_fock_alpha(i,1:ao_num)
+  do i = 1, mo_num
+   write(*,*)i,mcscf_fock_diag_mo(i)
+!   write(*,*)mcscf_fock_alpha_mo(i,i)
   enddo
 
 
