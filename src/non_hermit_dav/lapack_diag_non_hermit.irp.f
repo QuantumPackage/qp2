@@ -1857,7 +1857,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
   integer                       :: i, j
   double precision, allocatable :: SS(:,:)
 
-  !print *, ' check bi-orthogonality'
+  print *, ' check bi-orthogonality'
 
   ! ---
 
@@ -1865,10 +1865,10 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
             , Vl, size(Vl, 1), Vr, size(Vr, 1) &
             , 0.d0, S, size(S, 1) )
 
-  !print *, ' overlap matrix:'
-  !do i = 1, m
-  !  write(*,'(1000(F16.10,X))') S(i,:)
-  !enddo
+  print *, ' overlap matrix:'
+  do i = 1, m
+    write(*,'(1000(F16.10,X))') S(i,:)
+  enddo
 
   accu_d  = 0.d0
   accu_nd = 0.d0
@@ -1883,8 +1883,8 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
   enddo
   accu_nd = dsqrt(accu_nd) / dble(m)
 
-  !print *, ' accu_nd = ', accu_nd
-  !print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
+  print *, ' accu_nd = ', accu_nd
+  print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
 
   ! ---
 
@@ -1987,11 +1987,11 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
     enddo
   enddo
   
-  !do i = 1, n
-  !  if(deg_num(i) .gt. 1) then
-  !    print *, ' degen on', i, deg_num(i), e0(i)
-  !  endif
-  !enddo
+  do i = 1, n
+    if(deg_num(i) .gt. 1) then
+      print *, ' degen on', i, deg_num(i), e0(i)
+    endif
+  enddo
 
   ! ---
 
@@ -2010,7 +2010,7 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
 
       ! ---
 
-      call impose_orthog_svd(n, m, L)
+!      call impose_orthog_svd(n, m, L)
       call impose_orthog_svd(n, m, R)
       !call impose_orthog_GramSchmidt(n, m, L)
       !call impose_orthog_GramSchmidt(n, m, R)
@@ -2030,7 +2030,8 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
       !call bi_ortho_s_inv_half(m, L, R, S_inv_half)
       !deallocate(S, S_inv_half)
 
-      call impose_biorthog_svd(n, m, L, R)
+!      call impose_biorthog_svd(n, m, L, R)
+!     call impose_biorthog_inverse(n, m, L, R)
 
       !call impose_biorthog_qr(n, m, thr_d, thr_nd, L, R)
 
@@ -2045,6 +2046,7 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
 
     endif
   enddo
+  call impose_biorthog_inverse(n, n, L0, R0)
 
 end subroutine impose_biorthog_degen_eigvec 
 
@@ -2420,10 +2422,10 @@ subroutine impose_biorthog_svd(n, m, L, R)
             , L, size(L, 1), R, size(R, 1) &
             , 0.d0, S, size(S, 1) )
 
-  !print *, ' overlap bef SVD: '
-  !do i = 1, m
-  !  write(*, '(1000(F16.10,X))') S(i,:)
-  !enddo
+  print *, ' overlap bef SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
 
   ! ---
  
@@ -2495,16 +2497,60 @@ subroutine impose_biorthog_svd(n, m, L, R)
             , L, size(L, 1), R, size(R, 1) &
             , 0.d0, S, size(S, 1) )
 
-  !print *, ' overlap aft SVD: '
-  !do i = 1, m
-  !  write(*, '(1000(F16.10,X))') S(i,:)
-  !enddo
+  print *, ' overlap aft SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
 
   deallocate(S)
 
   ! ---
 
 end subroutine impose_biorthog_svd
+
+subroutine impose_biorthog_inverse(n, m, L, R)
+
+  implicit none
+
+  integer,          intent(in)    :: n, m
+  double precision, intent(inout) :: L(n,m)
+  double precision, intent(in)    :: R(n,m)
+  double precision, allocatable :: Lt(:,:),S(:,:)
+  integer :: i,j
+  allocate(Lt(m,n))
+  allocate(S(m,m))
+
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , L, size(L, 1), R, size(R, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' overlap bef SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+
+  call get_pseudo_inverse(R,n,n,m,Lt,m,1.d-6)
+  do i = 1, m
+   do j = 1, n
+    L(j,i) = Lt(i,j)
+   enddo
+  enddo
+  ! ---
+
+  call dgemm( 'T', 'N', m, m, n, 1.d0      &
+            , L, size(L, 1), R, size(R, 1) &
+            , 0.d0, S, size(S, 1) )
+
+  print *, ' overlap aft SVD: '
+  do i = 1, m
+    write(*, '(1000(F16.10,X))') S(i,:)
+  enddo
+
+  deallocate(S,Lt)
+
+
+end subroutine impose_biorthog_svd
+
 
 ! ---
 

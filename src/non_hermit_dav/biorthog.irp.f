@@ -331,7 +331,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !thr    = 100d0
   thr    = Im_thresh_tcscf
   do i = 1, n
-    !print*, 'Re(i) + Im(i)', WR(i), WI(i)
+    print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
@@ -405,7 +405,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   if( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .lt. thr_d) ) then
 
-    !print *, ' lapack vectors are normalized and bi-orthogonalized'
+    print *, ' lapack vectors are normalized and bi-orthogonalized'
     deallocate(S)
     return
 
@@ -422,7 +422,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   else
 
-    !print *, ' lapack vectors are not normalized neither bi-orthogonalized'
+    print *, ' lapack vectors are not normalized neither bi-orthogonalized'
 
     ! ---
 

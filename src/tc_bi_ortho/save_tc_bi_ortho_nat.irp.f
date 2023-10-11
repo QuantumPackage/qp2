@@ -22,6 +22,7 @@ program tc_natorb_bi_ortho
 
   call print_energy_and_mos()
   call save_tc_natorb()
+  call print_angles_tc()
   !call minimize_tc_orb_angles()
 
 end
@@ -35,9 +36,12 @@ subroutine save_tc_natorb()
   print*,'Saving the natorbs '
 
   provide natorb_tc_leigvec_ao natorb_tc_reigvec_ao
+  mo_l_coef = natorb_tc_leigvec_ao 
+  mo_r_coef = natorb_tc_reigvec_ao 
+  touch mo_l_coef mo_r_coef 
 
-  call ezfio_set_bi_ortho_mos_mo_l_coef(natorb_tc_leigvec_ao)
-  call ezfio_set_bi_ortho_mos_mo_r_coef(natorb_tc_reigvec_ao)
+  call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
+  call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
   call save_ref_determinant_nstates_1()
   call ezfio_set_determinants_read_wf(.False.)
 
