@@ -32,6 +32,13 @@
   thr_d   = 1.d-6
   thr_nd  = 1.d-6
   thr_deg = 1.d-3
+  do i = 1, mo_num
+   do j = 1, mo_num
+    if(dabs(dm_tmp(j,i)).lt.thr_d)then
+     dm_tmp(j,i) = 0.d0
+    endif
+   enddo
+  enddo
 !  if(n_core_orb.ne.0)then
 !   call diag_mat_per_fock_degen_core( fock_diag, dm_tmp, list_core, n_core_orb, mo_num, thr_d, thr_nd, thr_deg & 
 !                                    , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
