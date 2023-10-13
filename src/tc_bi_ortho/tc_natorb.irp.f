@@ -29,6 +29,12 @@
     write(*, '(100(F16.10,X))') -dm_tmp(:,i)
   enddo
 
+  print *, ' Transition density matrix AO'
+  do i = 1, ao_num
+    write(*, '(100(F16.10,X))') tc_transition_matrix_ao(:,i,1,1)
+  enddo
+  stop
+
   thr_d   = 1.d-6
   thr_nd  = 1.d-6
   thr_deg = 1.d-3

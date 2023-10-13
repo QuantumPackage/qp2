@@ -211,6 +211,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
               tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT} --without-hdf5 CFLAGS='-g'
@@ -224,6 +225,7 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
               tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT} CFLAGS="-g"
@@ -235,9 +237,22 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
               tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
               cd qmckl-${VERSION}
               ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc CFLAGS='-g'
+              make && make -j 4 check && make install
+EOF
+    elif [[ ${PACKAGE} = qmckl-intel ]] ; then
+
+            VERSION=0.5.4
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc --with-icc --with-ifort CFLAGS='-g'
               make && make -j 4 check && make install
 EOF
  
@@ -378,13 +393,13 @@ fi
 
 TREXIO=$(find_lib -ltrexio)
 if [[ ${TREXIO} = $(not_found) ]] ; then
-        error "TREXIO (trexio,trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
+        error "TREXIO (trexio | trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
         fail
 fi
 
 QMCKL=$(find_lib -lqmckl)
 if [[ ${QMCKL} = $(not_found) ]] ; then
-        error "QMCkl (qmckl) is not installed."
+        error "QMCkl (qmckl | qmckl-intel) is not installed."
         fail
 fi
 
