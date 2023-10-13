@@ -42,7 +42,7 @@ program fci
     write(json_unit,json_array_open_fmt) 'fci'
 
     double precision, allocatable :: Ev(:),PT2(:)
-    allocate(Ev(N_states), PT2(N_state))
+    allocate(Ev(N_states), PT2(N_states))
     if (do_pt2) then
       call run_stochastic_cipsi(Ev,PT2)
     else
