@@ -6,27 +6,30 @@ BEGIN_PROVIDER [double precision, ao_one_e_integrals_tc_tot, (ao_num,ao_num)]
   implicit none
   integer :: i, j
 
-  ao_one_e_integrals_tc_tot = ao_one_e_integrals      
+  ao_one_e_integrals_tc_tot = ao_one_e_integrals
 
-  provide j1b_type
+  !provide j1b_type
 
-  if( (j1b_type .eq. 1) .or. (j1b_type .eq. 2) ) then
+  !if( (j1b_type .eq. 1) .or. (j1b_type .eq. 2) ) then
+  !
+  !  print *, ' do things properly !'
+  !  stop
 
-    do i = 1, ao_num
-      do j = 1, ao_num
-        ao_one_e_integrals_tc_tot(j,i) += ( j1b_gauss_hermI  (j,i) &
-                                          + j1b_gauss_hermII (j,i) &
-                                          + j1b_gauss_nonherm(j,i) )
-      enddo
-    enddo
+  !  !do i = 1, ao_num
+  !  !  do j = 1, ao_num
+  !  !    ao_one_e_integrals_tc_tot(j,i) += ( j1b_gauss_hermI  (j,i) &
+  !  !                                      + j1b_gauss_hermII (j,i) &
+  !  !                                      + j1b_gauss_nonherm(j,i) )
+  !  !  enddo
+  !  !enddo
 
-  endif
+  !endif
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
 
   BEGIN_DOC
   !
@@ -38,6 +41,11 @@ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_one_e, (mo_num, mo_num)]
  
   call ao_to_mo_bi_ortho(ao_one_e_integrals_tc_tot, ao_num, mo_bi_ortho_tc_one_e, mo_num)
 
+  if(noL_standard) then
+    PROVIDE noL_1e
+    mo_bi_ortho_tc_one_e = mo_bi_ortho_tc_one_e + noL_1e
+  endif
+
 END_PROVIDER 
 
 ! ---
@@ -45,12 +53,14 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_x , (mo_num,mo_num)]
 &BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_y , (mo_num,mo_num)]
 &BEGIN_PROVIDER [double precision, mo_bi_orth_bipole_z , (mo_num,mo_num)]
- BEGIN_DOC
- ! array of the integrals of Left MO_i * x Right MO_j
- ! array of the integrals of Left MO_i * y Right MO_j
- ! array of the integrals of Left MO_i * z Right MO_j
- END_DOC
- implicit none
+
+  BEGIN_DOC
+  ! array of the integrals of Left MO_i * x Right MO_j
+  ! array of the integrals of Left MO_i * y Right MO_j
+  ! array of the integrals of Left MO_i * z Right MO_j
+  END_DOC
+ 
+  implicit none
 
   call ao_to_mo_bi_ortho(                                                     &
       ao_dipole_x,                                                   &

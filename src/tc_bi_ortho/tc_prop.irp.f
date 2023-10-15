@@ -29,7 +29,7 @@
          tc_transition_matrix_mo_alpha(m,m,istate,jstate)+= psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         enddo
         do p = 1, n_occ_ab(2) ! browsing the beta electrons
-         m = occ(p,1)
+         m = occ(p,2)
          tc_transition_matrix_mo_beta(m,m,istate,jstate)+= psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         enddo
        else
@@ -38,12 +38,14 @@
           ! Single alpha
           h = exc(1,1,1) ! hole in psi_det(1,1,j) 
           p = exc(1,2,1) ! particle in psi_det(1,1,j) 
-          tc_transition_matrix_mo_alpha(p,h,istate,jstate)+= phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
+          tc_transition_matrix_mo_alpha(p,h,istate,jstate)+= &
+          phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         else
           ! Single beta
           h = exc(1,1,2) ! hole in psi_det(1,1,j) 
           p = exc(1,2,2) ! particle in psi_det(1,1,j) 
-          tc_transition_matrix_mo_beta(p,h,istate,jstate)+= phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
+          tc_transition_matrix_mo_beta(p,h,istate,jstate)+=  &
+          phase * psi_l_coef_bi_ortho(i,istate) * psi_r_coef_bi_ortho(j,jstate)
         endif
        endif
      enddo
@@ -88,6 +90,7 @@
    enddo
   enddo
  enddo
+ print*,'tc_bi_ortho_dipole(3) elec = ',tc_bi_ortho_dipole(3,1)
 
  nuclei_part = 0.d0
  do m = 1, 3

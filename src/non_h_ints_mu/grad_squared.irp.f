@@ -17,7 +17,7 @@ BEGIN_PROVIDER [ double precision, gradu_squared_u_ij_mu, (ao_num, ao_num, n_poi
   !
   ! if J(r1,r2) = u12 x v1 x v2
   !
-  ! gradu_squared_u_ij_mu = -0.50 x \int r2 \phi_i(2) \phi_j(2) [ v1^2  v2^2 ((grad_1 u12)^2 + (grad_2 u12^2)]) + u12^2  v2^2 (grad_1 v1)^2 + 2 u12 v1 v2^2 (grad_1 u12) . (grad_1 v1) ]
+  ! gradu_squared_u_ij_mu = -0.50 x \int r2 \phi_i(2) \phi_j(2) [ v1^2  v2^2 ((grad_1 u12)^2 + (grad_2 u12^2)) + u12^2  v2^2 (grad_1 v1)^2 + 2 u12 v1 v2^2 (grad_1 u12) . (grad_1 v1) ]
   !                       = -0.25 x        v1^2      \int r2 \phi_i(2) \phi_j(2) [1 - erf(mu r12)]^2 v2^2
   !                       + -0.50 x    (grad_1 v1)^2 \int r2 \phi_i(2) \phi_j(2)      u12^2          v2^2
   !                       + -1.00 x v1 (grad_1 v1)   \int r2 \phi_i(2) \phi_j(2)   (grad_1 u12)      v2^2
@@ -231,47 +231,47 @@ BEGIN_PROVIDER [ double precision, grad12_j12, (ao_num, ao_num, n_points_final_g
   call wall_time(time0)
 
   PROVIDE j1b_type
+  PROVIDE int2_grad1u2_grad2u2_j1b2
 
-  if(j1b_type .eq. 3) then
-
-    do ipoint = 1, n_points_final_grid
-      tmp1 = v_1b(ipoint)
-      tmp1 = tmp1 * tmp1
-      do j = 1, ao_num
-        do i = 1, ao_num
-          grad12_j12(i,j,ipoint) = tmp1 * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)
-        enddo
+  do ipoint = 1, n_points_final_grid
+    tmp1 = v_1b(ipoint)
+    tmp1 = tmp1 * tmp1
+    do j = 1, ao_num
+      do i = 1, ao_num
+        grad12_j12(i,j,ipoint) = tmp1 * int2_grad1u2_grad2u2_j1b2(i,j,ipoint)
       enddo
     enddo
+  enddo
 
-  else
+  FREE int2_grad1u2_grad2u2_j1b2
 
-    grad12_j12 = 0.d0
-    do ipoint = 1, n_points_final_grid
-      r(1) = final_grid_points(1,ipoint)
-      r(2) = final_grid_points(2,ipoint)
-      r(3) = final_grid_points(3,ipoint)
-      do j = 1, ao_num
-        do i = 1, ao_num
-          do igauss = 1, n_max_fit_slat
-            delta = expo_gauss_1_erf_x_2(igauss)
-            coef  = coef_gauss_1_erf_x_2(igauss)
-            grad12_j12(i,j,ipoint) += -0.25d0 * coef * overlap_gauss_r12_ao(r, delta, i, j)
-          enddo
-        enddo
-      enddo
-    enddo
-
-  endif
+  !if(j1b_type .eq. 0) then 
+  !  grad12_j12 = 0.d0
+  !  do ipoint = 1, n_points_final_grid
+  !    r(1) = final_grid_points(1,ipoint)
+  !    r(2) = final_grid_points(2,ipoint)
+  !    r(3) = final_grid_points(3,ipoint)
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        do igauss = 1, n_max_fit_slat
+  !          delta = expo_gauss_1_erf_x_2(igauss)
+  !          coef  = coef_gauss_1_erf_x_2(igauss)
+  !          grad12_j12(i,j,ipoint) += -0.25d0 * coef * overlap_gauss_r12_ao(r, delta, i, j)
+  !        enddo
+  !      enddo
+  !    enddo
+  !  enddo
+  !endif
 
   call wall_time(time1)
   print*, ' Wall time for grad12_j12 = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_grid) ]
+BEGIN_PROVIDER [double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_grid)]
 
   implicit none
   integer                    :: ipoint, i, j
@@ -281,6 +281,9 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
 
   print*, ' providing u12sq_j1bsq ...'
   call wall_time(time0)
+
+  ! do not free here
+  PROVIDE int2_u2_j1b2
 
   do ipoint = 1, n_points_final_grid
     tmp_x = v_1b_grad(1,ipoint)
@@ -296,6 +299,7 @@ BEGIN_PROVIDER [ double precision, u12sq_j1bsq, (ao_num, ao_num, n_points_final_
 
   call wall_time(time1)
   print*, ' Wall time for u12sq_j1bsq = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
@@ -313,6 +317,9 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
 
   print*, ' providing u12_grad1_u12_j1b_grad1_j1b ...'
   call wall_time(time0)
+
+  PROVIDE int2_u_grad1u_j1b2
+  PROVIDE int2_u_grad1u_x_j1b2
 
   do ipoint = 1, n_points_final_grid
 
@@ -344,8 +351,12 @@ BEGIN_PROVIDER [ double precision, u12_grad1_u12_j1b_grad1_j1b, (ao_num, ao_num,
     enddo
   enddo
 
+  FREE int2_u_grad1u_j1b2
+  FREE int2_u_grad1u_x_j1b2
+
   call wall_time(time1)
   print*, ' Wall time for u12_grad1_u12_j1b_grad1_j1b = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
@@ -355,13 +366,14 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   BEGIN_DOC
   !
-  ! tc_grad_square_ao(k,i,l,j) = 1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
+  ! tc_grad_square_ao(k,i,l,j) = -1/2 <kl | |\grad_1 u(r1,r2)|^2 + |\grad_2 u(r1,r2)|^2 | ij>
   !
   END_DOC
 
   implicit none
   integer                       :: ipoint, i, j, k, l
-  double precision              :: weight1, ao_ik_r, ao_i_r
+  double precision              :: weight1, ao_k_r, ao_i_r
+  double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
   double precision, allocatable :: b_mat(:,:,:), tmp(:,:,:)
 
@@ -376,14 +388,18 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   else
 
-    allocate(b_mat(n_points_final_grid,ao_num,ao_num), tmp(ao_num,ao_num,n_points_final_grid))
+    ! ---
+
+    PROVIDE int2_grad1_u12_square_ao
+
+    allocate(b_mat(n_points_final_grid,ao_num,ao_num))
 
     b_mat = 0.d0
-   !$OMP PARALLEL               &
-   !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (i, k, ipoint) &
-   !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
-   !$OMP DO SCHEDULE (static)
+    !$OMP PARALLEL               &
+    !$OMP DEFAULT (NONE)         &
+    !$OMP PRIVATE (i, k, ipoint) &
+    !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+    !$OMP DO SCHEDULE (static)
     do i = 1, ao_num
       do k = 1, ao_num
         do ipoint = 1, n_points_final_grid
@@ -391,49 +407,65 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
         enddo
       enddo
     enddo
-   !$OMP END DO
-   !$OMP END PARALLEL
-
-    tmp = 0.d0
-   !$OMP PARALLEL               &
-   !$OMP DEFAULT (NONE)         &
-   !$OMP PRIVATE (j, l, ipoint) &
-   !$OMP SHARED (tmp, ao_num, n_points_final_grid, u12sq_j1bsq, u12_grad1_u12_j1b_grad1_j1b, grad12_j12)
-   !$OMP DO SCHEDULE (static)
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do l = 1, ao_num
-          tmp(l,j,ipoint) = u12sq_j1bsq(l,j,ipoint) + u12_grad1_u12_j1b_grad1_j1b(l,j,ipoint) + 0.5d0 * grad12_j12(l,j,ipoint)
-        enddo
-      enddo
-    enddo
-   !$OMP END DO
-   !$OMP END PARALLEL
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     tc_grad_square_ao = 0.d0
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-              , tmp(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid      &
-              , 1.d0, tc_grad_square_ao, ao_num*ao_num)
-    deallocate(tmp, b_mat)
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
+              , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+              , 0.d0, tc_grad_square_ao, ao_num*ao_num)
 
+    FREE int2_grad1_u12_square_ao
+
+    ! ---
+
+    if(((j1b_type .eq. 3) .or. (j1b_type .eq. 4)) .and. use_ipp) then
+
+      print*, " going through Manu's IPP"
+
+      ! an additional term is added here directly instead of 
+      ! being added in int2_grad1_u12_square_ao for performance
+
+      PROVIDE int2_u2_j1b2
+
+      b_mat = 0.d0
+      !$OMP PARALLEL                                                                                     &
+      !$OMP DEFAULT (NONE)                                                                               &
+      !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                                              &
+      !$OMP SHARED (aos_in_r_array_transp, b_mat, ao_num, n_points_final_grid, final_weight_at_r_vector, &
+      !$OMP         v_1b_square_grad, v_1b_square_lapl, aos_grad_in_r_array_transp_bis)
+      !$OMP DO SCHEDULE (static)
+      do i = 1, ao_num
+        do k = 1, ao_num
+          do ipoint = 1, n_points_final_grid
+
+            weight1 = 0.25d0 * final_weight_at_r_vector(ipoint)
+
+            ao_i_r = aos_in_r_array_transp(ipoint,i)
+            ao_k_r = aos_in_r_array_transp(ipoint,k)
+
+            b_mat(ipoint,k,i) = weight1 * ( ao_k_r * ao_i_r * v_1b_square_lapl(ipoint)                                                                                   &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) * v_1b_square_grad(ipoint,1) &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) * v_1b_square_grad(ipoint,2) &
+                              + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3)) * v_1b_square_grad(ipoint,3) )
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+
+      call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
+                , int2_u2_j1b2(1,1,1), ao_num*ao_num, b_mat(1,1,1), n_points_final_grid &
+                , 1.d0, tc_grad_square_ao, ao_num*ao_num)
+
+      FREE int2_u2_j1b2
+    endif
+
+    ! ---
+
+    deallocate(b_mat)
     call sum_A_At(tc_grad_square_ao(1,1,1,1), ao_num*ao_num)
 
-   !!$OMP PARALLEL             &
-   !!$OMP DEFAULT (NONE)       &
-   !!$OMP PRIVATE (i, j, k, l) &
-   !!$OMP SHARED (ac_mat, tc_grad_square_ao, ao_num)
-   !!$OMP DO SCHEDULE (static)
-   ! do j = 1, ao_num
-   !   do l = 1, ao_num
-   !     do i = 1, ao_num
-   !       do k = 1, ao_num
-   !         tc_grad_square_ao(k,i,l,j) = ac_mat(k,i,l,j) + ac_mat(l,j,k,i)
-   !       enddo
-   !     enddo
-   !   enddo
-   ! enddo
-   !!$OMP END DO
-   !!$OMP END PARALLEL
   endif
 
   if(write_tc_integ.and.mpi_master) then
@@ -446,7 +478,9 @@ BEGIN_PROVIDER [double precision, tc_grad_square_ao, (ao_num, ao_num, ao_num, ao
 
   call wall_time(time1)
   print*, ' Wall time for tc_grad_square_ao = ', time1 - time0
+  call print_memory_usage()
 
 END_PROVIDER
 
 ! ---
+

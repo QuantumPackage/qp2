@@ -322,9 +322,9 @@ double precision function num_gradu_squared_u_ij_mu(i, j, ipoint)
   double precision, external :: ao_value
   double precision, external :: j1b_nucl
   double precision, external :: j12_mu
-  double precision, external :: grad_x_j1b_nucl
-  double precision, external :: grad_y_j1b_nucl
-  double precision, external :: grad_z_j1b_nucl
+  double precision, external :: grad_x_j1b_nucl_num
+  double precision, external :: grad_y_j1b_nucl_num
+  double precision, external :: grad_z_j1b_nucl_num
 
   r1(1) = final_grid_points(1,ipoint)
   r1(2) = final_grid_points(2,ipoint)
@@ -342,11 +342,11 @@ double precision function num_gradu_squared_u_ij_mu(i, j, ipoint)
     tmp_z = r1(3) - r2(3)
     r12   = dsqrt(tmp_x*tmp_x + tmp_y*tmp_y + tmp_z*tmp_z)
 
-    dx1_v1 = grad_x_j1b_nucl(r1)
-    dy1_v1 = grad_y_j1b_nucl(r1)
-    dz1_v1 = grad_z_j1b_nucl(r1)
+    dx1_v1 = grad_x_j1b_nucl_num(r1)
+    dy1_v1 = grad_y_j1b_nucl_num(r1)
+    dz1_v1 = grad_z_j1b_nucl_num(r1)
 
-    call grad1_j12_mu_exc(r1, r2, grad_u12)
+    call grad1_j12_mu(r1, r2, grad_u12)
 
     tmp1    = 1.d0 - derf(mu_erf * r12)
     v1_tmp  = j1b_nucl(r1)
@@ -390,9 +390,9 @@ double precision function num_grad12_j12(i, j, ipoint)
   double precision, external :: ao_value
   double precision, external :: j1b_nucl
   double precision, external :: j12_mu
-  double precision, external :: grad_x_j1b_nucl
-  double precision, external :: grad_y_j1b_nucl
-  double precision, external :: grad_z_j1b_nucl
+  double precision, external :: grad_x_j1b_nucl_num
+  double precision, external :: grad_y_j1b_nucl_num
+  double precision, external :: grad_z_j1b_nucl_num
 
   r1(1) = final_grid_points(1,ipoint)
   r1(2) = final_grid_points(2,ipoint)
@@ -410,11 +410,11 @@ double precision function num_grad12_j12(i, j, ipoint)
     tmp_z = r1(3) - r2(3)
     r12   = dsqrt(tmp_x*tmp_x + tmp_y*tmp_y + tmp_z*tmp_z)
 
-    dx1_v1 = grad_x_j1b_nucl(r1)
-    dy1_v1 = grad_y_j1b_nucl(r1)
-    dz1_v1 = grad_z_j1b_nucl(r1)
+    dx1_v1 = grad_x_j1b_nucl_num(r1)
+    dy1_v1 = grad_y_j1b_nucl_num(r1)
+    dz1_v1 = grad_z_j1b_nucl_num(r1)
 
-    call grad1_j12_mu_exc(r1, r2, grad_u12)
+    call grad1_j12_mu(r1, r2, grad_u12)
 
     tmp1    = 1.d0 - derf(mu_erf * r12)
     v1_tmp  = j1b_nucl(r1)
@@ -456,9 +456,9 @@ double precision function num_u12sq_j1bsq(i, j, ipoint)
   double precision, external :: ao_value
   double precision, external :: j1b_nucl
   double precision, external :: j12_mu
-  double precision, external :: grad_x_j1b_nucl
-  double precision, external :: grad_y_j1b_nucl
-  double precision, external :: grad_z_j1b_nucl
+  double precision, external :: grad_x_j1b_nucl_num
+  double precision, external :: grad_y_j1b_nucl_num
+  double precision, external :: grad_z_j1b_nucl_num
 
   r1(1) = final_grid_points(1,ipoint)
   r1(2) = final_grid_points(2,ipoint)
@@ -476,11 +476,11 @@ double precision function num_u12sq_j1bsq(i, j, ipoint)
     tmp_z = r1(3) - r2(3)
     r12   = dsqrt(tmp_x*tmp_x + tmp_y*tmp_y + tmp_z*tmp_z)
 
-    dx1_v1 = grad_x_j1b_nucl(r1)
-    dy1_v1 = grad_y_j1b_nucl(r1)
-    dz1_v1 = grad_z_j1b_nucl(r1)
+    dx1_v1 = grad_x_j1b_nucl_num(r1)
+    dy1_v1 = grad_y_j1b_nucl_num(r1)
+    dz1_v1 = grad_z_j1b_nucl_num(r1)
 
-    call grad1_j12_mu_exc(r1, r2, grad_u12)
+    call grad1_j12_mu(r1, r2, grad_u12)
 
     tmp1    = 1.d0 - derf(mu_erf * r12)
     v1_tmp  = j1b_nucl(r1)
@@ -522,9 +522,9 @@ double precision function num_u12_grad1_u12_j1b_grad1_j1b(i, j, ipoint)
   double precision, external :: ao_value
   double precision, external :: j1b_nucl
   double precision, external :: j12_mu
-  double precision, external :: grad_x_j1b_nucl
-  double precision, external :: grad_y_j1b_nucl
-  double precision, external :: grad_z_j1b_nucl
+  double precision, external :: grad_x_j1b_nucl_num
+  double precision, external :: grad_y_j1b_nucl_num
+  double precision, external :: grad_z_j1b_nucl_num
 
   r1(1) = final_grid_points(1,ipoint)
   r1(2) = final_grid_points(2,ipoint)
@@ -542,11 +542,11 @@ double precision function num_u12_grad1_u12_j1b_grad1_j1b(i, j, ipoint)
     tmp_z = r1(3) - r2(3)
     r12   = dsqrt(tmp_x*tmp_x + tmp_y*tmp_y + tmp_z*tmp_z)
 
-    dx1_v1 = grad_x_j1b_nucl(r1)
-    dy1_v1 = grad_y_j1b_nucl(r1)
-    dz1_v1 = grad_z_j1b_nucl(r1)
+    dx1_v1 = grad_x_j1b_nucl_num(r1)
+    dy1_v1 = grad_y_j1b_nucl_num(r1)
+    dz1_v1 = grad_z_j1b_nucl_num(r1)
 
-    call grad1_j12_mu_exc(r1, r2, grad_u12)
+    call grad1_j12_mu(r1, r2, grad_u12)
 
     tmp1    = 1.d0 - derf(mu_erf * r12)
     v1_tmp  = j1b_nucl(r1)

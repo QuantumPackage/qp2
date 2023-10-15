@@ -591,7 +591,7 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
             time-time0
 
             ! Old print
-            !print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.1,1pE16.6,1pE16.6)', c, &
+            !print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.1,ES16.6,ES16.6)', c, &
             !  pt2_data     % pt2(pt2_stoch_istate) +E, &
             !  pt2_data_err % pt2(pt2_stoch_istate), &
             !  pt2_data     % variance(pt2_stoch_istate), &

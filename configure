@@ -191,7 +191,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio qmckl"
 fi
 
 
@@ -211,11 +211,11 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
-              tar -zxf trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
-              ./configure --prefix=\${QP_ROOT} --without-hdf5
+              ./configure --prefix=\${QP_ROOT} --without-hdf5 CFLAGS='-g'
               make -j 8 && make -j 8 check && make -j 8 install
-              cp ${QP_ROOT}/include/trexio_f.f90 ${QP_ROOT}/src/ezfio_files
               tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
               mv ninja "\${QP_ROOT}"/bin/
 EOF
@@ -225,11 +225,35 @@ EOF
             execute << EOF
               cd "\${QP_ROOT}"/external
               wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
-              tar -zxf trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
-              ./configure --prefix=\${QP_ROOT}
+              ./configure --prefix=\${QP_ROOT} CFLAGS="-g"
               make -j 8 && make -j 8 check && make -j 8 install
-              cp ${QP_ROOT}/include/trexio_f.f90 ${QP_ROOT}/src/ezfio_files
+EOF
+    elif [[ ${PACKAGE} = qmckl ]] ; then
+
+            VERSION=0.5.4
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc CFLAGS='-g'
+              make && make -j 4 check && make install
+EOF
+    elif [[ ${PACKAGE} = qmckl-intel ]] ; then
+
+            VERSION=0.5.4
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc --with-icc --with-ifort CFLAGS='-g'
+              make && make -j 4 check && make install
 EOF
  
 
@@ -369,7 +393,13 @@ fi
 
 TREXIO=$(find_lib -ltrexio)
 if [[ ${TREXIO} = $(not_found) ]] ; then
-        error "TREXIO (trexio,trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
+        error "TREXIO (trexio | trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
+        fail
+fi
+
+QMCKL=$(find_lib -lqmckl)
+if [[ ${QMCKL} = $(not_found) ]] ; then
+        error "QMCkl (qmckl | qmckl-intel) is not installed."
         fail
 fi
 

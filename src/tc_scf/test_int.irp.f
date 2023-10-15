@@ -9,10 +9,9 @@ program test_ints
   print *, ' starting test_ints ...'
 
   my_grid_becke  = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
-!  my_n_pt_r_grid = 15 ! small grid for quick debug
-!  my_n_pt_a_grid = 26 ! small grid for quick debug
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   my_extra_grid_becke = .True.
@@ -55,7 +54,12 @@ program test_ints
 !!PROVIDE TC_HF_energy VARTC_HF_energy
 !!print *, '    TC_HF_energy = ',    TC_HF_energy
 !!print *, ' VARTC_HF_energy = ', VARTC_HF_energy
- call test_old_ints
+! call test_old_ints
+
+  call test_fock_3e_uhf_mo_cs()
+  call test_fock_3e_uhf_mo_a()
+  call test_fock_3e_uhf_mo_b()
+
 end
 
 ! ---
@@ -280,7 +284,7 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
     do i = 1, ao_num
      do j = 1, ao_num
       array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -506,7 +510,7 @@ subroutine routine_v_ij_u_cst_mu_j1b
     do i = 1, ao_num
      do j = 1, ao_num
       array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -1097,3 +1101,130 @@ subroutine test_int2_grad1_u12_ao_test
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 end
+
+! ---
+
+subroutine test_fock_3e_uhf_mo_cs()
+
+  implicit none
+  integer          :: i, j
+  double precision :: I_old, I_new
+  double precision :: diff_tot, diff, thr_ih, norm
+
+!  double precision :: t0, t1
+!  print*, ' Providing fock_a_tot_3e_bi_orth ...'
+!  call wall_time(t0)
+!  PROVIDE fock_a_tot_3e_bi_orth
+!  call wall_time(t1)
+!  print*, ' Wall time for fock_a_tot_3e_bi_orth =', t1 - t0 
+
+  PROVIDE fock_3e_uhf_mo_cs fock_3e_uhf_mo_cs_old
+
+  thr_ih   = 1d-8
+  norm     = 0.d0
+  diff_tot = 0.d0
+
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      I_old = fock_3e_uhf_mo_cs_old(j,i)
+      I_new = fock_3e_uhf_mo_cs    (j,i)
+
+      diff = dabs(I_old - I_new)
+      if(diff .gt. thr_ih) then
+        print *, ' problem in fock_3e_uhf_mo_cs on ', j, i
+        print *, ' old value = ', I_old
+        print *, ' new value = ', I_new
+        !stop
+      endif
+
+      norm     += dabs(I_old)
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
+
+  return
+end subroutine test_fock_3e_uhf_mo_cs
+
+! ---
+
+subroutine test_fock_3e_uhf_mo_a()
+
+  implicit none
+  integer          :: i, j
+  double precision :: I_old, I_new
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  PROVIDE fock_3e_uhf_mo_a fock_3e_uhf_mo_a_old
+
+  thr_ih   = 1d-8
+  norm     = 0.d0
+  diff_tot = 0.d0
+
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      I_old = fock_3e_uhf_mo_a_old(j,i)
+      I_new = fock_3e_uhf_mo_a    (j,i)
+
+      diff = dabs(I_old - I_new)
+      if(diff .gt. thr_ih) then
+        print *, ' problem in fock_3e_uhf_mo_a on ', j, i
+        print *, ' old value = ', I_old
+        print *, ' new value = ', I_new
+        !stop
+      endif
+
+      norm     += dabs(I_old)
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
+
+  return
+end subroutine test_fock_3e_uhf_mo_a
+
+! ---
+
+subroutine test_fock_3e_uhf_mo_b()
+
+  implicit none
+  integer          :: i, j
+  double precision :: I_old, I_new
+  double precision :: diff_tot, diff, thr_ih, norm
+
+  PROVIDE fock_3e_uhf_mo_b fock_3e_uhf_mo_b_old
+
+  thr_ih   = 1d-8
+  norm     = 0.d0
+  diff_tot = 0.d0
+
+  do i = 1, mo_num
+    do j = 1, mo_num
+
+      I_old = fock_3e_uhf_mo_b_old(j,i)
+      I_new = fock_3e_uhf_mo_b    (j,i)
+
+      diff = dabs(I_old - I_new)
+      if(diff .gt. thr_ih) then
+        print *, ' problem in fock_3e_uhf_mo_b on ', j, i
+        print *, ' old value = ', I_old
+        print *, ' new value = ', I_new
+        !stop
+      endif
+
+      norm     += dabs(I_old)
+      diff_tot += diff
+    enddo
+  enddo
+
+  print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
+
+  return
+end subroutine test_fock_3e_uhf_mo_b
+
+! ---
+

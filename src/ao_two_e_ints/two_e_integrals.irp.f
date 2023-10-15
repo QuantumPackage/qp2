@@ -460,7 +460,7 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_schwartz)              &
-      !$OMP SCHEDULE(dynamic)
+      !$OMP SCHEDULE(guided)
   do i=1,ao_num
     do k=1,i
       ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,i,k,k))
@@ -590,8 +590,20 @@ double precision function general_primitive_integral(dim,            &
     d_poly(i)=0.d0
   enddo
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(Ix_pol,n_Ix,Iy_pol,n_Iy,d_poly,n_pt_tmp)
+!  call multiply_poly(Ix_pol,n_Ix,Iy_pol,n_Iy,d_poly,n_pt_tmp)
+  integer :: ib, ic
+  if (ior(n_Ix,n_Iy) >= 0) then
+    do ib=0,n_Ix
+      do ic = 0,n_Iy
+        d_poly(ib+ic) = d_poly(ib+ic) + Iy_pol(ic) * Ix_pol(ib)
+      enddo
+    enddo
+
+    do n_pt_tmp = n_Ix+n_Iy, 0, -1
+      if (d_poly(n_pt_tmp) /= 0.d0) exit
+    enddo
+  endif
+
   if (n_pt_tmp == -1) then
     return
   endif
@@ -600,8 +612,21 @@ double precision function general_primitive_integral(dim,            &
     d1(i)=0.d0
   enddo
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(d_poly ,n_pt_tmp ,Iz_pol,n_Iz,d1,n_pt_out)
+!  call multiply_poly(d_poly ,n_pt_tmp ,Iz_pol,n_Iz,d1,n_pt_out)
+  if (ior(n_pt_tmp,n_Iz) >= 0) then
+    ! Bottleneck here
+    do ib=0,n_pt_tmp
+      do ic = 0,n_Iz
+        d1(ib+ic) = d1(ib+ic) + Iz_pol(ic) * d_poly(ib)
+      enddo
+    enddo
+
+    do n_pt_out = n_pt_tmp+n_Iz, 0, -1
+      if (d1(n_pt_out) /= 0.d0) exit
+    enddo
+  endif
+
+
   double precision               :: rint_sum
   accu = accu + rint_sum(n_pt_out,const,d1)
 
@@ -926,7 +951,7 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
   double precision               :: X(0:max_dim)
   double precision               :: Y(0:max_dim)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: X,Y
-  integer                        :: nx, ix,iy,ny
+  integer                        :: nx, ix,iy,ny,ib
 
   ASSERT (a>2)
   !DIR$ LOOP COUNT(8)
@@ -948,8 +973,44 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
     X(ix) *= dble(a-1)
   enddo
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(X,nx,B_10,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(X,nx,B_10,d,nd)
+  if (nx >= 0) then
+    select case (nx)
+      case (0)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(2) * X(0)
+
+      case (1)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(1) * X(1) + B_10(2) * X(0)
+        d(3) = d(3) + B_10(2) * X(1)
+
+      case (2)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(0) * X(2) + B_10(1) * X(1) + B_10(2) * X(0)
+        d(3) = d(3) + B_10(1) * X(2) + B_10(2) * X(1)
+        d(4) = d(4) + B_10(2) * X(2)
+
+      case default
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        do ib=2,nx
+          d(ib) = d(ib) + B_10(0) * X(ib) + B_10(1) * X(ib-1) + B_10(2) * X(ib-2)
+        enddo
+        d(nx+1) = d(nx+1) + B_10(1) * X(nx) + B_10(2) * X(nx-1)
+        d(nx+2) = d(nx+2) + B_10(2) * X(nx)
+
+    end select
+
+    do nd = nx+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
   nx = nd
   !DIR$ LOOP COUNT(8)
@@ -970,8 +1031,47 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
         X(ix) *= c
       enddo
     endif
-    !DIR$ FORCEINLINE
-    call multiply_poly(X,nx,B_00,2,d,nd)
+
+!    !DIR$ FORCEINLINE
+!    call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
+    if(nx >= 0) then
+
+      select case (nx)
+        case (0)
+          d(0) = d(0) + B_00(0) * X(0)
+          d(1) = d(1) + B_00(1) * X(0)
+          d(2) = d(2) + B_00(2) * X(0)
+
+        case (1)
+          d(0) = d(0) + B_00(0) * X(0)
+          d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+          d(2) = d(2) + B_00(1) * X(1) + B_00(2) * X(0)
+          d(3) = d(3) + B_00(2) * X(1)
+
+        case (2)
+          d(0) = d(0) + B_00(0) * X(0)
+          d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+          d(2) = d(2) + B_00(0) * X(2) + B_00(1) * X(1) + B_00(2) * X(0)
+          d(3) = d(3) + B_00(1) * X(2) + B_00(2) * X(1)
+          d(4) = d(4) + B_00(2) * X(2)
+
+        case default
+          d(0) = d(0) + B_00(0) * X(0)
+          d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+          do ib=2,nx
+            d(ib) = d(ib) + B_00(0) * X(ib) + B_00(1) * X(ib-1) + B_00(2) * X(ib-2)
+          enddo
+          d(nx+1) = d(nx+1) + B_00(1) * X(nx) + B_00(2) * X(nx-1)
+          d(nx+2) = d(nx+2) + B_00(2) * X(nx)
+
+      end select
+
+      do nd = nx+2,0,-1
+        if (d(nd) /= 0.d0) exit
+      enddo
+
+    endif
+
   endif
 
   ny=0
@@ -988,8 +1088,45 @@ recursive subroutine I_x1_pol_mult_recurs(a,c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
     call I_x1_pol_mult_recurs(a-1,c,B_10,B_01,B_00,C_00,D_00,Y,ny,n_pt_in)
   endif
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(Y,ny,C_00,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
+  if(ny >= 0) then
+
+    select case (ny)
+      case (0)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(2) * Y(0)
+
+      case (1)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(2) * Y(1)
+
+      case (2)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(0) * Y(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(1) * Y(2) + C_00(2) * Y(1)
+        d(4) = d(4) + C_00(2) * Y(2)
+
+      case default
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        do ib=2,ny
+          d(ib) = d(ib) + C_00(0) * Y(ib) + C_00(1) * Y(ib-1) + C_00(2) * Y(ib-2)
+        enddo
+        d(ny+1) = d(ny+1) + C_00(1) * Y(ny) + C_00(2) * Y(ny-1)
+        d(ny+2) = d(ny+2) + C_00(2) * Y(ny)
+
+    end select
+
+    do nd = ny+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
 end
 
@@ -1007,7 +1144,7 @@ recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
   double precision               :: X(0:max_dim)
   double precision               :: Y(0:max_dim)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: X,Y
-  integer                        :: nx, ix,iy,ny
+  integer                        :: nx, ix,iy,ny,ib
 
   if( (c<0).or.(nd<0) )then
     nd = -1
@@ -1028,8 +1165,45 @@ recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
     enddo
   endif
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(X,nx,B_00,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
+  if(nx >= 0) then
+
+    select case (nx)
+      case (0)
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(2) * X(0)
+
+      case (1)
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(1) * X(1) + B_00(2) * X(0)
+        d(3) = d(3) + B_00(2) * X(1)
+
+      case (2)
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(0) * X(2) + B_00(1) * X(1) + B_00(2) * X(0)
+        d(3) = d(3) + B_00(1) * X(2) + B_00(2) * X(1)
+        d(4) = d(4) + B_00(2) * X(2)
+
+      case default
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        do ib=2,nx
+          d(ib) = d(ib) + B_00(0) * X(ib) + B_00(1) * X(ib-1) + B_00(2) * X(ib-2)
+        enddo
+        d(nx+1) = d(nx+1) + B_00(1) * X(nx) + B_00(2) * X(nx-1)
+        d(nx+2) = d(nx+2) + B_00(2) * X(nx)
+
+    end select
+
+    do nd = nx+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
   ny=0
 
@@ -1039,8 +1213,45 @@ recursive subroutine I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
   enddo
   call I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,Y,ny,n_pt_in)
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(Y,ny,C_00,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
+  if(ny >= 0) then
+
+    select case (ny)
+      case (0)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(2) * Y(0)
+
+      case (1)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(2) * Y(1)
+
+      case (2)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(0) * Y(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(1) * Y(2) + C_00(2) * Y(1)
+        d(4) = d(4) + C_00(2) * Y(2)
+
+      case default
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        do ib=2,ny
+          d(ib) = d(ib) + C_00(0) * Y(ib) + C_00(1) * Y(ib-1) + C_00(2) * Y(ib-2)
+        enddo
+        d(ny+1) = d(ny+1) + C_00(1) * Y(ny) + C_00(2) * Y(ny-1)
+        d(ny+2) = d(ny+2) + C_00(2) * Y(ny)
+
+    end select
+
+    do nd = ny+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
 end
 
@@ -1058,7 +1269,7 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
   double precision               :: X(0:max_dim)
   double precision               :: Y(0:max_dim)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: X,Y
-  integer                        :: nx, ix,iy,ny
+  integer                        :: nx, ix,iy,ny,ib
 
   !DIR$ LOOP COUNT(8)
   do ix=0,n_pt_in
@@ -1067,8 +1278,45 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
   nx = 0
   call I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,X,nx,n_pt_in)
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(X,nx,B_10,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(X,nx,B_10,d,nd)
+  if(nx >= 0) then
+
+    select case (nx)
+      case (0)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(2) * X(0)
+
+      case (1)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(1) * X(1) + B_10(2) * X(0)
+        d(3) = d(3) + B_10(2) * X(1)
+
+      case (2)
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        d(2) = d(2) + B_10(0) * X(2) + B_10(1) * X(1) + B_10(2) * X(0)
+        d(3) = d(3) + B_10(1) * X(2) + B_10(2) * X(1)
+        d(4) = d(4) + B_10(2) * X(2)
+
+      case default
+        d(0) = d(0) + B_10(0) * X(0)
+        d(1) = d(1) + B_10(0) * X(1) + B_10(1) * X(0)
+        do ib=2,nx
+          d(ib) = d(ib) + B_10(0) * X(ib) + B_10(1) * X(ib-1) + B_10(2) * X(ib-2)
+        enddo
+        d(nx+1) = d(nx+1) + B_10(1) * X(nx) + B_10(2) * X(nx-1)
+        d(nx+2) = d(nx+2) + B_10(2) * X(nx)
+
+    end select
+
+    do nd = nx+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
   nx = nd
   !DIR$ LOOP COUNT(8)
@@ -1086,8 +1334,45 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
     enddo
   endif
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(X,nx,B_00,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(X,nx,B_00,d,nd)
+  if(nx >= 0) then
+
+    select case (nx)
+      case (0)
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(2) * X(0)
+
+      case (1)
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(1) * X(1) + B_00(2) * X(0)
+        d(3) = d(3) + B_00(2) * X(1)
+
+      case (2)
+      d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        d(2) = d(2) + B_00(0) * X(2) + B_00(1) * X(1) + B_00(2) * X(0)
+        d(3) = d(3) + B_00(1) * X(2) + B_00(2) * X(1)
+        d(4) = d(4) + B_00(2) * X(2)
+
+      case default
+        d(0) = d(0) + B_00(0) * X(0)
+        d(1) = d(1) + B_00(0) * X(1) + B_00(1) * X(0)
+        do ib=2,nx
+          d(ib) = d(ib) + B_00(0) * X(ib) + B_00(1) * X(ib-1) + B_00(2) * X(ib-2)
+        enddo
+        d(nx+1) = d(nx+1) + B_00(1) * X(nx) + B_00(2) * X(nx-1)
+        d(nx+2) = d(nx+2) + B_00(2) * X(nx)
+
+    end select
+
+    do nd = nx+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
   ny=0
   !DIR$ LOOP COUNT(8)
@@ -1097,8 +1382,45 @@ recursive subroutine I_x1_pol_mult_a2(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt_in)
   !DIR$ FORCEINLINE
   call I_x1_pol_mult_a1(c,B_10,B_01,B_00,C_00,D_00,Y,ny,n_pt_in)
 
-  !DIR$ FORCEINLINE
-  call multiply_poly(Y,ny,C_00,2,d,nd)
+!  !DIR$ FORCEINLINE
+!  call multiply_poly_c2_inline_2e(Y,ny,C_00,d,nd)
+  if(ny >= 0) then
+
+    select case (ny)
+      case (0)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(2) * Y(0)
+
+      case (1)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(2) * Y(1)
+
+      case (2)
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        d(2) = d(2) + C_00(0) * Y(2) + C_00(1) * Y(1) + C_00(2) * Y(0)
+        d(3) = d(3) + C_00(1) * Y(2) + C_00(2) * Y(1)
+        d(4) = d(4) + C_00(2) * Y(2)
+
+      case default
+        d(0) = d(0) + C_00(0) * Y(0)
+        d(1) = d(1) + C_00(0) * Y(1) + C_00(1) * Y(0)
+        do ib=2,ny
+          d(ib) = d(ib) + C_00(0) * Y(ib) + C_00(1) * Y(ib-1) + C_00(2) * Y(ib-2)
+        enddo
+        d(ny+1) = d(ny+1) + C_00(1) * Y(ny) + C_00(2) * Y(ny-1)
+        d(ny+2) = d(ny+2) + C_00(2) * Y(ny)
+
+    end select
+
+    do nd = ny+2,0,-1
+      if (d(nd) /= 0.d0) exit
+    enddo
+
+  endif
 
 end
 
@@ -1116,7 +1438,7 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
   integer                        :: nx, ix,ny
   double precision               :: X(0:max_dim),Y(0:max_dim)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: X, Y
-  integer                        :: i
+  integer                        :: i, ib
 
   select case (c)
     case (0)
@@ -1146,8 +1468,47 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
       Y(1) = D_00(1)
       Y(2) = D_00(2)
 
-      !DIR$ FORCEINLINE
-      call multiply_poly(Y,ny,D_00,2,d,nd)
+!      !DIR$ FORCEINLINE
+!      call multiply_poly_c2_inline_2e(Y,ny,D_00,d,nd)
+      if(ny >= 0) then
+
+        select case (ny)
+          case (0)
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(2) * Y(0)
+
+          case (1)
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
+            d(3) = d(3) + D_00(2) * Y(1)
+
+          case (2)
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(0) * Y(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
+            d(3) = d(3) + D_00(1) * Y(2) + D_00(2) * Y(1)
+            d(4) = d(4) + D_00(2) * Y(2)
+
+          case default
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            do ib=2,ny
+              d(ib) = d(ib) + D_00(0) * Y(ib) + D_00(1) * Y(ib-1) + D_00(2) * Y(ib-2)
+            enddo
+            d(ny+1) = d(ny+1) + D_00(1) * Y(ny) + D_00(2) * Y(ny-1)
+            d(ny+2) = d(ny+2) + D_00(2) * Y(ny)
+
+        end select
+
+        do nd = ny+2,0,-1
+          if (d(nd) /= 0.d0) exit
+        enddo
+
+      endif
+
+
       return
 
       case default
@@ -1164,8 +1525,45 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
         X(ix) *= dble(c-1)
       enddo
 
-      !DIR$ FORCEINLINE
-      call multiply_poly(X,nx,B_01,2,d,nd)
+!      !DIR$ FORCEINLINE
+!      call multiply_poly_c2_inline_2e(X,nx,B_01,d,nd)
+      if(nx >= 0) then
+
+        select case (nx)
+          case (0)
+            d(0) = d(0) + B_01(0) * X(0)
+            d(1) = d(1) + B_01(1) * X(0)
+            d(2) = d(2) + B_01(2) * X(0)
+
+          case (1)
+            d(0) = d(0) + B_01(0) * X(0)
+            d(1) = d(1) + B_01(0) * X(1) + B_01(1) * X(0)
+            d(2) = d(2) + B_01(1) * X(1) + B_01(2) * X(0)
+            d(3) = d(3) + B_01(2) * X(1)
+
+          case (2)
+            d(0) = d(0) + B_01(0) * X(0)
+            d(1) = d(1) + B_01(0) * X(1) + B_01(1) * X(0)
+            d(2) = d(2) + B_01(0) * X(2) + B_01(1) * X(1) + B_01(2) * X(0)
+            d(3) = d(3) + B_01(1) * X(2) + B_01(2) * X(1)
+            d(4) = d(4) + B_01(2) * X(2)
+
+          case default
+            d(0) = d(0) + B_01(0) * X(0)
+            d(1) = d(1) + B_01(0) * X(1) + B_01(1) * X(0)
+            do ib=2,nx
+              d(ib) = d(ib) + B_01(0) * X(ib) + B_01(1) * X(ib-1) + B_01(2) * X(ib-2)
+            enddo
+            d(nx+1) = d(nx+1) + B_01(1) * X(nx) + B_01(2) * X(nx-1)
+            d(nx+2) = d(nx+2) + B_01(2) * X(nx)
+
+        end select
+
+        do nd = nx+2,0,-1
+          if (d(nd) /= 0.d0) exit
+        enddo
+
+      endif
 
       ny = 0
       !DIR$ LOOP COUNT(6)
@@ -1174,8 +1572,46 @@ recursive subroutine I_x2_pol_mult(c,B_10,B_01,B_00,C_00,D_00,d,nd,dim)
       enddo
       call I_x2_pol_mult(c-1,B_10,B_01,B_00,C_00,D_00,Y,ny,dim)
 
-      !DIR$ FORCEINLINE
-      call multiply_poly(Y,ny,D_00,2,d,nd)
+!      !DIR$ FORCEINLINE
+!      call multiply_poly_c2_inline_2e(Y,ny,D_00,d,nd)
+
+      if(ny >= 0) then
+
+        select case (ny)
+          case (0)
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(2) * Y(0)
+
+          case (1) 
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
+            d(3) = d(3) + D_00(2) * Y(1)
+
+          case (2) 
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            d(2) = d(2) + D_00(0) * Y(2) + D_00(1) * Y(1) + D_00(2) * Y(0)
+            d(3) = d(3) + D_00(1) * Y(2) + D_00(2) * Y(1)
+            d(4) = d(4) + D_00(2) * Y(2)
+
+          case default
+            d(0) = d(0) + D_00(0) * Y(0)
+            d(1) = d(1) + D_00(0) * Y(1) + D_00(1) * Y(0)
+            do ib=2,ny
+              d(ib) = d(ib) + D_00(0) * Y(ib) + D_00(1) * Y(ib-1) + D_00(2) * Y(ib-2)
+            enddo
+            d(ny+1) = d(ny+1) + D_00(1) * Y(ny) + D_00(2) * Y(ny-1)
+            d(ny+2) = d(ny+2) + D_00(2) * Y(ny)
+
+        end select
+
+        do nd = ny+2,0,-1
+          if (d(nd) /= 0.d0) exit
+        enddo
+
+      endif
 
   end select
 end
@@ -1197,7 +1633,8 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
   logical, external               :: ao_two_e_integral_zero
 
   integer                         :: i,k
-  double precision                :: ao_two_e_integral,cpu_1,cpu_2, wall_1, wall_2
+  double precision, external      :: ao_two_e_integral
+  double precision                :: cpu_1,cpu_2, wall_1, wall_2
   double precision                :: integral, wall_0
   double precision                :: thr
   integer                         :: kk, m, j1, i1
@@ -1233,3 +1670,87 @@ subroutine compute_ao_integrals_jl(j,l,n_integrals,buffer_i,buffer_value)
   enddo
 
 end
+
+
+subroutine multiply_poly_local(b,nb,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb, nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:nc)
+  double precision, intent(inout) :: d(0:nb+nc)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(ior(nc,nb) < 0) return !False if nc>=0 and nb>=0
+
+  do ib=0,nb
+    do ic = 0,nc
+      d(ib+ic) = d(ib+ic) + c(ic) * b(ib)
+    enddo
+  enddo
+
+  do nd = nb+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+!DIR$ FORCEINLINE
+subroutine multiply_poly_c2_inline_2e(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:2)
+  double precision, intent(inout) :: d(0:nb+2)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+      d(2) = d(2) + c(2) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(1) * b(2) + c(2) * b(1)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ib=2,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1) + c(2) * b(ib-2)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb) + c(2) * b(nb-1)
+      d(nb+2) = d(nb+2) + c(2) * b(nb)
+
+  end select
+
+  do nd = nb+2,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+

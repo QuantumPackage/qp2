@@ -490,7 +490,7 @@ end subroutine check_sym
 subroutine sum_A_At(A, N)
 
   !BEGIN_DOC
-  ! useful for symmetrizing a tensor without a temporary tensor
+  ! add a tensor with its transpose without a temporary tensor
   !END_DOC
 
   implicit none
@@ -520,4 +520,64 @@ subroutine sum_A_At(A, N)
  !$OMP END PARALLEL
 
 end
+
+! ---
+
+subroutine sub_A_At(A, N)
+
+  !BEGIN_DOC
+  ! substruct a tensor with its transpose without a temporary tensor
+  !END_DOC
+
+  implicit none
+  integer,          intent(in)    :: N
+  double precision, intent(inout) :: A(N,N)
+  integer                         :: i, j
+
+ !$OMP PARALLEL       &
+ !$OMP DEFAULT (NONE) &
+ !$OMP PRIVATE (i, j) & 
+ !$OMP SHARED (A, N)
+ !$OMP DO 
+  do j = 1, N
+    do i = j, N
+      A(i,j) -= A(j,i)
+    enddo
+  enddo
+ !$OMP END DO
+
+ !$OMP DO 
+  do j = 2, N
+    do i = 1, j-1
+      A(i,j) = -A(j,i)
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+end
+
+! ---
+
+logical function is_same_spin(sigma_1, sigma_2)
+
+  BEGIN_DOC
+  !
+  ! true if sgn(sigma_1) = sgn(sigma_2)
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in) :: sigma_1, sigma_2
+
+  if((sigma_1 * sigma_2) .gt. 0.d0) then
+    is_same_spin = .true.
+  else
+    is_same_spin = .false.
+  endif
+
+end function is_same_spin
+
+! ---
+
 

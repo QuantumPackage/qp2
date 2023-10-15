@@ -39,17 +39,24 @@ subroutine state_average_energy(energy)
   double precision :: get_two_e_integral
   double precision :: mono_e, bi_e
   integer :: i,j,k,l
-  
+
+  energy = nuclear_repulsion
   ! mono electronic part
+  !$OMP PARALLEL DEFAULT(NONE) PRIVATE(i,j,k,l,mono_e, bi_e) &
+  !$OMP SHARED(mo_num, mo_integrals_map, two_e_dm_mo, one_e_dm_mo, energy, &
+  !$OMP       mo_one_e_integrals)
   mono_e = 0d0
+  !$OMP DO
   do j = 1, mo_num
     do i = 1, mo_num
       mono_e =  mono_e + mo_one_e_integrals(i,j) * one_e_dm_mo(i,j)
     enddo
   enddo
+  !$OMP END DO NOWAIT
 
   ! bi electronic part
   bi_e = 0d0
+  !$OMP DO
   do l = 1, mo_num
     do k = 1, mo_num
       do j = 1, mo_num
@@ -59,13 +66,17 @@ subroutine state_average_energy(energy)
       enddo
     enddo
   enddo
+  !$OMP END DO
 
   ! State average energy
-  energy = mono_e + 0.5d0 * bi_e + nuclear_repulsion
+  !$OMP CRITICAL
+  energy = energy + mono_e + 0.5d0 * bi_e
+  !$OMP END CRITICAL
+  !$OMP END PARALLEL
 
   ! Check
   !call print_energy_components
-  
+
   print*,'State average energy:', energy
   !print*,ci_energy
 

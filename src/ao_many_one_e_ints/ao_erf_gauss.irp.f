@@ -212,9 +212,7 @@ subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
   ! Computes the following integral :
   !
   ! $\int_{-\infty}^{infty} dr x * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
-  !
   ! $\int_{-\infty}^{infty} dr y * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
-  !
   ! $\int_{-\infty}^{infty} dr z * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
   !
   END_DOC
@@ -279,9 +277,7 @@ subroutine NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_
   ! Computes the following integral :
   !
   ! $\int_{-\infty}^{infty} dr x * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
-  !
   ! $\int_{-\infty}^{infty} dr y * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
-  !
   ! $\int_{-\infty}^{infty} dr z * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
   !
   END_DOC
@@ -1108,6 +1104,298 @@ subroutine NAI_pol_x_specify_mult_erf_ao(i_ao,j_ao,mu_in,C_center,m,ints)
     enddo
  enddo
 end
+
+! ---
+
+subroutine NAI_pol_x2_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center, ints)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! $\int_{-\infty}^{infty} dr x^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! $\int_{-\infty}^{infty} dr y^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! $\int_{-\infty}^{infty} dr z^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao
+  double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
+  double precision, intent(out) :: ints(3)
+
+  integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, m
+  integer                       :: power_A1(3), power_A2(3)
+  double precision              :: Ai_center(3), Aj_center(3), alphai, alphaj, coef, coefi
+  double precision              :: integral0, integral1, integral2
+
+  double precision, external    :: NAI_pol_mult_erf_with1s
+
+  ASSERT(beta .ge. 0.d0)
+  if(beta .lt. 1d-10) then
+    call NAI_pol_x2_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+    return
+  endif
+
+  ints = 0.d0
+
+  power_Ai(1:3) = ao_power(i_ao,1:3)
+  power_Aj(1:3) = ao_power(j_ao,1:3)
+
+  Ai_center(1:3) = nucl_coord(ao_nucl(i_ao),1:3)
+  Aj_center(1:3) = nucl_coord(ao_nucl(j_ao),1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  do i = 1, ao_prim_num(i_ao)
+    alphai = ao_expo_ordered_transp           (i,i_ao)
+    coefi  = ao_coef_normalized_ordered_transp(i,i_ao)
+
+    do m = 1, 3
+
+      power_A1     = power_Ai
+      power_A1(m) += 1
+
+      power_A2     = power_Ai
+      power_A2(m) += 2
+
+      do j = 1, ao_prim_num(j_ao)
+        alphaj = ao_expo_ordered_transp                   (j,j_ao)
+        coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
+
+        integral0 = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+        integral1 = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_A1, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+        integral2 = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_A2, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+
+        ints(m) += coef * (integral2 + Ai_center(m) * (2.d0*integral1 + Ai_center(m)*integral0))
+      enddo
+    enddo
+  enddo
+
+end subroutine NAI_pol_x2_mult_erf_ao_with1s
+
+! ---
+
+subroutine NAI_pol_x2_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! $\int_{-\infty}^{infty} dr x^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! $\int_{-\infty}^{infty} dr y^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! $\int_{-\infty}^{infty} dr z^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao
+  double precision, intent(in)  :: mu_in, C_center(3)
+  double precision, intent(out) :: ints(3)
+
+  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, m
+  integer                       :: power_A1(3), power_A2(3)
+  double precision              :: A_center(3), B_center(3), alpha, beta, coef
+  double precision              :: integral0, integral1, integral2
+
+  double precision              :: NAI_pol_mult_erf
+
+  ints = 0.d0
+
+  num_A         = ao_nucl(i_ao)
+  power_A(1:3)  = ao_power(i_ao,1:3)
+  A_center(1:3) = nucl_coord(num_A,1:3)
+  num_B         = ao_nucl(j_ao)
+  power_B(1:3)  = ao_power(j_ao,1:3)
+  B_center(1:3) = nucl_coord(num_B,1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  do i = 1, ao_prim_num(i_ao)
+    alpha = ao_expo_ordered_transp(i,i_ao)
+
+    do m = 1, 3
+
+      power_A1 = power_A
+      power_A1(m) += 1
+
+      power_A2 = power_A
+      power_A2(m) += 2
+
+      do j = 1, ao_prim_num(j_ao)
+        beta = ao_expo_ordered_transp(j,j_ao)
+        coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
+
+        integral0 = NAI_pol_mult_erf(A_center, B_center, power_A , power_B, alpha, beta, C_center, n_pt_in, mu_in)
+        integral1 = NAI_pol_mult_erf(A_center, B_center, power_A1, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+        integral2 = NAI_pol_mult_erf(A_center, B_center, power_A2, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+
+        ints(m) += coef * (integral2 + A_center(m) * (2.d0*integral1 + A_center(m)*integral0))
+      enddo
+    enddo
+  enddo
+
+end subroutine NAI_pol_x2_mult_erf_ao
+
+! ---
+
+subroutine NAI_pol_012_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_center, ints)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! ints(1) = $\int_{-\infty}^{infty} dr x^0 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! ints(2) = $\int_{-\infty}^{infty} dr x^1 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! ints(3) = $\int_{-\infty}^{infty} dr y^1 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! ints(4) = $\int_{-\infty}^{infty} dr z^1 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! ints(5) = $\int_{-\infty}^{infty} dr x^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! ints(6) = $\int_{-\infty}^{infty} dr y^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! ints(7) = $\int_{-\infty}^{infty} dr z^2 * \chi_i(r) \chi_j(r) e^{-\beta (r - B_center)^2} \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao
+  double precision, intent(in)  :: beta, B_center(3), mu_in, C_center(3)
+  double precision, intent(out) :: ints(7)
+
+  integer                       :: i, j, power_Ai(3), power_Aj(3), n_pt_in, m
+  integer                       :: power_A1(3), power_A2(3)
+  double precision              :: Ai_center(3), Aj_center(3), alphai, alphaj, coef, coefi
+  double precision              :: integral0, integral1, integral2
+
+  double precision, external    :: NAI_pol_mult_erf_with1s
+
+  ASSERT(beta .ge. 0.d0)
+  if(beta .lt. 1d-10) then
+    call NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+    return
+  endif
+
+  ints = 0.d0
+
+  power_Ai(1:3) = ao_power(i_ao,1:3)
+  power_Aj(1:3) = ao_power(j_ao,1:3)
+
+  Ai_center(1:3) = nucl_coord(ao_nucl(i_ao),1:3)
+  Aj_center(1:3) = nucl_coord(ao_nucl(j_ao),1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  do i = 1, ao_prim_num(i_ao)
+    alphai = ao_expo_ordered_transp           (i,i_ao)
+    coefi  = ao_coef_normalized_ordered_transp(i,i_ao)
+
+    do j = 1, ao_prim_num(j_ao)
+      alphaj = ao_expo_ordered_transp                   (j,j_ao)
+      coef   = coefi * ao_coef_normalized_ordered_transp(j,j_ao)
+
+      integral0 = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_Ai, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+      ints(1)  += coef * integral0
+
+      do m = 1, 3
+
+        power_A1     = power_Ai
+        power_A1(m) += 1
+        integral1    = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_A1, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+        ints(1+m)   += coef * (integral1 + Ai_center(m)*integral0)
+
+        power_A2     = power_Ai
+        power_A2(m) += 2
+        integral2    = NAI_pol_mult_erf_with1s(Ai_center, Aj_center, power_A2, power_Aj, alphai, alphaj, beta, B_center, C_center, n_pt_in, mu_in)
+        ints(4+m)   += coef * (integral2 + Ai_center(m) * (2.d0*integral1 + Ai_center(m)*integral0))
+      enddo
+    enddo
+  enddo
+
+end subroutine NAI_pol_012_mult_erf_ao_with1s
+
+! ---
+
+subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integral :
+  !
+  ! int(1) = $\int_{-\infty}^{infty} dr x^0 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! int(2) = $\int_{-\infty}^{infty} dr x^1 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! int(3) = $\int_{-\infty}^{infty} dr y^1 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! int(4) = $\int_{-\infty}^{infty} dr z^1 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  ! int(5) = $\int_{-\infty}^{infty} dr x^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! int(6) = $\int_{-\infty}^{infty} dr y^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  ! int(7) = $\int_{-\infty}^{infty} dr z^2 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i_ao, j_ao
+  double precision, intent(in)  :: mu_in, C_center(3)
+  double precision, intent(out) :: ints(7)
+
+  integer                       :: i, j, num_A, num_B, power_A(3), power_B(3), n_pt_in, m
+  integer                       :: power_A1(3), power_A2(3)
+  double precision              :: A_center(3), B_center(3), alpha, beta, coef
+  double precision              :: integral0, integral1, integral2
+
+  double precision              :: NAI_pol_mult_erf
+
+  ints = 0.d0
+
+  num_A         = ao_nucl(i_ao)
+  power_A(1:3)  = ao_power(i_ao,1:3)
+  A_center(1:3) = nucl_coord(num_A,1:3)
+  num_B         = ao_nucl(j_ao)
+  power_B(1:3)  = ao_power(j_ao,1:3)
+  B_center(1:3) = nucl_coord(num_B,1:3)
+
+  n_pt_in = n_pt_max_integrals
+
+  do i = 1, ao_prim_num(i_ao)
+    alpha = ao_expo_ordered_transp(i,i_ao)
+
+    do j = 1, ao_prim_num(j_ao)
+      beta = ao_expo_ordered_transp(j,j_ao)
+      coef = ao_coef_normalized_ordered_transp(j,j_ao) * ao_coef_normalized_ordered_transp(i,i_ao)
+
+      integral0 = NAI_pol_mult_erf(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+      ints(1)  += coef * integral0
+
+      do m = 1, 3
+
+        power_A1 = power_A
+        power_A1(m) += 1
+        integral1 = NAI_pol_mult_erf(A_center, B_center, power_A1, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+
+        ints(1+m) += coef * (integral1 + A_center(m)*integral0)
+
+        power_A2 = power_A
+        power_A2(m) += 2
+        integral2 = NAI_pol_mult_erf(A_center, B_center, power_A2, power_B, alpha, beta, C_center, n_pt_in, mu_in)
+
+        ints(4+m) += coef * (integral2 + A_center(m) * (2.d0*integral1 + A_center(m)*integral0))
+      enddo
+    enddo
+  enddo
+
+end subroutine NAI_pol_012_mult_erf_ao
 
 ! ---
 

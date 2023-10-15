@@ -26,10 +26,10 @@
   enddo
  enddo
  
-! print*,'electron part for z_dipole = ',z_dipole_moment
-! print*,'electron part for y_dipole = ',y_dipole_moment
-! print*,'electron part for x_dipole = ',x_dipole_moment
-! 
+ print*,'electron part for z_dipole = ',z_dipole_moment
+ print*,'electron part for y_dipole = ',y_dipole_moment
+ print*,'electron part for x_dipole = ',x_dipole_moment
+ 
  nuclei_part_z = 0.d0
  nuclei_part_y = 0.d0
  nuclei_part_x = 0.d0
@@ -38,10 +38,10 @@
   nuclei_part_y += nucl_charge(i) * nucl_coord(i,2) 
   nuclei_part_x += nucl_charge(i) * nucl_coord(i,1) 
  enddo
-! print*,'nuclei   part for z_dipole = ',nuclei_part_z
-! print*,'nuclei   part for y_dipole = ',nuclei_part_y
-! print*,'nuclei   part for x_dipole = ',nuclei_part_x
-!
+ print*,'nuclei   part for z_dipole = ',nuclei_part_z
+ print*,'nuclei   part for y_dipole = ',nuclei_part_y
+ print*,'nuclei   part for x_dipole = ',nuclei_part_x
+
  do istate = 1, N_states
   z_dipole_moment(istate) += nuclei_part_z
   y_dipole_moment(istate) += nuclei_part_y
@@ -66,9 +66,9 @@ END_PROVIDER
     write(*,'(i16)',advance='no') i
   end do
   write(*,*) ''
-  write(*,'(A17,100(1pE16.8))') 'x_dipole_moment = ',x_dipole_moment
-  write(*,'(A17,100(1pE16.8))') 'y_dipole_moment = ',y_dipole_moment
-  write(*,'(A17,100(1pE16.8))') 'z_dipole_moment = ',z_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'x_dipole_moment = ',x_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'y_dipole_moment = ',y_dipole_moment
+  write(*,'(A17,100(ES16.8))') 'z_dipole_moment = ',z_dipole_moment
   !print*, 'x_dipole_moment                  = ',x_dipole_moment
   !print*, 'y_dipole_moment                  = ',y_dipole_moment
   !print*, 'z_dipole_moment                  = ',z_dipole_moment

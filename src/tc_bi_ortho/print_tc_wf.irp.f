@@ -1,20 +1,31 @@
+
+! ---
+
 program print_tc_bi_ortho
-  implicit none
+
   BEGIN_DOC
-! TODO : Put the documentation of the program here
+  ! TODO : Put the documentation of the program here
   END_DOC
+
+  implicit none
+
   print *, 'Hello world'
+
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
 !  if(three_body_h_tc)then
 !   call provide_all_three_ints_bi_ortho
 !  endif
 !  call routine
- call write_l_r_wf
+  call write_l_r_wf
+
 end
 
 subroutine write_l_r_wf
@@ -26,7 +37,8 @@ subroutine write_l_r_wf
  integer :: i
  print*,'Writing the left-right wf'
  do i = 1, N_det
-  write(i_unit_output,*)i,psi_l_coef_sorted_bi_ortho_left(i),psi_r_coef_sorted_bi_ortho_right(i)
+  write(i_unit_output,*)i, psi_l_coef_sorted_bi_ortho_left(i)/psi_l_coef_sorted_bi_ortho_left(1) &
+                         , psi_r_coef_sorted_bi_ortho_right(i)/psi_r_coef_sorted_bi_ortho_right(1)
  enddo
 
 
@@ -48,12 +60,12 @@ subroutine routine
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
    if(degree == 1 .or. degree == 2)then
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-    call htilde_mu_mat_bi_ortho(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
     delta_e = e_tilde_00 - e_i0
     coef_pt1 = htilde_ij / delta_e
  
-    call htilde_mu_mat_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
     contrib_pt = coef_pt1 * htilde_ij
     e_pt2 += contrib_pt
  

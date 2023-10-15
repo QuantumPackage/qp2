@@ -40,7 +40,7 @@ program debug_hessian
   ! Definition of n  
   n = mo_num*(mo_num-1)/2
 
-  PROVIDE mo_two_e_integrals_in_map ! Vérifier pour suppression
+  PROVIDE mo_two_e_integrals_in_map 
 
   ! Allocation
   allocate(H(n,n),H2(n,n))  

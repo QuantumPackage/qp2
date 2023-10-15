@@ -104,6 +104,9 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
     IF(do_pseudo) THEN
        ao_integrals_n_e += ao_pseudo_integrals
     ENDIF
+    IF(point_charges) THEN
+       ao_integrals_n_e += ao_integrals_pt_chrg
+    ENDIF
 
   endif
 
@@ -455,10 +458,12 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(c)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny=0
     call I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,Y,ny,n_pt_in)
-    call multiply_poly(Y,ny,R1x,2,d,nd)
+!    call multiply_poly(Y,ny,R1x,2,d,nd)
+    call multiply_poly_c2(Y,ny,R1x,d,nd)
   else
     do ix=0,n_pt_in
       X(ix) = 0.d0
@@ -469,7 +474,8 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(a-1)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
 
     nx = nd
     do ix=0,n_pt_in
@@ -479,10 +485,12 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(c)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny=0
     call I_x1_pol_mult_one_e(a-1,c,R1x,R1xp,R2x,Y,ny,n_pt_in)
-    call multiply_poly(Y,ny,R1x,2,d,nd)
+!    call multiply_poly(Y,ny,R1x,2,d,nd)
+    call multiply_poly_c2(Y,ny,R1x,d,nd)
   endif
 end
 
@@ -519,7 +527,8 @@ recursive subroutine I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,d,nd,dim)
     do ix=0,nx
       X(ix) *= dble(c-1)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny = 0
     do ix=0,dim
       Y(ix) = 0.d0
@@ -527,7 +536,8 @@ recursive subroutine I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,d,nd,dim)
 
     call I_x1_pol_mult_one_e(0,c-1,R1x,R1xp,R2x,Y,ny,dim)
     if(ny.ge.0)then
-      call multiply_poly(Y,ny,R1xp,2,d,nd)
+!      call multiply_poly(Y,ny,R1xp,2,d,nd)
+      call multiply_poly_c2(Y,ny,R1xp,d,nd)
     endif
   endif
 end

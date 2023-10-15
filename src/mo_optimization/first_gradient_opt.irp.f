@@ -111,7 +111,7 @@ subroutine first_gradient_opt(n,v_grad)
   if (debug) then    
     print*,'Matrix containing the gradient :'
     do i = 1, mo_num
-      write(*,'(100(E12.5))') A(i,1:mo_num)
+      write(*,'(100(ES12.5))') A(i,1:mo_num)
     enddo
   endif
 
