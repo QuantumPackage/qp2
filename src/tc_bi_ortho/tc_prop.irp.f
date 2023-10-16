@@ -90,6 +90,7 @@
    enddo
   enddo
  enddo
+ print*,'tc_bi_ortho_dipole(3) elec = ',tc_bi_ortho_dipole(3,1)
 
  nuclei_part = 0.d0
  do m = 1, 3
