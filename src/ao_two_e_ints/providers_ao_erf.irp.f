@@ -90,7 +90,7 @@ BEGIN_PROVIDER [ logical, ao_two_e_integrals_erf_in_map ]
   if (write_ao_two_e_integrals_erf) then
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints_erf',ao_integrals_erf_map)
-    call ezfio_set_ao_two_e_erf_ints_io_ao_two_e_integrals_erf("Read")
+    call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals_erf("Read")
   endif
 
 END_PROVIDER
