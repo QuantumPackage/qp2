@@ -8,8 +8,8 @@ function run() {
   test_exe cisd || skip
   qp edit --check
   qp set determinants n_states  2
-  qp set davidson threshold_davidson 1.e-12
-  qp set davidson n_states_diag 24
+  qp set davidson_keywords threshold_davidson 1.e-12
+  qp set davidson_keywords n_states_diag 24
   qp run cis
   qp run cisd 
   energy1="$(qp get cisd energy | tr '[]' ' ' | cut -d ',' -f 1)"
