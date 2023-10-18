@@ -95,7 +95,12 @@ BEGIN_PROVIDER [double precision, diag_three_elem_hf]
 
   if(.not. three_body_h_tc) then
 
-    diag_three_elem_hf = 0.d0
+   if(noL_standard) then
+      PROVIDE noL_0e
+      diag_three_elem_hf = noL_0e
+    else
+      diag_three_elem_hf = 0.d0
+    endif
 
   else
 
