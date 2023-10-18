@@ -15,7 +15,7 @@ BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho, (N_det,N_det)]
   integer          :: i, j
   double precision :: htot
 
-  PROVIDE N_int
+  call provide_all_three_ints_bi_ortho
 
   i = 1
   j = 1

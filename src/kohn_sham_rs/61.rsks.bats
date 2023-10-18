@@ -13,7 +13,7 @@ function run() {
   qp set scf_utils thresh_scf 1.e-10
   qp set dft_keywords exchange_functional $functional
   qp set dft_keywords correlation_functional $functional
-  qp set ao_two_e_erf_ints mu_erf 0.5 
+  qp set hamiltonian mu_erf 0.5 
   qp set becke_numerical_grid grid_type_sgn 1 
   qp_reset --mos $1 
   qp run rs_ks_scf 

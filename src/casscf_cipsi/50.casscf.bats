@@ -9,8 +9,8 @@ function run_stoch() {
   test_exe casscf || skip
   qp set perturbation do_pt2 True
   qp set determinants n_det_max $3
-  qp set davidson threshold_davidson 1.e-10
-  qp set davidson n_states_diag 4
+  qp set davidson_keywords threshold_davidson 1.e-10
+  qp set davidson_keywords n_states_diag 4
   qp run casscf | tee casscf.out 
   energy1="$(ezfio get casscf energy_pt2 | tr '[]' ' ' | cut -d ',' -f 1)"
   eq $energy1 $1 $thresh

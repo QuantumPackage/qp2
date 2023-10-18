@@ -8,17 +8,23 @@ program casscf
 !  touch no_vvvv_integrals
   n_det_max_full = 500
   touch n_det_max_full
-  pt2_relative_error = 0.04
+  if(small_active_space)then
+   pt2_relative_error = 0.00001
+  else
+   thresh_scf = 1.d-4
+   pt2_relative_error = 0.04
+  endif
   touch pt2_relative_error 
-!  call run_stochastic_cipsi
   call run
 end
 
 subroutine run
   implicit none
-  double precision               :: energy_old, energy, pt2_max_before, ept2_before,delta_E
+  double precision               :: energy_old, energy, pt2_max_before,delta_E
   logical                        :: converged,state_following_casscf_cipsi_save
-  integer                        :: iteration
+  integer                        :: iteration,istate
+  double precision, allocatable :: E_PT2(:), PT2(:), Ev(:), ept2_before(:)
+  allocate(E_PT2(N_states), PT2(N_states), Ev(N_states), ept2_before(N_states))
   converged = .False.
 
   energy = 0.d0
@@ -28,13 +34,20 @@ subroutine run
   state_following_casscf = .True.
   touch state_following_casscf
   ept2_before = 0.d0
-  if(adaptive_pt2_max)then
-   pt2_max = 0.005
+  if(small_active_space)then
+   pt2_max = 1.d-10
    SOFT_TOUCH pt2_max
+  else
+   if(adaptive_pt2_max)then
+    pt2_max = 0.005
+    SOFT_TOUCH pt2_max
+   endif
   endif
   do while (.not.converged)
     print*,'pt2_max = ',pt2_max
-    call run_stochastic_cipsi
+    call run_stochastic_cipsi(Ev,PT2)
+    print*,'Ev,PT2',Ev(1),PT2(1)
+    E_PT2(1:N_states) = Ev(1:N_states) + PT2(1:N_states)
     energy_old = energy
     energy = eone+etwo+ecore
     pt2_max_before = pt2_max
@@ -42,15 +55,13 @@ subroutine run
     call write_time(6)
     call write_int(6,iteration,'CAS-SCF iteration = ')
     call write_double(6,energy,'CAS-SCF energy = ')
-    if(n_states == 1)then
-     double precision :: E_PT2, PT2
-     call ezfio_get_casscf_cipsi_energy_pt2(E_PT2)
-     call ezfio_get_casscf_cipsi_energy(PT2)
-     PT2 -= E_PT2
-     call write_double(6,E_PT2,'E + PT2 energy = ')
-     call write_double(6,PT2,'  PT2          = ')
+!    if(n_states == 1)then
+!     call ezfio_get_casscf_cipsi_energy_pt2(E_PT2)
+!     call ezfio_get_casscf_cipsi_energy(PT2)
+     call write_double(6,E_PT2(1:N_states),'E + PT2 energy = ')
+     call write_double(6,PT2(1:N_states),'  PT2          = ')
      call write_double(6,pt2_max,' PT2_MAX       = ')
-    endif
+!    endif
 
     print*,''
     call write_double(6,norm_grad_vec2,'Norm of gradients = ')
@@ -65,15 +76,20 @@ subroutine run
     else if (criterion_casscf == "gradients")then
      converged = norm_grad_vec2 < thresh_scf
     else if (criterion_casscf == "e_pt2")then
-     delta_E = dabs(E_PT2 - ept2_before)
+     delta_E = 0.d0
+     do istate = 1, N_states
+      delta_E += dabs(E_PT2(istate) - ept2_before(istate))
+     enddo
      converged = dabs(delta_E) < thresh_casscf
     endif
     ept2_before = E_PT2
-    if(adaptive_pt2_max)then
-     pt2_max = dabs(energy_improvement / (pt2_relative_error))
-     pt2_max = min(pt2_max, pt2_max_before)
-     if(n_act_orb.ge.n_big_act_orb)then
-      pt2_max = max(pt2_max,pt2_min_casscf)
+    if(.not.small_active_space)then
+     if(adaptive_pt2_max)then
+      pt2_max = dabs(energy_improvement / (pt2_relative_error))
+      pt2_max = min(pt2_max, pt2_max_before)
+      if(n_act_orb.ge.n_big_act_orb)then
+       pt2_max = max(pt2_max,pt2_min_casscf)
+      endif
      endif
     endif
     print*,''
@@ -94,8 +110,10 @@ subroutine run
      read_wf = .True.
      call clear_mo_map
      SOFT_TOUCH mo_coef N_det psi_det psi_coef
-     if(adaptive_pt2_max)then
-       SOFT_TOUCH pt2_max  
+     if(.not.small_active_space)then
+      if(adaptive_pt2_max)then
+        SOFT_TOUCH pt2_max  
+      endif
      endif
      if(iteration .gt. 3)then
       state_following_casscf = state_following_casscf_cipsi_save
@@ -104,6 +122,25 @@ subroutine run
     endif
 
   enddo
+     integer :: i
+    print*,'Converged CASSCF '
+    print*,'--------------------------'
+    write(6,*) ' occupation numbers of orbitals '
+    do i=1,mo_num
+      write(6,*) i,occnum(i)
+    end do
+    print*,'--------------'
+!
+!     write(6,*)
+!     write(6,*) ' the diagonal of the inactive effective Fock matrix '
+!     write(6,'(5(i3,F12.5))') (i,Fipq(i,i),i=1,mo_num)
+!     write(6,*)
+  print*,'Fock MCSCF'
+  do i = 1, mo_num
+   write(*,*)i,mcscf_fock_diag_mo(i)
+!   write(*,*)mcscf_fock_alpha_mo(i,i)
+  enddo
+
 
 end
 

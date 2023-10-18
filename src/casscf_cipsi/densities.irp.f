@@ -17,6 +17,35 @@ BEGIN_PROVIDER [real*8, D0tu, (n_act_orb,n_act_orb) ]
   
 END_PROVIDER
 
+ BEGIN_PROVIDER [double precision, D0tu_alpha_ao, (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, D0tu_beta_ao, (ao_num, ao_num)]
+ implicit none
+ integer :: i,ii,j,u,t,uu,tt
+ double precision, allocatable :: D0_tmp_alpha(:,:),D0_tmp_beta(:,:)
+ allocate(D0_tmp_alpha(mo_num, mo_num),D0_tmp_beta(mo_num, mo_num))
+ D0_tmp_beta = 0.d0
+ D0_tmp_alpha = 0.d0
+ do i = 1, n_core_inact_orb
+  ii = list_core_inact(i)
+  D0_tmp_alpha(ii,ii) = 1.d0
+  D0_tmp_beta(ii,ii) = 1.d0
+ enddo
+ print*,'Diagonal elements of the 1RDM in the active space'
+ do u=1,n_act_orb
+   uu = list_act(u)
+   print*,uu,one_e_dm_mo_alpha_average(uu,uu),one_e_dm_mo_beta_average(uu,uu)
+   do t=1,n_act_orb
+    tt = list_act(t)
+    D0_tmp_alpha(tt,uu) = one_e_dm_mo_alpha_average(tt,uu)
+    D0_tmp_beta(tt,uu) = one_e_dm_mo_beta_average(tt,uu)
+   enddo
+ enddo
+
+ call mo_to_ao_no_overlap(D0_tmp_alpha,mo_num,D0tu_alpha_ao,ao_num)
+ call mo_to_ao_no_overlap(D0_tmp_beta,mo_num,D0tu_beta_ao,ao_num)
+
+END_PROVIDER 
+
 BEGIN_PROVIDER [real*8, P0tuvx, (n_act_orb,n_act_orb,n_act_orb,n_act_orb) ]
    BEGIN_DOC
    ! The second-order density matrix in the basis of the starting MOs ONLY IN THE RANGE OF ACTIVE MOS
