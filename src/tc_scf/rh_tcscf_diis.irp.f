@@ -239,7 +239,7 @@ subroutine rh_tcscf_diis()
     write(json_unit, json_real_fmt) ' delta Energy   ', e_delta
     write(json_unit, json_real_fmt) ' DIIS error     ', er_DIIS
     write(json_unit, json_real_fmt) ' level_shift    ', level_shift_tcscf
-    write(json_unit, json_int_fmt)  ' DIIS           ', dim_DIIS
+    write(json_unit, json_int_fmtx) ' DIIS           ', dim_DIIS
     write(json_unit, json_real_fmt) ' Wall time (min)', (t1-t0)/60.d0
     call unlock_io
 

@@ -11,11 +11,13 @@ subroutine run_optimization
   implicit none
 
   double precision :: e_cipsi, e_opt, delta_e
+  double precision, allocatable :: Ev(:),PT2(:)
   integer :: nb_iter,i
   logical :: not_converged
   character (len=100) :: filename
 
   PROVIDE psi_det psi_coef mo_two_e_integrals_in_map ao_pseudo_integrals
+  allocate(Ev(N_states),PT2(N_states))
 
   not_converged = .True.
   nb_iter = 0
@@ -38,7 +40,7 @@ subroutine run_optimization
       print*,'' 
       print*,'********** cipsi step **********'
       ! cispi calculation
-      call run_stochastic_cipsi
+      call run_stochastic_cipsi(Ev,PT2)
 
       ! State average energy after the cipsi step
       call state_average_energy(e_cipsi)

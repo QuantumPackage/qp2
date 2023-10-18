@@ -91,7 +91,7 @@
   print *, ' parameters for nuclei jastrow'
   print *, ' i, Z, j1b_pen, j1b_pen_coef'
   do i = 1, nucl_num
-    write(*,"(I4, 2x, 3(E15.7, 2X))") i, nucl_charge(i), j1b_pen(i), j1b_pen_coef(i)
+    write(*,'(I4, 2x, 3(E15.7, 2X))') i, nucl_charge(i), j1b_pen(i), j1b_pen_coef(i)
   enddo
 
 END_PROVIDER

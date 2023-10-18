@@ -286,7 +286,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
-      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
+!      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
       s_(N_st_diag*itermax,N_st_diag*itermax),                       &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
@@ -340,7 +340,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    do iter=1,itermax-1
+    iter = 0
+    do while (iter < itermax-1)
+      iter += 1
+!    do iter=1,itermax-1
 
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
@@ -430,30 +433,30 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
-          0.d0, h, size(h_p,1))
+          0.d0, h, size(h,1))
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), U, size(U,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
 
-      ! Penalty method
-      ! --------------
-
-      if (s2_eig) then
-        h_p = s_
-        do k=1,shift2
-          h_p(k,k) = h_p(k,k) - expected_s2
-        enddo
-        if (only_expected_s2) then
-          alpha = 0.1d0
-          h_p = h + alpha*h_p
-        else
-          alpha = 0.0001d0
-          h_p = h + alpha*h_p
-        endif
-      else
-        h_p = h
-        alpha = 0.d0
-      endif
+!      ! Penalty method
+!      ! --------------
+!
+!      if (s2_eig) then
+!        h_p = s_
+!        do k=1,shift2
+!          h_p(k,k) = h_p(k,k) - expected_s2
+!        enddo
+!        if (only_expected_s2) then
+!          alpha = 0.1d0
+!          h_p = h + alpha*h_p
+!        else
+!          alpha = 0.0001d0
+!          h_p = h + alpha*h_p
+!        endif
+!      else
+!        h_p = h
+!        alpha = 0.d0
+!      endif
 
       ! Diagonalize h_p
       ! ---------------
@@ -473,8 +476,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        call dsygv(1,'V','U',shift2,y,size(y,1), &
           s_tmp,size(s_tmp,1), lambda, work,lwork,info)
        deallocate(work)
-       if (info /= 0) then
-         stop 'DSYGV Diagonalization failed'
+       if (info > 0) then
+         ! Numerical errors propagate. We need to reduce the number of iterations
+         itermax = iter-1
+         exit
        endif
 
       ! Compute Energy for each eigenvector

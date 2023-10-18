@@ -402,6 +402,7 @@ subroutine print_energy_and_mos(good_angles)
   print *, ' TC energy              = ', TC_HF_energy
   print *, ' TC SCF energy gradient = ', grad_non_hermit
   print *, ' Max angle Left/right   = ', max_angle_left_right
+  call print_angles_tc()
 
   if(max_angle_left_right .lt. thresh_lr_angle) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
