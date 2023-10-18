@@ -57,7 +57,7 @@
         r2(2) = final_grid_points_extra(2,jpoint)
         r2(3) = final_grid_points_extra(3,jpoint)
 
-        call grad1_j12_mu(r1, r2, grad1_u2b)
+        call grad1_j12_mu(r2, r1, grad1_u2b)
 
         dx = grad1_u2b(1)
         dy = grad1_u2b(2)
@@ -100,7 +100,7 @@
 
         v1b_r2  = j1b_nucl(r2)
         u2b_r12 = j12_mu(r1, r2)
-        call grad1_j12_mu(r1, r2, grad1_u2b)
+        call grad1_j12_mu(r2, r1, grad1_u2b)
 
         dx = (grad1_u2b(1) * v1b_r1 + u2b_r12 * grad1_v1b(1)) * v1b_r2
         dy = (grad1_u2b(2) * v1b_r1 + u2b_r12 * grad1_v1b(2)) * v1b_r2
