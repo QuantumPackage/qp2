@@ -9,25 +9,27 @@ subroutine mo_two_e_integrals_erf_index(i,j,k,l,i1)
   integer(key_kind)              :: p,q,r,s,i2
   p = min(i,k)
   r = max(i,k)
-  p = p+ishft(r*r-r,-1)
+  p = p+shiftr(r*r-r,1)
   q = min(j,l)
   s = max(j,l)
-  q = q+ishft(s*s-s,-1)
+  q = q+shiftr(s*s-s,1)
   i1 = min(p,q)
   i2 = max(p,q)
-  i1 = i1+ishft(i2*i2-i2,-1)
+  i1 = i1+shiftr(i2*i2-i2,1)
 end
 
 
 BEGIN_PROVIDER [ logical, mo_two_e_integrals_erf_in_map ]
   use map_module
   implicit none
-  integer(bit_kind)              :: mask_ijkl(N_int,4)
-  integer(bit_kind)              :: mask_ijk(N_int,3)
-
   BEGIN_DOC
   ! If True, the map of MO two-electron integrals is provided
   END_DOC
+  integer(bit_kind)              :: mask_ijkl(N_int,4)
+  integer(bit_kind)              :: mask_ijk(N_int,3)
+  double precision               :: cpu_1, cpu_2, wall_1, wall_2
+
+  PROVIDE mo_class
 
   real                           :: map_mb
 
@@ -55,7 +57,7 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_erf_in_map ]
   if (write_mo_two_e_integrals_erf) then
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_erf',mo_integrals_erf_map)
-    call ezfio_set_mo_two_e_erf_ints_io_mo_two_e_integrals_erf("Read")
+    call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals_erf("Read")
   endif
 
 END_PROVIDER

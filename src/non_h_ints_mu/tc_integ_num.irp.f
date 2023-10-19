@@ -47,7 +47,7 @@
   call total_memory(mem)
   mem      = max(1.d0, qp_max_mem - mem)
   n_double = mem * 1.d8
-  n_blocks = min(n_double / (n_points_extra_final_grid * 4), 1.d0*n_points_final_grid)
+  n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
   n_rest   = int(mod(n_points_final_grid, n_blocks))
   n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
 

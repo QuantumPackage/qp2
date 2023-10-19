@@ -10,8 +10,8 @@ function run() {
   qp set perturbation do_pt2 False
   qp set determinants n_det_max 8000
   qp set determinants n_states  1
-  qp set davidson threshold_davidson 1.e-10
-  qp set davidson n_states_diag 8
+  qp set davidson_keywords threshold_davidson 1.e-10
+  qp set davidson_keywords n_states_diag 8
   qp run fci 
   energy1="$(ezfio get fci energy | tr '[]' ' ' | cut -d ',' -f 1)"
   eq $energy1 $1 $thresh
