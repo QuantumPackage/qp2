@@ -13,7 +13,7 @@
 ! matrix as a expectation value
 ! \begin{align*}
 ! <\Psi_n|x| \Psi_m > = \sum_p \gamma_{pp}^{nm} < \phi_p | x | \phi_p >
-!      + \sum_{pq, p \neq q} \gamma_{pq}^{nm} < \phi_p | x | \phi_q > +  < \Psi_m | \sum_A Z_A R_A | \Psi_n >
+!      + \sum_{pq, p \neq q} \gamma_{pq}^{nm} < \phi_p |x | \phi_q > +  < \Psi_m | \sum_A Z_A R_A | \Psi_n >
 ! \end{align*}
 
 

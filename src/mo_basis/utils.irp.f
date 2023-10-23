@@ -3,7 +3,6 @@ subroutine save_mos
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j
 
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
   call ezfio_set_mo_basis_mo_num(mo_num)
   call ezfio_set_mo_basis_mo_label(mo_label)
   call ezfio_set_mo_basis_ao_md5(ao_md5)
@@ -27,7 +26,7 @@ subroutine save_mos_no_occ
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j
 
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
+!  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
  !call ezfio_set_mo_basis_mo_num(mo_num)
  !call ezfio_set_mo_basis_mo_label(mo_label)
  !call ezfio_set_mo_basis_ao_md5(ao_md5)
@@ -48,7 +47,7 @@ subroutine save_mos_truncated(n)
   double precision, allocatable  :: buffer(:,:)
   integer                        :: i,j,n
 
-  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
+!  call system('$QP_ROOT/scripts/save_current_mos.sh '//trim(ezfio_filename))
 
   call ezfio_set_mo_basis_mo_num(n)
   call ezfio_set_mo_basis_mo_label(mo_label)

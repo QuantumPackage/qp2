@@ -206,7 +206,12 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
      enddo
      nuclear_repulsion *= 0.5d0
      if(point_charges)then
-      nuclear_repulsion += pt_chrg_nuclei_interaction + pt_chrg_interaction
+      print*,'bear nuclear repulsion = ',nuclear_repulsion 
+      print*,'adding the interaction between the nuclein and the point charges'
+      print*,'to the usual nuclear repulsion '
+      nuclear_repulsion += pt_chrg_nuclei_interaction 
+      print*,'new nuclear repulsion =  ',nuclear_repulsion 
+      print*,'WARNING: we do not add the interaction between the point charges themselves'
      endif
    end if
 
@@ -241,13 +246,13 @@ END_PROVIDER
      enddo
      character*(80)                 :: buffer, dummy
      do
-     read(iunit,'(A80)',end=10) buffer
-     read(buffer,*) i ! First read i
-     read(buffer,*) i, element_name(i), dummy, element_mass(i)
-   enddo
-   10 continue
-   close(10)
- endif
+       read(iunit,'(A80)',end=10) buffer
+       read(buffer,*) i ! First read i
+       read(buffer,*) i, element_name(i), dummy, element_mass(i)
+     enddo
+     10 continue
+     close(10)
+   endif
 
  IRP_IF MPI_DEBUG
    print *,  irp_here, mpi_rank

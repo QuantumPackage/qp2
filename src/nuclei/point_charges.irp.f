@@ -205,5 +205,8 @@ BEGIN_PROVIDER [ double precision, pt_chrg_nuclei_interaction]
  enddo
  print*,'Interaction between point charges and nuclei'
  print*,'pt_chrg_nuclei_interaction = ',pt_chrg_nuclei_interaction
+ if(point_charges)then
+  provide pt_chrg_interaction
+ endif
 END_PROVIDER 
 

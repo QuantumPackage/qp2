@@ -48,6 +48,8 @@ jobs:
               ./configure -i docopt || :
               ./configure -i resultsFile || :
               ./configure -i bats || :
+              ./configure -i trexio-nohdf5 || :
+              ./configure -i qmckl || :
               ./configure -c ./config/gfortran_debug.cfg
        - name: Compilation
          run: |

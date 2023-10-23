@@ -270,7 +270,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   integer,          intent(out) :: n_real_eigv
   double precision, intent(out) :: reigvec(n,n), leigvec(n,n), eigval(n)
 
-  integer                       :: i, j
+  integer                       :: i, j,k 
   integer                       :: n_good
   double precision              :: thr, thr_cut, thr_diag, thr_norm
   double precision              :: accu_d, accu_nd
@@ -278,6 +278,8 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   integer,          allocatable :: list_good(:), iorder(:)
   double precision, allocatable :: WR(:), WI(:), VL(:,:), VR(:,:)
   double precision, allocatable :: S(:,:)
+  double precision, allocatable  :: phi_1_tilde(:),phi_2_tilde(:),chi_1_tilde(:),chi_2_tilde(:)
+  allocate(phi_1_tilde(n),phi_2_tilde(n),chi_1_tilde(n),chi_2_tilde(n))
 
 
   ! -------------------------------------------------------------------------------------
@@ -301,11 +303,78 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   call lapack_diag_non_sym(n, A, WR, WI, VL, VR)
   !call lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
 
-  !print *, ' '
-  !print *, ' eigenvalues'
-  !do i = 1, n
-  !  write(*, '(1000(F16.10,X))') WR(i), WI(i)
-  !enddo
+
+
+  print *, ' '
+  print *, ' eigenvalues'
+  i = 1
+  do while(i .le. n)
+    write(*, '(I3,X,1000(F16.10,X))')i, WR(i), WI(i)
+   if(.false.)then
+    if(WI(i).ne.0.d0)then
+     print*,'*****************'
+     print*,'WARNING ! IMAGINARY EIGENVALUES !!!'
+     write(*, '(1000(F16.10,X))') WR(i), WI(i+1)
+     ! phi = VR(:,i), psi = VR(:,i+1), |Phi_i> = phi + j psi , |Phi_i+1> = phi - j psi 
+     ! chi = VL(:,i), xhi = VL(:,i+1), |Chi_i> = chi + j xhi , |Chi_i+1> = chi - j xhi 
+     !                                   
+     accu_chi_phi = 0.d0
+     accu_xhi_psi = 0.d0
+     accu_chi_psi = 0.d0
+     accu_xhi_phi = 0.d0
+     double precision :: accu_chi_phi, accu_xhi_psi, accu_chi_psi, accu_xhi_phi
+     double precision :: mat_ovlp(2,2),eigval_tmp(2),eigvec(2,2),mat_ovlp_orig(2,2)
+     do j = 1, n 
+      accu_chi_phi += VL(j,i)   * VR(j,i)
+      accu_xhi_psi += VL(j,i+1) * VR(j,i+1)
+      accu_chi_psi += VL(j,i)   * VR(j,i+1)
+      accu_xhi_phi += VL(j,i+1) * VR(j,i)
+     enddo
+     mat_ovlp_orig(1,1) = accu_chi_phi
+     mat_ovlp_orig(2,1) = accu_xhi_phi
+     mat_ovlp_orig(1,2) = accu_chi_psi
+     mat_ovlp_orig(2,2) = accu_xhi_psi
+     print*,'old overlap matrix '
+     write(*,'(100(F16.10,X))')mat_ovlp_orig(1:2,1)
+     write(*,'(100(F16.10,X))')mat_ovlp_orig(1:2,2)
+
+
+     mat_ovlp(1,1) = accu_xhi_phi
+     mat_ovlp(2,1) = accu_chi_phi
+     mat_ovlp(1,2) = accu_xhi_psi
+     mat_ovlp(2,2) = accu_chi_psi
+    !print*,'accu_chi_phi = ',accu_chi_phi
+    !print*,'accu_xhi_psi = ',accu_xhi_psi
+    !print*,'accu_chi_psi = ',accu_chi_psi
+    !print*,'accu_xhi_phi = ',accu_xhi_phi
+     print*,'new overlap matrix '
+     write(*,'(100(F16.10,X))')mat_ovlp(1:2,1)
+     write(*,'(100(F16.10,X))')mat_ovlp(1:2,2)
+     call lapack_diag(eigval_tmp,eigvec,mat_ovlp,2,2)
+     print*,'eigval_tmp(1) = ',eigval_tmp(1)
+     print*,'eigvec(1) = ',eigvec(1:2,1)
+     print*,'eigval_tmp(2) = ',eigval_tmp(2)
+     print*,'eigvec(2) = ',eigvec(1:2,2)
+     print*,'*****************'
+     phi_1_tilde = 0.d0
+     phi_2_tilde = 0.d0
+     chi_1_tilde = 0.d0
+     chi_2_tilde = 0.d0
+     do j = 1, n
+      phi_1_tilde(j) += VR(j,i) * eigvec(1,1) + VR(j,i+1) * eigvec(2,1)
+      phi_2_tilde(j) += VR(j,i) * eigvec(1,2) + VR(j,i+1) * eigvec(2,2)
+      chi_1_tilde(j) += VL(j,i+1) * eigvec(1,1) + VL(j,i) * eigvec(2,1)
+      chi_2_tilde(j) += VL(j,i+1) * eigvec(1,2) + VL(j,i) * eigvec(2,2)
+     enddo
+     VR(1:n,i)   = phi_1_tilde(1:n)
+     VR(1:n,i+1) = phi_2_tilde(1:n)
+!     Vl(1:n,i)   = -chi_1_tilde(1:n)
+!     Vl(1:n,i+1) = chi_2_tilde(1:n)
+     i+=1 
+    endif
+   endif
+    i+=1
+  enddo
   !print *, ' right eigenvect bef' 
   !do i = 1, n
   !  write(*, '(1000(F16.10,X))') VR(:,i)
@@ -331,7 +400,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !thr    = 100d0
   thr    = Im_thresh_tcscf
   do i = 1, n
-    !print*, 'Re(i) + Im(i)', WR(i), WI(i)
+    print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
@@ -405,7 +474,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   if( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .lt. thr_d) ) then
 
-    !print *, ' lapack vectors are normalized and bi-orthogonalized'
+    print *, ' lapack vectors are normalized and bi-orthogonalized'
     deallocate(S)
     return
 
@@ -422,13 +491,14 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   else
 
-    !print *, ' lapack vectors are not normalized neither bi-orthogonalized'
+    print *, ' lapack vectors are not normalized neither bi-orthogonalized'
 
     ! ---
 
 !   call impose_orthog_degen_eigvec(n, eigval, reigvec)
 !   call impose_orthog_degen_eigvec(n, eigval, leigvec)
 
+    call reorder_degen_eigvec(n, eigval, leigvec, reigvec)
     call impose_biorthog_degen_eigvec(n, eigval, leigvec, reigvec)
 
 

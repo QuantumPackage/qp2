@@ -33,13 +33,13 @@ subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_err
   character(len=20)              :: str_size, str_nb_digits, str_exp
   integer                        :: nb_digits
 
-  !$OMP CRITICAL
+  call lock_io()
   ! max_nb_digit: Y max
   ! size_nb = Size of the double: X (FX.Y)
   write(str_size,'(I3)') size_nb
 
   ! Error
-  write(str_exp,'(1pE20.0)') error
+  write(str_exp,'(ES20.0)') error
   str_error = trim(adjustl(str_exp))
 
   ! Number of digit: Y (FX.Y) from the exponent
@@ -68,6 +68,6 @@ subroutine format_w_error(value,error,size_nb,max_nb_digits,format_value,str_err
 
   ! FX.Y just for the value
   format_value = 'F'//trim(adjustl(str_size))//'.'//trim(adjustl(str_nb_digits))
-  !$OMP END CRITICAL
+  call unlock_io()
 
 end

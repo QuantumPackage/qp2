@@ -32,9 +32,9 @@
 
 subroutine sub_to_full_rotation_matrix(m,tmp_list,tmp_R,R)
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the full rotation matrix from a smaller one
-  END_DOC
+  !END_DOC
   
   implicit none
 

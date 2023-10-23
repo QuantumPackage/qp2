@@ -241,7 +241,7 @@ subroutine run_ccsd_spin_orb
     call ccsd_energy_spin(nO,nV,t1,t2,F_ov,v_oovv,energy)
     call wall_time(tfi)
     
-    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,1pE10.2,A3,1pE10.2,A2)') ' | ',nb_iter,' | ', &
+    write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', &
          uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
     if (cc_dev) then
       print*,'Total:',tfi-tbi,'s'
@@ -266,11 +266,14 @@ subroutine run_ccsd_spin_orb
   print*,''
   write(*,'(A15,F18.12,A3)') ' E(CCSD)     = ', uncorr_energy+energy, ' Ha'
   write(*,'(A15,F18.12,A3)') ' Correlation = ', energy, ' Ha'
-  write(*,'(A15,1pE10.2,A3)')' Conv        = ', max_r
+  write(*,'(A15,ES10.2,A3)')' Conv        = ', max_r
   print*,''
 
-  call write_t1(nO,nV,t1)
-  call write_t2(nO,nV,t2)
+  if (write_amplitudes) then
+    call write_t1(nO,nV,t1)
+    call write_t2(nO,nV,t2)
+    call ezfio_set_utils_cc_io_amplitudes('Read')
+  endif
 
   ! Deallocate
   if (cc_update_method == 'diis') then
@@ -284,8 +287,9 @@ subroutine run_ccsd_spin_orb
   deallocate(v_ovoo,v_oovo)
   deallocate(v_ovvo,v_ovov,v_oovv)
   
+  double precision :: t_corr
+  t_corr = 0.d0
   if (cc_par_t .and. elec_alpha_num  +elec_beta_num > 2) then
-    double precision :: t_corr
     print*,'CCSD(T) calculation...'
     call wall_time(ta)
     !allocate(v_vvvo(nV,nV,nV,nO))
@@ -307,8 +311,8 @@ subroutine run_ccsd_spin_orb
     write(*,'(A15,F18.12,A3)') ' Correlation = ', energy + t_corr, ' Ha'
     print*,''
   endif
-  print*,'Reference determinant:'
-  call print_det(det,N_int)
+
+  call save_energy(uncorr_energy + energy, t_corr)
   
   deallocate(f_oo,f_ov,f_vv,f_o,f_v)
   deallocate(v_ooov,v_vvoo,t1,t2)

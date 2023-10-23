@@ -1,22 +1,32 @@
+
+! ---
+
 program test_tc_fock
- implicit none
+
   BEGIN_DOC
-! TODO : Put the documentation of the program here
+  ! TODO : Put the documentation of the program here
   END_DOC
+
+  implicit none
+
   print *, 'Hello world'
+
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
   !call routine_1
   !call routine_2
 !  call routine_3()
 
 ! call test_3e
- call routine_tot
+  call routine_tot
+
 end
 
 ! ---
@@ -25,8 +35,7 @@ subroutine test_3e
  implicit none
  double precision :: integral_aaa,integral_aab,integral_abb,integral_bbb,accu
  double precision ::  hmono, htwoe, hthree, htot
- call htilde_mu_mat_bi_ortho(ref_bitmask, ref_bitmask, N_int, hmono, htwoe, hthree, htot)
-! call diag_htilde_three_body_ints_bi_ort(N_int, ref_bitmask, hthree)
+ call htilde_mu_mat_bi_ortho_slow(ref_bitmask, ref_bitmask, N_int, hmono, htwoe, hthree, htot)
  print*,'hmono = ',hmono
  print*,'htwoe = ',htwoe
  print*,'hthree= ',hthree
@@ -88,7 +97,7 @@ subroutine routine_3()
        print*, ' excited det'
        call debug_det(det_i, N_int)
  
-       call htilde_mu_mat_bi_ortho(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
+       call htilde_mu_mat_bi_ortho_slow(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
        if(dabs(hthree).lt.1.d-10)cycle
        ref = hthree 
        if(s1 == 1)then
@@ -143,9 +152,7 @@ subroutine routine_tot()
 !   do i = 1, elec_num_tab(s1)
 !     do a = elec_num_tab(s1)+1, mo_num ! virtual 
    do i = 1, elec_beta_num
-     do a = elec_beta_num+1, elec_alpha_num! virtual 
-!   do i = elec_beta_num+1, elec_alpha_num
-!     do a = elec_alpha_num+1, mo_num! virtual 
+     do a = elec_beta_num+1, mo_num! virtual 
        print*,i,a 
  
        det_i = ref_bitmask
@@ -156,9 +163,9 @@ subroutine routine_tot()
         stop
        endif
  
-       call htilde_mu_mat_bi_ortho(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
+       call htilde_mu_mat_bi_ortho_slow(det_i, ref_bitmask, N_int, hmono, htwoe, hthree, htilde_ij)
        print*,htilde_ij
-       if(dabs(htilde_ij).lt.1.d-10)cycle
+!       if(dabs(htilde_ij).lt.1.d-10)cycle
        print*, ' excited det'
        call debug_det(det_i, N_int)
 
@@ -175,9 +182,12 @@ subroutine routine_tot()
 !       endif
        err_ai = dabs(dabs(ref) - dabs(new))
        if(err_ai .gt. 1d-7) then
+         print*,'---------'
          print*,'s1 = ',s1
          print*, ' warning on', i, a
          print*, ref,new,err_ai
+         print*,hmono, htwoe, hthree
+         print*,'---------'
        endif
        print*, ref,new,err_ai
        err_tot += err_ai

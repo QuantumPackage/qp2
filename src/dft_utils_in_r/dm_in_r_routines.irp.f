@@ -140,6 +140,8 @@ end
   enddo
  enddo
 
+ ! TODO : build the vector of chi_i(r) chi_j(r) and conscequently grad_i(r) grad_j(r) 
+ !      : the same for gamma_ij and big dot product 
  do istate = 1, N_states
    ! alpha density
    ! aos_array_bis = \rho_ao * aos_array

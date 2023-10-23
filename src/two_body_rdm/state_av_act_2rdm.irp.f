@@ -17,12 +17,12 @@
  state_weights = state_average_weight
  integer :: ispin
  ! condition for alpha/beta spin
- print*,''
- print*,''
- print*,''
- print*,'providint state_av_act_2_rdm_ab_mo '
+! print*,''
+! print*,''
+! print*,''
+! print*,'Providing state_av_act_2_rdm_ab_mo '
  ispin = 3 
- print*,'ispin = ',ispin
+! print*,'ispin = ',ispin
  state_av_act_2_rdm_ab_mo = 0.d0
  call wall_time(wall_1)
  double precision :: wall_1, wall_2
@@ -123,7 +123,7 @@
  state_av_act_2_rdm_spin_trace_mo = state_av_act_2_rdm_ab_mo & 
                                   + state_av_act_2_rdm_aa_mo & 
                                   + state_av_act_2_rdm_bb_mo   
-
+!
 ! call orb_range_2_rdm_state_av_openmp(state_av_act_2_rdm_spin_trace_mo,n_act_orb,n_act_orb,list_act,state_weights,ispin,psi_coef,size(psi_coef,2),size(psi_coef,1))
 
  call wall_time(wall_2)
