@@ -33,6 +33,8 @@ subroutine resident_memory(value)
   call usleep(10)
 
   value = 0.d0
+IRP_IF MACOS
+IRP_ELSE
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
     read(iunit,*,err=10,end=20) key, value
@@ -43,6 +45,7 @@ subroutine resident_memory(value)
   end do
   20 continue
   close(iunit)
+IRP_ENDIF
   value = value / (1024.d0*1024.d0)
   call unlock_io()
 end function
@@ -58,6 +61,9 @@ subroutine total_memory(value)
   double precision, intent(out) :: value
 
   call lock_io()
+  value = 0.d0
+IRP_IF MACOS
+IRP_ELSE
   iunit = getUnitAndOpen('/proc/self/status','r')
   do
     read(iunit,*,err=10,end=20) key, value
@@ -68,6 +74,7 @@ subroutine total_memory(value)
   end do
   20 continue
   close(iunit)
+IRP_ENDIF
   value = value / (1024.d0*1024.d0)
   call unlock_io()
 end function
