@@ -16,6 +16,9 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
    two_e_dm_mo = 0.d0
    integer                        :: i,j,k,l,iorb,jorb,korb,lorb,istate
 
+   !$OMP PARALLEL DO PRIVATE(i,j,k,l,iorb,jorb,korb,lorb) &
+   !$OMP DEFAULT(NONE) SHARED(n_core_inact_act_orb, list_core_inact_act, &
+   !$OMP  two_e_dm_mo, state_av_full_occ_2_rdm_spin_trace_mo)
    do l=1,n_core_inact_act_orb
     lorb = list_core_inact_act(l)
     do k=1,n_core_inact_act_orb
@@ -29,8 +32,7 @@ BEGIN_PROVIDER [double precision, two_e_dm_mo, (mo_num,mo_num,mo_num,mo_num)]
      enddo
     enddo
    enddo
-   two_e_dm_mo(:,:,:,:) = two_e_dm_mo(:,:,:,:) 
-!   * 2.d0
+   !$OMP END PARALLEL DO
 
  END_PROVIDER
 

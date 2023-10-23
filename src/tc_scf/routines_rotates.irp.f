@@ -46,6 +46,7 @@ end subroutine LTxR
 ! ---
 
 subroutine minimize_tc_orb_angles()
+
   BEGIN_DOC
   ! routine that minimizes the angle between left- and right-orbitals when degeneracies are found
   END_DOC
@@ -58,7 +59,7 @@ subroutine minimize_tc_orb_angles()
   good_angles = .False.
   thr_deg = thr_degen_tc
 
-  call print_energy_and_mos()
+  call print_energy_and_mos(good_angles)
 
   print *, ' Minimizing the angles between the TC orbitals'
   i = 1
@@ -77,7 +78,7 @@ subroutine minimize_tc_orb_angles()
   print *, ' Converged ANGLES MINIMIZATION !!'
 
   call print_angles_tc()
-  call print_energy_and_mos()
+  call print_energy_and_mos(good_angles)
 
 end
 
@@ -92,13 +93,21 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
   integer                       :: i, j, k, n_degen_list, m, n, n_degen, ilast, ifirst
   double precision              :: max_angle, norm
+  double precision              :: E_old, E_new, E_thr
   integer,          allocatable :: list_degen(:,:)
   double precision, allocatable :: new_angles(:)
+  double precision, allocatable :: mo_r_coef_old(:,:), mo_l_coef_old(:,:)
   double precision, allocatable :: mo_r_coef_good(:,:), mo_l_coef_good(:,:)
   double precision, allocatable :: mo_r_coef_new(:,:)
-  double precision, allocatable :: fock_diag(:),s_mat(:,:)
+  double precision, allocatable :: fock_diag(:), s_mat(:,:)
   double precision, allocatable :: stmp(:,:), T(:,:), Snew(:,:), smat2(:,:)
   double precision, allocatable :: mo_l_coef_tmp(:,:), mo_r_coef_tmp(:,:), mo_l_coef_new(:,:)
+
+  E_thr = 1d-8
+  E_old = TC_HF_energy
+  allocate(mo_l_coef_old(ao_num,mo_num), mo_r_coef_old(ao_num,mo_num))
+  mo_r_coef_old = mo_r_coef
+  mo_l_coef_old = mo_l_coef
 
   good_angles = .False.
 
@@ -131,7 +140,11 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
  ! compute the overlap between the left and rescaled right
   call build_s_matrix(ao_num, mo_num, mo_r_coef_new, mo_r_coef_new, ao_overlap, s_mat)
 ! call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
-  call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+  if(n_core_orb.ne.0)then
+   call give_degen_full_listcore(fock_diag, mo_num, list_core, n_core_orb, thr_deg, list_degen, n_degen_list)
+  else
+   call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+  endif
   print *, ' fock_matrix_mo'
   do i = 1, mo_num
     print *, i, fock_diag(i), angle_left_right(i)
@@ -143,6 +156,8 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 !  n_degen = ilast - ifirst +1
 
     n_degen = list_degen(i,0)
+    if(n_degen .ge. 1000)n_degen = 1 ! convention for core orbitals
+     
     if(n_degen .eq. 1) cycle
 
     allocate(stmp(n_degen,n_degen), smat2(n_degen,n_degen))
@@ -252,11 +267,32 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
   TOUCH mo_l_coef mo_r_coef
 
+  ! check if TC energy has changed
+  E_new = TC_HF_energy
+  if(dabs(E_new - E_old) .gt. E_thr) then
+    mo_r_coef = mo_r_coef_old
+    mo_l_coef = mo_l_coef_old
+    deallocate(mo_l_coef_old, mo_r_coef_old)
+    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
+    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
+    TOUCH mo_l_coef mo_r_coef
+    print*, ' TC energy bef rotation = ', E_old
+    print*, ' TC energy aft rotation = ', E_new
+    print*, ' the rotation is refused'
+    stop
+  endif
+
   allocate(new_angles(mo_num))
   new_angles(1:mo_num) = dabs(angle_left_right(1:mo_num))
   max_angle = maxval(new_angles)
-  good_angles = max_angle.lt.45.d0
+  good_angles = max_angle.lt.thresh_lr_angle
   print *, ' max_angle = ', max_angle
+  deallocate(new_angles)
+
+
+  deallocate(mo_l_coef_old, mo_r_coef_old)
+  deallocate(mo_l_coef_good, mo_r_coef_good)
+  deallocate(mo_r_coef_new)
   
 end
 
@@ -356,22 +392,27 @@ end
 
 ! ---
 
-subroutine print_energy_and_mos()
+subroutine print_energy_and_mos(good_angles)
 
   implicit none
-  integer :: i
+  logical, intent(out) :: good_angles
+  integer              :: i
 
   print *, ' '
-  print *, ' TC energy = ', TC_HF_energy
+  print *, ' TC energy              = ', TC_HF_energy
   print *, ' TC SCF energy gradient = ', grad_non_hermit
   print *, ' Max angle Left/right   = ', max_angle_left_right
+  call print_angles_tc()
 
-  if(max_angle_left_right .lt. 45.d0) then
+  if(max_angle_left_right .lt. thresh_lr_angle) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
-  else if(max_angle_left_right .gt. 45.d0 .and. max_angle_left_right .lt. 75.d0) then
-    print *, ' Maximum angle between 45 and 75 degrees, this is not the best for TC-CI calculations ...'
+    good_angles = .true.
+  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
+    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
+    good_angles = .false.
   else if(max_angle_left_right .gt. 75.d0) then
     print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
+    good_angles = .false.
   endif
 
   print *, ' Diag Fock elem, product of left/right norm, angle left/right '

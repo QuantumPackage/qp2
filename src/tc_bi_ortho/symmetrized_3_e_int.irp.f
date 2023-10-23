@@ -41,14 +41,21 @@ subroutine give_all_perm_for_three_e(n,l,k,m,j,i,idx_list,phase)
 
 end
 
-double precision function sym_3_e_int_from_6_idx_tensor(n,l,k,m,j,i)
- implicit none
- BEGIN_DOC
- ! returns all good combinations of permutations of integrals with the good signs 
- !
- ! for a given (k^dagger l^dagger n^dagger m j i)  <nlk|L|mji> when all indices have the same spins
- END_DOC
- integer, intent(in)  :: n,l,k,m,j,i
+! ---
+
+double precision function sym_3_e_int_from_6_idx_tensor(n, l, k, m, j, i)
+
+  BEGIN_DOC
+  ! returns all good combinations of permutations of integrals with the good signs 
+  !
+  ! for a given (k^dagger l^dagger n^dagger m j i)  <nlk|L|mji> when all indices have the same spins
+  END_DOC
+ 
+  implicit none
+  integer, intent(in) :: n, l, k, m, j, i
+
+  PROVIDE mo_l_coef mo_r_coef
+
  sym_3_e_int_from_6_idx_tensor = three_body_ints_bi_ort(n,l,k,m,j,i) & ! direct 
                                + three_body_ints_bi_ort(n,l,k,j,i,m) & ! 1st cyclic permutation  
                                + three_body_ints_bi_ort(n,l,k,i,m,j) & ! 2nd cyclic permutation  
@@ -56,7 +63,10 @@ double precision function sym_3_e_int_from_6_idx_tensor(n,l,k,m,j,i)
                                - three_body_ints_bi_ort(n,l,k,i,j,m) & ! elec 2 is kept fixed
                                - three_body_ints_bi_ort(n,l,k,m,i,j)   ! elec 3 is kept fixed
 
+  return
 end
+
+! ---
 
 double precision function direct_sym_3_e_int(n,l,k,m,j,i)
  implicit none
@@ -83,22 +93,34 @@ double precision function direct_sym_3_e_int(n,l,k,m,j,i)
 
 end
 
-double precision function three_e_diag_parrallel_spin(m,j,i)
- implicit none
- integer, intent(in) :: i,j,m
+! ---
+
+double precision function three_e_diag_parrallel_spin(m, j, i)
+
+  implicit none
+  integer, intent(in) :: i, j, m
+
+  PROVIDE mo_l_coef mo_r_coef
+
   three_e_diag_parrallel_spin = three_e_3_idx_direct_bi_ort(m,j,i)  ! direct
   three_e_diag_parrallel_spin += three_e_3_idx_cycle_1_bi_ort(m,j,i) + three_e_3_idx_cycle_2_bi_ort(m,j,i) & ! two cyclic permutations 
-  - three_e_3_idx_exch23_bi_ort(m,j,i) - three_e_3_idx_exch13_bi_ort(m,j,i)  & ! two first exchange 
-  - three_e_3_idx_exch12_bi_ort(m,j,i) ! last exchange 
+                               - three_e_3_idx_exch23_bi_ort (m,j,i) - three_e_3_idx_exch13_bi_ort(m,j,i)  & ! two first exchange 
+                               - three_e_3_idx_exch12_bi_ort (m,j,i)                                         ! last exchange 
+
+  return
 end
+
+! ---
 
 double precision function three_e_single_parrallel_spin(m,j,k,i)
  implicit none
  integer, intent(in) :: i,k,j,m
   three_e_single_parrallel_spin = three_e_4_idx_direct_bi_ort(m,j,k,i)  ! direct
-  three_e_single_parrallel_spin += three_e_4_idx_cycle_1_bi_ort(m,j,k,i) + three_e_4_idx_cycle_2_bi_ort(m,j,k,i) & ! two cyclic permutations 
+  three_e_single_parrallel_spin += three_e_4_idx_cycle_1_bi_ort(m,j,k,i) + three_e_4_idx_cycle_1_bi_ort(j,m,k,i) & ! two cyclic permutations 
   - three_e_4_idx_exch23_bi_ort(m,j,k,i) - three_e_4_idx_exch13_bi_ort(m,j,k,i)  & ! two first exchange 
-  - three_e_4_idx_exch12_bi_ort(m,j,k,i) ! last exchange 
+  - three_e_4_idx_exch13_bi_ort(j,m,k,i) ! last exchange 
+  ! TODO
+  ! use transpose
 end
 
 double precision function three_e_double_parrallel_spin(m,l,j,k,i)
@@ -107,5 +129,6 @@ double precision function three_e_double_parrallel_spin(m,l,j,k,i)
   three_e_double_parrallel_spin = three_e_5_idx_direct_bi_ort(m,l,j,k,i)  ! direct
   three_e_double_parrallel_spin += three_e_5_idx_cycle_1_bi_ort(m,l,j,k,i) + three_e_5_idx_cycle_2_bi_ort(m,l,j,k,i) & ! two cyclic permutations 
   - three_e_5_idx_exch23_bi_ort(m,l,j,k,i) - three_e_5_idx_exch13_bi_ort(m,l,j,k,i)  & ! two first exchange 
-  - three_e_5_idx_exch12_bi_ort(m,l,j,k,i) ! last exchange 
+!  - three_e_5_idx_exch12_bi_ort(m,l,j,k,i) ! last exchange 
+  - three_e_5_idx_direct_bi_ort(m,l,i,k,j) ! last exchange 
 end

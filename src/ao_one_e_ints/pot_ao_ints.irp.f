@@ -1,4 +1,8 @@
+
+! ---
+
 BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
+
   BEGIN_DOC
   !  Nucleus-electron interaction, in the |AO| basis set.
   !
@@ -6,84 +10,103 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
   !
   !  These integrals also contain the pseudopotential integrals.
   END_DOC
+
   implicit none
-  double precision               :: alpha, beta, gama, delta
-  integer                        :: num_A,num_B
-  double precision               :: A_center(3),B_center(3),C_center(3)
-  integer                        :: power_A(3),power_B(3)
-  integer                        :: i,j,k,l,n_pt_in,m
-  double precision               :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
+  integer          :: num_A, num_B, power_A(3), power_B(3)
+  integer          :: i, j, k, l, n_pt_in, m
+  double precision :: alpha, beta
+  double precision :: A_center(3),B_center(3),C_center(3)
+  double precision :: overlap_x,overlap_y,overlap_z,overlap,dx,NAI_pol_mult
+
+  ao_integrals_n_e = 0.d0
 
   if (read_ao_integrals_n_e) then
+
     call ezfio_get_ao_one_e_ints_ao_integrals_n_e(ao_integrals_n_e)
     print *,  'AO N-e integrals read from disk'
+
   else
 
-    ao_integrals_n_e = 0.d0
+    if(use_cosgtos) then
+      !print *, " use_cosgtos for ao_integrals_n_e ?", use_cosgtos
 
-    !        _
-    ! /|  / |_)
-    !  | /  | \
-    !
+      do j = 1, ao_num
+        do i = 1, ao_num
+          ao_integrals_n_e(i,j) = ao_integrals_n_e_cosgtos(i,j)
+        enddo
+      enddo
 
-    !$OMP PARALLEL                                                   &
-        !$OMP DEFAULT (NONE)                                         &
-        !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
-        !$OMP          num_A,num_B,Z,c,n_pt_in)                      &
-        !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,nucl_coord,ao_coef_normalized_ordered_transp,&
-        !$OMP         n_pt_max_integrals,ao_integrals_n_e,nucl_num,nucl_charge)
+    else
 
-    n_pt_in = n_pt_max_integrals
+      !$OMP PARALLEL                                                   &
+          !$OMP DEFAULT (NONE)                                         &
+          !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
+          !$OMP          num_A,num_B,Z,c,c1,n_pt_in)                      &
+          !$OMP SHARED (ao_num,ao_prim_num,ao_expo_ordered_transp,ao_power,ao_nucl,nucl_coord,ao_coef_normalized_ordered_transp,&
+          !$OMP         n_pt_max_integrals,ao_integrals_n_e,nucl_num,nucl_charge)
 
-    !$OMP DO SCHEDULE (dynamic)
+      n_pt_in = n_pt_max_integrals
 
-    do j = 1, ao_num
-      num_A = ao_nucl(j)
-      power_A(1:3)= ao_power(j,1:3)
-      A_center(1:3) = nucl_coord(num_A,1:3)
+      !$OMP DO SCHEDULE (dynamic)
 
-      do i = 1, ao_num
+      do j = 1, ao_num
+        num_A = ao_nucl(j)
+        power_A(1:3)= ao_power(j,1:3)
+        A_center(1:3) = nucl_coord(num_A,1:3)
 
-        num_B = ao_nucl(i)
-        power_B(1:3)= ao_power(i,1:3)
-        B_center(1:3) = nucl_coord(num_B,1:3)
+        do i = 1, ao_num
 
-        do l=1,ao_prim_num(j)
-          alpha = ao_expo_ordered_transp(l,j)
+          num_B = ao_nucl(i)
+          power_B(1:3)= ao_power(i,1:3)
+          B_center(1:3) = nucl_coord(num_B,1:3)
 
-          do m=1,ao_prim_num(i)
-            beta = ao_expo_ordered_transp(m,i)
+          do l=1,ao_prim_num(j)
+            alpha = ao_expo_ordered_transp(l,j)
 
-            double precision               :: c
-            c = 0.d0
+            do m=1,ao_prim_num(i)
+              beta = ao_expo_ordered_transp(m,i)
 
-            do  k = 1, nucl_num
-              double precision               :: Z
-              Z = nucl_charge(k)
+              double precision               :: c, c1
+              c = 0.d0
 
-              C_center(1:3) = nucl_coord(k,1:3)
+              do  k = 1, nucl_num
+                double precision               :: Z
+                Z = nucl_charge(k)
 
-              c = c - Z * NAI_pol_mult(A_center,B_center,            &
-                  power_A,power_B,alpha,beta,C_center,n_pt_in)
+                C_center(1:3) = nucl_coord(k,1:3)
 
+                !print *, ' '
+                !print *, A_center, B_center, C_center, power_A, power_B
+                !print *, alpha, beta
+
+                c1 = NAI_pol_mult( A_center, B_center, power_A, power_B &
+                                 , alpha, beta, C_center, n_pt_in )
+
+                !print *, ' c1 = ', c1
+
+                c = c - Z * c1
+
+              enddo
+              ao_integrals_n_e(i,j) = ao_integrals_n_e(i,j)  &
+                  + ao_coef_normalized_ordered_transp(l,j)             &
+                  * ao_coef_normalized_ordered_transp(m,i) * c
             enddo
-            ao_integrals_n_e(i,j) = ao_integrals_n_e(i,j)  &
-                + ao_coef_normalized_ordered_transp(l,j)             &
-                * ao_coef_normalized_ordered_transp(m,i) * c
           enddo
         enddo
       enddo
-    enddo
 
     !$OMP END DO
     !$OMP END PARALLEL
-    IF (DO_PSEUDO) THEN
+
+    endif
+
+
+    IF(do_pseudo) THEN
        ao_integrals_n_e += ao_pseudo_integrals
     ENDIF
     IF(point_charges) THEN
        ao_integrals_n_e += ao_integrals_pt_chrg
     ENDIF
-
 
   endif
 
@@ -102,7 +125,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_imag, (ao_num,ao_num)]
   !  :math:`\langle \chi_i | -\sum_A \frac{1}{|r-R_A|} | \chi_j \rangle`
   END_DOC
   implicit none
-  double precision               :: alpha, beta, gama, delta
+  double precision               :: alpha, beta
   integer                        :: num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
@@ -125,7 +148,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_per_atom, (ao_num,ao_num,nuc
 ! :math:`\langle \chi_i | -\frac{1}{|r-R_A|} | \chi_j \rangle`
   END_DOC
   implicit none
-  double precision               :: alpha, beta, gama, delta
+  double precision               :: alpha, beta
   integer                        :: i_c,num_A,num_B
   double precision               :: A_center(3),B_center(3),C_center(3)
   integer                        :: power_A(3),power_B(3)
@@ -268,6 +291,7 @@ double precision function NAI_pol_mult(A_center,B_center,power_A,power_B,alpha,b
 
 end
 
+! ---
 
 subroutine give_polynomial_mult_center_one_e(A_center,B_center,alpha,beta,power_A,power_B,C_center,n_pt_in,d,n_pt_out)
   implicit none
@@ -434,10 +458,12 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(c)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny=0
     call I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,Y,ny,n_pt_in)
-    call multiply_poly(Y,ny,R1x,2,d,nd)
+!    call multiply_poly(Y,ny,R1x,2,d,nd)
+    call multiply_poly_c2(Y,ny,R1x,d,nd)
   else
     do ix=0,n_pt_in
       X(ix) = 0.d0
@@ -448,7 +474,8 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(a-1)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
 
     nx = nd
     do ix=0,n_pt_in
@@ -458,10 +485,12 @@ recursive subroutine I_x1_pol_mult_one_e(a,c,R1x,R1xp,R2x,d,nd,n_pt_in)
     do ix=0,nx
       X(ix) *= dble(c)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny=0
     call I_x1_pol_mult_one_e(a-1,c,R1x,R1xp,R2x,Y,ny,n_pt_in)
-    call multiply_poly(Y,ny,R1x,2,d,nd)
+!    call multiply_poly(Y,ny,R1x,2,d,nd)
+    call multiply_poly_c2(Y,ny,R1x,d,nd)
   endif
 end
 
@@ -498,7 +527,8 @@ recursive subroutine I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,d,nd,dim)
     do ix=0,nx
       X(ix) *= dble(c-1)
     enddo
-    call multiply_poly(X,nx,R2x,2,d,nd)
+!    call multiply_poly(X,nx,R2x,2,d,nd)
+    call multiply_poly_c2(X,nx,R2x,d,nd)
     ny = 0
     do ix=0,dim
       Y(ix) = 0.d0
@@ -506,7 +536,8 @@ recursive subroutine I_x2_pol_mult_one_e(c,R1x,R1xp,R2x,d,nd,dim)
 
     call I_x1_pol_mult_one_e(0,c-1,R1x,R1xp,R2x,Y,ny,dim)
     if(ny.ge.0)then
-      call multiply_poly(Y,ny,R1xp,2,d,nd)
+!      call multiply_poly(Y,ny,R1xp,2,d,nd)
+      call multiply_poly_c2(Y,ny,R1xp,d,nd)
     endif
   endif
 end
@@ -576,64 +607,6 @@ double precision function V_r(n,alpha)
   else
     V_r = sqpi * fact(n) / fact(shiftr(n,1)) * (0.5d0/sqrt(alpha)) ** (n+1)
   endif
-end
-
-
-double precision function V_phi(n,m)
-  implicit none
-  BEGIN_DOC
-  ! Computes the angular $\phi$ part of the nuclear attraction integral:
-  !
-  ! $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
-  END_DOC
-  integer                        :: n,m, i
-  double precision               :: prod, Wallis
-  prod = 1.d0
-  do i = 0,shiftr(n,1)-1
-    prod = prod/ (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
-  enddo
-  V_phi = 4.d0 * prod * Wallis(m)
-end
-
-
-double precision function V_theta(n,m)
-  implicit none
-  BEGIN_DOC
-  ! Computes the angular $\theta$ part of the nuclear attraction integral:
-  !
-  ! $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
-  END_DOC
-  integer                        :: n,m,i
-  double precision               :: Wallis, prod
-  include 'utils/constants.include.F'
-  V_theta = 0.d0
-  prod = 1.d0
-  do i = 0,shiftr(n,1)-1
-    prod = prod / (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
-  enddo
-  V_theta = (prod+prod) * Wallis(m)
-end
-
-
-double precision function Wallis(n)
-  implicit none
-  BEGIN_DOC
-  ! Wallis integral:
-  !
-  ! $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
-  END_DOC
-  double precision               :: fact
-  integer                        :: n,p
-  include 'utils/constants.include.F'
-  if(iand(n,1).eq.0)then
-    Wallis = fact(shiftr(n,1))
-    Wallis = pi * fact(n) / (dble(ibset(0_8,n)) * (Wallis+Wallis)*Wallis)
-  else
-    p = shiftr(n,1)
-    Wallis = fact(p)
-    Wallis = dble(ibset(0_8,p+p)) * Wallis*Wallis / fact(p+p+1)
-  endif
-
 end
 
 

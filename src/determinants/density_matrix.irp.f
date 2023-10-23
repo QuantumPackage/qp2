@@ -117,7 +117,7 @@ END_PROVIDER
       !$OMP  N_det_alpha_unique,N_det_beta_unique,irp_here)
   allocate(tmp_a(mo_num,mo_num,N_states), tmp_b(mo_num,mo_num,N_states) )
   tmp_a = 0.d0
-  !$OMP DO SCHEDULE(dynamic,64)
+  !$OMP DO SCHEDULE(guided)
   do k_a=1,N_det
     krow = psi_bilinear_matrix_rows(k_a)
     ASSERT (krow <= N_det_alpha_unique)
@@ -173,7 +173,7 @@ END_PROVIDER
   deallocate(tmp_a)
 
   tmp_b = 0.d0
-  !$OMP DO SCHEDULE(dynamic,64)
+  !$OMP DO SCHEDULE(guided)
   do k_b=1,N_det
     krow = psi_bilinear_matrix_transp_rows(k_b)
     ASSERT (krow <= N_det_alpha_unique)
@@ -493,3 +493,101 @@ subroutine get_occupation_from_dets(istate,occupation)
   enddo
 end
 
+BEGIN_PROVIDER [double precision, difference_dm, (mo_num, mo_num, N_states)]
+ implicit none
+ BEGIN_DOC
+! difference_dm(i,j,istate) = dm(i,j,1) - dm(i,j,istate)
+ END_DOC
+ integer :: istate
+ do istate = 1, N_states
+   difference_dm(:,:,istate) =  one_e_dm_mo_alpha(:,:,1) + one_e_dm_mo_beta(:,:,1) & 
+                             - (one_e_dm_mo_alpha(:,:,istate) + one_e_dm_mo_beta(:,:,istate))
+ enddo
+END_PROVIDER 
+
+ BEGIN_PROVIDER [double precision, difference_dm_eigvect, (mo_num, mo_num, N_states) ]
+&BEGIN_PROVIDER [double precision, difference_dm_eigval, (mo_num,  N_states) ]
+ implicit none
+ BEGIN_DOC
+! eigenvalues and eigevenctors of the difference_dm
+ END_DOC
+ integer :: istate,i
+ do istate = 2, N_states
+  call lapack_diag(difference_dm_eigval(1,istate),difference_dm_eigvect(1,1,istate)& 
+                  ,difference_dm(1,1,istate),mo_num,mo_num)
+  print*,'Eigenvalues of difference_dm for state ',istate
+  do i = 1, mo_num
+   print*,i,difference_dm_eigval(i,istate)
+  enddo
+ enddo
+END_PROVIDER 
+
+ BEGIN_PROVIDER [ integer         , n_attachment,  (N_states)]
+&BEGIN_PROVIDER [ integer         , n_dettachment, (N_states)]
+&BEGIN_PROVIDER [ integer         , list_attachment,  (mo_num,N_states)]
+&BEGIN_PROVIDER [ integer         , list_dettachment, (mo_num,N_states)]
+ implicit none
+ integer :: i,istate
+ integer :: list_attachment_tmp(mo_num)
+ n_attachment = 0
+ n_dettachment = 0
+ do istate = 2, N_states
+  do i = 1, mo_num
+   if(difference_dm_eigval(i,istate).lt.0.d0)then ! dettachment_orbitals
+    n_dettachment(istate) += 1
+    list_dettachment(n_dettachment(istate),istate) = i ! they are already sorted 
+   else
+    n_attachment(istate) += 1
+    list_attachment_tmp(n_attachment(istate)) = i ! they are not sorted 
+   endif
+  enddo
+  ! sorting the attachment
+  do i = 0, n_attachment(istate) - 1
+   list_attachment(i+1,istate) = list_attachment_tmp(n_attachment(istate) - i)
+  enddo
+ enddo
+ 
+END_PROVIDER 
+
+ BEGIN_PROVIDER [ double precision,  attachment_numbers_sorted,  (mo_num, N_states)]
+&BEGIN_PROVIDER [ double precision,  dettachment_numbers_sorted, (mo_num, N_states)]
+ implicit none
+ integer :: i,istate
+ do istate = 2, N_states
+  print*,'dettachment'
+  do i = 1, n_dettachment(istate)
+   dettachment_numbers_sorted(i,istate) = difference_dm_eigval(list_dettachment(i,istate),istate)
+   print*,i,list_dettachment(i,istate),dettachment_numbers_sorted(i,istate)
+  enddo
+  print*,'attachment'
+  do i = 1, n_attachment(istate)
+   attachment_numbers_sorted(i,istate) = difference_dm_eigval(list_attachment(i,istate),istate)
+   print*,i,list_attachment(i,istate),attachment_numbers_sorted(i,istate)
+  enddo
+ enddo
+ END_PROVIDER 
+
+ BEGIN_PROVIDER [ double precision,  attachment_orbitals, (ao_num, mo_num, N_states)]
+&BEGIN_PROVIDER [ double precision, dettachment_orbitals, (ao_num, mo_num, N_states)]
+ implicit none
+ integer :: i,j,k,istate
+ attachment_orbitals = 0.d0
+ dettachment_orbitals = 0.d0
+ do istate = 2, N_states
+   do i = 1, n_dettachment(istate)
+    do j = 1, mo_num
+     do k = 1, ao_num
+      dettachment_orbitals(k,list_dettachment(i,istate),istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_dettachment(i,istate),istate) 
+     enddo
+    enddo
+   enddo
+   do i = 1, n_attachment(istate)
+    do j = 1, mo_num
+     do k = 1, ao_num
+      attachment_orbitals(k,i,istate) += mo_coef(k,j) * difference_dm_eigvect(j,list_attachment(i,istate),istate) 
+     enddo
+    enddo
+   enddo
+ enddo
+
+END_PROVIDER 

@@ -136,7 +136,7 @@ BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) 
 END_PROVIDER
 
 
-subroutine save_tc_wavefunction_general(ndet,nstates,psidet,sze,dim_psicoef,psilcoef,psircoef)
+subroutine save_tc_wavefunction_general(ndet, nstates, psidet, sze, dim_psicoef, psilcoef, psircoef)
   implicit none
   BEGIN_DOC
   !  Save the wave function into the |EZFIO| file
@@ -192,37 +192,78 @@ subroutine save_tc_wavefunction_general(ndet,nstates,psidet,sze,dim_psicoef,psil
   endif
 end
 
-subroutine save_tc_bi_ortho_wavefunction
- implicit none
- if(save_sorted_tc_wf)then
-  call save_tc_wavefunction_general(N_det,N_states,psi_det_sorted_tc,size(psi_det_sorted_tc, 3),size(psi_l_coef_sorted_bi_ortho, 1),psi_l_coef_sorted_bi_ortho,psi_r_coef_sorted_bi_ortho)
- else
-  call save_tc_wavefunction_general(N_det,N_states,psi_det,size(psi_det, 3), size(psi_l_coef_bi_ortho, 1),psi_l_coef_bi_ortho,psi_r_coef_bi_ortho)
- endif
- call routine_save_right_bi_ortho
+! ---
+
+subroutine save_tc_bi_ortho_wavefunction()
+
+  implicit none
+
+  if(save_sorted_tc_wf) then
+
+    call save_tc_wavefunction_general( N_det, N_states, psi_det_sorted_tc, size(psi_det_sorted_tc, 3) &
+                                     , size(psi_l_coef_sorted_bi_ortho, 1), psi_l_coef_sorted_bi_ortho, psi_r_coef_sorted_bi_ortho)
+    call routine_save_right_sorted_bi_ortho()
+
+  else
+
+    call save_tc_wavefunction_general( N_det, N_states, psi_det, size(psi_det, 3) &
+                                     , size(psi_l_coef_bi_ortho, 1), psi_l_coef_bi_ortho, psi_r_coef_bi_ortho )
+    call routine_save_right_bi_ortho()
+
+  endif
+
 end
 
-subroutine routine_save_right_bi_ortho
- implicit none
- double precision, allocatable :: coef_tmp(:,:)
- integer :: i
- allocate(coef_tmp(N_det, N_states))
- do i = 1, N_det
-  coef_tmp(i,1:N_states) = psi_r_coef_sorted_bi_ortho(i,1:N_states)
- enddo
- call save_wavefunction_general_unormalized(N_det,N_states,psi_det_sorted_tc,size(coef_tmp,1),coef_tmp(1,1))
-end                     
+! ---
 
-subroutine routine_save_left_right_bi_ortho
- implicit none
- double precision, allocatable :: coef_tmp(:,:)
- integer :: i,n_states_tmp
- n_states_tmp = 2
- allocate(coef_tmp(N_det, n_states_tmp))
- do i = 1, N_det
-  coef_tmp(i,1) = psi_r_coef_bi_ortho(i,1)
-  coef_tmp(i,2) = psi_l_coef_bi_ortho(i,1)
- enddo
- call save_wavefunction_general_unormalized(N_det,n_states_tmp,psi_det,size(coef_tmp,1),coef_tmp(1,1))
+subroutine routine_save_right_sorted_bi_ortho()
+
+  implicit none
+  integer                       :: i
+  double precision, allocatable :: coef_tmp(:,:)
+
+  allocate(coef_tmp(N_det, N_states))
+  do i = 1, N_det
+    coef_tmp(i,1:N_states) = psi_r_coef_sorted_bi_ortho(i,1:N_states)
+  enddo
+  call save_wavefunction_general_unormalized(N_det, N_states, psi_det_sorted_tc, size(coef_tmp, 1), coef_tmp(1,1))
+  deallocate(coef_tmp)
+
 end
+
+subroutine routine_save_left_right_sorted_bi_ortho()
+
+  implicit none
+  integer                       :: i, n_states_tmp
+  double precision, allocatable :: coef_tmp(:,:)
+
+  n_states_tmp = 2
+  allocate(coef_tmp(N_det, n_states_tmp))
+  do i = 1, N_det
+    coef_tmp(i,1) = psi_r_coef_bi_ortho(i,1)
+    coef_tmp(i,2) = psi_l_coef_bi_ortho(i,1)
+  enddo
+  call save_wavefunction_general_unormalized(N_det, n_states_tmp, psi_det, size(coef_tmp, 1), coef_tmp(1,1))
+  deallocate(coef_tmp)
+end
+
+! ---
+
+subroutine routine_save_right_bi_ortho()
+
+  implicit none
+  integer                       :: i
+  double precision, allocatable :: coef_tmp(:,:)
+
+  allocate(coef_tmp(N_det, N_states))
+  do i = 1, N_det
+    coef_tmp(i,1:N_states) = psi_r_coef_bi_ortho(i,1:N_states)
+  enddo
+  call save_wavefunction_general_unormalized(N_det, N_states, psi_det, size(coef_tmp, 1), coef_tmp(1,1))
+  deallocate(coef_tmp)
+
+end
+
+! ---
+
 

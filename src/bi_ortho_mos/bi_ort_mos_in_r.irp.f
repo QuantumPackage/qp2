@@ -46,7 +46,7 @@ BEGIN_PROVIDER[double precision, mos_r_in_r_array_transp, (n_points_final_grid, 
       mos_r_in_r_array_transp(i,j) = mos_r_in_r_array(j,i) 
     enddo
   enddo
- 
+
 END_PROVIDER
 
 ! ---
@@ -116,7 +116,7 @@ end subroutine give_all_mos_l_at_r
 
 ! ---
 
-BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp,(n_points_final_grid,mo_num)]
+BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp, (n_points_final_grid,mo_num)]
 
   BEGIN_DOC
   ! mos_l_in_r_array_transp(i,j) = value of the jth mo on the ith grid point
@@ -130,7 +130,7 @@ BEGIN_PROVIDER[double precision, mos_l_in_r_array_transp,(n_points_final_grid,mo
       mos_l_in_r_array_transp(i,j) = mos_l_in_r_array(j,i) 
     enddo
   enddo
- 
+
 END_PROVIDER
 
 ! ---

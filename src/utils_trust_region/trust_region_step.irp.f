@@ -341,9 +341,10 @@
 ! Cf. qp_edit in orbital optimization section, for some constants/thresholds
 
 ! Input:
-! | m         | integer          | number of MOs                                |
+! | m         | integer          | number of MOs                                   |
 ! | n         | integer          | m*(m-1)/2                                       |
-! | H(n, n)   | double precision | hessian                                         |
+! | n2        | integer          | m*(m-1)/2 or 1 if the hessian is diagonal       |
+! | H(n,n2)   | double precision | hessian                                         |
 ! | v_grad(n) | double precision | gradient                                        |
 ! | e_val(n)  | double precision | eigenvalues of the hessian                      |
 ! | W(n, n)   | double precision | eigenvectors of the hessian                     |
@@ -371,23 +372,23 @@
 ! | f_norm_trust_region_omp | double precision | compute the value of norm(x(lambda)^2) |
 
 
-subroutine trust_region_step(n,nb_iter,v_grad,rho,e_val,w,x,delta)
+subroutine trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,w,x,delta)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compuet the step in the trust region
-  END_DOC
+  !END_DOC
 
   implicit none
 
   ! Variables
 
   ! in
-  integer, intent(in)             :: n
+  integer, intent(in)             :: n,n2
   double precision, intent(in)    :: v_grad(n), rho
   integer, intent(inout)          :: nb_iter
-  double precision, intent(in)    :: e_val(n), w(n,n)
+  double precision, intent(in)    :: e_val(n), w(n,n2)
 
   ! inout
   double precision, intent(inout) :: delta
@@ -432,11 +433,19 @@ lambda = 0d0
 
 ! List of w^T.g, to avoid the recomputation
 tmp_wtg = 0d0
-do j = 1, n
-  do i = 1, n
-    tmp_wtg(j) = tmp_wtg(j) + w(i,j) * v_grad(i)
+if (n == n2) then
+  do j = 1, n
+    do i = 1, n
+      tmp_wtg(j) = tmp_wtg(j) + w(i,j) * v_grad(i)
+    enddo
   enddo
-enddo
+else
+  ! For the diagonal case
+  do j = 1, n
+    k = int(w(j,1)+1d-15)
+    tmp_wtg(j) = v_grad(k) 
+  enddo
+endif
 
 ! Replacement of the small tmp_wtg corresponding to a negative eigenvalue
 ! in the case of avoid_saddle
@@ -463,18 +472,18 @@ if (avoid_saddle .and. e_val(1) < - thresh_eig) then
     tmp_wtg(1) = 0d0
   endif
 
-endif 
+endif
 
 ! Norm^2 of x, ||x||^2
 norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg,0d0)
 ! We just use this norm for the nb_iter = 0 in order to initialize the trust radius delta
 ! We don't care about the sign of the eigenvalue we just want the size of the step in a normal Newton-Raphson algorithm
 ! Anyway if the step is too big it will be reduced
-print*,'||x||^2 :', norm2_x
+!print*,'||x||^2 :', norm2_x
 
 ! Norm^2 of the gradient, ||v_grad||^2
 norm2_g = (dnrm2(n,v_grad,1))**2
-print*,'||grad||^2 :', norm2_g
+!print*,'||grad||^2 :', norm2_g
 
 ! Trust radius initialization
 
@@ -526,7 +535,7 @@ if (delta > 1d10) then
   delta = 1d10
 endif
 
-print*, 'Delta :', delta
+!print*, 'Delta :', delta
 
 ! Calculation of the optimal lambda
 
@@ -545,26 +554,26 @@ print*, 'Delta :', delta
 ! Research of lambda to solve ||x(lambda)|| = Delta 
 
 ! Display
-print*, 'e_val(1) = ', e_val(1)
-print*, 'w_1^T.g =', tmp_wtg(1)
+!print*, 'e_val(1) = ', e_val(1)
+!print*, 'w_1^T.g =', tmp_wtg(1)
 
 ! H positive definite 
 if (e_val(1) > - thresh_eig) then
   norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg,0d0)
-  print*, '||x(0)||=', dsqrt(norm2_x)
-  print*, 'Delta=', delta
+  !print*, '||x(0)||=', dsqrt(norm2_x)
+  !print*, 'Delta=', delta
 
   ! H positive definite, ||x(lambda = 0)|| <= Delta
   if (dsqrt(norm2_x) <= delta) then 
-    print*, 'H positive definite, ||x(lambda = 0)|| <= Delta'
-    print*, 'lambda = 0, no lambda optimization'
+    !print*, 'H positive definite, ||x(lambda = 0)|| <= Delta'
+    !print*, 'lambda = 0, no lambda optimization'
     lambda = 0d0
 
   ! H positive definite, ||x(lambda = 0)|| > Delta
   else
     ! Constraint solution
-    print*, 'H positive definite, ||x(lambda = 0)|| > Delta' 
-    print*,'Computation of the optimal lambda...'
+    !print*, 'H positive definite, ||x(lambda = 0)|| > Delta' 
+    !print*,'Computation of the optimal lambda...'
     call trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   endif
 
@@ -572,14 +581,14 @@ if (e_val(1) > - thresh_eig) then
 else
   if (DABS(tmp_wtg(1)) < thresh_wtg) then
     norm2_x = f_norm_trust_region_omp(n,e_val,tmp_wtg, - e_val(1))
-    print*, 'w_1^T.g <', thresh_wtg,', ||x(lambda = -e_val(1))|| =', dsqrt(norm2_x) 
+    !print*, 'w_1^T.g <', thresh_wtg,', ||x(lambda = -e_val(1))|| =', dsqrt(norm2_x) 
   endif
 
   ! H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta 
   if (dsqrt(norm2_x) <= delta .and. DABS(tmp_wtg(1)) < thresh_wtg) then
     ! Add e_val(1) in order to have (H - e_val(1) I) positive definite
-    print*, 'H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta'
-    print*, 'lambda = -e_val(1), no lambda optimization'
+    !print*, 'H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| <= Delta'
+    !print*, 'lambda = -e_val(1), no lambda optimization'
     lambda = - e_val(1)
 
   ! H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| > Delta
@@ -587,12 +596,12 @@ else
   ! H indefinite, w_1^T.g =/= 0
   else
     ! Constraint solution/ add lambda
-    if (DABS(tmp_wtg(1)) < thresh_wtg) then
-       print*, 'H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| > Delta'
-    else
-       print*, 'H indefinite, w_1^T.g =/= 0'
-    endif
-    print*, 'Computation of the optimal lambda...'
+    !if (DABS(tmp_wtg(1)) < thresh_wtg) then
+    !   print*, 'H indefinite, w_1^T.g = 0, ||x(lambda = -e_val(1))|| > Delta'
+    !else
+    !   print*, 'H indefinite, w_1^T.g =/= 0'
+    !endif
+    !print*, 'Computation of the optimal lambda...'
     call trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
     endif
 
@@ -621,28 +630,53 @@ x = 0d0
 
 ! Calculation of the step x
 
-! Normal version
-if (.not. absolute_eig) then
+if (n == n2) then
+  ! Normal version
+  if (.not. absolute_eig) then
 
-  do i = 1, n 
-    if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
-      do j = 1, n
-        x(j) = x(j) - tmp_wtg(i) * W(j,i) / (e_val(i) + lambda)
-      enddo
-    endif
-  enddo
+    do i = 1, n 
+      if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
+        do j = 1, n
+          x(j) = x(j) - tmp_wtg(i) * W(j,i) / (e_val(i) + lambda)
+        enddo
+      endif
+    enddo
 
-! Version to use the absolute value of the eigenvalues
+  ! Version to use the absolute value of the eigenvalues
+  else
+
+    do i = 1, n 
+      if (DABS(e_val(i)) > thresh_eig) then
+        do j = 1, n
+          x(j) = x(j) - tmp_wtg(i) * W(j,i) / (DABS(e_val(i)) + lambda)
+        enddo
+      endif
+    enddo
+
+  endif
 else
+  ! If the hessian is diagonal
+  ! Normal version
+  if (.not. absolute_eig) then
 
-  do i = 1, n 
-    if (DABS(e_val(i)) > thresh_eig) then
-      do j = 1, n
-        x(j) = x(j) - tmp_wtg(i) * W(j,i) / (DABS(e_val(i)) + lambda)
-      enddo
-    endif
-  enddo
+    do i = 1, n 
+      if (DABS(e_val(i)) > thresh_eig .and. DABS(e_val(i)+lambda) > thresh_eig) then
+        j = int(w(i,1) + 1d-15)
+        x(j) = - tmp_wtg(i) * 1d0 / (e_val(i) + lambda)
+      endif
+    enddo
 
+  ! Version to use the absolute value of the eigenvalues
+  else
+
+    do i = 1, n 
+      if (DABS(e_val(i)) > thresh_eig) then
+        j = int(w(i,1) + 1d-15)
+        x(j) = - tmp_wtg(i) * 1d0 / (DABS(e_val(i)) + lambda)
+      endif
+    enddo
+
+  endif
 endif
 
 double precision :: beta, norm_x
@@ -711,6 +745,5 @@ deallocate(tmp_wtg)
   print*,'======================'
   print*,'---End trust_region---'
   print*,'======================'
-  print*,''
 
 end

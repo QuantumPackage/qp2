@@ -1565,7 +1565,7 @@ subroutine nullify_small_elements(m,n,A,LDA,thresh)
   ! Remove tiny elements
   do j=1,n
     do i=1,m
-      if ( dabs(A(i,j) * amax) < thresh ) then
+      if ( (dabs(A(i,j) * amax) < thresh).or.(dabs(A(i,j)) < 1.d-99) ) then
          A(i,j) = 0.d0
       endif
     enddo
@@ -1661,7 +1661,15 @@ subroutine restore_symmetry(m,n,A,LDA,thresh)
     ! Update i
     i = i + 1
   enddo
-  copy(i:) = 0.d0
+
+  ! To nullify the remaining elements that are below the threshold
+  if (i == sze) then
+    if (-copy(i) <= thresh) then
+      copy(i) = 0d0
+    endif
+  else
+    copy(i:) = 0.d0
+  endif
 
   !$OMP PARALLEL if (sze>10000) &
   !$OMP SHARED(m,sze,copy_sign,copy,key,A,ii,jj) &
@@ -1823,41 +1831,39 @@ subroutine pivoted_cholesky( A, rank, tol, ndim, U)
 ! U is allocated inside this subroutine
 ! rank is the number of Cholesky vectors depending on tol
 !
-integer :: ndim
-integer, intent(inout)                                        :: rank
-double precision, dimension(ndim, ndim), intent(inout)        :: A
-double precision, dimension(ndim, rank), intent(out)          :: U
-double precision, intent(in)                                  :: tol
+integer                          :: ndim
+integer, intent(inout)           :: rank
+double precision, intent(inout)  :: A(ndim, ndim)
+double precision, intent(out)    :: U(ndim, rank)
+double precision, intent(in)     :: tol
 
 integer, dimension(:), allocatable          :: piv
 double precision, dimension(:), allocatable :: work
-character, parameter :: uplo = "U"
-integer :: N, LDA
+character, parameter :: uplo = 'L'
+integer :: LDA
 integer :: info
 integer :: k, l, rank0
-external :: dpstrf
 
 rank0 = rank
-N = size(A, dim=1)
-LDA = N
-allocate(piv(N))
-allocate(work(2*N))
-call dpstrf(uplo, N, A, LDA, piv, rank, tol, work, info)
+LDA = ndim
+allocate(piv(ndim))
+allocate(work(2*ndim))
+call dpstrf(uplo, ndim, A, LDA, piv, rank, tol, work, info)
 
 if (rank > rank0) then
   print *, 'Bug: rank > rank0 in pivoted cholesky. Increase rank before calling'
   stop
 end if
 
-do k = 1, N
-  A(k+1:, k) = 0.00D+0
+do k = 1, ndim
+  A(k,k+1:ndim) = 0.00D+0
 end do
 ! TODO: It should be possible to use only one vector of size (1:rank) as a buffer
 ! to do the swapping in-place
-U = 0.00D+0
-do k = 1, N
+U(:,:) = 0.00D+0
+do k = 1, ndim
   l = piv(k)
-  U(l, :) = A(1:rank, k)
+  U(l, 1:rank) = A(k,1:rank)
 end do
 
 end subroutine pivoted_cholesky

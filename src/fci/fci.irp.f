@@ -39,11 +39,20 @@ program fci
   if (.not.is_zmq_slave) then
     PROVIDE psi_det psi_coef mo_two_e_integrals_in_map
 
+    write(json_unit,json_array_open_fmt) 'fci'
+
+    double precision, allocatable :: Ev(:),PT2(:)
+    allocate(Ev(N_states), PT2(N_states))
     if (do_pt2) then
-      call run_stochastic_cipsi
+      call run_stochastic_cipsi(Ev,PT2)
     else
       call run_cipsi
     endif
+
+    write(json_unit,json_dict_uopen_fmt)
+    write(json_unit,json_dict_close_fmtx)
+    write(json_unit,json_array_close_fmtx)
+    call json_close
 
   else
     PROVIDE mo_two_e_integrals_in_map pt2_min_parallel_tasks

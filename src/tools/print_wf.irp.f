@@ -47,6 +47,7 @@ subroutine routine
  do i = 1, min(N_det_print_wf,N_det)
   print*,''
   print*,'i = ',i
+  print *,psi_det_sorted(1,1,i)
   call debug_det(psi_det_sorted(1,1,i),N_int)
   call get_excitation_degree(psi_det_sorted(1,1,i),psi_det_sorted(1,1,1),degree,N_int)
   print*,'degree = ',degree

@@ -77,7 +77,7 @@
 !      ! Criterion -> step accepted or rejected 
 !      call trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, criterion_model,rho,cancel_step)
 !
-!      ! ### TODO ###
+!      !### TODO ###
 !      !if (cancel_step) then
 !      ! Cancel the previous step (mo_coef = prev_mos if you keep them...)
 !      !endif
@@ -133,19 +133,19 @@
 ! | must_exit       | logical          | If the program must exit the loop                                               |
 
 
-subroutine trust_region_step_w_expected_e(n,H,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,x,must_exit)
+subroutine trust_region_step_w_expected_e(n,n2,H,W,e_val,v_grad,prev_criterion,rho,nb_iter,delta,criterion_model,x,must_exit)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the step and the expected criterion/energy after the step
-  END_DOC
+  !END_DOC
 
   implicit none
 
   ! in
-  integer, intent(in)             :: n, nb_iter
-  double precision, intent(in)    :: H(n,n), W(n,n), v_grad(n)
+  integer, intent(in)             :: n,n2, nb_iter
+  double precision, intent(in)    :: H(n,n2), W(n,n2), v_grad(n)
   double precision, intent(in)    :: rho, prev_criterion
 
   ! inout
@@ -160,9 +160,9 @@ subroutine trust_region_step_w_expected_e(n,H,W,e_val,v_grad,prev_criterion,rho,
 
   must_exit = .False.
   
-  call trust_region_step(n,nb_iter,v_grad,rho,e_val,W,x,delta)
+  call trust_region_step(n,n2,nb_iter,v_grad,rho,e_val,W,x,delta)
 
-  call trust_region_expected_e(n,v_grad,H,x,prev_criterion,criterion_model)
+  call trust_region_expected_e(n,n2,v_grad,H,x,prev_criterion,criterion_model)
 
   ! exit if DABS(prev_criterion - criterion_model) < 1d-12
   if (DABS(prev_criterion - criterion_model) < thresh_model) then
@@ -210,9 +210,9 @@ subroutine trust_region_is_step_cancelled(nb_iter,prev_criterion, criterion, cri
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute if the step should be cancelled
-  END_DOC
+  !END_DOC
 
   implicit none
  

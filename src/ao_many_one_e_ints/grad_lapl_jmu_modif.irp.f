@@ -24,12 +24,12 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
 
   v_ij_erf_rk_cst_mu_j1b = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                         &
- !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, int_mu, int_coulomb, tmp) & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points, &
- !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,   &
- !$OMP          v_ij_erf_rk_cst_mu_j1b, mu_erf)
- !$OMP DO
+  !$OMP PARALLEL DEFAULT (NONE)                                                         &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, int_mu, int_coulomb, tmp) & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points, &
+  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,   &
+  !$OMP          v_ij_erf_rk_cst_mu_j1b, mu_erf)
+  !$OMP DO
   !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
@@ -51,7 +51,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
 
         int_mu      = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
         int_coulomb = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
-!        if(dabs(coef)*dabs(int_mu - int_coulomb) .lt. 1d-12) cycle
+!       if(dabs(coef)*dabs(int_mu - int_coulomb) .lt. 1d-12) cycle
 
         tmp += coef * (int_mu - int_coulomb)
 
@@ -60,6 +60,7 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
         do i_1s = 2, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
           beta        = List_all_comb_b2_expo  (i_1s)
           B_center(1) = List_all_comb_b2_cent(1,i_1s)
           B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -77,8 +78,8 @@ BEGIN_PROVIDER [ double precision, v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_po
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
@@ -112,13 +113,13 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_
 
   x_v_ij_erf_rk_cst_mu_j1b = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                        &
- !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
- !$OMP          tmp_x, tmp_y, tmp_z)                                                  & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points,&
- !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,  &
- !$OMP          x_v_ij_erf_rk_cst_mu_j1b, mu_erf)
- !$OMP DO
+  !$OMP PARALLEL DEFAULT (NONE)                                                        &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center, ints, ints_coulomb,      & 
+  !$OMP          tmp_x, tmp_y, tmp_z)                                                  & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, final_grid_points,&
+  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo, List_all_comb_b2_cent,  &
+  !$OMP          x_v_ij_erf_rk_cst_mu_j1b, mu_erf)
+  !$OMP DO
   !do ipoint = 1, 10
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
@@ -143,7 +144,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_
         call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, ints        )
         call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, ints_coulomb)
 
-!        if( dabs(coef)*(dabs(ints(1)-ints_coulomb(1)) + dabs(ints(2)-ints_coulomb(2)) + dabs(ints(3)-ints_coulomb(3))) .lt. 3d-10) cycle
+!       if( dabs(coef)*(dabs(ints(1)-ints_coulomb(1)) + dabs(ints(2)-ints_coulomb(2)) + dabs(ints(3)-ints_coulomb(3))) .lt. 3d-10) cycle
 
         tmp_x += coef * (ints(1) - ints_coulomb(1))
         tmp_y += coef * (ints(2) - ints_coulomb(2))
@@ -154,6 +155,7 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_
         do i_1s = 2, List_all_comb_b2_size
 
           coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
           beta        = List_all_comb_b2_expo  (i_1s)
           B_center(1) = List_all_comb_b2_cent(1,i_1s)
           B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -175,8 +177,8 @@ BEGIN_PROVIDER [ double precision, x_v_ij_erf_rk_cst_mu_j1b, (ao_num, ao_num, n_
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
@@ -195,8 +197,7 @@ END_PROVIDER
 
 ! ---
 
-! TODO analytically
-BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b_fit, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
@@ -213,23 +214,24 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 
   double precision, external :: overlap_gauss_r12_ao_with1s
 
-  print*, ' providing v_ij_u_cst_mu_j1b ...'
+  print*, ' providing v_ij_u_cst_mu_j1b_fit ...'
   call wall_time(wall0)
 
   provide mu_erf final_grid_points j1b_pen
+  PROVIDE ng_fit_jast expo_gauss_j_mu_x coef_gauss_j_mu_x
+  PROVIDE List_all_comb_b2_size List_all_comb_b2_coef List_all_comb_b2_expo List_all_comb_b2_cent
 
-  v_ij_u_cst_mu_j1b = 0.d0
+  v_ij_u_cst_mu_j1b_fit = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
- !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
- !$OMP          final_grid_points, ng_fit_jast,                     &
- !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
- !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
- !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b)
- !$OMP DO
-  !do ipoint = 1, 10
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
+  !$OMP          final_grid_points, ng_fit_jast,                     &
+  !$OMP          expo_gauss_j_mu_x, coef_gauss_j_mu_x,               &
+  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
+  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b_fit)
+  !$OMP DO
   do ipoint = 1, n_points_final_grid
     r(1) = final_grid_points(1,ipoint)
     r(2) = final_grid_points(2,ipoint)
@@ -240,7 +242,6 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 
         tmp = 0.d0
         do i_fit = 1, ng_fit_jast
-
           expo_fit = expo_gauss_j_mu_x(i_fit)
           coef_fit = coef_gauss_j_mu_x(i_fit)
 
@@ -253,7 +254,6 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
           B_center(3) = List_all_comb_b2_cent(3,1)
 
           int_fit = overlap_gauss_r12_ao_with1s(B_center, beta, r, expo_fit, i, j)
-!          if(dabs(int_fit*coef) .lt. 1d-12) cycle
 
           tmp += coef * coef_fit * int_fit
 
@@ -262,6 +262,7 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
           do i_1s = 2, List_all_comb_b2_size
 
             coef        = List_all_comb_b2_coef  (i_1s)
+            if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
             beta        = List_all_comb_b2_expo  (i_1s)
             B_center(1) = List_all_comb_b2_cent(1,i_1s)
             B_center(2) = List_all_comb_b2_cent(2,i_1s)
@@ -276,25 +277,276 @@ BEGIN_PROVIDER [ double precision, v_ij_u_cst_mu_j1b, (ao_num, ao_num, n_points_
 
         enddo
 
-        v_ij_u_cst_mu_j1b(j,i,ipoint) = tmp
+        v_ij_u_cst_mu_j1b_fit(j,i,ipoint) = tmp
       enddo
     enddo
   enddo
- !$OMP END DO
- !$OMP END PARALLEL
+  !$OMP END DO
+  !$OMP END PARALLEL
 
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        v_ij_u_cst_mu_j1b(j,i,ipoint) = v_ij_u_cst_mu_j1b(i,j,ipoint)
+        v_ij_u_cst_mu_j1b_fit(j,i,ipoint) = v_ij_u_cst_mu_j1b_fit(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for v_ij_u_cst_mu_j1b', wall1 - wall0
+  print*, ' wall time for v_ij_u_cst_mu_j1b_fit', wall1 - wall0
 
 END_PROVIDER 
 
 ! ---
 
+BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_j1b_an_old, (ao_num, ao_num, n_points_final_grid)]
+
+  BEGIN_DOC
+  !
+  ! int dr2 phi_i(r2) phi_j(r2) 1s_j1b(r2) u(mu, r12)
+  !
+  END_DOC
+
+  include 'constants.include.F'
+
+  implicit none
+  integer                    :: i, j, ipoint, i_1s
+  double precision           :: r(3), r1_2
+  double precision           :: int_c1, int_e1, int_o
+  double precision           :: int_c2(3), int_e2(3)
+  double precision           :: int_c3(3), int_e3(3)
+  double precision           :: coef, beta, B_center(3)
+  double precision           :: tmp, ct
+  double precision           :: wall0, wall1
+
+  double precision, external :: overlap_gauss_r12_ao_with1s
+  double precision, external :: NAI_pol_mult_erf_ao_with1s
+
+  print*, ' providing v_ij_u_cst_mu_j1b_an_old ...'
+  call wall_time(wall0)
+
+  provide mu_erf final_grid_points j1b_pen
+  PROVIDE List_all_comb_b2_size List_all_comb_b2_coef List_all_comb_b2_expo List_all_comb_b2_cent
+
+  ct = inv_sq_pi_2 / mu_erf
+
+  v_ij_u_cst_mu_j1b_an_old = 0.d0
+
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center,        &
+  !$OMP          r1_2, tmp, int_c1, int_e1, int_o, int_c2,           &
+  !$OMP          int_e2, int_c3, int_e3)                             &
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
+  !$OMP          final_grid_points, mu_erf, ct,                      &
+  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
+  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b_an_old)
+  !$OMP DO
+  do ipoint = 1, n_points_final_grid
+
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+    r1_2 = 0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3))
+
+    do i = 1, ao_num
+      do j = i, ao_num
+
+        ! ---
+
+        coef        = List_all_comb_b2_coef  (1)
+        beta        = List_all_comb_b2_expo  (1)
+        B_center(1) = List_all_comb_b2_cent(1,1)
+        B_center(2) = List_all_comb_b2_cent(2,1)
+        B_center(3) = List_all_comb_b2_cent(3,1)
+
+        int_c1 = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
+        int_e1 = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
+
+        call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c2)
+        call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e2)
+
+        call NAI_pol_x2_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c3)
+        call NAI_pol_x2_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e3)
+
+        int_o = overlap_gauss_r12_ao_with1s(B_center, beta, r, mu_erf*mu_erf, i, j)
+
+        tmp = coef                                                                                               &
+            * ( r1_2 * (int_c1 - int_e1)                                                                         &
+              - r(1) * (int_c2(1) - int_e2(1)) - r(2) * (int_c2(2) - int_e2(2)) - r(3) * (int_c2(3) - int_e2(3)) &
+              + 0.5d0 * (int_c3(1) + int_c3(2) + int_c3(3) - int_e3(1) - int_e3(2) - int_e3(3))                  &
+              - ct * int_o                                                                                       &
+              )
+
+        ! ---
+
+        do i_1s = 2, List_all_comb_b2_size
+
+          coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
+          beta        = List_all_comb_b2_expo  (i_1s)
+          B_center(1) = List_all_comb_b2_cent(1,i_1s)
+          B_center(2) = List_all_comb_b2_cent(2,i_1s)
+          B_center(3) = List_all_comb_b2_cent(3,i_1s)
+
+          int_c1 = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r)
+          int_e1 = NAI_pol_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r)
+
+          call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c2)
+          call NAI_pol_x_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e2)
+
+          call NAI_pol_x2_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c3)
+          call NAI_pol_x2_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e3)
+
+          int_o = overlap_gauss_r12_ao_with1s(B_center, beta, r, mu_erf*mu_erf, i, j)
+
+          tmp = tmp + coef                                                                                         &
+              * ( r1_2 * (int_c1 - int_e1)                                                                         &
+                - r(1) * (int_c2(1) - int_e2(1)) - r(2) * (int_c2(2) - int_e2(2)) - r(3) * (int_c2(3) - int_e2(3)) &
+                + 0.5d0 * (int_c3(1) + int_c3(2) + int_c3(3) - int_e3(1) - int_e3(2) - int_e3(3))                  &
+                - ct * int_o                                                                                       &
+                )
+
+        enddo
+
+        ! ---
+
+        v_ij_u_cst_mu_j1b_an_old(j,i,ipoint) = tmp
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  do ipoint = 1, n_points_final_grid
+    do i = 2, ao_num
+      do j = 1, i-1
+        v_ij_u_cst_mu_j1b_an_old(j,i,ipoint) = v_ij_u_cst_mu_j1b_an_old(i,j,ipoint)
+      enddo
+    enddo
+  enddo
+ 
+  call wall_time(wall1)
+  print*, ' wall time for v_ij_u_cst_mu_j1b_an_old', wall1 - wall0
+
+END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [double precision, v_ij_u_cst_mu_j1b_an, (ao_num, ao_num, n_points_final_grid)]
+
+  BEGIN_DOC
+  !
+  ! int dr2 phi_i(r2) phi_j(r2) 1s_j1b(r2) u(mu, r12)
+  !
+  END_DOC
+
+  include 'constants.include.F'
+
+  implicit none
+  integer                    :: i, j, ipoint, i_1s
+  double precision           :: r(3), r1_2
+  double precision           :: int_o
+  double precision           :: int_c(7), int_e(7)
+  double precision           :: coef, beta, B_center(3)
+  double precision           :: tmp, ct
+  double precision           :: wall0, wall1
+
+  double precision, external :: overlap_gauss_r12_ao_with1s
+  double precision, external :: NAI_pol_mult_erf_ao_with1s
+
+  print*, ' providing v_ij_u_cst_mu_j1b_an ...'
+  call wall_time(wall0)
+
+  provide mu_erf final_grid_points j1b_pen
+  PROVIDE List_all_comb_b2_size List_all_comb_b2_coef List_all_comb_b2_expo List_all_comb_b2_cent
+
+  ct = inv_sq_pi_2 / mu_erf
+
+  v_ij_u_cst_mu_j1b_an = 0.d0
+
+  !$OMP PARALLEL DEFAULT (NONE)                                      &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, r, coef, beta, B_center,        &
+  !$OMP          r1_2, tmp, int_c, int_e, int_o)                     &
+  !$OMP SHARED  (n_points_final_grid, ao_num, List_all_comb_b2_size, & 
+  !$OMP          final_grid_points, mu_erf, ct,                      &
+  !$OMP          List_all_comb_b2_coef, List_all_comb_b2_expo,       & 
+  !$OMP          List_all_comb_b2_cent, v_ij_u_cst_mu_j1b_an)
+  !$OMP DO
+  do ipoint = 1, n_points_final_grid
+
+    r(1) = final_grid_points(1,ipoint)
+    r(2) = final_grid_points(2,ipoint)
+    r(3) = final_grid_points(3,ipoint)
+    r1_2 = 0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3))
+
+    do i = 1, ao_num
+      do j = i, ao_num
+
+        ! ---
+
+        coef        = List_all_comb_b2_coef  (1)
+        beta        = List_all_comb_b2_expo  (1)
+        B_center(1) = List_all_comb_b2_cent(1,1)
+        B_center(2) = List_all_comb_b2_cent(2,1)
+        B_center(3) = List_all_comb_b2_cent(3,1)
+
+        call NAI_pol_012_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c)
+        call NAI_pol_012_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e)
+
+        int_o = overlap_gauss_r12_ao_with1s(B_center, beta, r, mu_erf*mu_erf, i, j)
+
+        tmp = coef                                                                                         &
+            * ( r1_2 * (int_c(1) - int_e(1))                                                               &
+              - r(1) * (int_c(2) - int_e(2)) - r(2) * (int_c(3) - int_e(3)) - r(3) * (int_c(4) - int_e(4)) &
+              + 0.5d0 * (int_c(5) + int_c(6) + int_c(7) - int_e(5) - int_e(6) - int_e(7))                  &
+              - ct * int_o                                                                                 &
+              )
+
+        ! ---
+
+        do i_1s = 2, List_all_comb_b2_size
+
+          coef        = List_all_comb_b2_coef  (i_1s)
+          if(dabs(coef) .lt. 1d-15) cycle ! beta = 0.0
+          beta        = List_all_comb_b2_expo  (i_1s)
+          B_center(1) = List_all_comb_b2_cent(1,i_1s)
+          B_center(2) = List_all_comb_b2_cent(2,i_1s)
+          B_center(3) = List_all_comb_b2_cent(3,i_1s)
+
+          call NAI_pol_012_mult_erf_ao_with1s(i, j, beta, B_center,  1.d+9, r, int_c)
+          call NAI_pol_012_mult_erf_ao_with1s(i, j, beta, B_center, mu_erf, r, int_e)
+
+          int_o = overlap_gauss_r12_ao_with1s(B_center, beta, r, mu_erf*mu_erf, i, j)
+
+          tmp = tmp + coef                                                                                   &
+              * ( r1_2 * (int_c(1) - int_e(1))                                                               &
+                - r(1) * (int_c(2) - int_e(2)) - r(2) * (int_c(3) - int_e(3)) - r(3) * (int_c(4) - int_e(4)) &
+                + 0.5d0 * (int_c(5) + int_c(6) + int_c(7) - int_e(5) - int_e(6) - int_e(7))                  &
+                - ct * int_o                                                                                 &
+                )
+
+        enddo
+
+        ! ---
+
+        v_ij_u_cst_mu_j1b_an(j,i,ipoint) = tmp
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  do ipoint = 1, n_points_final_grid
+    do i = 2, ao_num
+      do j = 1, i-1
+        v_ij_u_cst_mu_j1b_an(j,i,ipoint) = v_ij_u_cst_mu_j1b_an(i,j,ipoint)
+      enddo
+    enddo
+  enddo
+ 
+  call wall_time(wall1)
+  print*, ' wall time for v_ij_u_cst_mu_j1b_an', wall1 - wall0
+
+END_PROVIDER 
+
+! ---

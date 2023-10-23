@@ -1,21 +1,34 @@
+
+! ---
+
 program test_natorb
-  implicit none
+
   BEGIN_DOC
-! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together with the energy. Saves the left-right wave functions at the end. 
+  ! TODO : Reads psi_det in the EZFIO folder and prints out the left- and right-eigenvectors together with the energy. Saves the left-right wave functions at the end. 
   END_DOC
+
+  implicit none
+
   print *, 'Hello world'
+
   my_grid_becke = .True.
-  my_n_pt_r_grid = 30
-  my_n_pt_a_grid = 50
+  PROVIDE tc_grid1_a tc_grid1_r
+  my_n_pt_r_grid = tc_grid1_r
+  my_n_pt_a_grid = tc_grid1_a
+  touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
+
   read_wf = .True.
   touch read_wf
-  touch  my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
- call routine
-! call test
+
+  call routine()
+  ! call test()
 
 end
 
-subroutine routine
+! ---
+
+subroutine routine()
+
  implicit none
  double precision, allocatable :: fock_diag(:),eigval(:),leigvec(:,:),reigvec(:,:),mat_ref(:,:)
  allocate(eigval(mo_num),leigvec(mo_num,mo_num),reigvec(mo_num,mo_num),fock_diag(mo_num),mat_ref(mo_num, mo_num))

@@ -17,6 +17,8 @@ subroutine ao_to_mo_bi_ortho(A_ao, LDA_ao, A_mo, LDA_mo)
   double precision, intent(out) :: A_mo(LDA_mo,mo_num)
   double precision, allocatable :: T(:,:)
 
+  PROVIDE mo_l_coef mo_r_coef
+
   allocate ( T(ao_num,mo_num) )
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: T
 
@@ -30,7 +32,6 @@ subroutine ao_to_mo_bi_ortho(A_ao, LDA_ao, A_mo, LDA_mo)
             , mo_l_coef, size(mo_l_coef, 1), T, size(T, 1) &
             , 0.d0, A_mo, LDA_mo )
 
-!  call restore_symmetry(mo_num,mo_num,A_mo,size(A_mo,1),1.d-12)
   deallocate(T)
 
 end subroutine ao_to_mo_bi_ortho
@@ -53,6 +54,8 @@ subroutine mo_to_ao_bi_ortho(A_mo, LDA_mo, A_ao, LDA_ao)
   double precision, intent(in)  :: A_mo(LDA_mo,mo_num)
   double precision, intent(out) :: A_ao(LDA_ao,ao_num)
   double precision, allocatable :: tmp_1(:,:), tmp_2(:,:)
+
+  PROVIDE mo_l_coef mo_r_coef
 
   ! ao_overlap x mo_r_coef
   allocate( tmp_1(ao_num,mo_num) )
@@ -132,6 +135,7 @@ BEGIN_PROVIDER [ double precision, mo_r_coef, (ao_num, mo_num) ]
         mo_r_coef(j,i) = mo_coef(j,i)
       enddo
     enddo
+    call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
   endif
 
 END_PROVIDER
@@ -187,6 +191,7 @@ BEGIN_PROVIDER [ double precision, mo_l_coef, (ao_num, mo_num) ]
         mo_l_coef(j,i) = mo_coef(j,i)
       enddo
     enddo
+    call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
   endif
 
 END_PROVIDER

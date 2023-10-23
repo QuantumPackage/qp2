@@ -27,7 +27,7 @@ subroutine get_delta_bitc_right(psidet, psicoef, ndet, Nint, delta)
 
   i = 1
   j = 1
-  call htilde_mu_mat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
+  call htilde_mu_mat_bi_ortho_slow(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
   call hmat_bi_ortho         (psidet(1,1,i), psidet(1,1,j), Nint, h_mono, h_twoe, h_tot)
 
   delta = 0.d0
@@ -38,9 +38,9 @@ subroutine get_delta_bitc_right(psidet, psicoef, ndet, Nint, delta)
   do i = 1, ndet
     do j = 1, ndet
 
-      ! < I | Htilde | J >
-      call htilde_mu_mat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
-      ! < I | H | J >
+      ! < I |Htilde | J >
+      call htilde_mu_mat_bi_ortho_slow(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
+      ! < I |H | J >
       call hmat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, h_mono, h_twoe, h_tot)
 
       delta_mat = htc_tot - h_tot
@@ -78,7 +78,7 @@ subroutine get_htc_bitc_right(psidet, psicoef, ndet, Nint, delta)
 
   i = 1
   j = 1
-  call htilde_mu_mat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
+  call htilde_mu_mat_bi_ortho_slow(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
 
   delta = 0.d0
  !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(dynamic,8)   &
@@ -87,8 +87,8 @@ subroutine get_htc_bitc_right(psidet, psicoef, ndet, Nint, delta)
   do i = 1, ndet
     do j = 1, ndet
 
-      ! < I | Htilde | J >
-      call htilde_mu_mat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
+      ! < I |Htilde | J >
+      call htilde_mu_mat_bi_ortho_slow(psidet(1,1,i), psidet(1,1,j), Nint, htc_mono, htc_twoe, htc_three, htc_tot)
 
       delta(i) = delta(i) + psicoef(j) * htc_tot
     enddo
@@ -141,7 +141,7 @@ subroutine get_h_bitc_right(psidet, psicoef, ndet, Nint, delta)
   do i = 1, ndet
     do j = 1, ndet
 
-      ! < I | H | J >
+      ! < I |H | J >
       call hmat_bi_ortho(psidet(1,1,i), psidet(1,1,j), Nint, h_mono, h_twoe, h_tot)
 
       delta(i) = delta(i) + psicoef(j) * h_tot

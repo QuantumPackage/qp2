@@ -36,10 +36,10 @@ subroutine vec_to_mat_index(i,p,q)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the indexes (p,q) of the element in the lower diagonal matrix knowing
   ! its index i a vector
-  END_DOC
+  !END_DOC
 
   implicit none
 

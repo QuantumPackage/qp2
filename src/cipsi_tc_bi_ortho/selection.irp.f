@@ -868,7 +868,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         ! <det|H(j)|psi_0> and transpose
         ! -------------------------------------------
 
-!        call htilde_mu_mat_bi_ortho_tot(det, det, N_int, Hii)
         double precision               :: hmono, htwoe, hthree
         call diag_htilde_mu_mat_fock_bi_ortho(N_int, det, hmono, htwoe, hthree, hii)
         do istate = 1,N_states
@@ -878,8 +877,8 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
             psi_h_alpha = 0.d0
             alpha_h_psi = 0.d0
             do iii = 1, N_det_selectors
-              call htilde_mu_mat_bi_ortho_tot(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-              call htilde_mu_mat_bi_ortho_tot(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+              call htilde_mu_mat_bi_ortho_tot_slow(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+              call htilde_mu_mat_bi_ortho_tot_slow(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
               call get_excitation_degree(psi_selectors(1,1,iii), det,degree,N_int)
               if(degree == 0)then
                print*,'problem !!!'
@@ -894,20 +893,45 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
               alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
             enddo
           else if(debug_tc_pt2 == 2)then !! debugging the new version
+!            psi_h_alpha_tmp = 0.d0
+!            alpha_h_psi_tmp = 0.d0
+!            do iii = 1, N_det_selectors ! old version
+!              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+!              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+!              psi_h_alpha_tmp += i_h_alpha * psi_selectors_coef_tc(iii,1,1) ! left function
+!              alpha_h_psi_tmp += alpha_h_i * psi_selectors_coef_tc(iii,2,1) ! right function
+!            enddo
             psi_h_alpha_tmp = mat_l(istate, p1, p2) ! new version
             alpha_h_psi_tmp = mat_r(istate, p1, p2) ! new version
             psi_h_alpha = 0.d0
             alpha_h_psi = 0.d0
-            do iii = 1, N_det_selectors ! old version
-              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-              psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
-              alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
+            do iii = 1, N_det ! old version
+              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_det(1,1,iii), det, N_int, i_h_alpha)
+              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_det(1,1,iii), N_int, alpha_h_i)
+              psi_h_alpha += i_h_alpha * psi_l_coef_bi_ortho(iii,1) ! left function
+              alpha_h_psi += alpha_h_i * psi_r_coef_bi_ortho(iii,1) ! right function
             enddo
             if(dabs(psi_h_alpha*alpha_h_psi/delta_E).gt.1.d-10)then
               error = dabs(psi_h_alpha * alpha_h_psi - psi_h_alpha_tmp * alpha_h_psi_tmp)/dabs(psi_h_alpha * alpha_h_psi)
               if(error.gt.1.d-2)then
+                call debug_det(det, N_int)
                 print*,'error =',error,psi_h_alpha * alpha_h_psi/delta_E,psi_h_alpha_tmp * alpha_h_psi_tmp/delta_E
+                print*,psi_h_alpha , alpha_h_psi
+                print*,psi_h_alpha_tmp , alpha_h_psi_tmp
+                print*,'selectors '
+                do iii = 1, N_det_selectors ! old version
+                 print*,'iii',iii,psi_selectors_coef_tc(iii,1,1),psi_selectors_coef_tc(iii,2,1)
+                 call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
+                 call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
+                 print*,i_h_alpha,alpha_h_i
+                 call debug_det(psi_selectors(1,1,iii),N_int) 
+                enddo 
+!                print*,'psi_det '
+!                do iii = 1, N_det! old version
+!                 print*,'iii',iii,psi_l_coef_bi_ortho(iii,1),psi_r_coef_bi_ortho(iii,1)
+!                 call debug_det(psi_det(1,1,iii),N_int) 
+!                enddo 
+                stop
               endif
             endif
           else

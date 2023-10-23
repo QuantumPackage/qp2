@@ -209,8 +209,8 @@ function is_del(i)
   is_del = .False.
 
   ! Search
-  do j = 1, dim_list_core_orb
-    if (list_core(j) == i) then
+  do j = 1, dim_list_del_orb
+    if (list_del(j) == i) then
       is_del = .True.
       exit
     endif

@@ -1,0 +1,83 @@
+! State average energy
+
+! Calculation of the state average energy from the integrals and the
+! density matrices.
+
+! \begin{align*}
+! E = \sum_{ij} h_{ij} \gamma_{ij} + \frac{1}{2} v_{ij}^{kl} \Gamma_{ij}^{kl}
+! \end{align*}
+! $h_{ij}$: mono-electronic integral
+! $\gamma_{ij}$: one electron density matrix
+! $v_{ij}^{kl}$: bi-electronic integral
+! $\Gamma_{ij}^{kl}$: two electrons density matrix
+
+! TODO: OMP version
+
+! PROVIDED:
+! | mo_one_e_integrals | double precision | mono-electronic integrals    |
+! | get_two_e_integral | double precision | bi-electronic integrals      |
+! | one_e_dm_mo        | double precision | one electron density matrix  |
+! | two_e_dm_mo        | double precision | two electrons density matrix |
+! | nuclear_repulsion  | double precision | nuclear repulsion            |
+! | mo_num             | integer          | number of MOs                |
+
+! Output:
+! | energy | double precision | state average energy |
+
+! Internal:
+! | mono_e  | double precision | mono-electronic energy       |
+! | bi_e    | double precision | bi-electronic energy         |
+! | i,j,k,l | integer          | indexes to loop over the MOs |
+
+
+subroutine state_average_energy(energy)
+
+  implicit none
+
+  double precision, intent(out) :: energy
+
+  double precision :: get_two_e_integral
+  double precision :: mono_e, bi_e
+  integer :: i,j,k,l
+
+  energy = nuclear_repulsion
+  ! mono electronic part
+  !$OMP PARALLEL DEFAULT(NONE) PRIVATE(i,j,k,l,mono_e, bi_e) &
+  !$OMP SHARED(mo_num, mo_integrals_map, two_e_dm_mo, one_e_dm_mo, energy, &
+  !$OMP       mo_one_e_integrals)
+  mono_e = 0d0
+  !$OMP DO
+  do j = 1, mo_num
+    do i = 1, mo_num
+      mono_e =  mono_e + mo_one_e_integrals(i,j) * one_e_dm_mo(i,j)
+    enddo
+  enddo
+  !$OMP END DO NOWAIT
+
+  ! bi electronic part
+  bi_e = 0d0
+  !$OMP DO
+  do l = 1, mo_num
+    do k = 1, mo_num
+      do j = 1, mo_num
+        do i = 1, mo_num
+          bi_e = bi_e + get_two_e_integral(i,j,k,l,mo_integrals_map) * two_e_dm_mo(i,j,k,l)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  ! State average energy
+  !$OMP CRITICAL
+  energy = energy + mono_e + 0.5d0 * bi_e
+  !$OMP END CRITICAL
+  !$OMP END PARALLEL
+
+  ! Check
+  !call print_energy_components
+
+  print*,'State average energy:', energy
+  !print*,ci_energy
+
+end

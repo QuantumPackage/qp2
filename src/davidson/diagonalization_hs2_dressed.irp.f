@@ -14,15 +14,6 @@ BEGIN_PROVIDER [ character*(64), diag_algorithm ]
   endif
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, threshold_davidson_pt2 ]
- implicit none
- BEGIN_DOC
- ! Threshold of Davidson's algorithm, using PT2 as a guide
- END_DOC
- threshold_davidson_pt2 = threshold_davidson
-
-END_PROVIDER
-
 
 
 BEGIN_PROVIDER [ integer, dressed_column_idx, (N_states) ]
@@ -66,7 +57,7 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
   double precision, allocatable  :: H_jj(:)
 
   double precision, external     :: diag_H_mat_elem, diag_S_mat_elem
-  integer                        :: i,k
+  integer                        :: i,k,l
   ASSERT (N_st > 0)
   ASSERT (sze > 0)
   ASSERT (Nint > 0)
@@ -87,9 +78,14 @@ subroutine davidson_diag_hs2(dets_in,u_in,s2_out,dim_in,energies,sze,N_st,N_st_d
 
   if (dressing_state > 0) then
     do k=1,N_st
+
       do i=1,sze
-        H_jj(i)  += u_in(i,k) * dressing_column_h(i,k)
+        H_jj(i) += u_in(i,k) * dressing_column_h(i,k)
       enddo
+
+      !l = dressed_column_idx(k)
+      !H_jj(l) += u_in(l,k) * dressing_column_h(l,k)
+
     enddo
   endif
 
@@ -290,7 +286,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       ! Small
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
-      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
+!      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
       s_(N_st_diag*itermax,N_st_diag*itermax),                       &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
@@ -344,7 +340,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    do iter=1,itermax-1
+    iter = 0
+    do while (iter < itermax-1)
+      iter += 1
+!    do iter=1,itermax-1
 
       shift  = N_st_diag*(iter-1)
       shift2 = N_st_diag*iter
@@ -434,30 +433,30 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), W, size(W,1),                          &
-          0.d0, h, size(h_p,1))
+          0.d0, h, size(h,1))
       call dgemm('T','N', shift2, shift2, sze,                       &
           1.d0, U, size(U,1), U, size(U,1),                          &
           0.d0, s_tmp, size(s_tmp,1))
 
-      ! Penalty method
-      ! --------------
-
-      if (s2_eig) then
-        h_p = s_
-        do k=1,shift2
-          h_p(k,k) = h_p(k,k) - expected_s2
-        enddo
-        if (only_expected_s2) then
-          alpha = 0.1d0
-          h_p = h + alpha*h_p
-        else
-          alpha = 0.0001d0
-          h_p = h + alpha*h_p
-        endif
-      else
-        h_p = h
-        alpha = 0.d0
-      endif
+!      ! Penalty method
+!      ! --------------
+!
+!      if (s2_eig) then
+!        h_p = s_
+!        do k=1,shift2
+!          h_p(k,k) = h_p(k,k) - expected_s2
+!        enddo
+!        if (only_expected_s2) then
+!          alpha = 0.1d0
+!          h_p = h + alpha*h_p
+!        else
+!          alpha = 0.0001d0
+!          h_p = h + alpha*h_p
+!        endif
+!      else
+!        h_p = h
+!        alpha = 0.d0
+!      endif
 
       ! Diagonalize h_p
       ! ---------------
@@ -466,6 +465,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        double precision, allocatable :: work(:)
 
        y = h
+!       y = h_p   ! Doesn't work for non-singlets
        lwork = -1
        allocate(work(1))
        call dsygv(1,'V','U',shift2,y,size(y,1), &
@@ -476,8 +476,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        call dsygv(1,'V','U',shift2,y,size(y,1), &
           s_tmp,size(s_tmp,1), lambda, work,lwork,info)
        deallocate(work)
-       if (info /= 0) then
-         stop 'DSYGV Diagonalization failed'
+       if (info > 0) then
+         ! Numerical errors propagate. We need to reduce the number of iterations
+         itermax = iter-1
+         exit
        endif
 
       ! Compute Energy for each eigenvector
@@ -614,7 +616,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         !don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,E11.3))') iter-1, to_print(1:3,1:N_st)
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:3,1:N_st)
       endif
 
       ! Check convergence

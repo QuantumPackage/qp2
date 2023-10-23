@@ -22,7 +22,7 @@ jobs:
        - uses: actions/checkout@v3
        - name: Install dependencies
          run: |
-           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config
+           sudo apt install gfortran gcc liblapack-dev libblas-dev wget python3 make m4 pkg-config libhdf5-dev
        - name: zlib
          run: |
               ./configure -i zlib || echo OK
@@ -50,6 +50,15 @@ jobs:
        - name: bats
          run: |
               ./configure -i bats || echo OK
+       - name: trexio-nohdf5
+         run: |
+              ./configure -i trexio-nohdf5 || echo OK
+       - name: trexio
+         run: |
+              ./configure -i trexio || echo OK
+       - name: qmckl
+         run: |
+              ./configure -i qmckl || echo OK
        - name: Final check
          run: |
               ./configure -c config/gfortran_debug.cfg
