@@ -99,6 +99,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
     stop
 
   endif
+  grad = -grad
 
   return
 end subroutine grad1_j12_mu
@@ -486,6 +487,13 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     !!!!!!!!! rho1,rho2,rho1+rho2
     call get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
     rho_tot = rho1 + rho2
+!    if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
+    if(rho_tot.lt.1.d-10)then
+     mu_val = mu_erf 
+     mu_der = 0.d0
+     return
+    endif
+    
     if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
     inv_rho_tot = 1.d0/rho_tot
     ! f(rho) = mu_r_ct * rho**beta_rho_power + mu_erf 
@@ -506,18 +514,26 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     ! d/dx1 f[rho(r1)] = [0.5 alpha / sqrt(rho(r1)) ] (d rho(r1) / dx1)
     !
     ! d/dx1 (rho(r1) f[rho(r1)] = rho(r1) * d/dx1 f[rho(r1)] + f[rho(r1)] * d/dx1 rho(r1)
-     
     !!!!!!!!! rho1,rho2,rho1+rho2
     call get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
     rho_tot = rho1 + rho2
+!    if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
+    if(rho_tot.lt.1.d-10)then
+     mu_val = mu_erf 
+     mu_der = 0.d0
+     return
+    endif
+    
     if(rho_tot.lt.1.d-10)rho_tot = 1.d-10
     inv_rho_tot = 1.d0/rho_tot
-    ! f(rho) = mu_r_ct * rho**beta_rho_power + mu_erf 
-    call get_all_f_rho_simple(rho1,rho2,mu_r_ct,mu_erf,beta_rho_power,f_rho1,d_drho_f_rho1,f_rho2)
+    ! f(rho) = (mu_r_ct* rho)**beta_rho_power * erf(zeta_erf_mu_of_r * rho) + mu_eff * (1 - erf(zeta_erf_mu_of_r*rho))
+    call get_all_f_rho_erf(rho1,rho2,mu_r_ct,beta_rho_power,mu_erf,zeta_erf_mu_of_r,f_rho1,d_drho_f_rho1,f_rho2)
     d_dx1_f_rho1(1:3)   = d_drho_f_rho1 * grad_rho1(1:3)
     d_dx_rho_f_rho(1:3) = rho1 * d_dx1_f_rho1(1:3) + f_rho1 * grad_rho1(1:3)
-    mu_val = 0.5d0 * ( f_rho1 + f_rho2)
-    mu_der(1:3) = d_dx_rho_f_rho(1:3) 
+    nume   = rho1 * f_rho1 + rho2 * f_rho2
+    mu_val = nume * inv_rho_tot
+    mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
+     
   else
     print *, ' j1b_type = ', j1b_type, 'not implemented yet'
     stop
@@ -676,8 +692,17 @@ subroutine get_all_f_rho_simple(rho1,rho2,alpha,mu0,beta,f_rho1,d_drho_f_rho1,f_
  double precision, intent(in) :: rho1,rho2,alpha,mu0,beta
  double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
  double precision :: tmp
- call f_mu_and_deriv_mu_simple(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
- call f_mu_and_deriv_mu_simple(rho2,alpha,mu0,beta,f_rho2,tmp)
+ if(rho1.lt.1.d-10)then
+  f_rho1 = 0.d0
+  d_drho_f_rho1 = 0.d0
+ else
+  call f_mu_and_deriv_mu_simple(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
+ endif
+ if(rho2.lt.1.d-10)then
+  f_rho2 = 0.d0
+ else
+  call f_mu_and_deriv_mu_simple(rho2,alpha,mu0,beta,f_rho2,tmp)
+ endif
 end
 
 subroutine f_mu_and_deriv_mu_simple(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
@@ -691,10 +716,53 @@ subroutine f_mu_and_deriv_mu_simple(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
  END_DOC
  double precision, intent(in)  :: rho,alpha,mu0,beta
  double precision, intent(out) :: f_mu,d_drho_f_mu
- f_mu = alpha * (rho)**beta + mu0 
- d_drho_f_mu = alpha * beta * rho**(beta-1.d0) 
+ f_mu = alpha**beta * (rho)**beta + mu0 
+ d_drho_f_mu = alpha**beta * beta * rho**(beta-1.d0) 
 
 end
 
 ! ---
 
+subroutine f_mu_and_deriv_mu_erf(rho,alpha,zeta,mu0,beta,f_mu,d_drho_f_mu)
+ implicit none
+  include 'constants.include.F'
+ BEGIN_DOC
+! function giving mu as a function of rho
+!
+! f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
+!
+! and its derivative with respect to rho d_drho_f_mu
+!
+! d_drho_f_mu = 2 beta/sqrt(pi) * exp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) 
+!               + alpha * zeta * (alpha *rho)**(zeta-1)  * erf(beta*rho)
+ END_DOC
+ double precision, intent(in)  :: rho,alpha,mu0,beta,zeta
+ double precision, intent(out) :: f_mu,d_drho_f_mu
+ f_mu = (alpha * rho)**zeta * derf(beta * rho) + mu0 * (1.d0 - derf(beta*rho))
+ d_drho_f_mu = 2.d0  * beta * inv_sq_pi * dexp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) & 
+             + alpha * zeta * (alpha *rho)**(zeta-1)  * derf(beta*rho)
+
+end
+
+
+subroutine get_all_f_rho_erf(rho1,rho2,alpha,zeta,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
+ implicit none
+ BEGIN_DOC
+! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+! with f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
+ END_DOC
+ double precision, intent(in) :: rho1,rho2,alpha,mu0,beta,zeta
+ double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
+ double precision :: tmp
+ if(rho1.lt.1.d-10)then
+  f_rho1 = mu_erf
+  d_drho_f_rho1 = 0.d0
+ else
+  call f_mu_and_deriv_mu_erf(rho1,alpha,zeta,mu0,beta,f_rho1,d_drho_f_rho1)
+ endif
+ if(rho2.lt.1.d-10)then
+  f_rho2 = mu_erf
+ else
+  call f_mu_and_deriv_mu_erf(rho2,alpha,zeta,mu0,beta,f_rho2,tmp)
+ endif
+end
