@@ -33,6 +33,8 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
 
   call ezfio_set_file(ezfio_filename)
 
+IRP_IF MACOS
+IRP_ELSE
   ! Adjust out-of-memory killer flag such that the current process will be
   ! killed first by the OOM killer, allowing compute nodes to survive
   integer :: getpid
@@ -40,6 +42,7 @@ BEGIN_PROVIDER [ character*(1024), ezfio_filename ]
   write(pidc,*) getpid()
   write(command,*) 'echo 15 > /proc//'//trim(adjustl(pidc))//'/oom_adj'
   call system(command)
+IRP_ENDIF
 
   PROVIDE file_lock
 
