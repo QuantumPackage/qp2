@@ -579,5 +579,24 @@ logical function is_same_spin(sigma_1, sigma_2)
 end function is_same_spin
 
 ! ---
+   
+function Kronecker_delta(i, j) result(delta)
 
+  BEGIN_DOC
+  ! Kronecker Delta
+  END_DOC
+
+  implicit none
+  integer, intent(in) :: i, j
+  double precision    :: delta
+
+  if(i == j) then
+    delta = 1.d0
+  else
+    delta = 0.d0
+  endif
+
+end function Kronecker_delta
+
+! ---
 

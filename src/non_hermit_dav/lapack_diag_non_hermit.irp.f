@@ -1944,6 +1944,7 @@ subroutine check_orthog(n, m, V, accu_d, accu_nd, S)
 end subroutine check_orthog
 
 ! ---
+
 subroutine reorder_degen_eigvec(n, e0, L0, R0)
 
   implicit none
@@ -1953,7 +1954,7 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
   double precision, intent(inout) :: L0(n,n), R0(n,n)
 
   logical                         :: complex_root
-  integer                         :: i, j, k, m
+  integer                         :: i, j, k, m, ii
   double precision                :: ei, ej, de, de_thr
   double precision                :: accu_d, accu_nd
   integer,          allocatable   :: deg_num(:)
@@ -1986,11 +1987,18 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
     enddo
   enddo
   
+  ii = 0
   do i = 1, n
     if(deg_num(i) .gt. 1) then
       print *, ' degen on', i, deg_num(i), e0(i)
+      ii = ii + 1
     endif
   enddo
+  if(ii .eq. 0) then
+    print*, ' WARNING: bi-orthogonality is lost but there is no degeneracies'
+    print*, ' rotations may change energy'
+  endif
+  print *, ii, ' type of degeneracies'
 
   ! ---
 
@@ -2013,7 +2021,7 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
       print*,'Overlap matrix '
       accu_nd = 0.D0
       do j = 1, m
-       write(*,'(100(F16.10,X))')S(1:m,j)
+       write(*,'(100(F16.10,X))') S(1:m,j)
        do k = 1, m
         if(j==k)cycle
         accu_nd += dabs(S(j,k))
