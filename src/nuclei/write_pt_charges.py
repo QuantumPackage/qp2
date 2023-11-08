@@ -52,7 +52,7 @@ fncharges.write(" "+str(n_charges)+'\n')
 fncharges.close()
 mv_in_ezfio(EZFIO,tmp)
 
-# Write the file containing the charges and set in EZFIO folder 
+# Write the file containing the charges and set in EZFIO folder
 tmp="pts_charge_z"
 fcharges = open(tmp,'w')
 fcharges.write(" 1\n")
