@@ -12,7 +12,7 @@ This basis set correction relies mainy on :
        When HF is a qualitative representation of the electron pairs (i.e. weakly correlated systems), such an approach for \mu(r) is OK. 
        See for instance JPCL, 10, 2931-2937 (2019) for typical flavours of the results. 
        Thanks to the trivial nature of such a two-body rdm, the equation (22) of J. Chem. Phys. 149, 194301 (2018) can be rewritten in a very efficient way, and therefore the limiting factor of such an approach is the AO->MO four-index transformation of the two-electron integrals.  
-    b) "mu_of_r_potential = cas_ful" uses the two-body rdm of CAS-like wave function (i.e. linear combination of Slater determinants developped in an active space with the MOs stored in the EZFIO folder). 
+    b) "mu_of_r_potential = cas_full" uses the two-body rdm of CAS-like wave function (i.e. linear combination of Slater determinants developped in an active space with the MOs stored in the EZFIO folder). 
       If the CAS is properly chosen (i.e. the CAS-like wave function qualitatively represents the wave function of the systems), then such an approach is OK for \mu(r) even in the case of strong correlation. 
 
   +) The use of DFT correlation functionals with multi-determinant reference (Ecmd). These functionals are originally defined in the RS-DFT framework (see for instance Theor.  Chem.  Acc.114,  305(2005)) and design to capture short-range correlation effects. A important quantity arising in the Ecmd is the exact on-top pair density of the system, and the main differences of approximated Ecmd relies on different approximations for the exact on-top pair density.  
