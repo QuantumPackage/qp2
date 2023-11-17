@@ -8,7 +8,7 @@
 !
 !                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,beta} a_{l,beta} a_{k,alpha} |Psi_{istate}>
 !
-! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
 ! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * N_{\beta} * 2
 !
@@ -149,7 +149,7 @@
 !
 !                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,alpha} a^{\dagger}_{j,alpha} a_{l,alpha} a_{k,alpha} |Psi_{istate}>
 !
-! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
 ! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\alpha} * (N_{\alpha} - 1)
 !
@@ -262,7 +262,7 @@
 !
 !                                     = \sum_{istate} w(istate) * <Psi_{istate}| a^{\dagger}_{i,beta} a^{\dagger}_{j,beta} a_{l,beta} a_{k,beta} |Psi_{istate}>
 !
-! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
 ! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{\beta} * (N_{\beta} - 1)
 !
@@ -376,7 +376,7 @@
 !                                     = \sum_{istate} w(istate) * \sum_{sigma,sigma'} <Psi_{istate}| a^{\dagger}_{i,sigma} a^{\dagger'}_{j,sigma} a_{l,sigma'} a_{k,sigma} |Psi_{istate}>
 !
 !
-! WHERE ALL ORBITALS (i,j,k,l) BELONGS TO ALL OCCUPIED ORBITALS : core, inactive and active
+! WHERE ALL ORBITALS (i,j,k,l) BELONG TO ALL OCCUPIED ORBITALS : core, inactive and active
 !
 ! THE NORMALIZATION (i.e. sum of diagonal elements) IS SET TO N_{elec} * (N_{elec} - 1)
 !
@@ -619,3 +619,4 @@
   !$OMP END PARALLEL
 
  END_PROVIDER
+

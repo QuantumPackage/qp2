@@ -199,6 +199,7 @@ END_DOC
   write(6,*)
   if (converged) then
     write(6,*) 'SCF converged'
+    call sleep(1)   ! When too fast, the MOs aren't saved.
   endif
 
 
