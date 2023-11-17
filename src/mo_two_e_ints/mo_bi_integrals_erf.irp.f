@@ -31,36 +31,143 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_erf_in_map ]
 
   PROVIDE mo_class
 
-  real                           :: map_mb
-
   mo_two_e_integrals_erf_in_map = .True.
   if (read_mo_two_e_integrals_erf) then
     print*,'Reading the MO integrals_erf'
     call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints_erf',mo_integrals_erf_map)
     print*, 'MO integrals_erf provided'
     return
-  else
-    PROVIDE ao_two_e_integrals_erf_in_map
   endif
 
-  !  call four_index_transform_block(ao_integrals_erf_map,mo_integrals_erf_map, &
-  !      mo_coef, size(mo_coef,1),                                      &
-  !      1, 1, 1, 1, ao_num, ao_num, ao_num, ao_num,                    &
-  !      1, 1, 1, 1, mo_num, mo_num, mo_num, mo_num)
-   call add_integrals_to_map_erf(full_ijkl_bitmask_4)
-    integer*8                      :: get_mo_erf_map_size, mo_erf_map_size
-    mo_erf_map_size = get_mo_erf_map_size()
+  PROVIDE ao_two_e_integrals_erf_in_map
 
-! print*,'Molecular integrals ERF provided:'
-! print*,' Size of MO ERF map           ', map_mb(mo_integrals_erf_map) ,'MB'
-! print*,' Number of MO ERF integrals: ',  mo_erf_map_size
-  if (write_mo_two_e_integrals_erf) then
+  print *,  ''
+  print *,  'AO -> MO ERF integrals transformation'
+  print *,  '-------------------------------------'
+  print *,  ''
+
+  call wall_time(wall_1)
+  call cpu_time(cpu_1)
+
+      if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
+        call four_idx_dgemm_erf
+      else
+        call add_integrals_to_map_erf(full_ijkl_bitmask_4)
+      endif
+
+  call wall_time(wall_2)
+  call cpu_time(cpu_2)
+
+  integer*8                      :: get_mo_erf_map_size, mo_erf_map_size
+  mo_erf_map_size = get_mo_erf_map_size()
+
+  double precision, external     :: map_mb
+  print*,'Molecular integrals provided:'
+  print*,' Size of MO map           ', map_mb(mo_integrals_erf_map) ,'MB'
+  print*,' Number of MO integrals: ',  mo_erf_map_size
+  print*,' cpu  time :',cpu_2 - cpu_1, 's'
+  print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
+
+  if (write_mo_two_e_integrals_erf.and.mpi_master) then
     call ezfio_set_work_empty(.False.)
     call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints_erf',mo_integrals_erf_map)
-    call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals_erf("Read")
+    call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals_erf('Read')
   endif
 
 END_PROVIDER
+
+subroutine four_idx_dgemm_erf
+  implicit none
+  integer :: p,q,r,s,i,j,k,l
+  double precision, allocatable :: a1(:,:,:,:)
+  double precision, allocatable :: a2(:,:,:,:)
+
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
+
+  allocate (a1(ao_num,ao_num,ao_num,ao_num))
+
+  print *, 'Getting AOs'
+  !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,r,s)
+  do s=1,ao_num
+    do r=1,ao_num
+      do q=1,ao_num
+        call get_ao_two_e_integrals_erf(q,r,s,ao_num,a1(1,q,r,s))
+      enddo
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+
+  print *, '1st transformation'
+  ! 1st transformation
+  allocate (a2(ao_num,ao_num,ao_num,mo_num))
+  call dgemm('T','N', (ao_num*ao_num*ao_num), mo_num, ao_num, 1.d0, a1, ao_num, mo_coef, ao_num, 0.d0, a2, (ao_num*ao_num*ao_num))
+
+  ! 2nd transformation
+  print *, '2nd transformation'
+  deallocate (a1)
+  allocate (a1(ao_num,ao_num,mo_num,mo_num))
+  call dgemm('T','N', (ao_num*ao_num*mo_num), mo_num, ao_num, 1.d0, a2, ao_num, mo_coef, ao_num, 0.d0, a1, (ao_num*ao_num*mo_num))
+
+  ! 3rd transformation
+  print *, '3rd transformation'
+  deallocate (a2)
+  allocate (a2(ao_num,mo_num,mo_num,mo_num))
+  call dgemm('T','N', (ao_num*mo_num*mo_num), mo_num, ao_num, 1.d0, a1, ao_num, mo_coef, ao_num, 0.d0, a2, (ao_num*mo_num*mo_num))
+
+  ! 4th transformation
+  print *, '4th transformation'
+  deallocate (a1)
+  allocate (a1(mo_num,mo_num,mo_num,mo_num))
+  call dgemm('T','N', (mo_num*mo_num*mo_num), mo_num, ao_num, 1.d0, a2, ao_num, mo_coef, ao_num, 0.d0, a1, (mo_num*mo_num*mo_num))
+
+  deallocate (a2)
+
+  integer :: n_integrals, size_buffer
+  integer(key_kind)  , allocatable :: buffer_i(:)
+  real(integral_kind), allocatable :: buffer_value(:)
+  size_buffer = min(ao_num*ao_num*ao_num,16000000)
+
+  !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,l,buffer_value,buffer_i,n_integrals)
+  allocate ( buffer_i(size_buffer), buffer_value(size_buffer) )
+
+  n_integrals = 0
+  !$OMP DO
+  do l=1,mo_num
+    do k=1,mo_num
+      do j=1,l
+        do i=1,k
+            if (abs(a1(i,j,k,l)) < mo_integrals_threshold) then
+              cycle
+            endif
+            n_integrals += 1
+            buffer_value(n_integrals) = a1(i,j,k,l)
+            !DIR$ FORCEINLINE
+            call mo_two_e_integrals_index(i,j,k,l,buffer_i(n_integrals))
+            if (n_integrals == size_buffer) then
+              call map_append(mo_integrals_erf_map, buffer_i, buffer_value, n_integrals)
+              n_integrals = 0
+            endif
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+
+  call map_append(mo_integrals_erf_map, buffer_i, buffer_value, n_integrals)
+
+  deallocate(buffer_i, buffer_value)
+  !$OMP END PARALLEL
+
+  deallocate (a1)
+
+  call map_sort(mo_integrals_erf_map)
+  call map_unique(mo_integrals_erf_map)
+
+end subroutine
+
 
 
  BEGIN_PROVIDER [ double precision, mo_two_e_int_erf_jj_from_ao, (mo_num,mo_num) ]

@@ -23,10 +23,10 @@ cd $StartDir
 
 ############################################################################
 #### EXAMPLE OF SCRIPT TO RUN A CIPSI CALCULATION ON 5 STATES ON THE Ne^+ CATION
-#### USING NATURAL ORBITALS OF A SMALL CIPSI AS MOS 
+#### USING NATURAL ORBITALS OF A SMALL CIPSI AS MOS 
 #### ALL STATES WILL HAVE THE SAME SPIN SIMETRY : A DOUBLET 
 
-####### YOU PUT THE PATH TO YOUR 
+####### YOU PUT THE PATH TO YOUR 
 QP_ROOT=/home_lct/eginer/programs/qp2
 source ${QP_ROOT}/quantum_package.rc 
 ####### YOU LOAD SOME LIBRARIES 

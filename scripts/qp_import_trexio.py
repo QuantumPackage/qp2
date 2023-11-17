@@ -142,6 +142,7 @@ def write_ezfio(trexio_filename, filename):
     try:
         basis_type = trexio.read_basis_type(trexio_file)
 
+        print ("BASIS TYPE: ", basis_type.lower())
         if basis_type.lower() in ["gaussian", "slater"]:
             shell_num   = trexio.read_basis_shell_num(trexio_file)
             prim_num    = trexio.read_basis_prim_num(trexio_file)

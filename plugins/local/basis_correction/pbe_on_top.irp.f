@@ -39,7 +39,7 @@
    grad_rho_a(1:3) = one_e_dm_and_grad_alpha_in_r(1:3,ipoint,istate)
    grad_rho_b(1:3) = one_e_dm_and_grad_beta_in_r(1:3,ipoint,istate)
    
-   if(mu_of_r_potential == "cas_ful")then
+   if(mu_of_r_potential == "cas_full")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
     on_top =  on_top_cas_mu_r(ipoint,istate)
    else
@@ -101,7 +101,7 @@
    grad_rho_a(1:3) = one_e_dm_and_grad_alpha_in_r(1:3,ipoint,istate)
    grad_rho_b(1:3) = one_e_dm_and_grad_beta_in_r(1:3,ipoint,istate)
    
-   if(mu_of_r_potential == "cas_ful")then
+   if(mu_of_r_potential == "cas_full")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
     on_top = on_top_cas_mu_r(ipoint,istate)
    else
@@ -163,7 +163,7 @@
    grad_rho_a(1:3) = one_e_dm_and_grad_alpha_in_r(1:3,ipoint,istate)
    grad_rho_b(1:3) = one_e_dm_and_grad_beta_in_r(1:3,ipoint,istate)
    
-   if(mu_of_r_potential == "cas_ful")then
+   if(mu_of_r_potential == "cas_full")then
     ! You take the on-top of the CAS wave function which is computed with mu(r) 
     on_top = on_top_cas_mu_r(ipoint,istate)
    else

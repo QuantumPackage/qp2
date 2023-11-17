@@ -4,8 +4,8 @@ subroutine print_basis_correction
  provide mu_average_prov
  if(mu_of_r_potential.EQ."hf")then
   provide ecmd_lda_mu_of_r ecmd_pbe_ueg_mu_of_r
- else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated")then
-  provide ecmd_lda_mu_of_r ecmd_pbe_ueg_mu_of_r 
+ else if(mu_of_r_potential.EQ."cas_full".or.mu_of_r_potential.EQ."cas_truncated")then
+  provide ecmd_lda_mu_of_r ecmd_pbe_ueg_mu_of_r
   provide ecmd_pbe_on_top_mu_of_r ecmd_pbe_on_top_su_mu_of_r
  endif
 
@@ -25,7 +25,7 @@ subroutine print_basis_correction
  if(mu_of_r_potential.EQ."hf")then
    print*, ''
    print*,'Using a HF-like two-body density to define mu(r)'
-   print*,'This assumes that HF is a qualitative representation of the wave function ' 
+   print*,'This assumes that HF is a qualitative representation of the wave function '
    print*,'********************************************'
    print*,'Functionals more suited for weak correlation'
    print*,'********************************************'
@@ -38,10 +38,10 @@ subroutine print_basis_correction
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-UEG       , state ',istate,' = ',ecmd_pbe_ueg_mu_of_r(istate)
    enddo
 
-  else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
+  else if(mu_of_r_potential.EQ."cas_full".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
    print*, ''
    print*,'Using a CAS-like two-body density to define mu(r)'
-   print*,'This assumes that the CAS is a qualitative representation of the wave function ' 
+   print*,'This assumes that the CAS is a qualitative representation of the wave function '
    print*,'********************************************'
    print*,'Functionals more suited for weak correlation'
    print*,'********************************************'
@@ -56,14 +56,14 @@ subroutine print_basis_correction
    print*,''
    print*,'********************************************'
    print*,'********************************************'
-   print*,'+) PBE-on-top Ecmd functional : JCP, 152, 174104 (2020) ' 
+   print*,'+) PBE-on-top Ecmd functional : JCP, 152, 174104 (2020) '
    print*,'PBE at mu=0, extrapolated ontop pair density at large mu, usual spin-polarization'
    do istate = 1, N_states
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD PBE-OT        , state ',istate,' = ',ecmd_pbe_on_top_mu_of_r(istate)
    enddo
    print*,''
    print*,'********************************************'
-   print*,'+) PBE-on-top no spin polarization Ecmd functional : JCP, 152, 174104 (2020)' 
+   print*,'+) PBE-on-top no spin polarization Ecmd functional : JCP, 152, 174104 (2020)'
    print*,'PBE at mu=0, extrapolated ontop pair density at large mu, and ZERO SPIN POLARIZATION'
    do istate = 1, N_states
     write(*, '(A29,X,I3,X,A3,X,F16.10)') '  ECMD SU-PBE-OT     , state ',istate,' = ',ecmd_pbe_on_top_su_mu_of_r(istate)
