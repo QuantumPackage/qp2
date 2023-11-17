@@ -445,13 +445,43 @@ END_PROVIDER
            mo_beta = one_e_dm_mo_beta_average(j,i)
            !    if(dabs(dm_mo).le.1.d-10)cycle
            one_e_dm_ao_alpha(l,k) += mo_coef(k,i) * mo_coef(l,j) *  mo_alpha
-           one_e_dm_ao_beta(l,k) += mo_coef(k,i) * mo_coef(l,j)  *  mo_beta
+           one_e_dm_ao_beta(l,k)  += mo_coef(k,i) * mo_coef(l,j) *  mo_beta
          enddo
        enddo
      enddo
    enddo
 
 END_PROVIDER
+
+ BEGIN_PROVIDER [ double precision, one_e_dm_ao_alpha_nstates, (ao_num,ao_num,N_states) ]
+&BEGIN_PROVIDER [ double precision, one_e_dm_ao_beta_nstates, (ao_num,ao_num,N_states) ]
+   BEGIN_DOC
+   ! One body density matrix on the |AO| basis : $\rho_{AO}(\alpha), \rho_{AO}(\beta)$.
+   END_DOC
+   implicit none
+   integer                        :: i,j,k,l,istate
+   double precision               :: mo_alpha,mo_beta
+
+   one_e_dm_ao_alpha_nstates = 0.d0
+   one_e_dm_ao_beta_nstates = 0.d0
+  do istate = 1, N_states
+   do k = 1, ao_num
+     do l = 1, ao_num
+       do i = 1, mo_num
+         do j = 1, mo_num
+           mo_alpha = one_e_dm_mo_alpha(j,i,istate)
+           mo_beta = one_e_dm_mo_beta(j,i,istate)
+           !    if(dabs(dm_mo).le.1.d-10)cycle
+           one_e_dm_ao_alpha_nstates(l,k,istate) += mo_coef(k,i) * mo_coef(l,j) *  mo_alpha
+           one_e_dm_ao_beta_nstates(l,k,istate)  += mo_coef(k,i) * mo_coef(l,j) *  mo_beta
+         enddo
+       enddo
+     enddo
+   enddo
+  enddo
+
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, one_e_dm_ao, (ao_num, ao_num)]
  implicit none
