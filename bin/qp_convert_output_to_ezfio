@@ -260,6 +260,7 @@ def write_ezfio(res, filename):
 
     MoTag = res.determinants_mo_type
     ezfio.set_mo_basis_mo_label('Orthonormalized')
+    ezfio.set_determinants_mo_label('Orthonormalized')
     MO_type = MoTag
     allMOs = res.mo_sets[MO_type]
 
