@@ -600,3 +600,43 @@ end function Kronecker_delta
 
 ! ---
 
+subroutine diagonalize_sym_matrix(N, A, e)
+
+  BEGIN_DOC
+  !
+  ! Diagonalize a symmetric matrix
+  !
+  END_DOC
+
+  implicit none
+
+  integer,          intent(in)    :: N
+  double precision, intent(inout) :: A(N,N)
+  double precision, intent(out)   :: e(N)
+
+  integer                         :: lwork, info
+  double precision, allocatable   :: work(:)
+
+  allocate(work(1))
+
+  lwork = -1
+  call dsyev('V', 'U', N, A, N, e, work, lwork, info)
+  lwork = int(work(1))
+
+  deallocate(work)
+
+  allocate(work(lwork))
+
+  call dsyev('V', 'U', N, A, N, e, work, lwork, info)
+  deallocate(work)
+
+  if(info /= 0) then
+    print*,'Problem in diagonalize_sym_matrix (dsyev)!!'
+  endif
+
+end subroutine diagonalize_sym_matrix
+
+! ---
+
+
+  

@@ -346,7 +346,7 @@ subroutine davidson_general_ext_rout_nonsym_b1space(u_in, H_jj, energies, sze, N
         endif
 
         if(i_omax(l) .ne. l) then
-          print *, ' !!! WARNONG !!!'
+          print *, ' !!! WARNING !!!'
           print *, ' index of state', l, i_omax(l)
         endif
       enddo

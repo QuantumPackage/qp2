@@ -1883,8 +1883,13 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
   enddo
   accu_nd = dsqrt(accu_nd) / dble(m)
 
-  print *, ' accu_nd = ', accu_nd
-  print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
+  if((accu_nd .gt. thr_nd) .or. dabs(accu_d-dble(m))/dble(m) .gt. thr_d) then
+    print *, ' non bi-orthogonal vectors !'
+    print *, ' accu_nd = ', accu_nd
+    print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
+  else
+    print *, ' vectors are bi-orthogonaly'
+  endif
 
   ! ---
 
@@ -1994,10 +1999,13 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
       ii = ii + 1
     endif
   enddo
+
   if(ii .eq. 0) then
     print*, ' WARNING: bi-orthogonality is lost but there is no degeneracies'
     print*, ' rotations may change energy'
+    stop
   endif
+
   print *, ii, ' type of degeneracies'
 
   ! ---
@@ -2018,17 +2026,18 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
       call dgemm( 'T', 'N', m, m, n, 1.d0      &
                 , L, size(L, 1), R, size(R, 1) &
                 , 0.d0, S, size(S, 1) )
-      print*,'Overlap matrix '
-      accu_nd = 0.D0
+
+      print*, 'Overlap matrix '
+      accu_nd = 0.d0
       do j = 1, m
-       write(*,'(100(F16.10,X))') S(1:m,j)
-       do k = 1, m
-        if(j==k)cycle
-        accu_nd += dabs(S(j,k))
-       enddo
+        write(*,'(100(F16.10,X))') S(1:m,j)
+        do k = 1, m
+          if(j==k) cycle
+          accu_nd += dabs(S(j,k))
+        enddo
       enddo
       print*,'accu_nd = ',accu_nd
-!      if(accu_nd .gt.1.d-10)then
+!      if(accu_nd .gt.1.d-10) then
 !        stop
 !      endif
       do j = 1, m
@@ -2036,12 +2045,14 @@ subroutine reorder_degen_eigvec(n, e0, L0, R0)
         R0(1:n,i+j-1) = R(1:n,j)
       enddo
 
-      deallocate(L, R,S)
+      deallocate(L, R, S)
 
     endif
   enddo
 
 end subroutine reorder_degen_eigvec 
+
+! ---
 
 subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
 
@@ -2108,8 +2119,10 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
 
       ! ---
 
-!      call impose_orthog_svd(n, m, L)
       call impose_orthog_svd(n, m, R)
+      L(:,:) = R(:,:)
+
+      !call impose_orthog_svd(n, m, L)
       !call impose_orthog_GramSchmidt(n, m, L)
       !call impose_orthog_GramSchmidt(n, m, R)
 
@@ -2128,8 +2141,8 @@ subroutine impose_biorthog_degen_eigvec(n, e0, L0, R0)
       !call bi_ortho_s_inv_half(m, L, R, S_inv_half)
       !deallocate(S, S_inv_half)
 
-      call impose_biorthog_svd(n, m, L, R)
-!     call impose_biorthog_inverse(n, m, L, R)
+      !call impose_biorthog_svd(n, m, L, R)
+      !call impose_biorthog_inverse(n, m, L, R)
 
       !call impose_biorthog_qr(n, m, thr_d, thr_nd, L, R)
 
