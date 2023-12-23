@@ -127,6 +127,7 @@ def main(arguments):
             l_repository = list(d_tmp.keys())
             if l_repository == []:
                l_result = []
+               l_plugins = []
             else:
                 m_instance = ModuleHandler(l_repository)
                 l_plugins = [module for module in m_instance.l_module]

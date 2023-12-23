@@ -13,6 +13,7 @@ module Determinants_by_hand : sig
       psi_coef               : Det_coef.t array;
       psi_det                : Determinant.t array;
       state_average_weight   : Positive_float.t array;
+      mo_label               : MO_label.t;
     } [@@deriving sexp]
   val read : ?full:bool -> unit -> t option
   val write : ?force:bool -> t -> unit
@@ -34,10 +35,20 @@ end = struct
       psi_coef               : Det_coef.t array;
       psi_det                : Determinant.t array;
       state_average_weight   : Positive_float.t array;
+      mo_label               : MO_label.t;
     } [@@deriving sexp]
   ;;
 
   let get_default = Qpackage.get_ezfio_default "determinants";;
+
+  let read_mo_label () =
+    if not (Ezfio.has_determinants_mo_label ()) then
+      if Ezfio.has_mo_basis_mo_label () then (
+        let label = Ezfio.get_mo_basis_mo_label () in
+        Ezfio.set_determinants_mo_label label) ;
+    Ezfio.get_determinants_mo_label ()
+    |> MO_label.of_string
+  ;;
 
   let read_n_int () =
     if not (Ezfio.has_determinants_n_int()) then
@@ -222,7 +233,7 @@ end = struct
     and n_states =
       States_number.to_int n_states
     in
-    let r = 
+    let r =
       Ezfio.ezfio_array_of_list ~rank:2 ~dim:[| n_det ; n_states |] ~data:c
     in
     Ezfio.set_determinants_psi_coef r;
@@ -283,19 +294,23 @@ end = struct
       |> Array.concat
       |> Array.to_list
     in
-    let r = 
+    let r =
       Ezfio.ezfio_array_of_list ~rank:3 ~dim:[| N_int_number.to_int n_int ; 2 ; Det_number.to_int n_det |] ~data:data
     in
     Ezfio.set_determinants_psi_det r;
     Ezfio.set_determinants_psi_det_qp_edit r
   ;;
 
+  let write_mo_label a =
+    MO_label.to_string a
+    |> Ezfio.set_determinants_mo_label
+
 
   let read ?(full=true) () =
 
     let n_det_qp_edit = read_n_det_qp_edit () in
     let n_det         = read_n_det         () in
-    let read_only = 
+    let read_only =
       if full then false else n_det_qp_edit <> n_det
     in
 
@@ -311,6 +326,7 @@ end = struct
           psi_det                = read_psi_det ~read_only  ()  ;
           n_states               = read_n_states ()             ;
           state_average_weight   = read_state_average_weight () ;
+          mo_label               = read_mo_label () ;
         }
       with _ -> None
     else
@@ -328,6 +344,7 @@ end = struct
       psi_det              ;
       n_states             ;
       state_average_weight ;
+      mo_label             ;
     } =
      write_n_int n_int ;
      write_bit_kind bit_kind;
@@ -340,7 +357,9 @@ end = struct
           write_psi_coef ~n_det:n_det ~n_states:n_states psi_coef ;
           write_psi_det ~n_int:n_int ~n_det:n_det psi_det
         end;
-     write_state_average_weight state_average_weight
+     write_state_average_weight state_average_weight ;
+     write_mo_label mo_label ;
+     ()
   ;;
 
 
@@ -439,7 +458,7 @@ psi_det                = %s
     in
 
     (* Split into header and determinants data *)
-    let idx = 
+    let idx =
       match String_ext.substr_index r ~pos:0 ~pattern:"\nDeterminants" with
       | Some x -> x
       | None -> assert false
@@ -545,6 +564,8 @@ psi_det                = %s
     let bitkind =
       Printf.sprintf "(bit_kind %d)" (Lazy.force Qpackage.bit_kind
       |> Bit_kind.to_int)
+    and mo_label =
+      Printf.sprintf "(mo_label %s)" (MO_label.to_string @@ read_mo_label ())
     and n_int =
       Printf.sprintf "(n_int %d)" (N_int_number.get_max ())
     and n_states =
@@ -553,7 +574,7 @@ psi_det                = %s
       Printf.sprintf "(n_det_qp_edit %d)" (Det_number.to_int @@ read_n_det_qp_edit ())
     in
     let s =
-       String.concat "" [ header ; bitkind ; n_int ; n_states ; psi_coef ; psi_det ; n_det_qp_edit ]
+       String.concat "" [ header ; mo_label ; bitkind ; n_int ; n_states ; psi_coef ; psi_det ; n_det_qp_edit ]
     in
 
 

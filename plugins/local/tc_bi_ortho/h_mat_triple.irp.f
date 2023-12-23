@@ -325,7 +325,7 @@ end
 subroutine triple_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
   use bitmasks
   BEGIN_DOC
-! <key_j | H_tilde | key_i> for triple excitation  
+! <key_j | H_tilde | key_i> for triple excitation  
 !!
 !! WARNING !!
 ! 

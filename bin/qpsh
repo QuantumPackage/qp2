@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export QP_ROOT=$(dirname "$(readlink -f "$0")")/..
+REALPATH=$( cd "$(dirname "$0")" ; pwd -P )
+export QP_ROOT=${REALPATH}/..
 
 bash --init-file <(cat << EOF
     [[ -f /etc/bashrc ]] && source /etc/bashrc 

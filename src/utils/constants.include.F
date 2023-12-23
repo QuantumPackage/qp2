@@ -1,6 +1,6 @@
 integer, parameter :: max_dim = 511
 integer, parameter :: SIMD_vector = 32
-integer, parameter :: N_int_max = 32
+integer, parameter :: N_int_max = 128
 
 double precision, parameter :: pi =  dacos(-1.d0)
 double precision, parameter :: inv_pi =  1.d0/dacos(-1.d0)
