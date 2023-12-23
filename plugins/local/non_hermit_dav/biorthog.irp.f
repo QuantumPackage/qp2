@@ -386,7 +386,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   thr_diag = 1d-06
   thr_norm = 1d+10
-  call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
+  !call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
 
   !
   ! -------------------------------------------------------------------------------------
@@ -479,15 +479,16 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
     return
 
   ! accu_nd is modified after adding the normalization
-  !elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
+  elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
 
-  !  print *, ' lapack vectors are not normalized but bi-orthogonalized'
-  !  call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
+    print *, ' lapack vectors are not normalized but bi-orthogonalized'
+    call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
 
-  !  call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
+    call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .true.)
+    call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
 
-  !  deallocate(S)
-  !  return
+    deallocate(S)
+    return
 
   else
 

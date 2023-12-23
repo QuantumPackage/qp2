@@ -1865,10 +1865,11 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
             , Vl, size(Vl, 1), Vr, size(Vr, 1) &
             , 0.d0, S, size(S, 1) )
 
-  print *, ' overlap matrix:'
-  do i = 1, m
-    write(*,'(1000(F16.10,X))') S(i,:)
-  enddo
+  ! print ca juste s'il y a besoin 
+  !print *, ' overlap matrix:'
+  !do i = 1, m
+  !  write(*,'(1000(F16.10,X))') S(i,:)
+  !enddo
 
   accu_d  = 0.d0
   accu_nd = 0.d0
@@ -1888,7 +1889,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
     print *, ' accu_nd = ', accu_nd
     print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
   else
-    print *, ' vectors are bi-orthogonaly'
+    print *, ' vectors are bi-orthogonals'
   endif
 
   ! ---
