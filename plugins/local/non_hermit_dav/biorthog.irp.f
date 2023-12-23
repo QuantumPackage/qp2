@@ -275,10 +275,11 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   double precision              :: thr, thr_cut, thr_diag, thr_norm
   double precision              :: accu_d, accu_nd
 
-  integer,          allocatable :: list_good(:), iorder(:)
+  integer,          allocatable :: list_good(:), iorder(:), deg_num(:)
   double precision, allocatable :: WR(:), WI(:), VL(:,:), VR(:,:)
   double precision, allocatable :: S(:,:)
   double precision, allocatable  :: phi_1_tilde(:),phi_2_tilde(:),chi_1_tilde(:),chi_2_tilde(:)
+
   allocate(phi_1_tilde(n),phi_2_tilde(n),chi_1_tilde(n),chi_2_tilde(n))
 
 
@@ -496,18 +497,10 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
     ! ---
 
-!   call impose_orthog_degen_eigvec(n, eigval, reigvec)
-!   call impose_orthog_degen_eigvec(n, eigval, leigvec)
-
-    call reorder_degen_eigvec(n, eigval, leigvec, reigvec)
-    call impose_biorthog_degen_eigvec(n, eigval, leigvec, reigvec)
-
-
-    !call impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, eigval, leigvec, reigvec)
-
-    !call impose_unique_biorthog_degen_eigvec(n, eigval, mo_coef, ao_overlap, leigvec, reigvec)
-
-    ! ---
+    allocate(deg_num(n))
+    call reorder_degen_eigvec(n, deg_num, eigval, leigvec, reigvec)
+    call impose_biorthog_degen_eigvec(n, deg_num, eigval, leigvec, reigvec)
+    deallocate(deg_num)
 
     call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .false.)
     if( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv)) .gt. thr_d) ) then
@@ -515,12 +508,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
     endif
     call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .true.)
 
-    !call impose_biorthog_qr(n, n_real_eigv, thr_d, thr_nd, leigvec, reigvec)
-    !call impose_biorthog_lu(n, n_real_eigv, thr_d, thr_nd, leigvec, reigvec)
-
-    ! ---
-
-    call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
+    !call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
 
     deallocate(S)
 
