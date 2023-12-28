@@ -7,6 +7,8 @@ program tc_scf
   END_DOC
 
   implicit none
+  integer :: i
+  logical :: good_angles
 
   write(json_unit,json_array_open_fmt) 'tc-scf'
 
@@ -69,7 +71,16 @@ program tc_scf
       stop
     endif
 
-    call minimize_tc_orb_angles()
+    PROVIDE Fock_matrix_tc_diag_mo_tot
+    print*, ' Eigenvalues:' 
+    do i = 1, mo_num
+      print*, i, Fock_matrix_tc_diag_mo_tot(i)
+    enddo
+
+    ! TODO 
+    ! rotate angles in separate code only if necessary
+    !call minimize_tc_orb_angles()
+    call print_energy_and_mos(good_angles)
 
   endif
 

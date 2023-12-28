@@ -306,11 +306,11 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
 
 
-  print *, ' '
-  print *, ' eigenvalues'
+  !print *, ' '
+  !print *, ' eigenvalues'
   i = 1
   do while(i .le. n)
-    write(*, '(I3,X,1000(F16.10,X))')i, WR(i), WI(i)
+    !write(*, '(I3,X,1000(F16.10,X))')i, WR(i), WI(i)
    if(.false.)then
     if(WI(i).ne.0.d0)then
      print*,'*****************'
@@ -401,7 +401,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !thr    = 100d0
   thr    = Im_thresh_tcscf
   do i = 1, n
-    print*, 'Re(i) + Im(i)', WR(i), WI(i)
+    !print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
