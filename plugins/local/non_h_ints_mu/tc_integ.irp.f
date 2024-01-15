@@ -119,8 +119,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         !$OMP END DO
         !$OMP END PARALLEL
 
-        FREE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
-
       elseif((j2e_type .eq. "rs-dft") .and. (env_type .eq. "sum-gauss")) then
 
         PROVIDE mu_erf
@@ -190,7 +188,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
         PROVIDE elec_num
         PROVIDE ao_overlap
-        PROVIDE j1e_dx j1e_dy j1e_dz
+        PROVIDE j1e_gradx j1e_grady j1e_gradz
 
         tmp_ct = 1.d0 / (dble(elec_num) - 1.d0)
 
@@ -198,12 +196,12 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         !$OMP DEFAULT (NONE)                                 &
         !$OMP PRIVATE (ipoint, i, j, tmp0_x, tmp0_y, tmp0_z) &
         !$OMP SHARED (ao_num, n_points_final_grid, tmp_ct,   &
-        !$OMP         j1e_dx, j1e_dy, j1e_dz, ao_overlap, int2_grad1_u12_ao)
+        !$OMP         j1e_gradx, j1e_grady, j1e_gradz, ao_overlap, int2_grad1_u12_ao)
         !$OMP DO SCHEDULE (static)
         do ipoint = 1, n_points_final_grid
-          tmp0_x = tmp_ct * j1e_dx(ipoint)
-          tmp0_y = tmp_ct * j1e_dy(ipoint)
-          tmp0_z = tmp_ct * j1e_dz(ipoint)
+          tmp0_x = tmp_ct * j1e_gradx(ipoint)
+          tmp0_y = tmp_ct * j1e_grady(ipoint)
+          tmp0_z = tmp_ct * j1e_gradz(ipoint)
           do j = 1, ao_num
             do i = 1, ao_num
               int2_grad1_u12_ao(i,j,ipoint,1) = int2_grad1_u12_ao(i,j,ipoint,1) + tmp0_x * ao_overlap(i,j)
@@ -217,7 +215,13 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       else
 
-        FREE Ir2_rsdft_long_Du_0 Ir2_rsdft_long_Du_x Ir2_rsdft_long_Du_y Ir2_rsdft_long_Du_z Ir2_rsdft_gauss_Du Ir2_rsdft_long_Du_2
+        if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) then
+          FREE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
+        elseif((j2e_type .eq. "rs-dft") .and. (env_type .eq. "prod-gauss")) then
+          FREE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
+        elseif((j2e_type .eq. "rs-dft") .and. (env_type .eq. "sum-gauss")) then
+          FREE Ir2_rsdft_long_Du_0 Ir2_rsdft_long_Du_x Ir2_rsdft_long_Du_y Ir2_rsdft_long_Du_z Ir2_rsdft_gauss_Du Ir2_rsdft_long_Du_2
+        endif
 
       endif ! j1e_type
 
@@ -519,7 +523,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
       PROVIDE elec_num
       PROVIDE ao_overlap
-      PROVIDE j1e_dx j1e_dy j1e_dz
+      PROVIDE j1e_gradx j1e_grady j1e_gradz
 
       tmp_ct1 = 1.0d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
       tmp_ct2 = 1.0d0 / (dble(elec_num) - 1.d0)
@@ -531,7 +535,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       !$OMP         tmp0_x, tmp0_y, tmp0_z)                            &
       !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,    &
       !$OMP         tmp_ct1, tmp_ct2, env_val, env_grad,               &
-      !$OMP         j1e_dx, j1e_dy, j1e_dz,                            &
+      !$OMP         j1e_gradx, j1e_grady, j1e_gradz,                   &
       !$OMP         Ir2_rsdft_long_Du_0, Ir2_rsdft_long_Du_2,          &
       !$OMP         Ir2_rsdft_long_Du_x, Ir2_rsdft_long_Du_y,          &
       !$OMP         Ir2_rsdft_long_Du_z, Ir2_rsdft_gauss_Du,           &
@@ -548,9 +552,9 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         dy1 = env_grad(2,ipoint)
         dz1 = env_grad(3,ipoint)
 
-        dx2 = j1e_dx(ipoint)
-        dy2 = j1e_dy(ipoint)
-        dz2 = j1e_dz(ipoint)
+        dx2 = j1e_gradx(ipoint)
+        dy2 = j1e_grady(ipoint)
+        dz2 = j1e_gradz(ipoint)
 
         dr12 = dx1*dx2 + dy1*dy2 + dz1*dz2
 

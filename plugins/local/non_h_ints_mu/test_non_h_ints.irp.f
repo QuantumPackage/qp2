@@ -26,28 +26,33 @@ program test_non_h
   
   !call test_v_ij_u_cst_mu_env_an()
 
-  call test_int2_grad1_u12_square_ao()
-  call test_int2_grad1_u12_ao()
+  !call test_int2_grad1_u12_square_ao()
+  !call test_int2_grad1_u12_ao()
+
+  call test_j1e_grad()
 end
 
 ! ---
 
 subroutine routine_fit
- implicit none
- integer :: i,nx
- double precision :: dx,xmax,x,j_mu,j_mu_F_x_j,j_mu_fit_gauss
- nx = 500
- xmax = 5.d0
- dx = xmax/dble(nx)
- x = 0.d0
- print*,'coucou',mu_erf
- do i = 1, nx
-  write(33,'(100(F16.10,X))') x,j_mu(x),j_mu_F_x_j(x),j_mu_fit_gauss(x)
-  x += dx
- enddo
+
+  implicit none
+  integer :: i,nx
+  double precision :: dx,xmax,x,j_mu,j_mu_F_x_j,j_mu_fit_gauss
+ 
+  nx = 500
+  xmax = 5.d0
+  dx = xmax/dble(nx)
+  x = 0.d0
+  print*,'coucou',mu_erf
+  do i = 1, nx
+    write(33,'(100(F16.10,X))') x,j_mu(x),j_mu_F_x_j(x),j_mu_fit_gauss(x)
+    x += dx
+  enddo
 
 end
 
+! ---
 
 subroutine test_ipp()
 
@@ -561,7 +566,7 @@ subroutine test_int2_grad1_u12_square_ao()
   print*, ' accuracy(%) = ', 100.d0 * accu / norm
 
   return
-end subroutine test_int2_grad1_u12_square_ao
+end
 
 ! ---
 
@@ -605,7 +610,108 @@ subroutine test_int2_grad1_u12_ao()
   print*, ' accuracy(%) = ', 100.d0 * accu / norm
 
   return
-end subroutine test_int2_grad1_u12_ao
+end
+
+! ---
+
+subroutine test_j1e_grad()
+
+  implicit none
+  integer                       :: i, j, ipoint
+  double precision              :: g
+  double precision              :: x_loops, x_dgemm, diff, thr, accu, norm
+  double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
+  double precision, allocatable :: x(:), y(:), z(:)
+  
+  PROVIDE int2_grad1_u2b_ao
+  PROVIDE mo_coef
+
+  allocate(Pa(ao_num,ao_num), Pb(ao_num,ao_num), Pt(ao_num,ao_num))
+
+  call dgemm( 'N', 'T', ao_num, ao_num, elec_alpha_num, 1.d0       &
+            , mo_coef, size(mo_coef, 1), mo_coef, size(mo_coef, 1) &
+            , 0.d0, Pa, size(Pa, 1))
+
+  if(elec_alpha_num .eq. elec_beta_num) then
+    Pb = Pa
+  else
+    call dgemm( 'N', 'T', ao_num, ao_num, elec_beta_num, 1.d0        &
+              , mo_coef, size(mo_coef, 1), mo_coef, size(mo_coef, 1) &
+              , 0.d0, Pb, size(Pb, 1))
+  endif
+  Pt = Pa + Pa
+
+
+  g = 0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
+
+  allocate(x(n_points_final_grid), y(n_points_final_grid), z(n_points_final_grid))
+
+  do ipoint = 1, n_points_final_grid
+    x(ipoint) = 0.d0
+    y(ipoint) = 0.d0
+    z(ipoint) = 0.d0
+    do i = 1, ao_num
+      do j = 1, ao_num
+        x(ipoint) = x(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,1)
+        y(ipoint) = y(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,2)
+        z(ipoint) = z(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,3)
+      enddo
+    enddo
+  enddo
+
+  deallocate(Pa, Pb, Pt)
+
+  ! ---
+
+  thr  = 1d-10
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+
+    x_loops = x        (ipoint)
+    x_dgemm = j1e_gradx(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    if(diff .gt. thr) then
+      print *, ' problem in j1e_gradx on:', ipoint
+      print *, ' loops :', x_loops
+      print *, ' dgemm :', x_dgemm
+      stop
+    endif
+    accu += diff
+    norm += dabs(x_loops)
+
+    x_loops = y        (ipoint)
+    x_dgemm = j1e_grady(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    if(diff .gt. thr) then
+      print *, ' problem in j1e_grady on:', ipoint
+      print *, ' loops :', x_loops
+      print *, ' dgemm :', x_dgemm
+      stop
+    endif
+    accu += diff
+    norm += dabs(x_loops)
+
+    x_loops = z        (ipoint)
+    x_dgemm = j1e_gradz(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    if(diff .gt. thr) then
+      print *, ' problem in j1e_gradz on:', ipoint
+      print *, ' loops :', x_loops
+      print *, ' dgemm :', x_dgemm
+      stop
+    endif
+    accu += diff
+    norm += dabs(x_loops)
+
+  enddo
+
+  deallocate(x, y, z)
+
+  print*, ' accuracy(%) = ', 100.d0 * accu / norm
+
+  return
+end
 
 ! ---
 
