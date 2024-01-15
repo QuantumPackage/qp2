@@ -45,7 +45,6 @@ program test_ints
 !!PROVIDE TC_HF_energy VARTC_HF_energy
 !!print *, '    TC_HF_energy = ',    TC_HF_energy
 !!print *, ' VARTC_HF_energy = ', VARTC_HF_energy
-! call test_old_ints
 
   call test_fock_3e_uhf_mo_cs()
   call test_fock_3e_uhf_mo_a()
@@ -795,41 +794,6 @@ subroutine test_two_e_tc_non_hermit_integral()
 end
 
 ! ---
-
-subroutine test_old_ints
- implicit none
- integer :: i,j,k,l
- double precision :: old, new, contrib, get_ao_tc_sym_two_e_pot
- double precision :: integral_sym , integral_nsym,accu
-    PROVIDE ao_tc_sym_two_e_pot_in_map
- accu = 0.d0
- do j = 1, ao_num
-  do l= 1, ao_num
-   do i = 1, ao_num
-    do k = 1, ao_num
-!      integral_sym  = get_ao_tc_sym_two_e_pot(i, j, k, l, ao_tc_sym_two_e_pot_map)
-      ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
-!      integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
-!      old = integral_sym + integral_nsym 
-      new = ao_tc_int_chemist_test(k,i,l,j)
-      old = ao_tc_int_chemist_no_cycle(k,i,l,j)
-      contrib = dabs(old - new)
-      if(contrib.gt.1.d-6)then
-       print*,'problem !!'
-       print*,i,j,k,l
-       print*,old, new, contrib
-      endif
-       accu += contrib
-    enddo
-   enddo
-  enddo
- enddo
- print*,'******'
- print*,'******'
- print*,'in test_old_ints'
- print*,'accu = ',accu/dble(ao_num**4)
-
-end
 
 subroutine test_int2_grad1_u12_ao_test
  implicit none

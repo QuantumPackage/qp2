@@ -7,8 +7,7 @@ subroutine get_grad1_u12_withsq_r1_seq(r1, n_grid2, resx, resy, resz, res)
   ! 
   ! grad_1 u(r1,r2)
   !
-  ! this will be integrated numerically over r2:
-  !   we use grid for r1 and extra_grid for r2
+  ! we use grid for r1 and extra_grid for r2
   !
   END_DOC
 
@@ -29,13 +28,11 @@ subroutine get_grad1_u12_withsq_r1_seq(r1, n_grid2, resx, resy, resz, res)
   PROVIDE final_grid_points_extra
 
   if( ((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) .or. &
-       (j2e_type .eq. "rs-dft-murho") ) then
+      (j2e_type .eq. "rs-dft-murho") ) then
 
     call grad1_j12_mu_r1_seq(r1, n_grid2, resx, resy, resz)
     do jpoint = 1, n_points_extra_final_grid
-      res(jpoint) = resx(jpoint) * resx(jpoint) &
-                  + resy(jpoint) * resy(jpoint) &
-                  + resz(jpoint) * resz(jpoint)
+      res(jpoint) = resx(jpoint) * resx(jpoint) + resy(jpoint) * resy(jpoint) + resz(jpoint) * resz(jpoint)
     enddo
 
   elseif((j2e_type .eq. "rs-dft") .and. (env_type .ne. "none")) then
@@ -60,9 +57,7 @@ subroutine get_grad1_u12_withsq_r1_seq(r1, n_grid2, resx, resy, resz, res)
       resx(jpoint) = (gradx1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(1)) * env_r2(jpoint)
       resy(jpoint) = (grady1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(2)) * env_r2(jpoint)
       resz(jpoint) = (gradz1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(3)) * env_r2(jpoint)
-      res (jpoint) = resx(jpoint) * resx(jpoint) &
-                   + resy(jpoint) * resy(jpoint) &
-                   + resz(jpoint) * resz(jpoint)
+      res (jpoint) = resx(jpoint) * resx(jpoint) + resy(jpoint) * resy(jpoint) + resz(jpoint) * resz(jpoint)
     enddo
 
     deallocate(env_r2, u2b_r12, gradx1_u2b, grady1_u2b, gradz1_u2b)

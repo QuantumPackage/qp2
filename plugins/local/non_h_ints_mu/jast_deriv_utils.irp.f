@@ -161,7 +161,7 @@ double precision function env_nucl(r)
 
   else
 
-    print *, ' Error in grad1_env_nucl: Unknown env_type = ', env_type
+    print *, ' Error in env_nucl: Unknown env_type = ', env_type
     stop
 
   endif
@@ -230,7 +230,7 @@ double precision function env_nucl_square(r)
 
   else
 
-    print *, ' Error in grad1_env_nucl: Unknown env_type = ', env_type
+    print *, ' Error in env_nucl_square: Unknown env_type = ', env_type
     stop
 
   endif
