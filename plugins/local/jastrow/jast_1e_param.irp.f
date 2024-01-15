@@ -20,7 +20,7 @@
   ! ---
 
   if (mpi_master) then
-    call ezfio_has_hamiltonian_j1e_expo(exists)
+    call ezfio_has_jastrow_j1e_expo(exists)
   endif
 
   IRP_IF MPI_DEBUG
@@ -39,7 +39,7 @@
   if (exists) then
     if (mpi_master) then
       write(6,'(A)') '.. >>>>> [ IO READ: j1e_expo ] <<<<< ..'
-      call ezfio_get_hamiltonian_j1e_expo(j1e_expo)
+      call ezfio_get_jastrow_j1e_expo(j1e_expo)
       IRP_IF MPI
         call MPI_BCAST(j1e_expo, (j1e_size*nucl_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
         if (ierr /= MPI_SUCCESS) then
@@ -54,7 +54,7 @@
   ! ---
 
   if (mpi_master) then
-    call ezfio_has_hamiltonian_j1e_coef(exists)
+    call ezfio_has_jastrow_j1e_coef(exists)
   endif
 
   IRP_IF MPI_DEBUG
@@ -72,7 +72,7 @@
   if (exists) then
     if (mpi_master) then
       write(6,'(A)') '.. >>>>> [ IO READ: j1e_coef ] <<<<< ..'
-      call ezfio_get_hamiltonian_j1e_coef(j1e_coef)
+      call ezfio_get_jastrow_j1e_coef(j1e_coef)
       IRP_IF MPI
         call MPI_BCAST(j1e_coef, (j1e_size*nucl_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
         if (ierr /= MPI_SUCCESS) then

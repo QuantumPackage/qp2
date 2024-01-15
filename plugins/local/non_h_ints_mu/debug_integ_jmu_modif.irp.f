@@ -29,7 +29,7 @@ program debug_integ_jmu_modif
   !call test_vect_overlap_gauss_r12_ao()
   !call test_vect_overlap_gauss_r12_ao_with1s()
 
-  !call test_Ir2_LinFcRSDFT_long_Du_0()
+  !call test_Ir2_rsdft_long_Du_0()
 
 end
 
@@ -731,17 +731,17 @@ end
 
 ! ---
 
-subroutine test_Ir2_LinFcRSDFT_long_Du_0()
+subroutine test_Ir2_rsdft_long_Du_0()
 
   implicit none
   integer          :: i, j, ipoint
   double precision :: i_old, i_new
   double precision :: acc_ij, acc_tot, eps_ij, normalz
 
-  print*, ' test_Ir2_LinFcRSDFT_long_Du_0 ...'
+  print*, ' test_Ir2_rsdft_long_Du_0 ...'
 
   PROVIDE v_ij_erf_rk_cst_mu_env
-  PROVIDE Ir2_LinFcRSDFT_long_Du_0
+  PROVIDE Ir2_rsdft_long_Du_0
 
   eps_ij  = 1d-10
   acc_tot = 0.d0
@@ -751,12 +751,12 @@ subroutine test_Ir2_LinFcRSDFT_long_Du_0()
     do j = 1, ao_num
       do i = 1, ao_num
 
-        i_old = v_ij_erf_rk_cst_mu_env  (i,j,ipoint)
-        i_new = Ir2_LinFcRSDFT_long_Du_0(i,j,ipoint)
+        i_old = v_ij_erf_rk_cst_mu_env(i,j,ipoint)
+        i_new = Ir2_rsdft_long_Du_0   (i,j,ipoint)
 
         acc_ij = dabs(i_old - i_new)
         if(acc_ij .gt. eps_ij) then
-          print *, ' problem in Ir2_LinFcRSDFT_long_Du_0 on', i, j, ipoint
+          print *, ' problem in Ir2_rsdft_long_Du_0 on', i, j, ipoint
           print *, ' old integ = ', i_old
           print *, ' new integ = ', i_new
           print *, ' diff      = ', acc_ij

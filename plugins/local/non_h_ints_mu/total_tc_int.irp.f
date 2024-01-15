@@ -36,6 +36,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   double precision, allocatable :: b_mat(:,:,:,:), c_mat(:,:,:)
   double precision, external    :: get_ao_two_e_integral
 
+  PROVIDe tc_integ_type
   PROVIDE env_type
   PROVIDE j2e_type
   PROVIDE j1e_type

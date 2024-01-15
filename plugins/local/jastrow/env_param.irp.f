@@ -18,7 +18,7 @@
   ! ---
 
   if (mpi_master) then
-    call ezfio_has_hamiltonian_env_expo(exists)
+    call ezfio_has_jastrow_env_expo(exists)
   endif
 
   IRP_IF MPI_DEBUG
@@ -37,7 +37,7 @@
   if (exists) then
     if (mpi_master) then
       write(6,'(A)') '.. >>>>> [ IO READ: env_expo ] <<<<< ..'
-      call ezfio_get_hamiltonian_env_expo(env_expo)
+      call ezfio_get_jastrow_env_expo(env_expo)
       IRP_IF MPI
         call MPI_BCAST(env_expo, (nucl_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
         if (ierr /= MPI_SUCCESS) then
@@ -54,7 +54,7 @@
   ! ---
 
   if (mpi_master) then
-    call ezfio_has_hamiltonian_env_coef(exists)
+    call ezfio_has_jastrow_env_coef(exists)
   endif
 
   IRP_IF MPI_DEBUG
@@ -72,7 +72,7 @@
   if (exists) then
     if (mpi_master) then
       write(6,'(A)') '.. >>>>> [ IO READ: env_coef ] <<<<< ..'
-      call ezfio_get_hamiltonian_env_coef(env_coef)
+      call ezfio_get_jastrow_env_coef(env_coef)
       IRP_IF MPI
         call MPI_BCAST(env_coef, (nucl_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
         if (ierr /= MPI_SUCCESS) then

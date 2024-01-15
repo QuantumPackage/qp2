@@ -125,22 +125,22 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
         PROVIDE mu_erf
         PROVIDE env_type env_val env_grad
-        PROVIDE Ir2_LinFcRSDFT_long_Du_0 Ir2_LinFcRSDFT_long_Du_x Ir2_LinFcRSDFT_long_Du_y Ir2_LinFcRSDFT_long_Du_z Ir2_LinFcRSDFT_long_Du_2
-        PROVIDE Ir2_LinFcRSDFT_gauss_Du
+        PROVIDE Ir2_rsdft_long_Du_0 Ir2_rsdft_long_Du_x Ir2_rsdft_long_Du_y Ir2_rsdft_long_Du_z Ir2_rsdft_long_Du_2
+        PROVIDE Ir2_rsdft_gauss_Du
 
         tmp_ct = 0.5d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
 
         int2_grad1_u12_ao = 0.d0
 
-        !$OMP PARALLEL                                                     &
-        !$OMP DEFAULT (NONE)                                               &
-        !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx, dy, dz, tmp1, tmp2,  & 
-        !$OMP         tmp0_x, tmp0_y, tmp0_z, tmp1_x, tmp1_y, tmp1_z)      &
-        !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,      &
-        !$OMP         tmp_ct, env_val, env_grad, Ir2_LinFcRSDFT_long_Du_0, &
-        !$OMP         Ir2_LinFcRSDFT_long_Du_x, Ir2_LinFcRSDFT_long_Du_y,  &
-        !$OMP         Ir2_LinFcRSDFT_long_Du_z, Ir2_LinFcRSDFT_gauss_Du,   &
-        !$OMP         Ir2_LinFcRSDFT_long_Du_2, int2_grad1_u12_ao)
+        !$OMP PARALLEL                                                    &
+        !$OMP DEFAULT (NONE)                                              &
+        !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx, dy, dz, tmp1, tmp2, & 
+        !$OMP         tmp0_x, tmp0_y, tmp0_z, tmp1_x, tmp1_y, tmp1_z)     &
+        !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,     &
+        !$OMP         tmp_ct, env_val, env_grad, Ir2_rsdft_long_Du_0,     &
+        !$OMP         Ir2_rsdft_long_Du_x, Ir2_rsdft_long_Du_y,           &
+        !$OMP         Ir2_rsdft_long_Du_z, Ir2_rsdft_gauss_Du,            &
+        !$OMP         Ir2_rsdft_long_Du_2, int2_grad1_u12_ao)
         !$OMP DO SCHEDULE (static)
         do ipoint = 1, n_points_final_grid
 
@@ -166,11 +166,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
           do j = 1, ao_num
             do i = 1, ao_num
   
-              tmp2 = 0.5d0 * Ir2_LinFcRSDFT_long_Du_2(i,j,ipoint) - x * Ir2_LinFcRSDFT_long_Du_x(i,j,ipoint) - y * Ir2_LinFcRSDFT_long_Du_y(i,j,ipoint) - z * Ir2_LinFcRSDFT_long_Du_z(i,j,ipoint)
+              tmp2 = 0.5d0 * Ir2_rsdft_long_Du_2(i,j,ipoint) - x * Ir2_rsdft_long_Du_x(i,j,ipoint) - y * Ir2_rsdft_long_Du_y(i,j,ipoint) - z * Ir2_rsdft_long_Du_z(i,j,ipoint)
 
-              int2_grad1_u12_ao(i,j,ipoint,1) = -Ir2_LinFcRSDFT_long_Du_0(i,j,ipoint) * tmp0_x + tmp1 * Ir2_LinFcRSDFT_long_Du_x(i,j,ipoint) - dx * tmp2 + tmp1_x * Ir2_LinFcRSDFT_gauss_Du(i,j,ipoint)
-              int2_grad1_u12_ao(i,j,ipoint,2) = -Ir2_LinFcRSDFT_long_Du_0(i,j,ipoint) * tmp0_y + tmp1 * Ir2_LinFcRSDFT_long_Du_y(i,j,ipoint) - dy * tmp2 + tmp1_y * Ir2_LinFcRSDFT_gauss_Du(i,j,ipoint)
-              int2_grad1_u12_ao(i,j,ipoint,3) = -Ir2_LinFcRSDFT_long_Du_0(i,j,ipoint) * tmp0_z + tmp1 * Ir2_LinFcRSDFT_long_Du_z(i,j,ipoint) - dz * tmp2 + tmp1_z * Ir2_LinFcRSDFT_gauss_Du(i,j,ipoint)
+              int2_grad1_u12_ao(i,j,ipoint,1) = -Ir2_rsdft_long_Du_0(i,j,ipoint) * tmp0_x + tmp1 * Ir2_rsdft_long_Du_x(i,j,ipoint) - dx * tmp2 + tmp1_x * Ir2_rsdft_gauss_Du(i,j,ipoint)
+              int2_grad1_u12_ao(i,j,ipoint,2) = -Ir2_rsdft_long_Du_0(i,j,ipoint) * tmp0_y + tmp1 * Ir2_rsdft_long_Du_y(i,j,ipoint) - dy * tmp2 + tmp1_y * Ir2_rsdft_gauss_Du(i,j,ipoint)
+              int2_grad1_u12_ao(i,j,ipoint,3) = -Ir2_rsdft_long_Du_0(i,j,ipoint) * tmp0_z + tmp1 * Ir2_rsdft_long_Du_z(i,j,ipoint) - dz * tmp2 + tmp1_z * Ir2_rsdft_gauss_Du(i,j,ipoint)
             enddo
           enddo
         enddo
@@ -217,7 +217,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       else
 
-        FREE Ir2_LinFcRSDFT_long_Du_0 Ir2_LinFcRSDFT_long_Du_x Ir2_LinFcRSDFT_long_Du_y Ir2_LinFcRSDFT_long_Du_z Ir2_LinFcRSDFT_gauss_Du Ir2_LinFcRSDFT_long_Du_2
+        FREE Ir2_rsdft_long_Du_0 Ir2_rsdft_long_Du_x Ir2_rsdft_long_Du_y Ir2_rsdft_long_Du_z Ir2_rsdft_gauss_Du Ir2_rsdft_long_Du_2
 
       endif ! j1e_type
 
@@ -440,28 +440,28 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 !
 !      PROVIDE mu_erf
 !      PROVIDE env_val env_grad
-!      PROVIDE Ir2_LinFcRSDFT_short_Du2_0 Ir2_LinFcRSDFT_short_Du2_x Ir2_LinFcRSDFT_short_Du2_y Ir2_LinFcRSDFT_short_Du2_z Ir2_LinFcRSDFT_short_Du2_2
-!      PROVIDE Ir2_LinFcRSDFT_long_Du2_0 Ir2_LinFcRSDFT_long_Du2_x Ir2_LinFcRSDFT_long_Du2_y Ir2_LinFcRSDFT_long_Du2_z Ir2_LinFcRSDFT_long_Du2_2
-!      PROVIDE Ir2_LinFcRSDFT_gauss_Du2
+!      PROVIDE Ir2_rsdft_short_Du2_0 Ir2_rsdft_short_Du2_x Ir2_rsdft_short_Du2_y Ir2_rsdft_short_Du2_z Ir2_rsdft_short_Du2_2
+!      PROVIDE Ir2_rsdft_long_Du2_0 Ir2_rsdft_long_Du2_x Ir2_rsdft_long_Du2_y Ir2_rsdft_long_Du2_z Ir2_rsdft_long_Du2_2
+!      PROVIDE Ir2_rsdft_gauss_Du2
 !
 !      tmp_ct  = 1.d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
 !      tmp_ct2 = tmp_ct * tmp_ct
 !
 !      int2_grad1_u12_square_ao = 0.d0
 !
-!      !$OMP PARALLEL                                                        &
-!      !$OMP DEFAULT (NONE)                                                  &
-!      !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx, dy, dz, dr2,            &
-!      !$OMP         tmp1, tmp2, tmp3, tmp4, tmp5, tmp6,                     & 
-!      !$OMP         tmp0_x, tmp0_y, tmp0_z, tmp1_x, tmp1_y, tmp1_z)         &
-!      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,         &
-!      !$OMP         tmp_ct, tmp_ct2, env_val, env_grad,                     &
-!      !$OMP         Ir2_LinFcRSDFT_long_Du2_0, Ir2_LinFcRSDFT_long_Du2_x,   & 
-!      !$OMP         Ir2_LinFcRSDFT_long_Du2_y, Ir2_LinFcRSDFT_long_Du2_z,   &
-!      !$OMP         Ir2_LinFcRSDFT_gauss_Du2, Ir2_LinFcRSDFT_long_Du2_2,    &
-!      !$OMP         Ir2_LinFcRSDFT_short_Du2_0, Ir2_LinFcRSDFT_short_Du2_x, &
-!      !$OMP         Ir2_LinFcRSDFT_short_Du2_y, Ir2_LinFcRSDFT_short_Du2_z, &
-!      !$OMP         Ir2_LinFcRSDFT_short_Du2_2, int2_grad1_u12_square_ao)
+!      !$OMP PARALLEL                                                &
+!      !$OMP DEFAULT (NONE)                                          &
+!      !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx, dy, dz, dr2,    &
+!      !$OMP         tmp1, tmp2, tmp3, tmp4, tmp5, tmp6,             & 
+!      !$OMP         tmp0_x, tmp0_y, tmp0_z, tmp1_x, tmp1_y, tmp1_z) &
+!      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points, &
+!      !$OMP         tmp_ct, tmp_ct2, env_val, env_grad,             &
+!      !$OMP         Ir2_rsdft_long_Du2_0, Ir2_rsdft_long_Du2_x,     &
+!      !$OMP         Ir2_rsdft_long_Du2_y, Ir2_rsdft_long_Du2_z,     &
+!      !$OMP         Ir2_rsdft_gauss_Du2, Ir2_rsdft_long_Du2_2,      &
+!      !$OMP         Ir2_rsdft_short_Du2_0, Ir2_rsdft_short_Du2_x,   &
+!      !$OMP         Ir2_rsdft_short_Du2_y, Ir2_rsdft_short_Du2_z,   &
+!      !$OMP         Ir2_rsdft_short_Du2_2, int2_grad1_u12_square_ao)
 !      !$OMP DO SCHEDULE (static)
 !      do ipoint = 1, n_points_final_grid
 !
@@ -492,12 +492,12 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 !        do j = 1, ao_num
 !          do i = 1, ao_num
 !
-!            tmp2 = tmp1_x * Ir2_LinFcRSDFT_long_Du2_x (i,j,ipoint) + tmp1_y * Ir2_LinFcRSDFT_long_Du2_y (i,j,ipoint) + tmp1_z * Ir2_LinFcRSDFT_long_Du2_z (i,j,ipoint) &
-!                 - tmp0_x * Ir2_LinFcRSDFT_short_Du2_x(i,j,ipoint) - tmp0_y * Ir2_LinFcRSDFT_short_Du2_y(i,j,ipoint) - tmp0_z * Ir2_LinFcRSDFT_short_Du2_z(i,j,ipoint)
+!            tmp2 = tmp1_x * Ir2_rsdft_long_Du2_x (i,j,ipoint) + tmp1_y * Ir2_rsdft_long_Du2_y (i,j,ipoint) + tmp1_z * Ir2_rsdft_long_Du2_z (i,j,ipoint) &
+!                 - tmp0_x * Ir2_rsdft_short_Du2_x(i,j,ipoint) - tmp0_y * Ir2_rsdft_short_Du2_y(i,j,ipoint) - tmp0_z * Ir2_rsdft_short_Du2_z(i,j,ipoint)
 !
-!            int2_grad1_u12_square_ao(i,j,ipoint) = tmp1 * Ir2_LinFcRSDFT_short_Du2_0(i,j,ipoint) + tmp2 + tmp3 * Ir2_LinFcRSDFT_short_Du2_2(i,j,ipoint) &
-!                                                 + tmp4 * Ir2_LinFcRSDFT_gauss_Du2(i,j,ipoint) - tmp5 * Ir2_LinFcRSDFT_long_Du2_0(i,j,ipoint)           &
-!                                                 - tmp6 * Ir2_LinFcRSDFT_long_Du2_2(i,j,ipoint)
+!            int2_grad1_u12_square_ao(i,j,ipoint) = tmp1 * Ir2_rsdft_short_Du2_0(i,j,ipoint) + tmp2 + tmp3 * Ir2_rsdft_short_Du2_2(i,j,ipoint) &
+!                                                 + tmp4 * Ir2_rsdft_gauss_Du2(i,j,ipoint) - tmp5 * Ir2_rsdft_long_Du2_0(i,j,ipoint)           &
+!                                                 - tmp6 * Ir2_rsdft_long_Du2_2(i,j,ipoint)
 !          enddo
 !        enddo
 !      enddo
@@ -524,17 +524,17 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       tmp_ct1 = 1.0d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
       tmp_ct2 = 1.0d0 / (dble(elec_num) - 1.d0)
 
-      !$OMP PARALLEL                                                    &
-      !$OMP DEFAULT (NONE)                                              &
-      !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx1, dy1, dz1,          &
-      !$OMP         dx2, dy2, dz2, dr12, tmp0, tmp1, tmp2, tmp3, tmp4,  & 
-      !$OMP         tmp0_x, tmp0_y, tmp0_z)                             &
-      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,     &
-      !$OMP         tmp_ct1, tmp_ct2, env_val, env_grad,                &
-      !$OMP         j1e_dx, j1e_dy, j1e_dz,                             &
-      !$OMP         Ir2_LinFcRSDFT_long_Du_0, Ir2_LinFcRSDFT_long_Du_2, &
-      !$OMP         Ir2_LinFcRSDFT_long_Du_x, Ir2_LinFcRSDFT_long_Du_y, &
-      !$OMP         Ir2_LinFcRSDFT_long_Du_z, Ir2_LinFcRSDFT_gauss_Du,  &
+      !$OMP PARALLEL                                                   &
+      !$OMP DEFAULT (NONE)                                             &
+      !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx1, dy1, dz1,         &
+      !$OMP         dx2, dy2, dz2, dr12, tmp0, tmp1, tmp2, tmp3, tmp4, & 
+      !$OMP         tmp0_x, tmp0_y, tmp0_z)                            &
+      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,    &
+      !$OMP         tmp_ct1, tmp_ct2, env_val, env_grad,               &
+      !$OMP         j1e_dx, j1e_dy, j1e_dz,                            &
+      !$OMP         Ir2_rsdft_long_Du_0, Ir2_rsdft_long_Du_2,          &
+      !$OMP         Ir2_rsdft_long_Du_x, Ir2_rsdft_long_Du_y,          &
+      !$OMP         Ir2_rsdft_long_Du_z, Ir2_rsdft_gauss_Du,           &
       !$OMP         ao_overlap, int2_grad1_u12_square_ao)
       !$OMP DO SCHEDULE (static)
       do ipoint = 1, n_points_final_grid
@@ -566,11 +566,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         do j = 1, ao_num
           do i = 1, ao_num
   
-            tmp4 = tmp0_x * Ir2_LinFcRSDFT_long_Du_x(i,j,ipoint) + tmp0_y * Ir2_LinFcRSDFT_long_Du_y(i,j,ipoint) + tmp0_z * Ir2_LinFcRSDFT_long_Du_z(i,j,ipoint)
+            tmp4 = tmp0_x * Ir2_rsdft_long_Du_x(i,j,ipoint) + tmp0_y * Ir2_rsdft_long_Du_y(i,j,ipoint) + tmp0_z * Ir2_rsdft_long_Du_z(i,j,ipoint)
 
-            int2_grad1_u12_square_ao(i,j,ipoint) = int2_grad1_u12_square_ao(i,j,ipoint)                                                             &
-                                                 + tmp0 * Ir2_LinFcRSDFT_long_Du_0(i,j,ipoint) - tmp4 + tmp1 * Ir2_LinFcRSDFT_long_Du_2(i,j,ipoint) &
-                                                 - tmp2 * Ir2_LinFcRSDFT_gauss_Du(i,j,ipoint)                                                       &
+            int2_grad1_u12_square_ao(i,j,ipoint) = int2_grad1_u12_square_ao(i,j,ipoint)                                                   &
+                                                 + tmp0 * Ir2_rsdft_long_Du_0(i,j,ipoint) - tmp4 + tmp1 * Ir2_rsdft_long_Du_2(i,j,ipoint) &
+                                                 - tmp2 * Ir2_rsdft_gauss_Du(i,j,ipoint)                                                  &
                                                  + tmp3 * ao_overlap(i,j)
           enddo
         enddo
@@ -578,7 +578,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       !$OMP END DO
       !$OMP END PARALLEL
 
-      FREE Ir2_LinFcRSDFT_long_Du_0 Ir2_LinFcRSDFT_long_Du_x Ir2_LinFcRSDFT_long_Du_y Ir2_LinFcRSDFT_long_Du_z Ir2_LinFcRSDFT_gauss_Du Ir2_LinFcRSDFT_long_Du_2
+      FREE Ir2_rsdft_long_Du_0 Ir2_rsdft_long_Du_x Ir2_rsdft_long_Du_y Ir2_rsdft_long_Du_z Ir2_rsdft_gauss_Du Ir2_rsdft_long_Du_2
 
     endif ! j1e_type
 
