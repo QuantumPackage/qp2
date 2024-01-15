@@ -3,6 +3,15 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   BEGIN_DOC
   !
+  !                                        !!!!!! WARNING !!!!!!!!!
+  !                                       
+  !                                          DEFINED WITH - SIGN
+  !
+  !                                   FOR 3e-iontegrals this doesn't matter
+  !                                      
+  !                                        !!!!!! WARNING !!!!!!!!!
+  !
+  !
   ! int2_grad1_u12_ao_test(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2)
   !
   ! where r1 = r(ipoint)
@@ -16,9 +25,9 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
   !
   ! int2_grad1_u12_ao_test(i,j,ipoint,:) =      v1    x [ 0.5 x \int dr2 [(r1 - r2) (erf(mu * r12)-1)r_12] v2 \phi_i(r2) \phi_j(r2) ]
   !                                 - \grad_1 v1 x [       \int dr2                  u12              v2 \phi_i(r2) \phi_j(r2) ]
-  !                                 =    0.5 v_1b(ipoint) * v_ij_erf_rk_cst_mu_j1b(i,j,ipoint) * r(:)
-  !                                 -    0.5 v_1b(ipoint) * x_v_ij_erf_rk_cst_mu_j1b(i,j,ipoint,:)
-  !                                 - v_1b_grad[:,ipoint] * v_ij_u_cst_mu_j1b(i,j,ipoint)
+  !                                 =  0.5 env_val(ipoint) * v_ij_erf_rk_cst_mu_env(i,j,ipoint) * r(:)
+  !                                 -  0.5 env_val(ipoint) * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,:)
+  !                                 -  env_grad[:,ipoint] * v_ij_u_cst_mu_env(i,j,ipoint)
   !
   !
   END_DOC
@@ -31,8 +40,6 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
   print*, ' providing int2_grad1_u12_ao_test ...'
   call wall_time(time0)
 
-  PROVIDE j1b_type
-
   if(read_tc_integ) then
 
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao_test', action="read")
@@ -41,41 +48,33 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   else
 
-    if(j1b_type .eq. 3) then
+    if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "prod-gauss")) then
+
       do ipoint = 1, n_points_final_grid
         x = final_grid_points(1,ipoint)
         y = final_grid_points(2,ipoint)
         z = final_grid_points(3,ipoint)
-        tmp0  = 0.5d0 * v_1b(ipoint)
-        tmp_x =  v_1b_grad(1,ipoint)
-        tmp_y =  v_1b_grad(2,ipoint)
-        tmp_z =  v_1b_grad(3,ipoint)
+        tmp0  = 0.5d0 * env_val(ipoint)
+        tmp_x =  env_grad(1,ipoint)
+        tmp_y =  env_grad(2,ipoint)
+        tmp_z =  env_grad(3,ipoint)
         do j = 1, ao_num
           do i = 1, ao_num
-            tmp1 = tmp0 * v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint)
-            tmp2 = v_ij_u_cst_mu_j1b_test(i,j,ipoint)
-            int2_grad1_u12_ao_test(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,1) - tmp2 * tmp_x
-            int2_grad1_u12_ao_test(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,2) - tmp2 * tmp_y
-            int2_grad1_u12_ao_test(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_j1b_test(i,j,ipoint,3) - tmp2 * tmp_z
+            tmp1 = tmp0 * v_ij_erf_rk_cst_mu_env_test(i,j,ipoint)
+            tmp2 = v_ij_u_cst_mu_env_test(i,j,ipoint)
+            int2_grad1_u12_ao_test(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_env_test(i,j,ipoint,1) - tmp2 * tmp_x
+            int2_grad1_u12_ao_test(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_env_test(i,j,ipoint,2) - tmp2 * tmp_y
+            int2_grad1_u12_ao_test(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_env_test(i,j,ipoint,3) - tmp2 * tmp_z
           enddo
         enddo
       enddo
+
     else
-      do ipoint = 1, n_points_final_grid
-        x = final_grid_points(1,ipoint)
-        y = final_grid_points(2,ipoint)
-        z = final_grid_points(3,ipoint)
-        do j = 1, ao_num
-          do i = 1, ao_num
-            tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
-            int2_grad1_u12_ao_test(i,j,ipoint,1) = tmp1 * x - x_v_ij_erf_rk_cst_mu_tmp(i,j,ipoint,1)
-            int2_grad1_u12_ao_test(i,j,ipoint,2) = tmp1 * y - x_v_ij_erf_rk_cst_mu_tmp(i,j,ipoint,2)
-            int2_grad1_u12_ao_test(i,j,ipoint,3) = tmp1 * z - x_v_ij_erf_rk_cst_mu_tmp(i,j,ipoint,3)
-          enddo
-        enddo
-      enddo
-      int2_grad1_u12_ao_test *= 0.5d0
-    endif
+
+      print *, ' Error in int2_grad1_u12_ao_test: Unknown j2e_type = ', j2e_type
+      stop
+
+    endif ! j2e_type
 
   endif
 
@@ -191,7 +190,7 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_test, (ao_num, ao_num, ao_
   endif
 
   call wall_time(time1)
-  print*, ' Wall time for tc_grad_and_lapl_ao_test = ', time1 - time0
+  print*, ' Wall time for tc_grad_and_lapl_ao_test (min) = ', (time1 - time0) / 60.d0
 
 END_PROVIDER
 

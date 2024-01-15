@@ -10,9 +10,16 @@ program tc_scf
   integer :: i
   logical :: good_angles
 
-  write(json_unit,json_array_open_fmt) 'tc-scf'
+  PROVIDE j1e_type
+  PROVIDE j2e_type
+  PROVIDE tcscf_algorithm
+  PROVIDE var_tc
 
-  print *, ' starting ...'
+  print *, ' TC-SCF with:'
+  print *, ' j1e_type = ', j1e_type
+  print *, ' j2e_type = ', j2e_type
+
+  write(json_unit,json_array_open_fmt) 'tc-scf'
 
   my_grid_becke  = .True.
   PROVIDE tc_grid1_a tc_grid1_r
@@ -24,13 +31,7 @@ program tc_scf
   call write_int(6, my_n_pt_a_grid, 'angular external grid over')
 
 
-  PROVIDE mu_erf 
-  print *, ' mu = ', mu_erf
-  PROVIDE j1b_type
-  print *, ' j1b_type = ', j1b_type
-  print *, j1b_pen
-
-  if(j1b_type .ge. 100) then
+  if(tc_integ_type .eq. "numeric") then
     my_extra_grid_becke  = .True.
     PROVIDE tc_grid2_a tc_grid2_r
     my_n_pt_r_extra_grid = tc_grid2_r
@@ -44,8 +45,6 @@ program tc_scf
   !call create_guess()
   !call orthonormalize_mos()
 
-  PROVIDE tcscf_algorithm
-  PROVIDE var_tc
 
   if(var_tc) then
 

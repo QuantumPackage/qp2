@@ -17,9 +17,6 @@ program print_tc_energy
   read_wf = .True.
   touch read_wf
 
-  PROVIDE j1b_type
-  print*, 'j1b_type = ', j1b_type
-
   call write_tc_energy()
 
 end

@@ -1,7 +1,7 @@
 program test_ints
 
   BEGIN_DOC
-! TODO : Put the documentation of the program here
+  ! TODO : Put the documentation of the program here
   END_DOC
 
   implicit none
@@ -20,36 +20,27 @@ program test_ints
   touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
 
 !! OK 
-! call routine_int2_u_grad1u_j1b2 
+! call routine_int2_u_grad1u_env2 
 ! OK
-! call routine_v_ij_erf_rk_cst_mu_j1b
+! call routine_v_ij_erf_rk_cst_mu_env
 ! OK 
-! call routine_x_v_ij_erf_rk_cst_mu_j1b
+! call routine_x_v_ij_erf_rk_cst_mu_env
 ! OK
-! call routine_int2_u2_j1b2
+! call routine_int2_u2_env2
 ! OK
-! call routine_int2_u_grad1u_x_j1b2
+! call routine_int2_u_grad1u_x_env2
 ! OK 
-! call routine_int2_grad1u2_grad2u2_j1b2
-! call routine_int2_u_grad1u_j1b2
-! call test_total_grad_lapl
-! call test_total_grad_square
+! call routine_int2_grad1u2_grad2u2_env2
+! call routine_int2_u_grad1u_env2
 ! call test_int2_grad1_u12_ao_test
-! call routine_v_ij_u_cst_mu_j1b_test
-! call test_ao_tc_int_chemist
+! call routine_v_ij_u_cst_mu_env_test
 ! call test_grid_points_ao
-! call test_tc_scf
  !call test_int_gauss
 
   !call test_fock_3e_uhf_ao()
   !call test_fock_3e_uhf_mo()
 
-  !call test_tc_grad_and_lapl_ao()
-  !call test_tc_grad_square_ao()
-
   !call test_two_e_tc_non_hermit_integral()
-
-!  call test_tc_grad_square_ao_test()
 
 !!PROVIDE TC_HF_energy VARTC_HF_energy
 !!print *, '    TC_HF_energy = ',    TC_HF_energy
@@ -64,47 +55,21 @@ end
 
 ! ---
 
-subroutine test_tc_scf
- implicit none
- integer :: i
-! provide int2_u_grad1u_x_j1b2_test
- provide x_v_ij_erf_rk_cst_mu_j1b_test
-! do i = 1, ng_fit_jast
-!  print*,expo_gauss_1_erf_x_2(i),coef_gauss_1_erf_x_2(i)
-! enddo
-! provide tc_grad_square_ao_test
-!  provide tc_grad_and_lapl_ao_test
-! provide int2_u_grad1u_x_j1b2_test
-! provide x_v_ij_erf_rk_cst_mu_j1b_test
-! print*,'TC_HF_energy = ',TC_HF_energy
-! print*,'grad_non_hermit = ',grad_non_hermit
-end
-
-subroutine test_ao_tc_int_chemist
- implicit none
- provide ao_tc_int_chemist
-! provide ao_tc_int_chemist_test
-! provide tc_grad_square_ao_test
-! provide tc_grad_and_lapl_ao_test
-end
-
-! ---
-
-subroutine routine_test_j1b
+subroutine routine_test_env
  implicit none
  integer :: i,icount,j
  icount = 0
- do i = 1, List_all_comb_b3_size
-  if(dabs(List_all_comb_b3_coef(i)).gt.1.d-10)then
+ do i = 1, List_env1s_square_size
+  if(dabs(List_env1s_square_coef(i)).gt.1.d-10)then
    print*,''
-   print*,List_all_comb_b3_expo(i),List_all_comb_b3_coef(i)
-   print*,List_all_comb_b3_cent(1:3,i)
+   print*,List_env1s_square_expo(i),List_env1s_square_coef(i)
+   print*,List_env1s_square_cent(1:3,i)
    print*,''
    icount += 1
   endif
   
  enddo
- print*,'List_all_comb_b3_coef,icount = ',List_all_comb_b3_size,icount
+ print*,'List_env1s_square_coef,icount = ',List_env1s_square_size,icount
  do i = 1, ao_num
   do j = 1, ao_num
    do icount = 1, List_comb_thr_b3_size(j,i)
@@ -116,11 +81,11 @@ subroutine routine_test_j1b
 !   enddo
   enddo
  enddo
- print*,'max_List_comb_thr_b3_size = ',max_List_comb_thr_b3_size,List_all_comb_b3_size
+ print*,'max_List_comb_thr_b3_size = ',max_List_comb_thr_b3_size,List_env1s_square_size
 
 end
 
-subroutine routine_int2_u_grad1u_j1b2
+subroutine routine_int2_u_grad1u_env2
  implicit none
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -136,8 +101,8 @@ subroutine routine_int2_u_grad1u_j1b2
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += int2_u_grad1u_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += int2_u_grad1u_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += int2_u_grad1u_env2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += int2_u_grad1u_env2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -160,7 +125,7 @@ subroutine routine_int2_u_grad1u_j1b2
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_int2_u_grad1u_j1b2'
+ print*,'routine_int2_u_grad1u_env2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -168,7 +133,7 @@ subroutine routine_int2_u_grad1u_j1b2
 
 end
 
-subroutine routine_v_ij_erf_rk_cst_mu_j1b
+subroutine routine_v_ij_erf_rk_cst_mu_env
  implicit none
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -183,8 +148,8 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_erf_rk_cst_mu_j1b(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += v_ij_erf_rk_cst_mu_env_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_erf_rk_cst_mu_env(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -207,7 +172,7 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_v_ij_erf_rk_cst_mu_j1b'
+ print*,'routine_v_ij_erf_rk_cst_mu_env'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -216,7 +181,7 @@ subroutine routine_v_ij_erf_rk_cst_mu_j1b
 end
 
 
-subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
+subroutine routine_x_v_ij_erf_rk_cst_mu_env
  implicit none
  integer :: i,j,ipoint,k,l,m
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -232,8 +197,8 @@ subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
     do i = 1, ao_num
      do j = 1, ao_num
       do m = 1, 3
-       array(j,i,l,k)     += x_v_ij_erf_rk_cst_mu_j1b_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
-       array_ref(j,i,l,k) += x_v_ij_erf_rk_cst_mu_j1b     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array(j,i,l,k)     += x_v_ij_erf_rk_cst_mu_env_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array_ref(j,i,l,k) += x_v_ij_erf_rk_cst_mu_env     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
       enddo
      enddo
     enddo
@@ -258,7 +223,7 @@ subroutine routine_x_v_ij_erf_rk_cst_mu_j1b
 
  print*,'******'
  print*,'******'
- print*,'routine_x_v_ij_erf_rk_cst_mu_j1b'
+ print*,'routine_x_v_ij_erf_rk_cst_mu_env'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -268,7 +233,7 @@ end
 
 
 
-subroutine routine_v_ij_u_cst_mu_j1b_test
+subroutine routine_v_ij_u_cst_mu_env_test
  implicit none
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -283,8 +248,8 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += v_ij_u_cst_mu_env_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_env_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -307,15 +272,13 @@ subroutine routine_v_ij_u_cst_mu_j1b_test
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_v_ij_u_cst_mu_j1b_test'
+ print*,'routine_v_ij_u_cst_mu_env_test'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
-  
-
 end
 
-subroutine routine_int2_grad1u2_grad2u2_j1b2
+subroutine routine_int2_grad1u2_grad2u2_env2
  implicit none
  integer :: i,j,ipoint,k,l
  integer :: ii , jj
@@ -341,17 +304,17 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!     !array(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      array_ref(j,i,l,k)     += int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += int2_grad1u2_grad2u2_env2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!     !array(j,i,l,k)     += int2_grad1u2_grad2u2_env2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!      array_ref(j,i,l,k)     += int2_grad1u2_grad2u2_env2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
 !     !array(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!       array_ref(j,i,l,k) += int2_grad1u2_grad2u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+!       array_ref(j,i,l,k) += int2_grad1u2_grad2u2_env2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
       array_ref(j,i,l,k) += ints(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-!      if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint)).gt.1.d-6)then
-!       if(dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint)).gt.1.d-6)then
+!      if(dabs(int2_grad1u2_grad2u2_env2_test(j,i,ipoint)).gt.1.d-6)then
+!       if(dabs(int2_grad1u2_grad2u2_env2_test(j,i,ipoint) - int2_grad1u2_grad2u2_env2_test(j,i,ipoint)).gt.1.d-6)then
 !        print*,j,i,ipoint
-!        print*,int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) , int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint) - int2_grad1u2_grad2u2_j1b2_test(j,i,ipoint))
-!        print*,int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) , int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint), dabs(int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint) - int2_grad1u2_grad2u2_j1b2_test(i,j,ipoint))
+!        print*,int2_grad1u2_grad2u2_env2_test(j,i,ipoint) , int2_grad1u2_grad2u2_env2_test(j,i,ipoint), dabs(int2_grad1u2_grad2u2_env2_test(j,i,ipoint) - int2_grad1u2_grad2u2_env2_test(j,i,ipoint))
+!        print*,int2_grad1u2_grad2u2_env2_test(i,j,ipoint) , int2_grad1u2_grad2u2_env2_test(i,j,ipoint), dabs(int2_grad1u2_grad2u2_env2_test(i,j,ipoint) - int2_grad1u2_grad2u2_env2_test(i,j,ipoint))
 !        stop
 !       endif
 !      endif
@@ -394,7 +357,7 @@ subroutine routine_int2_grad1u2_grad2u2_j1b2
 
 end
 
-subroutine routine_int2_u2_j1b2
+subroutine routine_int2_u2_env2
  implicit none
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -410,8 +373,8 @@ subroutine routine_int2_u2_j1b2
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += int2_u2_j1b2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += int2_u2_j1b2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += int2_u2_env2_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += int2_u2_env2(j,i,ipoint)      * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -434,7 +397,7 @@ subroutine routine_int2_u2_j1b2
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_int2_u2_j1b2'
+ print*,'routine_int2_u2_env2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -443,7 +406,7 @@ subroutine routine_int2_u2_j1b2
 end
 
 
-subroutine routine_int2_u_grad1u_x_j1b2
+subroutine routine_int2_u_grad1u_x_env2
  implicit none
  integer :: i,j,ipoint,k,l,m
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -460,8 +423,8 @@ subroutine routine_int2_u_grad1u_x_j1b2
     do i = 1, ao_num
      do j = 1, ao_num
       do m = 1, 3
-       array(j,i,l,k)     += int2_u_grad1u_x_j1b2_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
-       array_ref(j,i,l,k) += int2_u_grad1u_x_j1b2     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array(j,i,l,k)     += int2_u_grad1u_x_env2_test(j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
+       array_ref(j,i,l,k) += int2_u_grad1u_x_env2     (j,i,ipoint,m) * aos_grad_in_r_array_transp(m,k,ipoint) * aos_in_r_array(l,ipoint) * weight
       enddo
      enddo
     enddo
@@ -485,7 +448,7 @@ subroutine routine_int2_u_grad1u_x_j1b2
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_int2_u_grad1u_x_j1b2'
+ print*,'routine_int2_u_grad1u_x_env2'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -493,7 +456,7 @@ subroutine routine_int2_u_grad1u_x_j1b2
 
 end
 
-subroutine routine_v_ij_u_cst_mu_j1b
+subroutine routine_v_ij_u_cst_mu_env
  implicit none
  integer :: i,j,ipoint,k,l
  double precision :: weight,accu_relat, accu_abs, contrib
@@ -509,8 +472,8 @@ subroutine routine_v_ij_u_cst_mu_j1b
    do l = 1, ao_num
     do i = 1, ao_num
      do j = 1, ao_num
-      array(j,i,l,k)     += v_ij_u_cst_mu_j1b_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
-      array_ref(j,i,l,k) += v_ij_u_cst_mu_j1b_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array(j,i,l,k)     += v_ij_u_cst_mu_env_test(j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
+      array_ref(j,i,l,k) += v_ij_u_cst_mu_env_fit (j,i,ipoint) * aos_in_r_array(k,ipoint) * aos_in_r_array(l,ipoint) * weight
      enddo
     enddo
    enddo
@@ -533,7 +496,7 @@ subroutine routine_v_ij_u_cst_mu_j1b
   enddo
  print*,'******'
  print*,'******'
- print*,'routine_v_ij_u_cst_mu_j1b'
+ print*,'routine_v_ij_u_cst_mu_env'
  print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
  print*,'accu_relat = ',accu_relat/dble(ao_num)**4
 
@@ -674,65 +637,9 @@ subroutine test_fock_3e_uhf_mo()
 
   ! ---
 
-end subroutine test_fock_3e_uhf_mo
+end
 
 ! ---
-
-subroutine test_total_grad_lapl
- implicit none
- integer :: i,j,ipoint,k,l
- double precision :: weight,accu_relat, accu_abs, contrib
- accu_relat = 0.d0
- accu_abs   = 0.d0
-  do k = 1, ao_num
-   do l = 1, ao_num
-    do i = 1, ao_num
-     do j = 1, ao_num
-      contrib = dabs(tc_grad_and_lapl_ao_test(j,i,l,k) - tc_grad_and_lapl_ao(j,i,l,k))
-      accu_abs += contrib
-      if(dabs(tc_grad_and_lapl_ao(j,i,l,k)).gt.1.d-10)then
-       accu_relat += contrib/dabs(tc_grad_and_lapl_ao(j,i,l,k))
-      endif
-     enddo
-    enddo
-   enddo
-  enddo
- print*,'******'
- print*,'******'
- print*,' test_total_grad_lapl'
- print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
- print*,'accu_relat = ',accu_relat/dble(ao_num)**4
-
-
-end
-
-subroutine test_total_grad_square
- implicit none
- integer :: i,j,ipoint,k,l
- double precision :: weight,accu_relat, accu_abs, contrib
- accu_relat = 0.d0
- accu_abs   = 0.d0
-  do k = 1, ao_num
-   do l = 1, ao_num
-    do i = 1, ao_num
-     do j = 1, ao_num
-      contrib = dabs(tc_grad_square_ao_test(j,i,l,k) - tc_grad_square_ao(j,i,l,k))
-      accu_abs += contrib
-      if(dabs(tc_grad_square_ao(j,i,l,k)).gt.1.d-10)then
-       accu_relat += contrib/dabs(tc_grad_square_ao(j,i,l,k))
-      endif
-     enddo
-    enddo
-   enddo
-  enddo
- print*,'******'
- print*,'******'
- print*,'test_total_grad_square'
- print*,'accu_abs   = ',accu_abs/dble(ao_num)**4
- print*,'accu_relat = ',accu_relat/dble(ao_num)**4
-
-
-end
 
 subroutine test_grid_points_ao
  implicit none
@@ -748,26 +655,26 @@ subroutine test_grid_points_ao
   icount_bad = 0
   icount_full = 0
   do ipoint = 1, n_points_final_grid
-!   if(dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,1)) & 
-!    + dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,2)) &
-!    + dabs(int2_u_grad1u_x_j1b2_test(j,i,ipoint,3)) )
-!   if(dabs(int2_u2_j1b2_test(j,i,ipoint)).gt.thr)then
+!   if(dabs(int2_u_grad1u_x_env2_test(j,i,ipoint,1)) & 
+!    + dabs(int2_u_grad1u_x_env2_test(j,i,ipoint,2)) &
+!    + dabs(int2_u_grad1u_x_env2_test(j,i,ipoint,3)) )
+!   if(dabs(int2_u2_env2_test(j,i,ipoint)).gt.thr)then
 !    icount += 1
 !   endif
-   if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
+   if(dabs(v_ij_u_cst_mu_env_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
     icount_full += 1
    endif
-   if(dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint)).gt.thr)then
+   if(dabs(v_ij_u_cst_mu_env_test(j,i,ipoint)).gt.thr)then
     icount += 1
-    if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
+    if(dabs(v_ij_u_cst_mu_env_ng_1_test(j,i,ipoint)).gt.thr*0.1d0)then
     icount_good += 1
     else
     print*,j,i,ipoint
-    print*,dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint)),dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)),dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint))/dabs(v_ij_u_cst_mu_j1b_test(j,i,ipoint))
+    print*,dabs(v_ij_u_cst_mu_env_test(j,i,ipoint)), dabs(v_ij_u_cst_mu_env_ng_1_test(j,i,ipoint)),dabs(v_ij_u_cst_mu_env_ng_1_test(j,i,ipoint))/dabs(v_ij_u_cst_mu_env_test(j,i,ipoint))
     icount_bad  += 1
     endif
    endif
-!   if(dabs(v_ij_u_cst_mu_j1b_ng_1_test(j,i,ipoint)).gt.thr)then
+!   if(dabs(v_ij_u_cst_mu_env_ng_1_test(j,i,ipoint)).gt.thr)then
 !   endif
   enddo
    print*,''
@@ -817,90 +724,6 @@ subroutine test_int_gauss
  print*,'integral_2      =',integral_2
  print*,'(pi/alpha)**1.5 =',2.d0*pi / (alpha)**2
 
-
-end
-
-! ---
-
-subroutine test_tc_grad_and_lapl_ao()
-
-  implicit none
-  integer          :: i, j, k, l
-  double precision :: diff_tot, diff, thr_ih, norm
-
-  thr_ih = 1d-10
-
-  PROVIDE tc_grad_and_lapl_ao tc_grad_and_lapl_ao_loop
-
-  norm     = 0.d0
-  diff_tot = 0.d0
-  do i = 1, ao_num
-    do j = 1, ao_num
-      do k = 1, ao_num
-        do l = 1, ao_num
-
-          diff = dabs(tc_grad_and_lapl_ao_loop(l,k,j,i) - tc_grad_and_lapl_ao(l,k,j,i))
-          if(diff .gt. thr_ih) then
-            print *, ' difference on ', l, k, j, i
-            print *, ' loops : ', tc_grad_and_lapl_ao_loop(l,k,j,i)
-            print *, ' lapack: ', tc_grad_and_lapl_ao     (l,k,j,i)
-            !stop
-          endif
-
-          norm     += dabs(tc_grad_and_lapl_ao_loop(l,k,j,i))
-          diff_tot += diff
-        enddo
-      enddo
-    enddo
-  enddo
-
-  print *, ' diff tot = ', diff_tot / norm
-  print *, '     norm = ', norm
-  print *, ' '
-
-  return
-
-end
-
-! ---
-
-subroutine test_tc_grad_square_ao()
-
-  implicit none
-  integer          :: i, j, k, l
-  double precision :: diff_tot, diff, thr_ih, norm
-
-  thr_ih = 1d-10
-
-  PROVIDE tc_grad_square_ao tc_grad_square_ao_loop
-
-  norm     = 0.d0
-  diff_tot = 0.d0
-  do i = 1, ao_num
-    do j = 1, ao_num
-      do k = 1, ao_num
-        do l = 1, ao_num
-
-          diff = dabs(tc_grad_square_ao_loop(l,k,j,i) - tc_grad_square_ao(l,k,j,i))
-          if(diff .gt. thr_ih) then
-            print *, ' difference on ', l, k, j, i
-            print *, ' loops : ', tc_grad_square_ao_loop(l,k,j,i)
-            print *, ' lapack: ', tc_grad_square_ao     (l,k,j,i)
-            !stop
-          endif
-
-          norm     += dabs(tc_grad_square_ao_loop(l,k,j,i))
-          diff_tot += diff
-        enddo
-      enddo
-    enddo
-  enddo
-
-  print *, ' diff tot = ', diff_tot / norm
-  print *, '     norm = ', norm
-  print *, ' '
-
-  return
 
 end
 
@@ -973,52 +796,6 @@ end
 
 ! ---
 
-subroutine test_tc_grad_square_ao_test()
-
-  implicit none
-  integer          :: i, j, k, l
-  double precision :: diff_tot, diff, thr_ih, norm
-
-  print*, ' test_tc_grad_square_ao_test '
-
-  thr_ih = 1d-7
-
-  PROVIDE tc_grad_square_ao_test tc_grad_square_ao_test_ref
-
-  norm     = 0.d0
-  diff_tot = 0.d0
-  do i = 1, ao_num
-    do j = 1, ao_num
-      do k = 1, ao_num
-        do l = 1, ao_num
-      
-
-          diff = dabs(tc_grad_square_ao_test(l,k,j,i) - tc_grad_square_ao_test_ref(l,k,j,i))
-          if(diff .gt. thr_ih) then
-            print *, ' difference on ', l, k, j, i
-            print *, ' new         : ', tc_grad_square_ao_test    (l,k,j,i)
-            print *, ' ref         : ', tc_grad_square_ao_test_ref(l,k,j,i)
-            !stop
-          endif
-
-          norm     += dabs(tc_grad_square_ao_test_ref(l,k,j,i))
-          diff_tot += diff
-        enddo
-      enddo
-    enddo
-  enddo
-
-  print *, ' diff tot = ', diff_tot / norm
-  print *, '     norm = ', norm
-  print *, ' '
-
-  return
-end
-
-! ---
-
-
-
 subroutine test_old_ints
  implicit none
  integer :: i,j,k,l
@@ -1034,7 +811,6 @@ subroutine test_old_ints
       ! ao_non_hermit_term_chemist(k,i,l,j) = < k l | [erf( mu r12) - 1] d/d_r12 | i j > on the AO basis
 !      integral_nsym = ao_non_hermit_term_chemist(k,i,l,j)
 !      old = integral_sym + integral_nsym 
-!      old = tc_grad_square_ao(k,i,l,j) + tc_grad_and_lapl_ao(k,i,l,j) + ao_two_e_coul(k,i,l,j)
       new = ao_tc_int_chemist_test(k,i,l,j)
       old = ao_tc_int_chemist_no_cycle(k,i,l,j)
       contrib = dabs(old - new)
@@ -1146,7 +922,7 @@ subroutine test_fock_3e_uhf_mo_cs()
   print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
 
   return
-end subroutine test_fock_3e_uhf_mo_cs
+end
 
 ! ---
 
@@ -1185,7 +961,7 @@ subroutine test_fock_3e_uhf_mo_a()
   print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
 
   return
-end subroutine test_fock_3e_uhf_mo_a
+end
 
 ! ---
 
@@ -1224,7 +1000,7 @@ subroutine test_fock_3e_uhf_mo_b()
   print *, ' diff tot (%) = ', 100.d0 * diff_tot / norm
 
   return
-end subroutine test_fock_3e_uhf_mo_b
+end
 
 ! ---
 

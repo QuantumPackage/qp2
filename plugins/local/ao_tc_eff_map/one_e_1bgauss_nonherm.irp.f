@@ -1,10 +1,11 @@
+
 ! ---
 
-BEGIN_PROVIDER [ double precision, j1b_gauss_nonherm, (ao_num,ao_num)]
+BEGIN_PROVIDER [double precision, env_gauss_nonherm, (ao_num,ao_num)]
 
   BEGIN_DOC
   !
-  !  j1b_gauss_nonherm(i,j) = \langle \chi_j | - grad \tau_{1b} \cdot grad | \chi_i \rangle  
+  !  env_gauss_nonherm(i,j) = \langle \chi_j | - grad \tau_{env} \cdot grad | \chi_i \rangle  
   !
   END_DOC
 
@@ -22,8 +23,6 @@ BEGIN_PROVIDER [ double precision, j1b_gauss_nonherm, (ao_num,ao_num)]
 
   double precision :: int_gauss_deriv
 
-  PROVIDE j1b_type j1b_pen j1b_coeff
-
   ! --------------------------------------------------------------------------------
   ! -- Dummy call to provide everything
   dim1        = 100
@@ -38,10 +37,8 @@ BEGIN_PROVIDER [ double precision, j1b_gauss_nonherm, (ao_num,ao_num)]
   ! --------------------------------------------------------------------------------
   
 
-  j1b_gauss_nonherm(1:ao_num,1:ao_num) = 0.d0
+  env_gauss_nonherm(1:ao_num,1:ao_num) = 0.d0
 
-   if(j1b_type .eq. 1) then
-  ! \tau_1b = \sum_iA -[1 - exp(-alpha_A r_iA^2)] 
 
  !$OMP PARALLEL                                                 &
  !$OMP DEFAULT (NONE)                                           &
@@ -51,100 +48,45 @@ BEGIN_PROVIDER [ double precision, j1b_gauss_nonherm, (ao_num,ao_num)]
  !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     & 
  !$OMP         ao_power, ao_nucl, nucl_coord,                   &
  !$OMP         ao_coef_normalized_ordered_transp,               &
- !$OMP         nucl_num, j1b_pen, j1b_gauss_nonherm)
+ !$OMP         nucl_num, env_expo, env_gauss_nonherm)
  !$OMP DO SCHEDULE (dynamic)
-    do j = 1, ao_num
-      num_A         = ao_nucl(j)
-      power_A(1:3)  = ao_power(j,1:3)
-      A_center(1:3) = nucl_coord(num_A,1:3)
-  
-      do i = 1, ao_num
-        num_B         = ao_nucl(i)
-        power_B(1:3)  = ao_power(i,1:3)
-        B_center(1:3) = nucl_coord(num_B,1:3)
-  
-        do l = 1, ao_prim_num(j)
-          alpha = ao_expo_ordered_transp(l,j)
-  
-          do m = 1, ao_prim_num(i)
-            beta = ao_expo_ordered_transp(m,i)
-  
-            c = 0.d0
-            do k = 1, nucl_num
-              gama          = j1b_pen(k)
-              C_center(1:3) = nucl_coord(k,1:3)
-  
-              !  \langle \chi_A | exp[-gama r_C^2] r_C \cdot grad | \chi_B \rangle
-              c1 = int_gauss_deriv( A_center, B_center, C_center        &
-                                  , power_A, power_B, alpha, beta, gama )
-  
-              c = c + 2.d0 * gama * c1 
-            enddo
-  
-            j1b_gauss_nonherm(i,j) =  j1b_gauss_nonherm(i,j) & 
-                    + ao_coef_normalized_ordered_transp(l,j) &
-                    * ao_coef_normalized_ordered_transp(m,i) * c
+  do j = 1, ao_num
+    num_A         = ao_nucl(j)
+    power_A(1:3)  = ao_power(j,1:3)
+    A_center(1:3) = nucl_coord(num_A,1:3)
+
+    do i = 1, ao_num
+      num_B         = ao_nucl(i)
+      power_B(1:3)  = ao_power(i,1:3)
+      B_center(1:3) = nucl_coord(num_B,1:3)
+
+      do l = 1, ao_prim_num(j)
+        alpha = ao_expo_ordered_transp(l,j)
+
+        do m = 1, ao_prim_num(i)
+          beta = ao_expo_ordered_transp(m,i)
+
+          c = 0.d0
+          do k = 1, nucl_num
+            gama          = env_expo(k)
+            C_center(1:3) = nucl_coord(k,1:3)
+
+            !  \langle \chi_A | exp[-gama r_C^2] r_C \cdot grad | \chi_B \rangle
+            c1 = int_gauss_deriv( A_center, B_center, C_center        &
+                                , power_A, power_B, alpha, beta, gama )
+
+            c = c + 2.d0 * gama * c1 
           enddo
+
+          env_gauss_nonherm(i,j) =  env_gauss_nonherm(i,j) & 
+                  + ao_coef_normalized_ordered_transp(l,j) &
+                  * ao_coef_normalized_ordered_transp(m,i) * c
         enddo
       enddo
     enddo
+  enddo
  !$OMP END DO
  !$OMP END PARALLEL
-
-  elseif(j1b_type .eq. 2) then
-  ! \tau_1b = \sum_iA [c_A exp(-alpha_A r_iA^2)]
-
- !$OMP PARALLEL                                                 &
- !$OMP DEFAULT (NONE)                                           &
- !$OMP PRIVATE (i, j, k, l, m, alpha, beta, gama, coef,         &
- !$OMP          A_center, B_center, C_center, power_A, power_B, &
- !$OMP          num_A, num_B, c1, c)                            &
- !$OMP SHARED (ao_num, ao_prim_num, ao_expo_ordered_transp,     & 
- !$OMP         ao_power, ao_nucl, nucl_coord,                   &
- !$OMP         ao_coef_normalized_ordered_transp,               &
- !$OMP         nucl_num, j1b_pen, j1b_gauss_nonherm,            &
- !$OMP         j1b_coeff)
- !$OMP DO SCHEDULE (dynamic)
-    do j = 1, ao_num
-      num_A         = ao_nucl(j)
-      power_A(1:3)  = ao_power(j,1:3)
-      A_center(1:3) = nucl_coord(num_A,1:3)
-  
-      do i = 1, ao_num
-        num_B         = ao_nucl(i)
-        power_B(1:3)  = ao_power(i,1:3)
-        B_center(1:3) = nucl_coord(num_B,1:3)
-  
-        do l = 1, ao_prim_num(j)
-          alpha = ao_expo_ordered_transp(l,j)
-  
-          do m = 1, ao_prim_num(i)
-            beta = ao_expo_ordered_transp(m,i)
-  
-            c = 0.d0
-            do k = 1, nucl_num
-              gama          = j1b_pen  (k)
-              coef          = j1b_coeff(k)
-              C_center(1:3) = nucl_coord(k,1:3)
-  
-              !  \langle \chi_A | exp[-gama r_C^2] r_C \cdot grad | \chi_B \rangle
-              c1 = int_gauss_deriv( A_center, B_center, C_center        &
-                                  , power_A, power_B, alpha, beta, gama )
-  
-              c = c + 2.d0 * gama * coef * c1 
-            enddo
-  
-            j1b_gauss_nonherm(i,j) =  j1b_gauss_nonherm(i,j) & 
-                    + ao_coef_normalized_ordered_transp(l,j) &
-                    * ao_coef_normalized_ordered_transp(m,i) * c
-          enddo
-        enddo
-      enddo
-    enddo
- !$OMP END DO
- !$OMP END PARALLEL
-
-  endif
 
 END_PROVIDER
 
