@@ -12,14 +12,8 @@ The main keywords are:
 1. **none:** No 2e-Jastrow is used.
 
 2. **rs-dft:** 2e-Jastrow inspired by Range Separated Density Functional Theory. It has the following shape:
-   \begin{equation}
-   \tau = \frac{1}{2} \sum_{i,j \neq i} u(\mathbf{r}_i, \mathbf{r}_j),
-   \end{equation}
-   with,
-   \begin{equation}
-   u(\mathbf{r}_1, \mathbf{r}_2) = u(r_{12}) = \frac{r_{12}}{2} \left[ 1 - \text{erf}(\mu \, r_{12}) \right] - \frac{\exp\left[- (\mu \, r_{12})^2\right]}{2 \sqrt{\pi} \mu}.
-   \end{equation}
-
+   \[ \tau = \frac{1}{2} \sum_{i,j \neq i} u(\mathbf{r}_i, \mathbf{r}_j) \]
+   with, \[ u(\mathbf{r}_1, \mathbf{r}_2) = u(r_{12}) = \frac{r_{12}}{2} \left[ 1 - \text{erf}(\mu \, r_{12}) \right] - \frac{\exp\left[- (\mu \, r_{12})^2\right]}{2 \sqrt{\pi} \mu} \]
 
 
 ## env_type Options
