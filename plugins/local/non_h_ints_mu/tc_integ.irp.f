@@ -59,7 +59,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       ! ---
 
-      if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) then
+      if(j2e_type .eq. "none") then
+      
+        int2_grad1_u12_ao = 0.d0
+
+      elseif((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) then
 
         PROVIDE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
 
@@ -307,7 +311,11 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
     ! ---
 
-    if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) then
+    if(j2e_type .eq. "none") then
+
+      int2_grad1_u12_square_ao = 0.d0
+
+    elseif((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) then
 
       PROVIDE int2_grad1u2_grad2u2
 
