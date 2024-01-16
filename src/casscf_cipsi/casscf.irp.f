@@ -58,8 +58,10 @@ subroutine run
 !    if(n_states == 1)then
 !     call ezfio_get_casscf_cipsi_energy_pt2(E_PT2)
 !     call ezfio_get_casscf_cipsi_energy(PT2)
-     call write_double(6,E_PT2(1:N_states),'E + PT2 energy = ')
-     call write_double(6,PT2(1:N_states),'  PT2          = ')
+     do istate=1,N_states
+     call write_double(6,E_PT2(istate),'E + PT2 energy = ')
+     call write_double(6,PT2(istate),'  PT2          = ')
+     enddo
      call write_double(6,pt2_max,' PT2_MAX       = ')
 !    endif
 

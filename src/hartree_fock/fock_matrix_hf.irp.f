@@ -174,7 +174,6 @@ END_PROVIDER
 
  allocate (X(cholesky_ao_num))
 
-
  ! X(j) = \sum_{mn} SCF_density_matrix_ao(m,n) * cholesky_ao(m,n,j)
  call dgemm('T','N',cholesky_ao_num,1,ao_num*ao_num,1.d0,            &
      cholesky_ao, ao_num*ao_num,                                     &

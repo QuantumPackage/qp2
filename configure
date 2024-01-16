@@ -195,7 +195,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio qmckl"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
 fi
 
 
@@ -402,11 +402,11 @@ if [[ ${TREXIO} = $(not_found) ]] ; then
         fail
 fi
 
-QMCKL=$(find_lib -lqmckl)
-if [[ ${QMCKL} = $(not_found) ]] ; then
-        error "QMCkl (qmckl | qmckl-intel) is not installed."
-        fail
-fi
+#QMCKL=$(find_lib -lqmckl)
+#if [[ ${QMCKL} = $(not_found) ]] ; then
+#        error "QMCkl (qmckl | qmckl-intel) is not installed."
+#        fail
+#fi
 
 F77ZMQ=$(find_lib -lzmq -lf77zmq -lpthread)
 if [[ ${F77ZMQ} = $(not_found) ]] ; then
