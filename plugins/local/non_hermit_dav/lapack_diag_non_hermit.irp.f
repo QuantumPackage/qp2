@@ -54,7 +54,7 @@ subroutine lapack_diag_non_sym(n, A, WR, WI, VL, VR)
 
   deallocate(Atmp, WORK)
 
-end subroutine lapack_diag_non_sym
+end
 
 
 subroutine non_sym_diag_inv_right(n,A,leigvec,reigvec,n_real_eigv,eigval)
@@ -269,7 +269,7 @@ subroutine lapack_diag_non_sym_new(n, A, WR, WI, VL, VR)
   deallocate( Atmp )
   deallocate( WORK, SCALE_array, RCONDE, RCONDV, IWORK )
 
-end subroutine lapack_diag_non_sym_new
+end
 
 ! ---
 
@@ -323,7 +323,7 @@ subroutine lapack_diag_non_sym_right(n, A, WR, WI, VR)
 !   write(*, '(1000(F16.10,X))') VR(:,i)
 ! enddo
 
-end subroutine lapack_diag_non_sym_right
+end
 
 ! ---
 
@@ -437,7 +437,7 @@ subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
     print*, ' Notice that if you are interested in ground state it is not a problem :)'
   endif
 
-end subroutine non_hrmt_real_diag
+end
 
 ! ---
 
@@ -495,7 +495,7 @@ subroutine lapack_diag_general_non_sym(n, A, B, WR, WI, VL, VR)
 
   deallocate( WORK, Atmp )
 
-end subroutine lapack_diag_general_non_sym
+end
 
 ! ---
 
@@ -570,7 +570,7 @@ subroutine non_hrmt_general_real_diag(n, A, B, reigvec, leigvec, n_real_eigv, ei
     enddo
   enddo
 
-end subroutine non_hrmt_general_real_diag
+end
 
 ! ---
 
@@ -727,7 +727,7 @@ subroutine impose_biorthog_qr(m, n, thr_d, thr_nd, Vl, Vr)
   deallocate(tmp)
 
   return
-end subroutine impose_biorthog_qr
+end
 
 ! ---
 
@@ -890,7 +890,7 @@ subroutine impose_biorthog_lu(m, n, Vl, Vr, S)
   !stop
 
   return
-end subroutine impose_biorthog_lu
+end
 
 ! ---
 
@@ -996,7 +996,7 @@ subroutine check_EIGVEC(n, m, A, eigval, leigvec, reigvec, thr_diag, thr_norm, s
 
   deallocate( Mtmp )
 
-end subroutine check_EIGVEC
+end
 
 ! ---
 
@@ -1066,7 +1066,7 @@ subroutine check_degen(n, m, eigval, leigvec, reigvec)
     stop
   endif
 
-end subroutine check_degen
+end
 
 ! ---
 
@@ -1169,7 +1169,7 @@ subroutine impose_weighted_orthog_svd(n, m, W, C)
 
   ! ---
 
-end subroutine impose_weighted_orthog_svd
+end
 
 ! ---
 
@@ -1266,7 +1266,7 @@ subroutine impose_orthog_svd(n, m, C)
 
   ! ---
 
-end subroutine impose_orthog_svd
+end
 
 ! ---
 
@@ -1365,7 +1365,7 @@ subroutine impose_orthog_svd_overlap(n, m, C, overlap)
   !enddo
   deallocate(S)
 
-end subroutine impose_orthog_svd_overlap
+end
 
 ! ---
 
@@ -1442,7 +1442,7 @@ subroutine impose_orthog_GramSchmidt(n, m, C)
 
   ! ---
 
-end subroutine impose_orthog_GramSchmidt
+end
 
 ! ---
 
@@ -1484,7 +1484,7 @@ subroutine impose_orthog_ones(n, deg_num, C)
     endif
   enddo 
 
-end subroutine impose_orthog_ones
+end
 
 ! ---
 
@@ -1577,7 +1577,7 @@ subroutine impose_orthog_degen_eigvec(n, e0, C0)
     endif
   enddo
 
-end subroutine impose_orthog_degen_eigvec 
+end
 
 ! ---
 
@@ -1661,7 +1661,7 @@ subroutine get_halfinv_svd(n, S)
 
   deallocate(S0, Stmp, Stmp2)
 
-end subroutine get_halfinv_svd
+end
 
 ! ---
 
@@ -1776,7 +1776,7 @@ subroutine check_biorthog_binormalize(n, m, Vl, Vr, thr_d, thr_nd, stop_ifnot)
     stop
   endif
 
-end subroutine check_biorthog_binormalize
+end
 
 ! ---
 
@@ -1840,7 +1840,7 @@ subroutine check_weighted_biorthog(n, m, W, Vl, Vr, thr_d, thr_nd, accu_d, accu_
     stop
   endif
 
-end subroutine check_weighted_biorthog
+end
 
 ! ---
 
@@ -1907,7 +1907,7 @@ subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_
     stop
   endif
 
-end subroutine check_biorthog
+end
 
 ! ---
 
@@ -1949,7 +1949,7 @@ subroutine check_orthog(n, m, V, accu_d, accu_nd, S)
   !print*, '    diag acc: ', accu_d
   !print*, ' nondiag acc: ', accu_nd
 
-end subroutine check_orthog
+end
 
 ! ---
 
@@ -2067,7 +2067,7 @@ subroutine reorder_degen_eigvec(n, deg_num, e0, L0, R0)
 !    endif
 !  enddo
 !
-end subroutine reorder_degen_eigvec 
+end
 
 ! ---
 
@@ -2188,7 +2188,7 @@ subroutine impose_biorthog_degen_eigvec(n, deg_num, e0, L0, R0)
     endif
   enddo
 
-end subroutine impose_biorthog_degen_eigvec 
+end
 
 ! ---
 
@@ -2282,7 +2282,7 @@ subroutine impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, L0, R0)
     endif
   enddo
 
-end subroutine impose_orthog_biorthog_degen_eigvec 
+end
 
 ! ---
 
@@ -2420,7 +2420,7 @@ subroutine impose_unique_biorthog_degen_eigvec(n, thr_d, thr_nd, e0, C0, W0, L0,
     endif
   enddo
 
-end subroutine impose_unique_biorthog_degen_eigvec 
+end
 
 ! ---
 
@@ -2503,7 +2503,7 @@ subroutine max_overlap_qr(m, n, S0, V)
   ! ---
 
   return
-end subroutine max_overlap_qr
+end
 
 ! ---
 
@@ -2538,7 +2538,7 @@ subroutine max_overlap_invprod(n, m, S, V)
   deallocate(tmp, invS)
 
   return
-end subroutine max_overlap_invprod
+end
 
 ! ---
 
@@ -2623,7 +2623,7 @@ subroutine impose_biorthog_svd(n, m, L, R)
 
   deallocate(tmp, U, V, D)
 
-end subroutine impose_biorthog_svd
+end
 
 ! ---
 
@@ -2668,8 +2668,7 @@ subroutine impose_biorthog_inverse(n, m, L, R)
   deallocate(S,Lt)
 
 
-end subroutine impose_biorthog_inverse
-
+end
 
 ! ---
 
@@ -2831,7 +2830,7 @@ subroutine impose_weighted_biorthog_qr(m, n, thr_d, thr_nd, Vl, W, Vr)
   call check_weighted_biorthog_binormalize(m, n, Vl, W, Vr, thr_d, thr_nd, .false.)
 
   return
-end subroutine impose_weighted_biorthog_qr
+end
 
 ! ---
 
@@ -2948,7 +2947,7 @@ subroutine check_weighted_biorthog_binormalize(n, m, Vl, W, Vr, thr_d, thr_nd, s
     stop
   endif
 
-end subroutine check_weighted_biorthog_binormalize
+end
 
 ! ---
 
@@ -3066,7 +3065,7 @@ subroutine impose_weighted_biorthog_svd(n, m, overlap, L, R)
   deallocate(S)
 
   return
-end subroutine impose_weighted_biorthog_svd
+end
 
 ! ---
 

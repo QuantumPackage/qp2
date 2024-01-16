@@ -142,7 +142,7 @@ subroutine non_hrmt_diag_split_degen(n, A, leigvec, reigvec, n_real_eigv, eigval
    enddo
   enddo
 
-end subroutine non_hrmt_diag_split_degen
+end
 
 ! ---
 
@@ -248,7 +248,7 @@ subroutine non_hrmt_real_diag_new(n, A, leigvec, reigvec, n_real_eigv, eigval)
    print*,'Your matrix intrinsically contains complex eigenvalues'
   endif
 
-end subroutine non_hrmt_real_diag_new
+end
 
 ! ---
 
@@ -519,7 +519,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   return
 
-end subroutine non_hrmt_bieig
+end
 
 ! ---
 
@@ -692,7 +692,7 @@ subroutine non_hrmt_bieig_random_diag(n, A, leigvec, reigvec, n_real_eigv, eigva
 
   return
 
-end subroutine non_hrmt_bieig_random_diag
+end
 
 ! ---
 
@@ -801,7 +801,7 @@ subroutine non_hrmt_real_im(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   deallocate( S )
 
-end subroutine non_hrmt_real_im
+end
 
 ! ---
 
@@ -906,7 +906,7 @@ subroutine non_hrmt_generalized_real_im(n, A, B, leigvec, reigvec, n_real_eigv, 
 
   deallocate( S )
 
-end subroutine non_hrmt_generalized_real_im
+end
 
 ! ---
 
@@ -1042,7 +1042,7 @@ subroutine non_hrmt_bieig_fullvect(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   return
 
-end subroutine non_hrmt_bieig_fullvect
+end
 
 ! ---
 

@@ -9,7 +9,7 @@ The main keywords are:
 
 ## j2e_type Options
 
-1. **none:** No 2e-Jastrow is used.
+1. **None:** No 2e-Jastrow is used.
 
 2. **Mu:** 2e-Jastrow inspired by Range Separated Density Functional Theory. It has the following shape:
    <p align="center">
@@ -28,7 +28,7 @@ The 2-electron Jastrow is multiplied by an envelope \(v\):
       <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%5Ctau=%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi,j%5Cneq%20i%7Du(%5Cmathbf%7Br%7D_i,%5Cmathbf%7Br%7D_j)%5C,v(%5Cmathbf%7Br%7D_i)%5C,v(%5Cmathbf%7Br%7D_j)">
 </p>
 
-- if `env_type` is **none**: No envelope is used.
+- if `env_type` is **None**: No envelope is used.
 
 - if `env_type` is **Prod_Gauss**:
   <p align="center">
@@ -50,7 +50,7 @@ The 1-electron Jastrow used is:
    <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%5Ctau=%5Csum_i%20u_%7B1e%7D(%5Cmathbf%7Br%7D_i)">
 </p>
 
-- if `j1e_type` is **none**: No one-electron Jastrow is used.
+- if `j1e_type` is **None**: No one-electron Jastrow is used.
 
 - if `j1e_type` is **Gauss**: We use
 <p align="center">
@@ -65,4 +65,5 @@ are defined by the tables `j1e_coef` and `j1e_expo`, respectively.
      <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7Du_%7B1e%7D(%5Cmathbf%7Br%7D_1)=-%5Cfrac%7BN-1%7D%7B2N%7D%5C,%5Csum_%7B%5Csigma%7D%5C,%5Cint%20d%5Cmathbf%7Br%7D_2%5C,%5Crho%5E%7B%5Csigma%7D(%5Cmathbf%7Br%7D_2)%5C,u_%7B2e%7D(%5Cmathbf%7Br%7D_1,%5Cmathbf%7Br%7D_2)">
   </p>
 
+- if `j1e_type` is **Charge_Harmonizer_AO**: The one-electron Jastrow factor **Charge_Harmonizer** is fitted by the atomic orbitals
 

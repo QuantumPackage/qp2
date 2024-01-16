@@ -623,7 +623,7 @@ subroutine test_j1e_grad()
   double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: x(:), y(:), z(:)
   
-  PROVIDE int2_grad1_u2b_ao
+  PROVIDE int2_grad1_u2e_ao
   PROVIDE mo_coef
 
   allocate(Pa(ao_num,ao_num), Pb(ao_num,ao_num), Pt(ao_num,ao_num))
@@ -652,9 +652,9 @@ subroutine test_j1e_grad()
     z(ipoint) = 0.d0
     do i = 1, ao_num
       do j = 1, ao_num
-        x(ipoint) = x(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,1)
-        y(ipoint) = y(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,2)
-        z(ipoint) = z(ipoint) + g * Pt(i,j) * int2_grad1_u2b_ao(i,j,ipoint,3)
+        x(ipoint) = x(ipoint) + g * Pt(i,j) * int2_grad1_u2e_ao(i,j,ipoint,1)
+        y(ipoint) = y(ipoint) + g * Pt(i,j) * int2_grad1_u2e_ao(i,j,ipoint,2)
+        z(ipoint) = z(ipoint) + g * Pt(i,j) * int2_grad1_u2e_ao(i,j,ipoint,3)
       enddo
     enddo
   enddo

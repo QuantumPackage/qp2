@@ -7,7 +7,11 @@ BEGIN_PROVIDER [integer, List_env1s_size]
 
   PROVIDE env_type
 
-  if(env_type .eq. "Prod_Gauss") then
+  if(env_type .eq. "None") then
+
+    List_env1s_size = 1
+
+  elseif(env_type .eq. "Prod_Gauss") then
 
     List_env1s_size = 2**nucl_num
 
@@ -63,11 +67,17 @@ END_PROVIDER
 
   provide env_type env_expo env_coef
 
-  List_env1s_coef = 0.d0
-  List_env1s_expo = 0.d0
-  List_env1s_cent = 0.d0
+  if(env_type .eq. "None") then
 
-  if(env_type .eq. "Prod_Gauss") then
+    List_env1s_coef(    1) = 1.d0
+    List_env1s_expo(    1) = 0.d0
+    List_env1s_cent(1:3,1) = 0.d0
+
+  elseif(env_type .eq. "Prod_Gauss") then
+
+    List_env1s_coef = 0.d0
+    List_env1s_expo = 0.d0
+    List_env1s_cent = 0.d0
 
     do i = 1, List_env1s_size
 
@@ -150,7 +160,11 @@ BEGIN_PROVIDER [integer, List_env1s_square_size]
   implicit none
   double precision :: tmp
 
-  if(env_type .eq. "Prod_Gauss") then
+  if(env_type .eq. "None") then
+
+    List_env1s_square_size = 1
+
+  elseif(env_type .eq. "Prod_Gauss") then
 
     List_env1s_square_size = 3**nucl_num
 
@@ -220,11 +234,17 @@ END_PROVIDER
 
   provide env_type env_expo env_coef
 
-  List_env1s_square_coef = 0.d0
-  List_env1s_square_expo = 0.d0
-  List_env1s_square_cent = 0.d0
+  if(env_type .eq. "None") then
 
-  if(env_type .eq. "Prod_Gauss") then
+    List_env1s_square_coef(    1) = 1.d0
+    List_env1s_square_expo(    1) = 0.d0
+    List_env1s_square_cent(1:3,1) = 0.d0
+
+  elseif(env_type .eq. "Prod_Gauss") then
+
+    List_env1s_square_coef = 0.d0
+    List_env1s_square_expo = 0.d0
+    List_env1s_square_cent = 0.d0
 
     do i = 1, List_env1s_square_size
 

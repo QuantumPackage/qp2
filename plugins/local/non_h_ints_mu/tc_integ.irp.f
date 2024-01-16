@@ -63,67 +63,70 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
       
         int2_grad1_u12_ao = 0.d0
 
-      elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) then
+      !elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) then
 
-        PROVIDE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
+      !  PROVIDE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
 
-        int2_grad1_u12_ao = 0.d0
-        !$OMP PARALLEL                                                &
-        !$OMP DEFAULT (NONE)                                          &
-        !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp1)                   &
-        !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points &
-        !$OMP        , v_ij_erf_rk_cst_mu, x_v_ij_erf_rk_cst_mu, int2_grad1_u12_ao)
-        !$OMP DO SCHEDULE (static)
-        do ipoint = 1, n_points_final_grid
-          x = final_grid_points(1,ipoint)
-          y = final_grid_points(2,ipoint)
-          z = final_grid_points(3,ipoint)
-          do j = 1, ao_num
-            do i = 1, ao_num
-              tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
-              int2_grad1_u12_ao(i,j,ipoint,1) = 0.5d0 * (tmp1 * x - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1))
-              int2_grad1_u12_ao(i,j,ipoint,2) = 0.5d0 * (tmp1 * y - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2))
-              int2_grad1_u12_ao(i,j,ipoint,3) = 0.5d0 * (tmp1 * z - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3))
-            enddo
-          enddo
-        enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+      !  int2_grad1_u12_ao = 0.d0
+      !  !$OMP PARALLEL                                                &
+      !  !$OMP DEFAULT (NONE)                                          &
+      !  !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp1)                   &
+      !  !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points &
+      !  !$OMP        , v_ij_erf_rk_cst_mu, x_v_ij_erf_rk_cst_mu, int2_grad1_u12_ao)
+      !  !$OMP DO SCHEDULE (static)
+      !  do ipoint = 1, n_points_final_grid
+      !    x = final_grid_points(1,ipoint)
+      !    y = final_grid_points(2,ipoint)
+      !    z = final_grid_points(3,ipoint)
+      !    do j = 1, ao_num
+      !      do i = 1, ao_num
+      !        tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
+      !        int2_grad1_u12_ao(i,j,ipoint,1) = 0.5d0 * (tmp1 * x - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1))
+      !        int2_grad1_u12_ao(i,j,ipoint,2) = 0.5d0 * (tmp1 * y - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2))
+      !        int2_grad1_u12_ao(i,j,ipoint,3) = 0.5d0 * (tmp1 * z - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3))
+      !      enddo
+      !    enddo
+      !  enddo
+      !  !$OMP END DO
+      !  !$OMP END PARALLEL
 
-      elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
+      !elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
 
-        PROVIDE env_type env_val env_grad
-        PROVIDE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
+      !  PROVIDE env_type env_val env_grad
+      !  PROVIDE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
 
-        int2_grad1_u12_ao = 0.d0
-        !$OMP PARALLEL                                                                   &
-        !$OMP DEFAULT (NONE)                                                             &
-        !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp0, tmp1, tmp2, tmp0_x, tmp0_y, tmp0_z)  &
-        !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points, env_val, env_grad, &
-        !$OMP        v_ij_erf_rk_cst_mu_env, v_ij_u_cst_mu_env_an, x_v_ij_erf_rk_cst_mu_env, int2_grad1_u12_ao)
-        !$OMP DO SCHEDULE (static)
-        do ipoint = 1, n_points_final_grid
-          x      = final_grid_points(1,ipoint)
-          y      = final_grid_points(2,ipoint)
-          z      = final_grid_points(3,ipoint)
-          tmp0   =     0.5d0 * env_val(ipoint)
-          tmp0_x =          env_grad(1,ipoint)
-          tmp0_y =          env_grad(2,ipoint)
-          tmp0_z =          env_grad(3,ipoint)
-          do j = 1, ao_num
-            do i = 1, ao_num
-              tmp1 = tmp0 * v_ij_erf_rk_cst_mu_env(i,j,ipoint)
-              tmp2 = v_ij_u_cst_mu_env_an(i,j,ipoint)
-              int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,1) - tmp2 * tmp0_x
-              int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,2) - tmp2 * tmp0_y
-              int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,3) - tmp2 * tmp0_z
-            enddo
-          enddo
-        enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+      !  int2_grad1_u12_ao = 0.d0
+      !  !$OMP PARALLEL                                                                   &
+      !  !$OMP DEFAULT (NONE)                                                             &
+      !  !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp0, tmp1, tmp2, tmp0_x, tmp0_y, tmp0_z)  &
+      !  !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points, env_val, env_grad, &
+      !  !$OMP        v_ij_erf_rk_cst_mu_env, v_ij_u_cst_mu_env_an, x_v_ij_erf_rk_cst_mu_env, int2_grad1_u12_ao)
+      !  !$OMP DO SCHEDULE (static)
+      !  do ipoint = 1, n_points_final_grid
+      !    x      = final_grid_points(1,ipoint)
+      !    y      = final_grid_points(2,ipoint)
+      !    z      = final_grid_points(3,ipoint)
+      !    tmp0   =     0.5d0 * env_val(ipoint)
+      !    tmp0_x =          env_grad(1,ipoint)
+      !    tmp0_y =          env_grad(2,ipoint)
+      !    tmp0_z =          env_grad(3,ipoint)
+      !    do j = 1, ao_num
+      !      do i = 1, ao_num
+      !        tmp1 = tmp0 * v_ij_erf_rk_cst_mu_env(i,j,ipoint)
+      !        tmp2 = v_ij_u_cst_mu_env_an(i,j,ipoint)
+      !        int2_grad1_u12_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,1) - tmp2 * tmp0_x
+      !        int2_grad1_u12_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,2) - tmp2 * tmp0_y
+      !        int2_grad1_u12_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,3) - tmp2 * tmp0_z
+      !      enddo
+      !    enddo
+      !  enddo
+      !  !$OMP END DO
+      !  !$OMP END PARALLEL
 
-      elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
+      !elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
+
+      elseif( (j2e_type .eq. "Mu") .and. &
+              ( (env_type .eq. "None") .or. (env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss") ) ) then
 
         PROVIDE mu_erf
         PROVIDE env_type env_val env_grad
@@ -131,8 +134,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         PROVIDE Ir2_Mu_gauss_Du
 
         tmp_ct = 0.5d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
-
-        int2_grad1_u12_ao = 0.d0
 
         !$OMP PARALLEL                                                    &
         !$OMP DEFAULT (NONE)                                              &
@@ -220,11 +221,14 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
 
       else
 
-        if((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) then
-          FREE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
-        elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
-          FREE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
-        elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
+        !if((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) then
+        !  FREE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
+        !elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
+        !  FREE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
+        !elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
+
+        if( (j2e_type .eq. "Mu") .and. &
+            ( (env_type .eq. "None") .or. (env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss") ) ) then
           FREE Ir2_Mu_long_Du_0 Ir2_Mu_long_Du_x Ir2_Mu_long_Du_y Ir2_Mu_long_Du_z Ir2_Mu_gauss_Du Ir2_Mu_long_Du_2
         endif
 
