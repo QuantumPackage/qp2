@@ -90,8 +90,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     FREE int2_grad1_u12_square_ao
 
     if( (tc_integ_type .eq. "semi-analytic")                            .and. &
-        (j2e_type .eq. "rs-dft")                                        .and. &
-        ((env_type .eq. "prod_gauss") .or. (env_type .eq. "sum-gauss")) .and. &
+        (j2e_type .eq. "Mu")                                            .and. &
+        ((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) .and. &
         use_ipp ) then
 
       ! an additional term is added here directly instead of 

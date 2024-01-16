@@ -267,7 +267,7 @@ BEGIN_PROVIDER [double precision, grad12_j12_test, (ao_num, ao_num, n_points_fin
   print*, ' providing grad12_j12_test ...'
   call wall_time(time0)
 
-  if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "prod-gauss")) then
+  if((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
 
     do ipoint = 1, n_points_final_grid
       tmp1 = env_val(ipoint)

@@ -1,21 +1,21 @@
 
 ! ---
 
- BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du_0, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du_x, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du_y, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du_z, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du_2, (ao_num, ao_num, n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du_0, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du_x, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du_y, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du_z, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du_2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
-  ! Ir2_rsdft_long_Du_0 = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12]
+  ! Ir2_Mu_long_Du_0 = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12]
   !
-  ! Ir2_rsdft_long_Du_x = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * x2
-  ! Ir2_rsdft_long_Du_y = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * y2
-  ! Ir2_rsdft_long_Du_z = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * z2
+  ! Ir2_Mu_long_Du_x = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * x2
+  ! Ir2_Mu_long_Du_y = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * y2
+  ! Ir2_Mu_long_Du_z = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * z2
   !
-  ! Ir2_rsdft_long_Du_2 = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * r2^2
+  ! Ir2_Mu_long_Du_2 = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) [(1 - erf(mu r_12) / r_12] * r2^2
   !
   END_DOC
 
@@ -32,7 +32,7 @@
   PROVIDE List_env1s_size List_env1s_expo List_env1s_coef List_env1s_cent
 
 
-  print *, ' providing Ir2_rsdft_long_Du ...'
+  print *, ' providing Ir2_Mu_long_Du ...'
   call wall_time(wall0)
 
   !$OMP PARALLEL DEFAULT (NONE)                                             &
@@ -41,9 +41,9 @@
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_erf,    &
   !$OMP          List_env1s_size, List_env1s_expo,                          &
   !$OMP          List_env1s_coef, List_env1s_cent,                          &
-  !$OMP          Ir2_rsdft_long_Du_0, Ir2_rsdft_long_Du_x,                  &
-  !$OMP          Ir2_rsdft_long_Du_y, Ir2_rsdft_long_Du_z,                  &
-  !$OMP          Ir2_rsdft_long_Du_2)
+  !$OMP          Ir2_Mu_long_Du_0, Ir2_Mu_long_Du_x,                        &
+  !$OMP          Ir2_Mu_long_Du_y, Ir2_Mu_long_Du_z,                        &
+  !$OMP          Ir2_Mu_long_Du_2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
 
@@ -81,11 +81,11 @@
           tmp_Du_2 = tmp_Du_2 + c_1s * (int_clb(5) + int_clb(6) + int_clb(7) - int_erf(5) - int_erf(6) - int_erf(7))
         enddo
 
-        Ir2_rsdft_long_Du_0(j,i,ipoint) = tmp_Du_0
-        Ir2_rsdft_long_Du_x(j,i,ipoint) = tmp_Du_x
-        Ir2_rsdft_long_Du_y(j,i,ipoint) = tmp_Du_y
-        Ir2_rsdft_long_Du_z(j,i,ipoint) = tmp_Du_z
-        Ir2_rsdft_long_Du_2(j,i,ipoint) = tmp_Du_2
+        Ir2_Mu_long_Du_0(j,i,ipoint) = tmp_Du_0
+        Ir2_Mu_long_Du_x(j,i,ipoint) = tmp_Du_x
+        Ir2_Mu_long_Du_y(j,i,ipoint) = tmp_Du_y
+        Ir2_Mu_long_Du_z(j,i,ipoint) = tmp_Du_z
+        Ir2_Mu_long_Du_2(j,i,ipoint) = tmp_Du_2
       enddo
     enddo
   enddo
@@ -95,27 +95,27 @@
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        Ir2_rsdft_long_Du_0(j,i,ipoint) = Ir2_rsdft_long_Du_0(i,j,ipoint)
-        Ir2_rsdft_long_Du_x(j,i,ipoint) = Ir2_rsdft_long_Du_x(i,j,ipoint)
-        Ir2_rsdft_long_Du_y(j,i,ipoint) = Ir2_rsdft_long_Du_y(i,j,ipoint)
-        Ir2_rsdft_long_Du_z(j,i,ipoint) = Ir2_rsdft_long_Du_z(i,j,ipoint)
-        Ir2_rsdft_long_Du_2(j,i,ipoint) = Ir2_rsdft_long_Du_2(i,j,ipoint)
+        Ir2_Mu_long_Du_0(j,i,ipoint) = Ir2_Mu_long_Du_0(i,j,ipoint)
+        Ir2_Mu_long_Du_x(j,i,ipoint) = Ir2_Mu_long_Du_x(i,j,ipoint)
+        Ir2_Mu_long_Du_y(j,i,ipoint) = Ir2_Mu_long_Du_y(i,j,ipoint)
+        Ir2_Mu_long_Du_z(j,i,ipoint) = Ir2_Mu_long_Du_z(i,j,ipoint)
+        Ir2_Mu_long_Du_2(j,i,ipoint) = Ir2_Mu_long_Du_2(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for Ir2_rsdft_long_Du (min) = ', (wall1 - wall0) / 60.d0
+  print*, ' wall time for Ir2_Mu_long_Du (min) = ', (wall1 - wall0) / 60.d0
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
-  ! Ir2_rsdft_gauss_Du = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) e^{-(mu r_12)^2}
+  ! Ir2_Mu_gauss_Du = int dr2 phi_i(r2) phi_j(r2) fc_env(r2) e^{-(mu r_12)^2}
   !
   END_DOC
 
@@ -136,7 +136,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du, (ao_num, ao_num, n_points_
   PROVIDE List_env1s_size List_env1s_expo List_env1s_coef List_env1s_cent
 
 
-  print *, ' providing Ir2_rsdft_gauss_Du ...'
+  print *, ' providing Ir2_Mu_gauss_Du ...'
   call wall_time(wall0)
 
   mu_sq = mu_erf * mu_erf
@@ -147,7 +147,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du, (ao_num, ao_num, n_points_
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_sq, &
   !$OMP          List_env1s_size, List_env1s_expo,                      &
   !$OMP          List_env1s_coef, List_env1s_cent,                      &
-  !$OMP          Ir2_rsdft_gauss_Du)
+  !$OMP          Ir2_Mu_gauss_Du)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
 
@@ -186,7 +186,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du, (ao_num, ao_num, n_points_
           tmp_Du += coef * overlap_gauss_r12_ao(B_center, beta, j, i)
         enddo
 
-        Ir2_rsdft_gauss_Du(j,i,ipoint) = tmp_Du
+        Ir2_Mu_gauss_Du(j,i,ipoint) = tmp_Du
       enddo
     enddo
   enddo
@@ -197,33 +197,33 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du, (ao_num, ao_num, n_points_
     do i = 2, ao_num
       do j = 1, i-1
 
-        Ir2_rsdft_gauss_Du(j,i,ipoint) = Ir2_rsdft_gauss_Du(i,j,ipoint)
+        Ir2_Mu_gauss_Du(j,i,ipoint) = Ir2_Mu_gauss_Du(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for Ir2_rsdft_gauss_Du (min) = ', (wall1 - wall0) / 60.d0
+  print*, ' wall time for Ir2_Mu_gauss_Du (min) = ', (wall1 - wall0) / 60.d0
 
 END_PROVIDER 
 
 ! ---
 
- BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du2_0, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du2_x, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du2_y, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du2_z, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_long_Du2_2, (ao_num, ao_num, n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du2_0, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du2_x, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du2_y, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du2_z, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_long_Du2_2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
-  ! Ir2_rsdft_long_Du2_0 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12]
+  ! Ir2_Mu_long_Du2_0 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12]
   !                                                                       
-  ! Ir2_rsdft_long_Du2_x = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * x2
-  ! Ir2_rsdft_long_Du2_y = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * y2
-  ! Ir2_rsdft_long_Du2_z = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * z2
+  ! Ir2_Mu_long_Du2_x = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * x2
+  ! Ir2_Mu_long_Du2_y = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * y2
+  ! Ir2_Mu_long_Du2_z = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * z2
   !                                                                       
-  ! Ir2_rsdft_long_Du2_2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * r2^2
+  ! Ir2_Mu_long_Du2_2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12) / r_12] * r2^2
   !
   END_DOC
 
@@ -242,7 +242,7 @@ END_PROVIDER
   PROVIDE final_grid_points
   PROVIDE List_env1s_square_size List_env1s_square_expo List_env1s_square_coef List_env1s_square_cent
 
-  print *, ' providing Ir2_rsdft_long_Du2 ...'
+  print *, ' providing Ir2_Mu_long_Du2 ...'
   call wall_time(wall0)
 
   mu_sq = mu_erf * mu_erf
@@ -255,9 +255,9 @@ END_PROVIDER
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_sq,  &
   !$OMP          mu_erf, List_env1s_square_size, List_env1s_square_expo, &
   !$OMP          List_env1s_square_coef, List_env1s_square_cent,         &
-  !$OMP          Ir2_rsdft_long_Du2_0, Ir2_rsdft_long_Du2_x,             &
-  !$OMP          Ir2_rsdft_long_Du2_y, Ir2_rsdft_long_Du2_z,             &
-  !$OMP          Ir2_rsdft_long_Du2_2)
+  !$OMP          Ir2_Mu_long_Du2_0, Ir2_Mu_long_Du2_x,                   &
+  !$OMP          Ir2_Mu_long_Du2_y, Ir2_Mu_long_Du2_z,                   &
+  !$OMP          Ir2_Mu_long_Du2_2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
 
@@ -310,11 +310,11 @@ END_PROVIDER
           tmp_Du2_2 = tmp_Du2_2 + coef * (int_clb(5) + int_clb(6) + int_clb(7) - int_erf(5) - int_erf(6) - int_erf(7))
         enddo
 
-        Ir2_rsdft_long_Du2_0(j,i,ipoint) = tmp_Du2_0
-        Ir2_rsdft_long_Du2_x(j,i,ipoint) = tmp_Du2_x
-        Ir2_rsdft_long_Du2_y(j,i,ipoint) = tmp_Du2_y
-        Ir2_rsdft_long_Du2_z(j,i,ipoint) = tmp_Du2_z
-        Ir2_rsdft_long_Du2_2(j,i,ipoint) = tmp_Du2_2
+        Ir2_Mu_long_Du2_0(j,i,ipoint) = tmp_Du2_0
+        Ir2_Mu_long_Du2_x(j,i,ipoint) = tmp_Du2_x
+        Ir2_Mu_long_Du2_y(j,i,ipoint) = tmp_Du2_y
+        Ir2_Mu_long_Du2_z(j,i,ipoint) = tmp_Du2_z
+        Ir2_Mu_long_Du2_2(j,i,ipoint) = tmp_Du2_2
       enddo
     enddo
   enddo
@@ -324,27 +324,27 @@ END_PROVIDER
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        Ir2_rsdft_long_Du2_0(j,i,ipoint) = Ir2_rsdft_long_Du2_0(i,j,ipoint)
-        Ir2_rsdft_long_Du2_x(j,i,ipoint) = Ir2_rsdft_long_Du2_x(i,j,ipoint)
-        Ir2_rsdft_long_Du2_y(j,i,ipoint) = Ir2_rsdft_long_Du2_y(i,j,ipoint)
-        Ir2_rsdft_long_Du2_z(j,i,ipoint) = Ir2_rsdft_long_Du2_z(i,j,ipoint)
-        Ir2_rsdft_long_Du2_2(j,i,ipoint) = Ir2_rsdft_long_Du2_2(i,j,ipoint)
+        Ir2_Mu_long_Du2_0(j,i,ipoint) = Ir2_Mu_long_Du2_0(i,j,ipoint)
+        Ir2_Mu_long_Du2_x(j,i,ipoint) = Ir2_Mu_long_Du2_x(i,j,ipoint)
+        Ir2_Mu_long_Du2_y(j,i,ipoint) = Ir2_Mu_long_Du2_y(i,j,ipoint)
+        Ir2_Mu_long_Du2_z(j,i,ipoint) = Ir2_Mu_long_Du2_z(i,j,ipoint)
+        Ir2_Mu_long_Du2_2(j,i,ipoint) = Ir2_Mu_long_Du2_2(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for Ir2_rsdft_long_Du2 (min) = ', (wall1 - wall0) / 60.d0
+  print*, ' wall time for Ir2_Mu_long_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du2, (ao_num, ao_num, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, Ir2_Mu_gauss_Du2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
-  ! Ir2_rsdft_gauss_Du2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 e^{-(mu r_12)^2}
+  ! Ir2_Mu_gauss_Du2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 e^{-(mu r_12)^2}
   !
   END_DOC
 
@@ -365,7 +365,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du2, (ao_num, ao_num, n_points
   PROVIDE List_env1s_square_size List_env1s_square_expo List_env1s_square_coef List_env1s_square_cent
 
 
-  print *, ' providing Ir2_rsdft_gauss_Du2 ...'
+  print *, ' providing Ir2_Mu_gauss_Du2 ...'
   call wall_time(wall0)
 
   mu_sq = 2.d0 * mu_erf * mu_erf
@@ -376,7 +376,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du2, (ao_num, ao_num, n_points
   !$OMP SHARED  (n_points_final_grid, ao_num, final_grid_points, mu_sq, &
   !$OMP          List_env1s_square_size, List_env1s_square_expo,        &
   !$OMP          List_env1s_square_coef, List_env1s_square_cent,        &
-  !$OMP          Ir2_rsdft_gauss_Du2)
+  !$OMP          Ir2_Mu_gauss_Du2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
 
@@ -415,7 +415,7 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du2, (ao_num, ao_num, n_points
           tmp_Du2 += coef * overlap_gauss_r12_ao(B_center, beta, j, i)
         enddo
 
-        Ir2_rsdft_gauss_Du2(j,i,ipoint) = tmp_Du2
+        Ir2_Mu_gauss_Du2(j,i,ipoint) = tmp_Du2
       enddo
     enddo
   enddo
@@ -426,33 +426,33 @@ BEGIN_PROVIDER [double precision, Ir2_rsdft_gauss_Du2, (ao_num, ao_num, n_points
     do i = 2, ao_num
       do j = 1, i-1
 
-        Ir2_rsdft_gauss_Du2(j,i,ipoint) = Ir2_rsdft_gauss_Du2(i,j,ipoint)
+        Ir2_Mu_gauss_Du2(j,i,ipoint) = Ir2_Mu_gauss_Du2(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for Ir2_rsdft_gauss_Du2 (min) = ', (wall1 - wall0) / 60.d0
+  print*, ' wall time for Ir2_Mu_gauss_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
 END_PROVIDER 
 
 ! ---
 
- BEGIN_PROVIDER [double precision, Ir2_rsdft_short_Du2_0, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_short_Du2_x, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_short_Du2_y, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_short_Du2_z, (ao_num, ao_num, n_points_final_grid)]
-&BEGIN_PROVIDER [double precision, Ir2_rsdft_short_Du2_2, (ao_num, ao_num, n_points_final_grid)]
+ BEGIN_PROVIDER [double precision, Ir2_Mu_short_Du2_0, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_short_Du2_x, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_short_Du2_y, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_short_Du2_z, (ao_num, ao_num, n_points_final_grid)]
+&BEGIN_PROVIDER [double precision, Ir2_Mu_short_Du2_2, (ao_num, ao_num, n_points_final_grid)]
 
   BEGIN_DOC
   !
-  ! Ir2_rsdft_short_Du2_0 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2
+  ! Ir2_Mu_short_Du2_0 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2
   !
-  ! Ir2_rsdft_short_Du2_x = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * x2
-  ! Ir2_rsdft_short_Du2_y = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * y2
-  ! Ir2_rsdft_short_Du2_z = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * z2
+  ! Ir2_Mu_short_Du2_x = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * x2
+  ! Ir2_Mu_short_Du2_y = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * y2
+  ! Ir2_Mu_short_Du2_z = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * z2
   !
-  ! Ir2_rsdft_short_Du2_2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * r2^2
+  ! Ir2_Mu_short_Du2_2 = int dr2 phi_i(r2) phi_j(r2) [fc_env(r2)]^2 [(1 - erf(mu r_12)]^2 * r2^2
   !
   END_DOC
 
@@ -470,7 +470,7 @@ END_PROVIDER
   PROVIDE List_env1s_square_size List_env1s_square_expo List_env1s_square_coef List_env1s_square_cent
   PROVIDE ng_fit_jast expo_gauss_1_erf_x_2 coef_gauss_1_erf_x_2
 
-  print *, ' providing Ir2_rsdft_short_Du2 ...'
+  print *, ' providing Ir2_Mu_short_Du2 ...'
   call wall_time(wall0)
 
   !$OMP PARALLEL DEFAULT (NONE)                                           &
@@ -482,9 +482,9 @@ END_PROVIDER
   !$OMP          ng_fit_jast, expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2, &
   !$OMP          List_env1s_square_size, List_env1s_square_expo,          &
   !$OMP          List_env1s_square_coef, List_env1s_square_cent,          &
-  !$OMP          Ir2_rsdft_short_Du2_0, Ir2_rsdft_short_Du2_x,            &
-  !$OMP          Ir2_rsdft_short_Du2_y, Ir2_rsdft_short_Du2_z,            &
-  !$OMP          Ir2_rsdft_short_Du2_2)
+  !$OMP          Ir2_Mu_short_Du2_0, Ir2_Mu_short_Du2_x,                  &
+  !$OMP          Ir2_Mu_short_Du2_y, Ir2_Mu_short_Du2_z,                  &
+  !$OMP          Ir2_Mu_short_Du2_2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
 
@@ -542,11 +542,11 @@ END_PROVIDER
           enddo ! i_1s
         enddo ! i_fit
 
-        Ir2_rsdft_short_Du2_0(j,i,ipoint) = tmp_Du2_0
-        Ir2_rsdft_short_Du2_x(j,i,ipoint) = tmp_Du2_x
-        Ir2_rsdft_short_Du2_y(j,i,ipoint) = tmp_Du2_y
-        Ir2_rsdft_short_Du2_z(j,i,ipoint) = tmp_Du2_z
-        Ir2_rsdft_short_Du2_2(j,i,ipoint) = tmp_Du2_2
+        Ir2_Mu_short_Du2_0(j,i,ipoint) = tmp_Du2_0
+        Ir2_Mu_short_Du2_x(j,i,ipoint) = tmp_Du2_x
+        Ir2_Mu_short_Du2_y(j,i,ipoint) = tmp_Du2_y
+        Ir2_Mu_short_Du2_z(j,i,ipoint) = tmp_Du2_z
+        Ir2_Mu_short_Du2_2(j,i,ipoint) = tmp_Du2_2
       enddo ! j
     enddo ! i
   enddo ! ipoint
@@ -556,17 +556,17 @@ END_PROVIDER
   do ipoint = 1, n_points_final_grid
     do i = 2, ao_num
       do j = 1, i-1
-        Ir2_rsdft_short_Du2_0(j,i,ipoint) = Ir2_rsdft_short_Du2_0(i,j,ipoint)
-        Ir2_rsdft_short_Du2_x(j,i,ipoint) = Ir2_rsdft_short_Du2_x(i,j,ipoint)
-        Ir2_rsdft_short_Du2_y(j,i,ipoint) = Ir2_rsdft_short_Du2_y(i,j,ipoint)
-        Ir2_rsdft_short_Du2_z(j,i,ipoint) = Ir2_rsdft_short_Du2_z(i,j,ipoint)
-        Ir2_rsdft_short_Du2_2(j,i,ipoint) = Ir2_rsdft_short_Du2_2(i,j,ipoint)
+        Ir2_Mu_short_Du2_0(j,i,ipoint) = Ir2_Mu_short_Du2_0(i,j,ipoint)
+        Ir2_Mu_short_Du2_x(j,i,ipoint) = Ir2_Mu_short_Du2_x(i,j,ipoint)
+        Ir2_Mu_short_Du2_y(j,i,ipoint) = Ir2_Mu_short_Du2_y(i,j,ipoint)
+        Ir2_Mu_short_Du2_z(j,i,ipoint) = Ir2_Mu_short_Du2_z(i,j,ipoint)
+        Ir2_Mu_short_Du2_2(j,i,ipoint) = Ir2_Mu_short_Du2_2(i,j,ipoint)
       enddo
     enddo
   enddo
  
   call wall_time(wall1)
-  print*, ' wall time for Ir2_rsdft_short_Du2 (min) = ', (wall1 - wall0) / 60.d0
+  print*, ' wall time for Ir2_Mu_short_Du2 (min) = ', (wall1 - wall0) / 60.d0
 
 END_PROVIDER 
 

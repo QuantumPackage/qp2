@@ -48,7 +48,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_test, (ao_num, ao_num, n_po
 
   else
 
-    if((j2e_type .eq. "rs-dft") .and. (env_type .eq. "prod-gauss")) then
+    if((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
 
       do ipoint = 1, n_points_final_grid
         x = final_grid_points(1,ipoint)

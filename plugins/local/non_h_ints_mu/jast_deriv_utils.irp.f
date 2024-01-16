@@ -9,7 +9,7 @@ double precision function j12_mu(r1, r2)
   double precision, intent(in) :: r1(3), r2(3)
   double precision             :: mu_tmp, r12
 
-  if(j2e_type .eq. "rs-dft") then
+  if(j2e_type .eq. "Mu") then
 
     r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
                + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
@@ -57,7 +57,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
 
   grad = 0.d0
 
-  if(j2e_type .eq. "rs-dft") then
+  if(j2e_type .eq. "Mu") then
 
     dx = r1(1) - r2(1)
     dy = r1(2) - r2(2)
@@ -72,7 +72,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
     grad(2) = tmp * dy
     grad(3) = tmp * dz
 
-  elseif(j2e_type .eq. "rs-dft-murho") then
+  elseif(j2e_type .eq. "Mur") then
 
     dx  = r1(1) - r2(1)
     dy  = r1(2) - r2(2)
@@ -113,7 +113,7 @@ double precision function env_nucl(r)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if(env_type .eq. "sum-slat") then
+  if(env_type .eq. "Sum_Slat") then
 
     env_nucl = 1.d0
     do i = 1, nucl_num
@@ -124,7 +124,7 @@ double precision function env_nucl(r)
       env_nucl = env_nucl - env_coef(i) * dexp(-a*dsqrt(d))
     enddo
 
-  elseif(env_type .eq. "prod-gauss") then
+  elseif(env_type .eq. "Prod_Gauss") then
 
     env_nucl = 1.d0
     do i = 1, nucl_num
@@ -136,7 +136,7 @@ double precision function env_nucl(r)
       env_nucl = env_nucl * e
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     env_nucl = 1.d0
     do i = 1, nucl_num
@@ -147,7 +147,7 @@ double precision function env_nucl(r)
       env_nucl = env_nucl - env_coef(i) * dexp(-a*d)
     enddo
 
-  elseif(env_type .eq. "sum-quartic") then
+  elseif(env_type .eq. "Sum_Quartic") then
 
     env_nucl = 1.d0
     do i = 1, nucl_num
@@ -178,7 +178,7 @@ double precision function env_nucl_square(r)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if(env_type .eq. "sum-slat") then
+  if(env_type .eq. "Sum_Slat") then
 
     env_nucl_square = 1.d0
     do i = 1, nucl_num
@@ -190,7 +190,7 @@ double precision function env_nucl_square(r)
     enddo
     env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif(env_type .eq. "prod-gauss") then
+  elseif(env_type .eq. "Prod_Gauss") then
 
     env_nucl_square = 1.d0
     do i = 1, nucl_num
@@ -203,7 +203,7 @@ double precision function env_nucl_square(r)
     enddo
     env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     env_nucl_square = 1.d0
     do i = 1, nucl_num
@@ -215,7 +215,7 @@ double precision function env_nucl_square(r)
     enddo
     env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif(env_type .eq. "sum-quartic") then
+  elseif(env_type .eq. "Sum_Quartic") then
 
     env_nucl_square = 1.d0
     do i = 1, nucl_num
@@ -251,7 +251,7 @@ subroutine grad1_env_nucl(r, grad)
   double precision              :: fact_x, fact_y, fact_z
   double precision              :: ax_der, ay_der, az_der, a_expo
 
-  if(env_type .eq. "sum-slat") then
+  if(env_type .eq. "Sum_Slat") then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -273,7 +273,7 @@ subroutine grad1_env_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif(env_type .eq. "prod-gauss") then
+  elseif(env_type .eq. "Prod_Gauss") then
 
     x = r(1)
     y = r(2)
@@ -312,7 +312,7 @@ subroutine grad1_env_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     fact_x = 0.d0
     fact_y = 0.d0
@@ -334,7 +334,7 @@ subroutine grad1_env_nucl(r, grad)
     grad(2) = 2.d0 * fact_y
     grad(3) = 2.d0 * fact_z
 
-  elseif(env_type .eq. "sum-quartic") then
+  elseif(env_type .eq. "Sum_Quartic") then
 
     fact_x = 0.d0
     fact_y = 0.d0

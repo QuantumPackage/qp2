@@ -30,8 +30,8 @@
   grad1_u12_num         = 0.d0
   grad1_u12_squared_num = 0.d0
 
-  if( ((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) .or. &
-       (j2e_type .eq. "rs-dft-murho") ) then
+  if( ((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) .or. &
+       (j2e_type .eq. "Mur") ) then
 
     !$OMP PARALLEL                                                                                    &
     !$OMP DEFAULT (NONE)                                                                              &
@@ -67,7 +67,7 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-  elseif((j2e_type .eq. "rs-dft") .and. (env_type .ne. "none")) then
+  elseif((j2e_type .eq. "Mu") .and. (env_type .ne. "None")) then
 
     PROVIDE final_grid_points
 
@@ -110,7 +110,7 @@
     !$OMP END DO
     !$OMP END PARALLEL
 
-  elseif(j2e_type .eq. "champ") then
+  elseif(j2e_type .eq. "Qmckl") then
 
     double precision :: f
     f = 1.d0 / dble(elec_num - 1)

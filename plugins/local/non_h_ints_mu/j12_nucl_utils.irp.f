@@ -8,7 +8,7 @@ BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
   double precision :: x, y, z, dx, dy, dz
   double precision :: a, d, e, fact_r
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
@@ -33,7 +33,7 @@ BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
       env_val(ipoint) = fact_r
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
@@ -77,7 +77,7 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
   double precision :: fact_x, fact_y, fact_z
   double precision :: ax_der, ay_der, az_der, a_expo
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
@@ -121,7 +121,7 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
       env_grad(3,ipoint) = fact_z
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     ! v(r) = 1 - \sum_{a} \beta_a \exp(-\alpha_a (r - r_a)^2)
 
@@ -176,7 +176,7 @@ END_PROVIDER
 
   PROVIDE List_env1s_square_coef List_env1s_square_expo List_env1s_square_cent
 
-  if((env_type .eq. "prod-gauss") .or. (env_type .eq. "sum-gauss")) then
+  if((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) then
 
     do ipoint = 1, n_points_final_grid
 

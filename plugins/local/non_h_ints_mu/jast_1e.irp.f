@@ -14,11 +14,11 @@ BEGIN_PROVIDER [double precision, j1e_val, (n_points_final_grid)]
   call wall_time(time0)
   print*, ' providing j1e_val ...'
 
-  if(j1e_type .eq. "none") then
+  if(j1e_type .eq. "None") then
 
     j1e_val = 0.d0
 
-  elseif(j1e_type .eq. "gauss") then
+  elseif(j1e_type .eq. "Gauss") then
 
     ! \sum_{A} \sum_p c_{p_A} \exp(-\alpha_{p_A} (r - R_A)^2)
 
@@ -81,13 +81,13 @@ END_PROVIDER
   call wall_time(time0)
   print*, ' providing j1e_grad ...'
 
-  if(j1e_type .eq. "none") then
+  if(j1e_type .eq. "None") then
 
     j1e_gradx = 0.d0
     j1e_grady = 0.d0
     j1e_gradz = 0.d0
 
-  elseif(j1e_type .eq. "gauss") then
+  elseif(j1e_type .eq. "Gauss") then
 
     ! - \sum_{A} (r - R_A) \sum_p c_{p_A} \exp(-\alpha_{p_A} (r - R_A)^2)
 
@@ -126,7 +126,7 @@ END_PROVIDER
       j1e_gradz(ipoint) = 2.d0 * tmp_z
     enddo
 
-  elseif(j1e_type .eq. "charge-harmonizer") then
+  elseif(j1e_type .eq. "Charge_Harmonizer") then
 
     ! The - sign is in the integral over r2
     ! [(N-1)/2N] x \sum_{\mu,\nu} P_{\mu,\nu} \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_\mu(r2) \phi_nu(r2) 
@@ -180,11 +180,11 @@ BEGIN_PROVIDER [double precision, j1e_lapl, (n_points_final_grid)]
   double precision :: x, y, z, dx, dy, dz, d2
   double precision :: a, c, g, tmp
 
-  if(j1e_type .eq. "none") then
+  if(j1e_type .eq. "None") then
 
     j1e_lapl = 0.d0
 
-  elseif(j1e_type .eq. "gauss") then
+  elseif(j1e_type .eq. "Gauss") then
 
     ! - \sum_{A} (r - R_A) \sum_p c_{p_A} \exp(-\alpha_{p_A} (r - R_A)^2)
 

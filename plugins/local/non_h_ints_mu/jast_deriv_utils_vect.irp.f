@@ -27,15 +27,15 @@ subroutine get_grad1_u12_withsq_r1_seq(r1, n_grid2, resx, resy, resz, res)
   PROVIDE j1e_type j2e_type env_type
   PROVIDE final_grid_points_extra
 
-  if( ((j2e_type .eq. "rs-dft") .and. (env_type .eq. "none")) .or. &
-      (j2e_type .eq. "rs-dft-murho") ) then
+  if( ((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) .or. &
+      (j2e_type .eq. "Mur") ) then
 
     call grad1_j12_mu_r1_seq(r1, n_grid2, resx, resy, resz)
     do jpoint = 1, n_points_extra_final_grid
       res(jpoint) = resx(jpoint) * resx(jpoint) + resy(jpoint) * resy(jpoint) + resz(jpoint) * resz(jpoint)
     enddo
 
-  elseif((j2e_type .eq. "rs-dft") .and. (env_type .ne. "none")) then
+  elseif((j2e_type .eq. "Mu") .and. (env_type .ne. "None")) then
 
     !   u(r1,r2)        = j12_mu(r12) x v(r1) x v(r2)
     !   grad1 u(r1, r2) = [(grad1 j12_mu) v(r1) + j12_mu grad1 v(r1)] v(r2)
@@ -105,7 +105,7 @@ subroutine grad1_j12_mu_r1_seq(r1, n_grid2, gradx, grady, gradz)
   double precision              :: dx, dy, dz, r12, tmp
   double precision              :: mu_val, mu_tmp, mu_der(3)
 
-  if(j2e_type .eq. "rs-dft") then
+  if(j2e_type .eq. "Mu") then
 
     do jpoint = 1, n_points_extra_final_grid ! r2 
 
@@ -132,7 +132,7 @@ subroutine grad1_j12_mu_r1_seq(r1, n_grid2, gradx, grady, gradz)
       gradz(jpoint) = tmp * dz
     enddo
 
-  elseif(j2e_type .eq. "rs-dft-murho") then
+  elseif(j2e_type .eq. "Mur") then
 
     do jpoint = 1, n_points_extra_final_grid ! r2 
 
@@ -225,7 +225,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
   integer                        :: i, jpoint
   double precision               :: a, d, e, x, y, z
 
-  if(env_type .eq. "sum-slat") then
+  if(env_type .eq. "Sum_Slat") then
 
     res = 1.d0
 
@@ -244,7 +244,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
       enddo
     enddo
 
-  elseif(env_type .eq. "prod-gauss") then
+  elseif(env_type .eq. "Prod_Gauss") then
 
     res = 1.d0
 
@@ -264,7 +264,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
       enddo
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     res = 1.d0
 
@@ -282,7 +282,7 @@ subroutine env_nucl_r1_seq(n_grid2, res)
       enddo
     enddo
 
-  elseif(env_type .eq. "sum-quartic") then
+  elseif(env_type .eq. "Sum_Quartic") then
 
     res = 1.d0
 

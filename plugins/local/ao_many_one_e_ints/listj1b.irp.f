@@ -7,11 +7,11 @@ BEGIN_PROVIDER [integer, List_env1s_size]
 
   PROVIDE env_type
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     List_env1s_size = 2**nucl_num
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     List_env1s_size = nucl_num + 1
 
@@ -67,7 +67,7 @@ END_PROVIDER
   List_env1s_expo = 0.d0
   List_env1s_cent = 0.d0
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     do i = 1, List_env1s_size
 
@@ -121,7 +121,7 @@ END_PROVIDER
       List_env1s_coef(i) = (-1.d0)**dble(phase) * dexp(-List_env1s_coef(i))
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     List_env1s_coef(    1) = 1.d0
     List_env1s_expo(    1) = 0.d0
@@ -150,11 +150,11 @@ BEGIN_PROVIDER [integer, List_env1s_square_size]
   implicit none
   double precision :: tmp
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     List_env1s_square_size = 3**nucl_num
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     tmp                   = 0.5d0 * dble(nucl_num) * (dble(nucl_num) + 3.d0)
     List_env1s_square_size = int(tmp) + 1
@@ -224,7 +224,7 @@ END_PROVIDER
   List_env1s_square_expo = 0.d0
   List_env1s_square_cent = 0.d0
 
-  if(env_type .eq. "prod-gauss") then
+  if(env_type .eq. "Prod_Gauss") then
 
     do i = 1, List_env1s_square_size
 
@@ -280,7 +280,7 @@ END_PROVIDER
       List_env1s_square_coef(i) = (-1.d0)**dble(phase) * facto * dexp(-List_env1s_square_coef(i))
     enddo
 
-  elseif(env_type .eq. "sum-gauss") then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     ii = 1
     List_env1s_square_coef(    ii) = 1.d0

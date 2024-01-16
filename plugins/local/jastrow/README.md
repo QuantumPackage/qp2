@@ -11,7 +11,7 @@ The main keywords are:
 
 1. **none:** No 2e-Jastrow is used.
 
-2. **rs-dft:** 2e-Jastrow inspired by Range Separated Density Functional Theory. It has the following shape:
+2. **Mu:** 2e-Jastrow inspired by Range Separated Density Functional Theory. It has the following shape:
    <p align="center">
       <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%5Ctau=%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi,j%5Cneq%20i%7Du(%5Cmathbf%7Br%7D_i,%5Cmathbf%7Br%7D_j)">
    </p>
@@ -30,12 +30,12 @@ The 2-electron Jastrow is multiplied by an envelope \(v\):
 
 - if `env_type` is **none**: No envelope is used.
 
-- if `env_type` is **prod-gauss**:
+- if `env_type` is **Prod_Gauss**:
   <p align="center">
      <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%20v(%5Cmathbf%7Br%7D)=%5Cprod_%7BA%7D%5Cleft(1-e%5E%7B-%5Calpha_A(%5Cmathbf%7Br%7D-%5Cmathbf%7BR%7D_A)%5E2%7D%5Cright)">
    </p>
 
-- if `env_type` is **sum-gauss**:
+- if `env_type` is **Sum_Gauss**:
   <p align="center">
      <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%20v(%5Cmathbf%7Br%7D)=1-%5Csum_%7BA%7Dc_A%20e%5E%7B-%5Calpha_A(%5Cmathbf%7Br%7D-%5Cmathbf%7BR%7D_A)%5E2%7D">
   </p>
@@ -52,7 +52,7 @@ The 1-electron Jastrow used is:
 
 - if `j1e_type` is **none**: No one-electron Jastrow is used.
 
-- if `j1e_type` is **gauss**: We use
+- if `j1e_type` is **Gauss**: We use
 <p align="center">
    <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7Du_%7B1e%7D(%5Cmathbf%7Br%7D)=%5Csum_A%5Csum_%7Bp_A%7Dc_%7Bp_A%7De%5E%7B-%5Calpha_%7Bp_A%7D(%5Cmathbf%7Br%7D-%5Cmathbf%7BR%7D_A)%5E2%7D">
 </p>
@@ -60,7 +60,7 @@ The 1-electron Jastrow used is:
 
 are defined by the tables `j1e_coef` and `j1e_expo`, respectively.
 
-- if `j1e_type` is **charge-harmonizer**: The one-electron Jastrow factor aims to offset the adverse impact of modifying the charge density induced by the two-electron factor
+- if `j1e_type` is **Charge_Harmonizer**: The one-electron Jastrow factor aims to offset the adverse impact of modifying the charge density induced by the two-electron factor
   <p align="center">
      <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7Du_%7B1e%7D(%5Cmathbf%7Br%7D_1)=-%5Cfrac%7BN-1%7D%7B2N%7D%5C,%5Csum_%7B%5Csigma%7D%5C,%5Cint%20d%5Cmathbf%7Br%7D_2%5C,%5Crho%5E%7B%5Csigma%7D(%5Cmathbf%7Br%7D_2)%5C,u_%7B2e%7D(%5Cmathbf%7Br%7D_1,%5Cmathbf%7Br%7D_2)">
   </p>
