@@ -46,9 +46,9 @@
       IRP_ENDIF
     endif
   else
-    do i = 1, nucl_num
-      env_expo(i) = 1d5
-    enddo
+
+    env_expo = 1d5
+    call ezfio_set_jastrow_env_expo(env_expo)
   endif
 
   ! ---
@@ -81,9 +81,9 @@
       IRP_ENDIF
     endif
   else
-    do i = 1, nucl_num
-      env_coef(i) = 1d0
-    enddo
+
+    env_coef = 1d0
+    call ezfio_set_jastrow_env_coef(env_coef)
   endif
 
   ! ---

@@ -195,28 +195,40 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         PROVIDE ao_overlap
         PROVIDE j1e_gradx j1e_grady j1e_gradz
 
+        double precision, allocatable :: int_tmp(:,:,:,:)
+
         ! minus because we calculate \int [-\grad_1 u(1,2)]
         tmp_ct = -1.d0 / (dble(elec_num) - 1.d0)
 
-        !$OMP PARALLEL                                       &
-        !$OMP DEFAULT (NONE)                                 &
-        !$OMP PRIVATE (ipoint, i, j, tmp0_x, tmp0_y, tmp0_z) &
-        !$OMP SHARED (ao_num, n_points_final_grid, tmp_ct,   &
-        !$OMP         j1e_gradx, j1e_grady, j1e_gradz, ao_overlap, int2_grad1_u12_ao)
-        !$OMP DO SCHEDULE (static)
+        !$OMP PARALLEL                                                 &
+        !$OMP DEFAULT (NONE)                                           &
+        !$OMP PRIVATE (ipoint, i, j, tmp0_x, tmp0_y, tmp0_z, int_tmp)  &
+        !$OMP SHARED (ao_num, n_points_final_grid, tmp_ct, ao_overlap, &
+        !$OMP         j1e_gradx, j1e_grady, j1e_gradz, int2_grad1_u12_ao)
+
+        allocate(int_tmp(ao_num,ao_num,n_points_final_grid,3))
+        int_tmp = 0.d0
+
+        !$OMP DO
         do ipoint = 1, n_points_final_grid
           tmp0_x = tmp_ct * j1e_gradx(ipoint)
           tmp0_y = tmp_ct * j1e_grady(ipoint)
           tmp0_z = tmp_ct * j1e_gradz(ipoint)
           do j = 1, ao_num
             do i = 1, ao_num
-              int2_grad1_u12_ao(i,j,ipoint,1) = int2_grad1_u12_ao(i,j,ipoint,1) + tmp0_x * ao_overlap(i,j)
-              int2_grad1_u12_ao(i,j,ipoint,2) = int2_grad1_u12_ao(i,j,ipoint,2) + tmp0_y * ao_overlap(i,j)
-              int2_grad1_u12_ao(i,j,ipoint,3) = int2_grad1_u12_ao(i,j,ipoint,3) + tmp0_z * ao_overlap(i,j)
+              int_tmp(i,j,ipoint,1) = int_tmp(i,j,ipoint,1) + tmp0_x * ao_overlap(i,j)
+              int_tmp(i,j,ipoint,2) = int_tmp(i,j,ipoint,2) + tmp0_y * ao_overlap(i,j)
+              int_tmp(i,j,ipoint,3) = int_tmp(i,j,ipoint,3) + tmp0_z * ao_overlap(i,j)
             enddo
           enddo
         enddo
-        !$OMP END DO
+        !$OMP END DO NOWAIT
+
+        !$OMP CRITICAL
+        int2_grad1_u12_ao = int2_grad1_u12_ao + int_tmp
+        !$OMP END CRITICAL
+
+        deallocate(int_tmp)
         !$OMP END PARALLEL
 
       else
@@ -324,7 +336,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
       PROVIDE int2_grad1u2_grad2u2
 
-      int2_grad1_u12_square_ao = 0.d0
       !$OMP PARALLEL               &
       !$OMP DEFAULT (NONE)         &
       !$OMP PRIVATE (i, j, ipoint) &
@@ -352,7 +363,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         ! the term u12_grad1_u12_env_grad1_env is added directly for performance
         PROVIDE u12sq_envsq grad12_j12
 
-        int2_grad1_u12_square_ao = 0.d0
         !$OMP PARALLEL               &
         !$OMP DEFAULT (NONE)         &
         !$OMP PRIVATE (i, j, ipoint) &
@@ -374,7 +384,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
         PROVIDE u12sq_envsq u12_grad1_u12_env_grad1_env grad12_j12
 
-        int2_grad1_u12_square_ao = 0.d0
         !$OMP PARALLEL               &
         !$OMP DEFAULT (NONE)         &
         !$OMP PRIVATE (i, j, ipoint) &
@@ -405,7 +414,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
         PROVIDE int2_u2_env2
         PROVIDE int2_grad1u2_grad2u2_env2
 
-        int2_grad1_u12_square_ao = 0.d0
         !$OMP PARALLEL                                                       &
         !$OMP DEFAULT (NONE)                                                 &
         !$OMP PRIVATE (i, j, ipoint, tmp0_x, tmp0_y, tmp0_z, tmp1, tmp2)     &
@@ -433,7 +441,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
         PROVIDE u12sq_envsq u12_grad1_u12_env_grad1_env grad12_j12
 
-        int2_grad1_u12_square_ao = 0.d0
         !$OMP PARALLEL               &
         !$OMP DEFAULT (NONE)         &
         !$OMP PRIVATE (i, j, ipoint) &
@@ -538,6 +545,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       PROVIDE ao_overlap
       PROVIDE j1e_gradx j1e_grady j1e_gradz
 
+      double precision, allocatable :: int_tmp(:,:,:)
+
       tmp_ct1 = 1.d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
       tmp_ct2 = 1.d0 / (dble(elec_num) - 1.d0)
 
@@ -545,15 +554,18 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       !$OMP DEFAULT (NONE)                                             &
       !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx1, dy1, dz1,         &
       !$OMP         dx2, dy2, dz2, dr12, tmp0, tmp1, tmp2, tmp3, tmp4, & 
-      !$OMP         tmp0_x, tmp0_y, tmp0_z)                            &
+      !$OMP         tmp0_x, tmp0_y, tmp0_z, int_tmp)                   &
       !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points,    &
       !$OMP         tmp_ct1, tmp_ct2, env_val, env_grad,               &
-      !$OMP         j1e_gradx, j1e_grady, j1e_gradz,                   &
+      !$OMP         j1e_gradx, j1e_grady, j1e_gradz, ao_overlap,       &
       !$OMP         Ir2_Mu_long_Du_0, Ir2_Mu_long_Du_2,                &
       !$OMP         Ir2_Mu_long_Du_x, Ir2_Mu_long_Du_y,                &
-      !$OMP         Ir2_Mu_long_Du_z, Ir2_Mu_gauss_Du,                 &
-      !$OMP         ao_overlap, int2_grad1_u12_square_ao)
-      !$OMP DO SCHEDULE (static)
+      !$OMP         Ir2_Mu_long_Du_z, Ir2_Mu_gauss_Du, int2_grad1_u12_square_ao)
+
+      allocate(int_tmp(ao_num,ao_num,n_points_final_grid))
+      int_tmp = 0.d0
+
+      !$OMP DO
       do ipoint = 1, n_points_final_grid
 
         x  = final_grid_points(1,ipoint)
@@ -585,14 +597,18 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
   
             tmp4 = tmp0_x * Ir2_Mu_long_Du_x(i,j,ipoint) + tmp0_y * Ir2_Mu_long_Du_y(i,j,ipoint) + tmp0_z * Ir2_Mu_long_Du_z(i,j,ipoint)
 
-            int2_grad1_u12_square_ao(i,j,ipoint) = int2_grad1_u12_square_ao(i,j,ipoint)                                             &
-                                                 + tmp0 * Ir2_Mu_long_Du_0(i,j,ipoint) - tmp4 + tmp1 * Ir2_Mu_long_Du_2(i,j,ipoint) &
-                                                 - tmp2 * Ir2_Mu_gauss_Du(i,j,ipoint)                                               &
-                                                 + tmp3 * ao_overlap(i,j)
+            int_tmp(i,j,ipoint) = int_tmp(i,j,ipoint) + tmp0 * Ir2_Mu_long_Du_0(i,j,ipoint) - tmp4 + tmp1 * Ir2_Mu_long_Du_2(i,j,ipoint) &
+                                                      - tmp2 * Ir2_Mu_gauss_Du(i,j,ipoint) + tmp3 * ao_overlap(i,j)
           enddo
         enddo
       enddo
-      !$OMP END DO
+      !$OMP END DO NOWAIT
+
+      !$OMP CRITICAL
+      int2_grad1_u12_square_ao = int2_grad1_u12_square_ao + int_tmp
+      !$OMP END CRITICAL
+
+      deallocate(int_tmp)
       !$OMP END PARALLEL
 
       FREE Ir2_Mu_long_Du_0 Ir2_Mu_long_Du_x Ir2_Mu_long_Du_y Ir2_Mu_long_Du_z Ir2_Mu_gauss_Du Ir2_Mu_long_Du_2

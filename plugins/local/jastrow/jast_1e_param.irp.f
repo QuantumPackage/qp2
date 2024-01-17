@@ -48,7 +48,9 @@
       IRP_ENDIF
     endif
   else
+
     j1e_expo = 1.d0
+    call ezfio_set_jastrow_j1e_expo(j1e_expo)
   endif
 
   ! ---
@@ -81,7 +83,9 @@
       IRP_ENDIF
     endif
   else
+
     j1e_coef = 0.d0
+    call ezfio_set_jastrow_j1e_coef(j1e_coef)
   endif
 
   ! ---
