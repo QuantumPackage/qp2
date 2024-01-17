@@ -27,7 +27,7 @@ subroutine htilde_mu_mat_bi_ortho_tot_slow(key_j, key_i, Nint, htot)
     call htilde_mu_mat_bi_ortho_slow(key_j, key_i, Nint, hmono, htwoe, hthree, htot)
   endif
 
-end subroutine htilde_mu_mat_bi_ortho_tot_slow
+end
 
 ! --
 

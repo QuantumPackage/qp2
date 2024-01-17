@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_poin
 
   BEGIN_DOC
   !
-  ! -\frac{1}{4} x int dr2 phi_i(r2) phi_j(r2) [1 - erf(mu r12)]^2
+  ! \frac{1}{4} x int dr2 phi_i(r2) phi_j(r2) [1 - erf(mu r12)]^2
   !
   END_DOC
 
@@ -45,7 +45,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1u2_grad2u2, (ao_num, ao_num, n_poin
           expo_fit = expo_gauss_1_erf_x_2(i_fit)
           coef_fit = coef_gauss_1_erf_x_2(i_fit)
 
-          tmp += -0.25d0 * coef_fit * overlap_gauss_r12_ao(r, expo_fit, i, j)
+          tmp += 0.25d0 * coef_fit * overlap_gauss_r12_ao(r, expo_fit, i, j)
         enddo
 
         int2_grad1u2_grad2u2(j,i,ipoint) = tmp
@@ -96,13 +96,13 @@ BEGIN_PROVIDER [double precision, int2_grad1u2_grad2u2_env2, (ao_num, ao_num, n_
 
   int2_grad1u2_grad2u2_env2 = 0.d0
 
-  !$OMP PARALLEL DEFAULT (NONE)                                      &
-  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
-  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
+  !$OMP PARALLEL DEFAULT (NONE)                                       &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    & 
   !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
-  !$OMP          final_grid_points, ng_fit_jast,                     &
-  !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,         &
-  !$OMP          List_env1s_square_coef, List_env1s_square_expo,       & 
+  !$OMP          final_grid_points, ng_fit_jast,                      &
+  !$OMP          expo_gauss_1_erf_x_2, coef_gauss_1_erf_x_2,          &
+  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
   !$OMP          List_env1s_square_cent, int2_grad1u2_grad2u2_env2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -192,13 +192,13 @@ BEGIN_PROVIDER [double precision, int2_u2_env2, (ao_num, ao_num, n_points_final_
 
   int2_u2_env2 = 0.d0
 
-  !$OMP PARALLEL DEFAULT (NONE)                                      &
-  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
-  !$OMP          coef_fit, expo_fit, int_fit, tmp)                   & 
+  !$OMP PARALLEL DEFAULT (NONE)                                       &
+  !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
+  !$OMP          coef_fit, expo_fit, int_fit, tmp)                    & 
   !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
-  !$OMP          final_grid_points, ng_fit_jast,                     &
-  !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,           &
-  !$OMP          List_env1s_square_coef, List_env1s_square_expo,       & 
+  !$OMP          final_grid_points, ng_fit_jast,                      &
+  !$OMP          expo_gauss_j_mu_x_2, coef_gauss_j_mu_x_2,            &
+  !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
   !$OMP          List_env1s_square_cent, int2_u2_env2)
   !$OMP DO
   do ipoint = 1, n_points_final_grid
@@ -287,15 +287,15 @@ BEGIN_PROVIDER [double precision, int2_u_grad1u_x_env2, (ao_num, ao_num, n_point
 
   int2_u_grad1u_x_env2 = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, alpha_1s, dist,        &
- !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,     & 
- !$OMP          tmp_x, tmp_y, tmp_z)                                & 
+ !$OMP PARALLEL DEFAULT (NONE)                                       &
+ !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
+ !$OMP          coef_fit, expo_fit, int_fit, alpha_1s, dist,         &
+ !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp,      & 
+ !$OMP          tmp_x, tmp_y, tmp_z)                                 & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
- !$OMP          final_grid_points, ng_fit_jast,                     &
- !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,       &
- !$OMP          List_env1s_square_coef, List_env1s_square_expo,       & 
+ !$OMP          final_grid_points, ng_fit_jast,                      &
+ !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,        &
+ !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
  !$OMP          List_env1s_square_cent, int2_u_grad1u_x_env2)
  !$OMP DO
 
@@ -409,14 +409,14 @@ BEGIN_PROVIDER [ double precision, int2_u_grad1u_env2, (ao_num, ao_num, n_points
 
   int2_u_grad1u_env2 = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                      &
- !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center, &
- !$OMP          coef_fit, expo_fit, int_fit, tmp, alpha_1s, dist,   &
- !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp)     & 
+ !$OMP PARALLEL DEFAULT (NONE)                                       &
+ !$OMP PRIVATE (ipoint, i, j, i_1s, i_fit, r, coef, beta, B_center,  &
+ !$OMP          coef_fit, expo_fit, int_fit, tmp, alpha_1s, dist,    &
+ !$OMP          alpha_1s_inv, centr_1s, expo_coef_1s, coef_tmp)      & 
  !$OMP SHARED  (n_points_final_grid, ao_num, List_env1s_square_size, & 
- !$OMP          final_grid_points, ng_fit_jast,                     &
- !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,       &
- !$OMP          List_env1s_square_coef, List_env1s_square_expo,       & 
+ !$OMP          final_grid_points, ng_fit_jast,                      &
+ !$OMP          expo_gauss_j_mu_1_erf, coef_gauss_j_mu_1_erf,        &
+ !$OMP          List_env1s_square_coef, List_env1s_square_expo,      & 
  !$OMP          List_env1s_square_cent, int2_u_grad1u_env2)
  !$OMP DO
   do ipoint = 1, n_points_final_grid

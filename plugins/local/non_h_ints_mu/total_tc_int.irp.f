@@ -67,7 +67,6 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
     allocate(c_mat(n_points_final_grid,ao_num,ao_num))
 
-    c_mat = 0.d0
     !$OMP PARALLEL               &
     !$OMP DEFAULT (NONE)         &
     !$OMP PRIVATE (i, k, ipoint) &
@@ -99,7 +98,6 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
       PROVIDE int2_u2_env2
 
-      c_mat = 0.d0
       !$OMP PARALLEL                                                                                     &
       !$OMP DEFAULT (NONE)                                                                               &
       !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                                              &
@@ -142,7 +140,6 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
       allocate(b_mat(n_points_final_grid,ao_num,ao_num,3))
 
-      b_mat = 0.d0
       !$OMP PARALLEL                                                              &
       !$OMP DEFAULT (NONE)                                                        &
       !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 

@@ -37,7 +37,10 @@ program test_non_h
 
   !call test_j1e_grad()
 
-  call test_j1e_fit_ao()
+  !call test_j1e_fit_ao()
+
+  call test_tc_grad_and_lapl_ao_new()
+  call test_tc_grad_square_ao_new()
 end
 
 ! ---
@@ -846,6 +849,266 @@ subroutine test_j1e_fit_ao()
   print*, ' fit accuracy (%) = ', 100.d0 * accu / norm
 
 end 
+
+! ---
+
+subroutine test_tc_grad_and_lapl_ao_new()
+
+  implicit none
+  integer                       :: i, j, k, l
+  double precision              :: i_old, i_new, diff, thr, accu, norm
+  double precision, allocatable :: tc_grad_and_lapl_ao_old(:,:,:,:)
+
+  PROVIDE tc_grad_and_lapl_ao_new
+
+  thr  = 1d-10
+  norm = 0.d0
+  accu = 0.d0
+
+  allocate(tc_grad_and_lapl_ao_old(ao_num,ao_num,ao_num,ao_num))
+
+  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_and_lapl_ao_old', action="read")
+    read(11) tc_grad_and_lapl_ao_old
+  close(11)
+
+  do i = 1, ao_num
+    do j = 1, ao_num
+      do k = 1, ao_num
+        do l = 1, ao_num
+
+          i_old = tc_grad_and_lapl_ao_old(l,k,j,i)
+          i_new = tc_grad_and_lapl_ao_new(l,k,j,i)
+          diff  = dabs(i_old - i_new)
+          if(diff .gt. thr) then
+            print *, ' problem in tc_grad_and_lapl_ao_new on:', l, k, j, i
+            print *, ' old :', i_old
+            print *, ' new :', i_new
+            stop
+          endif
+          accu += diff
+          norm += dabs(i_old) 
+        enddo
+      enddo
+    enddo
+  enddo
+
+  deallocate(tc_grad_and_lapl_ao_old)
+
+  print*, ' accuracy (%) = ', 100.d0 * accu / norm
+
+end
+
+! ---
+
+subroutine test_tc_grad_square_ao_new()
+
+  implicit none
+  integer                       :: i, j, k, l
+  double precision              :: i_old, i_new, diff, thr, accu, norm
+  double precision, allocatable :: tc_grad_square_ao_old(:,:,:,:)
+
+  PROVIDE tc_grad_square_ao_new
+
+  thr  = 1d-10
+  norm = 0.d0
+  accu = 0.d0
+
+  allocate(tc_grad_square_ao_old(ao_num,ao_num,ao_num,ao_num))
+
+  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/tc_grad_square_ao_old', action="read")
+    read(11) tc_grad_square_ao_old
+  close(11)
+
+  do i = 1, ao_num
+    do j = 1, ao_num
+      do k = 1, ao_num
+        do l = 1, ao_num
+
+          i_old = tc_grad_square_ao_old(l,k,j,i)
+          i_new = tc_grad_square_ao_new(l,k,j,i)
+          diff  = dabs(i_old - i_new)
+          if(diff .gt. thr) then
+            print *, ' problem in tc_grad_and_lapl_ao_new on:', l, k, j, i
+            print *, ' old :', i_old
+            print *, ' new :', i_new
+            stop
+          endif
+          accu += diff
+          norm += dabs(i_old) 
+        enddo
+      enddo
+    enddo
+  enddo
+
+  deallocate(tc_grad_square_ao_old)
+
+  print*, ' accuracy (%) = ', 100.d0 * accu / norm
+
+end
+
+! ---
+
+BEGIN_PROVIDER [double precision, tc_grad_square_ao_new, (ao_num, ao_num, ao_num, ao_num)]
+
+  implicit none
+  integer                       :: i, j, k, l, m, ipoint
+  double precision              :: weight1, ao_k_r, ao_i_r
+  double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
+  double precision              :: time0, time1
+  double precision, allocatable :: b_mat(:,:,:,:), c_mat(:,:,:)
+  double precision, external    :: get_ao_two_e_integral
+
+  PROVIDe tc_integ_type
+  PROVIDE env_type
+  PROVIDE j2e_type
+  PROVIDE j1e_type
+
+  call wall_time(time0)
+
+  print *, ' providing tc_grad_square_ao_new ...'
+
+  PROVIDE int2_grad1_u12_square_ao
+
+  allocate(c_mat(n_points_final_grid,ao_num,ao_num))
+
+  !$OMP PARALLEL               &
+  !$OMP DEFAULT (NONE)         &
+  !$OMP PRIVATE (i, k, ipoint) &
+  !$OMP SHARED (aos_in_r_array_transp, c_mat, ao_num, n_points_final_grid, final_weight_at_r_vector)
+  !$OMP DO SCHEDULE (static)
+  do i = 1, ao_num
+    do k = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+        c_mat(ipoint,k,i) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,k)
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
+            , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+            , 0.d0, tc_grad_square_ao_new, ao_num*ao_num)
+
+  FREE int2_grad1_u12_square_ao
+
+  if( (tc_integ_type .eq. "semi-analytic")                            .and. &
+      (j2e_type .eq. "Mu")                                            .and. &
+      ((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) .and. &
+      use_ipp ) then
+
+    ! an additional term is added here directly instead of 
+    ! being added in int2_grad1_u12_square_ao for performance
+
+    PROVIDE int2_u2_env2
+
+    !$OMP PARALLEL                                                                                     &
+    !$OMP DEFAULT (NONE)                                                                               &
+    !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                                              &
+    !$OMP SHARED (aos_in_r_array_transp, c_mat, ao_num, n_points_final_grid, final_weight_at_r_vector, &
+    !$OMP         env_square_grad, env_square_lapl, aos_grad_in_r_array_transp_bis)
+    !$OMP DO SCHEDULE (static)
+    do i = 1, ao_num
+      do k = 1, ao_num
+        do ipoint = 1, n_points_final_grid
+
+          weight1 = 0.25d0 * final_weight_at_r_vector(ipoint)
+
+          ao_i_r = aos_in_r_array_transp(ipoint,i)
+          ao_k_r = aos_in_r_array_transp(ipoint,k)
+
+          c_mat(ipoint,k,i) = weight1 * ( ao_k_r * ao_i_r * env_square_lapl(ipoint)                                                                                   &
+                            + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) * env_square_grad(ipoint,1) &
+                            + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) * env_square_grad(ipoint,2) &
+                            + (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) + ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3)) * env_square_grad(ipoint,3) )
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0     &
+              , int2_u2_env2(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+              , 1.d0, tc_grad_square_ao_new, ao_num*ao_num)
+
+    FREE int2_u2_env2
+  endif ! use_ipp
+
+  deallocate(c_mat)
+
+  call sum_A_At(tc_grad_square_ao_new(1,1,1,1), ao_num*ao_num)
+
+  call wall_time(time1)
+  print*, ' Wall time for tc_grad_square_ao_new (min) = ', (time1 - time0) / 60.d0
+
+END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_num, ao_num)]
+
+  implicit none
+  integer                       :: i, j, k, l, m, ipoint
+  double precision              :: weight1, ao_k_r, ao_i_r
+  double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
+  double precision              :: time0, time1
+  double precision, allocatable :: b_mat(:,:,:,:), c_mat(:,:,:)
+  double precision, external    :: get_ao_two_e_integral
+
+  PROVIDe tc_integ_type
+  PROVIDE env_type
+  PROVIDE j2e_type
+  PROVIDE j1e_type
+
+  call wall_time(time0)
+
+  print *, ' providing tc_grad_square_ao_new ...'
+
+
+  PROVIDE int2_grad1_u12_ao
+
+  allocate(b_mat(n_points_final_grid,ao_num,ao_num,3))
+
+  !$OMP PARALLEL                                                              &
+  !$OMP DEFAULT (NONE)                                                        &
+  !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
+  !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
+  !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
+  !$OMP DO SCHEDULE (static)
+  do i = 1, ao_num
+    do k = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+
+        weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
+        ao_i_r  = aos_in_r_array_transp(ipoint,i)
+        ao_k_r  = aos_in_r_array_transp(ipoint,k)
+
+        b_mat(ipoint,k,i,1) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1))
+        b_mat(ipoint,k,i,2) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2))
+        b_mat(ipoint,k,i,3) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3))
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  tc_grad_and_lapl_ao_new = 0.d0
+  do m = 1, 3
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0             &
+              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
+              , 1.d0, tc_grad_and_lapl_ao_new, ao_num*ao_num)
+    enddo
+  deallocate(b_mat)
+
+  FREE int2_grad1_u12_ao
+  FREE int2_grad1_u2e_ao
+
+  call sum_A_At(tc_grad_and_lapl_ao_new(1,1,1,1), ao_num*ao_num)
+
+  call wall_time(time1)
+  print*, ' Wall time for tc_grad_and_lapl_ao_new (min) = ', (time1 - time0) / 60.d0
+
+END_PROVIDER 
 
 ! ---
 

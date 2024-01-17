@@ -207,7 +207,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       do ipoint = 1, n_points_final_grid
         do j = 1, ao_num
           do i = 1, ao_num
-            int2_grad1_u12_square_ao(i,j,ipoint) = int2_grad1u2_grad2u2(i,j,ipoint)
+            int2_grad1_u12_square_ao(i,j,ipoint) = -0.5d0 * int2_grad1u2_grad2u2(i,j,ipoint)
           enddo
         enddo
       enddo
@@ -323,76 +323,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
       endif ! use_ipp
 
-!    elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
-!
-!      PROVIDE mu_erf
-!      PROVIDE env_val env_grad
-!      PROVIDE Ir2_Mu_short_Du2_0 Ir2_Mu_short_Du2_x Ir2_Mu_short_Du2_y Ir2_Mu_short_Du2_z Ir2_Mu_short_Du2_2
-!      PROVIDE Ir2_Mu_long_Du2_0 Ir2_Mu_long_Du2_x Ir2_Mu_long_Du2_y Ir2_Mu_long_Du2_z Ir2_Mu_long_Du2_2
-!      PROVIDE Ir2_Mu_gauss_Du2
-!
-!      tmp_ct  = 1.d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
-!      tmp_ct2 = tmp_ct * tmp_ct
-!
-!      int2_grad1_u12_square_ao = 0.d0
-!
-!      !$OMP PARALLEL                                                &
-!      !$OMP DEFAULT (NONE)                                          &
-!      !$OMP PRIVATE (ipoint, i, j, x, y, z, r2, dx, dy, dz, dr2,    &
-!      !$OMP         tmp1, tmp2, tmp3, tmp4, tmp5, tmp6,             & 
-!      !$OMP         tmp0_x, tmp0_y, tmp0_z, tmp1_x, tmp1_y, tmp1_z) &
-!      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points, &
-!      !$OMP         tmp_ct, tmp_ct2, env_val, env_grad,             &
-!      !$OMP         Ir2_Mu_long_Du2_0, Ir2_Mu_long_Du2_x,     &
-!      !$OMP         Ir2_Mu_long_Du2_y, Ir2_Mu_long_Du2_z,     &
-!      !$OMP         Ir2_Mu_gauss_Du2, Ir2_Mu_long_Du2_2,      &
-!      !$OMP         Ir2_Mu_short_Du2_0, Ir2_Mu_short_Du2_x,   &
-!      !$OMP         Ir2_Mu_short_Du2_y, Ir2_Mu_short_Du2_z,   &
-!      !$OMP         Ir2_Mu_short_Du2_2, int2_grad1_u12_square_ao)
-!      !$OMP DO SCHEDULE (static)
-!      do ipoint = 1, n_points_final_grid
-!
-!        x  = final_grid_points(1,ipoint)
-!        y  = final_grid_points(2,ipoint)
-!        z  = final_grid_points(3,ipoint)
-!        r2 = x*x + y*y + z*z
-!
-!        dx = env_grad(1,ipoint)
-!        dy = env_grad(2,ipoint)
-!        dz = env_grad(3,ipoint)
-!        dr2 = dx*dx + dy*dy + dz*dz
-!
-!        tmp0_x = 0.5d0 * (dr2 * x + env_val(ipoint) * dx)
-!        tmp0_y = 0.5d0 * (dr2 * y + env_val(ipoint) * dy)
-!        tmp0_z = 0.5d0 * (dr2 * z + env_val(ipoint) * dz)
-!
-!        tmp1 = 0.25d0 * (env_val(ipoint)*env_val(ipoint) + r2*dr2 + 2.d0*env_val(ipoint)*(x*dx+y*dy+z*dz))
-!        tmp3 = 0.25d0 * dr2 
-!        tmp4 = tmp3 * tmp_ct2
-!        tmp5 = 0.50d0 * tmp_ct * (r2*dr2 + env_val(ipoint)*(x*dx+y*dy+z*dz))
-!        tmp6 = 0.50d0 * tmp_ct * dr2
-!
-!        tmp1_x = 0.5d0 * tmp_ct * (2.d0*dr2*x + env_val(ipoint)*dx)
-!        tmp1_y = 0.5d0 * tmp_ct * (2.d0*dr2*y + env_val(ipoint)*dy)
-!        tmp1_z = 0.5d0 * tmp_ct * (2.d0*dr2*z + env_val(ipoint)*dz)
-!
-!        do j = 1, ao_num
-!          do i = 1, ao_num
-!
-!            tmp2 = tmp1_x * Ir2_Mu_long_Du2_x (i,j,ipoint) + tmp1_y * Ir2_Mu_long_Du2_y (i,j,ipoint) + tmp1_z * Ir2_Mu_long_Du2_z (i,j,ipoint) &
-!                 - tmp0_x * Ir2_Mu_short_Du2_x(i,j,ipoint) - tmp0_y * Ir2_Mu_short_Du2_y(i,j,ipoint) - tmp0_z * Ir2_Mu_short_Du2_z(i,j,ipoint)
-!
-!            int2_grad1_u12_square_ao(i,j,ipoint) = tmp1 * Ir2_Mu_short_Du2_0(i,j,ipoint) + tmp2 + tmp3 * Ir2_Mu_short_Du2_2(i,j,ipoint) &
-!                                                 + tmp4 * Ir2_Mu_gauss_Du2(i,j,ipoint) - tmp5 * Ir2_Mu_long_Du2_0(i,j,ipoint)           &
-!                                                 - tmp6 * Ir2_Mu_long_Du2_2(i,j,ipoint)
-!          enddo
-!        enddo
-!      enddo
-!      !$OMP END DO
-!      !$OMP END PARALLEL
-!
-!      int2_grad1_u12_square_ao = -0.5d0 * int2_grad1_u12_square_ao
-
     else 
 
       print *, ' Error in int2_grad1_u12_square_ao: Unknown Jastrow'
@@ -409,8 +339,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
       PROVIDE j1e_gradx j1e_grady j1e_gradz
       PROVIDE int2_grad1_u2e_ao
 
-      tmp_ct1 = 2.d0 / (dble(elec_num) - 1.d0)
-      tmp_ct2 = 1.d0 / ((dble(elec_num) - 1.d0) * (dble(elec_num) - 1.d0))
+      tmp_ct1 = -1.0d0 / (dble(elec_num) - 1.d0)
+      tmp_ct2 = -0.5d0 / ((dble(elec_num) - 1.d0) * (dble(elec_num) - 1.d0))
 
       !$OMP PARALLEL                                 &
       !$OMP DEFAULT (NONE)                           &
