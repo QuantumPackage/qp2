@@ -8,7 +8,11 @@ BEGIN_PROVIDER [double precision, env_val, (n_points_final_grid)]
   double precision :: x, y, z, dx, dy, dz
   double precision :: a, d, e, fact_r
 
-  if(env_type .eq. "Prod_Gauss") then
+  if(env_type .eq. "None") then
+
+    env_val = 1.d0
+
+  elseif(env_type .eq. "Prod_Gauss") then
 
     ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
@@ -77,7 +81,11 @@ BEGIN_PROVIDER [double precision, env_grad, (3, n_points_final_grid)]
   double precision :: fact_x, fact_y, fact_z
   double precision :: ax_der, ay_der, az_der, a_expo
 
-  if(env_type .eq. "Prod_Gauss") then
+  if(env_type .eq. "None") then
+
+    env_grad = 0.d0
+
+  elseif(env_type .eq. "Prod_Gauss") then
 
     ! v(r) = \Pi_{a} [1 - \exp(-\alpha_a (r - r_a)^2)]
 
@@ -176,7 +184,12 @@ END_PROVIDER
 
   PROVIDE List_env1s_square_coef List_env1s_square_expo List_env1s_square_cent
 
-  if((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) then
+  if(env_type .eq. "None") then
+
+    env_square_grad = 0.d0
+    env_square_lapl = 0.d0
+
+  elseif((env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss")) then
 
     do ipoint = 1, n_points_final_grid
 

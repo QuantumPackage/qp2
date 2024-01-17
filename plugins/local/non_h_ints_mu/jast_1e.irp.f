@@ -177,29 +177,24 @@ END_PROVIDER
     call get_j1e_coef_fit_ao(ao_num, coef_fit)
     call ezfio_set_jastrow_j1e_coef_ao(coef_fit)
 
-    !$OMP PARALLEL                                 &
-    !$OMP DEFAULT (NONE)                           &
-    !$OMP PRIVATE (i, ipoint, tmp_x, tmp_y, tmp_z, &
-    !$OMP         c)                               &
-    !$OMP SHARED (n_points_final_grid, ao_num,     &
-    !$OMP         aos_grad_in_r_array, coef_fit,   &
+    !$OMP PARALLEL                               &
+    !$OMP DEFAULT (NONE)                         &
+    !$OMP PRIVATE (i, ipoint, c)                 &
+    !$OMP SHARED (n_points_final_grid, ao_num,   &
+    !$OMP         aos_grad_in_r_array, coef_fit, &
     !$OMP         j1e_gradx, j1e_grady, j1e_gradz)
     !$OMP DO SCHEDULE (static)
     do ipoint = 1, n_points_final_grid
 
-      tmp_x = 0.d0
-      tmp_y = 0.d0
-      tmp_z = 0.d0
+      j1e_gradx(ipoint) = 0.d0
+      j1e_grady(ipoint) = 0.d0
+      j1e_gradz(ipoint) = 0.d0
       do i = 1, ao_num
         c = coef_fit(i)
-        tmp_x = tmp_x + c * aos_grad_in_r_array(i,ipoint,1)
-        tmp_y = tmp_y + c * aos_grad_in_r_array(i,ipoint,2)
-        tmp_z = tmp_z + c * aos_grad_in_r_array(i,ipoint,3)
+        j1e_gradx(ipoint) = j1e_gradx(ipoint) + c * aos_grad_in_r_array(i,ipoint,1)
+        j1e_grady(ipoint) = j1e_grady(ipoint) + c * aos_grad_in_r_array(i,ipoint,2)
+        j1e_gradz(ipoint) = j1e_gradz(ipoint) + c * aos_grad_in_r_array(i,ipoint,3)
       enddo
-
-      j1e_gradx(ipoint) = tmp_x
-      j1e_grady(ipoint) = tmp_y
-      j1e_gradz(ipoint) = tmp_z
     enddo
     !$OMP END DO
     !$OMP END PARALLEL

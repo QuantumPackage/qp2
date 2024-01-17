@@ -19,6 +19,12 @@ program test_non_h
     touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
   endif
 
+  PROVIDE j2e_type
+  PROVIDE j1e_type
+  PROVIDE env_type
+  print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
 
   !call routine_fit()
   
@@ -29,7 +35,9 @@ program test_non_h
   !call test_int2_grad1_u12_square_ao()
   !call test_int2_grad1_u12_ao()
 
-  call test_j1e_grad()
+  !call test_j1e_grad()
+
+  call test_j1e_fit_ao()
 end
 
 ! ---
@@ -712,6 +720,132 @@ subroutine test_j1e_grad()
 
   return
 end
+
+! ---
+
+subroutine test_j1e_fit_ao()
+
+  implicit none
+  integer                       :: i, j, ipoint
+  double precision              :: g, c
+  double precision              :: x_loops, x_dgemm, diff, thr, accu, norm
+  double precision, allocatable :: pa(:,:), Pb(:,:), Pt(:,:)
+  double precision, allocatable :: x(:), y(:), z(:)
+  double precision, allocatable :: x_fit(:), y_fit(:), z_fit(:), coef_fit(:)
+
+  PROVIDE mo_coef
+  PROVIDE int2_grad1_u2e_ao
+
+  ! ---
+
+  allocate(Pa(ao_num,ao_num), Pb(ao_num,ao_num), Pt(ao_num,ao_num))
+
+  call dgemm( 'N', 'T', ao_num, ao_num, elec_alpha_num, 1.d0       &
+            , mo_coef, size(mo_coef, 1), mo_coef, size(mo_coef, 1) &
+            , 0.d0, Pa, size(Pa, 1))
+
+  if(elec_alpha_num .eq. elec_beta_num) then
+    Pb = Pa
+  else
+    call dgemm( 'N', 'T', ao_num, ao_num, elec_beta_num, 1.d0        &
+              , mo_coef, size(mo_coef, 1), mo_coef, size(mo_coef, 1) &
+              , 0.d0, Pb, size(Pb, 1))
+  endif
+  Pt = Pa + Pa
+
+  allocate(x(n_points_final_grid), y(n_points_final_grid), z(n_points_final_grid))
+
+  g = 0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
+
+  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1, 0.d0, x, 1)
+  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1, 0.d0, y, 1)
+  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,3), ao_num*ao_num, Pt, 1, 0.d0, z, 1)
+
+  FREE int2_grad1_u2e_ao
+
+  deallocate(Pa, Pb, Pt)
+
+  ! ---
+
+  allocate(x_fit(n_points_final_grid), y_fit(n_points_final_grid), z_fit(n_points_final_grid))
+  allocate(coef_fit(ao_num))
+
+  call get_j1e_coef_fit_ao(ao_num, coef_fit)
+  !print *, ' coef fit in AO:'
+  !print*, coef_fit
+
+!  !$OMP PARALLEL                             &
+!  !$OMP DEFAULT (NONE)                       &
+!  !$OMP PRIVATE (i, ipoint, c)               &
+!  !$OMP SHARED (n_points_final_grid, ao_num, &
+!  !$OMP         aos_grad_in_r_array, coef_fit, x_fit, y_fit, z_fit)
+!  !$OMP DO SCHEDULE (static)
+  do ipoint = 1, n_points_final_grid
+    x_fit(ipoint) = 0.d0
+    y_fit(ipoint) = 0.d0
+    z_fit(ipoint) = 0.d0
+    do i = 1, ao_num
+      c = coef_fit(i)
+      x_fit(ipoint) = x_fit(ipoint) + c * aos_grad_in_r_array(i,ipoint,1)
+      y_fit(ipoint) = y_fit(ipoint) + c * aos_grad_in_r_array(i,ipoint,2)
+      z_fit(ipoint) = z_fit(ipoint) + c * aos_grad_in_r_array(i,ipoint,3)
+    enddo
+  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+
+  deallocate(coef_fit)
+
+  ! ---
+
+  thr  = 1d-10
+  norm = 0.d0
+  accu = 0.d0
+  do ipoint = 1, n_points_final_grid
+
+    x_loops = x    (ipoint)
+    x_dgemm = x_fit(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    !if(diff .gt. thr) then
+    !  print *, ' problem in j1e_gradx on:', ipoint
+    !  print *, ' loops :', x_loops
+    !  print *, ' dgemm :', x_dgemm
+    !  stop
+    !endif
+    accu += diff
+    norm += dabs(x_loops)
+
+    x_loops = y    (ipoint)
+    x_dgemm = y_fit(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    !if(diff .gt. thr) then
+    !  print *, ' problem in j1e_grady on:', ipoint
+    !  print *, ' loops :', x_loops
+    !  print *, ' dgemm :', x_dgemm
+    !  stop
+    !endif
+    accu += diff
+    norm += dabs(x_loops)
+
+    x_loops = z    (ipoint)
+    x_dgemm = z_fit(ipoint)
+    diff    = dabs(x_loops - x_dgemm)
+    !if(diff .gt. thr) then
+    !  print *, ' problem in j1e_gradz on:', ipoint
+    !  print *, ' loops :', x_loops
+    !  print *, ' dgemm :', x_dgemm
+    !  stop
+    !endif
+    accu += diff
+    norm += dabs(x_loops)
+  enddo
+
+  deallocate(x, y, z)
+  deallocate(x_fit, y_fit, z_fit)
+
+  print*, ' fit accuracy (%) = ', 100.d0 * accu / norm
+
+end 
 
 ! ---
 

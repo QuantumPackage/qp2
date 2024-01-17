@@ -58,8 +58,8 @@ BEGIN_PROVIDER [double precision, int2_u2e_ao, (ao_num, ao_num, n_points_final_g
           dy = y * env_val(ipoint)
           dz = z * env_val(ipoint)
 
+          tmp0 = 0.5d0 * env_val(ipoint) * r2
           tmp1 = 0.5d0 * env_val(ipoint)
-          tmp0 = tmp1 * r2
           tmp3 = tmp_ct * env_val(ipoint)
 
           do j = 1, ao_num
@@ -124,67 +124,9 @@ BEGIN_PROVIDER [double precision, int2_grad1_u2e_ao, (ao_num, ao_num, n_points_f
 
   if(tc_integ_type .eq. "semi-analytic") then
 
-    if((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) then
 
-      PROVIDE v_ij_erf_rk_cst_mu x_v_ij_erf_rk_cst_mu
-
-      int2_grad1_u2e_ao = 0.d0
-      !$OMP PARALLEL                                                &
-      !$OMP DEFAULT (NONE)                                          &
-      !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp1)                   &
-      !$OMP SHARED ( ao_num, n_points_final_grid, final_grid_points &
-      !$OMP        , v_ij_erf_rk_cst_mu, x_v_ij_erf_rk_cst_mu, int2_grad1_u2e_ao)
-      !$OMP DO SCHEDULE (static)
-      do ipoint = 1, n_points_final_grid
-        x = final_grid_points(1,ipoint)
-        y = final_grid_points(2,ipoint)
-        z = final_grid_points(3,ipoint)
-        do j = 1, ao_num
-          do i = 1, ao_num
-            tmp1 = v_ij_erf_rk_cst_mu(i,j,ipoint)
-            int2_grad1_u2e_ao(i,j,ipoint,1) = 0.5d0 * (tmp1 * x - x_v_ij_erf_rk_cst_mu(i,j,ipoint,1))
-            int2_grad1_u2e_ao(i,j,ipoint,2) = 0.5d0 * (tmp1 * y - x_v_ij_erf_rk_cst_mu(i,j,ipoint,2))
-            int2_grad1_u2e_ao(i,j,ipoint,3) = 0.5d0 * (tmp1 * z - x_v_ij_erf_rk_cst_mu(i,j,ipoint,3))
-          enddo
-        enddo
-      enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
-
-    elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Prod_Gauss")) then
-
-      PROVIDE env_type env_val env_grad
-      PROVIDE v_ij_erf_rk_cst_mu_env v_ij_u_cst_mu_env_an x_v_ij_erf_rk_cst_mu_env
-
-      int2_grad1_u2e_ao = 0.d0
-      !$OMP PARALLEL                                                                   &
-      !$OMP DEFAULT (NONE)                                                             &
-      !$OMP PRIVATE (ipoint, i, j, x, y, z, tmp0, tmp1, tmp2, tmp0_x, tmp0_y, tmp0_z)  &
-      !$OMP SHARED (ao_num, n_points_final_grid, final_grid_points, env_val, env_grad, &
-      !$OMP        v_ij_erf_rk_cst_mu_env, v_ij_u_cst_mu_env_an, x_v_ij_erf_rk_cst_mu_env, int2_grad1_u2e_ao)
-      !$OMP DO SCHEDULE (static)
-      do ipoint = 1, n_points_final_grid
-        x      = final_grid_points(1,ipoint)
-        y      = final_grid_points(2,ipoint)
-        z      = final_grid_points(3,ipoint)
-        tmp0   =     0.5d0 * env_val(ipoint)
-        tmp0_x =          env_grad(1,ipoint)
-        tmp0_y =          env_grad(2,ipoint)
-        tmp0_z =          env_grad(3,ipoint)
-        do j = 1, ao_num
-          do i = 1, ao_num
-            tmp1 = tmp0 * v_ij_erf_rk_cst_mu_env(i,j,ipoint)
-            tmp2 = v_ij_u_cst_mu_env_an(i,j,ipoint)
-            int2_grad1_u2e_ao(i,j,ipoint,1) = tmp1 * x - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,1) - tmp2 * tmp0_x
-            int2_grad1_u2e_ao(i,j,ipoint,2) = tmp1 * y - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,2) - tmp2 * tmp0_y
-            int2_grad1_u2e_ao(i,j,ipoint,3) = tmp1 * z - tmp0 * x_v_ij_erf_rk_cst_mu_env(i,j,ipoint,3) - tmp2 * tmp0_z
-          enddo
-        enddo
-      enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
-
-    elseif((j2e_type .eq. "Mu") .and. (env_type .eq. "Sum_Gauss")) then
+    if( (j2e_type .eq. "Mu") .and. &
+        ( (env_type .eq. "None") .or. (env_type .eq. "Prod_Gauss") .or. (env_type .eq. "Sum_Gauss") ) ) then
 
       PROVIDE mu_erf
       PROVIDE env_type env_val env_grad
@@ -192,8 +134,6 @@ BEGIN_PROVIDER [double precision, int2_grad1_u2e_ao, (ao_num, ao_num, n_points_f
       PROVIDE Ir2_Mu_gauss_Du
 
       tmp_ct = 0.5d0 / (dsqrt(dacos(-1.d0)) * mu_erf)
-
-      int2_grad1_u2e_ao = 0.d0
 
       !$OMP PARALLEL                                                    &
       !$OMP DEFAULT (NONE)                                              &
@@ -300,8 +240,8 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
   allocate(u1e_tmp(n_points_final_grid))
   
-  g = 0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
-  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao(1,1,1), ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
+  g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
+  call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_u2e_ao, ao_num*ao_num, Pt, 1, 0.d0, u1e_tmp, 1)
 
   FREE int2_u2e_ao
 
@@ -340,6 +280,19 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
   ! coef_fit = A_inv x b
   call dgemv("N", ao_num, ao_num, 1.d0, A_inv, ao_num, b, 1, 0.d0, coef_fit, 1)
+
+  !integer          :: j, k
+  !double precision :: tmp
+  !print *, ' check A_inv'
+  !do i = 1, ao_num
+  !  tmp = 0.d0
+  !  do j = 1, ao_num
+  !    tmp += ao_overlap(i,j) * coef_fit(j)
+  !  enddo
+  !  tmp = tmp - b(i)
+  !  print*, i, tmp
+  !enddo
+
   deallocate(A_inv, b)
 
   return
