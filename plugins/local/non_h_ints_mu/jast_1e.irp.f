@@ -129,8 +129,7 @@ END_PROVIDER
 
   elseif(j1e_type .eq. "Charge_Harmonizer") then
 
-    ! The - sign is in the integral over r2
-    ! [(N-1)/2N] x \sum_{\mu,\nu} P_{\mu,\nu} \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_\mu(r2) \phi_nu(r2) 
+    ! -[(N-1)/2N] x \sum_{\mu,\nu} P_{\mu,\nu} \int dr2 [\grad_r1 J_2e(r1,r2)] \phi_\mu(r2) \phi_nu(r2) 
 
     PROVIDE elec_alpha_num elec_beta_num elec_num
     PROVIDE mo_coef
@@ -151,7 +150,7 @@ END_PROVIDER
     endif
     Pt = Pa + Pb
 
-    g = 0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
+    g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
 
     call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1, 0.d0, j1e_gradx, 1)
     call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1, 0.d0, j1e_grady, 1)

@@ -755,7 +755,7 @@ subroutine test_j1e_fit_ao()
 
   allocate(x(n_points_final_grid), y(n_points_final_grid), z(n_points_final_grid))
 
-  g = 0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
+  g = -0.5d0 * (dble(elec_num) - 1.d0) / dble(elec_num)
 
   call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,1), ao_num*ao_num, Pt, 1, 0.d0, x, 1)
   call dgemv("T", ao_num*ao_num, n_points_final_grid, g, int2_grad1_u2e_ao(1,1,1,2), ao_num*ao_num, Pt, 1, 0.d0, y, 1)
