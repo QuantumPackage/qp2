@@ -71,6 +71,8 @@ END_PROVIDER
 
   implicit none
   integer                       :: ipoint, i, j, p
+  integer                       :: ierr
+  logical                       :: exists
   double precision              :: x, y, z, dx, dy, dz, d2
   double precision              :: a, c, g, tmp_x, tmp_y, tmp_z
   double precision              :: time0, time1
@@ -116,15 +118,15 @@ END_PROVIDER
           a = j1e_expo(p,j)
           g = c * a * dexp(-a*d2)
 
-          tmp_x = tmp_x - g * dx
-          tmp_y = tmp_y - g * dy
-          tmp_z = tmp_z - g * dz
+          tmp_x = tmp_x + g * dx
+          tmp_y = tmp_y + g * dy
+          tmp_z = tmp_z + g * dz
         enddo
       enddo
 
-      j1e_gradx(ipoint) = 2.d0 * tmp_x
-      j1e_grady(ipoint) = 2.d0 * tmp_y
-      j1e_gradz(ipoint) = 2.d0 * tmp_z
+      j1e_gradx(ipoint) = -2.d0 * tmp_x
+      j1e_grady(ipoint) = -2.d0 * tmp_y
+      j1e_gradz(ipoint) = -2.d0 * tmp_z
     enddo
 
   elseif(j1e_type .eq. "Charge_Harmonizer") then
@@ -173,8 +175,38 @@ END_PROVIDER
 
     allocate(coef_fit(ao_num))
 
-    call get_j1e_coef_fit_ao(ao_num, coef_fit)
-    call ezfio_set_jastrow_j1e_coef_ao(coef_fit)
+    if(mpi_master) then
+      call ezfio_has_jastrow_j1e_coef_ao(exists)
+    endif 
+    IRP_IF MPI_DEBUG
+      print *,  irp_here, mpi_rank
+      call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+    IRP_ENDIF
+    IRP_IF MPI
+      include 'mpif.h'
+      call MPI_BCAST(coef_fit, ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+      if (ierr /= MPI_SUCCESS) then
+        stop 'Unable to read j1e_coef_ao with MPI'
+      endif
+    IRP_ENDIF
+    if(exists) then
+      if(mpi_master) then
+        write(6,'(A)') '.. >>>>> [ IO READ: j1e_coef_ao ] <<<<< ..'
+        call ezfio_get_jastrow_j1e_coef_ao(coef_fit)
+        IRP_IF MPI
+          call MPI_BCAST(coef_fit, ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+          if (ierr /= MPI_SUCCESS) then
+            stop 'Unable to read j1e_coef_ao with MPI'
+          endif
+        IRP_ENDIF
+      endif
+    else
+
+      call get_j1e_coef_fit_ao(ao_num, coef_fit)
+      call ezfio_set_jastrow_j1e_coef_ao(coef_fit)
+
+    endif
+
 
     !$OMP PARALLEL                               &
     !$OMP DEFAULT (NONE)                         &

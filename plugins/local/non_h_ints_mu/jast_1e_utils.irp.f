@@ -9,15 +9,20 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
   integer                       :: i, ipoint
   double precision              :: g
+  double precision              :: t0, t1
   double precision, allocatable :: A(:,:), b(:), A_inv(:,:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:)
+
 
   PROVIDE j1e_type
   PROVIDE int2_u2e_ao
   PROVIDE elec_alpha_num elec_beta_num elec_num
   PROVIDE mo_coef
   PROVIDE ao_overlap
+
+  call wall_time(t0)
+  print*, ' PROVIDING the representation of 1e-Jastrow in AOs ... '
 
   ! --- --- ---
   ! get u1e(r)
@@ -93,6 +98,9 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
   !enddo
 
   deallocate(A_inv, b)
+
+  call wall_time(t1)
+  print*, ' END after (min) ', (t1-t0)/60.d0
 
   return
 end

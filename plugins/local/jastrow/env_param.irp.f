@@ -1,11 +1,13 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, env_expo     , (nucl_num) ]
-&BEGIN_PROVIDER [ double precision, env_coef, (nucl_num) ]
+ BEGIN_PROVIDER [double precision, env_expo, (nucl_num)]
+&BEGIN_PROVIDER [double precision, env_coef, (nucl_num)]
 
   BEGIN_DOC
-  ! parameters of the 1-body Jastrow
+  !
+  ! parameters of the env of the 2e-Jastrow
+  !
   END_DOC
 
   implicit none
