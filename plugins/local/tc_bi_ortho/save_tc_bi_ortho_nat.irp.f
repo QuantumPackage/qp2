@@ -17,7 +17,7 @@ program tc_natorb_bi_ortho
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
-  if(j1b_type .ge. 100) then
+  if(tc_integ_type .eq. "numeric") then
     my_extra_grid_becke  = .True.
     PROVIDE tc_grid2_a tc_grid2_r
     my_n_pt_r_extra_grid = tc_grid2_r

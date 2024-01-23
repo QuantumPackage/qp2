@@ -200,7 +200,7 @@ subroutine overlap_gauss_r12_v(D_center, LD_D, delta, A_center, B_center, power_
 
   deallocate(A_new, A_center_new, fact_a_new, iorder_a_new, overlap)
 
-end subroutine overlap_gauss_r12_v
+end
 
 !---
 

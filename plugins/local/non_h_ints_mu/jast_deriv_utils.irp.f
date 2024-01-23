@@ -9,7 +9,7 @@ double precision function j12_mu(r1, r2)
   double precision, intent(in) :: r1(3), r2(3)
   double precision             :: mu_tmp, r12
 
-  if((j1b_type .ge. 0) .and. (j1b_type .lt. 200)) then
+  if(j2e_type .eq. "Mu") then
 
     r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
                + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
@@ -20,13 +20,13 @@ double precision function j12_mu(r1, r2)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented for j12_mu'
+    print *, ' Error in j12_mu: Unknown j2e_type = ', j2e_type
     stop
 
-  endif
+  endif ! j2e_type
 
   return
-end function j12_mu
+end
 
 ! ---
 
@@ -36,11 +36,11 @@ subroutine grad1_j12_mu(r1, r2, grad)
   !
   !  gradient of j(mu(r1,r2),r12) form of jastrow. 
   !
-  ! if mu(r1,r2) = cst ---> j1b_type < 200 and 
+  ! if mu(r1,r2) = cst ---> 
   !
   !  d/dx1 j(mu,r12) = 0.5 * (1 - erf(mu *r12))/r12 * (x1 - x2)
   !
-  ! if mu(r1,r2) /= cst ---> 200 < j1b_type < 300 and 
+  ! if mu(r1,r2) /= cst ---> 
   !
   ! d/dx1 j(mu(r1,r2),r12) = exp(-(mu(r1,r2)*r12)**2) /(2 *sqrt(pi) * mu(r1,r2)**2 ) d/dx1 mu(r1,r2) 
   !                        + 0.5 * (1 - erf(mu(r1,r2) *r12))/r12 * (x1 - x2)
@@ -53,10 +53,11 @@ subroutine grad1_j12_mu(r1, r2, grad)
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: grad(3)
   double precision              :: dx, dy, dz, r12, tmp
+  double precision              :: mu_val, mu_tmp, mu_der(3)
 
   grad = 0.d0
 
-  if((j1b_type .ge. 0) .and. (j1b_type .lt. 200)) then
+  if(j2e_type .eq. "Mu") then
 
     dx = r1(1) - r2(1)
     dy = r1(2) - r2(2)
@@ -71,9 +72,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
     grad(2) = tmp * dy
     grad(3) = tmp * dz
 
-  elseif((j1b_type .ge. 200) .and. (j1b_type .lt. 300)) then
-
-    double precision :: mu_val, mu_tmp, mu_der(3)
+  elseif(j2e_type .eq. "Mur") then
 
     dx  = r1(1) - r2(1)
     dy  = r1(2) - r2(2)
@@ -95,152 +94,153 @@ subroutine grad1_j12_mu(r1, r2, grad)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+    print *, ' Error in grad1_j12_mu: Unknown j2e_type = ', j2e_type
     stop
 
-  endif
+  endif ! j2e_type
+
   grad = -grad
 
   return
-end subroutine grad1_j12_mu
+end
 
 ! ---
 
-double precision function j1b_nucl(r)
+double precision function env_nucl(r)
 
   implicit none
   double precision, intent(in) :: r(3)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
+  if(env_type .eq. "Sum_Slat") then
 
-    j1b_nucl = 1.d0
+    env_nucl = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl = j1b_nucl - dexp(-a*dsqrt(d))
+      env_nucl = env_nucl - env_coef(i) * dexp(-a*dsqrt(d))
     enddo
 
-  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
+  elseif(env_type .eq. "Prod_Gauss") then
 
-    j1b_nucl = 1.d0
+    env_nucl = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
       e = 1.d0 - dexp(-a*d)
-      j1b_nucl = j1b_nucl * e
+      env_nucl = env_nucl * e
     enddo
 
-  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
+  elseif(env_type .eq. "Sum_Gauss") then
 
-    j1b_nucl = 1.d0
+    env_nucl = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl = j1b_nucl - j1b_pen_coef(i) * dexp(-a*d)
+      env_nucl = env_nucl - env_coef(i) * dexp(-a*d)
     enddo
 
-  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
+  elseif(env_type .eq. "Sum_Quartic") then
 
-    j1b_nucl = 1.d0
+    env_nucl = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       x = r(1) - nucl_coord(i,1)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      j1b_nucl = j1b_nucl - dexp(-a*d*d)
+      env_nucl = env_nucl - env_coef(i) * dexp(-a*d*d)
     enddo
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented for j1b_nucl'
+    print *, ' Error in env_nucl: Unknown env_type = ', env_type
     stop
 
   endif
 
   return
-end function j1b_nucl
+end
 
 ! ---
 
-double precision function j1b_nucl_square(r)
+double precision function env_nucl_square(r)
 
   implicit none
   double precision, intent(in) :: r(3)
   integer                      :: i
   double precision             :: a, d, e, x, y, z
 
-  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
+  if(env_type .eq. "Sum_Slat") then
 
-    j1b_nucl_square = 1.d0
+    env_nucl_square = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl_square = j1b_nucl_square - dexp(-a*dsqrt(d))
+      env_nucl_square = env_nucl_square - env_coef(i) * dexp(-a*dsqrt(d))
     enddo
-    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+    env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
+  elseif(env_type .eq. "Prod_Gauss") then
 
-    j1b_nucl_square = 1.d0
+    env_nucl_square = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
       e = 1.d0 - dexp(-a*d)
-      j1b_nucl_square = j1b_nucl_square * e
+      env_nucl_square = env_nucl_square * e
     enddo
-    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+    env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
+  elseif(env_type .eq. "Sum_Gauss") then
 
-    j1b_nucl_square = 1.d0
+    env_nucl_square = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       d = ( (r(1) - nucl_coord(i,1)) * (r(1) - nucl_coord(i,1)) &
           + (r(2) - nucl_coord(i,2)) * (r(2) - nucl_coord(i,2)) &
           + (r(3) - nucl_coord(i,3)) * (r(3) - nucl_coord(i,3)) )
-      j1b_nucl_square = j1b_nucl_square - j1b_pen_coef(i) * dexp(-a*d)
+      env_nucl_square = env_nucl_square - env_coef(i) * dexp(-a*d)
     enddo
-    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+    env_nucl_square = env_nucl_square * env_nucl_square
 
-  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
+  elseif(env_type .eq. "Sum_Quartic") then
 
-    j1b_nucl_square = 1.d0
+    env_nucl_square = 1.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       x = r(1) - nucl_coord(i,1)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      j1b_nucl_square = j1b_nucl_square - dexp(-a*d*d)
+      env_nucl_square = env_nucl_square - env_coef(i) * dexp(-a*d*d)
     enddo
-    j1b_nucl_square = j1b_nucl_square * j1b_nucl_square
+    env_nucl_square = env_nucl_square * env_nucl_square
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented for j1b_nucl_square'
+    print *, ' Error in env_nucl_square: Unknown env_type = ', env_type
     stop
 
   endif
 
   return
-end function j1b_nucl_square
+end
 
 ! ---
 
-subroutine grad1_j1b_nucl(r, grad)
+subroutine grad1_env_nucl(r, grad)
 
   implicit none
   double precision, intent(in)  :: r(3)
@@ -251,18 +251,18 @@ subroutine grad1_j1b_nucl(r, grad)
   double precision              :: fact_x, fact_y, fact_z
   double precision              :: ax_der, ay_der, az_der, a_expo
 
-  if((j1b_type .eq. 2) .or. (j1b_type .eq. 102)) then
+  if(env_type .eq. "Sum_Slat") then
 
     fact_x = 0.d0
     fact_y = 0.d0
     fact_z = 0.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       x = r(1) - nucl_coord(i,1)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = dsqrt(x*x + y*y + z*z)
-      e = a * dexp(-a*d) / d
+      e = a * env_coef(i) * dexp(-a*d) / d
 
       fact_x += e * x
       fact_y += e * y
@@ -273,7 +273,7 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif((j1b_type .eq. 3) .or. (j1b_type .eq. 103)) then
+  elseif(env_type .eq. "Prod_Gauss") then
 
     x = r(1)
     y = r(2)
@@ -282,7 +282,7 @@ subroutine grad1_j1b_nucl(r, grad)
     fact_x = 0.d0
     fact_y = 0.d0
     fact_z = 0.d0
-    do i = 1, List_all_comb_b2_size
+    do i = 1, List_env1s_size
 
       phase  = 0
       a_expo = 0.d0
@@ -290,12 +290,12 @@ subroutine grad1_j1b_nucl(r, grad)
       ay_der = 0.d0
       az_der = 0.d0
       do j = 1, nucl_num
-        a  = dble(List_all_comb_b2(j,i)) * j1b_pen(j)
+        a  = dble(List_env1s(j,i)) * env_expo(j)
         dx = x - nucl_coord(j,1)
         dy = y - nucl_coord(j,2)
         dz = z - nucl_coord(j,3)
 
-        phase  += List_all_comb_b2(j,i)
+        phase  += List_env1s(j,i)
         a_expo += a * (dx*dx + dy*dy + dz*dz)
         ax_der += a * dx
         ay_der += a * dy
@@ -312,18 +312,18 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = fact_y
     grad(3) = fact_z
 
-  elseif((j1b_type .eq. 4) .or. (j1b_type .eq. 104)) then
+  elseif(env_type .eq. "Sum_Gauss") then
 
     fact_x = 0.d0
     fact_y = 0.d0
     fact_z = 0.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       x = r(1) - nucl_coord(i,1)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      e = a * j1b_pen_coef(i) * dexp(-a*d)
+      e = a * env_coef(i) * dexp(-a*d)
 
       fact_x += e * x
       fact_y += e * y
@@ -334,18 +334,18 @@ subroutine grad1_j1b_nucl(r, grad)
     grad(2) = 2.d0 * fact_y
     grad(3) = 2.d0 * fact_z
 
-  elseif((j1b_type .eq. 5) .or. (j1b_type .eq. 105)) then
+  elseif(env_type .eq. "Sum_Quartic") then
 
     fact_x = 0.d0
     fact_y = 0.d0
     fact_z = 0.d0
     do i = 1, nucl_num
-      a = j1b_pen(i)
+      a = env_expo(i)
       x = r(1) - nucl_coord(i,1)
       y = r(2) - nucl_coord(i,2)
       z = r(3) - nucl_coord(i,3)
       d = x*x + y*y + z*z
-      e = a * d * dexp(-a*d*d)
+      e = a * env_coef(i) * d * dexp(-a*d*d)
 
       fact_x += e * x
       fact_y += e * y
@@ -358,13 +358,13 @@ subroutine grad1_j1b_nucl(r, grad)
 
   else
 
-    print *, ' j1b_type = ', j1b_type, 'not implemented for grad1_j1b_nucl'
+    print *, ' Error in grad1_env_nucl: Unknown env_type = ', env_type
     stop
 
   endif
 
   return
-end subroutine grad1_j1b_nucl
+end
 
 ! ---
 
@@ -380,7 +380,10 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
   double precision :: f_rho1, f_rho2, d_drho_f_rho1
   double precision :: d_dx1_f_rho1(3),d_dx_rho_f_rho(3),nume
 
-  if(j1b_type .eq. 200) then
+  PROVIDE murho_type
+  PROVIDE mu_r_ct mu_erf
+
+  if(murho_type .eq. 1) then
 
     !
     ! r = 0.5 (r1 + r2)
@@ -390,8 +393,6 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     ! d mu[rho(r)] / dx1 = 0.5 d mu[rho(r)] / dx
     ! d mu[rho(r)] / dx  = [0.5 alpha / sqrt(rho) - mu0 exp(-rho)] (d rho(r) / dx)
     !
-
-    PROVIDE mu_r_ct mu_erf
 
     r(1) = 0.5d0 * (r1(1) + r2(1))
     r(2) = 0.5d0 * (r1(2) + r2(2))
@@ -413,7 +414,7 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     mu_der(2) = tmp3 * (grad_dm_a(2,1) + grad_dm_b(2,1))
     mu_der(3) = tmp3 * (grad_dm_a(3,1) + grad_dm_b(3,1))
 
-  elseif(j1b_type .eq. 201) then
+  elseif(murho_type .eq. 2) then
 
     !
     ! r = 0.5 (r1 + r2)
@@ -423,8 +424,6 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     ! d mu[rho(r)] / dx1 = 0.5 d mu[rho(r)] / dx
     ! d mu[rho(r)] / dx  = [0.5 alpha / sqrt(rho) - mu0 exp(-rho)] (d rho(r) / dx)
     !
-
-    PROVIDE mu_r_ct mu_erf
 
     r(1) = 0.5d0 * (r1(1) + r2(1))
     r(2) = 0.5d0 * (r1(2) + r2(2))
@@ -442,7 +441,7 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     mu_der(2) = tmp3 * (grad_dm_a(2,1) + grad_dm_b(2,1))
     mu_der(3) = tmp3 * (grad_dm_a(3,1) + grad_dm_b(3,1))
 
-  elseif(j1b_type .eq. 202) then
+  elseif(murho_type .eq. 3) then
 
     ! mu(r1,r2) = {rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]} / RHO
     !
@@ -469,7 +468,8 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     nume   = rho1 * f_rho1 + rho2 * f_rho2
     mu_val = nume * inv_rho_tot
     mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
-  elseif(j1b_type .eq. 203) then
+
+  elseif(murho_type .eq. 4) then
 
     ! mu(r1,r2) = {rho(r1) f[rho(r1)] + rho(r2) f[rho(r2)]} / RHO
     !
@@ -503,7 +503,8 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     nume   = rho1 * f_rho1 + rho2 * f_rho2
     mu_val = nume * inv_rho_tot
     mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
-  elseif(j1b_type .eq. 204) then
+
+  elseif(murho_type .eq. 5) then
 
     ! mu(r1,r2) = 1/2 * (f[rho(r1)] + f[rho(r2)]} 
     !
@@ -535,23 +536,24 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
     mu_der(1:3) = inv_rho_tot*inv_rho_tot * (rho_tot * d_dx_rho_f_rho(1:3) - grad_rho1(1:3) * nume)
      
   else
-    print *, ' j1b_type = ', j1b_type, 'not implemented yet'
+
+    print *, ' Error in mu_r_val_and_grad: Unknown env_type = ', env_type
     stop
 
   endif
 
   return
-end subroutine mu_r_val_and_grad
+end
 
 ! ---
 
-subroutine grad1_j1b_nucl_square_num(r1, grad)
+subroutine grad1_env_nucl_square_num(r1, grad)
 
   implicit none
   double precision, intent(in)  :: r1(3)
   double precision, intent(out) :: grad(3)
   double precision              :: r(3), eps, tmp_eps, vp, vm
-  double precision, external    :: j1b_nucl_square
+  double precision, external    :: env_nucl_square
 
   eps     = 1d-5
   tmp_eps = 0.5d0 / eps
@@ -559,28 +561,28 @@ subroutine grad1_j1b_nucl_square_num(r1, grad)
   r(1:3) = r1(1:3)
 
   r(1) = r(1) + eps
-  vp   = j1b_nucl_square(r)
+  vp   = env_nucl_square(r)
   r(1) = r(1) - 2.d0 * eps
-  vm   = j1b_nucl_square(r)
+  vm   = env_nucl_square(r)
   r(1) = r(1) + eps
   grad(1) = tmp_eps * (vp - vm)
 
   r(2) = r(2) + eps
-  vp   = j1b_nucl_square(r)
+  vp   = env_nucl_square(r)
   r(2) = r(2) - 2.d0 * eps
-  vm   = j1b_nucl_square(r)
+  vm   = env_nucl_square(r)
   r(2) = r(2) + eps
   grad(2) = tmp_eps * (vp - vm)
 
   r(3) = r(3) + eps
-  vp   = j1b_nucl_square(r)
+  vp   = env_nucl_square(r)
   r(3) = r(3) - 2.d0 * eps
-  vm   = j1b_nucl_square(r)
+  vm   = env_nucl_square(r)
   r(3) = r(3) + eps
   grad(3) = tmp_eps * (vp - vm)
   
   return
-end subroutine grad1_j1b_nucl_square_num
+end
 
 ! ---
 
@@ -622,7 +624,7 @@ subroutine grad1_j12_mu_square_num(r1, r2, grad)
   grad(3) = tmp_eps * (vp - vm)
 
   return
-end subroutine grad1_j12_mu_square_num
+end
 
 ! ---
 
@@ -635,134 +637,172 @@ double precision function j12_mu_square(r1, r2)
   j12_mu_square = j12_mu(r1, r2) * j12_mu(r1, r2)
 
   return
-end function j12_mu_square
+end
 
 ! ---
 
-subroutine f_mu_and_deriv_mu(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
- implicit none
- BEGIN_DOC
-! function giving mu as a function of rho
-!
-! f_mu = alpha * rho**beta + mu0 * exp(-rho)
-!
-! and its derivative with respect to rho d_drho_f_mu
- END_DOC
- double precision, intent(in)  :: rho,alpha,mu0,beta
- double precision, intent(out) :: f_mu,d_drho_f_mu
- f_mu = alpha * (rho)**beta + mu0 * dexp(-rho)
- d_drho_f_mu = alpha * beta * rho**(beta-1.d0) - mu0 * dexp(-rho)
+subroutine f_mu_and_deriv_mu(rho, alpha, mu0, beta, f_mu, d_drho_f_mu)
+
+  BEGIN_DOC
+  ! function giving mu as a function of rho
+  !
+  ! f_mu = alpha * rho**beta + mu0 * exp(-rho)
+  !
+  ! and its derivative with respect to rho d_drho_f_mu
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho, alpha, mu0, beta
+  double precision, intent(out) :: f_mu, d_drho_f_mu
+
+  f_mu = alpha * (rho)**beta + mu0 * dexp(-rho)
+  d_drho_f_mu = alpha * beta * rho**(beta-1.d0) - mu0 * dexp(-rho)
 
 end
 
+! ---
 
-subroutine get_all_rho_grad_rho(r1,r2,rho1,rho2,grad_rho1)
- implicit none
- BEGIN_DOC
-! returns the density in r1,r2 and grad_rho at r1
- END_DOC
- double precision, intent(in) :: r1(3),r2(3)
- double precision, intent(out):: grad_rho1(3),rho1,rho2
- double precision              :: dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
- call density_and_grad_alpha_beta(r1, dm_a, dm_b, grad_dm_a, grad_dm_b)
- rho1 = dm_a(1) + dm_b(1)
- grad_rho1(1:3) = grad_dm_a(1:3,1) + grad_dm_b(1:3,1)
- call density_and_grad_alpha_beta(r2, dm_a, dm_b, grad_dm_a, grad_dm_b)
- rho2 = dm_a(1) + dm_b(1)
+subroutine get_all_rho_grad_rho(r1, r2, rho1, rho2, grad_rho1)
+
+  BEGIN_DOC
+  ! returns the density in r1,r2 and grad_rho at r1
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: r1(3), r2(3)
+  double precision, intent(out) :: grad_rho1(3), rho1, rho2
+  double precision              :: dm_a(1), dm_b(1), grad_dm_a(3,1), grad_dm_b(3,1)
+
+  call density_and_grad_alpha_beta(r1, dm_a, dm_b, grad_dm_a, grad_dm_b)
+  rho1 = dm_a(1) + dm_b(1)
+  grad_rho1(1:3) = grad_dm_a(1:3,1) + grad_dm_b(1:3,1)
+  call density_and_grad_alpha_beta(r2, dm_a, dm_b, grad_dm_a, grad_dm_b)
+  rho2 = dm_a(1) + dm_b(1)
+
 end
 
-subroutine get_all_f_rho(rho1,rho2,alpha,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
- implicit none
- BEGIN_DOC
-! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
- END_DOC
- double precision, intent(in) :: rho1,rho2,alpha,mu0,beta
- double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
- double precision :: tmp
- call f_mu_and_deriv_mu(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
- call f_mu_and_deriv_mu(rho2,alpha,mu0,beta,f_rho2,tmp)
+! ---
+
+subroutine get_all_f_rho(rho1, rho2, alpha, mu0, beta, f_rho1, d_drho_f_rho1, f_rho2)
+
+  BEGIN_DOC
+  ! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho1, rho2, alpha, mu0, beta
+  double precision, intent(out) :: f_rho1, d_drho_f_rho1, f_rho2
+  double precision              :: tmp
+
+  call f_mu_and_deriv_mu(rho1, alpha, mu0, beta, f_rho1, d_drho_f_rho1)
+  call f_mu_and_deriv_mu(rho2, alpha, mu0, beta, f_rho2, tmp)
+
 end
 
+! ---
 
 subroutine get_all_f_rho_simple(rho1,rho2,alpha,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
- implicit none
- BEGIN_DOC
-! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
- END_DOC
- double precision, intent(in) :: rho1,rho2,alpha,mu0,beta
- double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
- double precision :: tmp
- if(rho1.lt.1.d-10)then
-  f_rho1 = 0.d0
-  d_drho_f_rho1 = 0.d0
- else
-  call f_mu_and_deriv_mu_simple(rho1,alpha,mu0,beta,f_rho1,d_drho_f_rho1)
- endif
- if(rho2.lt.1.d-10)then
-  f_rho2 = 0.d0
- else
-  call f_mu_and_deriv_mu_simple(rho2,alpha,mu0,beta,f_rho2,tmp)
- endif
+
+  BEGIN_DOC
+  ! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho1, rho2, alpha, mu0, beta
+  double precision, intent(out) :: f_rho1, d_drho_f_rho1, f_rho2
+  double precision              :: tmp
+
+  if(rho1.lt.1.d-10) then
+    f_rho1 = 0.d0
+    d_drho_f_rho1 = 0.d0
+  else
+    call f_mu_and_deriv_mu_simple(rho1, alpha, mu0, beta, f_rho1, d_drho_f_rho1)
+  endif
+
+  if(rho2.lt.1.d-10)then
+    f_rho2 = 0.d0
+  else
+    call f_mu_and_deriv_mu_simple(rho2, alpha, mu0, beta, f_rho2, tmp)
+  endif
+
 end
 
-subroutine f_mu_and_deriv_mu_simple(rho,alpha,mu0,beta,f_mu,d_drho_f_mu)
- implicit none
- BEGIN_DOC
-! function giving mu as a function of rho
-!
-! f_mu = alpha * rho**beta + mu0 
-!
-! and its derivative with respect to rho d_drho_f_mu
- END_DOC
- double precision, intent(in)  :: rho,alpha,mu0,beta
- double precision, intent(out) :: f_mu,d_drho_f_mu
- f_mu = alpha**beta * (rho)**beta + mu0 
- d_drho_f_mu = alpha**beta * beta * rho**(beta-1.d0) 
+! ---
+
+subroutine f_mu_and_deriv_mu_simple(rho, alpha, mu0, beta, f_mu, d_drho_f_mu)
+
+  BEGIN_DOC
+  ! function giving mu as a function of rho
+  !
+  ! f_mu = alpha * rho**beta + mu0 
+  !
+  ! and its derivative with respect to rho d_drho_f_mu
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho, alpha, mu0, beta
+  double precision, intent(out) :: f_mu, d_drho_f_mu
+
+  f_mu = alpha**beta * (rho)**beta + mu0 
+  d_drho_f_mu = alpha**beta * beta * rho**(beta-1.d0) 
 
 end
 
 ! ---
 
 subroutine f_mu_and_deriv_mu_erf(rho,alpha,zeta,mu0,beta,f_mu,d_drho_f_mu)
- implicit none
+
   include 'constants.include.F'
- BEGIN_DOC
-! function giving mu as a function of rho
-!
-! f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
-!
-! and its derivative with respect to rho d_drho_f_mu
-!
-! d_drho_f_mu = 2 beta/sqrt(pi) * exp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) 
-!               + alpha * zeta * (alpha *rho)**(zeta-1)  * erf(beta*rho)
- END_DOC
- double precision, intent(in)  :: rho,alpha,mu0,beta,zeta
- double precision, intent(out) :: f_mu,d_drho_f_mu
- f_mu = (alpha * rho)**zeta * derf(beta * rho) + mu0 * (1.d0 - derf(beta*rho))
- d_drho_f_mu = 2.d0  * beta * inv_sq_pi * dexp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) & 
-             + alpha * zeta * (alpha *rho)**(zeta-1)  * derf(beta*rho)
+
+  BEGIN_DOC
+  ! function giving mu as a function of rho
+  !
+  ! f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
+  !
+  ! and its derivative with respect to rho d_drho_f_mu
+  !
+  ! d_drho_f_mu = 2 beta/sqrt(pi) * exp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) 
+  !               + alpha * zeta * (alpha *rho)**(zeta-1)  * erf(beta*rho)
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho, alpha, mu0, beta, zeta
+  double precision, intent(out) :: f_mu, d_drho_f_mu
+
+  f_mu = (alpha * rho)**zeta * derf(beta * rho) + mu0 * (1.d0 - derf(beta*rho))
+  d_drho_f_mu = 2.d0  * beta * inv_sq_pi * dexp(-(beta*rho)**2) * ( (alpha*rho)**zeta - mu0) & 
+              + alpha * zeta * (alpha *rho)**(zeta-1)  * derf(beta*rho)
 
 end
 
+! ---
 
-subroutine get_all_f_rho_erf(rho1,rho2,alpha,zeta,mu0,beta,f_rho1,d_drho_f_rho1,f_rho2)
- implicit none
- BEGIN_DOC
-! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
-! with f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
- END_DOC
- double precision, intent(in) :: rho1,rho2,alpha,mu0,beta,zeta
- double precision, intent(out):: f_rho1,d_drho_f_rho1,f_rho2
- double precision :: tmp
- if(rho1.lt.1.d-10)then
-  f_rho1 = mu_erf
-  d_drho_f_rho1 = 0.d0
- else
-  call f_mu_and_deriv_mu_erf(rho1,alpha,zeta,mu0,beta,f_rho1,d_drho_f_rho1)
- endif
- if(rho2.lt.1.d-10)then
-  f_rho2 = mu_erf
- else
-  call f_mu_and_deriv_mu_erf(rho2,alpha,zeta,mu0,beta,f_rho2,tmp)
- endif
+subroutine get_all_f_rho_erf(rho1, rho2, alpha, zeta, mu0, beta, f_rho1, d_drho_f_rho1, f_rho2)
+
+  BEGIN_DOC
+  ! returns the values f(mu(r1)), f(mu(r2)) and d/drho(1) f(mu(r1))
+  ! with f_mu = (alpha * rho)**zeta * erf(beta * rho) + mu0 * (1 - erf(beta*rho))
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: rho1, rho2, alpha, mu0, beta, zeta
+  double precision, intent(out) :: f_rho1, d_drho_f_rho1, f_rho2
+  double precision              :: tmp
+
+  if(rho1 .lt. 1.d-10) then
+    f_rho1 = mu_erf
+    d_drho_f_rho1 = 0.d0
+  else
+    call f_mu_and_deriv_mu_erf(rho1, alpha, zeta, mu0, beta, f_rho1, d_drho_f_rho1)
+  endif
+
+  if(rho2 .lt. 1.d-10)then
+    f_rho2 = mu_erf
+  else
+    call f_mu_and_deriv_mu_erf(rho2, alpha, zeta, mu0, beta, f_rho2, tmp)
+  endif
+
 end
+
+! ---
+

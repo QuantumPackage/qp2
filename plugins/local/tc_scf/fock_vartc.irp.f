@@ -13,9 +13,9 @@
   two_e_vartc_integral_alpha = 0.d0
   two_e_vartc_integral_beta  = 0.d0
 
- !$OMP PARALLEL DEFAULT (NONE)                                                                           &
- !$OMP PRIVATE (i, j, k, l, density_a, density_b, density, tmp_a, tmp_b, I_coul, I_kjli)                 &
- !$OMP SHARED  (ao_num, TCSCF_density_matrix_ao_alpha, TCSCF_density_matrix_ao_beta, ao_two_e_vartc_tot, &
+ !$OMP PARALLEL DEFAULT (NONE)                                                                        &
+ !$OMP PRIVATE (i, j, k, l, density_a, density_b, density, tmp_a, tmp_b, I_coul, I_kjli)              &
+ !$OMP SHARED  (ao_num, TCSCF_density_matrix_ao_alpha, TCSCF_density_matrix_ao_beta, ao_two_e_tc_tot, &
  !$OMP         two_e_vartc_integral_alpha, two_e_vartc_integral_beta)
 
   allocate(tmp_a(ao_num,ao_num), tmp_b(ao_num,ao_num))
@@ -31,8 +31,8 @@
       do i = 1, ao_num
         do k = 1, ao_num
 
-          I_coul = density * ao_two_e_vartc_tot(k,i,l,j)
-          I_kjli = ao_two_e_vartc_tot(k,j,l,i)
+          I_coul = density * ao_two_e_tc_tot(k,i,l,j)
+          I_kjli = ao_two_e_tc_tot(k,j,l,i)
 
           tmp_a(k,i) += I_coul - density_a * I_kjli
           tmp_b(k,i) += I_coul - density_b * I_kjli

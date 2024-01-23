@@ -142,7 +142,7 @@ subroutine non_hrmt_diag_split_degen(n, A, leigvec, reigvec, n_real_eigv, eigval
    enddo
   enddo
 
-end subroutine non_hrmt_diag_split_degen
+end
 
 ! ---
 
@@ -248,7 +248,7 @@ subroutine non_hrmt_real_diag_new(n, A, leigvec, reigvec, n_real_eigv, eigval)
    print*,'Your matrix intrinsically contains complex eigenvalues'
   endif
 
-end subroutine non_hrmt_real_diag_new
+end
 
 ! ---
 
@@ -275,10 +275,11 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   double precision              :: thr, thr_cut, thr_diag, thr_norm
   double precision              :: accu_d, accu_nd
 
-  integer,          allocatable :: list_good(:), iorder(:)
+  integer,          allocatable :: list_good(:), iorder(:), deg_num(:)
   double precision, allocatable :: WR(:), WI(:), VL(:,:), VR(:,:)
   double precision, allocatable :: S(:,:)
   double precision, allocatable  :: phi_1_tilde(:),phi_2_tilde(:),chi_1_tilde(:),chi_2_tilde(:)
+
   allocate(phi_1_tilde(n),phi_2_tilde(n),chi_1_tilde(n),chi_2_tilde(n))
 
 
@@ -305,11 +306,11 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
 
 
-  print *, ' '
-  print *, ' eigenvalues'
+  !print *, ' '
+  !print *, ' eigenvalues'
   i = 1
   do while(i .le. n)
-    write(*, '(I3,X,1000(F16.10,X))')i, WR(i), WI(i)
+    !write(*, '(I3,X,1000(F16.10,X))')i, WR(i), WI(i)
    if(.false.)then
     if(WI(i).ne.0.d0)then
      print*,'*****************'
@@ -386,7 +387,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   thr_diag = 1d-06
   thr_norm = 1d+10
-  call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
+  !call check_EIGVEC(n, n, A, WR, VL, VR, thr_diag, thr_norm, .false.)
 
   !
   ! -------------------------------------------------------------------------------------
@@ -400,7 +401,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   !thr    = 100d0
   thr    = Im_thresh_tcscf
   do i = 1, n
-    print*, 'Re(i) + Im(i)', WR(i), WI(i)
+    !print*, 'Re(i) + Im(i)', WR(i), WI(i)
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
     else
@@ -479,15 +480,16 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
     return
 
   ! accu_nd is modified after adding the normalization
-  !elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
+  elseif( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv))/dble(n_real_eigv) .gt. thr_d) ) then
 
-  !  print *, ' lapack vectors are not normalized but bi-orthogonalized'
-  !  call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
+    print *, ' lapack vectors are not normalized but bi-orthogonalized'
+    call check_biorthog_binormalize(n, n_real_eigv, leigvec, reigvec, thr_d, thr_nd, .true.)
 
-  !  call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
+    call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .true.)
+    call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
 
-  !  deallocate(S)
-  !  return
+    deallocate(S)
+    return
 
   else
 
@@ -495,18 +497,10 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
     ! ---
 
-!   call impose_orthog_degen_eigvec(n, eigval, reigvec)
-!   call impose_orthog_degen_eigvec(n, eigval, leigvec)
-
-    call reorder_degen_eigvec(n, eigval, leigvec, reigvec)
-    call impose_biorthog_degen_eigvec(n, eigval, leigvec, reigvec)
-
-
-    !call impose_orthog_biorthog_degen_eigvec(n, thr_d, thr_nd, eigval, leigvec, reigvec)
-
-    !call impose_unique_biorthog_degen_eigvec(n, eigval, mo_coef, ao_overlap, leigvec, reigvec)
-
-    ! ---
+    allocate(deg_num(n))
+    call reorder_degen_eigvec(n, deg_num, eigval, leigvec, reigvec)
+    call impose_biorthog_degen_eigvec(n, deg_num, eigval, leigvec, reigvec)
+    deallocate(deg_num)
 
     call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .false.)
     if( (accu_nd .lt. thr_nd) .and. (dabs(accu_d-dble(n_real_eigv)) .gt. thr_d) ) then
@@ -514,12 +508,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
     endif
     call check_biorthog(n, n_real_eigv, leigvec, reigvec, accu_d, accu_nd, S, thr_d, thr_nd, .true.)
 
-    !call impose_biorthog_qr(n, n_real_eigv, thr_d, thr_nd, leigvec, reigvec)
-    !call impose_biorthog_lu(n, n_real_eigv, thr_d, thr_nd, leigvec, reigvec)
-
-    ! ---
-
-    call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
+    !call check_EIGVEC(n, n, A, eigval, leigvec, reigvec, thr_diag, thr_norm, .true.)
 
     deallocate(S)
 
@@ -530,7 +519,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
 
   return
 
-end subroutine non_hrmt_bieig
+end
 
 ! ---
 
@@ -703,7 +692,7 @@ subroutine non_hrmt_bieig_random_diag(n, A, leigvec, reigvec, n_real_eigv, eigva
 
   return
 
-end subroutine non_hrmt_bieig_random_diag
+end
 
 ! ---
 
@@ -812,7 +801,7 @@ subroutine non_hrmt_real_im(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   deallocate( S )
 
-end subroutine non_hrmt_real_im
+end
 
 ! ---
 
@@ -917,7 +906,7 @@ subroutine non_hrmt_generalized_real_im(n, A, B, leigvec, reigvec, n_real_eigv, 
 
   deallocate( S )
 
-end subroutine non_hrmt_generalized_real_im
+end
 
 ! ---
 
@@ -1053,7 +1042,7 @@ subroutine non_hrmt_bieig_fullvect(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   return
 
-end subroutine non_hrmt_bieig_fullvect
+end
 
 ! ---
 

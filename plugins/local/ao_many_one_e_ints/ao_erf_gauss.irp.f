@@ -98,7 +98,7 @@ double precision function phi_j_erf_mu_r_phi(i, j, mu_in, C_center)
    enddo
   enddo
 
-end function phi_j_erf_mu_r_phi
+end
 
 ! ---
 
@@ -201,7 +201,7 @@ subroutine erf_mu_gauss_ij_ao(i, j, mu, C_center, delta, gauss_ints)
    enddo
   enddo
 
-end subroutine erf_mu_gauss_ij_ao
+end
 
 ! ---
 
@@ -266,7 +266,7 @@ subroutine NAI_pol_x_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
     enddo
   enddo
 
-end subroutine NAI_pol_x_mult_erf_ao
+end
 
 ! ---
 
@@ -340,7 +340,7 @@ subroutine NAI_pol_x_mult_erf_ao_v0(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_
 
   deallocate(integral)
 
-end subroutine NAI_pol_x_mult_erf_ao_v0
+end
 
 ! ---
 
@@ -420,7 +420,7 @@ subroutine NAI_pol_x_mult_erf_ao_v(i_ao, j_ao, mu_in, C_center, LD_C, ints, LD_i
 
   deallocate(integral)
 
-end subroutine NAI_pol_x_mult_erf_ao_v
+end
 
 ! ---
 
@@ -479,7 +479,7 @@ double precision function NAI_pol_x_mult_erf_ao_x(i_ao, j_ao, mu_in, C_center)
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_x
+end
 
 ! ---
 
@@ -538,7 +538,7 @@ double precision function NAI_pol_x_mult_erf_ao_y(i_ao, j_ao, mu_in, C_center)
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_y
+end
 
 ! ---
 
@@ -597,7 +597,7 @@ double precision function NAI_pol_x_mult_erf_ao_z(i_ao, j_ao, mu_in, C_center)
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_z
+end
 
 ! ---
 
@@ -667,7 +667,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_x(i_ao, j_ao, beta, B_cen
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_with1s_x
+end
 
 ! ---
 
@@ -737,7 +737,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_y(i_ao, j_ao, beta, B_cen
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_with1s_y
+end
 
 ! ---
 
@@ -807,7 +807,7 @@ double precision function NAI_pol_x_mult_erf_ao_with1s_z(i_ao, j_ao, beta, B_cen
     enddo
   enddo
 
-end function NAI_pol_x_mult_erf_ao_with1s_z
+end
 
 ! ---
 
@@ -880,7 +880,7 @@ subroutine NAI_pol_x_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_cen
     enddo
   enddo
 
-end subroutine NAI_pol_x_mult_erf_ao_with1s
+end
 
 ! ---
 
@@ -967,7 +967,7 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v0(i_ao, j_ao, beta, B_center, LD_B, mu_
 
   deallocate(integral)
 
-end subroutine NAI_pol_x_mult_erf_ao_with1s_v0
+end
 
 ! ---
 
@@ -1057,7 +1057,7 @@ subroutine NAI_pol_x_mult_erf_ao_with1s_v(i_ao, j_ao, beta, B_center, LD_B, mu_i
 
   deallocate(integral)
 
-end subroutine NAI_pol_x_mult_erf_ao_with1s_v
+end
 
 ! ---
 
@@ -1175,7 +1175,7 @@ subroutine NAI_pol_x2_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_ce
     enddo
   enddo
 
-end subroutine NAI_pol_x2_mult_erf_ao_with1s
+end
 
 ! ---
 
@@ -1241,7 +1241,7 @@ subroutine NAI_pol_x2_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
     enddo
   enddo
 
-end subroutine NAI_pol_x2_mult_erf_ao
+end
 
 ! ---
 
@@ -1320,7 +1320,7 @@ subroutine NAI_pol_012_mult_erf_ao_with1s(i_ao, j_ao, beta, B_center, mu_in, C_c
     enddo
   enddo
 
-end subroutine NAI_pol_012_mult_erf_ao_with1s
+end
 
 ! ---
 
@@ -1328,7 +1328,7 @@ subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
 
   BEGIN_DOC
   !
-  ! Computes the following integral :
+  ! Computes the following integrals :
   !
   ! int(1) = $\int_{-\infty}^{infty} dr x^0 * \chi_i(r) \chi_j(r) \frac{\erf(\mu | r - R_C | )}{ | r - R_C | }$.
   !
@@ -1395,7 +1395,7 @@ subroutine NAI_pol_012_mult_erf_ao(i_ao, j_ao, mu_in, C_center, ints)
     enddo
   enddo
 
-end subroutine NAI_pol_012_mult_erf_ao
+end
 
 ! ---
 

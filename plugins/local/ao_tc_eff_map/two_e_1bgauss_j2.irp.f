@@ -1,6 +1,6 @@
 ! ---
 
-double precision function j1b_gauss_2e_j2(i, j, k, l)
+double precision function env_gauss_2e_j2(i, j, k, l)
 
   BEGIN_DOC
   ! 
@@ -36,12 +36,12 @@ double precision function j1b_gauss_2e_j2(i, j, k, l)
   double precision    :: I_center(3), J_center(3), K_center(3), L_center(3)
   double precision    :: ff, gg, cx, cy, cz
 
-  double precision    :: j1b_gauss_2e_j2_schwartz
+  double precision    :: env_gauss_2e_j2_schwartz
   
   dim1 = n_pt_max_integrals
 
   if( ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
-    j1b_gauss_2e_j2 = j1b_gauss_2e_j2_schwartz(i, j, k, l)
+    env_gauss_2e_j2 = env_gauss_2e_j2_schwartz(i, j, k, l)
     return
   endif
 
@@ -61,7 +61,7 @@ double precision function j1b_gauss_2e_j2(i, j, k, l)
     L_center(p) = nucl_coord(num_l,p)
   enddo
 
-  j1b_gauss_2e_j2 = 0.d0
+  env_gauss_2e_j2 = 0.d0
 
   do p = 1, ao_prim_num(i)
     coef1 = ao_coef_normalized_ordered_transp(p, i)
@@ -91,18 +91,18 @@ double precision function j1b_gauss_2e_j2(i, j, k, l)
                             , P1_center, P1_new, pp1, fact_p1, p1_inv, iorder_p &
                             , Q1_center, Q1_new, qq1, fact_q1, q1_inv, iorder_q )
 
-          j1b_gauss_2e_j2 = j1b_gauss_2e_j2 + coef4 * ( cx + cy + cz )
+          env_gauss_2e_j2 = env_gauss_2e_j2 + coef4 * ( cx + cy + cz )
         enddo ! s
       enddo  ! r
     enddo   ! q
   enddo    ! p
 
   return
-end function j1b_gauss_2e_j2
+end
 
 ! ---
 
-double precision function j1b_gauss_2e_j2_schwartz(i, j, k, l)
+double precision function env_gauss_2e_j2_schwartz(i, j, k, l)
 
   BEGIN_DOC
   ! 
@@ -187,7 +187,7 @@ double precision function j1b_gauss_2e_j2_schwartz(i, j, k, l)
   enddo
 
 
-  j1b_gauss_2e_j2_schwartz = 0.d0
+  env_gauss_2e_j2_schwartz = 0.d0
 
   do p = 1, ao_prim_num(i)
     expo1 = ao_expo_ordered_transp(p, i)
@@ -226,7 +226,7 @@ double precision function j1b_gauss_2e_j2_schwartz(i, j, k, l)
                             , P1_center, P1_new, pp1, fact_p1, p1_inv, iorder_p &
                             , Q1_center, Q1_new, qq1, fact_q1, q1_inv, iorder_q )
 
-          j1b_gauss_2e_j2_schwartz = j1b_gauss_2e_j2_schwartz + coef4 * ( cx + cy + cz )
+          env_gauss_2e_j2_schwartz = env_gauss_2e_j2_schwartz + coef4 * ( cx + cy + cz )
         enddo ! s
       enddo  ! r
     enddo   ! q
@@ -235,7 +235,7 @@ double precision function j1b_gauss_2e_j2_schwartz(i, j, k, l)
   deallocate( schwartz_kl )
 
   return
-end function j1b_gauss_2e_j2_schwartz
+end
 
 ! ---
 
@@ -263,15 +263,13 @@ subroutine get_cxcycz_j2( dim1, cx, cy, cz                                  &
   double precision              :: general_primitive_integral_erf_shifted
   double precision              :: general_primitive_integral_coul_shifted
 
-  PROVIDE j1b_pen j1b_coeff
-
   cx = 0.d0
   cy = 0.d0
   cz = 0.d0
   do ii = 1, nucl_num
 
-    expoii        = j1b_pen  (ii)
-    coefii        = j1b_coeff(ii)
+    expoii        = env_expo(ii)
+    coefii        = env_coef(ii)
     Centerii(1:3) = nucl_coord(ii, 1:3)
 
     call gaussian_product(pp1, P1_center, expoii, Centerii, factii, pp2, P2_center)

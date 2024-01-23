@@ -23,10 +23,9 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
 
   logical, external               :: ao_two_e_integral_zero
   double precision                :: ao_tc_sym_two_e_pot, ao_two_e_integral_erf
-  double precision                :: j1b_gauss_2e_j1, j1b_gauss_2e_j2
+  double precision                :: env_gauss_2e_j1, env_gauss_2e_j2
 
 
-  PROVIDE j1b_type
 
   thr = ao_integrals_threshold
 
@@ -52,14 +51,6 @@ subroutine compute_ao_tc_sym_two_e_pot_jl(j, l, n_integrals, buffer_i, buffer_va
       integral_pot = ao_tc_sym_two_e_pot  (i, k, j, l)  ! i,k : r1    j,l : r2
       integral_erf = ao_two_e_integral_erf(i, k, j, l)
       integral     = integral_erf + integral_pot
-
-      !if( j1b_type .eq. 1 ) then
-      !  !print *, ' j1b type 1 is added'
-      !  integral = integral + j1b_gauss_2e_j1(i, k, j, l)
-      !elseif( j1b_type .eq. 2 ) then
-      !  !print *, ' j1b type 2 is added'
-      !  integral = integral + j1b_gauss_2e_j2(i, k, j, l)
-      !endif
 
       if(abs(integral) < thr) then
         cycle

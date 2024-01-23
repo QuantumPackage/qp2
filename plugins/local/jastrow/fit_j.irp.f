@@ -1,41 +1,67 @@
- BEGIN_PROVIDER [ double precision, expo_j_xmu_1gauss ]
-&BEGIN_PROVIDER [ double precision, coef_j_xmu_1gauss ]
- implicit none
- BEGIN_DOC
- ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
- !
- ! with a single gaussian. 
- !
- ! Such a function can be used to screen integrals with F(x). 
- END_DOC
- expo_j_xmu_1gauss  = 0.5d0
- coef_j_xmu_1gauss  = 1.d0
-END_PROVIDER 
+
 ! ---
 
-BEGIN_PROVIDER [ double precision, expo_erfc_gauss ]
- implicit none 
- expo_erfc_gauss = 1.41211d0
+ BEGIN_PROVIDER [double precision, expo_j_xmu_1gauss]
+&BEGIN_PROVIDER [double precision, coef_j_xmu_1gauss]
+
+  implicit none
+ 
+  BEGIN_DOC
+  ! Upper bound long range fit of F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) 
+  !
+  ! with a single gaussian. 
+  !
+  ! Such a function can be used to screen integrals with F(x). 
+  END_DOC
+ 
+  expo_j_xmu_1gauss  = 0.5d0
+  coef_j_xmu_1gauss  = 1.d0
+
 END_PROVIDER 
 
-BEGIN_PROVIDER [ double precision, expo_erfc_mu_gauss ]
- implicit none 
- expo_erfc_mu_gauss = expo_erfc_gauss * mu_erf * mu_erf
+! ---
+
+BEGIN_PROVIDER [double precision, expo_erfc_gauss]
+
+  implicit none 
+
+  expo_erfc_gauss = 1.41211d0
+
 END_PROVIDER 
 
- BEGIN_PROVIDER [ double precision, expo_good_j_mu_1gauss ]
-&BEGIN_PROVIDER [ double precision, coef_good_j_mu_1gauss ]
- implicit none
- BEGIN_DOC
- ! exponent of Gaussian in order to obtain an upper bound of J(r12,mu)
- !
- ! Can be used to scree integrals with J(r12,mu)
- END_DOC
- expo_good_j_mu_1gauss = 2.D0 * mu_erf * expo_j_xmu_1gauss
- coef_good_j_mu_1gauss = 0.5d0/mu_erf * coef_j_xmu_1gauss
- END_PROVIDER 
+! ---
 
-BEGIN_PROVIDER [ double precision, expo_j_xmu, (n_fit_1_erf_x) ]
+BEGIN_PROVIDER [double precision, expo_erfc_mu_gauss]
+
+  implicit none 
+
+  expo_erfc_mu_gauss = expo_erfc_gauss * mu_erf * mu_erf
+
+END_PROVIDER 
+
+! ---
+
+ BEGIN_PROVIDER [double precision, expo_good_j_mu_1gauss]
+&BEGIN_PROVIDER [double precision, coef_good_j_mu_1gauss]
+
+  BEGIN_DOC
+  !
+  ! exponent of Gaussian in order to obtain an upper bound of J(r12,mu)
+  !
+  ! Can be used to scree integrals with J(r12,mu)
+  !
+  END_DOC
+
+  implicit none
+ 
+  expo_good_j_mu_1gauss = 2.d0 * mu_erf * expo_j_xmu_1gauss
+  coef_good_j_mu_1gauss = 0.5d0/mu_erf * coef_j_xmu_1gauss
+
+END_PROVIDER 
+
+! ---
+
+BEGIN_PROVIDER [double precision, expo_j_xmu, (n_fit_1_erf_x)]
 
   BEGIN_DOC
   ! F(x) = x * (1 - erf(x)) - 1/sqrt(pi) * exp(-x**2) is fitted with a gaussian and a Slater
@@ -465,53 +491,86 @@ END_PROVIDER
 ! ---
 
 double precision  function F_x_j(x)
- implicit none
- BEGIN_DOC 
- ! F_x_j(x) = dimension-less correlation factor = x (1 - erf(x)) - 1/sqrt(pi) exp(-x^2)
- END_DOC
- double precision, intent(in) :: x
- F_x_j = x * (1.d0 - derf(x)) - 1/dsqrt(dacos(-1.d0)) * dexp(-x**2)
+
+  BEGIN_DOC 
+  !
+  ! dimension-less correlation factor:
+  !
+  ! F_x_j(x) = x (1 - erf(x)) - 1/sqrt(pi) exp(-x^2)
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in) :: x
+
+  F_x_j = x * (1.d0 - derf(x)) - 1/dsqrt(dacos(-1.d0)) * dexp(-x**2)
 
 end
+
+! ---
 
 double precision function j_mu_F_x_j(x)
- implicit none
- BEGIN_DOC 
- ! j_mu_F_x_j(x) = correlation factor = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
- !
- !         = 1/(2*mu) * F_x_j(mu*x)
- END_DOC
- double precision :: F_x_j
- double precision, intent(in) :: x
- j_mu_F_x_j = 0.5d0/mu_erf * F_x_j(x*mu_erf)
+
+  BEGIN_DOC 
+  !
+  ! correlation factor:
+  !
+  ! j_mu_F_x_j(x) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
+  !               = 1/(2*mu) * F_x_j(mu*x)
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in) :: x
+  double precision             :: F_x_j
+
+  j_mu_F_x_j = 0.5d0/mu_erf * F_x_j(x*mu_erf)
+
 end
 
+! ---
+
 double precision function j_mu(x)
- implicit none
- double precision, intent(in) :: x
- BEGIN_DOC 
- ! j_mu(x) = correlation factor = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
- END_DOC
- j_mu = 0.5d0* x * (1.d0 - derf(mu_erf*x)) - 0.5d0/( dsqrt(dacos(-1.d0))*mu_erf) * dexp(-(mu_erf*x)*(mu_erf*x))
+
+  BEGIN_DOC 
+  !
+  ! correlation factor:
+  !
+  ! j_mu(x) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
+  !
+  END_DOC
+ 
+  implicit none
+  double precision, intent(in) :: x
+ 
+  j_mu = 0.5d0* x * (1.d0 - derf(mu_erf*x)) - 0.5d0/( dsqrt(dacos(-1.d0))*mu_erf) * dexp(-(mu_erf*x)*(mu_erf*x))
  
 end
 
+! ---
+
 double precision function j_mu_fit_gauss(x)
- implicit none
- BEGIN_DOC 
- ! j_mu_fit_gauss(x) = correlation factor = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
- !
- ! but fitted with gaussians 
- END_DOC
- double precision, intent(in) :: x
- integer :: i
- double precision :: alpha,coef
- j_mu_fit_gauss = 0.d0
- do i = 1, n_max_fit_slat
-  alpha = expo_gauss_j_mu_x(i) 
-  coef  = coef_gauss_j_mu_x(i) 
-  j_mu_fit_gauss +=  coef * dexp(-alpha*x*x)
- enddo
+
+  BEGIN_DOC 
+  !
+  ! correlation factor fitted with gaussians:
+  !
+  ! j_mu_fit_gauss(x) = 1/2 r12 * (1 - erf(mu*r12)) - 1/(2 sqrt(pi)*mu) exp(-(mu*r12)^2)
+  !
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in) :: x
+  integer                      :: i
+  double precision             :: alpha, coef
+
+  j_mu_fit_gauss = 0.d0
+  do i = 1, n_max_fit_slat
+    alpha = expo_gauss_j_mu_x(i) 
+    coef  = coef_gauss_j_mu_x(i) 
+    j_mu_fit_gauss += coef * dexp(-alpha*x*x)
+  enddo
  
 end
 

@@ -174,7 +174,7 @@ double precision function general_primitive_integral_coul_shifted( dim          
   general_primitive_integral_coul_shifted = fact_p * fact_q * accu * pi_5_2 * p_inv * q_inv / dsqrt(p_plus_q)
 
   return
-end function general_primitive_integral_coul_shifted
+end
 !______________________________________________________________________________________________________________________
 !______________________________________________________________________________________________________________________
 
@@ -354,11 +354,56 @@ double precision function general_primitive_integral_erf_shifted( dim           
   general_primitive_integral_erf_shifted = fact_p * fact_q * accu * pi_5_2 * p_inv * q_inv / dsqrt(p_plus_q)
 
   return
-end function general_primitive_integral_erf_shifted
+end
 !______________________________________________________________________________________________________________________
 !______________________________________________________________________________________________________________________
 
 
 
 
+
+
+! ---
+
+subroutine inv_r_times_poly(r, dist_r, dist_vec, poly)
+
+  BEGIN_DOC
+  !
+  ! returns 
+  !
+  ! poly(1) = x / sqrt(x^2+y^2+z^2), poly(2) = y / sqrt(x^2+y^2+z^2), poly(3) = z / sqrt(x^2+y^2+z^2)
+  !
+  ! with the arguments  
+  !
+  ! r(1)  = x, r(2) = y, r(3) = z, dist_r = sqrt(x^2+y^2+z^2)
+  !
+  ! dist_vec(1) = sqrt(y^2+z^2), dist_vec(2) = sqrt(x^2+z^2), dist_vec(3) = sqrt(x^2+y^2)
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: r(3), dist_r, dist_vec(3)
+  double precision, intent(out) :: poly(3)
+  integer                       :: i
+  double precision              :: inv_dist
+
+  if (dist_r .gt. 1.d-8)then
+    inv_dist = 1.d0/dist_r
+    do i = 1, 3
+      poly(i) = r(i) * inv_dist
+    enddo
+  else
+    do i = 1, 3
+      if(dabs(r(i)).lt.dist_vec(i)) then
+        inv_dist = 1.d0/dist_r
+        poly(i) = r(i) * inv_dist
+      else
+        poly(i) = 1.d0
+      endif
+    enddo
+  endif
+
+end
+
+! ---
 
