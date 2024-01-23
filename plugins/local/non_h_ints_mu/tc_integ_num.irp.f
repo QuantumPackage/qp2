@@ -6,7 +6,7 @@
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao_num(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao_num(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
   !
   ! int2_grad1_u12_square_ao_num = -(1/2) x int dr2 chi_l(r2) chi_j(r2) [grad_1 u(r1,r2)]^2
   !
@@ -73,10 +73,10 @@
     !$OMP DO 
     do i_blocks = 1, n_blocks
       ipoint = ii - 1 + i_blocks ! r1
-      call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1) &
-                                                                                             , tmp_grad1_u12(1,i_blocks,2) &
-                                                                                             , tmp_grad1_u12(1,i_blocks,3) &
-                                                                                             , tmp_grad1_u12_squared(1,i_blocks))
+      call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1) &
+                                                                        , tmp_grad1_u12(1,i_blocks,2) &
+                                                                        , tmp_grad1_u12(1,i_blocks,3) &
+                                                                        , tmp_grad1_u12_squared(1,i_blocks))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -109,10 +109,10 @@
     !$OMP DO 
     do i_rest = 1, n_rest
       ipoint = ii - 1 + i_rest ! r1
-      call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1) &
-                                                                                             , tmp_grad1_u12(1,i_rest,2) &
-                                                                                             , tmp_grad1_u12(1,i_rest,3) &
-                                                                                             , tmp_grad1_u12_squared(1,i_rest))
+      call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1) &
+                                                                        , tmp_grad1_u12(1,i_rest,2) &
+                                                                        , tmp_grad1_u12(1,i_rest,3) &
+                                                                        , tmp_grad1_u12_squared(1,i_rest))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -144,7 +144,7 @@ END_PROVIDER
 
   BEGIN_DOC
   !
-  ! int2_grad1_u12_ao_num_1shot(i,j,ipoint,:) = \int dr2 [-1 * \grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
+  ! int2_grad1_u12_ao_num_1shot(i,j,ipoint,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
   !
   ! int2_grad1_u12_square_ao_num_1shot = -(1/2) x int dr2 chi_l(r2) chi_j(r2) [grad_1 u(r1,r2)]^2
   !
@@ -178,9 +178,7 @@ END_PROVIDER
   !$OMP END PARALLEL
 
   do m = 1, 3
-    !call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, -1.d0         &
-    ! this work also because of the symmetry in K(1,2) and sign compensation in L(1,2,3)
-    call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, +1.d0         &
+    call dgemm( "T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid,  1.d0         &
               , tmp(1,1,1), n_points_extra_final_grid, grad1_u12_num(1,1,m), n_points_extra_final_grid &
               , 0.d0, int2_grad1_u12_ao_num_1shot(1,1,1,m), ao_num*ao_num) 
   enddo

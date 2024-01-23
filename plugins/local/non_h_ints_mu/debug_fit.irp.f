@@ -401,10 +401,10 @@ subroutine test_grad1_u12_withsq_num()
 
   do ipoint = 1, n_points_final_grid
 
-    call get_grad1_u12_withsq_r1_seq(final_grid_points(1,ipoint), n_points_extra_final_grid, tmp_grad1_u12(1,ipoint,1) &
-                                                                                           , tmp_grad1_u12(1,ipoint,2) &
-                                                                                           , tmp_grad1_u12(1,ipoint,3) &
-                                                                                           , tmp_grad1_u12_squared(1,ipoint))
+    call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,ipoint,1) &
+                                                                      , tmp_grad1_u12(1,ipoint,2) &
+                                                                      , tmp_grad1_u12(1,ipoint,3) &
+                                                                      , tmp_grad1_u12_squared(1,ipoint))
     do jpoint = 1, n_points_extra_final_grid
 
       i_exc  = grad1_u12_squared_num(jpoint,ipoint) 
