@@ -65,5 +65,8 @@ are defined by the tables `j1e_coef` and `j1e_expo`, respectively.
      <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7Du_%7B1e%7D(%5Cmathbf%7Br%7D_1)=-%5Cfrac%7BN-1%7D%7B2N%7D%5C,%5Csum_%7B%5Csigma%7D%5C,%5Cint%20d%5Cmathbf%7Br%7D_2%5C,%5Crho%5E%7B%5Csigma%7D(%5Cmathbf%7Br%7D_2)%5C,u_%7B2e%7D(%5Cmathbf%7Br%7D_1,%5Cmathbf%7Br%7D_2)">
   </p>
 
-- if `j1e_type` is **Charge_Harmonizer_AO**: The one-electron Jastrow factor **Charge_Harmonizer** is fitted by the atomic orbitals
+- if `j1e_type` is **Charge_Harmonizer_AO**: The one-electron Jastrow factor **Charge_Harmonizer** is fitted by the product of atomic orbitals:
+  <p align="center">
+     <img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{300}\bg{white}&space;u_{1e}(\mathbf{r})=\sum_{\alpha,\beta}C_{\alpha,\beta}\chi_{\alpha}(\mathbf{r})\chi_{\beta}(\mathbf{r})">
+  </p>
 

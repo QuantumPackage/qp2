@@ -80,24 +80,33 @@ subroutine get_j1e_coef_fit_ao(dim_fit, coef_fit)
 
   allocate(A_inv(ao_num,ao_num))
   call get_inverse(A, ao_num, ao_num, A_inv, ao_num)
-  deallocate(A)
 
   ! coef_fit = A_inv x b
   call dgemv("N", ao_num, ao_num, 1.d0, A_inv, ao_num, b, 1, 0.d0, coef_fit, 1)
 
-  !integer          :: j, k
-  !double precision :: tmp
-  !print *, ' check A_inv'
-  !do i = 1, ao_num
-  !  tmp = 0.d0
-  !  do j = 1, ao_num
-  !    tmp += ao_overlap(i,j) * coef_fit(j)
-  !  enddo
-  !  tmp = tmp - b(i)
-  !  print*, i, tmp
-  !enddo
+  integer          :: j
+  double precision :: tmp, acc, nrm
 
-  deallocate(A_inv, b)
+  acc = 0.d0
+  nrm = 0.d0
+  print *, ' check A_inv'
+  do i = 1, ao_num
+    tmp = 0.d0
+    do j = 1, ao_num
+      tmp += ao_overlap(i,j) * coef_fit(j)
+    enddo
+    tmp = tmp - b(i)
+    if(dabs(tmp) .gt. 1d-8) then
+      print*, ' problem found in fitting 1e-Jastrow'
+      print*, i, tmp
+    endif
+
+    acc += dabs(tmp)
+    nrm += dabs(b(i))
+  enddo
+  print *, ' Relative Error (%) =', 100.d0*acc/nrm
+
+  deallocate(A, A_inv, b)
 
   call wall_time(t1)
   print*, ' END after (min) ', (t1-t0)/60.d0
@@ -128,7 +137,7 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   PROVIDE mo_coef
 
   call wall_time(t0)
-  print*, ' PROVIDING the representation of 1e-Jastrow in AOs x AOx ... '
+  print*, ' PROVIDING the representation of 1e-Jastrow in AOs x AOs ... '
 
   ! --- --- ---
   ! get u1e(r)
@@ -188,10 +197,10 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   !$OMP END DO
   !$OMP END PARALLEL
 
-  print *, ' A'
-  do ij = 1, ao_num*ao_num
-    write(*, '(100000(f15.7))') (A(ij,kl), kl = 1, ao_num*ao_num)
-  enddo
+!  print *, ' A'
+!  do ij = 1, ao_num*ao_num
+!    write(*, '(100000(f15.7))') (A(ij,kl), kl = 1, ao_num*ao_num)
+!  enddo
 
   ! --- --- ---
   ! get b
@@ -223,44 +232,35 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! solve Ax = b
 
   allocate(A_inv(ao_num*ao_num,ao_num*ao_num))
-  call get_inverse(A, ao_num*ao_num, ao_num*ao_num, A_inv, ao_num*ao_num)
-
-  integer :: mn
-  print *, ' check A_inv'
-  do ij = 1, ao_num*ao_num
-    do kl = 1, ao_num*ao_num
-
-      tmp = 0.d0
-      do mn = 1, ao_num*ao_num
-        tmp += A(ij,mn) * A_inv(mn,kl)
-      enddo
-
-      print*, ij, kl, tmp
-    enddo
-  enddo
+  !call get_inverse(A, ao_num*ao_num, ao_num*ao_num, A_inv, ao_num*ao_num)
+  call get_pseudo_inverse(A, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A_inv, ao_num*ao_num, 5d-8)
 
   ! coef_fit = A_inv x b
-  !call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A_inv, ao_num*ao_num, b, 1, 0.d0, coef_fit(1,1), 1)
-  do ij = 1, ao_num*ao_num
-    coef_fit(ij) = 0.d0
-    do kl = 1, ao_num*ao_num
-      coef_fit(ij) += A_inv(ij,kl) * b(kl)
-    enddo
-  enddo
+  call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A_inv, ao_num*ao_num, b, 1, 0.d0, coef_fit, 1)
 
-  double precision :: tmp
-  print *, ' check A_inv'
+  integer          :: mn
+  double precision :: tmp, acc, nrm
+
+  acc = 0.d0
+  nrm = 0.d0
   do ij = 1, ao_num*ao_num
     tmp = 0.d0
     do kl = 1, ao_num*ao_num
       tmp += A(ij,kl) * coef_fit(kl)
     enddo
     tmp = tmp - b(ij)
-    print*, ij, tmp
-  enddo
+    if(dabs(tmp) .gt. 1d-7) then
+      print*, ' problem found in fitting 1e-Jastrow'
+      print*, ij, tmp
+    endif
 
-  deallocate(A)
-  deallocate(A_inv, b)
+    acc += dabs(tmp)
+    nrm += dabs(b(ij))
+  enddo
+  print *, ' Relative Error (%) =', 100.d0*acc/nrm
+
+
+  deallocate(A, A_inv, b)
 
   call wall_time(t1)
   print*, ' END after (min) ', (t1-t0)/60.d0
@@ -373,6 +373,7 @@ subroutine get_j1e_coef_fit_ao3(dim_fit, coef_fit)
       enddo
       tmp = tmp - b(i,d)
       if(dabs(tmp) .gt. 1d-8) then
+        print*, ' problem found in fitting 1e-Jastrow'
         print*, d, i, tmp
       endif
 
