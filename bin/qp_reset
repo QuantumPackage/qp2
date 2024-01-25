@@ -97,6 +97,8 @@ if [[ $dets -eq 1 ]] ; then
   rm --force -- ${ezfio}/determinants/psi_{det,coef}.gz
   rm --force -- ${ezfio}/determinants/n_det_qp_edit
   rm --force -- ${ezfio}/determinants/psi_{det,coef}_qp_edit.gz
+  rm --force -- ${ezfio}/tc_bi_ortho/psi_{l,r}_coef_bi_ortho.gz 
+
 fi
 
 if [[ $mos -eq 1 ]] ; then

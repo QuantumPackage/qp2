@@ -154,8 +154,8 @@ let input_ezfio = "
 
 * N_int_number : int
   determinants_n_int
-  1 : 30
-  N_int > 30
+  1 : 128
+  N_int > 128
 
 * Det_number : int
   determinants_n_det

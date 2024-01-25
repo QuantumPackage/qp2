@@ -149,7 +149,3 @@ BEGIN_PROVIDER [ double precision, ao_prod_dist_grid, (ao_num, ao_num, n_points_
 END_PROVIDER 
 
 
-!BEGIN_PROVIDER [ double precision, ao_abs_prod_j1b, (ao_num, ao_num)]
-! implicit none
-!
-!END_PROVIDER 

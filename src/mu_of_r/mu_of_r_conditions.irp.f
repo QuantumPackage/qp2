@@ -26,7 +26,7 @@
   do ipoint = 1, n_points_final_grid
    if(mu_of_r_potential.EQ."hf")then
     mu_of_r_prov(ipoint,istate) =  mu_of_r_hf(ipoint)
-   else if(mu_of_r_potential.EQ."cas_ful".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
+   else if(mu_of_r_potential.EQ."cas_full".or.mu_of_r_potential.EQ."cas_truncated".or.mu_of_r_potential.EQ."pure_act")then
     mu_of_r_prov(ipoint,istate) =  mu_of_r_psi_cas(ipoint,istate)
    else 
     print*,'you requested the following mu_of_r_potential'
@@ -128,7 +128,7 @@
  BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  implicit none
  BEGIN_DOC
- ! average value of mu(r) weighted with the total one-e density and divised by the number of electrons 
+ ! average value of mu(r) weighted with the total one-e density and divided by the number of electrons 
  !
  ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals 
  !

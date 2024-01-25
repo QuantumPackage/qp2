@@ -58,17 +58,32 @@ let int_of_atom_id : atom_id -> int = fun x -> x
 let float_of_distance : float StringMap.t -> distance -> float =
   fun map -> function
   | Value x -> x
-  | Label s -> StringMap.find s map
+  | Label s -> begin
+                 try StringMap.find s map with
+                 | Not_found ->
+                     Printf.sprintf "Zmatrix error: distance %s undefined" s
+                     |> failwith
+               end
 
 let float_of_angle : float StringMap.t -> angle -> float =
   fun map -> function
   | Value x -> x
-  | Label s -> StringMap.find s map
+  | Label s -> begin
+                 try StringMap.find s map with
+                 | Not_found ->
+                     Printf.sprintf "Zmatrix error: angle %s undefined" s
+                     |> failwith
+               end
 
 let float_of_dihedral : float StringMap.t -> dihedral -> float =
   fun map -> function
   | Value x -> x
-  | Label s -> StringMap.find s map
+  | Label s -> begin
+                 try StringMap.find s map with
+                 | Not_found ->
+                     Printf.sprintf "Zmatrix error: dihedral %s undefined" s
+                     |> failwith
+               end
 
 
 type line =

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# On Darwin: try gzcat if available, otherwise use Python
+
+if [[ $(uname -s) = Darwin ]] ; then
+   which gzcat &> /dev/null
+   if [[ $? -eq 0 ]] ; then 
+      exec gzcat $@
+   else
+
+      exec python3 << EOF
+import sys
+import gzip
+with gzip.open("$1", "rt") as f:
+    print(f.read())
+EOF
+   fi
+else
+   SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+   command=$(which -a zcat | grep -v "$SCRIPTPATH/" | head -1)
+   exec $command $@
+fi
+

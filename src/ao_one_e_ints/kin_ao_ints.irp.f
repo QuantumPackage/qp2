@@ -52,7 +52,7 @@
     !$OMP DEFAULT(NONE) &
     !$OMP PRIVATE(A_center,B_center,power_A,power_B,&
     !$OMP  overlap_y, overlap_z, overlap, &
-    !$OMP  alpha, beta,i,j,c,d_a_2,d_2,deriv_tmp, &
+    !$OMP  alpha, beta, n, l, i,j,c,d_a_2,d_2,deriv_tmp, &
     !$OMP  overlap_x0,overlap_y0,overlap_z0) &
     !$OMP SHARED(nucl_coord,ao_power,ao_prim_num, &
     !$OMP  ao_deriv2_x,ao_deriv2_y,ao_deriv2_z,ao_num,ao_coef_normalized_ordered_transp,ao_nucl, &
