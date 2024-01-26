@@ -645,7 +645,7 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   END_DOC
   integer, intent(in)            :: m,n, LDA, LDC
   complex*16, intent(in)   :: A(LDA,n)
-  double precision, intent(in)   :: cutoff
+  double precision, intent(in)   :: cutoff, d1
   complex*16, intent(out)  :: C(LDC,m)
 
   double precision, allocatable  :: D(:), rwork(:)
@@ -673,8 +673,9 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
     stop 1
   endif
 
+  d1 = D(1)
   do i=1,n
-    if (D(i) > cutoff*D(1)) then
+    if (D(i) > cutoff*d1) then
       D(i) = 1.d0/D(i)
     else
       D(i) = 0.d0
