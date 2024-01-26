@@ -127,8 +127,8 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   integer                       :: info, n_svd, LWORK
   double precision              :: g
   double precision              :: t0, t1
-  double precision              :: cutoff_svd
-  double precision, allocatable :: A(:,:,:,:), b(:,:)
+  double precision              :: cutoff_svd, D1_inv
+  double precision, allocatable :: A(:,:,:,:), b(:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:), tmp(:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:)
@@ -140,7 +140,7 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   PROVIDE mo_coef
 
 
-  cutoff_svd = 5d-8
+  cutoff_svd = 1d-10
 
   call wall_time(t0)
   print*, ' PROVIDING the representation of 1e-Jastrow in AOs x AOs ... '
@@ -175,31 +175,7 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! --- --- ---
   ! get A
 
-  !!$OMP PARALLEL                             &
-  !!$OMP DEFAULT (NONE)                       &
-  !!$OMP PRIVATE (i, j, k, l, ij, kl, ipoint) &
-  !!$OMP SHARED (n_points_final_grid, ao_num, &
-  !!$OMP         final_weight_at_r_vector, aos_in_r_array_transp, A)
-  !!$OMP DO COLLAPSE(2)
-  !do k = 1, ao_num
-  !  do l = 1, ao_num
-  !    kl = (k-1)*ao_num + l
-  !    do i = 1, ao_num
-  !      do j = 1, ao_num
-  !        ij = (i-1)*ao_num + j
-  !        A(ij,kl) = 0.d0
-  !        do ipoint = 1, n_points_final_grid
-  !          A(ij,kl) += final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) &
-  !                                                       * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,l)
-  !        enddo
-  !      enddo
-  !    enddo
-  !  enddo
-  !enddo
-  !!$OMP END DO
-  !!$OMP END PARALLEL
-
-  allocate(tmp(ao_num,ao_num,n_points_final_grid))
+  allocate(tmp(n_points_final_grid,ao_num,ao_num))
   allocate(A(ao_num,ao_num,ao_num,ao_num))
 
   !$OMP PARALLEL               &
@@ -210,47 +186,41 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   do j = 1, ao_num
     do i = 1, ao_num
       do ipoint = 1, n_points_final_grid
-        tmp(i,j,ipoint) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp(ipoint,i,j) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
       enddo
     enddo
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), ao_num*ao_num, tmp(1,1,1), ao_num*ao_num              &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+            , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
-
-  deallocate(tmp)
-
 
   ! --- --- ---
   ! get b
 
-  allocate(b(ao_num,ao_num))
+  allocate(b(ao_num*ao_num))
 
-  !$OMP PARALLEL               &
-  !$OMP DEFAULT (NONE)         &
-  !$OMP PRIVATE (i, j, ipoint) &
-  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, u1e_tmp, b)
-  !$OMP DO COLLAPSE(2)
-  do i = 1, ao_num
-    do j = 1, ao_num
-      b(j,i) = 0.d0
-      do ipoint = 1, n_points_final_grid
-        b(j,i) = b(j,i) + final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) * u1e_tmp(ipoint)
-      enddo
-    enddo
+  do ipoint = 1, n_points_final_grid
+    u1e_tmp(ipoint) = dsqrt(final_weight_at_r_vector(ipoint)) * u1e_tmp(ipoint)
   enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
+
+  call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
+  !call dgemm( "T", "N", ao_num*ao_num, 1, n_points_final_grid, 1.d0            &
+  !          , tmp(1,1,1), n_points_final_grid, u1e_tmp(1), n_points_final_grid &
+  !          , 0.d0, b(1), ao_num*ao_num)
 
   deallocate(u1e_tmp)
+  deallocate(tmp)
 
   ! --- --- ---
   ! solve Ax = b
 
-  !call get_pseudo_inverse(A, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A_inv, ao_num*ao_num, cutoff_svd)
+!  double precision, allocatable :: A_inv(:,:,:,:)
+!  allocate(A_inv(ao_num,ao_num,ao_num,ao_num))
+!  call get_pseudo_inverse(A(1,1,1,1), ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A_inv(1,1,1,1), ao_num*ao_num, cutoff_svd)
+!  A = A_inv
 
   allocate(D(ao_num*ao_num), U(ao_num*ao_num,ao_num*ao_num), Vt(ao_num*ao_num,ao_num*ao_num))
 
@@ -275,15 +245,21 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
   deallocate(work)
 
-  n_svd = 0
-  do ij = 1, ao_num*ao_num
-    if(D(ij)/D(1) > cutoff_svd) then
-      D(ij) = 1.d0 / D(ij)
-      n_svd = n_svd + 1
-    else
-      D(ij) = 0.d0
-    endif
-  enddo
+  if(D(1) .lt. 1d-14) then
+    print*, ' largest singular value is very small:', D(1)
+    n_svd = 1
+  else
+    n_svd  = 0
+    D1_inv = 1.d0 / D(1)
+    do ij = 1, ao_num*ao_num
+      if(D(ij)*D1_inv > cutoff_svd) then
+        D(ij) = 1.d0 / D(ij)
+        n_svd = n_svd + 1
+      else
+        D(ij) = 0.d0
+      endif
+    enddo
+  endif
   print*, ' n_svd = ', n_svd
 
   !$OMP PARALLEL         &
@@ -310,7 +286,10 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! ---
 
   ! coef_fit = A_inv x b
-  call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A(1,1,1,1), ao_num*ao_num, b(1,1), 1, 0.d0, coef_fit(1,1), 1)
+  call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A(1,1,1,1), ao_num*ao_num, b(1), 1, 0.d0, coef_fit(1,1), 1)
+  !call dgemm( "N", "N", ao_num*ao_num, 1, ao_num*ao_num, 1.d0 &
+  !          , A(1,1,1,1), ao_num*ao_num, b(1), ao_num*ao_num  &
+  !          , 0.d0, coef_fit(1,1), ao_num*ao_num)
 
   deallocate(A, b)
 

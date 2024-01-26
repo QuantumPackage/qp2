@@ -1232,8 +1232,8 @@ subroutine test_fit_coef_inv()
   integer                       :: n_svd, info, lwork, mn
   double precision              :: t1, t2
   double precision              :: accu, norm, diff
-  double precision              :: cutoff_svd
-  double precision, allocatable :: A1(:,:), A1_inv(:,:)
+  double precision              :: cutoff_svd, D1_inv
+  double precision, allocatable :: A1(:,:), A1_inv(:,:), A1_tmp(:,:)
   double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:), A2_inv(:,:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A2_tmp(:,:,:,:)
 
@@ -1285,7 +1285,7 @@ subroutine test_fit_coef_inv()
 
   call wall_time(t1)
 
-  allocate(tmp(ao_num,ao_num,n_points_final_grid))
+  allocate(tmp(n_points_final_grid,ao_num,ao_num))
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (i, j, ipoint) &
@@ -1294,7 +1294,7 @@ subroutine test_fit_coef_inv()
   do j = 1, ao_num
     do i = 1, ao_num
       do ipoint = 1, n_points_final_grid
-        tmp(i,j,ipoint) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp(ipoint,i,j) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
       enddo
     enddo
   enddo
@@ -1303,8 +1303,8 @@ subroutine test_fit_coef_inv()
 
   allocate(A2(ao_num,ao_num,ao_num,ao_num))
 
-  call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), ao_num*ao_num, tmp(1,1,1), ao_num*ao_num              &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+            , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
             , 0.d0, A2(1,1,1,1), ao_num*ao_num)
 
   deallocate(tmp)
@@ -1312,6 +1312,8 @@ subroutine test_fit_coef_inv()
   call wall_time(t2)
   print*, ' WALL TIME FOR A2 (min) =', (t2-t1)/60.d0
 
+  allocate(A1_tmp(ao_num*ao_num,ao_num*ao_num))
+  A1_tmp = A1
   allocate(A2_tmp(ao_num,ao_num,ao_num,ao_num))
   A2_tmp = A2
 
@@ -1322,7 +1324,8 @@ subroutine test_fit_coef_inv()
   allocate(work(1))
   lwork = -1
 
-  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
+  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A1_tmp(1,1), ao_num*ao_num &
+  !call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
              , D(1), U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num, work, lwork, info)
   if(info /= 0) then
     print *,  info, ': SVD failed'
@@ -1333,7 +1336,8 @@ subroutine test_fit_coef_inv()
   deallocate(work)
   allocate(work(lwork))
 
-  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
+  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A1_tmp(1,1), ao_num*ao_num &
+  !call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
              , D(1), U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num, work, lwork, info)
   if(info /= 0) then
     print *,  info, ':: SVD failed'
@@ -1343,9 +1347,10 @@ subroutine test_fit_coef_inv()
   deallocate(A2_tmp)
   deallocate(work)
 
-  n_svd = 0
+  n_svd  = 0
+  D1_inv = 1.d0 / D(1)
   do ij = 1, ao_num*ao_num
-    if(D(ij)/D(1) > cutoff_svd) then
+    if(D(ij)*D1_inv > cutoff_svd) then
       D(ij) = 1.d0 / D(ij)
       n_svd = n_svd + 1
     else
@@ -1416,12 +1421,12 @@ subroutine test_fit_coef_inv()
           ij = (i-1)*ao_num + j
 
           diff = dabs(A2_inv(j,i,l,k) - A1_inv(ij,kl))
-          !if(diff .gt. cutoff_svd) then
-          !  print *, ' problem in A2_inv on:', i, i, l, k
-          !  print *, ' A1_inv :', A1_inv(ij,kl)
-          !  print *, ' A2_inv :', A2_inv(j,i,l,k)
-          !  stop
-          !endif
+          if(diff .gt. cutoff_svd) then
+            print *, ' problem in A2_inv on:', i, i, l, k
+            print *, ' A1_inv :', A1_inv(ij,kl)
+            print *, ' A2_inv :', A2_inv(j,i,l,k)
+            stop
+          endif
 
           accu += diff
           norm += dabs(A1_inv(ij,kl)) 

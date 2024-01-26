@@ -1335,6 +1335,7 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
 
   integer                       :: info, lwork
   integer                       :: i, j, k, n_svd
+  double precision              :: D1_inv
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A_tmp(:,:)
 
   allocate (D(n),U(m,n),Vt(n,n),work(1),A_tmp(m,n))
@@ -1358,15 +1359,22 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
     stop 1
   endif
 
-  n_svd = 0
-  do i = 1, n
-    if(D(i)/D(1) > cutoff) then
-      D(i) = 1.d0 / D(i)
-      n_svd = n_svd + 1
-    else
-      D(i) = 0.d0
-    endif
-  enddo
+  if(D(1) .lt. 1d-14) then
+    print*, ' largest singular value is very small:', D(1)
+    n_svd = 1
+  else
+    n_svd  = 0
+    D1_inv = 1.d0 / D(1)
+    do i = 1, n
+      if(D(i)*D1_inv > cutoff) then
+        D(i) = 1.d0 / D(i)
+        n_svd = n_svd + 1
+      else
+        D(i) = 0.d0
+      endif
+    enddo
+  endif
+
   print*, ' n_svd = ', n_svd
 
   !$OMP PARALLEL       &
@@ -1384,14 +1392,14 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
 
   call dgemm("N", "N", m, n, n_svd, 1.d0, U, m, Vt, n, 0.d0, C, LDC)
 
-  !C = 0.d0
-  !do i=1,m
-  !  do j=1,n
-  !    do k=1,n
-  !      C(j,i) = C(j,i) + U(i,k) * D(k) * Vt(k,j)
-  !    enddo
-  !  enddo
-  !enddo
+!  C = 0.d0
+!  do i=1,m
+!    do j=1,n
+!      do k=1,n
+!        C(j,i) = C(j,i) + U(i,k) * D(k) * Vt(k,j)
+!      enddo
+!    enddo
+!  enddo
 
   deallocate(U,D,Vt,work,A_tmp)
 
