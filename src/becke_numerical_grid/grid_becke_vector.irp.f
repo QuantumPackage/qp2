@@ -55,7 +55,7 @@ END_PROVIDER
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
-        if(dabs(final_weight_at_r(k,i,j)) < thresh_grid)then
+        if(dabs(final_weight_at_r(k,i,j)) < thresh_grid) then
           cycle
         endif
         i_count += 1
@@ -67,6 +67,13 @@ END_PROVIDER
         index_final_points(2,i_count) = i
         index_final_points(3,i_count) = j
         index_final_points_reverse(k,i,j) = i_count
+
+        if(final_weight_at_r_vector(i_count) .lt. 0.d0) then
+          print *, ' !!! WARNING !!!'
+          print *, ' negative weight !!!!'
+          print *, i_count, final_weight_at_r_vector(i_count)
+          stop
+        endif 
       enddo
     enddo
   enddo
