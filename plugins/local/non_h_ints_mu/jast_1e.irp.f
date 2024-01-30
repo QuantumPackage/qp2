@@ -78,7 +78,7 @@ END_PROVIDER
   double precision              :: cx, cy, cz
   double precision              :: time0, time1
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
-  double precision, allocatable :: coef_fit(:), coef_fit2(:), coef_fit3(:,:)
+  double precision, allocatable :: coef_fit(:), coef_fit2(:,:), coef_fit3(:,:)
 
   PROVIDE j1e_type
 
@@ -243,7 +243,7 @@ END_PROVIDER
 
     PROVIDE aos_grad_in_r_array
 
-    allocate(coef_fit2(ao_num*ao_num))
+    allocate(coef_fit2(ao_num,ao_num))
 
     if(mpi_master) then
       call ezfio_has_jastrow_j1e_coef_ao2(exists)
@@ -254,7 +254,7 @@ END_PROVIDER
     IRP_ENDIF
     IRP_IF MPI
       include 'mpif.h'
-      call MPI_BCAST(coef_fit2, ao_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+      call MPI_BCAST(coef_fit2, (ao_num*ao_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
       if (ierr /= MPI_SUCCESS) then
         stop 'Unable to read j1e_coef_ao2 with MPI'
       endif
@@ -264,7 +264,7 @@ END_PROVIDER
         write(6,'(A)') '.. >>>>> [ IO READ: j1e_coef_ao2 ] <<<<< ..'
         call ezfio_get_jastrow_j1e_coef_ao2(coef_fit2)
         IRP_IF MPI
-          call MPI_BCAST(coef_fit2, ao_num*ao_num, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+          call MPI_BCAST(coef_fit2, (ao_num*ao_num), MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
           if (ierr /= MPI_SUCCESS) then
             stop 'Unable to read j1e_coef_ao2 with MPI'
           endif
@@ -272,14 +272,14 @@ END_PROVIDER
       endif
     else
 
-      call get_j1e_coef_fit_ao2(ao_num*ao_num, coef_fit2)
+      call get_j1e_coef_fit_ao2(ao_num, coef_fit2)
       call ezfio_set_jastrow_j1e_coef_ao2(coef_fit2)
 
     endif
 
     !$OMP PARALLEL                                &
     !$OMP DEFAULT (NONE)                          &
-    !$OMP PRIVATE (i, j, ij, ipoint, c)           &
+    !$OMP PRIVATE (i, j, ipoint, c)               &
     !$OMP SHARED (n_points_final_grid, ao_num,    &
     !$OMP         aos_grad_in_r_array, coef_fit2, &
     !$OMP         aos_in_r_array, j1e_gradx, j1e_grady, j1e_gradz)
@@ -292,9 +292,7 @@ END_PROVIDER
 
       do i = 1, ao_num
         do j = 1, ao_num
-          ij = (i-1)*ao_num + j
-
-          c = coef_fit2(ij)
+          c = coef_fit2(j,i)
 
           j1e_gradx(ipoint) += c * (aos_in_r_array(i,ipoint) * aos_grad_in_r_array(j,ipoint,1) + aos_grad_in_r_array(i,ipoint,1) * aos_in_r_array(j,ipoint))
           j1e_grady(ipoint) += c * (aos_in_r_array(i,ipoint) * aos_grad_in_r_array(j,ipoint,2) + aos_grad_in_r_array(i,ipoint,2) * aos_in_r_array(j,ipoint))
