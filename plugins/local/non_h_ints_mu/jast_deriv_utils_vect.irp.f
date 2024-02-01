@@ -395,3 +395,81 @@ end
 
 ! ---
 
+subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
+
+  BEGIN_DOC
+  ! 
+  ! grad_1 u_2e(r1,r2)
+  !
+  ! we use grid for r1 and extra_grid for r2
+  !
+  END_DOC
+
+  implicit none
+  integer,          intent(in)  :: ipoint, n_grid2
+  double precision, intent(out) :: resx(n_grid2), resy(n_grid2), resz(n_grid2)
+
+  integer                       :: jpoint
+  double precision              :: env_r1, tmp
+  double precision              :: grad1_env(3), r1(3)
+  double precision, allocatable :: env_r2(:)
+  double precision, allocatable :: u2b_r12(:)
+  double precision, allocatable :: gradx1_u2b(:), grady1_u2b(:), gradz1_u2b(:)
+  double precision, external    :: env_nucl
+
+  PROVIDE j1e_type j2e_type env_type
+  PROVIDE final_grid_points
+  PROVIDE final_grid_points_extra
+
+  r1(1) = final_grid_points(1,ipoint)
+  r1(2) = final_grid_points(2,ipoint)
+  r1(3) = final_grid_points(3,ipoint)
+
+  if( (j2e_type .eq. "Mu")  .or. &
+      (j2e_type .eq. "Mur") .or. &
+      (j2e_type .eq. "Boys") ) then
+
+    if(env_type .eq. "None") then
+
+      call grad1_j12_r1_seq(r1, n_grid2, resx, resy, resz)
+
+    else
+
+      !   u(r1,r2)        = j12_mu(r12) x v(r1) x v(r2)
+      !   grad1 u(r1, r2) = [(grad1 j12_mu) v(r1) + j12_mu grad1 v(r1)] v(r2)
+
+      allocate(env_r2(n_grid2))
+      allocate(u2b_r12(n_grid2))
+      allocate(gradx1_u2b(n_grid2))
+      allocate(grady1_u2b(n_grid2))
+      allocate(gradz1_u2b(n_grid2))
+
+      env_r1 = env_nucl(r1)
+      call grad1_env_nucl(r1, grad1_env)
+
+      call env_nucl_r1_seq(n_grid2, env_r2)
+      call j12_r1_seq(r1, n_grid2, u2b_r12)
+      call grad1_j12_r1_seq(r1, n_grid2, gradx1_u2b, grady1_u2b, gradz1_u2b)
+
+      do jpoint = 1, n_points_extra_final_grid
+        resx(jpoint) = (gradx1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(1)) * env_r2(jpoint)
+        resy(jpoint) = (grady1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(2)) * env_r2(jpoint)
+        resz(jpoint) = (gradz1_u2b(jpoint) * env_r1 + u2b_r12(jpoint) * grad1_env(3)) * env_r2(jpoint)
+      enddo
+
+      deallocate(env_r2, u2b_r12, gradx1_u2b, grady1_u2b, gradz1_u2b)
+
+    endif ! env_type
+
+  else
+
+    print *, ' Error in get_grad1_u12_withsq_r1_seq: Unknown Jastrow'
+    stop
+
+  endif ! j2e_type
+
+  return
+end
+
+! ---
+
