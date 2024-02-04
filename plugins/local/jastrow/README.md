@@ -20,6 +20,12 @@ The main keywords are:
    <img src="https://latex.codecogs.com/png.image?%5Cinline%20%5Clarge%20%5Cdpi%7B200%7D%5Cbg%7Bwhite%7D%20u(%5Cmathbf%7Br%7D_1,%5Cmathbf%7Br%7D_2)=u(r_%7B12%7D)=%5Cfrac%7Br_%7B12%7D%7D%7B2%7D%5Cleft%5B1-%5Ctext%7Berf%7D(%5Cmu%20r_%7B12%7D)%5Cright%5D-%5Cfrac%7B%5Cexp%5B-(%5Cmu%20r_%7B12%7D)%5E2%5D%7D%7B2%5Csqrt%7B%5Cpi%7D%5Cmu%7D">
    </p>
 
+3. **Mu_Nu:** A valence and a core correlation terms are used
+   <p align="center">
+      <img src="https://latex.codecogs.com/png.image?\inline&space;\huge&space;\dpi{110}\bg{white}&space;u(\mathbf{r}_1,\mathbf{r}_2)=u(\mu;r_{12})\,v(\mathbf{r}_1)\,v(\mathbf{r}_2)&plus;u(\nu;r_{12})[1-v(\mathbf{r}_1)\,v(\mathbf{r}_2)]">
+   </p>
+   with envelop \(v\).
+
 
 ## env_type Options
 
