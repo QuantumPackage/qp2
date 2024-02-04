@@ -126,9 +126,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   integer                       :: ij, kl, mn
   integer                       :: info, n_svd, LWORK
   double precision              :: g
-  double precision              :: t0, t1
+  double precision              :: t0, t1, svd_t0, svd_t1
   double precision              :: cutoff_svd, D1_inv
-  double precision              :: accu, norm, diff
+  double precision, allocatable :: diff(:)
   double precision, allocatable :: A(:,:,:,:), b(:), A_tmp(:,:,:,:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:), tmp(:,:,:)
@@ -211,9 +211,6 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   enddo
 
   call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
-  !call dgemm( "T", "N", ao_num*ao_num, 1, n_points_final_grid, 1.d0            &
-  !          , tmp(1,1,1), n_points_final_grid, u1e_tmp(1), n_points_final_grid &
-  !          , 0.d0, b(1), ao_num*ao_num)
 
   deallocate(u1e_tmp)
   deallocate(tmp)
@@ -222,6 +219,8 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! solve Ax = b
 
   allocate(D(ao_num*ao_num), U(ao_num*ao_num,ao_num*ao_num), Vt(ao_num*ao_num,ao_num*ao_num))
+
+  call wall_time(svd_t0)
 
   allocate(work(1))
   lwork = -1
@@ -243,6 +242,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   endif
 
   deallocate(work)
+
+  call wall_time(svd_t1)
+  print*, ' SVD time (min) ', (svd_t1-svd_t0)/60.d0
 
   if(D(1) .lt. 1d-14) then
     print*, ' largest singular value is very small:', D(1)
@@ -289,24 +291,12 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
   ! ---
 
-  accu = 0.d0
-  norm = 0.d0
-  do k = 1, ao_num
-    do l = 1, ao_num
-      kl = (k-1)*ao_num + l
-      diff = 0.d0
-      do i = 1, ao_num
-        do j = 1, ao_num
-          diff += A_tmp(k,l,i,j) * coef_fit(j,i)
-        enddo
-      enddo
+  allocate(diff(ao_num*ao_num))
 
-      !print*, kl, b(kl)
-      accu += dabs(diff - b(kl))
-      norm += dabs(b(kl))
-    enddo
-  enddo
-  print*, ' accu total on Ax = b (%) = ', 100.d0*accu/norm
+  call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A_tmp(1,1,1,1), ao_num*ao_num, coef_fit(1,1), 1, 0.d0, diff(1), 1)
+  print*, ' accu total on Ax = b (%) = ', 100.d0*sum(dabs(diff-b))/sum(dabs(b))
+
+  deallocate(diff)
   deallocate(A_tmp)
 
   ! ---

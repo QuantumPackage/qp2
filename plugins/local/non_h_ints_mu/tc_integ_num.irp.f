@@ -45,7 +45,6 @@
   !$OMP END DO
   !$OMP END PARALLEL
 
-  ! n_points_final_grid = n_blocks * n_pass + n_rest
   call total_memory(mem)
   mem      = max(1.d0, qp_max_mem - mem)
   n_double = mem * 1.d8
