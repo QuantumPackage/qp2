@@ -19,11 +19,13 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
   double precision              :: env_r1, tmp
   double precision              :: grad1_env(3), r1(3)
   double precision, allocatable :: env_r2(:)
-  double precision, allocatable :: u2b_r12(:)
-  double precision, allocatable :: gradx1_u2b(:), grady1_u2b(:), gradz1_u2b(:)
+  double precision, allocatable :: u2b_r12(:), gradx1_u2b(:), grady1_u2b(:), gradz1_u2b(:)
+  double precision, allocatable :: u2b_mu(:), gradx1_mu(:), grady1_mu(:), gradz1_mu(:)
+  double precision, allocatable :: u2b_nu(:), gradx1_nu(:), grady1_nu(:), gradz1_nu(:)
   double precision, external    :: env_nucl
 
   PROVIDE j1e_type j2e_type env_type
+  PROVIDE mu_erf nu_erf a_boys
   PROVIDE final_grid_points
   PROVIDE final_grid_points_extra
 
@@ -41,8 +43,8 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
 
     else
 
-      !   u(r1,r2)        = j12_mu(r12) x v(r1) x v(r2)
-      !   grad1 u(r1, r2) = [(grad1 j12_mu) v(r1) + j12_mu grad1 v(r1)] v(r2)
+      ! u(r1,r2)        = j12_mu(r12) x v(r1) x v(r2)
+      ! grad1 u(r1, r2) = [(grad1 j12_mu) v(r1) + j12_mu grad1 v(r1)] v(r2)
 
       allocate(env_r2(n_grid2))
       allocate(u2b_r12(n_grid2))
@@ -64,6 +66,46 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
       enddo
 
       deallocate(env_r2, u2b_r12, gradx1_u2b, grady1_u2b, gradz1_u2b)
+
+    endif ! env_type
+
+  elseif(j2e_type .eq. "Mu_Nu") then
+
+    if(env_type .eq. "None") then
+
+      call grad1_jmu_r1_seq(mu_erf, r1, n_grid2, resx, resy, resz)
+
+    else
+
+      ! u(r1,r2) = jmu(r12) x v(r1) x v(r2) + jnu(r12) x [1 - v(r1) x v(r2)]
+
+      allocate(env_r2(n_grid2))
+      allocate(u2b_mu(n_grid2))
+      allocate(u2b_nu(n_grid2))
+      allocate(gradx1_mu(n_grid2), grady1_mu(n_grid2), gradz1_mu(n_grid2))
+      allocate(gradx1_nu(n_grid2), grady1_nu(n_grid2), gradz1_nu(n_grid2))
+
+      env_r1 = env_nucl(r1)
+      call grad1_env_nucl(r1, grad1_env)
+      call env_nucl_r1_seq(n_grid2, env_r2)
+
+      call jmu_r1_seq(mu_erf, r1, n_grid2, u2b_mu)
+      call jmu_r1_seq(nu_erf, r1, n_grid2, u2b_nu)
+
+      call grad1_jmu_r1_seq(mu_erf, r1, n_grid2, gradx1_mu, grady1_mu, gradz1_mu)
+      call grad1_jmu_r1_seq(nu_erf, r1, n_grid2, gradx1_nu, grady1_nu, gradz1_nu)
+
+      do jpoint = 1, n_points_extra_final_grid
+        resx(jpoint) = gradx1_nu(jpoint) + ((gradx1_mu(jpoint) - gradx1_nu(jpoint)) * env_r1 + (u2b_mu(jpoint) - u2b_nu(jpoint)) * grad1_env(1)) * env_r2(jpoint)
+        resy(jpoint) = grady1_nu(jpoint) + ((grady1_mu(jpoint) - grady1_nu(jpoint)) * env_r1 + (u2b_mu(jpoint) - u2b_nu(jpoint)) * grad1_env(2)) * env_r2(jpoint)
+        resz(jpoint) = gradz1_nu(jpoint) + ((gradz1_mu(jpoint) - gradz1_nu(jpoint)) * env_r1 + (u2b_mu(jpoint) - u2b_nu(jpoint)) * grad1_env(3)) * env_r2(jpoint)
+      enddo
+
+      deallocate(env_r2)
+      deallocate(u2b_mu)
+      deallocate(u2b_nu)
+      deallocate(gradx1_mu, grady1_mu, gradz1_mu)
+      deallocate(gradx1_nu, grady1_nu, gradz1_nu)
 
     endif ! env_type
 
@@ -99,6 +141,9 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
   BEGIN_DOC
   !
+  !  d/dx1 j_2e(1,2)
+  !  d/dy1 j_2e(1,2)
+  !  d/dz1 j_2e(1,2)
   !
   END_DOC
 
@@ -116,10 +161,13 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
   double precision              :: dx, dy, dz, r12, tmp
   double precision              :: mu_val, mu_tmp, mu_der(3)
 
+  PROVIDE j2e_type
+
   if(j2e_type .eq. "Mu") then
 
-    !  d/dx1 j(mu,r12) = 0.5 * (1 - erf(mu *r12))/r12 * (x1 - x2)
-    !
+    !  d/dx1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (x1 - x2)
+    !  d/dy1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (y1 - y2)
+    !  d/dz1 j(mu,r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (z1 - z2)
 
     do jpoint = 1, n_points_extra_final_grid ! r2 
 
@@ -185,7 +233,12 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
 
   elseif(j2e_type .eq. "Boys") then
 
-   ! j(r12) = 0.5 r12 / (1 + a_boys r_12)
+    !
+    ! j(r12) = 0.5 r12 / (1 + a_boys r_12)
+    !
+    ! d/dx1 j(r12) = 0.5 (x1 - x2) / [r12 * (1 + b r12^2)^2]
+    ! d/dy1 j(r12) = 0.5 (y1 - y2) / [r12 * (1 + b r12^2)^2]
+    ! d/dz1 j(r12) = 0.5 (z1 - z2) / [r12 * (1 + b r12^2)^2]
 
     PROVIDE a_boys
 
@@ -220,6 +273,58 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
     stop
 
   endif ! j2e_type
+
+  return
+end
+
+! ---
+
+subroutine grad1_jmu_r1_seq(mu, r1, n_grid2, gradx, grady, gradz)
+
+  BEGIN_DOC
+  !
+  !  d/dx1 jmu(r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (x1 - x2)
+  !  d/dy1 jmu(r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (y1 - y2)
+  !  d/dz1 jmu(r12) = 0.5 * [(1 - erf(mu * r12)) / r12] * (z1 - z2)
+  !
+  END_DOC
+
+  implicit none
+  integer         , intent(in)  :: n_grid2
+  double precision, intent(in)  :: mu, r1(3)
+  double precision, intent(out) :: gradx(n_grid2)
+  double precision, intent(out) :: grady(n_grid2)
+  double precision, intent(out) :: gradz(n_grid2)
+
+  integer                       :: jpoint
+  double precision              :: r2(3)
+  double precision              :: dx, dy, dz, r12, tmp
+
+
+  do jpoint = 1, n_points_extra_final_grid ! r2 
+
+    r2(1) = final_grid_points_extra(1,jpoint)
+    r2(2) = final_grid_points_extra(2,jpoint)
+    r2(3) = final_grid_points_extra(3,jpoint)
+
+    dx = r1(1) - r2(1)
+    dy = r1(2) - r2(2)
+    dz = r1(3) - r2(3)
+
+    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+    if(r12 .lt. 1d-10) then
+      gradx(jpoint) = 0.d0 
+      grady(jpoint) = 0.d0 
+      gradz(jpoint) = 0.d0 
+      cycle
+    endif
+
+    tmp = 0.5d0 * (1.d0 - derf(mu * r12)) / r12
+
+    gradx(jpoint) = tmp * dx
+    grady(jpoint) = tmp * dy
+    gradz(jpoint) = tmp * dz
+  enddo
 
   return
 end
@@ -293,6 +398,44 @@ subroutine j12_r1_seq(r1, n_grid2, res)
 end
 
 ! ---
+
+subroutine jmu_r1_seq(mu, r1, n_grid2, res)
+
+  include 'constants.include.F'
+
+  implicit none
+  integer,          intent(in)  :: n_grid2
+  double precision, intent(in)  :: mu, r1(3)
+  double precision, intent(out) :: res(n_grid2)
+
+  integer                       :: jpoint
+  double precision              :: r2(3)
+  double precision              :: dx, dy, dz
+  double precision              :: r12, tmp1, tmp2
+
+  tmp1 = inv_sq_pi_2 / mu
+
+  do jpoint = 1, n_points_extra_final_grid ! r2 
+  
+    r2(1) = final_grid_points_extra(1,jpoint)
+    r2(2) = final_grid_points_extra(2,jpoint)
+    r2(3) = final_grid_points_extra(3,jpoint)
+  
+    dx  = r1(1) - r2(1)
+    dy  = r1(2) - r2(2)
+    dz  = r1(3) - r2(3)
+    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+
+    tmp2 = mu * r12
+  
+    res(jpoint) = 0.5d0 * r12 * (1.d0 - derf(tmp2)) - tmp1 * dexp(-tmp2*tmp2)
+  enddo
+
+  return
+end
+
+! ---
+
 
 subroutine env_nucl_r1_seq(n_grid2, res)
 
@@ -464,6 +607,74 @@ subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
   else
 
     print *, ' Error in get_grad1_u12_withsq_r1_seq: Unknown Jastrow'
+    stop
+
+  endif ! j2e_type
+
+  return
+end
+
+! ---
+
+subroutine get_u12_2e_r1_seq(ipoint, n_grid2, res)
+
+  BEGIN_DOC
+  ! 
+  ! u_2e(r1,r2)
+  !
+  ! we use grid for r1 and extra_grid for r2
+  !
+  END_DOC
+
+  implicit none
+  integer,          intent(in)  :: ipoint, n_grid2
+  double precision, intent(out) :: res(n_grid2)
+
+  integer                       :: jpoint
+  double precision              :: env_r1, tmp
+  double precision              :: grad1_env(3), r1(3)
+  double precision, allocatable :: env_r2(:)
+  double precision, allocatable :: u2b_r12(:)
+  double precision, external    :: env_nucl
+
+  PROVIDE j1e_type j2e_type env_type
+  PROVIDE final_grid_points
+  PROVIDE final_grid_points_extra
+
+  r1(1) = final_grid_points(1,ipoint)
+  r1(2) = final_grid_points(2,ipoint)
+  r1(3) = final_grid_points(3,ipoint)
+
+  if( (j2e_type .eq. "Mu")  .or. &
+      (j2e_type .eq. "Mur") .or. &
+      (j2e_type .eq. "Boys") ) then
+
+    if(env_type .eq. "None") then
+
+      call j12_r1_seq(r1, n_grid2, res)
+
+    else
+
+      ! u(r1,r2) = j12_mu(r12) x v(r1) x v(r2)
+
+      allocate(env_r2(n_grid2))
+      allocate(u2b_r12(n_grid2))
+
+      env_r1 = env_nucl(r1)
+      call j12_r1_seq(r1, n_grid2, u2b_r12)
+      call env_nucl_r1_seq(n_grid2, env_r2)
+
+      do jpoint = 1, n_points_extra_final_grid
+        res(jpoint) = env_r1 * u2b_r12(jpoint) * env_r2(jpoint)
+      enddo
+
+      deallocate(env_r2, u2b_r12)
+
+    endif ! env_type
+
+  else
+
+    print *, ' Error in get_u12_withsq_r1_seq: Unknown Jastrow'
     stop
 
   endif ! j2e_type

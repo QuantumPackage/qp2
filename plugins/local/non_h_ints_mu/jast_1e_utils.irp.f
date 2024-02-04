@@ -128,7 +128,8 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   double precision              :: g
   double precision              :: t0, t1
   double precision              :: cutoff_svd, D1_inv
-  double precision, allocatable :: A(:,:,:,:), b(:)
+  double precision              :: accu, norm, diff
+  double precision, allocatable :: A(:,:,:,:), b(:), A_tmp(:,:,:,:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:), tmp(:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:)
@@ -197,6 +198,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
             , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
 
+  allocate(A_tmp(ao_num,ao_num,ao_num,ao_num))
+  A_tmp = A
+
   ! --- --- ---
   ! get b
 
@@ -216,11 +220,6 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
   ! --- --- ---
   ! solve Ax = b
-
-!  double precision, allocatable :: A_inv(:,:,:,:)
-!  allocate(A_inv(ao_num,ao_num,ao_num,ao_num))
-!  call get_pseudo_inverse(A(1,1,1,1), ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A_inv(1,1,1,1), ao_num*ao_num, cutoff_svd)
-!  A = A_inv
 
   allocate(D(ao_num*ao_num), U(ao_num*ao_num,ao_num*ao_num), Vt(ao_num*ao_num,ao_num*ao_num))
 
@@ -287,9 +286,30 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
   ! coef_fit = A_inv x b
   call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A(1,1,1,1), ao_num*ao_num, b(1), 1, 0.d0, coef_fit(1,1), 1)
-  !call dgemm( "N", "N", ao_num*ao_num, 1, ao_num*ao_num, 1.d0 &
-  !          , A(1,1,1,1), ao_num*ao_num, b(1), ao_num*ao_num  &
-  !          , 0.d0, coef_fit(1,1), ao_num*ao_num)
+
+  ! ---
+
+  accu = 0.d0
+  norm = 0.d0
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+      diff = 0.d0
+      do i = 1, ao_num
+        do j = 1, ao_num
+          diff += A_tmp(k,l,i,j) * coef_fit(j,i)
+        enddo
+      enddo
+
+      !print*, kl, b(kl)
+      accu += dabs(diff - b(kl))
+      norm += dabs(b(kl))
+    enddo
+  enddo
+  print*, ' accu total on Ax = b (%) = ', 100.d0*accu/norm
+  deallocate(A_tmp)
+
+  ! ---
 
   deallocate(A, b)
 

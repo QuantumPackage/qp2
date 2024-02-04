@@ -43,7 +43,9 @@ program test_non_h
   !call test_tc_grad_square_ao_new()
 
   !call test_fit_coef_A1()
-  call test_fit_coef_inv()
+  !call test_fit_coef_inv()
+
+  call test_fit_coef_testinvA()
 end
 
 ! ---
@@ -1229,14 +1231,13 @@ subroutine test_fit_coef_inv()
 
   implicit none
   integer                       :: i, j, k, l, ij, kl, ipoint
-  integer                       :: n_svd, info, lwork, mn
+  integer                       :: n_svd, info, lwork, mn, m, n
   double precision              :: t1, t2
   double precision              :: accu, norm, diff
   double precision              :: cutoff_svd, D1_inv
   double precision, allocatable :: A1(:,:), A1_inv(:,:), A1_tmp(:,:)
   double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:), A2_inv(:,:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A2_tmp(:,:,:,:)
-
 
   cutoff_svd = 5d-8
 
@@ -1435,10 +1436,91 @@ subroutine test_fit_coef_inv()
     enddo
   enddo
 
+  print*, ' accuracy on A_inv (%) = ', 100.d0 * accu / norm
+
   deallocate(A1_inv, A2_inv)
   deallocate(A1, A2)
 
-  print*, ' accuracy on A_inv (%) = ', 100.d0 * accu / norm
+  return
+end
+
+! ---
+
+subroutine test_fit_coef_testinvA()
+
+  implicit none
+  integer                       :: i, j, k, l, m, n, ij, kl, mn, ipoint
+  double precision              :: t1, t2
+  double precision              :: accu, norm, diff
+  double precision              :: cutoff_svd
+  double precision, allocatable :: A1(:,:), A1_inv(:,:)
+
+  cutoff_svd = 1d-17
+
+  ! ---
+
+  call wall_time(t1)
+
+  allocate(A1(ao_num*ao_num,ao_num*ao_num))
+
+  !$OMP PARALLEL                             &
+  !$OMP DEFAULT (NONE)                       &
+  !$OMP PRIVATE (i, j, k, l, ij, kl, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, &
+  !$OMP         final_weight_at_r_vector, aos_in_r_array_transp, A1)
+  !$OMP DO COLLAPSE(2)
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          A1(ij,kl) = 0.d0
+          do ipoint = 1, n_points_final_grid
+            A1(ij,kl) += final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) &
+                                                          * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,l)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
+
+  allocate(A1_inv(ao_num*ao_num,ao_num*ao_num))
+  call get_pseudo_inverse(A1, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A1_inv, ao_num*ao_num, cutoff_svd)
+
+  call wall_time(t1)
+  print*, ' WALL TIME FOR A1_inv (min) =', (t1-t2)/60.d0
+
+  ! ---
+
+  print*, ' check inv'
+
+  do kl = 1, ao_num*ao_num
+    do ij = 1, ao_num*ao_num
+
+      diff = 0.d0
+      do mn = 1, ao_num*ao_num
+        diff += A1(kl,mn) * A1_inv(mn,ij)
+      enddo
+
+      if(kl .eq. ij) then
+        accu += dabs(diff - 1.d0)
+      else
+        accu += dabs(diff - 0.d0)
+      endif
+    enddo
+  enddo
+
+  print*, ' accuracy (%) = ', accu * 100.d0
+  
+  deallocate(A1, A1_inv)
 
   return
 end
