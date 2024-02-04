@@ -22,7 +22,7 @@ The main keywords are:
 
 3. **Mu_Nu:** A valence and a core correlation terms are used
    <p align="center">
-      <img src="https://latex.codecogs.com/png.image?\inline&space;\huge&space;\dpi{110}\bg{white}&space;u(\mathbf{r}_1,\mathbf{r}_2)=u(\mu;r_{12})\,v(\mathbf{r}_1)\,v(\mathbf{r}_2)&plus;u(\nu;r_{12})[1-v(\mathbf{r}_1)\,v(\mathbf{r}_2)]">
+      <img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{110}\bg{white}&space;u(\mathbf{r}_1,\mathbf{r}_2)=u(\mu;r_{12})\,v(\mathbf{r}_1)\,v(\mathbf{r}_2)&plus;u(\nu;r_{12})[1-v(\mathbf{r}_1)\,v(\mathbf{r}_2)]">
    </p>
    with envelop \(v\).
 
