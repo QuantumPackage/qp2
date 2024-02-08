@@ -645,13 +645,14 @@ subroutine get_pseudo_inverse_complex(A,LDA,m,n,C,LDC,cutoff)
   END_DOC
   integer, intent(in)            :: m,n, LDA, LDC
   complex*16, intent(in)   :: A(LDA,n)
-  double precision, intent(in)   :: cutoff, d1
+  double precision, intent(in)   :: cutoff
   complex*16, intent(out)  :: C(LDC,m)
 
   double precision, allocatable  :: D(:), rwork(:)
   complex*16, allocatable  :: U(:,:), Vt(:,:), work(:), A_tmp(:,:)
   integer                        :: info, lwork
   integer                        :: i,j,k
+  double precision  :: d1
   allocate (D(n),U(m,n),Vt(n,n),work(1),A_tmp(m,n),rwork(5*n))
   do j=1,n
     do i=1,m
