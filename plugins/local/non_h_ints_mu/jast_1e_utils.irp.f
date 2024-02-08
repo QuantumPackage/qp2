@@ -126,9 +126,10 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   integer                       :: ij, kl, mn
   integer                       :: info, n_svd, LWORK
   double precision              :: g
-  double precision              :: t0, t1
+  double precision              :: t0, t1, svd_t0, svd_t1
   double precision              :: cutoff_svd, D1_inv
-  double precision, allocatable :: A(:,:,:,:), b(:)
+  double precision, allocatable :: diff(:)
+  double precision, allocatable :: A(:,:,:,:), b(:), A_tmp(:,:,:,:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:), tmp(:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:)
@@ -197,6 +198,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
             , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
 
+  allocate(A_tmp(ao_num,ao_num,ao_num,ao_num))
+  A_tmp = A
+
   ! --- --- ---
   ! get b
 
@@ -207,9 +211,6 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   enddo
 
   call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
-  !call dgemm( "T", "N", ao_num*ao_num, 1, n_points_final_grid, 1.d0            &
-  !          , tmp(1,1,1), n_points_final_grid, u1e_tmp(1), n_points_final_grid &
-  !          , 0.d0, b(1), ao_num*ao_num)
 
   deallocate(u1e_tmp)
   deallocate(tmp)
@@ -217,12 +218,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! --- --- ---
   ! solve Ax = b
 
-!  double precision, allocatable :: A_inv(:,:,:,:)
-!  allocate(A_inv(ao_num,ao_num,ao_num,ao_num))
-!  call get_pseudo_inverse(A(1,1,1,1), ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A_inv(1,1,1,1), ao_num*ao_num, cutoff_svd)
-!  A = A_inv
-
   allocate(D(ao_num*ao_num), U(ao_num*ao_num,ao_num*ao_num), Vt(ao_num*ao_num,ao_num*ao_num))
+
+  call wall_time(svd_t0)
 
   allocate(work(1))
   lwork = -1
@@ -244,6 +242,9 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   endif
 
   deallocate(work)
+
+  call wall_time(svd_t1)
+  print*, ' SVD time (min) ', (svd_t1-svd_t0)/60.d0
 
   if(D(1) .lt. 1d-14) then
     print*, ' largest singular value is very small:', D(1)
@@ -287,9 +288,18 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
 
   ! coef_fit = A_inv x b
   call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A(1,1,1,1), ao_num*ao_num, b(1), 1, 0.d0, coef_fit(1,1), 1)
-  !call dgemm( "N", "N", ao_num*ao_num, 1, ao_num*ao_num, 1.d0 &
-  !          , A(1,1,1,1), ao_num*ao_num, b(1), ao_num*ao_num  &
-  !          , 0.d0, coef_fit(1,1), ao_num*ao_num)
+
+  ! ---
+
+  allocate(diff(ao_num*ao_num))
+
+  call dgemv("N", ao_num*ao_num, ao_num*ao_num, 1.d0, A_tmp(1,1,1,1), ao_num*ao_num, coef_fit(1,1), 1, 0.d0, diff(1), 1)
+  print*, ' accu total on Ax = b (%) = ', 100.d0*sum(dabs(diff-b))/sum(dabs(b))
+
+  deallocate(diff)
+  deallocate(A_tmp)
+
+  ! ---
 
   deallocate(A, b)
 
