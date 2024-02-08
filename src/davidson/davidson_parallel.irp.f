@@ -150,7 +150,9 @@ subroutine davidson_slave_work(zmq_to_qp_run_socket, zmq_socket_push, N_st, sze,
       exit
     endif
     if(task_id == 0) exit
+    call lock_io()
     read (msg,*) imin, imax, ishift, istep
+    call unlock_io()
     integer :: k
     do k=imin,imax
       v_t(:,k) = 0.d0
@@ -541,24 +543,6 @@ subroutine H_S2_u_0_nstates_zmq(v_0,s_0,u_0,N_st,sze)
 !  SOFT_TOUCH N_states_diag
 end
 
-
-
-
-
-
-BEGIN_PROVIDER [ integer, nthreads_davidson ]
- implicit none
- BEGIN_DOC
- ! Number of threads for Davidson
- END_DOC
- nthreads_davidson = nproc
- character*(32) :: env
- call getenv('QP_NTHREADS_DAVIDSON',env)
- if (trim(env) /= '') then
-   read(env,*) nthreads_davidson
-   call write_int(6,nthreads_davidson,'Target number of threads for <Psi|H|Psi>')
- endif
-END_PROVIDER
 
 
 integer function zmq_put_N_states_diag(zmq_to_qp_run_socket,worker_id)

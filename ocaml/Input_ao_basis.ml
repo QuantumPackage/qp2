@@ -44,8 +44,12 @@ end = struct
   let get_default = Qpackage.get_ezfio_default "ao_basis";;
 
   let read_ao_basis () =
-    Ezfio.get_ao_basis_ao_basis ()
-    |> AO_basis_name.of_string
+    let result =
+      Ezfio.get_ao_basis_ao_basis ()
+    in
+    if result <> "None" then
+      AO_basis_name.of_string result
+    else failwith "No basis"
   ;;
 
   let read_ao_num () =
@@ -192,7 +196,7 @@ end = struct
          ao_expo         ;
          ao_cartesian    ;
          ao_normalized   ;
-         primitives_normalized ; 
+         primitives_normalized ;
        } = b
      in
      write_md5 b ;
@@ -207,7 +211,7 @@ end = struct
      Ezfio.set_ao_basis_ao_prim_num (Ezfio.ezfio_array_of_list
        ~rank:1 ~dim:[| ao_num |] ~data:ao_prim_num) ;
 
-     let ao_nucl = 
+     let ao_nucl =
        Array.to_list ao_nucl
        |> list_map Nucl_number.to_int
      in
@@ -215,7 +219,7 @@ end = struct
        ~rank:1 ~dim:[| ao_num |] ~data:ao_nucl) ;
 
      let ao_power =
-       let l = Array.to_list ao_power in 
+       let l = Array.to_list ao_power in
        List.concat [
          (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.x) l) ;
          (list_map (fun a -> Positive_int.to_int a.Angmom.Xyz.y) l) ;
@@ -227,7 +231,7 @@ end = struct
      Ezfio.set_ao_basis_ao_cartesian(ao_cartesian);
      Ezfio.set_ao_basis_ao_normalized(ao_normalized);
      Ezfio.set_ao_basis_primitives_normalized(primitives_normalized);
-     
+
      let ao_coef =
       Array.to_list ao_coef
       |> list_map AO_coef.to_float
@@ -247,8 +251,7 @@ end = struct
 
 
   let read () =
-    if (Ezfio.has_ao_basis_ao_basis ()) then
-      begin
+      try
         let result =
           { ao_basis        = read_ao_basis ();
             ao_num          = read_ao_num () ;
@@ -267,9 +270,11 @@ end = struct
         |> MD5.to_string
         |> Ezfio.set_ao_basis_ao_md5 ;
         Some result
-      end
-    else
-      None
+      with
+      | _ -> ( "None"
+               |> Digest.string
+               |> Digest.to_hex
+               |> Ezfio.set_ao_basis_ao_md5 ; None)
   ;;
 
 
@@ -278,7 +283,7 @@ end = struct
       to_basis b
       |> Long_basis.of_basis
       |> Array.of_list
-    and unordered_basis = 
+    and unordered_basis =
       to_long_basis b
       |> Array.of_list
     in
@@ -291,15 +296,15 @@ end = struct
             (a.(i) <- None ; i)
           else
             find x a (i+1)
-      and find2 (s,g,n) a i = 
+      and find2 (s,g,n) a i =
         if i = Array.length a then -1
         else
-            match a.(i) with 
+            match a.(i) with
                 | None -> find2 (s,g,n) a (i+1)
                 | Some (s', g', n')  ->
                    if s <> s' || n <> n' then find2 (s,g,n) a (i+1)
                    else
-                   let lc  = list_map (fun (prim, _) -> prim) g.Gto.lc 
+                   let lc  = list_map (fun (prim, _) -> prim) g.Gto.lc
                    and lc' = list_map (fun (prim, _) -> prim) g'.Gto.lc
                    in
                    if lc <> lc' then find2 (s,g,n) a (i+1) else (a.(i) <- None ; i)
@@ -315,13 +320,13 @@ end = struct
       let ao_num = List.length long_basis |> AO_number.of_int in
       let ao_prim_num =
         list_map (fun (_,g,_) -> List.length g.Gto.lc
-          |> AO_prim_number.of_int ) long_basis 
+          |> AO_prim_number.of_int ) long_basis
         |> Array.of_list
       and ao_nucl =
-        list_map (fun (_,_,n) -> n) long_basis 
+        list_map (fun (_,_,n) -> n) long_basis
         |> Array.of_list
       and ao_power =
-        list_map (fun (x,_,_) -> x) long_basis 
+        list_map (fun (x,_,_) -> x) long_basis
         |> Array.of_list
       in
       let ao_prim_num_max = Array.fold_left (fun s x ->
@@ -331,16 +336,16 @@ end = struct
       in
 
       let gtos =
-        list_map (fun (_,x,_) -> x) long_basis 
+        list_map (fun (_,x,_) -> x) long_basis
       in
       let create_expo_coef ec =
           let coefs =
             begin match ec with
             | `Coefs -> list_map (fun x->
-              list_map (fun (_,coef) -> AO_coef.to_float coef) x.Gto.lc ) gtos 
+              list_map (fun (_,coef) -> AO_coef.to_float coef) x.Gto.lc ) gtos
             | `Expos -> list_map (fun x->
               list_map (fun (prim,_) -> AO_expo.to_float
-              prim.GaussianPrimitive.expo) x.Gto.lc ) gtos 
+              prim.GaussianPrimitive.expo) x.Gto.lc ) gtos
             end
           in
           let rec get_n n accu = function
@@ -362,7 +367,7 @@ end = struct
       let ao_coef = create_expo_coef `Coefs
       |> Array.of_list
       |> Array.map AO_coef.of_float
-      and ao_expo = create_expo_coef `Expos 
+      and ao_expo = create_expo_coef `Expos
       |> Array.of_list
       |> Array.map AO_expo.of_float
       in
@@ -374,7 +379,7 @@ end = struct
         }
   ;;
 
-  let reorder b = 
+  let reorder b =
     let order = ordering b in
     let f a = Array.init (Array.length a) (fun i -> a.(order.(i))) in
     let ao_prim_num_max = AO_prim_number.to_int b.ao_prim_num_max
@@ -466,7 +471,7 @@ Basis set (read-only) ::
     | line :: tail ->
       let line = String.trim line in
       if line = "Basis set (read-only) ::" then
-        String.concat "\n" tail 
+        String.concat "\n" tail
       else
         extract_basis tail
     in

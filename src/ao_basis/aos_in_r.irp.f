@@ -12,21 +12,21 @@ double precision function ao_value(i,r)
  integer :: power_ao(3)
  double precision :: accu,dx,dy,dz,r2
  num_ao = ao_nucl(i)
-! power_ao(1:3)= ao_power(i,1:3)
-! center_ao(1:3) = nucl_coord(num_ao,1:3)
-! dx = (r(1) - center_ao(1))
-! dy = (r(2) - center_ao(2))
-! dz = (r(3) - center_ao(3))
-! r2 = dx*dx + dy*dy + dz*dz
-! dx = dx**power_ao(1)
-! dy = dy**power_ao(2)
-! dz = dz**power_ao(3)
+ power_ao(1:3)= ao_power(i,1:3)
+ center_ao(1:3) = nucl_coord(num_ao,1:3)
+ dx = (r(1) - center_ao(1))
+ dy = (r(2) - center_ao(2))
+ dz = (r(3) - center_ao(3))
+ r2 = dx*dx + dy*dy + dz*dz
+ dx = dx**power_ao(1)
+ dy = dy**power_ao(2)
+ dz = dz**power_ao(3)
 
  accu = 0.d0
-! do m=1,ao_prim_num(i)
-!   beta = ao_expo_ordered_transp(m,i)
-!   accu += ao_coef_normalized_ordered_transp(m,i) * dexp(-beta*r2)
-! enddo
+ do m=1,ao_prim_num(i)
+   beta = ao_expo_ordered_transp(m,i)
+   accu += ao_coef_normalized_ordered_transp(m,i) * dexp(-beta*r2)
+ enddo
  ao_value = accu * dx * dy * dz
 
 end
@@ -65,46 +65,60 @@ double precision function primitive_value(i,j,r)
 
 end
 
+! ---
 
-subroutine give_all_aos_at_r(r,aos_array)
- implicit none
- BEGIN_dOC
-! input  : r == r(1) = x and so on
-!
-! output : aos_array(i) = aos(i) evaluated in $\textbf{r}$
- END_DOC
- double precision, intent(in) :: r(3)
- double precision, intent(out):: aos_array(ao_num)
+subroutine give_all_aos_at_r(r, tmp_array)
 
- integer :: power_ao(3)
- integer :: i,j,k,l,m
- double precision :: dx,dy,dz,r2
- double precision ::      dx2,dy2,dz2
- double precision :: center_ao(3)
- double precision :: beta
- do i = 1, nucl_num
-  center_ao(1:3) = nucl_coord(i,1:3)
-  dx = (r(1) - center_ao(1))
-  dy = (r(2) - center_ao(2))
-  dz = (r(3) - center_ao(3))
-  r2 = dx*dx + dy*dy + dz*dz
-  do j = 1,Nucl_N_Aos(i)
-   k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
-   aos_array(k) = 0.d0
-   power_ao(1:3)= ao_power_ordered_transp_per_nucl(1:3,j,i)
-   dx2 = dx**power_ao(1)
-   dy2 = dy**power_ao(2)
-   dz2 = dz**power_ao(3)
-   do l = 1,ao_prim_num(k)
-    beta = ao_expo_ordered_transp_per_nucl(l,j,i)
-    if(dabs(beta*r2).gt.40.d0)cycle
-    aos_array(k)+= ao_coef_normalized_ordered_transp_per_nucl(l,j,i) * dexp(-beta*r2)
-   enddo
-   aos_array(k) = aos_array(k) * dx2 * dy2 * dz2
+  BEGIN_dOC
+  !
+  ! input  : r == r(1) = x and so on
+  !
+  ! output : tmp_array(i) = aos(i) evaluated in $\textbf{r}$
+  !
+  END_DOC
+
+  implicit none
+  double precision, intent(in)  :: r(3)
+  double precision, intent(out) :: tmp_array(ao_num)
+  integer                       :: p_ao(3)
+  integer                       :: i, j, k, l, m
+  double precision              :: dx, dy, dz, r2
+  double precision              :: dx2, dy2, dz2
+  double precision              :: c_ao(3)
+  double precision              :: beta
+
+  do i = 1, nucl_num
+
+    c_ao(1:3) = nucl_coord(i,1:3)
+    dx = r(1) - c_ao(1)
+    dy = r(2) - c_ao(2)
+    dz = r(3) - c_ao(3)
+    r2 = dx*dx + dy*dy + dz*dz
+
+    do j = 1, Nucl_N_Aos(i)
+
+      k = Nucl_Aos_transposed(j,i) ! index of the ao in the ordered format
+      p_ao(1:3) = ao_power_ordered_transp_per_nucl(1:3,j,i)
+      dx2 = dx**p_ao(1)
+      dy2 = dy**p_ao(2)
+      dz2 = dz**p_ao(3)
+
+      tmp_array(k) = 0.d0
+      do l = 1,ao_prim_num(k)
+        beta = ao_expo_ordered_transp_per_nucl(l,j,i)
+        if(dabs(beta*r2).gt.40.d0) cycle
+
+        tmp_array(k) += ao_coef_normalized_ordered_transp_per_nucl(l,j,i) * dexp(-beta*r2)
+      enddo
+
+      tmp_array(k) = tmp_array(k) * dx2 * dy2 * dz2
+    enddo
   enddo
- enddo
+
+  return
 end
 
+! ---
 
 subroutine give_all_aos_and_grad_at_r(r,aos_array,aos_grad_array)
  implicit none

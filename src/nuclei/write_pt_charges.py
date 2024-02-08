@@ -1,4 +1,4 @@
-#!/usr/bin/env python  
+#!/usr/bin/env python3
 import os
 import sys
 
@@ -21,7 +21,7 @@ def mv_in_ezfio(ezfio,tmp):
   os.system(cmdmv)
 
 
-# Getting the EZFIO
+ ##Getting the EZFIO
 EZFIO=sys.argv[1]
 EZFIO=EZFIO.replace("/", "")
 print(EZFIO)
@@ -52,7 +52,7 @@ fncharges.write(" "+str(n_charges)+'\n')
 fncharges.close()
 mv_in_ezfio(EZFIO,tmp)
 
-# Write the file containing the charges and set in EZFIO folder 
+# Write the file containing the charges and set in EZFIO folder
 tmp="pts_charge_z"
 fcharges = open(tmp,'w')
 fcharges.write(" 1\n")
@@ -66,8 +66,20 @@ zip_in_ezfio(EZFIO,tmp)
 tmp="pts_charge_coord"
 fcoord = open(tmp,'w')
 fcoord.write("  2\n")
-fcoord.write("                   "+str(n_charges)+'                    3\n')
-#fcoord.write(" "+'   3 '+str(n_charges)+' \n')
+if(n_charges < 10):  
+ fcoord.write("                   "+str(n_charges)+'                    3\n')
+elif(n_charges <100): 
+ fcoord.write("                  "+str(n_charges)+'                    3\n')
+elif(n_charges <1000): 
+ fcoord.write("                 "+str(n_charges)+'                    3\n')
+elif(n_charges <10000): 
+ fcoord.write("                "+str(n_charges)+'                    3\n')
+elif(n_charges <100000): 
+ fcoord.write("               "+str(n_charges)+'                    3\n')
+elif(n_charges <1000000): 
+ fcoord.write("              "+str(n_charges)+'                    3\n')
+elif(n_charges <10000000): 
+ fcoord.write("             "+str(n_charges)+'                    3\n')
 for i in range(n_charges):
  fcoord.write('   '+coord_x[i]+'\n')
 for i in range(n_charges):

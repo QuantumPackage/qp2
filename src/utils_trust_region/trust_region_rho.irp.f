@@ -47,9 +47,9 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute rho, the agreement between the predicted criterion/energy and the real one
-  END_DOC
+  !END_DOC
 
   implicit none
    
@@ -69,7 +69,7 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
   print*,''
   print*,'---Rho_model---'
   
-  call wall_time(t1)
+  !call wall_time(t1)
 
 ! Rho
 ! \begin{equation}
@@ -92,30 +92,29 @@ subroutine trust_region_rho(prev_energy, energy,e_model,rho)
 
   rho = (prev_energy - energy) / (prev_energy - e_model)
 
-  print*, 'previous energy, prev_energy :', prev_energy
-  print*, 'predicted energy, e_model :', e_model
-  print*, 'real energy, energy :', energy
-  print*, 'prev_energy - energy :', prev_energy - energy
-  print*, 'prev_energy - e_model :', prev_energy - e_model
-  print*, 'Rho :', rho
-  print*, 'Threshold for rho:', thresh_rho
+  !print*, 'previous energy, prev_energy:', prev_energy
+  !print*, 'predicted energy, e_model:', e_model
+  !print*, 'real energy, energy:', energy
+  !print*, 'prev_energy - energy:', prev_energy - energy
+  !print*, 'prev_energy - e_model:', prev_energy - e_model
+  print*, 'Rho:', rho
+  !print*, 'Threshold for rho:', thresh_rho
 
   ! Modification of prev_energy in function of rho
   if (rho < thresh_rho) then !0.1) then
     ! the step is cancelled  
     print*, 'Rho <', thresh_rho,', the previous energy does not changed'
-    print*, 'prev_energy :', prev_energy  
+    !print*, 'prev_energy :', prev_energy  
   else
     ! the step is accepted
     prev_energy = energy
-    print*, 'Rho >=', thresh_rho,', energy -> prev_energy :', energy
+    print*, 'Rho >=', thresh_rho,', energy -> prev_energy:', energy
   endif
 
-  call wall_time(t2)
-  t3 = t2 - t1
-  print*,'Time in rho model:', t3
+  !call wall_time(t2)
+  !t3 = t2 - t1
+  !print*,'Time in rho model:', t3
 
   print*,'---End rho_model---'
-  print*,''
 
 end subroutine

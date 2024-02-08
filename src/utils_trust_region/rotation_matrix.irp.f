@@ -61,10 +61,10 @@ subroutine rotation_matrix(A,LDA,R,LDR,n,info,enforce_step_cancellation)
 
   implicit none
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Rotation matrix to rotate the molecular orbitals.
   ! If the rotation is too large the transformation is not unitary and must be cancelled.
-  END_DOC
+  !END_DOC
 
   include 'pi.h'
 
@@ -187,7 +187,7 @@ do j = 1, n
     endif
   enddo
 enddo
-print*,'max element in A', max_elem_A
+!print*,'max element in A', max_elem_A
 
 if (ABS(max_elem_A) > 2 * pi) then
    print*,''
@@ -215,18 +215,16 @@ W=B
 lwork = 3*n-1
 allocate(work(lwork,n))
 
-print*,'Starting diagonalization ...'
+!print*,'Starting diagonalization ...'
 
 call dsyev('V','U',n,W,size(W,1),e_val,work,lwork,info2)
 
 deallocate(work)
 
-if (info2 == 0) then
-   print*, 'Diagonalization : Done'
-elseif (info2 < 0) then
+if (info2 < 0) then
    print*, 'WARNING: error in the diagonalization'
    print*, 'Illegal value of the ', info2,'-th parameter'
-else
+elseif (info2 >0) then
    print*, "WARNING: Diagonalization failed to converge"
 endif
 
@@ -302,7 +300,7 @@ do i = 1, n
       max_elem = tau_m1(i,i)
    endif
 enddo
-print*,'max elem tau^-1:', max_elem
+!print*,'max elem tau^-1:', max_elem
 
 ! Debug
 !print*,'eigenvalues:'
@@ -373,7 +371,7 @@ enddo
 call dgemm('N','T',n,n,n,1d0,R,size(R,1),R,size(R,1),-1d0,RR_t,size(RR_t,1))
 
 norm = dnrm2(n*n,RR_t,1)
-print*, 'Rotation matrix check, norm R.R^T = ', norm 
+!print*, 'Rotation matrix check, norm R.R^T = ', norm 
 
 ! Debug
 !if (debug) then
@@ -396,9 +394,9 @@ do j = 1, n
 enddo
 
 print*, 'Max error in R.R^T:', max_elem
-print*, 'e_val(1):', e_val(1)
-print*, 'e_val(n):', e_val(n)
-print*, 'max elem in A:', max_elem_A
+!print*, 'e_val(1):', e_val(1)
+!print*, 'e_val(n):', e_val(n)
+!print*, 'max elem in A:', max_elem_A
 
 if (ABS(max_elem) > 1d-12) then
   print*, 'WARNING: max error in R.R^T > 1d-12'

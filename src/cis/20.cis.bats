@@ -9,7 +9,7 @@ function run() {
   qp set_file $1
   qp edit --check
   qp set determinants n_states  3
-  qp set davidson threshold_davidson 1.e-12
+  qp set davidson_keywords threshold_davidson 1.e-12
   qp set mo_two_e_ints io_mo_two_e_integrals Write
   qp set_frozen_core 
   qp run cis 
@@ -59,7 +59,7 @@ function run() {
 
 @test "ClO" { # 1.65582s 2.06465s
   [[ -n $TRAVIS ]] && skip
-  run clo.ezfio -534.263560525680 -534.256601571199 -534.062020844428
+  run clo.ezfio -534.2635737789097 -534.2566081298855 -534.0620070783308
 }
 
 @test "SO" { # 1.9667s 2.91234s
@@ -69,7 +69,7 @@ function run() {
 
 @test "OH" { # 2.201s 2.65573s
   [[ -n $TRAVIS ]] && skip
-  run oh.ezfio -75.4314648243896 -75.4254639668256 -75.2707675632313
+  run oh.ezfio -75.4314822573358 -75.4254733392003 -75.2707586997333
 }
 
 @test "H2O2" { # 2.27079s 3.07875s
@@ -109,7 +109,7 @@ function run() {
 
 @test "DHNO" { # 6.42976s 12.9899s
   [[ -n $TRAVIS ]] && skip
-  run dhno.ezfio -130.4472288472718 -130.3571808164850 -130.2196257046987
+  run dhno.ezfio -130.447238897118 -130.357186843611 -130.219626716369
 }
 
 @test "CH4" { # 6.4969s 10.9157s
@@ -129,7 +129,7 @@ function run() {
 
 @test "[Cu(NH3)4]2+" { # 29.7711s  3.45478m
   [[ -n ${TRAVIS} ]] && skip
-  run  cu_nh3_4_2plus.ezfio -1862.97958885180 -1862.92457657404 -1862.91134959451
+  run  cu_nh3_4_2plus.ezfio -1862.97958844302 -1862.92454785007 -1862.91130869967
 
 }
 

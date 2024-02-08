@@ -38,7 +38,8 @@ let run slave ?prefix exe ezfio_file =
       | Unix.Unix_error _ -> try_new_port (port_number+100)
     in
     let result =
-      try_new_port 41279
+      let port = 10*(Unix.getpid () mod 2823) + 32_769 in
+      try_new_port port
     in
     Zmq.Socket.close dummy_socket;
     Zmq.Context.terminate zmq_context;

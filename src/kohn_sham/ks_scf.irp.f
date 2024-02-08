@@ -90,7 +90,11 @@ subroutine run
 
 ! Choose SCF algorithm
 
+  write(json_unit,*) '"scf" : ['
   call Roothaan_Hall_SCF
+  write(json_unit,*) ']'
+
+  call json_close
 
 end
 

@@ -23,9 +23,36 @@ function run {
   qp set mo_two_e_ints io_mo_two_e_integrals "Write" 
 }
 
+@test "H2_1" {
+  run h2_1.xyz 1 0 cc-pvdz
+}
+
+@test "H2_3" {
+  run h2_3.xyz 3 0 cc-pvdz
+}
+
+@test "H3_2" {
+  run h3_2.xyz 2 0 cc-pvdz
+}
+
+@test "H3_4" {
+  run h3_4.xyz 4 0 cc-pvdz
+}
+
+@test "H4_1" {
+  run h4_1.xyz 1 0 cc-pvdz
+}
+
+@test "H4_3" {
+  run h4_3.xyz 3 0 cc-pvdz
+}
+
+@test "H4_5" {
+  run h4_5.xyz 5 0 cc-pvdz
+}
+
 
 @test "B-B" {
-  qp set_file b2_stretched.ezfio
   run b2_stretched.zmt 1 0 6-31g
 }
 

@@ -377,6 +377,7 @@ integer function load_mo_integrals(filename)
   integer*8                      :: n, j
   load_mo_integrals = 1
   open(unit=66,file=filename,FORM='unformatted',STATUS='UNKNOWN')
+  call lock_io()
   read(66,err=98,end=98) iknd, kknd
   if (iknd /= integral_kind) then
     print *,  'Wrong integrals kind in file :', iknd
@@ -399,6 +400,7 @@ integer function load_mo_integrals(filename)
     n = mo_integrals_map%map(i)%n_elements
     read(66,err=99,end=99) (key(j), j=1,n), (val(j), j=1,n)
   enddo
+  call unlock_io()
   call map_sort(mo_integrals_map)
   load_mo_integrals = 0
   return
