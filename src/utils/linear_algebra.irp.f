@@ -1377,31 +1377,29 @@ subroutine get_pseudo_inverse(A, LDA, m, n, C, LDC, cutoff)
     enddo
   endif
 
-  print*, ' n_svd = ', n_svd
-
-  !$OMP PARALLEL       &
-  !$OMP DEFAULT (NONE) &
-  !$OMP PRIVATE (i, j) &
-  !$OMP SHARED (n, n_svd, D, Vt)
-  !$OMP DO
-  do j = 1, n
-    do i = 1, n_svd
-      Vt(i,j) = D(i) * Vt(i,j)
-    enddo
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
-
-  call dgemm("N", "N", m, n, n_svd, 1.d0, U, m, Vt, n, 0.d0, C, LDC)
-
-!  C = 0.d0
-!  do i=1,m
-!    do j=1,n
-!      do k=1,n
-!        C(j,i) = C(j,i) + U(i,k) * D(k) * Vt(k,j)
-!      enddo
+!  !$OMP PARALLEL       &
+!  !$OMP DEFAULT (NONE) &
+!  !$OMP PRIVATE (i, j) &
+!  !$OMP SHARED (n, n_svd, D, Vt)
+!  !$OMP DO
+!  do j = 1, n
+!    do i = 1, n_svd
+!      Vt(i,j) = D(i) * Vt(i,j)
 !    enddo
 !  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+
+!  call dgemm('N', 'N', n, m, n_svd, 1.d0, Vt, size(Vt,1), U, size(U,1), 0.d0, C, size(C,1))
+
+  C = 0.d0
+  do i=1,m
+    do j=1,n
+      do k=1,n_svd
+        C(j,i) = C(j,i) + U(i,k) * D(k) * Vt(k,j)
+      enddo
+    enddo
+  enddo
 
   deallocate(U,D,Vt,work,A_tmp)
 
