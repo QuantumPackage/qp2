@@ -6,6 +6,11 @@ subroutine print_mol_properties()
   ! Run the propertie calculations
   END_DOC
 
+  ! Energy components
+  if (calc_energy_components) then
+    call print_energy_components
+  endif
+
   ! Electric dipole moment
   if (calc_dipole_moment) then
     call print_dipole_moment
@@ -18,7 +23,7 @@ subroutine print_mol_properties()
 
   ! Oscillator strength
   if (calc_osc_str .and. N_states > 1) then
-    call print_oscillator_strength 
+    call print_oscillator_strength
   endif
 
 end
