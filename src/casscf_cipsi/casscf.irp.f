@@ -99,8 +99,8 @@ subroutine run
 
     mo_coef = NewOrbs
     mo_occ  = occnum
-    call save_mos
     if(.not.converged)then
+     call save_mos
      iteration += 1
      if(norm_grad_vec2.gt.0.01d0)then
       N_det = N_states
