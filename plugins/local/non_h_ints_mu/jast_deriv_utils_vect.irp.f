@@ -113,10 +113,8 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
 
     PROVIDE jBH_size jBH_en jBH_ee jBH_m jBH_n jBH_o jBH_c
 
-    if(env_type .ne. "None") then
-
+    if(env_type .eq. "None") then
       call grad1_j12_r1_seq(r1, n_grid2, resx, resy, resz)
-
     endif ! env_type
 
   else
