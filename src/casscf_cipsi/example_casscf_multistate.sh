@@ -10,7 +10,7 @@ source ${QP_ROOT}/quantum_package.rc
 # Create the EZFIO folder
 qp create_ezfio -b aug-cc-pvdz O2.xyz -m 3 -a -o O2_avdz_multi_state
 # Start with ROHF orbitals 
-qp run scf 
+qp run scf # ROHF energy : -149.619992871398
 # Freeze the 1s orbitals of the two oxygen
 qp set_frozen_core 
 
@@ -18,7 +18,7 @@ qp set_frozen_core
 # Tell that you want 3 states in your WF
 qp set determinants n_states 3 
 # Run a CIS wave function to start your calculation 
-qp run cis | tee ${EZFIO_FILE}.cis_3_states.out 
+qp run cis | tee ${EZFIO_FILE}.cis_3_states.out # -149.6652601409258 -149.4714726176746 -149.4686165431939
 # Save the STATE AVERAGE natural orbitals for having a balanced description 
 # This will also order the orbitals according to their occupation number 
 # Which makes the active space selection easyer !
@@ -32,7 +32,7 @@ qp run save_natorb | tee ${EZFIO_FILE}.natorb_3states.out
 # !!!!! WE SET TO "-D" for DELETED !!!!
 qp set_mo_class -c "[1-5]" -a "[6-13]" -d "[14-46]" 
 # You create a guess of CIS type WITHIN THE ACTIVE SPACE 
-qp run cis | tee ${EZFIO_FILE}.cis_3_states_active_space.out 
+qp run cis | tee ${EZFIO_FILE}.cis_3_states_active_space.out # -149.6515472533511 -149.4622878024821 -149.4622878024817
 # You tell to read the WFT stored (i.e. the guess we just created) 
 qp set determinants read_wf True
 
@@ -47,7 +47,7 @@ qp set casscf_cipsi small_active_space True
 # You specify the output file 
 output=${EZFIO_FILE}.casscf_3states.out 
 # You run the CASSCF calculation 
-qp run casscf  | tee ${output}
+qp run casscf  | tee ${output} # -149.7175867510 -149.5059010227 -149.5059010226
 
 # Some grep in order to get some numbers useful to check convergence 
 # State average energy 
