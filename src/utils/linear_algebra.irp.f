@@ -1897,3 +1897,140 @@ end do
 
 end subroutine pivoted_cholesky
 
+subroutine exp_matrix(X,n,exp_X)
+ implicit none
+ double precision, intent(in) :: X(n,n)
+ integer, intent(in):: n
+ double precision, intent(out):: exp_X(n,n)
+ BEGIN_DOC
+ ! exponential of the matrix X: X has to be ANTI HERMITIAN !! 
+ ! 
+ ! taken from Hellgaker, jorgensen, Olsen book
+ !
+ ! section evaluation of matrix exponential (Eqs. 3.1.29 to 3.1.31)
+ END_DOC
+ integer :: i
+ double precision, allocatable :: r2_mat(:,:),eigvalues(:),eigvectors(:,:)
+ double precision, allocatable :: matrix_tmp1(:,:),eigvalues_mat(:,:),matrix_tmp2(:,:)
+ include 'constants.include.F'
+ allocate(r2_mat(n,n),eigvalues(n),eigvectors(n,n))
+ allocate(eigvalues_mat(n,n),matrix_tmp1(n,n),matrix_tmp2(n,n))
+
+ ! r2_mat = X^2 in the 3.1.30 
+ call get_A_squared(X,n,r2_mat)
+ call lapack_diagd(eigvalues,eigvectors,r2_mat,n,n) 
+ eigvalues=-eigvalues
+
+ if(.False.)then
+ !!! For debugging and following the book intermediate
+   ! rebuilding the matrix : X^2 = -W t^2 W^T as in 3.1.30 
+   ! matrix_tmp1 = W t^2 
+   print*,'eigvalues = '
+   do i = 1, n
+    print*,i,eigvalues(i)
+    write(*,'(100(F16.10,X))')eigvectors(:,i)
+   enddo
+   eigvalues_mat=0.d0
+   do i = 1,n
+    ! t = dsqrt(t^2) where t^2 are eigenvalues of X^2
+    eigvalues(i) = dsqrt(eigvalues(i)) 
+    eigvalues_mat(i,i) = eigvalues(i)*eigvalues(i)
+   enddo
+   call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
+   eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
+   call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
+   eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+   print*,'r2_mat new = '
+   do i = 1, n
+    write(*,'(100(F16.10,X))')matrix_tmp2(:,i)
+   enddo
+ endif
+
+ ! building the exponential 
+ ! exp(X) = W cos(t) W^T + W t^-1 sin(t) W^T X as in Eq. 3.1.31
+ ! matrix_tmp1 = W cos(t) 
+ do i = 1,n
+  eigvalues_mat(i,i) = dcos(eigvalues(i))
+ enddo
+ ! matrix_tmp2 = W cos(t)
+ call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
+ eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
+ ! matrix_tmp2 = W cos(t) W^T
+ call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
+ eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+ exp_X = matrix_tmp2
+ ! matrix_tmp2 = W t^-1 sin(t) W^T X
+ do i = 1,n
+  if(dabs(eigvalues(i)).gt.1.d-4)then
+   eigvalues_mat(i,i) = dsin(eigvalues(i))/eigvalues(i)
+  else ! Taylor development of sin(x)/x near x=0 = 1 - x^2/6
+   eigvalues_mat(i,i) = 1.d0 - eigvalues(i)*eigvalues(i)*c_1_3*0.5d0
+  endif
+ enddo
+ ! matrix_tmp1 = W t^-1 sin(t) 
+ call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
+ eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
+ ! matrix_tmp2 = W t^-1 sin(t) W^T 
+ call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
+ eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+ ! exp_X += matrix_tmp2 X 
+ call dgemm('N','N',n,n,n,1.d0,matrix_tmp2,size(matrix_tmp2,1), &
+ X,size(X,1),1.d0,exp_X,size(exp_X,1))
+ 
+end
+
+
+subroutine exp_matrix_taylor(X,n,exp_X,converged)
+ implicit none
+ BEGIN_DOC
+ ! exponential of a general real matrix X using the Taylor expansion of exp(X) 
+ ! 
+ ! returns the logical converged which checks the convergence 
+ END_DOC
+ double precision, intent(in) :: X(n,n)
+ integer, intent(in):: n
+ double precision, intent(out):: exp_X(n,n)
+ logical :: converged
+ double precision :: f
+ integer :: i,iter
+ double precision, allocatable :: Tpotmat(:,:),Tpotmat2(:,:)
+ allocate(Tpotmat(n,n),Tpotmat2(n,n))
+ BEGIN_DOC
+ ! exponential of X using Taylor expansion 
+ END_DOC
+ Tpotmat(:,:)=0.D0
+ exp_X(:,:)  =0.D0
+ do i=1,n
+   Tpotmat(i,i)=1.D0
+   exp_X(i,i)  =1.d0
+ end do
+ iter=0
+ converged=.false.
+ do while (.not.converged)
+   iter+=1
+   f = 1.d0 / dble(iter)
+   Tpotmat2(:,:) = Tpotmat(:,:) * f
+   call dgemm('N','N', n,n,n,1.d0,                   &
+       Tpotmat2, size(Tpotmat2,1),                                  &
+       X, size(X,1), 0.d0,                                    &
+       Tpotmat, size(Tpotmat,1))
+   exp_X(:,:) = exp_X(:,:) + Tpotmat(:,:)
+   
+   converged = ( sum(abs(Tpotmat(:,:))) < 1.d-6).or.(iter>30)
+ end do
+ if(.not.converged)then
+  print*,'Warning !! exp_matrix_taylor did not converge !'
+ endif
+  
+end
+
+subroutine get_A_squared(A,n,A2)
+ implicit none
+ BEGIN_DOC
+! A2 = A A where A is n x n matrix. Use the dgemm routine 
+ END_DOC
+ double precision, intent(in) :: A(n,n)
+ integer, intent(in) :: n
+ double precision, intent(out):: A2(n,n) 
+ call dgemm('N','N',n,n,n,1.d0,A,size(A,1),A,size(A,1),0.d0,A2,size(A2,1))
+end
