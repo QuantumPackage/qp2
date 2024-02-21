@@ -24,11 +24,15 @@ subroutine main()
   implicit none
   double precision :: etc_tot, etc_1e, etc_2e, etc_3e
 
-  PROVIDE mu_erf
-  PROVIDE j1b_type
+  PROVIDE j2e_type mu_erf
+  PROVIDE j1e_type j1e_coef j1e_expo
+  PROVIDE env_type env_coef env_expo
+
+  print*, ' j2e_type = ', j2e_type
+  print*, ' j1e_type = ', j1e_type
+  print*, ' env_type = ', env_type
 
   print*, ' mu_erf   = ', mu_erf
-  print*, ' j1b_type = ', j1b_type
 
   etc_tot = TC_HF_energy
   etc_1e  = TC_HF_one_e_energy

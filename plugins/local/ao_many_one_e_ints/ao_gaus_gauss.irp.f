@@ -152,7 +152,7 @@ double precision function overlap_gauss_r12_ao(D_center, delta, i, j)
     enddo
   enddo
 
-end function overlap_gauss_r12_ao
+end
 
 ! --
 
@@ -199,7 +199,7 @@ double precision function overlap_abs_gauss_r12_ao(D_center, delta, i, j)
     enddo
   enddo
 
-end function overlap_gauss_r12_ao
+end
 
 ! --
 
@@ -257,7 +257,7 @@ subroutine overlap_gauss_r12_ao_v(D_center, LD_D, delta, i, j, resv, LD_resv, n_
 
   deallocate(analytical_j)
 
-end subroutine overlap_gauss_r12_ao_v
+end
 
 ! ---
 
@@ -327,7 +327,7 @@ double precision function overlap_gauss_r12_ao_with1s(B_center, beta, D_center, 
     enddo
   enddo
 
-end function overlap_gauss_r12_ao_with1s
+end
 
 ! ---
 
@@ -420,7 +420,86 @@ subroutine overlap_gauss_r12_ao_with1s_v(B_center, beta, D_center, LD_D, delta, 
 
   deallocate(fact_g, G_center, analytical_j)
 
-end subroutine overlap_gauss_r12_ao_with1s_v
+end
+
+! ---
+
+subroutine overlap_gauss_r12_ao_012(D_center, delta, i, j, ints)
+
+  BEGIN_DOC
+  !
+  ! Computes the following integrals :
+  !
+  ! ints(1) = $\int_{-\infty}^{infty} dr x^0 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  !
+  ! ints(2) = $\int_{-\infty}^{infty} dr x^1 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  ! ints(3) = $\int_{-\infty}^{infty} dr y^1 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  ! ints(4) = $\int_{-\infty}^{infty} dr z^1 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  !
+  ! ints(5) = $\int_{-\infty}^{infty} dr x^2 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  ! ints(6) = $\int_{-\infty}^{infty} dr y^2 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  ! ints(7) = $\int_{-\infty}^{infty} dr z^2 * \chi_i(r) \chi_j(r) e^{-\delta (r - D_center)^2}
+  !
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  implicit none
+
+  integer,          intent(in)  :: i, j
+  double precision, intent(in)  :: delta, D_center(3)
+  double precision, intent(out) :: ints(7)
+
+  integer                       :: k, l, m
+  integer                       :: power_A(3), power_B(3), power_A1(3), power_A2(3)
+  double precision              :: A_center(3), B_center(3), alpha, beta, coef1, coef
+  double precision              :: integral0, integral1, integral2
+
+  double precision, external   :: overlap_gauss_r12
+
+  ints = 0.d0
+
+  if(ao_overlap_abs(j,i).lt.1.d-12) then
+    return
+  endif
+
+  power_A(1:3) = ao_power(i,1:3)
+  power_B(1:3) = ao_power(j,1:3)
+
+  A_center(1:3) = nucl_coord(ao_nucl(i),1:3)
+  B_center(1:3) = nucl_coord(ao_nucl(j),1:3)
+
+  do l = 1, ao_prim_num(i)
+    alpha = ao_expo_ordered_transp           (l,i)
+    coef1  = ao_coef_normalized_ordered_transp(l,i)
+
+    do k = 1, ao_prim_num(j)
+      beta = ao_expo_ordered_transp(k,j)
+      coef = coef1 * ao_coef_normalized_ordered_transp(k,j)
+
+      if(dabs(coef) .lt. 1d-12) cycle
+
+      integral0 = overlap_gauss_r12(D_center, delta, A_center, B_center, power_A, power_B, alpha, beta)
+
+      ints(1) += coef * integral0
+
+      do m = 1, 3
+        power_A1     = power_A
+        power_A1(m) += 1
+        integral1    = overlap_gauss_r12(D_center, delta, A_center, B_center, power_A1, power_B, alpha, beta)
+        ints(1+m)   += coef * (integral1 + A_center(m)*integral0)
+
+        power_A2     = power_A
+        power_A2(m) += 2
+        integral2    = overlap_gauss_r12(D_center, delta, A_center, B_center, power_A2, power_B, alpha, beta)
+        ints(4+m)   += coef * (integral2 + A_center(m) * (2.d0*integral1 + A_center(m)*integral0))
+      enddo
+
+    enddo ! k
+  enddo ! l
+
+  return
+end
 
 ! ---
 

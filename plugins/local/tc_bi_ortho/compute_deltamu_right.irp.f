@@ -24,10 +24,6 @@ subroutine delta_right()
   integer                       :: k
   double precision, allocatable :: delta(:,:) 
 
-  print *, j1b_type
-  print *, j1b_pen
-  print *, mu_erf
-
   allocate( delta(N_det,N_states) )
   delta = 0.d0
 
@@ -48,7 +44,7 @@ subroutine delta_right()
   deallocate(delta)
 
   return
-end subroutine delta_right
+end
 
 ! ---
 

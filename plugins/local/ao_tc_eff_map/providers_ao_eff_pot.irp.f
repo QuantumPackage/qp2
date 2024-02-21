@@ -22,9 +22,6 @@ BEGIN_PROVIDER [ logical, ao_tc_sym_two_e_pot_in_map ]
   integer                        :: kk, m, j1, i1, lmax
   character*(64)                 :: fmt
 
-  !double precision               :: j1b_gauss_coul_debug
-  !integral = j1b_gauss_coul_debug(1,1,1,1)
-
   integral = ao_tc_sym_two_e_pot(1,1,1,1)
 
   double precision               :: map_mb

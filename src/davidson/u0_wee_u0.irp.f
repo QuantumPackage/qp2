@@ -492,3 +492,25 @@ subroutine u_0_H_u_0_two_e(e_0,u_0,n,keys_tmp,Nint,N_st,sze)
   deallocate (s_0, v_0)
 end
 
+BEGIN_PROVIDER [double precision, psi_energy_two_e_trans, (N_states, N_states)]
+ implicit none
+ BEGIN_DOC
+! psi_energy_two_e_trans(istate,jstate) = <Psi_istate|W_ee |Psi_jstate>
+ END_dOC
+ integer :: i,j,istate,jstate
+ double precision :: hij, coef_i, coef_j
+ psi_energy_two_e_trans = 0.d0
+ do i = 1, N_det
+  do j = 1, N_det
+  call i_H_j_two_e(psi_det(1,1,i),psi_det(1,1,j),N_int,hij)
+   do istate = 1, N_states
+    coef_i = psi_coef(i,istate)
+    do jstate = 1, N_states
+    coef_j = psi_coef(j,jstate)
+    psi_energy_two_e_trans(jstate,istate) += coef_i * coef_j * hij
+    enddo
+   enddo
+  enddo
+ enddo
+
+END_PROVIDER 

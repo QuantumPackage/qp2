@@ -4,5 +4,6 @@ program test_2_rdm
  touch read_wf 
  call routine_active_only
  call routine_full_mos
+ call routine_active_only_trans
 end
 

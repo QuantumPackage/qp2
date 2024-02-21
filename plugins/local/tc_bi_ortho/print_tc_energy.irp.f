@@ -17,8 +17,14 @@ program print_tc_energy
   read_wf = .True.
   touch read_wf
 
-  PROVIDE j1b_type
-  print*, 'j1b_type = ', j1b_type
+
+  PROVIDE j2e_type
+  PROVIDE j1e_type
+  PROVIDE env_type
+
+  print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
 
   call write_tc_energy()
 
