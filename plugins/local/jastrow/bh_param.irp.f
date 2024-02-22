@@ -236,7 +236,7 @@
   print *, ' nb of terms per nucleus = ', jBH_size
 
   do i_nucl = 1, nucl_num
-    print *, ' i_nucl  = ', i_nucl
+    print *, ' nucl    = ', nucl_label(i_nucl)
     print *, ' ee-term = ', jBH_ee(i_nucl)
     print *, ' en-term = ', jBH_en(i_nucl)
     print *, 'm     n     o     c'
