@@ -239,7 +239,7 @@
     print *, ' nucl    = ', nucl_label(i_nucl)
     print *, ' ee-term = ', jBH_ee(i_nucl)
     print *, ' en-term = ', jBH_en(i_nucl)
-    print *, 'm     n     o     c'
+    print *, '  m     n     o          c'
     do p = 1, jBH_size
       write(*,'(3(I4,2x), E15.7)') jBH_m(p,i_nucl), jBH_n(p,i_nucl), jBH_o(p,i_nucl), jBH_c(p,i_nucl)
     enddo
