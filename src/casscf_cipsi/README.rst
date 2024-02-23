@@ -4,13 +4,15 @@ casscf
 
 |CASSCF| program with the CIPSI algorithm.
 
-Example of inputs
------------------
+
+Example of inputs for GROUND STATE calculations
+-----------------------------------------------
+NOTICE :: FOR EXCITED STATES CALCULATIONS SEE THE FILE "example_casscf_multistate.sh"
 
 a) Small active space : standard CASSCF 
 ---------------------------------------
 Let's do O2 (triplet) in aug-cc-pvdz with the following geometry (xyz format, Bohr units)
-3
+2
 
  O           0.0000000000        0.0000000000       -1.1408000000
  O           0.0000000000        0.0000000000        1.1408000000
@@ -44,4 +46,5 @@ qp set casscf_cipsi small_active_space False
 # As it is a large active space, the energy convergence thereshold is set to be 0.0001
 qp run casscf | tee ${EZFIO_FILE}.casscf_large.out
 # you should find around -149.9046
+
 
