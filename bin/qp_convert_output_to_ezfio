@@ -224,14 +224,18 @@ def write_ezfio(res, filename):
           exponent += [p.expo for p in b.prim]
           ang_mom.append(str.count(s, "z"))
           shell_prim_num.append(len(b.prim))
-          shell_index += [nshell_tot+1] * len(b.prim)
+          shell_index += [nshell_tot] * len(b.prim)
+
+    shell_num = len(ang_mom)
+    assert(shell_index[0] = 1)
+    assert(shell_index[-1] = shell_num)
 
     # ~#~#~#~#~ #
     # W r i t e #
     # ~#~#~#~#~ #
 
     ezfio.set_basis_basis("Read from ResultsFile")
-    ezfio.set_basis_shell_num(len(ang_mom))
+    ezfio.set_basis_shell_num(shell_num)
     ezfio.set_basis_basis_nucleus_index(nucl_index)
     ezfio.set_basis_prim_num(len(coefficient))
 
