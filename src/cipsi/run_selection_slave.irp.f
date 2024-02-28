@@ -65,7 +65,7 @@ subroutine run_selection_slave(thread,iproc,energy)
           stop '-1'
         end if
       end if
-      call select_connected(i_generator,energy,pt2_data,buf,subset,pt2_F(i_generator))
+      call select_connected(i_generator, energy, pt2_data, buf, subset, pt2_F(i_generator))
     endif
 
     integer, external :: task_done_to_taskserver

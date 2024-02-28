@@ -5,19 +5,22 @@ subroutine run_selection_slave(thread, iproc, energy)
 
   implicit none
 
-  double precision, intent(in) :: energy(N_states)
-  integer,          intent(in) :: thread, iproc
+  double precision, intent(in)    :: energy(N_states)
+  integer,  intent(in)            :: thread, iproc
+  integer                        :: rc, i
 
-  integer                      :: rc, i
-  integer                      :: worker_id, task_id(1), ctask, ltask
-  character*(512)              :: task
-  integer(ZMQ_PTR)             :: zmq_to_qp_run_socket
-  integer(ZMQ_PTR)             :: zmq_socket_push
-  integer(ZMQ_PTR), external   :: new_zmq_to_qp_run_socket
-  integer(ZMQ_PTR), external   :: new_zmq_push_socket
-  type(selection_buffer)       :: buf, buf2
-  type(pt2_type)               :: pt2_data
-  logical                      :: done, buffer_ready
+  integer                        :: worker_id, task_id(1), ctask, ltask
+  character*(512)                :: task
+
+  integer(ZMQ_PTR),external      :: new_zmq_to_qp_run_socket
+  integer(ZMQ_PTR)               :: zmq_to_qp_run_socket
+
+  integer(ZMQ_PTR), external     :: new_zmq_push_socket
+  integer(ZMQ_PTR)               :: zmq_socket_push
+
+  type(selection_buffer) :: buf, buf2
+  logical :: done, buffer_ready
+  type(pt2_type) :: pt2_data
 
   PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
   PROVIDE psi_bilinear_matrix_rows psi_det_sorted_tc_order psi_bilinear_matrix_order
@@ -64,7 +67,7 @@ subroutine run_selection_slave(thread, iproc, energy)
           stop '-1'
         end if
       end if
-      call select_connected(i_generator, energy, pt2_data, buf,subset, pt2_F(i_generator))
+      call select_connected(i_generator, energy, pt2_data, buf, subset, pt2_F(i_generator))
     endif
 
     integer, external :: task_done_to_taskserver
