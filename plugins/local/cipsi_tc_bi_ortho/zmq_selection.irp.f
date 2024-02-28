@@ -11,7 +11,7 @@ subroutine ZMQ_selection(N_in, pt2_data)
   integer, external              :: omp_get_thread_num
   type(pt2_type), intent(inout)  :: pt2_data
 
-  PROVIDE psi_det psi_coef N_det qp_max_mem N_states pt2_F s2_eig N_det_generators
+!  PROVIDE psi_det psi_coef N_det qp_max_mem N_states pt2_F s2_eig N_det_generators
 
   N = max(N_in,1)
   N = min(N, (elec_alpha_num * (mo_num-elec_alpha_num))**2)
@@ -61,7 +61,6 @@ subroutine ZMQ_selection(N_in, pt2_data)
   ipos=1
   task = ' '
 
- 
  do i= 1, N_det_generators
     do j=1,pt2_F(i)
       write(task(ipos:ipos+30),'(I9,1X,I9,1X,I9,''|'')') j, i, N

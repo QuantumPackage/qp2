@@ -31,11 +31,12 @@ subroutine run_pt2_slave(thread,iproc,energy)
 
   double precision, intent(in)    :: energy(N_states_diag)
   integer,  intent(in)            :: thread, iproc
-  if (N_det > 100000 ) then
-    call run_pt2_slave_large(thread,iproc,energy)
-  else
-    call run_pt2_slave_small(thread,iproc,energy)
-  endif
+  call run_pt2_slave_large(thread,iproc,energy)
+!  if (N_det > 100000 ) then
+!   call run_pt2_slave_large(thread,iproc,energy)
+! else
+!   call run_pt2_slave_small(thread,iproc,energy)
+! endif
 end
 
 subroutine run_pt2_slave_small(thread,iproc,energy)
@@ -178,15 +179,12 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(pt2_type) :: pt2_data
   integer :: n_tasks, k, N
   integer :: i_generator, subset
+  integer :: ifirst
 
   integer :: bsize ! Size of selection buffers
   logical :: sending
-  double precision :: time_shift
-
   PROVIDE global_selection_buffer global_selection_buffer_lock
 
-  call random_number(time_shift)
-  time_shift = time_shift*15.d0
 
   zmq_to_qp_run_socket = new_zmq_to_qp_run_socket()
 
@@ -198,15 +196,13 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
   zmq_socket_push      = new_zmq_push_socket(thread)
 
+  ifirst = 0
   b%N = 0
   buffer_ready = .False.
   n_tasks = 1
 
   sending = .False.
   done = .False.
-  double precision :: time0, time1
-  call wall_time(time0)
-  time0 = time0+time_shift
   do while (.not.done)
 
     integer, external :: get_tasks_from_taskserver
@@ -233,28 +229,29 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
       ASSERT (b%N == bsize)
     endif
 
+    double precision :: time0, time1
+    call wall_time(time0)
     call pt2_alloc(pt2_data,N_states)
     b%cur = 0
     call select_connected(i_generator,energy,pt2_data,b,subset,pt2_F(i_generator))
+    call wall_time(time1)
 
     integer, external :: tasks_done_to_taskserver
     if (tasks_done_to_taskserver(zmq_to_qp_run_socket,worker_id,task_id,n_tasks) == -1) then
       done = .true.
     endif
     call sort_selection_buffer(b)
-
-    call wall_time(time1)
-!    if (time1-time0 > 15.d0) then
-      call omp_set_lock(global_selection_buffer_lock)
-      global_selection_buffer%mini = b%mini
-      call merge_selection_buffers(b,global_selection_buffer)
-      b%cur=0
-      call omp_unset_lock(global_selection_buffer_lock)
-      call wall_time(time0)
-!    endif
-
     call push_pt2_results_async_recv(zmq_socket_push,b%mini,sending)
-    if ( iproc == 1 .or. i_generator < 100 .or. done) then
+    call omp_set_lock(global_selection_buffer_lock)
+    global_selection_buffer%mini = b%mini
+    call merge_selection_buffers(b,global_selection_buffer)
+    if (ifirst /= 0 ) then
+      b%cur=0
+    else
+      ifirst = 1
+    endif
+    call omp_unset_lock(global_selection_buffer_lock)
+    if ( iproc == 1 ) then
       call omp_set_lock(global_selection_buffer_lock)
       call push_pt2_results_async_send(zmq_socket_push, (/i_generator/), (/pt2_data/), global_selection_buffer, (/task_id/), 1,sending)
       global_selection_buffer%cur = 0
