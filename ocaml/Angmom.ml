@@ -26,8 +26,7 @@ let of_string = function
   | "J" | "j" -> J
   | "K" | "k" -> K
   | "L" | "l" -> L
-  | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L,
-not "^x^"."))
+  | x -> raise (Failure ("Angmom should be S|P|D|F|G|H|I|J|K|L, not "^x^"."))
 
 let of_char = function
   | 'S' | 's' -> S
