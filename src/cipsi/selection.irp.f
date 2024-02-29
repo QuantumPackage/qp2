@@ -845,7 +845,13 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
             if (h0_type == 'CFG') then
               w = min(w, e_pert(istate) * s_weight(istate,istate)) / c0_weight(istate)
             else
+!              if(dabs(e_pert(istate) * s_weight(istate,istate)).gt.1.d-5)then
+!              print*,w,e_pert(istate) * s_weight(istate,istate)
+!              endif
               w = min(w, e_pert(istate) * s_weight(istate,istate))
+!              if(dabs(e_pert(istate) * s_weight(istate,istate)).gt.1.d-5)then
+!              print*,w
+!              endif
             endif
 
         end select
@@ -881,6 +887,10 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
         call configuration_to_dets_size(occ,n,elec_alpha_num,N_int)
         n = max(n,1)
         w *= dsqrt(dble(n))
+      endif
+
+      if(dabs(w).gt.1.d-5)then
+       print*,w,buf%mini
       endif
 
       if(w <= buf%mini) then
