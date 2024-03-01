@@ -7,6 +7,10 @@ program tc_bi_ortho
   !
   END_DOC
 
+  implicit none
+
+  PROVIDE N_int
+
   my_grid_becke = .True.
   PROVIDE tc_grid1_a tc_grid1_r
   my_n_pt_r_grid = tc_grid1_r
@@ -65,6 +69,15 @@ subroutine routine_diag()
   ! provide eigval_right_tc_bi_orth
   ! provide overlap_bi_ortho
   ! provide htilde_matrix_elmt_bi_ortho
+
+  if(noL_standard) then
+    PROVIDE noL_0e
+    PROVIDE noL_1e
+    PROVIDE noL_2e
+  endif
+
+  PROVIDE htilde_matrix_elmt_bi_ortho
+  return
 
   if(N_states .eq. 1) then
 
