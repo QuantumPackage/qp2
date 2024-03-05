@@ -8,7 +8,12 @@ subroutine provide_all_three_ints_bi_ortho()
   END_DOC
 
   implicit none
+  double precision :: t1, t2
+
   PROVIDE ao_two_e_integrals_in_map
+
+  print *, ' start provide_all_three_ints_bi_ortho'
+  call wall_time(t1)
 
   if(three_body_h_tc) then
 
@@ -31,6 +36,9 @@ subroutine provide_all_three_ints_bi_ortho()
     endif
 
   endif
+
+  call wall_time(t2)
+  print *, ' end provide_all_three_ints_bi_ortho after (min) = ', (t2-t1)/60.d0
 
   return
 end
@@ -83,7 +91,10 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
   integer,           intent(in) :: Nint
   integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
   double precision, intent(out) :: hmono, htwoe, hthree, htot
+
   integer                       :: degree
+
+  PROVIDE pure_three_body_h_tc
 
   hmono  = 0.d0
   htwoe  = 0.d0
@@ -99,7 +110,7 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
     if(degree == 0) then
       call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
     else if (degree == 1) then
-      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
     else if(degree == 2) then
       call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
     endif
@@ -111,7 +122,7 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
     if(degree == 0) then
       call diag_htilde_mu_mat_fock_bi_ortho  (Nint, key_i, hmono, htwoe, hthree, htot)
     else if (degree == 1) then
-      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i , hmono, htwoe, hthree, htot)
+      call single_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
     else if(degree == 2) then
       call double_htilde_mu_mat_fock_bi_ortho(Nint, key_j, key_i, hmono, htwoe, hthree, htot)
     else
@@ -149,16 +160,16 @@ subroutine htilde_mu_mat_opt_bi_ortho_no_3e(key_j, key_i, Nint, htot)
   double precision, intent(out) :: htot
   integer                       :: degree
 
-  htot   = 0.d0
+  htot = 0.d0
 
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.gt.2) return
 
-  if(degree == 0)then
+  if(degree == 0) then
     call diag_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_i,htot)
-  else if (degree == 1)then
+  else if (degree == 1) then
     call single_htilde_mu_mat_fock_bi_ortho_no_3e(Nint,key_j, key_i , htot)
-  else if(degree == 2)then
+  else if(degree == 2) then
     call double_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
   endif
 

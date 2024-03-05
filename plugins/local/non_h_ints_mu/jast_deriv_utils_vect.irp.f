@@ -109,6 +109,14 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
 
     endif ! env_type
 
+  elseif(j2e_type .eq. "Boys_Handy") then
+
+    PROVIDE jBH_size jBH_en jBH_ee jBH_m jBH_n jBH_o jBH_c
+
+    if(env_type .eq. "None") then
+      call grad1_j12_r1_seq(r1, n_grid2, resx, resy, resz)
+    endif ! env_type
+
   else
 
     print *, ' Error in get_grad1_u12_withsq_r1_seq: Unknown Jastrow'
@@ -157,9 +165,13 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
   double precision, intent(out) :: gradz(n_grid2)
 
   integer                       :: jpoint
+  integer                       :: i_nucl, p, mpA, npA, opA
   double precision              :: r2(3)
   double precision              :: dx, dy, dz, r12, tmp
   double precision              :: mu_val, mu_tmp, mu_der(3)
+  double precision              :: rn(3), f1A, gard1_f1A(3), f2A, gard2_f2A(3), g12, gard1_g12(3)
+  double precision              :: tmp1, tmp2
+
 
   PROVIDE j2e_type
 
@@ -266,6 +278,57 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       grady(jpoint) = tmp * dy
       gradz(jpoint) = tmp * dz
     enddo
+
+  elseif(j2e_type .eq. "Boys_Handy") then
+
+    do jpoint = 1, n_points_extra_final_grid ! r2
+
+      r2(1) = final_grid_points_extra(1,jpoint)
+      r2(2) = final_grid_points_extra(2,jpoint)
+      r2(3) = final_grid_points_extra(3,jpoint)
+
+      gradx(jpoint) = 0.d0 
+      grady(jpoint) = 0.d0 
+      gradz(jpoint) = 0.d0 
+      do i_nucl = 1, nucl_num 
+
+        rn(1) = nucl_coord(i_nucl,1)
+        rn(2) = nucl_coord(i_nucl,2)
+        rn(3) = nucl_coord(i_nucl,3)
+
+        call jBH_elem_fct_grad(jBH_en(i_nucl), r1, rn, f1A, gard1_f1A)
+        call jBH_elem_fct_grad(jBH_en(i_nucl), r2, rn, f2A, gard2_f2A)
+        call jBH_elem_fct_grad(jBH_ee(i_nucl), r1, r2, g12, gard1_g12)
+
+        do p = 1, jBH_size
+          mpA = jBH_m(p,i_nucl)
+          npA = jBH_n(p,i_nucl)
+          opA = jBH_o(p,i_nucl)
+          tmp = jBH_c(p,i_nucl)
+          if(mpA .eq. npA) then
+            tmp = tmp * 0.5d0
+          endif
+
+          tmp1 = 0.d0
+          if(mpA .gt. 0) then
+            tmp1 = tmp1 + dble(mpA) * f1A**dble(mpA-1) * f2A**dble(npA)
+          endif
+          if(npA .gt. 0) then
+            tmp1 = tmp1 + dble(npA) * f1A**dble(npA-1) * f2A**dble(mpA)
+          endif
+          tmp1 = tmp1 * g12**dble(opA)
+
+          tmp2 = 0.d0
+          if(opA .gt. 0) then
+            tmp2 = tmp2 + dble(opA) * g12**dble(opA-1) * (f1A**dble(mpA) * f2A**dble(npA) + f1A**dble(npA) * f2A**dble(mpA))
+          endif
+
+          gradx(jpoint) = gradx(jpoint) + tmp * (tmp1 * gard1_f1A(1) + tmp2 * gard1_g12(1))
+          grady(jpoint) = grady(jpoint) + tmp * (tmp1 * gard1_f1A(2) + tmp2 * gard1_g12(2))
+          gradz(jpoint) = gradz(jpoint) + tmp * (tmp1 * gard1_f1A(3) + tmp2 * gard1_g12(3))
+        enddo ! p
+      enddo ! i_nucl
+    enddo ! jpoint
 
   else
 
@@ -754,6 +817,37 @@ subroutine get_u12_2e_r1_seq(ipoint, n_grid2, res)
 
   return
 end
+
+! ---
+
+subroutine jBH_elem_fct_grad(alpha, r1, r2, fct, gard1_fct)
+
+  implicit none
+  double precision, intent(in)  :: alpha, r1(3), r2(3)
+  double precision, intent(out) :: fct, gard1_fct(3)
+  double precision              :: dist, tmp1, tmp2
+
+  dist = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
+              + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
+              + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
+
+  tmp1 = 1.d0 / (1.d0 + alpha * dist)
+
+  fct = alpha * dist * tmp1
+
+  if(dist .lt. 1d-10) then
+    gard1_fct(1) = 0.d0
+    gard1_fct(2) = 0.d0
+    gard1_fct(3) = 0.d0
+  else
+    tmp2 = alpha * tmp1 * tmp1 / dist
+    gard1_fct(1) = tmp2 * (r1(1) - r2(1))
+    gard1_fct(2) = tmp2 * (r1(2) - r2(2))
+    gard1_fct(3) = tmp2 * (r1(3) - r2(3))
+  endif
+
+  return
+end 
 
 ! ---
 
