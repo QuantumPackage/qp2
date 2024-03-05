@@ -1,17 +1,27 @@
-subroutine export_trexio(update)
+subroutine export_trexio(update,full_path)
   use trexio
   implicit none
   BEGIN_DOC
   !     Exports the wave function in TREXIO format
   END_DOC
 
-  logical, intent(in)            :: update
+  logical, intent(in)            :: update, full_path
   integer(trexio_t)              :: f(N_states) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
-  integer                        :: k
+  integer                        :: k, iunit
   double precision, allocatable  :: factor(:)
-  character*(256)  :: filenames(N_states)
+  character*(256)  :: filenames(N_states), fp
   character :: rw
+
+  integer, external :: getunitandopen
+
+  if (full_path) then
+    fp = trexio_filename
+    call system('realpath '//trim(fp)//' > '//trim(fp)//'.tmp')
+    iunit = getunitandopen(trim(fp)//'.tmp','r')
+    read(iunit,'(A)') trexio_filename
+    close(iunit, status='delete')
+  endif
 
   filenames(1) = trexio_filename
   do k=2,N_states
@@ -48,6 +58,8 @@ subroutine export_trexio(update)
     endif
   enddo
   call ezfio_set_trexio_trexio_file(trexio_filename)
+
+    
 
 ! ------------------------------------------------------------------------------
 
