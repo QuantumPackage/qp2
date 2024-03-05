@@ -230,6 +230,7 @@ end
 
     allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag))
 
+    ! TODO : OPEN-MP
     do i = 1, N_det
       call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
     enddo
@@ -277,7 +278,6 @@ end
     do istate = N_states+1, n_states_diag
       vec_tmp(istate,istate) = 1.d0
     enddo
-    !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
     converged = .False.
     i_it = 0
     do while (.not. converged)
@@ -364,6 +364,7 @@ subroutine bi_normalize(u_l, u_r, n, ld, nstates)
 
     !!!! Normalization of right eigenvectors |Phi>
     accu = 0.d0
+    ! TODO: dot product lapack
     do j = 1, n
       accu += u_r(j,i) * u_r(j,i)
     enddo

@@ -520,6 +520,7 @@ compute_singles=.True.
         ASSERT (lrow <= N_det_alpha_unique)
 
         tmp_det2(1:$N_int,1) = psi_det_alpha_unique(1:$N_int, lrow)
+        ! TODO: i_htc "optimized" for normal ordering for single/double by spin
 !        call i_h_j_single_spin( tmp_det, tmp_det2, $N_int, 1, hij)
          if(do_right)then
           call htilde_mu_mat_opt_bi_ortho_tot(tmp_det,tmp_det2,$N_int,hij)
