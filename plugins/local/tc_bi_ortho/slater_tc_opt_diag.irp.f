@@ -15,6 +15,8 @@
   implicit none
   double precision :: hmono, htwoe, htot, hthree
 
+  PROVIDE N_int
+  PROVIDE HF_bitmask
   PROVIDE mo_l_coef mo_r_coef
 
   call diag_htilde_mu_mat_bi_ortho_slow(N_int, HF_bitmask, hmono, htwoe, htot)
