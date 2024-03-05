@@ -889,9 +889,9 @@ subroutine fill_buffer_$DOUBLE(i_generator, sp, h1, h2, bannedOrb, banned, fock_
         w *= dsqrt(dble(n))
       endif
 
-      if(dabs(w).gt.1.d-5)then
-       print*,w,buf%mini
-      endif
+!      if(dabs(w).gt.1.d-5)then
+!       print*,w,buf%mini
+!      endif
 
       if(w <= buf%mini) then
         call add_to_selection_buffer(buf, det, w)
