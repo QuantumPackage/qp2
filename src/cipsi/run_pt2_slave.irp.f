@@ -186,6 +186,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
   type(pt2_type) :: pt2_data
   integer :: n_tasks, k, N
   integer :: i_generator, subset
+  integer :: ifirst
 
   integer :: bsize ! Size of selection buffers
   logical :: sending
@@ -202,6 +203,7 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
 
   zmq_socket_push      = new_zmq_push_socket(thread)
 
+  ifirst = 0
   b%N = 0
   buffer_ready = .False.
   n_tasks = 1
@@ -250,7 +252,11 @@ subroutine run_pt2_slave_large(thread,iproc,energy)
     call omp_set_lock(global_selection_buffer_lock)
     global_selection_buffer%mini = b%mini
     call merge_selection_buffers(b,global_selection_buffer)
-    b%cur=0
+    if (ifirst /= 0 ) then
+      b%cur=0
+    else
+      ifirst = 1
+    endif
     call omp_unset_lock(global_selection_buffer_lock)
     if ( iproc == 1 ) then
       call omp_set_lock(global_selection_buffer_lock)
