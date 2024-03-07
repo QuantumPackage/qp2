@@ -91,3 +91,26 @@ BEGIN_PROVIDER [double precision, multi_s_dipole_moment, (N_states, N_states)]
   enddo
 
 END_PROVIDER
+
+! ---
+
+ BEGIN_PROVIDER [double precision, multi_s_x_dipole_moment_eigenvec, (N_states, N_states)]
+&BEGIN_PROVIDER [double precision, multi_s_y_dipole_moment_eigenvec, (N_states, N_states)]
+&BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenvec, (N_states, N_states)]
+&BEGIN_PROVIDER [double precision, multi_s_x_dipole_moment_eigenval,           (N_states)]
+&BEGIN_PROVIDER [double precision, multi_s_y_dipole_moment_eigenval,           (N_states)]
+&BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenval,           (N_states)]
+
+  implicit none
+
+  PROVIDE multi_s_x_dipole_moment multi_s_y_dipole_moment multi_s_z_dipole_moment
+
+  call lapack_diag(multi_s_x_dipole_moment_eigenval(1), multi_s_x_dipole_moment_eigenvec(1,1), multi_s_x_dipole_moment(1,1), N_states, N_states)
+  call lapack_diag(multi_s_y_dipole_moment_eigenval(1), multi_s_y_dipole_moment_eigenvec(1,1), multi_s_y_dipole_moment(1,1), N_states, N_states)
+  call lapack_diag(multi_s_z_dipole_moment_eigenval(1), multi_s_z_dipole_moment_eigenvec(1,1), multi_s_z_dipole_moment(1,1), N_states, N_states)
+
+END_PROVIDER
+
+! ---
+
+
