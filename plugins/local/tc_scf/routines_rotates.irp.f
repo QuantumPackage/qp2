@@ -439,18 +439,18 @@ subroutine print_energy_and_mos(good_angles)
   if(max_angle_left_right .lt. thresh_lr_angle) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
     good_angles = .true.
-  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
-    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
-    good_angles = .false.
-  else if(max_angle_left_right .gt. 75.d0) then
-    print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
-    good_angles = .false.
+!  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
+!    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
+!    good_angles = .false.
+!  else if(max_angle_left_right .gt. 75.d0) then
+!    print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
+!    good_angles = .false.
   endif
-
-  print *, ' Diag Fock elem, product of left/right norm, angle left/right '
-  do i = 1, mo_num
-    write(*, '(I3,X,100(F16.10,X))') i, Fock_matrix_tc_mo_tot(i,i), overlap_mo_l(i,i)*overlap_mo_r(i,i), angle_left_right(i)
-  enddo
+!
+!  print *, ' Diag Fock elem, product of left/right norm, angle left/right '
+!  do i = 1, mo_num
+!    write(*, '(I3,X,100(F16.10,X))') i, Fock_matrix_tc_mo_tot(i,i), overlap_mo_l(i,i)*overlap_mo_r(i,i), angle_left_right(i)
+!  enddo
 
 end
 

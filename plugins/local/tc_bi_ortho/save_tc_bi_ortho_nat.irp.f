@@ -33,7 +33,8 @@ program tc_natorb_bi_ortho
   read_wf = .True.
   touch read_wf
 
-  call print_energy_and_mos()
+  logical :: good_angles
+  call print_energy_and_mos(good_angles)
   call save_tc_natorb()
   call print_angles_tc()
   !call minimize_tc_orb_angles()

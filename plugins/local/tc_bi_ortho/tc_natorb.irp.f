@@ -33,7 +33,6 @@
   do i = 1, ao_num
     write(*, '(100(F16.10,X))') tc_transition_matrix_ao(:,i,1,1)
   enddo
-  stop
 
   thr_d   = 1.d-6
   thr_nd  = 1.d-6
@@ -52,7 +51,6 @@
 !   call diag_mat_per_fock_degen( fock_diag, dm_tmp, mo_num, thr_d, thr_nd, thr_deg & 
 !                               , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo, natorb_tc_eigval)
 !  endif
-
   call non_hrmt_bieig(mo_num, dm_tmp, thresh_biorthog_diag, thresh_biorthog_nondiag & 
                       , natorb_tc_leigvec_mo, natorb_tc_reigvec_mo                  & 
                       , mo_num, natorb_tc_eigval )
