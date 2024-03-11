@@ -201,6 +201,8 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     !$OMP END DO
     !$OMP END PARALLEL
 
+    call clear_ao_map()
+
     if(tc_integ_type .eq. "numeric") then
       FREE int2_grad1_u12_ao_num int2_grad1_u12_square_ao_num
     endif
