@@ -20,4 +20,5 @@ subroutine routine
  call diagonalize_CI
  print*,'N_det = ',N_det
  call save_wavefunction_general(N_det,N_states,psi_det_sorted,size(psi_coef_sorted,1),psi_coef_sorted)
+ call print_mol_properties
 end

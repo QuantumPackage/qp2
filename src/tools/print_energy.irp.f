@@ -14,5 +14,6 @@ end
 
 subroutine run
  implicit none
-  print *,  psi_energy + nuclear_repulsion
+ call print_mol_properties
+ print *,  psi_energy + nuclear_repulsion
 end

@@ -224,14 +224,18 @@ def write_ezfio(res, filename):
           exponent += [p.expo for p in b.prim]
           ang_mom.append(str.count(s, "z"))
           shell_prim_num.append(len(b.prim))
-          shell_index += [nshell_tot+1] * len(b.prim)
+          shell_index += [nshell_tot] * len(b.prim)
+
+    shell_num = len(ang_mom)
+    assert(shell_index[0] = 1)
+    assert(shell_index[-1] = shell_num)
 
     # ~#~#~#~#~ #
     # W r i t e #
     # ~#~#~#~#~ #
 
     ezfio.set_basis_basis("Read from ResultsFile")
-    ezfio.set_basis_shell_num(len(ang_mom))
+    ezfio.set_basis_shell_num(shell_num)
     ezfio.set_basis_basis_nucleus_index(nucl_index)
     ezfio.set_basis_prim_num(len(coefficient))
 
@@ -309,9 +313,18 @@ def write_ezfio(res, filename):
 
     MoMatrix = []
     sym0 = [i.sym for i in res.mo_sets[MO_type]]
-    sym = [i.sym for i in res.mo_sets[MO_type]]
+    sym  = [i.sym for i in res.mo_sets[MO_type]]
     for i in range(len(sym)):
         sym[MOmap[i]] = sym0[i]
+
+    irrep = {}
+    for i in sym:
+      irrep[i] = 0
+
+    for i, j in enumerate(irrep.keys()):
+      irrep[j] = i+1
+
+    sym = [ irrep[k] for k in sym ]
 
     MoMatrix = []
     for i in range(len(MOs)):
@@ -329,6 +342,7 @@ def write_ezfio(res, filename):
     ezfio.set_mo_basis_mo_num(mo_num)
     ezfio.set_mo_basis_mo_coef(MoMatrix)
     ezfio.set_mo_basis_mo_occ(OccNum)
+    ezfio.set_mo_basis_mo_symmetry(sym)
 
     print("OK")
 

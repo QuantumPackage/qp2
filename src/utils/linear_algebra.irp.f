@@ -1920,8 +1920,12 @@ subroutine exp_matrix(X,n,exp_X)
  call get_A_squared(X,n,r2_mat)
  call lapack_diagd(eigvalues,eigvectors,r2_mat,n,n) 
  eigvalues=-eigvalues
+ do i = 1,n
+  ! t = dsqrt(t^2) where t^2 are eigenvalues of X^2
+  eigvalues(i) = dsqrt(eigvalues(i)) 
+ enddo
 
- if(.False.)then
+ if(.false.)then
  !!! For debugging and following the book intermediate
    ! rebuilding the matrix : X^2 = -W t^2 W^T as in 3.1.30 
    ! matrix_tmp1 = W t^2 
@@ -1932,14 +1936,16 @@ subroutine exp_matrix(X,n,exp_X)
    enddo
    eigvalues_mat=0.d0
    do i = 1,n
-    ! t = dsqrt(t^2) where t^2 are eigenvalues of X^2
-    eigvalues(i) = dsqrt(eigvalues(i)) 
     eigvalues_mat(i,i) = eigvalues(i)*eigvalues(i)
    enddo
    call dgemm('N','N',n,n,n,1.d0,eigvectors,size(eigvectors,1), &
    eigvalues_mat,size(eigvalues_mat,1),0.d0,matrix_tmp1,size(matrix_tmp1,1))
    call dgemm('N','T',n,n,n,-1.d0,matrix_tmp1,size(matrix_tmp1,1), &
    eigvectors,size(eigvectors,1),0.d0,matrix_tmp2,size(matrix_tmp2,1))
+   print*,'r2_mat = '
+   do i = 1, n
+    write(*,'(100(F16.10,X))')r2_mat(:,i)
+   enddo
    print*,'r2_mat new = '
    do i = 1, n
     write(*,'(100(F16.10,X))')matrix_tmp2(:,i)
@@ -1964,7 +1970,8 @@ subroutine exp_matrix(X,n,exp_X)
   if(dabs(eigvalues(i)).gt.1.d-4)then
    eigvalues_mat(i,i) = dsin(eigvalues(i))/eigvalues(i)
   else ! Taylor development of sin(x)/x near x=0 = 1 - x^2/6
-   eigvalues_mat(i,i) = 1.d0 - eigvalues(i)*eigvalues(i)*c_1_3*0.5d0
+   eigvalues_mat(i,i) = 1.d0 - eigvalues(i)*eigvalues(i)*c_1_3*0.5d0 &
+                             + eigvalues(i)*eigvalues(i)*eigvalues(i)*eigvalues(i)*c_1_3*0.025d0
   endif
  enddo
  ! matrix_tmp1 = W t^-1 sin(t) 
