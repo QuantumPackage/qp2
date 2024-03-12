@@ -91,6 +91,7 @@ subroutine run_stochastic_cipsi
     to_select = max(N_states_diag, to_select)
 
     E_denom = E_tc ! TC Energy of the current wave function 
+    print*,'E_tc = ',E_tc
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)

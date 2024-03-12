@@ -55,9 +55,11 @@ subroutine diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
 !     write(*,'(A28,X,I10,X,100(F16.8,X))')'Ndet,E,E+PT2,E+RPT2,|PT2|=',ndet,E_tc ,E_tc  + pt2_tot/norm,E_tc  + rpt2_tot/norm,pt2_minus, pt2_plus
 !     print*,'*****'
 !   endif
-!   E_tc(k) = eigval_right_tc_bi_orth(k)
-!   norm(k) = norm_ground_left_right_bi_orth(k)
 !  enddo
+  do k = 1, N_states
+   E_tc(k) = eigval_right_tc_bi_orth(k)
+   norm(k) = norm_ground_left_right_bi_orth(k)
+  enddo
 
   psi_energy(1:N_states) = eigval_right_tc_bi_orth(1:N_states) - nuclear_repulsion
   psi_s2(1:N_states) = s2_eigvec_tc_bi_orth(1:N_states)
