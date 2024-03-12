@@ -98,7 +98,7 @@ subroutine run_stochastic_cipsi
     call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 
-    call print_summary(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
+    call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
