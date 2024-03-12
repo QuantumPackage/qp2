@@ -40,7 +40,7 @@ END_PROVIDER
   enddo
   do k=1,N_states
     do i=1,N_det_selectors
-      psi_selectors_coef(i,k)      = psi_coef_sorted_tc_gen(i,k)
+      psi_selectors_coef(i,k)      = psi_coef_sorted_gen(i,k)
       psi_selectors_coef_tc(i,1,k) = psi_l_coef_sorted_bi_ortho(i,k)
       psi_selectors_coef_tc(i,2,k) = psi_r_coef_sorted_bi_ortho(i,k)
     enddo

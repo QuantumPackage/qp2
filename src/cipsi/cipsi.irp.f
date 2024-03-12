@@ -1,10 +1,13 @@
 subroutine run_cipsi
-  implicit none
-  use selection_types
+
   BEGIN_DOC
-! Selected Full Configuration Interaction with deterministic selection and
-! stochastic PT2.
+  ! Selected Full Configuration Interaction with deterministic selection and
+  ! stochastic PT2.
   END_DOC
+
+  use selection_types
+
+  implicit none
   integer                        :: i,j,k
   type(pt2_type)                 :: pt2_data, pt2_data_err
   double precision, allocatable  :: zeros(:)
