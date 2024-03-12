@@ -852,7 +852,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     #Total energy shift due to Ewald probe charge = -1/2 * Nelec*madelung/cell.vol =
     madelung = tools.pbc.madelung(cell, kpts)
     shift = madelung*cell.nelectron * -.5
-    e_nuc = (cell.energy_nuc())*Nk
+    e_nuc = (cell.energy_nuc() + shift)*Nk
   
     print('nucl_repul', e_nuc)
 
