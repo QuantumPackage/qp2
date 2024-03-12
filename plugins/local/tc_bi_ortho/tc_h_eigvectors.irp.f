@@ -45,12 +45,12 @@ end
 
 ! ---
 
- BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)      ]
-&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth , (N_states)      ]
-&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth     , (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth     , (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth   , (N_states)      ]
-&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth           ]
+ BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth        , (N_states)      ]
+&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth         , (N_states)      ]
+&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth             , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth             , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth           , (N_states)      ]
+&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth , (N_states)      ]
 
   BEGIN_DOC
   ! eigenvalues, right and left eigenvectors of the transcorrelated Hamiltonian on the BI-ORTHO basis 
@@ -309,13 +309,13 @@ end
   deallocate(Stmp)
 
   print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ', leigvec_tc_bi_orth(1,1), reigvec_tc_bi_orth(1,1)
+  norm_ground_left_right_bi_orth = 0.d0
   do i = 1, N_states
-    norm_ground_left_right_bi_orth = 0.d0
     do j = 1, N_det
-      norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,i) * reigvec_tc_bi_orth(j,i)
+      norm_ground_left_right_bi_orth(i) += leigvec_tc_bi_orth(j,i) * reigvec_tc_bi_orth(j,i)
     enddo
     print*,' state      ', i
-    print*,' norm l/r = ', norm_ground_left_right_bi_orth
+    print*,' norm l/r = ', norm_ground_left_right_bi_orth(i)
     print*,' <S2>     = ', s2_eigvec_tc_bi_orth(i)
   enddo
 

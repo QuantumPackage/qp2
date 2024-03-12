@@ -980,8 +980,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         psi_h_alpha = mat_l(istate, p1, p2)
 
         pt2_data % overlap(:,istate) = pt2_data % overlap(:,istate) + coef(:) * coef(istate)
-        pt2_data % variance(istate)  = pt2_data % variance(istate) + dabs(e_pert(istate))
-        pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
+        if(e_pert(istate).gt.0.d0)then! accumulate the positive part of the pt2
+         pt2_data % variance(istate)  = pt2_data % variance(istate) + e_pert(istate) 
+        else                          ! accumulate the negative part of the pt2
+         pt2_data % pt2(istate)       = pt2_data % pt2(istate)      + e_pert(istate)
+        endif
 
         select case (weight_selection)
           case(5)

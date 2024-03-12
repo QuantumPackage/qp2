@@ -57,7 +57,6 @@ subroutine run_stochastic_cipsi
 !  endif
   print_pt2 = .False.
   call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
-!  call routine_save_right
 
 
 !  if (N_det > N_det_max) then
