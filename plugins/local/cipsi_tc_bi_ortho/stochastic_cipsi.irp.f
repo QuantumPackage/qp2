@@ -11,15 +11,13 @@ subroutine run_stochastic_cipsi
   implicit none
   integer                       :: i, j, k, ndet
   integer                       :: to_select
-  logical                       :: print_pt2
   logical                       :: has
   type(pt2_type)                :: pt2_data, pt2_data_err
   double precision              :: rss
-  double precision              :: correlation_energy_ratio, E_denom, E_tc, norm
+  double precision              :: correlation_energy_ratio
   double precision              :: hf_energy_ref
   double precision              :: relative_error
-  double precision, allocatable :: ept2(:), pt1(:), extrap_energy(:)
-  double precision, allocatable :: zeros(:)
+  double precision, allocatable :: zeros(:),E_tc(:), norm(:)
 
   logical,          external    :: qp_stop
   double precision, external    :: memory_of_double
@@ -32,14 +30,13 @@ subroutine run_stochastic_cipsi
     write(*,*) i, Fock_matrix_tc_mo_tot(i,i)
   enddo
 
-  N_iter = 1
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
   rss = memory_of_double(N_states)*4.d0
   call check_mem(rss, irp_here)
 
-  allocate(zeros(N_states))
+  allocate(zeros(N_states),E_tc(N_states), norm(N_states))
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
 
@@ -55,8 +52,7 @@ subroutine run_stochastic_cipsi
 !  if (s2_eig) then
 !    call make_s2_eigenfunction
 !  endif
-  print_pt2 = .False.
-  call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
+  call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm)
 
 
 !  if (N_det > N_det_max) then
@@ -67,19 +63,16 @@ subroutine run_stochastic_cipsi
 !   if (s2_eig) then
 !     call make_s2_eigenfunction
 !   endif
-!    print_pt2 = .False.
-!    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
+!    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm)
 !    call routine_save_right
 !  endif
 
-  allocate(ept2(1000),pt1(1000),extrap_energy(100))
 
   correlation_energy_ratio = 0.d0
 
 ! thresh_it_dav  = 5.d-5
 ! soft_touch thresh_it_dav
 
-  print_pt2 = .True.
   do while( (N_det < N_det_max) .and. &
             (maxval(abs(pt2_data % pt2(1:N_states))) > pt2_max))
 
@@ -90,13 +83,12 @@ subroutine run_stochastic_cipsi
     to_select = int(sqrt(dble(N_states))*dble(N_det)*selection_factor)
     to_select = max(N_states_diag, to_select)
 
-    E_denom = E_tc ! TC Energy of the current wave function 
     print*,'E_tc = ',E_tc
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
-    call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
+    call ZMQ_pt2(E_tc, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 
     call print_summary_tc(psi_energy_with_nucl_rep, pt2_data, pt2_data_err, N_det, N_configuration, N_states, psi_s2)
@@ -117,48 +109,19 @@ subroutine run_stochastic_cipsi
     PROVIDE psi_det
     PROVIDE psi_det_sorted_tc
 
-    ept2(N_iter-1) = E_tc + nuclear_repulsion + (pt2_data % pt2(1))/norm
-    pt1(N_iter-1)  = dsqrt(pt2_data % overlap(1,1))
-    call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm, pt2_data, print_pt2)
+    call diagonalize_CI_tc_bi_ortho(ndet, E_tc, norm)
 !    stop
     if (qp_stop()) exit
   enddo
-!  print*,'data to extrapolate '
-!  do i = 2, N_iter
-!   print*,'iteration ',i
-!   print*,'pt1,Ept2',pt1(i),ept2(i)
-!   call get_extrapolated_energy(i-1,ept2(i),pt1(i),extrap_energy(i))
-!   do j = 2, i
-!    print*,'j,e,energy',j,extrap_energy(j)
-!   enddo
-!  enddo
-
-! thresh_it_dav  = 5.d-6
-! soft_touch thresh_it_dav
 
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)
   call pt2_alloc(pt2_data, N_states)
   call pt2_alloc(pt2_data_err, N_states)
   call ZMQ_pt2(E_tc, pt2_data, pt2_data_err, relative_error,0) ! Stochastic PT2 and selection
-  call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
-!  if (.not.qp_stop()) then
-!    if (N_det < N_det_max) then
-!     thresh_it_dav  = 5.d-7
-!     soft_touch thresh_it_dav
-!     call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
-!    endif
-!
-!    call pt2_dealloc(pt2_data)
-!    call pt2_dealloc(pt2_data_err)
-!    call pt2_alloc(pt2_data, N_states)
-!    call pt2_alloc(pt2_data_err, N_states)
-!    call ZMQ_pt2(E_denom, pt2_data, pt2_data_err, relative_error, 0) ! Stochastic PT2
-!    call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm,pt2_data,print_pt2)
-!  endif
-!  call pt2_dealloc(pt2_data)
-!  call pt2_dealloc(pt2_data_err)
-!  call routine_save_right
+  call diagonalize_CI_tc_bi_ortho(ndet, E_tc,norm)
+  call pt2_dealloc(pt2_data)
+  call pt2_dealloc(pt2_data_err)
 
 end
 

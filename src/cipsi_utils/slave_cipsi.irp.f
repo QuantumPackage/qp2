@@ -306,7 +306,7 @@ subroutine run_slave_main
           PROVIDE psi_bilinear_matrix_rows psi_bilinear_matrix_order
           PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
           PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp
-          PROVIDE psi_det_hii selection_weight pseudo_sym pt2_min_parallel_tasks
+          PROVIDE selection_weight pseudo_sym pt2_min_parallel_tasks
           call provide_for_zmq_pt2
 
           if (mpi_master) then
