@@ -88,10 +88,10 @@ subroutine select_connected(i_generator,E0,pt2_data,b,subset,csubset)
       particle_mask(k,1) = iand(generators_bitmask(k,1,s_part), not(psi_det_generators(k,1,i_generator)) )
       particle_mask(k,2) = iand(generators_bitmask(k,2,s_part), not(psi_det_generators(k,2,i_generator)) )
   enddo
-  if ((subset == 1).and.(sum(hole_mask(:,2)) == 0_bit_kind)) then
-     ! No beta electron to excite
-     call select_singles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,b)
-  endif
+!  if ((subset == 1).and.(sum(hole_mask(:,2)) == 0_bit_kind)) then
+!     ! No beta electron to excite
+!     call select_singles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,b)
+!  endif
   call select_singles_and_doubles(i_generator,hole_mask,particle_mask,fock_diag_tmp,E0,pt2_data,b,subset,csubset)
   deallocate(fock_diag_tmp)
 end subroutine
