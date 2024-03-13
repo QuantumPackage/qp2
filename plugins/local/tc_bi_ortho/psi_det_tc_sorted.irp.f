@@ -25,6 +25,10 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
   do i=1,N_det
     psi_average_norm_contrib_tc(i) = psi_average_norm_contrib_tc(i)*f
   enddo
+  f = 0.d0
+  do i=1,N_det
+   f+= psi_average_norm_contrib_tc(i)
+  enddo
 END_PROVIDER
 
 
