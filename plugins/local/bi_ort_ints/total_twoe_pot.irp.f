@@ -41,7 +41,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
 
   implicit none
   integer                       :: i, j, k, l, m, n, p, q, s, r
-  double precision              :: t1, t2
+  double precision              :: t1, t2, tt1, tt2
   double precision, allocatable :: a1(:,:,:,:), a2(:,:,:,:)
   double precision, allocatable :: a_jkp(:,:,:), a_kpq(:,:,:), a_pqr(:,:,:)
 
@@ -60,9 +60,11 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
     allocate(a_kpq(ao_num,mo_num,mo_num))
     allocate(a_pqr(mo_num,mo_num,mo_num))
 
-    do s = 1, mo_num
-      mo_bi_ortho_tc_two_e_chemist(:,:,:,s) = 0.d0
+    call wall_time(tt1)
 
+    do s = 1, mo_num
+
+      mo_bi_ortho_tc_two_e_chemist(:,:,:,s) = 0.d0
       do l = 1, ao_num
 
         call dgemm( 'T', 'N', ao_num*ao_num, mo_num, ao_num, 1.d0 &
@@ -93,6 +95,17 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
         !$OMP END PARALLEL
 
       enddo ! l
+
+      if(s == 2) then
+        call wall_time(tt2)
+        print*, ' 1 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-1)*(tt2-tt1)/60.d0
+      elseif(s == 11) then
+        call wall_time(tt2)
+        print*, ' 10 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-10)*(tt2-tt1)/600.d0
+      endif
+
     enddo ! s
 
     deallocate(a_jkp, a_kpq, a_pqr)
