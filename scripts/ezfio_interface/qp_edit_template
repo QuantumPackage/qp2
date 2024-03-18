@@ -156,10 +156,10 @@ let create_temp_file ?filename ezfio_filename fields =
 let run check_only ?ndet ?state ?read ?write ezfio_filename =
 
   (* Set check_only if the arguments are not empty *)
-  let check_only =
-    match ndet, state, read with
-    | None, None, None -> check_only
-    | _ -> true
+  let open_editor =
+    match ndet, state, read, write with
+    | None, None, None, None -> not check_only
+    | _ -> false
   in
 
   (* Open EZFIO *)
@@ -246,10 +246,7 @@ let run check_only ?ndet ?state ?read ?write ezfio_filename =
   in
 
 
-  let () =
-    match check_only with
-    | true  -> ()
-    | false ->
+  if open_editor then
       begin
         (* Open the temp file with external editor *)
         let editor =
@@ -258,8 +255,7 @@ let run check_only ?ndet ?state ?read ?write ezfio_filename =
         in
         Printf.sprintf "%s %s" editor temp_filename
         |> Sys.command |> ignore
-      end
-  in
+      end;
 
   if write = None then
     (* Re-read the temp file *)
