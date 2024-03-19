@@ -50,7 +50,7 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   call print_memory_usage()
 
   PROVIDE mo_r_coef mo_l_coef
-  PROVIDe ao_two_e_tc_tot
+  PROVIDE ao_two_e_tc_tot
 
   if(ao_to_mo_tc_n3) then
 
@@ -103,8 +103,29 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
       elseif(s == 11) then
         call wall_time(tt2)
         print*, ' 10 / mo_num done in (min)', (tt2-tt1)/60.d0
-        print*, ' estimated time required (min)', dble(mo_num-10)*(tt2-tt1)/600.d0
+        print*, ' estimated time required (min)', dble(mo_num-10)*(tt2-tt1)/(60.d0*10.d0)
+      elseif(s == 26) then
+        call wall_time(tt2)
+        print*, ' 25 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-25)*(tt2-tt1)/(60.d0*25.d0)
+      elseif(s == 51) then
+        call wall_time(tt2)
+        print*, ' 50 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-50)*(tt2-tt1)/(60.d0*50.d0)
+      elseif(s == 101) then
+        call wall_time(tt2)
+        print*, ' 100 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-100)*(tt2-tt1)/(60.d0*100.d0)
+      elseif(s == 201) then
+        call wall_time(tt2)
+        print*, ' 200 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-200)*(tt2-tt1)/(60.d0*200.d0)
+      elseif(s == 501) then
+        call wall_time(tt2)
+        print*, ' 500 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-500)*(tt2-tt1)/(60.d0*500.d0)
       endif
+
 
     enddo ! s
 

@@ -131,7 +131,7 @@
   deallocate(tmp)
 
   call wall_time(time1)
-  print*, ' wall time for int2_grad1_u12_ao_num & int2_grad1_u12_square_ao_num =', time1-time0 
+  print*, ' wall time for int2_grad1_u12_ao_num & int2_grad1_u12_square_ao_num = (min)', (time1-time0) / 60.d0
   call print_memory_usage()
 
 END_PROVIDER
