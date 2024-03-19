@@ -11,13 +11,13 @@
    !       |-----------------------|
    !       |  Fcv  |  F^a  |  Rvv  |
    !
-   ! C: Core, O: Open, V: Virtual 
-   ! 
+   ! C: Core, O: Open, V: Virtual
+   !
    ! Rcc = Acc Fcc^a + Bcc Fcc^b
    ! Roo = Aoo Foo^a + Boo Foo^b
    ! Rvv = Avv Fvv^a + Bvv Fvv^b
    ! Fcv = (F^a + F^b)/2
-   ! 
+   !
    ! F^a: Fock matrix alpha (MO), F^b: Fock matrix beta (MO)
    ! A,B: Coupling parameters
    !
@@ -26,10 +26,10 @@
    !       cc   oo   vv
    !  A  -0.5  0.5  1.5
    !  B   1.5  0.5 -0.5
-   ! 
+   !
    END_DOC
    integer                        :: i,j,n
-   if (elec_alpha_num == elec_beta_num) then
+   if (all_shells_closed) then
      Fock_matrix_mo = Fock_matrix_mo_alpha
    else
      ! Core
@@ -102,7 +102,7 @@
    !
    ! END_DOC
    !integer                        :: i,j,n
-   !if (elec_alpha_num == elec_beta_num) then
+   !if (all_shells_closed) then
    !  Fock_matrix_mo = Fock_matrix_mo_alpha
    !else
 
@@ -192,7 +192,7 @@
        do j = 1, n_core_orb
          jorb = list_core(j)
          Fock_matrix_mo(iorb,jorb) = 0.d0
-         Fock_matrix_mo(jorb,iorb) = 0.d0                                                                                                                 
+         Fock_matrix_mo(jorb,iorb) = 0.d0
        enddo
      enddo
    endif
@@ -229,9 +229,7 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
    call mo_to_ao(Fock_matrix_mo,size(Fock_matrix_mo,1),              &
        Fock_matrix_ao,size(Fock_matrix_ao,1))
  else
-   if ( (elec_alpha_num == elec_beta_num).and.                       &
-         (level_shift == 0.) )                                       &
-         then
+   if (all_shells_closed.and. (level_shift == 0.)) then
      integer                        :: i,j
      do j=1,ao_num
        do i=1,ao_num
