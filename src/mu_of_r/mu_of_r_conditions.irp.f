@@ -128,7 +128,7 @@
  BEGIN_PROVIDER [double precision, mu_average_prov, (N_states)]
  implicit none
  BEGIN_DOC
- ! average value of mu(r) weighted with the total one-e density and divised by the number of electrons 
+ ! average value of mu(r) weighted with the total one-e density and divided by the number of electrons 
  !
  ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals 
  !

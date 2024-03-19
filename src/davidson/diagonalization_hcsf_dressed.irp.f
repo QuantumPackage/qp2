@@ -477,7 +477,7 @@ subroutine davidson_diag_csf_hjj(dets_in,u_in,H_jj,energies,dim_in,sze,sze_csf,N
         !don't print
         continue
       else
-        write(*,'(1X,I3,1X,100(1X,F16.10,1X,E11.3))') iter-1, to_print(1:2,1:N_st)
+        write(*,'(1X,I3,1X,100(1X,F16.10,1X,ES11.3))') iter-1, to_print(1:2,1:N_st)
       endif
 
       ! Check convergence

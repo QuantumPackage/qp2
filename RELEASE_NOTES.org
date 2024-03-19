@@ -10,7 +10,8 @@
   - Added many types of integrals
   - Accelerated four-index transformation
   - Added transcorrelated SCF
-  - Added transcorrelated CIPSI
+  - Added bi-orthonormal transcorrelated CIPSI
+  - Added Cholesky decomposition of AO integrals
   - Added CCSD and CCSD(T)
   - Added MO localization
   - Changed coupling parameters for ROHF
@@ -20,7 +21,7 @@
   - Removed cryptokit dependency in OCaml
   - Using now standard convention in RDM
   - Added molecular properties
-  - [ ] Added GTOs with complex exponent
+  - Added GTOs with complex exponent
 
 *** TODO: take from dev
   - Updated version of f77-zmq

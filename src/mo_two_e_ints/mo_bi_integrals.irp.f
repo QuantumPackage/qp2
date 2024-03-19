@@ -37,7 +37,9 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     call map_load_from_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
     print*, 'MO integrals provided'
     return
-  else
+  endif
+
+  if (.not. do_direct_integrals) then
     PROVIDE ao_two_e_integrals_in_map
   endif
 
@@ -50,13 +52,16 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call cpu_time(cpu_1)
 
   if(no_vvvv_integrals)then
-!    call four_idx_novvvv
     call four_idx_novvvv_old
   else
-    if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
-      call four_idx_dgemm
+    if (do_ao_cholesky) then
+      call add_integrals_to_map_cholesky
     else
-      call add_integrals_to_map(full_ijkl_bitmask_4)
+      if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
+        call four_idx_dgemm
+      else
+        call add_integrals_to_map(full_ijkl_bitmask_4)
+      endif
     endif
   endif
 
@@ -87,6 +92,10 @@ subroutine four_idx_dgemm
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
+
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
 
   print *, 'Getting AOs'
@@ -99,6 +108,7 @@ subroutine four_idx_dgemm
     enddo
   enddo
   !$OMP END PARALLEL DO
+
 
   print *, '1st transformation'
   ! 1st transformation
@@ -163,10 +173,8 @@ subroutine four_idx_dgemm
 
   deallocate (a1)
 
+  call map_sort(mo_integrals_map)
   call map_unique(mo_integrals_map)
-
-  integer*8                      :: get_mo_map_size, mo_map_size
-  mo_map_size = get_mo_map_size()
 
 end subroutine
 
@@ -175,7 +183,7 @@ subroutine add_integrals_to_map(mask_ijkl)
   implicit none
 
   BEGIN_DOC
-  ! Adds integrals to tha MO map according to some bitmask
+  ! Adds integrals to the MO map according to some bitmask
   END_DOC
 
   integer(bit_kind), intent(in)  :: mask_ijkl(N_int,4)
@@ -247,7 +255,7 @@ subroutine add_integrals_to_map(mask_ijkl)
 
   call wall_time(wall_1)
 
-  size_buffer = min(ao_num*ao_num*ao_num,8000000)
+  size_buffer = min(ao_num*ao_num,8000000)
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
       ao_num+ao_num*ao_num+ size_buffer*3)/(1024*1024), 'MB / core'
 
@@ -440,23 +448,79 @@ subroutine add_integrals_to_map(mask_ijkl)
   !$OMP END PARALLEL
   call map_merge(mo_integrals_map)
 
-  call wall_time(wall_2)
-  call cpu_time(cpu_2)
-  integer*8                      :: get_mo_map_size, mo_map_size
-  mo_map_size = get_mo_map_size()
-
   deallocate(list_ijkl)
 
 
 end
 
+subroutine add_integrals_to_map_cholesky
+  use bitmasks
+  implicit none
+
+  BEGIN_DOC
+  ! Adds integrals to the MO map using Cholesky vectors
+  END_DOC
+
+  integer :: i,j,k,l,m
+  integer :: size_buffer, n_integrals
+  size_buffer = min(mo_num*mo_num*mo_num,16000000)
+
+  double precision, allocatable :: Vtmp(:,:,:)
+  integer(key_kind)  , allocatable :: buffer_i(:)
+  real(integral_kind), allocatable :: buffer_value(:)
+
+  call set_multiple_levels_omp(.False.)
+
+  !$OMP PARALLEL DEFAULT(SHARED) &
+  !$OMP PRIVATE(i,j,k,l,n_integrals,buffer_value, buffer_i, Vtmp)
+  allocate (buffer_i(size_buffer), buffer_value(size_buffer))
+  allocate (Vtmp(mo_num,mo_num,mo_num))
+  n_integrals = 0
+
+  !$OMP DO SCHEDULE(dynamic)
+  do l=1,mo_num
+    call dgemm('T','N',mo_num*mo_num,mo_num,cholesky_mo_num,1.d0, &
+       cholesky_mo_transp, cholesky_mo_num, &
+       cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+       Vtmp, mo_num*mo_num)
+
+    do k=1,l
+      do j=1,mo_num
+        do i=1,j
+          if (dabs(Vtmp(i,j,k)) > mo_integrals_threshold) then
+            n_integrals = n_integrals + 1
+            buffer_value(n_integrals) = Vtmp(i,j,k)
+            !DIR$ FORCEINLINE
+            call mo_two_e_integrals_index(i,k,j,l,buffer_i(n_integrals))
+            if (n_integrals == size_buffer) then
+              call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+              n_integrals = 0
+            endif
+          endif
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO NOWAIT
+
+  if (n_integrals > 0) then
+    call map_append(mo_integrals_map, buffer_i, buffer_value, n_integrals)
+  endif
+  deallocate(buffer_i, buffer_value, Vtmp)
+  !$OMP BARRIER
+  !$OMP END PARALLEL
+
+  call map_sort(mo_integrals_map)
+  call map_unique(mo_integrals_map)
+
+end
 
 subroutine add_integrals_to_map_three_indices(mask_ijk)
   use bitmasks
   implicit none
 
   BEGIN_DOC
-  ! Adds integrals to tha MO map according to some bitmask
+  ! Adds integrals to the MO map according to some bitmask
   END_DOC
 
   integer(bit_kind), intent(in)  :: mask_ijk(N_int,3)
@@ -518,6 +582,9 @@ subroutine add_integrals_to_map_three_indices(mask_ijk)
     return
   endif
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
   print*, 'Providing the molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
@@ -793,6 +860,9 @@ subroutine add_integrals_to_map_no_exit_34(mask_ijkl)
   call bitstring_to_list( mask_ijkl(1,3), list_ijkl(1,3), n_k, N_int )
   call bitstring_to_list( mask_ijkl(1,4), list_ijkl(1,4), n_l, N_int )
 
+  if (ao_num > 1289) then
+    print *,  irp_here, ': Integer overflow in ao_num**3'
+  endif
   size_buffer = min(ao_num*ao_num*ao_num,16000000)
   print*, 'Providing the molecular integrals '
   print*, 'Buffers : ', 8.*(mo_num*(n_j)*(n_k+1) + mo_num+&
@@ -1288,18 +1358,46 @@ END_PROVIDER
   ! mo_two_e_integrals_jj_anti(i,j) = J_ij - K_ij
   END_DOC
 
-  integer                        :: i,j
+  integer                        :: i,j,k
   double precision               :: get_two_e_integral
 
-  PROVIDE mo_two_e_integrals_in_map
-  mo_two_e_integrals_jj = 0.d0
-  mo_two_e_integrals_jj_exchange = 0.d0
+
+  if (do_ao_cholesky) then
+    double precision, allocatable :: buffer(:,:)
+    allocate (buffer(cholesky_mo_num,mo_num))
+    do k=1,cholesky_mo_num
+      do i=1,mo_num
+        buffer(k,i) = cholesky_mo_transp(k,i,i)
+      enddo
+    enddo
+    call dgemm('T','N',mo_num,mo_num,cholesky_mo_num,1.d0, &
+      buffer, cholesky_mo_num, buffer, cholesky_mo_num, 0.d0, mo_two_e_integrals_jj, mo_num)
+    deallocate(buffer)
+
+    do j=1,mo_num
+      do i=1,mo_num
+          mo_two_e_integrals_jj_exchange(i,j) = 0.d0
+          do k=1,cholesky_mo_num
+            mo_two_e_integrals_jj_exchange(i,j) = mo_two_e_integrals_jj_exchange(i,j) + &
+                          cholesky_mo_transp(k,i,j)*cholesky_mo_transp(k,j,i)
+          enddo
+      enddo
+    enddo
+
+  else
+
+    do j=1,mo_num
+      do i=1,mo_num
+        mo_two_e_integrals_jj(i,j) = get_two_e_integral(i,j,i,j,mo_integrals_map)
+        mo_two_e_integrals_jj_exchange(i,j) = get_two_e_integral(i,j,j,i,mo_integrals_map)
+      enddo
+    enddo
+
+  endif
 
   do j=1,mo_num
     do i=1,mo_num
-      mo_two_e_integrals_jj(i,j) = get_two_e_integral(i,j,i,j,mo_integrals_map)
-      mo_two_e_integrals_jj_exchange(i,j) = get_two_e_integral(i,j,j,i,mo_integrals_map)
-      mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
+        mo_two_e_integrals_jj_anti(i,j) = mo_two_e_integrals_jj(i,j) - mo_two_e_integrals_jj_exchange(i,j)
     enddo
   enddo
 

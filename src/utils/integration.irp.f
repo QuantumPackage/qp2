@@ -56,7 +56,7 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
   !               * [ sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z ] exp (- p (z-P_center(3))^2 )
   !
-  ! WARNING ::: IF fact_k is too smal then: 
+  ! WARNING ::: IF fact_k is too smal then:
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
   END_DOC
@@ -86,7 +86,7 @@ subroutine give_explicit_poly_and_gaussian(P_new,P_center,p,fact_k,iorder,alpha,
   !DIR$ FORCEINLINE
   call gaussian_product(alpha,A_center,beta,B_center,fact_k,p,P_center)
   if (fact_k < thresh) then
-    ! IF fact_k is too smal then: 
+    ! IF fact_k is too smal then:
     ! returns a "s" function centered in zero
     ! with an inifinite exponent and a zero polynom coef
     P_center = 0.d0
@@ -133,7 +133,7 @@ subroutine give_explicit_poly_and_gaussian_v(P_new, ldp, P_center, p, fact_k, io
 
   BEGIN_DOC
   ! Transforms the product of
-  !          (x-x_A)^a(1) (x-x_B)^b(1) (x-x_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3) exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
+  !          (x-x_A)^a(1) (x-x_B)^b(1) (y-y_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3) exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
   ! into
   !        fact_k * [ sum (l_x = 0,i_order(1)) P_new(l_x,1) * (x-P_center(1))^l_x ] exp (- p (x-P_center(1))^2 )
   !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
@@ -418,7 +418,7 @@ subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
   xab = xa-xb
   ab = ab*p_inv
   k = ab*xab*xab
-  if (k > 40.d0) then
+  if (k > 400.d0) then
     k=0.d0
     return
   endif
@@ -427,6 +427,44 @@ subroutine gaussian_product_x(a,xa,b,xb,k,p,xp)
 end subroutine
 
 
+!-
+
+subroutine gaussian_product_x_v(a,xa,b,xb,k,p,xp,n_points)
+  implicit none
+  BEGIN_DOC
+  ! Gaussian product in 1D with multiple xa
+  ! e^{-a (x-x_A)^2} e^{-b (x-x_B)^2} = K_{ab}^x e^{-p (x-x_P)^2}
+  END_DOC
+
+  integer, intent(in) :: n_points
+  double precision  , intent(in) :: a,b      ! Exponents
+  double precision  , intent(in) :: xa(n_points),xb    ! Centers
+  double precision  , intent(out) :: p(n_points)       ! New exponent
+  double precision  , intent(out) :: xp(n_points) ! New center
+  double precision  , intent(out) :: k(n_points)       ! Constant
+
+  double precision               :: p_inv
+  integer :: ipoint
+
+  ASSERT (a>0.)
+  ASSERT (b>0.)
+
+  double precision               :: xab, ab
+
+  p = a+b
+  p_inv = 1.d0/(a+b)
+  ab = a*b*p_inv
+  do ipoint = 1, n_points
+    xab = xa(ipoint)-xb
+    k(ipoint) = ab*xab*xab
+    if (k(ipoint) > 40.d0) then
+      k(ipoint)=0.d0
+      cycle
+    endif
+    k(ipoint) = exp(-k(ipoint))
+    xp(ipoint) = (a*xa(ipoint)+b*xb)*p_inv
+  enddo
+end subroutine
 
 
 
@@ -444,32 +482,291 @@ subroutine multiply_poly(b,nb,c,nc,d,nd)
 
   integer                        :: ndtmp
   integer                        :: ib, ic, id, k
-  if(ior(nc,nb) >= 0) then ! True if nc>=0 and nb>=0
-    continue
-  else
-    return
-  endif
-  ndtmp = nb+nc
+  if(ior(nc,nb) < 0) return !False if nc>=0 and nb>=0
+
+  select case (nb)
+    case (0)
+      call multiply_poly_b0(b,c,nc,d,nd)
+      return
+    case (1)
+      call multiply_poly_b1(b,c,nc,d,nd)
+      return
+    case (2)
+      call multiply_poly_b2(b,c,nc,d,nd)
+      return
+  end select
+
+  select case (nc)
+    case (0)
+      call multiply_poly_c0(b,nb,c,d,nd)
+      return
+    case (1)
+      call multiply_poly_c1(b,nb,c,d,nd)
+      return
+    case (2)
+      call multiply_poly_c2(b,nb,c,d,nd)
+      return
+  end select
+
+  do ib=0,nb
+    do ic = 0,nc
+      d(ib+ic) = d(ib+ic) + c(ic) * b(ib)
+    enddo
+  enddo
+
+  do nd = nb+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_b0(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:0), c(0:nc)
+  double precision, intent(inout) :: d(0:nc)
+
+  integer                        :: ndtmp
+  integer                        :: ic, id, k
+  if(nc < 0) return !False if nc>=0
 
   do ic = 0,nc
     d(ic) = d(ic) + c(ic) * b(0)
   enddo
 
-  do ib=1,nb
-    d(ib) = d(ib) + c(0) * b(ib)
-    do ic = 1,nc
-      d(ib+ic) = d(ib+ic) + c(ic) * b(ib)
-    enddo
-  enddo
-
-  do nd = ndtmp,0,-1
-    if (d(nd) == 0.d0) then
-      cycle
-    endif
-    exit
+  do nd = nc,0,-1
+    if (d(nd) /= 0.d0) exit
   enddo
 
 end
+
+subroutine multiply_poly_b1(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:1), c(0:nc)
+  double precision, intent(inout) :: d(0:1+nc)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nc < 0) return !False if nc>=0
+
+
+  select case (nc)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      do ic = 1,nc
+        d(ic) = d(ic) + c(ic) * b(0) + c(ic-1) * b(1)
+      enddo
+      d(nc+1) = d(nc+1) + c(nc) * b(1)
+
+  end select
+
+  do nd = 1+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_b2(b,c,nc,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nc
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:2), c(0:nc)
+  double precision, intent(inout) :: d(0:2+nc)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nc < 0) return !False if nc>=0
+
+  select case (nc)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1)
+      d(2) = d(2) + c(0) * b(2)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1)
+      d(3) = d(3) + c(1) * b(2)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1) + c(1) * b(2)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ic = 2,nc
+        d(ic) = d(ic) + c(ic) * b(0) + c(ic-1) * b(1) + c(ic-2) * b(2)
+      enddo
+      d(nc+1) = d(nc+1) + c(nc) * b(1) + c(nc-1) * b(2)
+      d(nc+2) = d(nc+2) + c(nc) * b(2)
+
+  end select
+
+  do nd = 2+nc,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c0(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:0)
+  double precision, intent(inout) :: d(0:nb)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  do ib=0,nb
+      d(ib) = d(ib) + c(0) * b(ib)
+  enddo
+
+  do nd = nb,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c1(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:1)
+  double precision, intent(inout) :: d(0:nb+1)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      do ib=1,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb)
+
+  end select
+
+  do nd = nb+1,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+subroutine multiply_poly_c2(b,nb,c,d,nd)
+  implicit none
+  BEGIN_DOC
+  ! Multiply two polynomials
+  ! D(t) += B(t)*C(t)
+  END_DOC
+
+  integer, intent(in)            :: nb
+  integer, intent(out)           :: nd
+  double precision, intent(in)   :: b(0:nb), c(0:2)
+  double precision, intent(inout) :: d(0:nb+2)
+
+  integer                        :: ndtmp
+  integer                        :: ib, ic, id, k
+  if(nb < 0) return !False if nb>=0
+
+  select case (nb)
+    case (0)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(1) * b(0)
+      d(2) = d(2) + c(2) * b(0)
+
+    case (1)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(2) * b(1)
+
+    case (2)
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      d(2) = d(2) + c(0) * b(2) + c(1) * b(1) + c(2) * b(0)
+      d(3) = d(3) + c(1) * b(2) + c(2) * b(1)
+      d(4) = d(4) + c(2) * b(2)
+
+    case default
+      d(0) = d(0) + c(0) * b(0)
+      d(1) = d(1) + c(0) * b(1) + c(1) * b(0)
+      do ib=2,nb
+        d(ib) = d(ib) + c(0) * b(ib) + c(1) * b(ib-1) + c(2) * b(ib-2)
+      enddo
+      d(nb+1) = d(nb+1) + c(1) * b(nb) + c(2) * b(nb-1)
+      d(nb+2) = d(nb+2) + c(2) * b(nb)
+
+  end select
+
+  do nd = nb+2,0,-1
+    if (d(nd) /= 0.d0) exit
+  enddo
+
+end
+
+
+
 
 subroutine multiply_poly_v(b,nb,c,nc,d,nd,n_points)
   implicit none
@@ -506,7 +803,9 @@ subroutine multiply_poly_v(b,nb,c,nc,d,nd,n_points)
       enddo
     enddo
   enddo
+
 end
+
 
 subroutine add_poly(b,nb,c,nc,d,nd)
   implicit none
@@ -643,11 +942,11 @@ end subroutine recentered_poly2_v
 subroutine recentered_poly2_v0(P_new, lda, x_A, LD_xA, x_P, a, n_points)
 
   BEGIN_DOC
-  ! 
+  !
   ! Recenter two polynomials. Special case for b=(0,0,0)
-  ! 
+  !
   ! (x - A)^a (x - B)^0 = (x - P + P - A)^a  (x - Q + Q - B)^0
-  !                     = (x - P + P - A)^a 
+  !                     = (x - P + P - A)^a
   !
   END_DOC
 
@@ -1041,3 +1340,94 @@ double precision function rint1(n,rho)
   write(*,*)'pb in rint1 k too large!'
   stop 1
 end
+
+! ---
+
+double precision function V_phi(n, m)
+
+  BEGIN_DOC
+  ! Computes the angular $\phi$ part of the nuclear attraction integral:
+  !
+  ! $\int_{0}^{2 \pi} \cos(\phi)^n \sin(\phi)^m d\phi$.
+  END_DOC
+
+  implicit none
+  integer, intent(in) :: n, m
+
+  integer             :: i
+  double precision    :: prod
+
+  double precision    :: Wallis
+
+  prod = 1.d0
+  do i = 0, shiftr(n, 1)-1
+    prod = prod/ (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
+  enddo
+  V_phi = 4.d0 * prod * Wallis(m)
+
+end function V_phi
+
+! ---
+
+double precision function V_theta(n, m)
+
+  BEGIN_DOC
+  ! Computes the angular $\theta$ part of the nuclear attraction integral:
+  !
+  ! $\int_{0}^{\pi} \cos(\theta)^n \sin(\theta)^m d\theta$
+  END_DOC
+
+  implicit none
+  include 'utils/constants.include.F'
+  integer, intent(in) :: n, m
+
+  integer             :: i
+  double precision    :: prod
+
+  double precision    :: Wallis
+
+  V_theta = 0.d0
+  prod = 1.d0
+  do i = 0, shiftr(n, 1)-1
+    prod = prod / (1.d0 + dfloat(m+1)/dfloat(n-i-i-1))
+  enddo
+  V_theta = (prod + prod) * Wallis(m)
+
+end function V_theta
+
+! ---
+
+double precision function Wallis(n)
+
+  BEGIN_DOC
+  ! Wallis integral:
+  !
+  ! $\int_{0}^{\pi} \cos(\theta)^n d\theta$.
+  END_DOC
+
+  implicit none
+  include 'utils/constants.include.F'
+
+  integer, intent(in) :: n
+
+  integer             :: p
+
+  double precision    :: fact
+
+  if(iand(n, 1) .eq. 0) then
+
+    Wallis = fact(shiftr(n, 1))
+    Wallis = pi * fact(n) / (dble(ibset(0_8, n)) * (Wallis + Wallis) * Wallis)
+
+  else
+
+    p = shiftr(n, 1)
+    Wallis = fact(p)
+    Wallis = dble(ibset(0_8, p+p)) * Wallis * Wallis / fact(p+p+1)
+
+  endif
+
+end function Wallis
+
+! ---
+

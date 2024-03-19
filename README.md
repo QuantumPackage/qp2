@@ -1,3 +1,10 @@
+**Important**: The Intel ifx compiler is not able to produce correct
+executables for Quantum Package. Please use ifort as long as you can, and
+consider switching to gfortran in the long term.
+
+---
+
+
 # Quantum Package 2.2
 
 <!--- img src="https://raw.githubusercontent.com/QuantumPackage/qp2/master/data/qp2.png" width="250" --->

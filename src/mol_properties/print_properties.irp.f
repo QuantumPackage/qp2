@@ -13,7 +13,7 @@ subroutine print_dipole_moment
   implicit none
 
   BEGIN_DOC
-  ! To print the dipole moment ||<\Psi_i|µ|\Psi_i>|| and its x,y,z components
+  ! To print the dipole moment ||<\Psi_i|\mu|\Psi_i>|| and its x,y,z components
   END_DOC
 
   integer :: istate
@@ -33,7 +33,7 @@ subroutine print_dipole_moment
   print*,'# Dipoles:'
   print*,'=============================================='
   print*,' Dipole moments (au)'
-  print*,' State      X           Y           Z         ||µ||' 
+  print*,' State      X           Y           Z         ||MU||' 
 
   do istate = 1, N_states 
     write(*,'(I5,4(F12.6))') (istate-1), d_x(istate), d_y(istate), d_z(istate), d(istate)
@@ -42,7 +42,7 @@ subroutine print_dipole_moment
   ! Debye
   print*,''
   print*,' Dipole moments (D)'
-  print*,' State      X           Y           Z         ||µ||' 
+  print*,' State      X           Y           Z         ||MU||' 
 
   do istate = 1, N_states 
     write(*,'(I5,4(F12.6))') (istate-1), d_x(istate)*au_to_D, d_y(istate)*au_to_D, d_z(istate)*au_to_D, d(istate)*au_to_D
@@ -70,7 +70,7 @@ subroutine print_transition_dipole_moment
   implicit none
 
   BEGIN_DOC
-  ! To print the transition dipole moment ||<\Psi_i|µ|\Psi_j>|| and its components along x, y and z
+  ! To print the transition dipole moment ||<\Psi_i|\mu|\Psi_j>|| and its components along x, y and z
   END_DOC
 
   integer          :: istate,jstate, n_states_print
@@ -84,7 +84,7 @@ subroutine print_transition_dipole_moment
   print*,'# Transition dipoles:'
   print*,'=============================================='
   print*,' Transition dipole moments (au)'
-  write(*,'(A89)') '   #  Transition       X           Y           Z         ||µ||     Dip. str.   Osc. str.'
+  write(*,'(A89)') '   #  Transition       X           Y           Z         ||MU||     Dip. str.   Osc. str.'
  
   if (print_all_transitions) then
     n_states_print = N_states
@@ -106,7 +106,7 @@ subroutine print_transition_dipole_moment
 
   print*,''
   print*,' Transition dipole moments (D)'
-  write(*,'(A89)') '   #  Transition       X           Y           Z         ||µ||     Dip. str.   Osc. str.'
+  write(*,'(A89)') '   #  Transition       X           Y           Z         ||MU||     Dip. str.   Osc. str.'
   
   do jstate = 1, n_states_print !N_states
     do istate = jstate + 1, N_states

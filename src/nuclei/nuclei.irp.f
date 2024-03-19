@@ -206,7 +206,12 @@ BEGIN_PROVIDER [ double precision, nuclear_repulsion ]
      enddo
      nuclear_repulsion *= 0.5d0
      if(point_charges)then
-      nuclear_repulsion += pt_chrg_nuclei_interaction + pt_chrg_interaction
+      print*,'bear nuclear repulsion = ',nuclear_repulsion 
+      print*,'adding the interaction between the nuclein and the point charges'
+      print*,'to the usual nuclear repulsion '
+      nuclear_repulsion += pt_chrg_nuclei_interaction 
+      print*,'new nuclear repulsion =  ',nuclear_repulsion 
+      print*,'WARNING: we do not add the interaction between the point charges themselves'
      endif
    end if
 

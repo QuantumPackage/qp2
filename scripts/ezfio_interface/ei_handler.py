@@ -829,4 +829,8 @@ if __name__ == "__main__":
     #                   _|
 
     for (m, dict_ezfio_cfg) in l_dict_ezfio_cfg:
+        if dict_ezfio_cfg == {}:
+           print("Error: Empty EZFIO.cfg in ", arguments["--path_module"])
+           sys.exit(-1)
         code_generation(arguments, dict_ezfio_cfg, m)
+

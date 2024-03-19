@@ -1,10 +1,11 @@
-subroutine run_stochastic_cipsi
+subroutine run_stochastic_cipsi(Ev,PT2) 
   use selection_types
   implicit none
   BEGIN_DOC
 ! Selected Full Configuration Interaction with Stochastic selection and PT2.
   END_DOC
   integer                        :: i,j,k
+  double precision, intent(out)  :: Ev(N_states), PT2(N_states) 
   double precision, allocatable  :: zeros(:)
   integer                        :: to_select
   type(pt2_type)                 :: pt2_data, pt2_data_err
@@ -15,7 +16,6 @@ subroutine run_stochastic_cipsi
   double precision, external :: memory_of_double
   PROVIDE H_apply_buffer_allocated distributed_davidson mo_two_e_integrals_in_map
 
-  N_iter = 1
   threshold_generators = 1.d0
   SOFT_TOUCH threshold_generators
 
@@ -80,12 +80,14 @@ subroutine run_stochastic_cipsi
     to_select = max(N_states_diag, to_select)
 
 
+    Ev(1:N_states) = psi_energy_with_nucl_rep(1:N_states)
     call pt2_dealloc(pt2_data)
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
     call ZMQ_pt2(psi_energy_with_nucl_rep,pt2_data,pt2_data_err,relative_error,to_select) ! Stochastic PT2 and selection
 
+    PT2(1:N_states) = pt2_data % pt2(1:N_states)
     correlation_energy_ratio = (psi_energy_with_nucl_rep(1) - hf_energy_ref)  /     &
                     (psi_energy_with_nucl_rep(1) + pt2_data % rpt2(1) - hf_energy_ref)
     correlation_energy_ratio = min(1.d0,correlation_energy_ratio)
@@ -96,10 +98,10 @@ subroutine run_stochastic_cipsi
 
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
 
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
+    call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
-    N_iter += 1
+    call write_cipsi_json(pt2_data,pt2_data_err)
 
     if (qp_stop()) exit
 
@@ -135,9 +137,10 @@ subroutine run_stochastic_cipsi
     call save_energy(psi_energy_with_nucl_rep, pt2_data % pt2)
     call print_summary(psi_energy_with_nucl_rep, &
        pt2_data , pt2_data_err, N_det, N_configuration, N_states, psi_s2)
-    call save_iterations(psi_energy_with_nucl_rep(1:N_states),pt2_data % rpt2,N_det)
+    call increment_n_iter(psi_energy_with_nucl_rep, pt2_data)
     call print_extrapolated_energy()
     call print_mol_properties()
+    call write_cipsi_json(pt2_data,pt2_data_err)
   endif
   call pt2_dealloc(pt2_data)
   call pt2_dealloc(pt2_data_err)

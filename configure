@@ -9,6 +9,8 @@ echo "QP_ROOT="$QP_ROOT
 unset CC
 unset CCXX
 
+TREXIO_VERSION=2.3.2
+
 # Force GCC instead of ICC for dependencies
 export CC=gcc
 
@@ -17,7 +19,11 @@ git submodule init
 git submodule update
 
 # Update ARM or x86 dependencies
-ARCHITECTURE=$(uname -m)
+SYSTEM=$(uname -s)
+if [[ $SYSTEM = "Linux" ]] ; then
+  SYSTEM=""
+fi
+ARCHITECTURE=$(uname -m)$SYSTEM
 cd ${QP_ROOT}/external/qp2-dependencies
 git checkout master
 git pull
@@ -189,7 +195,7 @@ if [[ "${PACKAGES}.x" != ".x" ]] ; then
 fi
 
 if [[ ${PACKAGES} = all ]] ; then
-        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats"
+        PACKAGES="zlib ninja zeromq f77zmq gmp ocaml docopt resultsFile bats trexio"
 fi
 
 
@@ -203,6 +209,57 @@ for PACKAGE in ${PACKAGES} ; do
               mv ninja "\${QP_ROOT}"/bin/
 EOF
 
+    elif [[ ${PACKAGE} = trexio-nohdf5 ]] ; then
+
+            VERSION=$TREXIO_VERSION
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
+              cd trexio-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --without-hdf5 CFLAGS='-g'
+              make -j 8 && make -j 8 check && make -j 8 install
+              tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
+              mv ninja "\${QP_ROOT}"/bin/
+EOF
+    elif [[ ${PACKAGE} = trexio ]] ; then
+
+            VERSION=$TREXIO_VERSION
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/trexio/releases/download/v${VERSION}/trexio-${VERSION}.tar.gz
+              rm -rf trexio-${VERSION}
+              tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
+              cd trexio-${VERSION}
+              ./configure --prefix=\${QP_ROOT} CFLAGS="-g"
+              make -j 8 && make -j 8 check && make -j 8 install
+EOF
+    elif [[ ${PACKAGE} = qmckl ]] ; then
+
+            VERSION=0.5.4
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc CFLAGS='-g'
+              make && make -j 4 check && make install
+EOF
+    elif [[ ${PACKAGE} = qmckl-intel ]] ; then
+
+            VERSION=0.5.4
+            execute << EOF
+              cd "\${QP_ROOT}"/external
+              wget https://github.com/TREX-CoE/qmckl/releases/download/v${VERSION}/qmckl-${VERSION}.tar.gz
+              rm -rf qmckl-${VERSION}
+              tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
+              cd qmckl-${VERSION}
+              ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc --with-icc --with-ifort CFLAGS='-g'
+              make && make -j 4 check && make install
+EOF
+ 
 
     elif [[ ${PACKAGE} = gmp ]] ; then
 
@@ -222,6 +279,7 @@ EOF
               cd "\${QP_ROOT}"/external
               tar --gunzip --extract --file qp2-dependencies/zeromq-4.2.5.tar.gz
               cd zeromq-*
+              [[ "${SYSTEM}" = "Darwin" ]] && ./autogen.sh
               ./configure --prefix="\$QP_ROOT" --without-libsodium --enable-libunwind=no
               make -j 8
               make install
@@ -337,6 +395,18 @@ if [[ ${ZEROMQ} = $(not_found) ]] ; then
         error "ZeroMQ (zeromq) is not installed."
         fail
 fi
+
+TREXIO=$(find_lib -ltrexio)
+if [[ ${TREXIO} = $(not_found) ]] ; then
+        error "TREXIO (trexio | trexio-nohdf5) is not installed. If you don't have HDF5, use trexio-nohdf5"
+        fail
+fi
+
+#QMCKL=$(find_lib -lqmckl)
+#if [[ ${QMCKL} = $(not_found) ]] ; then
+#        error "QMCkl (qmckl | qmckl-intel) is not installed."
+#        fail
+#fi
 
 F77ZMQ=$(find_lib -lzmq -lf77zmq -lpthread)
 if [[ ${F77ZMQ} = $(not_found) ]] ; then

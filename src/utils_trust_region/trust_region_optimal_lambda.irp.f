@@ -153,9 +153,9 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Research the optimal lambda to constrain the step size in the trust region
-  END_DOC
+  !END_DOC
 
   implicit none
   
@@ -195,18 +195,17 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
   print*,''
   print*,'---Trust_newton---'
-  print*,''
 
   call wall_time(t1)
 
   ! version_lambda_search
   ! 1 -> ||x||^2 - delta^2 = 0,
   ! 2 -> 1/||x||^2 - 1/delta^2 = 0 (better)
-  if (version_lambda_search == 1) then
-    print*, 'Research of the optimal lambda by solving ||x||^2 - delta^2 = 0'
-  else
-    print*, 'Research of the optimal lambda by solving 1/||x||^2 - 1/delta^2 = 0'
-  endif
+  !if (version_lambda_search == 1) then
+  !  print*, 'Research of the optimal lambda by solving ||x||^2 - delta^2 = 0'
+  !else
+  !  print*, 'Research of the optimal lambda by solving 1/||x||^2 - 1/delta^2 = 0'
+  !endif
   ! Version 2 is normally better
 
 
@@ -216,21 +215,21 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
 ! Initialization
   epsilon = 1d-4
-  lambda =MAX(0d0, -e_val(1))
+  lambda = max(0d0, -e_val(1))
   
   ! Pre research of lambda to start near the optimal lambda
   ! by adding a constant epsilon and changing the constant to
   ! have ||x(lambda + epsilon)|| ~ delta, before setting
   ! lambda = lambda + epsilon 
-  print*, 'Pre research of lambda:'
-  print*,'Initial lambda =', lambda
+  !print*, 'Pre research of lambda:'
+  !print*,'Initial lambda =', lambda
   f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda + epsilon)
-  print*,'||x(lambda)||=', dsqrt(f_N),'delta=',delta 
+  !print*,'||x(lambda)||=', dsqrt(f_N),'delta=',delta 
   i = 1
   
   ! To increase lambda
   if (f_N > delta**2) then
-    print*,'Increasing lambda...'
+    !print*,'Increasing lambda...'
     do while (f_N > delta**2 .and. i <= nb_it_max_pre_search)
 
       ! Update the previous norm
@@ -240,7 +239,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       ! New norm
       f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda + epsilon)
 
-      print*, 'lambda', lambda + epsilon, '||x||', dsqrt(f_N), 'delta', delta
+      !print*, 'lambda', lambda + epsilon, '||x||', dsqrt(f_N), 'delta', delta
       
       ! Security
       if (prev_f_N < f_N) then
@@ -254,7 +253,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
   
   ! To reduce lambda
   else
-     print*,'Reducing lambda...'
+     !print*,'Reducing lambda...'
      do while (f_N < delta**2 .and. i <= nb_it_max_pre_search)
 
        ! Update the previous norm
@@ -264,7 +263,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
        ! New norm
        f_N = f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda + epsilon)
 
-       print*, 'lambda', lambda + epsilon, '||x||', dsqrt(f_N), 'delta', delta
+       !print*, 'lambda', lambda + epsilon, '||x||', dsqrt(f_N), 'delta', delta
 
        ! Security
        if (prev_f_N > f_N) then
@@ -277,27 +276,25 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
     enddo
   endif
 
-  print*,'End of the pre research of lambda'
+  !print*,'End of the pre research of lambda'
   
   ! New value of lambda
   lambda = lambda + epsilon
 
-  print*, 'e_val(1):', e_val(1)
-  print*, 'Staring point, lambda =', lambda
+  !print*, 'e_val(1):', e_val(1)
+  !print*, 'Staring point, lambda =', lambda
   
   ! thresh_cc, threshold for the research of the optimal lambda
   ! Leaves the loop when ABS(1d0-||x||^2/delta^2) > thresh_cc
   ! thresh_rho_2, threshold to cancel the step in the research
   ! of the optimal lambda, the step is cancelled if rho_2 < thresh_rho_2
-  print*,'Threshold for the CC:', thresh_cc
-  print*,'Threshold for rho_2:', thresh_rho_2  
-
-  print*, 'w_1^T . g =', tmp_wtg(1)
+  
+  !print*,'Threshold for the CC:', thresh_cc
+  !print*,'Threshold for rho_2:', thresh_rho_2  
+  !print*, 'w_1^T . g =', tmp_wtg(1)
 
   ! Debug
-  !if (debug) then
-  !    print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
-  !endif
+  !print*, 'Iteration    rho_2    lambda    delta  ||x||  |1-(||x||^2/delta^2)|'
 
   ! Initialization  
   i = 1
@@ -324,9 +321,9 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
     ! Newton's method
     do while (i <= 100 .and. DABS(1d0-f_N/delta**2) > thresh_cc)
-      print*,'--------------------------------------'
-      print*,'Research of lambda, iteration:', i
-      print*,'--------------------------------------'
+      !print*,'--------------------------------------'
+      !print*,'Research of lambda, iteration:', i
+      !print*,'--------------------------------------'
 
       ! Update of f_N, f_R and the derivatives
       prev_f_N = f_N 
@@ -339,7 +336,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
         d_1 = d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! first derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
         d_2 = d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta) ! second derivative of (1/||x(lambda)||^2 - 1/delta^2)^2
       endif
-      write(*,'(a,E12.5,a,E12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2  
+      !write(*,'(a,ES12.5,a,ES12.5)') ' 1st and 2nd derivative: ', d_1,', ', d_2  
 
       ! Newton's step
       y = -(1d0/DABS(d_2))*d_1
@@ -348,7 +345,7 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       if (DABS(y) > alpha) then
         y = alpha * (y/DABS(y)) ! preservation of the sign of y
       endif
-      write(*,'(a,E12.5)') ' Step length: ', y
+      !write(*,'(a,ES12.5)') ' Step length: ', y
 
       ! Predicted value of (||x(lambda)||^2 - delta^2)^2, Taylor series
       model = prev_f_R + d_1 * y + 0.5d0 * d_2 * y**2    
@@ -356,8 +353,8 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       ! Updates lambda
       prev_lambda = lambda
       lambda = prev_lambda + y
-      print*,'prev lambda:', prev_lambda
-      print*,'new lambda:', lambda
+      !print*,'prev lambda:', prev_lambda
+      !print*,'new lambda:', lambda
 
       ! Checks if lambda is in (-h_1, \infty)
       if (lambda > MAX(0d0, -e_val(1))) then
@@ -371,18 +368,18 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
           f_R = (1d0/f_N - 1d0/delta**2)**2  ! new value of (1/||x(lambda)||^2 -1/delta^2)^2
         endif
         
-        if (version_lambda_search == 1) then
-          print*,'Previous value of (||x(lambda)||^2 - delta^2)^2:', prev_f_R
-          print*,'Actual value of (||x(lambda)||^2 - delta^2)^2:', f_R
-          print*,'Predicted value of (||x(lambda)||^2 - delta^2)^2:', model
-        else
-          print*,'Previous value of (1/||x(lambda)||^2 - 1/delta^2)^2:', prev_f_R
-          print*,'Actual value of (1/||x(lambda)||^2 - 1/delta^2)^2:', f_R
-          print*,'Predicted value of (1/||x(lambda)||^2 - 1/delta^2)^2:', model
-        endif
+        !if (version_lambda_search == 1) then
+        !  print*,'Previous value of (||x(lambda)||^2 - delta^2)^2:', prev_f_R
+        !  print*,'Actual value of (||x(lambda)||^2 - delta^2)^2:', f_R
+        !  print*,'Predicted value of (||x(lambda)||^2 - delta^2)^2:', model
+        !else
+        !  print*,'Previous value of (1/||x(lambda)||^2 - 1/delta^2)^2:', prev_f_R
+        !  print*,'Actual value of (1/||x(lambda)||^2 - 1/delta^2)^2:', f_R
+        !  print*,'Predicted value of (1/||x(lambda)||^2 - 1/delta^2)^2:', model
+        !endif
 
-        print*,'previous - actual:', prev_f_R - f_R
-        print*,'previous - model:', prev_f_R - model
+        !print*,'previous - actual:', prev_f_R - f_R
+        !print*,'previous - model:', prev_f_R - model
 
         ! Check the gain
         if (DABS(prev_f_R - model) < thresh_model_2) then
@@ -401,10 +398,10 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
 
         ! Computes rho_2
         rho_2 = (prev_f_R - f_R)/(prev_f_R - model)
-        print*,'rho_2:', rho_2               
+        !print*,'rho_2:', rho_2               
       else
         rho_2 = 0d0 ! in order to reduce the size of the trust region, alpha, until lambda is in (-h_1, \infty)
-        print*,'lambda < -e_val(1) ===> rho_2 = 0'
+        !print*,'lambda < -e_val(1) ===> rho_2 = 0'
       endif
 
       ! Evolution of the trust length, alpha
@@ -417,20 +414,20 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
       else 
         alpha = 0.25d0 * alpha
       endif
-      write(*,'(a,E12.5)') ' New trust length alpha: ', alpha
+      !write(*,'(a,ES12.5)') ' New trust length alpha: ', alpha
 
       ! cancellaion of the step if rho < 0.1
       if (rho_2 < thresh_rho_2) then !0.1d0) then
         lambda = prev_lambda
         f_N = prev_f_N
-        print*,'Rho_2 <', thresh_rho_2,', cancellation of the step: lambda = prev_lambda'
+        !print*,'Rho_2 <', thresh_rho_2,', cancellation of the step: lambda = prev_lambda'
       endif
 
-      print*,''
-      print*,'lambda, ||x||, delta:'
-      print*, lambda, dsqrt(f_N), delta
-      print*,'CC:', DABS(1d0 - f_N/delta**2)
-      print*,''
+      !print*,''
+      !print*,'lambda, ||x||, delta:'
+      !print*, lambda, dsqrt(f_N), delta
+      !print*,'CC:', DABS(1d0 - f_N/delta**2)
+      !print*,''
       
       i = i + 1
     enddo
@@ -445,20 +442,19 @@ subroutine trust_region_optimal_lambda(n,e_val,tmp_wtg,delta,lambda)
     print*,''
   endif
 
-  print*,'Number of iterations :', i
-  print*,'Value of lambda :', lambda
-  print*,'Error on the trust region (1d0-f_N/delta**2) (Convergence criterion) :', 1d0-f_N/delta**2
-  print*,'Error on the trust region (||x||^2 - delta^2)^2) :', (f_N - delta**2)**2
-  print*,'Error on the trust region (1/||x||^2 - 1/delta^2)^2)', (1d0/f_N - 1d0/delta**2)**2
+  print*,'Number of iterations:', i
+  print*,'Value of lambda:', lambda
+  !print*,'Error on the trust region (1d0-f_N/delta**2) (Convergence criterion) :', 1d0-f_N/delta**2
+  print*,'Convergence criterion:', 1d0-f_N/delta**2
+  !print*,'Error on the trust region (||x||^2 - delta^2)^2):', (f_N - delta**2)**2
+  !print*,'Error on the trust region (1/||x||^2 - 1/delta^2)^2)', (1d0/f_N - 1d0/delta**2)**2
 
   ! Time
   call wall_time(t2)
   t3 = t2 - t1
   print*,'Time in trust_newton:', t3
 
-  print*,'' 
   print*,'---End trust_newton---'
-  print*,''
 
 end subroutine
 
@@ -508,9 +504,9 @@ function d1_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
-  END_DOC
+  !END_DOC
 
   implicit none
 
@@ -644,9 +640,9 @@ function d2_norm_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2
-  END_DOC
+  !END_DOC
   
   implicit none
 
@@ -792,9 +788,9 @@ function f_norm_trust_region_omp(n,e_val,tmp_wtg,lambda)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute ||x(lambda)||^2
-  END_DOC
+  !END_DOC
   
   implicit none
 
@@ -903,9 +899,9 @@ function d1_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the first derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
-  END_DOC
+  !END_DOC
   
   implicit none
 
@@ -1000,9 +996,9 @@ function d2_norm_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the second derivative with respect to lambda of (||x(lambda)||^2 - Delta^2)^2 
-  END_DOC
+  !END_DOC
 
   implicit none
 
@@ -1102,9 +1098,9 @@ function f_norm_trust_region(n,e_val,tmp_wtg,lambda)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute ||x(lambda)||^2
-  END_DOC
+  !END_DOC
   
   implicit none
 
@@ -1184,9 +1180,9 @@ function d1_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the first derivative of (1/||x||^2 - 1/Delta^2)^2
-  END_DOC
+  !END_DOC
 
   implicit none
 
@@ -1340,9 +1336,9 @@ function d2_norm_inverse_trust_region_omp(n,e_val,tmp_wtg,lambda,delta)
   use omp_lib
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the second derivative of (1/||x||^2 - 1/Delta^2)^2
-  END_DOC
+  !END_DOC
 
   implicit none
 
@@ -1498,9 +1494,9 @@ function d1_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the first derivative of (1/||x||^2 - 1/Delta^2)^2
-  END_DOC
+  !END_DOC
 
   implicit none
 
@@ -1592,9 +1588,9 @@ function d2_norm_inverse_trust_region(n,e_val,w,v_grad,lambda,delta)
 
   include 'pi.h'
 
-  BEGIN_DOC
+  !BEGIN_DOC
   ! Compute the second derivative of (1/||x||^2 - 1/Delta^2)^2
-  END_DOC
+  !END_DOC
 
   implicit none
 

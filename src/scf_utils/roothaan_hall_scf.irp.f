@@ -12,6 +12,7 @@ END_DOC
 
   integer                        :: iteration_SCF,dim_DIIS,index_dim_DIIS
 
+  logical                        :: converged
   integer                        :: i,j
   logical, external              :: qp_stop
   double precision, allocatable :: mo_coef_save(:,:)
@@ -50,10 +51,8 @@ END_DOC
 !
   PROVIDE FPS_SPF_matrix_AO Fock_matrix_AO 
 
-  do while ( &
-    ( (max_error_DIIS > threshold_DIIS_nonzero) .or. &
-      (dabs(Delta_energy_SCF) > thresh_SCF) &
-    ) .and. (iteration_SCF < n_it_SCF_max) )
+  converged = .False.
+  do while ( .not.converged .and. (iteration_SCF < n_it_SCF_max) )
 
 ! Increment cycle number
 
@@ -144,17 +143,49 @@ END_DOC
     SOFT_TOUCH level_shift
     energy_SCF_previous = energy_SCF
 
+    converged = ( (max_error_DIIS <= threshold_DIIS_nonzero) .and. &
+                  (dabs(Delta_energy_SCF) <= thresh_SCF) )
+
 !   Print results at the end of each iteration
 
     write(6,'(I4, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, F16.10, 1X, I3)')  &
       iteration_SCF, energy_SCF, Delta_energy_SCF, max_error_DIIS, level_shift, dim_DIIS
 
+!   Write data in JSON file
+
+    call lock_io
+    if (iteration_SCF == 1) then
+      write(json_unit, json_dict_uopen_fmt)
+    else
+      write(json_unit, json_dict_close_uopen_fmt)
+    endif
+    write(json_unit, json_int_fmt) 'iteration', iteration_SCF
+    write(json_unit, json_real_fmt) 'energy', energy_SCF
+    write(json_unit, json_real_fmt) 'delta_energy_SCF', Delta_energy_SCF
+    write(json_unit, json_real_fmt) 'max_error_DIIS', max_error_DIIS
+    write(json_unit, json_real_fmt) 'level_shift', level_shift
+    write(json_unit, json_int_fmt) 'dim_DIIS', dim_DIIS
+    call unlock_io
+
     if (Delta_energy_SCF < 0.d0) then
       call save_mos
+      write(json_unit, json_true_fmt) 'saved'
+    else
+      write(json_unit, json_false_fmt) 'saved'
     endif
+
+    call lock_io
+    if (converged) then
+      write(json_unit, json_true_fmtx) 'converged'
+    else
+      write(json_unit, json_false_fmtx) 'converged'
+    endif
+    call unlock_io
+
     if (qp_stop()) exit
 
   enddo
+  write(json_unit, json_dict_close_fmtx)
 
  if (iteration_SCF < n_it_SCF_max) then
    mo_label = 'Canonical'
@@ -166,6 +197,11 @@ END_DOC
   write(6,'(A4, 1X, A16, 1X, A16, 1X, A16, 1X, A16)')  &
     '====','================','================','================','================'
   write(6,*)
+  if (converged) then
+    write(6,*) 'SCF converged'
+    call sleep(1)   ! When too fast, the MOs aren't saved.
+  endif
+
 
   if(.not.frozen_orb_scf)then
    call mo_as_eigvectors_of_mo_matrix(Fock_matrix_mo,size(Fock_matrix_mo,1), &

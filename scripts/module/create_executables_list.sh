@@ -11,7 +11,11 @@ fi
 
 cd ${QP_ROOT}/data
 rm -f executables
+if [[ "$(uname -s)" = "Darwin" ]] ; then
+EXES=$(find -L ${QP_ROOT}/src -maxdepth 2 -depth -perm +111 -type f | grep -e "${QP_ROOT}/src/[^/]*/[^/]*$" |sort ) 
+else
 EXES=$(find -L ${QP_ROOT}/src -maxdepth 2 -depth -executable -type f | grep -e "${QP_ROOT}/src/[^/]*/[^/]*$" |sort ) 
+fi
 
 for EXE in $EXES
 do
