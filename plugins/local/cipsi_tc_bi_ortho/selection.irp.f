@@ -785,6 +785,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 
       call apply_particles(mask, s1, p1, s2, p2, det, ok, N_int)
 
+      if (do_ormas) then
+        logical, external :: det_allowed_ormas
+        if (.not.det_allowed_ormas(det)) cycle
+      endif
+
       if(do_only_cas) then
         if( number_of_particles(det) > 0 ) cycle
         if( number_of_holes(det) > 0 ) cycle
