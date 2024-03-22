@@ -46,6 +46,7 @@ The following people have contributed to this project (by alphabetical order):
 * Nicolas Renon
 * Lorenzo Tenti
 * Julien Toulouse
+* Diata Traoré
 * Mikaël Véril
 
 
