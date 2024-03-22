@@ -22,6 +22,8 @@ we will go through a series of examples that allow you to do the following thing
  IV)  print out the one- and two-electron rdms, 
  V)   obtain the AOs and MOs on the DFT grid, together with the density,
 
+How the tutorial will be done
+-----------------------------
 This tuto is as follows: 
  i)  you READ THIS FILE UNTIL THE END in order to get the big picture and vocabulary, 
  ii) you go to the directory qp2/plugins/tuto_plugins/ and you will find detailed tuto there for each of the 5 examples. 
@@ -32,7 +34,7 @@ The first thing to do is to be in the QPSH mode: you execute the qp2/bin/qpsh sc
 the environement variables and allows for the completion of command lines in bash (that is an AMAZING feature :) 
 
 Then, you need to known where you want to create your plugin, and what is the name of the plugin. 
-!!!! WARINING: The plugins are NECESSARILY located in qp2/plugins/ !!!!
+!!!! WARNING: The plugins are NECESSARILY located in qp2/plugins/ !!!!
 Ex: If you want to create a plugin named "my_fancy_plugin" in the directory plugins/plugins_test/, 
 this goes with the command 
 qp plugins create -n my_fancy_plugin -r plugins_test/
