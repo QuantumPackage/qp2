@@ -960,7 +960,7 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
 !          endif
           e_pert(istate) = 0.25 * val / delta_E
 !          e_pert(istate) = 0.5d0 * (tmp - delta_E)
-          if(dsqrt(dabs(tmp)).gt.1.d-4.and.dabs(alpha_h_psi).gt.1.d-4)then
+          if(dsqrt(tmp).gt.1.d-4.and.dabs(psi_h_alpha).gt.1.d-4)then
            coef(istate)   = e_pert(istate) / psi_h_alpha
           else
            coef(istate)   = alpha_h_psi / delta_E
