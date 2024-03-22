@@ -3,6 +3,9 @@ subroutine ZMQ_selection(N_in, pt2_data)
   use selection_types
 
   implicit none
+  BEGIN_DOC
+! Performs the determinant selection using ZeroMQ
+  END_DOC
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket , zmq_socket_pull
   integer, intent(in)            :: N_in

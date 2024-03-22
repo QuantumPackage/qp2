@@ -117,6 +117,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   use selection_types
 
   implicit none
+  BEGIN_DOC
+! Computes the PT2 energy using ZMQ
+  END_DOC
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in

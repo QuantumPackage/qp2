@@ -20,5 +20,5 @@ Then, to reference for "myref" just type :ref:`myref`
   or use `IRPF90`_ and define
   _IRPF90: http://irpf90.ups-tlse.fr
   somewhere
-* References of published results with QP should be added into docs/source/research.bib in bibtex
+* References of published results with QP should be added into docs/source/references.bib in bibtex
   format
