@@ -166,6 +166,10 @@
 
    if(frozen_orb_scf)then
      integer                        :: iorb,jorb
+     !       active|core|active
+     !active |     | 0  |      
+     !core   |  0  |    |   0
+     !active |     | 0  |       
      do i = 1, n_core_orb
       iorb = list_core(i)
       do j = 1, n_act_orb
