@@ -123,6 +123,7 @@ END_PROVIDER
         endif
 
      enddo
+
      if (N_states_diag > N_states_diag_save) then
        N_states_diag = N_states_diag_save
        TOUCH N_states_diag
@@ -133,24 +134,95 @@ END_PROVIDER
      print *,  'Diagonalization of H using Lapack'
      allocate (eigenvectors(size(H_matrix_all_dets,1),N_det))
      allocate (eigenvalues(N_det))
+
      if (s2_eig) then
+
        double precision, parameter :: alpha = 0.1d0
        allocate (H_prime(N_det,N_det) )
+
        H_prime(1:N_det,1:N_det) = H_matrix_all_dets(1:N_det,1:N_det) +  &
          alpha * S2_matrix_all_dets(1:N_det,1:N_det)
+
        do j=1,N_det
          H_prime(j,j) = H_prime(j,j) - alpha*expected_s2
        enddo
+
        call lapack_diag(eigenvalues,eigenvectors,H_prime,size(H_prime,1),N_det)
        call nullify_small_elements(N_det,N_det,eigenvectors,size(eigenvectors,1),1.d-12)
+
        CI_electronic_energy(:) = 0.d0
        i_state = 0
+
        allocate (s2_eigvalues(N_det))
        allocate(index_good_state_array(N_det),good_state_array(N_det))
+
        good_state_array = .False.
        call u_0_S2_u_0(s2_eigvalues,eigenvectors,N_det,psi_det,N_int,&
          N_det,size(eigenvectors,1))
-       if (only_expected_s2) then
+
+       if (state_following) then
+         if (.not. only_expected_s2) then
+           print*,''
+           print*,'!!! State following only available with only_expected_s2 = .True. !!!'
+           STOP
+         endif
+         if (N_det < N_states) then
+           print*,''
+           print*,'!!! State following requires at least N_states determinants to be activated !!!'
+           STOP
+         endif
+       endif
+
+       if (state_following .and. only_expected_s2) then
+
+         integer :: state(N_states), idx,l
+         double precision :: overlp(N_det), omax
+         logical :: ok(N_det), used
+
+         i_state = 0
+         state = 0
+         do l = 1, N_states
+
+           ! Overlap wrt each state
+           overlp = 0d0
+           do k = 1, N_det
+             do i = 1, N_det
+               overlp(k) = overlp(k) + psi_coef(i,l) * eigenvectors(i,k)
+             enddo
+           enddo
+
+           ! Idx of the state with the maximum overlap not already "used"
+           omax = 0d0
+           idx = 0
+           do k = 1, N_det
+
+             ! Already used ?
+             used = .False.
+             do i = 1, N_states
+               if (state(i) == k) then
+                 used = .True.
+               endif
+             enddo
+
+             ! Maximum overlap
+             if (dabs(overlp(k)) > omax .and. .not. used) then
+               if (dabs(s2_eigvalues(k)-expected_s2) > 0.5d0) cycle
+               omax = dabs(overlp(k))
+               idx = k
+             endif
+           enddo
+
+           state(l) = idx
+           i_state +=1
+         enddo
+
+         do i = 1, i_state
+           index_good_state_array(i) = state(i)
+           good_state_array(i) = .True.
+         enddo
+
+       else if (only_expected_s2) then
+
          do j=1,N_det
            ! Select at least n_states states with S^2 values closed to "expected_s2"
            if(dabs(s2_eigvalues(j)-expected_s2).le.0.5d0)then
@@ -158,17 +230,23 @@ END_PROVIDER
              index_good_state_array(i_state) = j
              good_state_array(j) = .True.
            endif
+
            if(i_state.eq.N_states) then
              exit
            endif
          enddo
+
        else
+
          do j=1,N_det
            index_good_state_array(j) = j
            good_state_array(j) = .True.
          enddo
+
        endif
+
        if(i_state .ne.0)then
+
          ! Fill the first "i_state" states that have a correct S^2 value
          do j = 1, i_state
            do i=1,N_det
@@ -177,6 +255,7 @@ END_PROVIDER
            CI_electronic_energy(j) = eigenvalues(index_good_state_array(j))
            CI_s2(j) = s2_eigvalues(index_good_state_array(j))
          enddo
+
          i_other_state = 0
          do j = 1, N_det
            if(good_state_array(j))cycle
@@ -201,6 +280,7 @@ END_PROVIDER
          print*,'  as the CI_eigenvectors'
          print*,'  You should consider more states and maybe ask for s2_eig to be .True. or just enlarge the CI space'
          print*,''
+
          do j=1,min(N_states_diag,N_det)
            do i=1,N_det
              CI_eigenvectors(i,j) = eigenvectors(i,j)
@@ -209,14 +289,18 @@ END_PROVIDER
            CI_s2(j) = s2_eigvalues(j)
          enddo
        endif
+
        deallocate(index_good_state_array,good_state_array)
        deallocate(s2_eigvalues)
+
      else
+
        call lapack_diag(eigenvalues,eigenvectors,                    &
            H_matrix_all_dets,size(H_matrix_all_dets,1),N_det)
        CI_electronic_energy(:) = 0.d0
        call u_0_S2_u_0(CI_s2,eigenvectors,N_det,psi_det,N_int,       &
            min(N_det,N_states_diag),size(eigenvectors,1))
+
        ! Select the "N_states_diag" states of lowest energy
        do j=1,min(N_det,N_states_diag)
          do i=1,N_det
@@ -224,7 +308,9 @@ END_PROVIDER
          enddo
          CI_electronic_energy(j) = eigenvalues(j)
        enddo
+
      endif
+
      do k=1,N_states_diag
        CI_electronic_energy(k) = 0.d0
        do j=1,N_det
@@ -235,6 +321,7 @@ END_PROVIDER
          enddo
        enddo
      enddo
+
      deallocate(eigenvectors,eigenvalues)
    endif
 
