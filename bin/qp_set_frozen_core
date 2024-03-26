@@ -83,6 +83,7 @@ def main(arguments):
                 elif charge <= 118: n_frozen += 43
 
         elif arguments["--small"]:
+            for charge in ezfio.nuclei_nucl_charge:
                 if   charge <=   4: pass
                 elif charge <=  18: n_frozen += 1
                 elif charge <=  36: n_frozen += 5
