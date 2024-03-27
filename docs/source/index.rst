@@ -39,9 +39,10 @@
    programmers_guide/programming
    programmers_guide/ezfio
    programmers_guide/plugins
+   programmers_guide/plugins_tuto_intro
+   programmers_guide/plugins_tuto_I
    programmers_guide/new_ks
    programmers_guide/index
-   programmers_guide/plugins
 
 
 .. toctree::
@@ -52,5 +53,6 @@
    appendix/benchmarks
    appendix/license
    appendix/contributors
+   appendix/references
 
 
