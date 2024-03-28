@@ -33,8 +33,10 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1
-  double precision, allocatable :: b_mat(:,:,:,:), c_mat(:,:,:)
+  double precision, allocatable :: c_mat(:,:,:)
+  logical,          external    :: ao_two_e_integral_zero
   double precision, external    :: get_ao_two_e_integral
+  double precision, external    :: ao_two_e_integral
 
   PROVIDe tc_integ_type
   PROVIDE env_type
@@ -194,9 +196,9 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
                   ao_i_r  = aos_in_r_array_transp(ipoint,i)
                   ao_k_r  = aos_in_r_array_transp(ipoint,k)
                   ao_two_e_tc_tot(j,l,k,i) = ao_two_e_tc_tot(j,l,k,i) &
-                                           + weight1 * int2_grad1_u12_ao(j,l,ipoint,1) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) &
-                                           + weight1 * int2_grad1_u12_ao(j,l,ipoint,2) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) &
-                                           + weight1 * int2_grad1_u12_ao(j,l,ipoint,3) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3))
+                                           - weight1 * int2_grad1_u12_ao(j,l,ipoint,1) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1)) &
+                                           - weight1 * int2_grad1_u12_ao(j,l,ipoint,2) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2)) &
+                                           - weight1 * int2_grad1_u12_ao(j,l,ipoint,3) * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3))
                 enddo
               enddo
             enddo
@@ -209,39 +211,37 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
         print*, ' DGEMM are used to evaluate non-Hermitian part of ao_two_e_tc_tot ...'
 
-        allocate(b_mat(n_points_final_grid,ao_num,ao_num,3))
-        !$OMP PARALLEL                                                              &
-        !$OMP DEFAULT (NONE)                                                        &
-        !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
-        !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, b_mat, & 
-        !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector)
-        !$OMP DO SCHEDULE (static)
-        do i = 1, ao_num
-          do k = 1, ao_num
-            do ipoint = 1, n_points_final_grid
+        allocate(c_mat(n_points_final_grid,ao_num,ao_num))
+        do m = 1, 3
+          !$OMP PARALLEL                                                              &
+          !$OMP DEFAULT (NONE)                                                        &
+          !$OMP PRIVATE (i, k, ipoint, weight1, ao_i_r, ao_k_r)                       & 
+          !$OMP SHARED (aos_in_r_array_transp, aos_grad_in_r_array_transp_bis, c_mat, & 
+          !$OMP         ao_num, n_points_final_grid, final_weight_at_r_vector, m)
+          !$OMP DO SCHEDULE (static)
+          do i = 1, ao_num
+            do k = 1, ao_num
+              do ipoint = 1, n_points_final_grid
   
-              weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
-              ao_i_r  = aos_in_r_array_transp(ipoint,i)
-              ao_k_r  = aos_in_r_array_transp(ipoint,k)
+                weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
+                ao_i_r  = aos_in_r_array_transp(ipoint,i)
+                ao_k_r  = aos_in_r_array_transp(ipoint,k)
   
-              b_mat(ipoint,k,i,1) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,1) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,1))
-              b_mat(ipoint,k,i,2) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,2) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,2))
-              b_mat(ipoint,k,i,3) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,3) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,3))
+                c_mat(ipoint,k,i) = weight1 * (ao_k_r * aos_grad_in_r_array_transp_bis(ipoint,i,m) - ao_i_r * aos_grad_in_r_array_transp_bis(ipoint,k,m))
+              enddo
             enddo
           enddo
-        enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
-  
-        do m = 1, 3
-          call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0             &
-                    , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, b_mat(1,1,1,m), n_points_final_grid &
+          !$OMP END DO
+          !$OMP END PARALLEL
+
+          call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0           &
+                    , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
                     , 1.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
         enddo
-        deallocate(b_mat)
+        deallocate(c_mat)
 
       end if
-      FREE int2_grad1_u12_ao
+      !FREE int2_grad1_u12_ao
 
       if(tc_integ_type .eq. "semi-analytic") then 
         FREE int2_grad1_u2e_ao
@@ -258,19 +258,26 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     call sum_A_At(ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
 
     ! ---
+  
+    logical          :: integ_zero
+    double precision :: integ_val
 
-    PROVIDE ao_integrals_map
+    print*, ' adding ERI to ao_two_e_tc_tot ...'
 
-    !$OMP PARALLEL DEFAULT(NONE)                            &
-    !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
-    !$OMP PRIVATE(i, j, k, l)
+    !$OMP PARALLEL DEFAULT(NONE)                     &
+    !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) & 
+    !$OMP SHARED(ao_num, ao_two_e_tc_tot)
     !$OMP DO COLLAPSE(4)
     do j = 1, ao_num
       do l = 1, ao_num
         do i = 1, ao_num
           do k = 1, ao_num
-            !                                                     < 1:i, 2:j | 1:k, 2:l > 
-            ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+            integ_zero = ao_two_e_integral_zero(i,j,k,l)
+            if(.not. integ_zero) then
+                          ! i,k : r1    j,l : r2
+              integ_val = ao_two_e_integral(i,k,j,l)
+              ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + integ_val
+            endif
           enddo
         enddo
       enddo
@@ -278,8 +285,25 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     !$OMP END DO
     !$OMP END PARALLEL
 
-    !call clear_ao_map()
-    FREE ao_integrals_map
+    !PROVIDE ao_integrals_map
+    !!$OMP PARALLEL DEFAULT(NONE)                            &
+    !!$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
+    !!$OMP PRIVATE(i, j, k, l)
+    !!$OMP DO COLLAPSE(4)
+    !do j = 1, ao_num
+    !  do l = 1, ao_num
+    !    do i = 1, ao_num
+    !      do k = 1, ao_num
+    !        !                                                     < 1:i, 2:j | 1:k, 2:l > 
+    !        ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+    !      enddo
+    !    enddo
+    !  enddo
+    !enddo
+    !!$OMP END DO
+    !!$OMP END PARALLEL
+    !!call clear_ao_map()
+    !FREE ao_integrals_map
 
     if(tc_integ_type .eq. "numeric") then
       FREE int2_grad1_u12_ao_num int2_grad1_u12_square_ao_num
