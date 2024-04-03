@@ -110,6 +110,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   double precision :: eocc
   double precision :: norm
   integer :: isample
+  PROVIDE nthreads_pt2
 
 
   ! Prepare table of triplets (a,b,c)
@@ -216,11 +217,12 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   print '(A)', ' ======================= ============== =========='
 
 
+  call set_multiple_levels_omp(.False.)
   call wall_time(t00)
   imin = 1_8
   !$OMP PARALLEL                                                     &
       !$OMP PRIVATE(ieta,eta,a,b,c,kiter,isample)                    &
-      !$OMP DEFAULT(SHARED)
+      !$OMP DEFAULT(SHARED) NUM_THREADS(nthreads_pt2)
 
   do kiter=1,Nabc
 
