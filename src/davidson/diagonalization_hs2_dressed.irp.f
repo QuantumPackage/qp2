@@ -139,7 +139,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   integer                        :: iter2, itertot
   double precision, allocatable  :: y(:,:), h(:,:), h_p(:,:), lambda(:), s2(:)
   real, allocatable              :: y_s(:,:)
-  double precision, allocatable  :: s_(:,:), s_tmp(:,:)
+  double precision, allocatable  :: s_(:,:), s_tmp(:,:), prev_y(:,:)
   double precision               :: diag_h_mat_elem
   double precision, allocatable  :: residual_norm(:)
   character*(16384)              :: write_buffer
@@ -288,6 +288,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       h(N_st_diag*itermax,N_st_diag*itermax),                        &
 !      h_p(N_st_diag*itermax,N_st_diag*itermax),                      &
       y(N_st_diag*itermax,N_st_diag*itermax),                        &
+      prev_y(N_st_diag*itermax,N_st_diag*itermax),                        &
       s_(N_st_diag*itermax,N_st_diag*itermax),                       &
       s_tmp(N_st_diag*itermax,N_st_diag*itermax),                    &
       residual_norm(N_st_diag),                                      &
@@ -301,6 +302,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
   s_ = 0.d0
   s_tmp = 0.d0
 
+  prev_y = 0.d0
+  do i = 1, N_st_diag*itermax
+    prev_y(i,i) = 1d0
+  enddo
 
   ASSERT (N_st > 0)
   ASSERT (N_st_diag >= N_st)
@@ -479,6 +484,10 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
        if (info > 0) then
          ! Numerical errors propagate. We need to reduce the number of iterations
          itermax = iter-1
+
+         ! eigenvectors of the previous iteration
+         y = prev_y
+         shift2 = shift2 - N_st_diag
          exit
        endif
 
@@ -553,7 +562,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           do l = 1, N_st
             do k = 1, N_st_diag
               do i = 1, sze
-                overlp(k+j-1,l) += U(i,l) * U(i,shift2+k)
+                overlp(k+j-1,l) += u_in(i,l) * U(i,shift2+k)
               enddo
             enddo
           enddo
@@ -576,7 +585,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
             enddo
 
             ! Maximum overlap
-            if (dabs(overlp(k,l)) > omax .and. .not. used .and. state_ok(k)) then
+            if ((dabs(overlp(k,l)) > omax) .and. (.not. used) .and. state_ok(k)) then
               omax = dabs(overlp(k,l))
               idx = k
             endif
@@ -614,6 +623,9 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           enddo
         endif
       enddo
+
+      ! Swapped eigenvectors
+      prev_y = y
 
 !      if (state_following) then
 !
@@ -677,7 +689,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
         do i=1,sze
           U(i,shift2+k) =  &
             (lambda(k) * U(i,shift2+k) - W(i,shift2+k) )      &
-              /max(H_jj(i) - lambda (k),1.d-2)
+              /max(dabs(H_jj(i) - lambda (k)),1.d-2) * dsign(1d0,H_jj(i) - lambda (k))
         enddo
 
         if (k <= N_st) then
@@ -792,7 +804,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       residual_norm,                                                 &
       U, overlap,                                                    &
       h, y_s, S_d,                                                   &
-      y, s_, s_tmp,                                                  &
+      y, s_, s_tmp, prev_y,                                          &
       lambda                                                         &
       )
   FREE nthreads_davidson

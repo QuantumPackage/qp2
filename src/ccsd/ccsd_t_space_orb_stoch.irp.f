@@ -181,8 +181,8 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   integer :: nbuckets
   nbuckets = 100
 
+  double precision, allocatable :: ED(:)
   double precision, allocatable :: wsum(:)
-  allocate(wsum(nbuckets))
 
   converged = .False.
   Ncomputed = 0_8
@@ -197,7 +197,8 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   iright = Nabc
   integer*8, allocatable :: bounds(:,:)
 
-  allocate (bounds(2,nbuckets))
+  allocate(wsum(nbuckets), ED(nbuckets), bounds(2,nbuckets))
+  ED(:) = 0.d0
   do isample=1,nbuckets
     eta = 1.d0/dble(nbuckets) * dble(isample)
     ieta = binary_search(waccu,eta,Nabc)
@@ -233,7 +234,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
     enddo
 
     ! Deterministic part
-    if (imin < Nabc) then
+    if (imin <= Nabc) then
       ieta=imin
       sampled(ieta) = 0_8
       a = abc(1,ieta)
@@ -254,7 +255,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
     ! Stochastic part
     call random_number(eta)
     do isample=1,nbuckets
-      if (imin >= bounds(2,isample)) then
+      if (imin > bounds(2,isample)) then
         cycle
       endif
       ieta = binary_search(waccu,(eta + dble(isample-1))/dble(nbuckets),Nabc)+1
@@ -280,7 +281,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
     enddo
 
     call wall_time(t01)
-    if ((t01-t00 > 1.0d0).or.(imin >= Nabc)) then
+    if ((t01-t00 > 1.0d0).or.(imin > Nabc)) then
 
       !$OMP TASKWAIT
       call wall_time(t01)
@@ -300,8 +301,11 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
 
       do isample=1,nbuckets
-        if (imin >= bounds(2,isample)) then
-          energy_det = energy_det + sum(memo(bounds(1,isample):bounds(2,isample)))
+        if (imin > bounds(2,isample)) then
+          if (ED(isample) == 0.d0) then
+             ED(isample) = sum(memo(bounds(1,isample):bounds(2,isample)))
+          endif
+          energy_det = energy_det + ED(isample)
           scale = scale - wsum(isample)
         else
           exit
@@ -310,12 +314,14 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
 
       isample = min(isample,nbuckets)
       do ieta=bounds(1,isample), Nabc
-          w = dble(max(sampled(ieta),0_8))
-          tmp = w * memo(ieta) * Pabc(ieta)
-          ET = ET + tmp
-          ET2 = ET2 + tmp * memo(ieta) * Pabc(ieta)
-          norm = norm + w
+        if (sampled(ieta) < 0_8) cycle
+        w = dble(sampled(ieta))
+        tmp = w * memo(ieta) * Pabc(ieta)
+        ET = ET + tmp
+        ET2 = ET2 + tmp * memo(ieta) * Pabc(ieta)
+        norm = norm + w
       enddo
+
       norm = norm/scale
       if (norm > 0.d0) then
         energy_stoch = ET / norm
@@ -327,7 +333,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       print '(''   '',F20.8, ''   '', ES12.4,''   '', F8.2,''  '')', eccsd+energy, dsqrt(variance/(norm-1.d0)), 100.*real(Ncomputed)/real(Nabc)
     endif
     !$OMP END MASTER
-    if (imin >= Nabc) exit
+    if (imin > Nabc) exit
   enddo
 
   !$OMP END PARALLEL
