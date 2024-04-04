@@ -227,8 +227,8 @@ def write_ezfio(res, filename):
           shell_index += [nshell_tot] * len(b.prim)
 
     shell_num = len(ang_mom)
-    assert(shell_index[0] = 1)
-    assert(shell_index[-1] = shell_num)
+    assert(shell_index[0] == 1)
+    assert(shell_index[-1] == shell_num)
 
     # ~#~#~#~#~ #
     # W r i t e #
