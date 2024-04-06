@@ -5,7 +5,8 @@ program print_detweights
   read_wf = .True.
   touch read_wf
 
-  call main()
+  call print_exc()
+  !call main()
 
 end
 
@@ -41,6 +42,7 @@ subroutine main()
 
   do i = 1, N_det
     deg_sorted(i) = deg(ii(i))
+    print *, deg_sorted(i), c(i)
   enddo
 
   print *, ' saving psi'
@@ -52,7 +54,7 @@ subroutine main()
       print *, ' Error opening file!'
       stop
     endif
-    
+
     write(10) N_det
     write(10) deg_sorted
     write(10) c
@@ -62,5 +64,34 @@ subroutine main()
   deallocate(deg, ii, deg_sorted, c)
 
 end
+
+! ---
+
+subroutine print_exc()
+
+  implicit none
+
+  integer              :: i
+  integer, allocatable :: deg(:)
+
+  PROVIDE N_int
+  PROVIDE N_det
+  PROVIDE psi_det
+
+  allocate(deg(N_det))
+
+  do i = 1, N_det
+    call get_excitation_degree(psi_det(1,1,1), psi_det(1,1,i), deg(i), N_int)
+  enddo
+
+  open(unit=10, file="exc.dat", action="write")
+    write(10,*) N_det
+    write(10,*) deg
+  close(10)
+
+  deallocate(deg)
+
+end
+
 
 
