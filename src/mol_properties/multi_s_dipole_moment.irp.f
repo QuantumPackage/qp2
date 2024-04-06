@@ -102,12 +102,28 @@ END_PROVIDER
 &BEGIN_PROVIDER [double precision, multi_s_z_dipole_moment_eigenval,           (N_states)]
 
   implicit none
+  double precision, allocatable :: eigval(:), eigvec(:,:), A(:,:)
 
   PROVIDE multi_s_x_dipole_moment multi_s_y_dipole_moment multi_s_z_dipole_moment
 
-  call lapack_diag(multi_s_x_dipole_moment_eigenval(1), multi_s_x_dipole_moment_eigenvec(1,1), multi_s_x_dipole_moment(1,1), N_states, N_states)
-  call lapack_diag(multi_s_y_dipole_moment_eigenval(1), multi_s_y_dipole_moment_eigenvec(1,1), multi_s_y_dipole_moment(1,1), N_states, N_states)
-  call lapack_diag(multi_s_z_dipole_moment_eigenval(1), multi_s_z_dipole_moment_eigenvec(1,1), multi_s_z_dipole_moment(1,1), N_states, N_states)
+  allocate(A(N_states,N_states), eigvec(N_states,N_states), eigval(N_states))
+
+  A = multi_s_x_dipole_moment
+  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+  multi_s_x_dipole_moment_eigenval = eigval
+  multi_s_x_dipole_moment_eigenvec = eigvec
+
+  A = multi_s_y_dipole_moment
+  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+  multi_s_y_dipole_moment_eigenval = eigval
+  multi_s_y_dipole_moment_eigenvec = eigvec
+
+  A = multi_s_z_dipole_moment
+  call lapack_diag(eigval(1), eigvec(1,1), A(1,1), N_states, N_states)
+  multi_s_z_dipole_moment_eigenval = eigval
+  multi_s_z_dipole_moment_eigenvec = eigvec
+
+  deallocate(A, eigvec, eigval)
 
 END_PROVIDER
 

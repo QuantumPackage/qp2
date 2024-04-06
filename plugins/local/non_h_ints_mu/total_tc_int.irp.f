@@ -55,7 +55,9 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     print*, ' Reading ao_two_e_tc_tot from ', trim(ezfio_filename) // '/work/ao_two_e_tc_tot'
 
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="read")
-      read(11) ao_two_e_tc_tot
+    do i = 1, ao_num
+      read(11) ao_two_e_tc_tot(:,:,:,i)
+    enddo
     close(11)
 
   else
@@ -67,7 +69,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
     PROVIDE int2_grad1_u12_square_ao
 
-    if(tc_save_mem) then
+    if(tc_save_mem_loops) then
 
       print*, ' LOOPS are used to evaluate Hermitian part of ao_two_e_tc_tot ...'
 
@@ -176,7 +178,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
       PROVIDE int2_grad1_u12_ao
 
-      if(tc_save_mem) then
+      if(tc_save_mem_loops) then
 
         print*, ' LOOPS are used to evaluate non-Hermitian part of ao_two_e_tc_tot ...'
 
@@ -241,7 +243,6 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
         deallocate(c_mat)
 
       end if
-      !FREE int2_grad1_u12_ao
 
       if(tc_integ_type .eq. "semi-analytic") then 
         FREE int2_grad1_u2e_ao
@@ -264,48 +265,52 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
 
     print*, ' adding ERI to ao_two_e_tc_tot ...'
 
-    !$OMP PARALLEL DEFAULT(NONE)                     &
-    !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) & 
-    !$OMP SHARED(ao_num, ao_two_e_tc_tot)
-    !$OMP DO COLLAPSE(4)
-    do j = 1, ao_num
-      do l = 1, ao_num
-        do i = 1, ao_num
-          do k = 1, ao_num
-            integ_zero = ao_two_e_integral_zero(i,j,k,l)
-            if(.not. integ_zero) then
-                          ! i,k : r1    j,l : r2
-              integ_val = ao_two_e_integral(i,k,j,l)
-              ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + integ_val
-            endif
+    if(tc_save_mem) then
+      print*, ' ao_integrals_map will not be used'
+      !$OMP PARALLEL DEFAULT(NONE)                     &
+      !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) & 
+      !$OMP SHARED(ao_num, ao_two_e_tc_tot)
+      !$OMP DO COLLAPSE(4)
+      do j = 1, ao_num
+        do l = 1, ao_num
+          do i = 1, ao_num
+            do k = 1, ao_num
+              integ_zero = ao_two_e_integral_zero(i,j,k,l)
+              if(.not. integ_zero) then
+                            ! i,k : r1    j,l : r2
+                integ_val = ao_two_e_integral(i,k,j,l)
+                ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + integ_val
+              endif
+            enddo
           enddo
         enddo
       enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+      !$OMP END DO
+      !$OMP END PARALLEL
+    else
+      print*, ' ao_integrals_map will be used'
+      PROVIDE ao_integrals_map
+      !$OMP PARALLEL DEFAULT(NONE)                            &
+      !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
+      !$OMP PRIVATE(i, j, k, l)
+      !$OMP DO COLLAPSE(4)
+      do j = 1, ao_num
+        do l = 1, ao_num
+          do i = 1, ao_num
+            do k = 1, ao_num
+              !                                                     < 1:i, 2:j | 1:k, 2:l > 
+              ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+            enddo
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      !call clear_ao_map()
+      FREE ao_integrals_map
+    endif
 
-    !PROVIDE ao_integrals_map
-    !!$OMP PARALLEL DEFAULT(NONE)                            &
-    !!$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
-    !!$OMP PRIVATE(i, j, k, l)
-    !!$OMP DO COLLAPSE(4)
-    !do j = 1, ao_num
-    !  do l = 1, ao_num
-    !    do i = 1, ao_num
-    !      do k = 1, ao_num
-    !        !                                                     < 1:i, 2:j | 1:k, 2:l > 
-    !        ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
-    !      enddo
-    !    enddo
-    !  enddo
-    !enddo
-    !!$OMP END DO
-    !!$OMP END PARALLEL
-    !!call clear_ao_map()
-    !FREE ao_integrals_map
-
-    if(tc_integ_type .eq. "numeric") then
+    if((tc_integ_type .eq. "numeric") .and. (.not. tc_save_mem)) then
       FREE int2_grad1_u12_ao_num int2_grad1_u12_square_ao_num
     endif
 
@@ -315,7 +320,9 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
     print*, ' Saving ao_two_e_tc_tot in ', trim(ezfio_filename) // '/work/ao_two_e_tc_tot'
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="write")
     call ezfio_set_work_empty(.False.)
-      write(11) ao_two_e_tc_tot
+    do i = 1, ao_num
+      write(11) ao_two_e_tc_tot(:,:,:,i)
+    enddo
     close(11)
     call ezfio_set_tc_keywords_io_tc_integ('Read')
   endif

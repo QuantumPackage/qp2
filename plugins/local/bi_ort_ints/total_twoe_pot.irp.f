@@ -16,10 +16,10 @@ double precision function bi_ortho_mo_ints(l, k, j, i)
   integer             :: m, n, p, q
 
   bi_ortho_mo_ints = 0.d0
-  do m = 1, ao_num
-    do p = 1, ao_num
-      do n = 1, ao_num
-        do q = 1, ao_num
+  do p = 1, ao_num
+    do m = 1, ao_num
+      do q = 1, ao_num
+        do n = 1, ao_num
           !                                   p1h1p2h2   l1                  l2              r1               r2
           bi_ortho_mo_ints += ao_two_e_tc_tot(n,q,m,p) * mo_l_coef(m,l) * mo_l_coef(n,k) * mo_r_coef(p,j) * mo_r_coef(q,i)
         enddo
@@ -27,7 +27,7 @@ double precision function bi_ortho_mo_ints(l, k, j, i)
     enddo
   enddo
 
-end function bi_ortho_mo_ints
+end
 
 ! ---
 
@@ -43,93 +43,68 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   integer                       :: i, j, k, l, m, n, p, q, s, r
   double precision              :: t1, t2, tt1, tt2
   double precision, allocatable :: a1(:,:,:,:), a2(:,:,:,:)
-  double precision, allocatable :: a_jkp(:,:,:), a_kpq(:,:,:), a_pqr(:,:,:)
+  double precision, allocatable :: a_jkp(:,:,:), a_kpq(:,:,:), ao_two_e_tc_tot_tmp(:,:,:)
 
   print *, ' PROVIDING mo_bi_ortho_tc_two_e_chemist ...'
   call wall_time(t1)
   call print_memory_usage()
 
   PROVIDE mo_r_coef mo_l_coef
-  PROVIDE ao_two_e_tc_tot
 
   if(ao_to_mo_tc_n3) then
 
     print*, ' memory scale of TC ao -> mo: O(N3) '
 
+    if(.not.read_tc_integ) then
+       stop 'read_tc_integ needs to be set to true'
+    endif
+
     allocate(a_jkp(ao_num,ao_num,mo_num))
     allocate(a_kpq(ao_num,mo_num,mo_num))
-    allocate(a_pqr(mo_num,mo_num,mo_num))
+    allocate(ao_two_e_tc_tot_tmp(ao_num,ao_num,ao_num))
+
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="read")
 
     call wall_time(tt1)
 
-    do s = 1, mo_num
+    mo_bi_ortho_tc_two_e_chemist(:,:,:,:) = 0.d0
+    do l = 1, ao_num
+      read(11) ao_two_e_tc_tot_tmp(:,:,:)
 
-      mo_bi_ortho_tc_two_e_chemist(:,:,:,s) = 0.d0
-      do l = 1, ao_num
+      do s = 1, mo_num
 
-        call dgemm( 'T', 'N', ao_num*ao_num, mo_num, ao_num, 1.d0 &
-                  , ao_two_e_tc_tot(1,1,1,l), ao_num, mo_l_coef(1,1), ao_num  &
+        call dgemm( 'T', 'N', ao_num*ao_num, mo_num, ao_num, 1.d0              &
+                  , ao_two_e_tc_tot_tmp(1,1,1), ao_num, mo_l_coef(1,1), ao_num &
                   , 0.d0, a_jkp(1,1,1), ao_num*ao_num)
-  
+
         call dgemm( 'T', 'N', ao_num*mo_num, mo_num, ao_num, 1.d0 &
                   , a_jkp(1,1,1), ao_num, mo_r_coef(1,1), ao_num  &
                   , 0.d0, a_kpq(1,1,1), ao_num*mo_num)
-  
-        call dgemm( 'T', 'N', mo_num*mo_num, mo_num, ao_num, 1.d0 &
-                  , a_kpq(1,1,1), ao_num, mo_l_coef(1,1), ao_num  &
-                  , 0.d0, a_pqr(1,1,1), mo_num*mo_num)
 
-        !$OMP PARALLEL         &
-        !$OMP DEFAULT(NONE)    &
-        !$OMP PRIVATE(p, q, r) &
-        !$OMP SHARED(s, l, mo_num, mo_bi_ortho_tc_two_e_chemist, mo_r_coef, a_pqr)
-        !$OMP DO COLLAPSE(2)
-        do p = 1, mo_num
-          do q = 1, mo_num
-            do r = 1, mo_num
-              mo_bi_ortho_tc_two_e_chemist(p,q,r,s) = mo_bi_ortho_tc_two_e_chemist(p,q,r,s) + mo_r_coef(l,s) * a_pqr(p,q,r)
-            enddo
-          enddo
-        enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        call dgemm( 'T', 'N', mo_num*mo_num, mo_num, ao_num, mo_r_coef(l,s) &
+                  , a_kpq(1,1,1), ao_num, mo_l_coef(1,1), ao_num            &
+                  , 1.d0, mo_bi_ortho_tc_two_e_chemist(1,1,1,s), mo_num*mo_num)
 
-      enddo ! l
+      enddo ! s
 
-      if(s == 2) then
+      if(l == 2) then
         call wall_time(tt2)
         print*, ' 1 / mo_num done in (min)', (tt2-tt1)/60.d0
         print*, ' estimated time required (min)', dble(mo_num-1)*(tt2-tt1)/60.d0
-      elseif(s == 11) then
+      elseif(l == 11) then
         call wall_time(tt2)
         print*, ' 10 / mo_num done in (min)', (tt2-tt1)/60.d0
         print*, ' estimated time required (min)', dble(mo_num-10)*(tt2-tt1)/(60.d0*10.d0)
-      elseif(s == 26) then
-        call wall_time(tt2)
-        print*, ' 25 / mo_num done in (min)', (tt2-tt1)/60.d0
-        print*, ' estimated time required (min)', dble(mo_num-25)*(tt2-tt1)/(60.d0*25.d0)
-      elseif(s == 51) then
-        call wall_time(tt2)
-        print*, ' 50 / mo_num done in (min)', (tt2-tt1)/60.d0
-        print*, ' estimated time required (min)', dble(mo_num-50)*(tt2-tt1)/(60.d0*50.d0)
-      elseif(s == 101) then
+      elseif(l == 101) then
         call wall_time(tt2)
         print*, ' 100 / mo_num done in (min)', (tt2-tt1)/60.d0
         print*, ' estimated time required (min)', dble(mo_num-100)*(tt2-tt1)/(60.d0*100.d0)
-      elseif(s == 201) then
-        call wall_time(tt2)
-        print*, ' 200 / mo_num done in (min)', (tt2-tt1)/60.d0
-        print*, ' estimated time required (min)', dble(mo_num-200)*(tt2-tt1)/(60.d0*200.d0)
-      elseif(s == 501) then
-        call wall_time(tt2)
-        print*, ' 500 / mo_num done in (min)', (tt2-tt1)/60.d0
-        print*, ' estimated time required (min)', dble(mo_num-500)*(tt2-tt1)/(60.d0*500.d0)
       endif
+    enddo ! l
 
+    close(11)
 
-    enddo ! s
-
-    deallocate(a_jkp, a_kpq, a_pqr)
+    deallocate(a_jkp, a_kpq, ao_two_e_tc_tot_tmp)
 
   else
 
@@ -141,6 +116,8 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
               , ao_two_e_tc_tot(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num &
               , 0.d0, a2(1,1,1,1), ao_num*ao_num*ao_num)
   
+    FREE ao_two_e_tc_tot
+
     allocate(a1(ao_num,ao_num,mo_num,mo_num))
   
     call dgemm( 'T', 'N', ao_num*ao_num*mo_num, mo_num, ao_num, 1.d0 &

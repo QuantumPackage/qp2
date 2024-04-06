@@ -175,7 +175,7 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num) ]
+BEGIN_PROVIDER [double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num)]
 
   BEGIN_DOC
   ! Total alpha TC Fock matrix : h_c + Two-e^TC terms on the MO basis
