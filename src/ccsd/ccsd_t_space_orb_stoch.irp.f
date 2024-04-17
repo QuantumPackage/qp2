@@ -125,7 +125,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
     do b = a+1, nV
       do c = b+1, nV
         Nabc = Nabc + 1_8
-        Pabc(Nabc) =  1.d0/(f_v(a) + f_v(b) + f_v(c))
+        Pabc(Nabc) =  f_v(a) + f_v(b) + f_v(c)
         abc(1,Nabc) = int(a,2)
         abc(2,Nabc) = int(b,2)
         abc(3,Nabc) = int(c,2)
@@ -135,13 +135,13 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       abc(1,Nabc) = int(a,2)
       abc(2,Nabc) = int(b,2)
       abc(3,Nabc) = int(a,2)
-      Pabc(Nabc) =  1.d0/(2.d0*f_v(a) + f_v(b))
+      Pabc(Nabc) =  2.d0*f_v(a) + f_v(b)
 
       Nabc = Nabc + 1_8
       abc(1,Nabc) = int(b,2)
       abc(2,Nabc) = int(a,2)
       abc(3,Nabc) = int(b,2)
-      Pabc(Nabc) =  1.d0/(f_v(a) + 2.d0*f_v(b))
+      Pabc(Nabc) =  f_v(a) + 2.d0*f_v(b)
     enddo
   enddo
 
@@ -150,7 +150,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   enddo
 
   ! Sort triplets in decreasing Pabc
-  Pabc(:) = -dabs(Pabc(:))
+  Pabc(:) = -1.d0/max(0.2d0,Pabc(:))
   call dsort_big(Pabc, iorder, Nabc)
 
   ! Normalize
@@ -164,7 +164,6 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   enddo
 
   call i8set_order_big(abc, iorder, Nabc)
-
 
   ! Cumulative distribution for sampling
   waccu(Nabc) = 0.d0
