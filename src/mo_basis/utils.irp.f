@@ -228,7 +228,11 @@ subroutine mo_as_svd_vectors_of_mo_matrix_eig(matrix,lda,m,n,eig,label)
   call dgemm('N','N',ao_num,m,m,1.d0,mo_coef_new,size(mo_coef_new,1),U,size(U,1),0.d0,mo_coef,size(mo_coef,1))
 
   do i=1,m
-    eig(i) = D(i)
+    if (eig(i) > 1.d-20) then
+      eig(i) = D(i)
+    else
+      eig(i) = 0.d0
+    endif
   enddo
 
   deallocate(A,mo_coef_new,U,Vt,D)
