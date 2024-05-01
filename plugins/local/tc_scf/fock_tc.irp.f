@@ -110,23 +110,14 @@ BEGIN_PROVIDER [double precision, Fock_matrix_tc_mo_alpha, (mo_num, mo_num)]
   double precision              :: t0, t1, tt0, tt1
   double precision, allocatable :: tmp(:,:)
 
-  if(bi_ortho) then
+  PROVIDE mo_l_coef mo_r_coef
 
-    PROVIDE mo_l_coef mo_r_coef
+  call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
+                        , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
 
-    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
-                          , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
-
-    if(three_body_h_tc) then
-      PROVIDE fock_3e_mo_a
-      Fock_matrix_tc_mo_alpha += fock_3e_mo_a
-    endif
-
-  else
-
-    call ao_to_mo( Fock_matrix_tc_ao_alpha, size(Fock_matrix_tc_ao_alpha, 1) &
-                 , Fock_matrix_tc_mo_alpha, size(Fock_matrix_tc_mo_alpha, 1) )
-
+  if(three_body_h_tc) then
+    PROVIDE fock_3e_mo_a
+    Fock_matrix_tc_mo_alpha += fock_3e_mo_a
   endif
 
 END_PROVIDER
@@ -142,21 +133,12 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_beta, (mo_num,mo_num) ]
   implicit none
   double precision, allocatable :: tmp(:,:)
 
-  if(bi_ortho) then
+  call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
+                        , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
 
-    call ao_to_mo_bi_ortho( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
-                          , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
-
-    if(three_body_h_tc) then
-      PROVIDE fock_3e_mo_b
-      Fock_matrix_tc_mo_beta += fock_3e_mo_b
-    endif
-
-  else
-
-    call ao_to_mo( Fock_matrix_tc_ao_beta, size(Fock_matrix_tc_ao_beta, 1) &
-                 , Fock_matrix_tc_mo_beta, size(Fock_matrix_tc_mo_beta, 1) )
-
+  if(three_body_h_tc) then
+    PROVIDE fock_3e_mo_b
+    Fock_matrix_tc_mo_beta += fock_3e_mo_b
   endif
 
 END_PROVIDER

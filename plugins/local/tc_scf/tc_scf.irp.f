@@ -10,13 +10,10 @@ program tc_scf
   integer :: i
   logical :: good_angles
 
-  PROVIDE j1e_type
-  PROVIDE j2e_type
-  PROVIDE tcscf_algorithm
-
   print *, ' TC-SCF with:'
-  print *, ' j1e_type = ', j1e_type
   print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
 
   write(json_unit,json_array_open_fmt) 'tc-scf'
 
@@ -29,7 +26,6 @@ program tc_scf
   call write_int(6, my_n_pt_r_grid, 'radial  external grid over')
   call write_int(6, my_n_pt_a_grid, 'angular external grid over')
 
-
   if(tc_integ_type .eq. "numeric") then
     my_extra_grid_becke  = .True.
     PROVIDE tc_grid2_a tc_grid2_r
@@ -41,17 +37,7 @@ program tc_scf
     call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
   endif
 
-  !call create_guess()
-  !call orthonormalize_mos()
-
-  if(tcscf_algorithm == 'DIIS') then
-    call rh_tcscf_diis()
-  elseif(tcscf_algorithm == 'Simple') then
-    call rh_tcscf_simple()
-  else
-    print *, ' not implemented yet', tcscf_algorithm
-    stop
-  endif
+  call rh_tcscf_diis()
 
   PROVIDE Fock_matrix_tc_diag_mo_tot
   print*, ' Eigenvalues:' 
@@ -59,13 +45,10 @@ program tc_scf
     print*, i, Fock_matrix_tc_diag_mo_tot(i)
   enddo
 
-  ! TODO 
-  ! rotate angles in separate code only if necessary
-  if(minimize_lr_angles)then
+  if(minimize_lr_angles) then
    call minimize_tc_orb_angles()
   endif
   call print_energy_and_mos(good_angles)
-
 
   write(json_unit,json_array_close_fmtx)
   call json_close

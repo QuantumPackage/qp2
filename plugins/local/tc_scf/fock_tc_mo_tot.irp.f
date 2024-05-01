@@ -132,7 +132,7 @@
      enddo
    endif
 
-  if(no_oa_or_av_opt)then
+  if(no_oa_or_av_opt) then
     do i = 1, n_act_orb
       iorb = list_act(i)
       do j = 1, n_inact_orb
@@ -153,8 +153,21 @@
     enddo
   endif
 
-  if(.not.bi_ortho .and. three_body_h_tc)then
-    Fock_matrix_tc_mo_tot += fock_3_mat
+  if(tc_Brillouin_Right) then
+
+    double precision, allocatable :: tmp(:,:)
+    allocate(tmp(mo_num,mo_num))
+
+    tmp = Fock_matrix_tc_mo_tot
+    do j = 1, mo_num
+      do i = 1, j-1
+        tmp(i,j) = Fock_matrix_tc_mo_tot(j,i)
+      enddo
+    enddo
+
+    Fock_matrix_tc_mo_tot = tmp
+    deallocate(tmp)
+
   endif
 
 END_PROVIDER

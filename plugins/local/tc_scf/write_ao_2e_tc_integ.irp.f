@@ -4,11 +4,9 @@ program write_ao_2e_tc_integ
 
   implicit none
 
-  PROVIDE j1e_type
-  PROVIDE j2e_type
-
-  print *, ' j1e_type = ', j1e_type
   print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
 
   my_grid_becke  = .True.
   PROVIDE tc_grid1_a tc_grid1_r
