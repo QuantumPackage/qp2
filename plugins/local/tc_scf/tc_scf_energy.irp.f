@@ -1,7 +1,8 @@
 
- BEGIN_PROVIDER [ double precision, TC_HF_energy      ]
-&BEGIN_PROVIDER [ double precision, TC_HF_one_e_energy]
-&BEGIN_PROVIDER [ double precision, TC_HF_two_e_energy]
+ BEGIN_PROVIDER [double precision, TC_HF_energy        ]
+&BEGIN_PROVIDER [double precision, TC_HF_one_e_energy  ]
+&BEGIN_PROVIDER [double precision, TC_HF_two_e_energy  ]
+&BEGIN_PROVIDER [double precision, TC_HF_three_e_energy]
 
   BEGIN_DOC
   ! TC Hartree-Fock energy containing the nuclear repulsion, and its one- and two-body components.
@@ -27,8 +28,13 @@
     enddo
   enddo
 
-  TC_HF_energy += TC_HF_one_e_energy + TC_HF_two_e_energy
-  TC_HF_energy += diag_three_elem_hf
+  if((three_body_h_tc .eq. .False.) .and. (.not. noL_standard)) then
+    TC_HF_three_e_energy = 0.d0
+  else
+    TC_HF_three_e_energy = noL_0e
+  endif
+
+  TC_HF_energy += TC_HF_one_e_energy + TC_HF_two_e_energy + TC_HF_three_e_energy
 
 END_PROVIDER
 

@@ -61,7 +61,7 @@ subroutine rh_tcscf_diis()
   etc_tot = TC_HF_energy
   etc_1e  = TC_HF_one_e_energy
   etc_2e  = TC_HF_two_e_energy
-  etc_3e  = diag_three_elem_hf
+  etc_3e  = TC_HF_three_e_energy
   !tc_grad = grad_non_hermit
   er_DIIS = maxval(abs(FQS_SQF_mo))
   e_delta = dabs(etc_tot - e_save)
@@ -189,7 +189,7 @@ subroutine rh_tcscf_diis()
     etc_tot = TC_HF_energy
     etc_1e  = TC_HF_one_e_energy
     etc_2e  = TC_HF_two_e_energy
-    etc_3e  = diag_three_elem_hf
+    etc_3e  = TC_HF_three_e_energy
     !tc_grad  = grad_non_hermit
     er_DIIS  = maxval(abs(FQS_SQF_mo))
     e_delta  = dabs(etc_tot - e_save)

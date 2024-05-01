@@ -43,7 +43,7 @@ subroutine non_hrmt_bieig(n, A, thr_d, thr_nd, leigvec, reigvec, n_real_eigv, ei
   ! track & sort the real eigenvalues 
 
   n_good = 0
-  thr    = Im_thresh_tcscf
+  thr    = Im_thresh_tc
   do i = 1, n
     if(dabs(WI(i)) .lt. thr) then
       n_good += 1
