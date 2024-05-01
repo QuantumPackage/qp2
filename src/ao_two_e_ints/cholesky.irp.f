@@ -66,7 +66,8 @@ END_PROVIDER
 
    else
 
-     PROVIDE nucl_coord
+     PROVIDE nucl_coord ao_two_e_integral_schwartz
+     call set_multiple_levels_omp(.False.)
 
      if (do_direct_integrals) then
        if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then

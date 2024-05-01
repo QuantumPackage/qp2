@@ -2041,3 +2041,22 @@ subroutine get_A_squared(A,n,A2)
  double precision, intent(out):: A2(n,n) 
  call dgemm('N','N',n,n,n,1.d0,A,size(A,1),A,size(A,1),0.d0,A2,size(A2,1))
 end
+
+subroutine get_AB_prod(A,n,m,B,l,AB)
+ implicit none
+ BEGIN_DOC
+! AB = A B where A is n x m, B is m x l. Use the dgemm routine 
+ END_DOC
+ double precision, intent(in) :: A(n,m),B(m,l)
+ integer, intent(in) :: n,m,l
+ double precision, intent(out):: AB(n,l) 
+ if(size(A,2).ne.m.or.size(B,1).ne.m)then
+  print*,'error in get_AB_prod ! '
+  print*,'matrices do not have the good dimension '
+  print*,'size(A,2) = ',size(A,2)
+  print*,'size(B,1) = ',size(B,1)
+  print*,'m         = ',m
+  stop
+ endif
+ call dgemm('N','N',n,l,m,1.d0,A,size(A,1),B,size(B,1),0.d0,AB,size(AB,1))
+end

@@ -45,12 +45,12 @@ end
 
 ! ---
 
- BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth, (N_states)      ]
-&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth , (N_states)      ]
-&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth     , (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth     , (N_det,N_states)]
-&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth   , (N_states)      ]
-&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth           ]
+ BEGIN_PROVIDER [double precision, eigval_right_tc_bi_orth        , (N_states)      ]
+&BEGIN_PROVIDER [double precision, eigval_left_tc_bi_orth         , (N_states)      ]
+&BEGIN_PROVIDER [double precision, reigvec_tc_bi_orth             , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, leigvec_tc_bi_orth             , (N_det,N_states)]
+&BEGIN_PROVIDER [double precision, s2_eigvec_tc_bi_orth           , (N_states)      ]
+&BEGIN_PROVIDER [double precision, norm_ground_left_right_bi_orth , (N_states)      ]
 
   BEGIN_DOC
   ! eigenvalues, right and left eigenvectors of the transcorrelated Hamiltonian on the BI-ORTHO basis 
@@ -86,17 +86,20 @@ end
     endif
 
     call non_hrmt_real_diag(N_det, H_prime, leigvec_tc_bi_orth_tmp, reigvec_tc_bi_orth_tmp, n_real_tc_bi_orth_eigval_right, eigval_right_tmp)
+    if(N_states.gt.1)then
+     print*,'n_real_tc_bi_orth_eigval_right = ',n_real_tc_bi_orth_eigval_right
+    endif
 !    do i = 1, N_det
 !     call get_H_tc_s2_l0_r0(leigvec_tc_bi_orth_tmp(1,i),reigvec_tc_bi_orth_tmp(1,i),1,N_det,expect_e(i), s2_values_tmp(i))
 !    enddo
     call get_H_tc_s2_l0_r0(leigvec_tc_bi_orth_tmp,reigvec_tc_bi_orth_tmp,N_det,N_det,expect_e, s2_values_tmp)
+    
 
     allocate(index_good_state_array(N_det),good_state_array(N_det))
     i_state = 0
     good_state_array = .False.
 
     if(s2_eig) then
-
       if(only_expected_s2) then
         do j = 1, N_det
          ! Select at least n_states states with S^2 values closed to "expected_s2"
@@ -116,6 +119,9 @@ end
           good_state_array(j) = .True.
         enddo
       endif
+    if(N_states.gt.1)then
+      print*,'i_state = ',i_state
+    endif
 
       if(i_state .ne. 0) then
         ! Fill the first "i_state" states that have a correct S^2 value
@@ -230,6 +236,7 @@ end
 
     allocate(H_jj(N_det),vec_tmp(N_det,n_states_diag))
 
+    ! TODO : OPEN-MP
     do i = 1, N_det
       call htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
     enddo
@@ -277,7 +284,6 @@ end
     do istate = N_states+1, n_states_diag
       vec_tmp(istate,istate) = 1.d0
     enddo
-    !call davidson_general_ext_rout_nonsym_b1space(vec_tmp, H_jj, eigval_right_tc_bi_orth, N_det, n_states, n_states_diag, converged, H_tc_u_0_opt)
     converged = .False.
     i_it = 0
     do while (.not. converged)
@@ -309,13 +315,13 @@ end
   deallocate(Stmp)
 
   print*,'leigvec_tc_bi_orth(1,1),reigvec_tc_bi_orth(1,1) = ', leigvec_tc_bi_orth(1,1), reigvec_tc_bi_orth(1,1)
+  norm_ground_left_right_bi_orth = 0.d0
   do i = 1, N_states
-    norm_ground_left_right_bi_orth = 0.d0
     do j = 1, N_det
-      norm_ground_left_right_bi_orth += leigvec_tc_bi_orth(j,i) * reigvec_tc_bi_orth(j,i)
+      norm_ground_left_right_bi_orth(i) += leigvec_tc_bi_orth(j,i) * reigvec_tc_bi_orth(j,i)
     enddo
     print*,' state      ', i
-    print*,' norm l/r = ', norm_ground_left_right_bi_orth
+    print*,' norm l/r = ', norm_ground_left_right_bi_orth(i)
     print*,' <S2>     = ', s2_eigvec_tc_bi_orth(i)
   enddo
 
@@ -338,11 +344,6 @@ end
   TOUCH psi_r_coef_bi_ortho
   call ezfio_set_tc_bi_ortho_psi_r_coef_bi_ortho(buffer)
   deallocate(buffer)
-!  print*,'After diag'
-!  do i = 1, N_det! old version
-!   print*,'i',i,psi_l_coef_bi_ortho(i,1),psi_r_coef_bi_ortho(i,1)
-!   call debug_det(psi_det(1,1,i),N_int) 
-!  enddo 
 
 END_PROVIDER 
 
@@ -357,22 +358,29 @@ subroutine bi_normalize(u_l, u_r, n, ld, nstates)
   implicit none
   integer,          intent(in)    :: n, ld, nstates
   double precision, intent(inout) :: u_l(ld,nstates), u_r(ld,nstates)
-  integer                         :: i, j
-  double precision                :: accu, tmp
+  integer                         :: i, j,j_loc
+  double precision                :: accu, tmp, maxval_tmp
 
   do i = 1, nstates
 
     !!!! Normalization of right eigenvectors |Phi>
     accu = 0.d0
+    ! TODO: dot product lapack
+    maxval_tmp = 0.d0
     do j = 1, n
       accu += u_r(j,i) * u_r(j,i)
+      if(dabs(u_r(j,i)).gt.maxval_tmp)then
+       maxval_tmp = dabs(u_r(j,i))
+       j_loc = j
+      endif
     enddo
     accu = 1.d0/dsqrt(accu)
     print*,'accu_r = ',accu
+    print*,'j_loc  = ',j_loc
     do j = 1, n
       u_r(j,i) *= accu
     enddo
-    tmp = u_r(1,i) / dabs(u_r(1,i))
+    tmp = u_r(j_loc,i) / dabs(u_r(j_loc,i))
     do j = 1, n
       u_r(j,i) *= tmp
     enddo
@@ -389,7 +397,7 @@ subroutine bi_normalize(u_l, u_r, n, ld, nstates)
     else
       accu = 1.d0/dsqrt(-accu)
     endif
-    tmp = (u_l(1,i) * u_r(1,i) )/dabs(u_l(1,i) * u_r(1,i))
+    tmp = (u_l(j_loc,i) * u_r(j_loc,i) )/dabs(u_l(j_loc,i) * u_r(j_loc,i))
     do j = 1, n
       u_l(j,i) *= accu * tmp
       u_r(j,i) *= accu

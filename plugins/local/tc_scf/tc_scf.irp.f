@@ -78,7 +78,9 @@ program tc_scf
 
     ! TODO 
     ! rotate angles in separate code only if necessary
-    !call minimize_tc_orb_angles()
+    if(minimize_lr_angles)then
+     call minimize_tc_orb_angles()
+    endif
     call print_energy_and_mos(good_angles)
 
   endif

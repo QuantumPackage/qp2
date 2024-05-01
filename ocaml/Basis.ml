@@ -17,7 +17,7 @@ let read in_channel at_number =
 (** Find an element in the basis set file *)
 let find in_channel element =
   seek_in in_channel 0;
-  let element_read = ref Element.X in
+  let element_read = ref Element.Og in
   while !element_read <> element
   do
     let buffer = input_line in_channel in

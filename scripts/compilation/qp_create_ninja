@@ -802,8 +802,12 @@ if __name__ == "__main__":
     pickle_path = os.path.join(QP_ROOT, "config", "qp_create_ninja.pickle")
 
     if arguments["update"]:
+         try:
             with open(pickle_path, 'rb') as handle:
                 arguments = pickle.load(handle)
+         except FileNotFoundError:
+            print("\n-----\nError: Please run 'configure -c config/<config_file>'\n-----\n")
+            raise
 
     elif arguments["create"]:
 

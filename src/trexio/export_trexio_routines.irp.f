@@ -1,17 +1,27 @@
-subroutine export_trexio(update)
+subroutine export_trexio(update,full_path)
   use trexio
   implicit none
   BEGIN_DOC
   !     Exports the wave function in TREXIO format
   END_DOC
 
-  logical, intent(in)            :: update
+  logical, intent(in)            :: update, full_path
   integer(trexio_t)              :: f(N_states) ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
-  integer                        :: k
+  integer                        :: k, iunit
   double precision, allocatable  :: factor(:)
-  character*(256)  :: filenames(N_states)
+  character*(256)  :: filenames(N_states), fp
   character :: rw
+
+  integer, external :: getunitandopen
+
+  if (full_path) then
+    fp = trexio_filename
+    call system('realpath '//trim(fp)//' > '//trim(fp)//'.tmp')
+    iunit = getunitandopen(trim(fp)//'.tmp','r')
+    read(iunit,'(A)') trexio_filename
+    close(iunit, status='delete')
+  endif
 
   filenames(1) = trexio_filename
   do k=2,N_states
@@ -48,6 +58,60 @@ subroutine export_trexio(update)
     endif
   enddo
   call ezfio_set_trexio_trexio_file(trexio_filename)
+
+
+
+! ------------------------------------------------------------------------------
+
+! Metadata
+! --------
+
+  integer :: code_num, author_num
+  character*(64) :: code(100), author(100), user
+  character*(64), parameter :: qp2_code = "QuantumPackage"
+
+  call getenv("USER",user)
+  do k=1,N_states
+    rc = trexio_read_metadata_code_num(f(k), code_num)
+    if (rc == TREXIO_ATTR_MISSING) then
+      i = 1
+      code(:) = ""
+    else
+      rc = trexio_read_metadata_code(f(k), code, 64)
+      do i=1, code_num
+        if (trim(code(i)) == trim(qp2_code)) then
+          exit
+        endif
+      enddo
+    endif
+    if (i == code_num+1) then
+      code(i) = qp2_code
+      rc = trexio_write_metadata_code_num(f(k), i)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_metadata_code(f(k), code, 64)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+
+    rc = trexio_read_metadata_author_num(f(k), author_num)
+    if (rc == TREXIO_ATTR_MISSING) then
+      i = 1
+      author(:) = ""
+    else
+      rc = trexio_read_metadata_author(f(k), author, 64)
+      do i=1, author_num
+        if (trim(author(i)) == trim(user)) then
+          exit
+        endif
+      enddo
+    endif
+    if (i == author_num+1) then
+      author(i) = user
+      rc = trexio_write_metadata_author_num(f(k), i)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      rc = trexio_write_metadata_author(f(k), author, 64)
+      call trexio_assert(rc, TREXIO_SUCCESS)
+    endif
+  enddo
 
 ! ------------------------------------------------------------------------------
 

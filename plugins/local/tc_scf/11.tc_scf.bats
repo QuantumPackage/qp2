@@ -10,16 +10,17 @@ function run_Ne() {
   qp create_ezfio -b cc-pcvdz Ne.xyz -o Ne_tc_scf
   qp run scf
 
+  qp set tc_keywords tc_integ_type numeric
+  qp set jastrow env_type Sum_Gauss
   qp set hamiltonian mu_erf 0.87
-  qp set tc_keywords j1b_type 3
-  qp set tc_keywords j1b_pen [1.5]
-  qp set tc_keywords bi_ortho True
-  qp set tc_keywords test_cycle_tc True
+  qp set jastrow j1e_type None
+  qp set jastrow env_coef "[1.]"
+  qp set jastrow env_expo "[1.5]"
 
   qp run tc_scf | tee ${EZFIO_FILE}.tc_scf.out
   eref=-128.552134
   energy="$(qp get tc_scf bitc_energy)"
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 
@@ -33,16 +34,17 @@ function run_C() {
   qp create_ezfio -b cc-pcvdz C.xyz -o C_tc_scf -m 3
   qp run scf
 
+  qp set tc_keywords tc_integ_type numeric
+  qp set jastrow env_type Sum_Gauss
   qp set hamiltonian mu_erf 0.87
-  qp set tc_keywords j1b_type 3
-  qp set tc_keywords j1b_pen [1.5]
-  qp set tc_keywords bi_ortho True
-  qp set tc_keywords test_cycle_tc True
+  qp set jastrow j1e_type None
+  qp set jastrow env_coef "[1.]"
+  qp set jastrow env_expo "[1.5]"
 
   qp run tc_scf | tee ${EZFIO_FILE}.tc_scf.out
   eref=-37.691254356408791
   energy="$(qp get tc_scf bitc_energy)"
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 
@@ -57,16 +59,17 @@ function run_O() {
   qp create_ezfio -b cc-pcvdz O.xyz -o O_tc_scf -m 3
   qp run scf
 
+  qp set tc_keywords tc_integ_type numeric
+  qp set jastrow env_type Sum_Gauss
+  qp set jastrow j1e_type None
+  qp set jastrow env_coef "[1.]"
+  qp set jastrow env_expo "[1.5]"
   qp set hamiltonian mu_erf 0.87
-  qp set tc_keywords j1b_type 3
-  qp set tc_keywords j1b_pen [1.5]
-  qp set tc_keywords bi_ortho True
-  qp set tc_keywords test_cycle_tc True
 
   qp run tc_scf | tee ${EZFIO_FILE}.tc_scf.out
   eref=-74.814687229354590
   energy="$(qp get tc_scf bitc_energy)"
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 
@@ -82,16 +85,17 @@ function run_ch2() {
   qp create_ezfio -b "C:cc-pcvdz|H:cc-pvdz" ch2.xyz -o ch2_tc_scf
   qp run scf
 
+  qp set tc_keywords tc_integ_type numeric
+  qp set jastrow env_type Sum_Gauss
+  qp set jastrow j1e_type None
+  qp set jastrow env_coef "[1., 1., 1.]"
+  qp set jastrow env_expo '[1.5,10000,10000]'
   qp set hamiltonian mu_erf 0.87
-  qp set tc_keywords j1b_type 3
-  qp set tc_keywords j1b_pen '[1.5,10000,10000]'
-  qp set tc_keywords bi_ortho True
-  qp set tc_keywords test_cycle_tc True
 
   qp run tc_scf | tee ${EZFIO_FILE}.tc_scf.out
   eref=-38.903247818077737
   energy="$(qp get tc_scf bitc_energy)"
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 

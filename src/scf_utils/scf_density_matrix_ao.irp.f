@@ -1,3 +1,11 @@
+BEGIN_PROVIDER [ logical, all_shells_closed ]
+ implicit none
+ BEGIN_DOC
+ ! 
+ END_DOC
+ all_shells_closed = (elec_alpha_num == elec_beta_num)
+END_PROVIDER
+
 BEGIN_PROVIDER [double precision, SCF_density_matrix_ao_alpha, (ao_num,ao_num) ]
    implicit none
    BEGIN_DOC
@@ -30,7 +38,7 @@ BEGIN_PROVIDER [ double precision, SCF_density_matrix_ao, (ao_num,ao_num) ]
    ! Sum of $\alpha$ and $\beta$ density matrices
    END_DOC
    ASSERT (size(SCF_density_matrix_ao,1) == size(SCF_density_matrix_ao_alpha,1))
-   if (elec_alpha_num== elec_beta_num) then
+   if (all_shells_closed) then
      SCF_density_matrix_ao = SCF_density_matrix_ao_alpha + SCF_density_matrix_ao_alpha
    else
      ASSERT (size(SCF_density_matrix_ao,1) == size(SCF_density_matrix_ao_beta ,1))

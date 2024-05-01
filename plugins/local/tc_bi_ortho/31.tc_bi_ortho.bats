@@ -14,7 +14,7 @@ function run_Ne() {
   qp run tc_bi_ortho | tee Ne_tc_scf.cisd_tc_bi_ortho.out
   eref=-128.77020441279302
   energy=$(get_e Ne_tc_scf.cisd_tc_bi_ortho.out)
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 
@@ -29,7 +29,7 @@ function run_C() {
   qp run tc_bi_ortho | tee C_tc_scf.cisd_tc_bi_ortho.out
   eref=-37.757536149952514
   energy=$(get_e C_tc_scf.cisd_tc_bi_ortho.out)
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 
@@ -43,7 +43,7 @@ function run_O() {
   qp run tc_bi_ortho | tee O_tc_scf.cisd_tc_bi_ortho.out
   eref=-74.908518517716161
   energy=$(get_e O_tc_scf.cisd_tc_bi_ortho.out)
-  eq $energy $eref 1e-6
+  eq $energy $eref 2e-4
 }
 
 

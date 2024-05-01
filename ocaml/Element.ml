@@ -4,7 +4,7 @@ open Qptypes
 exception ElementError of string
 
 type t = X
-                                                                                              
+
 |H                                                 |He
 |Li|Be                              |B |C |N |O |F |Ne
 |Na|Mg                              |Al|Si|P |S |Cl|Ar
@@ -20,7 +20,7 @@ type t = X
 
 let of_string x =
   match (String.capitalize_ascii (String.lowercase_ascii x)) with
-|  "X"   |   "Dummy"        ->  X
+|  "X"   |   "Ghost"        ->  X
 |  "H"   |   "Hydrogen"     ->  H
 |  "He"  |   "Helium"       ->  He
 |  "Li"  |   "Lithium"      ->  Li
@@ -265,7 +265,7 @@ let to_string = function
 
 
 let to_long_string = function
-| X   -> "Dummy"
+| X   -> "Ghost"
 | H   -> "Hydrogen"
 | He  -> "Helium"
 | Li  -> "Lithium"
@@ -492,20 +492,20 @@ let to_charge c =
   | No  -> 102
   | Lr  -> 103
   | Rf  -> 104
-  | Db  -> 105 
-  | Sg  -> 106 
-  | Bh  -> 107 
-  | Hs  -> 108 
-  | Mt  -> 109 
-  | Ds  -> 110 
-  | Rg  -> 111 
-  | Cn  -> 112 
-  | Nh  -> 113 
-  | Fl  -> 114 
-  | Mc  -> 115 
-  | Lv  -> 116 
-  | Ts  -> 117 
-  | Og  -> 118 
+  | Db  -> 105
+  | Sg  -> 106
+  | Bh  -> 107
+  | Hs  -> 108
+  | Mt  -> 109
+  | Ds  -> 110
+  | Rg  -> 111
+  | Cn  -> 112
+  | Nh  -> 113
+  | Fl  -> 114
+  | Mc  -> 115
+  | Lv  -> 116
+  | Ts  -> 117
+  | Og  -> 118
   in Charge.of_int result
 
 
@@ -565,7 +565,7 @@ let of_charge c = match (Charge.to_int c) with
 |  52   -> Te
 |  53   -> I
 |  54   -> Xe
-|  55   -> Cs  
+|  55   -> Cs
 |  56   -> Ba
 |  57   -> La
 |  58   -> Ce
@@ -880,7 +880,7 @@ let vdw_radius x =
   | Ts  -> None
   | Og  -> None
   in
-  match result x with 
+  match result x with
   | Some y -> Some (Positive_float.of_float @@ Units.angstrom_to_bohr *. y )
   | None -> None
 

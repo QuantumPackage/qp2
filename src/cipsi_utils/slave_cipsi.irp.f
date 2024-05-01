@@ -1,12 +1,10 @@
 subroutine run_slave_cipsi
-
+  implicit none
   BEGIN_DOC
-  ! Helper program for distributed parallelism
+! Helper program for distributed parallelism
   END_DOC
 
-  implicit none
-
-  call omp_set_max_active_levels(1)
+  call set_multiple_levels_omp(.False.)
   distributed_davidson = .False.
   read_wf = .False.
   SOFT_TOUCH read_wf distributed_davidson
@@ -17,15 +15,12 @@ end
 
 subroutine provide_everything
   PROVIDE H_apply_buffer_allocated mo_two_e_integrals_in_map psi_det_generators psi_coef_generators psi_det_sorted_bit psi_selectors n_det_generators n_states generators_bitmask zmq_context N_states_diag
-
   PROVIDE pt2_e0_denominator mo_num N_int ci_energy mpi_master zmq_state zmq_context
   PROVIDE psi_det psi_coef threshold_generators state_average_weight
   PROVIDE N_det_selectors pt2_stoch_istate N_det selection_weight pseudo_sym
 end
 
-
 subroutine run_slave_main
-
   use f77_zmq
 
   implicit none
@@ -176,9 +171,9 @@ subroutine run_slave_main
       call write_double(6,(t1-t0),'Broadcast time')
 
       !---
-      call omp_set_max_active_levels(8)
+      call set_multiple_levels_omp(.True.)
       call davidson_slave_tcp(0)
-      call omp_set_max_active_levels(1)
+      call set_multiple_levels_omp(.False.)
       print *,  mpi_rank, ': Davidson done'
       !---
 
@@ -308,11 +303,11 @@ subroutine run_slave_main
 
           PROVIDE global_selection_buffer pt2_N_teeth pt2_F N_det_generators
           PROVIDE psi_bilinear_matrix_columns_loc psi_det_alpha_unique psi_det_beta_unique
-          PROVIDE psi_bilinear_matrix_rows psi_det_sorted_tc_order psi_bilinear_matrix_order
+          PROVIDE psi_bilinear_matrix_rows psi_bilinear_matrix_order
           PROVIDE psi_bilinear_matrix_transp_rows_loc psi_bilinear_matrix_transp_columns
-          PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp psi_det_sorted_tc
-
-          PROVIDE psi_det_hii selection_weight pseudo_sym pt2_min_parallel_tasks
+          PROVIDE psi_bilinear_matrix_transp_order psi_selectors_coef_transp
+          PROVIDE selection_weight pseudo_sym pt2_min_parallel_tasks
+          call provide_for_zmq_pt2
 
           if (mpi_master) then
             print *,  'Running PT2'

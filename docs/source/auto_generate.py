@@ -29,7 +29,8 @@ def generate_modules(abs_module, entities):
     rst += ["", "EZFIO parameters", "----------------", ""]
     config_file = configparser.ConfigParser()
     with open(EZFIO, 'r') as f:
-        config_file.readfp(f)
+#        config_file.readfp(f)
+        config_file.read_file(f)
         for section in config_file.sections():
             doc = config_file.get(section, "doc")
             doc = "    " + doc.replace("\n", "\n\n    ")+"\n"

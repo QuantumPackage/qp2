@@ -11,13 +11,23 @@ BEGIN_PROVIDER [ double precision, psi_average_norm_contrib_tc, (psi_det_size) ]
   psi_average_norm_contrib_tc(:) = 0.d0
   do k=1,N_states
     do i=1,N_det
-      psi_average_norm_contrib_tc(i) = & 
+!      print*,dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k)),psi_l_coef_bi_ortho(i,k),psi_r_coef_bi_ortho(i,k)
+      psi_average_norm_contrib_tc(i) += & 
           dabs(psi_l_coef_bi_ortho(i,k)*psi_r_coef_bi_ortho(i,k))*state_average_weight(k)
     enddo
   enddo
+!  print*,'***'
+!  do i = 1, N_det
+!   print*,psi_average_norm_contrib_tc(i)
+!  enddo
+  print*,'sum(psi_average_norm_contrib_tc(1:N_det))',sum(psi_average_norm_contrib_tc(1:N_det))
   f = 1.d0/sum(psi_average_norm_contrib_tc(1:N_det))
   do i=1,N_det
     psi_average_norm_contrib_tc(i) = psi_average_norm_contrib_tc(i)*f
+  enddo
+  f = 0.d0
+  do i=1,N_det
+   f+= psi_average_norm_contrib_tc(i)
   enddo
 END_PROVIDER
 
