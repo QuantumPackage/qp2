@@ -234,7 +234,7 @@ subroutine rh_tcscf_diis()
     call unlock_io
 
     if(er_delta .lt. 0.d0) then
-      call ezfio_set_tc_scf_bitc_energy(etc_tot)
+      call ezfio_set_tc_scf_tcscf_energy(etc_tot)
       call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
       write(json_unit, json_true_fmt) 'saved'
@@ -263,7 +263,7 @@ subroutine rh_tcscf_diis()
 
   deallocate(mo_r_coef_save, mo_l_coef_save, F_DIIS, E_DIIS)
 
-  call ezfio_set_tc_scf_bitc_energy(TC_HF_energy)
+  call ezfio_set_tc_scf_tcscf_energy(TC_HF_energy)
   call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
   call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
 

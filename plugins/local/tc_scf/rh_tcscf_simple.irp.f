@@ -91,7 +91,7 @@ subroutine rh_tcscf_simple()
       e_delta = dabs(etc_tot - e_save)
       e_save  = etc_tot
 
-      call ezfio_set_tc_scf_bitc_energy(etc_tot)
+      call ezfio_set_tc_scf_tcscf_energy(etc_tot)
 
       call wall_time(t1)
       write(6, '(I4,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, F16.10,1X, I4,1X, F8.2)')  &

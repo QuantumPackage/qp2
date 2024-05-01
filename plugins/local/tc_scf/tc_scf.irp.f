@@ -13,7 +13,6 @@ program tc_scf
   PROVIDE j1e_type
   PROVIDE j2e_type
   PROVIDE tcscf_algorithm
-  PROVIDE var_tc
 
   print *, ' TC-SCF with:'
   print *, ' j1e_type = ', j1e_type
@@ -45,45 +44,28 @@ program tc_scf
   !call create_guess()
   !call orthonormalize_mos()
 
-
-  if(var_tc) then
-
-    print *, ' VAR-TC'
-
-    if(tcscf_algorithm == 'DIIS') then
-      print*, ' NOT implemented yet'
-    elseif(tcscf_algorithm == 'Simple') then
-      call rh_vartcscf_simple()
-    else
-      print *, ' not implemented yet', tcscf_algorithm
-      stop
-    endif
-
+  if(tcscf_algorithm == 'DIIS') then
+    call rh_tcscf_diis()
+  elseif(tcscf_algorithm == 'Simple') then
+    call rh_tcscf_simple()
   else
-
-    if(tcscf_algorithm == 'DIIS') then
-      call rh_tcscf_diis()
-    elseif(tcscf_algorithm == 'Simple') then
-      call rh_tcscf_simple()
-    else
-      print *, ' not implemented yet', tcscf_algorithm
-      stop
-    endif
-
-    PROVIDE Fock_matrix_tc_diag_mo_tot
-    print*, ' Eigenvalues:' 
-    do i = 1, mo_num
-      print*, i, Fock_matrix_tc_diag_mo_tot(i)
-    enddo
-
-    ! TODO 
-    ! rotate angles in separate code only if necessary
-    if(minimize_lr_angles)then
-     call minimize_tc_orb_angles()
-    endif
-    call print_energy_and_mos(good_angles)
-
+    print *, ' not implemented yet', tcscf_algorithm
+    stop
   endif
+
+  PROVIDE Fock_matrix_tc_diag_mo_tot
+  print*, ' Eigenvalues:' 
+  do i = 1, mo_num
+    print*, i, Fock_matrix_tc_diag_mo_tot(i)
+  enddo
+
+  ! TODO 
+  ! rotate angles in separate code only if necessary
+  if(minimize_lr_angles)then
+   call minimize_tc_orb_angles()
+  endif
+  call print_energy_and_mos(good_angles)
+
 
   write(json_unit,json_array_close_fmtx)
   call json_close

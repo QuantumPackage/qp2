@@ -1,4 +1,6 @@
 
+! ---
+
  BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_tc_diag_mo_tot, (mo_num)]
 
@@ -22,9 +24,6 @@
   implicit none
   integer          :: i, j, n
   double precision :: t0, t1
-
-  !print*, ' Providing Fock_matrix_tc_mo_tot ...'
-  !call wall_time(t0)
 
   if(elec_alpha_num == elec_beta_num) then
 
@@ -158,8 +157,8 @@
     Fock_matrix_tc_mo_tot += fock_3_mat
   endif
 
-  !call wall_time(t1)
-  !print*, ' Wall time for Fock_matrix_tc_mo_tot =', t1-t0
-
 END_PROVIDER
+
+! ---
+
 
