@@ -44,14 +44,92 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
     elseif(tc_integ_type .eq. "numeric") then
 
       print *, ' Numerical integration over r1 and r2 will be performed'
-  
-      ! TODO combine 1shot & int2_grad1_u12_ao_num
 
-      PROVIDE int2_grad1_u12_ao_num
-      int2_grad1_u12_ao = int2_grad1_u12_ao_num
+      if(tc_save_mem) then
 
-      !PROVIDE int2_grad1_u12_ao_num_1shot
-      !int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
+        integer                       :: n_blocks, n_rest, n_pass
+        integer                       :: i_blocks, i_rest, i_pass, ii
+        double precision              :: mem, n_double
+        double precision, allocatable :: tmp(:,:,:), xx(:)
+        double precision, allocatable :: tmp_grad1_u12(:,:,:)
+
+        PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
+
+        allocate(tmp(n_points_extra_final_grid,ao_num,ao_num), xx(n_points_extra_final_grid))
+        !$OMP PARALLEL               &
+        !$OMP DEFAULT (NONE)         &
+        !$OMP PRIVATE (j, i, jpoint) &
+        !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
+        !$OMP DO COLLAPSE(2)
+        do j = 1, ao_num
+          do i = 1, ao_num
+            do jpoint = 1, n_points_extra_final_grid
+              tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+            enddo
+          enddo
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+        call total_memory(mem)
+        mem      = max(1.d0, qp_max_mem - mem)
+        n_double = mem * 1.d8
+        n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
+        n_rest   = int(mod(n_points_final_grid, n_blocks))
+        n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
+        call write_int(6, n_pass, 'Number of passes')
+        call write_int(6, n_blocks, 'Size of the blocks')
+        call write_int(6, n_rest, 'Size of the last block')
+        allocate(tmp_grad1_u12(n_points_extra_final_grid,n_blocks,3))
+        do i_pass = 1, n_pass
+          ii = (i_pass-1)*n_blocks + 1
+          !$OMP PARALLEL                   &
+          !$OMP DEFAULT (NONE)             &
+          !$OMP PRIVATE (i_blocks, ipoint) &
+          !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, final_grid_points, xx, tmp_grad1_u12)
+          !$OMP DO 
+          do i_blocks = 1, n_blocks
+            ipoint = ii - 1 + i_blocks ! r1
+            call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1), tmp_grad1_u12(1,i_blocks,2), tmp_grad1_u12(1,i_blocks,3), xx(1))
+          enddo
+          !$OMP END DO
+          !$OMP END PARALLEL
+          do m = 1, 3
+            call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                     &
+                      , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
+                      , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
+          enddo
+        enddo
+        deallocate(tmp_grad1_u12)
+        if(n_rest .gt. 0) then
+          allocate(tmp_grad1_u12(n_points_extra_final_grid,n_rest,3))
+          ii = n_pass*n_blocks + 1
+          !$OMP PARALLEL                 &
+          !$OMP DEFAULT (NONE)           &
+          !$OMP PRIVATE (i_rest, ipoint) &
+          !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, final_grid_points, xx, tmp_grad1_u12)
+          !$OMP DO 
+          do i_rest = 1, n_rest
+            ipoint = ii - 1 + i_rest ! r1
+            call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1), tmp_grad1_u12(1,i_rest,2), tmp_grad1_u12(1,i_rest,3), xx(1))
+          enddo
+          !$OMP END DO
+          !$OMP END PARALLEL
+          do m = 1, 3
+            call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                       &
+                      , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
+                      , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
+          enddo
+          deallocate(tmp_grad1_u12)
+        endif
+        deallocate(tmp,xx)
+
+      else
+        ! TODO combine 1shot & int2_grad1_u12_ao_num
+        PROVIDE int2_grad1_u12_ao_num
+        int2_grad1_u12_ao = int2_grad1_u12_ao_num
+        !PROVIDE int2_grad1_u12_ao_num_1shot
+        !int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
+      endif
 
     elseif(tc_integ_type .eq. "semi-analytic") then
 
@@ -177,13 +255,88 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_square_ao, (ao_num, ao_num, n_p
 
     print *, ' Numerical integration over r1 and r2 will be performed'
   
-    ! TODO combine 1shot & int2_grad1_u12_square_ao_num
+    if(tc_save_mem) then
 
-    PROVIDE int2_grad1_u12_square_ao_num
-    int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
+      integer                       :: n_blocks, n_rest, n_pass
+      integer                       :: i_blocks, i_rest, i_pass, ii
+      double precision              :: mem, n_double
+      double precision, allocatable :: tmp(:,:,:), xx(:,:,:)
+      double precision, allocatable :: tmp_grad1_u12_squared(:,:)
 
-    !PROVIDE int2_grad1_u12_square_ao_num_1shot
-    !int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
+      PROVIDE final_weight_at_r_vector_extra aos_in_r_array_extra
+
+      allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
+      !$OMP PARALLEL               &
+      !$OMP DEFAULT (NONE)         &
+      !$OMP PRIVATE (j, i, jpoint) &
+      !$OMP SHARED (tmp, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
+      !$OMP DO COLLAPSE(2)
+      do j = 1, ao_num
+        do i = 1, ao_num
+          do jpoint = 1, n_points_extra_final_grid
+            tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      call total_memory(mem)
+      mem      = max(1.d0, qp_max_mem - mem)
+      n_double = mem * 1.d8
+      n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
+      n_rest   = int(mod(n_points_final_grid, n_blocks))
+      n_pass   = int((n_points_final_grid - n_rest) / n_blocks)
+      call write_int(6, n_pass, 'Number of passes')
+      call write_int(6, n_blocks, 'Size of the blocks')
+      call write_int(6, n_rest, 'Size of the last block')
+      allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_blocks), xx(n_points_extra_final_grid,n_blocks,3))
+      do i_pass = 1, n_pass
+        ii = (i_pass-1)*n_blocks + 1
+        !$OMP PARALLEL                   &
+        !$OMP DEFAULT (NONE)             &
+        !$OMP PRIVATE (i_blocks, ipoint) &
+        !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, xx, final_grid_points, tmp_grad1_u12_squared)
+        !$OMP DO 
+        do i_blocks = 1, n_blocks
+          ipoint = ii - 1 + i_blocks ! r1
+          call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, xx(1,i_blocks,1), xx(1,i_blocks,2), xx(1,i_blocks,3), tmp_grad1_u12_squared(1,i_blocks))
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+        call dgemm( "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, -0.5d0                         &
+                  , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
+                  , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
+      enddo
+      deallocate(tmp_grad1_u12_squared, xx)
+      if(n_rest .gt. 0) then
+        ii = n_pass*n_blocks + 1
+        allocate(tmp_grad1_u12_squared(n_points_extra_final_grid,n_rest), xx(n_points_extra_final_grid,n_rest,3))
+        !$OMP PARALLEL                 &
+        !$OMP DEFAULT (NONE)           &
+        !$OMP PRIVATE (i_rest, ipoint) &
+        !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, xx, final_grid_points, tmp_grad1_u12_squared)
+        !$OMP DO 
+        do i_rest = 1, n_rest
+          ipoint = ii - 1 + i_rest ! r1
+          call get_grad1_u12_withsq_r1_seq(ipoint, n_points_extra_final_grid, xx(1,i_rest,1), xx(1,i_rest,2), xx(1,i_rest,3), tmp_grad1_u12_squared(1,i_rest))
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+        call dgemm( "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, -0.5d0                           &
+                  , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12_squared(1,1), n_points_extra_final_grid &
+                  , 0.d0, int2_grad1_u12_square_ao(1,1,ii), ao_num*ao_num)
+        deallocate(tmp_grad1_u12_squared, xx)
+      endif
+      deallocate(tmp)
+
+    else
+
+      ! TODO combine 1shot & int2_grad1_u12_square_ao_num
+      PROVIDE int2_grad1_u12_square_ao_num
+      int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num
+      !PROVIDE int2_grad1_u12_square_ao_num_1shot
+      !int2_grad1_u12_square_ao = int2_grad1_u12_square_ao_num_1shot
+    endif
 
   elseif(tc_integ_type .eq. "semi-analytic") then
 

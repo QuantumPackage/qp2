@@ -32,7 +32,7 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_a, (mo_num, mo_num)]
   endif
 
   !call wall_time(tf)
-  !print *, ' Wall time for fock_3e_uhf_mo_a =', tf - ti
+  !print *, ' Wall time for fock_3e_uhf_mo_a (min) =', (tf - ti)/60.d0
 
 END_PROVIDER 
 
