@@ -72,7 +72,11 @@ END_PROVIDER
           print *, ' !!! WARNING !!!'
           print *, ' negative weight !!!!'
           print *, i_count, final_weight_at_r_vector(i_count)
-          stop
+          if(dabs(final_weight_at_r_vector(i_count)) .lt. 1d-10) then
+            final_weight_at_r_vector(i_count) = 0.d0
+          else
+            stop
+          endif
         endif 
       enddo
     enddo

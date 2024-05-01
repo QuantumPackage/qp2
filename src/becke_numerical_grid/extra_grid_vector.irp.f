@@ -47,8 +47,12 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer                        :: i,j,k,l,i_count
-  double precision               :: r(3)
+  integer          :: i, j, k, l, i_count
+  double precision :: r(3)
+  double precision :: wall0, wall1
+
+  call wall_time(wall0)
+  print *, ' Providing extra_final_grid_points ...'
 
   i_count = 0
   do j = 1, nucl_num
@@ -66,9 +70,24 @@ END_PROVIDER
         index_final_points_extra(2,i_count) = i
         index_final_points_extra(3,i_count) = j
         index_final_points_extra_reverse(k,i,j) = i_count
+
+        if(final_weight_at_r_vector_extra(i_count) .lt. 0.d0) then
+          print *, ' !!! WARNING !!!'
+          print *, ' negative weight !!!!'
+          print *, i_count, final_weight_at_r_vector_extra(i_count)
+          if(dabs(final_weight_at_r_vector_extra(i_count)) .lt. 1d-10) then
+            final_weight_at_r_vector_extra(i_count) = 0.d0
+          else
+            stop
+          endif
+        endif
       enddo
     enddo
   enddo
+
+  call wall_time(wall1)
+  print *, ' wall time for extra_final_grid_points,', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER
 
