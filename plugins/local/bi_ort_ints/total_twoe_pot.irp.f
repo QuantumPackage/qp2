@@ -16,10 +16,10 @@ double precision function bi_ortho_mo_ints(l, k, j, i)
   integer             :: m, n, p, q
 
   bi_ortho_mo_ints = 0.d0
-  do m = 1, ao_num
-    do p = 1, ao_num
-      do n = 1, ao_num
-        do q = 1, ao_num
+  do p = 1, ao_num
+    do m = 1, ao_num
+      do q = 1, ao_num
+        do n = 1, ao_num
           !                                   p1h1p2h2   l1                  l2              r1               r2
           bi_ortho_mo_ints += ao_two_e_tc_tot(n,q,m,p) * mo_l_coef(m,l) * mo_l_coef(n,k) * mo_r_coef(p,j) * mo_r_coef(q,i)
         enddo
@@ -27,7 +27,7 @@ double precision function bi_ortho_mo_ints(l, k, j, i)
     enddo
   enddo
 
-end function bi_ortho_mo_ints
+end
 
 ! ---
 
@@ -40,38 +40,106 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   END_DOC
 
   implicit none
-  integer                       :: i, j, k, l, m, n, p, q
+  integer                       :: i, j, k, l, m, n, p, q, s, r
+  double precision              :: t1, t2, tt1, tt2
   double precision, allocatable :: a1(:,:,:,:), a2(:,:,:,:)
+  double precision, allocatable :: a_jkp(:,:,:), a_kpq(:,:,:), ao_two_e_tc_tot_tmp(:,:,:)
+
+  print *, ' PROVIDING mo_bi_ortho_tc_two_e_chemist ...'
+  call wall_time(t1)
+  call print_memory_usage()
 
   PROVIDE mo_r_coef mo_l_coef
 
-  allocate(a2(ao_num,ao_num,ao_num,mo_num))
+  if(ao_to_mo_tc_n3) then
 
-  call dgemm( 'T', 'N', ao_num*ao_num*ao_num, mo_num, ao_num, 1.d0     &
-            , ao_two_e_tc_tot(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num &
-            , 0.d0 , a2(1,1,1,1), ao_num*ao_num*ao_num)
+    print*, ' memory scale of TC ao -> mo: O(N3) '
 
-  allocate(a1(ao_num,ao_num,mo_num,mo_num))
+    if(.not.read_tc_integ) then
+       stop 'read_tc_integ needs to be set to true'
+    endif
 
-  call dgemm( 'T', 'N', ao_num*ao_num*mo_num, mo_num, ao_num, 1.d0 &
-            , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
-            , 0.d0, a1(1,1,1,1), ao_num*ao_num*mo_num)
+    allocate(a_jkp(ao_num,ao_num,mo_num))
+    allocate(a_kpq(ao_num,mo_num,mo_num))
+    allocate(ao_two_e_tc_tot_tmp(ao_num,ao_num,ao_num))
 
-  deallocate(a2)
-  allocate(a2(ao_num,mo_num,mo_num,mo_num))
+    open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="read")
 
-  call dgemm( 'T', 'N', ao_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
-            , a1(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num          &
-            , 0.d0, a2(1,1,1,1), ao_num*mo_num*mo_num)
+    call wall_time(tt1)
 
-  deallocate(a1)
+    mo_bi_ortho_tc_two_e_chemist(:,:,:,:) = 0.d0
+    do l = 1, ao_num
+      read(11) ao_two_e_tc_tot_tmp(:,:,:)
 
-  call dgemm( 'T', 'N', mo_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
-            , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
-            , 0.d0, mo_bi_ortho_tc_two_e_chemist(1,1,1,1), mo_num*mo_num*mo_num)
+      do s = 1, mo_num
 
-  deallocate(a2)
+        call dgemm( 'T', 'N', ao_num*ao_num, mo_num, ao_num, 1.d0              &
+                  , ao_two_e_tc_tot_tmp(1,1,1), ao_num, mo_l_coef(1,1), ao_num &
+                  , 0.d0, a_jkp(1,1,1), ao_num*ao_num)
 
+        call dgemm( 'T', 'N', ao_num*mo_num, mo_num, ao_num, 1.d0 &
+                  , a_jkp(1,1,1), ao_num, mo_r_coef(1,1), ao_num  &
+                  , 0.d0, a_kpq(1,1,1), ao_num*mo_num)
+
+        call dgemm( 'T', 'N', mo_num*mo_num, mo_num, ao_num, mo_r_coef(l,s) &
+                  , a_kpq(1,1,1), ao_num, mo_l_coef(1,1), ao_num            &
+                  , 1.d0, mo_bi_ortho_tc_two_e_chemist(1,1,1,s), mo_num*mo_num)
+
+      enddo ! s
+
+      if(l == 2) then
+        call wall_time(tt2)
+        print*, ' 1 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-1)*(tt2-tt1)/60.d0
+      elseif(l == 11) then
+        call wall_time(tt2)
+        print*, ' 10 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-10)*(tt2-tt1)/(60.d0*10.d0)
+      elseif(l == 101) then
+        call wall_time(tt2)
+        print*, ' 100 / mo_num done in (min)', (tt2-tt1)/60.d0
+        print*, ' estimated time required (min)', dble(mo_num-100)*(tt2-tt1)/(60.d0*100.d0)
+      endif
+    enddo ! l
+
+    close(11)
+
+    deallocate(a_jkp, a_kpq, ao_two_e_tc_tot_tmp)
+
+  else
+
+    print*, ' memory scale of TC ao -> mo: O(N4) '
+
+    allocate(a2(ao_num,ao_num,ao_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*ao_num*ao_num, mo_num, ao_num, 1.d0     &
+              , ao_two_e_tc_tot(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num &
+              , 0.d0, a2(1,1,1,1), ao_num*ao_num*ao_num)
+  
+    FREE ao_two_e_tc_tot
+
+    allocate(a1(ao_num,ao_num,mo_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*ao_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
+              , 0.d0, a1(1,1,1,1), ao_num*ao_num*mo_num)
+  
+    deallocate(a2)
+    allocate(a2(ao_num,mo_num,mo_num,mo_num))
+  
+    call dgemm( 'T', 'N', ao_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a1(1,1,1,1), ao_num, mo_l_coef(1,1), ao_num          &
+              , 0.d0, a2(1,1,1,1), ao_num*mo_num*mo_num)
+  
+    deallocate(a1)
+  
+    call dgemm( 'T', 'N', mo_num*mo_num*mo_num, mo_num, ao_num, 1.d0 &
+              , a2(1,1,1,1), ao_num, mo_r_coef(1,1), ao_num          &
+              , 0.d0, mo_bi_ortho_tc_two_e_chemist(1,1,1,1), mo_num*mo_num*mo_num)
+  
+    deallocate(a2)
+  
+  endif
 
   !allocate(a1(mo_num,ao_num,ao_num,ao_num))
   !a1 = 0.d0
@@ -135,6 +203,10 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e_chemist, (mo_num, mo_num,
   !enddo
   !deallocate(a1)
 
+  call wall_time(t2)
+  print *, ' WALL TIME for PROVIDING mo_bi_ortho_tc_two_e_chemist (min)', (t2-t1)/60.d0
+  call print_memory_usage()
+
 END_PROVIDER 
 
 ! ---
@@ -176,6 +248,28 @@ BEGIN_PROVIDER [double precision, mo_bi_ortho_tc_two_e, (mo_num, mo_num, mo_num,
 
 END_PROVIDER 
 
+BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_transp, (mo_num, mo_num, mo_num, mo_num)]
+ implicit none
+ BEGIN_DOC
+  !
+  ! mo_bi_ortho_tc_two_e_transp(i,j,k,l) = <k l| V(r_12) |i j> = transpose of mo_bi_ortho_tc_two_e
+  !
+  ! the potential V(r_12) contains ALL TWO-E CONTRIBUTION OF THE TC-HAMILTONIAN
+  !
+ END_DOC
+
+ integer :: i,j,k,l
+ do i = 1, mo_num
+  do j = 1, mo_num
+   do k = 1, mo_num
+    do l = 1, mo_num
+     mo_bi_ortho_tc_two_e_transp(i,j,k,l) = mo_bi_ortho_tc_two_e_transp(k,l,i,j)
+    enddo
+   enddo
+  enddo
+ enddo
+
+END_PROVIDER 
 ! ---
 
  BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_jj,          (mo_num,mo_num)]

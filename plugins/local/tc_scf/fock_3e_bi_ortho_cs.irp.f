@@ -9,7 +9,7 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
   double precision              :: loc_1, loc_2, loc_3
   double precision, allocatable :: Okappa(:), Jkappa(:,:)
   double precision, allocatable :: tmp_omp_d1(:), tmp_omp_d2(:,:)
-  double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:)
+  double precision, allocatable :: tmp_1(:,:), tmp_2(:,:,:,:), tmp_22(:,:,:)
   double precision, allocatable :: tmp_3(:,:,:), tmp_4(:,:,:)
 
   PROVIDE mo_l_coef mo_r_coef
@@ -63,16 +63,12 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
   allocate(tmp_1(n_points_final_grid,4))
 
   do ipoint = 1, n_points_final_grid
-
     loc_1 = 2.d0 * Okappa(ipoint) 
-
     tmp_1(ipoint,1) = loc_1 * Jkappa(ipoint,1)
     tmp_1(ipoint,2) = loc_1 * Jkappa(ipoint,2)
     tmp_1(ipoint,3) = loc_1 * Jkappa(ipoint,3)
-
     tmp_1(ipoint,4) = Okappa(ipoint)
   enddo
-
 
   !$OMP PARALLEL                                                  &
   !$OMP DEFAULT (NONE)                                            &
@@ -112,58 +108,81 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
 
   ! ---
 
-  allocate(tmp_2(n_points_final_grid,4,mo_num,mo_num))
+  if(tc_save_mem) then
 
-  !$OMP PARALLEL                                                  &
-  !$OMP DEFAULT (NONE)                                            &
-  !$OMP PRIVATE (ipoint, a, b)                                    &
-  !$OMP SHARED (n_points_final_grid, mo_num,                      &
-  !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
-  !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
-  !$OMP         tmp_2)
-  !$OMP DO COLLAPSE(2)
-  do a = 1, mo_num
-    do b = 1, mo_num
-      do ipoint = 1, n_points_final_grid
-        tmp_2(ipoint,1,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,b,a)
-        tmp_2(ipoint,2,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,b,a)
-        tmp_2(ipoint,3,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,b,a)
-      enddo
-    enddo
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
-
-  !$OMP PARALLEL                                                 &
-  !$OMP DEFAULT (NONE)                                           &
-  !$OMP PRIVATE (ipoint, a, b, i)                                &
-  !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num,      &
-  !$OMP         final_weight_at_r_vector, int2_grad1_u12_bimo_t, &
-  !$OMP         tmp_2)
-  !$OMP DO COLLAPSE(2)
-  do a = 1, mo_num
-    do b = 1, mo_num
-      tmp_2(:,4,b,a) = 0.d0
-      do i = 1, elec_beta_num
+    allocate(tmp_22(n_points_final_grid,4,mo_num))
+    do a = 1, mo_num
+      !$OMP PARALLEL                                                  &
+      !$OMP DEFAULT (NONE)                                            &
+      !$OMP PRIVATE (ipoint, b, i)                                    &
+      !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num, a,    &
+      !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
+      !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+      !$OMP         tmp_22)
+      !$OMP DO
+      do b = 1, mo_num
         do ipoint = 1, n_points_final_grid
-          tmp_2(ipoint,4,b,a) -= final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
-                                                                    + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
-                                                                    + int2_grad1_u12_bimo_t(ipoint,3,b,i) * int2_grad1_u12_bimo_t(ipoint,3,i,a) )
+          tmp_22(ipoint,1,b) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,b,a)
+          tmp_22(ipoint,2,b) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,b,a)
+          tmp_22(ipoint,3,b) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,b,a)
+        enddo
+        tmp_22(:,4,b) = 0.d0
+        do i = 1, elec_beta_num
+          do ipoint = 1, n_points_final_grid
+            tmp_22(ipoint,4,b) -= final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
+                                                                     + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
+                                                                     + int2_grad1_u12_bimo_t(ipoint,3,b,i) * int2_grad1_u12_bimo_t(ipoint,3,i,a) )
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      call dgemv( 'T', 4*n_points_final_grid, mo_num, -2.d0        &
+                , tmp_22(1,1,1), size(tmp_22, 1) * size(tmp_22, 2) &
+                , tmp_1(1,1), 1                                    &
+                , 0.d0, fock_3e_uhf_mo_cs(1,a), 1)
+    enddo
+    deallocate(tmp_22)
+
+  else
+
+    allocate(tmp_2(n_points_final_grid,4,mo_num,mo_num))
+    !$OMP PARALLEL                                                  &
+    !$OMP DEFAULT (NONE)                                            &
+    !$OMP PRIVATE (ipoint, a, b, i)                                 &
+    !$OMP SHARED (n_points_final_grid, mo_num, elec_beta_num,       &
+    !$OMP         mos_l_in_r_array_transp, mos_r_in_r_array_transp, &
+    !$OMP         int2_grad1_u12_bimo_t, final_weight_at_r_vector,  &
+    !$OMP         tmp_2)
+    !$OMP DO COLLAPSE(2)
+    do a = 1, mo_num
+      do b = 1, mo_num
+        do ipoint = 1, n_points_final_grid
+          tmp_2(ipoint,1,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,1,b,a)
+          tmp_2(ipoint,2,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,2,b,a)
+          tmp_2(ipoint,3,b,a) = final_weight_at_r_vector(ipoint) * int2_grad1_u12_bimo_t(ipoint,3,b,a)
+        enddo
+        tmp_2(:,4,b,a) = 0.d0
+        do i = 1, elec_beta_num
+          do ipoint = 1, n_points_final_grid
+            tmp_2(ipoint,4,b,a) -= final_weight_at_r_vector(ipoint) * ( int2_grad1_u12_bimo_t(ipoint,1,b,i) * int2_grad1_u12_bimo_t(ipoint,1,i,a) &
+                                                                      + int2_grad1_u12_bimo_t(ipoint,2,b,i) * int2_grad1_u12_bimo_t(ipoint,2,i,a) &
+                                                                      + int2_grad1_u12_bimo_t(ipoint,3,b,i) * int2_grad1_u12_bimo_t(ipoint,3,i,a) )
+          enddo
         enddo
       enddo
     enddo
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
+    !$OMP END DO
+    !$OMP END PARALLEL
+    call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, -2.d0 &
+              , tmp_2(1,1,1,1), size(tmp_2, 1) * size(tmp_2, 2)  &
+              , tmp_1(1,1), 1                                    &
+              , 0.d0, fock_3e_uhf_mo_cs(1,1), 1)
+    deallocate(tmp_2)
 
-  ! ---
+  endif
 
-  call dgemv( 'T', 4*n_points_final_grid, mo_num*mo_num, -2.d0 &
-            , tmp_2(1,1,1,1), size(tmp_2, 1) * size(tmp_2, 2)  &
-            , tmp_1(1,1), 1                                    &
-            , 0.d0, fock_3e_uhf_mo_cs(1,1), 1)
-
-  deallocate(tmp_1, tmp_2)
+  deallocate(tmp_1)
 
   ! ---
 
@@ -272,7 +291,7 @@ BEGIN_PROVIDER [double precision, fock_3e_uhf_mo_cs, (mo_num, mo_num)]
   ! ---
 
   !call wall_time(tf)
-  !print *, ' total Wall time for fock_3e_uhf_mo_cs =', tf - ti
+  !print *, ' total Wall time for fock_3e_uhf_mo_cs =', (tf - ti) / 60.d0
 
 END_PROVIDER 
 
