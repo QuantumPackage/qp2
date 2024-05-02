@@ -4,7 +4,7 @@
 BEGIN_PROVIDER [ double precision, good_hermit_tc_fock_mat, (mo_num, mo_num)]
 
   BEGIN_DOC
-! good_hermit_tc_fock_mat = Hermitian Upper triangular Fock matrix 
+! good_hermit_tc_fock_mat = Hermitian Upper triangular Fock matrix
 !
 ! The converged eigenvectors of such matrix yield to orthonormal vectors satisfying the left Brillouin theorem
   END_DOC
@@ -14,11 +14,11 @@ BEGIN_PROVIDER [ double precision, good_hermit_tc_fock_mat, (mo_num, mo_num)]
   good_hermit_tc_fock_mat = Fock_matrix_tc_mo_tot
   do j = 1, mo_num
     do i = 1, j-1
-      good_hermit_tc_fock_mat(i,j) = Fock_matrix_tc_mo_tot(j,i) 
+      good_hermit_tc_fock_mat(i,j) = Fock_matrix_tc_mo_tot(j,i)
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, hermit_average_tc_fock_mat, (mo_num, mo_num)]
 
@@ -35,7 +35,7 @@ BEGIN_PROVIDER [ double precision, hermit_average_tc_fock_mat, (mo_num, mo_num)]
     enddo
   enddo
 
-END_PROVIDER 
+END_PROVIDER
 
 
 ! ---
@@ -44,13 +44,13 @@ BEGIN_PROVIDER [ double precision, grad_hermit]
  BEGIN_DOC
  ! square of gradient of the energy
  END_DOC
- if(symetric_fock_tc)then
+ if(symmetric_fock_tc)then
   grad_hermit = grad_hermit_average_tc_fock_mat
  else
   grad_hermit = grad_good_hermit_tc_fock_mat
  endif
 
-END_PROVIDER 
+END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, grad_good_hermit_tc_fock_mat]
   implicit none
@@ -64,7 +64,7 @@ BEGIN_PROVIDER [ double precision, grad_good_hermit_tc_fock_mat]
       grad_good_hermit_tc_fock_mat += dabs(good_hermit_tc_fock_mat(i,j))
     enddo
   enddo
-END_PROVIDER 
+END_PROVIDER
 
 ! ---
 
@@ -80,7 +80,7 @@ BEGIN_PROVIDER [ double precision, grad_hermit_average_tc_fock_mat]
       grad_hermit_average_tc_fock_mat += dabs(hermit_average_tc_fock_mat(i,j))
     enddo
   enddo
-END_PROVIDER 
+END_PROVIDER
 
 
 ! ---
@@ -95,8 +95,8 @@ subroutine save_good_hermit_tc_eigvectors()
   sign = 1
   label = "Canonical"
   output = .False.
-  
-  if(symetric_fock_tc)then
+
+  if(symmetric_fock_tc)then
    call mo_as_eigvectors_of_mo_matrix(hermit_average_tc_fock_mat, mo_num, mo_num, label, sign, output)
   else
    call mo_as_eigvectors_of_mo_matrix(good_hermit_tc_fock_mat, mo_num, mo_num, label, sign, output)
