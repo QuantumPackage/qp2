@@ -9,15 +9,6 @@ program print_tc_energy
   read_wf = .True.
   touch read_wf
 
-  PROVIDE j2e_type
-  PROVIDE j1e_type
-  PROVIDE env_type
-
-  print *, ' j2e_type = ', j2e_type
-  print *, ' j1e_type = ', j1e_type
-  print *, ' env_type = ', env_type
-
-
   my_grid_becke  = .True.
   PROVIDE tc_grid1_a tc_grid1_r
   my_n_pt_r_grid = tc_grid1_r
@@ -37,6 +28,24 @@ program print_tc_energy
     call write_int(6, my_n_pt_r_extra_grid, 'radial  internal grid over')
     call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
   endif
+
+  call main()
+
+end
+
+! ---
+
+subroutine main()
+
+  implicit none
+
+  PROVIDE j2e_type
+  PROVIDE j1e_type
+  PROVIDE env_type
+
+  print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
 
   call write_tc_energy()
 

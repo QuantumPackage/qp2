@@ -7,15 +7,6 @@ program tc_scf
   END_DOC
 
   implicit none
-  integer :: i
-  logical :: good_angles
-
-  print *, ' TC-SCF with:'
-  print *, ' j2e_type = ', j2e_type
-  print *, ' j1e_type = ', j1e_type
-  print *, ' env_type = ', env_type
-
-  write(json_unit,json_array_open_fmt) 'tc-scf'
 
   my_grid_becke  = .True.
   PROVIDE tc_grid1_a tc_grid1_r
@@ -36,6 +27,26 @@ program tc_scf
     call write_int(6, my_n_pt_r_extra_grid, 'radial  internal grid over')
     call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
   endif
+
+  call main()
+
+end
+
+! ---
+
+subroutine main()
+
+  implicit none
+
+  integer :: i
+  logical :: good_angles
+
+  print *, ' TC-SCF with:'
+  print *, ' j2e_type = ', j2e_type
+  print *, ' j1e_type = ', j1e_type
+  print *, ' env_type = ', env_type
+
+  write(json_unit,json_array_open_fmt) 'tc-scf'
 
   call rh_tcscf_diis()
 
@@ -84,7 +95,7 @@ subroutine create_guess()
     SOFT_TOUCH mo_label
   endif
 
-end subroutine create_guess
+end
 
 ! ---
 
