@@ -24,7 +24,9 @@ let of_string ~units s =
   let l = s
           |> String_ext.split ~on:' '
           |> List.filter (fun x -> x <> "")
-          |> list_map float_of_string
+          |> list_map (fun x ->
+                 try float_of_string x with
+                 | Failure msg -> (Printf.eprintf "Bad string: \"%s\"\n%!" x ; failwith msg) )
           |> Array.of_list
   in
   { x = l.(0) *. f ;
