@@ -71,16 +71,16 @@ END_PROVIDER
         index_final_points_extra(3,i_count) = j
         index_final_points_extra_reverse(k,i,j) = i_count
 
-        if(final_weight_at_r_vector_extra(i_count) .lt. 0.d0) then
-          print *, ' !!! WARNING !!!'
-          print *, ' negative weight !!!!'
-          print *, i_count, final_weight_at_r_vector_extra(i_count)
-          if(dabs(final_weight_at_r_vector_extra(i_count)) .lt. 1d-10) then
-            final_weight_at_r_vector_extra(i_count) = 0.d0
-          else
-            stop
-          endif
-        endif
+!        if(final_weight_at_r_vector_extra(i_count) .lt. 0.d0) then
+!          print *, ' !!! WARNING !!!'
+!          print *, ' negative weight !!!!'
+!          print *, i_count, final_weight_at_r_vector_extra(i_count)
+!          if(dabs(final_weight_at_r_vector_extra(i_count)) .lt. 1d-10) then
+!            final_weight_at_r_vector_extra(i_count) = 0.d0
+!          else
+!            stop
+!          endif
+!        endif
       enddo
     enddo
   enddo
