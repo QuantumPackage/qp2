@@ -31,12 +31,14 @@ subroutine print_aos()
   integer          :: i, ipoint
   double precision :: r(3)
   double precision :: ao_val, ao_der(3), ao_lap
+  double precision :: mo_val, mo_der(3), mo_lap
 
   PROVIDE final_grid_points aos_in_r_array aos_grad_in_r_array aos_lapl_in_r_array
 
+  write(1000, *) n_points_final_grid
   do ipoint = 1, n_points_final_grid
     r(:) = final_grid_points(:,ipoint)
-    print*, r
+    write(1000, '(3(f15.7, 3X))') r
   enddo
 
   do ipoint = 1, n_points_final_grid
@@ -45,7 +47,17 @@ subroutine print_aos()
       ao_val    = aos_in_r_array     (i,ipoint)
       ao_der(:) = aos_grad_in_r_array(i,ipoint,:)
       ao_lap    = aos_lapl_in_r_array(1,i,ipoint) + aos_lapl_in_r_array(2,i,ipoint) + aos_lapl_in_r_array(3,i,ipoint)
-      write(*, '(5(f15.7, 3X))') ao_val, ao_der, ao_lap
+      write(1010, '(5(f15.7, 3X))') ao_val, ao_der, ao_lap
+    enddo
+  enddo
+
+  do ipoint = 1, n_points_final_grid
+    r(:) = final_grid_points(:,ipoint)
+    do i = 1, mo_num
+      mo_val    = mos_in_r_array     (i,ipoint)
+      mo_der(:) = mos_grad_in_r_array(i,ipoint,:)
+      mo_lap    = mos_lapl_in_r_array(i,ipoint,1) + mos_lapl_in_r_array(i,ipoint,2) + mos_lapl_in_r_array(i,ipoint,3)
+      write(2010, '(5(f15.7, 3X))') mo_val, mo_der, mo_lap
     enddo
   enddo
  
