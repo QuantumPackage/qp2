@@ -179,7 +179,7 @@ double precision function num_v_ij_erf_rk_cst_mu_env(i, j, ipoint)
     dx    = r1(1) - r2(1)
     dy    = r1(2) - r2(2)
     dz    = r1(3) - r2(3)
-    r12   = dsqrt( dx * dx + dy * dy + dz * dz )
+    r12   = dsqrt(dx*dx + dy*dy + dz*dz)
     if(r12 .lt. 1d-10) cycle
 
     tmp1  = (derf(mu_erf * r12) - 1.d0) / r12
@@ -228,7 +228,7 @@ subroutine num_x_v_ij_erf_rk_cst_mu_env(i, j, ipoint, integ)
     dx    = r1(1) - r2(1)
     dy    = r1(2) - r2(2)
     dz    = r1(3) - r2(3)
-    r12   = dsqrt( dx * dx + dy * dy + dz * dz )
+    r12   = dsqrt(dx*dx + dy*dy + dz*dz)
     if(r12 .lt. 1d-10) cycle
 
     tmp1  = (derf(mu_erf * r12) - 1.d0) / r12
@@ -530,7 +530,7 @@ subroutine num_int2_u_grad1u_total_env2(i, j, ipoint, integ)
     dx    = r1(1) - r2(1)
     dy    = r1(2) - r2(2)
     dz    = r1(3) - r2(3)
-    r12   = dsqrt( dx * dx + dy * dy + dz * dz )
+    r12   = dsqrt(dx*dx + dy*dy + dz*dz)
     if(r12 .lt. 1d-10) cycle
 
     tmp0 = env_nucl(r2)

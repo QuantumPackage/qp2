@@ -61,7 +61,7 @@ subroutine rh_tcscf_diis()
   etc_tot = TC_HF_energy
   etc_1e  = TC_HF_one_e_energy
   etc_2e  = TC_HF_two_e_energy
-  etc_3e  = diag_three_elem_hf
+  etc_3e  = TC_HF_three_e_energy
   !tc_grad = grad_non_hermit
   er_DIIS = maxval(abs(FQS_SQF_mo))
   e_delta = dabs(etc_tot - e_save)
@@ -189,7 +189,7 @@ subroutine rh_tcscf_diis()
     etc_tot = TC_HF_energy
     etc_1e  = TC_HF_one_e_energy
     etc_2e  = TC_HF_two_e_energy
-    etc_3e  = diag_three_elem_hf
+    etc_3e  = TC_HF_three_e_energy
     !tc_grad  = grad_non_hermit
     er_DIIS  = maxval(abs(FQS_SQF_mo))
     e_delta  = dabs(etc_tot - e_save)
@@ -234,7 +234,7 @@ subroutine rh_tcscf_diis()
     call unlock_io
 
     if(er_delta .lt. 0.d0) then
-      call ezfio_set_tc_scf_bitc_energy(etc_tot)
+      call ezfio_set_tc_scf_tcscf_energy(etc_tot)
       call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
       call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
       write(json_unit, json_true_fmt) 'saved'
@@ -263,7 +263,7 @@ subroutine rh_tcscf_diis()
 
   deallocate(mo_r_coef_save, mo_l_coef_save, F_DIIS, E_DIIS)
 
-  call ezfio_set_tc_scf_bitc_energy(TC_HF_energy)
+  call ezfio_set_tc_scf_tcscf_energy(TC_HF_energy)
   call ezfio_set_bi_ortho_mos_mo_l_coef(mo_l_coef)
   call ezfio_set_bi_ortho_mos_mo_r_coef(mo_r_coef)
 

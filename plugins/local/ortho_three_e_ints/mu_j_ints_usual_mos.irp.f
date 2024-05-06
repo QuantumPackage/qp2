@@ -183,11 +183,3 @@ BEGIN_PROVIDER [ double precision, x_W_ij_erf_rk, ( n_points_final_grid,3,mo_num
 
 END_PROVIDER 
 
-BEGIN_PROVIDER [ double precision, sqrt_weight_at_r, (n_points_final_grid)]
- implicit none
- integer :: ipoint
- do ipoint = 1, n_points_final_grid
-  sqrt_weight_at_r(ipoint) = dsqrt(final_weight_at_r_vector(ipoint))
- enddo
-END_PROVIDER 
-
