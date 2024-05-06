@@ -54,7 +54,7 @@ subroutine test
     if(i_ok.ne.1)cycle
      call do_single_excitation(det_i,h2,p2,s2,i_ok)
     if(i_ok.ne.1)cycle
-     call htilde_mu_mat_bi_ortho_slow(det_i,HF_bitmask,N_int,hmono,htwoe,hthree_tmp,htilde_ij)
+     call htilde_mu_mat_opt_bi_ortho(det_i,HF_bitmask,N_int,hmono,htwoe,hthree_tmp,htilde_ij)
      call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
      call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
      hthree_tmp *= phase
@@ -66,7 +66,7 @@ subroutine test
     if(i_ok.ne.1)cycle
      call do_single_excitation(det_i,h2,p2,s2,i_ok)
     if(i_ok.ne.1)cycle
-     call htilde_mu_mat_bi_ortho_slow(det_i,HF_bitmask,N_int,hmono,htwoe,hthree_tmp,htilde_ij)
+     call htilde_mu_mat_opt_bi_ortho(det_i,HF_bitmask,N_int,hmono,htwoe,hthree_tmp,htilde_ij)
      call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
      call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
      hthree_tmp *= phase
@@ -109,7 +109,7 @@ do h1 = 1, elec_alpha_num
     if(i_ok.ne.1)cycle
     call do_single_excitation(det_i,h2,p2,s2,i_ok)
     if(i_ok.ne.1)cycle
-    call htilde_mu_mat_bi_ortho_slow(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_opt_bi_ortho(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
     call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
     call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
     integer :: hh1, pp1, hh2, pp2, ss1, ss2
@@ -145,7 +145,7 @@ do h1 = 1, elec_beta_num
     if(i_ok.ne.1)cycle
     call do_single_excitation(det_i,h2,p2,s2,i_ok)
     if(i_ok.ne.1)cycle
-    call htilde_mu_mat_bi_ortho_slow(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+    call htilde_mu_mat_opt_bi_ortho(det_i,ref_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
     call get_excitation_degree(ref_bitmask,det_i,degree,N_int)
     call get_excitation(ref_bitmask,det_i,exc,degree,phase,N_int)
     call decode_exc(exc, 2, hh1, pp1, hh2, pp2, ss1, ss2)

@@ -14,7 +14,7 @@
   call htilde_mu_mat_bi_ortho_tot_slow(psi_det(1,1,i), psi_det(1,1,i), N_int, H_jj(i))
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
   if(degree == 1 .or. degree == 2)then
-   call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,h0j(i))
+   call htilde_mu_mat_opt_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,h0j(i))
   endif
  enddo
  reigvec_tc_bi_orth_tmp = 0.d0
