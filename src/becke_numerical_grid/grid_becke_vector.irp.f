@@ -67,17 +67,6 @@ END_PROVIDER
         index_final_points(2,i_count) = i
         index_final_points(3,i_count) = j
         index_final_points_reverse(k,i,j) = i_count
-
-!        if(final_weight_at_r_vector(i_count) .lt. 0.d0) then
-!          print *, ' !!! WARNING !!!'
-!          print *, ' negative weight !!!!'
-!          print *, i_count, final_weight_at_r_vector(i_count)
-!          if(dabs(final_weight_at_r_vector(i_count)) .lt. 1d-10) then
-!            final_weight_at_r_vector(i_count) = 0.d0
-!          else
-!            stop
-!          endif
-!        endif 
       enddo
     enddo
   enddo

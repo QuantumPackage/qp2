@@ -132,6 +132,7 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   double precision, allocatable :: A(:,:,:,:), b(:), A_tmp(:,:,:,:)
   double precision, allocatable :: Pa(:,:), Pb(:,:), Pt(:,:)
   double precision, allocatable :: u1e_tmp(:), tmp(:,:,:)
+  double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:)
 
 
@@ -176,26 +177,27 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   ! --- --- ---
   ! get A
 
-  allocate(tmp(n_points_final_grid,ao_num,ao_num))
+  allocate(tmp1(n_points_final_grid,ao_num,ao_num), tmp2(n_points_final_grid,ao_num,ao_num))
   allocate(A(ao_num,ao_num,ao_num,ao_num))
 
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (i, j, ipoint) &
-  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp)
+  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp1, tmp2)
   !$OMP DO COLLAPSE(2)
   do j = 1, ao_num
     do i = 1, ao_num
       do ipoint = 1, n_points_final_grid
-        tmp(ipoint,i,j) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp1(ipoint,i,j) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp2(ipoint,i,j) =                                    aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
       enddo
     enddo
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0  &
+            , tmp1(1,1,1), n_points_final_grid, tmp2(1,1,1), n_points_final_grid &
             , 0.d0, A(1,1,1,1), ao_num*ao_num)
 
   allocate(A_tmp(ao_num,ao_num,ao_num,ao_num))
@@ -207,13 +209,13 @@ subroutine get_j1e_coef_fit_ao2(dim_fit, coef_fit)
   allocate(b(ao_num*ao_num))
 
   do ipoint = 1, n_points_final_grid
-    u1e_tmp(ipoint) = dsqrt(final_weight_at_r_vector(ipoint)) * u1e_tmp(ipoint)
+    u1e_tmp(ipoint) = u1e_tmp(ipoint)
   enddo
 
-  call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
+  call dgemv("T", n_points_final_grid, ao_num*ao_num, 1.d0, tmp1(1,1,1), n_points_final_grid, u1e_tmp(1), 1, 0.d0, b(1), 1)
 
   deallocate(u1e_tmp)
-  deallocate(tmp)
+  deallocate(tmp1, tmp2)
 
   ! --- --- ---
   ! solve Ax = b

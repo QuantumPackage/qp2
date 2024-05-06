@@ -38,9 +38,9 @@ subroutine main()
         call ezfio_has_cisd_energy(exists)
         if(.not.exists) then
 
-          call ezfio_has_tc_scf_bitc_energy(exists)
+          call ezfio_has_tc_scf_tcscf_energy(exists)
           if(exists) then
-            call ezfio_get_tc_scf_bitc_energy(e_ref)
+            call ezfio_get_tc_scf_tcscf_energy(e_ref)
           endif
 
         else
@@ -59,7 +59,7 @@ subroutine main()
 
   close(iunit)
 
-end subroutine main
+end
 
 ! --
 
@@ -89,7 +89,7 @@ subroutine write_lr_spindeterminants()
   call ezfio_set_spindeterminants_psi_left_coef_matrix_values(buffer)
   deallocate(buffer)
 
-end subroutine write_lr_spindeterminants
+end
 
 ! ---
 

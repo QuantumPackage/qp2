@@ -6,7 +6,8 @@ program print_tc_var
 
   implicit none
 
-  print *, 'Hello world'
+  print *, ' TC VAR is available only for HF REF WF'
+  print *, ' DO NOT FORGET TO RUN A CISD CALCULATION BEF'
 
   my_grid_becke = .True.
   PROVIDE tc_grid1_a tc_grid1_r
@@ -17,7 +18,7 @@ program print_tc_var
   read_wf = .True.
   touch read_wf
 
-  call write_tc_var()
+  call write_tc_gs_var_HF()
 
 end
 
