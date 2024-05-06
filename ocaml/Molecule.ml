@@ -142,13 +142,21 @@ let of_xyz_string
   result
 
 
+let regexp_r = Str.regexp {||}
+let regexp_t = Str.regexp {|	|}
+
 
 let of_xyz_file
     ?(charge=(Charge.of_int 0)) ?(multiplicity=(Multiplicity.of_int 1))
     ?(units=Units.Angstrom)
     filename =
   let lines =
-    match Io_ext.input_lines filename with
+    Io_ext.input_lines filename
+    |> List.map (fun s -> Str.global_replace regexp_r "" s)
+    |> List.map (fun s -> Str.global_replace regexp_t " " s)
+  in
+  let lines =
+    match lines with
     | natoms :: title :: rest ->
           let natoms = 
             try
@@ -173,6 +181,8 @@ let of_zmt_file
     ?(units=Units.Angstrom)
     filename =
   Io_ext.read_all filename
+  |> Str.global_replace regexp_r ""
+  |> Str.global_replace regexp_t " "
   |> Zmatrix.of_string
   |> Zmatrix.to_xyz_string
   |> of_xyz_string ~charge ~multiplicity ~units

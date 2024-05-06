@@ -217,7 +217,7 @@ END_DOC
   do while (i<mo_num)
     j=i
     m=1
-    do while ( (j<mo_num).and.(fock_matrix_diag_mo(j+1)-fock_matrix_diag_mo(i) < 1.d-8) )
+    do while ( (j+1<mo_num).and.(fock_matrix_diag_mo(j+1)-fock_matrix_diag_mo(i) < 1.d-8) )
       j += 1
       m += 1
     enddo

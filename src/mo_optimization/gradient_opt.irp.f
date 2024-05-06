@@ -284,7 +284,7 @@ call omp_set_max_active_levels(4)
 ! \end{equation}
 
 ! We need a vector to use the gradient. Here the gradient is a
-! antisymetric matrix so we can transform it in a vector of length
+! antisymmetric matrix so we can transform it in a vector of length
 ! mo_num*(mo_num-1)/2.
 
 ! Here we do these two things at the same time.
