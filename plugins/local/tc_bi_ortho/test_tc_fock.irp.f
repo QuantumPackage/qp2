@@ -24,43 +24,11 @@ program test_tc_fock
   !call routine_2
 !  call routine_3()
 
-! call test_3e
   call routine_tot
 
 end
 
 ! ---
-
-subroutine test_3e
- implicit none
- double precision :: integral_aaa,integral_aab,integral_abb,integral_bbb,accu
- double precision ::  hmono, htwoe, hthree, htot
- call htilde_mu_mat_bi_ortho_slow(ref_bitmask, ref_bitmask, N_int, hmono, htwoe, hthree, htot)
- print*,'hmono = ',hmono
- print*,'htwoe = ',htwoe
- print*,'hthree= ',hthree
- print*,'htot  = ',htot
- print*,''
- print*,''
- print*,'TC_one= ',tc_hf_one_e_energy
- print*,'TC_two= ',TC_HF_two_e_energy
- print*,'TC_3e = ',diag_three_elem_hf
- print*,'TC_tot= ',TC_HF_energy
- print*,''
- print*,''
- call give_aaa_contrib(integral_aaa)
- print*,'integral_aaa = ',integral_aaa
- call give_aab_contrib(integral_aab)
- print*,'integral_aab = ',integral_aab
- call give_abb_contrib(integral_abb)
- print*,'integral_abb = ',integral_abb
- call give_bbb_contrib(integral_bbb)
- print*,'integral_bbb = ',integral_bbb
- accu = integral_aaa + integral_aab + integral_abb + integral_bbb
- print*,'accu = ',accu
- print*,'delta = ',hthree - accu
-
-end
 
 subroutine routine_3()
 
@@ -85,7 +53,6 @@ subroutine routine_3()
  
    do i = 1, elec_num_tab(s1)
      do a = elec_num_tab(s1)+1, mo_num ! virtual 
- 
  
        det_i = ref_bitmask
        call do_single_excitation(det_i, i, a, s1, i_ok)

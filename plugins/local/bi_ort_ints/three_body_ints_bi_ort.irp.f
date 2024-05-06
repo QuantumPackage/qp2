@@ -123,7 +123,7 @@ subroutine give_integrals_3_body_bi_ort_spin( n, sigma_n, l, sigma_l, k, sigma_k
   endif
 
   return
-end subroutine give_integrals_3_body_bi_ort_spin
+end
 
 ! ---
 

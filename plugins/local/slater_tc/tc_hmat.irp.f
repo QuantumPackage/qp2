@@ -22,6 +22,7 @@ BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho, (N_det,N_det)]
 
   if(noL_standard) then
     PROVIDE noL_0e
+    print*, "noL_0e =", noL_0e
     PROVIDE noL_1e
     PROVIDE noL_2e
   endif
