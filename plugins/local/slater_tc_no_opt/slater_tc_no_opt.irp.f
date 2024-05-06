@@ -1,4 +1,4 @@
-program slater_tc
+program slater_tc_no_opt
   implicit none
   BEGIN_DOC
 ! TODO : Put the documentation of the program here
