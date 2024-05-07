@@ -75,3 +75,107 @@ BEGIN_PROVIDER [ integer*8, qmckl_ctx_jastrow ]
   endif
 
 END_PROVIDER
+
+
+ BEGIN_PROVIDER [ double precision, aos_in_r_array_qmckl, (ao_num,n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, aos_grad_in_r_array_qmckl, (ao_num,n_points_final_grid,3)]
+&BEGIN_PROVIDER [ double precision, aos_lapl_in_r_array_qmckl, (ao_num, n_points_final_grid)]
+ implicit none
+ BEGIN_DOC
+ ! AOS computed with qmckl
+ END_DOC
+ use qmckl
+
+ integer*8 :: qmckl_ctx
+ integer(qmckl_exit_code) :: rc
+
+ qmckl_ctx = qmckl_context_create()
+
+ rc = qmckl_trexio_read(qmckl_ctx, trexio_file, 1_8*len(trim(trexio_filename)))
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in read_trexio'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ rc = qmckl_set_point(qmckl_ctx, 'N', n_points_final_grid*1_8, final_grid_points, n_points_final_grid*3_8)
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in set_electron_point'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ double precision, allocatable :: vgl(:,:,:)
+ allocate( vgl(ao_num,5,n_points_final_grid))
+ rc = qmckl_get_ao_basis_ao_vgl_inplace(qmckl_ctx, vgl, n_points_final_grid*ao_num*5_8)
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in get_ao_vgl'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ integer :: i,k
+ do k=1,n_points_final_grid
+   do i=1,ao_num
+     aos_in_r_array_qmckl(i,k) = vgl(i,1,k)
+     aos_grad_in_r_array_qmckl(i,k,1) = vgl(i,2,k)
+     aos_grad_in_r_array_qmckl(i,k,2) = vgl(i,3,k)
+     aos_grad_in_r_array_qmckl(i,k,3) = vgl(i,4,k)
+     aos_lapl_in_r_array_qmckl(i,k) = vgl(i,5,k)
+   enddo
+ enddo
+
+END_PROVIDER
+
+
+ BEGIN_PROVIDER [ double precision, mos_in_r_array_qmckl, (mo_num,n_points_final_grid)]
+&BEGIN_PROVIDER [ double precision, mos_grad_in_r_array_qmckl, (mo_num,n_points_final_grid,3)]
+&BEGIN_PROVIDER [ double precision, mos_lapl_in_r_array_qmckl, (mo_num, n_points_final_grid)]
+ implicit none
+ BEGIN_DOC
+ ! moS computed with qmckl
+ END_DOC
+ use qmckl
+
+ integer*8 :: qmckl_ctx
+ integer(qmckl_exit_code) :: rc
+
+ qmckl_ctx = qmckl_context_create()
+
+ rc = qmckl_trexio_read(qmckl_ctx, trexio_file, 1_8*len(trim(trexio_filename)))
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in read_trexio'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ rc = qmckl_set_point(qmckl_ctx, 'N', n_points_final_grid*1_8, final_grid_points, n_points_final_grid*3_8)
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in set_electron_point'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ double precision, allocatable :: vgl(:,:,:)
+ allocate( vgl(mo_num,5,n_points_final_grid))
+ rc = qmckl_get_mo_basis_mo_vgl_inplace(qmckl_ctx, vgl, n_points_final_grid*mo_num*5_8)
+ if (rc /= QMCKL_SUCCESS) then
+   print *, irp_here, 'qmckl error in get_mo_vgl'
+   rc = qmckl_check(qmckl_ctx, rc)
+   stop -1
+ endif
+
+ integer :: i,k
+ do k=1,n_points_final_grid
+   do i=1,mo_num
+     mos_in_r_array_qmckl(i,k) = vgl(i,1,k)
+     mos_grad_in_r_array_qmckl(i,k,1) = vgl(i,2,k)
+     mos_grad_in_r_array_qmckl(i,k,2) = vgl(i,3,k)
+     mos_grad_in_r_array_qmckl(i,k,3) = vgl(i,4,k)
+     mos_lapl_in_r_array_qmckl(i,k) = vgl(i,5,k)
+   enddo
+ enddo
+
+END_PROVIDER
+
+
