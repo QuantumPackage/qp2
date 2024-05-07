@@ -88,6 +88,9 @@ subroutine run_stochastic_cipsi
     call pt2_dealloc(pt2_data_err)
     call pt2_alloc(pt2_data, N_states)
     call pt2_alloc(pt2_data_err, N_states)
+    if(transpose_two_e_int)then
+     provide mo_bi_ortho_tc_two_e_transp
+    endif
     call ZMQ_pt2(E_tc, pt2_data, pt2_data_err, relative_error,to_select) ! Stochastic PT2 and selection
 !    stop
 

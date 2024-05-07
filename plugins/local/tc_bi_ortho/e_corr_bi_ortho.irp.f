@@ -27,7 +27,6 @@
    if(degree == 1)then
     e_pt2_tc_bi_orth_single += coef_pt1 * htilde_ij
    else 
-!    print*,'coef_pt1, e_pt2',coef_pt1,coef_pt1 * htilde_ij
     e_pt2_tc_bi_orth_double += coef_pt1 * htilde_ij
    endif
   endif

@@ -259,15 +259,21 @@ BEGIN_PROVIDER [ double precision, mo_bi_ortho_tc_two_e_transp, (mo_num, mo_num,
  END_DOC
 
  integer :: i,j,k,l
+ print*,'Providing mo_bi_ortho_tc_two_e_transp'
+ double precision :: t0,t1
+ call wall_time(t0)
  do i = 1, mo_num
   do j = 1, mo_num
    do k = 1, mo_num
     do l = 1, mo_num
-     mo_bi_ortho_tc_two_e_transp(i,j,k,l) = mo_bi_ortho_tc_two_e_transp(k,l,i,j)
+     mo_bi_ortho_tc_two_e_transp(i,j,k,l) = mo_bi_ortho_tc_two_e(k,l,i,j)
     enddo
    enddo
   enddo
  enddo
+ call wall_time(t1)
+ 
+ print *, ' WALL TIME for PROVIDING mo_bi_ortho_tc_two_e_transp (min)', (t1-t0)/60.d0
 
 END_PROVIDER 
 ! ---

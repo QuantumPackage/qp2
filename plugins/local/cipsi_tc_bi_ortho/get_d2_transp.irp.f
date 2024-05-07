@@ -1,5 +1,5 @@
 
-subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
+subroutine get_d2_new_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, coefs)
   !todo: indices/conjg should be correct for complex
   use bitmasks
   implicit none
@@ -62,49 +62,32 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
         !    <psi|H|j> +=  dconjg(c_i) * <i|H|j>
         !      <j|H|i>  =  (<p1,p2|h1,h2> - <p2,p1|h1,h2>) * phase
         !    <j|H|psi> +=  <j|H|i> * c_i
-!        hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2, p1, h1, h2)
 
 !!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
         ! take the transpose of what's written above because later use the complex conjugate 
-        hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e( h1, h2, p2, p1)
-        if (hij == 0.d0) cycle
+
+!        hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e( h1, h2, p2, p1)
+!        hji = mo_bi_ortho_tc_two_e_transp(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e_transp( h1, h2, p2, p1)
+        hij = mo_bi_ortho_tc_two_e_transp(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e_transp( p1, p2, h2, h1)
+        hji = mo_bi_ortho_tc_two_e(p1, p2, h1, h2)       - mo_bi_ortho_tc_two_e( p1, p2, h2, h1)
+        if (hij == 0.d0.or.hji==0.d0) cycle
 
         ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
 !        hij = dconjg(hij) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
-        hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+        phase = get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+        hij = hij * phase
+        hji = hji * phase
 
         if(ma == 1) then ! if particle spins are (alpha,alpha,alpha,beta), then puti is beta and putj is alpha
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,2) * hij
-          enddo
-        else            ! if particle spins are (beta,beta,beta,alpha), then puti is alpha and putj is beta
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
-            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
-          enddo
-        end if
-      end do
-      !! <phi|H|alpha>
-      do i = 1, 3    ! loop over all 3 combinations of 2 particles with spin ma
-        putj = p(i, ma)
-        if(banned(putj,puti,bant)) cycle
-        i1 = turn3(1,i)
-        i2 = turn3(2,i)
-        p1 = p(i1, ma)
-        p2 = p(i2, ma)
-        hji = mo_bi_ortho_tc_two_e(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e( p2, p1, h1, h2)
-        if (hji == 0.d0) cycle
-        hji = hji * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
-
-        if(ma == 1) then ! if particle spins are (alpha,alpha,alpha,beta), then puti is beta and putj is alpha
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
             mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,1) * hji
           enddo
         else            ! if particle spins are (beta,beta,beta,alpha), then puti is alpha and putj is beta
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
+            mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
             mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         end if
@@ -125,32 +108,19 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
 !          hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2)
 !!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
         ! take the transpose of what's written above because later use the complex conjugate 
-          hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2 )
-          if (hij /= 0.d0) then
+!          hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2 )
+!          hji = mo_bi_ortho_tc_two_e_transp(h1, h2, p1, p2 )
+          hij = mo_bi_ortho_tc_two_e_transp(p1, p2 ,h1, h2 )
+          hji = mo_bi_ortho_tc_two_e( p1, p2, h1, h2)
+          if (hij /= 0.d0.or.hji==0.d0) then
             ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
 !            hij = dconjg(hij) * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
-            hij = hij * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
+            phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
+            hij = hij * phase
+            hji = hji * phase
             !DIR$ LOOP COUNT AVG(4)
             do k=1,N_states
               mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
-            enddo
-          endif
-        end do
-      end do
-      !! <phi|H|alpha>
-      do j = 1,2 ! loop over all 4 combinations of one alpha and one beta particle
-        putj = p(j, 2)
-        if(bannedOrb(putj, 2)) cycle
-        p2 = p(turn2(j), 2)
-        do i = 1,2
-          puti = p(i, 1)
-          if(banned(puti,putj,bant) .or. bannedOrb(puti,1)) cycle
-          p1 = p(turn2(i), 1)
-          hji = mo_bi_ortho_tc_two_e( p1, p2, h1, h2)
-          if (hji /= 0.d0) then
-            hji = hji * get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
-            !DIR$ LOOP COUNT AVG(4)
-            do k=1,N_states
               mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
             enddo
           endif
@@ -178,35 +148,18 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
 !          hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2,p1, h1, h2)
 !!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
         ! take the transpose of what's written above because later use the complex conjugate 
-          hij = mo_bi_ortho_tc_two_e(h1, h2, p1, p2) - mo_bi_ortho_tc_two_e(h1, h2, p2,p1 )
-          if (hij == 0.d0) cycle
+          hij = mo_bi_ortho_tc_two_e_transp(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e_transp(p1, p2, h2,h1 )
+          hji = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p1, p2, h2,h1 )
+          if (hij == 0.d0.or.hji == 0.d0) cycle
 
           ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
 !          hij = dconjg(hij) * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
-          hij = hij * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+          phase = get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
+          hij = hij * phase
+          hji = hji * phase
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat_r(k, puti, putj) = mat_r(k, puti, putj) +coefs(k,2) * hij
-          enddo
-        end do
-      end do
-      !! <phi|H|alpha>
-      do i=1,3
-        puti = p(i, ma)
-        if(bannedOrb(puti,ma)) cycle
-        do j=i+1,4
-          putj = p(j, ma)
-          if(bannedOrb(putj,ma)) cycle
-          if(banned(puti,putj,1)) cycle
-          i1 = turn2d(1, i, j)
-          i2 = turn2d(2, i, j)
-          p1 = p(i1, ma)
-          p2 = p(i2, ma)
-          hji = mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2,p1,h1, h2 )
-          if (hji == 0.d0) cycle
-          hji = hji * get_phase_bi(phasemask, ma, ma, h1, p1, h2, p2, N_int)
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
             mat_l(k, puti, putj) = mat_l(k, puti, putj) +coefs(k,1) * hji
           enddo
         end do
@@ -227,43 +180,25 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
 !        hij = mo_bi_ortho_tc_two_e(p1, p2, h1, h2)
 !!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
         ! take the transpose of what's written above because later use the complex conjugate 
-        hij = mo_bi_ortho_tc_two_e(h1, h2,p1, p2 )
+        hij = mo_bi_ortho_tc_two_e_transp(p1, p2 ,h1, h2)
+        hji = mo_bi_ortho_tc_two_e(p1, p2,h1, h2 )
         if (hij == 0.d0) cycle
 
         ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
 !        hij = dconjg(hij) * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
-        hij = hij * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
+        phase = get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
+        hij = hij * phase
+        hji = hji * phase
         if (puti < putj) then
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
-          enddo
-        else
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
-            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,2) * hij
-          enddo
-        endif
-      end do
-      !! <phi|H|alpha>
-      do i=1,3
-        puti = p(turn3(1,i), ma)
-        if(bannedOrb(puti,ma)) cycle
-        putj = p(turn3(2,i), ma)
-        if(bannedOrb(putj,ma)) cycle
-        if(banned(puti,putj,1)) cycle
-        p2 = p(i, ma)
-        hji = mo_bi_ortho_tc_two_e(p1, p2,h1, h2)
-        if (hji == 0.d0) cycle
-        hji = hji * get_phase_bi(phasemask, mi, ma, h1, p1, h2, p2, N_int)
-        if (puti < putj) then
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
             mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         else
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
+            mat_r(k, putj, puti) = mat_r(k, putj, puti) + coefs(k,2) * hij
             mat_l(k, putj, puti) = mat_l(k, putj, puti) + coefs(k,1) * hji
           enddo
         endif
@@ -280,22 +215,17 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
 !        hij = (mo_bi_ortho_tc_two_e(p1, p2, h1, h2) - mo_bi_ortho_tc_two_e(p2,p1, h1, h2))
 !!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!! 
         ! take the transpose of what's written above because later use the complex conjugate 
-        hij = (mo_bi_ortho_tc_two_e(h1, h2,p1, p2) - mo_bi_ortho_tc_two_e(h1, h2, p2,p1))
-        if (hij /= 0.d0) then
+        hij = (mo_bi_ortho_tc_two_e_transp(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e_transp(p2,p1,h1, h2))
+        hji = (mo_bi_ortho_tc_two_e(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e(p2,p1,h1, h2))
+        if (hij /= 0.d0.or.hji==0.d0) then
           ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>
 !          hij = dconjg(hij) * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
-          hij = hij * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
+          phase = get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
+          hij = hij * phase
+          hji = hji* phase
           !DIR$ LOOP COUNT AVG(4)
           do k=1,N_states
             mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
-          enddo
-        end if
-      !! <phi|H|alpha>
-        hji = (mo_bi_ortho_tc_two_e(p1, p2,h1, h2) - mo_bi_ortho_tc_two_e( p2,p1, h1, h2))
-        if (hji /= 0.d0) then
-          hji = hji * get_phase_bi(phasemask, mi, mi, h1, p1, h2, p2, N_int)
-          !DIR$ LOOP COUNT AVG(4)
-          do k=1,N_states
             mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
           enddo
         end if
