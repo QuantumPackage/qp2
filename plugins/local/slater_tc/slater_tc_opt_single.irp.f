@@ -652,7 +652,7 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hj
   hmono  = 0.d0
   htwoe  = 0.d0
   hji   = 0.d0
-  hji   = 0.d0
+  hij   = 0.d0
   call get_excitation_degree(key_i, key_j, degree, Nint)
   if(degree.ne.1)then
    return
@@ -661,7 +661,7 @@ subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hj
 
   call get_single_excitation(key_i, key_j, exc, phase, Nint)
   call decode_exc(exc,1,h1,p1,h2,p2,s1,s2)
-  call get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h1, p1, s1, phase, hmono, htwoe, hji,hij)
+  call get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h1, p1, s1, phase, hji,hij)
 
 end
 

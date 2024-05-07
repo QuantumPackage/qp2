@@ -335,8 +335,8 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
         ! gen is a selector; mask is ionized generator; det is alpha
         ! hij is contribution to <psi|H|alpha>
 !        call i_h_j_complex(gen, det, N_int, hij)
-        call htilde_mu_mat_opt_bi_ortho_no_3e(det, gen, N_int, hij)
-        call htilde_mu_mat_opt_bi_ortho_no_3e(gen, det, N_int, hji)
+        call htilde_mu_mat_opt_bi_ortho_no_3e_both(det, gen, N_int, hij,hji)
+!        call htilde_mu_mat_opt_bi_ortho_no_3e(gen, det, N_int, hji)
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
           ! take conjugate to get contribution to <alpha|H|psi> instead of <psi|H|alpha>

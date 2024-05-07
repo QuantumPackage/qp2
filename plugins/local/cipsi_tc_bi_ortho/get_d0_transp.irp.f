@@ -45,33 +45,16 @@ subroutine get_d0_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
           call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
           ! call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
 !          call i_h_j_complex(det, gen, N_int, hij)
-          call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hij)
+          call htilde_mu_mat_opt_bi_ortho_no_3e_both(det,gen,N_int, hij,hji)
         else
           phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
           hij = hij_cache1(p2) * phase
+          hji = hji_cache1(p2) * phase
         end if
-        if (hij == (0.d0,0.d0)) cycle
+        if (hij == 0.d0.or.hji == 0.d0) cycle
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
           mat_r(k, p1, p2) = mat_r(k, p1, p2) + coefs(k,2) * hij  ! HOTSPOT
-        enddo
-      end do
-      !!!!!!!!!! <phi|H|alpha>
-      do p2=1, mo_num
-        if(bannedOrb(p2,2)) cycle
-        if(banned(p1, p2, bant)) cycle ! rentable?
-        if(p1 == h1 .or. p2 == h2) then
-          call apply_particles(mask, 1,p1,2,p2, det, ok, N_int)
-          ! call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
-!          call i_h_j_complex(det, gen, N_int, hij)
-          call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hji)
-        else
-          phase = get_phase_bi(phasemask, 1, 2, h1, p1, h2, p2, N_int)
-          hji = hji_cache1(p2) * phase
-        end if
-        if (hji == (0.d0,0.d0)) cycle
-        !DIR$ LOOP COUNT AVG(4)
-        do k=1,N_states
           mat_l(k, p1, p2) = mat_l(k, p1, p2) + coefs(k,1) * hji  ! HOTSPOT
         enddo
       end do
@@ -98,40 +81,25 @@ subroutine get_d0_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
           call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
           !call i_h_j_complex(gen, det, N_int, hij) ! need to take conjugate of this
 !          call i_h_j_complex(det, gen, N_int, hij)
-          call htilde_mu_mat_opt_bi_ortho_no_3e(det,gen,N_int, hij)
-          if (hij == 0.d0) cycle
+          call htilde_mu_mat_opt_bi_ortho_no_3e_both(det,gen,N_int, hij,hji)
+         if (hij == 0.d0.or.hji == 0.d0) cycle
         else
 !          hij = (mo_two_e_integral_complex(p1, p2, puti, putj) -  mo_two_e_integral_complex(p2, p1, puti, putj))
 !          hij = (mo_bi_ortho_tc_two_e(p1, p2, puti, putj) -  mo_bi_ortho_tc_two_e(p2, p1, puti, putj))
           hij = (mo_bi_ortho_tc_two_e(puti, putj, p1, p2) -  mo_bi_ortho_tc_two_e(puti, putj, p2, p1))
-          if (hij == 0.d0) cycle
-          hij = (hij) * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
+          hji = (mo_bi_ortho_tc_two_e_transp(puti, putj, p1, p2) -  mo_bi_ortho_tc_two_e_transp(puti, putj, p2, p1))
+          if (hij == 0.d0.or.hji == 0.d0) cycle
+          phase = get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
+          hij = (hij) * phase
+          hji = (hji) * phase
         end if
         !DIR$ LOOP COUNT AVG(4)
         do k=1,N_states
           mat_r(k, puti, putj) = mat_r(k, puti, putj) + coefs(k,2) * hij
-        enddo
-      end do
-
-      !!!!!!!!!! <phi|H|alpha>
-      do putj=puti+1, mo_num
-        if(bannedOrb(putj, sp)) cycle
-        if(banned(puti, putj, bant)) cycle ! rentable?
-        if(puti == p1 .or. putj == p2 .or. puti == p2 .or. putj == p1) then
-          call apply_particles(mask, sp,puti,sp,putj, det, ok, N_int)
-          call htilde_mu_mat_opt_bi_ortho_no_3e(gen,det,N_int, hji)
-          if (hji == 0.d0) cycle
-        else
-!          hji = (mo_bi_ortho_tc_two_e( p1, p2, puti, putj) -  mo_bi_ortho_tc_two_e( p2, p1, puti, putj))
-          hji = (mo_bi_ortho_tc_two_e_transp(puti, putj, p1, p2 ) -  mo_bi_ortho_tc_two_e_transp( puti, putj, p2, p1))
-          if (hji == 0.d0) cycle
-          hji = (hji) * get_phase_bi(phasemask, sp, sp, puti, p1 , putj, p2, N_int)
-        end if
-        !DIR$ LOOP COUNT AVG(4)
-        do k=1,N_states
           mat_l(k, puti, putj) = mat_l(k, puti, putj) + coefs(k,1) * hji
         enddo
       end do
+
     end do
   end if
 
