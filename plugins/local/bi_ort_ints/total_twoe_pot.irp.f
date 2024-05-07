@@ -332,3 +332,23 @@ END_PROVIDER
 
 ! ---
 
+ BEGIN_PROVIDER [double precision, tc_2e_3idx_coulomb_integrals_transp , (mo_num,mo_num,mo_num)]
+&BEGIN_PROVIDER [double precision, tc_2e_3idx_exchange_integrals_transp, (mo_num,mo_num,mo_num)]
+
+  BEGIN_DOC
+  ! tc_2e_3idx_coulomb_integrals_transp (j,k,i) = <jk|ji> 
+  ! tc_2e_3idx_exchange_integrals_transp(j,k,i) = <kj|ji> 
+  END_DOC
+ implicit none
+ integer :: i, j, k
+
+  do i = 1, mo_num
+    do k = 1, mo_num
+      do j = 1, mo_num
+        tc_2e_3idx_coulomb_integrals_transp(j, k,i) = mo_bi_ortho_tc_two_e_transp(j ,k ,j ,i ) 
+        tc_2e_3idx_exchange_integrals_transp(j,k,i) = mo_bi_ortho_tc_two_e_transp(k ,j ,j ,i ) 
+      enddo
+    enddo
+  enddo
+
+END_PROVIDER 

@@ -618,3 +618,145 @@ subroutine get_single_excitation_from_fock_tc_no_3e(Nint, key_i, key_j, h, p, sp
 
 end
 
+
+subroutine  single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji,hij)
+
+  BEGIN_DOC
+  ! <key_j |H_tilde | key_i> and <key_i |H_tilde | key_j> for single excitation ONLY FOR ONE- AND TWO-BODY TERMS 
+  !!
+  !! WARNING !!
+  ! 
+  ! Non hermitian !!
+  END_DOC
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
+  double precision, intent(out) :: hji,hij
+
+  double precision              :: hmono, htwoe
+  integer                       :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  integer                       :: degree,exc(0:2,2,2)
+  integer                       :: h1, p1, h2, p2, s1, s2
+  double precision              :: get_mo_two_e_integral_tc_int, phase
+  double precision              :: direct_int, exchange_int_12, exchange_int_23, exchange_int_13
+  integer                       :: other_spin(2)
+  integer(bit_kind)             :: key_j_core(Nint,2), key_i_core(Nint,2)
+
+  other_spin(1) = 2
+  other_spin(2) = 1
+
+  hmono  = 0.d0
+  htwoe  = 0.d0
+  hji   = 0.d0
+  hji   = 0.d0
+  call get_excitation_degree(key_i, key_j, degree, Nint)
+  if(degree.ne.1)then
+   return
+  endif
+  call bitstring_to_list_ab(key_i, occ, Ne, Nint)
+
+  call get_single_excitation(key_i, key_j, exc, phase, Nint)
+  call decode_exc(exc,1,h1,p1,h2,p2,s1,s2)
+  call get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h1, p1, s1, phase, hmono, htwoe, hji,hij)
+
+end
+
+! ---
+
+subroutine get_single_excitation_from_fock_tc_no_3e_both(Nint, key_i, key_j, h, p, spin, phase, hji,hij)
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in) :: Nint
+  integer,           intent(in) :: h, p, spin
+  double precision,  intent(in) :: phase
+  integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
+  double precision, intent(out) :: hji,hij
+  double precision :: hmono_ji,htwoe_ji
+  double precision :: hmono_ij,htwoe_ij
+
+  integer(bit_kind)             :: differences(Nint,2)
+  integer(bit_kind)             :: hole(Nint,2)
+  integer(bit_kind)             :: partcl(Nint,2)
+  integer                       :: occ_hole(Nint*bit_kind_size,2)
+  integer                       :: occ_partcl(Nint*bit_kind_size,2)
+  integer                       :: n_occ_ab_hole(2),n_occ_ab_partcl(2)
+  integer                       :: i0,i
+  double precision              :: buffer_c_ji(mo_num), buffer_x_ji(mo_num)
+  double precision              :: buffer_c_ij(mo_num), buffer_x_ij(mo_num)
+
+  do i = 1, mo_num
+    buffer_c_ji(i) = tc_2e_3idx_coulomb_integrals(i,p,h)
+    buffer_x_ji(i) = tc_2e_3idx_exchange_integrals(i,p,h)
+    buffer_c_ij(i) = tc_2e_3idx_coulomb_integrals_transp(i,p,h)
+    buffer_x_ij(i) = tc_2e_3idx_exchange_integrals_transp(i,p,h)
+  enddo
+
+  do i = 1, Nint
+   differences(i,1) = xor(key_i(i,1),ref_closed_shell_bitmask(i,1))
+   differences(i,2) = xor(key_i(i,2),ref_closed_shell_bitmask(i,2))
+   hole(i,1) = iand(differences(i,1),ref_closed_shell_bitmask(i,1))
+   hole(i,2) = iand(differences(i,2),ref_closed_shell_bitmask(i,2))
+   partcl(i,1) = iand(differences(i,1),key_i(i,1))
+   partcl(i,2) = iand(differences(i,2),key_i(i,2))
+  enddo
+
+  call bitstring_to_list_ab(hole, occ_hole, n_occ_ab_hole, Nint)
+  call bitstring_to_list_ab(partcl, occ_partcl, n_occ_ab_partcl, Nint)
+  hmono_ji = mo_bi_ortho_tc_one_e(p,h)
+  htwoe_ji = fock_op_2_e_tc_closed_shell(p,h)
+  hmono_ij = mo_bi_ortho_tc_one_e(h,p)
+  htwoe_ij = fock_op_2_e_tc_closed_shell(h,p)
+
+  ! holes :: direct terms
+  do i0 = 1, n_occ_ab_hole(1)
+    i = occ_hole(i0,1)
+    htwoe_ji -= buffer_c_ji(i)
+    htwoe_ij -= buffer_c_ij(i)
+  enddo
+  do i0 = 1, n_occ_ab_hole(2)
+    i = occ_hole(i0,2)
+    htwoe_ji -= buffer_c_ji(i)
+    htwoe_ij -= buffer_c_ij(i)
+  enddo
+ 
+  ! holes :: exchange terms
+  do i0 = 1, n_occ_ab_hole(spin)
+    i = occ_hole(i0,spin)
+    htwoe_ji += buffer_x_ji(i)
+    htwoe_ij += buffer_x_ij(i)
+  enddo
+ 
+  ! particles :: direct terms
+  do i0 = 1, n_occ_ab_partcl(1)
+    i = occ_partcl(i0,1)
+    htwoe_ji += buffer_c_ji(i)
+    htwoe_ij += buffer_c_ij(i)
+  enddo
+  do i0 = 1, n_occ_ab_partcl(2)
+    i = occ_partcl(i0,2)
+    htwoe_ji += buffer_c_ji(i)
+    htwoe_ij += buffer_c_ij(i)
+  enddo
+ 
+  ! particles :: exchange terms
+  do i0 = 1, n_occ_ab_partcl(spin)
+    i = occ_partcl(i0,spin)
+    htwoe_ji -= buffer_x_ji(i)
+    htwoe_ij -= buffer_x_ij(i)
+  enddo
+  htwoe_ji = htwoe_ji * phase
+  hmono_ji = hmono_ji * phase
+  hji  = htwoe_ji + hmono_ji 
+
+  htwoe_ij = htwoe_ij * phase
+  hmono_ij = hmono_ij * phase
+  hij  = htwoe_ij + hmono_ij 
+
+end
+
