@@ -340,8 +340,8 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
           endif
 
           tmp1 = double_p(mpA) * f1A_power(mpA-1) * f2A_power(npA) + double_p(npA) * f1A_power(npA-1) * f2A_power(mpA)
-          tmp1 = tmp1 * g12_power(opA)
-          tmp2 = double_p(opA) * g12_power(opA-1) * (f1A_power(mpA) * f2A_power(npA) + f1A_power(npA) * f2A_power(mpA))
+          tmp1 = tmp1 * g12_power(opA) * tmp
+          tmp2 = double_p(opA) * g12_power(opA-1) * (f1A_power(mpA) * f2A_power(npA) + f1A_power(npA) * f2A_power(mpA)) * tmp
 
           !tmp1 = 0.d0
           !if(mpA .gt. 0) then
@@ -356,9 +356,12 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
           !  tmp2 = tmp2 + dble(opA) * g12**dble(opA-1) * (f1A**dble(mpA) * f2A**dble(npA) + f1A**dble(npA) * f2A**dble(mpA))
           !endif
 
-          gradx(jpoint) = gradx(jpoint) + tmp * (tmp1 * grad1_f1A(1) + tmp2 * grad1_g12(1))
-          grady(jpoint) = grady(jpoint) + tmp * (tmp1 * grad1_f1A(2) + tmp2 * grad1_g12(2))
-          gradz(jpoint) = gradz(jpoint) + tmp * (tmp1 * grad1_f1A(3) + tmp2 * grad1_g12(3))
+!          gradx(jpoint) = gradx(jpoint) + tmp * (tmp1 * grad1_f1A(1) + tmp2 * grad1_g12(1))
+!          grady(jpoint) = grady(jpoint) + tmp * (tmp1 * grad1_f1A(2) + tmp2 * grad1_g12(2))
+!          gradz(jpoint) = gradz(jpoint) + tmp * (tmp1 * grad1_f1A(3) + tmp2 * grad1_g12(3))
+          gradx(jpoint) = gradx(jpoint) + tmp1 * grad1_f1A(1) + tmp2 * grad1_g12(1)
+          grady(jpoint) = grady(jpoint) + tmp1 * grad1_f1A(2) + tmp2 * grad1_g12(2)
+          gradz(jpoint) = gradz(jpoint) + tmp1 * grad1_f1A(3) + tmp2 * grad1_g12(3)
         enddo ! p
       enddo ! i_nucl
     enddo ! jpoint
