@@ -16,7 +16,7 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
   logical                        :: ok
 
   logical, allocatable           :: lbanned(:,:)
-  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j
+  integer                        :: puti, putj, ma, mi, s1, s2, i, i1, i2, j, istate
   integer                        :: hfix, pfix, h1, h2, p1, p2, ib, k, l, mm
 
   integer, parameter             :: turn2(2) = (/2,1/)
@@ -65,10 +65,12 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
        hij_cache(mm,2) = mo_bi_ortho_tc_two_e(mm,hfix,p2,p1)
        hji_cache(mm,1) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p1,p2)
        hji_cache(mm,2) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p2,p1)
+       do istate = 1,N_states
+        tmp_rowij(istate,mm)  = 0.d0
+        tmp_rowji(istate,mm)  = 0.d0
+       enddo
       enddo
       !! <alpha|H|psi>
-      tmp_rowij = 0.d0
-      tmp_rowji = 0.d0
       do putj=1, hfix-1
         if(lbanned(putj, ma)) cycle
         if(banned(putj, puti,bant)) cycle
@@ -119,13 +121,15 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
 
     !MOVE MI
     pfix = p(1,mi)
-    tmp_rowij  = 0.d0
-    tmp_rowij2 = 0.d0
-    tmp_rowji  = 0.d0
-    tmp_rowji2 = 0.d0
 !    call get_mo_two_e_integrals_complex(hfix,pfix,p1,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
 !    call get_mo_two_e_integrals_complex(hfix,pfix,p2,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
     do mm = 1, mo_num
+     do istate = 1,N_states
+      tmp_rowij(istate,mm)  = 0.d0
+      tmp_rowij2(istate,mm) = 0.d0
+      tmp_rowji(istate,mm)  = 0.d0
+      tmp_rowji2(istate,mm) = 0.d0
+     enddo
      hij_cache(mm,1) = mo_bi_ortho_tc_two_e(mm,hfix,pfix,p1)
      hij_cache(mm,2) = mo_bi_ortho_tc_two_e(mm,hfix,pfix,p2)
      hji_cache(mm,1) = mo_bi_ortho_tc_two_e_transp(mm,hfix,pfix,p1)
@@ -200,10 +204,12 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
          hij_cache(mm,2) = mo_bi_ortho_tc_two_e(mm,hfix,p2,p1)
          hji_cache(mm,1) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p1,p2)
          hji_cache(mm,2) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p2,p1)
+         do istate = 1, N_states
+          tmp_rowij(istate,mm) = 0.d0
+          tmp_rowji(istate,mm) = 0.d0
+         enddo
         enddo
     !! <alpha|H|psi>
-        tmp_rowij = 0.d0
-        tmp_rowji = 0.d0
         do putj=1,hfix-1
           if(banned(putj,puti,1)) cycle
           if(lbanned(putj,ma)) cycle
@@ -246,10 +252,6 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
       pfix = p(1,mi)
       p1 = p(1,ma)
       p2 = p(2,ma)
-      tmp_rowij =  0.d0
-      tmp_rowij2 = 0.d0
-      tmp_rowji =  0.d0
-      tmp_rowji2 = 0.d0
 !      call get_mo_two_e_integrals_complex(hfix,p1,pfix,mo_num,hij_cache(1,1),mo_integrals_map,mo_integrals_map_2)
 !      call get_mo_two_e_integrals_complex(hfix,p2,pfix,mo_num,hij_cache(1,2),mo_integrals_map,mo_integrals_map_2)
       do mm = 1, mo_num
@@ -257,6 +259,12 @@ subroutine get_d1_transp(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, 
        hij_cache(mm,2) = mo_bi_ortho_tc_two_e(mm,hfix,p2,pfix)
        hji_cache(mm,1) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p1,pfix)
        hji_cache(mm,2) = mo_bi_ortho_tc_two_e_transp(mm,hfix,p2,pfix)
+       do istate = 1,N_states
+        tmp_rowij (istate,mm) =  0.d0
+        tmp_rowij2(istate,mm) = 0.d0
+        tmp_rowji (istate,mm) =  0.d0
+        tmp_rowji2(istate,mm) = 0.d0
+       enddo
       enddo
       putj = p2
     !! <alpha|H|psi>

@@ -691,19 +691,19 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
           if(transpose_two_e_int)then
            call get_d2_new_transp(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           else
-           call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+           call get_d2_new       (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           endif
         elseif(nt == 3) then
           if(transpose_two_e_int)then
            call get_d1_transp(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           else
-           call get_d1_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+           call get_d1_new   (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
           endif
         else
          if(transpose_two_e_int)then
           call get_d0_transp (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
          else
-          call get_d0_new (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          call get_d0_new    (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
          endif
         endif
     elseif(nt == 4) then
