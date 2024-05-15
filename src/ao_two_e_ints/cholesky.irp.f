@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
  integer :: i,j,k
  do j=1,ao_num
   do i=1,ao_num
-   do k=1,ao_num
+   do k=1,cholesky_ao_num
     cholesky_ao_transp(k,i,j) = cholesky_ao(i,j,k)
    enddo
   enddo
