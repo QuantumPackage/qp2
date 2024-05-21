@@ -22,10 +22,15 @@ let of_string ~units s =
     }
   | [ name; x; y; z ] ->
     let e = Element.of_string name in
-    { element = e ;
-      charge  = Element.to_charge e;
-      coord   = Point3d.of_string ~units (String.concat " " [x; y; z])
-    }
+    begin
+      try
+      { element = e ;
+        charge  = Element.to_charge e;
+        coord   = Point3d.of_string ~units (String.concat " " [x; y; z])
+      }
+      with
+      | err -> (Printf.eprintf "name = \"%s\"\nxyz = (%s,%s,%s)\n%!" name x y z ; raise err)
+    end
   | _ -> raise (AtomError s)
 
 

@@ -191,7 +191,7 @@ subroutine give_degen_full_list(A, n, thr, list_degen, n_degen_list)
     list_degen(n_degen_list,1) = i
     icount = 1
     do j = i+1, n
-      if(dabs(A(i)-A(j)).lt.thr.and.is_ok(j)) then
+      if(dabs(A(i)-A(j)).lt.thr .and. is_ok(j)) then
         is_ok(j) = .False.
         icount += 1
         list_degen(n_degen_list,icount) = j

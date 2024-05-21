@@ -13,9 +13,9 @@ END_DOC
   integer                        :: iteration_SCF,dim_DIIS,index_dim_DIIS
 
   logical                        :: converged
-  integer                        :: i,j
+  integer                        :: i,j,m
   logical, external              :: qp_stop
-  double precision, allocatable :: mo_coef_save(:,:)
+  double precision, allocatable :: mo_coef_save(:,:), S(:,:)
 
   PROVIDE ao_md5 mo_occ level_shift
 
@@ -208,8 +208,28 @@ END_DOC
       size(Fock_matrix_mo,2),mo_label,1,.true.)
    call restore_symmetry(ao_num, mo_num, mo_coef, size(mo_coef,1), 1.d-10)
    call orthonormalize_mos
-   call save_mos
   endif
+
+
+  ! Identify degenerate MOs and force them on the axes
+  allocate(S(ao_num,ao_num))
+  i=1
+  do while (i<mo_num)
+    j=i
+    m=1
+    do while ( (j+1<mo_num).and.(fock_matrix_diag_mo(j+1)-fock_matrix_diag_mo(i) < 1.d-8) )
+      j += 1
+      m += 1
+    enddo
+    if (m>1) then
+      call dgemm('N','T',ao_num,ao_num,m,1.d0,mo_coef(1,i),size(mo_coef,1),mo_coef(1,i),size(mo_coef,1),0.d0,S,size(S,1))
+      call pivoted_cholesky( S, m, -1.d0, ao_num, mo_coef(1,i))
+    endif
+    i = j+1
+  enddo
+
+
+  call save_mos
 
   call write_double(6, Energy_SCF, 'SCF energy')
 

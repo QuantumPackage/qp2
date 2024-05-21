@@ -9,7 +9,7 @@ echo "QP_ROOT="$QP_ROOT
 unset CC
 unset CCXX
 
-TREXIO_VERSION=2.3.2
+TREXIO_VERSION=2.4.2
 
 # Force GCC instead of ICC for dependencies
 export CC=gcc
@@ -219,7 +219,7 @@ EOF
               tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT} --without-hdf5 CFLAGS='-g'
-              make -j 8 && make -j 8 check && make -j 8 install
+              (make -j 8 || make) && make check && make -j 8 install
               tar -zxvf "\${QP_ROOT}"/external/qp2-dependencies/${ARCHITECTURE}/ninja.tar.gz 
               mv ninja "\${QP_ROOT}"/bin/
 EOF
@@ -233,7 +233,7 @@ EOF
               tar -zxf trexio-${VERSION}.tar.gz && rm trexio-${VERSION}.tar.gz
               cd trexio-${VERSION}
               ./configure --prefix=\${QP_ROOT} CFLAGS="-g"
-              make -j 8 && make -j 8 check && make -j 8 install
+              (make -j 8 || make) && make check && make -j 8 install
 EOF
     elif [[ ${PACKAGE} = qmckl ]] ; then
 
@@ -245,7 +245,7 @@ EOF
               tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
               cd qmckl-${VERSION}
               ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc CFLAGS='-g'
-              make && make -j 4 check && make install
+              (make -j 8 || make) && make check && make install
 EOF
     elif [[ ${PACKAGE} = qmckl-intel ]] ; then
 
@@ -257,7 +257,7 @@ EOF
               tar -zxf qmckl-${VERSION}.tar.gz && rm qmckl-${VERSION}.tar.gz
               cd qmckl-${VERSION}
               ./configure --prefix=\${QP_ROOT} --enable-hpc --disable-doc --with-icc --with-ifort CFLAGS='-g'
-              make && make -j 4 check && make install
+              (make -j 8 || make) && make check && make install
 EOF
  
 

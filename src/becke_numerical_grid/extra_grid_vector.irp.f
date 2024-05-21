@@ -47,8 +47,12 @@ END_PROVIDER
   END_DOC
 
   implicit none
-  integer                        :: i,j,k,l,i_count
-  double precision               :: r(3)
+  integer          :: i, j, k, l, i_count
+  double precision :: r(3)
+  double precision :: wall0, wall1
+
+  call wall_time(wall0)
+  print *, ' Providing extra_final_grid_points ...'
 
   i_count = 0
   do j = 1, nucl_num
@@ -69,6 +73,10 @@ END_PROVIDER
       enddo
     enddo
   enddo
+
+  call wall_time(wall1)
+  print *, ' wall time for extra_final_grid_points,', wall1 - wall0
+  call print_memory_usage()
 
 END_PROVIDER
 

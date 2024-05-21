@@ -636,10 +636,7 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
     negMask(i,2) = not(mask(i,2))
   end do
 
-!  print*,'in selection '
   do i = 1, N_sel
-!    call debug_det(det(1,1,i),N_int)
-!    print*,i,dabs(psi_selectors_coef_transp_tc(1,2,i) * psi_selectors_coef_transp_tc(1,1,i))
     if(interesting(i) < 0) then
       stop 'prefetch interesting(i) and det(i)'
     endif
@@ -691,11 +688,23 @@ subroutine splash_pq(mask, sp, det, i_gen, N_sel, bannedOrb, banned, mat, intere
 
         call get_mask_phase(psi_det_sorted_tc(1,1,interesting(i)), phasemask,N_int)
         if(nt == 4) then
-          call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          if(transpose_two_e_int)then
+           call get_d2_new_transp(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          else
+           call get_d2_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          endif
         elseif(nt == 3) then
-          call get_d1_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          if(transpose_two_e_int)then
+           call get_d1_transp(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          else
+           call get_d1_new(det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+          endif
         else
+         if(transpose_two_e_int)then
+          call get_d0_transp (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+         else
           call get_d0_new (det(1,1,i), phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, p, sp, psi_selectors_coef_transp_tc(1, 1, interesting(i)))
+         endif
         endif
     elseif(nt == 4) then
         call bitstring_to_list_in_selection(mobMask(1,1), p(1,1), p(0,1), N_int)
@@ -887,79 +896,11 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
         call diag_htilde_mu_mat_fock_bi_ortho(N_int, det, hmono, htwoe, hthree, hii)
         do istate = 1,N_states
           delta_E = E0(istate) - Hii + E_shift
-          double precision               :: alpha_h_psi_tmp, psi_h_alpha_tmp, error
-          if(debug_tc_pt2 == 1)then !! Using the old version
-            psi_h_alpha = 0.d0
-            alpha_h_psi = 0.d0
-            do iii = 1, N_det_selectors
-              call htilde_mu_mat_bi_ortho_tot_slow(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-              call htilde_mu_mat_bi_ortho_tot_slow(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-              call get_excitation_degree(psi_selectors(1,1,iii), det,degree,N_int)
-              if(degree == 0)then
-               print*,'problem !!!'
-               print*,'a determinant is already in the wave function !!'
-               print*,'it corresponds to the selector number ',iii
-               call debug_det(det,N_int)
-               stop
-              endif
-!              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-!              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-              psi_h_alpha += i_h_alpha * psi_selectors_coef_tc(iii,2,1) ! left function
-              alpha_h_psi += alpha_h_i * psi_selectors_coef_tc(iii,1,1) ! right function
-            enddo
-          else if(debug_tc_pt2 == 2)then !! debugging the new version
-!            psi_h_alpha_tmp = 0.d0
-!            alpha_h_psi_tmp = 0.d0
-!            do iii = 1, N_det_selectors ! old version
-!              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-!              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-!              psi_h_alpha_tmp += i_h_alpha * psi_selectors_coef_tc(iii,1,1) ! left function
-!              alpha_h_psi_tmp += alpha_h_i * psi_selectors_coef_tc(iii,2,1) ! right function
-!            enddo
-            psi_h_alpha_tmp = mat_l(istate, p1, p2) ! new version
-            alpha_h_psi_tmp = mat_r(istate, p1, p2) ! new version
-            psi_h_alpha = 0.d0
-            alpha_h_psi = 0.d0
-            do iii = 1, N_det ! old version
-              call htilde_mu_mat_opt_bi_ortho_no_3e(psi_det(1,1,iii), det, N_int, i_h_alpha)
-              call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_det(1,1,iii), N_int, alpha_h_i)
-              psi_h_alpha += i_h_alpha * psi_l_coef_bi_ortho(iii,1) ! left function
-              alpha_h_psi += alpha_h_i * psi_r_coef_bi_ortho(iii,1) ! right function
-            enddo
-            if(dabs(psi_h_alpha*alpha_h_psi/delta_E).gt.1.d-10)then
-              error = dabs(psi_h_alpha * alpha_h_psi - psi_h_alpha_tmp * alpha_h_psi_tmp)/dabs(psi_h_alpha * alpha_h_psi)
-              if(error.gt.1.d-2)then
-                call debug_det(det, N_int)
-                print*,'error =',error,psi_h_alpha * alpha_h_psi/delta_E,psi_h_alpha_tmp * alpha_h_psi_tmp/delta_E
-                print*,psi_h_alpha , alpha_h_psi
-                print*,psi_h_alpha_tmp , alpha_h_psi_tmp
-                print*,'selectors '
-                do iii = 1, N_det_selectors ! old version
-                 print*,'iii',iii,psi_selectors_coef_tc(iii,1,1),psi_selectors_coef_tc(iii,2,1)
-                 call htilde_mu_mat_opt_bi_ortho_no_3e(psi_selectors(1,1,iii), det, N_int, i_h_alpha)
-                 call htilde_mu_mat_opt_bi_ortho_no_3e(det, psi_selectors(1,1,iii), N_int, alpha_h_i)
-                 print*,i_h_alpha,alpha_h_i
-                 call debug_det(psi_selectors(1,1,iii),N_int)
-                enddo
-!                print*,'psi_det '
-!                do iii = 1, N_det! old version
-!                 print*,'iii',iii,psi_l_coef_bi_ortho(iii,1),psi_r_coef_bi_ortho(iii,1)
-!                 call debug_det(psi_det(1,1,iii),N_int)
-!                enddo
-                stop
-              endif
-            endif
-          else
-           psi_h_alpha = mat_l(istate, p1, p2)
-           alpha_h_psi = mat_r(istate, p1, p2)
-          endif
+          psi_h_alpha = mat_l(istate, p1, p2)
+          alpha_h_psi = mat_r(istate, p1, p2)
           val = 4.d0 * psi_h_alpha * alpha_h_psi
           tmp = dsqrt(delta_E * delta_E + val)
-!          if (delta_E < 0.d0) then
-!              tmp = -tmp
-!          endif
           e_pert(istate) = 0.25 * val / delta_E
-!          e_pert(istate) = 0.5d0 * (tmp - delta_E)
           if(dsqrt(tmp).gt.1.d-4.and.dabs(psi_h_alpha).gt.1.d-4)then
            coef(istate)   = e_pert(istate) / psi_h_alpha
           else
@@ -976,15 +917,6 @@ subroutine fill_buffer_double(i_generator, sp, h1, h2, bannedOrb, banned, fock_d
            if(e_pert(istate).gt.0.d0)e_pert(istate)=0.d0
           endif
 
-!         if(selection_tc     ==  1 )then
-!          if(e_pert(istate).lt.0.d0)then
-!           e_pert(istate) = 0.d0
-!          endif
-!         else if(selection_tc == -1)then
-!          if(e_pert(istate).gt.0.d0)then
-!           e_pert(istate) = 0.d0
-!          endif
-!         endif
         enddo
 
 

@@ -97,7 +97,7 @@ end
 
 def get_repositories():
     l_result = [f for f in os.listdir(QP_PLUGINS) \
-                  if f not in [".gitignore", "local"] ]
+                  if f not in [".gitignore", "local", "README.rst"] ]
     return sorted(l_result)
 
 
