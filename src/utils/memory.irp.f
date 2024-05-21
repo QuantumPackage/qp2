@@ -107,7 +107,7 @@ subroutine check_mem(rss_in,routine)
   double precision, intent(in) :: rss_in
   character*(*) :: routine
   double precision :: mem
-  call total_memory(mem)
+  call resident_memory(mem)
   mem += rss_in
   if (mem > qp_max_mem) then
     call print_memory_usage()

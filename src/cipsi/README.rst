@@ -15,18 +15,18 @@ The :c:func:`run_cipsi` subroutine iteratively:
 * If :option:`determinants s2_eig` is |true|, it adds all the necessary
   determinants to allow the eigenstates of |H| to be eigenstates of |S^2|
 * Diagonalizes |H| in the enlarged internal space
-* Computes the |PT2| contribution to the energy stochastically :cite:`Garniron_2017.2`
+* Computes the |PT2| contribution to the energy stochastically :cite:`Garniron_2017b`
   or deterministically, depending on :option:`perturbation do_pt2`
 * Extrapolates the variational energy by fitting
   :math:`E=E_\text{FCI} - \alpha\, E_\text{PT2}`
 
 The difference between :c:func:`run_stochastic_cipsi` and :c:func:`run_cipsi` is that
 :c:func:`run_stochastic_cipsi` selects the determinants on the fly with the computation
-of the stochastic |PT2| :cite:`Garniron_2017.2`. Hence, it is a semi-stochastic selection. It
+of the stochastic |PT2| :cite:`Garniron_2017b`. Hence, it is a semi-stochastic selection. It
 
 * Selects the most important determinants from the external space and adds them to the
   internal space, on the fly with the computation of the PT2 with the stochastic algorithm
-  presented in :cite:`Garniron_2017.2`.
+  presented in :cite:`Garniron_2017b`.
 * If :option:`determinants s2_eig` is |true|, it adds all the necessary
   determinants to allow the eigenstates of |H| to be eigenstates of |S^2|
 * Extrapolates the variational energy by fitting

@@ -138,6 +138,8 @@ END_PROVIDER
     deallocate(S)
   endif
 
+  FREE ao_overlap
+
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, ao_ortho_canonical_overlap, (ao_ortho_canonical_num,ao_ortho_canonical_num)]

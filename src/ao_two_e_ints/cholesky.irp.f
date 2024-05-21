@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num,
  integer :: i,j,k
  do j=1,ao_num
   do i=1,ao_num
-   do k=1,ao_num
+   do k=1,cholesky_ao_num
     cholesky_ao_transp(k,i,j) = cholesky_ao(i,j,k)
    enddo
   enddo
@@ -66,7 +66,8 @@ END_PROVIDER
 
    else
 
-     PROVIDE nucl_coord
+     PROVIDE nucl_coord ao_two_e_integral_schwartz
+     call set_multiple_levels_omp(.False.)
 
      if (do_direct_integrals) then
        if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then

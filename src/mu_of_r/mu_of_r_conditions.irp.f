@@ -61,7 +61,7 @@
  END_DOC
  integer :: ipoint
  double precision :: wall0,wall1,f_hf,on_top,w_hf,sqpi
- PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
+ PROVIDE f_hf_cholesky on_top_hf_grid
  print*,'providing mu_of_r_hf ...'
  call wall_time(wall0)
  sqpi = dsqrt(dacos(-1.d0))
@@ -69,10 +69,10 @@
  !$OMP PARALLEL DO &
  !$OMP DEFAULT (NONE)  &
  !$OMP PRIVATE (ipoint,f_hf,on_top,w_hf) & 
- !$OMP ShARED (n_points_final_grid,mu_of_r_hf,f_psi_hf_ab,on_top_hf_mu_r,sqpi) 
+ !$OMP ShARED (n_points_final_grid,mu_of_r_hf,f_hf_cholesky,on_top_hf_grid,sqpi) 
  do ipoint = 1, n_points_final_grid
-  f_hf   = f_psi_hf_ab(ipoint)
-  on_top = on_top_hf_mu_r(ipoint)
+  f_hf   = f_hf_cholesky(ipoint)
+  on_top = on_top_hf_grid(ipoint)
   if(on_top.le.1.d-12.or.f_hf.le.0.d0.or.f_hf * on_top.lt.0.d0)then
     w_hf   = 1.d+10
   else 
@@ -84,6 +84,44 @@
  call wall_time(wall1)
  print*,'Time to provide mu_of_r_hf = ',wall1-wall0
  END_PROVIDER 
+
+ BEGIN_PROVIDER [double precision, mu_of_r_hf_old, (n_points_final_grid) ]
+ implicit none 
+ BEGIN_DOC
+ ! mu(r) computed with a HF wave function (assumes that HF MOs are stored in the EZFIO)
+ !
+ ! corresponds to Eq. (37) of J. Chem. Phys. 149, 194301 (2018) but for \Psi^B = HF^B
+ !
+ ! !!!!!! WARNING !!!!!! if no_core_density == .True. then all contributions from the core orbitals 
+ !
+ ! in the two-body density matrix are excluded
+ END_DOC
+ integer :: ipoint
+ double precision :: wall0,wall1,f_hf,on_top,w_hf,sqpi
+ PROVIDE mo_two_e_integrals_in_map mo_integrals_map big_array_exchange_integrals 
+ print*,'providing mu_of_r_hf_old ...'
+ call wall_time(wall0)
+ sqpi = dsqrt(dacos(-1.d0))
+ provide f_psi_hf_ab 
+ !$OMP PARALLEL DO &
+ !$OMP DEFAULT (NONE)  &
+ !$OMP PRIVATE (ipoint,f_hf,on_top,w_hf) & 
+ !$OMP ShARED (n_points_final_grid,mu_of_r_hf_old,f_psi_hf_ab,on_top_hf_mu_r,sqpi) 
+ do ipoint = 1, n_points_final_grid
+  f_hf   = f_psi_hf_ab(ipoint)
+  on_top = on_top_hf_mu_r(ipoint)
+  if(on_top.le.1.d-12.or.f_hf.le.0.d0.or.f_hf * on_top.lt.0.d0)then
+    w_hf   = 1.d+10
+  else 
+    w_hf  = f_hf /  on_top
+  endif
+  mu_of_r_hf_old(ipoint) =  w_hf * sqpi * 0.5d0
+ enddo
+ !$OMP END PARALLEL DO
+ call wall_time(wall1)
+ print*,'Time to provide mu_of_r_hf_old = ',wall1-wall0
+ END_PROVIDER 
+
 
  BEGIN_PROVIDER [double precision, mu_of_r_psi_cas, (n_points_final_grid,N_states) ]
  implicit none 

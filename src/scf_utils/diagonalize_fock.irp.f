@@ -47,7 +47,7 @@ BEGIN_PROVIDER [ double precision, eigenvectors_Fock_matrix_mo, (ao_num,mo_num) 
        do j = 1, n_core_orb
          jorb = list_core(j)
          F(iorb,jorb) = 0.d0
-         F(jorb,iorb) = 0.d0                                                                                                                 
+         F(jorb,iorb) = 0.d0
        enddo
      enddo
    endif

@@ -117,6 +117,9 @@ subroutine ZMQ_pt2(E, pt2_data, pt2_data_err, relative_error, N_in)
   use selection_types
 
   implicit none
+  BEGIN_DOC
+! Computes the PT2 energy using ZMQ
+  END_DOC
 
   integer(ZMQ_PTR)               :: zmq_to_qp_run_socket, zmq_socket_pull
   integer, intent(in)            :: N_in
@@ -540,27 +543,59 @@ subroutine pt2_collector(zmq_socket_pull, E, relative_error, pt2_data, pt2_data_
         ! 1/(N-1.5) : see  Brugger, The American Statistician (23) 4 p. 32 (1969)
         if(c > 2) then
           eqt = dabs((pt2_data_S2(t) % pt2(pt2_stoch_istate) / c) - (pt2_data_S(t) % pt2(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % pt2(pt2_stoch_istate) = eqt
 
           eqt = dabs((pt2_data_S2(t) % variance(pt2_stoch_istate) / c) - (pt2_data_S(t) % variance(pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqt = sqrt(eqt / (dble(c) - 1.5d0))
+          eqt = dsqrt(eqt / (dble(c) - 1.5d0))
           pt2_data_err % variance(pt2_stoch_istate) = eqt
 
           eqta(:) = dabs((pt2_data_S2(t) % overlap(:,pt2_stoch_istate) / c) - (pt2_data_S(t) % overlap(:,pt2_stoch_istate)/c)**2) ! dabs for numerical stability
-          eqta(:) = sqrt(eqta(:) / (dble(c) - 1.5d0))
+          eqta(:) = dsqrt(eqta(:) / (dble(c) - 1.5d0))
           pt2_data_err % overlap(:,pt2_stoch_istate) = eqta(:)
 
 
           if ((time - time1 > 1.d0) .or. (n==N_det_generators)) then
             time1 = time
-            print '(I10, X, F12.6, X, G10.3, X, F10.6, X, G10.3, X, F10.6, X, G10.3, X, F10.4)', c, &
-              pt2_data     % pt2(pt2_stoch_istate) +E, &
-              pt2_data_err % pt2(pt2_stoch_istate), &
-              pt2_data     % variance(pt2_stoch_istate), &
-              pt2_data_err % variance(pt2_stoch_istate), &
-              pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate), &
-              pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate), &
+
+            value1 =  pt2_data     % pt2(pt2_stoch_istate) + E
+            error1 =  pt2_data_err % pt2(pt2_stoch_istate)
+            value2 =  pt2_data     % pt2(pt2_stoch_istate)
+            error2 =  pt2_data_err % pt2(pt2_stoch_istate)
+            value3 =  pt2_data     % variance(pt2_stoch_istate)
+            error3 =  pt2_data_err % variance(pt2_stoch_istate)
+            value4 =  pt2_data     % overlap(pt2_stoch_istate,pt2_stoch_istate)
+            error4 =  pt2_data_err % overlap(pt2_stoch_istate,pt2_stoch_istate)
+
+            ! Max size of the values (FX.Y) with X=size
+            size1 = 15
+            size2 = 12
+            size3 = 12
+            size4 = 12
+
+            ! To generate the format: number(error)
+            call format_w_error(value1,error1,size1,8,format_value1,str_error1)
+            call format_w_error(value2,error2,size2,8,format_value2,str_error2)
+            call format_w_error(value3,error3,size3,8,format_value3,str_error3)
+            call format_w_error(value4,error4,size4,8,format_value4,str_error4)
+
+            ! value > string with the right format
+            write(str_value1,'('//format_value1//')') value1
+            write(str_value2,'('//format_value2//')') value2
+            write(str_value3,'('//format_value3//')') value3
+            write(str_value4,'('//format_value4//')') value4
+
+            ! Convergence criterion
+            conv_crit = dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &
+                  (1.d-20 + dabs(pt2_data % pt2(pt2_stoch_istate)) )
+            write(str_conv,'(G10.3)') conv_crit
+
+            write(*,'(I10,X,X,A20,X,A16,X,A16,X,A16,X,A12,X,F10.1)') c,&
+            adjustl(adjustr(str_value1)//'('//str_error1(1:1)//')'),&
+            adjustl(adjustr(str_value2)//'('//str_error2(1:1)//')'),&
+            adjustl(adjustr(str_value3)//'('//str_error3(1:1)//')'),&
+            adjustl(adjustr(str_value4)//'('//str_error4(1:1)//')'),&
+            adjustl(str_conv),&
             time-time0
             if (stop_now .or. (                                      &
                   (do_exit .and. (dabs(pt2_data_err % pt2(pt2_stoch_istate)) /    &

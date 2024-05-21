@@ -1,4 +1,4 @@
-program import_determinants_ao
+program import_trexio_determinants
   call run
 end
 
