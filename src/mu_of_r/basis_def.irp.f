@@ -114,3 +114,48 @@ BEGIN_PROVIDER [double precision, basis_mos_in_r_array, (n_basis_orb,n_points_fi
   enddo
  enddo
 END_PROVIDER 
+
+! BEGIN_PROVIDER [integer, n_docc_val_orb_for_cas]
+!&BEGIN_PROVIDER [integer, n_max_docc_val_orb_for_cas]
+! implicit none
+! BEGIN_DOC
+! ! Number of DOUBLY OCCUPIED VALENCE ORBITALS for the CAS wave function
+! !
+! ! This determines the size of the space \mathcal{A} of Eqs. (15-16) of Phys.Chem.Lett.2019, 10, 2931   2937
+! END_DOC
+! integer :: i
+! n_docc_val_orb_for_cas = 0
+! ! You browse the BETA  ELECTRONS and check if its not a CORE ORBITAL 
+! do i = 1, elec_beta_num
+!  if(  trim(mo_class(i))=="Inactive" & 
+!  .or. trim(mo_class(i))=="Active"   &
+!  .or. trim(mo_class(i))=="Virtual" )then
+!   n_docc_val_orb_for_cas +=1 
+!  endif
+! enddo
+! n_max_docc_val_orb_for_cas = maxval(n_docc_val_orb_for_cas)
+!
+!END_PROVIDER 
+!
+!BEGIN_PROVIDER [integer, list_doc_valence_orb_for_cas, (n_max_docc_val_orb_for_cas)]
+! implicit none
+! BEGIN_DOC
+! ! List of OCCUPIED valence orbitals for each spin to build the f_{HF}(r_1,r_2) function 
+! !
+! ! This corresponds to ALL OCCUPIED orbitals in the HF wave function, except those defined as "core" 
+! !
+! ! This determines the space \mathcal{A} of Eqs. (15-16) of Phys.Chem.Lett.2019, 10, 2931   2937
+! END_DOC
+! j = 0
+! ! You browse the BETA  ELECTRONS and check if its not a CORE ORBITAL 
+! do i = 1, elec_beta_num
+!  if(  trim(mo_class(i))=="Inactive" & 
+!  .or. trim(mo_class(i))=="Active"   &
+!  .or. trim(mo_class(i))=="Virtual" )then
+!   j +=1 
+!   list_doc_valence_orb_for_cas(j) = i
+!  endif
+! enddo
+!
+!END_PROVIDER 
+

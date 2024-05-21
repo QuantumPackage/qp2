@@ -48,7 +48,7 @@
  integer :: i,j
  do i = 1, n_points_final_grid
   do j = 1, mo_num
-   mos_in_r_array_transp(i,j) = mos_in_r_array(j,i) 
+   mos_in_r_array_transp(i,j) = mos_in_r_array_omp(j,i) 
   enddo
  enddo
  END_PROVIDER

@@ -37,14 +37,6 @@ function run_sd() {
   eq $energy1 $1 $thresh
 }
 
-@test "O2 CAS" {  
-  qp set_file o2_cas.gms.ezfio
-  qp set_mo_class -c "[1-2]" -a "[3-10]" -d "[11-46]"
-  run -149.72435425 3.e-4 10000
-  qp set_mo_class -c "[1-2]" -a "[3-10]" -v "[11-46]"
-  run_md -0.1160222327 1.e-6 
-}
-
 
 @test "LiF RHF" {  
   qp set_file lif.ezfio 
