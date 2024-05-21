@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [integer, list_couple_orb_r1, (2,n_couple_orb_r1)]
+BEGIN_PROVIDER [integer, list_couple_hf_orb_r1, (2,n_couple_orb_r1)]
  implicit none
  integer :: ii,i,mm,m,itmp
  itmp = 0
@@ -7,14 +7,14 @@ BEGIN_PROVIDER [integer, list_couple_orb_r1, (2,n_couple_orb_r1)]
    do mm = 1, n_basis_orb ! electron 1 
     m = list_basis(mm)
     itmp += 1
-    list_couple_orb_r1(1,itmp) = i
-    list_couple_orb_r1(2,itmp) = m
+    list_couple_hf_orb_r1(1,itmp) = i
+    list_couple_hf_orb_r1(2,itmp) = m
    enddo
   enddo
 END_PROVIDER 
 
 
-BEGIN_PROVIDER [integer, list_couple_orb_r2, (2,n_couple_orb_r2)]
+BEGIN_PROVIDER [integer, list_couple_hf_orb_r2, (2,n_couple_orb_r2)]
  implicit none
  integer :: ii,i,mm,m,itmp
  itmp = 0
@@ -23,8 +23,8 @@ BEGIN_PROVIDER [integer, list_couple_orb_r2, (2,n_couple_orb_r2)]
    do mm = 1, n_basis_orb ! electron 1 
     m = list_basis(mm)
     itmp += 1
-    list_couple_orb_r2(1,itmp) = i
-    list_couple_orb_r2(2,itmp) = m
+    list_couple_hf_orb_r2(1,itmp) = i
+    list_couple_hf_orb_r2(2,itmp) = m
    enddo
   enddo
 END_PROVIDER 
@@ -87,31 +87,6 @@ BEGIN_PROVIDER [ double precision, mos_times_cholesky_r1, (cholesky_mo_num,n_poi
   enddo
 
  call get_AB_prod(mo_chol_r1,cholesky_mo_num,n_couple_orb_r1,mos_ib_r1,n_points_final_grid,mos_times_cholesky_r1)
- allocate(test(cholesky_mo_num,n_points_final_grid))
- test = 0.d0
- do ipoint = 1, n_points_final_grid
-  do itmp = 1, n_couple_orb_r1
-    i = list_couple_orb_r1(1,itmp)
-    m = list_couple_orb_r1(2,itmp) 
-    mo_i_r1 = mos_in_r_array_omp(i,ipoint)
-    mo_b_r1 = mos_in_r_array_omp(m,ipoint)
-    do mm = 1, cholesky_mo_num
-     test(mm,ipoint) += mo_i_r1 * mo_b_r1 * mo_chol_r1(mm,itmp)
-    enddo
-   enddo
-  enddo
- double precision :: accu
- accu = 0.d0
- do ipoint = 1, n_points_final_grid
-  do mm = 1, cholesky_mo_num
-   accu += dabs(mos_times_cholesky_r1(mm,ipoint) - test(mm,ipoint) )
-   if(dabs(mos_times_cholesky_r1(mm,ipoint) - test(mm,ipoint)).gt.1.d-10)then
-    print*,'problem ! ',dabs(mos_times_cholesky_r1(mm,ipoint) - test(mm,ipoint)) & 
-                       ,     mos_times_cholesky_r1(mm,ipoint) , test(mm,ipoint) 
-   endif
-  enddo
- enddo
- print*,'accu = ',accu
    
 
 END_PROVIDER 
@@ -157,53 +132,72 @@ BEGIN_PROVIDER [ double precision, mos_times_cholesky_r2, (cholesky_mo_num,n_poi
   enddo
 
  call get_AB_prod(mo_chol_r2,cholesky_mo_num,n_couple_orb_r2,mos_ib_r2,n_points_final_grid,mos_times_cholesky_r2)
- allocate(test(cholesky_mo_num,n_points_final_grid))
- test = 0.d0
- do ipoint = 1, n_points_final_grid
-  do itmp = 1, n_couple_orb_r2
-    i = list_couple_orb_r2(1,itmp)
-    m = list_couple_orb_r2(2,itmp) 
-    mo_i_r2 = mos_in_r_array_omp(i,ipoint)
-    mo_b_r2 = mos_in_r_array_omp(m,ipoint)
-    do mm = 1, cholesky_mo_num
-     test(mm,ipoint) += mo_i_r2 * mo_b_r2 * mo_chol_r2(mm,itmp)
-    enddo
-   enddo
-  enddo
- double precision :: accu
- accu = 0.d0
- do ipoint = 1, n_points_final_grid
-  do mm = 1, cholesky_mo_num
-   accu += dabs(mos_times_cholesky_r2(mm,ipoint) - test(mm,ipoint) )
-   if(dabs(mos_times_cholesky_r2(mm,ipoint) - test(mm,ipoint)).gt.1.d-10)then
-    print*,'problem ! ',dabs(mos_times_cholesky_r2(mm,ipoint) - test(mm,ipoint)) & 
-                       ,     mos_times_cholesky_r2(mm,ipoint) , test(mm,ipoint) 
-   endif
-  enddo
- enddo
- print*,'accu = ',accu
 
 END_PROVIDER 
 
 
 BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
  implicit none
- integer :: ipoint
+ integer :: ipoint,m,k
  !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
  !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
  !!     =  \sum_A \sum_{I}Phi_I(R)V_AI \sum_{J}V_AJ Phi_J(R)
  !!     =  \sum_A V_AR G_AR 
  !! V_AR = \sum_{I}Phi_IR V_AI = \sum_{I}Phi^t_RI V_AI
- double precision :: u_dot_v
- do ipoint = 1, n_points_final_grid
-  f_hf_cholesky(ipoint) = 2.D0 * u_dot_v(mos_times_cholesky_r2(1,ipoint),mos_times_cholesky_r1(1,ipoint),cholesky_mo_num)
- enddo
+ double precision :: u_dot_v,wall0,wall1
+ if(elec_alpha_num == elec_beta_num)then
+  provide mos_times_cholesky_r1
+  print*,'providing f_hf_cholesky ...'
+  call wall_time(wall0)
+  !$OMP PARALLEL DO &
+  !$OMP DEFAULT (NONE)  &
+  !$OMP PRIVATE (ipoint,m) & 
+  !$OMP ShARED (mos_times_cholesky_r1,cholesky_mo_num,f_hf_cholesky,n_points_final_grid) 
+   do ipoint = 1, n_points_final_grid
+    f_hf_cholesky(ipoint) = 0.d0
+    do m = 1, cholesky_mo_num
+     f_hf_cholesky(ipoint) =  f_hf_cholesky(ipoint) + &
+       mos_times_cholesky_r1(m,ipoint) * mos_times_cholesky_r1(m,ipoint)
+    enddo
+    f_hf_cholesky(ipoint) *= 2.D0
+   enddo
+  !$OMP END PARALLEL DO
+  
+  call wall_time(wall1)
+  print*,'Time to provide f_hf_cholesky = ',wall1-wall0
+  free mos_times_cholesky_r1
+ else
+  provide mos_times_cholesky_r2 mos_times_cholesky_r1
+  !$OMP PARALLEL DO &
+  !$OMP DEFAULT (NONE)  &
+  !$OMP PRIVATE (ipoint,m) & 
+  !$OMP ShARED (mos_times_cholesky_r2,mos_times_cholesky_r1,cholesky_mo_num,f_hf_cholesky,n_points_final_grid) 
+  do ipoint = 1, n_points_final_grid
+   f_hf_cholesky(ipoint) = 0.D0
+    do m = 1, cholesky_mo_num
+     f_hf_cholesky(ipoint) =  f_hf_cholesky(ipoint) + &
+            mos_times_cholesky_r2(m,ipoint)*mos_times_cholesky_r1(m,ipoint)
+    enddo
+    f_hf_cholesky(ipoint) *= 2.D0
+  enddo
+  !$OMP END PARALLEL DO
+  call wall_time(wall1)
+  print*,'Time to provide f_hf_cholesky = ',wall1-wall0
+  free mos_times_cholesky_r2 mos_times_cholesky_r1
+ endif
 END_PROVIDER 
 
 BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
  implicit none
  integer :: ipoint,i,ii
- double precision :: dm_a, dm_b
+ double precision :: dm_a, dm_b,wall0,wall1
+ print*,'providing on_top_hf_grid ...'
+ provide mos_in_r_array_omp
+ call wall_time(wall0)
+ !$OMP PARALLEL DO &
+ !$OMP DEFAULT (NONE)  &
+ !$OMP PRIVATE (ipoint,dm_a,dm_b,ii,i) & 
+ !$OMP ShARED (n_points_final_grid,n_occ_val_orb_for_hf,mos_in_r_array_omp,list_valence_orb_for_hf,on_top_hf_grid) 
  do ipoint = 1, n_points_final_grid
   dm_a = 0.d0
   do ii = 1, n_occ_val_orb_for_hf(1)
@@ -217,5 +211,8 @@ BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
   enddo
    on_top_hf_grid(ipoint) = 2.D0 * dm_a*dm_b
  enddo
+ !$OMP END PARALLEL DO
+ call wall_time(wall1)
+ print*,'Time to provide on_top_hf_grid = ',wall1-wall0
 END_PROVIDER 
 
