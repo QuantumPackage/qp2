@@ -55,7 +55,7 @@ END_PROVIDER
   do j = 1, nucl_num
     do i = 1, n_points_radial_grid -1
       do k = 1, n_points_integration_angular
-        if(dabs(final_weight_at_r(k,i,j)) < thresh_grid)then
+        if(dabs(final_weight_at_r(k,i,j)) < thresh_grid) then
           cycle
         endif
         i_count += 1

@@ -54,14 +54,24 @@ subroutine run
 
     call write_time(6)
     call write_int(6,iteration,'CAS-SCF iteration = ')
-    call write_double(6,energy,'CAS-SCF energy = ')
+    call write_double(6,energy,'State-average CAS-SCF energy = ')
 !    if(n_states == 1)then
 !     call ezfio_get_casscf_cipsi_energy_pt2(E_PT2)
 !     call ezfio_get_casscf_cipsi_energy(PT2)
+     double precision :: delta_E_istate, e_av
+     e_av = 0.d0
      do istate=1,N_states
-     call write_double(6,E_PT2(istate),'E + PT2 energy = ')
-     call write_double(6,PT2(istate),'  PT2          = ')
+      e_av += state_average_weight(istate) * Ev(istate) 
+      if(istate.gt.1)then
+       delta_E_istate = E_PT2(istate)  - E_PT2(1)
+      write(*,'(A6,I2,A18,F16.10)')'state ',istate,' Delta E+PT2    = ',delta_E_istate
+      endif
+      write(*,'(A6,I2,A18,F16.10)')'state ',istate,' E + PT2 energy = ',E_PT2(istate)
+      write(*,'(A6,I2,A18,F16.10)')'state ',istate,'     PT2 energy = ',PT2(istate)
+!      call write_double(6,E_PT2(istate),'E + PT2 energy = ')
+!      call write_double(6,PT2(istate),'  PT2          = ')
      enddo
+     call write_double(6,e_av,'State-average CAS-SCF energy bis = ')
      call write_double(6,pt2_max,' PT2_MAX       = ')
 !    endif
 
@@ -99,8 +109,8 @@ subroutine run
 
     mo_coef = NewOrbs
     mo_occ  = occnum
-    call save_mos
     if(.not.converged)then
+     call save_mos
      iteration += 1
      if(norm_grad_vec2.gt.0.01d0)then
       N_det = N_states

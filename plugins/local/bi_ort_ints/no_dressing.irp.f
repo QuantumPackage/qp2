@@ -322,6 +322,12 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, noL_0e]
 
+  BEGIN_DOC
+  ! 
+  ! < Phi_left | L | Phi_right >
+  !
+  END_DOC 
+
   implicit none
   integer                       :: i, j, k, ipoint
   double precision              :: t0, t1
@@ -329,10 +335,6 @@ BEGIN_PROVIDER [double precision, noL_0e]
   double precision, allocatable :: tmp_L(:,:), tmp_R(:,:)
   double precision, allocatable :: tmp_M(:,:), tmp_S(:), tmp_O(:), tmp_J(:,:)
   double precision, allocatable :: tmp_M_priv(:,:), tmp_S_priv(:), tmp_O_priv(:), tmp_J_priv(:,:)
-
-
-  call wall_time(t0)
-  print*, " Providing noL_0e ..."
 
   if(elec_alpha_num .eq. elec_beta_num) then
 
@@ -707,11 +709,6 @@ BEGIN_PROVIDER [double precision, noL_0e]
     deallocate(tmp)
 
   endif
-
-  call wall_time(t1)
-  print*, " Wall time for noL_0e (min) = ", (t1 - t0)/60.d0
-
-  print*, " noL_0e = ", noL_0e
 
 END_PROVIDER
 

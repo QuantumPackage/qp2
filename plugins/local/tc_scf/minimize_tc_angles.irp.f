@@ -20,7 +20,7 @@ program minimize_tc_angles
   ! TODO
   ! check if rotations of orbitals affect the TC energy
   ! and refuse the step
-  call minimize_tc_orb_angles
+  call minimize_tc_orb_angles()
 
 end
 

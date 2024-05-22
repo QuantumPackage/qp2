@@ -21,7 +21,7 @@ The :c:func:`run_cipsi` subroutine iteratively:
 * If :option:`determinants s2_eig` is |true|, it adds all the necessary
   determinants to allow the eigenstates of |H| to be eigenstates of |S^2|
 * Diagonalizes |H| in the enlarged internal space
-* Computes the |PT2| contribution to the energy stochastically :cite:`Garniron_2017.2`
+* Computes the |PT2| contribution to the energy stochastically :cite:`Garniron_2017b`
   or deterministically, depending on :option:`perturbation do_pt2`
 * Extrapolates the variational energy by fitting
   :math:`E=E_\text{FCI} - \alpha\, E_\text{PT2}`

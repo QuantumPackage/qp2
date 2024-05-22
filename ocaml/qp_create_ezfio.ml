@@ -6,8 +6,8 @@ type element =
 | Element of Element.t
 | Int_elem of (Nucl_number.t * Element.t)
 
-(** Handle dummy atoms placed on bonds *)
-let dummy_centers ~threshold ~molecule ~nuclei =
+(** Handle ghost atoms placed on bonds *)
+let ghost_centers ~threshold ~molecule ~nuclei =
   let d =
     Molecule.distance_matrix molecule
   in
@@ -68,11 +68,11 @@ let run ?o b au c d m p cart xyz_file =
       (Molecule.of_file xyz_file ~charge:(Charge.of_int c)
         ~multiplicity:(Multiplicity.of_int m) )
   in
-  let dummy =
-    dummy_centers ~threshold:d ~molecule ~nuclei:molecule.Molecule.nuclei
+  let ghost =
+    ghost_centers ~threshold:d ~molecule ~nuclei:molecule.Molecule.nuclei
   in
   let nuclei =
-    molecule.Molecule.nuclei @ dummy
+    molecule.Molecule.nuclei @ ghost
   in
 
 
@@ -145,8 +145,6 @@ let run ?o b au c d m p cart xyz_file =
                 | i :: k :: [] -> (Nucl_number.of_int @@ int_of_string i, Element.of_string k)
                 | _ -> failwith "Expected format is int,Element:basis"
               in Int_elem result
-          and basis =
-            String.lowercase_ascii basis
           in
           let key =
              match elem with
@@ -313,7 +311,7 @@ let run ?o b au c d m p cart xyz_file =
         }
       in
       let nuclei =
-        molecule.Molecule.nuclei @ dummy
+        molecule.Molecule.nuclei @ ghost
       in
 
 
@@ -491,11 +489,7 @@ let run ?o b au c d m p cart xyz_file =
         |> List.rev
         |> list_map (fun (x,i) ->
           try
-            let e =
-              match x.Atom.element with
-              | Element.X -> Element.H
-              | e -> e
-            in
+            let e = x.Atom.element in
             let key =
               Int_elem (i,x.Atom.element)
             in
@@ -507,9 +501,15 @@ let run ?o b au c d m p cart xyz_file =
               in
               try
                 Basis.read_element (basis_channel key) i e
-              with Not_found ->
-                failwith (Printf.sprintf "Basis not found for atom %d (%s)" (Nucl_number.to_int i)
-                 (Element.to_string x.Atom.element) )
+              with _ ->
+                try
+                  if e = Element.X then
+                    Basis.read_element (basis_channel key) i (Element.H)
+                  else
+                    raise Not_found
+                with Not_found ->
+                  failwith (Printf.sprintf "Basis not found for atom %d (%s)" (Nucl_number.to_int i)
+                  (Element.to_string x.Atom.element) )
           with
           | End_of_file -> failwith
                 ("Element "^(Element.to_string x.Atom.element)^" not found in basis set.")
@@ -710,9 +710,9 @@ If a file with the same name as the basis set exists, this file will be read.  O
         arg=With_arg "<int>";
         doc="Total charge of the molecule. Default is 0. For negative values, use m instead of -, for ex m1"} ;
 
-      { opt=Optional ; short='d'; long="dummy";
+      { opt=Optional ; short='g'; long="ghost";
         arg=With_arg "<float>";
-        doc="Add dummy atoms. x * (covalent radii of the atoms)."} ;
+        doc="Add ghost atoms. x * (covalent radii of the atoms)."} ;
 
       { opt=Optional ; short='m'; long="multiplicity";
         arg=With_arg "<int>";
@@ -756,8 +756,8 @@ If a file with the same name as the basis set exists, this file will be read.  O
                     int_of_string x )
   in
 
-  let dummy =
-    match Command_line.get "dummy" with
+  let ghost =
+    match Command_line.get "ghost" with
     | None -> 0.
     | Some x -> float_of_string x
   in
@@ -782,7 +782,7 @@ If a file with the same name as the basis set exists, this file will be read.  O
     | x::_ -> x
   in
 
-  run ?o:output basis au charge dummy multiplicity pseudo cart xyz_filename
+  run ?o:output basis au charge ghost multiplicity pseudo cart xyz_filename
   )
   with
 (*  | Failure txt  -> Printf.eprintf "Fatal error: %s\n%!" txt *)

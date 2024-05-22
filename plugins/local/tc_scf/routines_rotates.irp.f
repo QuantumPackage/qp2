@@ -42,9 +42,6 @@ end subroutine LTxR
 
 ! ---
 
-
-! ---
-
 subroutine minimize_tc_orb_angles()
 
   BEGIN_DOC
@@ -103,7 +100,10 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   double precision, allocatable :: stmp(:,:), T(:,:), Snew(:,:), smat2(:,:)
   double precision, allocatable :: mo_l_coef_tmp(:,:), mo_r_coef_tmp(:,:), mo_l_coef_new(:,:)
 
-  E_thr = 1d-8
+  PROVIDE TC_HF_energy
+  PROVIDE mo_r_coef mo_l_coef
+
+  E_thr = 1d-07
   E_old = TC_HF_energy
   allocate(mo_l_coef_old(ao_num,mo_num), mo_r_coef_old(ao_num,mo_num))
   mo_r_coef_old = mo_r_coef
@@ -111,7 +111,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
   good_angles = .False.
 
-  allocate(mo_l_coef_good(ao_num, mo_num), mo_r_coef_good(ao_num,mo_num))
+  allocate(mo_l_coef_good(ao_num,mo_num), mo_r_coef_good(ao_num,mo_num))
 
   print *, ' ***************************************'
   print *, ' ***************************************'
@@ -123,7 +123,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   mo_r_coef_good = mo_r_coef
   mo_l_coef_good = mo_l_coef
 
-  allocate(mo_r_coef_new(ao_num, mo_num))
+  allocate(mo_r_coef_new(ao_num,mo_num))
   mo_r_coef_new = mo_r_coef
   do i = 1, mo_num
     norm = 1.d0/dsqrt(overlap_mo_r(i,i))
@@ -141,10 +141,11 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
   call build_s_matrix(ao_num, mo_num, mo_r_coef_new, mo_r_coef_new, ao_overlap, s_mat)
 ! call give_degen(fock_diag,mo_num,thr_deg,list_degen,n_degen_list)
   if(n_core_orb.ne.0)then
-   call give_degen_full_listcore(fock_diag, mo_num, list_core, n_core_orb, thr_deg, list_degen, n_degen_list)
+    call give_degen_full_listcore(fock_diag, mo_num, list_core, n_core_orb, thr_deg, list_degen, n_degen_list)
   else
-   call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
+    call give_degen_full_list(fock_diag, mo_num, thr_deg, list_degen, n_degen_list)
   endif
+
   print *, ' fock_matrix_mo'
   do i = 1, mo_num
     print *, i, fock_diag(i), angle_left_right(i)
@@ -156,17 +157,51 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 !  n_degen = ilast - ifirst +1
 
     n_degen = list_degen(i,0)
-    if(n_degen .ge. 1000)n_degen = 1 ! convention for core orbitals
+    if(n_degen .ge. 1000) n_degen = 1 ! convention for core orbitals
      
     if(n_degen .eq. 1) cycle
+    print*, ' working on orbital', i
+    print*, ' multiplicity =', n_degen
 
     allocate(stmp(n_degen,n_degen), smat2(n_degen,n_degen))
     allocate(mo_r_coef_tmp(ao_num,n_degen), mo_l_coef_tmp(ao_num,n_degen), mo_l_coef_new(ao_num,n_degen))
     allocate(T(n_degen,n_degen), Snew(n_degen,n_degen))
 
+    print*,'Right orbitals before'
     do j = 1, n_degen
-      mo_r_coef_tmp(1:ao_num,j) = mo_r_coef_new(1:ao_num,list_degen(i,j))
-      mo_l_coef_tmp(1:ao_num,j) = mo_l_coef(1:ao_num,list_degen(i,j))
+      write(*,'(1000(F16.10,X))') mo_r_coef_new(1:ao_num,list_degen(i,j))
+    enddo
+    print*,'Left orbitals before'
+    do j = 1, n_degen
+      write(*,'(1000(F16.10,X))') mo_l_coef(1:ao_num,list_degen(i,j)) 
+    enddo
+    if(angle_left_right(list_degen(i,1)).gt.80.d0.and.n_degen==2)then
+      integer :: i_list, j_list
+      i_list = list_degen(i,1)
+      j_list = list_degen(i,2)
+      print*,'Huge angle !!! == ',angle_left_right(list_degen(i,1)),angle_left_right(list_degen(i,2))
+      print*,'i_list = ',i_list
+      print*,'i_list = ',j_list
+      print*,'Swapping left/right orbitals'
+      call print_strong_overlap(i_list, j_list)
+      mo_r_coef_tmp(1:ao_num,1) = mo_r_coef_new(1:ao_num,i_list)
+      mo_r_coef_tmp(1:ao_num,2) = mo_l_coef(1:ao_num,i_list)
+      mo_l_coef_tmp(1:ao_num,1) = mo_l_coef(1:ao_num,j_list)
+      mo_l_coef_tmp(1:ao_num,2) = mo_r_coef_new(1:ao_num,j_list)
+    else
+      do j = 1, n_degen
+        print*,'i_list = ',list_degen(i,j)
+        mo_r_coef_tmp(1:ao_num,j) = mo_r_coef_new(1:ao_num,list_degen(i,j))
+        mo_l_coef_tmp(1:ao_num,j) = mo_l_coef(1:ao_num,list_degen(i,j))
+      enddo
+    endif
+    print*,'Right orbitals '
+    do j = 1, n_degen
+      write(*,'(1000(F16.10,X))') mo_r_coef_tmp(1:ao_num,j) 
+    enddo
+    print*,'Left orbitals '
+    do j = 1, n_degen
+      write(*,'(100(F16.10,X))') mo_l_coef_tmp(1:ao_num,j) 
     enddo
     ! Orthogonalization of right functions
     print *, ' Orthogonalization of RIGHT functions'
@@ -269,6 +304,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
   ! check if TC energy has changed
   E_new = TC_HF_energy
+  E_thr = thresh_de_tc_angles
   if(dabs(E_new - E_old) .gt. E_thr) then
     mo_r_coef = mo_r_coef_old
     mo_l_coef = mo_l_coef_old
@@ -407,18 +443,18 @@ subroutine print_energy_and_mos(good_angles)
   if(max_angle_left_right .lt. thresh_lr_angle) then
     print *, ' Maximum angle BELOW 45 degrees, everthing is OK !'
     good_angles = .true.
-  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
-    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
-    good_angles = .false.
-  else if(max_angle_left_right .gt. 75.d0) then
-    print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
-    good_angles = .false.
+!  else if(max_angle_left_right .gt. thresh_lr_angle .and. max_angle_left_right .lt. 75.d0) then
+!    print *, ' Maximum angle between thresh_lr_angle and 75 degrees, this is not the best for TC-CI calculations ...'
+!    good_angles = .false.
+!  else if(max_angle_left_right .gt. 75.d0) then
+!    print *, ' Maximum angle between ABOVE 75 degrees, YOU WILL CERTAINLY FIND TROUBLES IN TC-CI calculations ...'
+!    good_angles = .false.
   endif
-
-  print *, ' Diag Fock elem, product of left/right norm, angle left/right '
-  do i = 1, mo_num
-    write(*, '(I3,X,100(F16.10,X))') i, Fock_matrix_tc_mo_tot(i,i), overlap_mo_l(i,i)*overlap_mo_r(i,i), angle_left_right(i)
-  enddo
+!
+!  print *, ' Diag Fock elem, product of left/right norm, angle left/right '
+!  do i = 1, mo_num
+!    write(*, '(I3,X,100(F16.10,X))') i, Fock_matrix_tc_mo_tot(i,i), overlap_mo_l(i,i)*overlap_mo_r(i,i), angle_left_right(i)
+!  enddo
 
 end
 
@@ -445,3 +481,31 @@ subroutine sort_by_tc_fock
 
 end
 
+
+subroutine print_strong_overlap(i_list, j_list)
+ implicit none
+ integer, intent(in) :: i_list,j_list
+ double precision :: o_i, o_j,o_ij
+ double precision :: s_mat_r(2,2),s_mat_l(2,2)
+ o_i = dsqrt(overlap_mo_r(i_list, i_list))
+ o_j = dsqrt(overlap_mo_r(j_list, j_list))
+ o_ij = overlap_mo_r(j_list, i_list)
+ s_mat_r(1,1) = o_i*o_i
+ s_mat_r(2,1) = o_ij/(o_i * o_j)
+ s_mat_r(2,2) = o_j*o_j
+ s_mat_r(1,2) = s_mat_r(2,1)
+ print*,'Right overlap matrix '
+ write(*,'(2(F10.5,X))')s_mat_r(1:2,1)
+ write(*,'(2(F10.5,X))')s_mat_r(1:2,2)
+ o_i = dsqrt(overlap_mo_l(i_list, i_list))
+ o_j = dsqrt(overlap_mo_l(j_list, j_list))
+ o_ij = overlap_mo_l(j_list, i_list)
+ s_mat_l(1,1) = o_i*o_i
+ s_mat_l(2,1) = o_ij/(o_i * o_j)
+ s_mat_l(2,2) = o_j*o_j
+ s_mat_l(1,2) = s_mat_l(2,1)
+ print*,'Left overlap matrix '
+ write(*,'(2(F10.5,X))')s_mat_l(1:2,1)
+ write(*,'(2(F10.5,X))')s_mat_l(1:2,2)
+
+end

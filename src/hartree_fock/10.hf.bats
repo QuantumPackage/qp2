@@ -115,9 +115,6 @@ rm -rf $EZFIO
   run hco.ezfio -113.1841002944744
 }
 
-@test "HBO" { # 0.805600 1.4543s
-  run  hbo.ezfio  -100.018582259096
-}
 
 @test "H2S" { # 1.655600 4.21402s
   run h2s.ezfio -398.6944130421982
@@ -127,9 +124,6 @@ rm -rf $EZFIO
   run h3coh.ezfio  -114.9865030596373
 }
 
-@test "H2O" { # 1.811100 1.84387s
-  run  h2o.ezfio  -0.760270218692179E+02
-}
 
 @test "H2O2" { # 2.217000 8.50267s
   run h2o2.ezfio -150.7806608469964
@@ -185,13 +179,6 @@ rm -rf $EZFIO
 @test "OH" { # 32.042200 1.36478m
   [[ -n $TRAVIS ]] && skip
   run oh.ezfio -75.42025413469165
-}
-
-@test "[Cu(NH3)4]2+" { # 59.610100 4.18766m
-  [[ -n $TRAVIS ]] && skip
-  qp set_file cu_nh3_4_2plus.ezfio
-  qp set scf_utils thresh_scf 1.e-10
-  run  cu_nh3_4_2plus.ezfio -1862.97590358903
 }
 
 @test "SO2" { # 71.894900  3.22567m

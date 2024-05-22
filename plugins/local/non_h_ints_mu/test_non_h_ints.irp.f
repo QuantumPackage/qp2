@@ -39,8 +39,13 @@ program test_non_h
 
   !call test_j1e_fit_ao()
 
-  call test_tc_grad_and_lapl_ao_new()
-  call test_tc_grad_square_ao_new()
+  !call test_tc_grad_and_lapl_ao_new()
+  !call test_tc_grad_square_ao_new()
+
+  !call test_fit_coef_A1()
+  !call test_fit_coef_inv()
+
+  call test_fit_coef_testinvA()
 end
 
 ! ---
@@ -1109,6 +1114,420 @@ BEGIN_PROVIDER [double precision, tc_grad_and_lapl_ao_new, (ao_num, ao_num, ao_n
   print*, ' Wall time for tc_grad_and_lapl_ao_new (min) = ', (time1 - time0) / 60.d0
 
 END_PROVIDER 
+
+! ---
+
+subroutine test_fit_coef_A1()
+
+  implicit none
+  integer                       :: i, j, k, l, ij, kl, ipoint
+  double precision              :: t1, t2
+  double precision              :: accu, norm, diff
+  double precision, allocatable :: A1(:,:)
+  double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:)
+  double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
+
+  ! ---
+
+  allocate(A1(ao_num*ao_num,ao_num*ao_num))
+
+  call wall_time(t1)
+
+  !$OMP PARALLEL                             &
+  !$OMP DEFAULT (NONE)                       &
+  !$OMP PRIVATE (i, j, k, l, ij, kl, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, &
+  !$OMP         final_weight_at_r_vector, aos_in_r_array_transp, A1)
+  !$OMP DO COLLAPSE(2)
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          A1(ij,kl) = 0.d0
+          do ipoint = 1, n_points_final_grid
+            A1(ij,kl) += final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) &
+                                                          * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,l)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
+
+  ! ---
+
+  call wall_time(t1)
+
+  allocate(tmp1(ao_num,ao_num,n_points_final_grid), tmp2(ao_num,ao_num,n_points_final_grid))
+  !$OMP PARALLEL               &
+  !$OMP DEFAULT (NONE)         &
+  !$OMP PRIVATE (i, j, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp1, tmp2)
+  !$OMP DO COLLAPSE(2)
+  do j = 1, ao_num
+    do i = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+        tmp1(i,j,ipoint) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp2(i,j,ipoint) =                                    aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  allocate(A2(ao_num,ao_num,ao_num,ao_num))
+
+  call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
+            , tmp1(1,1,1), ao_num*ao_num, tmp2(1,1,1), ao_num*ao_num            &
+            , 0.d0, A2(1,1,1,1), ao_num*ao_num)
+  deallocate(tmp1, tmp2)
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A2 (min) =', (t2-t1)/60.d0
+
+  ! ---
+
+  accu = 0.d0
+  norm = 0.d0
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          diff = dabs(A2(j,i,l,k) - A1(ij,kl))
+          if(diff .gt. 1d-10) then
+            print *, ' problem in A2 on:', i, i, l, k
+            print *, ' A1 :', A1(ij,kl)
+            print *, ' A2 :', A2(j,i,l,k)
+            stop
+          endif
+
+          accu += diff
+          norm += dabs(A1(ij,kl)) 
+        enddo
+      enddo
+    enddo
+  enddo
+
+  deallocate(A1, A2)
+
+  print*, ' accuracy (%) = ', 100.d0 * accu / norm
+
+  return
+end
+
+! ---
+
+subroutine test_fit_coef_inv()
+
+  implicit none
+  integer                       :: i, j, k, l, ij, kl, ipoint
+  integer                       :: n_svd, info, lwork, mn, m, n
+  double precision              :: t1, t2
+  double precision              :: accu, norm, diff
+  double precision              :: cutoff_svd, D1_inv
+  double precision, allocatable :: A1(:,:), A1_inv(:,:), A1_tmp(:,:)
+  double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:), A2_inv(:,:,:,:)
+  double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A2_tmp(:,:,:,:)
+  double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
+
+  cutoff_svd = 5d-8
+
+  ! ---
+
+  call wall_time(t1)
+
+  allocate(A1(ao_num*ao_num,ao_num*ao_num))
+
+  !$OMP PARALLEL                             &
+  !$OMP DEFAULT (NONE)                       &
+  !$OMP PRIVATE (i, j, k, l, ij, kl, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, &
+  !$OMP         final_weight_at_r_vector, aos_in_r_array_transp, A1)
+  !$OMP DO COLLAPSE(2)
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          A1(ij,kl) = 0.d0
+          do ipoint = 1, n_points_final_grid
+            A1(ij,kl) += final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) &
+                                                          * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,l)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
+
+  allocate(A1_inv(ao_num*ao_num,ao_num*ao_num))
+  call get_pseudo_inverse(A1, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A1_inv, ao_num*ao_num, cutoff_svd)
+
+  call wall_time(t1)
+  print*, ' WALL TIME FOR A1_inv (min) =', (t1-t2)/60.d0
+
+  ! ---
+
+  call wall_time(t1)
+
+  allocate(tmp1(n_points_final_grid,ao_num,ao_num), tmp2(n_points_final_grid,ao_num,ao_num))
+  !$OMP PARALLEL               &
+  !$OMP DEFAULT (NONE)         &
+  !$OMP PRIVATE (i, j, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp1, tmp2)
+  !$OMP DO COLLAPSE(2)
+  do j = 1, ao_num
+    do i = 1, ao_num
+      do ipoint = 1, n_points_final_grid
+        tmp1(ipoint,i,j) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp2(ipoint,i,j) =                                    aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  allocate(A2(ao_num,ao_num,ao_num,ao_num))
+
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0  &
+            , tmp1(1,1,1), n_points_final_grid, tmp2(1,1,1), n_points_final_grid &
+            , 0.d0, A2(1,1,1,1), ao_num*ao_num)
+
+  deallocate(tmp1, tmp2)
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A2 (min) =', (t2-t1)/60.d0
+
+  allocate(A1_tmp(ao_num*ao_num,ao_num*ao_num))
+  A1_tmp = A1
+  allocate(A2_tmp(ao_num,ao_num,ao_num,ao_num))
+  A2_tmp = A2
+
+  allocate(A2_inv(ao_num,ao_num,ao_num,ao_num))
+
+  allocate(D(ao_num*ao_num), U(ao_num*ao_num,ao_num*ao_num), Vt(ao_num*ao_num,ao_num*ao_num))
+
+  allocate(work(1))
+  lwork = -1
+
+  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A1_tmp(1,1), ao_num*ao_num &
+  !call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
+             , D(1), U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num, work, lwork, info)
+  if(info /= 0) then
+    print *,  info, ': SVD failed'
+    stop 
+  endif
+
+  LWORK = max(5*ao_num*ao_num, int(WORK(1)))
+  deallocate(work)
+  allocate(work(lwork))
+
+  call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A1_tmp(1,1), ao_num*ao_num &
+  !call dgesvd( 'S', 'A', ao_num*ao_num, ao_num*ao_num, A2_tmp(1,1,1,1), ao_num*ao_num &
+             , D(1), U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num, work, lwork, info)
+  if(info /= 0) then
+    print *,  info, ':: SVD failed'
+    stop 1
+  endif
+
+  deallocate(A2_tmp)
+  deallocate(work)
+
+  n_svd  = 0
+  D1_inv = 1.d0 / D(1)
+  do ij = 1, ao_num*ao_num
+    if(D(ij)*D1_inv > cutoff_svd) then
+      D(ij) = 1.d0 / D(ij)
+      n_svd = n_svd + 1
+    else
+      D(ij) = 0.d0
+    endif
+  enddo
+  print*, ' n_svd = ', n_svd
+
+  !$OMP PARALLEL         &
+  !$OMP DEFAULT (NONE)   &
+  !$OMP PRIVATE (ij, kl) &
+  !$OMP SHARED (ao_num, n_svd, D, Vt)
+  !$OMP DO
+  do kl = 1, ao_num*ao_num
+    do ij = 1, n_svd
+      Vt(ij,kl) = Vt(ij,kl) * D(ij)
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_svd, 1.d0 &
+            , U(1,1), ao_num*ao_num, Vt(1,1), ao_num*ao_num       &
+            , 0.d0, A2_inv(1,1,1,1), ao_num*ao_num)
+
+  deallocate(D, U, Vt)
+
+  call wall_time(t1)
+  print*, ' WALL TIME FOR A2_inv (min) =', (t1-t2)/60.d0
+
+  ! ---
+
+  accu = 0.d0
+  norm = 0.d0
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          diff = dabs(A2(j,i,l,k) - A1(ij,kl))
+          if(diff .gt. 1d-10) then
+            print *, ' problem in A2 on:', i, i, l, k
+            print *, ' A1 :', A1(ij,kl)
+            print *, ' A2 :', A2(j,i,l,k)
+            stop
+          endif
+
+          accu += diff
+          norm += dabs(A1(ij,kl)) 
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy on A (%) = ', 100.d0 * accu / norm
+
+  accu = 0.d0
+  norm = 0.d0
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          diff = dabs(A2_inv(j,i,l,k) - A1_inv(ij,kl))
+          if(diff .gt. cutoff_svd) then
+            print *, ' problem in A2_inv on:', i, i, l, k
+            print *, ' A1_inv :', A1_inv(ij,kl)
+            print *, ' A2_inv :', A2_inv(j,i,l,k)
+            stop
+          endif
+
+          accu += diff
+          norm += dabs(A1_inv(ij,kl)) 
+        enddo
+      enddo
+    enddo
+  enddo
+
+  print*, ' accuracy on A_inv (%) = ', 100.d0 * accu / norm
+
+  deallocate(A1_inv, A2_inv)
+  deallocate(A1, A2)
+
+  return
+end
+
+! ---
+
+subroutine test_fit_coef_testinvA()
+
+  implicit none
+  integer                       :: i, j, k, l, m, n, ij, kl, mn, ipoint
+  double precision              :: t1, t2
+  double precision              :: accu, norm, diff
+  double precision              :: cutoff_svd
+  double precision, allocatable :: A1(:,:), A1_inv(:,:)
+
+  cutoff_svd = 1d-17
+
+  ! ---
+
+  call wall_time(t1)
+
+  allocate(A1(ao_num*ao_num,ao_num*ao_num))
+
+  !$OMP PARALLEL                             &
+  !$OMP DEFAULT (NONE)                       &
+  !$OMP PRIVATE (i, j, k, l, ij, kl, ipoint) &
+  !$OMP SHARED (n_points_final_grid, ao_num, &
+  !$OMP         final_weight_at_r_vector, aos_in_r_array_transp, A1)
+  !$OMP DO COLLAPSE(2)
+  do k = 1, ao_num
+    do l = 1, ao_num
+      kl = (k-1)*ao_num + l
+
+      do i = 1, ao_num
+        do j = 1, ao_num
+          ij = (i-1)*ao_num + j
+
+          A1(ij,kl) = 0.d0
+          do ipoint = 1, n_points_final_grid
+            A1(ij,kl) += final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j) &
+                                                          * aos_in_r_array_transp(ipoint,k) * aos_in_r_array_transp(ipoint,l)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(t2)
+  print*, ' WALL TIME FOR A1 (min) =', (t2-t1)/60.d0
+
+  allocate(A1_inv(ao_num*ao_num,ao_num*ao_num))
+  call get_pseudo_inverse(A1, ao_num*ao_num, ao_num*ao_num, ao_num*ao_num, A1_inv, ao_num*ao_num, cutoff_svd)
+
+  call wall_time(t1)
+  print*, ' WALL TIME FOR A1_inv (min) =', (t1-t2)/60.d0
+
+  ! ---
+
+  print*, ' check inv'
+
+  do kl = 1, ao_num*ao_num
+    do ij = 1, ao_num*ao_num
+
+      diff = 0.d0
+      do mn = 1, ao_num*ao_num
+        diff += A1(kl,mn) * A1_inv(mn,ij)
+      enddo
+
+      if(kl .eq. ij) then
+        accu += dabs(diff - 1.d0)
+      else
+        accu += dabs(diff - 0.d0)
+      endif
+    enddo
+  enddo
+
+  print*, ' accuracy (%) = ', accu * 100.d0
+  
+  deallocate(A1, A1_inv)
+
+  return
+end
 
 ! ---
 

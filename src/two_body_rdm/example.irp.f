@@ -365,3 +365,91 @@ subroutine routine_full_mos
 
 end
 
+
+subroutine routine_active_only_trans
+ implicit none
+ integer :: i,j,k,l,iorb,jorb,korb,lorb,istate,jstate
+ BEGIN_DOC
+! This routine computes the two electron repulsion within the active space using various providers 
+! 
+ END_DOC
+
+ double precision :: vijkl,get_two_e_integral
+ double precision :: wee_tot(N_states,N_states),rdm_transtot
+ double precision :: spin_trace
+ double precision :: accu_tot
+
+ wee_tot = 0.d0
+
+
+ iorb = 1
+ jorb = 1
+ korb = 1
+ lorb = 1
+ vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)
+ provide act_2_rdm_trans_spin_trace_mo 
+ i = 1
+ j = 2
+
+ print*,'**************************'
+ print*,'**************************'
+ do jstate = 1, N_states
+  do istate = 1, N_states
+   !! PURE ACTIVE PART 
+   !! 
+   accu_tot = 0.d0
+   do i = 1, n_act_orb
+    iorb = list_act(i)
+    do j = 1, n_act_orb
+     jorb = list_act(j)
+     do k = 1, n_act_orb
+      korb = list_act(k)
+      do l = 1, n_act_orb
+       lorb = list_act(l)
+       !                               1 2 1 2                                   2 1 2 1
+!       if(dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(j,i,l,k,istate,jstate)).gt.1.d-10)then
+!        print*,'Error in act_2_rdm_trans_spin_trace_mo'
+!        print*,"dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l) - act_2_rdm_trans_spin_trace_mo(j,i,l,k)).gt.1.d-10"
+!        print*,i,j,k,l
+!        print*,act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate),act_2_rdm_trans_spin_trace_mo(j,i,l,k,istate,jstate),dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(j,i,l,k,istate,jstate))
+!       endif
+
+      !                                1 2 1 2                                   1 2 1 2 
+!       if(dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate)).gt.1.d-10)then
+!        print*,'Error in act_2_rdm_trans_spin_trace_mo'
+!        print*,"dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate)).gt.1.d-10"
+!        print*,i,j,k,l
+!        print*,act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate),act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate),dabs(act_2_rdm_trans_spin_trace_mo(i,j,k,l,istate,jstate) - act_2_rdm_trans_spin_trace_mo(k,l,i,j,istate,jstate))
+!       endif
+
+       vijkl = get_two_e_integral(lorb,korb,jorb,iorb,mo_integrals_map)                                 
+
+
+       rdm_transtot  =  act_2_rdm_trans_spin_trace_mo(l,k,j,i,istate,jstate)
+
+       wee_tot(istate,jstate)   += 0.5d0 * vijkl * rdm_transtot
+
+      enddo
+     enddo
+    enddo
+   enddo
+  print*,''
+  print*,''
+  print*,'Active space only energy for state ',istate,jstate
+  print*,'wee_tot                 = ',wee_tot(istate,jstate)
+  print*,'Full energy '
+  print*,'psi_energy_two_e(istate,jstate)= ',psi_energy_two_e_trans(istate,jstate)
+  print*,'--------------------------'
+  enddo
+ enddo
+ print*,'Wee from DM '
+ do istate = 1,N_states
+  write(*,'(100(F16.10,X))')wee_tot(1:N_states,istate)
+ enddo
+ print*,'Wee from Psi det'
+ do istate = 1,N_states
+  write(*,'(100(F16.10,X))')psi_energy_two_e_trans(1:N_states,istate)
+ enddo
+
+end
+
