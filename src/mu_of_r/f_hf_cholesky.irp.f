@@ -146,9 +146,9 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
  !! V_AR = \sum_{I}Phi_IR V_AI = \sum_{I}Phi^t_RI V_AI
  double precision :: u_dot_v,wall0,wall1
  if(elec_alpha_num == elec_beta_num)then
-  provide mos_times_cholesky_r1
   print*,'providing f_hf_cholesky ...'
   call wall_time(wall0)
+  provide mos_times_cholesky_r1
   !$OMP PARALLEL DO &
   !$OMP DEFAULT (NONE)  &
   !$OMP PRIVATE (ipoint,m) & 
@@ -167,6 +167,8 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
   print*,'Time to provide f_hf_cholesky = ',wall1-wall0
   free mos_times_cholesky_r1
  else
+  print*,'providing f_hf_cholesky ...'
+  call wall_time(wall0)
   provide mos_times_cholesky_r2 mos_times_cholesky_r1
   !$OMP PARALLEL DO &
   !$OMP DEFAULT (NONE)  &
@@ -198,10 +200,11 @@ BEGIN_PROVIDER [ double precision, f_hf_sparse_cholesky, (n_points_final_grid)]
  double precision :: u_dot_v,wall0,wall1,accu_1, accu_2,mo_i_r1,mo_b_r1
  if(elec_alpha_num == elec_beta_num)then
   call wall_time(wall0)
-!  !$OMP PARALLEL DO &
-!  !$OMP DEFAULT (NONE)  &
-!  !$OMP PRIVATE (ipoint,m) & 
-!  !$OMP ShARED (mos_times_cholesky_r1,cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid) 
+  !$OMP PARALLEL DO &
+  !$OMP DEFAULT (NONE)  &
+  !$OMP PRIVATE (accu_1,ipoint,p,ii,i,mm,m,mo_i_r1,mo_b_r1) & 
+  !$OMP ShARED (n_occ_val_orb_for_hf,list_valence_orb_for_hf,list_basis,mos_in_r_array_omp) & 
+  !$OMP ShARED (cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid,cholesky_mo,n_basis_orb) 
    do ipoint = 1, n_points_final_grid
     f_hf_sparse_cholesky(ipoint) = 0.d0
     do p = 1, cholesky_mo_num
@@ -219,16 +222,17 @@ BEGIN_PROVIDER [ double precision, f_hf_sparse_cholesky, (n_points_final_grid)]
     enddo
     f_hf_sparse_cholesky(ipoint) *= 2.D0
    enddo
-!  !$OMP END PARALLEL DO
+  !$OMP END PARALLEL DO
   
   call wall_time(wall1)
   print*,'Time to provide f_hf_sparse_cholesky = ',wall1-wall0
-  else
+ else
   call wall_time(wall0)
-!  !$OMP PARALLEL DO &
-!  !$OMP DEFAULT (NONE)  &
-!  !$OMP PRIVATE (ipoint,m) & 
-!  !$OMP ShARED (mos_times_cholesky_r1,cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid) 
+  !$OMP PARALLEL DO &
+  !$OMP DEFAULT (NONE)  &
+  !$OMP PRIVATE (accu_2,accu_1,ipoint,p,ii,i,mm,m,mo_i_r1,mo_b_r1) & 
+  !$OMP ShARED (n_occ_val_orb_for_hf,list_valence_orb_for_hf,list_basis,mos_in_r_array_omp) & 
+  !$OMP ShARED (cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid,cholesky_mo,n_basis_orb) 
    do ipoint = 1, n_points_final_grid
     f_hf_sparse_cholesky(ipoint) = 0.d0
     do p = 1, cholesky_mo_num
@@ -256,7 +260,7 @@ BEGIN_PROVIDER [ double precision, f_hf_sparse_cholesky, (n_points_final_grid)]
     enddo
     f_hf_sparse_cholesky(ipoint) *= 2.D0
    enddo
-!  !$OMP END PARALLEL DO
+  !$OMP END PARALLEL DO
   call wall_time(wall1)
   print*,'Time to provide f_hf_sparse_cholesky = ',wall1-wall0
  endif
