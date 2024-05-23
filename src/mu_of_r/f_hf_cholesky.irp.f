@@ -187,6 +187,81 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky, (n_points_final_grid)]
  endif
 END_PROVIDER 
 
+BEGIN_PROVIDER [ double precision, f_hf_sparse_cholesky, (n_points_final_grid)]
+ implicit none
+ integer :: ipoint,m,mm,i,ii,p
+ !!f(R) =  \sum_{I} \sum_{J} Phi_I(R) Phi_J(R) V_IJ
+ !!     =  \sum_{I}\sum_{J}\sum_A Phi_I(R) Phi_J(R) V_AI V_AJ
+ !!     =  \sum_A \sum_{I}Phi_I(R)V_AI \sum_{J}V_AJ Phi_J(R)
+ !!     =  \sum_A V_AR G_AR 
+ !! V_AR = \sum_{I}Phi_IR V_AI = \sum_{I}Phi^t_RI V_AI
+ double precision :: u_dot_v,wall0,wall1,accu_1, accu_2,mo_i_r1,mo_b_r1
+ if(elec_alpha_num == elec_beta_num)then
+  call wall_time(wall0)
+!  !$OMP PARALLEL DO &
+!  !$OMP DEFAULT (NONE)  &
+!  !$OMP PRIVATE (ipoint,m) & 
+!  !$OMP ShARED (mos_times_cholesky_r1,cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid) 
+   do ipoint = 1, n_points_final_grid
+    f_hf_sparse_cholesky(ipoint) = 0.d0
+    do p = 1, cholesky_mo_num
+     accu_1 = 0.d0
+     do ii = 1, n_occ_val_orb_for_hf(1)
+      i = list_valence_orb_for_hf(ii,1)
+      mo_i_r1 = mos_in_r_array_omp(i,ipoint)
+      do mm = 1, n_basis_orb ! electron 1 
+       m = list_basis(mm)
+       mo_b_r1 = mos_in_r_array_omp(m,ipoint)
+       accu_1 += mo_i_r1 * mo_b_r1 * cholesky_mo(m,i,p)
+      enddo
+     enddo
+     f_hf_sparse_cholesky(ipoint) += accu_1 * accu_1
+    enddo
+    f_hf_sparse_cholesky(ipoint) *= 2.D0
+   enddo
+!  !$OMP END PARALLEL DO
+  
+  call wall_time(wall1)
+  print*,'Time to provide f_hf_sparse_cholesky = ',wall1-wall0
+  else
+  call wall_time(wall0)
+!  !$OMP PARALLEL DO &
+!  !$OMP DEFAULT (NONE)  &
+!  !$OMP PRIVATE (ipoint,m) & 
+!  !$OMP ShARED (mos_times_cholesky_r1,cholesky_mo_num,f_hf_sparse_cholesky,n_points_final_grid) 
+   do ipoint = 1, n_points_final_grid
+    f_hf_sparse_cholesky(ipoint) = 0.d0
+    do p = 1, cholesky_mo_num
+     accu_2 = 0.d0
+     do ii = 1, n_occ_val_orb_for_hf(2)
+      i = list_valence_orb_for_hf(ii,2)
+      mo_i_r1 = mos_in_r_array_omp(i,ipoint)
+      do mm = 1, n_basis_orb ! electron 1 
+       m = list_basis(mm)
+       mo_b_r1 = mos_in_r_array_omp(m,ipoint)
+       accu_2 += mo_i_r1 * mo_b_r1 * cholesky_mo(m,i,p)
+      enddo
+     enddo
+     accu_1 = accu_2
+     do ii = n_occ_val_orb_for_hf(2)+1,n_occ_val_orb_for_hf(1)
+      i = list_valence_orb_for_hf(ii,1)
+      mo_i_r1 = mos_in_r_array_omp(i,ipoint)
+      do mm = 1, n_basis_orb ! electron 1 
+       m = list_basis(mm)
+       mo_b_r1 = mos_in_r_array_omp(m,ipoint)
+       accu_1 += mo_i_r1 * mo_b_r1 * cholesky_mo(m,i,p)
+      enddo
+     enddo
+     f_hf_sparse_cholesky(ipoint) += accu_1 * accu_2
+    enddo
+    f_hf_sparse_cholesky(ipoint) *= 2.D0
+   enddo
+!  !$OMP END PARALLEL DO
+  call wall_time(wall1)
+  print*,'Time to provide f_hf_sparse_cholesky = ',wall1-wall0
+ endif
+END_PROVIDER 
+
 BEGIN_PROVIDER [ double precision, on_top_hf_grid, (n_points_final_grid)]
  implicit none
  integer :: ipoint,i,ii
