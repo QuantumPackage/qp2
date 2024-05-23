@@ -326,7 +326,13 @@ end
   enddo
 
   double precision, allocatable :: buffer(:,:)
-  allocate(buffer(N_det,N_states))
+  allocate(buffer(psi_det_size,N_states))
+!  print*,N_det,N_states
+!  print*,size(psi_l_coef_bi_ortho,1),size(psi_l_coef_bi_ortho,2)
+!  print*,size(leigvec_tc_bi_orth,1),size(leigvec_tc_bi_orth,2)
+!  print*,size(reigvec_tc_bi_orth,1),size(reigvec_tc_bi_orth,2)
+!  print*,size(psi_r_coef_bi_ortho,1),size(psi_r_coef_bi_ortho,2)
+  buffer = 0.d0
   do k = 1, N_states
     do i = 1, N_det
       psi_l_coef_bi_ortho(i,k) = leigvec_tc_bi_orth(i,k)
