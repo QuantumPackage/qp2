@@ -34,8 +34,10 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
  END_DOC
 
  double precision, allocatable :: X(:,:,:)
+ double precision :: wall0, wall1
  integer :: ierr
  print *, 'AO->MO Transformation of Cholesky vectors'
+  call wall_time(wall0)
 
  allocate(X(mo_num,cholesky_mo_num,ao_num), stat=ierr)
  if (ierr /= 0) then
@@ -46,6 +48,8 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
  call dgemm('T','N', cholesky_mo_num*mo_num, mo_num, ao_num, 1.d0, &
      X, ao_num, mo_coef, ao_num, 0.d0, cholesky_mo_transp, cholesky_mo_num*mo_num)
  deallocate(X)
+  call wall_time(wall1)
+ print*,'Time for AO->MO Cholesky vectors = ',wall1-wall0
 
 END_PROVIDER
 
