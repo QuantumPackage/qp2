@@ -217,11 +217,14 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   print '(A)', ' ======================= ============== =========='
 
 
+  double precision :: t_error
   call set_multiple_levels_omp(.False.)
   call wall_time(t00)
   imin = 1_8
-  !$OMP PARALLEL                                                     &
-      !$OMP PRIVATE(ieta,eta,a,b,c,kiter,isample)                    &
+  t_error = huge(1.d0)
+
+  !$OMP PARALLEL                                      &
+      !$OMP PRIVATE(ieta,eta,a,b,c,kiter,isample)     &
       !$OMP DEFAULT(SHARED) NUM_THREADS(nthreads_pt2)
 
   do kiter=1,Nabc
@@ -328,15 +331,23 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
       if (norm > 0.d0) then
         energy_stoch = ET / norm
         variance = ET2 / norm - energy_stoch*energy_stoch
+        if (norm > 1.d0) then
+          t_error = dsqrt(variance/(norm-1.d0))
+        else
+          t_error = dsqrt(variance)
+        endif
       endif
 
       energy = energy_det + energy_stoch
 
-      print '(''   '',F20.8, ''   '', ES12.4,''   '', F8.2,''  '')', eccsd+energy, dsqrt(variance/(norm-1.d0)), 100.*real(Ncomputed)/real(Nabc)
+      print '(''   '',F20.8, ''   '', ES12.4,''   '', F8.2,''  '')', eccsd+energy, t_error, 100.*real(Ncomputed)/real(Nabc)
+
     endif
     !$OMP END MASTER
+    if (t_error < cc_par_t_stop) exit
     if (imin > Nabc) exit
   enddo
+  !$OMP TASKWAIT
 
   !$OMP END PARALLEL
   print '(A)', ' ======================= ============== ========== '
