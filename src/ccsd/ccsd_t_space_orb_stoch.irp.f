@@ -1,5 +1,5 @@
 ! Main
-subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy)
+subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energy,t_error)
 
   implicit none
 
@@ -7,7 +7,7 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   double precision, intent(in)  :: t1(nO,nV), f_o(nO), f_v(nV)
   double precision, intent(in)  :: t2(nO,nO,nV,nV)
   double precision, intent(in)  :: v_vvvo(nV,nV,nV,nO), v_vvoo(nV,nV,nO,nO), v_vooo(nV,nO,nO,nO)
-  double precision, intent(inout) :: energy
+  double precision, intent(inout) :: energy, t_error
 
   double precision, allocatable :: X_vovv(:,:,:,:), X_ooov(:,:,:,:), X_oovv(:,:,:,:)
   double precision, allocatable :: T_voov(:,:,:,:), T_oovv(:,:,:,:)
@@ -217,7 +217,6 @@ subroutine ccsd_par_t_space_stoch(nO,nV,t1,t2,f_o,f_v,v_vvvo,v_vvoo,v_vooo,energ
   print '(A)', ' ======================= ============== =========='
 
 
-  double precision :: t_error
   call set_multiple_levels_omp(.False.)
   call wall_time(t00)
   imin = 1_8
