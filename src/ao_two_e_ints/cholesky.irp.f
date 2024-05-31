@@ -255,7 +255,7 @@ END_PROVIDER
        allocate(computed(nq))
 !print *, 'allocate : computed(nq)', memory_of_int(nq)
 
-       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
+       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q,j)
 
        !$OMP DO
        do q=1,nq
@@ -351,7 +351,7 @@ END_PROVIDER
          ! iii.
          f = 1.d0/dsqrt(Qmax)
 
-         !$OMP PARALLEL PRIVATE(m,p,q,k) DEFAULT(shared)
+         !$OMP PARALLEL PRIVATE(p,q) DEFAULT(shared)
          !$OMP DO
          do p=1,np
            Ltmp_p(p,iblock) = Ltmp_p(p,iblock) * f
