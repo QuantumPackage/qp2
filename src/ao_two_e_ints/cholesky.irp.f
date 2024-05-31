@@ -27,19 +27,22 @@ END_PROVIDER
    ! https://doi.org/10.1016/j.apnum.2011.10.001 : Page 4, Algorithm 1
    END_DOC
 
-   integer                        :: rank, ndim
+   integer*8                      :: ndim8
+   integer                        :: rank
    double precision               :: tau
    double precision, pointer      :: L(:,:), L_old(:,:)
 
 
    double precision               :: s
-   double precision, parameter    :: dscale = 1.d0
+   double precision               :: dscale
 
    double precision, allocatable  :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
-   integer, allocatable           :: Lset(:), Dset(:), addr(:,:)
+   integer, allocatable           :: addr1(:,:), addr2(:,:)
+   integer**, allocatable         :: Lset(:), Dset(:), addr3(:,:)
    logical, allocatable           :: computed(:)
 
-   integer                        :: i,j,k,m,p,q, qj, dj, p2, q2
+   integer                        :: i,j,k,m,p,q, dj, p2, q2
+   integer*8                      :: i8, j8, p8, qj8
    integer                        :: N, np, nq
 
    double precision               :: Dmax, Dmin, Qmax, f
@@ -47,15 +50,15 @@ END_PROVIDER
    logical, external              :: ao_two_e_integral_zero
 
    double precision, external     :: ao_two_e_integral
-   integer                        :: block_size, iblock, ierr
+   integer                        :: block_size, iblock
 
    double precision               :: mem
-   double precision, external     :: memory_of_double, memory_of_int
+   double precision, external     :: memory_of_double8, memory_of_int8
 
    integer, external              :: getUnitAndOpen
-   integer                        :: iunit
+   integer                        :: iunit, ierr
 
-   ndim = ao_num*ao_num
+   ndim8 = ao_num*ao_num*1_8
    deallocate(cholesky_ao)
 
    if (read_ao_cholesky) then
@@ -83,13 +86,13 @@ END_PROVIDER
 
      tau = ao_cholesky_threshold
 
-     mem = 6.d0 * memory_of_double(ndim) + 6.d0 * memory_of_int(ndim)
+     mem = 6.d0 * memory_of_double8(ndim8) + 6.d0 * memory_of_int8(ndim8)
      call check_mem(mem, irp_here)
 
      call print_memory_usage()
 
-     allocate(L(ndim,1))
-!print *, 'allocate : (L(ndim,1))', memory_of_double(ndim)
+     allocate(L(ndim8,1))
+print *, 'allocate : (L(ndim8,1))', memory_of_double8(ndim8)
 
      print *,  ''
      print *,  'Cholesky decomposition of AO integrals'
@@ -102,36 +105,36 @@ END_PROVIDER
 
      rank = 0
 
-     allocate( D(ndim), Lset(ndim), Dset(ndim) )
-     allocate( addr(3,ndim) )
-!print *, 'allocate : (D(ndim))', memory_of_int(ndim)
-!print *, 'allocate : (Lset(ndim))', memory_of_int(ndim)
-!print *, 'allocate : (Dset(ndim))', memory_of_int(ndim)
-!print *, 'allocate : (3,addr(ndim))', memory_of_int(3*ndim)
+     allocate( D(ndim8), Lset(ndim8), Dset(ndim8) )
+     allocate( addr1(ndim8), addr2(ndim8), addr3(ndim8), )
+print *, 'allocate : (D(ndim8))', memory_of_int8(ndim8)
+print *, 'allocate : (Lset(ndim8))', memory_of_int8(ndim8)
+print *, 'allocate : (Dset(ndim8))', memory_of_int8(ndim8)
+print *, 'allocate : (4,addr(ndim8))', memory_of_int8(4_8*ndim8)
 
      ! 1.
      k=0
      do j=1,ao_num
        do i=1,ao_num
          k = k+1
-         addr(1,k) = i
-         addr(2,k) = j
-         addr(3,k) = (i-1)*ao_num + j
+         addr1(k) = i
+         addr2(k) = j
+         addr3(k) = (i-1)*ao_num + j
        enddo
      enddo
 
      if (do_direct_integrals) then
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i) SCHEDULE(guided)
-       do i=1,ndim
-         D(i) = ao_two_e_integral(addr(1,i), addr(2,i),              &
-             addr(1,i), addr(2,i))
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(guided)
+       do i8=1,ndim8
+         D(i8) = ao_two_e_integral(addr1(i8), addr2(i8),              &
+             addr1(i8), addr2(i8))
        enddo
        !$OMP END PARALLEL DO
      else
-       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i) SCHEDULE(guided)
-       do i=1,ndim
-         D(i) = get_ao_two_e_integral(addr(1,i), addr(1,i),          &
-             addr(2,i), addr(2,i),                                   &
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(guided)
+       do i8=1,ndim8
+         D(i8) = get_ao_two_e_integral(addr1(i8), addr1(i8),          &
+             addr2(i8), addr2(i8),                                   &
              ao_integrals_map)
        enddo
        !$OMP END PARALLEL DO
@@ -140,12 +143,21 @@ END_PROVIDER
      Dmax = maxval(D)
 
      ! 2.
-     np=0
-     do p=1,ndim
-       if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
-         np = np+1
-         Lset(np) = p
-       endif
+     np = huge(1_4)
+     dscale = 1.d0
+     do while (np == huge(1_4))
+       np=0
+       do p8=1,ndim8
+         if ( dscale*dscale*Dmax*D(p8) > tau*tau ) then
+           np = np+1
+           Lset(np) = p8
+           if (np == huge(1_4)) then
+             ! Overflow detected
+             dscale = dscale*0.5d0
+             exit
+           endif
+         endif
+       enddo
      enddo
 
      ! 3.
@@ -155,7 +167,7 @@ END_PROVIDER
      i = 0
 
      ! 5.
-     do while ( (Dmax > tau).and.(rank < ndim) )
+     do while ( (Dmax > tau).and.(rank < min(ndim8,huge(1_4)) )
        ! a.
        i = i+1
 
@@ -181,7 +193,8 @@ END_PROVIDER
          call total_memory(mem)
          mem = mem                                                   &
              + np*memory_of_double(nq)                               &! Delta(np,nq)
-             + (rank+nq)* memory_of_double(ndim)                     &! L(ndim,rank+nq)
+             + (rank+nq)* memory_of_double8(ndim8)
+&! L(ndim8,rank+nq)
              + (np+nq)*memory_of_double(block_size)    ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
          if (mem > qp_max_mem) then
@@ -205,19 +218,19 @@ END_PROVIDER
        ! d., e.
 
        L_old => L
-       allocate(L(ndim,rank+nq), stat=ierr)
-!print *, 'allocate : L(ndim,rank+nq)', memory_of_double(ndim*(rank+nq))
+       allocate(L(ndim8,rank+nq), stat=ierr)
+print *, 'allocate : L(ndim8,rank+nq)', memory_of_double8(ndim8*(rank+nq))
 
        if (ierr /= 0) then
          call print_memory_usage()
-         print *,  irp_here, ': allocation failed : (L(ndim,rank+nq))'
+         print *,  irp_here, ': allocation failed : (L(ndim8,rank+nq))'
          stop -1
        endif
 
        !$OMP PARALLEL DO PRIVATE(k,j)
        do k=1,rank
-         do j=1,ndim
-           L(j,k) = L_old(j,k)
+         do j8=1,ndim8
+           L(j8,k) = L_old(j8,k)
          enddo
        enddo
        !$OMP END PARALLEL DO
@@ -225,7 +238,7 @@ END_PROVIDER
        deallocate(L_old)
 
        allocate(Delta(np,nq), stat=ierr)
-!print *, 'allocate : Delta(np,nq)', memory_of_double(np*nq)
+print *, 'allocate : Delta(np,nq)', memory_of_double8(np*nq*1_8)
 
        if (ierr /= 0) then
          call print_memory_usage()
@@ -234,7 +247,7 @@ END_PROVIDER
        endif
 
        allocate(Ltmp_p(np,block_size), stat=ierr)
-!print *, 'allocate : Ltmp_p(np,block_size)', memory_of_double(np*block_size)
+print *, 'allocate : Ltmp_p(np,block_size)', memory_of_double8(np*block_size*1_8)
 
        if (ierr /= 0) then
          call print_memory_usage()
@@ -243,7 +256,7 @@ END_PROVIDER
        endif
 
        allocate(Ltmp_q(nq,block_size), stat=ierr)
-!print *, 'allocate : Ltmp_q(nq,block_size)', memory_of_double(nq*block_size)
+print *, 'allocate : Ltmp_q(nq,block_size)', memory_of_double8(nq*block_size*1_8) 
 
        if (ierr /= 0) then
          call print_memory_usage()
@@ -253,8 +266,9 @@ END_PROVIDER
 
 
        allocate(computed(nq))
-!print *, 'allocate : computed(nq)', memory_of_int(nq)
+print *, 'allocate : computed(nq)', memory_of_int(nq)
 
+print *, 'p1'
        !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q,j)
 
        !$OMP DO
@@ -296,7 +310,7 @@ END_PROVIDER
        iblock = 0
        do j=1,nq
 
-         if ( (Qmax <= Dmin).or.(N+j > ndim) ) exit
+         if ( (Qmax <= Dmin).or.(N+j*1_8 > ndim8) ) exit
          ! i.
          rank = N+j
 
@@ -308,28 +322,28 @@ END_PROVIDER
 
          ! ii.
          do dj=1,nq
-           qj = Dset(dj)
-           if (D(qj) == Qmax) then
+           qj8 = Dset(dj)
+           if (D(qj8) == Qmax) then
              exit
            endif
          enddo
 
-         L(1:ndim, rank) = 0.d0
+         L(1:ndim8, rank) = 0.d0
 
          if (.not.computed(dj)) then
            m = dj
            !$OMP PARALLEL DO PRIVATE(k) SCHEDULE(guided)
            do k=np,1,-1
-             if (.not.ao_two_e_integral_zero( addr(1,Lset(k)), addr(1,Dset(m)),&
-                   addr(2,Lset(k)), addr(2,Dset(m)) ) ) then
+             if (.not.ao_two_e_integral_zero( addr1(Lset(k)), addr1(Dset(m)),&
+                   addr2(Lset(k)), addr2(Dset(m)) ) ) then
                if (do_direct_integrals) then
                  Delta(k,m) = Delta(k,m) + &
-                     ao_two_e_integral(addr(1,Lset(k)), addr(2,Lset(k)),&
-                     addr(1,Dset(m)), addr(2,Dset(m)))
+                     ao_two_e_integral(addr1(Lset(k)), addr2(Lset(k)),&
+                     addr1(Dset(m)), addr2(Dset(m)))
                else
                  Delta(k,m) = Delta(k,m) + &
-                     get_ao_two_e_integral( addr(1,Lset(k)), addr(1,Dset(m)),&
-                     addr(2,Lset(k)), addr(2,Dset(m)), ao_integrals_map)
+                     get_ao_two_e_integral( addr1(Lset(k)), addr1(Dset(m)),&
+                     addr2(Lset(k)), addr2(Dset(m)), ao_integrals_map)
                endif
              endif
            enddo
@@ -391,18 +405,28 @@ END_PROVIDER
          Dmax = max(Dmax, D(Lset(p)))
        enddo
 
-       np=0
-       do p=1,ndim
-         if ( dscale*dscale*Dmax*D(p) > tau*tau ) then
-           np = np+1
-           Lset(np) = p
-         endif
+       np = huge(1_4)
+       dscale = 1.d0
+       do while (np == huge(1_4))
+         np=0
+         do p8=1,ndim8
+           if ( dscale*dscale*Dmax*D(p8) > tau*tau ) then
+             np = np+1
+             Lset(np) = p8
+             if (np == huge(1_4)) then
+               ! Overflow detected
+               dscale = dscale*0.5d0
+               exit
+             endif
+           endif
+         enddo
        enddo
+
 
      enddo
 
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
-!print *, 'allocate : cholesky_ao(ao_num,ao_num,rank)', ao_num*ao_num*(rank*1_8) * 8_8 / 1024_8**3
+print *, 'allocate : cholesky_ao(ao_num,ao_num,rank)', memory_of_double8(ao_num*ao_num*rank*1_8)
 
      if (ierr /= 0) then
        call print_memory_usage()
@@ -411,7 +435,9 @@ END_PROVIDER
      endif
      !$OMP PARALLEL DO PRIVATE(k)
      do k=1,rank
-       call dcopy(ndim, L(1,k), 1, cholesky_ao(1,1,k), 1)
+       do j=1,ao_num
+         call dcopy(ao_num, L((j-1)*ao_num+1,k), 1, cholesky_ao(1,j,k), 1)
+       enddo
      enddo
      !$OMP END PARALLEL DO
      deallocate(L)
