@@ -186,7 +186,7 @@ END_PROVIDER
 
          if (mem > qp_max_mem) then
            s = s*2.d0
-           block_size = block_size / 2
+           block_size = max(block_size / 2, 1)
          else
            exit
          endif
