@@ -22,6 +22,9 @@ END_PROVIDER
    ! <ij|kl> = (ik|jl) = sum_a (ik|a).(a|jl)
    !
    ! Last dimension of cholesky_ao is cholesky_ao_num
+   !
+   ! https://mogp-emulator.readthedocs.io/en/latest/methods/proc/ProcPivotedCholesky.html
+   ! https://doi.org/10.1016/j.apnum.2011.10.001 : Page 4, Algorithm 1
    END_DOC
 
    integer                        :: rank, ndim
@@ -86,20 +89,25 @@ END_PROVIDER
      call print_memory_usage()
 
      allocate(L(ndim,1))
+!print *, 'allocate : (L(ndim,1))', memory_of_double(ndim)
 
      print *,  ''
      print *,  'Cholesky decomposition of AO integrals'
      print *,  '======================================'
      print *,  ''
-     print *,  '============ ============='
-     print *,  '    Rank      Threshold'
-     print *,  '============ ============='
+     print *,  '============ ============ ============='
+     print *,  '    Rank      Block size    Threshold'
+     print *,  '============ ============ ============='
 
 
      rank = 0
 
      allocate( D(ndim), Lset(ndim), Dset(ndim) )
      allocate( addr(3,ndim) )
+!print *, 'allocate : (D(ndim))', memory_of_int(ndim)
+!print *, 'allocate : (Lset(ndim))', memory_of_int(ndim)
+!print *, 'allocate : (Dset(ndim))', memory_of_int(ndim)
+!print *, 'allocate : (3,addr(ndim))', memory_of_int(3*ndim)
 
      ! 1.
      k=0
@@ -151,9 +159,10 @@ END_PROVIDER
        ! a.
        i = i+1
 
-       s = 0.01d0
 
        ! Inrease s until the arrays fit in memory
+       s = 0.01d0
+       block_size = max(N,24)
        do while (.True.)
 
          ! b.
@@ -168,6 +177,7 @@ END_PROVIDER
            endif
          enddo
 
+
          call total_memory(mem)
          mem = mem                                                   &
              + np*memory_of_double(nq)                               &! Delta(np,nq)
@@ -176,23 +186,28 @@ END_PROVIDER
 
          if (mem > qp_max_mem) then
            s = s*2.d0
+           block_size = block_size / 2
          else
            exit
          endif
 
          if ((s > 1.d0).or.(nq == 0)) then
            call print_memory_usage()
-           print *,  'Not enough memory. Reduce cholesky threshold'
+           print *, 'Required peak memory: ', mem, 'Gb'
+           call total_memory(mem)
+           print *, 'Already used  memory: ', mem, 'Gb'
+           print *, 'Not enough memory. Reduce cholesky threshold'
            stop -1
          endif
 
        enddo
 
        ! d., e.
-       block_size = max(N,24)
 
        L_old => L
        allocate(L(ndim,rank+nq), stat=ierr)
+!print *, 'allocate : L(ndim,rank+nq)', memory_of_double(ndim*(rank+nq))
+
        if (ierr /= 0) then
          call print_memory_usage()
          print *,  irp_here, ': allocation failed : (L(ndim,rank+nq))'
@@ -210,6 +225,8 @@ END_PROVIDER
        deallocate(L_old)
 
        allocate(Delta(np,nq), stat=ierr)
+!print *, 'allocate : Delta(np,nq)', memory_of_double(np*nq)
+
        if (ierr /= 0) then
          call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Delta(np,nq))'
@@ -217,6 +234,8 @@ END_PROVIDER
        endif
 
        allocate(Ltmp_p(np,block_size), stat=ierr)
+!print *, 'allocate : Ltmp_p(np,block_size)', memory_of_double(np*block_size)
+
        if (ierr /= 0) then
          call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Ltmp_p(np,block_size))'
@@ -224,6 +243,8 @@ END_PROVIDER
        endif
 
        allocate(Ltmp_q(nq,block_size), stat=ierr)
+!print *, 'allocate : Ltmp_q(nq,block_size)', memory_of_double(nq*block_size)
+
        if (ierr /= 0) then
          call print_memory_usage()
          print *,  irp_here, ': allocation failed : (Ltmp_q(nq,block_size))'
@@ -232,6 +253,7 @@ END_PROVIDER
 
 
        allocate(computed(nq))
+!print *, 'allocate : computed(nq)', memory_of_int(nq)
 
        !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(m,k,p,q,j)
 
@@ -353,7 +375,7 @@ END_PROVIDER
 
        enddo
 
-       print '(I10, 4X, ES12.3)', rank, Qmax
+       print '(I10, 4X, I10, 4X, ES12.3)', rank, block_size, Qmax
 
        deallocate(computed)
        deallocate(Delta)
@@ -380,6 +402,8 @@ END_PROVIDER
      enddo
 
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
+!print *, 'allocate : cholesky_ao(ao_num,ao_num,rank)', ao_num*ao_num*(rank*1_8) * 8_8 / 1024_8**3
+
      if (ierr /= 0) then
        call print_memory_usage()
        print *,  irp_here, ': Allocation failed'
