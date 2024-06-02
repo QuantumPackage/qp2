@@ -79,6 +79,26 @@ IRP_ENDIF
   call unlock_io()
 end function
 
+double precision function memory_of_double8(n)
+  implicit none
+  BEGIN_DOC
+! Computes the memory required for n double precision elements in gigabytes.
+  END_DOC
+  integer*8, intent(in) :: n
+  double precision, parameter :: f = 8.d0 / (1024.d0*1024.d0*1024.d0)
+  memory_of_double8 = dble(n) * f
+end function
+
+double precision function memory_of_int8(n)
+  implicit none
+  BEGIN_DOC
+! Computes the memory required for n double precision elements in gigabytes.
+  END_DOC
+  integer*8, intent(in) :: n
+  double precision, parameter :: f = 4.d0 / (1024.d0*1024.d0*1024.d0)
+  memory_of_int8 = dble(n) * f
+end function
+
 double precision function memory_of_double(n)
   implicit none
   BEGIN_DOC
