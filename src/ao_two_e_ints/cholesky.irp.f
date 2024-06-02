@@ -51,7 +51,9 @@ END_PROVIDER
 
    integer, external              :: getUnitAndOpen
    integer                        :: iunit
+   double precision :: wall0,wall1
 
+   call wall_time(wall0)
    ndim = ao_num*ao_num
    deallocate(cholesky_ao)
 
@@ -409,6 +411,8 @@ END_PROVIDER
 
    print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
    print *,  ''
+   call wall_time(wall1)
+   print*,'Time to provide AO cholesky vectors = ',wall1-wall0
 
 END_PROVIDER
 
