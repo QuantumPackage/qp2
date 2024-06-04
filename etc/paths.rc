@@ -28,6 +28,15 @@ function qp_prepend_export () {
   fi
 }
 
+function qp_append_export () {
+  eval "value_1="\${$1}""
+  if [[ -z $value_1 ]] ; then
+      echo "${2}:"
+  else
+      echo "${value_1}:${2}"
+  fi
+}
+
 export PYTHONPATH=$(qp_prepend_export "PYTHONPATH" "${QP_EZFIO}/Python":"${QP_PYTHON}")
 
 export PATH=$(qp_prepend_export "PATH" "${QP_PYTHON}":"${QP_ROOT}"/bin:"${QP_ROOT}"/ocaml)
