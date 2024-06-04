@@ -220,10 +220,10 @@ BEGIN_PROVIDER [ double precision, f_hf_cholesky_sparse, (n_points_final_grid)]
       if(dabs(mo_i_r1).lt.thresh_1)cycle
       do mm = 1, n_basis_orb ! electron 1 
        m = list_basis(mm)
-       mo_b_r1 = mos_in_r_array_omp(m,ipoint)
-       if(dabs(mo_i_r1*mo_b_r1).lt.thresh_2)cycle
+       mo_b_r1 = mos_in_r_array_omp(m,ipoint)*mo_i_r1
+       if(dabs(mo_b_r1).lt.thresh_2)cycle
        do p = 1, cholesky_mo_num
-        accu_vec(p) = accu_vec(p) + mo_i_r1 * mo_b_r1 * cholesky_mo_transp(p,m,i)
+        accu_vec(p) = accu_vec(p) + mo_b_r1 * cholesky_mo_transp(p,m,i)
        enddo
       enddo
      enddo

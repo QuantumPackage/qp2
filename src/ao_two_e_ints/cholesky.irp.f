@@ -59,6 +59,9 @@ END_PROVIDER
    integer                        :: iunit, ierr
 
    ndim8 = ao_num*ao_num*1_8
+   double precision :: wall0,wall1
+
+   call wall_time(wall0)
    deallocate(cholesky_ao)
 
 
@@ -496,6 +499,8 @@ END_PROVIDER
 
    print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
    print *,  ''
+   call wall_time(wall1)
+   print*,'Time to provide AO cholesky vectors = ',wall1-wall0
 
 END_PROVIDER
 
