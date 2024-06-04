@@ -16,6 +16,7 @@ END_PROVIDER
 
  BEGIN_PROVIDER [ integer, cholesky_ao_num ]
 &BEGIN_PROVIDER [ double precision, cholesky_ao, (ao_num, ao_num, 1) ]
+   use mmap_module
    implicit none
    BEGIN_DOC
    ! Cholesky vectors in AO basis: (ik|a):
@@ -30,19 +31,19 @@ END_PROVIDER
    integer*8                      :: ndim8
    integer                        :: rank
    double precision               :: tau, tau2
-   double precision, pointer      :: L(:,:), L_old(:,:)
+   double precision, pointer      :: L(:,:)
 
    double precision               :: s
    double precision               :: dscale, dscale_tmp
 
-   double precision, allocatable  :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:)
+   double precision, allocatable  :: D(:), Delta(:,:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:)
    integer, allocatable           :: addr1(:), addr2(:)
    integer*8, allocatable         :: Lset(:), Dset(:), addr3(:)
    logical, allocatable           :: computed(:)
 
    integer                        :: i,j,k,m,p,q, dj, p2, q2
-   integer*8                      :: i8, j8, p8, qj8
-   integer                        :: N, np, nq, npmax
+   integer*8                      :: i8, j8, p8, qj8, rank_max, np8
+   integer                        :: N, np, nq
 
    double precision               :: Dmax, Dmin, Qmax, f
    double precision, external     :: get_ao_two_e_integral
@@ -61,11 +62,11 @@ END_PROVIDER
    ndim8 = ao_num*ao_num*1_8
    double precision :: wall0,wall1
 
+   type(c_ptr)                    :: c_pointer(2)
+   integer                        :: fd(2)
+
    call wall_time(wall0)
    deallocate(cholesky_ao)
-
-
-! TODO : Save L() to disk
 
    if (read_ao_cholesky) then
      print *,  'Reading Cholesky vectors from disk...'
@@ -80,6 +81,16 @@ END_PROVIDER
 
      PROVIDE nucl_coord ao_two_e_integral_schwartz
      call set_multiple_levels_omp(.False.)
+
+     rank_max = min(ndim8,274877906944_8/1_8/ndim8)
+     call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., c_pointer(1))
+     call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
+!print *, 'rank_max/ndim8', dble(rank_max) / dble(ndim8)
+
+     ! Deleting the file while it is open makes the file invisible on the filesystem,
+     ! and automatically deleted, even if the program crashes
+     iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_tmp', 'R')
+     close(iunit,status='delete')
 
      if (do_direct_integrals) then
        if (ao_two_e_integral(1,1,1,1) < huge(1.d0)) then
@@ -98,9 +109,6 @@ END_PROVIDER
 
      call print_memory_usage()
 
-     allocate(L(ndim8,1))
-!print *, 'allocate : (L(ndim8,1))', memory_of_double8(ndim8)
-
      print *,  ''
      print *,  'Cholesky decomposition of AO integrals'
      print *,  '======================================'
@@ -112,7 +120,7 @@ END_PROVIDER
 
      rank = 0
 
-     allocate( D(ndim8), Lset(ndim8), Dset(ndim8) )
+     allocate( D(ndim8), Lset(ndim8), Dset(ndim8), D_sorted(ndim8))
      allocate( addr1(ndim8), addr2(ndim8), addr3(ndim8) )
 !print *, 'allocate : (D(ndim8))', memory_of_int8(ndim8)
 !print *, 'allocate : (Lset(ndim8))', memory_of_int8(ndim8)
@@ -132,44 +140,52 @@ END_PROVIDER
 
      if (do_direct_integrals) then
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,16)
-       do i8=1,ndim8
+       do i8=ndim8,1,-1
          D(i8) = ao_two_e_integral(addr1(i8), addr2(i8),              &
              addr1(i8), addr2(i8))
        enddo
        !$OMP END PARALLEL DO
      else
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,16)
-       do i8=1,ndim8
+       do i8=ndim8,1,-1
          D(i8) = get_ao_two_e_integral(addr1(i8), addr1(i8),          &
              addr2(i8), addr2(i8),                                   &
              ao_integrals_map)
        enddo
        !$OMP END PARALLEL DO
      endif
+     D_sorted(:) = -D(:)
+     call dsort_noidx_big(D_sorted,ndim8)
+     D_sorted(:) = dabs(D_sorted(:))
 
-     Dmax = maxval(D)
+     Dmax = D_sorted(1)
 
      ! 2.
-     npmax = huge(1_4)*1_8
-     np = npmax
-     dscale = 1.d0
-     dscale_tmp = Dmax
-     do while (np == npmax)
-       np=0
+     dscale = tau2/Dmax
+     do i8=1,ndim8
+       if (D_sorted(i8) <= dscale) exit
+     enddo
+
+
+     mem = qp_max_mem+1
+     do while ( (mem > qp_max_mem).and.(i8>1_8) )
+       dscale = min(1.d0,dsqrt(tau2/(D_sorted(i8)*Dmax)))
+       dscale_tmp = dscale*dscale*Dmax
+! print *, 'dscale = ', dscale, dble(i8)/dble(ndim8)
+       np8=0_8
        do p8=1,ndim8
          if ( dscale_tmp*D(p8) > tau2 ) then
-           np = np+1
-           Lset(np) = p8
-           if (np == npmax) then
-             ! Overflow detected
-             dscale = dscale*0.1d0
-             dscale_tmp = dscale*dscale*Dmax
-!print *, 'Overflow detected '
-!print *, 'dscale = ', dscale
-             exit
-           endif
+           np8 = np8+1_8
+           Lset(np8) = p8
          endif
        enddo
+       i8 = i8*3_8/4_8
+       if (np8 > huge(1_4)/64_8) cycle
+       np = np8
+! print *, 'np = ', np
+       call resident_memory(mem)
+       mem = mem                                 &
+             + 0.1d0*np*memory_of_double(np)      ! Delta(np,nq)
      enddo
 
      ! 3.
@@ -179,7 +195,7 @@ END_PROVIDER
      i = 0
 
      ! 5.
-     do while ( (Dmax > tau).and.(rank < min(ndim8,huge(1_4))) )
+     do while ( (Dmax > tau).and.(rank*1_8 < min(ndim8,rank_max)) )
        ! a.
        i = i+1
 
@@ -202,12 +218,12 @@ END_PROVIDER
          enddo
 
 
-         call total_memory(mem)
+         call resident_memory(mem)
          mem = mem                                 &
              + np*memory_of_double(nq)             &! Delta(np,nq)
-             + (rank+nq)* memory_of_double8(ndim8) &! L(ndim8,rank+nq)
              + (np+nq)*memory_of_double(block_size) ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
+!print *, 'mem = ', mem
          if (mem > qp_max_mem) then
            s = s*2.d0
          else
@@ -217,7 +233,7 @@ END_PROVIDER
          if ((s > 1.d0).or.(nq == 0)) then
            call print_memory_usage()
            print *, 'Required peak memory: ', mem, 'Gb'
-           call total_memory(mem)
+           call resident_memory(mem)
            print *, 'Already used  memory: ', mem, 'Gb'
            print *, 'Not enough memory. Reduce cholesky threshold'
            stop -1
@@ -226,26 +242,6 @@ END_PROVIDER
        enddo
 
        ! d., e.
-
-       L_old => L
-       allocate(L(ndim8,rank+nq), stat=ierr)
-!print *, 'allocate : L(ndim8,rank+nq)', memory_of_double8(ndim8*(rank+nq))
-
-       if (ierr /= 0) then
-         call print_memory_usage()
-         print *,  irp_here, ': allocation failed : (L(ndim8,rank+nq))'
-         stop -1
-       endif
-
-       !$OMP PARALLEL DO PRIVATE(k,j8)
-       do k=1,rank
-         do j8=1,ndim8
-           L(j8,k) = L_old(j8,k)
-         enddo
-       enddo
-       !$OMP END PARALLEL DO
-
-       deallocate(L_old)
 
        allocate(Delta(np,nq), stat=ierr)
 !print *, 'allocate : Delta(np,nq)', memory_of_double8(np*nq*1_8)
@@ -280,39 +276,29 @@ END_PROVIDER
 
 !print *, 'N, rank, block_size', N, rank, block_size
 !print *, 'p1'
-       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q,j)
-
-!print *, 'computed'
-       !$OMP DO
+       !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(p,q,j)
        do q=1,nq
          computed(q) = .False.
-       enddo
-       !$OMP ENDDO NOWAIT
-
-!print *, 'Delta'
-       !$OMP DO
-       do q=1,nq
          do j=1,np
            Delta(j,q) = 0.d0
          enddo
        enddo
-       !$OMP ENDDO NOWAIT
+       !$OMP END PARALLEL DO
 
-!print *, 'Ltmp_p'
+       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q,j)
        do k=1,N
          !$OMP DO
          do p=1,np
-           Ltmp_p(p,k) = L(Lset(p),k)
+              Ltmp_p(p,k) = L(Lset(p),k)
          enddo
          !$OMP END DO NOWAIT
 
          !$OMP DO
          do q=1,nq
-           Ltmp_q(q,k) = L(Dset(q),k)
+              Ltmp_q(q,k) = L(Dset(q),k)
          enddo
          !$OMP END DO NOWAIT
        enddo
-
        !$OMP BARRIER
        !$OMP END PARALLEL
 
@@ -338,7 +324,7 @@ END_PROVIDER
          rank = N+j
 
          if (iblock == block_size) then
-!print *, 'dgemm'
+!print *, 'dgemm', np, nq
            call dgemm('N','T',np,nq,block_size,-1.d0,                &
                Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
 
@@ -401,7 +387,6 @@ END_PROVIDER
          ! iii.
          f = 1.d0/dsqrt(Qmax)
 
-!print *, 'p4'
          !$OMP PARALLEL PRIVATE(p,q) DEFAULT(shared)
          !$OMP DO
          do p=1,np
@@ -441,29 +426,41 @@ END_PROVIDER
          Dmax = max(Dmax, D(Lset(p)))
        enddo
 
-       np = npmax
-       dscale = 1.d0
-       dscale_tmp = Dmax
-       do while (np == npmax)
-         np=0
+       mem = qp_max_mem+1
+       do while ( (mem > qp_max_mem).and.(i8>1_8) )
+         dscale = min(1.d0,dsqrt(tau2/(D_sorted(i8)*Dmax)))
+         dscale_tmp = dscale*dscale*Dmax
+!print *, 'dscale = ', dscale, dble(i8)/dble(ndim8)
+         np8=0_8
          do p8=1,ndim8
            if ( dscale_tmp*D(p8) > tau2 ) then
-             np = np+1
-             Lset(np) = p8
-             if (np == npmax) then
-               ! Overflow detected
-               dscale = dscale*0.5d0
-               dscale_tmp = dscale*dscale*Dmax
-!print *, 'Overflow detected '
-!print *, 'dscale = ', dscale
-               exit
-             endif
+             np8 = np8+1_8
+             Lset(np8) = p8
            endif
          enddo
+         i8 = i8*3_8/4_8
+         if (np8 > huge(1_4)/64_8) cycle
+         np = np8
+!print *, 'np = ', np
+         call resident_memory(mem)
+         mem = mem                                 &
+               + 0.1d0*np*memory_of_double(np)      ! Delta(np,nq)
        enddo
 
+       if (np == 0) then
+           call print_memory_usage()
+           print *, 'Required peak memory: ', mem, 'Gb'
+           call resident_memory(mem)
+           print *, 'Already used  memory: ', mem, 'Gb'
+           print *, 'Not enough memory. Reduce cholesky threshold'
+           stop -1
+       endif
 
      enddo
+
+
+     print *,  '============ ============='
+     print *,  ''
 
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
 !print *, 'allocate : cholesky_ao(ao_num,ao_num,rank)', memory_of_double8(ao_num*ao_num*rank*1_8)
@@ -473,18 +470,19 @@ END_PROVIDER
        print *,  irp_here, ': Allocation failed'
        stop -1
      endif
-     !$OMP PARALLEL DO PRIVATE(k)
+
+
+     !$OMP PARALLEL DO PRIVATE(k,j)
      do k=1,rank
        do j=1,ao_num
            cholesky_ao(1:ao_num,j,k) = L((j-1)*ao_num+1:j*ao_num,k)
        enddo
      enddo
      !$OMP END PARALLEL DO
-     deallocate(L)
-     cholesky_ao_num = rank
 
-     print *,  '============ ============='
-     print *,  ''
+     call munmap( (/ ndim8, ndim8 /), 8, fd(1), c_pointer(1) )
+
+     cholesky_ao_num = rank
 
      if (write_ao_cholesky) then
        print *,  'Writing Cholesky vectors to disk...'
