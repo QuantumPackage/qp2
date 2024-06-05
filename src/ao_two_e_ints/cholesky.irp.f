@@ -248,7 +248,7 @@ END_PROVIDER
          allocate(Delta(np,nq))
          delta_on_disk = .False.
        endif
-       print *, delta_on_disk
+!print *, delta_on_disk
 
        allocate(Delta_col(np))
 
@@ -275,7 +275,7 @@ END_PROVIDER
 
 !print *, 'N, rank, block_size', N, rank, block_size
 
-       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q,j)
+       !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q)
        do k=1,N
          !$OMP DO
          do p=1,np
@@ -356,6 +356,8 @@ END_PROVIDER
                      Delta_col(k) = &
                          ao_two_e_integral(addr1(Lset(k)), addr2(Lset(k)),&
                          addr1(Dset(m)), addr2(Dset(m)))
+                 else
+                     Delta_col(k) = 0.d0
                  endif
                enddo
                !$OMP END PARALLEL DO
@@ -367,6 +369,8 @@ END_PROVIDER
                      Delta_col(k) = &
                          get_ao_two_e_integral( addr1(Lset(k)), addr1(Dset(m)),&
                          addr2(Lset(k)), addr2(Dset(m)), ao_integrals_map)
+                 else
+                     Delta_col(k) = 0.d0
                  endif
                enddo
                !$OMP END PARALLEL DO
