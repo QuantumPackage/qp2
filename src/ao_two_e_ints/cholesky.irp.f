@@ -272,9 +272,10 @@ END_PROVIDER
 
 
        allocate(computed(nq))
+       computed(:) = .False.
+
 
 !print *, 'N, rank, block_size', N, rank, block_size
-
        !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q)
        do k=1,N
          !$OMP DO
@@ -285,7 +286,6 @@ END_PROVIDER
 
          !$OMP DO
          do q=1,nq
-           computed(q) = .False.
            Ltmp_q(q,k) = L(Dset(q),k)
          enddo
          !$OMP END DO NOWAIT
