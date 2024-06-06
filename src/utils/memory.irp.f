@@ -6,7 +6,7 @@ BEGIN_PROVIDER [ integer, qp_max_mem ]
  character*(128) :: env
  integer, external :: get_total_available_memory
 
- qp_max_mem = get_total_available_memory()
+ qp_max_mem = max(get_total_available_memory() - 1,3)
  call write_int(6,qp_max_mem,'Total available memory (GB)')
  call getenv('QP_MAXMEM',env)
  if (trim(env) /= '') then

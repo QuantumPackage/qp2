@@ -7,7 +7,7 @@
 #include <sys/mman.h>
 
 
-void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
+void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only, int single_node)
 {
     int fd;
     int result;
@@ -21,7 +21,7 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
             perror("Error opening mmap file for reading");
             exit(EXIT_FAILURE);
         }
-        map = mmap(NULL, bytes, PROT_READ, MAP_SHARED, fd, 0);
+        map = mmap(NULL, bytes, PROT_READ, MAP_PRIVATE, fd, 0);
     }
     else
     {
@@ -39,7 +39,7 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
             perror("Error calling lseek() to stretch the file");
             exit(EXIT_FAILURE);
         }
-        
+
         result = write(fd, "", 1);
         if (result != 1) {
             close(fd);
@@ -48,7 +48,12 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only)
             exit(EXIT_FAILURE);
         }
 
-        map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (single_node == 1) {
+          map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, 
+             MAP_PRIVATE | MAP_HUGETLB , fd, 0);
+        } else {
+          map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_HUGETLB, fd, 0);
+        }
     }
 
     if (map == MAP_FAILED) {

@@ -1,6 +1,6 @@
 
 subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,converged,h_mat)
-  use mmap_module
+!  use mmap_module
   implicit none
   BEGIN_DOC
   ! Davidson diagonalization with specific diagonal elements of the H matrix
@@ -160,9 +160,9 @@ subroutine davidson_general(u_in,H_jj,energies,dim_in,sze,N_st,N_st_diag_in,conv
 !    type(c_ptr) :: ptr_w, ptr_s
 !    integer :: fd_s, fd_w
 !    call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-!        8, fd_w, .False., ptr_w)
+!        8, fd_w, .False., .True., ptr_w)
 !    call mmap(trim(ezfio_work_dir)//'davidson_s', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-!        4, fd_s, .False., ptr_s)
+!        4, fd_s, .False., .True., ptr_s)
 !    call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
 !    call c_f_pointer(ptr_s, s, (/sze,N_st_diag*itermax/))
 !  else

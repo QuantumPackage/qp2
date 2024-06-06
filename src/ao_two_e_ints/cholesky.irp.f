@@ -88,7 +88,7 @@ END_PROVIDER
      call resident_memory(mem0)
 
      rank_max = min(ndim8,274877906944_8/1_8/ndim8)
-     call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., c_pointer(1))
+     call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
      call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
      ! Deleting the file while it is open makes the file invisible on the filesystem,
      ! and automatically deleted, even if the program crashes
@@ -237,7 +237,7 @@ END_PROVIDER
              + (np+nq)*memory_of_double(block_size) ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
        if (mem > qp_max_mem) then
-         call mmap(trim(ezfio_work_dir)//'cholesky_delta', (/ np*1_8, nq*1_8 /), 8, fd(2), .False., c_pointer(2))
+         call mmap(trim(ezfio_work_dir)//'cholesky_delta', (/ np*1_8, nq*1_8 /), 8, fd(2), .False., .True., c_pointer(2))
          call c_f_pointer(c_pointer(2), Delta, (/ np, nq /))
          ! Deleting the file while it is open makes the file invisible on the filesystem,
          ! and automatically deleted, even if the program crashes
