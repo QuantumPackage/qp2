@@ -18,6 +18,8 @@ subroutine run_ccsd_space_orb
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
+  call set_multiple_levels_omp(.False.)
+
   if (do_ao_cholesky) then
     PROVIDE cholesky_mo_transp
     FREE cholesky_ao
