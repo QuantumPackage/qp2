@@ -39,29 +39,16 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     return
   endif
 
-  if (.not. do_direct_integrals) then
-    PROVIDE ao_two_e_integrals_in_map
-  endif
-
-  print *,  ''
-  print *,  'AO -> MO integrals transformation'
-  print *,  '---------------------------------'
-  print *,  ''
-
   call wall_time(wall_1)
   call cpu_time(cpu_1)
 
-  if(no_vvvv_integrals)then
-    call four_idx_novvvv_old
+  if (do_mo_cholesky) then
+    call add_integrals_to_map_cholesky
   else
-    if (do_ao_cholesky) then
-      call add_integrals_to_map_cholesky
+    if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
+      call four_idx_dgemm
     else
-      if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
-        call four_idx_dgemm
-      else
-        call add_integrals_to_map(full_ijkl_bitmask_4)
-      endif
+      call add_integrals_to_map(full_ijkl_bitmask_4)
     endif
   endif
 
@@ -92,8 +79,15 @@ subroutine four_idx_dgemm
   double precision, allocatable :: a1(:,:,:,:)
   double precision, allocatable :: a2(:,:,:,:)
 
+  PROVIDE ao_two_e_integrals_in_map mo_coef
+
+  print *, ''
+  print *, 'DGEMM-based AO->MO Transformation'
+  print *, '---------------------------------'
+  print *, ''
+
   if (ao_num > 1289) then
-    print *,  irp_here, ': Integer overflow in ao_num**3'
+    print *,  irp_here, ': Integer overflow in ao_num**3. Set do_ao_cholesky=.True.'
   endif
 
   allocate (a1(ao_num,ao_num,ao_num,ao_num))
@@ -212,6 +206,12 @@ subroutine add_integrals_to_map(mask_ijkl)
   double precision,parameter     :: thr_coef = 1.d-10
 
   PROVIDE ao_two_e_integrals_in_map  mo_coef
+
+
+  print *, ''
+  print *, 'Sparse AO->MO Transformation'
+  print *, '----------------------------'
+  print *, ''
 
   !Get list of MOs for i,j,k and l
   !-------------------------------
@@ -469,6 +469,7 @@ subroutine add_integrals_to_map_cholesky
   integer(key_kind)  , allocatable :: buffer_i(:)
   real(integral_kind), allocatable :: buffer_value(:)
 
+  PROVIDE cholesky_mo_transp
   call set_multiple_levels_omp(.False.)
 
   !$OMP PARALLEL DEFAULT(SHARED) &

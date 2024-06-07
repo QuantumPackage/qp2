@@ -68,7 +68,11 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
      read(iunit) cholesky_mo_transp
      close(iunit)
   else
+     print *, ''
      print *, 'AO->MO Transformation of Cholesky vectors'
+     print *, '-----------------------------------------'
+     print *, ''
+
      call wall_time(wall0)
 
      allocate(X(mo_num,cholesky_mo_num,ao_num), stat=ierr)
@@ -87,7 +91,7 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
      if (write_mo_cholesky) then
        print *,  'Writing Cholesky MO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'W')
-       write(iunit) rank
+       write(iunit) cholesky_mo_num
        write(iunit) cholesky_mo_transp
        close(iunit)
        call ezfio_set_mo_two_e_ints_io_mo_cholesky('Read')
