@@ -22,27 +22,27 @@ BEGIN_PROVIDER [ integer, cholesky_mo_num ]
  endif
 END_PROVIDER
 
-!BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num) ]
-! implicit none
-! BEGIN_DOC
-! ! Cholesky vectors in MO basis
-! END_DOC
-!
-! integer :: k, i, j
-!
-! call set_multiple_levels_omp(.False.)
-! !$OMP PARALLEL DO PRIVATE(k)
-! do k=1,cholesky_mo_num
-!  do j=1,mo_num
-!    do i=1,mo_num
-!      cholesky_mo(i,j,k) = cholesky_mo_transp(k,i,j)
-!    enddo
-!  enddo
-! enddo
-! !$OMP END PARALLEL DO
-!
-!END_PROVIDER
-!
+BEGIN_PROVIDER [ double precision, cholesky_mo, (mo_num, mo_num, cholesky_mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis
+ END_DOC
+
+ integer :: k, i, j
+
+ call set_multiple_levels_omp(.False.)
+ !$OMP PARALLEL DO PRIVATE(k)
+ do k=1,cholesky_mo_num
+  do j=1,mo_num
+    do i=1,mo_num
+      cholesky_mo(i,j,k) = cholesky_mo_transp(k,i,j)
+    enddo
+  enddo
+ enddo
+ !$OMP END PARALLEL DO
+
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num, mo_num) ]
  implicit none
  BEGIN_DOC
