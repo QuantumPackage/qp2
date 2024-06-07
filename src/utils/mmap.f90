@@ -46,9 +46,9 @@ module mmap_module
       type(c_ptr), intent(out)       :: map        ! C Pointer
 
       integer(c_size_t)              :: length
-      integer(c_int)                 :: fd_
+      integer(c_int)                 :: fd_, read_only_, single_node_
 
-      integer :: i, read_only_, single_node_
+      integer :: i
 
       read_only_ = 0
       single_node_ = 0
@@ -60,7 +60,7 @@ module mmap_module
         length = length * shape(i)
       enddo
 
-      map = c_mmap_fortran( trim(filename)//char(0), length, fd_, read_only, single_node)
+      map = c_mmap_fortran( trim(filename)//char(0), length, fd_, read_only_, single_node_)
       fd = fd_
   end subroutine
 

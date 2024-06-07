@@ -66,6 +66,10 @@ END_PROVIDER
    integer                        :: fd(2)
    logical                        :: delta_on_disk
 
+   PROVIDE nproc
+   PROVIDE nucl_coord ao_two_e_integral_schwartz
+   call set_multiple_levels_omp(.False.)
+
    call wall_time(wall0)
 
    ! Will be reallocated at the end
@@ -87,7 +91,7 @@ END_PROVIDER
 
      call resident_memory(mem0)
 
-     rank_max = min(ndim8,274877906944_8/1_8/ndim8)
+     rank_max = min(ndim8,(qp_max_mem*1024_8*1024_8*1024_8/8_8)/ndim8)
      call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
      call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
      ! Deleting the file while it is open makes the file invisible on the filesystem,
@@ -209,7 +213,7 @@ END_PROVIDER
              + np*memory_of_double(nq)
 
 !print *, 'mem = ', mem
-         if (mem > 300.d0) then ! 300GB max for Delta
+         if (mem > qp_max_mem/2) then
            s = s*2.d0
          else
            exit
@@ -231,9 +235,12 @@ END_PROVIDER
        enddo
 
        ! d., e.
-       mem = mem0                                &
+       mem = mem0                            &
              + memory_of_int(nq)             &! computed(nq)
              + np*memory_of_int(nq)          &! computed(nq)
+             + memory_of_double(np)          &! Delta_col(np)
+             + 7*memory_of_double(ndim8)     &! D, Lset, Dset, D_sorted, addr[1-3]
+             + np*memory_of_double(nq)       &! Delta(np,nq)
              + (np+nq)*memory_of_double(block_size) ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
        if (mem > qp_max_mem) then
