@@ -52,8 +52,8 @@ module mmap_module
 
       read_only_ = 0
       single_node_ = 0
-      if (read_only_) read_only_ = 1
-      if (single_node_) single_node_ = 1
+      if (read_only) read_only_ = 1
+      if (single_node) single_node_ = 1
 
       length = int(bytes,8)
       do i=1,size(shape)
