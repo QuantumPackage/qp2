@@ -98,7 +98,10 @@ double precision function get_two_e_integral(i,j,k,l,map)
   integer*8                      :: ii_8
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  integer                        :: kk
+
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky 
+
   if (use_banned_excitation) then
     if (banned_excitation(i,k)) then
       get_two_e_integral = 0.d0
@@ -109,22 +112,43 @@ double precision function get_two_e_integral(i,j,k,l,map)
       return
     endif
   endif
+
+
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
   ii = ior(ii, j-mo_integrals_cache_min)
   ii = ior(ii, i-mo_integrals_cache_min)
-  if (iand(ii, -128) /= 0) then
-    !DIR$ FORCEINLINE
-    call two_e_integrals_index(i,j,k,l,idx)
-    !DIR$ FORCEINLINE
-    call map_get(map,idx,tmp)
-    get_two_e_integral = dble(tmp)
+
+!  if (iand(ii, -128) /= 0) then
+  if (.True.) then
+    ! Integral is not in the cache
+
+    if  (do_mo_cholesky) then
+
+      get_two_e_integral = 0.d0
+      do kk=1,cholesky_mo_num
+        get_two_e_integral = get_two_e_integral + cholesky_mo_transp(kk,i,k) * cholesky_mo_transp(kk,j,l)
+      enddo
+
+    else
+      ! Integrals is in the map
+
+      !DIR$ FORCEINLINE
+      call two_e_integrals_index(i,j,k,l,idx)
+      !DIR$ FORCEINLINE
+      call map_get(map,idx,tmp)
+      get_two_e_integral = dble(tmp)
+    endif
+
   else
+    ! Integrals is in the cache
+
     ii_8 = int(l,8)-mo_integrals_cache_min_8
     ii_8 = ior( shiftl(ii_8,7), int(k,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(j,8)-mo_integrals_cache_min_8)
     ii_8 = ior( shiftl(ii_8,7), int(i,8)-mo_integrals_cache_min_8)
     get_two_e_integral = mo_integrals_cache(ii_8)
+
   endif
 end
 
