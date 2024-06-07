@@ -1,12 +1,3 @@
-!BEGIN_PROVIDER [ logical, no_vvvv_integrals  ]
-!  implicit none
-!  BEGIN_DOC
-! If `True`, computes all integrals except for the integrals having 3 or 4 virtual indices
-!  END_DOC
-!
-!  no_vvvv_integrals = .False.
-!END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, mo_coef_novirt, (ao_num,n_core_inact_act_orb) ]
  implicit none
  BEGIN_DOC

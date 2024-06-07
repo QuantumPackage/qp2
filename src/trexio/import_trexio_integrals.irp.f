@@ -41,6 +41,11 @@ subroutine run(f)
   integer         , allocatable :: Vi(:,:)
   double precision              :: s
 
+! TODO:
+! - If Cholesky AO in trexio file, read cholesky ao vectors
+! - If Cholesky MO in trexio file, read cholesky mo vectors
+! - If Cholesky MO not in trexio file, force do_cholesky_mo to False
+
   if (trexio_has_nucleus_repulsion(f) == TREXIO_SUCCESS) then
     rc = trexio_read_nucleus_repulsion(f, s)
     if (rc /= TREXIO_SUCCESS) then

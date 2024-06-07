@@ -1362,7 +1362,7 @@ END_PROVIDER
   double precision               :: get_two_e_integral
 
 
-  if (do_ao_cholesky) then
+  if (do_mo_cholesky) then
     double precision, allocatable :: buffer(:,:)
     allocate (buffer(cholesky_mo_num,mo_num))
     do k=1,cholesky_mo_num

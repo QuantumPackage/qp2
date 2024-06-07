@@ -76,7 +76,7 @@ END_PROVIDER
    deallocate(cholesky_ao)
 
    if (read_ao_cholesky) then
-     print *,  'Reading Cholesky vectors from disk...'
+     print *,  'Reading Cholesky AO vectors from disk...'
      iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'R')
      read(iunit) rank
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
@@ -486,7 +486,7 @@ END_PROVIDER
      cholesky_ao_num = rank
 
      if (write_ao_cholesky) then
-       print *,  'Writing Cholesky vectors to disk...'
+       print *,  'Writing Cholesky AO vectors to disk...'
        iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
        write(iunit) rank
        write(iunit) cholesky_ao
@@ -499,7 +499,7 @@ END_PROVIDER
    print *, 'Rank  : ', cholesky_ao_num, '(', 100.d0*dble(cholesky_ao_num)/dble(ao_num*ao_num), ' %)'
    print *,  ''
    call wall_time(wall1)
-   print*,'Time to provide AO cholesky vectors = ',wall1-wall0
+   print*,'Time to provide AO cholesky vectors = ',(wall1-wall0)/60.d0, ' min'
 
 END_PROVIDER
 
