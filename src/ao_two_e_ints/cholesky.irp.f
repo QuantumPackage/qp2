@@ -239,7 +239,7 @@ END_PROVIDER
              + memory_of_int(nq)             &! computed(nq)
              + np*memory_of_int(nq)          &! computed(nq)
              + memory_of_double(np)          &! Delta_col(np)
-             + 7*memory_of_double(ndim8)     &! D, Lset, Dset, D_sorted, addr[1-3]
+             + 7*memory_of_double8(ndim8)     &! D, Lset, Dset, D_sorted, addr[1-3]
              + np*memory_of_double(nq)       &! Delta(np,nq)
              + (np+nq)*memory_of_double(block_size) ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
