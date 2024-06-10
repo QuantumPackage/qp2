@@ -16,7 +16,6 @@
 ! - 1,2,3-index arrays are built from the map
 !
 ! TODO:
-! - build cache map from cholesky vectors
 ! - get_mo_integrals using cholesky
 ! - get_mo_integralss using cholesky
 ! - get_mo_integralss in PT2

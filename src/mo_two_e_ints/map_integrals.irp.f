@@ -59,29 +59,50 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0_8:128_8*128_8*128_8*12
  integer(key_kind)              :: idx
  real(integral_kind)            :: integral
  FREE ao_integrals_cache
- !$OMP PARALLEL DO PRIVATE (i,j,k,l,i4,j4,k4,l4,idx,ii,integral)
- do l=mo_integrals_cache_min_8,mo_integrals_cache_max_8
-   l4 = int(l,4)
-   do k=mo_integrals_cache_min_8,mo_integrals_cache_max_8
-     k4 = int(k,4)
-     do j=mo_integrals_cache_min_8,mo_integrals_cache_max_8
-       j4 = int(j,4)
-       do i=mo_integrals_cache_min_8,mo_integrals_cache_max_8
-         i4 = int(i,4)
-         !DIR$ FORCEINLINE
-         call two_e_integrals_index(i4,j4,k4,l4,idx)
-         !DIR$ FORCEINLINE
-         call map_get(mo_integrals_map,idx,integral)
+ if (do_mo_cholesky) then
+
+   call set_multiple_levels_omp(.False.)
+   !$OMP PARALLEL DO PRIVATE (k,l,ii)
+   do l=mo_integrals_cache_min_8,mo_integrals_cache_max_8
+     do k=mo_integrals_cache_min_8,mo_integrals_cache_max_8
          ii = l-mo_integrals_cache_min_8
          ii = ior( shiftl(ii,7), k-mo_integrals_cache_min_8)
-         ii = ior( shiftl(ii,7), j-mo_integrals_cache_min_8)
-         ii = ior( shiftl(ii,7), i-mo_integrals_cache_min_8)
-         mo_integrals_cache(ii) = integral
+         ii = shiftl(ii,14)
+         call dgemm('T','N', mo_integrals_cache_max-mo_integrals_cache_min+1, &
+                             mo_integrals_cache_max-mo_integrals_cache_min+1, &
+           cholesky_mo_num, 1.d0, &
+           cholesky_mo_transp(1,mo_integrals_cache_min,k), cholesky_mo_num, &
+           cholesky_mo_transp(1,mo_integrals_cache_min,l), cholesky_mo_num, 0.d0, &
+           mo_integrals_cache(ii), 128)
+     enddo
+   enddo
+   !$OMP END PARALLEL DO
+
+ else
+   !$OMP PARALLEL DO PRIVATE (i,j,k,l,i4,j4,k4,l4,idx,ii,integral)
+   do l=mo_integrals_cache_min_8,mo_integrals_cache_max_8
+     l4 = int(l,4)
+     do k=mo_integrals_cache_min_8,mo_integrals_cache_max_8
+       k4 = int(k,4)
+       do j=mo_integrals_cache_min_8,mo_integrals_cache_max_8
+         j4 = int(j,4)
+         do i=mo_integrals_cache_min_8,mo_integrals_cache_max_8
+           i4 = int(i,4)
+           !DIR$ FORCEINLINE
+           call two_e_integrals_index(i4,j4,k4,l4,idx)
+           !DIR$ FORCEINLINE
+           call map_get(mo_integrals_map,idx,integral)
+           ii = l-mo_integrals_cache_min_8
+           ii = ior( shiftl(ii,7), k-mo_integrals_cache_min_8)
+           ii = ior( shiftl(ii,7), j-mo_integrals_cache_min_8)
+           ii = ior( shiftl(ii,7), i-mo_integrals_cache_min_8)
+           mo_integrals_cache(ii) = integral
+         enddo
        enddo
      enddo
    enddo
- enddo
- !$OMP END PARALLEL DO
+   !$OMP END PARALLEL DO
+ endif
 
 END_PROVIDER
 
@@ -100,7 +121,7 @@ double precision function get_two_e_integral(i,j,k,l,map)
   real(integral_kind)            :: tmp
   integer                        :: kk
 
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky 
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky
 
   if (use_banned_excitation) then
     if (banned_excitation(i,k)) then
@@ -119,16 +140,13 @@ double precision function get_two_e_integral(i,j,k,l,map)
   ii = ior(ii, j-mo_integrals_cache_min)
   ii = ior(ii, i-mo_integrals_cache_min)
 
-!  if (iand(ii, -128) /= 0) then
-  if (.True.) then
+  if (iand(ii, -128) /= 0) then
     ! Integral is not in the cache
 
     if  (do_mo_cholesky) then
 
-      get_two_e_integral = 0.d0
-      do kk=1,cholesky_mo_num
-        get_two_e_integral = get_two_e_integral + cholesky_mo_transp(kk,i,k) * cholesky_mo_transp(kk,j,l)
-      enddo
+      double precision, external :: ddot
+      get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
 
     else
       ! Integrals is in the map
