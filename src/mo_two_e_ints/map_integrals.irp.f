@@ -262,9 +262,25 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   integer                        :: j
   real(integral_kind), allocatable :: tmp_val(:)
 
-  do j=1,sze
-    call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
-  enddo
+  if (do_mo_cholesky) then
+    call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+       cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+       cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+       out_array, sze)
+! integer :: i
+! do j=1,mo_num
+!  do i=1,mo_num
+!   double precision, external :: get_two_e_integral
+!   print *, i, j, real(out_array(i,j)), real(get_two_e_integral(i,j,k,l,map))
+!  enddo
+! enddo
+! print *, irp_here
+! pause
+  else
+    do j=1,sze
+      call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
+    enddo
+  endif
 end
 
 subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
@@ -303,9 +319,16 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
   double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  do i=1,sze
-    out_val(i) = get_two_e_integral(k,i,l,i,map)
-  enddo
+  if (do_mo_cholesky) then
+    call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
+       cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
+       cholesky_mo_transp(1,k,l), 1, 0.d0, &
+       out_val, 1)
+  else
+    do i=1,sze
+      out_val(i) = get_two_e_integral(k,i,l,i,map)
+    enddo
+  endif
 
 end
 

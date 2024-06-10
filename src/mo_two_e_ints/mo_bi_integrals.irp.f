@@ -65,9 +65,11 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   call cpu_time(cpu_1)
 
   if (do_mo_cholesky) then
-    call add_integrals_to_map_cholesky
+     PROVIDE cholesky_mo_transp
   else
-    if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
+    if (do_ao_cholesky) then
+      call add_integrals_to_map_cholesky
+    else if (dble(ao_num)**4 * 32.d-9 < dble(qp_max_mem)) then
       call four_idx_dgemm
     else
       call add_integrals_to_map(full_ijkl_bitmask_4)
