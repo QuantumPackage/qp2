@@ -200,128 +200,88 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
 
 
-  out_val(1:sze) = 0.d0
   if (banned_excitation(j,l)) then
-    return
+      out_val(1:sze) = 0.d0
+      return
   endif
 
-  ii0 = l-mo_integrals_cache_min
-  ii0 = ior(ii0, k-mo_integrals_cache_min)
-  ii0 = ior(ii0, j-mo_integrals_cache_min)
+  if (mo_integrals_cache_min > 1) then
 
-  integer :: ii0, ii0_8, ii_8
-  ii0_8 = l-mo_integrals_cache_min
-  ii0_8 = ior( shiftl(ii0_8,mo_integrals_cache_shift), k-mo_integrals_cache_min)
-  ii0_8 = ior( shiftl(ii0_8,mo_integrals_cache_shift), j-mo_integrals_cache_min)
+    if (do_mo_cholesky) then
 
-  q = min(j,l)
-  s = max(j,l)
-  q = q+shiftr(s*s-s,1)
+      call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
+         cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+         cholesky_mo_transp(1,j,l), 1, 0.d0, &
+         out_val, 1)
 
-  do i=1,sze
-    if (banned_excitation(i,k)) cycle
-    ii = ior(ii0, i-mo_integrals_cache_min)
-    if (iand(ii, -mo_integrals_cache_size) == 0) then
-      ii_8 = ior( shiftl(ii0_8,mo_integrals_cache_shift), i-mo_integrals_cache_min)
-      out_val(i) = mo_integrals_cache(ii_8)
     else
-      p = min(i,k)
-      r = max(i,k)
-      p = p+shiftr(r*r-r,1)
-      i1 = min(p,q)
-      i2 = max(p,q)
-      idx = i1+shiftr(i2*i2-i2,1)
-      !DIR$ FORCEINLINE
-      call map_get(map,idx,tmp)
-      out_val(i) = dble(tmp)
-    endif
-  enddo
 
-!  if (banned_excitation(j,l)) then
-!      out_val(1:sze) = 0.d0
-!      return
-!  endif
-!
-!  if (mo_integrals_cache_min > 1) then
-!
-!    if (do_mo_cholesky) then
-!
-!      call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
-!         cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-!         cholesky_mo_transp(1,j,l), 1, 0.d0, &
-!         out_val, 1)
-!
-!    else
-!
-!      q = min(j,l)
-!      s = max(j,l)
-!      q = q+shiftr(s*s-s,1)
-!
-!      do i=1,mo_integrals_cache_min-1
-!        if (banned_excitation(i,k)) then
-!          out_val(i) = 0.d0
-!          cycle
-!        endif
-!        p = min(i,k)
-!        r = max(i,k)
-!        p = p+shiftr(r*r-r,1)
-!        i1 = min(p,q)
-!        i2 = max(p,q)
-!        idx = i1+shiftr(i2*i2-i2,1)
-!        !DIR$ FORCEINLINE
-!        call map_get(map,idx,tmp)
-!        out_val(i) = dble(tmp)
-!      enddo
-!
-!    endif
-!
-!  endif
-!
-!
-!  ii = l-mo_integrals_cache_min
-!  ii = ior( shiftl(ii, mo_integrals_cache_shift), k-mo_integrals_cache_min)
-!  ii = ior( shiftl(ii, mo_integrals_cache_shift), j-mo_integrals_cache_min)
-!  ii = shiftl(ii, mo_integrals_cache_shift)
-!  do i=mo_integrals_cache_min, mo_integrals_cache_max
-!    ii = ii+1
-!    out_val(i) = mo_integrals_cache(ii)
-!  enddo
-!
-!
-!  if (mo_integrals_cache_max < mo_num) then
-!
-!    if (do_mo_cholesky) then
-!
-!      call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
-!         cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
-!         cholesky_mo_transp(1,j,l), 1, 0.d0, &
-!         out_val(mo_integrals_cache_max+1), 1)
-!
-!    else
-!
-!      q = min(j,l)
-!      s = max(j,l)
-!      q = q+shiftr(s*s-s,1)
-!
-!      do i=mo_integrals_cache_max+1,mo_num
-!        if (banned_excitation(i,k)) then
-!          out_val(i) = 0.d0
-!          cycle
-!        endif
-!        p = min(i,k)
-!        r = max(i,k)
-!        p = p+shiftr(r*r-r,1)
-!        i1 = min(p,q)
-!        i2 = max(p,q)
-!        idx = i1+shiftr(i2*i2-i2,1)
-!        !DIR$ FORCEINLINE
-!        call map_get(map,idx,tmp)
-!        out_val(i) = dble(tmp)
-!      enddo
-!
-!    endif
-!
-!  endif
+      q = min(j,l)
+      s = max(j,l)
+      q = q+shiftr(s*s-s,1)
+
+      do i=1,mo_integrals_cache_min-1
+        if (banned_excitation(i,k)) then
+          out_val(i) = 0.d0
+          cycle
+        endif
+        p = min(i,k)
+        r = max(i,k)
+        p = p+shiftr(r*r-r,1)
+        i1 = min(p,q)
+        i2 = max(p,q)
+        idx = i1+shiftr(i2*i2-i2,1)
+        !DIR$ FORCEINLINE
+        call map_get(map,idx,tmp)
+        out_val(i) = dble(tmp)
+      enddo
+
+    endif
+
+  endif
+
+
+  ii = l-mo_integrals_cache_min
+  ii = ior( shiftl(ii, mo_integrals_cache_shift), k-mo_integrals_cache_min)
+  ii = ior( shiftl(ii, mo_integrals_cache_shift), j-mo_integrals_cache_min)
+  ii = shiftl(ii, mo_integrals_cache_shift)
+  out_val(mo_integrals_cache_min:mo_integrals_cache_max) = &
+     mo_integrals_cache(ii:ii+mo_integrals_cache_max-mo_integrals_cache_min)
+
+  if (mo_integrals_cache_max < mo_num) then
+
+    if (do_mo_cholesky) then
+
+      call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
+         cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
+         cholesky_mo_transp(1,j,l), 1, 0.d0, &
+         out_val(mo_integrals_cache_max+1), 1)
+
+    else
+
+      q = min(j,l)
+      s = max(j,l)
+      q = q+shiftr(s*s-s,1)
+
+      do i=mo_integrals_cache_max+1,mo_num
+        if (banned_excitation(i,k)) then
+          out_val(i) = 0.d0
+          cycle
+        endif
+        p = min(i,k)
+        r = max(i,k)
+        p = p+shiftr(r*r-r,1)
+        i1 = min(p,q)
+        i2 = max(p,q)
+        idx = i1+shiftr(i2*i2-i2,1)
+        !DIR$ FORCEINLINE
+        call map_get(map,idx,tmp)
+        out_val(i) = dble(tmp)
+      enddo
+
+    endif
+
+  endif
 
 end
 
