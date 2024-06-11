@@ -15,10 +15,6 @@
 ! - All integrals are stored in the map or cache map
 ! - 1,2,3-index arrays are built from the map
 !
-! TODO:
-! - get_mo_integrals using cholesky
-! - get_mo_integralss using cholesky
-! - get_mo_integralss in PT2
 
 subroutine mo_two_e_integrals_index(i,j,k,l,i1)
   use map_module

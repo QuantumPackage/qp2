@@ -4,7 +4,7 @@ BEGIN_PROVIDER [ logical, do_mo_cholesky ]
  ! If True, use Cholesky vectors for MO integrals
  END_DOC
  do_mo_cholesky = do_ao_cholesky
- do_mo_cholesky = .False.
+! do_mo_cholesky = .False.
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, cholesky_mo_num ]

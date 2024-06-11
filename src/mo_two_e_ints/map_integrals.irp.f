@@ -48,6 +48,8 @@ end
    mo_integrals_cache_shift = 7  ! 7 = log(128). Max 7
  endif
 
+!mo_integrals_cache_shift = 2  ! 5 = log(32).
+
  mo_integrals_cache_size  = 2**mo_integrals_cache_shift
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
@@ -112,6 +114,24 @@ BEGIN_PROVIDER [ double precision, mo_integrals_cache, (0:mo_integrals_cache_siz
 END_PROVIDER
 
 
+double precision function get_two_e_integral_cache(i,j,k,l)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Returns one integral <ij|kl> in the MO basis taken from the cache
+  END_DOC
+  integer, intent(in)            :: i,j,k,l
+  integer                        :: ii
+
+  ii = l-mo_integrals_cache_min
+  ii = ior( shiftl(ii,mo_integrals_cache_shift), k-mo_integrals_cache_min)
+  ii = ior( shiftl(ii,mo_integrals_cache_shift), j-mo_integrals_cache_min)
+  ii = ior( shiftl(ii,mo_integrals_cache_shift), i-mo_integrals_cache_min)
+  get_two_e_integral_cache = mo_integrals_cache(ii)
+
+end
+
+
 double precision function get_two_e_integral(i,j,k,l,map)
   use map_module
   implicit none
@@ -123,7 +143,6 @@ double precision function get_two_e_integral(i,j,k,l,map)
   integer                        :: ii
   type(map_type), intent(inout)  :: map
   real(integral_kind)            :: tmp
-  integer                        :: kk
 
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache do_mo_cholesky
 
@@ -145,13 +164,9 @@ double precision function get_two_e_integral(i,j,k,l,map)
   ii = ior(ii, i-mo_integrals_cache_min)
 
   if (iand(ii, -mo_integrals_cache_size) == 0) then
-    ! Integrals is in the cache
 
-    ii = l-mo_integrals_cache_min
-    ii = ior( shiftl(ii,mo_integrals_cache_shift), k-mo_integrals_cache_min)
-    ii = ior( shiftl(ii,mo_integrals_cache_shift), j-mo_integrals_cache_min)
-    ii = ior( shiftl(ii,mo_integrals_cache_shift), i-mo_integrals_cache_min)
-    get_two_e_integral = mo_integrals_cache(ii)
+    double precision, external :: get_two_e_integral_cache
+    get_two_e_integral = get_two_e_integral_cache(i,j,k,l)
 
   else
 
@@ -199,7 +214,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   double precision, intent(out)  :: out_val(sze)
   type(map_type), intent(inout)  :: map
   integer                        :: i
-  double precision, external :: get_two_e_integral
 
   integer                        :: ii
   real(integral_kind)            :: tmp
@@ -256,13 +270,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
     endif
 
-
-    ii = l-mo_integrals_cache_min
-    ii = ior( shiftl(ii, mo_integrals_cache_shift), k-mo_integrals_cache_min)
-    ii = ior( shiftl(ii, mo_integrals_cache_shift), j-mo_integrals_cache_min)
-    ii = shiftl(ii, mo_integrals_cache_shift)
-    out_val(mo_integrals_cache_min:mo_integrals_cache_max) = &
-       mo_integrals_cache(ii:ii+mo_integrals_cache_max-mo_integrals_cache_min)
+    call get_mo_two_e_integrals_cache(j,k,l,sze,out_val)
 
     if (mo_integrals_cache_max < mo_num) then
 
@@ -333,6 +341,26 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
 end
 
+subroutine get_mo_two_e_integrals_cache(j,k,l,sze,out_val)
+  use map_module
+  implicit none
+  BEGIN_DOC
+  ! Returns multiple integrals <ij|kl> in the MO basis, all
+  ! i for j,k,l fixed, all integrals from the cache
+  END_DOC
+  integer, intent(in)            :: j,k,l, sze
+  double precision, intent(out)  :: out_val(sze)
+  integer                        :: ii
+
+  ii = l-mo_integrals_cache_min
+  ii = ior( shiftl(ii, mo_integrals_cache_shift), k-mo_integrals_cache_min)
+  ii = ior( shiftl(ii, mo_integrals_cache_shift), j-mo_integrals_cache_min)
+  ii = shiftl(ii, mo_integrals_cache_shift)
+  out_val(mo_integrals_cache_min:mo_integrals_cache_max) = &
+       mo_integrals_cache(ii:ii+mo_integrals_cache_max-mo_integrals_cache_min)
+
+end
+
 subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   use map_module
   implicit none
@@ -347,16 +375,32 @@ subroutine get_mo_two_e_integrals_ij(k,l,sze,out_array,map)
   integer                        :: j
   real(integral_kind), allocatable :: tmp_val(:)
 
-  if (do_mo_cholesky) then
-    call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
-       cholesky_mo_transp(1,1,k), cholesky_mo_num, &
-       cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
-       out_array, sze)
+  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
+
+    if (do_mo_cholesky) then
+
+      call dgemm('T', 'N', mo_num, mo_num, cholesky_mo_num, 1.d0, &
+         cholesky_mo_transp(1,1,k), cholesky_mo_num, &
+         cholesky_mo_transp(1,1,l), cholesky_mo_num, 0.d0, &
+         out_array, sze)
+
+    else
+
+      do j=1,sze
+        call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
+      enddo
+
+    endif
+
   else
+
+    double precision, external :: get_two_e_integral_cache
     do j=1,sze
-      call get_mo_two_e_integrals(j,k,l,sze,out_array(1,j),map)
+      call get_mo_two_e_integrals_cache(j,k,l,sze,out_array(1,j))
     enddo
+
   endif
+
 end
 
 subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
@@ -373,17 +417,28 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
   integer                        :: j
   PROVIDE mo_two_e_integrals_in_map
 
-  if (do_mo_cholesky) then
+  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
-    call dgemv('T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
-       cholesky_mo_transp(1,1,1), cholesky_mo_num, &
-       cholesky_mo_transp(1,k,l), 1, 0.d0, &
-       out_array, 1)
+    if (do_mo_cholesky) then
+
+      call dgemv('T', cholesky_mo_num, mo_num*mo_num, 1.d0, &
+         cholesky_mo_transp(1,1,1), cholesky_mo_num, &
+         cholesky_mo_transp(1,k,l), 1, 0.d0, &
+         out_array, 1)
+
+    else
+
+      do j=1,sze
+        call get_mo_two_e_integrals(k,j,l,sze,out_array(1,j),map)
+      enddo
+
+    endif
 
   else
 
+    double precision, external :: get_two_e_integral_cache
     do j=1,sze
-      call get_mo_two_e_integrals(k,j,l,sze,out_array(1,j),map)
+      call get_mo_two_e_integrals_cache(k,j,l,sze,out_array(1,j))
     enddo
 
   endif
@@ -406,20 +461,32 @@ subroutine get_mo_two_e_integrals_coulomb_ii(k,l,sze,out_val,map)
   double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  if (do_mo_cholesky) then
+  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
 
-    call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
-       cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
-       cholesky_mo_transp(1,k,l), 1, 0.d0, &
-       out_val, 1)
+    if (do_mo_cholesky) then
+
+      call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
+         cholesky_mo_transp(1,1,1), cholesky_mo_num*(mo_num+1), &
+         cholesky_mo_transp(1,k,l), 1, 0.d0, &
+         out_val, 1)
+
+    else
+
+      do i=1,sze
+        out_val(i) = get_two_e_integral(i,k,i,l,map)
+      enddo
+
+    endif
 
   else
 
+    double precision, external :: get_two_e_integral_cache
     do i=1,sze
-      out_val(i) = get_two_e_integral(k,i,l,i,map)
+      out_val(i) = get_two_e_integral_cache(i,k,i,l)
     enddo
 
   endif
+
 
 end
 
@@ -438,9 +505,33 @@ subroutine get_mo_two_e_integrals_exch_ii(k,l,sze,out_val,map)
   double precision, external     :: get_two_e_integral
   PROVIDE mo_two_e_integrals_in_map
 
-  do i=1,sze
-    out_val(i) = get_two_e_integral(k,i,i,l,map)
-  enddo
+  if ( (mo_integrals_cache_min>1).or.(mo_integrals_cache_max<mo_num) ) then
+
+    if (do_mo_cholesky) then
+
+      double precision, external :: ddot
+      do i=1,sze
+        out_val(i) = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, &
+                                           cholesky_mo_transp(1,i,l), 1)
+      enddo
+
+    else
+
+      do i=1,sze
+        out_val(i) = get_two_e_integral(i,i,k,l,map)
+      enddo
+
+    endif
+
+  else
+
+    double precision, external :: get_two_e_integral_cache
+    do i=1,sze
+      out_val(i) = get_two_e_integral_cache(i,i,k,l)
+    enddo
+
+  endif
+
 
 end
 
