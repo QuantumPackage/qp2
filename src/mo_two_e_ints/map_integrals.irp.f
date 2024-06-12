@@ -48,7 +48,7 @@ end
    mo_integrals_cache_shift = 7  ! 7 = log(128). Max 7
  endif
 
-!mo_integrals_cache_shift = 2  ! 5 = log(32).
+mo_integrals_cache_shift = 2  ! 5 = log(32).
 
  mo_integrals_cache_size  = 2**mo_integrals_cache_shift
 
@@ -176,6 +176,8 @@ double precision function get_two_e_integral(i,j,k,l,map)
 
       double precision, external :: ddot
       get_two_e_integral = ddot(cholesky_mo_num, cholesky_mo_transp(1,i,k), 1, cholesky_mo_transp(1,j,l), 1)
+!       double precision, external :: get_from_mo_cholesky_cache
+!       get_two_e_integral = get_from_mo_cholesky_cache(i,j,k,l,.False.)
 
     else
 
@@ -227,6 +229,11 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
       out_val(1:sze) = 0.d0
       return
   endif
+!
+!  if (do_mo_cholesky) then
+!    call get_from_mo_cholesky_caches(j,k,l,out_val)
+!    return
+!  endif
 
   ii = l-mo_integrals_cache_min
   ii = ior(ii, k-mo_integrals_cache_min)
@@ -239,6 +246,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       if (do_mo_cholesky) then
 
+        !TODO: here
         call dgemv('T', cholesky_mo_num, mo_integrals_cache_min-1, 1.d0, &
            cholesky_mo_transp(1,1,k), cholesky_mo_num, &
            cholesky_mo_transp(1,j,l), 1, 0.d0, &
@@ -276,6 +284,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
       if (do_mo_cholesky) then
 
+        !TODO: here
         call dgemv('T', cholesky_mo_num, mo_num-mo_integrals_cache_max, 1.d0, &
            cholesky_mo_transp(1,mo_integrals_cache_max+1,k), cholesky_mo_num, &
            cholesky_mo_transp(1,j,l), 1, 0.d0, &
@@ -311,6 +320,7 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
 
     if (do_mo_cholesky) then
 
+      !TODO: here
       call dgemv('T', cholesky_mo_num, mo_num, 1.d0, &
            cholesky_mo_transp(1,1,k), cholesky_mo_num, &
            cholesky_mo_transp(1,j,l), 1, 0.d0, &
@@ -425,6 +435,10 @@ subroutine get_mo_two_e_integrals_i1j1(k,l,sze,out_array,map)
          cholesky_mo_transp(1,1,1), cholesky_mo_num, &
          cholesky_mo_transp(1,k,l), 1, 0.d0, &
          out_array, 1)
+!
+!      do j=1,sze
+!        call get_from_mo_cholesky_caches(k,j,l,out_array(1,j))
+!      enddo
 
     else
 
