@@ -41,7 +41,7 @@ END_PROVIDER
    integer*8, allocatable         :: Lset(:), Dset(:), addr3(:)
    logical, allocatable           :: computed(:)
 
-   integer                        :: i,j,k,m,p,q, dj, p2, q2
+   integer                        :: i,j,k,m,p,q, dj, p2, q2, ii, jj
    integer*8                      :: i8, j8, p8, qj8, rank_max, np8
    integer                        :: N, np, nq
 
@@ -65,6 +65,8 @@ END_PROVIDER
    type(c_ptr)                    :: c_pointer(2)
    integer                        :: fd(2)
    logical                        :: delta_on_disk
+   integer                        :: dgemm_block_size, nqq
+   double precision, allocatable  :: dgemm_buffer1(:,:), dgemm_buffer2(:,:)
 
    PROVIDE nproc
    PROVIDE nucl_coord ao_two_e_integral_schwartz
@@ -300,17 +302,58 @@ END_PROVIDER
        !$OMP BARRIER
        !$OMP END PARALLEL
 
+       PROVIDE nproc
        if (N>0) then
-           call dgemm('N','T', np, nq, N, -1.d0,                       &
-               Ltmp_p, np, Ltmp_q, nq, 0.d0, Delta, np)
-       else
-         !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j) SCHEDULE(static,1)
-         do q=1,nq
-           do j=1,np
-             Delta(j,q) = 0.d0
+
+         if (delta_on_disk) then
+           ! Blocking improves I/O performance
+
+           dgemm_block_size = nproc*4
+
+           allocate (dgemm_buffer1(np,dgemm_block_size))
+           allocate (dgemm_buffer2(dgemm_block_size,N))
+
+           do jj=1,nq,dgemm_block_size
+
+             nqq = min(nq, jj+dgemm_block_size-1) - jj + 1
+
+             !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,ii)
+             do ii=1,N
+               do q=jj,jj+nqq-1
+                 dgemm_buffer2(q-jj+1,ii) = Ltmp_q(q,ii)
+               enddo
+             enddo
+             !$OMP END PARALLEL DO
+
+             call dgemm('N', 'T', np, nqq, N, 1.d0,                       &
+                   Ltmp_p, np, dgemm_buffer2, dgemm_block_size, 0.d0, dgemm_buffer1, np)
+
+             !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+             do q=jj,jj+nqq-1
+               Delta(:,q) = - dgemm_buffer1(:, q-jj+1)
+             enddo
+             !$OMP END PARALLEL DO
+
            enddo
+
+           deallocate(dgemm_buffer1, dgemm_buffer2)
+
+         else
+
+           call dgemm('N', 'T', np, nq, N, -1.d0,                       &
+                  Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
+
+         endif
+
+
+       else
+
+         !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
+         do q=1,nq
+           Delta(:,q) = 0.d0
          enddo
          !$OMP END PARALLEL DO
+
        endif
 
        ! f.
@@ -329,9 +372,46 @@ END_PROVIDER
          rank = N+j
 
          if (iblock == block_size) then
-           call dgemm('N','T',np,nq,block_size,-1.d0,                &
+
+           if (delta_on_disk) then
+             ! Blocking improves I/O performance
+
+             dgemm_block_size = nproc*4
+             allocate (dgemm_buffer1(np,dgemm_block_size))
+             allocate (dgemm_buffer2(dgemm_block_size,block_size))
+
+             do jj=1,nq,dgemm_block_size
+               nqq = min(nq, jj+dgemm_block_size-1) - jj + 1
+
+               !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,ii)
+               do ii=1,block_size
+                 do q=jj,jj+nqq-1
+                   dgemm_buffer2(q-jj+1,ii) = Ltmp_q(q,ii)
+                 enddo
+               enddo
+               !$OMP END PARALLEL DO
+
+               call dgemm('N', 'T', np, nqq, block_size, 1.d0,                       &
+                     Ltmp_p(1,1), np, dgemm_buffer2, dgemm_block_size, 0.d0, dgemm_buffer1, np)
+
+               !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+               do q=jj,jj+nqq-1
+                 Delta(:,q) = Delta(:,q) - dgemm_buffer1(:, q-jj+1)
+               enddo
+               !$OMP END PARALLEL DO
+
+             enddo
+             deallocate(dgemm_buffer1, dgemm_buffer2)
+
+           else
+
+             call dgemm('N','T',np,nq,block_size,-1.d0,                &
                  Ltmp_p, np, Ltmp_q, nq, 1.d0, Delta, np)
+
+           endif
+
            iblock = 0
+
          endif
 
          ! ii.
