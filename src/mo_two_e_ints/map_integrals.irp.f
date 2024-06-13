@@ -192,19 +192,6 @@ double precision function get_two_e_integral(i,j,k,l,map)
 end
 
 
-double precision function mo_two_e_integral(i,j,k,l)
-  implicit none
-  BEGIN_DOC
-  ! Returns one integral <ij|kl> in the MO basis
-  END_DOC
-  integer, intent(in)            :: i,j,k,l
-  double precision               :: get_two_e_integral
-  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
-  !DIR$ FORCEINLINE
-  mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
-  return
-end
-
 subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   use map_module
   implicit none
@@ -222,8 +209,6 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   integer(key_kind)              :: i1, idx
   integer(key_kind)              :: p,q,r,s,i2
   PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
-
-
 
   if (banned_excitation(j,l)) then
       out_val(1:sze) = 0.d0
@@ -350,6 +335,20 @@ subroutine get_mo_two_e_integrals(j,k,l,sze,out_val,map)
   endif
 
 end
+
+double precision function mo_two_e_integral(i,j,k,l)
+  implicit none
+  BEGIN_DOC
+  ! Returns one integral <ij|kl> in the MO basis
+  END_DOC
+  integer, intent(in)            :: i,j,k,l
+  double precision               :: get_two_e_integral
+  PROVIDE mo_two_e_integrals_in_map mo_integrals_cache
+  !DIR$ FORCEINLINE
+  mo_two_e_integral = get_two_e_integral(i,j,k,l,mo_integrals_map)
+  return
+end
+
 
 subroutine get_mo_two_e_integrals_cache(j,k,l,sze,out_val)
   use map_module
