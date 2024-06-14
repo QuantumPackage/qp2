@@ -31,12 +31,12 @@ END_PROVIDER
    integer*8                      :: ndim8
    integer                        :: rank
    double precision               :: tau, tau2
-   double precision, pointer      :: L(:,:), Delta(:,:)
+   double precision, pointer      :: L(:,:)
 
    double precision               :: s
    double precision               :: dscale, dscale_tmp
 
-   double precision, allocatable  :: D(:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:), Delta_col(:)
+   double precision, allocatable  :: D(:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:), Delta_col(:), Delta(:,:)
    integer, allocatable           :: addr1(:), addr2(:)
    integer*8, allocatable         :: Lset(:), Dset(:), addr3(:)
    logical, allocatable           :: computed(:)
@@ -66,7 +66,7 @@ END_PROVIDER
    integer                        :: fd(2)
    logical                        :: delta_on_disk
    integer                        :: dgemm_block_size, nqq
-   double precision, allocatable  :: dgemm_buffer1(:,:), dgemm_buffer2(:,:)
+   double precision, allocatable  :: dgemm_buffer1(:,:), dgemm_buffer2(:,:), dgemm_buffer3(:,:)
 
    PROVIDE nproc
    PROVIDE nucl_coord ao_two_e_integral_schwartz
@@ -230,7 +230,7 @@ END_PROVIDER
            stop -1
          endif
 
-         if (s > 0.1d0) then
+         if (s > 0.3d0) then
            exit
          endif
 
@@ -245,13 +245,16 @@ END_PROVIDER
              + np*memory_of_double(nq)       &! Delta(np,nq)
              + (np+nq)*memory_of_double(block_size) ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
-       if (mem > qp_max_mem) then
-         call mmap(trim(ezfio_work_dir)//'cholesky_delta', (/ np*1_8, nq*1_8 /), 8, fd(2), .False., .True., c_pointer(2))
-         call c_f_pointer(c_pointer(2), Delta, (/ np, nq /))
-         ! Deleting the file while it is open makes the file invisible on the filesystem,
-         ! and automatically deleted, even if the program crashes
+       if (1.1*mem > qp_max_mem) then
+!         call mmap(trim(ezfio_work_dir)//'cholesky_delta', (/ np*1_8, nq*1_8 /), 8, fd(2), .False., .True., c_pointer(2))
+!         call c_f_pointer(c_pointer(2), Delta, (/ np, nq /))
+
+!         ! Deleting the file while it is open makes the file invisible on the filesystem,
+!         ! and automatically deleted, even if the program crashes
          iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_delta', 'R')
          close(iunit,status='delete')
+         open(unit=iunit, access='DIRECT', form='UNFORMATTED', RECL=(np+1)*8, &
+            ASYNCHRONOUS='YES', file=trim(ezfio_work_dir)//'cholesky_delta')
          delta_on_disk = .True.
        else
          allocate(Delta(np,nq))
@@ -303,15 +306,18 @@ END_PROVIDER
        !$OMP END PARALLEL
 
        PROVIDE nproc
-       if (N>0) then
 
-         if (delta_on_disk) then
+       if (delta_on_disk) then
+
+         dgemm_block_size = nproc*4
+
+         allocate (dgemm_buffer1(np,dgemm_block_size))
+         allocate (dgemm_buffer3(np,dgemm_block_size))
+         allocate (dgemm_buffer2(dgemm_block_size,N))
+
+         if (N>0) then
            ! Blocking improves I/O performance
 
-           dgemm_block_size = nproc*4
-
-           allocate (dgemm_buffer1(np,dgemm_block_size))
-           allocate (dgemm_buffer2(dgemm_block_size,N))
 
            do jj=1,nq,dgemm_block_size
 
@@ -325,34 +331,55 @@ END_PROVIDER
              enddo
              !$OMP END PARALLEL DO
 
-             call dgemm('N', 'T', np, nqq, N, 1.d0,                       &
+print *, np, nq, jj, nqq, N
+             call dgemm('N', 'T', np, nqq, N, -1.d0,                       &
                    Ltmp_p, np, dgemm_buffer2, dgemm_block_size, 0.d0, dgemm_buffer1, np)
 
-             !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+             wait(iunit)
+             dgemm_buffer3(:,:) = dgemm_buffer1(:,:)
+!             !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
              do q=jj,jj+nqq-1
-               Delta(:,q) = - dgemm_buffer1(:, q-jj+1)
+               write(iunit, ASYNCHRONOUS='YES', rec=q) dgemm_buffer3(1:np, q-jj+1)
              enddo
-             !$OMP END PARALLEL DO
+!             !$OMP END PARALLEL DO
 
            enddo
-
-           deallocate(dgemm_buffer1, dgemm_buffer2)
+print *, 'ok1'
 
          else
 
-           call dgemm('N', 'T', np, nq, N, -1.d0,                       &
-                  Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
+
+           dgemm_buffer1(1:np,1) = 0.d0
+
+!           !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+           do q=1,nq
+             write(iunit, ASYNCHRONOUS='YES', rec=q) dgemm_buffer1(1:np, 1)
+           enddo
+!           !$OMP END PARALLEL DO
 
          endif
+
+         deallocate(dgemm_buffer1, dgemm_buffer2)
+         if (delta_on_disk) wait(iunit)
+         deallocate(dgemm_buffer3)
 
 
        else
 
-         !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
-         do q=1,nq
-           Delta(:,q) = 0.d0
-         enddo
-         !$OMP END PARALLEL DO
+         if (N>0) then
+
+           call dgemm('N', 'T', np, nq, N, -1.d0,                       &
+                  Ltmp_p(1,1), np, Ltmp_q(1,1), nq, 0.d0, Delta, np)
+
+         else
+
+           !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,j)
+           do q=1,nq
+             Delta(:,q) = 0.d0
+           enddo
+           !$OMP END PARALLEL DO
+
+         endif
 
        endif
 
@@ -383,25 +410,40 @@ END_PROVIDER
              do jj=1,nq,dgemm_block_size
                nqq = min(nq, jj+dgemm_block_size-1) - jj + 1
 
-               !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q,ii)
+               !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(q,ii)
+               !$OMP DO
                do ii=1,block_size
                  do q=jj,jj+nqq-1
                    dgemm_buffer2(q-jj+1,ii) = Ltmp_q(q,ii)
                  enddo
                enddo
-               !$OMP END PARALLEL DO
+               !$OMP END DO
+               !$OMP END PARALLEL
 
-               call dgemm('N', 'T', np, nqq, block_size, 1.d0,                       &
-                     Ltmp_p(1,1), np, dgemm_buffer2, dgemm_block_size, 0.d0, dgemm_buffer1, np)
-
-               !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+!               !$OMP DO
                do q=jj,jj+nqq-1
-                 Delta(:,q) = Delta(:,q) - dgemm_buffer1(:, q-jj+1)
+                 read(iunit, rec=q) dgemm_buffer1(1:np, q-jj+1)
                enddo
-               !$OMP END PARALLEL DO
+!               !$OMP END DO
+
+print *, np, nq, jj, nqq, block_size
+               call dgemm('N', 'T', np, nqq, block_size, -1.d0,                       &
+                     Ltmp_p(1,1), np, dgemm_buffer2, dgemm_block_size, 1.d0, dgemm_buffer1, np)
+
+               wait(iunit)
+               dgemm_buffer3 = dgemm_buffer1
+
+!               !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(q)
+               do q=jj,jj+nqq-1
+                 write(iunit, ASYNCHRONOUS='YES', rec=q) dgemm_buffer3(:, q-jj+1)
+               enddo
+!               !$OMP END PARALLEL DO
 
              enddo
+print *, 'ok'
              deallocate(dgemm_buffer1, dgemm_buffer2)
+             wait(iunit)
+             deallocate(dgemm_buffer3)
 
            else
 
@@ -427,11 +469,20 @@ END_PROVIDER
          enddo
 
          iblock = iblock+1
-         !$OMP PARALLEL DO PRIVATE(p)
-         do p=1,np
-           Ltmp_p(p,iblock) = Delta(p,dj)
-         enddo
-         !$OMP END PARALLEL DO
+
+         if (delta_on_disk) then
+
+           read(iunit,rec=dj) Ltmp_p(1:np,iblock)
+
+         else
+
+           !$OMP PARALLEL DO PRIVATE(p)
+           do p=1,np
+             Ltmp_p(p,iblock) = Delta(p,dj)
+           enddo
+           !$OMP END PARALLEL DO
+
+         endif
 
          if (.not.computed(dj)) then
            m = dj
@@ -463,12 +514,26 @@ END_PROVIDER
                !$OMP END PARALLEL DO
            endif
 
-           !$OMP PARALLEL DO PRIVATE(p)
-           do p=1,np
-             Ltmp_p(p,iblock) =  Ltmp_p(p,iblock) + Delta_col(p)
-             Delta(p,dj) =  Ltmp_p(p,iblock)
-           enddo
-           !$OMP END PARALLEL DO
+           if (delta_on_disk) then
+
+             !$OMP PARALLEL DO PRIVATE(p)
+             do p=1,np
+               Ltmp_p(p,iblock) =  Ltmp_p(p,iblock) + Delta_col(p)
+             enddo
+             !$OMP END PARALLEL DO
+
+             write(iunit, ASYNCHRONOUS='YES', rec=dj) Ltmp_p(1:np,iblock)
+
+           else
+
+             !$OMP PARALLEL DO PRIVATE(p)
+             do p=1,np
+               Ltmp_p(p,iblock) =  Ltmp_p(p,iblock) + Delta_col(p)
+               Delta(p,dj) =  Ltmp_p(p,iblock)
+             enddo
+             !$OMP END PARALLEL DO
+
+           endif
 
            computed(dj) = .True.
          endif
@@ -512,7 +577,7 @@ END_PROVIDER
        deallocate(Ltmp_q)
        deallocate(computed)
        if (delta_on_disk) then
-         call munmap( (/ np*1_8, nq*1_8 /), 8, fd(2), c_pointer(2) )
+         close(iunit, status='delete')
        else
          deallocate(Delta)
        endif
