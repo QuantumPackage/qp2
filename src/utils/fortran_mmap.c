@@ -49,10 +49,13 @@ void* mmap_fortran(char* filename, size_t bytes, int* file_descr, int read_only,
         }
 
         if (single_node == 1) {
+          map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+/*
           map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_NONBLOCK | MAP_NORESERVE, fd, 0);
           if (map == MAP_FAILED) {
              map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
           }
+*/
         } else {
           map = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         }

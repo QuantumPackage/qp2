@@ -31,12 +31,11 @@ END_PROVIDER
    integer*8                      :: ndim8
    integer                        :: rank
    double precision               :: tau, tau2
-   double precision, pointer      :: L(:,:), Delta(:,:)
+   double precision, pointer      :: L(:,:)
 
    double precision               :: s
-   double precision               :: dscale, dscale_tmp
 
-   double precision, allocatable  :: D(:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:), Delta_col(:)
+   double precision, allocatable  :: D(:), Ltmp_p(:,:), Ltmp_q(:,:), D_sorted(:), Delta_col(:), Delta(:,:)
    integer, allocatable           :: addr1(:), addr2(:)
    integer*8, allocatable         :: Lset(:), Dset(:)
    logical, allocatable           :: computed(:)
@@ -102,7 +101,7 @@ END_PROVIDER
      rank = 0
 
      allocate( D(ndim8), Lset(ndim8), Dset(ndim8), D_sorted(ndim8))
-     allocate( addr1(ndim8), addr2(ndim8), Delta_col(ndim8) )
+     allocate( addr1(ndim8), addr2(ndim8), Delta_col(ndim8), computed(ndim8) )
 
      call resident_memory(mem0)
 
@@ -149,11 +148,9 @@ END_PROVIDER
      Dmax = D_sorted(1)
 
      ! 2.
-     dscale = 1.d0
-     dscale_tmp = dscale*dscale*Dmax
      np8=0_8
      do p8=1,ndim8
-       if ( dscale_tmp*D(p8) >= tau2 ) then
+       if ( Dmax*D(p8) >= tau2 ) then
          np8 = np8+1_8
          Lset(np8) = p8
        endif
@@ -203,16 +200,23 @@ END_PROVIDER
 
          mem = mem0                                 &
              + np*memory_of_double(nq)              & ! Delta(np,nq)
-             + (np+nq)*memory_of_double(block_size) & ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
-             + memory_of_int(nq)                      ! computed(nq)
+             + (np+nq)*memory_of_double(block_size)   ! Ltmp_p(np,block_size) + Ltmp_q(nq,block_size)
 
          if (mem > qp_max_mem*0.5d0) then
-           nq = nq/2
+           Dmin = D_sorted(nq/2)
+           do ii=nq/2,np-1
+             if (D_sorted(ii) < Dmin) then
+               nq = ii
+               exit
+             endif
+           enddo
          else
            exit
          endif
 
        enddo
+!call print_memory_usage
+!print *, 'np, nq, Predicted memory: ', np, nq, mem
 
        if (nq <= 0) then
          print *, nq
@@ -247,8 +251,7 @@ END_PROVIDER
        endif
 
 
-       allocate(computed(nq))
-       computed(:) = .False.
+       computed(1:nq) = .False.
 
 
        !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(k,p,q)
@@ -406,7 +409,6 @@ END_PROVIDER
 
        deallocate(Ltmp_p)
        deallocate(Ltmp_q)
-       deallocate(computed)
        deallocate(Delta)
 
        ! i.
@@ -419,11 +421,9 @@ END_PROVIDER
 
        Dmax = D_sorted(1)
 
-       dscale = 1.d0
-       dscale_tmp = dscale*dscale*Dmax
        np8=0_8
        do p8=1,ndim8
-         if ( dscale_tmp*D(p8) >= tau2 ) then
+         if ( Dmax*D(p8) >= tau2 ) then
            np8 = np8+1_8
            Lset(np8) = p8
          endif
@@ -435,6 +435,10 @@ END_PROVIDER
 
      print *,  '============ ============='
      print *,  ''
+
+     deallocate( D, Lset, Dset, D_sorted )
+     deallocate( addr1, addr2, Delta_col, computed )
+
 
      allocate(cholesky_ao(ao_num,ao_num,rank), stat=ierr)
 
