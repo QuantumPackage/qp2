@@ -25,7 +25,10 @@ END_PROVIDER
    ! Last dimension of cholesky_ao is cholesky_ao_num
    !
    ! https://mogp-emulator.readthedocs.io/en/latest/methods/proc/ProcPivotedCholesky.html
+   !
    ! https://doi.org/10.1016/j.apnum.2011.10.001 : Page 4, Algorithm 1
+   !
+   ! https://www.diva-portal.org/smash/get/diva2:396223/FULLTEXT01.pdf
    END_DOC
 
    integer*8                      :: ndim8
