@@ -31,6 +31,9 @@ subroutine print_aos()
   integer          :: i, ipoint
   double precision :: r(3)
   double precision :: ao_val, ao_der(3), ao_lap
+  double precision :: accu_vgl(5)
+  double precision :: accu_vgl_nrm(5)
+
   double precision :: mo_val, mo_der(3), mo_lap
 
   PROVIDE final_grid_points aos_in_r_array aos_grad_in_r_array aos_lapl_in_r_array
@@ -40,9 +43,6 @@ subroutine print_aos()
     write(1000, '(3(f15.7, 3X))') r
   enddo
   
-double precision :: accu_vgl(5)
-double precision :: accu_vgl_nrm(5)
-
   do ipoint = 1, n_points_final_grid
     do i = 1, ao_num
       ao_val    = aos_in_r_array     (i,ipoint)
