@@ -304,6 +304,7 @@ subroutine routine_save_rotated_mos(thr_deg, good_angles)
 
   ! check if TC energy has changed
   E_new = TC_HF_energy
+  E_thr = thresh_de_tc_angles
   if(dabs(E_new - E_old) .gt. E_thr) then
     mo_r_coef = mo_r_coef_old
     mo_l_coef = mo_l_coef_old

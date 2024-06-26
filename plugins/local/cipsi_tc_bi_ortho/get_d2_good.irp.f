@@ -25,9 +25,6 @@ subroutine get_d2_new(gen, phasemask, bannedOrb, banned, mat_l, mat_r, mask, h, 
 
   integer :: bant
   bant = 1
-!  print*, 'in get_d2_new'
-!  call debug_det(gen,N_int)
-!  print*,'coefs',coefs(1,:)
 
   tip = p(0,1) * p(0,2) ! number of alpha particles times number of beta particles
 

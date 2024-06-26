@@ -1,7 +1,7 @@
 
 ! ---
 
-subroutine diag_htilde_three_body_ints_bi_ort_slow(Nint, key_i, hthree)
+subroutine diag_htc_bi_orth_3e_brute(Nint, key_i, hthree)
 
   BEGIN_DOC
   !  diagonal element of htilde ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS

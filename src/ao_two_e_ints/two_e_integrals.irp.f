@@ -460,8 +460,8 @@ BEGIN_PROVIDER [ double precision, ao_two_e_integral_schwartz, (ao_num, ao_num) 
   !$OMP PARALLEL DO PRIVATE(i,k)                                     &
       !$OMP DEFAULT(NONE)                                            &
       !$OMP SHARED (ao_num,ao_two_e_integral_schwartz)              &
-      !$OMP SCHEDULE(guided)
-  do i=1,ao_num
+      !$OMP SCHEDULE(dynamic)
+  do i=ao_num,1,-1
     do k=1,i
       ao_two_e_integral_schwartz(i,k) = dsqrt(ao_two_e_integral(i,i,k,k))
       ao_two_e_integral_schwartz(k,i) = ao_two_e_integral_schwartz(i,k)

@@ -194,17 +194,28 @@ END_PROVIDER
  endif
 
 
- double precision :: rss
+ double precision :: rss, mem0, mem
  double precision :: memory_of_double
 
  integer :: iblock
- integer, parameter :: block_size = 32
+ integer :: block_size
 
- rss = memory_of_double(ao_num*ao_num)
- call check_mem(2.d0*block_size*rss, irp_here)
+ call resident_memory(mem0)
+
+ block_size = 1024
+
+ rss = memory_of_double(2.d0*ao_num*ao_num)
+ do
+   mem = mem0 + block_size*rss
+   if ( (block_size < 2).or.(mem < qp_max_mem) ) exit
+   block_size = block_size/2
+ enddo
+
+ call check_mem(block_size*rss, irp_here)
+
  allocate(X2(ao_num,ao_num,block_size,2))
  allocate(X3(ao_num,block_size,ao_num,2))
-    
+
 ! ao_two_e_integral_alpha_chol (l,s) -= cholesky_ao(l,m,j) * SCF_density_matrix_ao_beta (m,n) * cholesky_ao(n,s,j)
 
  do iblock=1,cholesky_ao_num,block_size

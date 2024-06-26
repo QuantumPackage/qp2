@@ -18,6 +18,8 @@ subroutine run_ccsd_space_orb
   integer(bit_kind)             :: det(N_int,2)
   integer                       :: nO, nV, nOa, nVa
 
+  call set_multiple_levels_omp(.False.)
+
   if (do_ao_cholesky) then
     PROVIDE cholesky_mo_transp
     FREE cholesky_ao
@@ -192,7 +194,7 @@ subroutine run_ccsd_space_orb
   deallocate(H_vv,H_oo,H_vo,r1,r2,tau)
 
   ! CCSD(T)
-  double precision :: e_t
+  double precision :: e_t, e_t_err
   e_t = 0.d0
 
   if (cc_par_t .and. elec_alpha_num + elec_beta_num > 2) then
@@ -210,22 +212,24 @@ subroutine run_ccsd_space_orb
     !print*,''
 
     ! New
+    e_t = uncorr_energy + energy ! For print in (T) call
+    e_t_err = 0.d0
+
     print*,'Computing (T) correction...'
     call wall_time(ta)
 !    call ccsd_par_t_space_v3(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
 !         ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
 
-    e_t = uncorr_energy + energy ! For print in next call
     call ccsd_par_t_space_stoch(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
-         ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
+         ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t, e_t_err)
 
     call wall_time(tb)
     print*,'Time: ',tb-ta, ' s'
 
     print*,''
-    write(*,'(A15,F18.12,A3)') ' E(CCSD(T))  = ', uncorr_energy + energy + e_t, ' Ha'
-    write(*,'(A15,F18.12,A3)') ' E(T)        = ', e_t, ' Ha'
-    write(*,'(A15,F18.12,A3)') ' Correlation = ', energy + e_t, ' Ha'
+    write(*,'(A15,F18.12,A7,F18.12)') ' E(CCSD(T))  = ', uncorr_energy + energy + e_t, ' Ha +/- ', e_t_err
+    write(*,'(A15,F18.12,A7,F18.12)') ' E(T)        = ', e_t, ' Ha +/- ', e_t_err
+    write(*,'(A15,F18.12,A7,F18.12)') ' Correlation = ', energy + e_t, ' Ha +/- ', e_t_err
     print*,''
   endif
 

@@ -181,3 +181,48 @@ end
 
 ! ---
 
+subroutine htilde_mu_mat_opt_bi_ortho_no_3e_both(key_j, key_i, Nint, hji,hij)
+
+  BEGIN_DOC
+  !
+  ! <key_j |H_tilde | key_i> where |key_j> is developed on the LEFT basis and |key_i> is developed on the RIGHT basis
+  !!
+  ! Returns the detail of the matrix element WITHOUT ANY CONTRIBUTION FROM THE THREE ELECTRON TERMS
+  !! WARNING !!
+  !
+  ! Non hermitian !!
+  !
+  END_DOC
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_i(Nint,2), key_j(Nint,2)
+  double precision, intent(out) :: hji,hij
+  integer                       :: degree
+
+  hji = 0.d0
+  hij = 0.d0
+
+  call get_excitation_degree(key_i, key_j, degree, Nint)
+  if(degree.gt.2) return
+
+  if(degree == 0) then
+    call diag_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_i,hji)
+    hij = hji
+  else if (degree == 1) then
+    call single_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint,key_j, key_i , hji,hij)
+  else if(degree == 2) then
+    call double_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji,hij)
+  endif
+
+  if(degree==0) then
+    hji += nuclear_repulsion
+    hij += nuclear_repulsion
+  endif
+
+end
+
+! ---
+

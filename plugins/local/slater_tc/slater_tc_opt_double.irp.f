@@ -505,3 +505,63 @@ subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e(Nint, key_j, key_i, htot)
 
 end
 
+subroutine double_htilde_mu_mat_fock_bi_ortho_no_3e_both(Nint, key_j, key_i, hji,hij)
+
+  BEGIN_DOC
+  ! <key_j |H_tilde | key_i> and <key_i |H_tilde | key_j> for double excitation  ONLY FOR ONE- AND TWO-BODY TERMS
+  !!
+  !! WARNING !!
+  !
+  ! Non hermitian !!
+  END_DOC
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_j(Nint,2), key_i(Nint,2)
+  double precision, intent(out) :: hji,hij
+  double precision :: hmono, htwoe_ji, htwoe_ij
+  integer                       :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  integer                       :: degree,exc(0:2,2,2)
+  integer                       :: h1, p1, h2, p2, s1, s2
+  double precision              :: get_mo_two_e_integral_tc_int,phase
+
+
+  call get_excitation_degree(key_i, key_j, degree, Nint)
+
+  hmono  = 0.d0
+  htwoe_ji  = 0.d0
+  htwoe_ij  = 0.d0
+  hji   = 0.d0
+  hij   = 0.d0
+
+  if(degree.ne.2)then
+   return
+  endif
+  integer :: degree_i,degree_j
+  call get_excitation_degree(ref_bitmask,key_i,degree_i,N_int)
+  call get_excitation_degree(ref_bitmask,key_j,degree_j,N_int)
+  call get_double_excitation(key_i, key_j, exc, phase, Nint)
+  call decode_exc(exc, 2, h1, p1, h2, p2, s1, s2)
+
+  if(s1.ne.s2)then
+   ! opposite spin two-body
+    htwoe_ji  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
+    htwoe_ij  = mo_bi_ortho_tc_two_e_transp(p2,p1,h2,h1)
+  else
+   ! same spin two-body
+   ! direct terms
+   htwoe_ji  = mo_bi_ortho_tc_two_e(p2,p1,h2,h1)
+   htwoe_ij  = mo_bi_ortho_tc_two_e_transp(p2,p1,h2,h1)
+   ! exchange terms
+   htwoe_ji -= mo_bi_ortho_tc_two_e(p1,p2,h2,h1)
+   htwoe_ij -= mo_bi_ortho_tc_two_e_transp(p1,p2,h2,h1)
+  endif
+  htwoe_ji  *= phase
+  hji    =  htwoe_ji
+  htwoe_ij  *= phase
+  hij    =  htwoe_ij
+
+end

@@ -19,13 +19,13 @@
   PROVIDE HF_bitmask
   PROVIDE mo_l_coef mo_r_coef
 
-  call diag_htilde_mu_mat_bi_ortho_slow(N_int, HF_bitmask, hmono, htwoe, htot)
+  call diag_htc_bi_orth_2e_brute(N_int, HF_bitmask, hmono, htwoe, htot)
 
   ref_tc_energy_1e = hmono
   ref_tc_energy_2e = htwoe 
 
   if(three_body_h_tc) then
-    call diag_htilde_three_body_ints_bi_ort_slow(N_int, HF_bitmask, hthree)
+    call diag_htc_bi_orth_3e_brute(N_int, HF_bitmask, hthree)
     ref_tc_energy_3e = hthree
   else
     ref_tc_energy_3e = 0.d0
@@ -523,4 +523,311 @@ subroutine a_tc_operator_no_3e(iorb,ispin,key,hmono,htwoe,Nint,na,nb)
 end
 
 ! ---
+
+subroutine diag_htc_bi_orth_2e_brute(Nint, key_i, hmono, htwoe, htot)
+
+  BEGIN_DOC
+  !
+  ! diagonal element of htilde ONLY FOR ONE- AND TWO-BODY TERMS 
+  !
+  END_DOC
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in)  :: Nint
+  integer(bit_kind), intent(in)  :: key_i(Nint,2)
+  double precision, intent(out)  :: hmono,htwoe,htot
+  integer                        :: occ(Nint*bit_kind_size,2)
+  integer                        :: Ne(2), i, j, ii, jj, ispin, jspin, k, kk
+  double precision               :: get_mo_two_e_integral_tc_int
+  integer(bit_kind)              :: key_i_core(Nint,2)
+
+  PROVIDE mo_bi_ortho_tc_two_e
+
+  hmono = 0.d0
+  htwoe = 0.d0
+  htot  = 0.d0
+
+  call bitstring_to_list_ab(key_i, occ, Ne, Nint)
+
+  do ispin = 1, 2
+    do i = 1, Ne(ispin)
+      ii = occ(i,ispin)
+      hmono += mo_bi_ortho_tc_one_e(ii,ii)
+    enddo
+  enddo
+
+  ! alpha/beta two-body
+  ispin = 1
+  jspin = 2
+  do i = 1, Ne(ispin) ! electron 1 (so it can be associated to mu(r1))
+    ii = occ(i,ispin) 
+    do j = 1, Ne(jspin) ! electron 2 
+      jj = occ(j,jspin) 
+      htwoe += mo_bi_ortho_tc_two_e(jj,ii,jj,ii) 
+    enddo
+  enddo
+ 
+  ! alpha/alpha two-body
+  do i = 1, Ne(ispin)
+    ii = occ(i,ispin) 
+    do j = i+1, Ne(ispin)
+      jj = occ(j,ispin) 
+      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
+    enddo
+  enddo
+ 
+  ! beta/beta two-body
+  do i = 1, Ne(jspin)
+    ii = occ(i,jspin) 
+    do j = i+1, Ne(jspin)
+      jj = occ(j,jspin) 
+      htwoe += mo_bi_ortho_tc_two_e(ii,jj,ii,jj) - mo_bi_ortho_tc_two_e(ii,jj,jj,ii)
+    enddo
+  enddo
+
+  htot = hmono + htwoe 
+
+end
+
+! ---                                                                                           
+
+subroutine diag_htc_bi_orth_3e_brute(Nint, key_i, hthree)
+
+  BEGIN_DOC
+  !  diagonal element of htilde ONLY FOR THREE-BODY TERMS WITH BI ORTHONORMAL ORBITALS
+  END_DOC
+
+  use bitmasks
+
+  implicit none
+  integer,           intent(in) :: Nint
+  integer(bit_kind), intent(in) :: key_i(Nint,2)
+  double precision, intent(out) :: hthree
+  integer                       :: occ(Nint*bit_kind_size,2)
+  integer                       :: Ne(2),i,j,ii,jj,ispin,jspin,m,mm
+  integer(bit_kind)             :: key_i_core(Nint,2)
+  double precision              :: direct_int, exchange_int, ref
+  double precision, external    :: sym_3_e_int_from_6_idx_tensor
+  double precision, external    :: three_e_diag_parrallel_spin
+
+  PROVIDE mo_l_coef mo_r_coef
+
+  if(core_tc_op) then
+    do i = 1, Nint
+      key_i_core(i,1) = xor(key_i(i,1), core_bitmask(i,1))
+      key_i_core(i,2) = xor(key_i(i,2), core_bitmask(i,2))
+    enddo
+    call bitstring_to_list_ab(key_i_core, occ, Ne, Nint)
+  else
+    call bitstring_to_list_ab(key_i, occ, Ne, Nint)
+  endif
+
+  hthree = 0.d0
+
+  if((Ne(1)+Ne(2)) .ge. 3) then
+
+    ! alpha/alpha/beta three-body
+    do i = 1, Ne(1)
+      ii = occ(i,1)
+      do j = i+1, Ne(1)
+        jj = occ(j,1)
+        do m = 1, Ne(2)
+          mm = occ(m,2)
+          !direct_int   = three_body_ints_bi_ort(mm,jj,ii,mm,jj,ii) !uses the 6-idx tensor
+          !exchange_int = three_body_ints_bi_ort(mm,jj,ii,mm,ii,jj) !uses the 6-idx tensor
+          direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,ii)      !uses 3-idx tensor
+          exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)      !uses 3-idx tensor
+          hthree      += direct_int - exchange_int
+        enddo
+      enddo
+    enddo
+
+    ! beta/beta/alpha three-body
+    do i = 1, Ne(2)
+      ii = occ(i,2)
+      do j = i+1, Ne(2)
+        jj = occ(j,2)
+        do m = 1, Ne(1)
+          mm = occ(m,1)
+          !direct_int   = three_body_ints_bi_ort(mm,jj,ii,mm,jj,ii) !uses the 6-idx tensor
+          !exchange_int = three_body_ints_bi_ort(mm,jj,ii,mm,ii,jj) !uses the 6-idx tensor
+          direct_int   = three_e_3_idx_direct_bi_ort(mm,jj,ii)
+          exchange_int = three_e_3_idx_exch12_bi_ort(mm,jj,ii)
+          hthree      += direct_int - exchange_int
+        enddo
+      enddo
+    enddo
+
+    ! alpha/alpha/alpha three-body
+    do i = 1, Ne(1)
+      ii = occ(i,1) ! 1
+      do j = i+1, Ne(1)
+        jj = occ(j,1) ! 2
+        do m = j+1, Ne(1)
+          mm = occ(m,1) ! 3
+          !hthree += sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) !uses the 6 idx tensor
+          hthree += three_e_diag_parrallel_spin(mm,jj,ii)             !uses only 3-idx tensors
+        enddo
+      enddo
+    enddo
+
+    ! beta/beta/beta three-body
+    do i = 1, Ne(2)
+      ii = occ(i,2) ! 1
+      do j = i+1, Ne(2)
+        jj = occ(j,2) ! 2
+        do m = j+1, Ne(2)
+          mm = occ(m,2) ! 3
+          !hthree += sym_3_e_int_from_6_idx_tensor(mm,jj,ii,mm,jj,ii) !uses the 6 idx tensor
+          hthree += three_e_diag_parrallel_spin(mm,jj,ii)             !uses only 3-idx tensors
+        enddo
+      enddo
+    enddo
+
+  endif
+
+end
+
+
+
+BEGIN_PROVIDER [ double precision, three_e_diag_parrallel_spin_prov, (mo_num, mo_num, mo_num)]
+
+  BEGIN_DOC
+  !
+  ! matrix element of the -L  three-body operator ON A BI ORTHONORMAL BASIS 
+  !
+  ! three_e_diag_parrallel_spin_prov(m,j,i) = All combinations of the form <mji|-L|mji> for same spin matrix elements  
+  ! 
+  ! notice the -1 sign: in this way three_e_diag_parrallel_spin_prov can be directly used to compute Slater rules with a + sign
+  !
+  END_DOC
+
+  implicit none
+  integer          :: i, j, m
+  double precision :: integral, wall1, wall0, three_e_diag_parrallel_spin
+
+  three_e_diag_parrallel_spin_prov = 0.d0
+  print *, ' Providing the three_e_diag_parrallel_spin_prov ...'
+
+ integral = three_e_diag_parrallel_spin(1,1,1) ! to provide all stuffs
+  call wall_time(wall0)
+ !$OMP PARALLEL                 &
+ !$OMP DEFAULT (NONE)           &
+ !$OMP PRIVATE (i,j,m,integral) & 
+ !$OMP SHARED (mo_num,three_e_diag_parrallel_spin_prov)
+ !$OMP DO SCHEDULE (dynamic)
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do m = j, mo_num
+        three_e_diag_parrallel_spin_prov(m,j,i) =  three_e_diag_parrallel_spin(m,j,i)
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do m = 1, j
+        three_e_diag_parrallel_spin_prov(m,j,i) = three_e_diag_parrallel_spin_prov(j,m,i)
+      enddo
+    enddo
+  enddo
+
+  call wall_time(wall1)
+  print *, ' wall time for three_e_diag_parrallel_spin_prov', wall1 - wall0
+
+END_PROVIDER 
+
+BEGIN_PROVIDER [ double precision, three_e_single_parrallel_spin_prov, (mo_num, mo_num, mo_num, mo_num)]
+
+  BEGIN_DOC
+  !
+  ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF SINGLE EXCITATIONS AND BI ORTHO MOs
+  !
+  ! three_e_single_parrallel_spin_prov(m,j,k,i) = All combination of <mjk|-L|mji> for same spin matrix elements 
+  !
+  ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
+  !
+  END_DOC
+
+ implicit none
+ integer          :: i, j, k, m
+ double precision :: integral, wall1, wall0, three_e_single_parrallel_spin
+
+  three_e_single_parrallel_spin_prov = 0.d0
+  print *, ' Providing the three_e_single_parrallel_spin_prov ...'
+
+  integral = three_e_single_parrallel_spin(1,1,1,1)
+  call wall_time(wall0)
+ !$OMP PARALLEL                   &
+ !$OMP DEFAULT (NONE)             &
+ !$OMP PRIVATE (i,j,k,m,integral) & 
+ !$OMP SHARED (mo_num,three_e_single_parrallel_spin_prov)
+ !$OMP DO SCHEDULE (dynamic)
+  do i = 1, mo_num
+    do k = 1, mo_num
+      do j = 1, mo_num
+        do m = 1, mo_num
+          three_e_single_parrallel_spin_prov(m,j,k,i) = three_e_single_parrallel_spin(m,j,k,i)
+        enddo
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  call wall_time(wall1)
+  print *, ' wall time for three_e_single_parrallel_spin_prov', wall1 - wall0
+
+END_PROVIDER 
+
+
+! ---
+
+BEGIN_PROVIDER [ double precision, three_e_double_parrallel_spin_prov, (mo_num, mo_num, mo_num, mo_num, mo_num)]
+
+  BEGIN_DOC
+  !
+  ! matrix element of the -L  three-body operator FOR THE DIRECT TERMS OF DOUBLE EXCITATIONS AND BI ORTHO MOs
+  !
+  ! three_e_double_parrallel_spin_prov(m,l,j,k,i) = <mlk|-L|mji> ::: notice that i is the RIGHT MO and k is the LEFT MO
+  !
+  ! notice the -1 sign: in this way three_e_3_idx_direct_bi_ort can be directly used to compute Slater rules with a + sign
+  END_DOC
+
+  implicit none
+  integer          :: i, j, k, m, l
+  double precision :: integral, wall1, wall0, three_e_double_parrallel_spin
+
+  three_e_double_parrallel_spin_prov = 0.d0
+  print *, ' Providing the three_e_double_parrallel_spin_prov ...'
+  call wall_time(wall0)
+
+ integral = three_e_double_parrallel_spin(1,1,1,1,1)
+ !$OMP PARALLEL                     &
+ !$OMP DEFAULT (NONE)               &
+ !$OMP PRIVATE (i,j,k,m,l,integral) & 
+ !$OMP SHARED (mo_num,three_e_double_parrallel_spin_prov)
+ !$OMP DO SCHEDULE (dynamic)
+  do i = 1, mo_num
+    do k = 1, mo_num
+      do j = 1, mo_num
+        do l = 1, mo_num
+          do m = 1, mo_num
+            three_e_double_parrallel_spin_prov(m,l,j,k,i) = three_e_double_parrallel_spin(m,l,j,k,i)
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+ !$OMP END DO
+ !$OMP END PARALLEL
+
+  call wall_time(wall1)
+  print *, ' wall time for three_e_double_parrallel_spin_prov', wall1 - wall0
+
+END_PROVIDER 
 

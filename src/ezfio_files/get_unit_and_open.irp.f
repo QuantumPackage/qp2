@@ -47,11 +47,13 @@ integer function getUnitAndOpen(f,mode)
     endif
     open(unit=getUnitAndOpen,file=f,status='OLD',action='READ',form='UNFORMATTED')
   else if (mode.eq.'W') then
-    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='WRITE',form='UNFORMATTED')
+    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='READWRITE',form='UNFORMATTED')
+  else if (mode.eq.'A') then
+    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='READWRITE',position='APPEND',form='UNFORMATTED')
   else if (mode.eq.'w') then
-    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='WRITE',form='FORMATTED')
+    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='READWRITE',form='FORMATTED')
   else if (mode.eq.'a') then
-    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='WRITE',position='APPEND',form='FORMATTED')
+    open(unit=getUnitAndOpen,file=new_f,status='UNKNOWN',action='READWRITE',position='APPEND',form='FORMATTED')
   else if (mode.eq.'x') then
     open(unit=getUnitAndOpen,file=new_f,form='FORMATTED')
   endif

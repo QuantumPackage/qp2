@@ -158,7 +158,7 @@ END_PROVIDER
 
  double precision, allocatable :: vgl(:,:,:)
  allocate( vgl(mo_num,5,n_points_final_grid))
- rc = qmckl_get_mo_basis_mo_vgl_inplace(qmckl_ctx, vgl, n_points_final_grid*mo_num*5_8)
+ rc = qmckl_get_mo_basis_mo_vgl(qmckl_ctx, vgl, n_points_final_grid*mo_num*5_8)
  if (rc /= QMCKL_SUCCESS) then
    print *, irp_here, 'qmckl error in get_mo_vgl'
    rc = qmckl_check(qmckl_ctx, rc)
