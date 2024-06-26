@@ -14,19 +14,17 @@ program write_tc_int
   my_n_pt_a_grid = tc_grid1_a
   touch my_grid_becke my_n_pt_r_grid my_n_pt_a_grid
 
+  my_extra_grid_becke  = .True.
+  PROVIDE tc_grid2_a tc_grid2_r
+  my_n_pt_r_extra_grid = tc_grid2_r
+  my_n_pt_a_extra_grid = tc_grid2_a
+  touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
+
   call write_int(6, my_n_pt_r_grid, 'radial  external grid over')
   call write_int(6, my_n_pt_a_grid, 'angular external grid over')
 
-  if(tc_integ_type .eq. "numeric") then
-    my_extra_grid_becke  = .True.
-    PROVIDE tc_grid2_a tc_grid2_r
-    my_n_pt_r_extra_grid = tc_grid2_r
-    my_n_pt_a_extra_grid = tc_grid2_a
-    touch my_extra_grid_becke my_n_pt_r_extra_grid my_n_pt_a_extra_grid
-
-    call write_int(6, my_n_pt_r_extra_grid, 'radial  internal grid over')
-    call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
-  endif
+  call write_int(6, my_n_pt_r_extra_grid, 'radial  internal grid over')
+  call write_int(6, my_n_pt_a_extra_grid, 'angular internal grid over')
 
   call main()
 
