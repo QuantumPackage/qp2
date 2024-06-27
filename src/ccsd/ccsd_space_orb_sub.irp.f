@@ -1,4 +1,5 @@
 subroutine run_ccsd_space_orb
+  use gpu
 
   implicit none
 
@@ -11,7 +12,7 @@ subroutine run_ccsd_space_orb
 
   double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:), tau_x(:,:,:,:)
   double precision, allocatable :: t1(:,:), r1(:,:)
-  double precision, allocatable :: H_oo(:,:), H_vv(:,:), H_vo(:,:)
+  double precision, pointer     :: H_oo, H_vv, H_vo
 
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
@@ -55,7 +56,10 @@ subroutine run_ccsd_space_orb
   allocate(tau(nO,nO,nV,nV))
   allocate(tau_x(nO,nO,nV,nV))
   allocate(t1(nO,nV), r1(nO,nV))
-  allocate(H_oo(nO,nO), H_vv(nV,nV), H_vo(nV,nO))
+
+  call gpu_allocate_double(H_oo, (/ nO, nO /) )
+  call gpu_allocate_double(H_vv, (/ nV, nV /) )
+  call gpu_allocate_double(H_vo, (/ nV, nO /) )
 
   if (cc_update_method == 'diis') then
     double precision :: rss, diis_mem, extra_mem
@@ -191,7 +195,11 @@ subroutine run_ccsd_space_orb
     deallocate(all_err,all_t)
   endif
 
-  deallocate(H_vv,H_oo,H_vo,r1,r2,tau)
+  call gpu_deallocate_double(H_oo)
+  call gpu_deallocate_double(H_vv)
+  call gpu_deallocate_double(H_vo)
+
+  deallocate(r1,r2,tau)
 
   ! CCSD(T)
   double precision :: e_t, e_t_err

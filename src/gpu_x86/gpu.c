@@ -25,7 +25,7 @@ void gpu_allocate(void** ptr, const int64_t n) {
   }
 }
 
-void gpu_free(void** ptr) {
+void gpu_deallocate(void** ptr) {
   free(*ptr);
   *ptr = NULL;
 }
