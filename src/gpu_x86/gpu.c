@@ -251,7 +251,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[j*ldb+i];
          }
        }
@@ -259,7 +259,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i];
          }
        }
@@ -267,7 +267,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i] + beta * b[j*ldb+i];
          }
        }
@@ -282,7 +282,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[i*ldb+j];
          }
        }
@@ -290,7 +290,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i];
          }
        }
@@ -298,7 +298,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i] + beta * b[i*ldb+j];
          }
        }
@@ -313,7 +313,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[j*ldb+i];
          }
        }
@@ -321,7 +321,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j];
          }
        }
@@ -329,7 +329,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j] + beta * b[j*ldb+i];
          }
        }
@@ -344,7 +344,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[i*ldb+j];
          }
        }
@@ -352,7 +352,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j];
          }
        }
@@ -360,7 +360,7 @@ void gpu_dgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j] + beta * b[i*ldb+j];
          }
        }
@@ -386,7 +386,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[j*ldb+i];
          }
        }
@@ -394,7 +394,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i];
          }
        }
@@ -402,7 +402,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i] + beta * b[j*ldb+i];
          }
        }
@@ -417,7 +417,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[i*ldb+j];
          }
        }
@@ -425,7 +425,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i];
          }
        }
@@ -433,7 +433,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[j*lda+i] + beta * b[i*ldb+j];
          }
        }
@@ -448,7 +448,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[j*ldb+i];
          }
        }
@@ -456,7 +456,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j];
          }
        }
@@ -464,7 +464,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j] + beta * b[j*ldb+i];
          }
        }
@@ -479,7 +479,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      if (alpha == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = beta * b[i*ldb+j];
          }
        }
@@ -487,7 +487,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else if (beta == 0.) {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j];
          }
        }
@@ -495,7 +495,7 @@ void gpu_sgeam(const void* handle, const char transa, const char transb, const i
      } else {
 
        for (int64_t j=0 ; j<n ; ++j) {
-         for (int64_t i=0 ; i<n ; ++i) {
+         for (int64_t i=0 ; i<m ; ++i) {
            c[j*ldc+i] = alpha * a[i*lda+j] + beta * b[i*ldb+j];
          }
        }

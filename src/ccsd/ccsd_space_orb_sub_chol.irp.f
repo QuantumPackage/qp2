@@ -294,12 +294,12 @@ end
 ! H_oo
 
 subroutine compute_H_oo_chol(nO,nV,tau_x,H_oo)
-
+  use gpu
   implicit none
 
   integer, intent(in)           :: nO,nV
-  double precision, intent(in)  :: tau_x(nO, nO, nV, nV)
-  double precision, intent(out) :: H_oo(nO, nO)
+  type(gpu_double4), intent(in)    :: tau_x
+  type(gpu_double2), intent(out)   :: H_oo
 
   integer :: a,b,i,j,u,k
 
@@ -315,7 +315,7 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,H_oo)
     do b=1,nV
       do j=1,nO
         do a=1,nV
-          tmp_vov(a,j,b) = tau_x(u,j,a,b)
+          tmp_vov(a,j,b) = tau_x%f(u,j,a,b)
         enddo
       enddo
     enddo
@@ -328,7 +328,7 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,H_oo)
   !$omp do
   do i = 1, nO
     do u = 1, nO
-      H_oo(u,i) = cc_space_f_oo(u,i)
+      H_oo%f(u,i) = cc_space_f_oo(u,i)
     enddo
   enddo
   !$omp end do nowait
@@ -336,7 +336,7 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,H_oo)
   !$omp end  parallel
   call dgemm('T', 'N', nO, nO, cholesky_mo_num*nV, 1.d0, &
     tau_kau, cholesky_mo_num*nV,  cc_space_v_vo_chol, cholesky_mo_num*nV, &
-    1.d0, H_oo, nO)
+    1.d0, H_oo%f, nO)
 
 end
 

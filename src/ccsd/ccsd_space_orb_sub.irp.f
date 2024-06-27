@@ -10,9 +10,9 @@ subroutine run_ccsd_space_orb
   double precision :: uncorr_energy,energy, max_elem, max_r, max_r1, max_r2,ta,tb
   logical :: not_converged
 
-  double precision, allocatable :: t2(:,:,:,:), r2(:,:,:,:), tau(:,:,:,:), tau_x(:,:,:,:)
-  double precision, allocatable :: t1(:,:), r1(:,:)
-  double precision, pointer     :: H_oo, H_vv, H_vo
+  type(gpu_double4) :: t2, r2, tau, tau_x
+  type(gpu_double2) :: t1, r1
+  type(gpu_double2) :: H_oo, H_vv, H_vo
 
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
@@ -52,14 +52,15 @@ subroutine run_ccsd_space_orb
   !print*,'occ',list_occ
   !print*,'vir',list_vir
 
-  allocate(t2(nO,nO,nV,nV), r2(nO,nO,nV,nV))
-  allocate(tau(nO,nO,nV,nV))
-  allocate(tau_x(nO,nO,nV,nV))
-  allocate(t1(nO,nV), r1(nO,nV))
-
-  call gpu_allocate_double(H_oo, (/ nO, nO /) )
-  call gpu_allocate_double(H_vv, (/ nV, nV /) )
-  call gpu_allocate_double(H_vo, (/ nV, nO /) )
+  call gpu_allocate(t2, nO,nO,nV,nV)
+  call gpu_allocate(r2, nO,nO,nV,nV)
+  call gpu_allocate(tau, nO,nO,nV,nV)
+  call gpu_allocate(tau_x, nO,nO,nV,nV)
+  call gpu_allocate(t1, nO,nV)
+  call gpu_allocate(r1, nO,nV)
+  call gpu_allocate(H_oo, nO, nO)
+  call gpu_allocate(H_vo, nV, nO)
+  call gpu_allocate(H_vv, nV, nV)
 
   if (cc_update_method == 'diis') then
     double precision :: rss, diis_mem, extra_mem
@@ -101,14 +102,21 @@ subroutine run_ccsd_space_orb
   endif
 
   ! Init
-  call guess_t1(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_f_ov,t1)
-  call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,t2)
-  call update_tau_space(nO,nV,t1,t2,tau)
+  double precision, allocatable :: h_t1(:,:), h_t2(:,:,:,:)
+  allocate(h_t1(nO,nV), h_t2(nO,nO,nV,nV))
+
+  call guess_t1(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_f_ov,h_t1)
+  call gpu_upload(h_t1, t1)
+
+  call guess_t2(nO,nV,cc_space_f_o,cc_space_f_v,cc_space_v_oovv,h_t2)
+  call gpu_upload(h_t2, t2)
+
+  call update_tau_space(nO,nV,h_t1,t1,t2,tau)
   call update_tau_x_space(nO,nV,tau,tau_x)
   !print*,'hf_energy', hf_energy
   call det_energy(det,uncorr_energy)
   print*,'Det energy', uncorr_energy
-  call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
+  call ccsd_energy_space_x(nO,nV,tau_x%f,t1%f,energy)
   print*,'Guess energy', uncorr_energy+energy, energy
 
   nb_iter = 0
@@ -127,40 +135,38 @@ subroutine run_ccsd_space_orb
     if (do_ao_cholesky) then
 !    if (.False.) then
       call compute_H_oo_chol(nO,nV,tau_x,H_oo)
-      call compute_H_vv_chol(nO,nV,tau_x,H_vv)
-      call compute_H_vo_chol(nO,nV,t1,H_vo)
+      call compute_H_vv_chol(nO,nV,tau_x%f,H_vv%f)
+      call compute_H_vo_chol(nO,nV,t1%f,H_vo%f)
 
-      call compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
-      call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+      call compute_r1_space_chol(nO,nV,t1%f,t2%f,tau%f,H_oo%F,H_vv%F,H_vo%F,r1%f,max_r1)
+      call compute_r2_space_chol(nO,nV,t1%f,t2%f,tau%f,H_oo%F,H_vv%F,H_vo%F,r2%f,max_r2)
     else
-      call compute_H_oo(nO,nV,t1,t2,tau,H_oo)
-      call compute_H_vv(nO,nV,t1,t2,tau,H_vv)
-      call compute_H_vo(nO,nV,t1,t2,H_vo)
+      call compute_H_oo(nO,nV,t1%f,t2%f,tau%f,H_oo%f)
+      call compute_H_vv(nO,nV,t1%f,t2%f,tau%f,H_vv%f)
+      call compute_H_vo(nO,nV,t1%f,t2%f,H_vo%f)
 
-      call compute_r1_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
-      call compute_r2_space(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r2,max_r2)
+      call compute_r1_space(nO,nV,t1%f,t2%f,tau%f,H_oo%f,H_vv%f,H_vo%f,r1%f,max_r1)
+      call compute_r2_space(nO,nV,t1%f,t2%f,tau%f,H_oo%f,H_vv%f,H_vo%f,r2%f,max_r2)
     endif
     max_r = max(max_r1,max_r2)
 
     ! Update
     if (cc_update_method == 'diis') then
-      !call update_t_ccsd(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
-      !call update_t_ccsd_diis(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err1,all_err2,all_t1,all_t2)
-      call update_t_ccsd_diis_v3(nO,nV,nb_iter,cc_space_f_o,cc_space_f_v,r1,r2,t1,t2,all_err,all_t)
+      call update_t_ccsd_diis_v3(nO,nV,nb_iter,cc_space_f_o,cc_space_f_v,r1%f,r2%f,t1%f,t2%f,all_err,all_t)
 
     ! Standard update as T = T - Delta
     elseif (cc_update_method == 'none') then
-      call update_t1(nO,nV,cc_space_f_o,cc_space_f_v,r1,t1)
-      call update_t2(nO,nV,cc_space_f_o,cc_space_f_v,r2,t2)
+      call update_t1(nO,nV,cc_space_f_o,cc_space_f_v,r1%f,t1%f)
+      call update_t2(nO,nV,cc_space_f_o,cc_space_f_v,r2%f,t2%f)
     else
       print*,'Unkown cc_method_method: '//cc_update_method
     endif
 
-    call update_tau_space(nO,nV,t1,t2,tau)
+    call update_tau_space(nO,nV,t1%f,t1,t2,tau)
     call update_tau_x_space(nO,nV,tau,tau_x)
 
     ! Energy
-    call ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
+    call ccsd_energy_space_x(nO,nV,tau_x%f,t1%f,energy)
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
 
     nb_iter = nb_iter + 1
@@ -185,8 +191,8 @@ subroutine run_ccsd_space_orb
   print*,''
 
   if (write_amplitudes) then
-    call write_t1(nO,nV,t1)
-    call write_t2(nO,nV,t2)
+    call write_t1(nO,nV,t1%f)
+    call write_t2(nO,nV,t2%f)
     call ezfio_set_utils_cc_io_amplitudes('Read')
   endif
 
@@ -195,11 +201,14 @@ subroutine run_ccsd_space_orb
     deallocate(all_err,all_t)
   endif
 
-  call gpu_deallocate_double(H_oo)
-  call gpu_deallocate_double(H_vv)
-  call gpu_deallocate_double(H_vo)
+  call gpu_deallocate(H_oo)
+  call gpu_deallocate(H_vv)
+  call gpu_deallocate(H_vo)
 
-  deallocate(r1,r2,tau)
+  call gpu_deallocate(r1)
+  call gpu_deallocate(r2)
+  call gpu_deallocate(tau)
+  call gpu_deallocate(tau_x)
 
   ! CCSD(T)
   double precision :: e_t, e_t_err
@@ -207,28 +216,14 @@ subroutine run_ccsd_space_orb
 
   if (cc_par_t .and. elec_alpha_num + elec_beta_num > 2) then
 
-    ! Dumb way
-    !call wall_time(ta)
-    !call ccsd_par_t_space(nO,nV,t1,t2,e_t)
-    !call wall_time(tb)
-    !print*,'Time: ',tb-ta, ' s'
-
-    !print*,''
-    !write(*,'(A15,F18.12,A3)') ' E(CCSD(T))  = ', uncorr_energy + energy + e_t, ' Ha'
-    !write(*,'(A15,F18.12,A3)') ' E(T)        = ', e_t, ' Ha'
-    !write(*,'(A15,F18.12,A3)') ' Correlation = ', energy + e_t, ' Ha'
-    !print*,''
-
     ! New
     e_t = uncorr_energy + energy ! For print in (T) call
     e_t_err = 0.d0
 
     print*,'Computing (T) correction...'
     call wall_time(ta)
-!    call ccsd_par_t_space_v3(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
-!         ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t)
 
-    call ccsd_par_t_space_stoch(nO,nV,t1,t2,cc_space_f_o,cc_space_f_v &
+    call ccsd_par_t_space_stoch(nO,nV,t1%f,t2%f,cc_space_f_o,cc_space_f_v &
          ,cc_space_v_vvvo,cc_space_v_vvoo,cc_space_v_vooo,e_t, e_t_err)
 
     call wall_time(tb)
@@ -243,7 +238,9 @@ subroutine run_ccsd_space_orb
 
   call save_energy(uncorr_energy + energy, e_t)
 
-  deallocate(t1,t2)
+  deallocate(h_t1, h_t2)
+  call gpu_deallocate(t1)
+  call gpu_deallocate(t2)
 
 end
 
@@ -341,69 +338,138 @@ end
 
 ! Tau
 
-subroutine update_tau_space(nO,nV,t1,t2,tau)
-
+subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
+  use gpu
   implicit none
 
   ! in
   integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV)
+  double precision, intent(in)  :: h_t1(nO,nV)
+  type(gpu_double2), intent(in) :: t1
+  type(gpu_double4), intent(in) :: t2
 
   ! out
-  double precision, intent(out) :: tau(nO,nO,nV,nV)
+  type(gpu_double4) :: tau
 
   ! internal
   integer                       :: i,j,a,b
 
+!  !$OMP PARALLEL &
+!  !$OMP SHARED(nO,nV,tau,t2,t1,h_t1) &
+!  !$OMP PRIVATE(i,j,a,b) &
+!  !$OMP DEFAULT(NONE)
+!  !$OMP DO
+!  do b = 1, nV
+!    do a = 1, nV
+!      do j = 1, nO
+!        do i = 1, nO
+!          tau%f(i,j,a,b) = t2%f(i,j,a,b) + t1%f(i,a) * h_t1(j,b)
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+
+
+  type(gpu_blas) :: blas
+  type(gpu_stream) :: stream(nV)
+
+  call gpu_blas_create(blas)
+  do b=1,nV
+    call gpu_stream_create(stream(b))
+  enddo
+
   !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,tau,t2,t1) &
+  !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
-  !$OMP DO
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          tau(i,j,a,b) = t2(i,j,a,b) + t1(i,a) * t1(j,b)
-        enddo
-      enddo
+  do j=1,nO
+    !$OMP DO
+    do b=1,nV
+      call gpu_set_stream(blas,stream(b))
+      call gpu_dgeam_c(blas%c, 'N', 'N', nO*1_8, nV*1_8, &
+         1.d0, c_loc(t2%f(1,j,1,b)), nO*nO*1_8, &
+         h_t1(j,b), t1%c, nO*1_8, &
+         c_loc(tau%f(1,j,1,b)), nO*nO*1_8)
     enddo
+    !$OMP END DO
   enddo
-  !$OMP END DO
   !$OMP END PARALLEL
+
+  call gpu_synchronize()
+
+  do b=1,nV
+    call gpu_stream_destroy(stream(b))
+  enddo
+
+  call gpu_blas_destroy(blas)
 
 end
 
 subroutine update_tau_x_space(nO,nV,tau,tau_x)
-
+  use gpu
   implicit none
 
   ! in
-  integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: tau(nO,nO,nV,nV)
+  integer, intent(in)         :: nO, nV
+  type(gpu_double4), intent(in)  :: tau
 
   ! out
-  double precision, intent(out) :: tau_x(nO,nO,nV,nV)
+  type(gpu_double4) :: tau_x
 
   ! internal
   integer                       :: i,j,a,b
 
+!  !$OMP PARALLEL &
+!  !$OMP SHARED(nO,nV,tau,tau_x) &
+!  !$OMP PRIVATE(i,j,a,b) &
+!  !$OMP DEFAULT(NONE)
+!  !$OMP DO
+!  do b = 1, nV
+!    do a = 1, nV
+!      do j = 1, nO
+!        do i = 1, nO
+!          tau_x%f(i,j,a,b) = 2.d0*tau%f(i,j,a,b) - tau%f(i,j,b,a)
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+
+  type(gpu_blas) :: blas
+  type(gpu_stream) :: stream(nV)
+
+  call gpu_blas_create(blas)
+  do a=1,nV
+    call gpu_stream_create(stream(a))
+  enddo
+
   !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,tau,tau_x) &
+  !$OMP SHARED(nO,nV,tau,tau_x,stream,blas) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
   !$OMP DO
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          tau_x(i,j,a,b) = 2.d0*tau(i,j,a,b) - tau(i,j,b,a)
-        enddo
-      enddo
+  do b=1,nV
+    do a=1,nV
+      call gpu_set_stream(blas,stream(a))
+      call gpu_dgeam_c(blas%c, 'N', 'N', nO*1_8, nO*1_8, &
+          2.d0, c_loc(tau%f(1,1,a,b)), nO*1_8, &
+         -1.d0, c_loc(tau%f(1,1,b,a)), nO*1_8, &
+         c_loc(tau_x%f(1,1,a,b)), nO*1_8)
     enddo
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
+
+  call gpu_synchronize()
+
+  do b=1,nV
+    call gpu_stream_destroy(stream(b))
+  enddo
+
+  call gpu_blas_destroy(blas)
 
 end
 
