@@ -107,7 +107,7 @@ module gpu
       double precision, pointer, intent(inout) :: ptr
       type(c_ptr) :: cptr
       cptr = c_loc(ptr)
-      call gpu_deallocate(cptr)
+      call gpu_deallocate_c(cptr)
       NULLIFY(ptr)
     end subroutine
 
