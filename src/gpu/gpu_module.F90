@@ -365,42 +365,42 @@ module gpu
     subroutine gpu_download_double1(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double1), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:)
+      double precision, target, intent(in)   :: cpu_ptr(:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*size(gpu_ptr%f))
     end subroutine
 
     subroutine gpu_download_double2(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double2), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:,:)
+      double precision, target, intent(in)   :: cpu_ptr(:,:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
     subroutine gpu_download_double3(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double3), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:,:,:)
+      double precision, target, intent(in)   :: cpu_ptr(:,:,:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
     subroutine gpu_download_double4(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double4), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:,:,:,:)
+      double precision, target, intent(in)   :: cpu_ptr(:,:,:,:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
     subroutine gpu_download_double5(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double5), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:,:,:,:,:)
+      double precision, target, intent(in)   :: cpu_ptr(:,:,:,:,:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
     subroutine gpu_download_double6(gpu_ptr, cpu_ptr)
       implicit none
       type(gpu_double6), intent(in)  :: gpu_ptr
-      double precision, intent(in)   :: cpu_ptr(:,:,:,:,:,:)
+      double precision, target, intent(in)   :: cpu_ptr(:,:,:,:,:,:)
       call gpu_download_c(gpu_ptr%c, c_loc(cpu_ptr), 8_8*product(shape(gpu_ptr%f)*1_8))
     end subroutine
 
@@ -454,19 +454,16 @@ module gpu
 ! ----------
 
     subroutine gpu_stream_create(stream)
-      import
       type(gpu_stream) :: stream
       call gpu_stream_create_c(stream%c)
     end subroutine
 
     subroutine gpu_stream_destroy(stream)
-      import
       type(gpu_stream) :: stream
       call gpu_stream_destroy_c(stream%c)
     end subroutine
 
     subroutine gpu_set_stream(handle, stream)
-      import
       type(gpu_blas)   :: handle
       type(gpu_stream) :: stream
       call gpu_set_stream_c(handle%c, stream%c)
@@ -477,13 +474,11 @@ module gpu
 ! --------
 
     subroutine gpu_blas_create(handle)
-      import
       type(gpu_blas) :: handle
       call gpu_blas_create_c(handle%c)
     end subroutine
 
     subroutine gpu_blas_destroy(handle)
-      import
       type(gpu_blas) :: handle
       call gpu_blas_destroy_c(handle%c)
     end subroutine
@@ -500,7 +495,7 @@ subroutine gpu_ddot(handle, n, dx, incx, dy, incy, res)
   use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*8                      :: n, incx, incy
-  double precision, intent(in)   :: dx(*), dy(*)
+  double precision, target, intent(in)   :: dx(*), dy(*)
   double precision, intent(out)    :: res
   call gpu_ddot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
 end subroutine
@@ -525,7 +520,7 @@ subroutine gpu_dgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, lda, ldb, ldc
   double precision, intent(in) :: alpha, beta
-  double precision             :: a(lda,*), b(ldb,*), c(ldc,*)
+  double precision, target     :: a(lda,*), b(ldb,*), c(ldc,*)
   call gpu_dgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
         c_loc(b), ldb, c_loc(c), ldc)
 end subroutine
@@ -537,7 +532,7 @@ subroutine gpu_sgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, lda, ldb, ldc
   real, intent(in)             :: alpha, beta
-  real                         :: a(lda,*), b(ldb,*), c(ldc,*)
+  real, target                 :: a(lda,*), b(ldb,*), c(ldc,*)
   call gpu_sgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
         c_loc(b), ldb, c_loc(c), ldc)
 end subroutine
