@@ -318,42 +318,42 @@ module gpu
 
     subroutine gpu_upload_double1(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:)
+      double precision, target, intent(in)     :: cpu_ptr(*)
       type(gpu_double1), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, 8_8*size(gpu_ptr%f))
     end subroutine
 
     subroutine gpu_upload_double2(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:,:)
+      double precision, target, intent(in)     :: cpu_ptr(:,:)
       type(gpu_double2), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, product(shape(gpu_ptr%f)*1_8)*8_8)
     end subroutine
 
     subroutine gpu_upload_double3(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:,:,:)
+      double precision, target, intent(in)     :: cpu_ptr(:,:,:)
       type(gpu_double3), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, product(shape(gpu_ptr%f)*1_8)*8_8)
     end subroutine
 
     subroutine gpu_upload_double4(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:,:,:,:)
+      double precision, target, intent(in)     :: cpu_ptr(:,:,:,:)
       type(gpu_double4), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, product(shape(gpu_ptr%f)*1_8)*8_8)
     end subroutine
 
     subroutine gpu_upload_double5(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:,:,:,:,:)
+      double precision, target, intent(in)     :: cpu_ptr(:,:,:,:,:)
       type(gpu_double5), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, product(shape(gpu_ptr%f)*1_8)*8_8)
     end subroutine
 
     subroutine gpu_upload_double6(cpu_ptr, gpu_ptr)
       implicit none
-      double precision, intent(in)     :: cpu_ptr(:,:,:,:,:,:)
+      double precision, target, intent(in)     :: cpu_ptr(:,:,:,:,:,:)
       type(gpu_double6), intent(in)    :: gpu_ptr
       call gpu_upload_c(c_loc(cpu_ptr), gpu_ptr%c, product(shape(gpu_ptr%f)*1_8)*8_8)
     end subroutine
@@ -504,7 +504,7 @@ subroutine gpu_sdot(handle, n, dx, incx, dy, incy, res)
   use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*8                      :: n, incx, incy
-  real, intent(in)               :: dx(*), dy(*)
+  real, target, intent(in)       :: dx(*), dy(*)
   real, intent(out)              :: res
   call gpu_sdot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
 end subroutine
