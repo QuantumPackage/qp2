@@ -271,40 +271,40 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   integer :: i,j,a,b
   double precision :: e
 
-  energy = 0d0
-  !$omp parallel &
-  !$omp shared(nO,nV,energy,tau_x,t1,&
-  !$omp d_cc_space_f_vo,d_cc_space_v_oovv) &
-  !$omp private(i,j,a,b,e) &
-  !$omp default(none)
-  e = 0d0
-  !$omp do
-  do a = 1, nV
-    do i = 1, nO
-      e = e + 2d0 * d_cc_space_f_vo%f(a,i) * t1%f(i,a)
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp do
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          e = e + tau_x%f(i,j,a,b) * d_cc_space_v_oovv%f(i,j,a,b)
-       enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp critical
-  energy = energy + e
-  !$omp end critical
-  !$omp end parallel
-!
-!
-!   call gpu_ddot(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1, d_cc_space_v_oovv, 1, energy)
-!   call gpu_ddot(blas_handle, nO*nV*1_8, d_cc_space_f_vo, 1, t1, 1, e)
-!   energy = energy + 2.d0*e
+!  energy = 0d0
+!  !$omp parallel &
+!  !$omp shared(nO,nV,energy,tau_x,t1,&
+!  !$omp d_cc_space_f_vo,d_cc_space_v_oovv) &
+!  !$omp private(i,j,a,b,e) &
+!  !$omp default(none)
+!  e = 0d0
+!  !$omp do
+!  do a = 1, nV
+!    do i = 1, nO
+!      e = e + 2d0 * d_cc_space_f_vo%f(a,i) * t1%f(i,a)
+!    enddo
+!  enddo
+!  !$omp end do nowait
+!  !$omp do
+!  do b = 1, nV
+!    do a = 1, nV
+!      do j = 1, nO
+!        do i = 1, nO
+!          e = e + tau_x%f(i,j,a,b) * d_cc_space_v_oovv%f(i,j,a,b)
+!       enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$omp end do nowait
+!  !$omp critical
+!  energy = energy + e
+!  !$omp end critical
+!  !$omp end parallel
+
+
+   call gpu_ddot(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1, d_cc_space_v_oovv, 1, energy)
+   call gpu_ddot(blas_handle, nO*nV*1_8, d_cc_space_f_vo, 1, t1, 1, e)
+   energy = energy + 2.d0*e
 
 end
 
