@@ -119,15 +119,15 @@ rm -f ${QP_ROOT}/src/gpu_arch
 case "$GPU" in
   amd) # Nvidia
      echo "Activating AMD GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_amd ${QP_ROOT}/src/gpu_arch
+     ln -s ${QP_ROOT}/plugins/local/gpu_amd ${QP_ROOT}/src/gpu_arch
      ;;
   nvidia) # Nvidia
      echo "Activating Nvidia GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_nvidia ${QP_ROOT}/src/gpu_arch
+     ln -s ${QP_ROOT}/plugins/local/gpu_nvidia ${QP_ROOT}/src/gpu_arch
      ;;
   *) # No Acceleration
      echo "Disabling GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_x86 ${QP_ROOT}/src/gpu_arch
+     ln -s ${QP_ROOT}/plugins/local/gpu_x86 ${QP_ROOT}/src/gpu_arch
      ;;
 esac
 
