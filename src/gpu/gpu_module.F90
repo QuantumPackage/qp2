@@ -120,7 +120,7 @@ module gpu
 
     subroutine gpu_ddot_c(handle, n, dx, incx, dy, incy, res) bind(C, name='gpu_ddot')
       import
-      type(c_ptr), intent(in), value :: handle
+      type(c_ptr), intent(in)        :: handle
       integer(c_int64_t), value      :: n, incx, incy
       type(c_ptr), intent(in), value :: dx, dy
       real(c_double), intent(out)    :: res
@@ -128,7 +128,7 @@ module gpu
 
     subroutine gpu_sdot_c(handle, n, dx, incx, dy, incy, res) bind(C, name='gpu_sdot')
       import
-      type(c_ptr), intent(in), value :: handle
+      type(c_ptr), intent(in)        :: handle
       integer(c_int64_t), value      :: n, incx, incy
       type(c_ptr), intent(in), value :: dx, dy
       real(c_float), intent(out)  :: res
@@ -137,7 +137,7 @@ module gpu
     subroutine gpu_dgeam_c(handle, transa, transb, m, n, alpha, a, lda, beta, &
       b, ldb, c, ldc) bind(C, name='gpu_dgeam')
       import
-      type(c_ptr), intent(in), value :: handle
+      type(c_ptr), intent(in)        :: handle
       character(c_char), intent(in), value :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_double), intent(in), value :: alpha, beta

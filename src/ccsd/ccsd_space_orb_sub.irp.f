@@ -384,17 +384,17 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
-  do j=1,nO
-    !$OMP DO
-    do b=1,nV
-      call gpu_set_stream(blas,stream(b))
+  !$OMP DO
+  do b=1,nV
+    call gpu_set_stream(blas,stream(b))
+    do j=1,nO
       call gpu_dgeam_c(blas%c, 'N', 'N', nO*1_8, nV*1_8, &
          1.d0, c_loc(t2%f(1,j,1,b)), nO*nO*1_8, &
          h_t1(j,b), t1%c, nO*1_8, &
          c_loc(tau%f(1,j,1,b)), nO*nO*1_8)
     enddo
-    !$OMP END DO
   enddo
+  !$OMP END DO
   !$OMP END PARALLEL
 
   call gpu_synchronize()
