@@ -144,6 +144,16 @@ module gpu
       type(c_ptr), value :: a, b, c
     end subroutine
 
+    subroutine gpu_sgeam_c(handle, transa, transb, m, n, alpha, a, lda, beta, &
+      b, ldb, c, ldc) bind(C, name='gpu_sgeam')
+      import
+      type(c_ptr), intent(in)        :: handle
+      character(c_char), intent(in), value :: transa, transb
+      integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
+      real(c_float), intent(in), value :: alpha, beta
+      type(c_ptr), value :: a, b, c
+    end subroutine
+
   end interface
 
 
@@ -478,5 +488,57 @@ module gpu
       call gpu_blas_destroy_c(handle%c)
     end subroutine
 
+
 end module
+
+
+
+! dot
+! ---
+
+subroutine gpu_ddot(handle, n, dx, incx, dy, incy, res)
+  use gpu
+  type(gpu_blas), intent(in)     :: handle
+  integer*8                      :: n, incx, incy
+  double precision, intent(in)   :: dx(*), dy(*)
+  double precision, intent(out)    :: res
+  call gpu_ddot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
+end subroutine
+
+subroutine gpu_sdot(handle, n, dx, incx, dy, incy, res)
+  use gpu
+  type(gpu_blas), intent(in)     :: handle
+  integer*8                      :: n, incx, incy
+  real, intent(in)               :: dx(*), dy(*)
+  real, intent(out)              :: res
+  call gpu_sdot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
+end subroutine
+
+
+! geam
+! ----
+
+subroutine gpu_dgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
+  b, ldb, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*8, intent(in)        :: m, n, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  double precision             :: a(lda,*), b(ldb,*), c(ldc,*)
+  call gpu_dgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
+        c_loc(b), ldb, c_loc(c), ldc)
+end subroutine
+
+subroutine gpu_sgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
+  b, ldb, c, ldc)
+ use gpu 
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*8, intent(in)        :: m, n, lda, ldb, ldc
+  real, intent(in)             :: alpha, beta
+  real                         :: a(lda,*), b(ldb,*), c(ldc,*)
+  call gpu_sgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
+        c_loc(b), ldb, c_loc(c), ldc)
+end subroutine
 

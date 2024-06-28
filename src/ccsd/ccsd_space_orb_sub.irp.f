@@ -14,6 +14,9 @@ subroutine run_ccsd_space_orb
   type(gpu_double2) :: t1, r1
   type(gpu_double2) :: H_oo, H_vv, H_vo
 
+  type(gpu_double2) :: d_cc_space_f_vo
+  type(gpu_double4) :: d_cc_space_v_oovv
+
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
   integer(bit_kind)             :: det(N_int,2)
@@ -51,6 +54,12 @@ subroutine run_ccsd_space_orb
   !call extract_list_orb_space(det,nO,nV,list_occ,list_vir)
   !print*,'occ',list_occ
   !print*,'vir',list_vir
+
+  call gpu_allocate(d_cc_space_f_vo, nV, nO)
+  call gpu_allocate(d_cc_space_v_oovv, nO, nO, nV, nV)
+  call gpu_upload(cc_space_f_vo, d_cc_space_f_vo)
+  call gpu_upload(cc_space_v_oovv, d_cc_space_v_oovv)
+
 
   call gpu_allocate(t2, nO,nO,nV,nV)
   call gpu_allocate(r2, nO,nO,nV,nV)
@@ -116,7 +125,8 @@ subroutine run_ccsd_space_orb
   !print*,'hf_energy', hf_energy
   call det_energy(det,uncorr_energy)
   print*,'Det energy', uncorr_energy
-  call ccsd_energy_space_x(nO,nV,tau_x%f,t1%f,energy)
+
+  call ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,energy)
   print*,'Guess energy', uncorr_energy+energy, energy
 
   nb_iter = 0
@@ -166,7 +176,7 @@ subroutine run_ccsd_space_orb
     call update_tau_x_space(nO,nV,tau,tau_x)
 
     ! Energy
-    call ccsd_energy_space_x(nO,nV,tau_x%f,t1%f,energy)
+    call ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,energy)
     write(*,'(A3,I6,A3,F18.12,A3,F16.12,A3,ES10.2,A3,ES10.2,A2)') ' | ',nb_iter,' | ', uncorr_energy+energy,' | ', energy,' | ', max_r1,' | ', max_r2,' |'
 
     nb_iter = nb_iter + 1
@@ -239,6 +249,8 @@ subroutine run_ccsd_space_orb
   call save_energy(uncorr_energy + energy, e_t)
 
   deallocate(h_t1, h_t2)
+  call gpu_deallocate(d_cc_space_f_vo)
+  call gpu_deallocate(d_cc_space_v_oovv)
   call gpu_deallocate(t1)
   call gpu_deallocate(t2)
 
@@ -246,59 +258,14 @@ end
 
 ! Energy
 
-subroutine ccsd_energy_space(nO,nV,tau,t1,energy)
-
+subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,energy)
+  use gpu
   implicit none
 
-  integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: tau(nO,nO,nV,nV)
-  double precision, intent(in)  :: t1(nO,nV)
-  double precision, intent(out) :: energy
-
-  ! internal
-  integer :: i,j,a,b
-  double precision :: e
-
-  energy = 0d0
-  !$omp parallel &
-  !$omp shared(nO,nV,energy,tau,t1,&
-  !$omp cc_space_f_vo,cc_space_w_oovv) &
-  !$omp private(i,j,a,b,e) &
-  !$omp default(none)
-  e = 0d0
-  !$omp do
-  do a = 1, nV
-    do i = 1, nO
-      e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp do
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          e = e + tau(i,j,a,b) * cc_space_w_oovv(i,j,a,b)
-       enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp critical
-  energy = energy + e
-  !$omp end critical
-  !$omp end parallel
-
-end
-
-subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
-
-  implicit none
-
-  integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: tau_x(nO,nO,nV,nV)
-  double precision, intent(in)  :: t1(nO,nV)
-  double precision, intent(out) :: energy
+  integer, intent(in)            :: nO, nV
+  type(gpu_double4), intent(in)  :: tau_x, d_cc_space_v_oovv
+  type(gpu_double2), intent(in)  :: t1, d_cc_space_f_vo
+  double precision, intent(out)  :: energy
 
   ! internal
   integer :: i,j,a,b
@@ -307,14 +274,14 @@ subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
   energy = 0d0
   !$omp parallel &
   !$omp shared(nO,nV,energy,tau_x,t1,&
-  !$omp cc_space_f_vo,cc_space_v_oovv) &
+  !$omp d_cc_space_f_vo,d_cc_space_v_oovv) &
   !$omp private(i,j,a,b,e) &
   !$omp default(none)
   e = 0d0
   !$omp do
   do a = 1, nV
     do i = 1, nO
-      e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
+      e = e + 2d0 * d_cc_space_f_vo%f(a,i) * t1%f(i,a)
     enddo
   enddo
   !$omp end do nowait
@@ -323,7 +290,7 @@ subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
-          e = e + tau_x(i,j,a,b) * cc_space_v_oovv(i,j,a,b)
+          e = e + tau_x%f(i,j,a,b) * d_cc_space_v_oovv%f(i,j,a,b)
        enddo
       enddo
     enddo
@@ -333,6 +300,12 @@ subroutine ccsd_energy_space_x(nO,nV,tau_x,t1,energy)
   energy = energy + e
   !$omp end critical
   !$omp end parallel
+!
+!
+!   call gpu_ddot(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1, d_cc_space_v_oovv, 1, energy)
+!   call gpu_ddot(blas_handle, nO*nV*1_8, d_cc_space_f_vo, 1, t1, 1, e)
+!   energy = energy + 2.d0*e
+
 
 end
 
@@ -372,26 +345,24 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
 !  !$OMP END PARALLEL
 
 
-  type(gpu_blas) :: blas
   type(gpu_stream) :: stream(nV)
 
-  call gpu_blas_create(blas)
   do b=1,nV
     call gpu_stream_create(stream(b))
   enddo
 
   !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas) &
+  !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas_handle) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
   !$OMP DO
   do b=1,nV
-    call gpu_set_stream(blas,stream(b))
+    call gpu_set_stream(blas_handle,stream(b))
     do j=1,nO
-      call gpu_dgeam_c(blas%c, 'N', 'N', nO*1_8, nV*1_8, &
-         1.d0, c_loc(t2%f(1,j,1,b)), nO*nO*1_8, &
-         h_t1(j,b), t1%c, nO*1_8, &
-         c_loc(tau%f(1,j,1,b)), nO*nO*1_8)
+      call gpu_dgeam(blas_handle, 'N', 'N', nO*1_8, nV*1_8, &
+         1.d0, t2%f(1,j,1,b), nO*nO*1_8, &
+         h_t1(j,b), t1%f, nO*1_8, &
+         tau%f(1,j,1,b), nO*nO*1_8)
     enddo
   enddo
   !$OMP END DO
@@ -402,8 +373,6 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   do b=1,nV
     call gpu_stream_destroy(stream(b))
   enddo
-
-  call gpu_blas_destroy(blas)
 
 end
 
@@ -438,26 +407,24 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
 !  !$OMP END DO
 !  !$OMP END PARALLEL
 
-  type(gpu_blas) :: blas
   type(gpu_stream) :: stream(nV)
 
-  call gpu_blas_create(blas)
   do a=1,nV
     call gpu_stream_create(stream(a))
   enddo
 
   !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,tau,tau_x,stream,blas) &
+  !$OMP SHARED(nO,nV,tau,tau_x,stream,blas_handle) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
   !$OMP DO
   do b=1,nV
     do a=1,nV
-      call gpu_set_stream(blas,stream(a))
-      call gpu_dgeam_c(blas%c, 'N', 'N', nO*1_8, nO*1_8, &
-          2.d0, c_loc(tau%f(1,1,a,b)), nO*1_8, &
-         -1.d0, c_loc(tau%f(1,1,b,a)), nO*1_8, &
-         c_loc(tau_x%f(1,1,a,b)), nO*1_8)
+      call gpu_set_stream(blas_handle,stream(a))
+      call gpu_dgeam(blas_handle, 'N', 'N', nO*1_8, nO*1_8, &
+          2.d0, tau%f(1,1,a,b), nO*1_8, &
+         -1.d0, tau%f(1,1,b,a), nO*1_8, &
+         tau_x%f(1,1,a,b), nO*1_8)
     enddo
   enddo
   !$OMP END DO
@@ -468,8 +435,6 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   do b=1,nV
     call gpu_stream_destroy(stream(b))
   enddo
-
-  call gpu_blas_destroy(blas)
 
 end
 
