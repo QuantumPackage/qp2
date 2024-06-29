@@ -49,7 +49,12 @@ module gpu
 ! ------------
 
   interface
+    logical(c_bool) function no_gpu() bind(C)
+      import
+    end function
+
     integer function gpu_ndevices() bind(C)
+      import
     end function
 
     subroutine gpu_set_device(id) bind(C)
@@ -101,7 +106,7 @@ module gpu
 
     subroutine gpu_set_stream_c(handle, stream) bind(C, name='gpu_set_stream')
       import
-      type(c_ptr) :: handle, stream
+      type(c_ptr), value :: handle, stream
     end subroutine
 
     subroutine gpu_synchronize() bind(C)
@@ -120,15 +125,15 @@ module gpu
 
     subroutine gpu_ddot_c(handle, n, dx, incx, dy, incy, res) bind(C, name='gpu_ddot')
       import
-      type(c_ptr), intent(in)        :: handle
+      type(c_ptr), value, intent(in) :: handle
       integer(c_int64_t), value      :: n, incx, incy
-      type(c_ptr), intent(in), value :: dx, dy
+      type(c_ptr), value             :: dx, dy
       real(c_double), intent(out)    :: res
     end subroutine
 
     subroutine gpu_sdot_c(handle, n, dx, incx, dy, incy, res) bind(C, name='gpu_sdot')
       import
-      type(c_ptr), intent(in)        :: handle
+      type(c_ptr), value, intent(in) :: handle
       integer(c_int64_t), value      :: n, incx, incy
       type(c_ptr), intent(in), value :: dx, dy
       real(c_float), intent(out)  :: res
@@ -137,8 +142,8 @@ module gpu
     subroutine gpu_dgeam_c(handle, transa, transb, m, n, alpha, a, lda, beta, &
       b, ldb, c, ldc) bind(C, name='gpu_dgeam')
       import
-      type(c_ptr), intent(in)        :: handle
-      character(c_char), intent(in), value :: transa, transb
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_double), intent(in), value :: alpha, beta
       type(c_ptr), value :: a, b, c
@@ -147,9 +152,29 @@ module gpu
     subroutine gpu_sgeam_c(handle, transa, transb, m, n, alpha, a, lda, beta, &
       b, ldb, c, ldc) bind(C, name='gpu_sgeam')
       import
-      type(c_ptr), intent(in)        :: handle
-      character(c_char), intent(in), value :: transa, transb
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
+      real(c_float), intent(in), value :: alpha, beta
+      type(c_ptr), value :: a, b, c
+    end subroutine
+
+    subroutine gpu_dgemm_c(handle, transa, transb, m, n, k, alpha, a, lda, &
+      b, ldb, beta, c, ldc) bind(C, name='gpu_dgemm')
+      import
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in), value  :: transa, transb
+      integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
+      real(c_double), intent(in), value :: alpha, beta
+      type(c_ptr), value :: a, b, c
+    end subroutine
+
+    subroutine gpu_sgemm_c(handle, transa, transb, m, n, k, alpha, a, lda, &
+      b, ldb, beta, c, ldc) bind(C, name='gpu_sgemm')
+      import
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in), value  :: transa, transb
+      integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
       real(c_float), intent(in), value :: alpha, beta
       type(c_ptr), value :: a, b, c
     end subroutine
@@ -161,20 +186,26 @@ module gpu
 ! ----------------------
 
   interface gpu_allocate
-    procedure gpu_allocate_double1  &
-             ,gpu_allocate_double2  &
-             ,gpu_allocate_double3  &
-             ,gpu_allocate_double4  &
-             ,gpu_allocate_double5  &
-             ,gpu_allocate_double6
+    procedure gpu_allocate_double1     &
+             ,gpu_allocate_double2     &
+             ,gpu_allocate_double3     &
+             ,gpu_allocate_double4     &
+             ,gpu_allocate_double5     &
+             ,gpu_allocate_double6     &
+             ,gpu_allocate_double1_64  &
+             ,gpu_allocate_double2_64  &
+             ,gpu_allocate_double3_64  &
+             ,gpu_allocate_double4_64  &
+             ,gpu_allocate_double5_64  &
+             ,gpu_allocate_double6_64
   end interface gpu_allocate
 
   interface gpu_deallocate
-    procedure gpu_deallocate_double1  &
-             ,gpu_deallocate_double2  &
-             ,gpu_deallocate_double3  &
-             ,gpu_deallocate_double4  &
-             ,gpu_deallocate_double5  &
+    procedure gpu_deallocate_double1     &
+             ,gpu_deallocate_double2     &
+             ,gpu_deallocate_double3     &
+             ,gpu_deallocate_double4     &
+             ,gpu_deallocate_double5     &
              ,gpu_deallocate_double6
   end interface gpu_deallocate
 
@@ -261,6 +292,61 @@ module gpu
       implicit none
       type(gpu_double6), intent(inout) :: ptr
       integer, intent(in) :: s1, s2, s3, s4, s5, s6
+
+      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*s5*s6*8_8)
+      call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4, s5, s6 /))
+    end subroutine
+
+
+    subroutine gpu_allocate_double1_64(ptr, s)
+      implicit none
+      type(gpu_double1), intent(inout) :: ptr
+      integer*8, intent(in) :: s
+
+      call gpu_allocate_c(ptr%c, s)
+      call c_f_pointer(ptr%c, ptr%f, (/ s /))
+    end subroutine
+
+    subroutine gpu_allocate_double2_64(ptr, s1, s2)
+      implicit none
+      type(gpu_double2), intent(inout) :: ptr
+      integer*8, intent(in) :: s1, s2
+
+      call gpu_allocate_c(ptr%c, s1*s2*8_8)
+      call c_f_pointer(ptr%c, ptr%f, (/ s1, s2 /))
+    end subroutine
+
+    subroutine gpu_allocate_double3_64(ptr, s1, s2, s3)
+      implicit none
+      type(gpu_double3), intent(inout) :: ptr
+      integer*8, intent(in) :: s1, s2, s3
+
+      call gpu_allocate_c(ptr%c, s1*s2*s3*8_8)
+      call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3 /))
+    end subroutine
+
+    subroutine gpu_allocate_double4_64(ptr, s1, s2, s3, s4)
+      implicit none
+      type(gpu_double4), intent(inout) :: ptr
+      integer*8, intent(in) :: s1, s2, s3, s4
+
+      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*8_8)
+      call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4 /))
+    end subroutine
+
+    subroutine gpu_allocate_double5_64(ptr, s1, s2, s3, s4, s5)
+      implicit none
+      type(gpu_double5), intent(inout) :: ptr
+      integer*8, intent(in) :: s1, s2, s3, s4, s5
+
+      call gpu_allocate_c(ptr%c, s1*s2*s3*s4*s5*8_8)
+      call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4, s5 /))
+    end subroutine
+
+    subroutine gpu_allocate_double6_64(ptr, s1, s2, s3, s4, s5, s6)
+      implicit none
+      type(gpu_double6), intent(inout) :: ptr
+      integer*8, intent(in) :: s1, s2, s3, s4, s5, s6
 
       call gpu_allocate_c(ptr%c, s1*s2*s3*s4*s5*s6*8_8)
       call c_f_pointer(ptr%c, ptr%f, (/ s1, s2, s3, s4, s5, s6 /))
@@ -494,19 +580,38 @@ end module
 subroutine gpu_ddot(handle, n, dx, incx, dy, incy, res)
   use gpu
   type(gpu_blas), intent(in)     :: handle
-  integer*8                      :: n, incx, incy
-  double precision, target, intent(in)   :: dx(*), dy(*)
-  double precision, intent(out)    :: res
-  call gpu_ddot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
+  integer*4                      :: n, incx, incy
+  type(gpu_double1), intent(in)  :: dx, dy
+  double precision, intent(out)  :: res
+  call gpu_ddot_c(handle%c, int(n,c_int64_t), dx%c, int(incx,c_int64_t), dy%c, int(incy,c_int64_t), res)
 end subroutine
 
-subroutine gpu_sdot(handle, n, dx, incx, dy, incy, res)
+subroutine gpu_ddot_f(handle, n, dx, incx, dy, incy, res)
+  use gpu
+  type(gpu_blas), intent(in)     :: handle
+  integer*4                      :: n, incx, incy
+  double precision, target       :: dx(*), dy(*)
+  double precision, intent(out)  :: res
+  call gpu_ddot_c(handle%c, int(n,c_int64_t), c_loc(dx), int(incx,c_int64_t), c_loc(dy), int(incy,c_int64_t), res)
+end subroutine
+
+
+subroutine gpu_ddot_64(handle, n, dx, incx, dy, incy, res)
   use gpu
   type(gpu_blas), intent(in)     :: handle
   integer*8                      :: n, incx, incy
-  real, target, intent(in)       :: dx(*), dy(*)
-  real, intent(out)              :: res
-  call gpu_sdot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
+  type(gpu_double1), intent(in)  :: dx, dy
+  double precision, intent(out)  :: res
+  call gpu_ddot_c(handle%c, n, dx%c, incx, dy%c, incy, res)
+end subroutine
+
+subroutine gpu_ddot_f_64(handle, n, dx, incx, dy, incy, res)
+  use gpu
+  type(gpu_blas), intent(in)     :: handle
+  integer*8                      :: n, incx, incy
+  double precision, target       :: dx(*), dy(*)
+  double precision, intent(out)  :: res
+  call gpu_ddot_c(handle%c, n, c_loc(dx), incx, c_loc(dy), incy, res)
 end subroutine
 
 
@@ -518,22 +623,103 @@ subroutine gpu_dgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
   use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
-  integer*8, intent(in)        :: m, n, lda, ldb, ldc
+  integer*4, intent(in)        :: m, n, lda, ldb, ldc
   double precision, intent(in) :: alpha, beta
-  double precision, target     :: a(lda,*), b(ldb,*), c(ldc,*)
-  call gpu_dgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
-        c_loc(b), ldb, c_loc(c), ldc)
+  type(gpu_double2)            :: a, b, c
+  call gpu_dgeam_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), alpha, a%c, int(lda,c_int64_t), beta, &
+        b%c, int(ldb,c_int64_t), c%c, int(ldc,c_int64_t))
 end subroutine
 
-subroutine gpu_sgeam(handle, transa, transb, m, n, alpha, a, lda, beta, &
+
+subroutine gpu_dgeam_f(handle, transa, transb, m, n, alpha, a, lda, beta, &
   b, ldb, c, ldc)
- use gpu 
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*4, intent(in)        :: m, n, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  double precision, target     :: a(*), b(*), c(*)
+  call gpu_dgeam_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), alpha, c_loc(a), int(lda,c_int64_t), beta, &
+        c_loc(b), int(ldb,c_int64_t), c_loc(c), int(ldc,c_int64_t))
+end subroutine
+
+
+subroutine gpu_dgeam_64(handle, transa, transb, m, n, alpha, a, lda, beta, &
+  b, ldb, c, ldc)
+  use gpu
   type(gpu_blas), intent(in)   :: handle
   character, intent(in)        :: transa, transb
   integer*8, intent(in)        :: m, n, lda, ldb, ldc
-  real, intent(in)             :: alpha, beta
-  real, target                 :: a(lda,*), b(ldb,*), c(ldc,*)
-  call gpu_sgeam_c(handle%c, transa, transb, m, n, alpha, c_loc(a), lda, beta, &
-        c_loc(b), ldb, c_loc(c), ldc)
+  double precision, intent(in) :: alpha, beta
+  type(gpu_double2)            :: a, b, c
+  call gpu_dgeam_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), alpha, a%c, int(lda,c_int64_t), beta, &
+        b%c, int(ldb,c_int64_t), c%c, int(ldc,c_int64_t))
+end subroutine
+
+
+subroutine gpu_dgeam_f_64(handle, transa, transb, m, n, alpha, a, lda, beta, &
+  b, ldb, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*8, intent(in)        :: m, n, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  double precision, target     :: a(*), b(*), c(*)
+  call gpu_dgeam_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), alpha, c_loc(a), int(lda,c_int64_t), beta, &
+        c_loc(b), int(ldb,c_int64_t), c_loc(c), int(ldc,c_int64_t))
+end subroutine
+
+
+! gemm
+! ----
+
+subroutine gpu_dgemm(handle, transa, transb, m, n, k, alpha, a, lda, &
+  b, ldb, beta, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*4, intent(in)        :: m, n, k, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  type(gpu_double2)            :: a, b, c
+  call gpu_dgemm_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), int(k,c_int64_t), &
+        alpha, a%c, int(lda,c_int64_t), &
+        b%c, int(ldb,c_int64_t), beta, c%c, int(ldc,c_int64_t))
+end subroutine
+
+subroutine gpu_dgemm_64(handle, transa, transb, m, n, k, alpha, a, lda, &
+  b, ldb, beta, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*8, intent(in)        :: m, n, k, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  type(gpu_double2)            :: a, b, c
+  call gpu_dgemm_c(handle%c, transa, transb, m, n, k, &
+        alpha, a%c, lda, b%c, ldb, beta, c%c, ldc)
+end subroutine
+
+subroutine gpu_dgemm_f(handle, transa, transb, m, n, k, alpha, a, lda, &
+  b, ldb, beta, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*4, intent(in)        :: m, n, k, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  double precision, target     :: a(*), b(*), c(*)
+  call gpu_dgemm_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), int(k,c_int64_t), &
+        alpha, c_loc(a), int(lda,c_int64_t), &
+        c_loc(b), int(ldb,c_int64_t), beta, c_loc(c), int(ldc,c_int64_t))
+end subroutine
+
+subroutine gpu_dgemm_f_64(handle, transa, transb, m, n, k, alpha, a, lda, &
+  b, ldb, beta, c, ldc)
+  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa, transb
+  integer*8, intent(in)        :: m, n, k, lda, ldb, ldc
+  double precision, intent(in) :: alpha, beta
+  double precision, target     :: a(*), b(*), c(*)
+  call gpu_dgemm_c(handle%c, transa, transb, m, n, k, &
+        alpha, c_loc(a), lda, c_loc(b), ldb, beta, c_loc(c), ldc)
 end subroutine
 

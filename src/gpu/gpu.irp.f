@@ -8,4 +8,11 @@ BEGIN_PROVIDER [ type(gpu_blas), blas_handle ]
  call gpu_blas_create(blas_handle)
 END_PROVIDER
 
+BEGIN_PROVIDER [ type(gpu_stream), gpu_default_stream ]
+ implicit none
+ BEGIN_DOC
+ ! Default stream
+ END_DOC
+ gpu_default_stream%c = C_NULL_PTR
+END_PROVIDER
 
