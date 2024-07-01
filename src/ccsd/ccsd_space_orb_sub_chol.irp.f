@@ -1,81 +1,200 @@
-subroutine ccsd_energy_space_chol(nO,nV,tau,t1,energy)
+! H_oo
 
+subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
+    d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
+  use gpu
   implicit none
 
-  integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: tau(nO,nO,nV,nV)
-  double precision, intent(in)  :: t1(nO,nV)
-  double precision, intent(out) :: energy
+  integer, intent(in)           :: nO,nV
+  type(gpu_double2), intent(in)    :: d_cc_space_f_oo
+  type(gpu_double3), intent(in)    :: d_cc_space_v_ov_chol, d_cc_space_v_vo_chol
+  type(gpu_double4), intent(in)    :: tau_x
+  type(gpu_double2), intent(out)   :: H_oo
 
-  ! internal
-  integer :: i,j,a,b
-  double precision :: e
+  integer :: a,b,i,j,u,k
 
-  energy = 0d0
-  !$omp parallel &
-  !$omp shared(nO,nV,energy,tau,t1,&
-  !$omp cc_space_f_vo,cc_space_w_oovv) &
-  !$omp private(i,j,a,b,e) &
-  !$omp default(none)
-  e = 0d0
-  !$omp do
-  do a = 1, nV
-    do i = 1, nO
-      e = e + 2d0 * cc_space_f_vo(a,i) * t1(i,a)
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp do
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          e = e + tau(i,j,a,b) * cc_space_w_oovv(i,j,a,b)
-       enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do nowait
-  !$omp critical
-  energy = energy + e
-  !$omp end critical
-  !$omp end parallel
+  type(gpu_double3) :: tau_kau, tmp_vov, tmp_ovv
 
-end
+  call gpu_allocate(tau_kau, cholesky_mo_num, nV, nO)
 
-! Tau
+  type(gpu_blas) :: blas
 
-subroutine update_tau_space_chol(nO,nV,t1,t2,tau)
 
-  implicit none
+  !$OMP PARALLEL  &
+  !$OMP DEFAULT(SHARED) &
+  !$OMP PRIVATE(blas,u,b,tmp_vov,tmp_ovv)
 
-  ! in
-  integer, intent(in)           :: nO, nV
-  double precision, intent(in)  :: t1(nO,nV), t2(nO,nO,nV,nV)
+  !$OMP SINGLE
+  !$OMP TASK
+  call gpu_copy(d_cc_space_f_oo, H_oo)
+  !$OMP END TASK
+  !$OMP END SINGLE
 
-  ! out
-  double precision, intent(out) :: tau(nO,nO,nV,nV)
+  call gpu_allocate(tmp_ovv, nO, nV, nV)
+  call gpu_allocate(tmp_vov, nV, nO, nV)
 
-  ! internal
-  integer                       :: i,j,a,b
+  call gpu_blas_create(blas)
 
-  !$OMP PARALLEL &
-  !$OMP SHARED(nO,nV,tau,t2,t1) &
-  !$OMP PRIVATE(i,j,a,b) &
-  !$OMP DEFAULT(NONE)
   !$OMP DO
-  do b = 1, nV
-    do a = 1, nV
-      do j = 1, nO
-        do i = 1, nO
-          tau(i,j,a,b) = t2(i,j,a,b) + t1(i,a) * t1(j,b)
-        enddo
-      enddo
+  do u=1,nO
+    call gpu_dgeam_f(blas, 'N', 'N', 1, nO*nV*nV, 1.d0, &
+           tau_x%f(u,1,1,1), nO, 0.d0, tau_x%f, nO, tmp_ovv%f, 1)
+    do b=1,nV
+      call gpu_dgeam_f(blas, 'T', 'T', nV, nO, 1.d0, &
+           tmp_ovv%f(1,1,b), nO, 0.d0, &
+           tmp_ovv%f(1,1,b), nO, tmp_vov%f(1,1,b), nV)
     enddo
+    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nV,nO*nV,1.d0, &
+      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_vov%f, nV, &
+      0.d0, tau_kau%f(1,1,u), cholesky_mo_num)
   enddo
   !$OMP END DO
+
+  call gpu_blas_destroy(blas)
+
+  call gpu_deallocate(tmp_vov)
+  call gpu_deallocate(tmp_ovv)
+
+  !$OMP TASKWAIT
   !$OMP END PARALLEL
 
+  call gpu_dgemm(blas_handle, 'T', 'N', nO, nO, cholesky_mo_num*nV, 1.d0, &
+    tau_kau, cholesky_mo_num*nV,  d_cc_space_v_vo_chol, cholesky_mo_num*nV, &
+    1.d0, H_oo, nO)
+
+  call gpu_synchronize()
+  call gpu_deallocate(tau_kau)
+end
+
+! H_vv
+
+subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
+         d_cc_space_v_ov_chol,H_vv)
+  use gpu
+  implicit none
+
+  integer, intent(in)              :: nO,nV
+  type(gpu_double2), intent(in)    :: d_cc_space_f_vv
+  type(gpu_double3), intent(in)    :: d_cc_space_v_ov_chol
+  type(gpu_double4), intent(in)    :: tau_x
+  type(gpu_double2), intent(out)   :: H_vv
+
+  integer :: a,b,i,j,u,k, beta
+
+  type(gpu_double3) :: tau_kia, tmp_oov
+
+  call gpu_allocate(tau_kia, cholesky_mo_num, nO, nV)
+
+  type(gpu_blas) :: blas
+
+  !$OMP PARALLEL &
+  !$OMP DEFAULT(SHARED) &
+  !$OMP PRIVATE(a,b,tmp_oov,blas)
+
+  !$OMP SINGLE
+  !$OMP TASK
+  call gpu_copy(d_cc_space_f_vv, H_vv)
+  !$OMP END TASK
+  !$OMP END SINGLE
+
+  call gpu_blas_create(blas)
+  call gpu_allocate(tmp_oov, nO, nO, nV)
+
+  !$OMP DO
+  do a = 1, nV
+    do b=1,nV
+      call gpu_dgeam_f(blas, 'N', 'N', nO, nO, 1.d0, &
+        tau_x%f(1,1,a,b), nO, 0.d0, &
+        tau_x%f(1,1,a,b), nO, tmp_oov%f(1,1,b), nO)
+    enddo
+    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nO,nO*nV,1.d0, &
+      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_oov%f, nO, &
+      0.d0, tau_kia%f(1,1,a), cholesky_mo_num)
+  enddo
+  !$OMP END DO
+
+  call gpu_blas_destroy(blas)
+
+  call gpu_deallocate(tmp_oov)
+  !$OMP TASKWAIT
+  !$OMP END PARALLEL
+
+  call gpu_dgemm(blas_handle,'T', 'N', nV, nV, cholesky_mo_num*nO, -1.d0, &
+    tau_kia, cholesky_mo_num*nO,  d_cc_space_v_ov_chol, cholesky_mo_num*nO, &
+    1.d0, H_vv, nV)
+
+  call gpu_synchronize()
+  call gpu_deallocate(tau_kia)
+end
+
+! H_vo
+subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
+         d_cc_space_v_ov_chol,d_cc_space_v_vo_chol, H_vo)
+  use gpu
+  implicit none
+
+  integer, intent(in)            :: nO,nV
+  type(gpu_double2), intent(in)  :: t1, d_cc_space_f_vo
+  type(gpu_double3), intent(in)  :: d_cc_space_v_ov_chol, d_cc_space_v_vo_chol
+  type(gpu_double2), intent(out) :: H_vo
+
+  integer :: a,b,i,j,u,k
+
+  type(gpu_double1) :: tmp_k
+  type(gpu_double3) :: tmp, tmp2
+
+  call gpu_copy(d_cc_space_f_vo, H_vo)
+
+  call gpu_allocate(tmp_k, cholesky_mo_num)
+
+  call gpu_dgemm(blas_handle, 'N', 'N', cholesky_mo_num, 1, nO*nV, 2.d0, &
+     d_cc_space_v_ov_chol, cholesky_mo_num, &
+     t1, nO*nV, 0.d0, tmp_k, cholesky_mo_num)
+
+  call gpu_dgemm(blas_handle, 'T','N',nV*nO,1,cholesky_mo_num,1.d0, &
+      d_cc_space_v_vo_chol, cholesky_mo_num, tmp_k, cholesky_mo_num, 1.d0, &
+      H_vo, nV*nO)
+
+  call gpu_deallocate(tmp_k)
+
+
+  call gpu_allocate(tmp,  cholesky_mo_num, nO, nO)
+
+  call gpu_dgemm(blas_handle, 'N','T', cholesky_mo_num*nO, nO, nV, 1.d0, &
+    d_cc_space_v_ov_chol, cholesky_mo_num*nO, t1, nO, 0.d0, tmp, cholesky_mo_num*nO)
+
+  call gpu_allocate(tmp2, cholesky_mo_num, nO, nO)
+
+  type(gpu_stream) :: stream(nO)
+  do i=1,nO
+    call gpu_stream_create(stream(i))
+  enddo
+
+  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,j)
+  do i=1,nO
+    do j=1,nO
+      call gpu_set_stream(blas_handle,stream(j))
+      call gpu_dgeam_f(blas_handle, 'N', 'N', cholesky_mo_num, 1, 1.d0, &
+        tmp%f(1,i,j), cholesky_mo_num, 0.d0, &
+        tmp%f(1,i,j), cholesky_mo_num, tmp2%f(1,j,i), cholesky_mo_num)
+    enddo
+  enddo
+  !$OMP END PARALLEL DO
+
+  call gpu_set_stream(blas_handle,gpu_default_stream)
+  call gpu_synchronize()
+
+  do i=1,nO
+    call gpu_stream_destroy(stream(i))
+  enddo
+  call gpu_deallocate(tmp)
+
+  call gpu_dgemm(blas_handle, 'T','N', nV, nO, cholesky_mo_num*nO, -1.d0, &
+    d_cc_space_v_ov_chol, cholesky_mo_num*nO, tmp2, cholesky_mo_num*nO, &
+    1.d0, H_vo, nV)
+
+  call gpu_synchronize()
+  call gpu_deallocate(tmp2)
 end
 
 ! R1
@@ -288,251 +407,6 @@ subroutine compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1)
   enddo
   !$omp end do
   !$omp end parallel
-
-end
-
-! H_oo
-
-subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
-    d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
-  use gpu
-  implicit none
-
-  integer, intent(in)           :: nO,nV
-  type(gpu_double2), intent(in)    :: d_cc_space_f_oo
-  type(gpu_double3), intent(in)    :: d_cc_space_v_ov_chol, d_cc_space_v_vo_chol
-  type(gpu_double4), intent(in)    :: tau_x
-  type(gpu_double2), intent(out)   :: H_oo
-
-  integer :: a,b,i,j,u,k
-
-  type(gpu_double3) :: tau_kau, tmp_vov, tmp_ovv
-
-  call gpu_allocate(tau_kau, cholesky_mo_num, nV, nO)
-
-!  !$omp parallel &
-!  !$omp default(shared) &
-!  !$omp private(i,u,j,k,a,b,tmp_vov)
-!  call gpu_allocate(tmp_vov, nV, nO, nV)
-!  !$omp do
-!  do u = 1, nO
-!    do b=1,nV
-!      do j=1,nO
-!        do a=1,nV
-!          tmp_vov%f(a,j,b) = tau_x%f(u,j,a,b)
-!        enddo
-!      enddo
-!    enddo
-!    call dgemm('N','T',cholesky_mo_num,nV,nO*nV,1.d0, &
-!      d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num, tmp_vov%f, nV, &
-!      0.d0, tau_kau%f(1,1,u), cholesky_mo_num)
-!  enddo
-!  !$omp end do nowait
-!  call gpu_deallocate(tmp_vov)
-!  !$omp do
-!  do i = 1, nO
-!    do u = 1, nO
-!      H_oo%f(u,i) = d_cc_space_f_oo%f(u,i)
-!    enddo
-!  enddo
-!  !$omp end do nowait
-!
-!  !$omp barrier
-!  !$omp end  parallel
-!  call dgemm('T', 'N', nO, nO, cholesky_mo_num*nV, 1.d0, &
-!    tau_kau%f(1,1,1), cholesky_mo_num*nV,  d_cc_space_v_vo_chol%f(1,1,1), cholesky_mo_num*nV, &
-!    1.d0, H_oo%f(1,1), nO)
-!
-
-  type(gpu_blas) :: blas
-
-
-  !$OMP PARALLEL  &
-  !$OMP DEFAULT(SHARED) &
-  !$OMP PRIVATE(blas,u,b,tmp_vov,tmp_ovv)
-
-  !$OMP SINGLE
-  !$OMP TASK
-  call gpu_copy(d_cc_space_f_oo, H_oo)
-  !$OMP END TASK
-  !$OMP END SINGLE
-
-  call gpu_allocate(tmp_ovv, nO, nV, nV)
-  call gpu_allocate(tmp_vov, nV, nO, nV)
-
-  call gpu_blas_create(blas)
-
-  !$OMP DO
-  do u=1,nO
-    call gpu_dgeam_f(blas, 'N', 'N', 1, nO*nV*nV, 1.d0, &
-           tau_x%f(u,1,1,1), nO, 0.d0, tau_x%f, nO, tmp_ovv%f, 1)
-    do b=1,nV
-      call gpu_dgeam_f(blas, 'T', 'T', nV, nO, 1.d0, &
-           tmp_ovv%f(1,1,b), nO, 0.d0, &
-           tmp_ovv%f(1,1,b), nO, tmp_vov%f(1,1,b), nV)
-    enddo
-    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nV,nO*nV,1.d0, &
-      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_vov%f, nV, &
-      0.d0, tau_kau%f(1,1,u), cholesky_mo_num)
-  enddo
-  !$OMP END DO
-
-  call gpu_blas_destroy(blas)
-
-  call gpu_deallocate(tmp_vov)
-  call gpu_deallocate(tmp_ovv)
-
-  !$OMP TASKWAIT
-  !$OMP END PARALLEL
-
-  call gpu_dgemm(blas_handle, 'T', 'N', nO, nO, cholesky_mo_num*nV, 1.d0, &
-    tau_kau, cholesky_mo_num*nV,  d_cc_space_v_vo_chol, cholesky_mo_num*nV, &
-    1.d0, H_oo, nO)
-
-  call gpu_deallocate(tau_kau)
-end
-
-! H_vv
-
-subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
-         d_cc_space_v_ov_chol,H_vv)
-  use gpu
-  implicit none
-
-  integer, intent(in)              :: nO,nV
-  type(gpu_double2), intent(in)    :: d_cc_space_f_vv
-  type(gpu_double3), intent(in)    :: d_cc_space_v_ov_chol
-  type(gpu_double4), intent(in)    :: tau_x
-  type(gpu_double2), intent(out)   :: H_vv
-
-  integer :: a,b,i,j,u,k, beta
-
-  type(gpu_double3) :: tau_kia, tmp_oov
-
-  call gpu_allocate(tau_kia, cholesky_mo_num, nO, nV)
-
-!  !$omp parallel &
-!  !$omp default(shared) &
-!  !$omp private(i,beta,j,k,a,b,tmp_oov)
-!  allocate(tmp_oov(nO,nO,nV) )
-!  !$omp do
-!  do a = 1, nV
-!    do b=1,nV
-!      do j=1,nO
-!        do i=1,nO
-!          tmp_oov(i,j,b) = tau_x%f(i,j,a,b)
-!        enddo
-!      enddo
-!    enddo
-!    call dgemm('N','T',cholesky_mo_num,nO,nO*nV,1.d0, &
-!      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_oov, nO, &
-!      0.d0, tau_kia(1,1,a), cholesky_mo_num)
-!  enddo
-!  !$omp end do nowait
-!  deallocate(tmp_oov)
-
-!  !$omp do
-!  do beta = 1, nV
-!    do a = 1, nV
-!      H_vv%f(a,beta) = cc_space_f_vv(a,beta)
-!    enddo
-!  enddo
-!  !$omp end do nowait
-!  !$omp barrier
-!  !$omp end  parallel
-!  call dgemm('T', 'N', nV, nV, cholesky_mo_num*nO, -1.d0, &
-!    tau_kia, cholesky_mo_num*nO,  d_cc_space_v_ov_chol%f, cholesky_mo_num*nO, &
-!    1.d0, H_vv%f, nV)
-
-  type(gpu_blas) :: blas
-
-
-  PROVIDE gpu_num
-  !$OMP PARALLEL &
-  !$OMP DEFAULT(SHARED) &
-  !$OMP PRIVATE(a,b,tmp_oov,blas)
-
-  !$OMP SINGLE
-  !$OMP TASK
-  call gpu_copy(d_cc_space_f_vv, H_vv)
-  !$OMP END TASK
-  !$OMP END SINGLE
-
-  call gpu_blas_create(blas)
-  call gpu_allocate(tmp_oov, nO, nO, nV)
-
-  !$OMP DO
-  do a = 1, nV
-    do b=1,nV
-      call gpu_dgeam_f(blas, 'N', 'N', nO, nO, 1.d0, &
-        tau_x%f(1,1,a,b), nO, 0.d0, &
-        tau_x%f(1,1,a,b), nO, tmp_oov%f(1,1,b), nO)
-    enddo
-    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nO,nO*nV,1.d0, &
-      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_oov%f, nO, &
-      0.d0, tau_kia%f(1,1,a), cholesky_mo_num)
-  enddo
-  !$OMP END DO
-
-  call gpu_blas_destroy(blas)
-
-  call gpu_deallocate(tmp_oov)
-  !$OMP TASKWAIT
-  !$OMP END PARALLEL
-
-  call gpu_dgemm(blas_handle,'T', 'N', nV, nV, cholesky_mo_num*nO, -1.d0, &
-    tau_kia, cholesky_mo_num*nO,  d_cc_space_v_ov_chol, cholesky_mo_num*nO, &
-    1.d0, H_vv, nV)
-
-  call gpu_deallocate(tau_kia)
-end
-
-! H_vo
-subroutine compute_H_vo_chol(nO,nV,t1,H_vo)
-
-  implicit none
-
-  integer, intent(in)           :: nO,nV
-  double precision, intent(in)  :: t1(nO, nV)
-  double precision, intent(out) :: H_vo(nV, nO)
-
-  integer :: a,b,i,j,u,k
-
-  double precision, allocatable :: tmp_k(:), tmp(:,:,:), tmp2(:,:,:)
-  do i=1,nO
-    do a=1,nV
-      H_vo(a,i) = cc_space_f_vo(a,i)
-    enddo
-  enddo
-
-  allocate(tmp_k(cholesky_mo_num))
-  call dgemm('N', 'N', cholesky_mo_num, 1, nO*nV, 2.d0, &
-     cc_space_v_ov_chol, cholesky_mo_num, &
-     t1, nO*nV, 0.d0, tmp_k, cholesky_mo_num)
-
-  call dgemm('T','N',nV*nO,1,cholesky_mo_num,1.d0, &
-      cc_space_v_vo_chol, cholesky_mo_num, tmp_k, cholesky_mo_num, 1.d0, &
-      H_vo, nV*nO)
-  deallocate(tmp_k)
-
-  allocate(tmp(cholesky_mo_num,nO,nO))
-  allocate(tmp2(cholesky_mo_num,nO,nO))
-
-  call dgemm('N','T', cholesky_mo_num*nO, nO, nV, 1.d0, &
-    cc_space_v_ov_chol, cholesky_mo_num*nO, t1, nO, 0.d0, tmp, cholesky_mo_num*nO)
-
-  do i=1,nO
-    do j=1,nO
-      do k=1,cholesky_mo_num
-        tmp2(k,j,i) = tmp(k,i,j)
-      enddo
-    enddo
-  enddo
-  deallocate(tmp)
-
-  call dgemm('T','N', nV, nO, cholesky_mo_num*nO, -1.d0, &
-    cc_space_v_ov_chol, cholesky_mo_num*nO, tmp2, cholesky_mo_num*nO, &
-    1.d0, H_vo, nV)
 
 end
 

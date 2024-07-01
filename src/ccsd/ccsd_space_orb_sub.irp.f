@@ -181,11 +181,9 @@ subroutine run_ccsd_space_orb
 
     ! Residue
     if (do_mo_cholesky) then
-      call compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
-              d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
-      call compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
-              d_cc_space_v_ov_chol,H_vv)
-      call compute_H_vo_chol(nO,nV,t1%f,H_vo%f)
+      call compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
+      call compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, d_cc_space_v_ov_chol,H_vv)
+      call compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, d_cc_space_v_ov_chol,d_cc_space_v_vo_chol, H_vo)
 
       call compute_r1_space_chol(nO,nV,t1%f,t2%f,tau%f,H_oo%F,H_vv%F,H_vo%F,r1%f,max_r1)
       call compute_r2_space_chol(nO,nV,t1%f,t2%f,tau%f,H_oo%F,H_vv%F,H_vo%F,r2%f,max_r2)
@@ -316,51 +314,20 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   integer :: i,j,a,b
   double precision :: e
 
-!  energy = 0d0
-!  !$omp parallel &
-!  !$omp shared(nO,nV,energy,tau_x,t1,&
-!  !$omp d_cc_space_f_vo,d_cc_space_v_oovv) &
-!  !$omp private(i,j,a,b,e) &
-!  !$omp default(none)
-!  e = 0d0
-!  !$omp do
-!  do a = 1, nV
-!    do i = 1, nO
-!      e = e + 2d0 * d_cc_space_f_vo%f(a,i) * t1%f(i,a)
-!    enddo
-!  enddo
-!  !$omp end do nowait
-!  !$omp do
-!  do b = 1, nV
-!    do a = 1, nV
-!      do j = 1, nO
-!        do i = 1, nO
-!          e = e + tau_x%f(i,j,a,b) * d_cc_space_v_oovv%f(i,j,a,b)
-!       enddo
-!      enddo
-!    enddo
-!  enddo
-!  !$omp end do nowait
-!  !$omp critical
-!  energy = energy + e
-!  !$omp end critical
-!  !$omp end parallel
+  type(gpu_stream) :: s1, s2
+  call gpu_stream_create(s1)
+  call gpu_stream_create(s2)
 
+  call gpu_set_stream(blas_handle,s1)
+  call gpu_ddot(blas_handle, nO*nV, d_cc_space_f_vo, 1, t1, 1, e)
 
-   type(gpu_stream) :: s1, s2
-   call gpu_stream_create(s1)
-   call gpu_stream_create(s2)
+  call gpu_set_stream(blas_handle,s2)
+  call gpu_ddot_64(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1_8, d_cc_space_v_oovv, 1_8, energy)
+  call gpu_set_stream(blas_handle,gpu_default_stream)
 
-   call gpu_set_stream(blas_handle,s1)
-   call gpu_ddot(blas_handle, nO*nV, d_cc_space_f_vo, 1, t1, 1, e)
-
-   call gpu_set_stream(blas_handle,s2)
-   call gpu_ddot_64(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1_8, d_cc_space_v_oovv, 1_8, energy)
-   call gpu_synchronize()
-   call gpu_set_stream(blas_handle,gpu_default_stream)
-
-   call gpu_stream_destroy(s1)
-   call gpu_stream_destroy(s2)
+  call gpu_synchronize()
+  call gpu_stream_destroy(s1)
+  call gpu_stream_destroy(s2)
 
    energy = energy + 2.d0*e
 
@@ -384,27 +351,9 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   ! internal
   integer                       :: i,j,a,b
 
-!  !$OMP PARALLEL &
-!  !$OMP SHARED(nO,nV,tau,t2,t1,h_t1) &
-!  !$OMP PRIVATE(i,j,a,b) &
-!  !$OMP DEFAULT(NONE)
-!  !$OMP DO
-!  do b = 1, nV
-!    do a = 1, nV
-!      do j = 1, nO
-!        do i = 1, nO
-!          tau%f(i,j,a,b) = t2%f(i,j,a,b) + t1%f(i,a) * h_t1(j,b)
-!        enddo
-!      enddo
-!    enddo
-!  enddo
-!  !$OMP END DO
-!  !$OMP END PARALLEL
-
-
   type(gpu_stream) :: stream(nV)
 
-  !$OMP PARALLEL if (gpu_num == 0) &
+  !$OMP PARALLEL &
   !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas_handle) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
@@ -421,6 +370,8 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
+
+  call gpu_synchronize()
 
   do b=1,nV
     call gpu_stream_destroy(stream(b))
@@ -444,32 +395,15 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   ! internal
   integer                       :: i,j,a,b
 
-!  !$OMP PARALLEL &
-!  !$OMP SHARED(nO,nV,tau,tau_x) &
-!  !$OMP PRIVATE(i,j,a,b) &
-!  !$OMP DEFAULT(NONE)
-!  !$OMP DO
-!  do b = 1, nV
-!    do a = 1, nV
-!      do j = 1, nO
-!        do i = 1, nO
-!          tau_x%f(i,j,a,b) = 2.d0*tau%f(i,j,a,b) - tau%f(i,j,b,a)
-!        enddo
-!      enddo
-!    enddo
-!  enddo
-!  !$OMP END DO
-!  !$OMP END PARALLEL
-
   type(gpu_stream) :: stream(nV)
 
   do a=1,nV
     call gpu_stream_create(stream(a))
   enddo
 
-  !$OMP PARALLEL if (gpu_num == 0) &
+  !$OMP PARALLEL &
   !$OMP SHARED(nO,nV,tau,tau_x,stream,blas_handle) &
-  !$OMP PRIVATE(i,j,a,b) &
+  !$OMP PRIVATE(a,b) &
   !$OMP DEFAULT(NONE)
   !$OMP DO
   do b=1,nV
@@ -484,10 +418,12 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   !$OMP END DO
   !$OMP END PARALLEL
 
+  call gpu_set_stream(blas_handle,gpu_default_stream)
+  call gpu_synchronize()
+
   do b=1,nV
     call gpu_stream_destroy(stream(b))
   enddo
-  call gpu_set_stream(blas_handle,gpu_default_stream)
 
 
 end
