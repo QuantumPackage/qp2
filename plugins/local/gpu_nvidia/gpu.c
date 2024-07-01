@@ -11,10 +11,6 @@
 
 /* Generic functions */
 
-bool no_gpu() {
- return false;
-}
-
 int gpu_ndevices() {
   int ngpus;
   cudaGetDeviceCount(&ngpus);
@@ -35,13 +31,13 @@ void gpu_allocate(void** ptr, const int64_t size) {
       free = INT64_MAX;
     }
 
-    /* Use managed memory if it does not fit on the GPU */
-    if (size < free && size < total/2) {
+    rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
+//    /* Use managed memory if it does not fit on the GPU */
+//    if (size < free && size < total/2) {
 //      rc= cudaMalloc(ptr, size);
-      rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
-    } else {
-      rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
-    }
+//    } else {
+//      rc = cudaMallocManaged(ptr, size, cudaMemAttachGlobal);
+//    }
     assert (rc == cudaSuccess);
 }
 

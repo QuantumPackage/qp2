@@ -5,14 +5,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
-bool no_gpu() {
- return true;
-}
-
 /* Generic functions */
 
 int gpu_ndevices() {
-  return 1;
+  return 0;
 }
 
 void gpu_set_device(int32_t i) {

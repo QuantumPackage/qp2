@@ -183,7 +183,8 @@ subroutine run_ccsd_space_orb
     if (do_mo_cholesky) then
       call compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
               d_cc_space_v_ov_chol,d_cc_space_v_vo_chol,H_oo)
-      call compute_H_vv_chol(nO,nV,tau_x,H_vv)
+      call compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
+              d_cc_space_v_ov_chol,H_vv)
       call compute_H_vo_chol(nO,nV,t1%f,H_vo%f)
 
       call compute_r1_space_chol(nO,nV,t1%f,t2%f,tau%f,H_oo%F,H_vv%F,H_vo%F,r1%f,max_r1)
@@ -403,7 +404,7 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
 
   type(gpu_stream) :: stream(nV)
 
-  !$OMP PARALLEL if (no_gpu()) &
+  !$OMP PARALLEL if (gpu_num == 0) &
   !$OMP SHARED(nO,nV,tau,t2,t1,h_t1,stream,blas_handle) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)
@@ -466,7 +467,7 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
     call gpu_stream_create(stream(a))
   enddo
 
-  !$OMP PARALLEL if (no_gpu()) &
+  !$OMP PARALLEL if (gpu_num == 0) &
   !$OMP SHARED(nO,nV,tau,tau_x,stream,blas_handle) &
   !$OMP PRIVATE(i,j,a,b) &
   !$OMP DEFAULT(NONE)

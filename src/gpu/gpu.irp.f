@@ -16,3 +16,11 @@ BEGIN_PROVIDER [ type(gpu_stream), gpu_default_stream ]
  gpu_default_stream%c = C_NULL_PTR
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, gpu_num ]
+ implicit none
+ BEGIN_DOC
+ ! Number of usable GPUs
+ END_DOC
+ gpu_num = gpu_ndevices()
+END_PROVIDER
+
