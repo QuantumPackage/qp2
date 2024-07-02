@@ -49,10 +49,11 @@ void gpu_copy(const void* gpu_ptr_src, void* gpu_ptr_dest, const int64_t n) {
 /* Streams */
 
 void gpu_stream_create(void** ptr) {
-  *ptr = (void*) 2;
+  *ptr = (void*) malloc(sizeof(char));
 }
 
 void gpu_stream_destroy(void** ptr) {
+  free(*ptr);
   *ptr = NULL;
 }
 
@@ -68,11 +69,12 @@ void gpu_synchronize() {
 /* BLAS functions */
 
 void gpu_blas_create(void** handle) {
-  *handle = (void*) 1;
+  *handle = (void*) malloc(sizeof(char));
 }
 
 
 void gpu_blas_destroy(void** handle) {
+  free(*handle);
   *handle = NULL;
 }
 
@@ -122,7 +124,7 @@ void gpu_sdot(void* handle, const int64_t n, const float* x, const int64_t incx,
 void dgemv_(const char* transa, const int32_t* m, const int32_t* n, const double* alpha,
             const double* a, const int32_t* lda, const double* x, const int32_t* incx, const double* beta, double* y, const int32_t* incy);
 
-void gpu_dgemv(void* handle, const char transa, const int64_t m, const int64_t n, const double alpha,
+void gpu_dgemv(void* handle, const char* transa, const int64_t m, const int64_t n, const double alpha,
                const double* a, const int64_t lda, const double* x, const int64_t incx, const double beta, double* y, const int64_t incy) {
 
   assert (handle != NULL);
@@ -143,14 +145,14 @@ void gpu_dgemv(void* handle, const char transa, const int64_t m, const int64_t n
   assert ( (int64_t) incx_ == incx);
   assert ( (int64_t) incy_ == incy);
 
-  dgemv_(&transa, &m_, &n_, &alpha, a, &lda_, x, &incx_, &beta, y, &incy_);
+  dgemv_(transa, &m_, &n_, &alpha, a, &lda_, x, &incx_, &beta, y, &incy_);
 }
 
 
 void sgemv_(const char* transa, const int32_t* m, const int32_t* n, const float* alpha,
                const float* a, const int32_t* lda, const float* x, const int32_t* incx, const float* beta, float* y, const int32_t* incy);
 
-void gpu_sgemv(void* handle, const char transa, const int64_t m, const int64_t n, const float alpha,
+void gpu_sgemv(void* handle, const char* transa, const int64_t m, const int64_t n, const float alpha,
                const float* a, const int64_t lda, const float* x, const int64_t incx, const float beta, float* y, const int64_t incy) {
 
   assert (handle != NULL);
@@ -171,14 +173,14 @@ void gpu_sgemv(void* handle, const char transa, const int64_t m, const int64_t n
   assert ( (int64_t) incx_ == incx);
   assert ( (int64_t) incy_ == incy);
 
-  sgemv_(&transa, &m_, &n_, &alpha, a, &lda_, x, &incx_, &beta, y, &incy_);
+  sgemv_(transa, &m_, &n_, &alpha, a, &lda_, x, &incx_, &beta, y, &incy_);
 }
 
 
 void dgemm_(const char* transa, const char* transb, const int32_t* m, const int32_t* n, const int32_t* k, const double* alpha,
             const double* a, const int32_t* lda, const double* b, const int32_t* ldb, const double* beta, double* c, const int32_t* ldc);
 
-void gpu_dgemm(void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const double alpha,
+void gpu_dgemm(void* handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const double alpha,
                const double* a, const int64_t lda, const double* b, const int64_t ldb, const double beta, double* c, const int64_t ldc) {
 
   assert (handle != NULL);
@@ -201,7 +203,7 @@ void gpu_dgemm(void* handle, const char transa, const char transb, const int64_t
   assert ( (int64_t) ldb_ == ldb);
   assert ( (int64_t) ldc_ == ldc);
 
-  dgemm_(&transa, &transb, &m_, &n_, &k_, &alpha, a, &lda_, b, &ldb_, &beta, c, &ldc_);
+  dgemm_(transa, transb, &m_, &n_, &k_, &alpha, a, &lda_, b, &ldb_, &beta, c, &ldc_);
 }
 
 
@@ -209,7 +211,7 @@ void gpu_dgemm(void* handle, const char transa, const char transb, const int64_t
 void sgemm_(const char* transa, const char* transb, const int32_t* m, const int32_t* n, const int32_t* k, const float* alpha,
             const float* a, const int32_t* lda, const float* b, const int32_t* ldb, const float* beta, float* c, const int32_t* ldc);
 
-void gpu_sgemm(void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const float alpha,
+void gpu_sgemm(void* handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const float alpha,
                const float* a, const int64_t lda, const float* b, const int64_t ldb, const float beta, float* c, const int64_t ldc) {
 
   assert (handle != NULL);
@@ -232,18 +234,18 @@ void gpu_sgemm(void* handle, const char transa, const char transb, const int64_t
   assert ( (int64_t) ldb_ == ldb);
   assert ( (int64_t) ldc_ == ldc);
 
-  sgemm_(&transa, &transb, &m_, &n_, &k_, &alpha, a, &lda_, b, &ldb_, &beta, c, &ldc_);
+  sgemm_(transa, transb, &m_, &n_, &k_, &alpha, a, &lda_, b, &ldb_, &beta, c, &ldc_);
 }
 
 
-void gpu_dgeam(void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const double alpha,
+void gpu_dgeam(void* handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const double alpha,
                const double* a, const int64_t lda, const double beta, const double* b, const int64_t ldb, double* c, const int64_t ldc) {
   assert (handle != NULL);
 
-  if ( (transa == 'N' && transb == 'N') ||
-       (transa == 'n' && transb == 'N') ||
-       (transa == 'N' && transb == 'n') ||
-       (transa == 'n' && transb == 'n') ) {
+  if ( (*transa == 'N' && *transb == 'N') ||
+       (*transa == 'n' && *transb == 'N') ||
+       (*transa == 'N' && *transb == 'n') ||
+       (*transa == 'n' && *transb == 'n') ) {
 
      if (alpha == 0.) {
 
@@ -271,10 +273,10 @@ void gpu_dgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'N' && transb == 'T') ||
-              (transa == 'n' && transb == 'T') ||
-              (transa == 'N' && transb == 't') ||
-              (transa == 'n' && transb == 't') ) {
+  } else if ( (*transa == 'N' && *transb == 'T') ||
+              (*transa == 'n' && *transb == 'T') ||
+              (*transa == 'N' && *transb == 't') ||
+              (*transa == 'n' && *transb == 't') ) {
 
      if (alpha == 0.) {
 
@@ -302,10 +304,10 @@ void gpu_dgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'T' && transb == 'N') ||
-              (transa == 't' && transb == 'N') ||
-              (transa == 'T' && transb == 'n') ||
-              (transa == 't' && transb == 'n') ) {
+  } else if ( (*transa == 'T' && *transb == 'N') ||
+              (*transa == 't' && *transb == 'N') ||
+              (*transa == 'T' && *transb == 'n') ||
+              (*transa == 't' && *transb == 'n') ) {
 
      if (alpha == 0.) {
 
@@ -333,10 +335,10 @@ void gpu_dgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'T' && transb == 'T') ||
-              (transa == 't' && transb == 'T') ||
-              (transa == 'T' && transb == 't') ||
-              (transa == 't' && transb == 't') ) {
+  } else if ( (*transa == 'T' && *transb == 'T') ||
+              (*transa == 't' && *transb == 'T') ||
+              (*transa == 'T' && *transb == 't') ||
+              (*transa == 't' && *transb == 't') ) {
 
      if (alpha == 0.) {
 
@@ -368,14 +370,14 @@ void gpu_dgeam(void* handle, const char transa, const char transb, const int64_t
 }
 
 
-void gpu_sgeam(void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const float alpha,
+void gpu_sgeam(void* handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const float alpha,
                const float* a, const int64_t lda, const float beta, const float* b, const int64_t ldb, float* c, const int64_t ldc) {
   assert (handle != NULL);
 
-  if ( (transa == 'N' && transb == 'N') ||
-       (transa == 'n' && transb == 'N') ||
-       (transa == 'N' && transb == 'n') ||
-       (transa == 'n' && transb == 'n') ) {
+  if ( (*transa == 'N' && *transb == 'N') ||
+       (*transa == 'n' && *transb == 'N') ||
+       (*transa == 'N' && *transb == 'n') ||
+       (*transa == 'n' && *transb == 'n') ) {
 
      if (alpha == 0.) {
 
@@ -403,10 +405,10 @@ void gpu_sgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'N' && transb == 'T') ||
-              (transa == 'n' && transb == 'T') ||
-              (transa == 'N' && transb == 't') ||
-              (transa == 'n' && transb == 't') ) {
+  } else if ( (*transa == 'N' && *transb == 'T') ||
+              (*transa == 'n' && *transb == 'T') ||
+              (*transa == 'N' && *transb == 't') ||
+              (*transa == 'n' && *transb == 't') ) {
 
      if (alpha == 0.) {
 
@@ -434,10 +436,10 @@ void gpu_sgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'T' && transb == 'N') ||
-              (transa == 't' && transb == 'N') ||
-              (transa == 'T' && transb == 'n') ||
-              (transa == 't' && transb == 'n') ) {
+  } else if ( (*transa == 'T' && *transb == 'N') ||
+              (*transa == 't' && *transb == 'N') ||
+              (*transa == 'T' && *transb == 'n') ||
+              (*transa == 't' && *transb == 'n') ) {
 
      if (alpha == 0.) {
 
@@ -465,10 +467,10 @@ void gpu_sgeam(void* handle, const char transa, const char transb, const int64_t
 
      }
 
-  } else if ( (transa == 'T' && transb == 'T') ||
-              (transa == 't' && transb == 'T') ||
-              (transa == 'T' && transb == 't') ||
-              (transa == 't' && transb == 't') ) {
+  } else if ( (*transa == 'T' && *transb == 'T') ||
+              (*transa == 't' && *transb == 'T') ||
+              (*transa == 'T' && *transb == 't') ||
+              (*transa == 't' && *transb == 't') ) {
 
      if (alpha == 0.) {
 

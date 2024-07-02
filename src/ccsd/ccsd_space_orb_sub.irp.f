@@ -319,10 +319,10 @@ subroutine ccsd_energy_space_x(nO,nV,d_cc_space_v_oovv,d_cc_space_f_vo,tau_x,t1,
   call gpu_stream_create(s2)
 
   call gpu_set_stream(blas_handle,s1)
-  call gpu_ddot(blas_handle, nO*nV, d_cc_space_f_vo, 1, t1, 1, e)
+  call gpu_ddot(blas_handle, nO*nV, d_cc_space_f_vo%f(1,1), 1, t1%f(1,1), 1, e)
 
   call gpu_set_stream(blas_handle,s2)
-  call gpu_ddot_64(blas_handle, nO*nO*nV*nV*1_8, tau_x, 1_8, d_cc_space_v_oovv, 1_8, energy)
+  call gpu_ddot_64(blas_handle, nO*nO*nV*nV*1_8, tau_x%f(1,1,1,1), 1_8, d_cc_space_v_oovv%f(1,1,1,1), 1_8, energy)
   call gpu_set_stream(blas_handle,gpu_default_stream)
 
   call gpu_synchronize()
@@ -362,9 +362,9 @@ subroutine update_tau_space(nO,nV,h_t1,t1,t2,tau)
     call gpu_stream_create(stream(b))
     call gpu_set_stream(blas_handle,stream(b))
     do j=1,nO
-      call gpu_dgeam_f(blas_handle, 'N', 'N', nO, nV, &
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, &
          1.d0, t2%f(1,j,1,b), nO*nO, &
-         h_t1(j,b), t1%f, nO, &
+         h_t1(j,b), t1%f(1,1), nO, &
          tau%f(1,j,1,b), nO*nO)
     enddo
   enddo
@@ -409,7 +409,7 @@ subroutine update_tau_x_space(nO,nV,tau,tau_x)
   do b=1,nV
     do a=1,nV
       call gpu_set_stream(blas_handle,stream(a))
-      call gpu_dgeam_f(blas_handle, 'N', 'N', nO, nO, &
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nO, &
           2.d0, tau%f(1,1,a,b), nO, &
          -1.d0, tau%f(1,1,b,a), nO, &
          tau_x%f(1,1,a,b), nO)

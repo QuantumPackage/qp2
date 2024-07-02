@@ -37,15 +37,15 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
 
   !$OMP DO
   do u=1,nO
-    call gpu_dgeam_f(blas, 'N', 'N', 1, nO*nV*nV, 1.d0, &
-           tau_x%f(u,1,1,1), nO, 0.d0, tau_x%f, nO, tmp_ovv%f, 1)
+    call gpu_dgeam(blas, 'N', 'N', 1, nO*nV*nV, 1.d0, &
+           tau_x%f(u,1,1,1), nO, 0.d0, tau_x%f(1,1,1,1), nO, tmp_ovv%f(1,1,1), 1)
     do b=1,nV
-      call gpu_dgeam_f(blas, 'T', 'T', nV, nO, 1.d0, &
+      call gpu_dgeam(blas, 'T', 'T', nV, nO, 1.d0, &
            tmp_ovv%f(1,1,b), nO, 0.d0, &
            tmp_ovv%f(1,1,b), nO, tmp_vov%f(1,1,b), nV)
     enddo
-    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nV,nO*nV,1.d0, &
-      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_vov%f, nV, &
+    call gpu_dgemm(blas, 'N','T',cholesky_mo_num,nV,nO*nV,1.d0, &
+      d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num, tmp_vov%f(1,1,1), nV, &
       0.d0, tau_kau%f(1,1,u), cholesky_mo_num)
   enddo
   !$OMP END DO
@@ -59,8 +59,8 @@ subroutine compute_H_oo_chol(nO,nV,tau_x,d_cc_space_f_oo, &
   !$OMP END PARALLEL
 
   call gpu_dgemm(blas_handle, 'T', 'N', nO, nO, cholesky_mo_num*nV, 1.d0, &
-    tau_kau, cholesky_mo_num*nV,  d_cc_space_v_vo_chol, cholesky_mo_num*nV, &
-    1.d0, H_oo, nO)
+    tau_kau%f(1,1,1), cholesky_mo_num*nV,  d_cc_space_v_vo_chol%f(1,1,1), cholesky_mo_num*nV, &
+    1.d0, H_oo%f(1,1), nO)
 
   call gpu_synchronize()
   call gpu_deallocate(tau_kau)
@@ -103,12 +103,12 @@ subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
   !$OMP DO
   do a = 1, nV
     do b=1,nV
-      call gpu_dgeam_f(blas, 'N', 'N', nO, nO, 1.d0, &
+      call gpu_dgeam(blas, 'N', 'N', nO, nO, 1.d0, &
         tau_x%f(1,1,a,b), nO, 0.d0, &
         tau_x%f(1,1,a,b), nO, tmp_oov%f(1,1,b), nO)
     enddo
-    call gpu_dgemm_f(blas, 'N','T',cholesky_mo_num,nO,nO*nV,1.d0, &
-      d_cc_space_v_ov_chol%f, cholesky_mo_num, tmp_oov%f, nO, &
+    call gpu_dgemm(blas, 'N', 'T', cholesky_mo_num, nO, nO*nV, 1.d0, &
+      d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num, tmp_oov%f(1,1,1), nO, &
       0.d0, tau_kia%f(1,1,a), cholesky_mo_num)
   enddo
   !$OMP END DO
@@ -119,9 +119,9 @@ subroutine compute_H_vv_chol(nO,nV,tau_x,d_cc_space_f_vv, &
   !$OMP TASKWAIT
   !$OMP END PARALLEL
 
-  call gpu_dgemm(blas_handle,'T', 'N', nV, nV, cholesky_mo_num*nO, -1.d0, &
-    tau_kia, cholesky_mo_num*nO,  d_cc_space_v_ov_chol, cholesky_mo_num*nO, &
-    1.d0, H_vv, nV)
+  call gpu_dgemm(blas_handle, 'T', 'N', nV, nV, cholesky_mo_num*nO, -1.d0, &
+    tau_kia%f(1,1,1), cholesky_mo_num*nO,  d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num*nO, &
+    1.d0, H_vv%f(1,1), nV)
 
   call gpu_synchronize()
   call gpu_deallocate(tau_kia)
@@ -148,20 +148,20 @@ subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
   call gpu_allocate(tmp_k, cholesky_mo_num)
 
   call gpu_dgemm(blas_handle, 'N', 'N', cholesky_mo_num, 1, nO*nV, 2.d0, &
-     d_cc_space_v_ov_chol, cholesky_mo_num, &
-     t1, nO*nV, 0.d0, tmp_k, cholesky_mo_num)
+     d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num, &
+     t1%f(1,1), nO*nV, 0.d0, tmp_k%f(1), cholesky_mo_num)
 
-  call gpu_dgemm(blas_handle, 'T','N',nV*nO,1,cholesky_mo_num,1.d0, &
-      d_cc_space_v_vo_chol, cholesky_mo_num, tmp_k, cholesky_mo_num, 1.d0, &
-      H_vo, nV*nO)
+  call gpu_dgemm(blas_handle, 'T', 'N', nV*nO, 1, cholesky_mo_num, 1.d0, &
+      d_cc_space_v_vo_chol%f(1,1,1), cholesky_mo_num, tmp_k%f(1), cholesky_mo_num, 1.d0, &
+      H_vo%f(1,1), nV*nO)
 
   call gpu_deallocate(tmp_k)
 
 
   call gpu_allocate(tmp,  cholesky_mo_num, nO, nO)
 
-  call gpu_dgemm(blas_handle, 'N','T', cholesky_mo_num*nO, nO, nV, 1.d0, &
-    d_cc_space_v_ov_chol, cholesky_mo_num*nO, t1, nO, 0.d0, tmp, cholesky_mo_num*nO)
+  call gpu_dgemm(blas_handle, 'N', 'T', cholesky_mo_num*nO, nO, nV, 1.d0, &
+    d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num*nO, t1%f(1,1), nO, 0.d0, tmp%f(1,1,1), cholesky_mo_num*nO)
 
   call gpu_allocate(tmp2, cholesky_mo_num, nO, nO)
 
@@ -174,7 +174,7 @@ subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
   do i=1,nO
     do j=1,nO
       call gpu_set_stream(blas_handle,stream(j))
-      call gpu_dgeam_f(blas_handle, 'N', 'N', cholesky_mo_num, 1, 1.d0, &
+      call gpu_dgeam(blas_handle, 'N', 'N', cholesky_mo_num, 1, 1.d0, &
         tmp%f(1,i,j), cholesky_mo_num, 0.d0, &
         tmp%f(1,i,j), cholesky_mo_num, tmp2%f(1,j,i), cholesky_mo_num)
     enddo
@@ -190,8 +190,8 @@ subroutine compute_H_vo_chol(nO,nV,t1,d_cc_space_f_vo, &
   call gpu_deallocate(tmp)
 
   call gpu_dgemm(blas_handle, 'T','N', nV, nO, cholesky_mo_num*nO, -1.d0, &
-    d_cc_space_v_ov_chol, cholesky_mo_num*nO, tmp2, cholesky_mo_num*nO, &
-    1.d0, H_vo, nV)
+    d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num*nO, tmp2%f(1,1,1), cholesky_mo_num*nO, &
+    1.d0, H_vo%f(1,1), nV)
 
   call gpu_synchronize()
   call gpu_deallocate(tmp2)
