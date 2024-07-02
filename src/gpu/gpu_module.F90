@@ -136,7 +136,7 @@ module gpu
       type(c_ptr), value, intent(in) :: handle
       integer(c_int64_t), value      :: n, incx, incy
       type(c_ptr), intent(in), value :: dx, dy
-      real(c_float), intent(out)  :: res
+      real(c_float), intent(out)     :: res
     end subroutine
 
     subroutine gpu_dgeam_c(handle, transa, transb, m, n, alpha, a, lda, beta, &
@@ -145,7 +145,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
-      real(c_double), intent(in), value :: alpha, beta
+      real(c_double), intent(in), value      :: alpha, beta
       type(c_ptr), value :: a, b, c
     end subroutine
 
@@ -155,9 +155,30 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
-      real(c_float), intent(in), value :: alpha, beta
+      real(c_float), intent(in), value      :: alpha, beta
       real(c_float) :: a, b, c
     end subroutine
+
+    subroutine gpu_dgemv_c(handle, transa, m, n, alpha, a, lda, &
+      x, incx, beta, y, incy) bind(C, name='gpu_dgemv')
+      import
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in)         :: transa
+      integer(c_int64_t), intent(in), value :: m, n, lda, incx, incy
+      real(c_double), intent(in), value     :: alpha, beta
+      real(c_double)                        :: a, x, y
+    end subroutine
+
+    subroutine gpu_sgemv_c(handle, transa, m, n, alpha, a, lda, &
+      x, incx, beta, y, incy) bind(C, name='gpu_sgemv')
+      import
+      type(c_ptr), value, intent(in)        :: handle
+      character(c_char), intent(in)         :: transa
+      integer(c_int64_t), intent(in), value :: m, n, lda, incx, incy
+      real(c_float), intent(in), value      :: alpha, beta
+      real(c_float)                         :: a, x, y
+    end subroutine
+
 
     subroutine gpu_dgemm_c(handle, transa, transb, m, n, k, alpha, a, lda, &
       b, ldb, beta, c, ldc) bind(C, name='gpu_dgemm')
@@ -622,6 +643,36 @@ subroutine gpu_dgeam_64(handle, transa, transb, m, n, alpha, a, lda, beta, &
   double precision, target     :: a, b, c
   call gpu_dgeam_c(handle%c, transa, transb, int(m,c_int64_t), int(n,c_int64_t), alpha, c_loc(a), int(lda,c_int64_t), beta, &
         c_loc(b), int(ldb,c_int64_t), c_loc(c), int(ldc,c_int64_t))
+end subroutine
+
+
+! gemv
+! ----
+
+subroutine gpu_dgemv(handle, transa, m, n, alpha, a, lda, &
+  x, incx, beta, y, incy)
+!  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa
+  integer*4, intent(in)        :: m, n, lda, incx, incy
+  double precision, intent(in) :: alpha, beta
+  double precision             :: a, x, y
+  call gpu_dgemv_c(handle%c, transa, int(m,c_int64_t), int(n,c_int64_t), &
+        alpha, a, int(lda,c_int64_t), &
+        x, int(incx,c_int64_t), beta, y, int(incy,c_int64_t))
+end subroutine
+
+subroutine gpu_dgemv_64(handle, transa, m, n, alpha, a, lda, &
+  x, incx, beta, y, incy)
+!  use gpu
+  type(gpu_blas), intent(in)   :: handle
+  character, intent(in)        :: transa
+  integer*8, intent(in)        :: m, n, lda, incx, incy
+  double precision, intent(in) :: alpha, beta
+  double precision             :: a, x, y
+  call gpu_dgemv_c(handle%c, transa, int(m,c_int64_t), int(n,c_int64_t), &
+        alpha, a, int(lda,c_int64_t), &
+        x, int(incx,c_int64_t), beta, y, int(incy,c_int64_t))
 end subroutine
 
 
