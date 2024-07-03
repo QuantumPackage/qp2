@@ -158,9 +158,9 @@ END_PROVIDER
          Lset(np8) = p8
        endif
      enddo
-     np = np8
+     if (np8 > ndim8) stop 'np>ndim8'
+     np = int(np8,4)
      if (np <= 0) stop 'np<=0'
-     if (np > ndim8) stop 'np>ndim8'
 
      rank_max = min(np,20*elec_num*elec_num)
      call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
@@ -431,7 +431,7 @@ END_PROVIDER
            Lset(np8) = p8
          endif
        enddo
-       np = np8
+       np = int(np8,4)
 
      enddo
 
