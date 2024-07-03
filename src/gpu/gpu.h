@@ -22,20 +22,20 @@ void gpu_ddot(const void* handle, const int64_t n, const double* x, const int64_
 
 void gpu_sdot(const void* handle, const int64_t n, const float* x, const int64_t incx, const float* y, const int64_t incy, float* result);
 
-void gpu_dgemv(const void* handle, const char transa, const int64_t m, const int64_t n, const double alpha,
-               const double* a, const int64_t lda, const double* x, const int64_t incx, const double beta, double* y, const int64_t incy);
+void gpu_dgemv(const void* handle, const char transa, const int64_t m, const int64_t n, const double* alpha,
+               const double* a, const int64_t lda, const double* x, const int64_t incx, const double* beta, double* y, const int64_t incy);
 
-void gpu_sgemv(const void* handle, const char transa, const int64_t m, const int64_t n, const float alpha,
-               const float* a, const int64_t lda, const float* x, const int64_t incx, const float beta, float* y, const int64_t incy);
+void gpu_sgemv(const void* handle, const char transa, const int64_t m, const int64_t n, const float* alpha,
+               const float* a, const int64_t lda, const float* x, const int64_t incx, const float* beta, float* y, const int64_t incy);
 
-void gpu_dgemm(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const double alpha,
-               const double* a, const int64_t lda, const double* b, const int64_t ldb, const double beta, double* c, const int64_t ldc);
+void gpu_dgemm(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const double* alpha,
+               const double* a, const int64_t lda, const double* b, const int64_t ldb, const double* beta, double* c, const int64_t ldc);
 
-void gpu_sgemm(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const float alpha,
-               const float* a, const int64_t lda, const float* b, const int64_t ldb, const float beta, float* c, const int64_t ldc);
+void gpu_sgemm(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const int64_t k, const float* alpha,
+               const float* a, const int64_t lda, const float* b, const int64_t ldb, const float* beta, float* c, const int64_t ldc);
 
-void gpu_dgeam(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const double alpha,
-               const double* a, const int64_t lda, const double beta, const double* b, const int64_t ldb, double* c, const int64_t ldc);
+void gpu_dgeam(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const double* alpha,
+               const double* a, const int64_t lda, const double* beta, const double* b, const int64_t ldb, double* c, const int64_t ldc);
 
-void gpu_sgeam(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const float alpha,
-               const float* a, const int64_t lda, const float beta, const float* b, const int64_t ldb, float* c, const int64_t ldc);
+void gpu_sgeam(const void* handle, const char transa, const char transb, const int64_t m, const int64_t n, const float* alpha,
+               const float* a, const int64_t lda, const float* beta, const float* b, const int64_t ldb, float* c, const int64_t ldc);

@@ -116,11 +116,6 @@ void gpu_ddot(cublasHandle_t handle, const int64_t n, const double* x, const int
   assert ( (int64_t) incy_ == incy);
 
   cublasStatus_t rc = cublasDdot(handle, n_, x, incx_, y, incy_, result);
-/*
-  double alpha = 1.0;
-  double beta = 0.0;
-  cublasStatus_t rc = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 1, 1, n_, &alpha, x, 1, y, n_, &beta, &result_, 1);
-*/
   assert (rc == CUBLAS_STATUS_SUCCESS);
 }
 
@@ -149,8 +144,8 @@ void gpu_sdot(cublasHandle_t handle, const int64_t n, const float* x, const int6
 
 
 
-void gpu_dgemv(cublasHandle_t handle, const char* transa, const int64_t m, const int64_t n, const double alpha,
-               const double* a, const int64_t lda, const double* x, const int64_t incx, const double beta, double* y, const int64_t incy) {
+void gpu_dgemv(cublasHandle_t handle, const char* transa, const int64_t m, const int64_t n, const double* alpha,
+               const double* a, const int64_t lda, const double* x, const int64_t incx, const double* beta, double* y, const int64_t incy) {
 
   assert (handle != NULL);
 
@@ -173,13 +168,13 @@ void gpu_dgemv(cublasHandle_t handle, const char* transa, const int64_t m, const
   cublasOperation_t transa_ = CUBLAS_OP_N;
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
 
-  cublasDgemv(handle, transa_, m_, n_, &alpha, a, lda_, x, incx_, &beta, y, incy_);
+  cublasDgemv(handle, transa_, m_, n_, alpha, a, lda_, x, incx_, beta, y, incy_);
 }
 
 
 
-void gpu_sgemv(cublasHandle_t handle, const char* transa, const int64_t m, const int64_t n, const float alpha,
-               const float* a, const int64_t lda, const float* x, const int64_t incx, const float beta, float* y, const int64_t incy) {
+void gpu_sgemv(cublasHandle_t handle, const char* transa, const int64_t m, const int64_t n, const float* alpha,
+               const float* a, const int64_t lda, const float* x, const int64_t incx, const float* beta, float* y, const int64_t incy) {
 
   assert (handle != NULL);
 
@@ -202,12 +197,12 @@ void gpu_sgemv(cublasHandle_t handle, const char* transa, const int64_t m, const
   cublasOperation_t transa_ = CUBLAS_OP_N;
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
 
-  cublasSgemv(handle, transa_, m_, n_, &alpha, a, lda_, x, incx_, &beta, y, incy_);
+  cublasSgemv(handle, transa_, m_, n_, alpha, a, lda_, x, incx_, beta, y, incy_);
 }
 
 
-void gpu_dgemm(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const double alpha,
-               const double* a, const int64_t lda, const double* b, const int64_t ldb, const double beta, double* c, const int64_t ldc) {
+void gpu_dgemm(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const double* alpha,
+               const double* a, const int64_t lda, const double* b, const int64_t ldb, const double* beta, double* c, const int64_t ldc) {
 
   assert (handle != NULL);
 
@@ -234,13 +229,13 @@ void gpu_dgemm(cublasHandle_t handle, const char* transa, const char* transb, co
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
   if (*transb == 'T' || *transb == 't') transb_ = CUBLAS_OP_T;
 
-  cublasDgemm(handle, transa_, transb_, m_, n_, k_, &alpha, a, lda_, b, ldb_, &beta, c, ldc_);
+  cublasDgemm(handle, transa_, transb_, m_, n_, k_, alpha, a, lda_, b, ldb_, beta, c, ldc_);
 }
 
 
 
-void gpu_sgemm(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const float alpha,
-               const float* a, const int64_t lda, const float* b, const int64_t ldb, const float beta, float* c, const int64_t ldc) {
+void gpu_sgemm(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const int64_t k, const float* alpha,
+               const float* a, const int64_t lda, const float* b, const int64_t ldb, const float* beta, float* c, const int64_t ldc) {
 
   assert (handle != NULL);
 
@@ -267,12 +262,12 @@ void gpu_sgemm(cublasHandle_t handle, const char* transa, const char* transb, co
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
   if (*transb == 'T' || *transb == 't') transb_ = CUBLAS_OP_T;
 
-  cublasSgemm(handle, transa_, transb_, m_, n_, k_, &alpha, a, lda_, b, ldb_, &beta, c, ldc_);
+  cublasSgemm(handle, transa_, transb_, m_, n_, k_, alpha, a, lda_, b, ldb_, beta, c, ldc_);
 }
 
 
-void gpu_dgeam(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const double alpha,
-               const double* a, const int64_t lda, const double beta, const double* b, const int64_t ldb, double* c, const int64_t ldc) {
+void gpu_dgeam(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const double* alpha,
+               const double* a, const int64_t lda, const double* beta, const double* b, const int64_t ldb, double* c, const int64_t ldc) {
   assert (handle != NULL);
 
   /* Convert to int */
@@ -296,13 +291,13 @@ void gpu_dgeam(cublasHandle_t handle, const char* transa, const char* transb, co
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
   if (*transb == 'T' || *transb == 't') transb_ = CUBLAS_OP_T;
 
-  cublasDgeam(handle, transa_, transb_, m_, n_, &alpha, a, lda_, &beta, b, ldb_, c, ldc_);
+  cublasDgeam(handle, transa_, transb_, m_, n_, alpha, a, lda_, beta, b, ldb_, c, ldc_);
 
 }
 
 
-void gpu_sgeam(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const float alpha,
-               const float* a, const int64_t lda, const float beta, const float* b, const int64_t ldb, float* c, const int64_t ldc) {
+void gpu_sgeam(cublasHandle_t handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const float* alpha,
+               const float* a, const int64_t lda, const float* beta, const float* b, const int64_t ldb, float* c, const int64_t ldc) {
   assert (handle != NULL);
 
   /* Convert to int */
@@ -326,6 +321,6 @@ void gpu_sgeam(cublasHandle_t handle, const char* transa, const char* transb, co
   if (*transa == 'T' || *transa == 't') transa_ = CUBLAS_OP_T;
   if (*transb == 'T' || *transb == 't') transb_ = CUBLAS_OP_T;
 
-  cublasSgeam(handle, transa_, transb_, m_, n_, &alpha, a, lda_, &beta, b, ldb_, c, ldc_);
+  cublasSgeam(handle, transa_, transb_, m_, n_, alpha, a, lda_, beta, b, ldb_, c, ldc_);
 
 }

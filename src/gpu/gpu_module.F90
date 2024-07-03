@@ -145,7 +145,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
-      real(c_double), intent(in), value      :: alpha, beta
+      real(c_double), intent(in)            :: alpha, beta
       type(c_ptr), value :: a, b, c
     end subroutine
 
@@ -155,7 +155,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
-      real(c_float), intent(in), value      :: alpha, beta
+      real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
     end subroutine
 
@@ -165,7 +165,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in)         :: transa
       integer(c_int64_t), intent(in), value :: m, n, lda, incx, incy
-      real(c_double), intent(in), value     :: alpha, beta
+      real(c_double), intent(in)            :: alpha, beta
       real(c_double)                        :: a, x, y
     end subroutine
 
@@ -175,7 +175,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in)         :: transa
       integer(c_int64_t), intent(in), value :: m, n, lda, incx, incy
-      real(c_float), intent(in), value      :: alpha, beta
+      real(c_float), intent(in)             :: alpha, beta
       real(c_float)                         :: a, x, y
     end subroutine
 
@@ -186,7 +186,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
-      real(c_double), intent(in), value :: alpha, beta
+      real(c_double), intent(in)            :: alpha, beta
       real(c_double) :: a, b, c
     end subroutine
 
@@ -196,7 +196,7 @@ module gpu
       type(c_ptr), value, intent(in)        :: handle
       character(c_char), intent(in), value  :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
-      real(c_float), intent(in), value :: alpha, beta
+      real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
     end subroutine
 
