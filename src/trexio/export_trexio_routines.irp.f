@@ -557,7 +557,7 @@ subroutine export_trexio(update,full_path)
     do k=1,cholesky_ao_num
      do j=1,mo_num
       do i=1,mo_num
-         integral = cholesky_mo(i,j,k)
+         integral = cholesky_mo_transp(k,i,j)
          if (integral == 0.d0) cycle
          icount += 1_8
          chol_buffer(icount) = integral

@@ -40,7 +40,7 @@ end
  ! Min and max values of the MOs for which the integrals are in the cache
  END_DOC
 
- mo_integrals_cache_size  = 2_8**mo_integrals_cache_shift
+ mo_integrals_cache_size  = 2**mo_integrals_cache_shift
 
  mo_integrals_cache_min = max(1,elec_alpha_num - (mo_integrals_cache_size/2 - 1) )
  mo_integrals_cache_max = min(mo_num, mo_integrals_cache_min + mo_integrals_cache_size - 1)
