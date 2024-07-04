@@ -392,8 +392,8 @@ end
 ! R2
 
 subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
-    d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, &
-    d_cc_space_v_vvoo, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
+    d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, d_cc_space_v_oovo, d_cc_space_v_ovvo, d_cc_space_v_ovoo, &
+    d_cc_space_v_ovov, d_cc_space_v_vvoo, d_cc_space_v_oo_chol, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
     r2,max_r2)
   use gpu
   implicit none
@@ -403,9 +403,11 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   type(gpu_double2), intent(in)  :: t1, H_oo, H_vv
   type(gpu_double4), intent(in)  :: t2, tau, d_cc_space_v_oovv
   type(gpu_double4), intent(in)  :: d_cc_space_v_vooo, d_cc_space_v_oooo
-  type(gpu_double4), intent(in)  :: d_cc_space_v_vvoo
-  type(gpu_double3), intent(in)  :: d_cc_space_v_ov_chol, d_cc_space_v_vv_chol
-  type(gpu_double3), intent(in)  :: d_cc_space_v_vo_chol
+  type(gpu_double4), intent(in)  :: d_cc_space_v_vvoo, d_cc_space_v_oovo
+  type(gpu_double4), intent(in)  :: d_cc_space_v_ovvo, d_cc_space_v_ovoo
+  type(gpu_double4), intent(in)  :: d_cc_space_v_ovov
+  type(gpu_double3), intent(in)  :: d_cc_space_v_oo_chol, d_cc_space_v_ov_chol
+  type(gpu_double3), intent(in)  :: d_cc_space_v_vo_chol, d_cc_space_v_vv_chol
 
   ! out
   double precision, intent(out)  :: max_r2
@@ -499,9 +501,11 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   call gpu_allocate(X_oovv,nO,nO,nV,nV)
   call gpu_copy(t2,X_oovv)
 
-  type(gpu_double2) :: g_vir
+  type(gpu_double2) :: g_occ, g_vir
   call gpu_allocate(g_vir,nV,nV)
+  call gpu_allocate(g_occ,nO,nO)
   call compute_g_vir_chol(nO,nV,t1%f,t2%f,H_vv%f,g_vir%f)
+  call compute_g_occ_chol(nO,nV,t1%f,t2%f,H_oo%f,g_occ%f)
 
   type(gpu_double4) :: Y_oovv
   call gpu_allocate(Y_oovv,nO,nO,nV,nV)
@@ -511,7 +515,41 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
                   g_vir%f(1,1), size(g_vir%f,1), &
              0d0, Y_oovv%f(1,1,1,1), size(Y_oovv%f,1) * size(Y_oovv%f,2) * size(Y_oovv%f,3))
 
+  call gpu_dgemm(blas_handle, 'N','N',nO,nO*nV*nV,nO, &
+             -1d0, g_occ%f(1,1), size(g_occ%f,1), &
+                  t2%f(1,1,1,1)    , size(t2%f,1), &
+             1d0, Y_oovv%f(1,1,1,1), size(Y_oovv%f,1))
+
+  call gpu_dgemm(blas_handle, 'N','N',nO*nO*nV,nV,nO, &
+            -1d0, d_cc_space_v_oovo%f(1,1,1,1), size(cc_space_v_oovo,1) * size(cc_space_v_oovo,2) * size(cc_space_v_oovo,3), &
+                  t1%f(1,1) , size(t1%f,1), &
+             1d0, Y_oovv%f(1,1,1,1), size(Y_oovv%f,1) * size(Y_oovv%f,2) * size(Y_oovv%f,3))
+
   call gpu_synchronize()
+  call gpu_deallocate(X_oovv)
+
+  call gpu_deallocate(g_vir)
+  call gpu_deallocate(g_occ)
+
+  type(gpu_double4) :: X_vovo, Y_oovo
+  call gpu_allocate(X_vovo,nV,nO,nV,nO)
+
+!  !$omp parallel &
+!  !$omp shared(nO,nV,r2,Y_oovv) &
+!  !$omp private(u,v,gam,beta) &
+!  !$omp default(none)
+!  !$omp do
+!  do gam = 1, nV
+!    do beta = 1, nV
+!      do v = 1, nO
+!        do u = 1, nO
+!           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) + Y_oovv%f(u,v,beta,gam) + Y_oovv%f(v,u,gam,beta)
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$omp end do
+!  !$omp end parallel
 
   do a=1,nV
     call gpu_stream_create(stream(a))
@@ -527,52 +565,24 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     enddo
   enddo
 
-  call gpu_deallocate(g_vir)
-  call gpu_set_stream(blas_handle, gpu_default_stream)
+  do i = 1, nO
+    do gam = 1, nV
+      call gpu_set_stream(blas_handle, stream(gam))
+      call gpu_dgeam(blas_handle, 'T', 'N', nV, nO, 1.d0, d_cc_space_v_ovvo%f(1,1,gam,i), &
+           nO, 0.d0, X_vovo%f(1,1,gam,i), nV, X_vovo%f(1,1,gam,i), nV)
+    enddo
+  enddo
 
   do a=1,nV
     call gpu_stream_destroy(stream(a))
   enddo
+  call gpu_set_stream(blas_handle, gpu_default_stream)
 
-  call gpu_deallocate(Y_oovv)
-
-  type(gpu_double2) :: g_occ
-  call gpu_allocate(g_occ,nO,nO)
-
-  call compute_g_occ_chol(nO,nV,t1%f,t2%f,H_oo%f,g_occ%f)
-
-  call gpu_dgemm(blas_handle, 'N','N',nO,nO*nV*nV,nO, &
-             1d0, g_occ%f(1,1), size(g_occ%f,1), &
-                  t2%f(1,1,1,1)    , size(t2%f,1), &
-             0d0, X_oovv%f(1,1,1,1), size(X_oovv%f,1))
-
-  call gpu_synchronize()
-
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,X_oovv) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
-  do gam = 1, nV
-    do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-          r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - X_oovv%f(u,v,beta,gam) - X_oovv%f(v,u,gam,beta)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
-
-  call gpu_deallocate(g_occ)
-  call gpu_deallocate(X_oovv)
 
   type(gpu_double4) :: X_vovv
 
   call gpu_allocate(X_vovv,nV,nO,nV,block_size)
-  call gpu_allocate(Y_oovv,nO,nO,nV,nV)
-
+  call gpu_allocate(Y_oovo,nO,nO,nV,nO)
 
   do iblock = 1, nV, block_size
     do gam = iblock, min(nV, iblock+block_size-1)
@@ -590,241 +600,176 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     call gpu_synchronize()
 
     call gpu_set_stream(blas_handle, gpu_default_stream)
-    call dgemm('N','N',nO,nO*nV*min(block_size, nV-iblock+1),nV, &
-             1d0, t1%f    , size(t1%f,1), &
-                  X_vovv%f, size(X_vovv%f,1), &
+    call gpu_dgemm(blas_handle, 'N','N', nO, &
+             nO*nV*min(block_size, nV-iblock+1),nV, &
+             1.d0, t1%f(1,1)    , size(t1%f,1), &
+             X_vovv%f(1,1,1,1), size(X_vovv%f,1), &
              0d0, Y_oovv%f(1,1,1,iblock), size(Y_oovv%f,1))
 
   enddo
+
+  call gpu_dgemm(blas_handle, 'N','N',nO,nO*nV*nO,nV, &
+             1d0, t1%f(1,1), size(t1%f,1), &
+                  X_vovo%f(1,1,1,1), size(X_vovo%f,1), &
+             0d0, Y_oovo%f(1,1,1,1), size(Y_oovo%f,1))
+
+  call gpu_dgemm(blas_handle, 'N','N',nO*nO*nV, nV, nO, &
+            -1d0, Y_oovo%f(1,1,1,1), size(Y_oovo%f,1) * size(Y_oovo%f,2) * size(Y_oovo%f,3), &
+                  t1%f(1,1)    , size(t1%f,1), &
+             1d0, Y_oovv%f(1,1,1,1), size(Y_oovv%f,1) * size(Y_oovv%f,2) * size(Y_oovv%f,3))
+
   call gpu_synchronize()
   call gpu_deallocate(X_vovv)
+  call gpu_deallocate(X_vovo)
+  call gpu_deallocate(Y_oovo)
 
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,Y_oovv) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
+!  !$omp parallel &
+!  !$omp shared(nO,nV,r2,Y_oovv) &
+!  !$omp private(u,v,gam,beta) &
+!  !$omp default(none)
+!  !$omp do
+!  do gam = 1, nV
+!    do beta = 1, nV
+!      do v = 1, nO
+!        do u = 1, nO
+!           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) + Y_oovv%f(u,v,gam,beta) + Y_oovv%f(v,u,beta,gam)
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!  !$omp end do
+!  !$omp end parallel
+
+  do a=1,nV
+    call gpu_stream_create(stream(a))
+  enddo
+
   do gam = 1, nV
     do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-          r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) + Y_oovv%f(v,u,beta,gam) + Y_oovv%f(u,v,gam,beta)
-        enddo
-      enddo
+      call gpu_set_stream(blas_handle, stream(beta))
+      call gpu_dgeam(blas_handle, 'T', 'N', nO, nO, 1.d0, Y_oovv%f(1,1,beta,gam), &
+           nO, 1.d0, r2%f(1,1,beta,gam), nO, r2%f(1,1,beta,gam), nO)
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nO, 1.d0, r2%f(1,1,beta,gam), &
+           nO, 1.d0, Y_oovv%f(1,1,gam,beta), nO, r2%f(1,1,beta,gam), nO)
     enddo
   enddo
-  !$omp end do
-  !$omp end parallel
+
+  call gpu_set_stream(blas_handle, gpu_default_stream)
+
+  do a=1,nV
+    call gpu_stream_destroy(stream(a))
+  enddo
+
+
+  call gpu_synchronize()
   call gpu_deallocate(Y_oovv)
 
-  double precision, allocatable :: X_ovvo(:,:,:,:)
-  double precision, allocatable :: tcc(:,:,:), tcc2(:,:,:)
-  allocate(tcc2(cholesky_mo_num,nV,nO), X_ovvo(nO,nV,nV,nO))
-  allocate(tcc(cholesky_mo_num,nO,nV))
+  type(gpu_double4) :: X_ovvo
+  type(gpu_double3) :: tcc, tcc2
+  call gpu_allocate(tcc2,cholesky_mo_num,nV,nO)
+  call gpu_allocate(X_ovvo,nO,nV,nV,nO)
+  call gpu_allocate(tcc,cholesky_mo_num,nO,nV)
 
-  call dgemm('N','T', cholesky_mo_num*nV, nO, nV, 1.d0, &
-     d_cc_space_v_vv_chol%f, cholesky_mo_num*nV, t1%f, nO, &
-     0.d0, tcc2, cholesky_mo_num*nV)
+  call gpu_dgemm(blas_handle, 'N','T', cholesky_mo_num*nV, nO, nV, 1.d0, &
+     d_cc_space_v_vv_chol%f(1,1,1), cholesky_mo_num*nV, t1%f(1,1), nO, &
+     0.d0, tcc2%f(1,1,1), cholesky_mo_num*nV)
 
-  call dgemm('N','N', cholesky_mo_num*nO, nV, nO, 1.d0, &
-     cc_space_v_oo_chol, cholesky_mo_num*nO, t1%f, nO, &
-     0.d0, tcc, cholesky_mo_num*nO)
+  call gpu_dgemm(blas_handle, 'N','N', cholesky_mo_num*nO, nV, nO, 1.d0, &
+     d_cc_space_v_oo_chol%f(1,1,1), cholesky_mo_num*nO, t1%f(1,1), nO, &
+     0.d0, tcc%f(1,1,1), cholesky_mo_num*nO)
 
-  call dgemm('T','N', nO*nV, nV*nO, cholesky_mo_num, 1.d0, &
-              tcc, cholesky_mo_num, tcc2, cholesky_mo_num, 0.d0, &
-              X_ovvo, nO*nV)
+  call gpu_dgemm(blas_handle, 'T','N', nO*nV, nV*nO, cholesky_mo_num, 1.d0, &
+              tcc%f(1,1,1), cholesky_mo_num, tcc2%f(1,1,1), cholesky_mo_num, 0.d0, &
+              X_ovvo%f(1,1,1,1), nO*nV)
 
-  deallocate(tcc, tcc2)
+  call gpu_synchronize()
 
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,X_ovvo) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
+  do a=1,nV
+    call gpu_stream_create(stream(a))
+  enddo
+
   do gam = 1, nV
     do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-          r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - X_ovvo(u,beta,gam,v)
-        enddo
-      enddo
+      call gpu_set_stream(blas_handle, stream(beta))
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nO, -1.d0, X_ovvo%f(1,beta,gam,1), &
+           nO*nV*nV, 1.d0, r2%f(1,1,beta,gam), nO, r2%f(1,1,beta,gam), nO)
+      call gpu_dgeam(blas_handle, 'T', 'N', nO, nO, -1.d0, X_ovvo%f(1,gam,beta,1), &
+           nO*nV*nV, 1.d0, r2%f(1,1,beta,gam), nO, r2%f(1,1,beta,gam), nO)
     enddo
   enddo
-  !$omp end do
-  !$omp do
-  do beta = 1, nV
-    do gam = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-          r2%f(v,u,gam,beta) = r2%f(v,u,gam,beta) - X_ovvo(u,beta,gam,v)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
 
-  deallocate(X_ovvo)
+  call gpu_set_stream(blas_handle, gpu_default_stream)
+
+  do a=1,nV
+    call gpu_stream_destroy(stream(a))
+  enddo
+
+  call gpu_synchronize()
+  call gpu_deallocate(tcc)
+  call gpu_deallocate(tcc2)
+  call gpu_deallocate(X_ovvo)
+
   !-----
 
-  call gpu_allocate(X_oovv,nO,nO,nV,nV)
+  type(gpu_double4) :: J1, K1
+  type(gpu_double4) :: Y_voov, Z_ovov
 
-  call dgemm('N','N',nO*nO*nV,nV,nO, &
-             1d0, cc_space_v_oovo, size(cc_space_v_oovo,1) * size(cc_space_v_oovo,2) * size(cc_space_v_oovo,3), &
-                  t1%f , size(t1%f,1), &
-             0d0, X_oovv%f, size(X_oovv%f,1) * size(X_oovv%f,2) * size(X_oovv%f,3))
+  call gpu_allocate(J1,nO,nV,nV,nO)
+  call compute_J1_chol(nO,nV,t1%f,t2%f,d_cc_space_v_ovvo%f,d_cc_space_v_ovoo%f, &
+       d_cc_space_v_vvoo%f,J1%f)
 
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,X_oovv) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
-  do gam = 1, nV
-    do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - X_oovv%f(u,v,beta,gam) - X_oovv%f(v,u,gam,beta)
-        enddo
-      enddo
+  call gpu_allocate(K1,nO,nV,nO,nV)
+  call compute_K1_chol(nO,nV,t1%f,t2%f,d_cc_space_v_ovoo%f,d_cc_space_v_vvoo%f, &
+       d_cc_space_v_ovov%f,K1%f)
+
+
+  call gpu_allocate(X_ovvo,nO,nV,nV,nO)
+  call gpu_allocate(Y_voov,nV,nO,nO,nV)
+
+  do a=1,nV
+    call gpu_stream_create(stream(a))
+  enddo
+
+  do i=1, nO
+    do a=1, nV
+      call gpu_set_stream(blas_handle, stream(a))
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, 1.d0, J1%f(1,a,1,i), &
+           nO*nV, -0.5d0, K1%f(1,a,i,1), nO*nV*nO, X_ovvo%f(1,1,a,i), nO)
     enddo
   enddo
-  !$omp end do
-  !$omp end parallel
-  call gpu_deallocate(X_oovv)
 
-  double precision, allocatable :: X_vovo(:,:,:,:), Y_oovo(:,:,:,:)
-  allocate(X_vovo(nV,nO,nV,nO))
-
-  !$omp parallel &
-  !$omp shared(nO,nV,X_vovo,cc_space_v_ovvo) &
-  !$omp private(a,v,gam,i) &
-  !$omp default(none)
-  do i = 1, nO
-    !$omp do
-    do gam = 1, nV
-      do v = 1, nO
-        do a = 1, nV
-          X_vovo(a,v,gam,i) = cc_space_v_ovvo(v,a,gam,i)
-        enddo
-      enddo
-    enddo
-    !$omp end do nowait
-  enddo
-  !$omp end parallel
-
-  allocate(Y_oovo(nO,nO,nV,nO))
-  call dgemm('N','N',nO,nO*nV*nO,nV, &
-             1d0, t1%f, size(t1%f,1), &
-                  X_vovo, size(X_vovo,1), &
-             0d0, Y_oovo, size(Y_oovo,1))
-
-  deallocate(X_vovo)
-  call gpu_allocate(X_oovv,nO,nO,nV,nV)
-  call dgemm('N','N',nO*nO*nV, nV, nO, &
-             1d0, Y_oovo, size(Y_oovo,1) * size(Y_oovo,2) * size(Y_oovo,3), &
-                  t1%f    , size(t1%f,1), &
-             0d0, X_oovv%f, size(X_oovv%f,1) * size(X_oovv%f,2) * size(X_oovv%f,3))
-  deallocate(Y_oovo)
-
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,X_oovv) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
-  do gam = 1, nV
-    do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - X_oovv%f(u,v,gam,beta) - X_oovv%f(v,u,beta,gam)
-        enddo
-      enddo
+  do gam=1, nV
+    call gpu_set_stream(blas_handle, stream(gam))
+    do v=1, nO
+      call gpu_dgeam(blas_handle, 'T', 'T', nV, nO, 2.d0, t2%f(1,v,1,gam), &
+           nO*nO, -1.d0, t2%f(1,v,gam,1), nO*nO*nV, Y_voov%f(1,1,v,gam), nV)
     enddo
   enddo
-  !$omp end do
-  !$omp end parallel
-  call gpu_deallocate(X_oovv)
 
+  call gpu_allocate(Z_ovov,nO,nV,nO,nV)
 
-  double precision, allocatable :: J1(:,:,:,:)
-  allocate(J1(nO,nV,nV,nO))
-  call compute_J1_chol(nO,nV,t1%f,t2%f,cc_space_v_ovvo,cc_space_v_ovoo, &
-       cc_space_v_vvoo,J1)
-
-  double precision, allocatable :: K1(:,:,:,:)
-  allocate(K1(nO,nV,nO,nV))
-  call compute_K1_chol(nO,nV,t1%f,t2%f,cc_space_v_ovoo,cc_space_v_vvoo, &
-       cc_space_v_ovov,K1)
-
-  allocate(X_ovvo(nO,nV,nV,nO))
-  !$omp parallel &
-  !$omp private(u,v,gam,beta,i,a) &
-  !$omp default(shared)
-  do i = 1, nO
-    !$omp do
-    do a = 1, nV
-      do beta = 1, nV
-        do u = 1, nO
-          X_ovvo(u,beta,a,i) = (J1(u,a,beta,i) - 0.5d0 * K1(u,a,i,beta))
-        enddo
-      enddo
-    enddo
-    !$omp end do nowait
+  do a=1,nV
+    call gpu_stream_destroy(stream(a))
   enddo
-  !$omp end parallel
-  deallocate(J1)
 
-  double precision, allocatable :: Y_voov(:,:,:,:)
-  allocate(Y_voov(nV,nO,nO,nV))
+  call gpu_deallocate(J1)
+  call gpu_set_stream(blas_handle, gpu_default_stream)
 
-  !$omp parallel &
-  !$omp private(u,v,gam,beta,i,a) &
-  !$omp default(shared)
-  !$omp do
-  do gam = 1, nV
-    do v = 1, nO
-      do i = 1, nO
-        do a = 1, nV
-          Y_voov(a,i,v,gam) = 2d0 * t2%f(i,v,a,gam) - t2%f(i,v,gam,a)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
 
-  double precision, allocatable :: Z_ovov(:,:,:,:)
-  allocate(Z_ovov(nO,nV,nO,nV))
+  call gpu_dgemm(blas_handle, 'N','N', nO*nV,nO*nV,nV*nO, &
+             1d0, X_ovvo%f(1,1,1,1), size(X_ovvo%f,1) * size(X_ovvo%f,2), &
+                  Y_voov%f(1,1,1,1), size(Y_voov%f,1) * size(Y_voov%f,2), &
+             0d0, Z_ovov%f(1,1,1,1), size(Z_ovov%f,1) * size(Z_ovov%f,2))
 
-  call dgemm('N','N', nO*nV,nO*nV,nV*nO, &
-             1d0, X_ovvo, size(X_ovvo,1) * size(X_ovvo,2), &
-                  Y_voov, size(Y_voov,1) * size(Y_voov,2), &
-             0d0, Z_ovov, size(Z_ovov,1) * size(Z_ovov,2))
+  call gpu_synchronize()
+  call gpu_deallocate(Y_voov)
+  call gpu_deallocate(X_ovvo)
 
-  deallocate(X_ovvo,Y_voov)
+  type(gpu_double4) :: Y_ovov, X_ovov
+  call gpu_allocate(X_ovov,nO,nV,nO,nV)
+  call gpu_allocate(Y_ovov,nO,nV,nO,nV)
 
-  !$omp parallel &
-  !$omp shared(nO,nV,r2,Z_ovov) &
-  !$omp private(u,v,gam,beta) &
-  !$omp default(none)
-  !$omp do
-  do gam = 1, nV
-    do beta = 1, nV
-      do v = 1, nO
-        do u = 1, nO
-           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) + Z_ovov(u,beta,v,gam) + Z_ovov(v,gam,u,beta)
-        enddo
-      enddo
-    enddo
-  enddo
-  !$omp end do
-  !$omp end parallel
-
-  deallocate(Z_ovov)
-
-  double precision, allocatable :: Y_ovov(:,:,:,:), X_ovov(:,:,:,:)
-  allocate(X_ovov(nO,nV,nO,nV))
-  allocate(Y_ovov(nO,nV,nO,nV))
-
+!TODO 
   !$omp parallel &
   !$omp shared(nO,nV,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,a,i,beta,gam) &
@@ -834,7 +779,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do u = 1, nO
       do a = 1, nV
         do i = 1, nO
-          X_ovov(i,a,u,beta) = 0.5d0 * K1(u,a,i,beta)
+          X_ovov%f(i,a,u,beta) = 0.5d0 * K1%f(u,a,i,beta)
         enddo
       enddo
     enddo
@@ -846,7 +791,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do v = 1, nO
       do a = 1, nV
         do i = 1, nO
-          Y_ovov(i,a,v,gam) = t2%f(i,v,gam,a)
+          Y_ovov%f(i,a,v,gam) = t2%f(i,v,gam,a)
         enddo
       enddo
     enddo
@@ -854,12 +799,12 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   !$omp end do
   !$omp end parallel
 
-  allocate(Z_ovov(nO,nV,nO,nV))
-  call dgemm('T','N',nO*nV,nO*nV,nO*nV, &
-             1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
-                  Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
-             0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
-  deallocate(X_ovov, Y_ovov)
+  call gpu_dgemm(blas_handle, 'T','N',nO*nV,nO*nV,nO*nV, &
+            -1d0, X_ovov%f(1,1,1,1), size(X_ovov%f,1) * size(X_ovov%f,2), &
+                  Y_ovov%f(1,1,1,1), size(Y_ovov%f,1) * size(Y_ovov%f,2), &
+             1d0, Z_ovov%f(1,1,1,1), size(Z_ovov%f,1) * size(Z_ovov%f,2))
+
+  call gpu_synchronize()
 
   !$omp parallel &
   !$omp shared(nO,nV,r2,Z_ovov) &
@@ -870,16 +815,14 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do beta = 1, nV
       do v = 1, nO
         do u = 1, nO
-           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - Z_ovov(u,beta,v,gam) - Z_ovov(v,gam,u,beta)
+           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) + Z_ovov%f(u,beta,v,gam) + Z_ovov%f(v,gam,u,beta)
         enddo
       enddo
     enddo
   enddo
   !$omp end do
   !$omp end parallel
-  deallocate(Z_ovov)
 
-  allocate(X_ovov(nO,nV,nO,nV),Y_ovov(nO,nV,nO,nV))
   !$omp parallel &
   !$omp shared(nO,nV,K1,X_ovov,Y_ovov,t2) &
   !$omp private(u,v,gam,beta,i,a) &
@@ -889,7 +832,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do i = 1, nO
       do gam = 1, nV
         do u = 1, nO
-          X_ovov(u,gam,i,a) = K1(u,a,i,gam)
+          X_ovov%f(u,gam,i,a) = K1%f(u,a,i,gam)
         enddo
       enddo
     enddo
@@ -901,7 +844,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do v = 1, nO
       do a = 1, nV
         do i = 1, nO
-          Y_ovov(i,a,v,beta) = t2%f(i,v,beta,a)
+          Y_ovov%f(i,a,v,beta) = t2%f(i,v,beta,a)
         enddo
       enddo
     enddo
@@ -909,16 +852,19 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   !$omp end do
   !$omp end parallel
 
-  deallocate(K1)
+  call gpu_deallocate(K1)
 
-  allocate(Z_ovov(nO,nV,nO,nV))
-  call dgemm('N','N',nO*nV,nO*nV,nO*nV, &
-             1d0, X_ovov, size(X_ovov,1) * size(X_ovov,2), &
-                  Y_ovov, size(Y_ovov,1) * size(Y_ovov,2), &
-             0d0, Z_ovov, size(Y_ovov,1) * size(Y_ovov,2))
+  call gpu_dgemm(blas_handle, 'N','N',nO*nV,nO*nV,nO*nV, &
+             1d0, X_ovov%f(1,1,1,1), size(X_ovov%f,1) * size(X_ovov%f,2), &
+                  Y_ovov%f(1,1,1,1), size(Y_ovov%f,1) * size(Y_ovov%f,2), &
+             0d0, Z_ovov%f(1,1,1,1), size(Z_ovov%f,1) * size(Z_ovov%f,2))
 
-  deallocate(X_ovov,Y_ovov)
+  call gpu_synchronize()
 
+  call gpu_deallocate(X_ovov)
+  call gpu_deallocate(Y_ovov)
+
+  ! Change the sign for consistency with the code in spin orbitals
   !$omp parallel &
   !$omp shared(nO,nV,r2,Z_ovov) &
   !$omp private(u,v,gam,beta) &
@@ -928,7 +874,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do beta = 1, nV
       do v = 1, nO
         do u = 1, nO
-           r2%f(u,v,beta,gam) = r2%f(u,v,beta,gam) - Z_ovov(u,gam,v,beta) - Z_ovov(v,beta,u,gam)
+           r2%f(u,v,beta,gam) = -r2%f(u,v,beta,gam) + Z_ovov%f(u,gam,v,beta) + Z_ovov%f(v,beta,u,gam)
         enddo
       enddo
     enddo
@@ -936,9 +882,7 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   !$omp end do
   !$omp end parallel
 
-  deallocate(Z_ovov)
-
-  ! Change the sign for consistency with the code in spin orbitals
+  call gpu_deallocate(Z_ovov)
 
   max_r2 = 0d0
   !$omp parallel &
@@ -951,7 +895,6 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
     do a = 1, nV
       do j = 1, nO
         do i = 1, nO
-          r2%f(i,j,a,b) = -r2%f(i,j,a,b)
           max_r2_local = max(r2%f(i,j,a,b), max_r2_local)
         enddo
       enddo

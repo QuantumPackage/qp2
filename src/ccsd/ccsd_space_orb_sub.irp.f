@@ -22,7 +22,7 @@ subroutine run_ccsd_space_orb
 
   type(gpu_double4) :: d_cc_space_v_oovv, d_cc_space_v_voov, d_cc_space_v_ovov
   type(gpu_double4) :: d_cc_space_v_oovo, d_cc_space_v_vooo, d_cc_space_v_oooo
-  type(gpu_double4) :: d_cc_space_v_vvoo
+  type(gpu_double4) :: d_cc_space_v_vvoo, d_cc_space_v_ovvo, d_cc_space_v_ovoo
 
   double precision, allocatable :: all_err(:,:), all_t(:,:)
   integer, allocatable          :: list_occ(:), list_vir(:)
@@ -98,17 +98,21 @@ subroutine run_ccsd_space_orb
   call gpu_allocate(d_cc_space_v_voov, nV, nO, nO, nV)
   call gpu_allocate(d_cc_space_v_ovov, nO, nV, nO, nV)
   call gpu_allocate(d_cc_space_v_oovo, nO, nO, nV, nO)
+  call gpu_allocate(d_cc_space_v_ovvo, nO, nV, nV, nO)
   call gpu_allocate(d_cc_space_v_vooo, nV, nO, nO, nO)
   call gpu_allocate(d_cc_space_v_oooo, nO, nO, nO, nO)
   call gpu_allocate(d_cc_space_v_vvoo, nV, nV, nO, nO)
+  call gpu_allocate(d_cc_space_v_ovoo, nO, nV, nO, nO)
 
   call gpu_upload(cc_space_v_oovv, d_cc_space_v_oovv)
   call gpu_upload(cc_space_v_voov, d_cc_space_v_voov)
   call gpu_upload(cc_space_v_ovov, d_cc_space_v_ovov)
   call gpu_upload(cc_space_v_oovo, d_cc_space_v_oovo)
+  call gpu_upload(cc_space_v_ovvo, d_cc_space_v_ovvo)
   call gpu_upload(cc_space_v_vooo, d_cc_space_v_vooo)
   call gpu_upload(cc_space_v_oooo, d_cc_space_v_oooo)
   call gpu_upload(cc_space_v_vvoo, d_cc_space_v_vvoo)
+  call gpu_upload(cc_space_v_ovoo, d_cc_space_v_ovoo)
 
 !  FREE cc_space_v_voov
 !  FREE cc_space_v_ovov
@@ -117,6 +121,8 @@ subroutine run_ccsd_space_orb
 !  FREE cc_space_v_vooo
 !  FREE cc_space_v_oooo
 !  FREE cc_space_v_vvoo
+!  FREE cc_space_v_ovvo
+!  FREE cc_space_v_ovoo
 
   call gpu_allocate(t2, nO,nO,nV,nV)
   call gpu_allocate(r2, nO,nO,nV,nV)
@@ -207,8 +213,8 @@ subroutine run_ccsd_space_orb
       call compute_r1_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv,H_vo,r1,max_r1,d_cc_space_f_ov,d_cc_space_f_vo, &
            d_cc_space_v_voov, d_cc_space_v_ovov, d_cc_space_v_oovo, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol)
       call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
-           d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, &
-           d_cc_space_v_vvoo, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
+           d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, d_cc_space_v_oovo, d_cc_space_v_ovvo, d_cc_space_v_ovoo, &
+           d_cc_space_v_ovov, d_cc_space_v_vvoo, d_cc_space_v_oo_chol, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
            r2, max_r2)
     else
       call compute_H_oo(nO,nV,t1%f,t2%f,tau%f,H_oo%f)
@@ -320,6 +326,11 @@ subroutine run_ccsd_space_orb
   call gpu_deallocate(d_cc_space_v_voov)
   call gpu_deallocate(d_cc_space_v_ovov)
   call gpu_deallocate(d_cc_space_v_oovo)
+  call gpu_deallocate(d_cc_space_v_ovvo)
+  call gpu_deallocate(d_cc_space_v_vooo)
+  call gpu_deallocate(d_cc_space_v_oooo)
+  call gpu_deallocate(d_cc_space_v_vvoo)
+  call gpu_deallocate(d_cc_space_v_ovoo)
 
   call gpu_deallocate(d_cc_space_f_oo)
   call gpu_deallocate(d_cc_space_f_vo)
