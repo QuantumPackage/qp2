@@ -215,6 +215,7 @@ subroutine run_ccsd_space_orb
       call compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
            d_cc_space_v_oovv, d_cc_space_v_vooo, d_cc_space_v_oooo, d_cc_space_v_oovo, d_cc_space_v_ovvo, d_cc_space_v_ovoo, &
            d_cc_space_v_ovov, d_cc_space_v_vvoo, d_cc_space_v_oo_chol, d_cc_space_v_ov_chol, d_cc_space_v_vo_chol, d_cc_space_v_vv_chol, &
+           d_cc_space_f_vo, &
            r2, max_r2)
     else
       call compute_H_oo(nO,nV,t1%f,t2%f,tau%f,H_oo%f)
