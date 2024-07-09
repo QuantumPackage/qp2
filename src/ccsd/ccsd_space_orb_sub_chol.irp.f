@@ -507,7 +507,8 @@ subroutine compute_r2_space_chol(nO,nV,t1,t2,tau,H_oo,H_vv, &
   call gpu_allocate(g_occ,nO,nO)
   call compute_g_vir_chol(nO,nV,t1,t2,H_vv,d_cc_space_f_vo, &
     d_cc_space_v_ov_chol, d_cc_space_v_vv_chol, g_vir)
-  call compute_g_occ_chol(nO,nV,t1%f,t2%f,H_oo%f,g_occ%f)
+  call compute_g_occ_chol(nO,nV,t1,t2,H_oo, &
+    d_cc_space_f_vo, d_cc_space_v_ov_chol, d_cc_space_v_oo_chol, d_cc_space_v_ovoo, g_occ)
 
   type(gpu_double4) :: Y_oovv
   call gpu_allocate(Y_oovv,nO,nO,nV,nV)
@@ -870,37 +871,42 @@ end
 
 ! g_occ
 
-subroutine compute_g_occ_chol(nO,nV,t1,t2,H_oo,g_occ)
+subroutine compute_g_occ_chol(nO,nV,t1,t2,H_oo, &
+  d_cc_space_f_vo, d_cc_space_v_ov_chol, d_cc_space_v_oo_chol, d_cc_space_v_ovoo, g_occ)
   use gpu
 
   implicit none
 
   integer, intent(in)           :: nO,nV
-  double precision, intent(in)  :: t1(nO, nV), H_oo(nO, nO)
-  double precision, intent(in)  :: t2(nO, nO, nV, nV)
-  double precision, intent(out) :: g_occ(nO, nO)
+  type(gpu_double2), intent(in)  :: t1, H_oo, d_cc_space_f_vo
+  type(gpu_double3), intent(in)  :: d_cc_space_v_ov_chol, d_cc_space_v_oo_chol
+  type(gpu_double4), intent(in)  :: t2, d_cc_space_v_ovoo
+  type(gpu_double2), intent(out) :: g_occ
 
-  g_occ = H_oo
+  call gpu_copy(H_oo, g_occ)
 
-  call dgemm('N','N',nO,nO,nV, &
-             1d0, t1, size(t1,1), &
-                  cc_space_f_vo, size(cc_space_f_vo,1), &
-             1d0, g_occ, size(g_occ,1))
+  call gpu_dgemm(blas_handle, 'N','N',nO,nO,nV, &
+             1d0, t1%f(1,1), size(t1%f,1), &
+                  d_cc_space_f_vo%f(1,1), size(d_cc_space_f_vo%f,1), &
+             1d0, g_occ%f(1,1), size(g_occ%f,1))
 
-  double precision, allocatable :: X(:)
-  allocate(X(cholesky_mo_num))
-  call dgemv('N',cholesky_mo_num,nO*nV,2.d0, &
-    cc_space_v_ov_chol, cholesky_mo_num, &
-    t1, 1, 0.d0, X, 1)
+  type(gpu_double1) :: X
+  call gpu_allocate(X,cholesky_mo_num)
 
-  call dgemv('T',cholesky_mo_num,nO*nO,1.d0, &
-    cc_space_v_oo_chol, cholesky_mo_num, &
-    X, 1, 1.d0, g_occ, 1)
-  deallocate(X)
+  call gpu_dgemv(blas_handle, 'N',cholesky_mo_num,nO*nV,2.d0, &
+    d_cc_space_v_ov_chol%f(1,1,1), cholesky_mo_num, &
+    t1%f(1,1), 1, 0.d0, X%f(1), 1)
 
-  call dgemv('T',nO*nV,nO*nO,-1.d0, &
-    cc_space_v_ovoo, nO*nV, &
-    t1, 1, 1.d0, g_occ, 1)
+  call gpu_dgemv(blas_handle, 'T',cholesky_mo_num,nO*nO,1.d0, &
+    d_cc_space_v_oo_chol%f(1,1,1), cholesky_mo_num, &
+    X%f(1), 1, 1.d0, g_occ%f(1,1), 1)
+
+  call gpu_dgemv(blas_handle, 'T',nO*nV,nO*nO,-1.d0, &
+    d_cc_space_v_ovoo%f(1,1,1,1), nO*nV, &
+    t1%f(1,1), 1, 1.d0, g_occ%f(1,1), 1)
+
+  call gpu_synchronize()
+  call gpu_deallocate(X)
 
 end
 
@@ -1193,22 +1199,15 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov, &
   enddo
 
   call gpu_allocate(X,nV,nO,nV,nO)
-
-  do i = 1, nO
-    do a = 1, nV
-      call gpu_set_stream(blas_handle, stream(a))
-      call gpu_dgeam(blas_handle, 'N', 'N', nV, nO, -1.d0, v_vvoo%f(1,a,i,1), &
-          nV*nV*nO, 0.d0, v_vvoo%f(1,a,i,1), nV*nV*nO, X%f(1,1,a,i), nV)
-    enddo
-  enddo
-
   call gpu_allocate(Y,nO,nV,nV,nO)
 
-  do j = 1, nO
-    do beta = 1, nV
-      call gpu_set_stream(blas_handle, stream(beta))
-      call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, 0.5d0, t2%f(1,j,1,beta), &
-          nO*nO, t1%f(j,beta), t1%f(1,1), nO, Y%f(1,beta,1,j), nO*nV)
+  do a = 1, nV
+    call gpu_set_stream(blas_handle, stream(a))
+    do i = 1, nO
+      call gpu_dgeam(blas_handle, 'N', 'N', nV, nO, -1.d0, v_vvoo%f(1,a,i,1), &
+          nV*nV*nO, 0.d0, v_vvoo%f(1,a,i,1), nV*nV*nO, X%f(1,1,a,i), nV)
+      call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, 0.5d0, t2%f(1,i,1,a), &
+          nO*nO, t1%f(i,a), t1%f(1,1), nO, Y%f(1,a,1,i), nO*nV)
     enddo
   enddo
 
@@ -1246,9 +1245,9 @@ subroutine compute_K1_chol(nO,nV,t1,t2,v_ovoo,v_vvoo,v_ovov, &
   call gpu_synchronize()
   call gpu_deallocate(t1v)
 
+  do beta = 1, nV
+   call gpu_set_stream(blas_handle, stream(beta))
    do i = 1, nO
-    do beta = 1, nV
-      call gpu_set_stream(blas_handle, stream(beta))
       call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, 1.d0, K1%f(1,1,i,beta), &
           nO, 1.d0, K1tmp%f(1,i,1,beta), nO*nO, K1%f(1,1,i,beta), nO)
       call gpu_dgeam(blas_handle, 'N', 'N', nO, nV, 1.d0, K1%f(1,1,i,beta), &
