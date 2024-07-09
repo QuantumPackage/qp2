@@ -18,7 +18,7 @@ void gpu_set_device(int32_t igpu) {
 /* Allocation functions */
 
 void gpu_allocate(void** ptr, int64_t size) {
-    auto queue = sycl::queue(sycl::default_selector{});
+    auto queue = sycl::queue(sycl::default_selector_v);
 
     try {
         *ptr = sycl::malloc_shared(size, queue);
@@ -31,25 +31,25 @@ void gpu_allocate(void** ptr, int64_t size) {
 
 void gpu_deallocate(void** ptr) {
     assert(*ptr != nullptr);
-    sycl::free(*ptr, sycl::queue(sycl::default_selector{}));
+    sycl::free(*ptr, sycl::queue(sycl::default_selector_v));
     *ptr = nullptr;
 }
 
 /* Upload data from host to device */
 void gpu_upload(const void* cpu_ptr, void* gpu_ptr, const int64_t n) {
-    sycl::queue queue(sycl::default_selector{});
+    sycl::queue queue(sycl::default_selector_v);
     queue.memcpy(gpu_ptr, cpu_ptr, n).wait();
 }
 
 /* Download data from device to host */
 void gpu_download(const void* gpu_ptr, void* cpu_ptr, const int64_t n) {
-    sycl::queue queue(sycl::default_selector{});
+    sycl::queue queue(sycl::default_selector_v);
     queue.memcpy(cpu_ptr, gpu_ptr, n).wait();
 }
 
 /* Copy data from one GPU memory location to another */
 void gpu_copy(const void* gpu_ptr_src, void* gpu_ptr_dest, const int64_t n) {
-    sycl::queue queue(sycl::default_selector{});
+    sycl::queue queue(sycl::default_selector_v);
     queue.memcpy(gpu_ptr_dest, gpu_ptr_src, n).wait();
 }
 
@@ -57,7 +57,7 @@ void gpu_copy(const void* gpu_ptr_src, void* gpu_ptr_dest, const int64_t n) {
 
 /* SYCL queue as a replacement for CUDA stream */
 void gpu_stream_create(sycl::queue** ptr) {
-    *ptr = new sycl::queue(sycl::default_selector{});
+    *ptr = new sycl::queue(sycl::default_selector_v);
 }
 
 void gpu_stream_destroy(sycl::queue** ptr) {
@@ -66,59 +66,8 @@ void gpu_stream_destroy(sycl::queue** ptr) {
     *ptr = nullptr;
 }
 
-To translate the CUDA functions related to stream management to SYCL, you will need to adapt to SYCL's approach to command groups and queues. SYCL uses queues to manage execution order and parallelism, similar to CUDA streams but integrated within the SYCL ecosystem.
-
-### Original CUDA Code
-
-```c
-/* Create a CUDA stream */
-void gpu_stream_create(cudaStream_t* ptr) {
-    cudaError_t rc = cudaStreamCreate(ptr);
-    assert(rc == cudaSuccess);
-}
-
-/* Destroy a CUDA stream */
-void gpu_stream_destroy(cudaStream_t* ptr) {
-    assert(ptr != NULL);
-    cudaError_t rc = cudaStreamDestroy(*ptr);
-    assert(rc == cudaSuccess);
-    *ptr = NULL;
-}
-
-/* Set a specific stream for cuBLAS operations */
-void gpu_set_stream(cublasHandle_t handle, cudaStream_t stream) {
-    cublasSetStream(handle, stream);
-}
-
-/* Synchronize all streams */
 void gpu_synchronize() {
-    cudaDeviceSynchronize();
-}
-```
-
-### Translated SYCL Code
-
-```cpp
-#include <CL/sycl.hpp>
-#include <cassert>
-
-/* SYCL queue as a replacement for CUDA stream */
-void gpu_stream_create(sycl::queue** ptr) {
-    *ptr = new sycl::queue(sycl::default_selector{});
-}
-
-void gpu_stream_destroy(sycl::queue** ptr) {
-    *ptr->wait_and_throw();
-    assert(*ptr != nullptr);
-    delete *ptr;
-    *ptr = nullptr;
-}
-
-/* SYCL does not need an equivalent for setting a stream on a cuBLAS handle,
-   because each SYCL queue acts independently and can be used directly. */
-
-void gpu_synchronize() {
-    sycl::queue queue(sycl::default_selector{});
+    sycl::queue queue(sycl::default_selector_v);
     queue.wait_and_throw();
 }
 
@@ -132,17 +81,17 @@ void gpu_set_stream(blasHandle_t* handle, sycl::queue* ptr) {
   handle->queue = ptr;
 }
 
-void gpu_blas_create(blasHandle_t* ptr) {
-    *ptr = new blasHandle_t;
+void gpu_blas_create(blasHandle_t** ptr) {
+    *ptr = (blasHandle_t*) malloc(sizeof(blasHandle_t));
     assert(*ptr != nullptr);
-    ptr->queue = new sycl::queue(sycl::default_selector{});
-    assert(ptr->queue != nullptr);
+    (*ptr)->queue = new sycl::queue(sycl::default_selector_v);
+    assert((*ptr)->queue != nullptr);
 }
 
-void gpu_blas_destroy(blasHandle_t* ptr) {
+void gpu_blas_destroy(blasHandle_t** ptr) {
     assert(*ptr != nullptr);
-    delete ptr->queue;
-    delete *ptr;
+    delete (*ptr)->queue;
+    free(*ptr);
     *ptr = nullptr;
 }
 
@@ -159,21 +108,7 @@ void gpu_ddot(blasHandle_t* handle, const int64_t n, const double* x, const int6
     assert(y != nullptr);
     assert(result != nullptr);
 
-    // SYCL buffer for the result
-    sycl::buffer<double, 1> result_buf(result, sycl::range<1>(1));
-
-    sycl::queue& queue = handle->queue;
-
-    // Perform the dot product operation
-    queue.submit([&](sycl::handler& cgh) {
-        // Accessors for the buffers
-        auto result_acc = result_buf.get_access<sycl::access::mode::write>(cgh);
-
-        // This is an asynchronous call to compute dot product
-        cgh.single_task([=]() {
-            result_acc[0] = oneapi::mkl::blas::dot(cgh, n, x, incx, y, incy);
-        });
-    });
+    oneapi::mkl::blas::dot(*handle->queue, n, x, incx, y, incy, result);
 
 }
 
@@ -194,16 +129,7 @@ void gpu_dgemv(blasHandle_t* handle, const char* transa, const int64_t m, const 
     }
 
     // Perform DGEMV operation using oneMKL
-    handle->queue->submit([&](sycl::handler& cgh) {
-        // Use accessors to ensure data consistency and dependency resolution
-        auto a_acc = sycl::accessor(a, sycl::range(m * lda), sycl::read_only, cgh);
-        auto x_acc = sycl::accessor(x, sycl::range(n * incx), sycl::read_only, cgh);
-        auto y_acc = sycl::accessor(y, sycl::range(m * incy), sycl::read_write, cgh);
-
-        cgh.parallel_for(sycl::range(1), [=](sycl::id<1>) {
-            oneapi::mkl::blas::gemv(*handle->queue, transa_, m, n, *alpha, a_acc.get_pointer(), lda, x_acc.get_pointer(), incx, *beta, y_acc.get_pointer(), incy);
-        });
-    });
+    oneapi::mkl::blas::column_major::gemv(*handle->queue, transa_, m, n, *alpha, a, lda, x, incx, *beta, y, incy);
 
 }
 
@@ -218,22 +144,11 @@ void gpu_dgemm(blasHandle_t* handle, const char* transa, const char* transb, con
     auto transa_ = (*transa == 'T' || *transa == 't') ? oneapi::mkl::transpose::trans : oneapi::mkl::transpose::nontrans;
     auto transb_ = (*transb == 'T' || *transb == 't') ? oneapi::mkl::transpose::trans : oneapi::mkl::transpose::nontrans;
 
-    // Ensure queue is ready
-    handle->queue->submit([&](sycl::handler& cgh) {
-        // Accessors for matrices
-        auto a_acc = sycl::accessor(a, sycl::range<1>(m * lda), sycl::read_only, cgh);
-        auto b_acc = sycl::accessor(b, sycl::range<1>(k * ldb), sycl::read_only, cgh);
-        auto c_acc = sycl::accessor(c, sycl::range<1>(m * ldc), sycl::read_write, cgh);
-
-        cgh.parallel_for(sycl::range(1), [=](sycl::id<1>) {
-            oneapi::mkl::blas::gemm(*handle->queue, transa_, transb_, m, n, k,
-                                    *alpha, a_acc.get_pointer(), lda,
-                                    b_acc.get_pointer(), ldb,
-                                    *beta, c_acc.get_pointer(), ldc);
-        });
-    });
+    oneapi::mkl::blas::column_major::gemm(*handle->queue, transa_, transb_, m, n, k,
+                                    *alpha, a, lda, b, ldb, *beta, c, ldc);
 
 }
+
 
 void gpu_dgeam(blasHandle_t* handle, const char* transa, const char* transb, const int64_t m, const int64_t n, const double* alpha,
                const double* a, const int64_t lda, const double* beta, const double* b, const int64_t ldb, double* c, const int64_t ldc) {
@@ -246,18 +161,14 @@ void gpu_dgeam(blasHandle_t* handle, const char* transa, const char* transb, con
     bool transB = (*transb == 'T' || *transb == 't');
 
     handle->queue->submit([&](sycl::handler& cgh) {
-        auto a_acc = sycl::accessor(a, sycl::range(m * lda), sycl::read_only, cgh);
-        auto b_acc = sycl::accessor(b, sycl::range(n * ldb), sycl::read_only, cgh);
-        auto c_acc = sycl::accessor(c, sycl::range(m * ldc), sycl::read_write, cgh);
-
         cgh.parallel_for(sycl::range<2>(m, n), [=](sycl::id<2> idx) {
-            int i = idx[0];
-            int j = idx[1];
-            int ai = transA ? j * lda + i : i * lda + j;
-            int bi = transB ? j * ldb + i : i * ldb + j;
-            int ci = i * ldc + j;
+            const int i = idx[0];
+            const int j = idx[1];
+            const int ai = transA ? j * lda + i : i * lda + j;
+            const int bi = transB ? j * ldb + i : i * ldb + j;
+            const int ci = i * ldc + j;
 
-            c_acc[ci] = (*alpha) * a_acc[ai] + (*beta) * b_acc[bi];
+            c[ci] = (*alpha) * a[ai] + (*beta) * b[bi];
         });
     });
 
