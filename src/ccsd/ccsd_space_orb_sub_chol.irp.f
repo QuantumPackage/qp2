@@ -996,8 +996,8 @@ subroutine compute_J1_chol(nO,nV,t1,t2,v_ovvo,v_ovoo,v_vvoo,d_cc_space_v_vo_chol
   integer, intent(in)            :: nO,nV
   type(gpu_double2), intent(in)  :: t1
   type(gpu_double4), intent(in)  :: t2, v_ovvo, v_ovoo, v_vvoo
+  type(gpu_double3), intent(in) :: d_cc_space_v_vo_chol,d_cc_space_v_vv_chol
   type(gpu_double4), intent(out) :: J1
-  type(gpu_double3), intent(out) :: d_cc_space_v_vo_chol,d_cc_space_v_vv_chol
 
   integer :: a,tmp_a,b,k,l,c,d,tmp_c,tmp_d,i,j,u,v, beta, gam
 
