@@ -117,12 +117,12 @@ done
 # Handle GPU acceleration
 rm -f ${QP_ROOT}/src/gpu_arch
 case "$GPU" in
-  amd) # Nvidia
+  amd) # AMD
      echo "Activating AMD GPU acceleration"
      ln -s ${QP_ROOT}/plugins/local/gpu_amd ${QP_ROOT}/src/gpu_arch
      ;;
   intel) # Intel
-     echo "Activating Intel GPU acceleration"
+     echo "Activating Intel GPU acceleration (EXPERIMENTAL)"
      ln -s ${QP_ROOT}/plugins/local/gpu_intel ${QP_ROOT}/src/gpu_arch
      ;;
   nvidia) # Nvidia
