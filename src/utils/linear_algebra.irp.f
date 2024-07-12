@@ -1856,7 +1856,7 @@ subroutine pivoted_cholesky( A, rank, tol, ndim, U)
 !
 ! matrix A is destroyed inside this subroutine
 ! Cholesky vectors are stored in U
-! dimension of U: U(1:rank, 1:n)
+! dimension of U: U(1:n, 1:rank)
 ! U is allocated inside this subroutine
 ! rank is the number of Cholesky vectors depending on tol
 !

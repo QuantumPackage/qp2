@@ -12,6 +12,9 @@ program four_idx_transform
 !
   END_DOC
 
+  if (do_mo_cholesky) then
+    stop 'Not implemented with Cholesky integrals'
+  endif
   io_mo_two_e_integrals = 'Write'
   SOFT_TOUCH io_mo_two_e_integrals
   if (.true.) then

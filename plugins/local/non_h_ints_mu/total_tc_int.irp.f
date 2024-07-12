@@ -78,7 +78,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP PRIVATE (i, j, k, l, ipoint, ao_i_r, ao_k_r, weight1) &
       !$OMP SHARED (ao_num, n_points_final_grid, ao_two_e_tc_tot, &
       !$OMP         aos_in_r_array_transp, final_weight_at_r_vector, int2_grad1_u12_square_ao)
-      !$OMP DO COLLAPSE(4)
+      !$OMP DO COLLAPSE(3)
       do i = 1, ao_num
         do k = 1, ao_num
           do l = 1, ao_num
@@ -188,7 +188,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
         !$OMP SHARED (ao_num, n_points_final_grid, ao_two_e_tc_tot,    &
         !$OMP         aos_in_r_array_transp, final_weight_at_r_vector, &
         !$OMP         int2_grad1_u12_ao, aos_grad_in_r_array_transp_bis)
-        !$OMP DO COLLAPSE(4)
+        !$OMP DO COLLAPSE(3)
         do i = 1, ao_num
           do k = 1, ao_num
             do l = 1, ao_num
@@ -270,7 +270,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP PARALLEL DEFAULT(NONE)                     &
       !$OMP PRIVATE(i, j, k, l, integ_zero, integ_val) & 
       !$OMP SHARED(ao_num, ao_two_e_tc_tot)
-      !$OMP DO COLLAPSE(4)
+      !$OMP DO COLLAPSE(3)
       do j = 1, ao_num
         do l = 1, ao_num
           do i = 1, ao_num
@@ -293,7 +293,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP PARALLEL DEFAULT(NONE)                            &
       !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
       !$OMP PRIVATE(i, j, k, l)
-      !$OMP DO COLLAPSE(4)
+      !$OMP DO COLLAPSE(3)
       do j = 1, ao_num
         do l = 1, ao_num
           do i = 1, ao_num
@@ -306,7 +306,6 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
-      !call clear_ao_map()
       FREE ao_integrals_map
     endif
 
