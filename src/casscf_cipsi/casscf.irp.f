@@ -11,7 +11,7 @@ program casscf
   if(small_active_space)then
    pt2_relative_error = 0.00001
   else
-   thresh_scf = 1.d-4
+   thresh_scf = max(1.d-4,thresh_scf)
    pt2_relative_error = 0.04
   endif
   touch pt2_relative_error 
