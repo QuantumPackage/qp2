@@ -3,4 +3,4 @@ selectors_full
 generators_cas
 two_body_rdm
 dav_general_mat
-mo_optimization
+mo_optimization_utils
