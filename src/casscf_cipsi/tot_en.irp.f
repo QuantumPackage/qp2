@@ -8,6 +8,7 @@
    implicit none
    integer                        :: t,u,v,x,i,ii,tt,uu,vv,xx,j,jj,t3,u3,v3,x3
    real*8                         :: e_one_all,e_two_all
+   double precision :: bielec_PQxx,bielec_PxxQ
    e_one_all=0.D0
    e_two_all=0.D0
    do i=1,n_core_inact_orb
