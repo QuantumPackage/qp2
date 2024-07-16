@@ -30,7 +30,9 @@ BEGIN_PROVIDER [double precision, htilde_matrix_elmt_bi_ortho, (N_det,N_det)]
   print *, ' PROVIDING htilde_matrix_elmt_bi_ortho ...'
   call wall_time(t1)
 
-  call provide_all_three_ints_bi_ortho()
+  if(three_body_h_tc)then
+   call provide_all_three_ints_bi_ortho()
+  endif
 
   i = 1
   j = 1

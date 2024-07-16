@@ -1,3 +1,15 @@
+double precision function get_ao_integ_chol(i,j,k,l)
+ implicit none
+  BEGIN_DOC
+  !  CHOLESKY representation of the integral of the AO basis <ik|jl> or (ij|kl)
+  !     i(r1) j(r1) 1/r12 k(r2) l(r2)
+  END_DOC
+ integer, intent(in) :: i,j,k,l
+ double precision, external :: ddot                                                                                  
+ get_ao_integ_chol = ddot(cholesky_ao_num, cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
+
+end
+
 BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
@@ -162,7 +174,8 @@ END_PROVIDER
      np = int(np8,4)
      if (np <= 0) stop 'np<=0'
 
-     rank_max = min(np,20*elec_num*elec_num)
+!     rank_max = min(np,20*elec_num*elec_num)
+     rank_max = np
      call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
      call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
 

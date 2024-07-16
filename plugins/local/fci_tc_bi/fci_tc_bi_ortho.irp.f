@@ -65,7 +65,15 @@ subroutine run_cipsi_tc()
 
   if (.not. is_zmq_slave) then
 
-    PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+     ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
+     PROVIDE Fock_matrix_tc_mo_tot 
+     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
+     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
+    endif
+    if(.True.)then ! DO NOT REMOVE THE IF(.TRUE.) !! 
+     PROVIDE psi_det psi_coef mo_bi_ortho_tc_two_e mo_bi_ortho_tc_one_e 
+    endif
 
     if((elec_alpha_num+elec_beta_num) .ge. 3) then
       if(three_body_h_tc) then
@@ -90,8 +98,16 @@ subroutine run_cipsi_tc()
     call json_close
 
   else
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+     ! this has to be provided before mo_bi_ortho_tc_two_e to avoid twice the computation of ao_two_e_tc_tot
+     PROVIDE Fock_matrix_tc_mo_tot 
+     ! because Fock_matrix_tc_mo_tot depends on ao_two_e_tc_tot 
+     ! and that mo_bi_ortho_tc_two_e erase ao_two_e_tc_tot after being provided 
+    endif
 
-    PROVIDE mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e pt2_min_parallel_tasks
+    if(.True.)then! DO NOT REMOVE THE IF(.TRUE.) !! 
+     PROVIDE mo_bi_ortho_tc_one_e mo_bi_ortho_tc_two_e pt2_min_parallel_tasks
+    endif
 
     if((elec_alpha_num+elec_beta_num) .ge. 3) then
       if(three_body_h_tc) then

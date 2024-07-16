@@ -10,8 +10,6 @@ subroutine provide_all_three_ints_bi_ortho()
   implicit none
   double precision :: t1, t2
 
-  PROVIDE ao_two_e_integrals_in_map
-
   print *, ' start provide_all_three_ints_bi_ortho'
   call wall_time(t1)
 
