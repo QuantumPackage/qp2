@@ -997,7 +997,7 @@ def pyscf2QP2(cell,mf, kpts, kmesh=None, cas_idx=None, int_threshold = 1E-8,
     with h5py.File(qph5path,'a') as qph5:
         qph5['qmcpack'].attrs['PBC']=True 
         qph5['qmcpack'].attrs['cart']=cell.cart 
-        qph5['qmcpack'].attrs['Pseudo']=cell.has_ecp() 
+        qph5['qmcpack'].attrs['Pseudo']=bool(cell.has_ecp())
         qph5.create_dataset('qmcpack/Super_Twist',(1,3),dtype="f8",data=sp_twist)
         if len(kpts)!= 0:
            qph5.create_dataset('qmcpack/LatticeVectors',(3,3),dtype="f8",data=loc_cell.lattice_vectors())
