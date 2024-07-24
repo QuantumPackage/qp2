@@ -130,3 +130,42 @@ subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_de
  grad_f_mf_ab *= 2.D0
  grad_two_bod_dens *= 2.d0
 end
+
+subroutine mu_of_r_mean_field(r,mu_mf, dm)
+ implicit none
+  include 'constants.include.F'
+ double precision, intent(in) :: r(3)
+ double precision, intent(out):: mu_mf, dm
+ double precision :: f_mf_ab,two_bod_dens, dm_a, dm_b
+ call get_f_mf_ab(r,f_mf_ab,two_bod_dens, dm_a, dm_b)
+ dm = dm_a + dm_b
+ if(dabs(two_bod_dens).lt.1.d-10)then
+  mu_mf = 1.d+10
+ else
+  mu_mf = 0.5d0 * sqpi * f_mf_ab/two_bod_dens
+ endif
+end
+
+subroutine grad_mu_of_r_mean_field(r,mu_mf, dm, grad_mu_mf, grad_dm)
+ implicit none
+ include 'constants.include.F'
+ double precision, intent(in) :: r(3)
+ double precision, intent(out):: grad_mu_mf(3), grad_dm(3)
+ double precision, intent(out):: mu_mf, dm
+ double precision :: grad_f_mf_ab(3), grad_two_bod_dens(3),grad_dm_a(3), grad_dm_b(3)
+ double precision :: f_mf_ab,two_bod_dens, dm_a, dm_b
+ call get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_dens, dm_a, dm_b,grad_dm_a, grad_dm_b)
+
+ dm = dm_a + dm_b
+ grad_dm(1:3) = grad_dm_a(1:3) + grad_dm_b(1:3)
+
+ if(dabs(two_bod_dens).lt.1.d-10)then
+  mu_mf = 1.d+10
+  grad_mu_mf = 0.d0
+ else
+  mu_mf = 0.5d0 * sqpi * f_mf_ab/two_bod_dens
+  grad_mu_mf(1:3) = 0.5d0 * sqpi * (grad_f_mf_ab(1:3) * two_bod_dens - f_mf_ab * grad_two_bod_dens(1:3))& 
+                                   /(two_bod_dens*two_bod_dens)
+ endif 
+
+end

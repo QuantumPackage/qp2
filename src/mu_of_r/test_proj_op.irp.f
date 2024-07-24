@@ -19,7 +19,8 @@ program projected_operators
 !  call test_f_ii_ia_aa_valence_ab
 ! call test
 !  call test_f_mean_field
- call test_grad_f_mean_field
+! call test_grad_f_mean_field
+ call test_grad_mu_mf
 end
 
 
@@ -127,5 +128,49 @@ subroutine test_grad_f_mean_field
  print*,accu_grad_dm_a
  print*,'accu_dm_b = '
  print*,accu_grad_dm_b
+
+end
+
+subroutine test_grad_mu_mf
+ implicit none
+ integer :: i_point,k
+ double precision :: weight,r(3),rbis(3)
+ double precision :: mu_mf, dm,grad_mu_mf(3), grad_dm(3)
+ double precision :: mu_mf_p, mu_mf_m, dm_m, dm_p, num_grad_mu_mf(3),dr, num_grad_dm(3)
+ double precision :: accu_mu, accu_dm, accu_grad_dm(3), accu_grad_mu_mf(3)
+ dr = 0.00001d0
+ accu_grad_mu_mf = 0.d0
+ accu_mu = 0.d0
+ accu_grad_dm = 0.d0
+ accu_dm = 0.d0
+ do i_point = 1, n_points_final_grid
+  r(1:3)   = final_grid_points(1:3,i_point)
+  weight = final_weight_at_r_vector(i_point)
+  call grad_mu_of_r_mean_field(r,mu_mf, dm, grad_mu_mf, grad_dm)
+  call mu_of_r_mean_field(r,mu_mf_p, dm_p)
+  accu_mu += weight*dabs(mu_mf_p - mu_mf)
+  accu_dm += weight*dabs(dm_p - dm)
+  do k = 1, 3
+   rbis = r
+   rbis(k) += dr
+   call mu_of_r_mean_field(rbis,mu_mf_p, dm_p)
+   rbis = r
+   rbis(k) -= dr
+   call mu_of_r_mean_field(rbis,mu_mf_m, dm_m)
+
+   num_grad_mu_mf(k) = (mu_mf_p - mu_mf_m)/(2.d0*dr)
+   num_grad_dm(k) = (dm_p - dm_m)/(2.d0*dr)
+  enddo
+  do k = 1, 3
+   accu_grad_dm(k)+= weight *dabs(num_grad_dm(k) - grad_dm(k))
+   accu_grad_mu_mf(k)+= weight *dabs(num_grad_mu_mf(k) - grad_mu_mf(k))
+  enddo
+ enddo
+ print*,'accu_mu = ',accu_mu
+ print*,'accu_dm = ',accu_dm
+ print*,'accu_grad_dm = '
+ print*, accu_grad_dm
+ print*,'accu_grad_mu_mf = '
+ print*, accu_grad_mu_mf
 
 end
