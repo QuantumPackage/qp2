@@ -288,25 +288,31 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP END DO
       !$OMP END PARALLEL
     else
-      print*, ' ao_integrals_map will be used'
-      PROVIDE ao_integrals_map
+!      print*, ' ao_integrals_map will be used'
+!      PROVIDE ao_integrals_map
+      print*,'Cholesky vectors will be used '
+      double precision :: get_ao_integ_chol,eri
+      eri = get_ao_integ_chol(1,1,1,1) ! FOR OPENMP 
       !$OMP PARALLEL DEFAULT(NONE)                            &
-      !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
-      !$OMP PRIVATE(i, j, k, l)
+!!!    !$OMP SHARED(ao_num, ao_two_e_tc_tot, ao_integrals_map) &
+      !$OMP SHARED(ao_num, ao_two_e_tc_tot) &
+      !$OMP PRIVATE(i, j, k, l,eri)
       !$OMP DO COLLAPSE(3)
       do j = 1, ao_num
         do l = 1, ao_num
           do i = 1, ao_num
             do k = 1, ao_num
               !                                                     < 1:i, 2:j | 1:k, 2:l > 
-              ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+!              eri =  get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+               eri = get_ao_integ_chol(i,k,j,l)
+              ao_two_e_tc_tot(k,i,l,j) = ao_two_e_tc_tot(k,i,l,j) + eri
             enddo
           enddo
         enddo
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
-      FREE ao_integrals_map
+!      FREE ao_integrals_map
     endif
 
     if((tc_integ_type .eq. "numeric") .and. (.not. tc_save_mem)) then

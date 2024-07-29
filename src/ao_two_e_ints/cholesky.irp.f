@@ -1,3 +1,15 @@
+double precision function get_ao_integ_chol(i,j,k,l)
+ implicit none
+  BEGIN_DOC
+  !  CHOLESKY representation of the integral of the AO basis <ik|jl> or (ij|kl)
+  !     i(r1) j(r1) 1/r12 k(r2) l(r2)
+  END_DOC
+ integer, intent(in) :: i,j,k,l
+ double precision, external :: ddot                                                                                  
+ get_ao_integ_chol = ddot(cholesky_ao_num, cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
+
+end
+
 BEGIN_PROVIDER [ double precision, cholesky_ao_transp, (cholesky_ao_num, ao_num, ao_num) ]
  implicit none
  BEGIN_DOC
@@ -25,7 +37,10 @@ END_PROVIDER
    ! Last dimension of cholesky_ao is cholesky_ao_num
    !
    ! https://mogp-emulator.readthedocs.io/en/latest/methods/proc/ProcPivotedCholesky.html
+   !
    ! https://doi.org/10.1016/j.apnum.2011.10.001 : Page 4, Algorithm 1
+   !
+   ! https://www.diva-portal.org/smash/get/diva2:396223/FULLTEXT01.pdf
    END_DOC
 
    integer*8                      :: ndim8
@@ -155,11 +170,15 @@ END_PROVIDER
          Lset(np8) = p8
        endif
      enddo
-     np = np8
+     if (np8 > ndim8) stop 'np>ndim8'
+     np = int(np8,4)
      if (np <= 0) stop 'np<=0'
-     if (np > ndim8) stop 'np>ndim8'
 
-     rank_max = min(np,20*elec_num*elec_num)
+     rank_max = np
+     ! Avoid too large arrays when there are many electrons
+     if (elec_num > 10) then
+       rank_max = min(np,20*elec_num*elec_num)
+     endif
      call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
      call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
 
@@ -428,7 +447,7 @@ END_PROVIDER
            Lset(np8) = p8
          endif
        enddo
-       np = np8
+       np = int(np8,4)
 
      enddo
 

@@ -1,0 +1,2 @@
+-ltbb -lsycl -lmkl_sycl -lgpu -limf -lintlc -lstdc++ 
+

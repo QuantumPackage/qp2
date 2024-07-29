@@ -101,3 +101,34 @@ BEGIN_PROVIDER [ double precision, cholesky_mo_transp, (cholesky_mo_num, mo_num,
 
 END_PROVIDER
 
+
+BEGIN_PROVIDER [ double precision, cholesky_semi_mo_transp_simple, (cholesky_mo_num, ao_num, mo_num) ]
+ implicit none
+ BEGIN_DOC
+ ! Cholesky vectors in MO basis
+ END_DOC
+
+ double precision, allocatable :: X(:,:,:)
+ double precision :: wall0, wall1
+ integer :: ierr
+ print *, 'Semi AO->MO Transformation of Cholesky vectors'
+  call wall_time(wall0)
+
+ allocate(X(mo_num,cholesky_mo_num,ao_num), stat=ierr)
+ if (ierr /= 0) then
+   print *, irp_here, ': Allocation failed'
+ endif
+ integer :: i_chol, i_mo, j_mo, i_ao 
+ cholesky_semi_mo_transp_simple = 0.d0
+ do i_mo = 1, mo_num
+  do i_ao = 1, ao_num
+   do j_mo = 1, mo_num
+    do i_chol = 1, cholesky_mo_num
+     cholesky_semi_mo_transp_simple(i_chol, i_ao,i_mo) += cholesky_mo_transp(i_chol,j_mo,i_mo) * mo_coef_transp(j_mo,i_ao)
+    enddo
+   enddo
+  enddo
+ enddo
+
+END_PROVIDER
+

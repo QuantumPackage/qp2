@@ -7,6 +7,7 @@ subroutine spher_harm_func_r3(r,l,m,re_ylm, im_ylm)
  double precision :: theta, phi,r_abs
  call cartesian_to_spherical(r,theta,phi,r_abs)
  call spher_harm_func(l,m,theta,phi,re_ylm, im_ylm)
+! call spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
 end
 
 
@@ -131,6 +132,10 @@ subroutine spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
   tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta) 
   re_ylm = tmp * dcos(phi)
   im_ylm = tmp * dsin(phi)
+ else if (l==1.and.m==-1)then
+  tmp = - inv_sq_pi * dsqrt(3.d0/8.d0) * dsin(theta) 
+  re_ylm = tmp * dcos(phi)
+  im_ylm = -tmp * dsin(phi)
  else if(l==1.and.m==0)then
   tmp = inv_sq_pi * dsqrt(3.d0/4.d0) * dcos(theta) 
   re_ylm = tmp 
@@ -139,10 +144,18 @@ subroutine spher_harm_func_expl(l,m,theta,phi,re_ylm, im_ylm)
   tmp = 0.25d0 * inv_sq_pi * dsqrt(0.5d0*15.d0) * dsin(theta)*dsin(theta)
   re_ylm = tmp * dcos(2.d0*phi)
   im_ylm = tmp * dsin(2.d0*phi)
+ else if(l==2.and.m==-2)then
+  tmp = 0.25d0 * inv_sq_pi * dsqrt(0.5d0*15.d0) * dsin(theta)*dsin(theta)
+  re_ylm = tmp * dcos(2.d0*phi)
+  im_ylm =-tmp * dsin(2.d0*phi)
  else if(l==2.and.m==1)then
   tmp = - inv_sq_pi * dsqrt(15.d0/8.d0) * dsin(theta) * dcos(theta)
   re_ylm = tmp * dcos(phi)
   im_ylm = tmp * dsin(phi)
+ else if(l==2.and.m==-1)then
+  tmp = - inv_sq_pi * dsqrt(15.d0/8.d0) * dsin(theta) * dcos(theta)
+  re_ylm = tmp * dcos(phi)
+  im_ylm =-tmp * dsin(phi)
  else if(l==2.and.m==0)then
   tmp = dsqrt(5.d0/4.d0) * inv_sq_pi* (1.5d0*dcos(theta)*dcos(theta)-0.5d0)
   re_ylm = tmp

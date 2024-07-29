@@ -10,6 +10,7 @@ real*8 function hessmat_itju(i,t,j,u)
   implicit none
   integer                        :: i,t,j,u,ii,tt,uu,v,vv,x,xx,y,jj
   real*8                         :: term,t2
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   ii=list_core_inact(i)
   tt=list_act(t)
@@ -95,6 +96,7 @@ real*8 function hessmat_itja(i,t,j,a)
   implicit none
   integer                        :: i,t,j,a,ii,tt,jj,aa,v,vv,x,y
   real*8                         :: term
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   ! it/ja
   ii=list_core_inact(i)
@@ -128,6 +130,7 @@ real*8 function hessmat_itua(i,t,u,a)
   implicit none
   integer                        :: i,t,u,a,ii,tt,uu,aa,v,vv,x,xx,u3,t3,v3
   real*8                         :: term
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   ii=list_core_inact(i)
   tt=list_act(t)
@@ -169,6 +172,7 @@ real*8 function hessmat_iajb(i,a,j,b)
   implicit none
   integer                        :: i,a,j,b,ii,aa,jj,bb
   real*8                         :: term
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   ii=list_core_inact(i)
   aa=list_virt(a)
@@ -205,6 +209,7 @@ real*8 function hessmat_iatb(i,a,t,b)
   implicit none
   integer                        :: i,a,t,b,ii,aa,tt,bb,v,vv,x,y,v3,t3
   real*8                         :: term
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   ii=list_core_inact(i)
   aa=list_virt(a)
@@ -237,6 +242,7 @@ real*8 function hessmat_taub(t,a,u,b)
   integer                        :: t,a,u,b,tt,aa,uu,bb,v,vv,x,xx,y
   integer                        :: v3,x3
   real*8                         :: term,t1,t2,t3
+  double precision :: bielec_pqxx_no,bielec_pxxq_no
   
   tt=list_act(t)
   aa=list_virt(a)
