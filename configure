@@ -40,7 +40,7 @@ Usage:
   $(basename $0) -c <file>    
   $(basename $0) -h           
   $(basename $0) -i <package> 
-  $(basename $0) -g [nvidia|none]
+  $(basename $0) -g [nvidia|intel|none]
 
 Options:
   -c  <file>        Define a COMPILATION configuration file,
@@ -49,7 +49,7 @@ Options:
   -i <package>      INSTALL <package>. Use at your OWN RISK:
                     no support will be provided for the installation of
                     dependencies.
-  -g [nvidia|none]  Choose GPU acceleration (experimental)
+  -g [nvidia|intel|none]  Choose GPU acceleration
 
 Example:
   ./$(basename $0) -c config/gfortran.cfg
@@ -115,19 +115,23 @@ while getopts "d:c:i:g:h" c ; do
 done
 
 # Handle GPU acceleration
-rm -f ${QP_ROOT}/src/gpu
+rm -f ${QP_ROOT}/src/gpu_arch
 case "$GPU" in
-  amd) # Nvidia
+  amd) # AMD
      echo "Activating AMD GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_amd ${QP_ROOT}/src/gpu
+     ln -s ${QP_ROOT}/plugins/local/gpu_amd ${QP_ROOT}/src/gpu_arch
+     ;;
+  intel) # Intel
+     echo "Activating Intel GPU acceleration (EXPERIMENTAL)"
+     ln -s ${QP_ROOT}/plugins/local/gpu_intel ${QP_ROOT}/src/gpu_arch
      ;;
   nvidia) # Nvidia
      echo "Activating Nvidia GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_nvidia ${QP_ROOT}/src/gpu
+     ln -s ${QP_ROOT}/plugins/local/gpu_nvidia ${QP_ROOT}/src/gpu_arch
      ;;
   *) # No Acceleration
      echo "Disabling GPU acceleration"
-     ln -s ${QP_ROOT}/src/gpu_x86 ${QP_ROOT}/src/gpu
+     ln -s ${QP_ROOT}/plugins/local/gpu_x86 ${QP_ROOT}/src/gpu_arch
      ;;
 esac
 

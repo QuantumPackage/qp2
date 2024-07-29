@@ -1,4 +1,36 @@
 
+
+! ---
+
+subroutine run_pouet
+
+  BEGIN_DOC
+  ! Selected Full Configuration Interaction with Stochastic selection and PT2.
+  END_DOC
+
+  use selection_types
+  implicit none
+  integer                       :: i, j, k, ndet
+  integer                       :: to_select
+  logical                       :: has
+  type(pt2_type)                :: pt2_data, pt2_data_err
+  double precision              :: rss
+  double precision              :: correlation_energy_ratio
+  double precision              :: hf_energy_ref
+  double precision              :: relative_error
+  double precision, allocatable :: zeros(:),E_tc(:), norm(:)
+
+  logical,          external    :: qp_stop
+  double precision, external    :: memory_of_double
+
+  PROVIDE mo_l_coef mo_r_coef
+  PROVIDE H_apply_buffer_allocated distributed_davidson 
+
+  print*, ' Diagonal elements of the Fock matrix '
+  do i = 1, mo_num
+    write(*,*) i, Fock_matrix_tc_mo_tot(i,i)
+  enddo
+end
 ! ---
 
 subroutine run_stochastic_cipsi
