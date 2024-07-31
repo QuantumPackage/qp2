@@ -282,9 +282,8 @@ END_PROVIDER
          print*,'  Within the ',N_det,'determinants selected'
          print*,'  and the ',N_states_diag,'states requested'
          print*,'  We did not find only states with S^2 values close to ',expected_s2
-         print*,'  We will then set the first N_states eigenvectors of the H matrix'
-         print*,'  as the CI_eigenvectors'
-         print*,'  You should consider more states and maybe ask for s2_eig to be .True. or just enlarge the CI space'
+         print*,'  You should consider more states, or change s2_eig, or just enlarge the CI space'
+         print*,'!!!!!!!!   WARNING  !!!!!!!!!'
          print*,''
 
          do j=1,min(N_states_diag,N_det)

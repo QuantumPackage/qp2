@@ -594,6 +594,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
           state(l) = idx
         enddo
 
+        ! Check if all states are attributed. If not, exit and N_st_diag will be increased.
+        do l=1,N_st
+          if (state(l) == 0) then
+            return
+          endif
+        enddo
+
         ! tmp array before setting state_ok
         ok = .False.
         do l = 1, N_st
@@ -626,47 +633,6 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
       ! Swapped eigenvectors
       prev_y = y
-
-!      if (state_following) then
-!
-!        overlap = -1.d0
-!        do k=1,shift2
-!          do i=1,shift2
-!            overlap(k,i) = dabs(y(k,i))
-!          enddo
-!        enddo
-!        do k=1,N_st
-!          cmax = -1.d0
-!          do i=1,N_st
-!            if (overlap(i,k) > cmax) then
-!              cmax = overlap(i,k)
-!              order(k) = i
-!            endif
-!          enddo
-!          do i=1,N_st_diag
-!            overlap(order(k),i) = -1.d0
-!          enddo
-!        enddo
-!        overlap = y
-!        do k=1,N_st
-!          l = order(k)
-!          if (k /= l) then
-!            y(1:shift2,k) = overlap(1:shift2,l)
-!          endif
-!        enddo
-!        do k=1,N_st
-!          overlap(k,1) = lambda(k)
-!          overlap(k,2) = s2(k)
-!        enddo
-!        do k=1,N_st
-!          l = order(k)
-!          if (k /= l) then
-!            lambda(k) = overlap(l,1)
-!            s2(k) = overlap(l,2)
-!          endif
-!        enddo
-!
-!      endif
 
 
       ! Express eigenvectors of h in the determinant basis
@@ -703,7 +669,7 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
 
       if ((itertot>1).and.(iter == 1)) then
-        !don't print
+        ! Don't print
         continue
       else
         write(*,'(1X,I3,1X,100(1X,F16.10,1X,F11.6,1X,ES11.3))') iter-1, to_print(1:3,1:N_st)
