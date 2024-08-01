@@ -2,7 +2,7 @@
 ! ---
 
 subroutine provide_int2_grad1_u12_ao()
-  use gpu
+
   BEGIN_DOC
   !
   ! int2_grad1_u12_ao(i,j,ipoint,1) = \int dr2         [\grad1 u(r1,r2)]_x1 \chi_i(r2) \chi_j(r2)
@@ -35,8 +35,8 @@ subroutine provide_int2_grad1_u12_ao()
   double precision              :: weight1, ao_k_r, ao_i_r
   double precision              :: der_envsq_x, der_envsq_y, der_envsq_z, lap_envsq
   double precision              :: time0, time1, time2, tc1, tc2, tc
-  type(gpu_double4)             :: int2_grad1_u12_ao
-  type(gpu_double3)             :: tmp_grad1_u12, tmp_grad1_u12p, tmp
+  double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
+  double precision, allocatable :: tmp_grad1_u12(:,:,:), tmp(:,:,:)
   double precision, allocatable :: c_mat(:,:,:), tc_int_2e_ao(:,:,:,:)
 
   double precision, external    :: get_ao_two_e_integral
@@ -52,7 +52,6 @@ subroutine provide_int2_grad1_u12_ao()
 
   call total_memory(mem)
   mem      = max(1.d0, qp_max_mem - mem)
-  mem = 6
   n_double = mem * 1.d8
   n_blocks = int(min(n_double / (n_points_extra_final_grid * 4.d0), 1.d0*n_points_final_grid))
   n_rest   = int(mod(n_points_final_grid, n_blocks))
@@ -66,9 +65,9 @@ subroutine provide_int2_grad1_u12_ao()
   ! ---
   ! ---
 
-  call gpu_allocate(int2_grad1_u12_ao, ao_num,ao_num,n_points_final_grid,4)
+  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
 
-  call gpu_allocate(tmp,n_points_extra_final_grid,ao_num,ao_num)
+  allocate(tmp(n_points_extra_final_grid,ao_num,ao_num))
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (j, i, jpoint) &
@@ -77,22 +76,16 @@ subroutine provide_int2_grad1_u12_ao()
   do j = 1, ao_num
     do i = 1, ao_num
       do jpoint = 1, n_points_extra_final_grid
-        tmp%f(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+        tmp(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
       enddo
     enddo
   enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call gpu_allocate(tmp_grad1_u12,n_points_extra_final_grid,n_blocks,4)
-  call gpu_allocate(tmp_grad1_u12p,n_points_extra_final_grid,n_blocks,4)
+  allocate(tmp_grad1_u12(n_points_extra_final_grid,n_blocks,4))
 
   tc = 0.d0
-
-  type(gpu_stream) :: stream(4)
-  do i=1,4
-    call gpu_stream_create(stream(i))
-  enddo
 
   do i_pass = 1, n_pass
     ii = (i_pass-1)*n_blocks + 1
@@ -102,25 +95,22 @@ subroutine provide_int2_grad1_u12_ao()
     !$OMP PARALLEL                   &
     !$OMP DEFAULT (NONE)             &
     !$OMP PRIVATE (i_blocks, ipoint) &
-    !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12)
+    !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, tmp_grad1_u12)
     !$OMP DO
     do i_blocks = 1, n_blocks
       ipoint = ii - 1 + i_blocks ! r1
-      call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, tmp_grad1_u12%f(1,i_blocks,1), tmp_grad1_u12%f(1,i_blocks,2), &
-        tmp_grad1_u12%f(1,i_blocks,3), tmp_grad1_u12%f(1,i_blocks,4))
+      call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_blocks,1), tmp_grad1_u12(1,i_blocks,2), &
+        tmp_grad1_u12(1,i_blocks,3), tmp_grad1_u12(1,i_blocks,4))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
     call wall_time(tc2)
     tc = tc + tc2 - tc1
 
-    call gpu_synchronize()
-    call gpu_copy(tmp_grad1_u12,tmp_grad1_u12p)
     do m = 1, 4
-      call gpu_set_stream(blas_handle, stream(m))
-      call gpu_dgemm(blas_handle, "T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                     &
-                , tmp%f(1,1,1), n_points_extra_final_grid, tmp_grad1_u12p%f(1,1,m), n_points_extra_final_grid &
-                , 0.d0, int2_grad1_u12_ao%f(1,1,ii,m), ao_num*ao_num)
+      call dgemm("T", "N", ao_num*ao_num, n_blocks, n_points_extra_final_grid, 1.d0                      &
+                , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
+                , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
     enddo
   enddo
 
@@ -132,12 +122,12 @@ subroutine provide_int2_grad1_u12_ao()
     !$OMP PARALLEL                 &
     !$OMP DEFAULT (NONE)           &
     !$OMP PRIVATE (i_rest, ipoint) &
-    !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12)
+    !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, tmp_grad1_u12)
     !$OMP DO
     do i_rest = 1, n_rest
       ipoint = ii - 1 + i_rest ! r1
-      call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, tmp_grad1_u12%f(1,i_rest,1), tmp_grad1_u12%f(1,i_rest,2), &
-        tmp_grad1_u12%f(1,i_rest,3), tmp_grad1_u12%f(1,i_rest,4))
+      call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, tmp_grad1_u12(1,i_rest,1), tmp_grad1_u12(1,i_rest,2), &
+        tmp_grad1_u12(1,i_rest,3), tmp_grad1_u12(1,i_rest,4))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -145,23 +135,15 @@ subroutine provide_int2_grad1_u12_ao()
     tc = tc + tc2 - tc1
 
     do m = 1, 4
-      call gpu_set_stream(blas_handle, stream(m))
-      call gpu_dgemm(blas_handle, "T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                       &
-                , tmp%f(1,1,1), n_points_extra_final_grid, tmp_grad1_u12%f(1,1,m), n_points_extra_final_grid &
-                , 0.d0, int2_grad1_u12_ao%f(1,1,ii,m), ao_num*ao_num)
+      call dgemm("T", "N", ao_num*ao_num, n_rest, n_points_extra_final_grid, 1.d0                        &
+                , tmp(1,1,1), n_points_extra_final_grid, tmp_grad1_u12(1,1,m), n_points_extra_final_grid &
+                , 0.d0, int2_grad1_u12_ao(1,1,ii,m), ao_num*ao_num)
     enddo
 
   endif
-  call gpu_synchronize()
-  call gpu_deallocate(tmp_grad1_u12)
-  call gpu_deallocate(tmp_grad1_u12p)
+  deallocate(tmp_grad1_u12)
 
-  do i=1,4
-    call gpu_stream_destroy(stream(i))
-  enddo
-
-
-  call gpu_deallocate(tmp)
+  deallocate(tmp)
 
 
   call wall_time(time1)
@@ -169,8 +151,6 @@ subroutine provide_int2_grad1_u12_ao()
   print*, ' wall time Jastrow derivatives   (min) = ', tc / 60.d0
   call print_memory_usage()
 
-!TODO
-stop
   ! ---
   ! ---
   ! ---
@@ -196,7 +176,7 @@ stop
   !$OMP END DO
   !$OMP END PARALLEL
   call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0            &
-            , int2_grad1_u12_ao%f(1,1,1,4), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+            , int2_grad1_u12_ao(1,1,1,4), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
             , 0.d0, tc_int_2e_ao(1,1,1,1), ao_num*ao_num)
   deallocate(c_mat)
 
@@ -232,7 +212,7 @@ stop
     !$OMP END PARALLEL
 
     call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0           &
-              , int2_grad1_u12_ao%f(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
+              , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
               , 1.d0, tc_int_2e_ao(1,1,1,1), ao_num*ao_num)
   enddo
   deallocate(c_mat)
@@ -281,9 +261,10 @@ stop
 
   print*, ' Writing int2_grad1_u12_ao in ', trim(ezfio_filename) // '/work/int2_grad1_u12_ao'
   open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
-  call ezfio_set_work_empty(.False.)
-    write(11) int2_grad1_u12_ao%f(:,:,:,1:3)
+    call ezfio_set_work_empty(.False.)
+    write(11) int2_grad1_u12_ao(:,:,:,1:3)
   close(11)
+  deallocate(int2_grad1_u12_ao)
 
   print*, ' Saving tc_int_2e_ao in ', trim(ezfio_filename) // '/work/ao_two_e_tc_tot'
   open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="write")
@@ -295,7 +276,6 @@ stop
 
   ! ----
 
-  call gpu_deallocate(int2_grad1_u12_ao)
   deallocate(tc_int_2e_ao)
 
   call wall_time(time2)

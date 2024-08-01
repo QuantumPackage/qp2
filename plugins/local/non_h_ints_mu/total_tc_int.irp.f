@@ -118,7 +118,7 @@ BEGIN_PROVIDER [double precision, ao_two_e_tc_tot, (ao_num, ao_num, ao_num, ao_n
       !$OMP END PARALLEL
       call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0                 &
                 , int2_grad1_u12_square_ao(1,1,1), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
-                , 0.d0, ao_two_e_tc_tot, ao_num*ao_num)
+                , 0.d0, ao_two_e_tc_tot(1,1,1,1), ao_num*ao_num)
       deallocate(c_mat)
     endif
   
