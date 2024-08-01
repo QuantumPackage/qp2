@@ -38,61 +38,23 @@ module gpu_module
 
     ! ---
 
-    subroutine deb_int_long_range(nBlocks, blockSize,            &
-                                  n_grid2, n_ao, wr2, aos_data2, &
-                                  int_fct_long_range) bind(C, name = "deb_int_long_range")
-
-      import c_int, c_double
-      integer(c_int), intent(in), value :: nBlocks, blockSize
-      integer(c_int), intent(in), value :: n_grid2
-      integer(c_int), intent(in), value :: n_ao
-      real(c_double), intent(in)        :: wr2(n_grid2)
-      real(c_double), intent(in)        :: aos_data2(n_grid2,n_ao,4)
-      real(c_double), intent(out)       :: int_fct_long_range(n_grid2,n_ao,n_ao)
-
-    end subroutine deb_int_long_range
-
-    ! ---
-
-    subroutine deb_int_bh_kernel(nBlocks, blockSize,                     &
-                                 n_grid1, n_grid2, n_ao, n_nuc, size_bh, &
-                                 r1, r2, rn, c_bh, m_bh, n_bh, o_bh,     &
-                                 grad1_u12) bind(C, name = "deb_int_bh_kernel")
+    subroutine deb_int2_grad1_u12_ao(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize, &
+                                     n_grid1, n_grid2, n_ao, n_nuc, size_bh,             &
+                                     r1, r2, wr2, rn, aos_data2, c_bh, m_bh, n_bh, o_bh, &
+                                     int2_grad1_u12_ao) bind(C, name ="deb_int2_grad1_u12_ao")
 
       import c_int, c_double, c_ptr
-      integer(c_int), intent(in), value :: nBlocks, blockSize
+      integer(c_int), intent(in), value :: nxBlocks, blockxSize
+      integer(c_int), intent(in), value :: nyBlocks, blockySize
+      integer(c_int), intent(in), value :: nzBlocks, blockzSize
       integer(c_int), intent(in), value :: n_grid1, n_grid2
       integer(c_int), intent(in), value :: n_ao
       integer(c_int), intent(in), value :: n_nuc
       integer(c_int), intent(in), value :: size_bh
-      real(c_double), intent(in)        :: r1(n_grid1,3)
-      real(c_double), intent(in)        :: r2(n_grid2,3)
-      real(c_double), intent(in)        :: rn(n_nuc,3)
-      real(c_double), intent(in)        :: c_bh(size_bh,n_nuc)
-      integer(c_int), intent(in)        :: m_bh(size_bh,n_nuc)
-      integer(c_int), intent(in)        :: n_bh(size_bh,n_nuc)
-      integer(c_int), intent(in)        :: o_bh(size_bh,n_nuc)
-      real(c_double), intent(out)       :: grad1_u12(n_grid2,n_grid1,4)
-
-    end subroutine deb_int_bh_kernel
-
-    ! ---
-
-    subroutine deb_int2_grad1_u12_ao(nBlocks, blockSize,                             &
-                                 n_grid1, n_grid2, n_ao, n_nuc, size_bh,             &
-                                 r1, r2, wr2, rn, aos_data2, c_bh, m_bh, n_bh, o_bh, &
-                                 int2_grad1_u12_ao) bind(C, name ="deb_int2_grad1_u12_ao")
-
-      import c_int, c_double, c_ptr
-      integer(c_int), intent(in), value :: nBlocks, blockSize
-      integer(c_int), intent(in), value :: n_grid1, n_grid2
-      integer(c_int), intent(in), value :: n_ao
-      integer(c_int), intent(in), value :: n_nuc
-      integer(c_int), intent(in), value :: size_bh
-      real(c_double), intent(in)        :: r1(n_grid1,3)
-      real(c_double), intent(in)        :: r2(n_grid2,3)
+      real(c_double), intent(in)        :: r1(3,n_grid1)
+      real(c_double), intent(in)        :: r2(3,n_grid2)
       real(c_double), intent(in)        :: wr2(n_grid2)
-      real(c_double), intent(in)        :: rn(n_nuc,3)
+      real(c_double), intent(in)        :: rn(3,n_nuc)
       real(c_double), intent(in)        :: aos_data2(n_grid2,n_ao,4)
       real(c_double), intent(in)        :: c_bh(size_bh,n_nuc)
       integer(c_int), intent(in)        :: m_bh(size_bh,n_nuc)
