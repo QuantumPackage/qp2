@@ -107,8 +107,17 @@ subroutine deb_int2_grad1_u12_ao_gpu()
 
   ! ---
 
+  integer :: nB
+  integer :: sB
+
   PROVIDE nxBlocks nyBlocks nzBlocks
   PROVIDE blockxSize blockySize blockzSize
+
+  sB = 32
+  nB = (n_points_final_grid + sB - 1) / sB
+
+  call ezfio_set_tc_int_blockxSize(sB)
+  call ezfio_set_tc_int_nxBlocks(nB)
 
   allocate(int2_grad1_u12_ao_gpu(ao_num,ao_num,n_points_final_grid,4))
 
@@ -126,96 +135,96 @@ subroutine deb_int2_grad1_u12_ao_gpu()
   ! ---
 
 
-  allocate(int_fct_long_range(n_points_extra_final_grid,ao_num,ao_num))
-  allocate(grad1_u12(n_points_extra_final_grid,n_points_final_grid,4))
-  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
-
-  call wall_time(cpu_time0)
-
-  call wall_time(cpu_ttime0)
-  !$OMP PARALLEL               &
-  !$OMP DEFAULT (NONE)         &
-  !$OMP PRIVATE (j, i, jpoint) &
-  !$OMP SHARED (int_fct_long_range, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
-  !$OMP DO SCHEDULE (static)
-  do j = 1, ao_num
-    do i = 1, ao_num
-      do jpoint = 1, n_points_extra_final_grid
-        int_fct_long_range(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
-      enddo
-    enddo
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
-  call wall_time(cpu_ttime1)
-  write(*,"(A,2X,F15.7)") ' wall time for int_long_range (sec) = ', (cpu_ttime1 - cpu_ttime0)
-
-
-  call wall_time(cpu_ttime0)
-  !$OMP PARALLEL         &
-  !$OMP DEFAULT (NONE)   &
-  !$OMP PRIVATE (ipoint) &
-  !$OMP SHARED (n_points_final_grid, n_points_extra_final_grid, grad1_u12)
-  !$OMP DO
-  do ipoint = 1, n_points_final_grid
-    call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, grad1_u12(1,ipoint,1) &
-                                                               , grad1_u12(1,ipoint,2) &
-                                                               , grad1_u12(1,ipoint,3) &
-                                                               , grad1_u12(1,ipoint,4) )
-  enddo
-  !$OMP END DO
-  !$OMP END PARALLEL
-  call wall_time(cpu_ttime1)
-  write(*,"(A,2X,F15.7)") ' wall time for tc_int_bh (sec) = ', (cpu_ttime1 - cpu_ttime0)
-
-
-  call wall_time(cpu_ttime0)
-  do m = 1, 4
-    call dgemm("T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, 1.d0                      &
-              , int_fct_long_range(1,1,1), n_points_extra_final_grid, grad1_u12(1,1,m), n_points_extra_final_grid &
-              , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num)
-  enddo
-  call wall_time(cpu_ttime1)
-  write(*,"(A,2X,F15.7)") ' wall time for DGEMM (sec) = ', (cpu_ttime1 - cpu_ttime0)
-
-  call wall_time(cpu_time1)
-  write(*,"(A,2X,F15.7)") ' wall time on cpu (sec) = ', (cpu_time1 - cpu_time0)
-
-  ! ---
-
-  acc_thr = 1d-12
-  err_tot = 0.d0
-  nrm_tot = 0.d0
-
-  do m = 1, 4
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do i = 1, ao_num
-          err_loc = dabs(int2_grad1_u12_ao(i,j,ipoint,m) - int2_grad1_u12_ao_gpu(i,j,ipoint,m))
-          if(err_loc > acc_thr) then
-            print*, " error on", i, j, ipoint, m
-            print*, " CPU res", int2_grad1_u12_ao    (i,j,ipoint,m)
-            print*, " GPU res", int2_grad1_u12_ao_gpu(i,j,ipoint,m)
-            stop
-          endif
-          err_tot = err_tot + err_loc
-          nrm_tot = nrm_tot + dabs(int2_grad1_u12_ao(i,j,ipoint,m))
-        enddo
-      enddo
-    enddo
-  enddo
-
-  print *, ' absolute accuracy (%) =', 100.d0 * err_tot / nrm_tot
-
-  ! ---
-
-  deallocate(r1, r2, rn, aos_data2)
-  deallocate(int_fct_long_range, grad1_u12)
-  deallocate(int2_grad1_u12_ao)
-  deallocate(int2_grad1_u12_ao_gpu)
-
-  call wall_time(time1)
-  write(*,"(A,2X,F15.7)") ' wall time for deb_int2_grad1_u12_ao_gpu (sec) = ', (time1 - time0)
+!  allocate(int_fct_long_range(n_points_extra_final_grid,ao_num,ao_num))
+!  allocate(grad1_u12(n_points_extra_final_grid,n_points_final_grid,4))
+!  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
+!
+!  call wall_time(cpu_time0)
+!
+!  call wall_time(cpu_ttime0)
+!  !$OMP PARALLEL               &
+!  !$OMP DEFAULT (NONE)         &
+!  !$OMP PRIVATE (j, i, jpoint) &
+!  !$OMP SHARED (int_fct_long_range, ao_num, n_points_extra_final_grid, final_weight_at_r_vector_extra, aos_in_r_array_extra_transp)
+!  !$OMP DO SCHEDULE (static)
+!  do j = 1, ao_num
+!    do i = 1, ao_num
+!      do jpoint = 1, n_points_extra_final_grid
+!        int_fct_long_range(jpoint,i,j) = final_weight_at_r_vector_extra(jpoint) * aos_in_r_array_extra_transp(jpoint,i) * aos_in_r_array_extra_transp(jpoint,j)
+!      enddo
+!    enddo
+!  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+!  call wall_time(cpu_ttime1)
+!  write(*,"(A,2X,F15.7)") ' wall time for int_long_range (sec) = ', (cpu_ttime1 - cpu_ttime0)
+!
+!
+!  call wall_time(cpu_ttime0)
+!  !$OMP PARALLEL         &
+!  !$OMP DEFAULT (NONE)   &
+!  !$OMP PRIVATE (ipoint) &
+!  !$OMP SHARED (n_points_final_grid, n_points_extra_final_grid, grad1_u12)
+!  !$OMP DO
+!  do ipoint = 1, n_points_final_grid
+!    call get_grad1_u12_for_tc(ipoint, n_points_extra_final_grid, grad1_u12(1,ipoint,1) &
+!                                                               , grad1_u12(1,ipoint,2) &
+!                                                               , grad1_u12(1,ipoint,3) &
+!                                                               , grad1_u12(1,ipoint,4) )
+!  enddo
+!  !$OMP END DO
+!  !$OMP END PARALLEL
+!  call wall_time(cpu_ttime1)
+!  write(*,"(A,2X,F15.7)") ' wall time for tc_int_bh (sec) = ', (cpu_ttime1 - cpu_ttime0)
+!
+!
+!  call wall_time(cpu_ttime0)
+!  do m = 1, 4
+!    call dgemm("T", "N", ao_num*ao_num, n_points_final_grid, n_points_extra_final_grid, 1.d0                      &
+!              , int_fct_long_range(1,1,1), n_points_extra_final_grid, grad1_u12(1,1,m), n_points_extra_final_grid &
+!              , 0.d0, int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num)
+!  enddo
+!  call wall_time(cpu_ttime1)
+!  write(*,"(A,2X,F15.7)") ' wall time for DGEMM (sec) = ', (cpu_ttime1 - cpu_ttime0)
+!
+!  call wall_time(cpu_time1)
+!  write(*,"(A,2X,F15.7)") ' wall time on cpu (sec) = ', (cpu_time1 - cpu_time0)
+!
+!  ! ---
+!
+!  acc_thr = 1d-12
+!  err_tot = 0.d0
+!  nrm_tot = 0.d0
+!
+!  do m = 1, 4
+!    do ipoint = 1, n_points_final_grid
+!      do j = 1, ao_num
+!        do i = 1, ao_num
+!          err_loc = dabs(int2_grad1_u12_ao(i,j,ipoint,m) - int2_grad1_u12_ao_gpu(i,j,ipoint,m))
+!          if(err_loc > acc_thr) then
+!            print*, " error on", i, j, ipoint, m
+!            print*, " CPU res", int2_grad1_u12_ao    (i,j,ipoint,m)
+!            print*, " GPU res", int2_grad1_u12_ao_gpu(i,j,ipoint,m)
+!            stop
+!          endif
+!          err_tot = err_tot + err_loc
+!          nrm_tot = nrm_tot + dabs(int2_grad1_u12_ao(i,j,ipoint,m))
+!        enddo
+!      enddo
+!    enddo
+!  enddo
+!
+!  print *, ' absolute accuracy (%) =', 100.d0 * err_tot / nrm_tot
+!
+!  ! ---
+!
+!  deallocate(r1, r2, rn, aos_data2)
+!  deallocate(int_fct_long_range, grad1_u12)
+!  deallocate(int2_grad1_u12_ao)
+!  deallocate(int2_grad1_u12_ao_gpu)
+!
+!  call wall_time(time1)
+!  write(*,"(A,2X,F15.7)") ' wall time for deb_int2_grad1_u12_ao_gpu (sec) = ', (time1 - time0)
 
   return
 end
