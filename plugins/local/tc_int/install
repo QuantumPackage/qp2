@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Check if the QP_ROOT environment variable is set.
+if [[ -z ${QP_ROOT} ]]
+then
+  print "The QP_ROOT environment variable is not set."
+  print "Please reload the quantum_package.rc file."
+  exit -1
+fi
+
+git clone https://github.com/AbdAmmar/CuTC
+cd CuTC
+source config/env.rc 
+make
+
+ln -s ${PWD}/CuTC/build/libtc_int_cu.so ${QP_ROOT}/lib
+

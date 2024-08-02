@@ -56,21 +56,13 @@ end
 
 subroutine do_work_on_gpu()
 
-  use gpu_module
+  use cutc_module
 
   implicit none
 
   integer :: k, ipoint
-  integer :: nBlocks, blockSize
-  integer :: n_grid1, n_grid2
-  integer :: n_ao
-  integer :: n_nuc
-  integer :: size_bh
 
-  double precision, allocatable :: r1(:,:), wr1(:), r2(:,:), wr2(:), rn(:,:)
   double precision, allocatable :: aos_data1(:,:,:), aos_data2(:,:,:)
-  double precision, allocatable :: c_bh(:,:)
-  integer,          allocatable :: m_bh(:,:), n_bh(:,:), o_bh(:,:)
   double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
   double precision, allocatable :: int_2e_ao(:,:,:,:)
 
@@ -80,47 +72,11 @@ subroutine do_work_on_gpu()
   call wall_time(time0)
   print*, ' start calculation of TC-integrals'
 
-  nBlocks = 100
-  blockSize = 32
+  allocate(aos_data1(n_points_final_grid,ao_num,4))
+  allocate(aos_data2(n_points_extra_final_grid,ao_num,4))
+  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
+  allocate(int_2e_ao(ao_num,ao_num,ao_num,ao_num))
 
-  n_grid1 = n_points_final_grid
-  n_grid2 = n_points_extra_final_grid
-
-  n_ao = ao_num
-  n_nuc = nucl_num
-
-  size_bh = jBH_size
-
-  print*, " nBlocks =", nBlocks
-  print*, " blockSize =", blockSize
-  print*, " n_grid1 =", n_grid1
-  print*, " n_grid2 =", n_grid2
-  print*, " n_ao =", n_ao
-  print*, " n_nuc =", n_nuc
-  print *, " size_bh =", size_bh
-
-  allocate(r1(n_grid1,3), wr1(n_grid1))
-  allocate(r2(n_grid2,3), wr2(n_grid2))
-  allocate(rn(n_nuc,3))
-  allocate(aos_data1(n_grid1,n_ao,4))
-  allocate(aos_data2(n_grid2,n_ao,4))
-  allocate(c_bh(size_bh,n_nuc), m_bh(size_bh,n_nuc), n_bh(size_bh,n_nuc), o_bh(size_bh,n_nuc))
-  allocate(int2_grad1_u12_ao(n_ao,n_ao,n_grid1,4))
-  allocate(int_2e_ao(n_ao,n_ao,n_ao,n_ao))
-
-  do ipoint = 1, n_points_final_grid
-    r1(ipoint,1) = final_grid_points(1,ipoint)
-    r1(ipoint,2) = final_grid_points(2,ipoint)
-    r1(ipoint,3) = final_grid_points(3,ipoint)
-    wr1(ipoint) = final_weight_at_r_vector(ipoint)
-  enddo
-
-  do ipoint = 1, n_points_extra_final_grid
-    r2(ipoint,1) = final_grid_points_extra(1,ipoint)
-    r2(ipoint,2) = final_grid_points_extra(2,ipoint)
-    r2(ipoint,3) = final_grid_points_extra(3,ipoint)
-    wr2(ipoint) = final_weight_at_r_vector_extra(ipoint)
-  enddo
 
   do k = 1, ao_num
     do ipoint = 1, n_points_final_grid
@@ -138,31 +94,37 @@ subroutine do_work_on_gpu()
     enddo
   enddo
 
-  rn(:,:) = nucl_coord(:,:)
+  ! ---
 
-  c_bh(:,:) = jBH_c(:,:)
-  m_bh(:,:) = jBH_m(:,:)
-  n_bh(:,:) = jBH_n(:,:)
-  o_bh(:,:) = jBH_o(:,:)
+  integer :: nB
+  integer :: sB
+
+  PROVIDE nxBlocks nyBlocks nzBlocks
+  PROVIDE blockxSize blockySize blockzSize
+
+  sB = 32
+  nB = (n_points_final_grid + sB - 1) / sB
+
+  call ezfio_set_tc_int_blockxSize(sB)
+  call ezfio_set_tc_int_nxBlocks(nB)
+
+
 
   call wall_time(cuda_time0)
   print*, ' start CUDA kernel'
 
-  int2_grad1_u12_ao = 0.d0
-  int_2e_ao = 0.d0
-
-  call tc_int_c(nBlocks, blockSize,                         &
-                n_grid1, n_grid2, n_ao, n_nuc, size_bh,     &
-                r1, wr1, r2, wr2, rn, aos_data1, aos_data2, &
-                c_bh, m_bh, n_bh, o_bh,                     &
+  call tc_int_c(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
+                n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
+                final_grid_points, final_weight_at_r_vector,                                &
+                final_grid_points_extra, final_weight_at_r_vector_extra,                    &
+                nucl_coord, aos_data1, aos_data2,                                           &
+                jBH_c, jBH_m, jBH_n, jBH_o,                                                 &
                 int2_grad1_u12_ao, int_2e_ao)
 
   call wall_time(cuda_time1)
   print*, ' wall time for CUDA kernel (min) = ', (cuda_time1-cuda_time0) / 60.d0
 
-  deallocate(r1, wr1, r2, wr2, rn)
   deallocate(aos_data1, aos_data2)
-  deallocate(c_bh, m_bh, n_bh, o_bh)
 
   ! ---
 

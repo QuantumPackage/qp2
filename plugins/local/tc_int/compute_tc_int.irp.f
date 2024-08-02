@@ -149,6 +149,7 @@ subroutine provide_int2_grad1_u12_ao()
   call wall_time(time1)
   print*, ' wall time for int2_grad1_u12_ao (min) = ', (time1-time0) / 60.d0
   print*, ' wall time Jastrow derivatives   (min) = ', tc / 60.d0
+
   call print_memory_usage()
 
   ! ---
@@ -156,11 +157,11 @@ subroutine provide_int2_grad1_u12_ao()
   ! ---
 
 
+  allocate(c_mat(n_points_final_grid,ao_num,ao_num))
   allocate(tc_int_2e_ao(ao_num,ao_num,ao_num,ao_num))
 
   call wall_time(time1)
 
-  allocate(c_mat(n_points_final_grid,ao_num,ao_num))
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (i, k, ipoint) &
@@ -178,17 +179,16 @@ subroutine provide_int2_grad1_u12_ao()
   call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0            &
             , int2_grad1_u12_ao(1,1,1,4), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
             , 0.d0, tc_int_2e_ao(1,1,1,1), ao_num*ao_num)
-  deallocate(c_mat)
 
   call wall_time(time2)
   print*, ' wall time of Hermitian part of tc_int_2e_ao (min) ', (time2 - time1) / 60.d0
+
   call print_memory_usage()
 
   ! ---
 
   call wall_time(time1)
 
-  allocate(c_mat(n_points_final_grid,ao_num,ao_num))
   do m = 1, 3
     !$OMP PARALLEL                                                              &
     !$OMP DEFAULT (NONE)                                                        &
@@ -215,10 +215,12 @@ subroutine provide_int2_grad1_u12_ao()
               , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
               , 1.d0, tc_int_2e_ao(1,1,1,1), ao_num*ao_num)
   enddo
-  deallocate(c_mat)
 
   call wall_time(time2)
   print*, ' wall time of non-Hermitian part of tc_int_2e_ao (min) ', (time2 - time1) / 60.d0
+
+  deallocate(c_mat)
+
   call print_memory_usage()
 
   ! ---
@@ -229,6 +231,7 @@ subroutine provide_int2_grad1_u12_ao()
 
   call wall_time(time2)
   print*, ' lower- and upper-triangle of tc_int_2e_ao (min) ', (time2 - time1) / 60.d0
+
   call print_memory_usage()
 
   ! ---
