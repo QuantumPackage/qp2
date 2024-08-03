@@ -313,6 +313,22 @@ subroutine deb_int_2e_ao_gpu()
 
   ! ---
 
+  print*, ' Writing int2_grad1_u12_ao in ', trim(ezfio_filename) // '/work/int2_grad1_u12_ao'
+  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
+    call ezfio_set_work_empty(.False.)
+    write(11) int2_grad1_u12_ao_gpu(:,:,:,1:3)
+  close(11)
+
+  print*, ' Saving tc_int_2e_ao in ', trim(ezfio_filename) // '/work/ao_two_e_tc_tot'
+  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="write")
+  call ezfio_set_work_empty(.False.)
+  do k = 1, ao_num
+    write(11) int_2e_ao_gpu(:,:,:,k)
+  enddo
+  close(11)
+
+  ! ---
+
   deallocate(int_fct_long_range, grad1_u12, c_mat)
   deallocate(int_2e_ao, int2_grad1_u12_ao)
   deallocate(int_2e_ao_gpu, int2_grad1_u12_ao_gpu)
