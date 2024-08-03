@@ -62,7 +62,7 @@ subroutine do_work_on_gpu()
 
   integer :: k, ipoint
 
-  double precision, allocatable :: aos_data1(:,:,:), aos_data2(:,:,:)
+  double precision, allocatable :: rn(:,:), aos_data1(:,:,:), aos_data2(:,:,:)
   double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
   double precision, allocatable :: int_2e_ao(:,:,:,:)
 
@@ -72,11 +72,18 @@ subroutine do_work_on_gpu()
   call wall_time(time0)
   print*, ' start calculation of TC-integrals'
 
+  allocate(rn(3,nucl_num))
   allocate(aos_data1(n_points_final_grid,ao_num,4))
   allocate(aos_data2(n_points_extra_final_grid,ao_num,4))
   allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
   allocate(int_2e_ao(ao_num,ao_num,ao_num,ao_num))
 
+
+  do k = 1, nucl_num
+    rn(1,k) = nucl_coord(k,1)
+    rn(2,k) = nucl_coord(k,2)
+    rn(3,k) = nucl_coord(k,3)
+  enddo
 
   do k = 1, ao_num
     do ipoint = 1, n_points_final_grid
@@ -117,14 +124,42 @@ subroutine do_work_on_gpu()
                 n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
                 final_grid_points, final_weight_at_r_vector,                                &
                 final_grid_points_extra, final_weight_at_r_vector_extra,                    &
-                nucl_coord, aos_data1, aos_data2,                                           &
-                jBH_c, jBH_m, jBH_n, jBH_o,                                                 &
+                rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &
                 int2_grad1_u12_ao, int_2e_ao)
 
   call wall_time(cuda_time1)
   print*, ' wall time for CUDA kernel (min) = ', (cuda_time1-cuda_time0) / 60.d0
 
   deallocate(aos_data1, aos_data2)
+
+  ! ---
+
+  integer :: i, j, l
+  double precision :: t1, t2
+  double precision, external :: get_ao_two_e_integral
+
+  call wall_time(t1)
+
+  PROVIDE ao_integrals_map
+  !$OMP PARALLEL DEFAULT(NONE)                      &
+  !$OMP SHARED(ao_num, int_2e_ao, ao_integrals_map) &
+  !$OMP PRIVATE(i, j, k, l)
+  !$OMP DO COLLAPSE(3)
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do i = 1, ao_num
+        do k = 1, ao_num
+          !                                         < 1:i, 2:j | 1:k, 2:l >
+          int_2e_ao(k,i,l,j) = int_2e_ao(k,i,l,j) + get_ao_two_e_integral(i, j, k, l, ao_integrals_map)
+        enddo
+      enddo
+    enddo
+  enddo
+  !$OMP END DO
+  !$OMP END PARALLEL
+
+  call wall_time(t2)
+  print*, ' wall time of Coulomb part of tc_int_2e_ao (min) ', (t2 - t1) / 60.d0
 
   ! ---
 
