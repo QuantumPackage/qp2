@@ -12,6 +12,7 @@ git clone https://github.com/AbdAmmar/CuTC
 cd CuTC
 source config/env.rc 
 make
+cd ..
 
 ln -s ${PWD}/CuTC/build/libtc_int_cu.so ${QP_ROOT}/lib
 
