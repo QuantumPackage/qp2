@@ -119,7 +119,7 @@ subroutine deb_int_2e_ao_gpu()
   call ezfio_set_tc_int_blockxSize(sB)
   call ezfio_set_tc_int_nxBlocks(nB)
 
-  allocate(int2_grad1_u12_ao_gpu(ao_num,ao_num,n_points_final_grid,4))
+  allocate(int2_grad1_u12_ao_gpu(ao_num,ao_num,n_points_final_grid,3))
   allocate(int_2e_ao_gpu(ao_num,ao_num,ao_num,ao_num))
 
   call deb_int_2e_ao(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
@@ -268,7 +268,7 @@ subroutine deb_int_2e_ao_gpu()
   print *, ' precision on int2_grad1_u12_ao '
   err_tot = 0.d0
   nrm_tot = 0.d0
-  do m = 1, 4
+  do m = 1, 3
     do ipoint = 1, n_points_final_grid
       do j = 1, ao_num
         do i = 1, ao_num
@@ -309,23 +309,6 @@ subroutine deb_int_2e_ao_gpu()
     enddo
   enddo
   print *, ' absolute accuracy on int_2e_ao (%) =', 100.d0 * err_tot / nrm_tot
-
-
-  ! ---
-
-  print*, ' Writing int2_grad1_u12_ao in ', trim(ezfio_filename) // '/work/int2_grad1_u12_ao'
-  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
-    call ezfio_set_work_empty(.False.)
-    write(11) int2_grad1_u12_ao_gpu(:,:,:,1:3)
-  close(11)
-
-  print*, ' Saving tc_int_2e_ao in ', trim(ezfio_filename) // '/work/ao_two_e_tc_tot'
-  open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/ao_two_e_tc_tot', action="write")
-  call ezfio_set_work_empty(.False.)
-  do k = 1, ao_num
-    write(11) int_2e_ao_gpu(:,:,:,k)
-  enddo
-  close(11)
 
   ! ---
 

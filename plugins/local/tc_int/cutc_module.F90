@@ -34,7 +34,7 @@ module cutc_module
       integer(c_int), intent(in)        :: m_bh(size_bh,n_nuc)
       integer(c_int), intent(in)        :: n_bh(size_bh,n_nuc)
       integer(c_int), intent(in)        :: o_bh(size_bh,n_nuc)
-      real(c_double), intent(out)       :: int2_grad1_u12_ao(n_ao,n_ao,n_grid1,4)
+      real(c_double), intent(out)       :: int2_grad1_u12_ao(n_ao,n_ao,n_grid1,3)
       real(c_double), intent(out)       :: int_2e_ao(n_ao,n_ao,n_ao,n_ao)
 
     end subroutine tc_int_c
@@ -66,7 +66,7 @@ module cutc_module
       integer(c_int), intent(in)        :: m_bh(size_bh,n_nuc)
       integer(c_int), intent(in)        :: n_bh(size_bh,n_nuc)
       integer(c_int), intent(in)        :: o_bh(size_bh,n_nuc)
-      real(c_double), intent(out)       :: int2_grad1_u12_ao(n_ao,n_ao,n_grid1,4)
+      real(c_double), intent(out)       :: int2_grad1_u12_ao(n_ao,n_ao,n_grid1,3)
       real(c_double), intent(out)       :: int_2e_ao(n_ao,n_ao,n_ao,n_ao)
 
     end subroutine deb_int_2e_ao

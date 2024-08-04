@@ -75,7 +75,7 @@ subroutine do_work_on_gpu()
   allocate(rn(3,nucl_num))
   allocate(aos_data1(n_points_final_grid,ao_num,4))
   allocate(aos_data2(n_points_extra_final_grid,ao_num,4))
-  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,4))
+  allocate(int2_grad1_u12_ao(ao_num,ao_num,n_points_final_grid,3))
   allocate(int_2e_ao(ao_num,ao_num,ao_num,ao_num))
 
 
@@ -166,7 +166,7 @@ subroutine do_work_on_gpu()
   print*, ' Writing int2_grad1_u12_ao in ', trim(ezfio_filename) // '/work/int2_grad1_u12_ao'
   open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
     call ezfio_set_work_empty(.False.)
-    write(11) int2_grad1_u12_ao(:,:,:,1:3)
+    write(11) int2_grad1_u12_ao
   close(11)
   deallocate(int2_grad1_u12_ao)
 

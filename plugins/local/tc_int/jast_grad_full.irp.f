@@ -170,11 +170,6 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
         npA = jBH_n(p,i_nucl)
         opA = jBH_o(p,i_nucl)
 
-        ! TODO to it when reading the parameters
-        if(mpA .eq. npA) then
-          tmp = tmp * 0.5d0
-        endif
-
         tmp1 = double_p(mpA) * f1A_power(mpA-1) * f2A_power(npA) + double_p(npA) * f1A_power(npA-1) * f2A_power(mpA)
         tmp1 = tmp1 * g12_power(opA) * tmp
         tmp2 = double_p(opA) * g12_power(opA-1) * (f1A_power(mpA) * f2A_power(npA) + f1A_power(npA) * f2A_power(mpA)) * tmp

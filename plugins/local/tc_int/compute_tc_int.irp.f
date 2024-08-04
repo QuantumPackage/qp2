@@ -200,7 +200,7 @@ subroutine provide_int2_grad1_u12_ao()
       do k = 1, ao_num
         do ipoint = 1, n_points_final_grid
 
-          weight1 = 0.5d0 * final_weight_at_r_vector(ipoint)
+          weight1 = final_weight_at_r_vector(ipoint)
           ao_i_r  = aos_in_r_array_transp(ipoint,i)
           ao_k_r  = aos_in_r_array_transp(ipoint,k)
 
@@ -211,7 +211,7 @@ subroutine provide_int2_grad1_u12_ao()
     !$OMP END DO
     !$OMP END PARALLEL
 
-    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -1.d0           &
+    call dgemm( "N", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, -0.5d0          &
               , int2_grad1_u12_ao(1,1,1,m), ao_num*ao_num, c_mat(1,1,1), n_points_final_grid &
               , 1.d0, tc_int_2e_ao(1,1,1,1), ao_num*ao_num)
   enddo
