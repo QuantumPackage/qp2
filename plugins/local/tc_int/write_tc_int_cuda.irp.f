@@ -136,11 +136,14 @@ subroutine do_work_on_gpu()
 
   integer :: i, j, l
   double precision :: t1, t2
+  double precision :: tmp
   double precision, external :: get_ao_two_e_integral
 
   call wall_time(t1)
 
   PROVIDE ao_integrals_map
+  tmp = get_ao_two_e_integral(1, 1, 1, 1, ao_integrals_map)
+
   !$OMP PARALLEL DEFAULT(NONE)                      &
   !$OMP SHARED(ao_num, int_2e_ao, ao_integrals_map) &
   !$OMP PRIVATE(i, j, k, l)

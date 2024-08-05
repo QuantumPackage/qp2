@@ -236,9 +236,13 @@ subroutine provide_int2_grad1_u12_ao()
 
   ! ---
 
+  double precision :: tmp_omp
+
   call wall_time(time1)
 
   PROVIDE ao_integrals_map
+  tmp_omp = get_ao_two_e_integral(1, 1, 1, 1, ao_integrals_map)
+
   !$OMP PARALLEL DEFAULT(NONE)                         &
   !$OMP SHARED(ao_num, tc_int_2e_ao, ao_integrals_map) &
   !$OMP PRIVATE(i, j, k, l)
