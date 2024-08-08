@@ -8,6 +8,8 @@ subroutine write_tc_energy()
   double precision              :: E_1e, E_2e, E_3e
   double precision, allocatable :: E_TC_tmp(:), E_1e_tmp(:), E_2e_tmp(:), E_3e_tmp(:)
 
+  call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,1), psi_det(1,1,1), N_int, hmono, htwoe, hthree, htot)
+
   ! GS 
   ! ---
 

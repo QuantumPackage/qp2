@@ -17,11 +17,13 @@ program bi_ort_ints
 ! call test_3e
 ! call test_5idx
 ! call test_5idx2
-  call test_4idx()
+!  call test_4idx()
   !call test_4idx_n4()
   !call test_4idx2()
   !call test_5idx2
   !call test_5idx
+
+  call test_mos_in_r()
 
 end
 
@@ -472,4 +474,56 @@ subroutine test_4idx()
   return
 end
 
+! ---
+
+subroutine test_mos_in_r()
+
+  implicit none
+
+  integer          :: i, j
+  double precision :: err_tot, nrm_tot, err_loc, acc_thr
+
+  PROVIDE mos_l_in_r_array_transp_old mos_r_in_r_array_transp_old
+  PROVIDE mos_l_in_r_array_transp mos_r_in_r_array_transp
+
+  acc_thr = 1d-12
+
+  err_tot = 0.d0
+  nrm_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, n_points_final_grid
+      err_loc = dabs(mos_l_in_r_array_transp_old(j,i) - mos_l_in_r_array_transp(j,i))
+      if(err_loc > acc_thr) then
+        print*, " error on", j, i
+        print*, " old res", mos_l_in_r_array_transp_old(j,i)
+        print*, " new res", mos_l_in_r_array_transp    (j,i)
+        stop
+      endif
+      err_tot = err_tot + err_loc
+      nrm_tot = nrm_tot + dabs(mos_l_in_r_array_transp_old(j,i))
+    enddo
+  enddo
+  print *, ' absolute accuracy on mos_l_in_r_array_transp (%) =', 100.d0 * err_tot / nrm_tot
+
+  err_tot = 0.d0
+  nrm_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, n_points_final_grid
+      err_loc = dabs(mos_r_in_r_array_transp_old(j,i) - mos_r_in_r_array_transp(j,i))
+      if(err_loc > acc_thr) then
+        print*, " error on", j, i
+        print*, " old res", mos_r_in_r_array_transp_old(j,i)
+        print*, " new res", mos_r_in_r_array_transp    (j,i)
+        stop
+      endif
+      err_tot = err_tot + err_loc
+      nrm_tot = nrm_tot + dabs(mos_r_in_r_array_transp_old(j,i))
+    enddo
+  enddo
+  print *, ' absolute accuracy on mos_r_in_r_array_transp (%) =', 100.d0 * err_tot / nrm_tot
+
+  return
+end
+
+! ---
 

@@ -710,6 +710,8 @@ BEGIN_PROVIDER [double precision, noL_0e]
 
   endif
 
+  print*, " noL_0e =", noL_0e
+
 END_PROVIDER
 
 ! ---
