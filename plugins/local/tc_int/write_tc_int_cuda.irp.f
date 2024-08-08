@@ -120,12 +120,12 @@ subroutine do_work_on_gpu()
   call wall_time(cuda_time0)
   print*, ' start CUDA kernel'
 
-  call tc_int_c(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
-                n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
-                final_grid_points, final_weight_at_r_vector,                                &
-                final_grid_points_extra, final_weight_at_r_vector_extra,                    &
-                rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &
-                int2_grad1_u12_ao, int_2e_ao)
+  call cutc_int_c(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
+                  n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
+                  final_grid_points, final_weight_at_r_vector,                                &
+                  final_grid_points_extra, final_weight_at_r_vector_extra,                    &
+                  rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &
+                  int2_grad1_u12_ao, int_2e_ao)
 
   call wall_time(cuda_time1)
   print*, ' wall time for CUDA kernel (min) = ', (cuda_time1-cuda_time0) / 60.d0

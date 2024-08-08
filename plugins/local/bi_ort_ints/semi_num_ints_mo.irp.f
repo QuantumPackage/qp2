@@ -21,9 +21,9 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3
   !$OMP SHARED (ao_num, mo_num, n_points_final_grid, int2_grad1_u12_ao, tmp)
   !$OMP DO SCHEDULE (dynamic)
   do ipoint = 1, n_points_final_grid
-    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,1), ao_num, tmp (1,1,ipoint,1), mo_num)
-    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,2), ao_num, tmp (1,1,ipoint,2), mo_num)
-    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,3), ao_num, tmp (1,1,ipoint,3), mo_num)
+    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,1), ao_num, tmp(1,1,ipoint,1), mo_num)
+    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,2), ao_num, tmp(1,1,ipoint,2), mo_num)
+    call ao_to_mo_bi_ortho(int2_grad1_u12_ao(1,1,ipoint,3), ao_num, tmp(1,1,ipoint,3), mo_num)
   enddo
   !$OMP END DO
   !$OMP END PARALLEL

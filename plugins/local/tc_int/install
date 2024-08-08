@@ -14,5 +14,5 @@ source config/env.rc
 make
 cd ..
 
-ln -s ${PWD}/CuTC/build/libtc_int_cu.so ${QP_ROOT}/lib
+ln -s ${PWD}/CuTC/build/libcutcint.so ${QP_ROOT}/lib
 
