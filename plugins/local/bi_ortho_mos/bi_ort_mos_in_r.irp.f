@@ -16,7 +16,7 @@
   double precision              :: r(3)
   double precision, allocatable :: aos_r(:,:)
 
-  call cpu_time(tt0)
+  call wall_time(tt0)
 
   allocate(aos_r(ao_num,n_points_final_grid))
 
@@ -27,7 +27,7 @@
   call give_all_aos_at_r(r, aos_r(1,1))
 
 
-  call cpu_time(tt2)
+  call wall_time(tt2)
 
   !$OMP PARALLEL       &
   !$OMP DEFAULT (NONE) &
@@ -43,7 +43,7 @@
   !$OMP END DO
   !$OMP END PARALLEL
 
-  call cpu_time(tt3)
+  call wall_time(tt3)
   write(*,"(A,2X,F15.7)") ' wall time for AOs on r (sec) = ', (tt3 - tt2)
 
 
@@ -63,7 +63,7 @@
 
   deallocate(aos_r)
 
-  call cpu_time(tt1)
+  call wall_time(tt1)
   write(*,"(A,2X,F15.7)") ' wall time for mos_l_in_r_array_transp & mos_r_in_r_array_transp (sec) = ', (tt1 - tt0)
 
 END_PROVIDER
