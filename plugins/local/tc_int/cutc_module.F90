@@ -119,6 +119,57 @@ module cutc_module
 
     ! ---
 
+    subroutine cutc_no_1e(n_grid1, n_mo, ne_a, ne_b,                   &
+                          wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, &
+                          no_1e) bind(C, name = "cutc_no_1e")
+
+      import c_int, c_double, c_ptr
+
+      integer(c_int), intent(in), value :: n_grid1
+      integer(c_int), intent(in), value :: n_mo
+      integer(c_int), intent(in), value :: ne_a
+      integer(c_int), intent(in), value :: ne_b
+      real(c_double), intent(in)        :: wr1(n_grid1)
+      real(c_double), intent(in)        :: mos_l_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: mos_r_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: int2_grad1_u12(n_grid1,3,n_mo,n_mo)
+      real(c_double), intent(out)       :: no_1e(n_mo,n_mo)
+
+    end subroutine cutc_no_1e
+
+    ! ---
+
+    subroutine deb_no_1e(n_grid1, n_mo, ne_a, ne_b,                                  &
+                         wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12,                &
+                         tmpO, tmpJ, tmpM, tmpS, tmpC, tmpD, tmpL, tmpR, tmpE, tmpF, &
+                         no_1e) bind(C, name = "deb_no_1e")
+
+      import c_int, c_double, c_ptr
+
+      integer(c_int), intent(in), value :: n_grid1
+      integer(c_int), intent(in), value :: n_mo
+      integer(c_int), intent(in), value :: ne_a
+      integer(c_int), intent(in), value :: ne_b
+      real(c_double), intent(in)        :: wr1(n_grid1)
+      real(c_double), intent(in)        :: mos_l_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: mos_r_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: int2_grad1_u12(n_grid1,3,n_mo,n_mo)
+      real(c_double), intent(out)       :: tmpO(n_grid1)
+      real(c_double), intent(out)       :: tmpJ(n_grid1,3)
+      real(c_double), intent(out)       :: tmpM(n_grid1,3)
+      real(c_double), intent(out)       :: tmpS(n_grid1)
+      real(c_double), intent(out)       :: tmpC(n_grid1,4,n_mo,n_mo)
+      real(c_double), intent(out)       :: tmpD(n_grid1,4)
+      real(c_double), intent(out)       :: tmpL(n_grid1,3,n_mo)
+      real(c_double), intent(out)       :: tmpR(n_grid1,3,n_mo)
+      real(c_double), intent(out)       :: tmpE(n_grid1,5,n_mo)
+      real(c_double), intent(out)       :: tmpF(n_grid1,5,n_mo)
+      real(c_double), intent(out)       :: no_1e(n_mo,n_mo)
+
+    end subroutine deb_no_1e
+
+    ! ---
+
   end interface
 
 end module cutc_module

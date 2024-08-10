@@ -37,8 +37,12 @@ subroutine main()
   implicit none
 
   !call deb_int_2e_ao_gpu()
+
   !call deb_no_2e_gpu_tmp()
-  call deb_no_2e_gpu()
+  !call deb_no_2e_gpu()
+
+  call deb_no_1e_gpu_tmp()
+  !call deb_no_1e_gpu()
 
   return
 end

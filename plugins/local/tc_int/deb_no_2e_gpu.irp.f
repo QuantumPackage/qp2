@@ -87,7 +87,6 @@ subroutine deb_no_2e_gpu()
 
   acc_thr = 1d-12
 
-  print *, ' precision on noL_2e '
   err_tot = 0.d0
   nrm_tot = 0.d0
   do i = 1, mo_num
