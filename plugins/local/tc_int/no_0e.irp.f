@@ -3,12 +3,6 @@
 
 subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, noL_0e)
 
-  BEGIN_DOC
-  ! 
-  ! < Phi_left | L | Phi_right >
-  !
-  END_DOC 
-
   implicit none
 
   integer,          intent(in)  :: n_grid, n_mo
@@ -22,44 +16,47 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
   integer                       :: i, j, k, ipoint
   double precision              :: t0, t1
   double precision, allocatable :: tmp(:)
-  double precision, allocatable :: tmp_L(:,:), tmp_R(:,:)
-  double precision, allocatable :: tmp_M(:,:), tmp_S(:), tmp_O(:), tmp_J(:,:)
-  double precision, allocatable :: tmp_M_priv(:,:), tmp_S_priv(:), tmp_O_priv(:), tmp_J_priv(:,:)
+  double precision, allocatable :: tmpL(:,:), tmpR(:,:)
+  double precision, allocatable :: tmpM(:,:), tmpS(:), tmpO(:), tmpJ(:,:)
+  double precision, allocatable :: tmpM_priv(:,:), tmpS_priv(:), tmpO_priv(:), tmpJ_priv(:,:)
+
+
+  call wall_time(t0)
 
 
   if(ne_a .eq. ne_b) then
 
     allocate(tmp(ne_b))
-    allocate(tmp_L(n_grid,3), tmp_R(n_grid,3))
+    allocate(tmpL(n_grid,3), tmpR(n_grid,3))
 
     !$OMP PARALLEL                            &
     !$OMP DEFAULT(NONE)                       &
-    !$OMP PRIVATE(j, i, ipoint, tmp_L, tmp_R) &
-    !$OMP SHARED(ne_b, n_grid,       & 
+    !$OMP PRIVATE(j, i, ipoint, tmpL, tmpR)   &
+    !$OMP SHARED(ne_b, n_grid,                & 
     !$OMP        mos_l_in_r, mos_r_in_r, wr1, &
     !$OMP        int2_grad1_u12, tmp)
 
     !$OMP DO
     do j = 1, ne_b
 
-      tmp_L = 0.d0
-      tmp_R = 0.d0
+      tmpL = 0.d0
+      tmpR = 0.d0
       do i = 1, ne_b
         do ipoint = 1, n_grid
 
-          tmp_L(ipoint,1) = tmp_L(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,2) = tmp_L(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,3) = tmp_L(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,1) = tmpL(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,2) = tmpL(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,3) = tmpL(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
 
-          tmp_R(ipoint,1) = tmp_R(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,2) = tmp_R(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,3) = tmp_R(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,1) = tmpR(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,2) = tmpR(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,3) = tmpR(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
         enddo
       enddo
 
       tmp(j) = 0.d0
       do ipoint = 1, n_grid
-        tmp(j) = tmp(j) + wr1(ipoint) * (tmp_L(ipoint,1)*tmp_R(ipoint,1) + tmp_L(ipoint,2)*tmp_R(ipoint,2) + tmp_L(ipoint,3)*tmp_R(ipoint,3))
+        tmp(j) = tmp(j) + wr1(ipoint) * (tmpL(ipoint,1)*tmpR(ipoint,1) + tmpL(ipoint,2)*tmpR(ipoint,2) + tmpL(ipoint,3)*tmpR(ipoint,3))
       enddo
     enddo ! j
     !$OMP END DO
@@ -68,150 +65,149 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     noL_0e = -2.d0 * sum(tmp)
 
     deallocate(tmp)
-    deallocate(tmp_L, tmp_R)
+    deallocate(tmpL, tmpR)
 
     ! ---
 
-    allocate(tmp_O(n_grid), tmp_J(n_grid,3))
-    tmp_O = 0.d0
-    tmp_J = 0.d0
+    allocate(tmpO(n_grid), tmpJ(n_grid,3))
+    tmpO = 0.d0
+    tmpJ = 0.d0
 
-    !$OMP PARALLEL                                   &
-    !$OMP DEFAULT(NONE)                              &
-    !$OMP PRIVATE(i, ipoint, tmp_O_priv, tmp_J_priv) &
-    !$OMP SHARED(ne_b, n_grid,              & 
-    !$OMP        mos_l_in_r, mos_r_in_r,             &
-    !$OMP        int2_grad1_u12, tmp_O, tmp_J)
+    !$OMP PARALLEL                                 &
+    !$OMP DEFAULT(NONE)                            &
+    !$OMP PRIVATE(i, ipoint, tmpO_priv, tmpJ_priv) &
+    !$OMP SHARED(ne_b, n_grid,                     &
+    !$OMP        mos_l_in_r, mos_r_in_r,           &
+    !$OMP        int2_grad1_u12, tmpO, tmpJ)
 
-    allocate(tmp_O_priv(n_grid), tmp_J_priv(n_grid,3))
-    tmp_O_priv = 0.d0
-    tmp_J_priv = 0.d0
+    allocate(tmpO_priv(n_grid), tmpJ_priv(n_grid,3))
+    tmpO_priv = 0.d0
+    tmpJ_priv = 0.d0
   
     !$OMP DO 
     do i = 1, ne_b
       do ipoint = 1, n_grid
-        tmp_O_priv(ipoint)   = tmp_O_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
-        tmp_J_priv(ipoint,1) = tmp_J_priv(ipoint,1) + int2_grad1_u12(ipoint,1,i,i)
-        tmp_J_priv(ipoint,2) = tmp_J_priv(ipoint,2) + int2_grad1_u12(ipoint,2,i,i)
-        tmp_J_priv(ipoint,3) = tmp_J_priv(ipoint,3) + int2_grad1_u12(ipoint,3,i,i)
+        tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
+        tmpJ_priv(ipoint,1) = tmpJ_priv(ipoint,1) + int2_grad1_u12(ipoint,1,i,i)
+        tmpJ_priv(ipoint,2) = tmpJ_priv(ipoint,2) + int2_grad1_u12(ipoint,2,i,i)
+        tmpJ_priv(ipoint,3) = tmpJ_priv(ipoint,3) + int2_grad1_u12(ipoint,3,i,i)
       enddo
     enddo
     !$OMP END DO NOWAIT
 
     !$OMP CRITICAL
-    tmp_O = tmp_O + tmp_O_priv
-    tmp_J = tmp_J + tmp_J_priv
+    tmpO = tmpO + tmpO_priv
+    tmpJ = tmpJ + tmpJ_priv
     !$OMP END CRITICAL
 
-    deallocate(tmp_O_priv, tmp_J_priv)
+    deallocate(tmpO_priv, tmpJ_priv)
     !$OMP END PARALLEL
 
-    allocate(tmp_M(n_grid,3), tmp_S(n_grid))
-    tmp_M = 0.d0
-    tmp_S = 0.d0
+    allocate(tmpM(n_grid,3), tmpS(n_grid))
+    tmpM = 0.d0
+    tmpS = 0.d0
 
-    !$OMP PARALLEL                                      &
-    !$OMP DEFAULT(NONE)                                 &
-    !$OMP PRIVATE(i, j, ipoint, tmp_M_priv, tmp_S_priv) &
-    !$OMP SHARED(ne_b, n_grid,                 & 
-    !$OMP        mos_l_in_r, mos_r_in_r,                &
-    !$OMP        int2_grad1_u12, tmp_M, tmp_S)
+    !$OMP PARALLEL                                    &
+    !$OMP DEFAULT(NONE)                               &
+    !$OMP PRIVATE(i, j, ipoint, tmpM_priv, tmpS_priv) &
+    !$OMP SHARED(ne_b, n_grid,                        &
+    !$OMP        mos_l_in_r, mos_r_in_r,              &
+    !$OMP        int2_grad1_u12, tmpM, tmpS)
 
-    allocate(tmp_M_priv(n_grid,3), tmp_S_priv(n_grid))
-    tmp_M_priv = 0.d0
-    tmp_S_priv = 0.d0
+    allocate(tmpM_priv(n_grid,3), tmpS_priv(n_grid))
+    tmpM_priv = 0.d0
+    tmpS_priv = 0.d0
   
     !$OMP DO COLLAPSE(2)
     do i = 1, ne_b
       do j = 1, ne_b
         do ipoint = 1, n_grid
 
-          tmp_M_priv(ipoint,1) = tmp_M_priv(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,2) = tmp_M_priv(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,3) = tmp_M_priv(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,1) = tmpM_priv(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,2) = tmpM_priv(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,3) = tmpM_priv(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
 
-          tmp_S_priv(ipoint)   = tmp_S_priv(ipoint)   + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
-                                                      + int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
-                                                      + int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
+          tmpS_priv(ipoint) = tmpS_priv(ipoint) + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
+                                                + int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
+                                                + int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
         enddo
       enddo
     enddo
     !$OMP END DO NOWAIT
 
     !$OMP CRITICAL
-    tmp_M = tmp_M + tmp_M_priv
-    tmp_S = tmp_S + tmp_S_priv
+    tmpM = tmpM + tmpM_priv
+    tmpS = tmpS + tmpS_priv
     !$OMP END CRITICAL
 
-    deallocate(tmp_M_priv, tmp_S_priv)
+    deallocate(tmpM_priv, tmpS_priv)
     !$OMP END PARALLEL
 
     allocate(tmp(n_grid))
 
     do ipoint = 1, n_grid
 
-      tmp_S(ipoint) = 2.d0 * (tmp_J(ipoint,1)*tmp_J(ipoint,1) + tmp_J(ipoint,2)*tmp_J(ipoint,2) + tmp_J(ipoint,3)*tmp_J(ipoint,3)) - tmp_S(ipoint)
+      tmpS(ipoint) = 2.d0 * (tmpJ(ipoint,1)*tmpJ(ipoint,1) + tmpJ(ipoint,2)*tmpJ(ipoint,2) + tmpJ(ipoint,3)*tmpJ(ipoint,3)) - tmpS(ipoint)
 
-      tmp(ipoint) = wr1(ipoint) * ( tmp_O(ipoint) * tmp_S(ipoint)              &
-                                  - 2.d0 * ( tmp_J(ipoint,1) * tmp_M(ipoint,1) &
-                                           + tmp_J(ipoint,2) * tmp_M(ipoint,2) &
-                                           + tmp_J(ipoint,3) * tmp_M(ipoint,3)))
+      tmp(ipoint) = wr1(ipoint) * ( tmpO(ipoint) * tmpS(ipoint) - 2.d0 * ( tmpJ(ipoint,1) * tmpM(ipoint,1) &
+                                                                         + tmpJ(ipoint,2) * tmpM(ipoint,2) &
+                                                                         + tmpJ(ipoint,3) * tmpM(ipoint,3) ) )
     enddo
 
-    noL_0e = noL_0e -2.d0 * (sum(tmp))
+    noL_0e = noL_0e - 2.d0 * (sum(tmp))
 
     deallocate(tmp)
 
   else
 
     allocate(tmp(ne_a))
-    allocate(tmp_L(n_grid,3), tmp_R(n_grid,3))
+    allocate(tmpL(n_grid,3), tmpR(n_grid,3))
 
-    !$OMP PARALLEL                                      &
-    !$OMP DEFAULT(NONE)                                 &
-    !$OMP PRIVATE(j, i, ipoint, tmp_L, tmp_R)           &
-    !$OMP SHARED(ne_b, ne_a, n_grid, & 
-    !$OMP        mos_l_in_r, mos_r_in_r,                &
+    !$OMP PARALLEL                          &
+    !$OMP DEFAULT(NONE)                     &
+    !$OMP PRIVATE(j, i, ipoint, tmpL, tmpR) &
+    !$OMP SHARED(ne_b, ne_a, n_grid,        &
+    !$OMP        mos_l_in_r, mos_r_in_r,    &
     !$OMP        int2_grad1_u12, tmp, wr1)
 
     !$OMP DO
     do j = 1, ne_b
 
-      tmp_L = 0.d0
-      tmp_R = 0.d0
+      tmpL = 0.d0
+      tmpR = 0.d0
       do i = ne_b+1, ne_a
         do ipoint = 1, n_grid
 
-          tmp_L(ipoint,1) = tmp_L(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,2) = tmp_L(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,3) = tmp_L(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,1) = tmpL(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,2) = tmpL(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,3) = tmpL(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
 
-          tmp_R(ipoint,1) = tmp_R(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,2) = tmp_R(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,3) = tmp_R(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,1) = tmpR(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,2) = tmpR(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,3) = tmpR(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
         enddo
       enddo
 
       tmp(j) = 0.d0
       do ipoint = 1, n_grid
-        tmp(j) = tmp(j) + wr1(ipoint) * (tmp_L(ipoint,1)*tmp_R(ipoint,1) + tmp_L(ipoint,2)*tmp_R(ipoint,2) + tmp_L(ipoint,3)*tmp_R(ipoint,3))
+        tmp(j) = tmp(j) + wr1(ipoint) * (tmpL(ipoint,1)*tmpR(ipoint,1) + tmpL(ipoint,2)*tmpR(ipoint,2) + tmpL(ipoint,3)*tmpR(ipoint,3))
       enddo
 
       do i = 1, ne_b
         do ipoint = 1, n_grid
 
-          tmp_L(ipoint,1) = tmp_L(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,2) = tmp_L(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,3) = tmp_L(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,1) = tmpL(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,2) = tmpL(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,3) = tmpL(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
 
-          tmp_R(ipoint,1) = tmp_R(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,2) = tmp_R(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,3) = tmp_R(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,1) = tmpR(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,2) = tmpR(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,3) = tmpR(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
         enddo
       enddo
 
       do ipoint = 1, n_grid
-        tmp(j) = tmp(j) + wr1(ipoint) * (tmp_L(ipoint,1)*tmp_R(ipoint,1) + tmp_L(ipoint,2)*tmp_R(ipoint,2) + tmp_L(ipoint,3)*tmp_R(ipoint,3))
+        tmp(j) = tmp(j) + wr1(ipoint) * (tmpL(ipoint,1)*tmpR(ipoint,1) + tmpL(ipoint,2)*tmpR(ipoint,2) + tmpL(ipoint,3)*tmpR(ipoint,3))
       enddo
     enddo ! j
     !$OMP END DO
@@ -219,33 +215,33 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
 
     ! ---
 
-    !$OMP PARALLEL                                      &
-    !$OMP DEFAULT(NONE)                                 &
-    !$OMP PRIVATE(j, i, ipoint, tmp_L, tmp_R)           &
-    !$OMP SHARED(ne_b, ne_a, n_grid, & 
-    !$OMP        mos_l_in_r, mos_r_in_r,                &
+    !$OMP PARALLEL                          &
+    !$OMP DEFAULT(NONE)                     &
+    !$OMP PRIVATE(j, i, ipoint, tmpL, tmpR) &
+    !$OMP SHARED(ne_b, ne_a, n_grid,        &
+    !$OMP        mos_l_in_r, mos_r_in_r,    &
     !$OMP        int2_grad1_u12, tmp, wr1)
 
     !$OMP DO
     do j = ne_b+1, ne_a
 
-      tmp_L = 0.d0
-      tmp_R = 0.d0
+      tmpL = 0.d0
+      tmpR = 0.d0
       do i = 1, ne_a
         do ipoint = 1, n_grid
-          tmp_L(ipoint,1) = tmp_L(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,2) = tmp_L(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
-          tmp_L(ipoint,3) = tmp_L(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,1) = tmpL(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,2) = tmpL(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i)
+          tmpL(ipoint,3) = tmpL(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i)
 
-          tmp_R(ipoint,1) = tmp_R(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,2) = tmp_R(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
-          tmp_R(ipoint,3) = tmp_R(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,1) = tmpR(ipoint,1) + int2_grad1_u12(ipoint,1,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,2) = tmpR(ipoint,2) + int2_grad1_u12(ipoint,2,i,j) * mos_r_in_r(ipoint,i)
+          tmpR(ipoint,3) = tmpR(ipoint,3) + int2_grad1_u12(ipoint,3,i,j) * mos_r_in_r(ipoint,i)
         enddo
       enddo
 
       tmp(j) = 0.d0
       do ipoint = 1, n_grid
-        tmp(j) = tmp(j) + 0.5d0 * wr1(ipoint) * (tmp_L(ipoint,1)*tmp_R(ipoint,1) + tmp_L(ipoint,2)*tmp_R(ipoint,2) + tmp_L(ipoint,3)*tmp_R(ipoint,3))
+        tmp(j) = tmp(j) + 0.5d0 * wr1(ipoint) * (tmpL(ipoint,1)*tmpR(ipoint,1) + tmpL(ipoint,2)*tmpR(ipoint,2) + tmpL(ipoint,3)*tmpR(ipoint,3))
       enddo
     enddo ! j
     !$OMP END DO
@@ -254,32 +250,32 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     noL_0e = -2.d0 * sum(tmp)
 
     deallocate(tmp)
-    deallocate(tmp_L, tmp_R)
+    deallocate(tmpL, tmpR)
 
     ! ---
 
-    allocate(tmp_O(n_grid), tmp_J(n_grid,3))
-    tmp_O = 0.d0
-    tmp_J = 0.d0
+    allocate(tmpO(n_grid), tmpJ(n_grid,3))
+    tmpO = 0.d0
+    tmpJ = 0.d0
 
-    !$OMP PARALLEL                                      &
-    !$OMP DEFAULT(NONE)                                 &
-    !$OMP PRIVATE(i, ipoint, tmp_O_priv, tmp_J_priv)    &
-    !$OMP SHARED(ne_b, ne_a, n_grid, & 
-    !$OMP        mos_l_in_r, mos_r_in_r,                &
-    !$OMP        int2_grad1_u12, tmp_O, tmp_J)
+    !$OMP PARALLEL                                 &
+    !$OMP DEFAULT(NONE)                            &
+    !$OMP PRIVATE(i, ipoint, tmpO_priv, tmpJ_priv) &
+    !$OMP SHARED(ne_b, ne_a, n_grid,               &
+    !$OMP        mos_l_in_r, mos_r_in_r,           &
+    !$OMP        int2_grad1_u12, tmpO, tmpJ)
 
-    allocate(tmp_O_priv(n_grid), tmp_J_priv(n_grid,3))
-    tmp_O_priv = 0.d0
-    tmp_J_priv = 0.d0
+    allocate(tmpO_priv(n_grid), tmpJ_priv(n_grid,3))
+    tmpO_priv = 0.d0
+    tmpJ_priv = 0.d0
   
     !$OMP DO 
     do i = 1, ne_b
       do ipoint = 1, n_grid
-        tmp_O_priv(ipoint)   = tmp_O_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
-        tmp_J_priv(ipoint,1) = tmp_J_priv(ipoint,1) + int2_grad1_u12(ipoint,1,i,i)
-        tmp_J_priv(ipoint,2) = tmp_J_priv(ipoint,2) + int2_grad1_u12(ipoint,2,i,i)
-        tmp_J_priv(ipoint,3) = tmp_J_priv(ipoint,3) + int2_grad1_u12(ipoint,3,i,i)
+        tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
+        tmpJ_priv(ipoint,1) = tmpJ_priv(ipoint,1) + int2_grad1_u12(ipoint,1,i,i)
+        tmpJ_priv(ipoint,2) = tmpJ_priv(ipoint,2) + int2_grad1_u12(ipoint,2,i,i)
+        tmpJ_priv(ipoint,3) = tmpJ_priv(ipoint,3) + int2_grad1_u12(ipoint,3,i,i)
       enddo
     enddo
     !$OMP END DO NOWAIT
@@ -287,49 +283,49 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
     !$OMP DO 
     do i = ne_b+1, ne_a
       do ipoint = 1, n_grid
-        tmp_O_priv(ipoint)   = tmp_O_priv(ipoint)   + 0.5d0 * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
-        tmp_J_priv(ipoint,1) = tmp_J_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,i)
-        tmp_J_priv(ipoint,2) = tmp_J_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,i)
-        tmp_J_priv(ipoint,3) = tmp_J_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,i)
+        tmpO_priv(ipoint)   = tmpO_priv(ipoint)   + 0.5d0 * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,i)
+        tmpJ_priv(ipoint,1) = tmpJ_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,i)
+        tmpJ_priv(ipoint,2) = tmpJ_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,i)
+        tmpJ_priv(ipoint,3) = tmpJ_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,i)
       enddo
     enddo
     !$OMP END DO NOWAIT
 
     !$OMP CRITICAL
-    tmp_O = tmp_O + tmp_O_priv
-    tmp_J = tmp_J + tmp_J_priv
+    tmpO = tmpO + tmpO_priv
+    tmpJ = tmpJ + tmpJ_priv
     !$OMP END CRITICAL
 
-    deallocate(tmp_O_priv, tmp_J_priv)
+    deallocate(tmpO_priv, tmpJ_priv)
     !$OMP END PARALLEL
 
     ! ---
 
-    allocate(tmp_M(n_grid,3), tmp_S(n_grid))
-    tmp_M = 0.d0
-    tmp_S = 0.d0
+    allocate(tmpM(n_grid,3), tmpS(n_grid))
+    tmpM = 0.d0
+    tmpS = 0.d0
 
-    !$OMP PARALLEL                                      &
-    !$OMP DEFAULT(NONE)                                 &
-    !$OMP PRIVATE(i, j, ipoint, tmp_M_priv, tmp_S_priv) &
-    !$OMP SHARED(ne_b, ne_a, n_grid, & 
-    !$OMP        mos_l_in_r, mos_r_in_r,                &
-    !$OMP        int2_grad1_u12, tmp_M, tmp_S)
+    !$OMP PARALLEL                                    &
+    !$OMP DEFAULT(NONE)                               &
+    !$OMP PRIVATE(i, j, ipoint, tmpM_priv, tmpS_priv) &
+    !$OMP SHARED(ne_b, ne_a, n_grid,                  &
+    !$OMP        mos_l_in_r, mos_r_in_r,              &
+    !$OMP        int2_grad1_u12, tmpM, tmpS)
 
-    allocate(tmp_M_priv(n_grid,3), tmp_S_priv(n_grid))
-    tmp_M_priv = 0.d0
-    tmp_S_priv = 0.d0
+    allocate(tmpM_priv(n_grid,3), tmpS_priv(n_grid))
+    tmpM_priv = 0.d0
+    tmpS_priv = 0.d0
   
     !$OMP DO COLLAPSE(2)
     do i = 1, ne_b
       do j = 1, ne_b
         do ipoint = 1, n_grid
 
-          tmp_M_priv(ipoint,1) = tmp_M_priv(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,2) = tmp_M_priv(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,3) = tmp_M_priv(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,1) = tmpM_priv(ipoint,1) + int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,2) = tmpM_priv(ipoint,2) + int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,3) = tmpM_priv(ipoint,3) + int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
 
-          tmp_S_priv(ipoint)   = tmp_S_priv(ipoint)   + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
+          tmpS_priv(ipoint)   = tmpS_priv(ipoint)   + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
                                                       + int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
                                                       + int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
         enddo
@@ -342,17 +338,17 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
       do j = 1, ne_b
         do ipoint = 1, n_grid
 
-          tmp_M_priv(ipoint,1) = tmp_M_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,2) = tmp_M_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,3) = tmp_M_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,1) = tmpM_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,2) = tmpM_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,3) = tmpM_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
 
-          tmp_M_priv(ipoint,1) = tmp_M_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
-          tmp_M_priv(ipoint,2) = tmp_M_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
-          tmp_M_priv(ipoint,3) = tmp_M_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
+          tmpM_priv(ipoint,1) = tmpM_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
+          tmpM_priv(ipoint,2) = tmpM_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
+          tmpM_priv(ipoint,3) = tmpM_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * mos_l_in_r(ipoint,j) * mos_r_in_r(ipoint,i)
 
-          tmp_S_priv(ipoint)   = tmp_S_priv(ipoint)   + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
-                                                      + int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
-                                                      + int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
+          tmpS_priv(ipoint) = tmpS_priv(ipoint) + int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
+                                                + int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
+                                                + int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
         enddo
       enddo
     enddo
@@ -363,39 +359,38 @@ subroutine provide_no_0e(n_grid, n_mo, ne_a, ne_b, wr1, mos_l_in_r, mos_r_in_r, 
       do j = ne_b+1, ne_a
         do ipoint = 1, n_grid
 
-          tmp_M_priv(ipoint,1) = tmp_M_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,2) = tmp_M_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
-          tmp_M_priv(ipoint,3) = tmp_M_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,1) = tmpM_priv(ipoint,1) + 0.5d0 * int2_grad1_u12(ipoint,1,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,2) = tmpM_priv(ipoint,2) + 0.5d0 * int2_grad1_u12(ipoint,2,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
+          tmpM_priv(ipoint,3) = tmpM_priv(ipoint,3) + 0.5d0 * int2_grad1_u12(ipoint,3,j,i) * mos_l_in_r(ipoint,i) * mos_r_in_r(ipoint,j)
 
-          tmp_S_priv(ipoint)   = tmp_S_priv(ipoint)   + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
-                                                      + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
-                                                      + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
+          tmpS_priv(ipoint) = tmpS_priv(ipoint) + 0.5d0 * int2_grad1_u12(ipoint,1,i,j) * int2_grad1_u12(ipoint,1,j,i) &
+                                                + 0.5d0 * int2_grad1_u12(ipoint,2,i,j) * int2_grad1_u12(ipoint,2,j,i) &
+                                                + 0.5d0 * int2_grad1_u12(ipoint,3,i,j) * int2_grad1_u12(ipoint,3,j,i)
         enddo
       enddo
     enddo
     !$OMP END DO NOWAIT
 
     !$OMP CRITICAL
-    tmp_M = tmp_M + tmp_M_priv
-    tmp_S = tmp_S + tmp_S_priv
+    tmpM = tmpM + tmpM_priv
+    tmpS = tmpS + tmpS_priv
     !$OMP END CRITICAL
 
-    deallocate(tmp_M_priv, tmp_S_priv)
+    deallocate(tmpM_priv, tmpS_priv)
     !$OMP END PARALLEL
 
     allocate(tmp(n_grid))
 
     do ipoint = 1, n_grid
 
-      tmp_S(ipoint) = 2.d0 * (tmp_J(ipoint,1)*tmp_J(ipoint,1) + tmp_J(ipoint,2)*tmp_J(ipoint,2) + tmp_J(ipoint,3)*tmp_J(ipoint,3)) - tmp_S(ipoint)
+      tmpS(ipoint) = 2.d0 * (tmpJ(ipoint,1)*tmpJ(ipoint,1) + tmpJ(ipoint,2)*tmpJ(ipoint,2) + tmpJ(ipoint,3)*tmpJ(ipoint,3)) - tmpS(ipoint)
 
-      tmp(ipoint) = wr1(ipoint) * ( tmp_O(ipoint) * tmp_S(ipoint)              &
-                                                       - 2.d0 * ( tmp_J(ipoint,1) * tmp_M(ipoint,1) &
-                                                                + tmp_J(ipoint,2) * tmp_M(ipoint,2) &
-                                                                + tmp_J(ipoint,3) * tmp_M(ipoint,3)))
+      tmp(ipoint) = wr1(ipoint) * ( tmpO(ipoint) * tmpS(ipoint) - 2.d0 * ( tmpJ(ipoint,1) * tmpM(ipoint,1) &
+                                                                         + tmpJ(ipoint,2) * tmpM(ipoint,2) &
+                                                                         + tmpJ(ipoint,3) * tmpM(ipoint,3) ) )
     enddo
 
-    noL_0e = noL_0e -2.d0 * (sum(tmp))
+    noL_0e = noL_0e - 2.d0 * (sum(tmp))
 
     deallocate(tmp)
 

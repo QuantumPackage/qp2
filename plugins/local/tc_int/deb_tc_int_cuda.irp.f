@@ -41,8 +41,12 @@ subroutine main()
   !call deb_no_2e_gpu_tmp()
   !call deb_no_2e_gpu()
 
-  call deb_no_1e_gpu_tmp()
+  !call deb_no_1e_gpu_tmp()
   !call deb_no_1e_gpu()
+
+  !call deb_no_0e_gpu()
+
+  call deb_no_gpu()
 
   return
 end

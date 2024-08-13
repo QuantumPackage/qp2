@@ -9,13 +9,13 @@ module cutc_module
 
     ! ---
 
-    subroutine cutc_int_c(nxBlocks, nyBlocks, nzBlocks,           &
-                          blockxSize, blockySize, blockzSize,     &
-                          n_grid1, n_grid2, n_ao, n_nuc, size_bh, &
-                          r1, wr1, r2, wr2, rn,                   &
-                          aos_data1, aos_data2,                   &
-                          c_bh, m_bh, n_bh, o_bh,                 &
-                          int2_grad1_u12_ao, int_2e_ao) bind(C, name = "cutc_int_c")
+    subroutine cutc_int(nxBlocks, nyBlocks, nzBlocks,           &
+                        blockxSize, blockySize, blockzSize,     &
+                        n_grid1, n_grid2, n_ao, n_nuc, size_bh, &
+                        r1, wr1, r2, wr2, rn,                   &
+                        aos_data1, aos_data2,                   &
+                        c_bh, m_bh, n_bh, o_bh,                 &
+                        int2_grad1_u12_ao, int_2e_ao) bind(C, name = "cutc_int")
 
       import c_int, c_double, c_ptr
       integer(c_int), intent(in), value :: nxBlocks, blockxSize
@@ -37,7 +37,7 @@ module cutc_module
       real(c_double), intent(out)       :: int2_grad1_u12_ao(n_ao,n_ao,n_grid1,3)
       real(c_double), intent(out)       :: int_2e_ao(n_ao,n_ao,n_ao,n_ao)
 
-    end subroutine cutc_int_c
+    end subroutine cutc_int
 
     ! ---
 
@@ -167,6 +167,48 @@ module cutc_module
       real(c_double), intent(out)       :: no_1e(n_mo,n_mo)
 
     end subroutine deb_no_1e
+
+    ! ---
+
+    subroutine cutc_no_0e(n_grid1, n_mo, ne_a, ne_b,                   &
+                          wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, &
+                          no_0e) bind(C, name = "cutc_no_0e")
+
+      import c_int, c_double, c_ptr
+
+      integer(c_int), intent(in), value :: n_grid1
+      integer(c_int), intent(in), value :: n_mo
+      integer(c_int), intent(in), value :: ne_a
+      integer(c_int), intent(in), value :: ne_b
+      real(c_double), intent(in)        :: wr1(n_grid1)
+      real(c_double), intent(in)        :: mos_l_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: mos_r_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: int2_grad1_u12(n_grid1,3,n_mo,n_mo)
+      real(c_double), intent(out)       :: no_0e(1)
+
+    end subroutine cutc_no_0e
+
+    ! ---
+
+    subroutine cutc_no(n_grid1, n_mo, ne_a, ne_b,                   &
+                       wr1, mos_l_in_r, mos_r_in_r, int2_grad1_u12, &
+                       no_2e, no_1e, no_0e) bind(C, name = "cutc_no")
+
+      import c_int, c_double, c_ptr
+
+      integer(c_int), intent(in), value :: n_grid1
+      integer(c_int), intent(in), value :: n_mo
+      integer(c_int), intent(in), value :: ne_a
+      integer(c_int), intent(in), value :: ne_b
+      real(c_double), intent(in)        :: wr1(n_grid1)
+      real(c_double), intent(in)        :: mos_l_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: mos_r_in_r(n_grid1,n_mo)
+      real(c_double), intent(in)        :: int2_grad1_u12(n_grid1,3,n_mo,n_mo)
+      real(c_double), intent(out)       :: no_2e(n_mo,n_mo,n_mo,n_mo)
+      real(c_double), intent(out)       :: no_1e(n_mo,n_mo)
+      real(c_double), intent(out)       :: no_0e(1)
+
+    end subroutine cutc_no
 
     ! ---
 
