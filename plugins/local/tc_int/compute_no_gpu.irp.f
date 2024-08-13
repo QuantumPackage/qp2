@@ -1,7 +1,7 @@
 
 ! ---
 
-program deb_no_gpu
+program compute_no_gpu
 
   implicit none
 
@@ -43,23 +43,19 @@ subroutine main()
   double precision              :: time0, time1
   double precision              :: tt0, tt1
   double precision              :: acc_thr, err_tot, nrm_tot, err_loc
-  double precision              :: noL_0e
   double precision              :: noL_0e_gpu(1)
   double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
   double precision, allocatable :: tmp(:,:,:,:)
   double precision, allocatable :: int2_grad1_u12_bimo_t(:,:,:,:)
-  double precision, allocatable :: noL_1e    (:,:)
   double precision, allocatable :: noL_1e_gpu(:,:)
-  double precision, allocatable :: noL_2e    (:,:,:,:)
   double precision, allocatable :: noL_2e_gpu(:,:,:,:)
-
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE mos_l_in_r_array_transp mos_r_in_r_array_transp
 
 
   call wall_time(time0)
-  print*, ' start deb_no_gpu'
+  print*, ' start compute_no_gpu'
 
 
 
@@ -112,8 +108,6 @@ subroutine main()
 
   deallocate(tmp)
 
-  ! ---
-
   allocate(noL_2e_gpu(mo_num,mo_num,mo_num,mo_num))
   allocate(noL_1e_gpu(mo_num,mo_num))
 
@@ -122,92 +116,12 @@ subroutine main()
                mos_l_in_r_array_transp(1,1), mos_r_in_r_array_transp(1,1), &
                int2_grad1_u12_bimo_t(1,1,1,1), noL_2e_gpu(1,1,1,1), noL_1e_gpu(1,1), noL_0e_gpu(1))
 
-  ! ---
-
-  allocate(noL_2e(mo_num,mo_num,mo_num,mo_num))
-  allocate(noL_1e(mo_num,mo_num))
-
-  call provide_no_2e(n_points_final_grid, mo_num, elec_alpha_num, elec_beta_num, &
-                     final_weight_at_r_vector(1),                                &
-                     mos_l_in_r_array_transp(1,1), mos_r_in_r_array_transp(1,1), &
-                     int2_grad1_u12_bimo_t(1,1,1,1), noL_2e(1,1,1,1))
-
-  call provide_no_1e(n_points_final_grid, mo_num, elec_alpha_num, elec_beta_num, &
-                     final_weight_at_r_vector(1),                                &
-                     mos_l_in_r_array_transp(1,1), mos_r_in_r_array_transp(1,1), &
-                     int2_grad1_u12_bimo_t(1,1,1,1), noL_1e(1,1))
-
-  call provide_no_0e(n_points_final_grid, mo_num, elec_alpha_num, elec_beta_num, &
-                     final_weight_at_r_vector(1),                                &
-                     mos_l_in_r_array_transp(1,1), mos_r_in_r_array_transp(1,1), &
-                     int2_grad1_u12_bimo_t(1,1,1,1), noL_0e)
-
-  ! ---
-
   deallocate(int2_grad1_u12_bimo_t)
-
-  acc_thr = 1d-12
-
-  ! ---
-
-  err_tot = 0.d0
-  nrm_tot = 0.d0
-  do i = 1, mo_num
-    do j = 1, mo_num
-      do k = 1, mo_num
-        do l = 1, mo_num
-          err_loc = dabs(noL_2e(l,k,j,i) - noL_2e_gpu(l,k,j,i))
-          if(err_loc > acc_thr) then
-            print*, " error on", l, k, j, i
-            print*, " CPU res", noL_2e    (l,k,j,i)
-            print*, " GPU res", noL_2e_gpu(l,k,j,i)
-            stop
-          endif
-          err_tot = err_tot + err_loc
-          nrm_tot = nrm_tot + dabs(noL_2e(l,k,j,i))
-        enddo
-      enddo
-    enddo
-  enddo
-  print *, ' absolute accuracy on noL_2e (%) =', 100.d0 * err_tot / nrm_tot
-
-  deallocate(noL_2e)
   deallocate(noL_2e_gpu)
-
-  ! ---
-
-  err_tot = 0.d0
-  nrm_tot = 0.d0
-  do k = 1, mo_num
-    do l = 1, mo_num
-      err_loc = dabs(noL_1e(l,k) - noL_1e_gpu(l,k))
-      if(err_loc > acc_thr) then
-        print*, " error on", l, k
-        print*, " CPU res", noL_1e    (l,k)
-        print*, " GPU res", noL_1e_gpu(l,k)
-        stop
-      endif
-      err_tot = err_tot + err_loc
-      nrm_tot = nrm_tot + dabs(noL_1e(l,k))
-    enddo
-  enddo
-  print *, ' absolute accuracy on noL_1e (%) =', 100.d0 * err_tot / nrm_tot
-
-  deallocate(noL_1e)
   deallocate(noL_1e_gpu)
 
-  ! ---
-
-  print *, 'noL_0e CPU = ', noL_0e
-  print *, 'noL_0e GPU = ', noL_0e_gpu(1)
-
-  err_tot = dabs(noL_0e - noL_0e_gpu(1))
-  nrm_tot = dabs(noL_0e)
-  print *, ' absolute accuracy on noL_0e (%) =', 100.d0 * err_tot / nrm_tot
-
-
   call wall_time(time1)
-  write(*,"(A,2X,F15.7)") ' wall time for deb_no_gpu (sec) = ', (time1 - time0)
+  write(*,"(A,2X,F15.7)") ' wall time for compute_no_gpu (sec) = ', (time1 - time0)
 
   return
 

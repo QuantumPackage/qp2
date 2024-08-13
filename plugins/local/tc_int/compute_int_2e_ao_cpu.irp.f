@@ -1,7 +1,7 @@
 
 ! ---
 
-program deb_int_2e_ao_gpu
+program compute_int_2e_ao_cpu
 
   implicit none
 
@@ -45,8 +45,6 @@ subroutine main()
 
   double precision              :: weight1, ao_i_r, ao_k_r
 
-  double precision              :: acc_thr, err_tot, nrm_tot, err_loc
-
   double precision              :: time0, time1
   double precision              :: wall_time0, wall_time1
   double precision              :: wall_ttime0, wall_ttime1
@@ -55,13 +53,11 @@ subroutine main()
   double precision, allocatable :: rn(:,:), aos_data1(:,:,:), aos_data2(:,:,:)
   double precision, allocatable :: grad1_u12(:,:,:), int_fct_long_range(:,:,:), c_mat(:,:,:)
   double precision, allocatable :: int2_grad1_u12_ao(:,:,:,:)
-  double precision, allocatable :: int2_grad1_u12_ao_gpu(:,:,:,:)
   double precision, allocatable :: int_2e_ao(:,:,:,:)
-  double precision, allocatable :: int_2e_ao_gpu(:,:,:,:)
 
 
   call wall_time(time0)
-  print*, ' start deb_int_2e_ao_gpu'
+  print*, ' start compute_int_2e_ao_cpu'
 
 
   ! ---
@@ -94,31 +90,6 @@ subroutine main()
     enddo
   enddo
 
-  ! ---
-
-  integer :: nB
-  integer :: sB
-
-  PROVIDE nxBlocks nyBlocks nzBlocks
-  PROVIDE blockxSize blockySize blockzSize
-
-  sB = 32
-  nB = (n_points_final_grid + sB - 1) / sB
-
-  call ezfio_set_tc_int_blockxSize(sB)
-  call ezfio_set_tc_int_nxBlocks(nB)
-
-  allocate(int2_grad1_u12_ao_gpu(ao_num,ao_num,n_points_final_grid,3))
-  allocate(int_2e_ao_gpu(ao_num,ao_num,ao_num,ao_num))
-
-  call cutc_int(nxBlocks, nyBlocks, nzBlocks, blockxSize, blockySize, blockzSize,           &
-                n_points_final_grid, n_points_extra_final_grid, ao_num, nucl_num, jBH_size, &
-                final_grid_points, final_weight_at_r_vector,                                &
-                final_grid_points_extra, final_weight_at_r_vector_extra,                    &
-                rn, aos_data1, aos_data2, jBH_c, jBH_m, jBH_n, jBH_o,                       &
-                int2_grad1_u12_ao_gpu, int_2e_ao_gpu)
-
-  ! ---
 
   allocate(int_fct_long_range(n_points_extra_final_grid,ao_num,ao_num))
   allocate(grad1_u12(n_points_extra_final_grid,n_points_final_grid,4))
@@ -250,62 +221,13 @@ subroutine main()
   call wall_time(wall_time1)
   write(*,"(A,2X,F15.7)") ' wall time on cpu (sec) = ', (wall_time1 - wall_time0)
 
-  ! ---
-
-  acc_thr = 1d-12
-
-  err_tot = 0.d0
-  nrm_tot = 0.d0
-  do m = 1, 3
-    do ipoint = 1, n_points_final_grid
-      do j = 1, ao_num
-        do i = 1, ao_num
-          err_loc = dabs(int2_grad1_u12_ao(i,j,ipoint,m) - int2_grad1_u12_ao_gpu(i,j,ipoint,m))
-          if(err_loc > acc_thr) then
-            print*, " error on", i, j, ipoint, m
-            print*, " CPU res", int2_grad1_u12_ao    (i,j,ipoint,m)
-            print*, " GPU res", int2_grad1_u12_ao_gpu(i,j,ipoint,m)
-            stop
-          endif
-          err_tot = err_tot + err_loc
-          nrm_tot = nrm_tot + dabs(int2_grad1_u12_ao(i,j,ipoint,m))
-        enddo
-      enddo
-    enddo
-  enddo
-  print *, ' absolute accuracy on int2_grad1_u12_ao (%) =', 100.d0 * err_tot / nrm_tot
-
-
-  err_tot = 0.d0
-  nrm_tot = 0.d0
-  do i = 1, ao_num
-    do j = 1, ao_num
-      do k = 1, ao_num
-        do l = 1, ao_num
-          err_loc = dabs(int_2e_ao(l,k,j,i) - int_2e_ao_gpu(l,k,j,i))
-          if(err_loc > acc_thr) then
-            print*, " error on", l, k, j, i
-            print*, " CPU res", int_2e_ao    (l,k,j,i)
-            print*, " GPU res", int_2e_ao_gpu(l,k,j,i)
-            stop
-          endif
-          err_tot = err_tot + err_loc
-          nrm_tot = nrm_tot + dabs(int_2e_ao(l,k,j,i))
-        enddo
-      enddo
-    enddo
-  enddo
-  print *, ' absolute accuracy on int_2e_ao (%) =', 100.d0 * err_tot / nrm_tot
-
-  ! ---
 
   deallocate(int_fct_long_range, grad1_u12, c_mat)
   deallocate(int_2e_ao, int2_grad1_u12_ao)
-  deallocate(int_2e_ao_gpu, int2_grad1_u12_ao_gpu)
   deallocate(rn, aos_data1, aos_data2)
 
   call wall_time(time1)
-  write(*,"(A,2X,F15.7)") ' wall time for deb_int_2e_ao_gpu (sec) = ', (time1 - time0)
+  write(*,"(A,2X,F15.7)") ' wall time for compute_int_2e_ao_cpu (sec) = ', (time1 - time0)
 
   return
 end
