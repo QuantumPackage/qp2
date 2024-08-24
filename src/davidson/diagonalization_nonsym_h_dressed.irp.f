@@ -251,7 +251,7 @@ subroutine davidson_diag_nonsym_hjj(dets_in, u_in, H_jj, energies, dim_in, sze, 
     type(c_ptr) :: ptr_w, ptr_s
     integer :: fd_s, fd_w
     call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-        8, fd_w, .False., ptr_w)
+        8, fd_w, .False., .True., ptr_w)
     call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
   else
     allocate(W(sze,N_st_diag*itermax))

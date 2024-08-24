@@ -63,12 +63,10 @@
   do i_pass = 1, n_pass
     ii = (i_pass-1)*n_blocks + 1
   
-    !$OMP PARALLEL                                         &
-    !$OMP DEFAULT (NONE)                                   &
-    !$OMP PRIVATE (i_blocks, ipoint)                       &
-    !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, &
-    !$OMP         final_grid_points, tmp_grad1_u12,        &
-    !$OMP         tmp_grad1_u12_squared)
+    !$OMP PARALLEL                   &
+    !$OMP DEFAULT (NONE)             &
+    !$OMP PRIVATE (i_blocks, ipoint) &
+    !$OMP SHARED (n_blocks, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12, tmp_grad1_u12_squared)
     !$OMP DO 
     do i_blocks = 1, n_blocks
       ipoint = ii - 1 + i_blocks ! r1
@@ -99,12 +97,10 @@
   
     ii = n_pass*n_blocks + 1
 
-    !$OMP PARALLEL                                       &
-    !$OMP DEFAULT (NONE)                                 &
-    !$OMP PRIVATE (i_rest, ipoint)                       &
-    !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, &
-    !$OMP         final_grid_points, tmp_grad1_u12,      &
-    !$OMP         tmp_grad1_u12_squared)
+    !$OMP PARALLEL                 &
+    !$OMP DEFAULT (NONE)           &
+    !$OMP PRIVATE (i_rest, ipoint) &
+    !$OMP SHARED (n_rest, n_points_extra_final_grid, ii, final_grid_points, tmp_grad1_u12, tmp_grad1_u12_squared)
     !$OMP DO 
     do i_rest = 1, n_rest
       ipoint = ii - 1 + i_rest ! r1
@@ -131,7 +127,7 @@
   deallocate(tmp)
 
   call wall_time(time1)
-  print*, ' wall time for int2_grad1_u12_ao_num & int2_grad1_u12_square_ao_num =', time1-time0 
+  print*, ' wall time for int2_grad1_u12_ao_num & int2_grad1_u12_square_ao_num = (min)', (time1-time0) / 60.d0
   call print_memory_usage()
 
 END_PROVIDER

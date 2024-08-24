@@ -28,7 +28,7 @@ subroutine run(f)
   integer(trexio_t), intent(in)  :: f ! TREXIO file handle
   integer(trexio_exit_code)      :: rc
 
-  integer ::i,j,k,l
+  integer :: i,j,k,l, iunit
   integer(8) :: m, n_integrals
   double precision :: integral
 
@@ -40,6 +40,13 @@ subroutine run(f)
   double precision, allocatable :: V(:)
   integer         , allocatable :: Vi(:,:)
   double precision              :: s
+
+  integer*4 :: BUFSIZE
+  integer :: rank
+  double precision, allocatable :: tmp(:,:,:)
+  integer*8 :: offset, icount
+
+  integer, external :: getUnitAndOpen
 
   if (trexio_has_nucleus_repulsion(f) == TREXIO_SUCCESS) then
     rc = trexio_read_nucleus_repulsion(f, s)
@@ -115,45 +122,88 @@ subroutine run(f)
   rc = trexio_has_ao_2e_int(f)
   PROVIDE ao_num
   if (rc /= TREXIO_HAS_NOT) then
-      PROVIDE ao_integrals_map
 
-      integer*4 :: BUFSIZE
-      BUFSIZE=ao_num**2
-      allocate(buffer_i(BUFSIZE), buffer_values(BUFSIZE))
-      allocate(Vi(4,BUFSIZE), V(BUFSIZE))
+      rc = trexio_has_ao_2e_int_eri_cholesky(f)
+      if (rc /= TREXIO_HAS_NOT) then
 
-      integer*8 :: offset, icount
+          rc = trexio_read_ao_2e_int_eri_cholesky_num(f, rank)
+          call trexio_assert(rc, TREXIO_SUCCESS)
 
-      offset = 0_8
-      icount = BUFSIZE
-      rc = TREXIO_SUCCESS
-      do while (icount == size(V))
-        rc = trexio_read_ao_2e_int_eri(f, offset, icount, Vi, V)
-        do m=1,icount
-          i = Vi(1,m)
-          j = Vi(2,m)
-          k = Vi(3,m)
-          l = Vi(4,m)
-          integral = V(m)
-          call two_e_integrals_index(i, j, k, l, buffer_i(m) )
-          buffer_values(m) = integral
-        enddo
-        call insert_into_ao_integrals_map(int(icount,4),buffer_i,buffer_values)
-        offset = offset + icount
-        if (rc /= TREXIO_SUCCESS) then
-            exit
-        endif
-      end do
-      n_integrals = offset
+          allocate(tmp(ao_num,ao_num,rank))
+          tmp(:,:,:) = 0.d0
 
-      call map_sort(ao_integrals_map)
-      call map_unique(ao_integrals_map)
+          BUFSIZE=ao_num**2
+          allocate(Vi(3,BUFSIZE), V(BUFSIZE))
 
-      call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-      call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
 
-      deallocate(buffer_i, buffer_values, Vi, V)
-      print *, 'AO integrals read from TREXIO file'
+          offset = 0_8
+          icount = BUFSIZE
+          rc = TREXIO_SUCCESS
+          do while (icount == size(V))
+            rc = trexio_read_ao_2e_int_eri_cholesky(f, offset, icount, Vi, V)
+            do m=1,icount
+              i = Vi(1,m)
+              j = Vi(2,m)
+              k = Vi(3,m)
+              integral = V(m)
+              tmp(i,j,k) = integral
+            enddo
+            offset = offset + icount
+            if (rc /= TREXIO_SUCCESS) then
+                exit
+            endif
+          end do
+
+          print *,  'Writing Cholesky AO vectors to disk...'
+          iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao', 'W')
+          write(iunit) rank
+          write(iunit) tmp(:,:,:)
+          close(iunit)
+          call ezfio_set_ao_two_e_ints_io_ao_cholesky('Read')
+
+          deallocate(Vi, V, tmp)
+          print *, 'Cholesky AO integrals read from TREXIO file'
+      endif
+
+      rc = trexio_has_ao_2e_int_eri(f)
+      if (rc /= TREXIO_HAS_NOT) then
+          PROVIDE ao_integrals_map
+
+          BUFSIZE=ao_num**2
+          allocate(buffer_i(BUFSIZE), buffer_values(BUFSIZE))
+          allocate(Vi(4,BUFSIZE), V(BUFSIZE))
+
+          offset = 0_8
+          icount = BUFSIZE
+          rc = TREXIO_SUCCESS
+          do while (icount == size(V))
+            rc = trexio_read_ao_2e_int_eri(f, offset, icount, Vi, V)
+            do m=1,icount
+              i = Vi(1,m)
+              j = Vi(2,m)
+              k = Vi(3,m)
+              l = Vi(4,m)
+              integral = V(m)
+              call two_e_integrals_index(i, j, k, l, buffer_i(m) )
+              buffer_values(m) = integral
+            enddo
+            call insert_into_ao_integrals_map(int(icount,4),buffer_i,buffer_values)
+            offset = offset + icount
+            if (rc /= TREXIO_SUCCESS) then
+                exit
+            endif
+          end do
+          n_integrals = offset
+
+          call map_sort(ao_integrals_map)
+          call map_unique(ao_integrals_map)
+
+          call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
+          call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
+
+          deallocate(buffer_i, buffer_values, Vi, V)
+          print *, 'AO integrals read from TREXIO file'
+      endif
   else
       print *, 'AO integrals not found in TREXIO file'
   endif
@@ -181,40 +231,85 @@ subroutine run(f)
   rc = trexio_has_mo_2e_int(f)
   if (rc /= TREXIO_HAS_NOT) then
 
-      BUFSIZE=mo_num**2
-      allocate(buffer_i(BUFSIZE), buffer_values(BUFSIZE))
-      allocate(Vi(4,BUFSIZE), V(BUFSIZE))
+      rc = trexio_has_mo_2e_int_eri_cholesky(f)
+      if (rc /= TREXIO_HAS_NOT) then
+
+          rc = trexio_read_mo_2e_int_eri_cholesky_num(f, rank)
+          call trexio_assert(rc, TREXIO_SUCCESS)
+
+          allocate(tmp(rank,mo_num,mo_num))
+          tmp(:,:,:) = 0.d0
+
+          BUFSIZE=mo_num**2
+          allocate(Vi(3,BUFSIZE), V(BUFSIZE))
+
+          offset = 0_8
+          icount = BUFSIZE
+          rc = TREXIO_SUCCESS
+          do while (icount == size(V))
+            rc = trexio_read_mo_2e_int_eri_cholesky(f, offset, icount, Vi, V)
+            do m=1,icount
+              i = Vi(1,m)
+              j = Vi(2,m)
+              k = Vi(3,m)
+              integral = V(m)
+              tmp(k,i,j) = integral
+            enddo
+            offset = offset + icount
+            if (rc /= TREXIO_SUCCESS) then
+                exit
+            endif
+          end do
+
+          print *,  'Writing Cholesky MO vectors to disk...'
+          iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_mo_transp', 'W')
+          write(iunit) rank
+          write(iunit) tmp(:,:,:)
+          close(iunit)
+          call ezfio_set_mo_two_e_ints_io_mo_cholesky('Read')
+
+          deallocate(Vi, V, tmp)
+          print *, 'Cholesky MO integrals read from TREXIO file'
+      endif
+
+      rc = trexio_has_mo_2e_int_eri(f)
+      if (rc /= TREXIO_HAS_NOT) then
+          BUFSIZE=mo_num**2
+          allocate(buffer_i(BUFSIZE), buffer_values(BUFSIZE))
+          allocate(Vi(4,BUFSIZE), V(BUFSIZE))
 
 
-      offset = 0_8
-      icount = BUFSIZE
-      rc = TREXIO_SUCCESS
-      do while (icount == size(V))
-        rc = trexio_read_mo_2e_int_eri(f, offset, icount, Vi, V)
-        do m=1,icount
-          i = Vi(1,m)
-          j = Vi(2,m)
-          k = Vi(3,m)
-          l = Vi(4,m)
-          integral = V(m)
-          call two_e_integrals_index(i, j, k, l, buffer_i(m) )
-          buffer_values(m) = integral
-        enddo
-        call map_append(mo_integrals_map, buffer_i, buffer_values, int(icount,4))
-        offset = offset + icount
-        if (rc /= TREXIO_SUCCESS) then
-            exit
-        endif
-      end do
-      n_integrals = offset
+          offset = 0_8
+          icount = BUFSIZE
+          rc = TREXIO_SUCCESS
+          do while (icount == size(V))
+            rc = trexio_read_mo_2e_int_eri(f, offset, icount, Vi, V)
+            do m=1,icount
+              i = Vi(1,m)
+              j = Vi(2,m)
+              k = Vi(3,m)
+              l = Vi(4,m)
+              integral = V(m)
+              call two_e_integrals_index(i, j, k, l, buffer_i(m) )
+              buffer_values(m) = integral
+            enddo
+            call map_append(mo_integrals_map, buffer_i, buffer_values, int(icount,4))
+            offset = offset + icount
+            if (rc /= TREXIO_SUCCESS) then
+                exit
+            endif
+          end do
+          n_integrals = offset
 
-      call map_sort(mo_integrals_map)
-      call map_unique(mo_integrals_map)
+          call map_sort(mo_integrals_map)
+          call map_unique(mo_integrals_map)
 
-      call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
-      call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
-      deallocate(buffer_i, buffer_values, Vi, V)
-      print *, 'MO integrals read from TREXIO file'
+          call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
+          call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
+          deallocate(buffer_i, buffer_values, Vi, V)
+          print *, 'MO integrals read from TREXIO file'
+      endif
+
   else
       print *, 'MO integrals not found in TREXIO file'
   endif

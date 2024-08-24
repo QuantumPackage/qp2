@@ -576,7 +576,7 @@ logical function is_same_spin(sigma_1, sigma_2)
     is_same_spin = .false.
   endif
 
-end function is_same_spin
+end
 
 ! ---
    
@@ -596,7 +596,7 @@ function Kronecker_delta(i, j) result(delta)
     delta = 0.d0
   endif
 
-end function Kronecker_delta
+end
 
 ! ---
 
@@ -634,7 +634,81 @@ subroutine diagonalize_sym_matrix(N, A, e)
     print*,'Problem in diagonalize_sym_matrix (dsyev)!!'
   endif
 
-end subroutine diagonalize_sym_matrix
+end
+
+! ---
+
+
+subroutine give_degen(A, n, shift, list_degen, n_degen_list)
+
+  BEGIN_DOC
+  ! returns n_degen_list :: the number of degenerated SET of elements (i.e. with |A(i)-A(i+1)| below shift)
+  !
+  ! for each of these sets, list_degen(1,i) = first degenerate element of the set i, 
+  !
+  !                         list_degen(2,i) = last degenerate element of the set i.
+  END_DOC
+
+  implicit none
+
+  double precision, intent(in)  :: A(n)
+  double precision, intent(in)  :: shift
+  integer,          intent(in)  :: n
+  integer,          intent(out) :: list_degen(2,n), n_degen_list
+
+  integer                       :: i, j, n_degen, k
+  logical                       :: keep_on
+  double precision, allocatable :: Aw(:)
+
+  list_degen = -1
+  allocate(Aw(n))
+  Aw = A
+  i=1
+  k = 0
+  do while(i.lt.n)
+   if(dabs(Aw(i)-Aw(i+1)).lt.shift)then
+    k+=1
+    j=1
+    list_degen(1,k) = i
+    keep_on = .True.
+    do while(keep_on)
+     if(i+j.gt.n)then
+      keep_on = .False.
+      exit
+     endif
+     if(dabs(Aw(i)-Aw(i+j)).lt.shift)then
+      j+=1
+     else
+      keep_on=.False.
+      exit
+     endif
+    enddo
+    n_degen = j
+    list_degen(2,k) = list_degen(1,k)-1 + n_degen
+    j=0
+    keep_on = .True.
+    do while(keep_on)
+     if(i+j+1.gt.n)then
+      keep_on = .False.
+      exit
+     endif
+     if(dabs(Aw(i+j)-Aw(i+j+1)).lt.shift)then
+      Aw(i+j) += (j-n_degen/2) * shift
+      j+=1
+     else
+      keep_on = .False.
+      exit
+     endif
+    enddo
+    Aw(i+n_degen-1) += (n_degen-1-n_degen/2) * shift
+    i+=n_degen
+   else
+    i+=1
+   endif
+  enddo
+  n_degen_list = k
+
+end
 
 ! ---
 

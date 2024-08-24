@@ -3,7 +3,7 @@ To localize the MOs:
 ```
 qp run localization  
 ```
-By default, the different otbital classes are automatically set by splitting  
+By default, the different orbital classes are automatically set by splitting  
 the orbitales in the following classes:  
 - Core -> Core  
 - Active, doubly occupied -> Inactive  

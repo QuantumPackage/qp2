@@ -107,8 +107,8 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
-  print *, ' providing int2_grad1_u12_ao_transp ...'
-  call wall_time(wall0)
+  !print *, ' providing int2_grad1_u12_ao_transp ...'
+  !call wall_time(wall0)
 
   if(test_cycle_tc) then
 
@@ -142,15 +142,15 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_transp, (ao_num, ao_num, 3,
 
   endif
 
-  call wall_time(wall1)
-  print *, ' wall time for int2_grad1_u12_ao_transp ', wall1 - wall0
-  call print_memory_usage()
+  !call wall_time(wall1)
+  !print *, ' wall time for int2_grad1_u12_ao_transp (min) = ', (wall1 - wall0) / 60.d0
+  !call print_memory_usage()
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
+BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 3, n_points_final_grid)]
 
   implicit none
   integer          :: ipoint
@@ -159,7 +159,7 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE int2_grad1_u12_ao_transp
 
-  !print *, ' providing int2_grad1_u12_bimo_transp'
+  !print *, ' providing int2_grad1_u12_bimo_transp ...'
   !call wall_time(wall0)
 
   !$OMP PARALLEL         &
@@ -167,33 +167,35 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_transp, (mo_num, mo_num, 
   !$OMP PRIVATE (ipoint) & 
   !$OMP SHARED (n_points_final_grid,int2_grad1_u12_ao_transp,int2_grad1_u12_bimo_transp)
   !$OMP DO SCHEDULE (dynamic)
-   do ipoint = 1, n_points_final_grid
-     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                           , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                           , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-     call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
-                           , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
-   enddo
+  do ipoint = 1, n_points_final_grid
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,1,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,1,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,2,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,2,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+    call ao_to_mo_bi_ortho( int2_grad1_u12_ao_transp  (1,1,3,ipoint), size(int2_grad1_u12_ao_transp  , 1) &
+                          , int2_grad1_u12_bimo_transp(1,1,3,ipoint), size(int2_grad1_u12_bimo_transp, 1) )
+  enddo
   !$OMP END DO
   !$OMP END PARALLEL
 
+  !FREE int2_grad1_u12_ao_transp
+
   !call wall_time(wall1)
-  !print *, ' Wall time for providing int2_grad1_u12_bimo_transp',wall1 - wall0
+  !print *, ' wall time for int2_grad1_u12_bimo_transp (min) =', (wall1 - wall0) / 60.d0
   !call print_memory_usage()
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
+BEGIN_PROVIDER [double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 3, mo_num, mo_num)]
 
   implicit none
   integer          :: i, j, ipoint
   double precision :: wall0, wall1
 
   !call wall_time(wall0)
-  !print *, ' Providing int2_grad1_u12_bimo_t ...'
+  !print *, ' providing int2_grad1_u12_bimo_t ...'
 
   PROVIDE mo_l_coef mo_r_coef
   PROVIDE int2_grad1_u12_bimo_transp
@@ -211,17 +213,21 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_bimo_t, (n_points_final_grid, 
   FREE int2_grad1_u12_bimo_transp
 
   !call wall_time(wall1)
-  !print *, ' wall time for int2_grad1_u12_bimo_t,', wall1 - wall0
+  !print *, ' wall time for int2_grad1_u12_bimo_t (min) =', (wall1 - wall0) / 60.d0
   !call print_memory_usage()
 
 END_PROVIDER 
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3, ao_num, ao_num)]
 
   implicit none
-  integer :: i, j, ipoint
+  integer          :: i, j, ipoint
+  double precision :: wall0, wall1
+
+  !call wall_time(wall0)
+  !print *, ' providing int2_grad1_u12_ao_t ...'
 
   PROVIDE int2_grad1_u12_ao
 
@@ -234,6 +240,10 @@ BEGIN_PROVIDER [ double precision, int2_grad1_u12_ao_t, (n_points_final_grid, 3,
       enddo                                  
     enddo
   enddo
+
+  !call wall_time(wall1)
+  !print *, ' wall time for int2_grad1_u12_ao_t (min) =', (wall1 - wall0) / 60.d0
+  !call print_memory_usage()
 
 END_PROVIDER 
 
@@ -275,8 +285,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk, (n_points_final_grid,
   double precision :: xyz
   double precision :: wall0, wall1
  
-  print*, ' providing x_W_ki_bi_ortho_erf_rk ...'
-  call wall_time(wall0)
+  !print*, ' providing x_W_ki_bi_ortho_erf_rk ...'
+  !call wall_time(wall0)
 
  !$OMP PARALLEL                   &
  !$OMP DEFAULT (NONE)             &
@@ -300,8 +310,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk, (n_points_final_grid,
  ! FREE mo_v_ki_bi_ortho_erf_rk_cst_mu_transp 
  ! FREE mo_x_v_ki_bi_ortho_erf_rk_cst_mu_transp
 
-  call wall_time(wall1)
-  print *, ' time to provide x_W_ki_bi_ortho_erf_rk = ', wall1 - wall0
+  !call wall_time(wall1)
+  !print *, ' time to provide x_W_ki_bi_ortho_erf_rk = ', wall1 - wall0
 
 END_PROVIDER 
 
@@ -323,8 +333,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk_diag, (n_points_final_
   double precision :: xyz
   double precision :: wall0, wall1
  
-  print*,'providing x_W_ki_bi_ortho_erf_rk_diag ...'
-  call wall_time(wall0)
+  !print*,'providing x_W_ki_bi_ortho_erf_rk_diag ...'
+  !call wall_time(wall0)
 
  !$OMP PARALLEL                 &
  !$OMP DEFAULT (NONE)           &
@@ -343,8 +353,8 @@ BEGIN_PROVIDER [ double precision, x_W_ki_bi_ortho_erf_rk_diag, (n_points_final_
  !$OMP END DO
  !$OMP END PARALLEL
 
-  call wall_time(wall1)
-  print*,'time to provide x_W_ki_bi_ortho_erf_rk_diag = ',wall1 - wall0
+  !call wall_time(wall1)
+  !print*,'time to provide x_W_ki_bi_ortho_erf_rk_diag = ',wall1 - wall0
 
 END_PROVIDER 
 

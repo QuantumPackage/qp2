@@ -3,8 +3,6 @@
 
 subroutine davidson_general_diag_dressed_ext_rout_nonsym_b1space(u_in, H_jj, Dress_jj,energies, sze, N_st, N_st_diag_in, converged, hcalc)
 
-  use mmap_module
-
   BEGIN_DOC
   ! Generic modified-Davidson diagonalization 
   !

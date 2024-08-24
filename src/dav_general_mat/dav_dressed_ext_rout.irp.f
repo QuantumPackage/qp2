@@ -1,5 +1,4 @@
 subroutine davidson_general_ext_rout_dressed(u_in,H_jj,energies,sze,N_st,N_st_diag,dressing_state,dressing_vec,idress,converged,hcalc)
-  use mmap_module
   implicit none
   BEGIN_DOC
   ! Davidson diagonalization.

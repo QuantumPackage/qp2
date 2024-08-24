@@ -56,10 +56,10 @@
     print*,'Average trace of overlap_bi_ortho is different from 1 by ', dabs(accu_d-1.d0)
     print*,'And bi orthogonality is off by an average of ',accu_nd
     print*,'****************'
-    print*,'Overlap matrix betwee mo_l_coef and mo_r_coef  '
-    do i = 1, mo_num
-      write(*,'(100(F16.10,X))')overlap_bi_ortho(i,:)
-    enddo
+    !print*,'Overlap matrix betwee mo_l_coef and mo_r_coef  '
+    !do i = 1, mo_num
+    !  write(*,'(100(F16.10,X))')overlap_bi_ortho(i,:)
+    !enddo
   endif
   print*,'Average trace of overlap_bi_ortho (should be 1.)'
   print*,'accu_d  = ',accu_d

@@ -91,28 +91,14 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
   double precision, allocatable :: tmp(:,:)
   double precision, allocatable :: F(:,:)
 
-  !print *, ' Providing FQS_SQF_ao ...'
-  !call wall_time(t0)
+  PROVIDE Fock_matrix_tc_ao_tot
 
   allocate(F(ao_num,ao_num))
-  if(var_tc) then
-
-    do i = 1, ao_num
-      do j = 1, ao_num
-        F(j,i) = Fock_matrix_vartc_ao_tot(j,i)
-      enddo
+  do i = 1, ao_num
+    do j = 1, ao_num
+      F(j,i) = Fock_matrix_tc_ao_tot(j,i)
     enddo
-
-  else
-
-    PROVIDE Fock_matrix_tc_ao_tot
-    do i = 1, ao_num
-      do j = 1, ao_num
-        F(j,i) = Fock_matrix_tc_ao_tot(j,i)
-      enddo
-    enddo
-
-  endif
+  enddo
 
   allocate(tmp(ao_num,ao_num))
 
@@ -140,9 +126,6 @@ BEGIN_PROVIDER [double precision, FQS_SQF_ao, (ao_num, ao_num)]
   deallocate(tmp)
   deallocate(F)
 
-  !call wall_time(t1)
-  !print *, ' Wall time for FQS_SQF_ao =', t1-t0
-
 END_PROVIDER
 
 ! ---
@@ -152,61 +135,13 @@ BEGIN_PROVIDER [double precision, FQS_SQF_mo, (mo_num, mo_num)]
   implicit none
   double precision :: t0, t1
 
-  !print*, ' Providing FQS_SQF_mo ...'
-  !call wall_time(t0)
-
   PROVIDE mo_r_coef mo_l_coef
   PROVIDE FQS_SQF_ao
 
   call ao_to_mo_bi_ortho( FQS_SQF_ao, size(FQS_SQF_ao, 1) &
                         , FQS_SQF_mo, size(FQS_SQF_mo, 1) )
 
-  !call wall_time(t1)
-  !print*, ' Wall time for FQS_SQF_mo =', t1-t0 
-
 END_PROVIDER
 
 ! ---
 
-! BEGIN_PROVIDER [ double precision, eigenval_Fock_tc_ao, (ao_num) ]
-!&BEGIN_PROVIDER [ double precision, eigenvec_Fock_tc_ao, (ao_num,ao_num) ]
-!
-!  BEGIN_DOC
-!  !
-!  ! Eigenvalues and eigenvectors of the Fock matrix over the ao basis
-!  !
-!  ! F' = X.T x F x X   where X = ao_overlap^(-1/2)
-!  ! 
-!  ! F'   x Cr' = Cr' x E ==> F   Cr = Cr x E with Cr = X x Cr'
-!  ! F'.T x Cl' = Cl' x E ==> F.T Cl = Cl x E with Cl = X x Cl'
-!  !
-!  END_DOC
-!
-!  implicit none
-!  double precision, allocatable :: tmp1(:,:), tmp2(:,:)
-!
-!  ! ---
-!  ! Fock matrix in orthogonal basis: F' = X.T x F x X
-!
-!  allocate(tmp1(ao_num,ao_num))
-!  call dgemm( 'N', 'N', ao_num, ao_num, ao_num, 1.d0                                                 &
-!            , Fock_matrix_tc_ao_tot, size(Fock_matrix_tc_ao_tot, 1), S_half_inv, size(S_half_inv, 1) &
-!            , 0.d0, tmp1, size(tmp1, 1) )
-!
-!  allocate(tmp2(ao_num,ao_num))
-!  call dgemm( 'T', 'N', ao_num, ao_num, ao_num, 1.d0               &
-!            , S_half_inv, size(S_half_inv, 1), tmp1, size(tmp1, 1) &
-!            , 0.d0, tmp2, size(tmp2, 1) )
-!
-!  ! ---
-!
-!  ! Diagonalize F' to obtain eigenvectors in orthogonal basis C' and eigenvalues
-!  ! TODO
-!
-!  ! Back-transform eigenvectors: C =X.C'
-!
-!END_PROVIDER
-
-! ---
-
-~                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

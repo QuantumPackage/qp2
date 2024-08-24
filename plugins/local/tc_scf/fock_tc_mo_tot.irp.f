@@ -1,4 +1,6 @@
 
+! ---
+
  BEGIN_PROVIDER [ double precision, Fock_matrix_tc_mo_tot, (mo_num,mo_num) ]
 &BEGIN_PROVIDER [ double precision, Fock_matrix_tc_diag_mo_tot, (mo_num)]
 
@@ -22,9 +24,6 @@
   implicit none
   integer          :: i, j, n
   double precision :: t0, t1
-
-  !print*, ' Providing Fock_matrix_tc_mo_tot ...'
-  !call wall_time(t0)
 
   if(elec_alpha_num == elec_beta_num) then
 
@@ -133,7 +132,7 @@
      enddo
    endif
 
-  if(no_oa_or_av_opt)then
+  if(no_oa_or_av_opt) then
     do i = 1, n_act_orb
       iorb = list_act(i)
       do j = 1, n_inact_orb
@@ -154,12 +153,25 @@
     enddo
   endif
 
-  if(.not.bi_ortho .and. three_body_h_tc)then
-    Fock_matrix_tc_mo_tot += fock_3_mat
+  if(tc_Brillouin_Right) then
+
+    double precision, allocatable :: tmp(:,:)
+    allocate(tmp(mo_num,mo_num))
+
+    tmp = Fock_matrix_tc_mo_tot
+    do j = 1, mo_num
+      do i = 1, j-1
+        tmp(i,j) = Fock_matrix_tc_mo_tot(j,i)
+      enddo
+    enddo
+
+    Fock_matrix_tc_mo_tot = tmp
+    deallocate(tmp)
+
   endif
 
-  !call wall_time(t1)
-  !print*, ' Wall time for Fock_matrix_tc_mo_tot =', t1-t0
-
 END_PROVIDER
+
+! ---
+
 
