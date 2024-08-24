@@ -43,6 +43,7 @@
       enddo
 
     elseif(do_torus) then
+      !print*, ' do_torus for ao_overlap ?', do_torus
 
       do j = 1, ao_num
         do i = 1, ao_num
