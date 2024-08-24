@@ -42,6 +42,17 @@
         enddo
       enddo
 
+    elseif(do_torus) then
+
+      do j = 1, ao_num
+        do i = 1, ao_num
+          ao_overlap  (i,j) = ao_overlap_torus  (i,j) 
+          ao_overlap_x(i,j) = ao_overlap_torus_x(i,j)
+          ao_overlap_y(i,j) = ao_overlap_torus_y(i,j)
+          ao_overlap_z(i,j) = ao_overlap_torus_z(i,j)
+        enddo
+      enddo
+
     else
 
       dim1=100
