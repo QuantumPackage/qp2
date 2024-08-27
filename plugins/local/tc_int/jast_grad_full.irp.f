@@ -58,7 +58,7 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
   integer                       :: jpoint, i_nucl, p, mpA, npA, opA
   double precision              :: r2(3)
   double precision              :: dx, dy, dz, r12, tmp
-  double precision              :: rn(3), f1A, grad1_f1A(3), f2A, grad2_f2A(3), g12, grad1_g12(3)
+  double precision              :: rn(3), f1A, grad1_f1A(3), f2A, g12, grad1_g12(3)
   double precision              :: tmp1, tmp2, dist
   integer                       :: powmax1, powmax, powmax2
   double precision, allocatable :: f1A_power(:), f2A_power(:), double_p(:), g12_power(:)
@@ -91,35 +91,29 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
     grady(jpoint) = 0.d0
     gradz(jpoint) = 0.d0
 
-    call jBH_elem_fct_grad_alpha1(r1, r2, g12, grad1_g12)
-
-!    dist =   (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-!           + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-!           + (r1(3) - r2(3)) * (r1(3) - r2(3))
-!
-!    if(dist .ge. 1d-15) then
-!      dist = dsqrt( dist )
-!
-!      tmp1 = 1.d0 / (1.d0 + dist)
-!
-!      g12 = dist * tmp1
-!      tmp2 = tmp1 * tmp1 / dist
-!      grad1_g12(1) = tmp2 * (r1(1) - r2(1))
-!      grad1_g12(2) = tmp2 * (r1(2) - r2(2))
-!      grad1_g12(3) = tmp2 * (r1(3) - r2(3))
-!
-!    else
-!
-!      grad1_g12(1) = 0.d0
-!      grad1_g12(2) = 0.d0
-!      grad1_g12(3) = 0.d0
-!      g12 = 0.d0
-!
-!    endif
-!
-    do p = 1, powmax2
-      g12_power(p) = g12_power(p-1) * g12
-    enddo
+    dist = (r1(1) - r2(1)) * (r1(1) - r2(1)) &
+         + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
+         + (r1(3) - r2(3)) * (r1(3) - r2(3))
+    if(dist .ge. 1d-15) then
+      dist = dsqrt(dist)
+      tmp1 = 1.d0 / (1.d0 + dist)
+      g12 = dist * tmp1
+      tmp2 = tmp1 * tmp1 / dist
+      grad1_g12(1) = tmp2 * (r1(1) - r2(1))
+      grad1_g12(2) = tmp2 * (r1(2) - r2(2))
+      grad1_g12(3) = tmp2 * (r1(3) - r2(3))
+      do p = 1, powmax2
+        g12_power(p) = g12_power(p-1) * g12
+      enddo
+    else
+      grad1_g12(1) = 0.d0
+      grad1_g12(2) = 0.d0
+      grad1_g12(3) = 0.d0
+      g12 = 0.d0
+      do p = 1, powmax2
+        g12_power(p) = 0.d0
+      enddo
+    endif
 
     do i_nucl = 1, nucl_num
 
@@ -127,71 +121,54 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       rn(2) = nucl_coord(i_nucl,2)
       rn(3) = nucl_coord(i_nucl,3)
 
-        call jBH_elem_fct_grad_alpha1(r1, rn, f1A, grad1_f1A)
-!      dist =   (r1(1) - rn(1)) * (r1(1) - rn(1)) &
-!             + (r1(2) - rn(2)) * (r1(2) - rn(2)) &
-!             + (r1(3) - rn(3)) * (r1(3) - rn(3))
-!      if (dist > 1.d-15) then
-!        dist = dsqrt( dist )
-!
-!        tmp1 = 1.d0 / (1.d0 + dist)
-!
-!        f1A = dist * tmp1
-!        tmp2 = tmp1 * tmp1 / dist
-!        grad1_f1A(1) = tmp2 * (r1(1) - rn(1))
-!        grad1_f1A(2) = tmp2 * (r1(2) - rn(2))
-!        grad1_f1A(3) = tmp2 * (r1(3) - rn(3))
-!
-!      else
-!
-!        grad1_f1A(1) = 0.d0
-!        grad1_f1A(2) = 0.d0
-!        grad1_f1A(3) = 0.d0
-!        f1A = 0.d0
-!
-!      endif
+      dist = (r1(1) - rn(1)) * (r1(1) - rn(1)) &
+           + (r1(2) - rn(2)) * (r1(2) - rn(2)) &
+           + (r1(3) - rn(3)) * (r1(3) - rn(3))
+      if (dist > 1.d-15) then
+        dist = dsqrt(dist)
+        tmp1 = 1.d0 / (1.d0 + dist)
+        f1A = dist * tmp1
+        tmp2 = tmp1 * tmp1 / dist
+        grad1_f1A(1) = tmp2 * (r1(1) - rn(1))
+        grad1_f1A(2) = tmp2 * (r1(2) - rn(2))
+        grad1_f1A(3) = tmp2 * (r1(3) - rn(3))
+        do p = 1, powmax1
+          f1A_power(p) = f1A_power(p-1) * f1A
+        enddo
+      else
+        grad1_f1A(1) = 0.d0
+        grad1_f1A(2) = 0.d0
+        grad1_f1A(3) = 0.d0
+        f1A = 0.d0
+        do p = 1, powmax1
+          f1A_power(p) = 0.d0
+        enddo
+      endif
 
-        call jBH_elem_fct_grad_alpha1(r2, rn, f2A, grad2_f2A)
-!      dist =   (r2(1) - rn(1)) * (r2(1) - rn(1)) &
-!             + (r2(2) - rn(2)) * (r2(2) - rn(2)) &
-!             + (r2(3) - rn(3)) * (r2(3) - rn(3))
-!
-!      if (dist > 1.d-15) then
-!        dist = dsqrt( dist )
-!
-!        tmp1 = 1.d0 / (1.d0 + dist)
-!
-!        f2A = dist * tmp1
-!        tmp2 = tmp1 * tmp1 / dist
-!        grad2_f2A(1) = tmp2 * (r2(1) - rn(1))
-!        grad2_f2A(2) = tmp2 * (r2(2) - rn(2))
-!        grad2_f2A(3) = tmp2 * (r2(3) - rn(3))
-!
-!      else
-!
-!        grad2_f2A(1) = 0.d0
-!        grad2_f2A(2) = 0.d0
-!        grad2_f2A(3) = 0.d0
-!        f2A = 0.d0
-!
-!      endif
-
-      ! Compute powers of f1A and f2A
-      do p = 1, powmax1
-        f1A_power(p) = f1A_power(p-1) * f1A
-        f2A_power(p) = f2A_power(p-1) * f2A
-      enddo
+      dist = (r2(1) - rn(1)) * (r2(1) - rn(1)) &
+           + (r2(2) - rn(2)) * (r2(2) - rn(2)) &
+           + (r2(3) - rn(3)) * (r2(3) - rn(3))
+      if (dist > 1.d-15) then
+        dist = dsqrt(dist)
+        f2A = dist / (1.d0 + dist)
+        do p = 1, powmax1
+          f2A_power(p) = f2A_power(p-1) * f2A
+        enddo
+      else
+        f2A = 0.d0
+        do p = 1, powmax1
+          f2A_power(p) = 0.d0
+        enddo
+      endif
 
       do p = 1, jBH_size
+
+        tmp = jBH_c(p,i_nucl)
+        if (dabs(tmp) <= 1.d-10) cycle
+
         mpA = jBH_m(p,i_nucl)
         npA = jBH_n(p,i_nucl)
         opA = jBH_o(p,i_nucl)
-        tmp = jBH_c(p,i_nucl)
-!        if (dabs(tmp) <= 1.d-10) cycle
-!
-        if(mpA .eq. npA) then
-          tmp = tmp * 0.5d0
-        endif
 
         tmp1 = double_p(mpA) * f1A_power(mpA-1) * f2A_power(npA) + double_p(npA) * f1A_power(npA-1) * f2A_power(mpA)
         tmp1 = tmp1 * g12_power(opA) * tmp
@@ -207,39 +184,5 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
   return
 end
 
-subroutine jBH_elem_fct_grad_alpha1(r1, r2, fct, grad1_fct)
-
-  implicit none
-  double precision, intent(in)  :: r1(3), r2(3)
-  double precision, intent(out) :: fct, grad1_fct(3)
-  double precision              :: dist, tmp1, tmp2
-
-  dist =   (r1(1) - r2(1)) * (r1(1) - r2(1)) &
-         + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
-         + (r1(3) - r2(3)) * (r1(3) - r2(3))
-
-
-  if(dist .ge. 1d-15) then
-    dist = dsqrt( dist )
-
-    tmp1 = 1.d0 / (1.d0 + dist)
-
-    fct = dist * tmp1
-    tmp2 = tmp1 * tmp1 / dist
-    grad1_fct(1) = tmp2 * (r1(1) - r2(1))
-    grad1_fct(2) = tmp2 * (r1(2) - r2(2))
-    grad1_fct(3) = tmp2 * (r1(3) - r2(3))
-
-  else
-
-    grad1_fct(1) = 0.d0
-    grad1_fct(2) = 0.d0
-    grad1_fct(3) = 0.d0
-    fct = 0.d0
-
-  endif
-
-  return
-end
-
 ! ---
+

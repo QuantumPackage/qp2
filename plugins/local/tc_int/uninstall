@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Check if the QP_ROOT environment variable is set.
+if [[ -z ${QP_ROOT} ]]
+then
+  print "The QP_ROOT environment variable is not set."
+  print "Please reload the quantum_package.rc file."
+  exit -1
+fi
+
+rm -rf ${PWD}/CuTC
+rm ${QP_ROOT}/lib/libcutcint.so
+
