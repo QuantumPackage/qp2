@@ -216,31 +216,35 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       r2(1) = final_grid_points_extra(1,jpoint)
       r2(2) = final_grid_points_extra(2,jpoint)
       r2(3) = final_grid_points_extra(3,jpoint)
-
-      dx  = r1(1) - r2(1)
-      dy  = r1(2) - r2(2)
-      dz  = r1(3) - r2(3)
-      r12 = dsqrt(dx * dx + dy * dy + dz * dz)
-
-      call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
-      mu_tmp  = mu_val * r12
-      tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
-      gradx(jpoint) = tmp * mu_der(1)
-      grady(jpoint) = tmp * mu_der(2)
-      gradz(jpoint) = tmp * mu_der(3)
-
-      if(r12 .lt. 1d-10) then
-        gradx(jpoint) = 0.d0
-        grady(jpoint) = 0.d0
-        gradz(jpoint) = 0.d0
-        cycle
-      endif
-
-      tmp = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
-
-      gradx(jpoint) = gradx(jpoint) + tmp * dx
-      grady(jpoint) = grady(jpoint) + tmp * dy
-      gradz(jpoint) = gradz(jpoint) + tmp * dz
+      double precision :: jast, grad_jast(3)
+      call grad_j_sum_mu_of_r(r1,r2,jast,grad_jast)
+      gradx(jpoint) = grad_jast(1)
+      grady(jpoint) = grad_jast(2)
+      gradz(jpoint) = grad_jast(3)
+!      dx  = r1(1) - r2(1)
+!      dy  = r1(2) - r2(2)
+!      dz  = r1(3) - r2(3)
+!      r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+!
+!      call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
+!      mu_tmp  = mu_val * r12
+!      tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
+!      gradx(jpoint) = tmp * mu_der(1)
+!      grady(jpoint) = tmp * mu_der(2)
+!      gradz(jpoint) = tmp * mu_der(3)
+!
+!      if(r12 .lt. 1d-10) then
+!        gradx(jpoint) = 0.d0
+!        grady(jpoint) = 0.d0
+!        gradz(jpoint) = 0.d0
+!        cycle
+!      endif
+!
+!      tmp = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
+!
+!      gradx(jpoint) = gradx(jpoint) + tmp * dx
+!      grady(jpoint) = grady(jpoint) + tmp * dy
+!      gradz(jpoint) = gradz(jpoint) + tmp * dz
     enddo
 
   elseif(j2e_type .eq. "Boys") then

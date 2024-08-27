@@ -20,7 +20,8 @@ program projected_operators
 ! call test
 !  call test_f_mean_field
 ! call test_grad_f_mean_field
- call test_grad_mu_mf
+! call test_grad_mu_mf
+ call plot_mu_of_r_mf
 end
 
 
@@ -173,4 +174,34 @@ subroutine test_grad_mu_mf
  print*,'accu_grad_mu_mf = '
  print*, accu_grad_mu_mf
 
+end
+
+subroutine plot_mu_of_r_mf
+ implicit none
+  include 'constants.include.F'
+ integer :: ipoint,npoint
+ double precision :: dx,r(3),xmax,xmin
+ double precision :: accu_mu,accu_nelec,mu_mf, dm,mu_mf_tc
+ character*(128) :: output
+ integer :: i_unit_output,getUnitAndOpen
+ output=trim(ezfio_filename)//'.mu_mf'
+ i_unit_output = getUnitAndOpen(output,'w')
+ xmax = 5.D0
+ xmin = 0.d0
+ npoint = 10000
+ dx = (xmax - xmin)/dble(npoint)
+ r = 0.d0
+ r(1) = xmin
+ accu_mu = 0.d0
+ accu_nelec = 0.d0
+ do ipoint = 1, npoint
+  call mu_of_r_mean_field(r,mu_mf, dm)
+  call mu_of_r_mean_field_tc(r,mu_mf_tc, dm)
+  write(i_unit_output,'(100(F16.10,X))')r(1),mu_mf,mu_mf_tc,dm
+  accu_mu    += mu_mf * dm * r(1)**2*dx*4.D0*pi
+  accu_nelec +=         dm * r(1)**2*dx*4.D0*pi
+  r(1) += dx
+ enddo
+ print*,'nelec      = ',accu_nelec
+ print*,'mu average = ',accu_mu/accu_nelec
 end

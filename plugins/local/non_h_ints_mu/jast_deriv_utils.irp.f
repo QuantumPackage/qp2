@@ -3,6 +3,9 @@
 
 double precision function j12_mu(r1, r2)
 
+  BEGIN_DOC
+  ! j(mu,r12) = 1/2 r12 (1 - erf(mu r12)) - 1/2 (sqrt(pi) * mu) e^{-(mu*r12)^2}
+  END_DOC
   include 'constants.include.F'
 
   implicit none
@@ -73,24 +76,41 @@ subroutine grad1_j12_mu(r1, r2, grad)
     grad(3) = tmp * dz
 
   elseif(j2e_type .eq. "Mur") then
+   double precision :: jast
+   call grad_j_sum_mu_of_r(r1,r2,jast,grad)
 
-    dx  = r1(1) - r2(1)
-    dy  = r1(2) - r2(2)
-    dz  = r1(3) - r2(3)
-    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+!    dx = r1(1) - r2(1)
+!    dy = r1(2) - r2(2)
+!    dz = r1(3) - r2(3)
+!
+!    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+!    if(r12 .lt. 1d-10) return
+!
+!    tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
+!
+!    grad(1) = tmp * dx
+!    grad(2) = tmp * dy
+!    grad(3) = tmp * dz
 
-    call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
-    mu_tmp  = mu_val * r12
-    tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
-    grad(1) = tmp * mu_der(1)
-    grad(2) = tmp * mu_der(2)
-    grad(3) = tmp * mu_der(3)
-
-    if(r12 .lt. 1d-10) return
-    tmp     = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
-    grad(1) = grad(1) + tmp * dx
-    grad(2) = grad(2) + tmp * dy
-    grad(3) = grad(3) + tmp * dz
+!  elseif(j2e_type .eq. "Mur") then
+!
+!    dx  = r1(1) - r2(1)
+!    dy  = r1(2) - r2(2)
+!    dz  = r1(3) - r2(3)
+!    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+!
+!    call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
+!    mu_tmp  = mu_val * r12
+!    tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
+!    grad(1) = tmp * mu_der(1)
+!    grad(2) = tmp * mu_der(2)
+!    grad(3) = tmp * mu_der(3)
+!
+!    if(r12 .lt. 1d-10) return
+!    tmp     = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
+!    grad(1) = grad(1) + tmp * dx
+!    grad(2) = grad(2) + tmp * dy
+!    grad(3) = grad(3) + tmp * dz
 
   else
 
@@ -369,7 +389,18 @@ end
 ! ---
 
 subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
-
+ BEGIN_DOC
+! various flavours of mu(r1,r2) 
+! depends on essentially the density and other related quantities 
+!
+! change the variable "murho_type" to change type
+!
+!  murho_type == -1 :: mu(r1,r2) = (rho(r1) mu_mf(r1) + rho(r2) mu_mf(r2))/[rho(r1)+rho(r2)]
+!
+!             ==  0 :: mu(r1,r2) = (sqrt(rho(r1)) mu_mf(r1) + sqrt(rho(r2)) mu_mf(r2))/[sqrt(rho(r1))+sqrt(rho(r2))]
+!             
+!             == -2 :: mu(r1,r2) = 0.5(mu_mf(r1) + mu_mf(r2))
+ END_DOC
   implicit none
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: mu_val, mu_der(3)
@@ -379,11 +410,50 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
   double precision :: rho1, grad_rho1(3),rho2,rho_tot,inv_rho_tot
   double precision :: f_rho1, f_rho2, d_drho_f_rho1
   double precision :: d_dx1_f_rho1(3),d_dx_rho_f_rho(3),nume
+  double precision :: mu_mf_r1, dm_r1, grad_mu_mf_r1(3), grad_dm_r1(3)
+  double precision :: mu_mf_r2, dm_r2, grad_mu_mf_r2(3), grad_dm_r2(3)
+
+  double precision :: num, denom, grad_denom(3), grad_num(3)
+  double precision :: dsqrt_dm_r1
 
   PROVIDE murho_type
   PROVIDE mu_r_ct mu_erf
 
-  if(murho_type .eq. 1) then
+  if(murho_type .eq. 0) then 
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   dsqrt_dm_r1 = dsqrt(dm_r1)
+   denom = (dsqrt_dm_r1 + dsqrt(dm_r2) )
+   if(denom.lt.1.d-7)then
+    mu_val = 1.d+10
+    mu_der = 0.d0
+    return
+   endif
+   num = (dsqrt(dm_r1) * mu_mf_r1 + dsqrt(dm_r2) * mu_mf_r2) 
+   mu_val = num / denom
+   grad_denom = grad_dm_r1/dsqrt_dm_r1
+   grad_num = dsqrt(dm_r1) * grad_mu_mf_r1 + mu_mf_r1 * grad_dm_r1
+   mu_der = (grad_num * denom - num * grad_denom)/(denom*denom)
+  else if(murho_type .eq. -1) then
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   denom = (dm_r1 + dm_r2 )
+   if(denom.lt.1.d-7)then
+    mu_val = 1.d+10
+    mu_der = 0.d0
+    return
+   endif
+   num = (dm_r1 * mu_mf_r1 + dm_r2 * mu_mf_r2) 
+   mu_val = num / denom
+   grad_denom = grad_dm_r1
+   grad_num = dm_r1 * grad_mu_mf_r1 + mu_mf_r1 * grad_dm_r1
+   mu_der = (grad_num * denom - num * grad_denom)/(denom*denom)
+  else if(murho_type .eq. -2) then
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   mu_val = 0.5d0 * (mu_mf_r1 + mu_mf_r2) 
+   mu_der = 0.5d0 * grad_mu_mf_r1
+  else if(murho_type .eq. 1) then
 
     !
     ! r = 0.5 (r1 + r2)
