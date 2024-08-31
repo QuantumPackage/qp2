@@ -24,6 +24,7 @@ double precision function ao_two_e_integral(i, j, k, l)
   double precision, external     :: ao_two_e_integral_erf
   double precision, external     :: ao_two_e_integral_cosgtos
   double precision, external     :: ao_two_e_integral_schwartz_accel
+  double precision, external     :: ao_two_e_integral_torus
 
 
   if(use_cosgtos) then
@@ -31,15 +32,21 @@ double precision function ao_two_e_integral(i, j, k, l)
 
     ao_two_e_integral = ao_two_e_integral_cosgtos(i, j, k, l)
 
+  elseif(do_torus) then
+
+    ao_two_e_integral = ao_two_e_integral_torus(i, j, k, l)
+
   else if (use_only_lr) then
 
     ao_two_e_integral = ao_two_e_integral_erf(i, j, k, l)
 
-  else if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
+  else
+
+    if (ao_prim_num(i) * ao_prim_num(j) * ao_prim_num(k) * ao_prim_num(l) > 1024 ) then
 
        ao_two_e_integral = ao_two_e_integral_schwartz_accel(i,j,k,l)
 
-  else
+    else
 
       dim1 = n_pt_max_integrals
 
@@ -119,6 +126,7 @@ double precision function ao_two_e_integral(i, j, k, l)
           enddo   ! q
         enddo    ! p
 
+      endif
     endif
 
   endif

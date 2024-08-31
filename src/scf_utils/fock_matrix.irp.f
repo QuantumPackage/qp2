@@ -263,9 +263,10 @@ BEGIN_PROVIDER [double precision, SCF_energy]
   double precision :: ax
 
   PROVIDE do_torus
-  PROVIDE torus_length
  
   if(do_torus) then
+
+    PROVIDE torus_length
 
     SCF_energy = 0.d0
     do l = 1, nucl_num
