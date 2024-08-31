@@ -36,6 +36,14 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
         enddo
       enddo
 
+    elseif(do_torus) then
+
+      do j = 1, ao_num
+        do i = 1, ao_num
+          ao_integrals_n_e(i,j) = ao_integrals_n_e_torus(i,j)
+        enddo
+      enddo
+
     else
 
       !$OMP PARALLEL                                                   &

@@ -248,22 +248,58 @@ BEGIN_PROVIDER [ double precision, Fock_matrix_ao, (ao_num, ao_num) ]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, SCF_energy ]
- implicit none
- BEGIN_DOC
- ! Hartree-Fock energy
- END_DOC
- SCF_energy = nuclear_repulsion
+BEGIN_PROVIDER [double precision, SCF_energy]
 
- integer                        :: i,j
- do j=1,ao_num
-   do i=1,ao_num
-     SCF_energy += 0.5d0 * (                                          &
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) )
-   enddo
- enddo
- SCF_energy += extra_e_contrib_density
+  implicit none
+
+  BEGIN_DOC
+  ! Hartree-Fock energy
+  END_DOC
+
+  include 'utils/constants.include.F'
+
+  integer          :: i, j, k, l, m
+  double precision :: Z12, r2, x(3)
+  double precision :: ax
+
+  PROVIDE do_torus
+  PROVIDE torus_length
+ 
+  if(do_torus) then
+
+    SCF_energy = 0.d0
+    do l = 1, nucl_num
+      do k = 1, nucl_num
+        if(k == l) cycle
+        Z12 = nucl_charge(k) * nucl_charge(l)
+        do m = 1, 3
+          !x(m) = nucl_coord(k,m) - nucl_coord(l,m)
+          ax = 2.d0 * pi / torus_length(m)
+          x(m) = dsqrt(2.d0 * (1.d0 - dcos(ax * (nucl_coord(k,m) - nucl_coord(l,m)))) / (ax * ax))
+        enddo
+        r2 = x(1)*x(1) + x(2)*x(2) + x(3)*x(3)
+        SCF_energy += Z12 / dsqrt(r2)
+      enddo
+    enddo
+
+    SCF_energy *= 0.5d0
+    !print *, ' Nuclear Repulsion in torus model = ', SCF_energy
+
+  else
+
+    SCF_energy = nuclear_repulsion
+
+  endif
+ 
+  do j=1,ao_num
+    do i=1,ao_num
+      SCF_energy += 0.5d0 * (                                          &
+          (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
+          (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) )
+    enddo
+  enddo
+
+  SCF_energy += extra_e_contrib_density
 
 END_PROVIDER
 

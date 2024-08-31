@@ -34,6 +34,16 @@
       enddo
     enddo
 
+  elseif(do_torus) then
+
+    do j = 1, ao_num
+      do i = 1, ao_num
+        ao_deriv2_x(i,j) = ao_deriv2_torus_x(i,j)
+        ao_deriv2_y(i,j) = ao_deriv2_torus_y(i,j)
+        ao_deriv2_z(i,j) = ao_deriv2_torus_z(i,j)
+      enddo
+    enddo
+
   else
 
     dim1=100
