@@ -19,9 +19,9 @@ program projected_operators
 !  call test_f_ii_ia_aa_valence_ab
 ! call test
 !  call test_f_mean_field
-! call test_grad_f_mean_field
-! call test_grad_mu_mf
- call plot_mu_of_r_mf
+ call test_grad_f_mean_field
+ call test_grad_mu_mf
+! call plot_mu_of_r_mf
 end
 
 

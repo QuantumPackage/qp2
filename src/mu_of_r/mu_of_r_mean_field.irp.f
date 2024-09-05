@@ -57,6 +57,9 @@ end
 
 subroutine get_grad_f_mf_ab(r,grad_f_mf_ab, grad_two_bod_dens,f_mf_ab,two_bod_dens, dm_a, dm_b,grad_dm_a, grad_dm_b)
  implicit none
+ BEGIN_DOC
+ ! gradient of mu(r) mean field, together with the gradient of the one- and two-body HF density. 
+ END_DOC
  double precision, intent(in)  :: r(3)
  double precision, intent(out) :: f_mf_ab, two_bod_dens
  double precision, intent(out) :: grad_two_bod_dens(3), grad_f_mf_ab(3)
