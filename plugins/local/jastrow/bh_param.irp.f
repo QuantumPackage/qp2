@@ -232,6 +232,14 @@
 
   ! ---
 
+  do i_nucl = 1, nucl_num
+    do p = 1, jBH_size
+      if(jBH_m(p,i_nucl) .eq. jBH_n(p,i_nucl)) then
+        jBH_c(p,i_nucl) = 0.5d0 * jBH_c(p,i_nucl)
+      endif
+    enddo
+  enddo
+
   print *, ' parameters for Boys-Handy Jastrow'
   print *, ' nb of terms per nucleus = ', jBH_size
 

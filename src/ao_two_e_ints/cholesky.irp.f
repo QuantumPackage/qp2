@@ -174,8 +174,11 @@ END_PROVIDER
      np = int(np8,4)
      if (np <= 0) stop 'np<=0'
 
-!     rank_max = min(np,20*elec_num*elec_num)
      rank_max = np
+     ! Avoid too large arrays when there are many electrons
+     if (elec_num > 10) then
+       rank_max = min(np,20*elec_num*elec_num)
+     endif
      call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
      call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
 

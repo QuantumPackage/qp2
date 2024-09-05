@@ -129,9 +129,9 @@ subroutine htilde_mu_mat_opt_bi_ortho(key_j, key_i, Nint, hmono, htwoe, hthree, 
 
   endif
 
-  if(degree==0) then
-    htot += nuclear_repulsion
-  endif
+! if(degree==0) then
+!   htot += nuclear_repulsion
+! endif
 
 end
 
