@@ -35,6 +35,7 @@ subroutine get_grad1_u12_withsq_r1_seq(ipoint, n_grid2, resx, resy, resz, res)
 
   if( (j2e_type .eq. "Mu")        .or. &
       (j2e_type .eq. "Mur")       .or. &
+      (j2e_type .eq. "Jpsi")   .or. &
       (j2e_type .eq. "Mugauss")   .or. &
       (j2e_type .eq. "Murgauss")  .or. &
       (j2e_type .eq. "Bump")      .or. &
@@ -417,6 +418,17 @@ subroutine grad1_j12_r1_seq(r1, n_grid2, gradx, grady, gradz)
       enddo ! i_nucl
     enddo ! jpoint
 
+  elseif(j2e_type .eq. "Jpsi") then
+   double precision :: grad_j_psi_r1(3),jast_psi
+   do jpoint = 1, n_points_extra_final_grid ! r2 
+     r2(1) = final_grid_points_extra(1,jpoint)
+     r2(2) = final_grid_points_extra(2,jpoint)
+     r2(3) = final_grid_points_extra(3,jpoint)
+     call get_grad_r1_jastrow_psi(r1,r2,grad_j_psi_r1,jast_psi)
+     gradx(jpoint) = grad_j_psi_r1(1)
+     grady(jpoint) = grad_j_psi_r1(2)
+     gradz(jpoint) = grad_j_psi_r1(3)
+   enddo
   else
 
     print *, ' Error in grad1_j12_r1_seq: Unknown j2e_type = ', j2e_type
@@ -723,6 +735,7 @@ subroutine get_grad1_u12_2e_r1_seq(ipoint, n_grid2, resx, resy, resz)
   if( (j2e_type .eq. "Mu")        .or. &
       (j2e_type .eq. "Mugauss")   .or. &
       (j2e_type .eq. "Mur")       .or. &
+      (j2e_type .eq. "Jpsi")       .or. &
       (j2e_type .eq. "Murgauss")  .or. &
       (j2e_type .eq. "Bump")      .or. &
       (j2e_type .eq. "Boys") ) then
