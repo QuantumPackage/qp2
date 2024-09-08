@@ -56,29 +56,25 @@ subroutine get_grad_r1_jastrow_psi(r1,r2,grad_j_psi_r1,jast)
  integer :: i,j,a,b
  double precision, allocatable :: mos_array_r1(:), mos_array_r2(:)
  double precision, allocatable :: mos_grad_array_r1(:,:),mos_grad_array_r2(:,:)
+ double precision :: num_j, denom_j, num_j_grad(3), denom_j_grad(3),delta,coef
+ double precision :: inv_denom_j
  allocate(mos_array_r1(mo_num), mos_array_r2(mo_num))
  allocate(mos_grad_array_r1(3,mo_num), mos_grad_array_r2(3,mo_num))
+ delta = a_boys
  call give_all_mos_and_grad_at_r(r1,mos_array_r1,mos_grad_array_r1)
  call give_all_mos_and_grad_at_r(r2,mos_array_r2,mos_grad_array_r2)
- double precision :: eps,coef, numerator(3),denominator
- double precision :: phi_i_phi_j
- eps = a_boys
  grad_j_psi_r1 = 0.d0
  jast = 0.d0
  do i = 1, elec_beta_num ! r1
   do j = 1, elec_alpha_num ! r2
-   phi_i_phi_j = mos_array_r1(i) * mos_array_r2(j) + eps
-   denominator = 1.d0/phi_i_phi_j
-   denominator *= denominator
+   call denom_jpsi(i,j,delta,mos_array_r1,mos_grad_array_r1,mos_array_r2,denom_j, denom_j_grad)
+   inv_denom_j = 1.d0/denom_j
    do a = elec_beta_num+1, mo_num ! r1
     do b = elec_alpha_num+1, mo_num ! r2 
+     call numerator_psi(a,b,mos_array_r1,mos_grad_array_r1,mos_array_r2,num_j, num_j_grad)
      coef = c_ij_ab_jastrow(b,a,j,i)
-     jast += phi_i_phi_j * mos_array_r2(b) * mos_array_r1(a) * coef
-!     print*,b,a,j,i,c_ij_ab_jastrow(b,a,j,i)
-!     print*,'jast = ',jast
-     numerator(:) = mos_array_r2(b) * mos_grad_array_r1(:,a) & 
-      * phi_i_phi_j - mos_array_r1(a) * mos_array_r2(b) * mos_array_r2(j) * mos_grad_array_r1(:,i)
-     grad_j_psi_r1 += coef * numerator*denominator
+     jast += coef * num_j * inv_denom_j
+     grad_j_psi_r1 += coef * (num_j_grad * denom_j - num_j * denom_j_grad) * inv_denom_j * inv_denom_j
     enddo
    enddo
   enddo
@@ -100,14 +96,12 @@ subroutine get_grad_r1_jastrow_psi(r1,r2,grad_j_psi_r1,jast)
 end
 
 
-subroutine denom_jpsi(i,j,mos_array_r1,mos_grad_array_r1,mos_array_r2,denom, grad_denom)
+subroutine denom_jpsi(i,j,delta,mos_array_r1,mos_grad_array_r1,mos_array_r2,denom, grad_denom)
  implicit none
  integer, intent(in)           :: i,j
- double precision, intent(in)  :: mos_array_r1(mo_num),mos_grad_array_r1(3,mo_num),mos_array_r2(mo_num)
+ double precision, intent(in)  :: mos_array_r1(mo_num),mos_grad_array_r1(3,mo_num),mos_array_r2(mo_num),delta
  double precision, intent(out) :: denom, grad_denom(3)
  double precision :: coef,phi_i_phi_j,inv_phi_i_phi_j,inv_phi_i_phi_j_2
- denom = 0.d0
- grad_denom = 0.d0
  phi_i_phi_j = mos_array_r1(i) * mos_array_r2(j)
  if(phi_i_phi_j /= 0.d0)then
   inv_phi_i_phi_j   = 1.d0/phi_i_phi_j
@@ -116,7 +110,15 @@ subroutine denom_jpsi(i,j,mos_array_r1,mos_grad_array_r1,mos_array_r2,denom, gra
   inv_phi_i_phi_j   = huge(1.0)
   inv_phi_i_phi_j_2 = huge(1.d0)
  endif
- denom += phi_i_phi_j + a_boys * inv_phi_i_phi_j
- grad_denom(:) += (1.d0 - a_boys*inv_phi_i_phi_j_2) * mos_array_r2(j) * mos_grad_array_r1(:,i)
+ denom         = phi_i_phi_j + delta * inv_phi_i_phi_j
+ grad_denom(:) = (1.d0 - delta*inv_phi_i_phi_j_2) * mos_array_r2(j) * mos_grad_array_r1(:,i)
+end
 
+subroutine numerator_psi(a,b,mos_array_r1,mos_grad_array_r1,mos_array_r2,num, grad_num)
+ implicit none
+ integer, intent(in)           :: a,b
+ double precision, intent(in)  :: mos_array_r1(mo_num),mos_grad_array_r1(3,mo_num),mos_array_r2(mo_num)
+ double precision, intent(out) :: num, grad_num(3)
+ num = mos_array_r1(a) * mos_array_r2(b)
+ grad_num(:) = mos_array_r2(b) * mos_grad_array_r1(:,a)
 end

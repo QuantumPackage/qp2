@@ -1,7 +1,7 @@
 program test_j_mu_of_r
  implicit none
-! call routine_deb_j_psi
- call routine_deb_denom
+ call routine_deb_j_psi
+! call routine_deb_denom
 end
 
 subroutine routine_deb_j_psi
@@ -9,7 +9,7 @@ subroutine routine_deb_j_psi
  integer :: ipoint,k 
  double precision :: r2(3), weight, dr, r1(3), r1bis(3)
  double precision :: accu_grad(3)
- double precision :: jast,grad_jast(3),j_bump,jastrow_psi
+ double precision :: jast,grad_jast(3),j_bump,jastrow_psi,grad_jast_bis(3)
  double precision :: jast_p,jast_m,num_grad_jast(3)
 
  dr = 0.00001d0
@@ -28,11 +28,11 @@ subroutine routine_deb_j_psi
    do k = 1, 3
     r1bis= r1
     r1bis(k) += dr
-    jast_p = jastrow_psi(r1bis, r2)
+    call get_grad_r1_jastrow_psi(r1bis,r2,grad_jast_bis,jast_p)
 
     r1bis= r1
     r1bis(k) -= dr
-    jast_m = jastrow_psi(r1bis, r2)
+    call get_grad_r1_jastrow_psi(r1bis,r2,grad_jast_bis,jast_m)
 
     num_grad_jast(k) = (jast_p - jast_m)/(2.d0* dr)
     norm += num_grad_jast(k)*num_grad_jast(k)
@@ -86,19 +86,19 @@ subroutine routine_deb_denom
      r1(1:3) = final_grid_points(1:3,ipoint)
      weight = final_weight_at_r_vector(ipoint)
      call give_all_mos_and_grad_at_r(r1,mos_array_r1,mos_grad_array_r1)
-     call denom_jpsi(i,j,mos_array_r1,mos_grad_array_r1,mos_array_r2,jast, grad_jast)
+     call denom_jpsi(i,j,a_boys, mos_array_r1,mos_grad_array_r1,mos_array_r2,jast, grad_jast)
      double precision :: norm,error
      norm = 0.D0
      do k = 1, 3
       r1bis= r1
       r1bis(k) += dr
       call give_all_mos_and_grad_at_r(r1bis,mos_array_r1,mos_grad_array_r1)
-      call denom_jpsi(i,j,mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_p, grad_jast_bis)
+      call denom_jpsi(i,j,a_boys, mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_p, grad_jast_bis)
   
       r1bis= r1
       r1bis(k) -= dr
       call give_all_mos_and_grad_at_r(r1bis,mos_array_r1,mos_grad_array_r1)
-      call denom_jpsi(i,j,mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_m, grad_jast_bis)
+      call denom_jpsi(i,j,a_boys, mos_array_r1,mos_grad_array_r1,mos_array_r2,jast_m, grad_jast_bis)
   
       num_grad_jast(k) = (jast_p - jast_m)/(2.d0* dr)
       norm += num_grad_jast(k)*num_grad_jast(k)
