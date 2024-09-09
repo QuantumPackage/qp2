@@ -1,6 +1,7 @@
 use bitmasks
 
-BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (psi_det_size,N_states) ]
+!BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (psi_det_size,N_states) ]
+BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (N_det,N_states) ]
   implicit none
   BEGIN_DOC
   ! The wave function coefficients. Initialized with Hartree-Fock if the |EZFIO| file
@@ -68,7 +69,8 @@ BEGIN_PROVIDER [ double precision, psi_l_coef_bi_ortho, (psi_det_size,N_states) 
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) ]
+!BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (psi_det_size,N_states) ]
+BEGIN_PROVIDER [ double precision, psi_r_coef_bi_ortho, (N_det,N_states) ]
   implicit none
   BEGIN_DOC
   ! The wave function coefficients. Initialized with Hartree-Fock if the |EZFIO| file

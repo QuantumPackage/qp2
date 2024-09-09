@@ -273,60 +273,6 @@ end
 
 ! ---
 
-subroutine lapack_diag_non_sym_right(n, A, WR, WI, VR)
-
-  implicit none
-
-  integer,          intent(in)  :: n
-  double precision, intent(in)  :: A(n,n)
-  double precision, intent(out) :: WR(n), WI(n), VR(n,n)
-
-  integer                       :: i, lda, ldvl, ldvr, LWORK, INFO
-  double precision, allocatable :: Atmp(:,:), WORK(:), VL(:,:)
-
-  lda  = n
-  ldvl = 1
-  ldvr = n
-
-  allocate( Atmp(n,n), VL(1,1) )
-  Atmp(1:n,1:n) = A(1:n,1:n)
-
-  allocate(WORK(1))
-  LWORK = -1
-  call dgeev('N', 'V', n, Atmp, lda, WR, WI, VL, ldvl, VR, ldvr, WORK, LWORK, INFO)
-  if(INFO.gt.0)then
-    print*,'dgeev failed !!',INFO
-    stop
-  endif
-
-  LWORK = max(int(WORK(1)), 1) ! this is the optimal size of WORK 
-  deallocate(WORK)
-
-  allocate(WORK(LWORK))
-
-  ! Actual diagonalization 
-  call dgeev('N', 'V', n, Atmp, lda, WR, WI, VL, ldvl, VR, ldvr, WORK, LWORK, INFO)
-  if(INFO.ne.0) then
-    print*,'dgeev failed !!', INFO
-    stop
-  endif
-
-  deallocate(Atmp, WORK, VL)
-
-! print *, ' JOBL = F'
-! print *, ' eigenvalues'
-! do i = 1, n
-!   write(*, '(1000(F16.10,X))') WR(i), WI(i)
-! enddo
-! print *, ' right eigenvect' 
-! do i = 1, n
-!   write(*, '(1000(F16.10,X))') VR(:,i)
-! enddo
-
-end
-
-! ---
-
 subroutine non_hrmt_real_diag(n, A, leigvec, reigvec, n_real_eigv, eigval)
 
   BEGIN_DOC
@@ -1780,70 +1726,6 @@ end
 
 ! ---
 
-subroutine check_weighted_biorthog(n, m, W, Vl, Vr, thr_d, thr_nd, accu_d, accu_nd, S, stop_ifnot)
-
-  implicit none
-  
-  integer,          intent(in)  :: n, m
-  double precision, intent(in)  :: Vl(n,m), Vr(n,m), W(n,n)
-  double precision, intent(in)  :: thr_d, thr_nd
-  logical,          intent(in)  :: stop_ifnot
-  double precision, intent(out) :: accu_d, accu_nd, S(m,m)
-
-  integer                       :: i, j
-  double precision, allocatable :: SS(:,:), tmp(:,:)
-
-  print *, ' check weighted bi-orthogonality'
-
-  ! ---
-
-  allocate(tmp(m,n))
-  call dgemm( 'T', 'N', m, n, n, 1.d0        &
-            , Vl, size(Vl, 1), W, size(W, 1) &
-            , 0.d0, tmp, size(tmp, 1) )
-  call dgemm( 'N', 'N', m, m, n, 1.d0            &
-            , tmp, size(tmp, 1), Vr, size(Vr, 1) &
-            , 0.d0, S, size(S, 1) )
-  deallocate(tmp)
-
-  !print *, ' overlap matrix:'
-  !do i = 1, m
-  !  write(*,'(1000(F16.10,X))') S(i,:)
-  !enddo
-
-  accu_d  = 0.d0
-  accu_nd = 0.d0
-  do i = 1, m
-    do j = 1, m
-      if(i==j) then
-        accu_d = accu_d + dabs(S(i,i))
-      else
-        accu_nd = accu_nd + S(j,i) * S(j,i)
-      endif
-    enddo
-  enddo
-  accu_nd = dsqrt(accu_nd)
-
-  print *, ' accu_nd = ', accu_nd
-  print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
-
-  ! ---
-
-  if( stop_ifnot .and. ((accu_nd .gt. thr_nd) .or. dabs(accu_d-dble(m))/dble(m) .gt. thr_d) ) then
-    print *, ' non bi-orthogonal vectors !'
-    print *, ' accu_nd = ', accu_nd
-    print *, ' accu_d  = ', dabs(accu_d-dble(m))/dble(m)
-    !print *, ' overlap matrix:'
-    !do i = 1, m
-    !  write(*,'(1000(F16.10,X))') S(i,:)
-    !enddo
-    stop
-  endif
-
-end
-
-! ---
-
 subroutine check_biorthog(n, m, Vl, Vr, accu_d, accu_nd, S, thr_d, thr_nd, stop_ifnot)
 
   implicit none
@@ -2144,6 +2026,7 @@ subroutine impose_biorthog_degen_eigvec(n, deg_num, e0, L0, R0)
       enddo
       !print*,' accu_nd after = ', accu_nd
       if(accu_nd .gt. 1d-12) then
+        print*, ' accu_nd =', accu_nd
         print*, ' your strategy for degenerates orbitals failed !'
         print*, m, 'deg on', i
         stop

@@ -123,7 +123,7 @@ subroutine give_integrals_3_body_bi_ort_spin( n, sigma_n, l, sigma_l, k, sigma_k
   endif
 
   return
-end subroutine give_integrals_3_body_bi_ort_spin
+end
 
 ! ---
 
@@ -168,7 +168,7 @@ subroutine give_integrals_3_body_bi_ort(n, l, k, m, j, i, integral)
     integral = integral + tmp * final_weight_at_r_vector(ipoint)
   enddo
 
-end subroutine give_integrals_3_body_bi_ort
+end
 
 ! ---
 

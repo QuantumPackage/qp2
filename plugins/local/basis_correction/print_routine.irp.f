@@ -22,7 +22,7 @@ subroutine print_basis_correction
  print*, '****************************************'
  print*, '****************************************'
  print*, 'mu_of_r_potential = ',mu_of_r_potential
- if(mu_of_r_potential.EQ."hf")then
+ if(mu_of_r_potential.EQ."hf".or.mu_of_r_potential.EQ."hf_old".or.mu_of_r_potential.EQ."hf_sparse")then
    print*, ''
    print*,'Using a HF-like two-body density to define mu(r)'
    print*,'This assumes that HF is a qualitative representation of the wave function '

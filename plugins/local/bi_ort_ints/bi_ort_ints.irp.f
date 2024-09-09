@@ -17,11 +17,14 @@ program bi_ort_ints
 ! call test_3e
 ! call test_5idx
 ! call test_5idx2
-  call test_4idx()
+!  call test_4idx()
   !call test_4idx_n4()
   !call test_4idx2()
   !call test_5idx2
   !call test_5idx
+
+  call test_mos_in_r()
+  call test_int2_grad1_u12_bimo_t()
 
 end
 
@@ -471,5 +474,95 @@ subroutine test_4idx()
 
   return
 end
+
+! ---
+
+subroutine test_mos_in_r()
+
+  implicit none
+
+  integer          :: i, j
+  double precision :: err_tot, nrm_tot, err_loc, acc_thr
+
+  PROVIDE mos_l_in_r_array_transp_old mos_r_in_r_array_transp_old
+  PROVIDE mos_l_in_r_array_transp mos_r_in_r_array_transp
+
+  acc_thr = 1d-13
+
+  err_tot = 0.d0
+  nrm_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, n_points_final_grid
+      err_loc = dabs(mos_l_in_r_array_transp_old(j,i) - mos_l_in_r_array_transp(j,i))
+      if(err_loc > acc_thr) then
+        print*, " error on", j, i
+        print*, " old res", mos_l_in_r_array_transp_old(j,i)
+        print*, " new res", mos_l_in_r_array_transp    (j,i)
+        stop
+      endif
+      err_tot = err_tot + err_loc
+      nrm_tot = nrm_tot + dabs(mos_l_in_r_array_transp_old(j,i))
+    enddo
+  enddo
+  print *, ' absolute accuracy on mos_l_in_r_array_transp (%) =', 100.d0 * err_tot / nrm_tot
+
+  err_tot = 0.d0
+  nrm_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, n_points_final_grid
+      err_loc = dabs(mos_r_in_r_array_transp_old(j,i) - mos_r_in_r_array_transp(j,i))
+      if(err_loc > acc_thr) then
+        print*, " error on", j, i
+        print*, " old res", mos_r_in_r_array_transp_old(j,i)
+        print*, " new res", mos_r_in_r_array_transp    (j,i)
+        stop
+      endif
+      err_tot = err_tot + err_loc
+      nrm_tot = nrm_tot + dabs(mos_r_in_r_array_transp_old(j,i))
+    enddo
+  enddo
+  print *, ' absolute accuracy on mos_r_in_r_array_transp (%) =', 100.d0 * err_tot / nrm_tot
+
+  return
+end
+
+! ---
+
+subroutine test_int2_grad1_u12_bimo_t()
+
+  implicit none
+  integer          :: i, j, ipoint, m
+  double precision :: err_tot, nrm_tot, err_loc, acc_thr
+
+  PROVIDE int2_grad1_u12_bimo_t_old
+  PROVIDE int2_grad1_u12_bimo_t
+
+  acc_thr = 1d-13
+
+  err_tot = 0.d0
+  nrm_tot = 0.d0
+  do i = 1, mo_num
+    do j = 1, mo_num
+      do m = 1, 3
+        do ipoint = 1, n_points_final_grid
+          err_loc = dabs(int2_grad1_u12_bimo_t_old(ipoint,m,j,i) - int2_grad1_u12_bimo_t(ipoint,m,j,i))
+          if(err_loc > acc_thr) then
+            print*, " error on", ipoint, m, j, i
+            print*, " old res", int2_grad1_u12_bimo_t_old(ipoint,m,j,i)
+            print*, " new res", int2_grad1_u12_bimo_t    (ipoint,m,j,i)
+            stop
+          endif
+          err_tot = err_tot + err_loc
+          nrm_tot = nrm_tot + dabs(int2_grad1_u12_bimo_t_old(ipoint,m,j,i))
+        enddo
+      enddo
+    enddo
+  enddo
+  print *, ' absolute accuracy on int2_grad1_u12_bimo_t (%) =', 100.d0 * err_tot / nrm_tot
+
+  return
+end
+
+! ---
 
 

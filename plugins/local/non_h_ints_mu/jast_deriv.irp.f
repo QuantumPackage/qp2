@@ -31,7 +31,7 @@
   grad1_u12_squared_num = 0.d0
 
   if( ((j2e_type .eq. "Mu") .and. (env_type .eq. "None")) .or. &
-       (j2e_type .eq. "Mur") ) then
+       (j2e_type .eq. "Mur").or.(j2e_type .eq. "Mugauss") .or. (j2e_type .eq. "Murgauss")) then
 
     !$OMP PARALLEL                                                                                    &
     !$OMP DEFAULT (NONE)                                                                              &

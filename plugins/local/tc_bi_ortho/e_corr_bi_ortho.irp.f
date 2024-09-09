@@ -2,7 +2,7 @@
  BEGIN_PROVIDER [ double precision, e_tilde_00]
  implicit none
  double precision :: hmono,htwoe,hthree,htot
- call htilde_mu_mat_bi_ortho_slow(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,htot)
+ call htilde_mu_mat_opt_bi_ortho(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,htot)
  e_tilde_00 = htot
  END_PROVIDER 
 
@@ -18,16 +18,15 @@
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
   if(degree == 1 .or. degree == 2)then
-   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
    delta_e = e_tilde_00 - e_i0
    coef_pt1 = htilde_ij / delta_e
-   call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
+   call htilde_mu_mat_opt_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
    e_pt2_tc_bi_orth += coef_pt1 * htilde_ij
    if(degree == 1)then
     e_pt2_tc_bi_orth_single += coef_pt1 * htilde_ij
    else 
-!    print*,'coef_pt1, e_pt2',coef_pt1,coef_pt1 * htilde_ij
     e_pt2_tc_bi_orth_double += coef_pt1 * htilde_ij
    endif
   endif
@@ -37,7 +36,7 @@
  BEGIN_PROVIDER [ double precision, e_tilde_bi_orth_00]
  implicit none
  double precision :: hmono,htwoe,hthree,htilde_ij
- call htilde_mu_mat_bi_ortho_slow(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,e_tilde_bi_orth_00)
+ call htilde_mu_mat_opt_bi_ortho(HF_bitmask,HF_bitmask,N_int,hmono,htwoe,hthree,e_tilde_bi_orth_00)
  e_tilde_bi_orth_00 += nuclear_repulsion
  END_PROVIDER 
 
@@ -57,7 +56,7 @@
  e_corr_double_bi_orth = 0.d0
  do i = 1, N_det
   call get_excitation_degree(HF_bitmask,psi_det(1,1,i),degree,N_int)
-  call htilde_mu_mat_bi_ortho_slow(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
+  call htilde_mu_mat_opt_bi_ortho(HF_bitmask,psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
   if(degree == 1)then
    e_corr_single_bi_orth += reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1)
    e_corr_single_bi_orth_abs += dabs(reigvec_tc_bi_orth(i,1) * htilde_ij/reigvec_tc_bi_orth(1,1))
@@ -80,7 +79,7 @@
  do i = 1, N_det
   accu += reigvec_tc_bi_orth(i,1) * leigvec_tc_bi_orth(i,1)
   do j = 1, N_det
-   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,j),psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,j),psi_det(1,1,i),N_int,hmono,htwoe,hthree,htilde_ij)
    e_tc_left_right += htilde_ij * reigvec_tc_bi_orth(i,1) * leigvec_tc_bi_orth(j,1)
   enddo
  enddo
@@ -99,8 +98,8 @@ BEGIN_PROVIDER [ double precision, coef_pt1_bi_ortho, (N_det)]
   if(degree==0)then
    coef_pt1_bi_ortho(i) = 1.d0
   else
-   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
-   call htilde_mu_mat_bi_ortho_slow(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i),HF_bitmask,N_int,hmono,htwoe,hthree,htilde_ij)
+   call htilde_mu_mat_opt_bi_ortho(psi_det(1,1,i),psi_det(1,1,i),N_int,hmono,htwoe,hthree,e_i0)
    delta_e = e_tilde_00 - e_i0
    coef_pt1 = htilde_ij / delta_e
    coef_pt1_bi_ortho(i)= coef_pt1

@@ -4,6 +4,7 @@ BEGIN_PROVIDER [real*8, Fipq, (mo_num,mo_num) ]
    END_DOC
    implicit none
    integer                        :: p,q,k,kk,t,tt,u,uu
+   double precision :: bielec_pxxq_no, bielec_pqxx_no
    
    do q=1,mo_num
      do p=1,mo_num
@@ -44,6 +45,7 @@ BEGIN_PROVIDER [real*8, Fapq, (mo_num,mo_num) ]
    END_DOC
    implicit none
    integer                        :: p,q,k,kk,t,tt,u,uu
+   double precision :: bielec_pxxq_no, bielec_pqxx_no
    
    Fapq = 0.d0
    

@@ -1,6 +1,5 @@
 
 subroutine davidson_general_ext_rout(u_in,H_jj,energies,sze,N_st,N_st_diag_in,converged,hcalc)
-  use mmap_module
   implicit none
   BEGIN_DOC
   ! Generic Davidson diagonalization 

@@ -1125,6 +1125,7 @@ subroutine test_fit_coef_A1()
   double precision              :: accu, norm, diff
   double precision, allocatable :: A1(:,:)
   double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:)
+  double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
 
   ! ---
 
@@ -1165,16 +1166,17 @@ subroutine test_fit_coef_A1()
 
   call wall_time(t1)
 
-  allocate(tmp(ao_num,ao_num,n_points_final_grid))
+  allocate(tmp1(ao_num,ao_num,n_points_final_grid), tmp2(ao_num,ao_num,n_points_final_grid))
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (i, j, ipoint) &
-  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp)
+  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp1, tmp2)
   !$OMP DO COLLAPSE(2)
   do j = 1, ao_num
     do i = 1, ao_num
       do ipoint = 1, n_points_final_grid
-        tmp(i,j,ipoint) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp1(i,j,ipoint) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp2(i,j,ipoint) =                                    aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
       enddo
     enddo
   enddo
@@ -1184,9 +1186,9 @@ subroutine test_fit_coef_A1()
   allocate(A2(ao_num,ao_num,ao_num,ao_num))
 
   call dgemm( "N", "T", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), ao_num*ao_num, tmp(1,1,1), ao_num*ao_num              &
+            , tmp1(1,1,1), ao_num*ao_num, tmp2(1,1,1), ao_num*ao_num            &
             , 0.d0, A2(1,1,1,1), ao_num*ao_num)
-  deallocate(tmp)
+  deallocate(tmp1, tmp2)
 
   call wall_time(t2)
   print*, ' WALL TIME FOR A2 (min) =', (t2-t1)/60.d0
@@ -1238,6 +1240,7 @@ subroutine test_fit_coef_inv()
   double precision, allocatable :: A1(:,:), A1_inv(:,:), A1_tmp(:,:)
   double precision, allocatable :: A2(:,:,:,:), tmp(:,:,:), A2_inv(:,:,:,:)
   double precision, allocatable :: U(:,:), D(:), Vt(:,:), work(:), A2_tmp(:,:,:,:)
+  double precision, allocatable :: tmp1(:,:,:), tmp2(:,:,:)
 
   cutoff_svd = 5d-8
 
@@ -1286,16 +1289,17 @@ subroutine test_fit_coef_inv()
 
   call wall_time(t1)
 
-  allocate(tmp(n_points_final_grid,ao_num,ao_num))
+  allocate(tmp1(n_points_final_grid,ao_num,ao_num), tmp2(n_points_final_grid,ao_num,ao_num))
   !$OMP PARALLEL               &
   !$OMP DEFAULT (NONE)         &
   !$OMP PRIVATE (i, j, ipoint) &
-  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp)
+  !$OMP SHARED (n_points_final_grid, ao_num, final_weight_at_r_vector, aos_in_r_array_transp, tmp1, tmp2)
   !$OMP DO COLLAPSE(2)
   do j = 1, ao_num
     do i = 1, ao_num
       do ipoint = 1, n_points_final_grid
-        tmp(ipoint,i,j) = dsqrt(final_weight_at_r_vector(ipoint)) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp1(ipoint,i,j) = final_weight_at_r_vector(ipoint) * aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
+        tmp2(ipoint,i,j) =                                    aos_in_r_array_transp(ipoint,i) * aos_in_r_array_transp(ipoint,j)
       enddo
     enddo
   enddo
@@ -1304,11 +1308,11 @@ subroutine test_fit_coef_inv()
 
   allocate(A2(ao_num,ao_num,ao_num,ao_num))
 
-  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0 &
-            , tmp(1,1,1), n_points_final_grid, tmp(1,1,1), n_points_final_grid  &
+  call dgemm( "T", "N", ao_num*ao_num, ao_num*ao_num, n_points_final_grid, 1.d0  &
+            , tmp1(1,1,1), n_points_final_grid, tmp2(1,1,1), n_points_final_grid &
             , 0.d0, A2(1,1,1,1), ao_num*ao_num)
 
-  deallocate(tmp)
+  deallocate(tmp1, tmp2)
 
   call wall_time(t2)
   print*, ' WALL TIME FOR A2 (min) =', (t2-t1)/60.d0

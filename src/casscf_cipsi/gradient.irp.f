@@ -157,6 +157,7 @@ real*8 function gradvec_it(i,t)
   
   integer                        :: ii,tt,v,vv,x,y
   integer                        :: x3,y3
+  double precision :: bielec_PQxx_no
   
   ii=list_core_inact(i)
   tt=list_act(t)

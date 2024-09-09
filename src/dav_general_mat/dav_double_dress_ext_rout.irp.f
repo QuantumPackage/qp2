@@ -1,5 +1,4 @@
 subroutine dav_double_dressed(u_in,H_jj,Dress_jj,Dressing_vec,idx_dress,energies,sze,N_st,N_st_diag,converged,hcalc)
-  use mmap_module
   BEGIN_DOC
   ! Generic Davidson diagonalization with TWO DRESSING VECTORS 
   !

@@ -13,6 +13,8 @@ program tc_pt2_prog
 
   pruning = -1.d0
   touch pruning
+  read_wf = .True.
+  touch read_wf 
 
 !  pt2_relative_error = 0.01d0
 !  touch pt2_relative_error
