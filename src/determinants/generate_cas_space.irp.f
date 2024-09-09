@@ -33,7 +33,7 @@ subroutine generate_cas_space
   print *, 'CAS(', n_alpha_act+n_beta_act, ', ', n_act_orb, ')'
   print *, ''
 
-  n_det_alpha_unique = binom_int(n_act_orb, n_alpha_act)
+  n_det_alpha_unique = int(binom_int(n_act_orb, n_alpha_act),4)
   TOUCH n_det_alpha_unique
 
   n = n_alpha_act
@@ -56,7 +56,7 @@ subroutine generate_cas_space
     u = ior(t1,t2)
   enddo
 
-  n_det_beta_unique = binom_int(n_act_orb, n_beta_act)
+  n_det_beta_unique = int(binom_int(n_act_orb, n_beta_act),4)
   TOUCH n_det_beta_unique
 
   n = n_beta_act
