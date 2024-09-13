@@ -261,13 +261,10 @@ def write_ezfio(trexio_filename, filename):
     except:
         cartesian = True
 
-    if not cartesian:
-        raise TypeError('Only cartesian TREXIO files can be converted')
-
     ao_num = trexio.read_ao_num(trexio_file)
     ezfio.set_ao_basis_ao_num(ao_num)
 
-    if shell_num > 0:
+    if cartesian and shell_num > 0:
         ao_shell    = trexio.read_ao_shell(trexio_file)
         at = [ nucl_index[i]+1 for i in ao_shell ]
         ezfio.set_ao_basis_ao_nucl(at)
@@ -330,7 +327,7 @@ def write_ezfio(trexio_filename, filename):
         print("OK")
 
     else:
-        print("None")
+        print("None: integrals should be also imported using qp run import_trexio_integrals")
 
 
     #                _
