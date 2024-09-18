@@ -143,7 +143,7 @@ module gpu
       b, ldb, c, ldc) bind(C, name='gpu_dgeam')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_double), intent(in)            :: alpha, beta
       type(c_ptr), value :: a, b, c
@@ -153,7 +153,7 @@ module gpu
       b, ldb, c, ldc) bind(C, name='gpu_sgeam')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, lda, ldb, ldc
       real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
@@ -194,7 +194,7 @@ module gpu
       b, ldb, beta, c, ldc) bind(C, name='gpu_sgemm')
       import
       type(c_ptr), value, intent(in)        :: handle
-      character(c_char), intent(in), value  :: transa, transb
+      character(c_char), intent(in)         :: transa, transb
       integer(c_int64_t), intent(in), value :: m, n, k, lda, ldb, ldc
       real(c_float), intent(in)             :: alpha, beta
       real(c_float) :: a, b, c
