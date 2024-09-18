@@ -9,5 +9,5 @@ then
 fi
 
 rm -rf ${PWD}/CuTC
-rm ${QP_ROOT}/lib/libcutcint.so
+rm -f ${QP_ROOT}/lib/libcutcint.so
 
