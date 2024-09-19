@@ -99,8 +99,8 @@ END_DOC
        call reorder_mo_max_overlap
     endif
     if(frozen_orb_scf)then
-     call reorder_core_orb
-     call initialize_mo_coef_begin_iteration
+      call reorder_core_orb
+      call initialize_mo_coef_begin_iteration
     endif
 
     TOUCH MO_coef
@@ -112,12 +112,12 @@ END_DOC
 
     energy_SCF = SCF_energy
     Delta_Energy_SCF = energy_SCF - energy_SCF_previous
-    ! if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0) ) then
-    !   Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
-    !   Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
-    !   Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
-    !   TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
-    ! endif
+    if ( (SCF_algorithm == 'DIIS').and.(Delta_Energy_SCF > 0.d0).and.(.not.do_mom) ) then
+      Fock_matrix_AO(1:ao_num,1:ao_num) = Fock_matrix_DIIS (1:ao_num,1:ao_num,index_dim_DIIS)
+      Fock_matrix_AO_alpha = Fock_matrix_AO*0.5d0
+      Fock_matrix_AO_beta  = Fock_matrix_AO*0.5d0
+      TOUCH Fock_matrix_AO_alpha Fock_matrix_AO_beta
+    endif
 
     if (.not.do_mom) then
        double precision :: level_shift_save
