@@ -28,7 +28,7 @@
     enddo
   enddo
 
-  if((three_body_h_tc .eq. .False.) .and. (.not. noL_standard)) then
+  if((three_body_h_tc .eqv. .False.) .and. (.not. noL_standard)) then
     TC_HF_three_e_energy = 0.d0
   else
     TC_HF_three_e_energy = noL_0e

@@ -1,8 +1,73 @@
+subroutine get_deriv_r12_j12(x,mu,d_dx_j)
+ implicit none
+  include 'constants.include.F'
+ BEGIN_DOC
+ ! d/dr12 j(mu,r12)
+ END_DOC
+ double precision, intent(in)  :: x,mu
+ double precision, intent(out) :: d_dx_j
+ 
+ d_dx_j = 0.d0
+ if(x .lt. 1d-10) return
+ if(j2e_type .eq. "Mu" .or. j2e_type .eq. "Mur") then
+  d_dx_j = 0.5d0 * (1.d0 - derf(mu * x))
+ else if(j2e_type .eq. "Mugauss" .or. j2e_type .eq. "Murgauss" ) then
+  double precision :: x_tmp
+  x_tmp = mu * x
+  ! gradient of j(mu,x)
+  d_dx_j = 0.5d0 * (1.d0 - derf(x_tmp))
+
+  ! gradient of gaussian additional term
+  x_tmp *= alpha_mu_gauss
+  x_tmp *= x_tmp 
+  d_dx_j += -0.5d0 * mu * c_mu_gauss * x * dexp(-x_tmp)
+ else
+   print *, ' Error in get_deriv_r12_j12: Unknown j2e_type = ', j2e_type
+   stop
+ endif
+end
+
+
+subroutine get_deriv_mu_j12(x,mu,d_d_mu)
+ implicit none
+ BEGIN_DOC
+ ! d/dmu j(mu,r12)
+ END_DOC
+  include 'constants.include.F'
+ double precision, intent(in)  :: x,mu
+ double precision, intent(out) :: d_d_mu
+ double precision :: x_tmp,inv_mu_2,inv_alpha_2
+ 
+ d_d_mu = 0.d0
+ if(x .lt. 1d-10) return
+ x_tmp = x*mu
+ if(mu.lt.1.d-10) return
+ inv_mu_2 = mu*mu
+ inv_mu_2 = 1.d0/inv_mu_2
+ if(j2e_type .eq. "Mu" .or. j2e_type .eq. "Mur") then
+  ! e^{-(r12*mu)^2}/(2 sqrt(pi) * mu^2)
+  d_d_mu = dexp(-x_tmp*x_tmp) * inv_sq_pi_2 * inv_mu_2
+ else if(j2e_type .eq. "Mugauss"  .or. j2e_type .eq. "Murgauss" ) then
+  d_d_mu  = dexp(-x_tmp*x_tmp) * inv_sq_pi_2 * inv_mu_2
+  inv_alpha_2 = 1.d0/alpha_mu_gauss
+  inv_alpha_2 *= inv_alpha_2
+  x_tmp *= alpha_mu_gauss
+  x_tmp *= x_tmp
+  d_d_mu += -0.25d0 * c_mu_gauss*inv_alpha_2*dexp(-x_tmp) * (1.d0 + 2.d0 * x_tmp) * inv_mu_2
+ else
+   print *, ' Error in get_deriv_r12_j12: Unknown j2e_type = ', j2e_type
+   stop
+ endif
+end
+
 
 ! ---
 
 double precision function j12_mu(r1, r2)
 
+  BEGIN_DOC
+  ! j(mu,r12) = 1/2 r12 (1 - erf(mu r12)) - 1/2 (sqrt(pi) * mu) e^{-(mu*r12)^2}
+  END_DOC
   include 'constants.include.F'
 
   implicit none
@@ -17,6 +82,18 @@ double precision function j12_mu(r1, r2)
     mu_tmp = mu_erf * r12
 
     j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu_tmp)) - inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / mu_erf
+
+  else if(j2e_type .eq. "Mugauss") then
+
+    r12 = dsqrt( (r1(1) - r2(1)) * (r1(1) - r2(1)) &
+               + (r1(2) - r2(2)) * (r1(2) - r2(2)) &
+               + (r1(3) - r2(3)) * (r1(3) - r2(3)) )
+    double precision :: r12_tmp
+    r12_tmp = mu_erf * r12
+
+    j12_mu = 0.5d0 * r12 * (1.d0 - derf(r12_tmp)) - inv_sq_pi_2 * dexp(-r12_tmp*r12_tmp) / mu_erf
+    r12_tmp *= alpha_mu_gauss
+    j12_mu += 0.25d0 * c_mu_gauss / (alpha_mu_gauss*alpha_mu_gauss*mu_erf) * dexp(-r12_tmp*r12_tmp)
 
   else
 
@@ -57,7 +134,7 @@ subroutine grad1_j12_mu(r1, r2, grad)
 
   grad = 0.d0
 
-  if(j2e_type .eq. "Mu") then
+  if(j2e_type .eq. "Mu".or.j2e_type .eq. "Mugauss") then
 
     dx = r1(1) - r2(1)
     dy = r1(2) - r2(2)
@@ -66,31 +143,42 @@ subroutine grad1_j12_mu(r1, r2, grad)
     r12 = dsqrt(dx * dx + dy * dy + dz * dz)
     if(r12 .lt. 1d-10) return
 
-    tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
+    call get_deriv_r12_j12(r12,mu_erf,tmp)
+!    tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
 
     grad(1) = tmp * dx
     grad(2) = tmp * dy
     grad(3) = tmp * dz
+    grad *= 1.d0/r12
 
-  elseif(j2e_type .eq. "Mur") then
+  elseif(j2e_type .eq. "Mur" .or. j2e_type .eq. "Murgauss") then
+   double precision :: jast
+   call grad_j_sum_mu_of_r(r1,r2,jast,grad)
+ 
+  elseif(j2e_type .eq. "Bump") then
+   double precision ::grad_jast(3)
+   call get_grad_j_bump_mu_of_r(r1,r2,grad_jast)
+     dx = r1(1) - r2(1)
+     dy = r1(2) - r2(2)
+     dz = r1(3) - r2(3)
 
-    dx  = r1(1) - r2(1)
-    dy  = r1(2) - r2(2)
-    dz  = r1(3) - r2(3)
-    r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+     r12 = dsqrt(dx * dx + dy * dy + dz * dz)
+     if(r12 .lt. 1d-10) then
+       grad(1) = 0.d0
+       grad(2) = 0.d0
+       grad(3) = 0.d0
+       return
+     endif                                                                                                                                                                            
 
-    call mu_r_val_and_grad(r1, r2, mu_val, mu_der)
-    mu_tmp  = mu_val * r12
-    tmp     = inv_sq_pi_2 * dexp(-mu_tmp*mu_tmp) / (mu_val * mu_val)
-    grad(1) = tmp * mu_der(1)
-    grad(2) = tmp * mu_der(2)
-    grad(3) = tmp * mu_der(3)
+     tmp = 0.5d0 * (1.d0 - derf(mu_erf * r12)) / r12
 
-    if(r12 .lt. 1d-10) return
-    tmp     = 0.5d0 * (1.d0 - derf(mu_tmp)) / r12
-    grad(1) = grad(1) + tmp * dx
-    grad(2) = grad(2) + tmp * dy
-    grad(3) = grad(3) + tmp * dz
+     grad(1) = 0.5d0 * tmp * dx
+     grad(2) = 0.5d0 * tmp * dy
+     grad(3) = 0.5d0 * tmp * dz
+     grad(1) += 0.5d0 * grad_jast(1)
+     grad(2) += 0.5d0 * grad_jast(2)
+     grad(3) += 0.5d0 * grad_jast(3)
+
 
   else
 
@@ -369,7 +457,18 @@ end
 ! ---
 
 subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
-
+ BEGIN_DOC
+! various flavours of mu(r1,r2) 
+! depends on essentially the density and other related quantities 
+!
+! change the variable "murho_type" to change type
+!
+!  murho_type == -1 :: mu(r1,r2) = (rho(r1) mu_mf(r1) + rho(r2) mu_mf(r2))/[rho(r1)+rho(r2)]
+!
+!             ==  0 :: mu(r1,r2) = (sqrt(rho(r1)) mu_mf(r1) + sqrt(rho(r2)) mu_mf(r2))/[sqrt(rho(r1))+sqrt(rho(r2))]
+!             
+!             == -2 :: mu(r1,r2) = 0.5(mu_mf(r1) + mu_mf(r2))
+ END_DOC
   implicit none
   double precision, intent(in)  :: r1(3), r2(3)
   double precision, intent(out) :: mu_val, mu_der(3)
@@ -379,11 +478,50 @@ subroutine mu_r_val_and_grad(r1, r2, mu_val, mu_der)
   double precision :: rho1, grad_rho1(3),rho2,rho_tot,inv_rho_tot
   double precision :: f_rho1, f_rho2, d_drho_f_rho1
   double precision :: d_dx1_f_rho1(3),d_dx_rho_f_rho(3),nume
+  double precision :: mu_mf_r1, dm_r1, grad_mu_mf_r1(3), grad_dm_r1(3)
+  double precision :: mu_mf_r2, dm_r2, grad_mu_mf_r2(3), grad_dm_r2(3)
+
+  double precision :: num, denom, grad_denom(3), grad_num(3)
+  double precision :: dsqrt_dm_r1
 
   PROVIDE murho_type
   PROVIDE mu_r_ct mu_erf
 
-  if(murho_type .eq. 1) then
+  if(murho_type .eq. 0) then 
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   dsqrt_dm_r1 = dsqrt(dm_r1)
+   denom = (dsqrt_dm_r1 + dsqrt(dm_r2) )
+   if(denom.lt.1.d-7)then
+    mu_val = 1.d+10
+    mu_der = 0.d0
+    return
+   endif
+   num = (dsqrt(dm_r1) * mu_mf_r1 + dsqrt(dm_r2) * mu_mf_r2) 
+   mu_val = num / denom
+   grad_denom = grad_dm_r1/dsqrt_dm_r1
+   grad_num = dsqrt(dm_r1) * grad_mu_mf_r1 + mu_mf_r1 * grad_dm_r1
+   mu_der = (grad_num * denom - num * grad_denom)/(denom*denom)
+  else if(murho_type .eq. -1) then
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   denom = (dm_r1 + dm_r2 )
+   if(denom.lt.1.d-7)then
+    mu_val = 1.d+10
+    mu_der = 0.d0
+    return
+   endif
+   num = (dm_r1 * mu_mf_r1 + dm_r2 * mu_mf_r2) 
+   mu_val = num / denom
+   grad_denom = grad_dm_r1
+   grad_num = dm_r1 * grad_mu_mf_r1 + mu_mf_r1 * grad_dm_r1
+   mu_der = (grad_num * denom - num * grad_denom)/(denom*denom)
+  else if(murho_type .eq. -2) then
+   call grad_mu_of_r_mean_field(r1,mu_mf_r1, dm_r1, grad_mu_mf_r1, grad_dm_r1)
+   call grad_mu_of_r_mean_field(r2,mu_mf_r2, dm_r2, grad_mu_mf_r2, grad_dm_r2)
+   mu_val = 0.5d0 * (mu_mf_r1 + mu_mf_r2) 
+   mu_der = 0.5d0 * grad_mu_mf_r1
+  else if(murho_type .eq. 1) then
 
     !
     ! r = 0.5 (r1 + r2)

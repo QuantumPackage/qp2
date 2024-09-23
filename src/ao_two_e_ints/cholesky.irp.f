@@ -73,7 +73,7 @@ END_PROVIDER
    integer, external              :: getUnitAndOpen
    integer                        :: iunit, ierr
 
-   ndim8 = ao_num*ao_num*1_8
+   ndim8 = ao_num*ao_num*1_8+1
    double precision :: wall0,wall1
 
    type(c_ptr)                    :: c_pointer(2)
@@ -143,19 +143,21 @@ END_PROVIDER
 
      if (do_direct_integrals) then
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
-       do i8=ndim8,1,-1
+       do i8=ndim8-1,1,-1
          D(i8) = ao_two_e_integral(addr1(i8), addr2(i8),              &
              addr1(i8), addr2(i8))
        enddo
        !$OMP END PARALLEL DO
      else
        !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i8) SCHEDULE(dynamic,21)
-       do i8=ndim8,1,-1
+       do i8=ndim8-1,1,-1
          D(i8) = get_ao_two_e_integral(addr1(i8), addr1(i8),          &
              addr2(i8), addr2(i8), ao_integrals_map)
        enddo
        !$OMP END PARALLEL DO
      endif
+     ! Just to guarentee termination 
+     D(ndim8) = 0.d0
 
      D_sorted(:) = -D(:)
      call dsort_noidx_big(D_sorted,ndim8)
@@ -203,6 +205,7 @@ END_PROVIDER
      do while ( (Dmax > tau).and.(np > 0) )
        ! a.
        i = i+1
+       
 
 
        block_size = max(N,24)
@@ -314,9 +317,10 @@ END_PROVIDER
        ! g.
 
        iblock = 0
+       
        do j=1,nq
 
-         if ( (Qmax <= Dmin).or.(N+j*1_8 > ndim8) ) exit
+         if ( (Qmax < Dmin).or.(N+j*1_8 > ndim8) ) exit
 
          ! i.
          rank = N+j

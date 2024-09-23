@@ -127,8 +127,8 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
         ! TODO combine 1shot & int2_grad1_u12_ao_num
         PROVIDE int2_grad1_u12_ao_num
         int2_grad1_u12_ao = int2_grad1_u12_ao_num
-        !PROVIDE int2_grad1_u12_ao_num_1shot
-        !int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
+!         PROVIDE int2_grad1_u12_ao_num_1shot
+!         int2_grad1_u12_ao = int2_grad1_u12_ao_num_1shot
       endif
 
     elseif(tc_integ_type .eq. "semi-analytic") then
@@ -204,7 +204,7 @@ BEGIN_PROVIDER [double precision, int2_grad1_u12_ao, (ao_num, ao_num, n_points_f
     print*, ' Writing int2_grad1_u12_ao in ', trim(ezfio_filename) // '/work/int2_grad1_u12_ao'
 
     open(unit=11, form="unformatted", file=trim(ezfio_filename)//'/work/int2_grad1_u12_ao', action="write")
-    call ezfio_set_work_empty(.False.)
+      call ezfio_set_work_empty(.False.)
       write(11) int2_grad1_u12_ao
     close(11)
     call ezfio_set_tc_keywords_io_tc_integ('Read')
