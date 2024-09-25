@@ -910,6 +910,7 @@ subroutine copy_psi_bilinear_to_psi(psi, isize)
 end
 
 
+
  BEGIN_PROVIDER [ integer*8, singles_alpha_csc_idx, (N_det_alpha_unique+1) ]
 &BEGIN_PROVIDER [ integer*8, singles_alpha_csc_size ]
   implicit none

@@ -76,8 +76,7 @@ END_PROVIDER
    ndim8 = ao_num*ao_num*1_8+1
    double precision :: wall0,wall1
 
-   type(c_ptr)                    :: c_pointer(2)
-   integer                        :: fd(2)
+   type(mmap_type) :: map
 
    PROVIDE nproc ao_cholesky_threshold do_direct_integrals qp_max_mem
    PROVIDE nucl_coord ao_two_e_integral_schwartz
@@ -181,8 +180,9 @@ END_PROVIDER
      if (elec_num > 10) then
        rank_max = min(np,20*elec_num*elec_num)
      endif
-     call mmap(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, fd(1), .False., .True., c_pointer(1))
-     call c_f_pointer(c_pointer(1), L, (/ ndim8, rank_max /))
+
+     call mmap_create_d(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, .False., .True., map)
+     L => map%d2
 
      ! Deleting the file while it is open makes the file invisible on the filesystem,
      ! and automatically deleted, even if the program crashes
@@ -480,7 +480,7 @@ END_PROVIDER
      enddo
      !$OMP END PARALLEL DO
 
-     call munmap( (/ ndim8, rank_max /), 8, fd(1), c_pointer(1) )
+     call mmap_destroy(map)
 
      cholesky_ao_num = rank
 
