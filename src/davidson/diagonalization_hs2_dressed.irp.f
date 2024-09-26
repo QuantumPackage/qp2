@@ -223,12 +223,11 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       exit
     endif
 
-    if (itermax > 4) then
-      itermax = itermax - 1
-    else if (m==1.and.disk_based_davidson) then
+    if (disk_based_davidson) then
       m=0
       disk_based = .True.
-      itermax = 6
+    else if (itermax > 4) then
+      itermax = itermax - 1
     else
       nproc_target = nproc_target - 1
     endif
@@ -267,14 +266,12 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   if (disk_based) then
     ! Create memory-mapped files for W and S
-    type(c_ptr) :: ptr_w, ptr_s
-    integer :: fd_s, fd_w
-    call mmap(trim(ezfio_work_dir)//'davidson_w', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-        8, fd_w, .False., .True., ptr_w)
-    call mmap(trim(ezfio_work_dir)//'davidson_s', (/int(sze,8),int(N_st_diag*itermax,8)/),&
-        4, fd_s, .False., .True., ptr_s)
-    call c_f_pointer(ptr_w, w, (/sze,N_st_diag*itermax/))
-    call c_f_pointer(ptr_s, s, (/sze,N_st_diag*itermax/))
+    type(mmap_type) :: map_s, map_w
+
+    call mmap_create_d('', (/ 1_8*sze, 1_8*N_st_diag*itermax /), .False., .True., map_w)
+    call mmap_create_s('', (/ 1_8*sze, 1_8*N_st_diag*itermax /), .False., .True., map_s)
+    w => map_w%d2
+    s => map_s%s2
   else
     allocate(W(sze,N_st_diag*itermax), S(sze,N_st_diag*itermax))
   endif
@@ -755,13 +752,8 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
 
   if (disk_based)then
     ! Remove temp files
-    integer, external :: getUnitAndOpen
-    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 8, fd_w, ptr_w )
-    fd_w = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_w','r')
-    close(fd_w,status='delete')
-    call munmap( (/int(sze,8),int(N_st_diag*itermax,8)/), 4, fd_s, ptr_s )
-    fd_s = getUnitAndOpen(trim(ezfio_work_dir)//'davidson_s','r')
-    close(fd_s,status='delete')
+    call mmap_destroy(map_w)
+    call mmap_destroy(map_s)
   else
     deallocate(W,S)
   endif

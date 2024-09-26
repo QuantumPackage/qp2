@@ -23,6 +23,11 @@ module mmap_module
     double precision, pointer :: d2(:,:)
     double precision, pointer :: d3(:,:,:)
     double precision, pointer :: d4(:,:,:,:)
+
+    real, pointer :: s1(:)
+    real, pointer :: s2(:,:)
+    real, pointer :: s3(:,:,:)
+    real, pointer :: s4(:,:,:,:)
   end type mmap_type
 
   interface
@@ -176,6 +181,10 @@ module mmap_module
       map%d2 => NULL()
       map%d3 => NULL()
       map%d4 => NULL()
+      map%s1 => NULL()
+      map%s2 => NULL()
+      map%s3 => NULL()
+      map%s4 => NULL()
       map%i1 => NULL()
       map%i2 => NULL()
       map%i3 => NULL()
@@ -206,6 +215,30 @@ module mmap_module
           call c_f_pointer(map%ptr, map%d3, shape)
         case (4)
           call c_f_pointer(map%ptr, map%d4, shape)
+        case default
+          stop 'mmap: dimension not implemented'
+      end select
+  end subroutine
+
+  subroutine mmap_create_s(filename, shape, read_only, single_node, map)
+      implicit none
+      character*(*), intent(in)      :: filename   ! Name of the mapped file
+      integer*8, intent(in)          :: shape(:)   ! Shape of the array to map
+      logical, intent(in)            :: read_only  ! If true, mmap is read-only
+      logical, intent(in)            :: single_node! If true, mmap is on a single node
+      type(mmap_type), intent(out)   :: map        ! mmap
+
+      call mmap_create(filename, shape, 4, read_only, single_node, map)
+
+      select case (size(shape))
+        case (1)
+          call c_f_pointer(map%ptr, map%s1, shape)
+        case (2)
+          call c_f_pointer(map%ptr, map%s2, shape)
+        case (3)
+          call c_f_pointer(map%ptr, map%s3, shape)
+        case (4)
+          call c_f_pointer(map%ptr, map%s4, shape)
         case default
           stop 'mmap: dimension not implemented'
       end select
@@ -269,6 +302,10 @@ module mmap_module
       map%filename = ''
       map%length   = 0
       map%fd       = 0
+      map%s1 => NULL()
+      map%s2 => NULL()
+      map%s3 => NULL()
+      map%s4 => NULL()
       map%d1 => NULL()
       map%d2 => NULL()
       map%d3 => NULL()
