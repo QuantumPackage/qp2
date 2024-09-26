@@ -179,13 +179,12 @@ subroutine H_u_0_nstates_openmp_work_$N_int(v_t,u_t,N_st,sze,istart,iend,ishift,
 !
 !  compute_singles = (mem+rss > qp_max_mem)
 !
-!  if (.not.compute_singles) then
-!    provide singles_beta_csc
-!  endif
+   compute_singles=.True.
 
-   PROVIDE singles_beta_csc_map singles_alpha_csc_map
+   if (.not.compute_singles) then
+     provide singles_alpha_csc singles_beta_csc
+   endif
 
-compute_singles=.True.
 
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
@@ -212,8 +211,8 @@ compute_singles=.True.
       !$OMP          psi_bilinear_matrix_transp_rows_loc,            &
       !$OMP          istart, iend, istep, irp_here, v_t,             &
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
-      !$OMP          singles_alpha_csc_map,singles_alpha_csc_idx,        &
-      !$OMP          singles_beta_csc_map,singles_beta_csc_idx)          &
+      !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
+      !$OMP          singles_beta_csc_,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
@@ -275,7 +274,7 @@ compute_singles=.True.
         !DIR$ LOOP COUNT avg(1000)
         do k8=singles_beta_csc_idx(kcol),singles_beta_csc_idx(kcol+1)-1
           n_singles_b = n_singles_b+1
-          singles_b(n_singles_b) = singles_beta_csc_map%i1(k8)
+          singles_b(n_singles_b) = singles_beta_csc(k8)
         enddo
       endif
     endif
@@ -329,9 +328,9 @@ compute_singles=.True.
           right = singles_alpha_csc_idx(krow+1)
           do while (right-left>0_8)
             k8 = shiftr(right+left,1)
-            if (singles_alpha_csc_map%i1(k8) > lrow) then
+            if (singles_alpha_csc(k8) > lrow) then
               right = k8
-            else if (singles_alpha_csc_map%i1(k8) < lrow) then
+            else if (singles_alpha_csc(k8) < lrow) then
               left = k8 + 1_8
             else
               right_max = k8+1_8
@@ -357,9 +356,9 @@ compute_singles=.True.
           right = right_max
           do while (right-left>0_8)
             k8 = shiftr(right+left,1)
-            if (singles_alpha_csc_map%i1(k8) > lrow) then
+            if (singles_alpha_csc(k8) > lrow) then
               right = k8
-            else if (singles_alpha_csc_map%i1(k8) < lrow) then
+            else if (singles_alpha_csc(k8) < lrow) then
               left = k8 + 1_8
             else
               n_singles_a += 1

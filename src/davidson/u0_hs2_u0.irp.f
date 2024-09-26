@@ -218,14 +218,13 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
 !
 !  compute_singles = (mem+rss > qp_max_mem)
 !
-!  if (.not.compute_singles) then
-!    provide singles_beta_csc
-!  endif
+  compute_singles=.True.
 
-!   PROVIDE singles_beta_csc_map singles_alpha_csc_map
-   PROVIDE singles_beta_csc singles_alpha_csc
+  if (.not.compute_singles) then
+    provide singles_alpha_csc
+    provide singles_beta_csc
+  endif
 
-   compute_singles=.True.
 
 
   maxab = max(N_det_alpha_unique, N_det_beta_unique)+1
@@ -254,8 +253,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
       !$OMP          ishift, idx0, u_t, maxab, compute_singles,      &
       !$OMP          singles_alpha_csc,singles_alpha_csc_idx,        &
       !$OMP          singles_beta_csc,singles_beta_csc_idx)          &
-!      !$OMP          singles_alpha_csc_map,singles_alpha_csc_idx,        &
-!      !$OMP          singles_beta_csc_map,singles_beta_csc_idx)          &
       !$OMP   PRIVATE(krow, kcol, tmp_det, spindet, k_a, k_b, i,     &
       !$OMP          lcol, lrow, l_a, l_b, utl, kk, u_is_sparse,     &
       !$OMP          buffer, doubles, n_doubles, umax,               &
@@ -317,7 +314,6 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
         !DIR$ LOOP COUNT avg(1000)
         do k8=singles_beta_csc_idx(kcol),singles_beta_csc_idx(kcol+1)-1
           n_singles_b = n_singles_b+1
-!          singles_b(n_singles_b) = singles_beta_csc_map%i1(k8)
           singles_b(n_singles_b) = singles_beta_csc(k8)
         enddo
       endif
@@ -375,10 +371,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
           right = singles_alpha_csc_idx(krow+1)
           do while (right-left>0_8)
             k8 = shiftr(right+left,1)
-!            if (singles_alpha_csc_map%i1(k8) > lrow) then
             if (singles_alpha_csc(k8) > lrow) then
               right = k8
-!            else if (singles_alpha_csc_map%i1(k8) < lrow) then
             else if (singles_alpha_csc(k8) < lrow) then
               left = k8 + 1_8
             else
@@ -405,10 +399,8 @@ subroutine H_S2_u_0_nstates_openmp_work_$N_int(v_t,s_t,u_t,N_st,sze,istart,iend,
           right = right_max
           do while (right-left>0_8)
             k8 = shiftr(right+left,1)
-!            if (singles_alpha_csc_map%i1(k8) > lrow) then
             if (singles_alpha_csc(k8) > lrow) then
               right = k8
-!            else if (singles_alpha_csc_map%i1(k8) < lrow) then
             else if (singles_alpha_csc(k8) < lrow) then
               left = k8 + 1_8
             else
