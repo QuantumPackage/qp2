@@ -910,6 +910,7 @@ subroutine copy_psi_bilinear_to_psi(psi, isize)
 end
 
 
+use mmap_module
 
  BEGIN_PROVIDER [ integer*8, singles_alpha_csc_idx, (N_det_alpha_unique+1) ]
 &BEGIN_PROVIDER [ integer*8, singles_alpha_csc_size ]
@@ -926,12 +927,11 @@ end
     idx0(i) = i
   enddo
 
-  !$OMP PARALLEL DEFAULT(NONE)                                       &
-      !$OMP   SHARED(N_det_alpha_unique, psi_det_alpha_unique,       &
-      !$OMP          idx0, N_int, singles_alpha_csc,                 &
-      !$OMP          elec_alpha_num, mo_num, singles_alpha_csc_idx)      &
+  !$OMP PARALLEL DEFAULT(NONE)                                 &
+      !$OMP   SHARED(N_det_alpha_unique, psi_det_alpha_unique, &
+      !$OMP          idx0, N_int, singles_alpha_csc_idx)       &
       !$OMP   PRIVATE(i,s,j)
-  allocate (s(elec_alpha_num * (mo_num-elec_alpha_num) ))
+  allocate (s(N_det_alpha_unique))
   !$OMP DO SCHEDULE(static,64)
   do i=1, N_det_alpha_unique
     call get_all_spin_singles(                                       &
@@ -967,7 +967,7 @@ BEGIN_PROVIDER [ integer, singles_alpha_csc, (singles_alpha_csc_size) ]
   !$OMP PARALLEL DO DEFAULT(NONE)                                    &
       !$OMP   SHARED(N_det_alpha_unique, psi_det_alpha_unique,       &
       !$OMP          idx0, N_int, singles_alpha_csc, singles_alpha_csc_idx)&
-      !$OMP   PRIVATE(i,k) SCHEDULE(static,1)
+      !$OMP   PRIVATE(i,k) SCHEDULE(static)
   do i=1, N_det_alpha_unique
     call get_all_spin_singles(                                       &
         psi_det_alpha_unique, idx0, psi_det_alpha_unique(1,i), N_int,&
@@ -979,7 +979,36 @@ BEGIN_PROVIDER [ integer, singles_alpha_csc, (singles_alpha_csc_size) ]
 
 END_PROVIDER
 
+BEGIN_PROVIDER [ type(mmap_type), singles_alpha_csc_map ]
+  implicit none
+  BEGIN_DOC
+  ! Indices of all single excitations
+  END_DOC
+  integer                        :: i, k
+  integer, allocatable           :: idx0(:)
 
+  call mmap_create_i('', (/ 1_8*singles_alpha_csc_size /), &
+                           .False., .False., singles_alpha_csc_map)
+
+  allocate (idx0(N_det_alpha_unique))
+  do i=1, N_det_alpha_unique
+    idx0(i) = i
+  enddo
+
+  !$OMP PARALLEL DO DEFAULT(NONE)                                    &
+      !$OMP   SHARED(N_det_alpha_unique, psi_det_alpha_unique,       &
+      !$OMP          idx0, N_int, singles_alpha_csc_map, singles_alpha_csc_idx)&
+      !$OMP   PRIVATE(i,k) SCHEDULE(static)
+  do i=1, N_det_alpha_unique
+    call get_all_spin_singles(                                       &
+        psi_det_alpha_unique, idx0, psi_det_alpha_unique(1,i), N_int, N_det_alpha_unique, &
+        singles_alpha_csc_map%i1(singles_alpha_csc_idx(i):singles_alpha_csc_idx(i)+N_det_alpha_unique-1),&
+        k)
+  enddo
+  !$OMP END PARALLEL DO
+  deallocate(idx0)
+
+END_PROVIDER
 
 
  BEGIN_PROVIDER [ integer*8, singles_beta_csc_idx, (N_det_beta_unique+1) ]
@@ -997,13 +1026,12 @@ END_PROVIDER
     idx0(i) = i
   enddo
 
-  !$OMP PARALLEL DEFAULT(NONE)                                       &
+  !$OMP PARALLEL DEFAULT(NONE)                                     &
       !$OMP   SHARED(N_det_beta_unique, psi_det_beta_unique,       &
-      !$OMP          idx0, N_int, singles_beta_csc,                 &
-      !$OMP          elec_beta_num, mo_num, singles_beta_csc_idx)      &
+      !$OMP          idx0, N_int, singles_beta_csc_idx)            &
       !$OMP   PRIVATE(i,s,j)
-  allocate (s(elec_beta_num*(mo_num-elec_beta_num)))
-  !$OMP DO SCHEDULE(static,1)
+  allocate (s(N_det_beta_unique))
+  !$OMP DO SCHEDULE(static)
   do i=1, N_det_beta_unique
     call get_all_spin_singles(                                       &
         psi_det_beta_unique, idx0, psi_det_beta_unique(1,i), N_int,&
@@ -1038,11 +1066,42 @@ BEGIN_PROVIDER [ integer, singles_beta_csc, (singles_beta_csc_size) ]
   !$OMP PARALLEL DO DEFAULT(NONE)                                    &
       !$OMP   SHARED(N_det_beta_unique, psi_det_beta_unique,       &
       !$OMP          idx0, N_int, singles_beta_csc, singles_beta_csc_idx)&
-      !$OMP   PRIVATE(i,k) SCHEDULE(static,64)
+      !$OMP   PRIVATE(i,k) SCHEDULE(static)
   do i=1, N_det_beta_unique
     call get_all_spin_singles(                                       &
         psi_det_beta_unique, idx0, psi_det_beta_unique(1,i), N_int,&
         N_det_beta_unique, singles_beta_csc(singles_beta_csc_idx(i)),&
+        k)
+  enddo
+  !$OMP END PARALLEL DO
+  deallocate(idx0)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ type(mmap_type), singles_beta_csc_map ]
+  implicit none
+  BEGIN_DOC
+  ! Indices of all single excitations
+  END_DOC
+  integer                        :: i, k
+  integer, allocatable           :: idx0(:)
+
+  call mmap_create_i('', (/ 1_8*singles_beta_csc_size /), &
+                           .False., .False., singles_beta_csc_map)
+
+  allocate (idx0(N_det_beta_unique))
+  do i=1, N_det_beta_unique
+    idx0(i) = i
+  enddo
+
+  !$OMP PARALLEL DO DEFAULT(NONE)                                    &
+      !$OMP   SHARED(N_det_beta_unique, psi_det_beta_unique,       &
+      !$OMP          idx0, N_int, singles_beta_csc_map, singles_beta_csc_idx)&
+      !$OMP   PRIVATE(i,k) SCHEDULE(static)
+  do i=1, N_det_beta_unique
+    call get_all_spin_singles(                                       &
+        psi_det_beta_unique, idx0, psi_det_beta_unique(1,i), N_int, N_det_beta_unique, &
+        singles_beta_csc_map%i1(singles_beta_csc_idx(i):singles_beta_csc_idx(i)+N_det_beta_unique-1),&
         k)
   enddo
   !$OMP END PARALLEL DO
@@ -1112,16 +1171,16 @@ subroutine get_all_spin_singles_1(buffer, idx, spindet, size_buffer, singles, n_
   integer                        :: i
   integer(bit_kind)              :: v
   integer                        :: degree
-  integer                        :: add_single(0:64) = (/ 0, 0, 1, 0, 0, (0, i=1,60) /)
   include 'utils/constants.include.F'
 
-  n_singles = 1
+  n_singles = 0
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    singles(n_singles) = idx(i)
-    n_singles = n_singles+add_single(degree)
+    if (degree == 2) then
+      n_singles = n_singles+1
+      singles(n_singles) = idx(i)
+    endif
   enddo
-  n_singles = n_singles-1
 
 end
 
@@ -1143,15 +1202,15 @@ subroutine get_all_spin_doubles_1(buffer, idx, spindet, size_buffer, doubles, n_
   integer                        :: i
   include 'utils/constants.include.F'
   integer                        :: degree
-  integer                        :: add_double(0:64) = (/ 0, 0, 0, 0, 1, (0, i=1,60) /)
 
-  n_doubles = 1
+  n_doubles = 0
   do i=1,size_buffer
     degree = popcnt(xor( spindet, buffer(i) ))
-    doubles(n_doubles) = idx(i)
-    n_doubles = n_doubles+add_double(degree)
+    if (degree == 4) then
+      n_doubles = n_doubles+1
+      doubles(n_doubles) = idx(i)
+    endif
   enddo
-  n_doubles = n_doubles-1
 
 end
 
@@ -1182,8 +1241,8 @@ subroutine get_all_spin_singles_and_doubles_$N_int(buffer, idx, spindet, size_bu
   integer(bit_kind)              :: xorvec($N_int)
   integer                        :: degree
 
-  n_singles = 1
-  n_doubles = 1
+  n_singles = 0
+  n_doubles = 0
   do i=1,size_buffer
 
     do k=1,$N_int
@@ -1197,16 +1256,14 @@ subroutine get_all_spin_singles_and_doubles_$N_int(buffer, idx, spindet, size_bu
     enddo
 
     if ( degree == 4 ) then
-      doubles(n_doubles) = idx(i)
       n_doubles = n_doubles+1
+      doubles(n_doubles) = idx(i)
     else if ( degree == 2 ) then
-      singles(n_singles) = idx(i)
       n_singles = n_singles+1
+      singles(n_singles) = idx(i)
     endif
 
   enddo
-  n_singles = n_singles-1
-  n_doubles = n_doubles-1
 
 end
 
@@ -1231,7 +1288,7 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
   integer(bit_kind)              :: xorvec($N_int)
   integer                        :: degree
 
-  n_singles = 1
+  n_singles = 0
   do i=1,size_buffer
 
     do k=1,$N_int
@@ -1248,11 +1305,10 @@ subroutine get_all_spin_singles_$N_int(buffer, idx, spindet, size_buffer, single
       cycle
     endif
 
-    singles(n_singles) = idx(i)
     n_singles = n_singles+1
+    singles(n_singles) = idx(i)
 
   enddo
-  n_singles = n_singles-1
 
 end
 
@@ -1276,7 +1332,7 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
   include 'utils/constants.include.F'
   integer(bit_kind)              :: xorvec($N_int)
 
-  n_doubles = 1
+  n_doubles = 0
   do i=1,size_buffer
 
     do k=1,$N_int
@@ -1293,12 +1349,10 @@ subroutine get_all_spin_doubles_$N_int(buffer, idx, spindet, size_buffer, double
       cycle
     endif
 
-    doubles(n_doubles) = idx(i)
     n_doubles = n_doubles+1
+    doubles(n_doubles) = idx(i)
 
   enddo
-
-  n_doubles = n_doubles-1
 
 end
 

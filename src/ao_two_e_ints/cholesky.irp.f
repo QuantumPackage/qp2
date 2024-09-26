@@ -5,7 +5,7 @@ double precision function get_ao_integ_chol(i,j,k,l)
   !     i(r1) j(r1) 1/r12 k(r2) l(r2)
   END_DOC
  integer, intent(in) :: i,j,k,l
- double precision, external :: ddot                                                                                  
+ double precision, external :: ddot
  get_ao_integ_chol = ddot(cholesky_ao_num, cholesky_ao_transp(1,i,j), 1, cholesky_ao_transp(1,k,l), 1)
 
 end
@@ -155,7 +155,7 @@ END_PROVIDER
        enddo
        !$OMP END PARALLEL DO
      endif
-     ! Just to guarentee termination 
+     ! Just to guarentee termination
      D(ndim8) = 0.d0
 
      D_sorted(:) = -D(:)
@@ -181,14 +181,8 @@ END_PROVIDER
        rank_max = min(np,20*elec_num*elec_num)
      endif
 
-     call mmap_create_d(trim(ezfio_work_dir)//'cholesky_ao_tmp', (/ ndim8, rank_max /), 8, .False., .True., map)
+     call mmap_create_d('', (/ ndim8, rank_max /), .False., .True., map)
      L => map%d2
-
-     ! Deleting the file while it is open makes the file invisible on the filesystem,
-     ! and automatically deleted, even if the program crashes
-     iunit = getUnitAndOpen(trim(ezfio_work_dir)//'cholesky_ao_tmp', 'R')
-     close(iunit,status='delete')
-
 
      ! 3.
      N = 0
@@ -205,7 +199,7 @@ END_PROVIDER
      do while ( (Dmax > tau).and.(np > 0) )
        ! a.
        i = i+1
-       
+
 
 
        block_size = max(N,24)
@@ -317,7 +311,7 @@ END_PROVIDER
        ! g.
 
        iblock = 0
-       
+
        do j=1,nq
 
          if ( (Qmax < Dmin).or.(N+j*1_8 > ndim8) ) exit

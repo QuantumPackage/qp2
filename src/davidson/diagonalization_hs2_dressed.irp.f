@@ -774,6 +774,13 @@ subroutine davidson_diag_hjj_sjj(dets_in,u_in,H_jj,s2_out,energies,dim_in,sze,N_
       lambda                                                         &
       )
   FREE nthreads_davidson
+
+!  call mmap_destroy(singles_alpha_csc_map)
+!  FREE singles_alpha_csc_map
+!
+!  call mmap_destroy(singles_beta_csc_map)
+!  FREE singles_beta_csc_map
+
 end
 
 

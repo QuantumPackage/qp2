@@ -9,16 +9,20 @@ module mmap_module
     integer         :: fd           ! File descriptor
 
     ! Pointers to data
-    integer, pointer, dimension (:)       :: i1
-    integer, pointer, dimension (:,:)     :: i2
-    integer, pointer, dimension (:,:,:)   :: i3
-    integer, pointer, dimension (:,:,:,:) :: i4
+    integer, pointer  :: i1(:)
+    integer, pointer  :: i2(:,:)
+    integer, pointer  :: i3(:,:,:)
+    integer, pointer  :: i4(:,:,:,:)
 
-    ! Pointers to data
-    double precision, pointer, dimension (:)       :: d1
-    double precision, pointer, dimension (:,:)     :: d2
-    double precision, pointer, dimension (:,:,:)   :: d3
-    double precision, pointer, dimension (:,:,:,:) :: d4
+    integer*8, pointer :: i81(:)
+    integer*8, pointer :: i82(:,:)
+    integer*8, pointer :: i83(:,:,:)
+    integer*8, pointer :: i84(:,:,:,:)
+
+    double precision, pointer :: d1(:)
+    double precision, pointer :: d2(:,:)
+    double precision, pointer :: d3(:,:,:)
+    double precision, pointer :: d4(:,:,:,:)
   end type mmap_type
 
   interface
@@ -138,8 +142,17 @@ module mmap_module
       type(mmap_type), intent(out)   :: map        ! mmap
 
       integer :: i
+      logical :: temporary
 
-      map%filename = filename
+      temporary = ( trim(filename) == '' )
+
+      if (.not.temporary) then
+        map%filename = filename
+      else
+        call getenv('EZFIO_FILE', map%filename)
+        map%filename = trim(map%filename) // '/work/tmpfile'
+      endif
+
       map%length = int(bytes,8)
       do i=1,size(shape)
         map%length = map%length * shape(i)
@@ -152,6 +165,13 @@ module mmap_module
                 single_node,  &
                 map%ptr)
 
+      if (temporary) then
+        ! Deleting the file while it is open makes the file invisible on the filesystem,
+        ! and automatically deleted, even if the program crashes
+        open(UNIT=47, FILE=trim(map%filename), STATUS='OLD')
+        close(47,STATUS='DELETE')
+      endif
+
       map%d1 => NULL()
       map%d2 => NULL()
       map%d3 => NULL()
@@ -160,19 +180,22 @@ module mmap_module
       map%i2 => NULL()
       map%i3 => NULL()
       map%i4 => NULL()
+      map%i81 => NULL()
+      map%i82 => NULL()
+      map%i83 => NULL()
+      map%i84 => NULL()
 
   end
 
-  subroutine mmap_create_d(filename, shape, bytes, read_only, single_node, map)
+  subroutine mmap_create_d(filename, shape, read_only, single_node, map)
       implicit none
       character*(*), intent(in)      :: filename   ! Name of the mapped file
       integer*8, intent(in)          :: shape(:)   ! Shape of the array to map
-      integer, intent(in)            :: bytes      ! Number of bytes per element
       logical, intent(in)            :: read_only  ! If true, mmap is read-only
       logical, intent(in)            :: single_node! If true, mmap is on a single node
       type(mmap_type), intent(out)   :: map        ! mmap
 
-      call mmap_create(filename, shape, bytes, read_only, single_node, map)
+      call mmap_create(filename, shape, 8, read_only, single_node, map)
 
       select case (size(shape))
         case (1)
@@ -188,16 +211,15 @@ module mmap_module
       end select
   end subroutine
 
-  subroutine mmap_create_i(filename, shape, bytes, read_only, single_node, map)
+  subroutine mmap_create_i(filename, shape, read_only, single_node, map)
       implicit none
       character*(*), intent(in)      :: filename   ! Name of the mapped file
       integer*8, intent(in)          :: shape(:)   ! Shape of the array to map
-      integer, intent(in)            :: bytes      ! Number of bytes per element
       logical, intent(in)            :: read_only  ! If true, mmap is read-only
       logical, intent(in)            :: single_node! If true, mmap is on a single node
       type(mmap_type), intent(out)   :: map        ! mmap
 
-      call mmap_create(filename, shape, bytes, read_only, single_node, map)
+      call mmap_create(filename, shape, 4, read_only, single_node, map)
 
       select case (size(shape))
         case (1)
@@ -208,6 +230,30 @@ module mmap_module
           call c_f_pointer(map%ptr, map%i3, shape)
         case (4)
           call c_f_pointer(map%ptr, map%i4, shape)
+        case default
+          stop 'mmap: dimension not implemented'
+      end select
+  end subroutine
+
+  subroutine mmap_create_i8(filename, shape, read_only, single_node, map)
+      implicit none
+      character*(*), intent(in)      :: filename   ! Name of the mapped file
+      integer*8, intent(in)          :: shape(:)   ! Shape of the array to map
+      logical, intent(in)            :: read_only  ! If true, mmap is read-only
+      logical, intent(in)            :: single_node! If true, mmap is on a single node
+      type(mmap_type), intent(out)   :: map        ! mmap
+
+      call mmap_create(filename, shape, 8, read_only, single_node, map)
+
+      select case (size(shape))
+        case (1)
+          call c_f_pointer(map%ptr, map%i81, shape)
+        case (2)
+          call c_f_pointer(map%ptr, map%i82, shape)
+        case (3)
+          call c_f_pointer(map%ptr, map%i83, shape)
+        case (4)
+          call c_f_pointer(map%ptr, map%i84, shape)
         case default
           stop 'mmap: dimension not implemented'
       end select
@@ -231,6 +277,10 @@ module mmap_module
       map%i2 => NULL()
       map%i3 => NULL()
       map%i4 => NULL()
+      map%i81 => NULL()
+      map%i82 => NULL()
+      map%i83 => NULL()
+      map%i84 => NULL()
   end subroutine
 
 
