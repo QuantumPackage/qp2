@@ -330,9 +330,9 @@ END_PROVIDER
      deallocate(eigenvectors,eigenvalues)
    endif
 
-    ! Dominant determinants for each states
-    call print_dominant_det(psi_det,CI_eigenvectors,N_det,N_states,N_int)
-    call wf_overlap(psi_det,psi_coef,N_states,N_det,psi_det,CI_eigenvectors,N_states,N_det)
+!    ! Dominant determinants for each states
+!    call print_dominant_det(psi_det,CI_eigenvectors,N_det,N_states,N_int)
+!    call wf_overlap(psi_det,psi_coef,N_states,N_det,psi_det,CI_eigenvectors,N_states,N_det)
 
 END_PROVIDER
 
