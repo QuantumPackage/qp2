@@ -8,7 +8,7 @@ qpsh
 
 
 :command:`qpsh` is the |qp| shell. It is a Bash shell with all the
-required evironment variables loaded, a modified prompt, and the
+required environment variables loaded, a modified prompt, and the
 :ref:`qp` command.
 
 
