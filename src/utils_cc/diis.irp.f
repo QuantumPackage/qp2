@@ -53,10 +53,10 @@ subroutine diis_cc(all_err,all_t,sze,m,iter,t)
   !$OMP END PARALLEL
   
   do i = 1, m_iter
-    B(i,m_iter+1) = -1
+    B(i,m_iter+1) = -1.d0
   enddo
   do j = 1, m_iter
-    B(m_iter+1,j) = -1
+    B(m_iter+1,j) = -1.d0
   enddo
   ! Debug
   !print*,'B'
@@ -493,7 +493,7 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   do i = 1, nO*nV
     tmp(i) = t1(i)
   enddo
-  !$OMP END DO NOWAIT
+  !$OMP END DO
   !$OMP DO
   do i = 1, nO*nO*nV*nV
     tmp(i+nO*nV) = t2(i)
@@ -515,7 +515,7 @@ subroutine update_t_ccsd_diis_v3(nO,nV,nb_iter,f_o,f_v,r1,r2,t1,t2,all_err,all_t
   do i = 1, nO*nV
     t1(i) = tmp(i)
   enddo
-  !$OMP END DO NOWAIT
+  !$OMP END DO
   !$OMP DO
   do i = 1, nO*nO*nV*nV
     t2(i) = tmp(i+nO*nV) 

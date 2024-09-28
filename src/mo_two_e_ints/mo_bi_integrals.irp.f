@@ -70,6 +70,10 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
     else
       call add_integrals_to_map(full_ijkl_bitmask_4)
     endif
+    double precision, external     :: map_mb
+    print*,'Molecular integrals provided:'
+    print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
+    print*,' Number of MO integrals: ',  mo_map_size
   endif
 
   call wall_time(wall_2)
@@ -78,10 +82,6 @@ BEGIN_PROVIDER [ logical, mo_two_e_integrals_in_map ]
   integer*8                      :: get_mo_map_size, mo_map_size
   mo_map_size = get_mo_map_size()
 
-  double precision, external     :: map_mb
-  print*,'Molecular integrals provided:'
-  print*,' Size of MO map           ', map_mb(mo_integrals_map) ,'MB'
-  print*,' Number of MO integrals: ',  mo_map_size
   print*,' cpu  time :',cpu_2 - cpu_1, 's'
   print*,' wall time :',wall_2 - wall_1, 's  ( x ', (cpu_2-cpu_1)/(wall_2-wall_1), ')'
 

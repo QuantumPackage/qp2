@@ -132,6 +132,7 @@ let run slave ?prefix exe ezfio_file =
   (** Run executable *)
   let prefix =
     match prefix with
+    | Some "gdb" -> "gdb --args "
     | Some x -> x^" "
     | None -> ""
   and exe =
