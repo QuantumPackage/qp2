@@ -58,52 +58,70 @@ end = struct
   ;;
 
   let read_ao_prim_num () =
-    Ezfio.get_ao_basis_ao_prim_num ()
-    |> Ezfio.flattened_ezfio
-    |> Array.map AO_prim_number.of_int
+    if Ezfio.has_ao_basis_ao_prim_num () then
+      Ezfio.get_ao_basis_ao_prim_num ()
+      |> Ezfio.flattened_ezfio
+      |> Array.map AO_prim_number.of_int
+    else
+      [||]
   ;;
 
   let read_ao_prim_num_max () =
-    Ezfio.get_ao_basis_ao_prim_num ()
-    |> Ezfio.flattened_ezfio
-    |> Array.fold_left (fun x y -> if x>y then x else y) 0
-    |> AO_prim_number.of_int
+    if Ezfio.has_ao_basis_ao_prim_num () then
+      Ezfio.get_ao_basis_ao_prim_num ()
+      |> Ezfio.flattened_ezfio
+      |> Array.fold_left (fun x y -> if x>y then x else y) 0
+      |> AO_prim_number.of_int
+    else
+      AO_prim_number.of_int 0
   ;;
 
   let read_ao_nucl () =
-    let nmax = Nucl_number.get_max () in
-    Ezfio.get_ao_basis_ao_nucl ()
-    |> Ezfio.flattened_ezfio
-    |> Array.map (fun x-> Nucl_number.of_int ~max:nmax x)
+    if Ezfio.has_ao_basis_ao_nucl () then
+      let nmax = Nucl_number.get_max () in
+      Ezfio.get_ao_basis_ao_nucl ()
+      |> Ezfio.flattened_ezfio
+      |> Array.map (fun x-> Nucl_number.of_int ~max:nmax x)
+    else
+      [||]
   ;;
 
   let read_ao_power () =
-    let x = Ezfio.get_ao_basis_ao_power () in
-    let dim = x.Ezfio.dim.(0) in
-    let data = Ezfio.flattened_ezfio x in
-    let result = Array.init dim (fun x -> "") in
-    for i=1 to dim
-    do
-      if (data.(i-1) > 0) then
-        result.(i-1) <- result.(i-1)^"x"^(string_of_int data.(i-1));
-      if (data.(dim+i-1) > 0) then
-        result.(i-1) <- result.(i-1)^"y"^(string_of_int data.(dim+i-1));
-      if (data.(2*dim+i-1) > 0) then
-        result.(i-1) <- result.(i-1)^"z"^(string_of_int data.(2*dim+i-1));
-    done;
-    Array.map Angmom.Xyz.of_string result
+    if Ezfio.has_ao_basis_ao_power () then
+      let x = Ezfio.get_ao_basis_ao_power () in
+      let dim = x.Ezfio.dim.(0) in
+      let data = Ezfio.flattened_ezfio x in
+      let result = Array.init dim (fun x -> "") in
+      for i=1 to dim
+      do
+        if (data.(i-1) > 0) then
+          result.(i-1) <- result.(i-1)^"x"^(string_of_int data.(i-1));
+        if (data.(dim+i-1) > 0) then
+          result.(i-1) <- result.(i-1)^"y"^(string_of_int data.(dim+i-1));
+        if (data.(2*dim+i-1) > 0) then
+          result.(i-1) <- result.(i-1)^"z"^(string_of_int data.(2*dim+i-1));
+      done;
+      Array.map Angmom.Xyz.of_string result
+    else
+      [||]
   ;;
 
   let read_ao_coef () =
-    Ezfio.get_ao_basis_ao_coef ()
-    |> Ezfio.flattened_ezfio
-    |> Array.map AO_coef.of_float
+    if Ezfio.has_ao_basis_ao_coef () then
+      Ezfio.get_ao_basis_ao_coef ()
+      |> Ezfio.flattened_ezfio
+      |> Array.map AO_coef.of_float
+    else
+      [||]
   ;;
 
   let read_ao_expo () =
-    Ezfio.get_ao_basis_ao_expo ()
-    |> Ezfio.flattened_ezfio
-    |> Array.map AO_expo.of_float
+    if Ezfio.has_ao_basis_ao_expo () then
+      Ezfio.get_ao_basis_ao_expo ()
+      |> Ezfio.flattened_ezfio
+      |> Array.map AO_expo.of_float
+    else
+      [||]
   ;;
 
   let read_ao_cartesian () =

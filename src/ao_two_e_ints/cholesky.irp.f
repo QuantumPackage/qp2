@@ -79,7 +79,7 @@ END_PROVIDER
    type(mmap_type) :: map
 
    PROVIDE nproc ao_cholesky_threshold do_direct_integrals qp_max_mem
-   PROVIDE nucl_coord ao_two_e_integral_schwartz
+   PROVIDE nucl_coord
    call set_multiple_levels_omp(.False.)
 
    call wall_time(wall0)
