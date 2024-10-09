@@ -101,8 +101,6 @@ double precision function ao_two_e_integral(i, j, k, l)
                 integral = general_primitive_integral(dim1,              &
                     P_new,P_center,fact_p,pp,p_inv,iorder_p,             &
                     Q_new,Q_center,fact_q,qq,q_inv,iorder_q)
-                !write(32,"(5(F22.15,2X))") ao_expo_ordered_transp(p,i),ao_expo_ordered_transp(q,j),ao_expo_ordered_transp(r,k),ao_expo_ordered_transp(s,l), coef4
-                !write(42,"(1(F22.15,2X))") coef4*integral
                 ao_two_e_integral = ao_two_e_integral +  coef4 * integral
               enddo ! s
             enddo  ! r
