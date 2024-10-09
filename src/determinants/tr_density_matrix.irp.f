@@ -6,28 +6,28 @@ BEGIN_PROVIDER [double precision, one_e_tr_dm_mo, (mo_num, mo_num, N_states, N_s
   ! One body transition density matrix for all pairs of states n and m, < Psi^n | a_i^\dagger a_a | Psi^m >
   END_DOC
 
-  integer                        :: j,k,l,m,k_a,k_b,n
+  integer                        :: j,l,m,k_a,k_b,n
   integer                        :: occ(N_int*bit_kind_size,2)
-  double precision               :: ck, cl, ckl
+  double precision               :: ck, ckl
   double precision               :: phase
-  integer                        :: h1,h2,p1,p2,s1,s2, degree
+  integer                        :: h1,h2,p1,p2,degree
   integer(bit_kind)              :: tmp_det(N_int,2), tmp_det2(N_int)
   integer                        :: exc(0:2,2),n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:,:), tmp_b(:,:,:,:)
   integer                        :: krow, kcol, lrow, lcol
 
-  PROVIDE psi_det
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
   one_e_tr_dm_mo = 0d0
  
   !$OMP PARALLEL DEFAULT(NONE)                                      &
-      !$OMP PRIVATE(j,k,k_a,k_b,l,m,occ,ck, cl, ckl,phase,h1,h2,p1,p2,s1,s2, degree,exc,&
+      !$OMP PRIVATE(j,k_a,k_b,l,m,n,occ,ck, ckl,phase,h1,h2,p1,p2,degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)&
-      !$OMP SHARED(psi_det,psi_coef,N_int,N_states,elec_alpha_num,  &
+      !$OMP SHARED(N_int,N_states,elec_alpha_num,  &
       !$OMP  elec_beta_num,one_e_tr_dm_mo,N_det,&
       !$OMP  mo_num,psi_bilinear_matrix_rows,psi_bilinear_matrix_columns,&
       !$OMP  psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns,&
-      !$OMP  psi_bilinear_matrix_order_reverse, psi_det_alpha_unique, psi_det_beta_unique,&
+      !$OMP  psi_det_alpha_unique, psi_det_beta_unique,&
       !$OMP  psi_bilinear_matrix_values, psi_bilinear_matrix_transp_values,&
       !$OMP  N_det_alpha_unique,N_det_beta_unique,irp_here)
   allocate(tmp_a(mo_num,mo_num,N_states,N_states), tmp_b(mo_num,mo_num,N_states,N_states) )
@@ -163,28 +163,28 @@ END_PROVIDER
   ! $\alpha$ and $\beta$ one-body transition density matrices for all pairs of states
   END_DOC
 
-  integer                        :: j,k,l,m,n,k_a,k_b
+  integer                        :: j,l,m,n,k_a,k_b
   integer                        :: occ(N_int*bit_kind_size,2)
-  double precision               :: ck, cl, ckl
+  double precision               :: ck, ckl
   double precision               :: phase
-  integer                        :: h1,h2,p1,p2,s1,s2, degree
+  integer                        :: h1,h2,p1,p2,degree
   integer(bit_kind)              :: tmp_det(N_int,2), tmp_det2(N_int)
   integer                        :: exc(0:2,2),n_occ(2)
   double precision, allocatable  :: tmp_a(:,:,:,:), tmp_b(:,:,:,:)
   integer                        :: krow, kcol, lrow, lcol
 
-  PROVIDE psi_det
+  PROVIDE psi_det_alpha_unique psi_det_beta_unique
 
   one_e_tr_dm_mo_alpha = 0.d0
   one_e_tr_dm_mo_beta  = 0.d0
   !$OMP PARALLEL DEFAULT(NONE)                                      &
-      !$OMP PRIVATE(j,k,k_a,k_b,l,m,n,occ,ck, cl, ckl,phase,h1,h2,p1,p2,s1,s2, degree,exc,&
+      !$OMP PRIVATE(j,k_a,k_b,l,m,n,occ,ck, ckl,phase,h1,h2,p1,p2,degree,exc,&
       !$OMP  tmp_a, tmp_b, n_occ, krow, kcol, lrow, lcol, tmp_det, tmp_det2)&
-      !$OMP SHARED(psi_det,psi_coef,N_int,N_states,elec_alpha_num,  &
+      !$OMP SHARED(N_int,N_states,elec_alpha_num,  &
       !$OMP  elec_beta_num,one_e_tr_dm_mo_alpha,one_e_tr_dm_mo_beta,N_det,&
       !$OMP  mo_num,psi_bilinear_matrix_rows,psi_bilinear_matrix_columns,&
       !$OMP  psi_bilinear_matrix_transp_rows, psi_bilinear_matrix_transp_columns,&
-      !$OMP  psi_bilinear_matrix_order_reverse, psi_det_alpha_unique, psi_det_beta_unique,&
+      !$OMP  psi_det_alpha_unique, psi_det_beta_unique,&
       !$OMP  psi_bilinear_matrix_values, psi_bilinear_matrix_transp_values,&
       !$OMP  N_det_alpha_unique,N_det_beta_unique,irp_here)
   allocate(tmp_a(mo_num,mo_num,N_states,N_states), tmp_b(mo_num,mo_num,N_states,N_states) )
