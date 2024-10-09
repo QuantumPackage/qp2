@@ -253,17 +253,18 @@ BEGIN_PROVIDER [ double precision, SCF_energy ]
  BEGIN_DOC
  ! Hartree-Fock energy
  END_DOC
- SCF_energy = nuclear_repulsion
-
  integer                        :: i,j
+
+ SCF_energy = 0.d0
+
  do j=1,ao_num
    do i=1,ao_num
-     SCF_energy += 0.5d0 * (                                          &
+     SCF_energy +=  &
          (ao_one_e_integrals(i,j) + Fock_matrix_ao_alpha(i,j) ) *  SCF_density_matrix_ao_alpha(i,j) +&
-         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) )
+         (ao_one_e_integrals(i,j) + Fock_matrix_ao_beta (i,j) ) *  SCF_density_matrix_ao_beta (i,j) 
    enddo
  enddo
- SCF_energy += extra_e_contrib_density
+ SCF_energy = 0.5d0 * SCF_energy + extra_e_contrib_density + nuclear_repulsion 
 
 END_PROVIDER
 

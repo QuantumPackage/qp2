@@ -154,14 +154,14 @@ subroutine run_ccsd_space_orb
 
     allocate(all_err(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth), all_t(nO*nV+nO*nO*nV*(nV*1_8),cc_diis_depth))
     !$OMP PARALLEL PRIVATE(i,j) DEFAULT(SHARED)
+    !$OMP DO COLLAPSE(2)
     do j=1,cc_diis_depth
-      !$OMP DO
       do i=1, size(all_err,1)
         all_err(i,j) = 0d0
         all_t(i,j)   = 0d0
       enddo
-      !$OMP END DO NOWAIT
     enddo
+    !$OMP END DO NOWAIT
     !$OMP END PARALLEL
   endif
 
@@ -237,6 +237,7 @@ subroutine run_ccsd_space_orb
       call update_t2(nO,nV,cc_space_f_o,cc_space_f_v,r2%f,t2%f)
     else
       print*,'Unkown cc_method_method: '//cc_update_method
+      call abort
     endif
 
     call update_tau_space(nO,nV,t1%f,t1,t2,tau)
