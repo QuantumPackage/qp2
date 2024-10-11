@@ -45,7 +45,7 @@ if __name__ == '__main__':
   jastrow_file = sys.argv[2]
   jastrow = import_jastrow(jastrow_file)
   print (jastrow)
-  ezfio.set_jastrow_jast_type("Qmckl")
+  ezfio.set_jastrow_j2e_type("Qmckl")
   ezfio.set_jastrow_jast_qmckl_type_nucl_num(jastrow['type_num'])
   charges = ezfio.get_nuclei_nucl_charge()
   types = {}

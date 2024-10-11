@@ -56,7 +56,7 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
   call multiply_cpoly(P_a(0), a, P_b(0), b, P_new(0), n_new)
   iorder = a + b
 
-end subroutine give_explicit_cpoly_and_cgaussian_x
+end
 
 ! ---
 
@@ -141,7 +141,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   !DIR$ FORCEINLINE
   call multiply_cpoly(P_a(0,3), a(3), P_b(0,3), b(3), P_new(0,3), n_new)
 
-end subroutine give_explicit_cpoly_and_cgaussian
+end
 
 ! ---
 
@@ -249,7 +249,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   xp(2) = ( a * xa(2) + b * xb(2) ) * p_inv
   xp(3) = ( a * xa(3) + b * xb(3) ) * p_inv
 
-end subroutine cgaussian_product
+end
 
 ! ---
 
@@ -290,7 +290,7 @@ subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
   k  = zexp(-k)
   xp = (a*xa + b*xb) * p_inv
 
-end subroutine cgaussian_product_x
+end
 
 ! ---
 
@@ -338,7 +338,7 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
     exit
   enddo
 
-end subroutine multiply_cpoly
+end
 
 ! ---
 
@@ -373,7 +373,7 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
     if(nd < 0) exit
   enddo
 
-end subroutine add_cpoly
+end
 
 ! ---
 
@@ -413,7 +413,7 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
 
   endif
 
-end subroutine add_cpoly_multiply
+end
 
 ! ---
 
@@ -475,7 +475,7 @@ subroutine recentered_cpoly2(P_A, x_A, x_P, a, P_B, x_B, x_Q, b)
     P_B(i) = binom_func(b,b-i) * pows_b(b-i)
   enddo
 
-end subroutine recentered_cpoly2
+end
 
 ! ---
 
@@ -514,267 +514,7 @@ complex*16 function Fc_integral(n, inv_sq_p)
 
   Fc_integral = sqpi * 0.5d0**n * inv_sq_p**dble(n+1) * fact(n) / fact(shiftr(n, 1))
 
-end function Fc_integral
-
-! ---
-
-complex*16 function crint(n, rho)
-
-  implicit none
-  include 'constants.include.F'
-
-  integer,    intent(in)  :: n
-  complex*16, intent(in)  :: rho
-
-  integer                 :: i, mmax
-  double precision        :: rho_mod, rho_re, rho_im 
-  double precision        :: sq_rho_re, sq_rho_im
-  double precision        :: n_tmp
-  complex*16              :: sq_rho, rho_inv, rho_exp
-
-  complex*16              :: crint_smallz, cpx_erf
-
-  rho_re  = REAL (rho)
-  rho_im  = AIMAG(rho)
-  rho_mod = dsqrt(rho_re*rho_re + rho_im*rho_im)
-
-  if(rho_mod < 10.d0) then
-    ! small z
-
-    if(rho_mod .lt. 1.d-10) then
-      crint = 1.d0 / dble(n + n + 1)
-    else
-      crint = crint_smallz(n, rho)
-    endif
-
-  else
-    ! large z
-
-    if(rho_mod .gt. 40.d0) then
-
-      n_tmp = dble(n) + 0.5d0
-      crint = 0.5d0 * gamma(n_tmp) / (rho**n_tmp)
-
-    else
-
-      ! get \sqrt(rho)
-      sq_rho_re = sq_op5 * dsqrt(rho_re + rho_mod)
-      sq_rho_im = 0.5d0 * rho_im / sq_rho_re 
-      sq_rho    = sq_rho_re + (0.d0, 1.d0) * sq_rho_im
-
-      rho_exp = 0.5d0 * zexp(-rho)
-      rho_inv = (1.d0, 0.d0) / rho
-
-      crint = 0.5d0 * sqpi * cpx_erf(sq_rho_re, sq_rho_im) / sq_rho
-      mmax = n
-      if(mmax .gt. 0) then
-        do i = 0, mmax-1
-          crint = ((dble(i) + 0.5d0) * crint - rho_exp) * rho_inv
-        enddo
-      endif
-
-      ! ***
-      
-    endif
-
-  endif
-
-!  print *, n, real(rho), real(crint)
-
-end function crint
-
-! ---
-
-complex*16 function crint_sum(n_pt_out, rho, d1)
-
-  implicit none
-  include 'constants.include.F'
-
-  integer,    intent(in)  :: n_pt_out
-  complex*16, intent(in)  :: rho, d1(0:n_pt_out)
-
-  integer                 :: n, i, mmax
-  double precision        :: rho_mod, rho_re, rho_im 
-  double precision        :: sq_rho_re, sq_rho_im
-  complex*16              :: sq_rho, F0
-  complex*16              :: rho_tmp, rho_inv, rho_exp
-  complex*16, allocatable :: Fm(:)
-
-  complex*16              :: crint_smallz, cpx_erf
-
-  rho_re  = REAL (rho)
-  rho_im  = AIMAG(rho)
-  rho_mod = dsqrt(rho_re*rho_re + rho_im*rho_im)
-
-  if(rho_mod < 10.d0) then
-    ! small z
-
-    if(rho_mod .lt. 1.d-10) then
-
-!      print *, ' 111'
-!      print *, ' rho = ', rho
-
-      crint_sum = d1(0)
-!      print *, 0, 1
-
-      do i = 2, n_pt_out, 2
-
-        n = shiftr(i, 1)
-        crint_sum = crint_sum + d1(i) / dble(n+n+1)
-
-!        print *, n, 1.d0 / dble(n+n+1)
-      enddo
-
-      ! ***
-
-    else
-
-!      print *, ' 222'
-!      print *, ' rho = ', real(rho)
-!      if(abs(aimag(rho)) .gt. 1d-15) then
-!        print *, ' complex rho', rho
-!        stop
-!      endif
-
-      crint_sum = d1(0) * crint_smallz(0, rho)
-
-!      print *, 0, real(d1(0)), real(crint_smallz(0, rho))
-!      if(abs(aimag(d1(0))) .gt. 1d-15) then
-!        print *, ' complex d1(0)', d1(0)
-!        stop
-!      endif
-
-      do i = 2, n_pt_out, 2
-        n = shiftr(i, 1)
-        crint_sum = crint_sum + d1(i) * crint_smallz(n, rho)
-
-!        print *, n, real(d1(i)), real(crint_smallz(n, rho))
-!        if(abs(aimag(d1(i))) .gt. 1d-15) then
-!          print *, ' complex d1(i)', i, d1(i)
-!          stop
-!        endif
-
-      enddo
-
-!      print *, 'sum = ', real(crint_sum)
-!      if(abs(aimag(crint_sum)) .gt. 1d-15) then
-!        print *, ' complex crint_sum', crint_sum
-!        stop
-!      endif
-
-      ! ***
-
-    endif
-
-  else
-    ! large z
-
-    if(rho_mod .gt. 40.d0) then
-
-!      print *, ' 333'
-!      print *, ' rho = ', rho
-
-      rho_inv   = (1.d0, 0.d0) / rho
-      rho_tmp   = 0.5d0 * sqpi * zsqrt(rho_inv)
-      crint_sum = rho_tmp * d1(0)
-!      print *, 0, rho_tmp
-
-      do i = 2, n_pt_out, 2
-        n = shiftr(i, 1)
-        rho_tmp   = rho_tmp * (dble(n) + 0.5d0) * rho_inv
-        crint_sum = crint_sum + rho_tmp * d1(i)
-!        print *, n, rho_tmp
-      enddo
-
-      ! ***
-
-    else
-
-!      print *, ' 444'
-!      print *, ' rho = ', rho
-
-      ! get \sqrt(rho)
-      sq_rho_re = sq_op5 * dsqrt(rho_re + rho_mod)
-      sq_rho_im = 0.5d0 * rho_im / sq_rho_re 
-      sq_rho    = sq_rho_re + (0.d0, 1.d0) * sq_rho_im
-      !sq_rho = zsqrt(rho)
-
-
-      F0        = 0.5d0 * sqpi * cpx_erf(sq_rho_re, sq_rho_im) / sq_rho
-      crint_sum = F0 * d1(0)
-!      print *, 0, F0
-
-      rho_exp = 0.5d0 * zexp(-rho)
-      rho_inv = (1.d0, 0.d0) / rho
-
-      mmax = shiftr(n_pt_out, 1)
-      if(mmax .gt. 0) then
-
-        allocate( Fm(mmax) )
-        Fm(1:mmax) = (0.d0, 0.d0)
-
-        do n = 0, mmax-1
-          F0      = ((dble(n) + 0.5d0) * F0 - rho_exp) * rho_inv
-          Fm(n+1) = F0
-!          print *, n, F0
-        enddo
-    
-        do i = 2, n_pt_out, 2
-          n = shiftr(i, 1)
-          crint_sum = crint_sum + Fm(n) * d1(i)
-        enddo
-        deallocate(Fm)
-      endif
-
-      ! ***
-      
-    endif
-
-  endif
-
-end function crint_sum
-
-! ---
-
-complex*16 function crint_smallz(n, rho)
-
-  BEGIN_DOC
-  ! Standard version of rint
-  END_DOC
-
-  implicit none
-  integer,    intent(in)      :: n
-  complex*16, intent(in)      :: rho
-
-  integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-13
-
-  integer                     :: k
-  double precision            :: delta_mod
-  complex*16                  :: rho_k, ct, delta_k
-
-  ct           = 0.5d0 * zexp(-rho) * gamma(dble(n) + 0.5d0)
-  rho_k        = (1.d0, 0.d0)
-  crint_smallz = ct * rho_k / gamma(dble(n) + 1.5d0)
-
-  do k = 1, kmax
-
-    rho_k        = rho_k * rho
-    delta_k      = ct * rho_k / gamma(dble(n+k) + 1.5d0)
-    crint_smallz = crint_smallz + delta_k
-
-    delta_mod = dsqrt(REAL(delta_k)*REAL(delta_k) + AIMAG(delta_k)*AIMAG(delta_k))
-    if(delta_mod .lt. eps) return
-  enddo
-
-  if(delta_mod > eps) then
-    write(*,*) ' pb in crint_smallz !'
-    write(*,*) ' n, rho    = ', n, rho
-    write(*,*) ' delta_mod = ', delta_mod
-    stop 1
-  endif
-
-end function crint_smallz
+end
 
 ! ---
 

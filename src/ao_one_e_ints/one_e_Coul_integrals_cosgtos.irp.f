@@ -111,8 +111,9 @@ complex*16 function NAI_pol_mult_cosgtos(A_center, B_center, power_A, power_B, a
   complex*16                   :: accu, P_center(3)
   complex*16                   :: d(0:n_pt_in)
 
-  complex*16                   :: V_n_e_cosgtos
-  complex*16                   :: crint
+  complex*16, external         :: V_n_e_cosgtos
+  complex*16, external         :: crint_2
+  complex*16, external         :: crint_sum_2
 
   if ( (A_center(1)/=B_center(1)) .or. (A_center(2)/=B_center(2)) .or. (A_center(3)/=B_center(3)) .or. &
        (A_center(1)/=C_center(1)) .or. (A_center(2)/=C_center(2)) .or. (A_center(3)/=C_center(3)) ) then
@@ -158,27 +159,27 @@ complex*16 function NAI_pol_mult_cosgtos(A_center, B_center, power_A, power_B, a
 
   n_pt = 2 * ( (power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)) )
   if(n_pt == 0) then
-    NAI_pol_mult_cosgtos = coeff * crint(0, const)
+    NAI_pol_mult_cosgtos = coeff * crint_2(0, const)
     return
   endif
 
-  call give_cpolynomial_mult_center_one_e( A_center, B_center, alpha, beta &
-                                         , power_A, power_B, C_center, n_pt_in, d, n_pt_out)
+  call give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
+                                          power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
   if(n_pt_out < 0) then
     NAI_pol_mult_cosgtos = (0.d0, 0.d0)
     return
   endif
 
-  accu = (0.d0, 0.d0)
-  do i = 0, n_pt_out, 2
-    accu += crint(shiftr(i, 1), const) * d(i)
-
-!    print *, shiftr(i, 1), real(const), real(d(i)), real(crint(shiftr(i, 1), const))
-  enddo
+  !accu = (0.d0, 0.d0)
+  !do i = 0, n_pt_out, 2
+  !  accu += crint_2(shiftr(i, 1), const) * d(i)
+  !enddo
+  accu = crint_sum_2(n_pt_out, const, d)
   NAI_pol_mult_cosgtos = accu * coeff
 
-end function NAI_pol_mult_cosgtos
+  return
+end
 
 ! ---
 
@@ -312,7 +313,7 @@ subroutine give_cpolynomial_mult_center_one_e( A_center, B_center, alpha, beta &
     d(i) = d1(i)
   enddo
 
-end subroutine give_cpolynomial_mult_center_one_e
+end
 
 ! ---
 
@@ -405,7 +406,7 @@ recursive subroutine I_x1_pol_mult_one_e_cosgtos(a, c, R1x, R1xp, R2x, d, nd, n_
 
   endif
 
-end subroutine I_x1_pol_mult_one_e_cosgtos
+end
 
 ! ---
 
@@ -467,7 +468,7 @@ recursive subroutine I_x2_pol_mult_one_e_cosgtos(c, R1x, R1xp, R2x, d, nd, dim)
 
   endif
 
-end subroutine I_x2_pol_mult_one_e_cosgtos
+end
 
 ! ---
 
@@ -502,7 +503,7 @@ complex*16 function V_n_e_cosgtos(a_x, a_y, a_z, b_x, b_y, b_z, alpha, beta)
                   * V_theta(a_z + b_z, a_x + b_x + a_y + b_y + 1)
   endif
 
-end function V_n_e_cosgtos
+end
 
 ! ---
 
@@ -529,7 +530,7 @@ complex*16 function V_r_cosgtos(n, alpha)
     V_r_cosgtos = sqpi * fact(n) / fact(shiftr(n, 1)) * (0.5d0/zsqrt(alpha))**(n+1)
   endif
 
-end function V_r_cosgtos
+end
 
 ! ---
 
