@@ -16,7 +16,6 @@ complex*16 function crint_1(n, rho)
   complex*16             :: sq_rho, rho_inv, rho_exp
 
   complex*16             :: crint_smallz, cpx_erf_1
-  complex*16             :: cpx_erf_2
 
   rho_re  = real (rho)
   rho_im  = aimag(rho)
@@ -47,10 +46,6 @@ complex*16 function crint_1(n, rho)
 
       rho_exp = 0.5d0 * zexp(-rho)
       rho_inv = (1.d0, 0.d0) / rho
-
-      !print*, sq_rho_re, sq_rho_im
-      !print*, cpx_erf_1(sq_rho_re, sq_rho_im)
-      !print*, cpx_erf_2(sq_rho_re, sq_rho_im)
 
       crint_1 = 0.5d0 * sqpi * cpx_erf_1(sq_rho_re, sq_rho_im) / sq_rho
       mmax = n
@@ -185,7 +180,7 @@ complex*16 function crint_smallz(n, rho)
   complex*16, intent(in)      :: rho
 
   integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-13
+  double precision, parameter :: eps = 1.d-10
 
   integer                     :: k
   double precision            :: delta_mod
@@ -207,7 +202,8 @@ complex*16 function crint_smallz(n, rho)
 
   if(delta_mod > eps) then
     write(*,*) ' pb in crint_smallz !'
-    write(*,*) ' n, rho    = ', n, rho
+    write(*,*) ' n, rho = ', n, rho
+    write(*,*) ' value = ', crint_smallz
     write(*,*) ' delta_mod = ', delta_mod
     !stop 1
   endif
@@ -229,29 +225,93 @@ complex*16 function crint_2(n, rho)
 
   complex*16, external   :: crint_smallz
 
-  if(abs(rho) < 10.d0) then
+  if(abs(rho) < 3.5d0) then
 
-    if(abs(rho) .lt. 1d-6) then
-      tmp = dble(n + n)
-      rho2 = rho * rho
-      crint_2 = - 0.16666666666666666d0 * rho * rho2 / (tmp + 7.d0) &
-              + 0.5d0 * rho2 / (tmp + 5.d0)                         &
-              - rho / (tmp + 3.d0)                                  &
-              + 1.d0 / (tmp + 1.d0)
+    if(abs(rho) .lt. 0.35d0) then
+
+      select case(n)
+      case(0)
+        crint_2 = (((((((((1.3122532963802805073d-08 * rho &
+                - 1.450385222315046877d-07) * rho &
+                + 1.458916900093370682d-06) * rho &
+                - 0.132275132275132275d-04) * rho &
+                + 0.106837606837606838d-03) * rho &
+                - 0.757575757575757576d-03) * rho &
+                + 0.462962962962962963d-02) * rho &
+                - 0.238095238095238095d-01) * rho &
+                + 0.10000000000000000000d0) * rho &
+                - 0.33333333333333333333d0) * rho &
+                + 1.0d0
+      case(1)
+        crint_2 = (((((((((1.198144314086343d-08 * rho &
+                - 1.312253296380281d-07) * rho &
+                + 1.305346700083542d-06) * rho &
+                - 1.167133520074696d-05) * rho &
+                + 9.259259259259259d-05) * rho &
+                - 6.410256410256410d-04) * rho &
+                + 3.787878787878788d-03) * rho &
+                - 1.851851851851852d-02) * rho &
+                + 7.142857142857142d-02) * rho &
+                - 2.000000000000000d-01) * rho &
+                + 3.333333333333333d-01
+      case(2)
+        crint_2 = (((((((((1.102292768959436d-08 * rho &
+                - 1.198144314086343d-07) * rho &
+                + 1.181027966742252d-06) * rho &
+                - 1.044277360066834d-05) * rho &
+                + 8.169934640522875d-05) * rho &
+                - 5.555555555555556d-04) * rho &
+                + 3.205128205128205d-03) * rho &
+                - 1.515151515151515d-02) * rho &
+                + 5.555555555555555d-02) * rho &
+                - 1.428571428571428d-01) * rho &
+                + 2.000000000000000d-01 
+      case(3)
+        crint_2 = (((((((((1.020641452740218d-08 * rho &
+                - 1.102292768959436d-07) * rho &
+                + 1.078329882677709d-06) * rho &
+                - 9.448223733938020d-06) * rho &
+                + 7.309941520467836d-05) * rho &
+                - 4.901960784313725d-04) * rho &
+                + 2.777777777777778d-03) * rho &
+                - 1.282051282051282d-02) * rho &
+                + 4.545454545454546d-02) * rho &
+                - 1.111111111111111d-01) * rho &
+                + 1.428571428571428d-01 
+      case default
+        tmp = dble(n + n + 1)
+        crint_2 = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
+                - 2.755731922398589d-06 / (tmp + 18.d0)) * rho &
+                + 2.480158730158730d-05 / (tmp + 16.d0)) * rho &
+                - 1.984126984126984d-04 / (tmp + 14.d0)) * rho &
+                + 1.388888888888889d-03 / (tmp + 12.d0)) * rho &
+                - 8.333333333333333d-03 / (tmp + 10.d0)) * rho &
+                + 4.166666666666666d-02 / (tmp +  8.d0)) * rho &
+                - 1.666666666666667d-01 / (tmp +  6.d0)) * rho &
+                + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
+                - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
+                + 1.0d0 / tmp
+      end select 
+
     else
+
       crint_2 = crint_smallz(n, rho)
+
     endif
 
   else
 
     if(real(rho) .ge. 0.d0) then
+
       call zboysfun(n, rho, vals)
       crint_2 = vals(n)
+
     else
+
       call zboysfunnrp(n, rho, vals)
       crint_2 = vals(n) * zexp(-rho)
-    endif
 
+    endif
   endif
 
   return
@@ -380,29 +440,82 @@ subroutine crint_2_vec(n_max, rho, vals)
 
   abs_rho = abs(rho)
 
-  if(abs_rho < 10.d0) then
+  if(abs_rho < 3.5d0) then
 
-    if(abs_rho .lt. 1d-6) then
+    if(abs_rho .lt. 0.35d0) then
 
-      ! use finite expansion for very small rho
+      vals(0) = (((((((((1.3122532963802805073d-08 * rho &
+              - 1.450385222315046877d-07) * rho &
+              + 1.458916900093370682d-06) * rho &
+              - 0.132275132275132275d-04) * rho &
+              + 0.106837606837606838d-03) * rho &
+              - 0.757575757575757576d-03) * rho &
+              + 0.462962962962962963d-02) * rho &
+              - 0.238095238095238095d-01) * rho &
+              + 0.10000000000000000000d0) * rho &
+              - 0.33333333333333333333d0) * rho &
+              + 1.0d0
 
-      !! rho^2 / 2
-      !rho2 = 0.5d0 * rho * rho
-      !! rho^3 / 6
-      !rho3 = 0.3333333333333333d0 * rho * rho2
-      !vals(0) = 1.d0 - 0.3333333333333333d0 * rho + 0.2d0 * rho2 - 0.14285714285714285d0 * rho3
-      !do n = 1, n_max
-      !  tmp = 2.d0 * dble(n)
-      !  vals(n) = 1.d0 / (tmp + 1.d0) - rho  / (tmp + 3.d0) &
-      !          + rho2 / (tmp + 5.d0) - rho3 / (tmp + 7.d0)
-      !enddo
+      if(n > 0) then
 
-      ! TODO (last term)
-      vals(0) = 1.d0 + rho * (-0.3333333333333333d0 + rho*(0.1d0 - 0.047619047619047616d0*rho))
-      do n = 1, n_max
-        tmp = 2.d0 * dble(n)
-        vals(n) = 1.d0 / (tmp + 1.d0) + rho * (-1.d0/(tmp+3.d0) + rho*(0.5d0/(tmp+5.d0) - 0.3333333333333333d0*rho/(tmp+7.d0)))
-      enddo
+        vals(1) = (((((((((1.198144314086343d-08 * rho &
+                - 1.312253296380281d-07) * rho &
+                + 1.305346700083542d-06) * rho &
+                - 1.167133520074696d-05) * rho &
+                + 9.259259259259259d-05) * rho &
+                - 6.410256410256410d-04) * rho &
+                + 3.787878787878788d-03) * rho &
+                - 1.851851851851852d-02) * rho &
+                + 7.142857142857142d-02) * rho &
+                - 2.000000000000000d-01) * rho &
+                + 3.333333333333333d-01
+
+        if(n > 1) then
+
+          vals(2) = (((((((((1.102292768959436d-08 * rho &
+                  - 1.198144314086343d-07) * rho &
+                  + 1.181027966742252d-06) * rho &
+                  - 1.044277360066834d-05) * rho &
+                  + 8.169934640522875d-05) * rho &
+                  - 5.555555555555556d-04) * rho &
+                  + 3.205128205128205d-03) * rho &
+                  - 1.515151515151515d-02) * rho &
+                  + 5.555555555555555d-02) * rho &
+                  - 1.428571428571428d-01) * rho &
+                  + 2.000000000000000d-01 
+
+          if(n > 2) then
+
+            vals(3) = (((((((((1.020641452740218d-08 * rho &
+                    - 1.102292768959436d-07) * rho &
+                    + 1.078329882677709d-06) * rho &
+                    - 9.448223733938020d-06) * rho &
+                    + 7.309941520467836d-05) * rho &
+                    - 4.901960784313725d-04) * rho &
+                    + 2.777777777777778d-03) * rho &
+                    - 1.282051282051282d-02) * rho &
+                    + 4.545454545454546d-02) * rho &
+                    - 1.111111111111111d-01) * rho &
+                    + 1.428571428571428d-01 
+
+            do n = 4, n_max
+              tmp = dble(n + n + 1)
+              vals(n) = (((((((((2.755731922398589d-07 * rho / (tmp + 20.d0) &
+                      - 2.755731922398589d-06 / (tmp + 18.d0)) * rho &
+                      + 2.480158730158730d-05 / (tmp + 16.d0)) * rho &
+                      - 1.984126984126984d-04 / (tmp + 14.d0)) * rho &
+                      + 1.388888888888889d-03 / (tmp + 12.d0)) * rho &
+                      - 8.333333333333333d-03 / (tmp + 10.d0)) * rho &
+                      + 4.166666666666666d-02 / (tmp +  8.d0)) * rho &
+                      - 1.666666666666667d-01 / (tmp +  6.d0)) * rho &
+                      + 5.000000000000000d-01 / (tmp +  4.d0)) * rho &
+                      - 1.000000000000000d+00 / (tmp +  2.d0)) * rho &
+                      + 1.0d0 / tmp
+            enddo
+
+          endif ! n > 2
+        endif ! n > 1
+      endif ! n > 0
 
     else
 
@@ -445,7 +558,7 @@ subroutine crint_smallz_vec(n_max, rho, vals)
   complex*16, intent(out)     :: vals(0:n_max)
 
   integer,          parameter :: kmax = 40
-  double precision, parameter :: eps = 1.d-13
+  double precision, parameter :: eps = 1.d-10
 
   integer                     :: k, n
   complex*16                  :: ct, delta_k
@@ -475,11 +588,12 @@ subroutine crint_smallz_vec(n_max, rho, vals)
       endif
     enddo
   
-    !if(abs(delta_k) > eps) then
-    !  write(*,*) ' pb in crint_smallz_vec !'
-    !  write(*,*) ' n, rho    = ', n, rho
-    !  write(*,*) ' |delta_k| = ', abs(delta_k)
-    !endif
+    if(abs(delta_k) > eps) then
+      write(*,*) ' pb in crint_smallz_vec !'
+      write(*,*) ' n, rho = ', n, rho
+      write(*,*) ' value = ', vals(n)
+      write(*,*) ' |delta_k| = ', abs(delta_k)
+    endif
   enddo
 
   deallocate(rho_k)

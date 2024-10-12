@@ -201,49 +201,6 @@ end
 
 ! ---
 
-complex*16 function cpx_erf_2(x, y)
-
-  BEGIN_DOC
-  !
-  ! compute erf(z) for z = x + i y
-  !
-  ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
-  ! https://doi.org/10.1063/5.0062444
-  !
-  END_DOC
-
-  implicit none
-  
-  double precision, intent(in) :: x, y
-
-  double precision             :: yabs
-  complex*16                   :: z
-
-  yabs = dabs(y)
-
-  if(yabs .lt. 1.d-15) then
-
-    cpx_erf_2 = (1.d0, 0.d0) * derf(x)
-    return
-
-  else
-
-    z = x + (0.d0, 1.d0) * y
-
-    if(x .ge. 0.d0) then
-      call zboysfun00(z, cpx_erf_2)
-    else
-      call zboysfun00nrp(z, cpx_erf_2)
-      cpx_erf_2 = cpx_erf_2 * zexp(-z)
-    endif
-
-  endif
-
-  return
-end
-
-! ---
-
 subroutine zboysfun00(z, val)
 
   BEGIN_DOC
@@ -333,20 +290,18 @@ subroutine zboysfun00(z, val)
   complex*16, intent(out) :: val
 
   integer    :: k
-  complex*16 :: z1, zz, y
-
-  zz = zexp(-z)
+  complex*16 :: z1, y
 
   if(abs(z) .ge. 100.0d0) then
 
     ! large |z|
-    z1 = (1.0d0, 0.d0) / zsqrt(z)
-    y  = (1.0d0, 0.d0) / z
+    z1 = (1.d0, 0.d0) / zsqrt(z)
+    y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
       val = val * y + asymcoef(k)
     enddo
-    val = zz * val * y + z1 * sqpio2
+    val = zexp(-z) * val * y + z1 * sqpio2
 
   else if(abs(z) .le. 0.35d0) then
 
@@ -359,12 +314,7 @@ subroutine zboysfun00(z, val)
   else
 
     ! intermediate |z|
-    val = sqpio2 / zsqrt(z) - 0.5d0 * zz * sum(ff(1:22)/(z+pp(1:22)))
-    !val = (0.d0, 0.d0)
-    !do k = 1, 22
-    !  val += ff(k) / (z + pp(k))
-    !enddo
-    !val = sqpio2 / zsqrt(z) - 0.5d0 * zz * val
+    val = sqpio2 / zsqrt(z) - 0.5d0 * zexp(-z) * sum(ff(1:22)/(z+pp(1:22)))
 
   endif
 
@@ -533,8 +483,8 @@ subroutine zboysfun00nrp(z, val)
 
   if(abs(z) .ge. 100.0d0) then
     ! large |z|
-    z1 = (1.0d0, 0.d0) / zsqrt(z)
-    y  = (1.0d0, 0.d0) / z
+    z1 = (1.d0, 0.d0) / zsqrt(z)
+    y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
       val = val * y + asymcoef(k)

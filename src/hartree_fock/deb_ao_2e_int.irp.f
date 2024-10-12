@@ -3,10 +3,10 @@ program deb_ao_2e_int
 
   implicit none
 
-  call check_ao_two_e_integral_cosgtos()
+  !call check_ao_two_e_integral_cosgtos()
   !call check_crint1()
   !call check_crint2()
-  !call check_crint3()
+  call check_crint3()
 
 end
 
@@ -26,31 +26,35 @@ subroutine check_ao_two_e_integral_cosgtos()
   acc = 0.d0
   nrm = 0.d0
 
-  i = 11
-  j = 100
-  k = 74
-  l = 104
- ! do i = 1, ao_num
- !   do k = 1, ao_num
- !     do j = 1, ao_num
- !       do l = 1, ao_num
+  !i = 11
+  !j = 100
+  !k = 74
+  !l = 104
+  do i = 1, ao_num
+    do k = 1, ao_num
+      j = i
+      l = k
+      !do j = 1, ao_num
+      !  do l = 1, ao_num
 
           tmp1 = ao_two_e_integral        (i, j, k, l)
           tmp2 = ao_two_e_integral_cosgtos(i, j, k, l)
 
           dif = abs(tmp1 - tmp2)
           !if(dif .gt. 1d-10) then
+          if(tmp1 .lt. 0.d0) then
             print*, ' error on:', i, j, k, l
             print*, tmp1, tmp2, dif
             !stop
+          endif
           !endif
 
           acc += dif
           nrm += abs(tmp1)
  !       enddo
  !     enddo
- !   enddo
- ! enddo
+    enddo
+  enddo
 
   print *, ' acc (%) = ', dif * 100.d0 / nrm
 
@@ -218,7 +222,7 @@ subroutine check_crint3()
   t_int1 = 0.d0
   t_int2 = 0.d0
 
-  n_test = 5
+  n_test = 1
 
   acc_re = 0.d0
   nrm_re = 0.d0
@@ -249,8 +253,13 @@ subroutine check_crint3()
     n = int(x)
     !if(n.eq.0) cycle
 
+    n = 0
+    !rho = (-6.83897018210218d0, -7.24479852507338d0)
+    rho = (-9.83206247355480d0, 0.445269582329036d0)
+
     print*, " n = ", n
     print*, " rho = ", real(rho), aimag(rho)
+
 
     call wall_time(t1)
     int1_old = crint_2(n, rho)
