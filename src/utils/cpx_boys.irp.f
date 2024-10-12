@@ -68,66 +68,6 @@ end
 
 ! ---
 
-complex*16 function crint_quad(n, rho)
-
-  implicit none
-
-  integer,    intent(in)  :: n
-  complex*16, intent(in)  :: rho
-
-  integer                 :: i_quad, n_quad
-  double precision        :: tmp_inv, tmp
-
-  n_quad = 1000000000
-  tmp_inv = 1.d0 / dble(n_quad)
-
-  !crint_quad = 0.5d0 * zexp(-rho)
-  !do i_quad = 1, n_quad - 1
-  !  tmp = tmp_inv * dble(i_quad)
-  !  tmp = tmp * tmp
-  !  crint_quad += zexp(-rho*tmp) * tmp**n
-  !enddo
-  !crint_quad = crint_quad * tmp_inv
-
-  !crint_quad = 0.5d0 * zexp(-rho)
-  !do i_quad = 1, n_quad - 1
-  !  tmp = tmp_inv * dble(i_quad)
-  !  crint_quad += zexp(-rho*tmp) * tmp**n / dsqrt(tmp)
-  !enddo
-  !crint_quad = crint_quad * 0.5d0 * tmp_inv
-
-  ! Composite Boole's Rule
-  crint_quad = 7.d0 * zexp(-rho)
-  do i_quad = 1, n_quad - 1
-    tmp = tmp_inv * dble(i_quad)
-    tmp = tmp * tmp
-    if(modulo(i_quad, 4) .eq. 0) then
-      crint_quad += 14.d0 * zexp(-rho*tmp) * tmp**n
-    else if(modulo(i_quad, 2) .eq. 0) then
-      crint_quad += 12.d0 * zexp(-rho*tmp) * tmp**n
-    else
-      crint_quad += 32.d0 * zexp(-rho*tmp) * tmp**n
-    endif
-  enddo
-  crint_quad = crint_quad * 2.d0 * tmp_inv / 45.d0
-
-  ! Composite Simpson's 3/8 rule
-  !crint_quad = zexp(-rho)
-  !do i_quad = 1, n_quad - 1
-  !  tmp = tmp_inv * dble(i_quad)
-  !  tmp = tmp * tmp
-  !  if(modulo(i_quad, 3) .eq. 0) then
-  !    crint_quad += 2.d0 * zexp(-rho*tmp) * tmp**n
-  !  else
-  !    crint_quad += 3.d0 * zexp(-rho*tmp) * tmp**n
-  !  endif
-  !enddo
-  !crint_quad = crint_quad * 3.d0 * tmp_inv / 8.d0
-
-end
-
-! ---
-
 complex*16 function crint_sum_1(n_pt_out, rho, d1)
 
   implicit none
@@ -283,20 +223,21 @@ complex*16 function crint_2(n, rho)
   integer,    intent(in) :: n
   complex*16, intent(in) :: rho
 
-  double precision :: tmp
-  complex*16 :: rho2
-  complex*16 :: vals(0:n)
-  complex*16, external :: crint_smallz
+  double precision       :: tmp
+  complex*16             :: rho2
+  complex*16             :: vals(0:n)
+
+  complex*16, external   :: crint_smallz
 
   if(abs(rho) < 10.d0) then
 
     if(abs(rho) .lt. 1d-6) then
-      tmp = 2.d0 * dble(n)
+      tmp = dble(n + n)
       rho2 = rho * rho
-      crint_2 = 1.d0 / (tmp + 1.d0)         &
-              - rho / (tmp + 3.d0)          &
-              + 0.5d0 * rho2 / (tmp + 5.d0) &
-              - 0.16666666666666666d0 * rho * rho2 / (tmp + 7.d0)
+      crint_2 = - 0.16666666666666666d0 * rho * rho2 / (tmp + 7.d0) &
+              + 0.5d0 * rho2 / (tmp + 5.d0)                         &
+              - rho / (tmp + 3.d0)                                  &
+              + 1.d0 / (tmp + 1.d0)
     else
       crint_2 = crint_smallz(n, rho)
     endif
@@ -327,6 +268,9 @@ subroutine zboysfun(n_max, x, vals)
   !
   ! Input: x --- argument, complex*16, Re(x) >= 0
   ! Output: vals  --- values of the Boys function, n = 0, 1, ..., n_max
+  !
+  ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
+  ! https://doi.org/10.1063/5.0062444
   !
   END_DOC
 
@@ -363,6 +307,9 @@ subroutine zboysfunnrp(n_max, x, vals)
   ! Input: x  --- argument, complex *16 Re(x)<=0
   ! Output: vals  --- values of e^z F(n,z), n = 0, 1, ..., n_max
   !
+  ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
+  ! https://doi.org/10.1063/5.0062444
+  !
   END_DOC
 
   implicit none
@@ -398,17 +345,12 @@ complex*16 function crint_sum_2(n_pt_out, rho, d1)
 
   complex*16, allocatable :: vals(:)
 
-  !complex*16, external    :: crint_2
-  !crint_sum_2 = (0.d0, 0.d0)
-  !do i = 0, n_pt_out, 2
-  !  n = shiftr(i, 1)
-  !  crint_sum_2 = crint_sum_2 + d1(i) * crint_2(n, rho)
-  !enddo
-
   n_max = shiftr(n_pt_out, 1)
-
   allocate(vals(0:n_max))
+
   call crint_2_vec(n_max, rho, vals)
+  ! FOR DEBUG
+  !call crint_quad_12_vec(n_max, rho, vals)
 
   crint_sum_2 = d1(0) * vals(0)
   do i = 2, n_pt_out, 2
@@ -444,16 +386,22 @@ subroutine crint_2_vec(n_max, rho, vals)
 
       ! use finite expansion for very small rho
 
-      ! rho^2 / 2
-      rho2 = 0.5d0 * rho * rho
-      ! rho^3 / 6
-      rho3 = 0.3333333333333333d0 * rho * rho2
+      !! rho^2 / 2
+      !rho2 = 0.5d0 * rho * rho
+      !! rho^3 / 6
+      !rho3 = 0.3333333333333333d0 * rho * rho2
+      !vals(0) = 1.d0 - 0.3333333333333333d0 * rho + 0.2d0 * rho2 - 0.14285714285714285d0 * rho3
+      !do n = 1, n_max
+      !  tmp = 2.d0 * dble(n)
+      !  vals(n) = 1.d0 / (tmp + 1.d0) - rho  / (tmp + 3.d0) &
+      !          + rho2 / (tmp + 5.d0) - rho3 / (tmp + 7.d0)
+      !enddo
 
-      vals(0) = 1.d0 - 0.3333333333333333d0 * rho + 0.2d0 * rho2 - 0.14285714285714285d0 * rho3
+      ! TODO (last term)
+      vals(0) = 1.d0 + rho * (-0.3333333333333333d0 + rho*(0.1d0 - 0.047619047619047616d0*rho))
       do n = 1, n_max
         tmp = 2.d0 * dble(n)
-        vals(n) = 1.d0 / (tmp + 1.d0) - rho  / (tmp + 3.d0) &
-                + rho2 / (tmp + 5.d0) - rho3 / (tmp + 7.d0)
+        vals(n) = 1.d0 / (tmp + 1.d0) + rho * (-1.d0/(tmp+3.d0) + rho*(0.5d0/(tmp+5.d0) - 0.3333333333333333d0*rho/(tmp+7.d0)))
       enddo
 
     else
@@ -535,6 +483,271 @@ subroutine crint_smallz_vec(n_max, rho, vals)
   enddo
 
   deallocate(rho_k)
+
+  return
+end
+
+! ---
+
+subroutine crint_quad_1(n, rho, n_quad, crint_quad)
+
+  implicit none
+
+  integer,    intent(in)  :: n, n_quad
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: crint_quad
+
+  integer                 :: i_quad
+  double precision        :: tmp_inv, tmp0, tmp1, tmp2
+  double precision        :: coef(0:3) = (/14.d0, 32.d0, 12.d0, 32.d0 /)
+
+  tmp_inv = 1.d0 / dble(n_quad)
+
+  crint_quad = 7.d0 * zexp(-rho)
+
+  tmp0 = 0.d0
+  select case (n)
+
+    case (0)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case (1)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case (2)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case (3)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1 * tmp1 * tmp1
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case (4)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        tmp2 = tmp1 * tmp1
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp2 * tmp2
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case default
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1) * tmp1**n
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+  end select
+
+end
+
+! ---
+
+subroutine crint_quad_2(n, rho, n_quad, crint_quad)
+
+  implicit none
+
+  integer,    intent(in)  :: n, n_quad
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: crint_quad
+
+  integer                 :: i_quad
+  double precision        :: tmp_inv, tmp0, tmp1, tmp2
+  double precision        :: coef(0:3) = (/14.d0, 32.d0, 12.d0, 32.d0 /)
+  complex*16              :: rhoc, rhoe
+
+  tmp_inv = 1.d0 / dble(n_quad)
+
+  crint_quad = 7.d0 * zexp(-rho)
+
+  tmp0 = 0.d0
+  rhoc = zexp(-rho*tmp_inv)
+  rhoe = (1.d0, 0.d0)
+  select case (n)
+
+    case (0)
+      !do i_quad = 1, n_quad - 1
+      !  tmp0 = tmp0 + tmp_inv
+      !  rhoe = rhoe * rhoc
+      !  tmp1 = (rhoe - 1.d0) / dsqrt(tmp0)
+      !  crint_quad = crint_quad + coef(iand(i_quad, 3)) * tmp1
+      !enddo
+      !crint_quad = 1.d0 + crint_quad * 0.022222222222222223d0 * tmp_inv
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe / dsqrt(tmp0)
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (1)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (2)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (3)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0 * tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (4)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        tmp2 = tmp1 * tmp1 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp2
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case default
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0**n / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+  end select
+
+end
+
+! ---
+
+subroutine crint_quad_12(n, rho, n_quad, crint_quad)
+
+  implicit none
+
+  integer,    intent(in)  :: n, n_quad
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: crint_quad
+
+  integer                 :: i_quad
+  double precision        :: tmp_inv, tmp0, tmp1, tmp2
+  double precision        :: coef(0:3) = (/14.d0, 32.d0, 12.d0, 32.d0 /)
+  complex*16              :: rhoc, rhoe
+
+  tmp_inv = 1.d0 / dble(n_quad)
+
+  crint_quad = 7.d0 * zexp(-rho)
+
+  tmp0 = 0.d0
+  rhoc = zexp(-rho*tmp_inv)
+  rhoe = (1.d0, 0.d0)
+  select case (n)
+
+    case (0)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * zexp(-rho*tmp1)
+      enddo
+      crint_quad = crint_quad * 0.044444444444444446d0 * tmp_inv
+
+    case (1)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (2)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (3)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0 * tmp0 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case (4)
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0 * tmp0
+        tmp2 = tmp1 * tmp1 / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp2
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+    case default
+      do i_quad = 1, n_quad - 1
+        tmp0 = tmp0 + tmp_inv
+        tmp1 = tmp0**n / dsqrt(tmp0)
+        rhoe = rhoe * rhoc
+        crint_quad = crint_quad + coef(iand(i_quad, 3)) * rhoe * tmp1
+      enddo
+      crint_quad = crint_quad * 0.022222222222222223d0 * tmp_inv
+
+  end select
+
+end
+
+! ---
+
+subroutine crint_quad_12_vec(n_max, rho, vals)
+
+  implicit none
+
+  integer,    intent(in)  :: n_max
+  complex*16, intent(in)  :: rho
+  complex*16, intent(out) :: vals(0:n_max)
+
+  integer                 :: n
+  double precision        :: tmp, abs_rho
+  complex*16              :: rho2, rho3, erho
+
+  do n = 1, n_max
+    call crint_quad_12(n, rho, 10000000, vals(n))
+  enddo
 
   return
 end

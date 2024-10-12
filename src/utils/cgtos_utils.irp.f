@@ -145,68 +145,6 @@ end
 
 ! ---
 
-!subroutine give_explicit_poly_and_gaussian_double(P_new,P_center,p,fact_k,iorder,alpha,beta,gama,a,b,A_center,B_center,Nucl_center,dim)
-!  BEGIN_DOC
-!  ! Transforms the product of
-!  !          (x-x_A)^a(1) (x-x_B)^b(1) (x-x_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3)
-!  !          exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta) exp(-(r-Nucl_center)^2 gama
-!  !
-!  ! into
-!  !        fact_k * [ sum (l_x = 0,i_order(1)) P_new(l_x,1) * (x-P_center(1))^l_x ] exp (- p (x-P_center(1))^2 )
-!  !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
-!  !               * [ sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z ] exp (- p (z-P_center(3))^2 )
-!  END_DOC
-!  implicit none
-!  include 'constants.include.F'
-!  integer, intent(in)            :: dim
-!  integer, intent(in)            :: a(3),b(3)         ! powers : (x-xa)**a_x = (x-A(1))**a(1)
-!  double precision, intent(in)   :: alpha, beta, gama ! exponents
-!  double precision, intent(in)   :: A_center(3)       ! A center
-!  double precision, intent(in)   :: B_center (3)      ! B center
-!  double precision, intent(in)   :: Nucl_center(3)    ! B center
-!  double precision, intent(out)  :: P_center(3)       ! new center
-!  double precision, intent(out)  :: p                 ! new exponent
-!  double precision, intent(out)  :: fact_k            ! constant factor
-!  double precision, intent(out)  :: P_new(0:max_dim,3)! polynomial
-!  integer         , intent(out)  :: iorder(3)         ! i_order(i) = order of the polynomials
-!
-!  double precision  :: P_center_tmp(3)       ! new center
-!  double precision  :: p_tmp                 ! new exponent
-!  double precision  :: fact_k_tmp,fact_k_bis ! constant factor
-!  double precision  :: P_new_tmp(0:max_dim,3)! polynomial
-!  integer :: i,j
-!  double precision :: binom_func
-!
-!  ! First you transform the two primitives into a sum of primitive with the same center P_center_tmp and gaussian exponent p_tmp
-!  call give_explicit_cpoly_and_cgaussian(P_new_tmp,P_center_tmp,p_tmp,fact_k_tmp,iorder,alpha,beta,a,b,A_center,B_center,dim)
-!  ! Then you create the new gaussian from the product of the new one per the Nuclei one
-!  call cgaussian_product(p_tmp,P_center_tmp,gama,Nucl_center,fact_k_bis,p,P_center)
-!  fact_k = fact_k_bis * fact_k_tmp
-!
-!  ! Then you build the coefficient of the new polynom
-!  do i = 0, iorder(1)
-!   P_new(i,1) = 0.d0
-!   do j = i,iorder(1)
-!    P_new(i,1) = P_new(i,1) + P_new_tmp(j,1) * binom_func(j,j-i) * (P_center(1) - P_center_tmp(1))**(j-i)
-!   enddo
-!  enddo
-!  do i = 0, iorder(2)
-!   P_new(i,2) = 0.d0
-!   do j = i,iorder(2)
-!    P_new(i,2) = P_new(i,2) + P_new_tmp(j,2) * binom_func(j,j-i) * (P_center(2) - P_center_tmp(2))**(j-i)
-!   enddo
-!  enddo
-!  do i = 0, iorder(3)
-!   P_new(i,3) = 0.d0
-!   do j = i,iorder(3)
-!    P_new(i,3) = P_new(i,3) + P_new_tmp(j,3) * binom_func(j,j-i) * (P_center(3) - P_center_tmp(3))**(j-i)
-!   enddo
-!  enddo
-!
-!end
-
-! ---
-
 subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
 
   BEGIN_DOC
@@ -237,7 +175,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   ab    = a * b * p_inv
 
   k       = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
-  tmp_mod = dsqrt(REAL(k)*REAL(k) + AIMAG(k)*AIMAG(k))
+  tmp_mod = dsqrt(real(k)*real(k) + aimag(k)*aimag(k))
   if(tmp_mod .gt. 40.d0) then
     k       = (0.d0, 0.d0)
     xp(1:3) = (0.d0, 0.d0)
@@ -245,9 +183,9 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   endif
 
   k = zexp(-k)
-  xp(1) = ( a * xa(1) + b * xb(1) ) * p_inv
-  xp(2) = ( a * xa(2) + b * xb(2) ) * p_inv
-  xp(3) = ( a * xa(3) + b * xb(3) ) * p_inv
+  xp(1) = (a * xa(1) + b * xb(1)) * p_inv
+  xp(2) = (a * xa(2) + b * xb(2)) * p_inv
+  xp(3) = (a * xa(3) + b * xb(3)) * p_inv
 
 end
 
@@ -309,8 +247,6 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
   integer,    intent(out)   :: nd
 
   integer                   :: ndtmp, ib, ic
-  double precision          :: tmp_mod
-  complex*16                :: tmp
 
   if(ior(nc, nb) >= 0) then ! True if nc>=0 and nb>=0
     continue
@@ -332,9 +268,7 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
   enddo
 
   do nd = ndtmp, 0, -1
-    tmp     = d(nd)
-    tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
-    if(tmp_mod .lt. 1.d-15) cycle
+    if(abs(d(nd)) .lt. 1.d-15) cycle
     exit
   enddo
 
@@ -432,47 +366,42 @@ subroutine recentered_cpoly2(P_A, x_A, x_P, a, P_B, x_B, x_Q, b)
   complex*16, intent(in)  :: x_A, x_P, x_B, x_Q
   complex*16, intent(out) :: P_A(0:a), P_B(0:b)
 
-  integer                 :: i, minab, maxab
-  complex*16              :: pows_a(-2:a+b+4), pows_b(-2:a+b+4)
+  integer                 :: i
+  integer                 :: maxbinom
+  complex*16              :: pows_a(0:a+b+2), pows_b(0:a+b+2)
 
   double precision        :: binom_func
 
-  if((a<0) .or. (b<0)) return
+  if((a < 0) .or. (b < 0)) return
 
-  maxab = max(a, b)
-  minab = max(min(a, b), 0)
+  maxbinom = size(binom_transp, 1)
 
   pows_a(0) = (1.d0, 0.d0)
   pows_a(1) = x_P - x_A
+  do i = 2, a
+    pows_a(i) = pows_a(i-1) * pows_a(1)
+  enddo
 
   pows_b(0) = (1.d0, 0.d0)
   pows_b(1) = x_Q - x_B
-
-  do i = 2, maxab
-    pows_a(i) = pows_a(i-1) * pows_a(1)
+  do i = 2, b
     pows_b(i) = pows_b(i-1) * pows_b(1)
   enddo
 
   P_A(0) = pows_a(a)
+  do i = 1, min(a, maxbinom)
+    P_A(i) = binom_transp(i,a) * pows_a(a-i)
+  enddo
+  do i = maxbinom+1, a
+    P_A(i) = binom_func(a, i) * pows_a(a-i)
+  enddo
+
   P_B(0) = pows_b(b)
-
-  do i = 1, min(minab, 20)
-    P_A(i) = binom_transp(a-i,a) * pows_a(a-i)
-    P_B(i) = binom_transp(b-i,b) * pows_b(b-i)
+  do i = 1, min(b, maxbinom)
+    P_B(i) = binom_transp(i,b) * pows_b(b-i)
   enddo
-
-  do i = minab+1, min(a, 20)
-    P_A(i) = binom_transp(a-i,a) * pows_a(a-i)
-  enddo
-  do i = minab+1, min(b, 20)
-    P_B(i) = binom_transp(b-i,b) * pows_b(b-i)
-  enddo
-
-  do i = 101, a
-    P_A(i) = binom_func(a,a-i) * pows_a(a-i)
-  enddo
-  do i = 101, b
-    P_B(i) = binom_func(b,b-i) * pows_b(b-i)
+  do i = maxbinom+1, b
+    P_B(i) = binom_func(b, i) * pows_b(b-i)
   enddo
 
 end
