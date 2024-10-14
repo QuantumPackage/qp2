@@ -23,14 +23,13 @@
   double precision :: A_center(3), B_center(3)
   double precision :: d_a_2,d_2
 
-  if(use_cosgtos) then
-    !print*, 'use_cosgtos for ao_kinetic_integrals ?', use_cosgtos
+  if(use_cgtos) then
 
     do j = 1, ao_num
       do i = 1, ao_num
-        ao_deriv2_x(i,j) = ao_deriv2_cosgtos_x(i,j)
-        ao_deriv2_y(i,j) = ao_deriv2_cosgtos_y(i,j)
-        ao_deriv2_z(i,j) = ao_deriv2_cosgtos_z(i,j)
+        ao_deriv2_x(i,j) = ao_deriv2_cgtos_x(i,j)
+        ao_deriv2_y(i,j) = ao_deriv2_cgtos_y(i,j)
+        ao_deriv2_z(i,j) = ao_deriv2_cgtos_z(i,j)
       enddo
     enddo
 
@@ -92,8 +91,8 @@
         power_A(1) = power_A(1)-2
 
         double precision :: deriv_tmp
-        deriv_tmp = (-2.d0 * alpha * (2.d0 * power_A(1) +1.d0) * overlap_x0 &
-        +power_A(1) * (power_A(1)-1.d0) * d_a_2 &
+        deriv_tmp = (-2.d0 * alpha * (2.d0 * dble(power_A(1)) +1.d0) * overlap_x0 &
+        +dble(power_A(1)) * (dble(power_A(1))-1.d0) * d_a_2 &
         +4.d0 * alpha * alpha * d_2   )*overlap_y0*overlap_z0
 
         ao_deriv2_x(i,j) += c*deriv_tmp
@@ -107,8 +106,8 @@
         call overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,power_B,overlap_y,d_2,overlap_z,overlap,dim1)
         power_A(2) = power_A(2)-2
 
-        deriv_tmp = (-2.d0 * alpha * (2.d0 * power_A(2) +1.d0 ) * overlap_y0 &
-        +power_A(2) * (power_A(2)-1.d0) * d_a_2 &
+        deriv_tmp = (-2.d0 * alpha * (2.d0 * dble(power_A(2)) +1.d0 ) * overlap_y0 &
+        +dble(power_A(2)) * (dble(power_A(2))-1.d0) * d_a_2 &
         +4.d0 * alpha * alpha * d_2   )*overlap_x0*overlap_z0
         ao_deriv2_y(i,j) += c*deriv_tmp
 
@@ -122,8 +121,8 @@
         call overlap_gaussian_xyz(A_center,B_center,alpha,beta,power_A,power_B,overlap_y,overlap_z,d_2,overlap,dim1)
         power_A(3) = power_A(3)-2
 
-        deriv_tmp = (-2.d0 * alpha * (2.d0 * power_A(3) +1.d0 ) * overlap_z0 &
-        +power_A(3) * (power_A(3)-1.d0) * d_a_2 &
+        deriv_tmp = (-2.d0 * alpha * (2.d0 * dble(power_A(3)) +1.d0 ) * overlap_z0 &
+        +dble(power_A(3)) * (dble(power_A(3))-1.d0) * d_a_2 &
         +4.d0 * alpha * alpha * d_2   )*overlap_x0*overlap_y0
         ao_deriv2_z(i,j) += c*deriv_tmp
 

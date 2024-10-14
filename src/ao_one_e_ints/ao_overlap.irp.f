@@ -1,10 +1,10 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, ao_overlap  , (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_x, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_y, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_z, (ao_num, ao_num) ]
+ BEGIN_PROVIDER [double precision, ao_overlap  , (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_x, (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_y, (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_z, (ao_num, ao_num)]
 
   BEGIN_DOC
   ! Overlap between atomic basis functions:
@@ -30,15 +30,14 @@
 
   else
 
-    if(use_cosgtos) then
-      !print*, ' use_cosgtos for ao_overlap ?', use_cosgtos
+    if(use_cgtos) then
 
       do j = 1, ao_num
         do i = 1, ao_num
-          ao_overlap  (i,j) = ao_overlap_cosgtos  (i,j) 
-          ao_overlap_x(i,j) = ao_overlap_cosgtos_x(i,j)
-          ao_overlap_y(i,j) = ao_overlap_cosgtos_y(i,j)
-          ao_overlap_z(i,j) = ao_overlap_cosgtos_z(i,j)
+          ao_overlap  (i,j) = ao_overlap_cgtos  (i,j) 
+          ao_overlap_x(i,j) = ao_overlap_cgtos_x(i,j)
+          ao_overlap_y(i,j) = ao_overlap_cgtos_y(i,j)
+          ao_overlap_z(i,j) = ao_overlap_cgtos_z(i,j)
         enddo
       enddo
 
@@ -49,7 +48,7 @@
       !$OMP DEFAULT(NONE) &
       !$OMP PRIVATE(A_center,B_center,power_A,power_B,&
       !$OMP  overlap_x,overlap_y, overlap_z, overlap, &
-      !$OMP  alpha, beta,i,j,c) &
+      !$OMP  alpha, beta,i,j,n,l,c) &
       !$OMP SHARED(nucl_coord,ao_power,ao_prim_num, &
       !$OMP  ao_overlap_x,ao_overlap_y,ao_overlap_z,ao_overlap,ao_num,ao_coef_normalized_ordered_transp,ao_nucl, &
       !$OMP  ao_expo_ordered_transp,dim1)

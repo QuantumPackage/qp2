@@ -143,7 +143,7 @@ complex*16 function erf_G(x, yabs)
     idble = dble(i)
     tmp0  = 0.5d0 * idble
     tmp1  = tmp0 * tmp0 + x2
-    tmp2  = dexp( idble * yabs - tmp1 - dlog(tmp1) - dlog_2pi) * (x - (0.d0, 1.d0)*tmp0)
+    tmp2  = dexp(idble * yabs - tmp1 - dlog(tmp1) - dlog_2pi) * (x - (0.d0, 1.d0)*tmp0)
 
     erf_G = erf_G + tmp2
 
@@ -197,49 +197,6 @@ complex*16 function erf_H(x, yabs)
 
   endif 
 
-end
-
-! ---
-
-complex*16 function cpx_erf_2(x, y)
-
-  BEGIN_DOC
-  !
-  ! compute erf(z) for z = x + i y
-  !
-  ! Beylkin & Sharma, J. Chem. Phys. 155, 174117 (2021)
-  ! https://doi.org/10.1063/5.0062444
-  !
-  END_DOC
-
-  implicit none
-  
-  double precision, intent(in) :: x, y
-
-  double precision             :: yabs
-  complex*16                   :: z
-
-  yabs = dabs(y)
-
-  if(yabs .lt. 1.d-15) then
-
-    cpx_erf_2 = (1.d0, 0.d0) * derf(x)
-    return
-
-  else
-
-    z = x + (0.d0, 1.d0) * y
-
-    if(x .ge. 0.d0) then
-      call zboysfun00(z, cpx_erf_2)
-    else
-      call zboysfun00nrp(z, cpx_erf_2)
-      cpx_erf_2 = cpx_erf_2 * zexp(-z)
-    endif
-
-  endif
-
-  return
 end
 
 ! ---
@@ -333,20 +290,18 @@ subroutine zboysfun00(z, val)
   complex*16, intent(out) :: val
 
   integer    :: k
-  complex*16 :: z1, zz, y
-
-  zz = zexp(-z)
+  complex*16 :: z1, y
 
   if(abs(z) .ge. 100.0d0) then
 
     ! large |z|
-    z1 = 1.0d0 / zsqrt(z)
-    y  = 1.0d0 / z
+    z1 = (1.d0, 0.d0) / zsqrt(z)
+    y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
       val = val * y + asymcoef(k)
     enddo
-    val = zz * val * y + z1 * sqpio2
+    val = zexp(-z) * val * y + z1 * sqpio2
 
   else if(abs(z) .le. 0.35d0) then
 
@@ -359,12 +314,7 @@ subroutine zboysfun00(z, val)
   else
 
     ! intermediate |z|
-    val = sqpio2 / zsqrt(z) - 0.5d0 * zz * sum(ff(1:22)/(z+pp(1:22)))
-    !val = (0.d0, 0.d0)
-    !do k = 1, 22
-    !  val += ff(k) / (z + pp(k))
-    !enddo
-    !val = sqpio2 / zsqrt(z) - 0.5d0 * zz * val
+    val = sqpio2 / zsqrt(z) - 0.5d0 * zexp(-z) * sum(ff(1:22)/(z+pp(1:22)))
 
   endif
 
@@ -388,6 +338,8 @@ subroutine zboysfun00nrp(z, val)
   ! https://doi.org/10.1063/5.0062444
   !
   END_DOC
+
+  include 'constants.include.F'
 
   implicit none
 
@@ -413,7 +365,6 @@ subroutine zboysfun00nrp(z, val)
 
   double precision, parameter :: tol     = 1.0d-03
   double precision, parameter :: sqpio2  = 0.886226925452758014d0 ! sqrt(pi)/2
-  double precision, parameter :: pi      = 3.14159265358979324d0
   double precision, parameter :: etmax   = 25.7903399171930621d0
   double precision, parameter :: etmax1  = 26.7903399171930621d0
   complex*16, parameter :: ima = (0.d0, 1.d0)
@@ -452,40 +403,40 @@ subroutine zboysfun00nrp(z, val)
                                                0.03112676196932382d0,  &
                                                0.013576229705876844d0 /)
 
-  double precision, parameter :: qq (1:16) = (/ 0.0007243228510223928d0, &
-                                                0.01980651726441906d0,   &
-                                                0.11641097769229371d0,   &
-                                                0.38573968881461146d0,   &
-                                                0.9414671037609641d0,    &
-                                                1.8939510935716377d0,    &
-                                                3.3275564293459383d0,    &
-                                                5.280587297262129d0,     &
-                                                7.730992222360452d0,     &
-                                                10.590207725831563d0,    &
-                                                13.706359477128965d0,    &
-                                                16.876705473663804d0,    &
-                                                19.867876155236257d0,    &
-                                                22.441333930203022d0,    &
-                                                24.380717439613566d0,    &
-                                                25.51771075067431d0 /)
+  double precision, parameter :: qq(1:16) = (/ 0.0007243228510223928d0, &
+                                               0.01980651726441906d0,   &
+                                               0.11641097769229371d0,   &
+                                               0.38573968881461146d0,   &
+                                               0.9414671037609641d0,    &
+                                               1.8939510935716377d0,    &
+                                               3.3275564293459383d0,    &
+                                               5.280587297262129d0,     &
+                                               7.730992222360452d0,     &
+                                               10.590207725831563d0,    &
+                                               13.706359477128965d0,    &
+                                               16.876705473663804d0,    &
+                                               19.867876155236257d0,    &
+                                               22.441333930203022d0,    &
+                                               24.380717439613566d0,    &
+                                               25.51771075067431d0 /)
 
 
-  double precision, parameter :: qq1 (1:16) = (/ 0.0007524078957852004d0,&
-                                                 0.020574499281252233d0, &
-                                                 0.12092472113522865d0,  &
-                                                 0.40069643967765295d0,  &
-                                                 0.9779717449089211d0,   &
-                                                 1.9673875468969015d0,   &
-                                                 3.4565797939091802d0,   &
-                                                 5.485337886599723d0,    &
-                                                 8.030755321535683d0,    &
-                                                 11.000834641174064d0,   &
-                                                 14.237812708111456d0,   &
-                                                 17.531086359214406d0,   &
-                                                 20.6382373144543d0,     &
-                                                 23.31147887603379d0,    &
-                                                 25.326060444703632d0,   &
-                                                 26.507139770710722d0 /)
+  double precision, parameter :: qq1(1:16) = (/ 0.0007524078957852004d0,&
+                                                0.020574499281252233d0, &
+                                                0.12092472113522865d0,  &
+                                                0.40069643967765295d0,  &
+                                                0.9779717449089211d0,   &
+                                                1.9673875468969015d0,   &
+                                                3.4565797939091802d0,   &
+                                                5.485337886599723d0,    &
+                                                8.030755321535683d0,    &
+                                                11.000834641174064d0,   &
+                                                14.237812708111456d0,   &
+                                                17.531086359214406d0,   &
+                                                20.6382373144543d0,     &
+                                                23.31147887603379d0,    &
+                                                25.326060444703632d0,   &
+                                                26.507139770710722d0 /)
 
   double precision, parameter :: uu(1:16) = (/ 0.9992759394074501d0,      &
                                                0.9803883431758104d0,      &
@@ -532,8 +483,8 @@ subroutine zboysfun00nrp(z, val)
 
   if(abs(z) .ge. 100.0d0) then
     ! large |z|
-    z1 = 1.0d0 / zsqrt(z)
-    y  = 1.0d0 / z
+    z1 = (1.d0, 0.d0) / zsqrt(z)
+    y  = (1.d0, 0.d0) / z
     val = asymcoef(7)
     do k = 6, 1, -1
       val = val * y + asymcoef(k)
@@ -560,13 +511,13 @@ subroutine zboysfun00nrp(z, val)
         zsum = zsum + ww(k) * (zz - uu(k)) / (qq(k) + z)
       else
         q = z + qq(k)
-        p = 1.0d0 - 0.5d0*q + q*q/6.0d0 - q*q*q/24.0d0 + q*q*q*q/120.0d0
-        zsum = zsum + ww(k) * p *zz
+        p = q * (0.041666666666666664d0*q * (q * (0.2d0*q - 1.d0) + 4.d0) - 0.5d0) + 1.d0
+        zsum = zsum + ww(k) * p * zz
       endif
     enddo
-    zt = ima * sqrt(z / etmax)
+    zt = ima * zsqrt(z / etmax)
     tmp = 0.5d0 * ima * log((1.0d0 - zt) / (1.0d0 + zt))
-    val = sqrt(etmax) * zsum / sqrt(pi) + zz * tmp / sqrt(pi*z)
+    val = dsqrt(etmax) * zsum * inv_sq_pi + zz * tmp / zsqrt(pi*z)
   else
     zsum = (0.d0, 0.d0)
     do k = 1, 16
@@ -574,13 +525,14 @@ subroutine zboysfun00nrp(z, val)
         zsum = zsum + ww(k) * (zz - uu1(k)) / (qq1(k) + z)
       else
         q = z + qq1(k)
-        p = 1.0d0 - 0.5d0*q + q*q/6.0d0 - q*q*q/24.0d0 + q*q*q*q/120.0d0
+        !p = 1.0d0 - 0.5d0*q + q*q/6.0d0 - q*q*q/24.0d0 + q*q*q*q/120.0d0
+        p = q * (0.041666666666666664d0*q * (q * (0.2d0*q - 1.d0) + 4.d0) - 0.5d0) + 1.d0
         zsum = zsum + ww(k) * p * zz
       endif
     enddo
     zt = ima * zsqrt(z / etmax1)
     tmp = 0.5d0 * ima * log((1.0d0 - zt) / (1.0d0 + zt))
-    val = dsqrt(etmax1) * zsum / dsqrt(pi) + zz * tmp / zsqrt(pi*z)
+    val = dsqrt(etmax1) * zsum * inv_sq_pi + zz * tmp / zsqrt(pi*z)
   endif
 
   return

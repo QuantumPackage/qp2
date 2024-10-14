@@ -38,15 +38,14 @@ double precision function ao_two_e_integral(i, j, k, l)
   double precision               :: Q_new(0:max_dim,3),Q_center(3),fact_q,qq
 
   double precision, external     :: ao_two_e_integral_erf
-  double precision, external     :: ao_two_e_integral_cosgtos
+  double precision, external     :: ao_two_e_integral_cgtos
   double precision, external     :: ao_two_e_integral_schwartz_accel
 
   logical, external :: do_schwartz_accel
 
-  if(use_cosgtos) then
-    !print *, ' use_cosgtos for ao_two_e_integral ?', use_cosgtos
+  if(use_cgtos) then
 
-    ao_two_e_integral = ao_two_e_integral_cosgtos(i, j, k, l)
+    ao_two_e_integral = ao_two_e_integral_cgtos(i, j, k, l)
 
   else if (use_only_lr) then
 
@@ -54,17 +53,17 @@ double precision function ao_two_e_integral(i, j, k, l)
 
   else if (do_schwartz_accel(i,j,k,l)) then
 
-       ao_two_e_integral = ao_two_e_integral_schwartz_accel(i,j,k,l)
+    ao_two_e_integral = ao_two_e_integral_schwartz_accel(i,j,k,l)
 
   else
 
-      dim1 = n_pt_max_integrals
+    dim1 = n_pt_max_integrals
 
-      num_i = ao_nucl(i)
-      num_j = ao_nucl(j)
-      num_k = ao_nucl(k)
-      num_l = ao_nucl(l)
-      ao_two_e_integral = 0.d0
+    num_i = ao_nucl(i)
+    num_j = ao_nucl(j)
+    num_k = ao_nucl(k)
+    num_l = ao_nucl(l)
+    ao_two_e_integral = 0.d0
 
       if (num_i /= num_j .or. num_k /= num_l .or. num_j /= num_k)then
         do p = 1, 3
