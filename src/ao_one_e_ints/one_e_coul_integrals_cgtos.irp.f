@@ -67,8 +67,8 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
           phiB = ao_expo_phase_ord_transp(4,l,i)
           KB2 = ao_expo_pw_ord_transp(4,l,i) * ao_expo_pw_ord_transp(4,l,i)
 
-          C1 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
-          C2 = zexp((0.d0, 1.d0) * ( phiA + phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
+          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
+          C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
 
           c = 0.d0
           do k = 1, nucl_num

@@ -90,8 +90,8 @@
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
-          C2 = zexp((0.d0, 1.d0) * ( phiA + phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
+          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
+          C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
 
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1)
