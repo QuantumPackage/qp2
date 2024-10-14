@@ -400,7 +400,7 @@ complex*16 function crint_sum_2(n_pt_out, rho, d1)
   integer,    intent(in)  :: n_pt_out
   complex*16, intent(in)  :: rho, d1(0:n_pt_out)
                           
-  integer                 :: n, i
+  integer                 :: i
   integer                 :: n_max
 
   complex*16, allocatable :: vals(:)
@@ -414,8 +414,7 @@ complex*16 function crint_sum_2(n_pt_out, rho, d1)
 
   crint_sum_2 = d1(0) * vals(0)
   do i = 2, n_pt_out, 2
-    n = shiftr(i, 1)
-    crint_sum_2 += d1(i) * vals(n)
+    crint_sum_2 += d1(i) * vals(shiftr(i, 1))
   enddo
 
   deallocate(vals)

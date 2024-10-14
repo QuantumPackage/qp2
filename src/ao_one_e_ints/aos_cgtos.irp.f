@@ -17,8 +17,8 @@ END_PROVIDER
 ! ---
 
  BEGIN_PROVIDER [complex*16, ao_expo_cgtos_ord_transp, (ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [complex*16, ao_expo_pw_ord_transp, (3, ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [complex*16, ao_expo_phase_ord_transp, (3, ao_prim_num_max, ao_num)]
+&BEGIN_PROVIDER [complex*16, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
+&BEGIN_PROVIDER [complex*16, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
 
   implicit none
   integer :: i, j, m
@@ -30,6 +30,12 @@ END_PROVIDER
         ao_expo_pw_ord_transp(m,i,j) = ao_expo_pw_ord(m,j,i)
         ao_expo_phase_ord_transp(m,i,j) = ao_expo_phase_ord(m,j,i)
       enddo
+      ao_expo_pw_ord_transp(4,i,j) = ao_expo_pw_ord_transp(1,i,j) &
+                                   + ao_expo_pw_ord_transp(2,i,j) &
+                                   + ao_expo_pw_ord_transp(3,i,j)
+      ao_expo_phase_ord_transp(4,i,j) = ao_expo_phase_ord_transp(1,j,i) &
+                                      + ao_expo_phase_ord_transp(2,j,i) &
+                                      + ao_expo_phase_ord_transp(3,j,i)
     enddo
   enddo
 

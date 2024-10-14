@@ -1,7 +1,7 @@
 
 ! ---
 
-BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
   BEGIN_DOC
   !
@@ -12,42 +12,63 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: num_A, num_B, power_A(3), power_B(3)
-  integer          :: i, j, k, l, n_pt_in, m
-  double precision :: c, Z, A_center(3), B_center(3), C_center(3)
-  complex*16       :: alpha, beta, c1, c2
+  integer          :: power_A(3), power_B(3)
+  integer          :: i, j, k, l, m, n, ii, jj
+  double precision :: c, Z, C_center(3)
+  complex*16       :: alpha, alpha_inv, A_center(3), phiA, KA2
+  complex*16       :: beta, beta_inv, B_center(3), phiB, KB2
+  complex*16       :: C1, C2, I1, I2
 
   complex*16       :: NAI_pol_mult_cgtos
 
   ao_integrals_n_e_cgtos = 0.d0
 
- !$OMP PARALLEL                                                                           &
- !$OMP DEFAULT (NONE)                                                                     &
- !$OMP PRIVATE ( i, j, k, l, m, alpha, beta, A_center, B_center, C_center                 &
- !$OMP         , power_A, power_B, num_A, num_B, Z, c, c1, c2, n_pt_in )                  &
- !$OMP SHARED ( ao_num, ao_prim_num, ao_nucl, nucl_coord, ao_power, nucl_num, nucl_charge &
- !$OMP        , ao_expo_cgtos_ord_transp, ao_coef_cgtos_norm_ord_transp               &
- !$OMP        , n_pt_max_integrals, ao_integrals_n_e_cgtos )
-
- n_pt_in = n_pt_max_integrals
-
+ !$OMP PARALLEL                                                         &
+ !$OMP DEFAULT (NONE)                                                   &
+ !$OMP PRIVATE (i, j, k, l, m, n, ii, jj, C_center, Z, c,               &
+ !$OMP          alpha, alpha_inv, A_center, phiA, KA2, power_A, C1, I1, &
+ !$OMP          beta, beta_inv, B_center, phiB, KB2, power_B, C2, I2)   &
+ !$OMP SHARED (ao_num, ao_prim_num, ao_nucl, nucl_coord,                &
+ !$OMP         ao_power, nucl_num, nucl_charge, n_pt_max_integrals,     &
+ !$OMP         ao_expo_cgtos_ord_transp, ao_coef_cgtos_norm_ord_transp, &
+ !$OMP         ao_expo_pw_ord_transp, ao_expo_phase_ord_transp,         &
+ !$OMP         ao_integrals_n_e_cgtos)
  !$OMP DO SCHEDULE (dynamic)
 
   do j = 1, ao_num
-    num_A         = ao_nucl(j)
-    power_A(1:3)  = ao_power(j,1:3)
-    A_center(1:3) = nucl_coord(num_A,1:3)
+
+    jj = ao_nucl(j)
+    power_A(1:3) = ao_power(j,1:3)
 
     do i = 1, ao_num
-      num_B         = ao_nucl(i)
-      power_B(1:3)  = ao_power(i,1:3)
-      B_center(1:3) = nucl_coord(num_B,1:3)
 
-      do l = 1, ao_prim_num(j)
-        alpha = ao_expo_cgtos_ord_transp(l,j)
+      ii = ao_nucl(i)
+      power_B(1:3) = ao_power(i,1:3)
 
-        do m = 1, ao_prim_num(i)
-          beta = ao_expo_cgtos_ord_transp(m,i)
+      do n = 1, ao_prim_num(j)
+
+        alpha = ao_expo_cgtos_ord_transp(n,j)
+        alpha_inv = (1.d0, 0.d0) / alpha
+
+        do m = 1, 3
+          A_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
+        enddo
+        phiA = ao_expo_phase_ord_transp(4,n,j)
+        KA2 = ao_expo_pw_ord_transp(4,n,j) * ao_expo_pw_ord_transp(4,n,j)
+
+        do l = 1, ao_prim_num(i)
+
+          beta = ao_expo_cgtos_ord_transp(l,i)
+          beta_inv = (1.d0, 0.d0) / beta
+
+          do m = 1, 3
+            B_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
+          enddo
+          phiB = ao_expo_phase_ord_transp(4,l,i)
+          KB2 = ao_expo_pw_ord_transp(4,l,i) * ao_expo_pw_ord_transp(4,l,i)
+
+          C1 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
+          C2 = zexp((0.d0, 1.d0) * ( phiA + phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
 
           c = 0.d0
           do k = 1, nucl_num
@@ -56,26 +77,15 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
             C_center(1:3) = nucl_coord(k,1:3)
 
-            !print *, ' '
-            !print *, A_center, B_center, C_center, power_A, power_B
-            !print *, real(alpha), real(beta)
+            I1 = NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_max_integrals)
 
-            c1 = NAI_pol_mult_cgtos( A_center, B_center, power_A, power_B &
-                                     , alpha, beta, C_center, n_pt_in )
+            I2 = NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, conjg(alpha), beta, C_center, n_pt_max_integrals)
 
-            !c2 = c1
-            c2 = NAI_pol_mult_cgtos( A_center, B_center, power_A, power_B  &
-                                     , conjg(alpha), beta, C_center, n_pt_in )
-
-            !print *, ' c1 = ', real(c1)
-            !print *, ' c2 = ', real(c2)
-
-            c = c - Z * 2.d0 * real(c1 + c2)
-
+            c = c - Z * 2.d0 * real(C1 * I1 + C2 * I2)
           enddo
-          ao_integrals_n_e_cgtos(i,j) = ao_integrals_n_e_cgtos(i,j) &
-                      + ao_coef_cgtos_norm_ord_transp(l,j)            &
-                      * ao_coef_cgtos_norm_ord_transp(m,i) * c
+
+          ao_integrals_n_e_cgtos(i,j) += c * ao_coef_cgtos_norm_ord_transp(n,j) &
+                                           * ao_coef_cgtos_norm_ord_transp(l,i)
         enddo
       enddo
     enddo
@@ -102,29 +112,38 @@ complex*16 function NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alp
   include 'utils/constants.include.F'
 
   integer,          intent(in) :: n_pt_in, power_A(3), power_B(3)
-  double precision, intent(in) :: C_center(3), A_center(3), B_center(3)
-  complex*16,       intent(in) :: alpha, beta
+  double precision, intent(in) :: C_center(3)
+  complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3)
 
   integer                      :: i, n_pt, n_pt_out
-  double precision             :: dist, const_mod
-  complex*16                   :: p, p_inv, rho, dist_integral, const, const_factor, coeff, factor
-  complex*16                   :: accu, P_center(3)
+  double precision             :: dist_AB, dist_AC
+  complex*16                   :: p, p_inv, rho, dist, dist_integral, const, const_factor, coeff, factor
+  complex*16                   :: P_center(3)
   complex*16                   :: d(0:n_pt_in)
 
   complex*16, external         :: V_n_e_cgtos
   complex*16, external         :: crint_2
   complex*16, external         :: crint_sum_2
 
-  if ( (A_center(1)/=B_center(1)) .or. (A_center(2)/=B_center(2)) .or. (A_center(3)/=B_center(3)) .or. &
-       (A_center(1)/=C_center(1)) .or. (A_center(2)/=C_center(2)) .or. (A_center(3)/=C_center(3)) ) then
+
+
+  dist_AB = 0.d0
+  dist_AC = 0.d0
+  do i = 1, 3
+    dist_AB += abs(A_center(i) - B_center(i))
+    dist_AC += abs(A_center(i) - C_center(i) * (1.d0, 0.d0))
+  enddo
+
+
+  if((dist_AB .gt. 1d-13) .or. (dist_AC .gt. 1d-13)) then
 
     continue
 
   else
 
-    NAI_pol_mult_cgtos = V_n_e_cgtos( power_A(1), power_A(2), power_A(3) &
-                                        , power_B(1), power_B(2), power_B(3) &
-                                        , alpha, beta )
+    NAI_pol_mult_cgtos = V_n_e_cgtos(power_A(1), power_A(2), power_A(3), &
+                                     power_B(1), power_B(2), power_B(3), &
+                                     alpha, beta)
     return
 
   endif
@@ -133,7 +152,7 @@ complex*16 function NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alp
   p_inv = (1.d0, 0.d0) / p
   rho   = alpha * beta * p_inv
 
-  dist          = 0.d0
+  dist          = (0.d0, 0.d0)
   dist_integral = (0.d0, 0.d0)
   do i = 1, 3
     P_center(i)    = (alpha * A_center(i) + beta * B_center(i)) * p_inv
@@ -144,8 +163,7 @@ complex*16 function NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alp
   const_factor = dist * rho
   const        = p * dist_integral
 
-  const_mod = dsqrt(real(const_factor)*real(const_factor) + aimag(const_factor)*aimag(const_factor))
-  if(const_mod > 80.d0) then
+  if(abs(const_factor) > 80.d0) then
     NAI_pol_mult_cgtos = (0.d0, 0.d0)
     return
   endif
@@ -153,16 +171,13 @@ complex*16 function NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alp
   factor = zexp(-const_factor)
   coeff  = dtwo_pi * factor * p_inv
 
-  do i = 0, n_pt_in
-    d(i) = (0.d0, 0.d0)
-  enddo
-
-  n_pt = 2 * ( (power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)) )
+  n_pt = 2 * ((power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)))
   if(n_pt == 0) then
     NAI_pol_mult_cgtos = coeff * crint_2(0, const)
     return
   endif
 
+  d(0:n_pt_in) = (0.d0, 0.d0)
   call give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
                                           power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
@@ -171,20 +186,15 @@ complex*16 function NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alp
     return
   endif
 
-  !accu = (0.d0, 0.d0)
-  !do i = 0, n_pt_out, 2
-  !  accu += crint_2(shiftr(i, 1), const) * d(i)
-  !enddo
-  accu = crint_sum_2(n_pt_out, const, d)
-  NAI_pol_mult_cgtos = accu * coeff
+  NAI_pol_mult_cgtos = coeff * crint_sum_2(n_pt_out, const, d)
 
   return
 end
 
 ! ---
 
-subroutine give_cpolynomial_mult_center_one_e( A_center, B_center, alpha, beta &
-                                             , power_A, power_B, C_center, n_pt_in, d, n_pt_out)
+subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
+                                              power_A, power_B, C_center, n_pt_in, d, n_pt_out)
 
   BEGIN_DOC
   ! Returns the explicit polynomial in terms of the "t" variable of the following
@@ -195,8 +205,8 @@ subroutine give_cpolynomial_mult_center_one_e( A_center, B_center, alpha, beta &
   implicit none
 
   integer,          intent(in) :: n_pt_in, power_A(3), power_B(3)
-  double precision, intent(in) :: A_center(3), B_center(3), C_center(3)
-  complex*16,       intent(in) :: alpha, beta
+  double precision, intent(in) :: C_center(3)
+  complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3)
   integer,         intent(out) :: n_pt_out
   complex*16,      intent(out) :: d(0:n_pt_in)
 
@@ -499,8 +509,8 @@ complex*16 function V_n_e_cgtos(a_x, a_y, a_z, b_x, b_y, b_z, alpha, beta)
   else
 
     V_n_e_cgtos = V_r_cgtos(a_x + b_x + a_y + b_y + a_z + b_z + 1, alpha + beta) &
-                  * V_phi(a_x + b_x, a_y + b_y)                                      &
-                  * V_theta(a_z + b_z, a_x + b_x + a_y + b_y + 1)
+                * V_phi(a_x + b_x, a_y + b_y)                                    &
+                * V_theta(a_z + b_z, a_x + b_x + a_y + b_y + 1)
   endif
 
 end

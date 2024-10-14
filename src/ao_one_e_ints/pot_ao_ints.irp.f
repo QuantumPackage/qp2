@@ -28,7 +28,6 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
   else
 
     if(use_cgtos) then
-      !print *, " use_cgtos for ao_integrals_n_e ?", use_cgtos
 
       do j = 1, ao_num
         do i = 1, ao_num
