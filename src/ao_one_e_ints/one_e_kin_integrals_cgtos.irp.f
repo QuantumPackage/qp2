@@ -1,9 +1,9 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, ao_deriv2_cosgtos_x, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_deriv2_cosgtos_y, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_deriv2_cosgtos_z, (ao_num, ao_num) ]
+ BEGIN_PROVIDER [ double precision, ao_deriv2_cgtos_x, (ao_num, ao_num) ]
+&BEGIN_PROVIDER [ double precision, ao_deriv2_cgtos_y, (ao_num, ao_num) ]
+&BEGIN_PROVIDER [ double precision, ao_deriv2_cgtos_z, (ao_num, ao_num) ]
 
   implicit none
   integer          :: i, j, n, l, dim1, power_A(3), power_B(3)
@@ -40,8 +40,8 @@
  !$OMP        , overlap_m2_1, overlap_p2_1, overlap_m2_2, overlap_p2_2                               &
  !$OMP        , overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap_x0_2, overlap_y0_2, overlap_z0_2 ) &
  !$OMP SHARED( nucl_coord, ao_power, ao_prim_num, ao_num, ao_nucl, dim1                              &
- !$OMP       , ao_coef_norm_ord_transp_cosgtos, ao_expo_ord_transp_cosgtos                           & 
- !$OMP       , ao_deriv2_cosgtos_x, ao_deriv2_cosgtos_y, ao_deriv2_cosgtos_z ) 
+ !$OMP       , ao_coef_norm_ord_transp_cgtos, ao_expo_ord_transp_cgtos                           & 
+ !$OMP       , ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z ) 
 
   do j = 1, ao_num
     A_center(1) = nucl_coord(ao_nucl(j),1) * (1.d0, 0.d0)
@@ -59,16 +59,16 @@
       power_B(2)  = ao_power(i,2)
       power_B(3)  = ao_power(i,3)
 
-      ao_deriv2_cosgtos_x(i,j) = 0.d0
-      ao_deriv2_cosgtos_y(i,j) = 0.d0
-      ao_deriv2_cosgtos_z(i,j) = 0.d0
+      ao_deriv2_cgtos_x(i,j) = 0.d0
+      ao_deriv2_cgtos_y(i,j) = 0.d0
+      ao_deriv2_cgtos_z(i,j) = 0.d0
 
       do n = 1, ao_prim_num(j)
-        alpha = ao_expo_ord_transp_cosgtos(n,j)
+        alpha = ao_expo_ord_transp_cgtos(n,j)
 
         do l = 1, ao_prim_num(i)
-          c    = ao_coef_norm_ord_transp_cosgtos(n,j) * ao_coef_norm_ord_transp_cosgtos(l,i)
-          beta = ao_expo_ord_transp_cosgtos(l,i)
+          c    = ao_coef_norm_ord_transp_cgtos(n,j) * ao_coef_norm_ord_transp_cgtos(l,i)
+          beta = ao_expo_ord_transp_cgtos(l,i)
 
           call overlap_cgaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B       &
                                     , overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1 )
@@ -109,7 +109,7 @@
 
           deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
-          ao_deriv2_cosgtos_x(i,j) += c * deriv_tmp
+          ao_deriv2_cgtos_x(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -144,7 +144,7 @@
 
           deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
-          ao_deriv2_cosgtos_y(i,j) += c * deriv_tmp
+          ao_deriv2_cgtos_y(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -179,7 +179,7 @@
 
           deriv_tmp = 2.d0 * real(deriv_tmp_1 + deriv_tmp_2)
 
-          ao_deriv2_cosgtos_z(i,j) += c * deriv_tmp
+          ao_deriv2_cgtos_z(i,j) += c * deriv_tmp
 
           ! ---
 
@@ -193,11 +193,11 @@ END_PROVIDER
 
 ! ---
 
-BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cosgtos, (ao_num, ao_num)]
+BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
 
   BEGIN_DOC
   ! 
-  ! Kinetic energy integrals in the cosgtos |AO| basis.
+  ! Kinetic energy integrals in the cgtos |AO| basis.
   !
   ! $\langle \chi_i |\hat{T}| \chi_j \rangle$
   !
@@ -208,12 +208,12 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cosgtos, (ao_num, ao_num)
 
  !$OMP PARALLEL DO DEFAULT(NONE) &
  !$OMP  PRIVATE(i, j)            &
- !$OMP  SHARED(ao_num, ao_kinetic_integrals_cosgtos, ao_deriv2_cosgtos_x, ao_deriv2_cosgtos_y, ao_deriv2_cosgtos_z)
+ !$OMP  SHARED(ao_num, ao_kinetic_integrals_cgtos, ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z)
   do j = 1, ao_num
     do i = 1, ao_num
-      ao_kinetic_integrals_cosgtos(i,j) = -0.5d0 * ( ao_deriv2_cosgtos_x(i,j) &
-                                                   + ao_deriv2_cosgtos_y(i,j) &
-                                                   + ao_deriv2_cosgtos_z(i,j) )
+      ao_kinetic_integrals_cgtos(i,j) = -0.5d0 * (ao_deriv2_cgtos_x(i,j) + &
+                                                  ao_deriv2_cgtos_y(i,j) + &
+                                                  ao_deriv2_cgtos_z(i,j))
     enddo
   enddo
  !$OMP END PARALLEL DO

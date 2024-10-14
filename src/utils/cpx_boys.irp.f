@@ -408,9 +408,9 @@ complex*16 function crint_sum_2(n_pt_out, rho, d1)
   n_max = shiftr(n_pt_out, 1)
   allocate(vals(0:n_max))
 
-  call crint_2_vec(n_max, rho, vals)
+  !call crint_2_vec(n_max, rho, vals)
   ! FOR DEBUG
-  !call crint_quad_12_vec(n_max, rho, vals)
+  call crint_quad_12_vec(n_max, rho, vals)
 
   crint_sum_2 = d1(0) * vals(0)
   do i = 2, n_pt_out, 2
@@ -859,7 +859,7 @@ subroutine crint_quad_12_vec(n_max, rho, vals)
   double precision        :: tmp, abs_rho
   complex*16              :: rho2, rho3, erho
 
-  do n = 1, n_max
+  do n = 0, n_max
     call crint_quad_12(n, rho, 10000000, vals(n))
   enddo
 

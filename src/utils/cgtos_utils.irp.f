@@ -101,7 +101,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
 
   ! IF fact_k is too smal then: returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
-  tmp_mod = dsqrt(REAL(fact_k)*REAL(fact_k) + AIMAG(fact_k)*AIMAG(fact_k))
+  tmp_mod = dsqrt(real(fact_k)*real(fact_k) + aimag(fact_k)*aimag(fact_k))
   if(tmp_mod < 1d-14) then
     iorder               = 0
     p                    = (1.d+14, 0.d0)

@@ -30,15 +30,14 @@
 
   else
 
-    if(use_cosgtos) then
-      !print*, ' use_cosgtos for ao_overlap ?', use_cosgtos
+    if(use_cgtos) then
 
       do j = 1, ao_num
         do i = 1, ao_num
-          ao_overlap  (i,j) = ao_overlap_cosgtos  (i,j) 
-          ao_overlap_x(i,j) = ao_overlap_cosgtos_x(i,j)
-          ao_overlap_y(i,j) = ao_overlap_cosgtos_y(i,j)
-          ao_overlap_z(i,j) = ao_overlap_cosgtos_z(i,j)
+          ao_overlap  (i,j) = ao_overlap_cgtos  (i,j) 
+          ao_overlap_x(i,j) = ao_overlap_cgtos_x(i,j)
+          ao_overlap_y(i,j) = ao_overlap_cgtos_y(i,j)
+          ao_overlap_z(i,j) = ao_overlap_cgtos_z(i,j)
         enddo
       enddo
 

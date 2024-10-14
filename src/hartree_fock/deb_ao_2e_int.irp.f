@@ -3,60 +3,65 @@ program deb_ao_2e_int
 
   implicit none
 
-  !call check_ao_two_e_integral_cosgtos()
+  call check_ao_two_e_integral_cgtos()
   !call check_crint1()
   !call check_crint2()
-  call check_crint3()
+  !call check_crint3()
 
 end
 
 ! ---
 
-subroutine check_ao_two_e_integral_cosgtos()
+subroutine check_ao_two_e_integral_cgtos()
 
   implicit none
 
   integer                    :: i, j, k, l
   double precision           :: acc, nrm, dif
   double precision           :: tmp1, tmp2
+  double precision           :: pw, pw0
+  double precision           :: t1, t2, tt
 
   double precision, external :: ao_two_e_integral
-  double precision, external :: ao_two_e_integral_cosgtos
+  double precision, external :: ao_two_e_integral_cgtos
 
   acc = 0.d0
   nrm = 0.d0
 
-  !i = 11
-  !j = 100
-  !k = 74
-  !l = 104
+  pw0 = dble(ao_num**3)
+  pw = 0.d0
+  tt = 0.d0
   do i = 1, ao_num
-    do k = 1, ao_num
-      j = i
-      l = k
-      !do j = 1, ao_num
-      !  do l = 1, ao_num
+    call wall_time(t1)
+    do j = 1, ao_num
+      do k = 1, ao_num
+        do l = 1, ao_num
 
-          tmp1 = ao_two_e_integral        (i, j, k, l)
-          tmp2 = ao_two_e_integral_cosgtos(i, j, k, l)
+          call deb_ao_2eint_cgtos(i, j, k, l)
 
-          dif = abs(tmp1 - tmp2)
-          !if(dif .gt. 1d-10) then
-          if(tmp1 .lt. 0.d0) then
-            print*, ' error on:', i, j, k, l
-            print*, tmp1, tmp2, dif
-            !stop
-          endif
-          !endif
+          !tmp1 = ao_two_e_integral      (i, j, k, l)
+          !tmp2 = ao_two_e_integral_cgtos(i, j, k, l)
 
-          acc += dif
-          nrm += abs(tmp1)
- !       enddo
- !     enddo
+          !print*, i, j, k, l
+
+          !dif = abs(tmp1 - tmp2)
+          !!if(dif .gt. 1d-10) then
+          !  print*, ' error on:', i, j, k, l
+          !  print*, tmp1, tmp2, dif
+          !  !stop
+          !!endif
+          !acc += dif
+          !nrm += abs(tmp1)
+        enddo
+      enddo
     enddo
+    call wall_time(t2)
+    tt += t2 - t1
+    print*, " % done = ", 100.d0 * dble(i) / ao_num
+    print*, ' ellepsed time (sec) =', tt
   enddo
 
-  print *, ' acc (%) = ', dif * 100.d0 / nrm
+  !print *, ' acc (%) = ', dif * 100.d0 / nrm
 
 end
 

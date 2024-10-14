@@ -23,14 +23,14 @@
   double precision :: A_center(3), B_center(3)
   double precision :: d_a_2,d_2
 
-  if(use_cosgtos) then
-    !print*, 'use_cosgtos for ao_kinetic_integrals ?', use_cosgtos
+  if(use_cgtos) then
+    !print*, 'use_cgtos for ao_kinetic_integrals ?', use_cgtos
 
     do j = 1, ao_num
       do i = 1, ao_num
-        ao_deriv2_x(i,j) = ao_deriv2_cosgtos_x(i,j)
-        ao_deriv2_y(i,j) = ao_deriv2_cosgtos_y(i,j)
-        ao_deriv2_z(i,j) = ao_deriv2_cosgtos_z(i,j)
+        ao_deriv2_x(i,j) = ao_deriv2_cgtos_x(i,j)
+        ao_deriv2_y(i,j) = ao_deriv2_cgtos_y(i,j)
+        ao_deriv2_z(i,j) = ao_deriv2_cgtos_z(i,j)
       enddo
     enddo
 

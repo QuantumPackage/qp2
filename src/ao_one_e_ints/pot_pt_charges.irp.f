@@ -25,12 +25,12 @@ BEGIN_PROVIDER [ double precision, ao_integrals_pt_chrg, (ao_num,ao_num)]
 !
 !  else
 
-!    if(use_cosgtos) then
-!      !print *, " use_cosgtos for ao_integrals_pt_chrg ?", use_cosgtos
+!    if(use_cgtos) then
+!      !print *, " use_cgtos for ao_integrals_pt_chrg ?", use_cgtos
 !
 !      do j = 1, ao_num
 !        do i = 1, ao_num
-!          ao_integrals_pt_chrg(i,j) = ao_integrals_pt_chrg_cosgtos(i,j)
+!          ao_integrals_pt_chrg(i,j) = ao_integrals_pt_chrg_cgtos(i,j)
 !        enddo
 !      enddo
 !

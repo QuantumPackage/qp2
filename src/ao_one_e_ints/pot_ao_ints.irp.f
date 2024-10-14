@@ -27,12 +27,12 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e, (ao_num,ao_num)]
 
   else
 
-    if(use_cosgtos) then
-      !print *, " use_cosgtos for ao_integrals_n_e ?", use_cosgtos
+    if(use_cgtos) then
+      !print *, " use_cgtos for ao_integrals_n_e ?", use_cgtos
 
       do j = 1, ao_num
         do i = 1, ao_num
-          ao_integrals_n_e(i,j) = ao_integrals_n_e_cosgtos(i,j)
+          ao_integrals_n_e(i,j) = ao_integrals_n_e_cgtos(i,j)
         enddo
       enddo
 
