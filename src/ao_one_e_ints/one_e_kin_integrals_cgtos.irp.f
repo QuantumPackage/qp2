@@ -40,7 +40,7 @@
  !$OMP        , overlap_m2_1, overlap_p2_1, overlap_m2_2, overlap_p2_2                               &
  !$OMP        , overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap_x0_2, overlap_y0_2, overlap_z0_2 ) &
  !$OMP SHARED( nucl_coord, ao_power, ao_prim_num, ao_num, ao_nucl, dim1                              &
- !$OMP       , ao_coef_norm_ord_transp_cgtos, ao_expo_ord_transp_cgtos                           & 
+ !$OMP       , ao_coef_cgtos_norm_ord_transp, ao_expo_cgtos_ord_transp                           & 
  !$OMP       , ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z ) 
 
   do j = 1, ao_num
@@ -64,11 +64,11 @@
       ao_deriv2_cgtos_z(i,j) = 0.d0
 
       do n = 1, ao_prim_num(j)
-        alpha = ao_expo_ord_transp_cgtos(n,j)
+        alpha = ao_expo_cgtos_ord_transp(n,j)
 
         do l = 1, ao_prim_num(i)
-          c    = ao_coef_norm_ord_transp_cgtos(n,j) * ao_coef_norm_ord_transp_cgtos(l,i)
-          beta = ao_expo_ord_transp_cgtos(l,i)
+          c    = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
+          beta = ao_expo_cgtos_ord_transp(l,i)
 
           call overlap_cgaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B       &
                                     , overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1 )

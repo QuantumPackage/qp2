@@ -48,12 +48,12 @@ subroutine deb_ao_2eint_cgtos(i, j, k, l)
     enddo
 
     do p = 1, ao_prim_num(i)
-      expo1 = ao_expo_ord_transp_cgtos(p,i) 
+      expo1 = ao_expo_cgtos_ord_transp(p,i) 
       !print*, "expo1 = ", expo1
       !print*, "center1 = ", I_center
 
       do q = 1, ao_prim_num(j)
-        expo2 = ao_expo_ord_transp_cgtos(q,j) 
+        expo2 = ao_expo_cgtos_ord_transp(q,j) 
         !print*, "expo2 = ", expo2
         !print*, "center2 = ", J_center
 
@@ -66,12 +66,12 @@ subroutine deb_ao_2eint_cgtos(i, j, k, l)
         iorder_p2(1:3) = I_power(1:3) + J_power(1:3)
 
         do r = 1, ao_prim_num(k)
-          expo3 = ao_expo_ord_transp_cgtos(r,k) 
+          expo3 = ao_expo_cgtos_ord_transp(r,k) 
           !print*, "expo3 = ", expo3
           !print*, "center3 = ", K_center
 
           do s = 1, ao_prim_num(l)
-            expo4 = ao_expo_ord_transp_cgtos(s,l) 
+            expo4 = ao_expo_cgtos_ord_transp(s,l) 
             !print*, "expo4 = ", expo4
             !print*, "center4 = ", L_center
 

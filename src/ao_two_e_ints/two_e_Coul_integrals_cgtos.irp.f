@@ -60,12 +60,12 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
       enddo
 
       do p = 1, ao_prim_num(i)
-        coef1 = ao_coef_norm_ord_transp_cgtos(p,i)
-        expo1 = ao_expo_ord_transp_cgtos(p,i) 
+        coef1 = ao_coef_cgtos_norm_ord_transp(p,i)
+        expo1 = ao_expo_cgtos_ord_transp(p,i) 
 
         do q = 1, ao_prim_num(j)
-          coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(q,j)
-          expo2 = ao_expo_ord_transp_cgtos(q,j) 
+          coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(q,j)
+          expo2 = ao_expo_cgtos_ord_transp(q,j) 
 
           call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                  expo1, expo2, I_power, J_power, I_center, J_center, dim1)
@@ -76,12 +76,12 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
           p2_inv = (1.d0, 0.d0) / pp2
 
           do r = 1, ao_prim_num(k)
-            coef3 = coef2 * ao_coef_norm_ord_transp_cgtos(r,k)
-            expo3 = ao_expo_ord_transp_cgtos(r,k) 
+            coef3 = coef2 * ao_coef_cgtos_norm_ord_transp(r,k)
+            expo3 = ao_expo_cgtos_ord_transp(r,k) 
 
             do s = 1, ao_prim_num(l)
-              coef4 = coef3 * ao_coef_norm_ord_transp_cgtos(s,l)
-              expo4 = ao_expo_ord_transp_cgtos(s,l) 
+              coef4 = coef3 * ao_coef_cgtos_norm_ord_transp(s,l)
+              expo4 = ao_expo_cgtos_ord_transp(s,l) 
 
               call give_explicit_cpoly_and_cgaussian(Q1_new, Q1_center, qq1, fact_q1, iorder_q1, &
                                                      expo3, expo4, K_power, L_power, K_center, L_center, dim1)
@@ -141,20 +141,20 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
       enddo
 
       do p = 1, ao_prim_num(i)
-        coef1 = ao_coef_norm_ord_transp_cgtos(p,i)
-        expo1 = ao_expo_ord_transp_cgtos(p,i) 
+        coef1 = ao_coef_cgtos_norm_ord_transp(p,i)
+        expo1 = ao_expo_cgtos_ord_transp(p,i) 
 
         do q = 1, ao_prim_num(j)
-          coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(q,j)
-          expo2 = ao_expo_ord_transp_cgtos(q,j) 
+          coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(q,j)
+          expo2 = ao_expo_cgtos_ord_transp(q,j) 
 
           do r = 1, ao_prim_num(k)
-            coef3 = coef2 * ao_coef_norm_ord_transp_cgtos(r,k)
-            expo3 = ao_expo_ord_transp_cgtos(r,k) 
+            coef3 = coef2 * ao_coef_cgtos_norm_ord_transp(r,k)
+            expo3 = ao_expo_cgtos_ord_transp(r,k) 
 
             do s = 1, ao_prim_num(l)
-              coef4 = coef3 * ao_coef_norm_ord_transp_cgtos(s,l)
-              expo4 = ao_expo_ord_transp_cgtos(s,l) 
+              coef4 = coef3 * ao_coef_cgtos_norm_ord_transp(s,l)
+              expo4 = ao_expo_cgtos_ord_transp(s,l) 
 
               integral1 = ERI_cgtos(expo1, expo2, expo3, expo4,                     &
                                       I_power(1), J_power(1), K_power(1), L_power(1), &
@@ -274,13 +274,13 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
     schwartz_kl(0,0) = 0.d0
     do r = 1, ao_prim_num(k)
-      coef1 = ao_coef_norm_ord_transp_cgtos(r,k) * ao_coef_norm_ord_transp_cgtos(r,k)
-      expo1 = ao_expo_ord_transp_cgtos(r,k) 
+      coef1 = ao_coef_cgtos_norm_ord_transp(r,k) * ao_coef_cgtos_norm_ord_transp(r,k)
+      expo1 = ao_expo_cgtos_ord_transp(r,k) 
 
       schwartz_kl(0,r) = 0.d0
       do s = 1, ao_prim_num(l)
-        coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(s,l) * ao_coef_norm_ord_transp_cgtos(s,l)
-        expo2 = ao_expo_ord_transp_cgtos(s,l) 
+        coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(s,l) * ao_coef_cgtos_norm_ord_transp(s,l)
+        expo2 = ao_expo_cgtos_ord_transp(s,l) 
 
         call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                expo1, expo2, K_power, L_power, K_center, L_center, dim1)
@@ -334,12 +334,12 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
 
     do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_norm_ord_transp_cgtos(p,i)
-      expo1 = ao_expo_ord_transp_cgtos(p,i) 
+      coef1 = ao_coef_cgtos_norm_ord_transp(p,i)
+      expo1 = ao_expo_cgtos_ord_transp(p,i) 
 
       do q = 1, ao_prim_num(j)
-        coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(q,j)
-        expo2 = ao_expo_ord_transp_cgtos(q,j) 
+        coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(q,j)
+        expo2 = ao_expo_cgtos_ord_transp(q,j) 
 
         call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                expo1, expo2, I_power, J_power, I_center, J_center, dim1)
@@ -390,14 +390,14 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         do r = 1, ao_prim_num(k)
           if(schwartz_kl(0,r)*schwartz_ij < thr) cycle
 
-          coef3 = coef2 * ao_coef_norm_ord_transp_cgtos(r,k)
-          expo3 = ao_expo_ord_transp_cgtos(r,k)
+          coef3 = coef2 * ao_coef_cgtos_norm_ord_transp(r,k)
+          expo3 = ao_expo_cgtos_ord_transp(r,k)
 
           do s = 1, ao_prim_num(l)
             if(schwartz_kl(s,r)*schwartz_ij < thr) cycle
 
-            coef4 = coef3 * ao_coef_norm_ord_transp_cgtos(s,l)
-            expo4 = ao_expo_ord_transp_cgtos(s,l)
+            coef4 = coef3 * ao_coef_cgtos_norm_ord_transp(s,l)
+            expo4 = ao_expo_cgtos_ord_transp(s,l)
 
             call give_explicit_cpoly_and_cgaussian(Q1_new, Q1_center, qq1, fact_q1, iorder_q1, &
                                                    expo3, expo4, K_power, L_power, K_center, L_center, dim1)
@@ -458,13 +458,13 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
 
     schwartz_kl(0,0) = 0.d0
     do r = 1, ao_prim_num(k)
-      coef1 = ao_coef_norm_ord_transp_cgtos(r,k) * ao_coef_norm_ord_transp_cgtos(r,k)
-      expo1 = ao_expo_ord_transp_cgtos(r,k)
+      coef1 = ao_coef_cgtos_norm_ord_transp(r,k) * ao_coef_cgtos_norm_ord_transp(r,k)
+      expo1 = ao_expo_cgtos_ord_transp(r,k)
 
       schwartz_kl(0,r) = 0.d0
       do s = 1, ao_prim_num(l)
-        coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(s,l) * ao_coef_norm_ord_transp_cgtos(s,l)
-        expo2 = ao_expo_ord_transp_cgtos(s,l)
+        coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(s,l) * ao_coef_cgtos_norm_ord_transp(s,l)
+        expo2 = ao_expo_cgtos_ord_transp(s,l)
 
         integral1 = ERI_cgtos(expo1, expo2, expo1, expo2,                     &
                                 K_power(1), L_power(1), K_power(1), L_power(1), &
@@ -517,12 +517,12 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
     enddo
 
     do p = 1, ao_prim_num(i)
-      coef1 = ao_coef_norm_ord_transp_cgtos(p,i)
-      expo1 = ao_expo_ord_transp_cgtos(p,i)
+      coef1 = ao_coef_cgtos_norm_ord_transp(p,i)
+      expo1 = ao_expo_cgtos_ord_transp(p,i)
 
       do q = 1, ao_prim_num(j)
-        coef2 = coef1 * ao_coef_norm_ord_transp_cgtos(q,j)
-        expo2 = ao_expo_ord_transp_cgtos(q,j)
+        coef2 = coef1 * ao_coef_cgtos_norm_ord_transp(q,j)
+        expo2 = ao_expo_cgtos_ord_transp(q,j)
 
         integral1 = ERI_cgtos(expo1, expo2, expo1, expo2,                     &
                                 I_power(1), J_power(1), I_power(1), J_power(1), &
@@ -572,54 +572,54 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         do r = 1, ao_prim_num(k)
           if(schwartz_kl(0,r)*schwartz_ij < thr) cycle
 
-          coef3 = coef2 * ao_coef_norm_ord_transp_cgtos(r,k)
-          expo3 = ao_expo_ord_transp_cgtos(r,k)
+          coef3 = coef2 * ao_coef_cgtos_norm_ord_transp(r,k)
+          expo3 = ao_expo_cgtos_ord_transp(r,k)
 
           do s = 1, ao_prim_num(l)
             if(schwartz_kl(s,r)*schwartz_ij < thr) cycle
 
-            coef4 = coef3 * ao_coef_norm_ord_transp_cgtos(s,l)
-            expo4 = ao_expo_ord_transp_cgtos(s,l)
+            coef4 = coef3 * ao_coef_cgtos_norm_ord_transp(s,l)
+            expo4 = ao_expo_cgtos_ord_transp(s,l)
 
             integral1 = ERI_cgtos(expo1, expo2, expo3, expo4,                     &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral2 = ERI_cgtos(expo1, expo2, conjg(expo3), expo4,              &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral3 = ERI_cgtos(conjg(expo1), expo2, expo3, expo4,              &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral4 = ERI_cgtos(conjg(expo1), expo2, conjg(expo3), expo4,       &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral5 = ERI_cgtos(expo1, conjg(expo2), expo3, expo4,              &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral6 = ERI_cgtos(expo1, conjg(expo2), conjg(expo3), expo4,       &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral7 = ERI_cgtos(conjg(expo1), conjg(expo2), expo3, expo4,       &
-                                    I_power(1), J_power(1), K_power(1), L_power(1), &
-                                    I_power(2), J_power(2), K_power(2), L_power(2), &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1), &
+                                  I_power(2), J_power(2), K_power(2), L_power(2), &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral8 = ERI_cgtos(conjg(expo1), conjg(expo2), conjg(expo3), expo4, &
-                                    I_power(1), J_power(1), K_power(1), L_power(1),  &
-                                    I_power(2), J_power(2), K_power(2), L_power(2),  &
-                                    I_power(3), J_power(3), K_power(3), L_power(3))
+                                  I_power(1), J_power(1), K_power(1), L_power(1),  &
+                                  I_power(2), J_power(2), K_power(2), L_power(2),  &
+                                  I_power(3), J_power(3), K_power(3), L_power(3))
 
             integral_tot = integral1 + integral2 + integral3 + integral4 + integral5 + integral6 + integral7 + integral8
 
@@ -666,7 +666,7 @@ END_PROVIDER
 ! ---
 
 complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_p, p, p_inv, iorder_p, &
-                                                            Q_new, Q_center, fact_q, q, q_inv, iorder_q)
+                                                          Q_new, Q_center, fact_q, q, q_inv, iorder_q)
 
   BEGIN_DOC
   !

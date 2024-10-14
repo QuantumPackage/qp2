@@ -1,10 +1,10 @@
 
 ! ---
 
- BEGIN_PROVIDER [ double precision, ao_overlap  , (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_x, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_y, (ao_num, ao_num) ]
-&BEGIN_PROVIDER [ double precision, ao_overlap_z, (ao_num, ao_num) ]
+ BEGIN_PROVIDER [double precision, ao_overlap  , (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_x, (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_y, (ao_num, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_overlap_z, (ao_num, ao_num)]
 
   BEGIN_DOC
   ! Overlap between atomic basis functions:
@@ -48,7 +48,7 @@
       !$OMP DEFAULT(NONE) &
       !$OMP PRIVATE(A_center,B_center,power_A,power_B,&
       !$OMP  overlap_x,overlap_y, overlap_z, overlap, &
-      !$OMP  alpha, beta,i,j,c) &
+      !$OMP  alpha, beta,i,j,n,l,c) &
       !$OMP SHARED(nucl_coord,ao_power,ao_prim_num, &
       !$OMP  ao_overlap_x,ao_overlap_y,ao_overlap_z,ao_overlap,ao_num,ao_coef_normalized_ordered_transp,ao_nucl, &
       !$OMP  ao_expo_ordered_transp,dim1)

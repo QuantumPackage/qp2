@@ -26,7 +26,7 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
  !$OMP PRIVATE ( i, j, k, l, m, alpha, beta, A_center, B_center, C_center                 &
  !$OMP         , power_A, power_B, num_A, num_B, Z, c, c1, c2, n_pt_in )                  &
  !$OMP SHARED ( ao_num, ao_prim_num, ao_nucl, nucl_coord, ao_power, nucl_num, nucl_charge &
- !$OMP        , ao_expo_ord_transp_cgtos, ao_coef_norm_ord_transp_cgtos               &
+ !$OMP        , ao_expo_cgtos_ord_transp, ao_coef_cgtos_norm_ord_transp               &
  !$OMP        , n_pt_max_integrals, ao_integrals_n_e_cgtos )
 
  n_pt_in = n_pt_max_integrals
@@ -44,10 +44,10 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
       B_center(1:3) = nucl_coord(num_B,1:3)
 
       do l = 1, ao_prim_num(j)
-        alpha = ao_expo_ord_transp_cgtos(l,j)
+        alpha = ao_expo_cgtos_ord_transp(l,j)
 
         do m = 1, ao_prim_num(i)
-          beta = ao_expo_ord_transp_cgtos(m,i)
+          beta = ao_expo_cgtos_ord_transp(m,i)
 
           c = 0.d0
           do k = 1, nucl_num
@@ -74,8 +74,8 @@ BEGIN_PROVIDER [ double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
           enddo
           ao_integrals_n_e_cgtos(i,j) = ao_integrals_n_e_cgtos(i,j) &
-                      + ao_coef_norm_ord_transp_cgtos(l,j)            &
-                      * ao_coef_norm_ord_transp_cgtos(m,i) * c
+                      + ao_coef_cgtos_norm_ord_transp(l,j)            &
+                      * ao_coef_cgtos_norm_ord_transp(m,i) * c
         enddo
       enddo
     enddo
