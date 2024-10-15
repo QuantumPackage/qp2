@@ -42,12 +42,12 @@ complex*16 function overlap_cgaussian_x(A_center, B_center, alpha, beta, power_A
 
   overlap_cgaussian_x *= fact_p
 
-end function overlap_cgaussian_x
+end
 
 ! ---
 
-subroutine overlap_cgaussian_xyz( A_center, B_center, alpha, beta, power_A, power_B &
-                                , overlap_x, overlap_y, overlap_z, overlap, dim )
+subroutine overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
+                                 overlap_x, overlap_y, overlap_z, overlap, dim )
 
   BEGIN_DOC
   !
@@ -113,7 +113,7 @@ subroutine overlap_cgaussian_xyz( A_center, B_center, alpha, beta, power_A, powe
 
   overlap = overlap_x * overlap_y * overlap_z
 
-end subroutine overlap_cgaussian_xyz
+end
 
 ! ---
 

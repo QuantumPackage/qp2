@@ -70,33 +70,31 @@
 
         alpha = ao_expo_cgtos_ord_transp(n,j)
         alpha_inv = (1.d0, 0.d0) / alpha
-
         do m = 1, 3
           A_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
         enddo
         phiA = ao_expo_phase_ord_transp(4,n,j)
-        KA2 = ao_expo_pw_ord_transp(4,n,j) * ao_expo_pw_ord_transp(4,n,j)
+        KA2 = ao_expo_pw_ord_transp(4,n,j)
 
         do l = 1, ao_prim_num(i)
 
           beta = ao_expo_cgtos_ord_transp(l,i)
           beta_inv = (1.d0, 0.d0) / beta
-
           do m = 1, 3
             B_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
           enddo
           phiB = ao_expo_phase_ord_transp(4,l,i)
-          KB2 = ao_expo_pw_ord_transp(4,l,i) * ao_expo_pw_ord_transp(4,l,i)
+          KB2 = ao_expo_pw_ord_transp(4,l,i)
 
           c = ao_coef_cgtos_norm_ord_transp(n,j) * ao_coef_cgtos_norm_ord_transp(l,i)
 
-          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
-          C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
+          C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv * KA2 + beta_inv        * KB2))
+          C2 = zexp((0.d0, 1.d0) * (-phiA + phiB) - 0.25d0 * (alpha_inv * KA2 + conjg(beta_inv) * KB2))
 
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x0_1, overlap_y0_1, overlap_z0_1, overlap, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+          call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                      overlap_x0_2, overlap_y0_2, overlap_z0_2, overlap, dim1)
 
           ! ---
@@ -106,7 +104,7 @@
             call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                        overlap_m2_1, overlap_y, overlap_z, overlap, dim1)
 
-            call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+            call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                        overlap_m2_2, overlap_y, overlap_z, overlap, dim1)
           else
             overlap_m2_1 = (0.d0, 0.d0)
@@ -117,7 +115,7 @@
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_p2_1, overlap_y, overlap_z, overlap, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+          call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                      overlap_p2_2, overlap_y, overlap_z, overlap, dim1)
 
           power_A(1) = power_A(1) - 2
@@ -141,7 +139,7 @@
             call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                        overlap_x, overlap_m2_1, overlap_y, overlap, dim1)
 
-            call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+            call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                        overlap_x, overlap_m2_2, overlap_y, overlap, dim1)
           else
             overlap_m2_1 = (0.d0, 0.d0)
@@ -152,7 +150,7 @@
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x, overlap_p2_1, overlap_y, overlap, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+          call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                      overlap_x, overlap_p2_2, overlap_y, overlap, dim1)
 
           power_A(2) = power_A(2) - 2
@@ -176,7 +174,7 @@
             call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                        overlap_x, overlap_y, overlap_m2_1, overlap, dim1)
 
-            call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+            call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                        overlap_x, overlap_y, overlap_m2_2, overlap, dim1)
           else
             overlap_m2_1 = (0.d0, 0.d0)
@@ -187,7 +185,7 @@
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x, overlap_y, overlap_p2_1, overlap, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, alpha, conjg(beta), power_A, power_B, &
+          call overlap_cgaussian_xyz(A_center, conjg(B_center), alpha, conjg(beta), power_A, power_B, &
                                      overlap_x, overlap_y, overlap_p2_2, overlap, dim1)
 
           power_A(3) = power_A(3) - 2
@@ -227,11 +225,12 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
   END_DOC
 
   implicit none
+
   integer :: i, j
 
- !$OMP PARALLEL DO DEFAULT(NONE) &
- !$OMP  PRIVATE(i, j)            &
- !$OMP  SHARED(ao_num, ao_kinetic_integrals_cgtos, ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z)
+  !$OMP PARALLEL DO DEFAULT(NONE) &
+  !$OMP PRIVATE(i, j)             &
+  !$OMP SHARED(ao_num, ao_kinetic_integrals_cgtos, ao_deriv2_cgtos_x, ao_deriv2_cgtos_y, ao_deriv2_cgtos_z)
   do j = 1, ao_num
     do i = 1, ao_num
       ao_kinetic_integrals_cgtos(i,j) = -0.5d0 * (ao_deriv2_cgtos_x(i,j) + &
@@ -239,8 +238,9 @@ BEGIN_PROVIDER [double precision, ao_kinetic_integrals_cgtos, (ao_num, ao_num)]
                                                   ao_deriv2_cgtos_z(i,j))
     enddo
   enddo
- !$OMP END PARALLEL DO
+  !$OMP END PARALLEL DO
 
 END_PROVIDER
 
 ! ---
+

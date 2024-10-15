@@ -30,9 +30,9 @@ END_PROVIDER
         ao_expo_pw_ord_transp(m,i,j) = ao_expo_pw_ord(m,j,i)
         ao_expo_phase_ord_transp(m,i,j) = ao_expo_phase_ord(m,j,i)
       enddo
-      ao_expo_pw_ord_transp(4,i,j) = ao_expo_pw_ord_transp(1,i,j) &
-                                   + ao_expo_pw_ord_transp(2,i,j) &
-                                   + ao_expo_pw_ord_transp(3,i,j)
+      ao_expo_pw_ord_transp(4,i,j) = ao_expo_pw_ord_transp(1,i,j) * ao_expo_pw_ord_transp(1,i,j) &
+                                   + ao_expo_pw_ord_transp(2,i,j) * ao_expo_pw_ord_transp(2,i,j) &
+                                   + ao_expo_pw_ord_transp(3,i,j) * ao_expo_pw_ord_transp(3,i,j)
       ao_expo_phase_ord_transp(4,i,j) = ao_expo_phase_ord_transp(1,j,i) &
                                       + ao_expo_phase_ord_transp(2,j,i) &
                                       + ao_expo_phase_ord_transp(3,j,i)
@@ -199,7 +199,6 @@ END_PROVIDER
 
         alpha = ao_expo_cgtos_ord_transp(n,j)
         alpha_inv = (1.d0, 0.d0) / alpha
-
         do m = 1, 3
           phiA(m) = ao_expo_phase_ord_transp(m,n,j)
           A_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
@@ -210,7 +209,6 @@ END_PROVIDER
 
           beta = ao_expo_cgtos_ord_transp(l,i)
           beta_inv = (1.d0, 0.d0) / beta
-
           do m = 1, 3
             phiB(m) = ao_expo_phase_ord_transp(m,l,i)
             B_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
@@ -232,7 +230,7 @@ END_PROVIDER
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, conjg(alpha), beta, power_A, power_B, &
+          call overlap_cgaussian_xyz(conjg(A_center), B_center, conjg(alpha), beta, power_A, power_B, &
                                      overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
 
           overlap_x = 2.d0 * real(C1(1) * overlap_x1 + C2(1) * overlap_x2)
