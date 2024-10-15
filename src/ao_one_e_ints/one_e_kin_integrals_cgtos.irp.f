@@ -8,8 +8,10 @@
   implicit none
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, deriv_tmp
-  complex*16       :: alpha, alpha_inv, A_center(3), KA2, phiA, C1
-  complex*16       :: beta, beta_inv, B_center(3), KB2, phiB, C2
+  double precision :: KA2, phiA
+  double precision :: KB2, phiB
+  complex*16       :: alpha, alpha_inv, A_center(3), C1
+  complex*16       :: beta, beta_inv, B_center(3), C2
   complex*16       :: overlap_x, overlap_y, overlap_z, overlap
   complex*16       :: overlap_x0_1, overlap_y0_1, overlap_z0_1
   complex*16       :: overlap_x0_2, overlap_y0_2, overlap_z0_2 

@@ -15,8 +15,10 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   integer          :: power_A(3), power_B(3)
   integer          :: i, j, k, l, m, n, ii, jj
   double precision :: c, Z, C_center(3)
-  complex*16       :: alpha, alpha_inv, A_center(3), phiA, KA2
-  complex*16       :: beta, beta_inv, B_center(3), phiB, KB2
+  double precision :: phiA, KA2
+  double precision :: phiB, KB2
+  complex*16       :: alpha, alpha_inv, A_center(3)
+  complex*16       :: beta, beta_inv, B_center(3)
   complex*16       :: C1, C2, I1, I2
 
   complex*16       :: NAI_pol_mult_cgtos
