@@ -30,3 +30,16 @@ the two electron integrals.
 
 
 
+Complex Gaussian-Type Orbitals (cGTOs)
+=====================================
+
+Complex Gaussian-Type Orbitals (cGTOs) are also supported:
+
+.. math::
+
+   \chi_i(\mathbf{r}) = x^a y^b z^c \sum_k c_{ki} \left( e^{-\alpha_{ki} \mathbf{r}^2 - \imath \mathbf{k}_{ki} \cdot \mathbf{r} - \imath \phi_{ki}} + \text{C.C.} \right)
+
+where:
+   - :math:`\alpha \in \mathbb{C}` and :math:`\Re(\alpha) > 0` (specified by ``ao_expo`` and ``ao_expo_im_cgtos``),
+   - :math:`\mathbf{k} = (k_x, k_y, k_z) \in \mathbb{R}^3` (specified by ``ao_expo_pw``),
+   - :math:`\phi = \phi_x + \phi_y + \phi_z \in \mathbb{R}` (specified by ``ao_expo_phase``).

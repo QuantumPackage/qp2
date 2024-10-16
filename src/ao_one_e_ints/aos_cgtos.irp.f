@@ -30,9 +30,9 @@ END_PROVIDER
         ao_expo_pw_ord_transp(m,i,j) = ao_expo_pw_ord(m,j,i)
         ao_expo_phase_ord_transp(m,i,j) = ao_expo_phase_ord(m,j,i)
       enddo
-      ao_expo_pw_ord_transp(4,i,j) = ao_expo_pw_ord_transp(1,i,j) &
-                                   + ao_expo_pw_ord_transp(2,i,j) &
-                                   + ao_expo_pw_ord_transp(3,i,j)
+      ao_expo_pw_ord_transp(4,i,j) = ao_expo_pw_ord_transp(1,i,j) * ao_expo_pw_ord_transp(1,i,j) &
+                                   + ao_expo_pw_ord_transp(2,i,j) * ao_expo_pw_ord_transp(2,i,j) &
+                                   + ao_expo_pw_ord_transp(3,i,j) * ao_expo_pw_ord_transp(3,i,j)
       ao_expo_phase_ord_transp(4,i,j) = ao_expo_phase_ord_transp(1,j,i) &
                                       + ao_expo_phase_ord_transp(2,j,i) &
                                       + ao_expo_phase_ord_transp(3,j,i)
@@ -47,10 +47,12 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
   implicit none
 
-  integer          :: i, j, powA(3), nz
+  integer          :: i, j, ii, m, powA(3), nz
   double precision :: norm
-  complex*16       :: overlap_x, overlap_y, overlap_z, C_A(3)
-  complex*16       :: integ1, integ2, expo
+  double precision :: kA2, phiA
+  complex*16       :: expo, expo_inv, C_A(3)
+  complex*16       :: overlap_x, overlap_y, overlap_z
+  complex*16       :: integ1, integ2, C1, C2
 
   nz = 100
 
@@ -62,22 +64,31 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
 
   do i = 1, ao_num
 
+    ii = ao_nucl(i)
     powA(1) = ao_power(i,1)
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
  
-    ! TODO
     ! Normalization of the primitives
     if(primitives_normalized) then
 
       do j = 1, ao_prim_num(i)
 
         expo = ao_expo(i,j) + (0.d0, 1.d0) * ao_expo_im_cgtos(i,j)
+        expo_inv = (1.d0, 0.d0) / expo
+        do m = 1, 3
+          C_A(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo_inv * ao_expo_pw(m,i,j)
+        enddo
+        phiA = ao_expo_phase(4,i,j)
+        KA2 = ao_expo_pw(4,i,j)
 
-        call overlap_cgaussian_xyz(C_A, C_A,        expo, expo, powA, powA, overlap_x, overlap_y, overlap_z, integ1, nz)
-        call overlap_cgaussian_xyz(C_A, C_A, conjg(expo), expo, powA, powA, overlap_x, overlap_y, overlap_z, integ2, nz)
+        C1 = zexp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
+        C2 = zexp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
 
-        norm = 2.d0 * real(integ1 + integ2)
+        call overlap_cgaussian_xyz(C_A,        C_A,        expo, expo, powA, powA, overlap_x, overlap_y, overlap_z, integ1, nz)
+        call overlap_cgaussian_xyz(conjg(C_A), C_A, conjg(expo), expo, powA, powA, overlap_x, overlap_y, overlap_z, integ2, nz)
+
+        norm = 2.d0 * real(C1 * integ1 + C2 * integ2)
 
         ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
       enddo
@@ -98,14 +109,14 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos_ord, (ao_num, ao_prim_num_max)]
 &BEGIN_PROVIDER [complex*16      , ao_expo_cgtos_ord, (ao_num, ao_prim_num_max)]
-&BEGIN_PROVIDER [double precision, ao_expo_pw_ord, (3, ao_num, ao_prim_num_max)]
-&BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (3, ao_num, ao_prim_num_max)]
+&BEGIN_PROVIDER [double precision, ao_expo_pw_ord, (4, ao_num, ao_prim_num_max)]
+&BEGIN_PROVIDER [double precision, ao_expo_phase_ord, (4, ao_num, ao_prim_num_max)]
 
   implicit none
 
-  integer          :: i, j
+  integer          :: i, j, m
   integer          :: iorder(ao_prim_num_max)
-  double precision :: d(ao_prim_num_max,9)
+  double precision :: d(ao_prim_num_max,11)
 
   d = 0.d0
 
@@ -116,28 +127,26 @@ END_PROVIDER
       d(j,1) = ao_expo(i,j)
       d(j,2) = ao_coef_norm_cgtos(i,j)
       d(j,3) = ao_expo_im_cgtos(i,j)
-      d(j,4) = ao_expo_pw(1,i,j)
-      d(j,5) = ao_expo_pw(2,i,j)
-      d(j,6) = ao_expo_pw(3,i,j)
-      d(j,7) = ao_expo_phase(1,i,j)
-      d(j,8) = ao_expo_phase(2,i,j)
-      d(j,9) = ao_expo_phase(3,i,j)
+
+      do m = 1, 4
+        d(j,3+m) = ao_expo_pw(m,i,j)
+        d(j,7+m) = ao_expo_phase(m,i,j)
+      enddo
     enddo
 
     call dsort(d(1,1), iorder, ao_prim_num(i))
-    do j = 2, 9
+    do j = 2, 11
       call dset_order(d(1,j), iorder, ao_prim_num(i))
     enddo
 
     do j = 1, ao_prim_num(i)
       ao_expo_cgtos_ord     (i,j) = d(j,1) + (0.d0, 1.d0) * d(j,3)
       ao_coef_norm_cgtos_ord(i,j) = d(j,2)
-      ao_expo_pw_ord(i,j,1) = d(j,4)
-      ao_expo_pw_ord(i,j,2) = d(j,5)
-      ao_expo_pw_ord(i,j,3) = d(j,6)
-      ao_expo_phase_ord(i,j,1) = d(j,7)
-      ao_expo_phase_ord(i,j,2) = d(j,8)
-      ao_expo_phase_ord(i,j,3) = d(j,9)
+
+      do m = 1, 4
+        ao_expo_pw_ord(m,i,j) = d(j,3+m)
+        ao_expo_phase_ord(m,i,j) = d(j,7+m)
+      enddo
     enddo
   enddo
 
@@ -154,8 +163,10 @@ END_PROVIDER
 
   integer          :: i, j, m, n, l, ii, jj, dim1, power_A(3), power_B(3)
   double precision :: c, overlap, overlap_x, overlap_y, overlap_z
-  complex*16       :: alpha, alpha_inv, A_center(3), KA2(3), phiA(3)
-  complex*16       :: beta, beta_inv, B_center(3), KB2(3), phiB(3)
+  double precision :: KA2(3), phiA(3)
+  double precision :: KB2(3), phiB(3)
+  complex*16       :: alpha, alpha_inv, A_center(3)
+  complex*16       :: beta, beta_inv, B_center(3)
   complex*16       :: C1(1:4), C2(1:4)
   complex*16       :: overlap1, overlap_x1, overlap_y1, overlap_z1
   complex*16       :: overlap2, overlap_x2, overlap_y2, overlap_z2
@@ -199,7 +210,6 @@ END_PROVIDER
 
         alpha = ao_expo_cgtos_ord_transp(n,j)
         alpha_inv = (1.d0, 0.d0) / alpha
-
         do m = 1, 3
           phiA(m) = ao_expo_phase_ord_transp(m,n,j)
           A_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
@@ -210,7 +220,6 @@ END_PROVIDER
 
           beta = ao_expo_cgtos_ord_transp(l,i)
           beta_inv = (1.d0, 0.d0) / beta
-
           do m = 1, 3
             phiB(m) = ao_expo_phase_ord_transp(m,l,i)
             B_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
@@ -232,7 +241,7 @@ END_PROVIDER
           call overlap_cgaussian_xyz(A_center, B_center, alpha, beta, power_A, power_B, &
                                      overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
 
-          call overlap_cgaussian_xyz(A_center, B_center, conjg(alpha), beta, power_A, power_B, &
+          call overlap_cgaussian_xyz(conjg(A_center), B_center, conjg(alpha), beta, power_A, power_B, &
                                      overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
 
           overlap_x = 2.d0 * real(C1(1) * overlap_x1 + C2(1) * overlap_x2)

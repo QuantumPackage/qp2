@@ -187,6 +187,10 @@ BEGIN_PROVIDER [ double precision, psi_coef, (psi_det_size,N_states) ]
   logical                        :: exists
   character*(64)                 :: label
 
+  ! Make psi_coef depend on psi_det explicitly to detect potential problems
+  ! if psi_det changes and psi_coef is kept constant
+  PROVIDE psi_det
+
   PROVIDE read_wf N_det mo_label ezfio_filename
   psi_coef = 0.d0
   do i=1,min(N_states,psi_det_size)

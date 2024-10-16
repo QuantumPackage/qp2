@@ -17,10 +17,14 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
   integer                    :: ii, jj, kk, ll, dim1, I_power(3), J_power(3), K_power(3), L_power(3)
   integer                    :: iorder_p1(3), iorder_p2(3), iorder_q1(3), iorder_q2(3)
   double precision           :: coef1, coef2, coef3, coef4
-  complex*16                 :: expo1, expo1_inv, I_center(3), KI2, phiI
-  complex*16                 :: expo2, expo2_inv, J_center(3), KJ2, phiJ
-  complex*16                 :: expo3, expo3_inv, K_center(3), KK2, phiK
-  complex*16                 :: expo4, expo4_inv, L_center(3), KL2, phiL
+  double precision           :: KI2, phiI
+  double precision           :: KJ2, phiJ
+  double precision           :: KK2, phiK
+  double precision           :: KL2, phiL
+  complex*16                 :: expo1, expo1_inv, I_center(3)
+  complex*16                 :: expo2, expo2_inv, J_center(3)
+  complex*16                 :: expo3, expo3_inv, K_center(3)
+  complex*16                 :: expo4, expo4_inv, L_center(3)
   complex*16                 :: P1_new(0:max_dim,3), P1_center(3), fact_p1, pp1, p1_inv
   complex*16                 :: P2_new(0:max_dim,3), P2_center(3), fact_p2, pp2, p2_inv
   complex*16                 :: Q1_new(0:max_dim,3), Q1_center(3), fact_q1, qq1, q1_inv
@@ -70,7 +74,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
           I_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,p,i)
         enddo
         phiI = ao_expo_phase_ord_transp(4,p,i)
-        KI2 = ao_expo_pw_ord_transp(4,p,i) * ao_expo_pw_ord_transp(4,p,i)
+        KI2 = ao_expo_pw_ord_transp(4,p,i)
 
         do q = 1, ao_prim_num(j)
 
@@ -81,7 +85,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
             J_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,q,j)
           enddo
           phiJ = ao_expo_phase_ord_transp(4,q,j)
-          KJ2 = ao_expo_pw_ord_transp(4,q,j) * ao_expo_pw_ord_transp(4,q,j)
+          KJ2 = ao_expo_pw_ord_transp(4,q,j)
 
           call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                  expo1, expo2, I_power, J_power, I_center, J_center, dim1)
@@ -100,7 +104,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
               K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo3_inv * ao_expo_pw_ord_transp(m,r,k)
             enddo
             phiK = ao_expo_phase_ord_transp(4,r,k)
-            KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+            KK2 = ao_expo_pw_ord_transp(4,r,k)
 
             do s = 1, ao_prim_num(l)
 
@@ -111,7 +115,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
                 L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo4_inv * ao_expo_pw_ord_transp(m,s,l)
               enddo
               phiL = ao_expo_phase_ord_transp(4,s,l)
-              KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+              KL2 = ao_expo_pw_ord_transp(4,s,l)
 
               call give_explicit_cpoly_and_cgaussian(Q1_new, Q1_center, qq1, fact_q1, iorder_q1, &
                                                      expo3, expo4, K_power, L_power, K_center, L_center, dim1)
@@ -189,7 +193,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
           I_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,p,i)
         enddo
         phiI = ao_expo_phase_ord_transp(4,p,i)
-        KI2 = ao_expo_pw_ord_transp(4,p,i) * ao_expo_pw_ord_transp(4,p,i)
+        KI2 = ao_expo_pw_ord_transp(4,p,i)
 
         do q = 1, ao_prim_num(j)
 
@@ -200,7 +204,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
             J_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,q,j)
           enddo
           phiJ = ao_expo_phase_ord_transp(4,q,j)
-          KJ2 = ao_expo_pw_ord_transp(4,q,j) * ao_expo_pw_ord_transp(4,q,j)
+          KJ2 = ao_expo_pw_ord_transp(4,q,j)
 
           do r = 1, ao_prim_num(k)
 
@@ -211,7 +215,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
               K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo3_inv * ao_expo_pw_ord_transp(m,r,k)
             enddo
             phiK = ao_expo_phase_ord_transp(4,r,k)
-            KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+            KK2 = ao_expo_pw_ord_transp(4,r,k)
 
             do s = 1, ao_prim_num(l)
 
@@ -222,7 +226,7 @@ double precision function ao_two_e_integral_cgtos(i, j, k, l)
                 L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo4_inv * ao_expo_pw_ord_transp(m,s,l)
               enddo
               phiL = ao_expo_phase_ord_transp(4,s,l)
-              KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+              KL2 = ao_expo_pw_ord_transp(4,s,l)
 
               C1 = zexp((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
                        - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))
@@ -313,10 +317,14 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
   integer                       :: ii, jj, kk, ll, dim1, I_power(3), J_power(3), K_power(3), L_power(3)
   integer                       :: iorder_p1(3), iorder_p2(3), iorder_q1(3), iorder_q2(3)
   double precision              :: coef1, coef2, coef3, coef4
-  complex*16                    :: expo1, expo1_inv, I_center(3), KI2, phiI
-  complex*16                    :: expo2, expo2_inv, J_center(3), KJ2, phiJ
-  complex*16                    :: expo3, expo3_inv, K_center(3), KK2, phiK
-  complex*16                    :: expo4, expo4_inv, L_center(3), KL2, phiL
+  double precision              :: KI2, phiI
+  double precision              :: KJ2, phiJ
+  double precision              :: KK2, phiK
+  double precision              :: KL2, phiL
+  complex*16                    :: expo1, expo1_inv, I_center(3)
+  complex*16                    :: expo2, expo2_inv, J_center(3)
+  complex*16                    :: expo3, expo3_inv, K_center(3)
+  complex*16                    :: expo4, expo4_inv, L_center(3)
   complex*16                    :: P1_new(0:max_dim,3), P1_center(3), fact_p1, pp1, p1_inv
   complex*16                    :: P2_new(0:max_dim,3), P2_center(3), fact_p2, pp2, p2_inv
   complex*16                    :: Q1_new(0:max_dim,3), Q1_center(3), fact_q1, qq1, q1_inv
@@ -366,7 +374,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,r,k)
       enddo
       phiK = ao_expo_phase_ord_transp(4,r,k)
-      KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+      KK2 = ao_expo_pw_ord_transp(4,r,k)
 
       schwartz_kl(0,r) = 0.d0
       do s = 1, ao_prim_num(l)
@@ -378,7 +386,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
           L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,s,l)
         enddo
         phiL = ao_expo_phase_ord_transp(4,s,l)
-        KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+        KL2 = ao_expo_pw_ord_transp(4,s,l)
 
         call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                expo1, expo2, K_power, L_power, K_center, L_center, dim1)
@@ -393,7 +401,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         !C3 = C2
         C4 = zexp((0.d0, 2.d0) * (phiK - phiL) - 0.5d0 * (conjg(expo1_inv) * KK2 + expo2_inv * KL2))
         C5 = zexp(-(0.d0, 2.d0) * phiK - 0.5d0 * (expo1_inv * KK2 + real(expo2_inv) * KL2))
-        C6 = zexp(-0.5d0 * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
+        C6 = zexp(-(0.5d0, 0.d0) * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
         !C7 = C6
         !C8 = conjg(C5)
 
@@ -452,7 +460,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         I_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,p,i)
       enddo
       phiI = ao_expo_phase_ord_transp(4,p,i)
-      KI2 = ao_expo_pw_ord_transp(4,p,i) * ao_expo_pw_ord_transp(4,p,i)
+      KI2 = ao_expo_pw_ord_transp(4,p,i)
 
       do q = 1, ao_prim_num(j)
 
@@ -463,7 +471,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
           J_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,q,j)
         enddo
         phiJ = ao_expo_phase_ord_transp(4,q,j)
-        KJ2 = ao_expo_pw_ord_transp(4,q,j) * ao_expo_pw_ord_transp(4,q,j)
+        KJ2 = ao_expo_pw_ord_transp(4,q,j)
 
         call give_explicit_cpoly_and_cgaussian(P1_new, P1_center, pp1, fact_p1, iorder_p1, &
                                                expo1, expo2, I_power, J_power, I_center, J_center, dim1)
@@ -478,7 +486,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         !C3 = C2
         C4 = zexp((0.d0, 2.d0) * (phiI - phiJ) - 0.5d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2))
         C5 = zexp(-(0.d0, 2.d0) * phiI - 0.5d0 * (expo1_inv * KI2 + real(expo2_inv) * KJ2))
-        C6 = zexp(-0.5d0 * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
+        C6 = zexp(-(0.5d0, 0.d0) * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
         !C7 = C6
         !C8 = conjg(C5)
 
@@ -533,7 +541,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
             K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo3_inv * ao_expo_pw_ord_transp(m,r,k)
           enddo
           phiK = ao_expo_phase_ord_transp(4,r,k)
-          KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+          KK2 = ao_expo_pw_ord_transp(4,r,k)
 
           do s = 1, ao_prim_num(l)
             if(schwartz_kl(s,r)*schwartz_ij < thr) cycle
@@ -545,7 +553,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
               L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo4_inv * ao_expo_pw_ord_transp(m,s,l)
             enddo
             phiL = ao_expo_phase_ord_transp(4,s,l)
-            KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+            KL2 = ao_expo_pw_ord_transp(4,s,l)
 
             call give_explicit_cpoly_and_cgaussian(Q1_new, Q1_center, qq1, fact_q1, iorder_q1, &
                                                    expo3, expo4, K_power, L_power, K_center, L_center, dim1)
@@ -624,7 +632,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,r,k)
       enddo
       phiK = ao_expo_phase_ord_transp(4,r,k)
-      KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+      KK2 = ao_expo_pw_ord_transp(4,r,k)
 
       schwartz_kl(0,r) = 0.d0
       do s = 1, ao_prim_num(l)
@@ -636,14 +644,14 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
           L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,s,l)
         enddo
         phiL = ao_expo_phase_ord_transp(4,s,l)
-        KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+        KL2 = ao_expo_pw_ord_transp(4,s,l)
 
         C1 = zexp(-(0.d0, 2.d0) * (phiK + phiL) - 0.5d0 * (expo1_inv * KK2 + expo2_inv * KL2))
         C2 = zexp(-(0.d0, 2.d0) * phiL - 0.5d0 * (real(expo1_inv) * KK2 + expo2_inv * KL2))
         !C3 = C2
         C4 = zexp((0.d0, 2.d0) * (phiK - phiL) - 0.5d0 * (conjg(expo1_inv) * KK2 + expo2_inv * KL2))
         C5 = zexp(-(0.d0, 2.d0) * phiK - 0.5d0 * (expo1_inv * KK2 + real(expo2_inv) * KL2))
-        C6 = zexp(-0.5d0 * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
+        C6 = zexp(-(0.5d0, 0.d0) * (real(expo1_inv) * KK2 + real(expo2_inv) * KL2))
         !C7 = C6
         !C8 = conjg(C5)
 
@@ -708,7 +716,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
         I_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * expo1_inv * ao_expo_pw_ord_transp(m,p,i)
       enddo
       phiI = ao_expo_phase_ord_transp(4,p,i)
-      KI2 = ao_expo_pw_ord_transp(4,p,i) * ao_expo_pw_ord_transp(4,p,i)
+      KI2 = ao_expo_pw_ord_transp(4,p,i)
 
       do q = 1, ao_prim_num(j)
 
@@ -719,14 +727,14 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
           J_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * expo2_inv * ao_expo_pw_ord_transp(m,q,j)
         enddo
         phiJ = ao_expo_phase_ord_transp(4,q,j)
-        KJ2 = ao_expo_pw_ord_transp(4,q,j) * ao_expo_pw_ord_transp(4,q,j)
+        KJ2 = ao_expo_pw_ord_transp(4,q,j)
 
         C1 = zexp(-(0.d0, 2.d0) * (phiI + phiJ) - 0.5d0 * (expo1_inv * KI2 + expo2_inv * KJ2))
         C2 = zexp(-(0.d0, 2.d0) * phiJ - 0.5d0 * (real(expo1_inv) * KI2 + expo2_inv * KJ2))
         !C3 = C2
         C4 = zexp((0.d0, 2.d0) * (phiI - phiJ) - 0.5d0 * (conjg(expo1_inv) * KI2 + expo2_inv * KJ2))
         C5 = zexp(-(0.d0, 2.d0) * phiI - 0.5d0 * (expo1_inv * KI2 + real(expo2_inv) * KJ2))
-        C6 = zexp(-0.5d0 * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
+        C6 = zexp(-(0.5d0, 0.d0) * (real(expo1_inv) * KI2 + real(expo2_inv) * KJ2))
         !C7 = C6
         !C8 = conjg(C5)
 
@@ -788,7 +796,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
             K_center(m) = nucl_coord(kk,m) - (0.d0, 0.5d0) * expo3_inv * ao_expo_pw_ord_transp(m,r,k)
           enddo
           phiK = ao_expo_phase_ord_transp(4,r,k)
-          KK2 = ao_expo_pw_ord_transp(4,r,k) * ao_expo_pw_ord_transp(4,r,k)
+          KK2 = ao_expo_pw_ord_transp(4,r,k)
 
           do s = 1, ao_prim_num(l)
             if(schwartz_kl(s,r)*schwartz_ij < thr) cycle
@@ -800,7 +808,7 @@ double precision function ao_2e_cgtos_schwartz_accel(i, j, k, l)
               L_center(m) = nucl_coord(ll,m) - (0.d0, 0.5d0) * expo4_inv * ao_expo_pw_ord_transp(m,s,l)
             enddo
             phiL = ao_expo_phase_ord_transp(4,s,l)
-            KL2 = ao_expo_pw_ord_transp(4,s,l) * ao_expo_pw_ord_transp(4,s,l)
+            KL2 = ao_expo_pw_ord_transp(4,s,l)
 
             C1 = zexp((0.d0, 1.d0) * (-phiI - phiJ - phiK - phiL) &
                      - 0.25d0 * (expo1_inv * KI2 + expo2_inv * KJ2 + expo3_inv * KK2 + expo4_inv * KL2))

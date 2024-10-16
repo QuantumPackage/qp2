@@ -15,8 +15,10 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   integer          :: power_A(3), power_B(3)
   integer          :: i, j, k, l, m, n, ii, jj
   double precision :: c, Z, C_center(3)
-  complex*16       :: alpha, alpha_inv, A_center(3), phiA, KA2
-  complex*16       :: beta, beta_inv, B_center(3), phiB, KB2
+  double precision :: phiA, KA2
+  double precision :: phiB, KB2
+  complex*16       :: alpha, alpha_inv, A_center(3)
+  complex*16       :: beta, beta_inv, B_center(3)
   complex*16       :: C1, C2, I1, I2
 
   complex*16       :: NAI_pol_mult_cgtos
@@ -54,7 +56,7 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
           A_center(m) = nucl_coord(jj,m) - (0.d0, 0.5d0) * alpha_inv * ao_expo_pw_ord_transp(m,n,j)
         enddo
         phiA = ao_expo_phase_ord_transp(4,n,j)
-        KA2 = ao_expo_pw_ord_transp(4,n,j) * ao_expo_pw_ord_transp(4,n,j)
+        KA2 = ao_expo_pw_ord_transp(4,n,j)
 
         do l = 1, ao_prim_num(i)
 
@@ -65,7 +67,7 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
             B_center(m) = nucl_coord(ii,m) - (0.d0, 0.5d0) * beta_inv * ao_expo_pw_ord_transp(m,l,i)
           enddo
           phiB = ao_expo_phase_ord_transp(4,l,i)
-          KB2 = ao_expo_pw_ord_transp(4,l,i) * ao_expo_pw_ord_transp(4,l,i)
+          KB2 = ao_expo_pw_ord_transp(4,l,i)
 
           C1 = zexp((0.d0, 1.d0) * (-phiA - phiB) - 0.25d0 * (alpha_inv        * KA2 + beta_inv * KB2))
           C2 = zexp((0.d0, 1.d0) * ( phiA - phiB) - 0.25d0 * (conjg(alpha_inv) * KA2 + beta_inv * KB2))
@@ -79,7 +81,7 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
 
             I1 = NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, alpha, beta, C_center, n_pt_max_integrals)
 
-            I2 = NAI_pol_mult_cgtos(A_center, B_center, power_A, power_B, conjg(alpha), beta, C_center, n_pt_max_integrals)
+            I2 = NAI_pol_mult_cgtos(conjg(A_center), B_center, power_A, power_B, conjg(alpha), beta, C_center, n_pt_max_integrals)
 
             c = c - Z * 2.d0 * real(C1 * I1 + C2 * I2)
           enddo

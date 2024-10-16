@@ -39,6 +39,10 @@ https://arxiv.org/abs/1902.08154
 # Getting started
 
 * [Visit the web site](https://quantumpackage.github.io/qp2)
+* Install from a singularity container<br>
+  Singularity containers for x86_64 (amd64) and ARM (aarch64) architectures are available here:<br>
+  https://cloud.sylabs.io/library/scemama/trex/qp2-qmcchem <br>
+  The repository containing the recipes to build the singularity container is here: https://github.com/TREX-CoE/trex-containers
 * [Download the latest release](http://github.com/QuantumPackage/qp2/releases)
 * [Read the documentation](https://quantum-package.readthedocs.io) 
 
@@ -50,9 +54,9 @@ You can also look over its [archives](https://groupes.renater.fr/sympa/arc/quant
 
 # Build status
 
-* Master [![master build status](https://travis-ci.com/QuantumPackage/qp2.svg?branch=master)](https://travis-ci.org/QuantumPackage/qp2)
-* Development [![dev build status](https://travis-ci.com/QuantumPackage/qp2.svg?branch=dev)](https://travis-ci.org/QuantumPackage/qp2)
-* Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master/?badge=master)
+* Master [![master build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml)
+* Development [![dev build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg?branch=dev-stable)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml)
+* Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master)
 
 
 
