@@ -54,9 +54,9 @@ You can also look over its [archives](https://groupes.renater.fr/sympa/arc/quant
 
 # Build status
 
-* Master [![master build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg)
-* Development [![dev build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg?branch=dev-stable)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg?branch=dev-stable)
-* Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master/?badge=master)
+* Master [![master build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml)
+* Development [![dev build status](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml/badge.svg?branch=dev-stable)](https://github.com/QuantumPackage/qp2/actions/workflows/compilation.yml)
+* Documentation [![Documentation Status](https://readthedocs.org/projects/quantum-package/badge/?version=master)](https://quantum-package.readthedocs.io/en/master)
 
 
 
