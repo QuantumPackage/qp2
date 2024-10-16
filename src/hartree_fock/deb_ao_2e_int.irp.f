@@ -3,10 +3,11 @@ program deb_ao_2e_int
 
   implicit none
 
-  call check_ao_two_e_integral_cgtos()
+  !call check_ao_two_e_integral_cgtos()
   !call check_crint1()
   !call check_crint2()
   !call check_crint3()
+  call check_crint4()
 
 end
 
@@ -336,6 +337,105 @@ subroutine check_crint3()
 
   print*, "crint_quad_1 wall time (sec) = ", t_int1
   print*, "crint_quad_2 wall time (sec) = ", t_int2
+
+
+  deallocate(seed)
+
+end
+
+! ---
+
+subroutine check_crint4()
+
+  implicit none
+
+  integer                    :: i_test, n_test
+  integer                    :: i, seed_size, clock_time
+  double precision           :: xr(1), x, shift
+  double precision           :: yr(1), y
+  double precision           :: dif_re, dif_im, acc_re, nrm_re, acc_im, nrm_im
+  double precision           :: delta_ref
+  double precision           :: t1, t2, t_int1, t_int2
+  complex*16                 :: rho
+  complex*16                 :: int1, int2, int3
+  integer, allocatable       :: seed(:)
+
+
+
+  call random_seed(size=seed_size)
+  allocate(seed(seed_size))
+  call system_clock(count=clock_time)                  
+  seed = clock_time + 37 * (/ (i, i=0, seed_size-1) /) 
+  !seed = 123456789
+  call random_seed(put=seed)
+
+
+  t_int1 = 0.d0
+  t_int2 = 0.d0
+
+  n_test = 100
+  shift = 15.d0
+
+  acc_re = 0.d0
+  nrm_re = 0.d0
+  acc_im = 0.d0
+  nrm_im = 0.d0
+  do i_test = 1, n_test
+
+    call random_number(xr)
+    call random_number(yr)
+
+    x = 1.d0 * (2.d0 * shift * xr(1) - shift)
+    y = 1.d0 * (2.d0 * shift * yr(1) - shift)
+
+    rho = x + (0.d0, 1.d0) * y
+
+    call wall_time(t1)
+    call zboysfun00_1(rho, int1)
+    call wall_time(t2)
+    t_int1 = t_int1 + t2 - t1
+
+    call wall_time(t1)
+    call zboysfun00_2(rho, int2)
+    call wall_time(t2)
+    t_int2 = t_int2 + t2 - t1
+
+    dif_re = dabs(real(int1) - real(int2))
+    dif_im = dabs(aimag(int1) - aimag(int2))
+    if((dif_re .gt. 1d-10) .or. (dif_im .gt. 1d-10)) then
+      print*, ' important error found: '
+      print*, " rho = ", x, y
+      print*, real(int1), real(int2), dif_re
+      print*, aimag(int1), aimag(int2), dif_im
+      call crint_quad_12(0, rho, 10000000, int3)
+      if(zabs(int1 - int3) .lt. zabs(int2 - int3)) then
+        print*, ' implementation 2 seems to be wrong'
+      else
+        print*, ' implementation 1 seems to be wrong'
+        print*, ' quad 10000000:', real(int3), aimag(int3)
+        call crint_quad_12(0, rho, 100000000, int3)
+        print*, ' quad 100000000:', real(int3), aimag(int3)
+      endif
+      !print*, ' quad:', real(int3), aimag(int3)
+      !stop
+    endif
+
+    if((real(int1) /= real(int1)) .or. (aimag(int1) /= aimag(int1)) .or. &
+       (real(int2) /= real(int2)) .or. (aimag(int2) /= aimag(int2)) ) then
+      cycle
+    else
+      acc_re += dif_re
+      acc_im += dif_im
+      nrm_re += dabs(real(int1))
+      nrm_im += dabs(aimag(int1))
+    endif
+  enddo
+
+  print*, "accuracy on real part (%):", 100.d0 * acc_re / (nrm_re + 1d-15)
+  print*, "accuracy on imag part (%):", 100.d0 * acc_im / (nrm_im + 1d-15)
+
+  print*, "zerf_1 wall time (sec) = ", t_int1
+  print*, "zerf_2 wall time (sec) = ", t_int2
 
 
   deallocate(seed)
