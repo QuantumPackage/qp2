@@ -7,7 +7,9 @@ program deb_ao_2e_int
   !call check_crint1()
   !call check_crint2()
   !call check_crint3()
-  call check_crint4()
+  !call check_crint4()
+  call check_crint5()
+  !call check_crint6()
 
 end
 
@@ -354,7 +356,6 @@ subroutine check_crint4()
   double precision           :: xr(1), x, shift
   double precision           :: yr(1), y
   double precision           :: dif_re, dif_im, acc_re, nrm_re, acc_im, nrm_im
-  double precision           :: delta_ref
   double precision           :: t1, t2, t_int1, t_int2
   complex*16                 :: rho
   complex*16                 :: int1, int2, int3
@@ -436,6 +437,196 @@ subroutine check_crint4()
 
   print*, "zerf_1 wall time (sec) = ", t_int1
   print*, "zerf_2 wall time (sec) = ", t_int2
+
+
+  deallocate(seed)
+
+end
+
+! ---
+
+subroutine check_crint5()
+
+  implicit none
+
+  integer                    :: i_test, n_test
+  integer                    :: i, seed_size, clock_time
+  integer                    :: n
+  double precision           :: xr(1), yr(1), nr(1), x, shift, y
+  double precision           :: dif1_re, dif1_im, acc1_re, acc1_im
+  double precision           :: dif2_re, dif2_im, acc2_re, acc2_im
+  double precision           :: nrm_re, nrm_im
+  double precision           :: t1, t2, t_int1, t_int2
+  complex*16                 :: rho
+  complex*16                 :: int1, int2, int_ref
+  integer, allocatable       :: seed(:)
+
+  complex*16, external       :: crint_1, crint_2
+
+
+
+  call random_seed(size=seed_size)
+  allocate(seed(seed_size))
+  call system_clock(count=clock_time)                  
+  seed = clock_time + 37 * (/ (i, i=0, seed_size-1) /) 
+  !seed = 123456789
+  call random_seed(put=seed)
+
+
+  t_int1 = 0.d0
+  t_int2 = 0.d0
+
+  n_test = 100
+
+  acc1_re = 0.d0
+  acc1_im = 0.d0
+  acc2_re = 0.d0
+  acc2_im = 0.d0
+  nrm_re = 0.d0
+  nrm_im = 0.d0
+  do i_test = 1, n_test
+
+    call random_number(xr)
+    call random_number(yr)
+    call random_number(nr)
+
+    x = 1.d+1 * (30.d0 * xr(1) - 15.d0)
+    y = 1.d+1 * (30.d0 * yr(1) - 15.d0)
+    n = int(16.d0 * nr(1))
+
+    rho = x + (0.d0, 1.d0) * y
+
+    call wall_time(t1)
+    int1 = crint_1(n, rho)
+    call wall_time(t2)
+    t_int1 = t_int1 + t2 - t1
+
+    call wall_time(t1)
+    int2 = crint_2(n, rho)
+    call wall_time(t2)
+    t_int2 = t_int2 + t2 - t1
+
+    call crint_quad_12(n, rho, 10000000, int_ref)
+
+    dif1_re = dabs(real(int1) - real(int_ref))
+    dif1_im = dabs(aimag(int1) - aimag(int_ref))
+
+    dif2_re = dabs(real(int2) - real(int_ref))
+    dif2_im = dabs(aimag(int2) - aimag(int_ref))
+
+    if((dif2_re .gt. 1d-7) .or. (dif2_im .gt. 1d-7)) then
+      print*, ' important error found: '
+      print*, " n, rho = ", n, x, y
+      print*, real(int1), real(int2), real(int_ref)
+      print*, aimag(int1), aimag(int2), aimag(int_ref)
+      !stop
+    endif
+
+    acc1_re += dif1_re
+    acc1_im += dif1_im
+
+    acc2_re += dif2_re
+    acc2_im += dif2_im
+
+    nrm_re += dabs(real(int_ref))
+    nrm_im += dabs(aimag(int_ref))
+  enddo
+
+  print*, "accuracy on boys_1 (%):", 100.d0 * acc1_re / (nrm_re + 1d-15), 100.d0 * acc1_im / (nrm_im + 1d-15)
+  print*, "accuracy on boys_2 (%):", 100.d0 * acc1_re / (nrm_re + 1d-15), 100.d0 * acc2_im / (nrm_im + 1d-15)
+
+  print*, "boys_1 wall time (sec) = ", t_int1
+  print*, "boys_2 wall time (sec) = ", t_int2
+
+
+  deallocate(seed)
+
+end
+
+! ---
+
+subroutine check_crint6()
+
+  implicit none
+
+  integer                    :: i_test, n_test
+  integer                    :: i, seed_size, clock_time
+  integer                    :: n
+  double precision           :: xr(1), yr(1), nr(1), x, shift, y
+  double precision           :: dif_re, dif_im, acc_re, acc_im
+  double precision           :: nrm_re, nrm_im
+  double precision           :: t1, t2, t_int1, t_int2
+  complex*16                 :: rho
+  complex*16                 :: int1, int2, int3
+  integer, allocatable       :: seed(:)
+
+  complex*16, external       :: crint_1, crint_2
+
+
+
+  call random_seed(size=seed_size)
+  allocate(seed(seed_size))
+  call system_clock(count=clock_time)                  
+  seed = clock_time + 37 * (/ (i, i=0, seed_size-1) /) 
+  !seed = 123456789
+  call random_seed(put=seed)
+
+
+  t_int1 = 0.d0
+  t_int2 = 0.d0
+
+  n_test = 100
+
+  acc_re = 0.d0
+  acc_im = 0.d0
+  nrm_re = 0.d0
+  nrm_im = 0.d0
+  do i_test = 1, n_test
+
+    call random_number(xr)
+    call random_number(yr)
+    call random_number(nr)
+
+    x = 1.d0 * (30.d0 * xr(1) - 15.d0)
+    y = 1.d0 * (30.d0 * yr(1) - 15.d0)
+    n = int(16.d0 * nr(1))
+
+    rho = x + (0.d0, 1.d0) * y
+
+    call wall_time(t1)
+    int1 = crint_1(n, rho)
+    call wall_time(t2)
+    t_int1 = t_int1 + t2 - t1
+
+    call wall_time(t1)
+    int2 = crint_2(n, rho)
+    call wall_time(t2)
+    t_int2 = t_int2 + t2 - t1
+
+    dif_re = dabs(real(int1) - real(int2))
+    dif_im = dabs(aimag(int1) - aimag(int2))
+
+    if((dif_re .gt. 1d-10) .or. (dif_im .gt. 1d-10)) then
+      print*, ' important error found: '
+      print*, " n, rho = ", n, x, y
+      print*, real(int1), real(int2), dif_re
+      print*, aimag(int1), aimag(int2), dif_im
+      call crint_quad_12(n, rho, 100000000, int3)
+      print*, ' quad 100000000:', real(int3), aimag(int3)
+      !print*, ' quad 100000000:', dabs(real(int1) - real(int3)), dabs(aimag(int1) - aimag(int3))
+      !stop
+    endif
+
+    acc_re += dif_re
+    acc_im += dif_im
+    nrm_re += dabs(real(int1))
+    nrm_im += dabs(aimag(int1))
+  enddo
+
+  print*, "diff (%):", 100.d0 * acc_re / (nrm_re + 1d-15), 100.d0 * acc_im / (nrm_im + 1d-15)
+
+  print*, "boys_1 wall time (sec) = ", t_int1
+  print*, "boys_2 wall time (sec) = ", t_int2
 
 
   deallocate(seed)
