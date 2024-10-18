@@ -75,10 +75,6 @@ END_PROVIDER
       enddo
     endif
 
-    powA(1) = ao_power(i,1)
-    powA(2) = ao_power(i,2)
-    powA(3) = ao_power(i,3)
-
     ! Normalization of the contracted basis functions
     if (ao_normalized) then
       norm = 0.d0

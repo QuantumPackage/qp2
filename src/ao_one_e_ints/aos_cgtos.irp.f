@@ -4,6 +4,7 @@
 BEGIN_PROVIDER [double precision, ao_coef_cgtos_norm_ord_transp, (ao_prim_num_max, ao_num)]
 
   implicit none
+
   integer :: i, j
 
   do j = 1, ao_num
@@ -62,9 +63,9 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
     powA(2) = ao_power(i,2)
     powA(3) = ao_power(i,3)
  
-    ! Normalization of the primitives
     if(primitives_normalized) then
 
+      ! Normalization of the primitives
       do j = 1, ao_prim_num(i)
 
         expo = ao_expo(i,j) + (0.d0, 1.d0) * ao_expo_im(i,j)
@@ -81,11 +82,15 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
         C1 = zexp(-(0.d0, 2.d0) * phiA - 0.5d0 * expo_inv * KA2)
         C2 = zexp(-(0.5d0, 0.d0) * real(expo_inv) * KA2)
 
-        call overlap_cgaussian_xyz(C_Ae,        C_Ae,        expo, expo, powA, powA, C_Ap,        C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)
-        call overlap_cgaussian_xyz(conjg(C_Ae), C_Ae, conjg(expo), expo, powA, powA, conjg(C_Ap), C_Ap, overlap_x, overlap_y, overlap_z, integ2, nz)
+        call overlap_cgaussian_xyz(C_Ae, C_Ae, expo, expo, powA, powA, &
+                                   C_Ap, C_Ap, overlap_x, overlap_y, overlap_z, integ1, nz)
+
+        call overlap_cgaussian_xyz(conjg(C_Ae), C_Ae, conjg(expo), expo, powA, powA, &
+                                   conjg(C_Ap), C_Ap, overlap_x, overlap_y, overlap_z, integ2, nz)
 
         norm = 2.d0 * real(C1 * integ1 + C2 * integ2)
 
+        !ao_coef_norm_cgtos(i,j) = 1.d0 / dsqrt(norm)
         ao_coef_norm_cgtos(i,j) = ao_coef(i,j) / dsqrt(norm)
       enddo
 
@@ -95,7 +100,7 @@ BEGIN_PROVIDER [double precision, ao_coef_norm_cgtos, (ao_num, ao_prim_num_max)]
         ao_coef_norm_cgtos(i,j) = ao_coef(i,j)
       enddo
 
-    endif
+    endif ! primitives_normalized
 
   enddo
 

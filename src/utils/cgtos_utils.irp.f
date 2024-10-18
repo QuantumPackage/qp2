@@ -66,7 +66,7 @@ end
 ! ---
 
 subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
-                                             alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
+               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
   BEGIN_DOC
   !
@@ -91,8 +91,8 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   include 'constants.include.F'
 
   integer,    intent(in)  :: dim, a(3), b(3)
-  complex*16, intent(in)  :: alpha, Ap_center(3), Ae_center(3)
-  complex*16, intent(in)  :: beta, Bp_center(3), Be_center(3)
+  complex*16, intent(in)  :: alpha, Ae_center(3), Ap_center(3)
+  complex*16, intent(in)  :: beta, Be_center(3), Bp_center(3)
   integer,    intent(out) :: iorder(3)         
   complex*16, intent(out) :: p, P_center(3), fact_k, P_new(0:max_dim,3)
 
@@ -167,13 +167,12 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   complex*16, intent(in)   :: a, b, xa(3), xb(3) 
   complex*16, intent(out)  :: p, k, xp(3)      
 
-  double precision         :: tmp_mod
   complex*16               :: p_inv, xab(3), ab
 
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: xab
 
-  ASSERT (REAL(a) > 0.)
-  ASSERT (REAL(b) > 0.)
+  ASSERT (real(a) > 0.)
+  ASSERT (real(b) > 0.)
 
   ! new exponent
   p = a + b
@@ -185,9 +184,8 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   p_inv = (1.d0, 0.d0) / p
   ab    = a * b * p_inv
 
-  k       = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
-  tmp_mod = dsqrt(real(k)*real(k) + aimag(k)*aimag(k))
-  if(tmp_mod .gt. 40.d0) then
+  k = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
+  if(real(k) .gt. 40.d0) then
     k       = (0.d0, 0.d0)
     xp(1:3) = (0.d0, 0.d0)
     return
@@ -228,8 +226,8 @@ subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
   p_inv = (1.d0, 0.d0) / p
   ab    = a * b * p_inv
 
-  k = ab * xab*xab
-  if(zabs(k) > 40.d0) then
+  k = ab * xab * xab
+  if(real(k) > 40.d0) then
     k  = (0.d0, 0.d0)
     xp = (0.d0, 0.d0)
     return
@@ -300,7 +298,6 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
   complex*16, intent(out)   :: d(0:nb+nc)
 
   integer                   :: ib
-  double precision          :: tmp_mod
   complex*16                :: tmp
 
   nd = nb + nc
@@ -308,12 +305,10 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
     d(ib) = d(ib) + c(ib) + b(ib)
   enddo
 
-  tmp     = d(nd)
-  tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
-  do while( (tmp_mod .lt. 1.d-15) .and. (nd >= 0) )
+  tmp = d(nd)
+  do while( (zabs(tmp) .lt. 1.d-15) .and. (nd >= 0) )
     nd -= 1
-    tmp     = d(nd)
-    tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
+    tmp = d(nd)
     if(nd < 0) exit
   enddo
 
@@ -336,7 +331,6 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
   complex*16, intent(inout) :: d(0:max(nb, nd))
 
   integer                   :: ib 
-  double precision          :: tmp_mod
   complex*16                :: tmp
 
   nd = max(nd, nb)
@@ -346,13 +340,11 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
       d(ib) = d(ib) + cst * b(ib)
     enddo
 
-    tmp     = d(nd)
-    tmp_mod = dsqrt(real(tmp)*real(tmp) + aimag(tmp)*aimag(tmp))
-    do while(tmp_mod .lt. 1.d-15)
+    tmp = d(nd)
+    do while(zabs(tmp) .lt. 1.d-15)
       nd -= 1
       if(nd < 0) exit
-      tmp     = d(nd)
-      tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
+      tmp = d(nd)
     enddo
 
   endif
