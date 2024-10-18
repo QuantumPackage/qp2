@@ -246,11 +246,11 @@ END_PROVIDER
           C2(3) = zexp((0.d0, 1.d0) * (phiA(3) - phiB(3)) - 0.25d0 * (conjg(alpha_inv) * KA2(3) + beta_inv * KB2(3)))
           C2(4) = C2(1) * C2(2) * C2(3)
 
-          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, Ap_center, Bp_center, &
-                                     overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
+          call overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, power_B, &
+                                     Ap_center, Bp_center, overlap_x1, overlap_y1, overlap_z1, overlap1, dim1)
 
-          call overlap_cgaussian_xyz(conjg(Ae_center), Be_center, conjg(alpha), beta, power_A, power_B, conjg(Ap_center), Bp_center, &
-                                     overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
+          call overlap_cgaussian_xyz(conjg(Ae_center), Be_center, conjg(alpha), beta, power_A, power_B, &
+                                     conjg(Ap_center), Bp_center, overlap_x2, overlap_y2, overlap_z2, overlap2, dim1)
 
           overlap_x = 2.d0 * real(C1(1) * overlap_x1 + C2(1) * overlap_x2)
           overlap_y = 2.d0 * real(C1(2) * overlap_y1 + C2(2) * overlap_y2)

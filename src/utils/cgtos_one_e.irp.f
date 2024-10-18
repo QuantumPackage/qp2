@@ -79,10 +79,10 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
            alpha, beta, power_A, power_B, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
   if(zabs(fact_p) .lt. 1.d-14) then
-    overlap_x = (1.d-10, 0.d0)
-    overlap_y = (1.d-10, 0.d0)
-    overlap_z = (1.d-10, 0.d0)
-    overlap   = (1.d-10, 0.d0)
+    overlap_x = (0.d0, 0.d0)
+    overlap_y = (0.d0, 0.d0)
+    overlap_z = (0.d0, 0.d0)
+    overlap   = (0.d0, 0.d0)
     return
   endif
 
