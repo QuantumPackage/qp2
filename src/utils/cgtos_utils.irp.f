@@ -1,13 +1,19 @@
 
 ! ---
 
-subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorder, alpha, beta, a, b, A_center, B_center, dim)
+subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorder, &
+                                               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
   BEGIN_DOC
+  !
   ! Transform the product of
-  !          (x-x_A)^a (x-x_B)^b exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
+  !
+  !     (x - x_Ap)^a (x - x_Bp)^b exp(-alpha (r - Ae)^2) exp(-beta (r - Be)^2)
+  !
   ! into
-  !        fact_k \sum_{i=0}^{iorder} (x-x_P)^i exp(-p(r-P)^2)
+  !
+  !     fact_k \sum_{i=0}^{iorder} (x - x_P)^i exp(-p (r - P)^2)
+  !
   END_DOC
 
   implicit none
@@ -15,13 +21,13 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
 
   integer,    intent(in)  :: dim
   integer,    intent(in)  :: a, b 
-  complex*16, intent(in)  :: alpha, beta, A_center, B_center          
+  complex*16, intent(in)  :: alpha, Ae_center, Ap_center
+  complex*16, intent(in)  :: beta, Be_center, Bp_center
   integer,    intent(out) :: iorder            
   complex*16, intent(out) :: p, P_center, fact_k          
   complex*16, intent(out) :: P_new(0:max_dim)  
 
   integer                 :: n_new, i, j
-  double precision        :: tmp_mod
   complex*16              :: P_a(0:max_dim), P_b(0:max_dim)
   complex*16              :: p_inv, ab, d_AB, tmp
 
@@ -35,13 +41,12 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
   ! new center
   p_inv    = (1.d0, 0.d0) / p
   ab       = alpha * beta
-  P_center = (alpha * A_center + beta * B_center) * p_inv
+  P_center = (alpha * Ae_center + beta * Be_center) * p_inv
 
   ! get the factor
-  d_AB    = (A_center - B_center) * (A_center - B_center)
-  tmp     = ab * p_inv * d_AB
-  tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
-  if(tmp_mod .lt. 50.d0) then
+  d_AB = (Ae_center - Be_center) * (Ae_center - Be_center)
+  tmp = ab * p_inv * d_AB
+  if(zabs(tmp) .lt. 50.d0) then
     fact_k = zexp(-tmp)
   else
     fact_k = (0.d0, 0.d0)
@@ -49,7 +54,7 @@ subroutine give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_k, iorde
 
   ! Recenter the polynomials P_a and P_b on P_center
   !DIR$ FORCEINLINE
-  call recentered_cpoly2(P_a(0), A_center, P_center, a, P_b(0), B_center, P_center, b)
+  call recentered_cpoly2(P_a(0), Ap_center, P_center, a, P_b(0), Bp_center, P_center, b)
   n_new = 0
 
   !DIR$ FORCEINLINE
@@ -60,31 +65,38 @@ end
 
 ! ---
 
-subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, alpha, beta, a, b, A_center, B_center, dim)
+subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder, &
+               alpha, beta, a, b, Ae_center, Be_center, Ap_center, Bp_center, dim)
 
   BEGIN_DOC
+  !
   ! Transforms the product of
-  !          (x-x_A)^a(1) (x-x_B)^b(1) (y-y_A)^a(2) (y-y_B)^b(2) (z-z_A)^a(3) (z-z_B)^b(3) exp(-(r-A)^2 alpha) exp(-(r-B)^2 beta)
+  !
+  !   (x - x_Ap)^a(1) (x - x_Bp)^b(1) exp(-alpha (x - x_Ae)^2) exp(-beta (x - x_Be)^2) x
+  !   (y - y_Ap)^a(2) (y - y_Bp)^b(2) exp(-alpha (y - y_Ae)^2) exp(-beta (y - y_Be)^2) x
+  !   (z - z_Ap)^a(3) (z - z_Bp)^b(3) exp(-alpha (z - z_Ae)^2) exp(-beta (z - z_Be)^2)
+  !
   ! into
-  !        fact_k * [ sum (l_x = 0,i_order(1)) P_new(l_x,1) * (x-P_center(1))^l_x ] exp (- p (x-P_center(1))^2 )
-  !               * [ sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y ] exp (- p (y-P_center(2))^2 )
-  !               * [ sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z ] exp (- p (z-P_center(3))^2 )
+  !   fact_k * [sum (l_x = 0,i_order(1)) P_new(l_x,1) * (x-P_center(1))^l_x] exp (-p (x-P_center(1))^2)
+  !          * [sum (l_y = 0,i_order(2)) P_new(l_y,2) * (y-P_center(2))^l_y] exp (-p (y-P_center(2))^2)
+  !          * [sum (l_z = 0,i_order(3)) P_new(l_z,3) * (z-P_center(3))^l_z] exp (-p (z-P_center(3))^2)
   !
   ! WARNING ::: IF fact_k is too smal then: 
   ! returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
+  !
   END_DOC
 
   implicit none
   include 'constants.include.F'
 
   integer,    intent(in)  :: dim, a(3), b(3)
-  complex*16, intent(in)  :: alpha, beta, A_center(3), B_center(3)      
+  complex*16, intent(in)  :: alpha, Ae_center(3), Ap_center(3)
+  complex*16, intent(in)  :: beta, Be_center(3), Bp_center(3)
   integer,    intent(out) :: iorder(3)         
   complex*16, intent(out) :: p, P_center(3), fact_k, P_new(0:max_dim,3)
 
   integer                 :: n_new, i, j
-  double precision        :: tmp_mod
   complex*16              :: P_a(0:max_dim,3), P_b(0:max_dim,3)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: P_a, P_b
 
@@ -97,12 +109,11 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   P_new(0,3) = (0.d0, 0.d0)
 
   !DIR$ FORCEINLINE
-  call cgaussian_product(alpha, A_center, beta, B_center, fact_k, p, P_center)
+  call cgaussian_product(alpha, Ae_center, beta, Be_center, fact_k, p, P_center)
 
   ! IF fact_k is too smal then: returns a "s" function centered in zero
   ! with an inifinite exponent and a zero polynom coef
-  tmp_mod = dsqrt(real(fact_k)*real(fact_k) + aimag(fact_k)*aimag(fact_k))
-  if(tmp_mod < 1d-14) then
+  if(zabs(fact_k) < 1d-14) then
     iorder               = 0
     p                    = (1.d+14, 0.d0)
     fact_k               = (0.d0  , 0.d0)
@@ -112,7 +123,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   endif
 
   !DIR$ FORCEINLINE
-  call recentered_cpoly2(P_a(0,1), A_center(1), P_center(1), a(1), P_b(0,1), B_center(1), P_center(1), b(1))
+  call recentered_cpoly2(P_a(0,1), Ap_center(1), P_center(1), a(1), P_b(0,1), Bp_center(1), P_center(1), b(1))
   iorder(1) = a(1) + b(1)
   do i = 0, iorder(1)
     P_new(i,1) = 0.d0
@@ -122,7 +133,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   call multiply_cpoly(P_a(0,1), a(1), P_b(0,1), b(1), P_new(0,1), n_new)
 
   !DIR$ FORCEINLINE
-  call recentered_cpoly2(P_a(0,2), A_center(2), P_center(2), a(2), P_b(0,2), B_center(2), P_center(2), b(2))
+  call recentered_cpoly2(P_a(0,2), Ap_center(2), P_center(2), a(2), P_b(0,2), Bp_center(2), P_center(2), b(2))
   iorder(2) = a(2) + b(2)
   do i = 0, iorder(2)
     P_new(i,2) = 0.d0
@@ -132,7 +143,7 @@ subroutine give_explicit_cpoly_and_cgaussian(P_new, P_center, p, fact_k, iorder,
   call multiply_cpoly(P_a(0,2), a(2), P_b(0,2), b(2), P_new(0,2), n_new)
 
   !DIR$ FORCEINLINE
-  call recentered_cpoly2(P_a(0,3), A_center(3), P_center(3), a(3), P_b(0,3), B_center(3), P_center(3), b(3))
+  call recentered_cpoly2(P_a(0,3), Ap_center(3), P_center(3), a(3), P_b(0,3), Bp_center(3), P_center(3), b(3))
   iorder(3) = a(3) + b(3)
   do i = 0, iorder(3)
     P_new(i,3) = 0.d0
@@ -156,13 +167,12 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   complex*16, intent(in)   :: a, b, xa(3), xb(3) 
   complex*16, intent(out)  :: p, k, xp(3)      
 
-  double precision         :: tmp_mod
   complex*16               :: p_inv, xab(3), ab
 
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: xab
 
-  ASSERT (REAL(a) > 0.)
-  ASSERT (REAL(b) > 0.)
+  ASSERT (real(a) > 0.)
+  ASSERT (real(b) > 0.)
 
   ! new exponent
   p = a + b
@@ -174,9 +184,8 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   p_inv = (1.d0, 0.d0) / p
   ab    = a * b * p_inv
 
-  k       = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
-  tmp_mod = dsqrt(real(k)*real(k) + aimag(k)*aimag(k))
-  if(tmp_mod .gt. 40.d0) then
+  k = ab * (xab(1)*xab(1) + xab(2)*xab(2) + xab(3)*xab(3))
+  if(real(k) .gt. 40.d0) then
     k       = (0.d0, 0.d0)
     xp(1:3) = (0.d0, 0.d0)
     return
@@ -199,15 +208,15 @@ subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
   END_DOC
 
   implicit none
+
   complex*16, intent(in)  :: a, b, xa, xb
   complex*16, intent(out) :: p, k, xp
 
-  double precision        :: tmp_mod
   complex*16              :: p_inv
   complex*16              :: xab, ab
 
-  ASSERT (REAL(a) > 0.)
-  ASSERT (REAL(b) > 0.)
+  ASSERT (real(a) > 0.)
+  ASSERT (real(b) > 0.)
 
   ! new center
   p = a + b
@@ -217,9 +226,8 @@ subroutine cgaussian_product_x(a, xa, b, xb, k, p, xp)
   p_inv = (1.d0, 0.d0) / p
   ab    = a * b * p_inv
 
-  k       = ab * xab*xab
-  tmp_mod = dsqrt(REAL(k)*REAL(k) + AIMAG(k)*AIMAG(k))
-  if(tmp_mod > 40.d0) then
+  k = ab * xab * xab
+  if(real(k) > 40.d0) then
     k  = (0.d0, 0.d0)
     xp = (0.d0, 0.d0)
     return
@@ -290,7 +298,6 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
   complex*16, intent(out)   :: d(0:nb+nc)
 
   integer                   :: ib
-  double precision          :: tmp_mod
   complex*16                :: tmp
 
   nd = nb + nc
@@ -298,12 +305,10 @@ subroutine add_cpoly(b, nb, c, nc, d, nd)
     d(ib) = d(ib) + c(ib) + b(ib)
   enddo
 
-  tmp     = d(nd)
-  tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
-  do while( (tmp_mod .lt. 1.d-15) .and. (nd >= 0) )
+  tmp = d(nd)
+  do while( (zabs(tmp) .lt. 1.d-15) .and. (nd >= 0) )
     nd -= 1
-    tmp     = d(nd)
-    tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
+    tmp = d(nd)
     if(nd < 0) exit
   enddo
 
@@ -326,7 +331,6 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
   complex*16, intent(inout) :: d(0:max(nb, nd))
 
   integer                   :: ib 
-  double precision          :: tmp_mod
   complex*16                :: tmp
 
   nd = max(nd, nb)
@@ -336,13 +340,11 @@ subroutine add_cpoly_multiply(b, nb, cst, d, nd)
       d(ib) = d(ib) + cst * b(ib)
     enddo
 
-    tmp     = d(nd)
-    tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
-    do while(tmp_mod .lt. 1.d-15)
+    tmp = d(nd)
+    do while(zabs(tmp) .lt. 1.d-15)
       nd -= 1
       if(nd < 0) exit
-      tmp     = d(nd)
-      tmp_mod = dsqrt(REAL(tmp)*REAL(tmp) + AIMAG(tmp)*AIMAG(tmp))
+      tmp = d(nd)
     enddo
 
   endif
