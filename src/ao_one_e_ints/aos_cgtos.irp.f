@@ -18,8 +18,8 @@ END_PROVIDER
 ! ---
 
  BEGIN_PROVIDER [complex*16, ao_expo_cgtos_ord_transp, (ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [complex*16, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
-&BEGIN_PROVIDER [complex*16, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_expo_pw_ord_transp, (4, ao_prim_num_max, ao_num)]
+&BEGIN_PROVIDER [double precision, ao_expo_phase_ord_transp, (4, ao_prim_num_max, ao_num)]
 
   implicit none
 

@@ -143,7 +143,7 @@ subroutine crint_1_vec(n_max, rho, vals)
               - 0.33333333333333333333d0) * rho &
               + 1.0d0
 
-      if(n > 0) then
+      if(n_max > 0) then
 
         vals(1) = (((((((((1.198144314086343d-08 * rho &
                 - 1.312253296380281d-07) * rho &
@@ -157,7 +157,7 @@ subroutine crint_1_vec(n_max, rho, vals)
                 - 2.000000000000000d-01) * rho &
                 + 3.333333333333333d-01
 
-        if(n > 1) then
+        if(n_max > 1) then
 
           vals(2) = (((((((((1.102292768959436d-08 * rho &
                   - 1.198144314086343d-07) * rho &
@@ -171,7 +171,7 @@ subroutine crint_1_vec(n_max, rho, vals)
                   - 1.428571428571428d-01) * rho &
                   + 2.000000000000000d-01 
 
-          if(n > 2) then
+          if(n_max > 2) then
 
             vals(3) = (((((((((1.020641452740218d-08 * rho &
                     - 1.102292768959436d-07) * rho &
@@ -200,9 +200,9 @@ subroutine crint_1_vec(n_max, rho, vals)
                       + 1.0d0 / tmp
             enddo
 
-          endif ! n > 2
-        endif ! n > 1
-      endif ! n > 0
+          endif ! n_max > 2
+        endif ! n_max > 1
+      endif ! n_max > 0
 
     else
 
@@ -515,7 +515,7 @@ subroutine crint_2_vec(n_max, rho, vals)
               - 0.33333333333333333333d0) * rho &
               + 1.0d0
 
-      if(n > 0) then
+      if(n_max > 0) then
 
         vals(1) = (((((((((1.198144314086343d-08 * rho &
                 - 1.312253296380281d-07) * rho &
@@ -529,7 +529,7 @@ subroutine crint_2_vec(n_max, rho, vals)
                 - 2.000000000000000d-01) * rho &
                 + 3.333333333333333d-01
 
-        if(n > 1) then
+        if(n_max > 1) then
 
           vals(2) = (((((((((1.102292768959436d-08 * rho &
                   - 1.198144314086343d-07) * rho &
@@ -543,7 +543,7 @@ subroutine crint_2_vec(n_max, rho, vals)
                   - 1.428571428571428d-01) * rho &
                   + 2.000000000000000d-01 
 
-          if(n > 2) then
+          if(n_max > 2) then
 
             vals(3) = (((((((((1.020641452740218d-08 * rho &
                     - 1.102292768959436d-07) * rho &
@@ -572,9 +572,9 @@ subroutine crint_2_vec(n_max, rho, vals)
                       + 1.0d0 / tmp
             enddo
 
-          endif ! n > 2
-        endif ! n > 1
-      endif ! n > 0
+          endif ! n_max > 2
+        endif ! n_max > 1
+      endif ! n_max > 0
 
     else
 
