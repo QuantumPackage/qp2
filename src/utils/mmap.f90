@@ -2,6 +2,8 @@ module mmap_module
 
   use iso_c_binding
 
+  character*(256)   :: mmap_prefix = '/tmp/'
+
   type mmap_type
     type(c_ptr)     :: ptr          ! Pointer to the data
     character*(128) :: filename     ! Name of the file
@@ -155,7 +157,15 @@ module mmap_module
         map%filename = filename
       else
         call getenv('EZFIO_FILE', map%filename)
-        map%filename = trim(map%filename) // '/work/tmpfile'
+        if (trim(map%filename) /= '') then
+          map%filename = trim(map%filename) // '/work/'
+        else
+          call getenv('TMPDIR', map%filename)
+          if (trim(map%filename) == '') then
+            map%filename = '/tmp/'
+          endif
+        endif
+        map%filename = trim(map%filename) // '/tmpfile'
       endif
 
       map%length = int(bytes,8)
