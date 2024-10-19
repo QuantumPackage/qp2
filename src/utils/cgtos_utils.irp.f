@@ -421,11 +421,12 @@ complex*16 function Fc_integral(n, inv_sq_p)
   implicit none
   include 'constants.include.F'
 
-  integer,    intent(in) :: n
-  complex*16, intent(in) :: inv_sq_p 
+  integer,    intent(in)     :: n
+  complex*16, intent(in)     :: inv_sq_p 
 
+  complex*16                 :: inv_sq_p2, inv_sq_p3, inv_sq_p4
   ! (n)! 
-  double precision       :: fact
+  double precision, external :: fact
 
   if(n < 0) then
     Fc_integral = (0.d0, 0.d0)
@@ -438,13 +439,29 @@ complex*16 function Fc_integral(n, inv_sq_p)
     return
   endif
 
-  if(n == 0) then
+  select case(n)
+  case(0)
     Fc_integral = sqpi * inv_sq_p
-    return
-  endif
+  case(2)
+    Fc_integral = 0.5d0 * sqpi * inv_sq_p * inv_sq_p * inv_sq_p
+  case(4)
+    inv_sq_p2 = inv_sq_p * inv_sq_p
+    Fc_integral = 0.75d0 * sqpi * inv_sq_p * inv_sq_p2 * inv_sq_p2
+  case(6)
+    inv_sq_p3 = inv_sq_p * inv_sq_p * inv_sq_p
+    Fc_integral = 1.875d0 * sqpi * inv_sq_p * inv_sq_p3 * inv_sq_p3
+  case(8)
+    inv_sq_p3 = inv_sq_p * inv_sq_p * inv_sq_p
+    Fc_integral = 6.5625d0 * sqpi * inv_sq_p3 * inv_sq_p3 * inv_sq_p3
+  case(10)
+    inv_sq_p2 = inv_sq_p * inv_sq_p
+    inv_sq_p4 = inv_sq_p2 * inv_sq_p2
+    Fc_integral = 29.53125d0 * sqpi * inv_sq_p * inv_sq_p2 * inv_sq_p4 * inv_sq_p4
+  case default
+    Fc_integral = sqpi * 0.5d0**n * inv_sq_p**(n+1) * fact(n) / fact(shiftr(n, 1))
+  end select
 
-  Fc_integral = sqpi * 0.5d0**n * inv_sq_p**dble(n+1) * fact(n) / fact(shiftr(n, 1))
-
+  return
 end
 
 ! ---
