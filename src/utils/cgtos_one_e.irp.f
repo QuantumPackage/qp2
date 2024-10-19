@@ -92,7 +92,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
     F_integral_tab(i) = Fc_integral(i, inv_sq_p)
   enddo
 
-  ab = alpha * beta * inv_sq_p
+  ab = alpha * beta * inv_sq_p * inv_sq_p
 
   arg = ab * (Ae_center(1) - Be_center(1)) &
            * (Ae_center(1) - Be_center(1))
