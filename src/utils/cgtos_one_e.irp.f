@@ -42,6 +42,7 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
 
   overlap_cgaussian_x = overlap_cgaussian_x * fact_p
 
+  return
 end
 
 ! ---

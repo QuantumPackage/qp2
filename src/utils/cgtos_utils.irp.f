@@ -164,6 +164,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   END_DOC
 
   implicit none
+
   complex*16, intent(in)   :: a, b, xa(3), xb(3) 
   complex*16, intent(out)  :: p, k, xp(3)      
 
@@ -196,6 +197,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   xp(2) = (a * xa(2) + b * xb(2)) * p_inv
   xp(3) = (a * xa(3) + b * xb(3)) * p_inv
 
+  return
 end
 
 ! ---
@@ -458,7 +460,7 @@ complex*16 function Fc_integral(n, inv_sq_p)
     inv_sq_p4 = inv_sq_p2 * inv_sq_p2
     Fc_integral = 29.53125d0 * sqpi * inv_sq_p * inv_sq_p2 * inv_sq_p4 * inv_sq_p4
   case default
-    Fc_integral = sqpi * 0.5d0**n * inv_sq_p**(n+1) * fact(n) / fact(shiftr(n, 1))
+    Fc_integral = 2.d0 * sqpi * (0.5d0 * inv_sq_p)**(n+1) * fact(n) / fact(shiftr(n, 1))
   end select
 
   return
