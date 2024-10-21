@@ -12,16 +12,19 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: power_A(3), power_B(3)
-  integer          :: i, j, k, l, m, n, ii, jj
-  double precision :: c, Z, C_center(3)
-  double precision :: phiA, KA2
-  double precision :: phiB, KB2
-  complex*16       :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
-  complex*16       :: beta, beta_inv, Be_center(3), Bp_center(3)
-  complex*16       :: C1, C2, I1, I2
 
-  complex*16       :: NAI_pol_mult_cgtos
+  integer              :: power_A(3), power_B(3)
+  integer              :: i, j, k, l, m, n, ii, jj
+  double precision     :: c, Z, C_center(3)
+  double precision     :: phiA, KA2
+  double precision     :: phiB, KB2
+  complex*16           :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
+  complex*16           :: beta, beta_inv, Be_center(3), Bp_center(3)
+  complex*16           :: C1, C2, I1, I2
+
+  complex*16, external :: NAI_pol_mult_cgtos
+
+
 
   ao_integrals_n_e_cgtos = 0.d0
 
@@ -140,7 +143,6 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
     dist_AC += abs(Ae_center(i) - C_center(i) * (1.d0, 0.d0))
   enddo
 
-
   if((dist_AB .gt. 1d-13) .or. (dist_AC .gt. 1d-13) .or. use_pw) then
 
     continue
@@ -158,24 +160,27 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
   p_inv = (1.d0, 0.d0) / p
   rho   = alpha * beta * p_inv
 
-  dist          = (0.d0, 0.d0)
-  dist_integral = (0.d0, 0.d0)
-  do i = 1, 3
-    P_center(i)    = (alpha * Ae_center(i) + beta * Be_center(i)) * p_inv
-    dist          += (Ae_center(i) - Be_center(i)) * (Ae_center(i) - Be_center(i))
-    dist_integral += (P_center(i) - C_center(i)) * (P_center(i) - C_center(i))
-  enddo
+  dist = (Ae_center(1) - Be_center(1)) * (Ae_center(1) - Be_center(1)) &
+       + (Ae_center(2) - Be_center(2)) * (Ae_center(2) - Be_center(2)) &
+       + (Ae_center(3) - Be_center(3)) * (Ae_center(3) - Be_center(3))
 
   const_factor = dist * rho
-  const        = p * dist_integral
-
-  if(abs(const_factor) > 80.d0) then
+  if(real(const_factor) > 80.d0) then
     NAI_pol_mult_cgtos = (0.d0, 0.d0)
     return
   endif
 
+  P_center(1) = (alpha * Ae_center(1) + beta * Be_center(1)) * p_inv
+  P_center(2) = (alpha * Ae_center(2) + beta * Be_center(2)) * p_inv
+  P_center(3) = (alpha * Ae_center(3) + beta * Be_center(3)) * p_inv
+
+  dist_integral = (P_center(1) - C_center(1)) * (P_center(1) - C_center(1)) &
+                + (P_center(2) - C_center(2)) * (P_center(2) - C_center(2)) &
+                + (P_center(3) - C_center(3)) * (P_center(3) - C_center(3))
+
+  const = p * dist_integral
   factor = zexp(-const_factor)
-  coeff  = dtwo_pi * factor * p_inv
+  coeff = dtwo_pi * factor * p_inv
 
   n_pt = 2 * ((power_A(1) + power_B(1)) + (power_A(2) + power_B(2)) + (power_A(3) + power_B(3)))
   if(n_pt == 0) then
@@ -214,12 +219,12 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
   double precision, intent(in) :: C_center(3)
   complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3)
   integer,         intent(out) :: n_pt_out
-  complex*16,      intent(out) :: d(0:n_pt_in)
+  complex*16,    intent(inout) :: d(0:n_pt_in)
 
   integer                      :: a_x, b_x, a_y, b_y, a_z, b_z
   integer                      :: n_pt1, n_pt2, n_pt3, dim, i, n_pt_tmp
   complex*16                   :: p, P_center(3), rho, p_inv, p_inv_2
-  complex*16                   :: R1x(0:2), B01(0:2), R1xp(0:2),R2x(0:2)
+  complex*16                   :: R1x(0:2), B01(0:2), R1xp(0:2), R2x(0:2)
   complex*16                   :: d1(0:n_pt_in), d2(0:n_pt_in), d3(0:n_pt_in)
 
   ASSERT (n_pt_in > 1)
@@ -228,9 +233,9 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
   p_inv   = (1.d0, 0.d0) / p
   p_inv_2 = 0.5d0 * p_inv
 
-  do i = 1, 3
-    P_center(i) = (alpha * A_center(i) + beta * B_center(i)) * p_inv
-  enddo
+  P_center(1) = (alpha * A_center(1) + beta * B_center(1)) * p_inv
+  P_center(2) = (alpha * A_center(2) + beta * B_center(2)) * p_inv
+  P_center(3) = (alpha * A_center(3) + beta * B_center(3)) * p_inv
 
   do i = 0, n_pt_in
     d(i)  = (0.d0, 0.d0)
@@ -257,6 +262,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_x = power_A(1)
   b_x = power_B(1)
+
   call I_x1_pol_mult_one_e_cgtos(a_x, b_x, R1x, R1xp, R2x, d1, n_pt1, n_pt_in)
 
   if(n_pt1 < 0) then
@@ -281,6 +287,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_y = power_A(2)
   b_y = power_B(2)
+
   call I_x1_pol_mult_one_e_cgtos(a_y, b_y, R1x, R1xp, R2x, d2, n_pt2, n_pt_in)
 
   if(n_pt2 < 0) then
@@ -305,6 +312,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_z = power_A(3)
   b_z = power_B(3)
+
   call I_x1_pol_mult_one_e_cgtos(a_z, b_z, R1x, R1xp, R2x, d3, n_pt3, n_pt_in)
 
   if(n_pt3 < 0) then
@@ -319,11 +327,9 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   n_pt_tmp = 0
   call multiply_cpoly(d1, n_pt1, d2, n_pt2, d, n_pt_tmp)
-  do i = 0, n_pt_tmp
-    d1(i) = (0.d0, 0.d0)
-  enddo
 
   n_pt_out = 0
+  d1(0:n_pt_tmp) = (0.d0, 0.d0)
   call multiply_cpoly(d, n_pt_tmp, d3, n_pt3, d1, n_pt_out)
   do i = 0, n_pt_out
     d(i) = d1(i)
@@ -354,13 +360,13 @@ recursive subroutine I_x1_pol_mult_one_e_cgtos(a, c, R1x, R1xp, R2x, d, nd, n_pt
 
   dim = n_pt_in
 
-  if( (a==0) .and. (c==0)) then
+  if((a == 0) .and. (c == 0)) then
 
     nd   = 0
     d(0) = (1.d0, 0.d0)
     return
 
-  elseif( (c < 0) .or. (nd < 0) ) then
+  elseif((c < 0) .or. (nd < 0)) then
 
     nd = -1
     return

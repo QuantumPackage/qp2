@@ -164,6 +164,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   END_DOC
 
   implicit none
+
   complex*16, intent(in)   :: a, b, xa(3), xb(3) 
   complex*16, intent(out)  :: p, k, xp(3)      
 
@@ -196,6 +197,7 @@ subroutine cgaussian_product(a, xa, b, xb, k, p, xp)
   xp(2) = (a * xa(2) + b * xb(2)) * p_inv
   xp(3) = (a * xa(3) + b * xb(3)) * p_inv
 
+  return
 end
 
 ! ---
@@ -254,15 +256,10 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
   complex*16, intent(inout) :: d(0:nb+nc)
   integer,    intent(out)   :: nd
 
-  integer                   :: ndtmp, ib, ic
+  integer                   :: ib, ic
 
-  if(ior(nc, nb) >= 0) then ! True if nc>=0 and nb>=0
-    continue
-  else
-    return
-  endif
+  if(ior(nc, nb) < 0) return ! False if nc>=0 and nb>=0
 
-  ndtmp = nb + nc
 
   do ic = 0, nc
     d(ic) = d(ic) + c(ic) * b(0)
@@ -275,9 +272,8 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
     enddo
   enddo
 
-  do nd = ndtmp, 0, -1
-    if(abs(d(nd)) .lt. 1.d-15) cycle
-    exit
+  do nd = nb + nc, 0, -1
+    if(d(nd) /= (0.d0, 0.d0)) exit
   enddo
 
 end
@@ -421,11 +417,12 @@ complex*16 function Fc_integral(n, inv_sq_p)
   implicit none
   include 'constants.include.F'
 
-  integer,    intent(in) :: n
-  complex*16, intent(in) :: inv_sq_p 
+  integer,    intent(in)     :: n
+  complex*16, intent(in)     :: inv_sq_p 
 
+  complex*16                 :: inv_sq_p2, inv_sq_p3, inv_sq_p4
   ! (n)! 
-  double precision       :: fact
+  double precision, external :: fact
 
   if(n < 0) then
     Fc_integral = (0.d0, 0.d0)
@@ -438,13 +435,29 @@ complex*16 function Fc_integral(n, inv_sq_p)
     return
   endif
 
-  if(n == 0) then
+  select case(n)
+  case(0)
     Fc_integral = sqpi * inv_sq_p
-    return
-  endif
+  case(2)
+    Fc_integral = 0.5d0 * sqpi * inv_sq_p * inv_sq_p * inv_sq_p
+  case(4)
+    inv_sq_p2 = inv_sq_p * inv_sq_p
+    Fc_integral = 0.75d0 * sqpi * inv_sq_p * inv_sq_p2 * inv_sq_p2
+  case(6)
+    inv_sq_p3 = inv_sq_p * inv_sq_p * inv_sq_p
+    Fc_integral = 1.875d0 * sqpi * inv_sq_p * inv_sq_p3 * inv_sq_p3
+  case(8)
+    inv_sq_p3 = inv_sq_p * inv_sq_p * inv_sq_p
+    Fc_integral = 6.5625d0 * sqpi * inv_sq_p3 * inv_sq_p3 * inv_sq_p3
+  case(10)
+    inv_sq_p2 = inv_sq_p * inv_sq_p
+    inv_sq_p4 = inv_sq_p2 * inv_sq_p2
+    Fc_integral = 29.53125d0 * sqpi * inv_sq_p * inv_sq_p2 * inv_sq_p4 * inv_sq_p4
+  case default
+    Fc_integral = 2.d0 * sqpi * (0.5d0 * inv_sq_p)**(n+1) * fact(n) / fact(shiftr(n, 1))
+  end select
 
-  Fc_integral = sqpi * 0.5d0**n * inv_sq_p**dble(n+1) * fact(n) / fact(shiftr(n, 1))
-
+  return
 end
 
 ! ---

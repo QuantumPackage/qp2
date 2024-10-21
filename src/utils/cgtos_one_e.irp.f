@@ -21,7 +21,7 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
   integer                :: i, iorder_p
   complex*16             :: P_new(0:max_dim), P_center, fact_p, p, inv_sq_p
 
-  complex*16             :: Fc_integral
+  complex*16, external   :: Fc_integral
 
 
   call give_explicit_cpoly_and_cgaussian_x(P_new, P_center, p, fact_p, iorder_p, &
@@ -42,6 +42,7 @@ complex*16 function overlap_cgaussian_x(Ae_center, Be_center, alpha, beta, power
 
   overlap_cgaussian_x = overlap_cgaussian_x * fact_p
 
+  return
 end
 
 ! ---
@@ -92,7 +93,7 @@ subroutine overlap_cgaussian_xyz(Ae_center, Be_center, alpha, beta, power_A, pow
     F_integral_tab(i) = Fc_integral(i, inv_sq_p)
   enddo
 
-  ab = alpha * beta * inv_sq_p
+  ab = alpha * beta * inv_sq_p * inv_sq_p
 
   arg = ab * (Ae_center(1) - Be_center(1)) &
            * (Ae_center(1) - Be_center(1))

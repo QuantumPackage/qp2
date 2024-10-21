@@ -882,15 +882,13 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_
   complex*16, intent(in) :: Q_new(0:max_dim,3), Q_center(3), fact_q, q, q_inv
 
   integer                :: i, j, nx, ny, nz, n_Ix, n_Iy, n_Iz, iorder, n_pt_tmp, n_pt_out
-  double precision       :: tmp_mod
-  double precision       :: ppq_re, ppq_im, ppq_mod, sq_ppq_re, sq_ppq_im
   complex*16             :: pq, pq_inv, pq_inv_2, p01_1, p01_2, p10_1, p10_2, ppq, sq_ppq
   complex*16             :: rho, dist, const
   complex*16             :: accu, tmp_p, tmp_q
   complex*16             :: dx(0:max_dim), Ix_pol(0:max_dim), dy(0:max_dim), Iy_pol(0:max_dim), dz(0:max_dim), Iz_pol(0:max_dim)
   complex*16             :: d1(0:max_dim), d_poly(0:max_dim)
 
-  complex*16             :: crint_sum
+  complex*16, external   :: crint_sum
 
 
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: dx, Ix_pol, dy, Iy_pol, dz, Iz_pol
@@ -919,15 +917,13 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_
   n_Ix = 0
   do i = 0, iorder_p(1)
 
-    tmp_p   = P_new(i,1)
-    tmp_mod = dsqrt(real(tmp_p)*real(tmp_p) + aimag(tmp_p)*aimag(tmp_p))
-    if(tmp_mod < thresh) cycle
+    tmp_p = P_new(i,1)
+    if(zabs(tmp_p) < thresh) cycle
 
     do j = 0, iorder_q(1)
 
-      tmp_q   = tmp_p * Q_new(j,1)
-      tmp_mod = dsqrt(real(tmp_q)*real(tmp_q) + aimag(tmp_q)*aimag(tmp_q))
-      if(tmp_mod < thresh) cycle
+      tmp_q = tmp_p * Q_new(j,1)
+      if(zabs(tmp_q) < thresh) cycle
 
       !DIR$ FORCEINLINE
       call give_cpolynom_mult_center_x(P_center(1), Q_center(1), i, j, p, q, iorder, pq_inv, pq_inv_2, p10_1, p01_1, p10_2, p01_2, dx, nx)
@@ -950,15 +946,13 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_
   n_Iy = 0
   do i = 0, iorder_p(2)
 
-    tmp_p   = P_new(i,2)
-    tmp_mod = dsqrt(REAL(tmp_p)*REAL(tmp_p) + AIMAG(tmp_p)*AIMAG(tmp_p))
-    if(tmp_mod < thresh) cycle
+    tmp_p = P_new(i,2)
+    if(zabs(tmp_p) < thresh) cycle
 
     do j = 0, iorder_q(2)
 
-      tmp_q   = tmp_p * Q_new(j,2)
-      tmp_mod = dsqrt(REAL(tmp_q)*REAL(tmp_q) + AIMAG(tmp_q)*AIMAG(tmp_q))
-      if(tmp_mod < thresh) cycle
+      tmp_q = tmp_p * Q_new(j,2)
+      if(zabs(tmp_q) < thresh) cycle
 
       !DIR$ FORCEINLINE
       call give_cpolynom_mult_center_x(P_center(2), Q_center(2), i, j, p, q, iorder, pq_inv, pq_inv_2, p10_1, p01_1, p10_2, p01_2, dy, ny)
@@ -982,15 +976,13 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_
   n_Iz = 0
   do i = 0, iorder_p(3)
 
-    tmp_p   = P_new(i,3)
-    tmp_mod = dsqrt(REAL(tmp_p)*REAL(tmp_p) + AIMAG(tmp_p)*AIMAG(tmp_p))
-    if(tmp_mod < thresh) cycle
+    tmp_p = P_new(i,3)
+    if(zabs(tmp_p) < thresh) cycle
 
     do j = 0, iorder_q(3)
 
-      tmp_q   = tmp_p * Q_new(j,3)
-      tmp_mod = dsqrt(REAL(tmp_q)*REAL(tmp_q) + AIMAG(tmp_q)*AIMAG(tmp_q))
-      if(tmp_mod < thresh) cycle
+      tmp_q = tmp_p * Q_new(j,3)
+      if(zabs(tmp_q) < thresh) cycle
 
       !DIR$ FORCEINLINE
       call give_cpolynom_mult_center_x(P_center(3), Q_center(3), i, j, p, q, iorder, pq_inv, pq_inv_2, p10_1, p01_1, p10_2, p01_2, dz, nz)
@@ -1028,6 +1020,9 @@ complex*16 function general_primitive_integral_cgtos(dim, P_new, P_center, fact_
 
   !DIR$ FORCEINLINE
   call multiply_cpoly(d_poly, n_pt_tmp, Iz_pol, n_Iz, d1, n_pt_out)
+  if(n_pt_out == -1) then
+    return
+  endif
 
   accu = crint_sum(n_pt_out, const, d1)
 
@@ -1056,7 +1051,6 @@ complex*16 function ERI_cgtos(alpha, beta, delta, gama, a_x, b_x, c_x, d_x, a_y,
   integer                :: a_x_2, b_x_2, c_x_2, d_x_2, a_y_2, b_y_2, c_y_2, d_y_2, a_z_2, b_z_2, c_z_2, d_z_2
   integer                :: i, j, k, l, n_pt
   integer                :: nx, ny, nz
-  double precision       :: ppq_re, ppq_im, ppq_mod, sq_ppq_re, sq_ppq_im
   complex*16             :: p, q, ppq, sq_ppq, coeff, I_f
 
   ERI_cgtos = (0.d0, 0.d0)
@@ -1494,7 +1488,7 @@ recursive subroutine I_x1_pol_mult_a1_cgtos(c,B_10,B_01,B_00,C_00,D_00,d,nd,n_pt
   complex*16                :: Y(0:max_dim)
   !DIR$ ATTRIBUTES ALIGN : $IRP_ALIGN :: X,Y
 
-  if( (c < 0) .or. (nd < 0) ) then
+  if((c < 0) .or. (nd < 0)) then
     nd = -1
     return
   endif
