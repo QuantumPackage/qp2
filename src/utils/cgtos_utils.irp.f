@@ -256,15 +256,10 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
   complex*16, intent(inout) :: d(0:nb+nc)
   integer,    intent(out)   :: nd
 
-  integer                   :: ndtmp, ib, ic
+  integer                   :: ib, ic
 
-  if(ior(nc, nb) >= 0) then ! True if nc>=0 and nb>=0
-    continue
-  else
-    return
-  endif
+  if(ior(nc, nb) < 0) return ! False if nc>=0 and nb>=0
 
-  ndtmp = nb + nc
 
   do ic = 0, nc
     d(ic) = d(ic) + c(ic) * b(0)
@@ -277,9 +272,8 @@ subroutine multiply_cpoly(b, nb, c, nc, d, nd)
     enddo
   enddo
 
-  do nd = ndtmp, 0, -1
-    if(abs(d(nd)) .lt. 1.d-15) cycle
-    exit
+  do nd = nb + nc, 0, -1
+    if(d(nd) /= (0.d0, 0.d0)) exit
   enddo
 
 end

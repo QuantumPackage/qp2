@@ -12,16 +12,19 @@ BEGIN_PROVIDER [double precision, ao_integrals_n_e_cgtos, (ao_num, ao_num)]
   END_DOC
 
   implicit none
-  integer          :: power_A(3), power_B(3)
-  integer          :: i, j, k, l, m, n, ii, jj
-  double precision :: c, Z, C_center(3)
-  double precision :: phiA, KA2
-  double precision :: phiB, KB2
-  complex*16       :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
-  complex*16       :: beta, beta_inv, Be_center(3), Bp_center(3)
-  complex*16       :: C1, C2, I1, I2
 
-  complex*16       :: NAI_pol_mult_cgtos
+  integer              :: power_A(3), power_B(3)
+  integer              :: i, j, k, l, m, n, ii, jj
+  double precision     :: c, Z, C_center(3)
+  double precision     :: phiA, KA2
+  double precision     :: phiB, KB2
+  complex*16           :: alpha, alpha_inv, Ae_center(3), Ap_center(3)
+  complex*16           :: beta, beta_inv, Be_center(3), Bp_center(3)
+  complex*16           :: C1, C2, I1, I2
+
+  complex*16, external :: NAI_pol_mult_cgtos
+
+
 
   ao_integrals_n_e_cgtos = 0.d0
 
@@ -140,7 +143,6 @@ complex*16 function NAI_pol_mult_cgtos(Ae_center, Be_center, power_A, power_B, a
     dist_AC += abs(Ae_center(i) - C_center(i) * (1.d0, 0.d0))
   enddo
 
-
   if((dist_AB .gt. 1d-13) .or. (dist_AC .gt. 1d-13) .or. use_pw) then
 
     continue
@@ -217,7 +219,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
   double precision, intent(in) :: C_center(3)
   complex*16,       intent(in) :: alpha, beta, A_center(3), B_center(3)
   integer,         intent(out) :: n_pt_out
-  complex*16,      intent(out) :: d(0:n_pt_in)
+  complex*16,    intent(inout) :: d(0:n_pt_in)
 
   integer                      :: a_x, b_x, a_y, b_y, a_z, b_z
   integer                      :: n_pt1, n_pt2, n_pt3, dim, i, n_pt_tmp
@@ -231,9 +233,9 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
   p_inv   = (1.d0, 0.d0) / p
   p_inv_2 = 0.5d0 * p_inv
 
-  do i = 1, 3
-    P_center(i) = (alpha * A_center(i) + beta * B_center(i)) * p_inv
-  enddo
+  P_center(1) = (alpha * A_center(1) + beta * B_center(1)) * p_inv
+  P_center(2) = (alpha * A_center(2) + beta * B_center(2)) * p_inv
+  P_center(3) = (alpha * A_center(3) + beta * B_center(3)) * p_inv
 
   do i = 0, n_pt_in
     d(i)  = (0.d0, 0.d0)
@@ -260,6 +262,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_x = power_A(1)
   b_x = power_B(1)
+
   call I_x1_pol_mult_one_e_cgtos(a_x, b_x, R1x, R1xp, R2x, d1, n_pt1, n_pt_in)
 
   if(n_pt1 < 0) then
@@ -284,6 +287,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_y = power_A(2)
   b_y = power_B(2)
+
   call I_x1_pol_mult_one_e_cgtos(a_y, b_y, R1x, R1xp, R2x, d2, n_pt2, n_pt_in)
 
   if(n_pt2 < 0) then
@@ -308,6 +312,7 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   a_z = power_A(3)
   b_z = power_B(3)
+
   call I_x1_pol_mult_one_e_cgtos(a_z, b_z, R1x, R1xp, R2x, d3, n_pt3, n_pt_in)
 
   if(n_pt3 < 0) then
@@ -322,11 +327,9 @@ subroutine give_cpolynomial_mult_center_one_e(A_center, B_center, alpha, beta, &
 
   n_pt_tmp = 0
   call multiply_cpoly(d1, n_pt1, d2, n_pt2, d, n_pt_tmp)
-  do i = 0, n_pt_tmp
-    d1(i) = (0.d0, 0.d0)
-  enddo
 
   n_pt_out = 0
+  d1(0:n_pt_tmp) = (0.d0, 0.d0)
   call multiply_cpoly(d, n_pt_tmp, d3, n_pt3, d1, n_pt_out)
   do i = 0, n_pt_out
     d(i) = d1(i)

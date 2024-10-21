@@ -46,6 +46,7 @@ double precision function ao_two_e_integral(i, j, k, l)
   if(use_cgtos) then
 
     ao_two_e_integral = ao_two_e_integral_cgtos(i, j, k, l)
+    return
 
   else if (use_only_lr) then
 
