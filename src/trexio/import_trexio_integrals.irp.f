@@ -36,7 +36,7 @@ subroutine run(f)
   real(integral_kind), allocatable :: buffer_values(:)
 
 
-  double precision, allocatable :: A(:,:)
+  double precision, allocatable :: A(:,:), B(:,:)
   double precision, allocatable :: V(:)
   integer         , allocatable :: Vi(:,:)
   double precision              :: s
@@ -66,6 +66,7 @@ subroutine run(f)
   ! ------------
 
   allocate(A(ao_num, ao_num))
+  allocate(B(ao_num, ao_num))
 
 
   if (trexio_has_ao_1e_int_overlap(f) == TREXIO_SUCCESS) then
@@ -92,17 +93,19 @@ subroutine run(f)
     call ezfio_set_ao_one_e_ints_io_ao_integrals_kinetic('Read')
   endif
 
-!  if (trexio_has_ao_1e_int_ecp(f) == TREXIO_SUCCESS) then
-!    rc = trexio_read_ao_1e_int_ecp(f, A)
-!    if (rc /= TREXIO_SUCCESS) then
-!      print *, irp_here
-!      print *, 'Error reading AO ECP local integrals'
-!      call trexio_assert(rc, TREXIO_SUCCESS)
-!      stop -1
-!    endif
-!    call ezfio_set_ao_one_e_ints_ao_integrals_pseudo(A)
-!    call ezfio_set_ao_one_e_ints_io_ao_integrals_pseudo('Read')
-!  endif
+  B=0.d0
+  if (trexio_has_ao_1e_int_ecp(f) == TREXIO_SUCCESS) then
+    rc = trexio_read_ao_1e_int_ecp(f, B)
+    if (rc /= TREXIO_SUCCESS) then
+      print *, irp_here
+      print *, 'Error reading AO ECP local integrals'
+      call trexio_assert(rc, TREXIO_SUCCESS)
+      stop -1
+    endif
+    call ezfio_set_ao_one_e_ints_ao_integrals_pseudo(B)
+    call ezfio_set_pseudo_do_pseudo(.True.)
+    call ezfio_set_ao_one_e_ints_io_ao_integrals_pseudo('Read')
+  endif
 
   if (trexio_has_ao_1e_int_potential_n_e(f) == TREXIO_SUCCESS) then
     rc = trexio_read_ao_1e_int_potential_n_e(f, A)
@@ -112,11 +115,11 @@ subroutine run(f)
       call trexio_assert(rc, TREXIO_SUCCESS)
       stop -1
     endif
-    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A)
+    call ezfio_set_ao_one_e_ints_ao_integrals_n_e(A+B)
     call ezfio_set_ao_one_e_ints_io_ao_integrals_n_e('Read')
   endif
 
-  deallocate(A)
+  deallocate(A,B)
 
   ! AO 2e integrals
   ! ---------------
