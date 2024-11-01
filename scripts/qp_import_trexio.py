@@ -341,7 +341,9 @@ def write_ezfio(trexio_filename, filename):
         print("OK")
 
     else:
-        warnings.append("Integrals should be imported using `qp run import_trexio_integrals`")
+        if basis_type.lower() == "gaussian" and not cartesian:
+          warnings.append(f"Spherical AOs not handled by QP. Convert the TREXIO file using trexio_tools:\n trexio convert-to -t cartesian -o cartesian_{trexio_filename} {trexio_filename}")
+        warnings.append("Integrals should be imported using:\n qp run import_trexio_integrals")
         print("None")
 
 
@@ -516,7 +518,9 @@ def write_ezfio(trexio_filename, filename):
 
 
     for w in warnings:
-      print(w)
+      s = "-------------"
+      print (s)
+      print (w)
 
 
 
