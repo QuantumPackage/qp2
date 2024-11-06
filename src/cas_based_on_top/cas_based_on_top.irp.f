@@ -16,4 +16,5 @@ end
 subroutine routine
  implicit none
  provide total_cas_on_top_density
+ provide average_on_top
 end
